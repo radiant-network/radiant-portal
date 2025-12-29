@@ -27,7 +27,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
     member => member.relationship_to_proband && member.relationship_to_proband != PROBAND,
   );
   const hasFamily = family.length > 0;
-  const hasVariants = data.assays.some(assay => assay.has_variants);
+  const hasVariants = data.sequencing_experiments.some(seqExp => seqExp.has_variants);
 
   return (
     <Card {...props}>

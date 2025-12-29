@@ -10,13 +10,12 @@ import OverlapTypeGeneCell from '@/apps/case/src/entity/variants/occurrence/tabl
 import OverlappingGeneLinkCell from '@/apps/case/src/entity/variants/occurrence/table/cells/overlapping-gene-link-cell';
 import CaseActionsMenuCell from '@/apps/case/src/exploration/table/cells/case-actions-menu-cell';
 import UninterpretedCasePreviewCell from '@/apps/variant/src/entity/cases/table/cells/uninterpreted-case-preview-cell';
-import { AssayStatus } from '@/components/base/badges/assay-status-badge';
+import { Status } from '@/components/base/badges/status-badge';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
 import AnalysisTypeCodeCell, {
   AnalysisTypeCodeCellTooltip,
 } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
-import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import BadgeListCell from '@/components/base/data-table/cells/badge-list-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
@@ -38,6 +37,7 @@ import RatingCell from '@/components/base/data-table/cells/rating-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
+import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
@@ -117,7 +117,7 @@ export const defaultColumnSettings = createColumnSettings([]);
 export type BaseCellMockData = {
   baseText?: string;
   link?: string;
-  assay_status_code?: AssayStatus;
+  status_code?: Status;
   badge?: string;
   badge_list?: string[];
   date?: string;
@@ -167,7 +167,7 @@ const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
  *   - RowSelectionCell
  *   - TextCell
  *   - AnchorLinkCell
- *   - AssayStatusCell
+ *   - StatusCell
  *   - BadgeCel
  *   - BadgeListCell
  *   - PhenotypeConditionLinkCell
@@ -210,10 +210,10 @@ export const firstSetCellColumns = [
     cell: info => <AnchorLinkCell>{info.getValue()}</AnchorLinkCell>,
     header: 'AnchorLinkCell',
   }),
-  baseCellColumnHelper.accessor(row => row.assay_status_code, {
-    id: 'assay_status_code',
-    cell: info => <AssayStatusCell status={info.getValue()} />,
-    header: 'AssayStatusCell',
+  baseCellColumnHelper.accessor(row => row.status_code, {
+    id: 'status_code',
+    cell: info => <StatusCell status={info.getValue()} />,
+    header: 'StatusCell',
   }),
   baseCellColumnHelper.accessor(row => row.badge, {
     id: 'badge',
@@ -258,7 +258,7 @@ export const firstSetCellColumns = [
 export const firstSetCellData = [
   {
     link: 'AnchorLinkCell 1',
-    assay_status_code: 'unknown',
+    status_code: 'unknown',
     badge: 'loremp',
     badge_list: ['loremp', 'ipsum'],
     date: '2022-02-12T13:08:00Z',
@@ -271,7 +271,7 @@ export const firstSetCellData = [
   },
   {
     link: 'AnchorLinkCell 2',
-    assay_status_code: 'draft',
+    status_code: 'draft',
     badge: 'loremp',
     badge_list: ['loremp', 'ipsum'],
     date: '2022-02-12T13:08:00Z',
@@ -284,7 +284,7 @@ export const firstSetCellData = [
   },
   {
     link: 'AnchorLinkCell 3',
-    assay_status_code: 'submitted',
+    status_code: 'submitted',
     badge: 'ipsum',
     badge_list: ['loremp'],
     date: '2021-01-10T13:08:00Z',
@@ -296,7 +296,7 @@ export const firstSetCellData = [
   },
   {
     link: 'AnchorLinkCell 4',
-    assay_status_code: 'in_progress',
+    status_code: 'in_progress',
     badge: 'amet',
     baseText: 'text 3',
     badge_list: ['sit', 'amet', 'consectetur'],
@@ -310,7 +310,7 @@ export const firstSetCellData = [
   {
     link: 'AnchorLinkCell 5',
     baseText: 'text 4',
-    assay_status_code: 'revoke',
+    status_code: 'revoke',
     badge: 'consectetur',
     badge_list: ['ipsum', 'sit', 'ipsum', 'volutpat'],
     date: '2025-05-22T13:08:00Z',
@@ -322,7 +322,7 @@ export const firstSetCellData = [
   },
   {
     link: 'AnchorLinkCell 6',
-    assay_status_code: 'completed',
+    status_code: 'completed',
     badge: 'loremp ipsum',
     badge_list: ['ipsum', 'sit', 'volutpat'],
     date: '2021-12-16T13:08:00Z',
@@ -334,7 +334,7 @@ export const firstSetCellData = [
   },
   {
     link: 'AnchorLinkCell 7',
-    assay_status_code: 'incomplete',
+    status_code: 'incomplete',
     badge: 'consectetur',
     badge_list: ['loremp'],
     date: '2023-09-12T13:08:00Z',
@@ -346,7 +346,7 @@ export const firstSetCellData = [
   },
   {
     link: undefined,
-    assay_status_code: undefined,
+    status_code: undefined,
     baseText: undefined,
     badge: undefined,
     badge_list: undefined,

@@ -1,6 +1,6 @@
 import { ClipboardPen } from 'lucide-react';
 
-import { CaseAssay, GermlineSNVOccurrence } from '@/api/api';
+import { CaseSequencingExperiment, GermlineSNVOccurrence } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import PreviewOccurrenceSubHeader from '@/components/base/preview/preview-occurrence-sub-header';
 import PreviewSheet from '@/components/base/preview/preview-sheet';
@@ -25,7 +25,7 @@ type OccurrencePreviewSheetProps = {
   onNext?: () => void;
   hasPrevious?: boolean;
   hasNext?: boolean;
-  patientSelected?: CaseAssay;
+  patientSelected?: CaseSequencingExperiment;
 };
 
 function OccurrencePreviewSheet({
@@ -61,7 +61,7 @@ type OccurrenceSheetContentProps = {
   onNext?: () => void;
   hasPrevious?: boolean;
   hasNext?: boolean;
-  patientSelected?: CaseAssay;
+  patientSelected?: CaseSequencingExperiment;
 };
 
 function OccurrenceSheetContent({
@@ -74,7 +74,7 @@ function OccurrenceSheetContent({
 }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
   const caseId = useCaseIdFromParam();
-  const { patient, assay, expandResult, isLoading } = useOccurrenceAndCase(
+  const { patient, caseSequencing, expandResult, isLoading } = useOccurrenceAndCase(
     caseId,
     occurrence.seq_id,
     occurrence.locus_id.toString(),
@@ -99,7 +99,7 @@ function OccurrenceSheetContent({
       <PreviewOccurrenceSubHeader
         patientId={patient?.patient_id}
         relationshipToProband={patient?.relationship_to_proband}
-        seqId={assay?.seq_id}
+        seqId={caseSequencing?.seq_id}
         actions={
           <InterpretationDialog
             occurrence={occurrence}

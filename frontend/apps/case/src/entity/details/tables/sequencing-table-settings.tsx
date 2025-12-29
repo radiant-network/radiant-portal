@@ -1,17 +1,17 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
-import { CaseAssay } from '@/api/api';
-import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
+import { CaseSequencingExperiment } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import ExperimentalStrategyCell from '@/components/base/data-table/cells/experimental-strategy-code-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
+import StatusCell from 'components/base/data-table/cells/status-cell';
 
 import SequencingActionsCell from './cells/sequencing-actions-cell';
 
-const columnHelper = createColumnHelper<CaseAssay>();
+const columnHelper = createColumnHelper<CaseSequencingExperiment>();
 
 function getColumns(t: TFunction<string, undefined>) {
   return [
@@ -86,7 +86,7 @@ function getColumns(t: TFunction<string, undefined>) {
     // Sequencing status
     columnHelper.accessor(row => row.status_code, {
       id: 'status_code',
-      cell: info => <AssayStatusCell status={info.getValue()} />,
+      cell: info => <StatusCell status={info.getValue()} />,
       header: () => (
         <TooltipHeader tooltip={t('case_entity.details.status_code_tooltip')}>
           {t('case_entity.details.status_code')}
@@ -116,14 +116,14 @@ function getColumns(t: TFunction<string, undefined>) {
       enableResizing: false,
       enablePinning: true,
     },
-  ] as TableColumnDef<CaseAssay, any>[];
+  ] as TableColumnDef<CaseSequencingExperiment, any>[];
 }
 
 const defaultSettings = createColumnSettings([
   {
     id: 'seq_id',
     visible: true,
-    label: 'caseEntity.details.assay_id',
+    label: 'caseEntity.details.sequencing_id',
   },
   {
     id: 'sample_id',

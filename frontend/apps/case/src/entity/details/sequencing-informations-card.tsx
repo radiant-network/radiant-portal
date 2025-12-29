@@ -7,10 +7,10 @@ import { useI18n } from '@/components/hooks/i18n';
 
 import { defaultSettings, getColumns } from './tables/sequencing-table-settings';
 
-type AssayInformationsCardProps = ComponentProps<'div'> & {
+type SequencingExperimentInformationsCardProps = ComponentProps<'div'> & {
   data: CaseEntity;
 };
-function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
+function SequencingExperimentInformationsCard({ data, ...props }: SequencingExperimentInformationsCardProps) {
   const { t } = useI18n();
 
   return (
@@ -20,15 +20,15 @@ function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
       </CardHeader>
       <CardContent>
         <DataTable
-          id="sequencing-and-assays"
+          id="sequencing-experiments"
           columns={getColumns(t)}
           defaultColumnSettings={defaultSettings}
-          data={data.assays}
+          data={data.sequencing_experiments}
           loadingStates={{
             total: false,
             list: false,
           }}
-          total={data.assays.length}
+          total={data.sequencing_experiments.length}
           pagination={{ type: 'hidden' }}
           tableIndexResultPosition="hidden"
         />
@@ -36,4 +36,4 @@ function AssayInformationsCard({ data, ...props }: AssayInformationsCardProps) {
     </Card>
   );
 }
-export default AssayInformationsCard;
+export default SequencingExperimentInformationsCard;
