@@ -31,6 +31,7 @@ const (
 // Patients error codes
 const (
 	InvalidFieldPatientsCode = "PATIENT-004"
+	PatientNotFoundCode      = "PATIENT-006"
 )
 
 type CaseKey struct {
@@ -66,6 +67,7 @@ func (r *CaseValidationRecord) preFetchValidationInfo(projects repository.Projec
 
 func validateCaseBatch(cases []types.CaseBatch,
 	projects repository.ProjectDAO,
+	patients repository.PatientsDAO,
 	observations repository.ObservationsDAO,
 	onsets repository.OnsetsDAO,
 ) ([]*CaseValidationRecord, error) {
@@ -78,7 +80,7 @@ func validateCaseBatch(cases []types.CaseBatch,
 			SubmitterCaseID: c.SubmitterCaseId,
 		}
 
-		record, err := validateCaseRecord(c, idx, projects, observations, onsets)
+		record, err := validateCaseRecord(c, idx, projects, patients, observations, onsets)
 		if err != nil {
 			return nil, fmt.Errorf("error during case validation: %v", err)
 		}
@@ -99,10 +101,14 @@ func (cr *CaseValidationRecord) formatPatientsErrorMessage(fieldName string, pat
 }
 
 func (cr *CaseValidationRecord) formatPatientsFieldPath(patientIndex int, collectionName string, collectionIndex int, fieldName string) string {
-	if collectionName == "" {
-		return fmt.Sprintf("case[%d].patients[%d].%s", cr.Index, patientIndex, fieldName)
+	path := fmt.Sprintf("case[%d].patients[%d]", cr.Index, patientIndex)
+	if collectionName != "" {
+		path = fmt.Sprintf("%s.%s[%d]", path, collectionName, collectionIndex)
 	}
-	return fmt.Sprintf("case[%d].patients[%d].%s[%d].%s", cr.Index, patientIndex, collectionName, collectionIndex, fieldName)
+	if fieldName != "" {
+		path = fmt.Sprintf("%s.%s", path, fieldName)
+	}
+	return path
 }
 
 func (cr *CaseValidationRecord) validateTextField(value, fieldName, path string, patientIndex int, regExp *regexp.Regexp, regExpStr string, required bool) {
@@ -210,7 +216,6 @@ func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int
 		// TODO: make sure interpretation oneof tag is containing valid codes
 		cr.validateObsCategoricalNote(patientIndex, obsIndex)
 	}
-
 	return nil
 }
 
@@ -235,24 +240,48 @@ func (cr *CaseValidationRecord) validateObservationsText(patientIndex int, obser
 	if err != nil {
 		return fmt.Errorf("error retrieving observation codes: %v", err)
 	}
-
 	for obsIndex := range cr.Case.Patients[patientIndex].ObservationsText {
 		cr.validateObsTextCode(patientIndex, obsIndex, validObservationCodes)
 		cr.validateObsTextNote(patientIndex, obsIndex)
 	}
+	return nil
+}
 
+func (cr *CaseValidationRecord) validatePatientInOrg(patientIndex int, patients repository.PatientsDAO) error {
+	p := cr.Case.Patients[patientIndex]
+	patient, err := patients.GetPatientByOrgCodeAndSubmitterPatientId(p.PatientOrganizationCode, p.SubmitterPatientId)
+	if err != nil {
+		return fmt.Errorf("error getting existing patient: %v", err)
+	}
+	if patient == nil { // TODO: does the patient need to exist?
+		path := cr.formatPatientsFieldPath(patientIndex, "", 0, "")
+		message := fmt.Sprintf("Patient (%s / %s) for case %d - patient %d does not exist.",
+			p.PatientOrganizationCode,
+			p.SubmitterPatientId,
+			cr.Index,
+			patientIndex,
+		)
+		cr.addErrors(message, PatientNotFoundCode, path)
+	}
 	return nil
 }
 
 // Case patient validation
 
-func (cr *CaseValidationRecord) validateCasePatients(patients []*types.CasePatientBatch, observations repository.ObservationsDAO, onsets repository.OnsetsDAO) error {
-	for patientIndex := range patients {
+func (cr *CaseValidationRecord) validateCasePatients(patientsBatch []*types.CasePatientBatch, patients repository.PatientsDAO, observations repository.ObservationsDAO, onsets repository.OnsetsDAO) error {
+	for patientIndex := range patientsBatch {
+		err := cr.validatePatientInOrg(patientIndex, patients)
+		if err != nil {
+			return fmt.Errorf("error validating patient in organization for patient index %d: %v", patientIndex, err)
+		}
+
+		// TODO: relation to proband is validated by oneof tag on API side
+
 		// Validate family history
 		cr.validateFamilyHistory(patientIndex)
 
 		// Validate observations categorical
-		err := cr.validateObservationsCategorical(patientIndex, observations, onsets)
+		err = cr.validateObservationsCategorical(patientIndex, observations, onsets)
 		if err != nil {
 			return fmt.Errorf("error validating observations categorical for patient index %d: %v", patientIndex, err)
 		}
@@ -262,13 +291,11 @@ func (cr *CaseValidationRecord) validateCasePatients(patients []*types.CasePatie
 		if err != nil {
 			return fmt.Errorf("error validating observations text for patient index %d: %v", patientIndex, err)
 		}
-
-		// Validate other patient fields
 	}
 	return nil
 }
 
-func validateCaseRecord(c types.CaseBatch, index int, projects repository.ProjectDAO, observations repository.ObservationsDAO, onsets repository.OnsetsDAO) (*CaseValidationRecord, error) {
+func validateCaseRecord(c types.CaseBatch, index int, projects repository.ProjectDAO, patients repository.PatientsDAO, observations repository.ObservationsDAO, onsets repository.OnsetsDAO) (*CaseValidationRecord, error) {
 	// FIXME: Not Implemented, will be implemented in follow-up tasks
 	cr := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: index},
@@ -284,7 +311,7 @@ func validateCaseRecord(c types.CaseBatch, index int, projects repository.Projec
 	// 1. Validate Case Fields
 
 	// 2. Validate Case Patients
-	if unexpectedErr := cr.validateCasePatients(c.Patients, observations, onsets); unexpectedErr != nil {
+	if unexpectedErr := cr.validateCasePatients(c.Patients, patients, observations, onsets); unexpectedErr != nil {
 		return nil, fmt.Errorf("error during case patients validation: %v", unexpectedErr)
 	}
 
@@ -300,7 +327,7 @@ func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.
 		return
 	}
 
-	records, unexpectedErr := validateCaseBatch(caseBatches, ctx.ProjectRepo, ctx.ObservationRepo, ctx.OnsetRepo)
+	records, unexpectedErr := validateCaseBatch(caseBatches, ctx.ProjectRepo, ctx.PatientRepo, ctx.ObservationRepo, ctx.OnsetRepo)
 	if unexpectedErr != nil {
 		processUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
