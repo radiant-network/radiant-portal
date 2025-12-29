@@ -21,7 +21,7 @@ function InterpretationVariantHeader({ occurrence }: InterpretationVariantHeader
 
   if (!occurrence) return null;
 
-  const member = caseEntity?.assays.find(assay => assay.seq_id === seqId);
+  const member = caseEntity?.sequencing_experiments.find(caseSeqEx => caseSeqEx.seq_id === seqId);
 
   return (
     <div className="flex items-center gap-4">

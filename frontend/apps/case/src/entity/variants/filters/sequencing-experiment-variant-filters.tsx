@@ -1,6 +1,6 @@
 import { DotIcon, FlaskConical } from 'lucide-react';
 
-import { CaseAssay } from '@/api/api';
+import { CaseSequencingExperiment } from '@/api/api';
 import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
@@ -12,7 +12,7 @@ import { cn } from '@/components/lib/utils';
 
 import { VariantInterface } from '../variants-tab';
 
-function AssayVariantFiltersSelectValue({ relationship_to_proband }: CaseAssay) {
+function SequencingVariantFiltersSelectValue({ relationship_to_proband }: CaseSequencingExperiment) {
   const { t } = useI18n();
 
   return (
@@ -24,18 +24,18 @@ function AssayVariantFiltersSelectValue({ relationship_to_proband }: CaseAssay) 
   );
 }
 
-function AssayVariantFiltersSelectItem(assay: CaseAssay) {
+function SequencingVariantFiltersSelectItem(caseSeqExp: CaseSequencingExperiment) {
   const { t } = useI18n();
   return (
     <div>
-      <AssayVariantFiltersSelectValue {...assay} />
+      <SequencingVariantFiltersSelectValue {...caseSeqExp} />
       <div className="flex items-center color-muted text-xs">
-        {t('case_entity.variants.filters.sample_id')} {assay.sample_id}
-        {assay.affected_status_code && (
+        {t('case_entity.variants.filters.sample_id')} {caseSeqExp.sample_id}
+        {caseSeqExp.affected_status_code && (
           <>
             <DotIcon />
-            <span className={cn({ 'text-red': assay.affected_status_code === 'affected' })}>
-              {t(`case_entity.variants.filters.affected_status_code.${assay.affected_status_code}`)}
+            <span className={cn({ 'text-red': caseSeqExp.affected_status_code === 'affected' })}>
+              {t(`case_entity.variants.filters.affected_status_code.${caseSeqExp.affected_status_code}`)}
             </span>
           </>
         )}
@@ -44,8 +44,8 @@ function AssayVariantFiltersSelectItem(assay: CaseAssay) {
   );
 }
 
-type AssayVariantFiltersProps = {
-  assays?: CaseAssay[];
+type SequencingVariantFiltersProps = {
+  sequencingExperiments?: CaseSequencingExperiment[];
   value?: number;
   handleChange: (value: number) => void;
   isLoading: boolean;
@@ -54,26 +54,26 @@ type AssayVariantFiltersProps = {
 };
 
 /**
- * Api return the assay by the following order.
+ * Api return the sequencing experiments by the following order.
  * 1. Proband first
  * 2. Every relation that has affected_status_code to affected
  * 3. Every relation that has other affected_status_code
  *
  * But the order can change if the proband doesn't have variants.
  */
-function AssayVariantFilters({
-  assays = [],
+function SequencingVariantFilters({
+  sequencingExperiments = [],
   value,
   activeInterface,
   onActiveInterfaceChange,
   handleChange,
   isLoading,
-}: AssayVariantFiltersProps) {
+}: SequencingVariantFiltersProps) {
   const { t } = useI18n();
 
-  const selectedAssay = assays.find(assay => assay.seq_id === value);
+  const selectedSequencingExperiment = sequencingExperiments.find(seqExp => seqExp.seq_id === value);
 
-  if (isLoading || assays.length === 0) {
+  if (isLoading || sequencingExperiments.length === 0) {
     return (
       <div className="inline-flex gap-4 items-center border-b px-2 py-4">
         <Skeleton className="w-[100px] h-[32px]" />
@@ -88,7 +88,7 @@ function AssayVariantFilters({
 
   return (
     <div className="inline-flex gap-4 items-center border-b px-3 py-4">
-      <span>{t('case_entity.variants.filters.assay')}</span>
+      <span>{t('case_entity.variants.filters.sequencing')}</span>
       <Select
         value={`${value}`}
         onValueChange={value => {
@@ -96,22 +96,24 @@ function AssayVariantFilters({
         }}
       >
         <SelectTrigger className="min-w-[125px] max-w-[200px] h-8">
-          <SelectValue>{selectedAssay && <AssayVariantFiltersSelectValue {...selectedAssay} />}</SelectValue>
+          <SelectValue>
+            {selectedSequencingExperiment && <SequencingVariantFiltersSelectValue {...selectedSequencingExperiment} />}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {assays.map(assay => (
-            <SelectItem key={`case-relation-${assay.seq_id}`} value={`${assay.seq_id}`}>
-              <AssayVariantFiltersSelectItem {...assay} />
+          {sequencingExperiments.map(seqExp => (
+            <SelectItem key={`case-relation-${seqExp.seq_id}`} value={`${seqExp.seq_id}`}>
+              <SequencingVariantFiltersSelectItem {...seqExp} />
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      {selectedAssay?.affected_status_code && (
-        <AffectedStatusBadge status={selectedAssay.affected_status_code as AffectedStatusProps} />
+      {selectedSequencingExperiment?.affected_status_code && (
+        <AffectedStatusBadge status={selectedSequencingExperiment.affected_status_code as AffectedStatusProps} />
       )}
       <Badge variant="outline">
         <FlaskConical />
-        {selectedAssay?.sample_id}
+        {selectedSequencingExperiment?.sample_id}
       </Badge>
       <Separator className="h-6" orientation="vertical" />
 
@@ -134,4 +136,4 @@ function AssayVariantFilters({
   );
 }
 
-export default AssayVariantFilters;
+export default SequencingVariantFilters;

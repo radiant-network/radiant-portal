@@ -94,7 +94,7 @@ export default function App() {
     return null;
   }
 
-  const hasVariants = (data?.assays ?? []).some(assay => assay.has_variants);
+  const hasVariants = (data?.sequencing_experiments ?? []).some(seqExp => seqExp.has_variants);
   return (
     <CaseEntityContext value={data}>
       <main ref={mainRef} className="bg-muted h-screen overflow-auto">

@@ -1,12 +1,12 @@
 import { Users } from 'lucide-react';
 
 import { CaseEntity } from '@/api/api';
-import AssayStatusBadge, { AssayStatus } from '@/components/base/badges/assay-status-badge';
 import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 import PageHeader from '@/components/base/page/page-header';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import StatusBadge, { Status } from 'components/base/badges/status-badge';
 
 export default function Header({ data, isLoading }: { data?: CaseEntity | null; isLoading: boolean }) {
   const { t } = useI18n();
@@ -44,7 +44,7 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
         </Tooltip>,
         <Tooltip key="status">
           <TooltipTrigger>
-            <AssayStatusBadge className="px-3 py-2" status={(data?.status_code as AssayStatus) || 'unknown'} />
+            <StatusBadge className="px-3 py-2" status={(data?.status_code as Status) || 'unknown'} />
           </TooltipTrigger>
           <TooltipContent>{t(`case_entity.header.status_tooltip`)}</TooltipContent>
         </Tooltip>,

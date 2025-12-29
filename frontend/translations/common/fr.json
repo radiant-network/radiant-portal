@@ -786,8 +786,8 @@
         "resolution_status_code": "Résolution"
       }
     },
-    "assays": {
-      "title": "Prescription"
+    "sequencing": {
+      "title": "Séquençage"
     }
   },
   "files": {
@@ -1110,7 +1110,7 @@
     "occurrence_details": {
       "title": "Détails de l'occurrence",
       "patient": "Patient",
-      "assay": "Essai",
+      "sequencing": "Séquençage",
       "actions": {
         "view_in_igv": "Ouvrir dans IGV"
       },
@@ -1337,7 +1337,7 @@
     "variants": {
       "title": "Variants",
       "filters": {
-        "assay": "Prescription",
+        "sequencing": "Séquençage",
         "proband": "Proband",
         "sample_id": "ID Échantillon",
         "affected_status_code": {

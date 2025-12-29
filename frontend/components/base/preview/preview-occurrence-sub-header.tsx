@@ -1,13 +1,19 @@
-import PreviewSheetAssayDetails, { PreviewSheetAssayDetailsProps } from './preview-sheet-assay-details';
+import PreviewSheetSequencingExperimentDetails, {
+  PreviewSheetSequencingExperimentDetailsProps,
+} from './preview-sheet-sequencing-experiment-details';
 
-type PreviewSheetSubHeaderProps = PreviewSheetAssayDetailsProps & {
+type PreviewSheetSubHeaderProps = PreviewSheetSequencingExperimentDetailsProps & {
   actions: React.ReactNode;
 };
 
 function PreviewOccurrenceSubHeader({ patientId, relationshipToProband, seqId, actions }: PreviewSheetSubHeaderProps) {
   return (
     <div className="flex flex-wrap gap-4 items-center justify-between w-full">
-      <PreviewSheetAssayDetails patientId={patientId} relationshipToProband={relationshipToProband} seqId={seqId} />
+      <PreviewSheetSequencingExperimentDetails
+        patientId={patientId}
+        relationshipToProband={relationshipToProband}
+        seqId={seqId}
+      />
       {actions}
     </div>
   );
