@@ -48,7 +48,7 @@ type ObservationCategoricalBatch struct {
 
 type ObservationTextBatch struct {
 	Code string `json:"code" binding:"required"`
-	Note string `json:"note" binding:"required"`
+	Note string `json:"note" binding:"required"` // TODO: should it be optional?
 }
 
 type CaseSequencingExperimentBatch struct {

@@ -1549,7 +1549,7 @@ components:
         code:
           type: string
         interpretation_code:
-          description: 'TODO: validate interpretation codes'
+          description: 'TODO: validate interpretation codes / should it be optional?'
           enum:
           - positive
           - negative
@@ -1574,6 +1574,7 @@ components:
         code:
           type: string
         note:
+          description: 'TODO: should it be optional?'
           type: string
       required:
       - code
