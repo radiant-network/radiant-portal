@@ -441,16 +441,19 @@ components:
           - unknown
           type: string
         family_history:
+          description: 'TODO: should we have min=1 here?'
           items:
             $ref: '#/components/schemas/FamilyHistoryBatch'
           type: array
           uniqueItems: false
         observations_categorical:
+          description: 'TODO: should we have min=1 here?'
           items:
             $ref: '#/components/schemas/ObservationCategoricalBatch'
           type: array
           uniqueItems: false
         observations_text:
+          description: 'TODO: should we have min=1 here?'
           items:
             $ref: '#/components/schemas/ObservationTextBatch'
           type: array
@@ -1546,6 +1549,10 @@ components:
         code:
           type: string
         interpretation_code:
+          description: 'TODO: validate interpretation codes'
+          enum:
+          - positive
+          - negative
           type: string
         note:
           type: string

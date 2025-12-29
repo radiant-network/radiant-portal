@@ -17,6 +17,18 @@ func (m *CaseValidationMockRepo) GetProjectByCode(code string) (*types.Project, 
 	return nil, nil
 }
 
+type ObservationsMockRepo struct{}
+
+func (m *ObservationsMockRepo) GetObservationCodes() ([]string, error) {
+	return []string{"phenotype", "condition", "note", "ancestry", "consanguinity"}, nil
+}
+
+type OnsetsMockRepo struct{}
+
+func (m *OnsetsMockRepo) GetOnsetCodes() ([]string, error) {
+	return []string{"unknown", "antenatal", "congenital", "neonatal", "infantile", "childhood", "juvenile", "young_adult", "middle_age", "senior"}, nil
+}
+
 func createString(length int) string {
 	var result strings.Builder
 	for range length {
@@ -49,6 +61,8 @@ func Test_preFetchValidationInfo_Error(t *testing.T) {
 
 func Test_validateCaseBatch_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
+	mockObservations := ObservationsMockRepo{}
+	mockOnsets := OnsetsMockRepo{}
 	vr, err := validateCaseBatch([]types.CaseBatch{
 		{
 			ProjectCode:                "PROJ-1",
@@ -63,7 +77,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 			Patients:                   []*types.CasePatientBatch{},
 			SequencingExperiments:      []*types.CaseSequencingExperimentBatch{},
 		},
-	}, &mockRepo)
+	}, &mockRepo, &mockObservations, &mockOnsets)
 	assert.NoError(t, err)
 	assert.Empty(t, vr[0].Infos)
 	assert.Empty(t, vr[0].Warnings)
@@ -72,6 +86,8 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 
 func Test_validateCaseBatch_Duplicates(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
+	mockObservations := ObservationsMockRepo{}
+	mockOnsets := OnsetsMockRepo{}
 	vr, err := validateCaseBatch([]types.CaseBatch{
 		{
 			ProjectCode:                "PROJ-1",
@@ -99,7 +115,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 			Patients:                   []*types.CasePatientBatch{},
 			SequencingExperiments:      []*types.CaseSequencingExperimentBatch{},
 		},
-	}, &mockRepo)
+	}, &mockRepo, &mockObservations, &mockOnsets)
 	assert.NoError(t, err)
 	assert.Empty(t, vr[0].Infos)
 	assert.Empty(t, vr[0].Warnings)
@@ -377,7 +393,732 @@ func Test_validateFamilyHistory_WithErrors(t *testing.T) {
 	assert.Len(t, record.Errors, 4)
 }
 
-func Test_validateCasePatients_MultiplePatients(t *testing.T) {
+func Test_validateObsCategoricalCode_Valid(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              "HP:0001263",
+							OnsetCode:          "unknown",
+							InterpretationCode: "positive",
+							Note:               "Test note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	validCodes := []string{"phenotype", "condition", "note"}
+	record.validateObsCategoricalCode(0, 0, validCodes)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateObsCategoricalCode_Invalid(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "invalid_code",
+							System:             "HPO",
+							Value:              "HP:0001263",
+							OnsetCode:          "unknown",
+							InterpretationCode: "positive",
+							Note:               "Test note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	validCodes := []string{"phenotype", "condition", "note"}
+	record.validateObsCategoricalCode(0, 0, validCodes)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "is not a valid observation code")
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0].code", record.Errors[0].Path)
+}
+
+func Test_validateSystem_Valid(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              "HP:0001263",
+							OnsetCode:          "unknown",
+							InterpretationCode: "positive",
+							Note:               "Test note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateSystem(0, 0)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateSystem_InvalidRegex(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO@invalid",
+							Value:              "HP:0001263",
+							OnsetCode:          "unknown",
+							InterpretationCode: "positive",
+							Note:               "Test note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateSystem(0, 0)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0].system", record.Errors[0].Path)
+}
+
+func Test_validateSystem_TooLong(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             createString(101),
+							Value:              "HP:0001263",
+							OnsetCode:          "unknown",
+							InterpretationCode: "positive",
+							Note:               "Test note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateSystem(0, 0)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "field is too long")
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0].system", record.Errors[0].Path)
+}
+
+func Test_validateValue_Valid(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              "HP:0001263",
+							OnsetCode:          "unknown",
+							InterpretationCode: "positive",
+							Note:               "Test note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateValue(0, 0)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateValue_InvalidRegex(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              "HP:0001263@invalid",
+							OnsetCode:          "unknown",
+							InterpretationCode: "positive",
+							Note:               "Test note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateValue(0, 0)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0].value", record.Errors[0].Path)
+}
+
+func Test_validateValue_TooLong(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              createString(101),
+							OnsetCode:          "unknown",
+							InterpretationCode: "positive",
+							Note:               "Test note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateValue(0, 0)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "field is too long")
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0].value", record.Errors[0].Path)
+}
+
+func Test_validateOnsetCode_Valid(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              "HP:0001263",
+							OnsetCode:          "childhood",
+							InterpretationCode: "positive",
+							Note:               "Test note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	validOnsetCodes := []string{"unknown", "childhood", "juvenile"}
+	record.validateOnsetCode(0, 0, validOnsetCodes)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateOnsetCode_Invalid(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              "HP:0001263",
+							OnsetCode:          "invalid_onset",
+							InterpretationCode: "positive",
+							Note:               "Test note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	validOnsetCodes := []string{"unknown", "childhood", "juvenile"}
+	record.validateOnsetCode(0, 0, validOnsetCodes)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "is not a valid onset code")
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0].onset_code", record.Errors[0].Path)
+}
+
+func Test_validateObsCategoricalNote_Valid(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              "HP:0001263",
+							OnsetCode:          "unknown",
+							InterpretationCode: "positive",
+							Note:               "Clinical note with details.",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateObsCategoricalNote(0, 0)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateObsCategoricalNote_InvalidRegex(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              "HP:0001263",
+							OnsetCode:          "unknown",
+							InterpretationCode: "positive",
+							Note:               "Invalid@note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateObsCategoricalNote(0, 0)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0].note", record.Errors[0].Path)
+}
+
+func Test_validateObsCategoricalNote_TooLong(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              "HP:0001263",
+							OnsetCode:          "unknown",
+							InterpretationCode: "positive",
+							Note:               createString(101),
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateObsCategoricalNote(0, 0)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "field is too long")
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0].note", record.Errors[0].Path)
+}
+
+func Test_validateObservationsCategorical_Valid(t *testing.T) {
+	mockObservations := &ObservationsMockRepo{}
+	mockOnsets := &OnsetsMockRepo{}
+
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "phenotype",
+							System:             "HPO",
+							Value:              "HP:0001263",
+							OnsetCode:          "childhood",
+							InterpretationCode: "positive",
+							Note:               "Clinical note",
+						},
+						{
+							Code:               "condition",
+							System:             "MONDO",
+							Value:              "MONDO:0001234",
+							OnsetCode:          "juvenile",
+							InterpretationCode: "negative",
+							Note:               "Another note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := record.validateObservationsCategorical(0, mockObservations, mockOnsets)
+	assert.NoError(t, err)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateObservationsCategorical_MultipleErrors(t *testing.T) {
+	mockObservations := &ObservationsMockRepo{}
+	mockOnsets := &OnsetsMockRepo{}
+
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{
+						{
+							Code:               "invalid_code",
+							System:             "HPO@invalid",
+							Value:              "HP:0001263@invalid",
+							OnsetCode:          "invalid_onset",
+							InterpretationCode: "positive",
+							Note:               "invalid@note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := record.validateObservationsCategorical(0, mockObservations, mockOnsets)
+	assert.NoError(t, err)
+	assert.Len(t, record.Errors, 5) // code, system, value, onset_code, note
+}
+
+func Test_validateObservationsCategorical_NoObservations(t *testing.T) {
+	mockObservations := &ObservationsMockRepo{}
+	mockOnsets := &OnsetsMockRepo{}
+
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsCategorical: []*types.ObservationCategoricalBatch{},
+				},
+			},
+		},
+	}
+
+	err := record.validateObservationsCategorical(0, mockObservations, mockOnsets)
+	assert.NoError(t, err)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateObsTextCode_Valid(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsText: []*types.ObservationTextBatch{
+						{
+							Code: "note",
+							Note: "Free text clinical note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	validCodes := []string{"note", "phenotype", "condition"}
+	record.validateObsTextCode(0, 0, validCodes)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateObsTextCode_Invalid(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsText: []*types.ObservationTextBatch{
+						{
+							Code: "invalid_code",
+							Note: "Free text clinical note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	validCodes := []string{"note", "phenotype", "condition"}
+	record.validateObsTextCode(0, 0, validCodes)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "is not a valid observation code")
+	assert.Equal(t, "case[0].patients[0].observations_text[0].code", record.Errors[0].Path)
+}
+
+func Test_validateObsTextNote_Valid(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsText: []*types.ObservationTextBatch{
+						{
+							Code: "note",
+							Note: "Free text clinical note with details.",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateObsTextNote(0, 0)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateObsTextNote_InvalidRegex(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsText: []*types.ObservationTextBatch{
+						{
+							Code: "note",
+							Note: "Invalid@note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateObsTextNote(0, 0)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "case[0].patients[0].observations_text[0].note", record.Errors[0].Path)
+}
+
+func Test_validateObsTextNote_TooLong(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsText: []*types.ObservationTextBatch{
+						{
+							Code: "note",
+							Note: createString(101),
+						},
+					},
+				},
+			},
+		},
+	}
+
+	record.validateObsTextNote(0, 0)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "field is too long")
+	assert.Equal(t, "case[0].patients[0].observations_text[0].note", record.Errors[0].Path)
+}
+
+func Test_validateObservationsText_Valid(t *testing.T) {
+	mockObservations := &ObservationsMockRepo{}
+
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsText: []*types.ObservationTextBatch{
+						{
+							Code: "note",
+							Note: "First clinical note",
+						},
+						{
+							Code: "phenotype",
+							Note: "Phenotype description",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := record.validateObservationsText(0, mockObservations)
+	assert.NoError(t, err)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateObservationsText_MultipleErrors(t *testing.T) {
+	mockObservations := &ObservationsMockRepo{}
+
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsText: []*types.ObservationTextBatch{
+						{
+							Code: "invalid_code",
+							Note: "invalid@note",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := record.validateObservationsText(0, mockObservations)
+	assert.NoError(t, err)
+	assert.Len(t, record.Errors, 2) // code and note
+}
+
+func Test_validateObservationsText_NoObservations(t *testing.T) {
+	mockObservations := &ObservationsMockRepo{}
+
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			Patients: []*types.CasePatientBatch{
+				{
+					PatientOrganizationCode: "CHUSJ",
+					SubmitterPatientId:      "PAT-1",
+					ObservationsText:        []*types.ObservationTextBatch{},
+				},
+			},
+		},
+	}
+
+	err := record.validateObservationsText(0, mockObservations)
+	assert.NoError(t, err)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateCasePatients_Valid(t *testing.T) {
+	mockObservations := &ObservationsMockRepo{}
+	mockOnsets := &OnsetsMockRepo{}
+
 	patients := []*types.CasePatientBatch{
 		{
 			PatientOrganizationCode: "CHUSJ",
@@ -386,6 +1127,16 @@ func Test_validateCasePatients_MultiplePatients(t *testing.T) {
 				{
 					FamilyMemberCode: "mother",
 					Condition:        "diabetes",
+				},
+			},
+			ObservationsCategorical: []*types.ObservationCategoricalBatch{
+				{
+					Code:               "phenotype",
+					System:             "heart disease",
+					Value:              "this is a value",
+					OnsetCode:          "unknown",
+					InterpretationCode: "positive",
+					Note:               "Test note",
 				},
 			},
 		},
@@ -398,6 +1149,16 @@ func Test_validateCasePatients_MultiplePatients(t *testing.T) {
 					Condition:        "heart disease",
 				},
 			},
+			ObservationsCategorical: []*types.ObservationCategoricalBatch{
+				{
+					Code:               "condition",
+					System:             "SNOMED",
+					OnsetCode:          "unknown",
+					Value:              "some condition",
+					InterpretationCode: "negative",
+					Note:               "Another test note",
+				},
+			},
 		},
 	}
 
@@ -410,12 +1171,15 @@ func Test_validateCasePatients_MultiplePatients(t *testing.T) {
 		},
 	}
 
-	err := record.validateCasePatients(patients)
+	err := record.validateCasePatients(patients, mockObservations, mockOnsets)
 	assert.NoError(t, err)
 	assert.Empty(t, record.Errors)
 }
 
-func Test_validateCasePatients_WithValidationErrors(t *testing.T) {
+func Test_validateCasePatients_Invalid(t *testing.T) {
+	mockObservations := &ObservationsMockRepo{}
+	mockOnsets := &OnsetsMockRepo{}
+
 	patients := []*types.CasePatientBatch{
 		{
 			PatientOrganizationCode: "CHUSJ",
@@ -424,6 +1188,16 @@ func Test_validateCasePatients_WithValidationErrors(t *testing.T) {
 				{
 					FamilyMemberCode: "invalid123",
 					Condition:        "diabetes",
+				},
+			},
+			ObservationsCategorical: []*types.ObservationCategoricalBatch{
+				{
+					Code:               "invalid_code",
+					System:             "HPO@invalid",
+					Value:              "HP:0001263",
+					OnsetCode:          "invalid_onset",
+					InterpretationCode: "positive",
+					Note:               "Clinical note",
 				},
 			},
 		},
@@ -436,6 +1210,12 @@ func Test_validateCasePatients_WithValidationErrors(t *testing.T) {
 					Condition:        "invalid@condition",
 				},
 			},
+			ObservationsText: []*types.ObservationTextBatch{
+				{
+					Code: "invalid_text_code",
+					Note: "invalid@note",
+				},
+			},
 		},
 	}
 
@@ -448,7 +1228,7 @@ func Test_validateCasePatients_WithValidationErrors(t *testing.T) {
 		},
 	}
 
-	err := record.validateCasePatients(patients)
+	err := record.validateCasePatients(patients, mockObservations, mockOnsets)
 	assert.NoError(t, err)
-	assert.Len(t, record.Errors, 2)
+	assert.Equal(t, 7, len(record.Errors))
 }

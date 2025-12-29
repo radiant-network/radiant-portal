@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"slices"
 
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -17,11 +18,11 @@ const FamilyMemberCodeRegExp = `^[A-Za-z\- ]+$`
 
 var FamilyMemberCodeRegExpCompiled = regexp.MustCompile(FamilyMemberCodeRegExp)
 
-// ConditionRegExp defines a regular expression pattern that matches strings containing
-// alphanumeric characters (A-Z, a-z, 0-9), hyphens, underscores, periods, commas, and spaces.
-const ConditionRegExp = `^[A-Za-z0-9\-\_\.\, ]+$`
+// TextRegExp defines a regular expression pattern that matches strings containing
+// alphanumeric characters (A-Z, a-z, 0-9), hyphens, underscores, periods, commas, colons, and spaces.
+const TextRegExp = `^[A-Za-z0-9\-\_\.\,\: ]+$`
 
-var ConditionRegExpCompiled = regexp.MustCompile(ConditionRegExp)
+var TextRegExpCompiled = regexp.MustCompile(TextRegExp)
 
 const (
 	IdenticalCaseInBatchCode = "CASE-001"
@@ -63,7 +64,11 @@ func (r *CaseValidationRecord) preFetchValidationInfo(projects repository.Projec
 	return nil
 }
 
-func validateCaseBatch(cases []types.CaseBatch, projects repository.ProjectDAO) ([]*CaseValidationRecord, error) {
+func validateCaseBatch(cases []types.CaseBatch,
+	projects repository.ProjectDAO,
+	observations repository.ObservationsDAO,
+	onsets repository.OnsetsDAO,
+) ([]*CaseValidationRecord, error) {
 	var records []*CaseValidationRecord
 	visited := map[CaseKey]struct{}{}
 
@@ -73,7 +78,7 @@ func validateCaseBatch(cases []types.CaseBatch, projects repository.ProjectDAO) 
 			SubmitterCaseID: c.SubmitterCaseId,
 		}
 
-		record, err := validateCaseRecord(c, idx, projects)
+		record, err := validateCaseRecord(c, idx, projects, observations, onsets)
 		if err != nil {
 			return nil, fmt.Errorf("error during case validation: %v", err)
 		}
@@ -125,10 +130,10 @@ func (cr *CaseValidationRecord) validateCondition(patientIndex int, fhIndex int)
 	)
 	path := fmt.Sprintf("case[%d].patients[%d].family_history[%d].%s", cr.Index, patientIndex, fhIndex, fieldName)
 
-	if !ConditionRegExpCompiled.MatchString(fh.Condition) {
+	if !TextRegExpCompiled.MatchString(fh.Condition) {
 		message := fmt.Sprintf("%s does not match the regular expression %s.",
 			message,
-			ConditionRegExp,
+			TextRegExp,
 		)
 		cr.addErrors(message, InvalidFieldPatientsCode, path)
 	}
@@ -149,15 +154,254 @@ func (cr *CaseValidationRecord) validateFamilyHistory(patientIndex int) {
 	}
 }
 
-func (cr *CaseValidationRecord) validateCasePatients(patients []*types.CasePatientBatch) error {
+func (cr *CaseValidationRecord) validateObsCategoricalCode(patientIndex int, obsIndex int, validObservationCodes []string) {
+	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
+
+	fieldName := "code"
+	message := fmt.Sprintf("Invalid field %s for case %s - patient %s. Reason:",
+		fieldName,
+		formatIds([]string{cr.Case.ProjectCode, cr.Case.SubmitterCaseId}),
+		formatIds([]string{cr.Case.Patients[patientIndex].PatientOrganizationCode, cr.Case.Patients[patientIndex].SubmitterPatientId}),
+	)
+	path := fmt.Sprintf("case[%d].patients[%d].observations_categorical[%d].%s", cr.Index, patientIndex, obsIndex, fieldName)
+
+	if !slices.Contains(validObservationCodes, obs.Code) {
+		message := fmt.Sprintf("%s code %q is not a valid observation code.",
+			message,
+			obs.Code,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateSystem(patientIndex int, obsIndex int) {
+	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
+
+	fieldName := "system"
+	message := fmt.Sprintf("Invalid field %s for case %s - patient %s. Reason:",
+		fieldName,
+		formatIds([]string{cr.Case.ProjectCode, cr.Case.SubmitterCaseId}),
+		formatIds([]string{cr.Case.Patients[patientIndex].PatientOrganizationCode, cr.Case.Patients[patientIndex].SubmitterPatientId}),
+	)
+	path := fmt.Sprintf("case[%d].patients[%d].observations_categorical[%d].%s", cr.Index, patientIndex, obsIndex, fieldName)
+
+	if !TextRegExpCompiled.MatchString(obs.System) {
+		message := fmt.Sprintf("%s does not match the regular expression %s.",
+			message,
+			TextRegExp,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+
+	if len(obs.System) > TextMaxLength {
+		message := fmt.Sprintf("%s field is too long, maximum length allowed is %d.",
+			message,
+			TextMaxLength,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateValue(patientIndex int, obsIndex int) {
+	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
+
+	fieldName := "value"
+	message := fmt.Sprintf("Invalid field %s for case %s - patient %s. Reason:",
+		fieldName,
+		formatIds([]string{cr.Case.ProjectCode, cr.Case.SubmitterCaseId}),
+		formatIds([]string{cr.Case.Patients[patientIndex].PatientOrganizationCode, cr.Case.Patients[patientIndex].SubmitterPatientId}),
+	)
+	path := fmt.Sprintf("case[%d].patients[%d].observations_categorical[%d].%s", cr.Index, patientIndex, obsIndex, fieldName)
+
+	if !TextRegExpCompiled.MatchString(obs.Value) {
+		message := fmt.Sprintf("%s does not match the regular expression %s.",
+			message,
+			TextRegExp,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+
+	if len(obs.Value) > TextMaxLength {
+		message := fmt.Sprintf("%s field is too long, maximum length allowed is %d.",
+			message,
+			TextMaxLength,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateOnsetCode(patientIndex int, obsIndex int, validOnsetCodes []string) {
+	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
+
+	fieldName := "onset_code"
+	message := fmt.Sprintf("Invalid field %s for case %s - patient %s. Reason:",
+		fieldName,
+		formatIds([]string{cr.Case.ProjectCode, cr.Case.SubmitterCaseId}),
+		formatIds([]string{cr.Case.Patients[patientIndex].PatientOrganizationCode, cr.Case.Patients[patientIndex].SubmitterPatientId}),
+	)
+	path := fmt.Sprintf("case[%d].patients[%d].observations_categorical[%d].%s", cr.Index, patientIndex, obsIndex, fieldName)
+
+	if !slices.Contains(validOnsetCodes, obs.OnsetCode) {
+		message := fmt.Sprintf("%s onset code %q is not a valid onset code.",
+			message,
+			obs.OnsetCode,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateObsCategoricalNote(patientIndex int, obsIndex int) {
+	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
+
+	if obs.Note == "" {
+		return
+	}
+
+	fieldName := "note"
+	message := fmt.Sprintf("Invalid field %s for case %s - patient %s. Reason:",
+		fieldName,
+		formatIds([]string{cr.Case.ProjectCode, cr.Case.SubmitterCaseId}),
+		formatIds([]string{cr.Case.Patients[patientIndex].PatientOrganizationCode, cr.Case.Patients[patientIndex].SubmitterPatientId}),
+	)
+	path := fmt.Sprintf("case[%d].patients[%d].observations_categorical[%d].%s", cr.Index, patientIndex, obsIndex, fieldName)
+
+	if !TextRegExpCompiled.MatchString(obs.Note) {
+		message := fmt.Sprintf("%s does not match the regular expression %s.",
+			message,
+			TextRegExp,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+
+	if len(obs.Note) > TextMaxLength {
+		message := fmt.Sprintf("%s field is too long, maximum length allowed is %d.",
+			message,
+			TextMaxLength,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int, observations repository.ObservationsDAO, onsets repository.OnsetsDAO) error {
+	// 1. Get observation codes
+	validObservationCodes, err := observations.GetObservationCodes()
+	if err != nil {
+		return fmt.Errorf("error retrieving observation codes: %v", err)
+	}
+
+	// 2. Get onset codes
+	validOnsetCodes, err := onsets.GetOnsetCodes()
+	if err != nil {
+		return fmt.Errorf("error retrieving onset codes: %v", err)
+	}
+
+	for obsIndex := range cr.Case.Patients[patientIndex].ObservationsCategorical {
+
+		// 3. Validate observation codes
+		cr.validateObsCategoricalCode(patientIndex, obsIndex, validObservationCodes)
+
+		// 4. Validate obs categorical system
+		cr.validateSystem(patientIndex, obsIndex)
+
+		// 5. Validate obs categorical value
+		cr.validateValue(patientIndex, obsIndex)
+
+		// 6. Validate onset codes
+		cr.validateOnsetCode(patientIndex, obsIndex, validOnsetCodes)
+
+		// 7. Validate interpretation codes
+		// TODO: make sure interpretation oneof tag is containing valid codes
+
+		// 8. Validate note
+		cr.validateObsCategoricalNote(patientIndex, obsIndex)
+	}
+
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateObsTextCode(patientIndex int, obsIndex int, validObservationCodes []string) {
+	obs := cr.Case.Patients[patientIndex].ObservationsText[obsIndex]
+
+	fieldName := "code"
+	message := fmt.Sprintf("Invalid field %s for case %s - patient %s. Reason:",
+		fieldName,
+		formatIds([]string{cr.Case.ProjectCode, cr.Case.SubmitterCaseId}),
+		formatIds([]string{cr.Case.Patients[patientIndex].PatientOrganizationCode, cr.Case.Patients[patientIndex].SubmitterPatientId}),
+	)
+	path := fmt.Sprintf("case[%d].patients[%d].observations_text[%d].%s", cr.Index, patientIndex, obsIndex, fieldName)
+
+	if !slices.Contains(validObservationCodes, obs.Code) {
+		message := fmt.Sprintf("%s code %q is not a valid observation code.",
+			message,
+			obs.Code,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateObsTextNote(patientIndex int, obsIndex int) {
+	obs := cr.Case.Patients[patientIndex].ObservationsText[obsIndex]
+
+	fieldName := "note"
+	message := fmt.Sprintf("Invalid field %s for case %s - patient %s. Reason:",
+		fieldName,
+		formatIds([]string{cr.Case.ProjectCode, cr.Case.SubmitterCaseId}),
+		formatIds([]string{cr.Case.Patients[patientIndex].PatientOrganizationCode, cr.Case.Patients[patientIndex].SubmitterPatientId}),
+	)
+	path := fmt.Sprintf("case[%d].patients[%d].observations_text[%d].%s", cr.Index, patientIndex, obsIndex, fieldName)
+
+	if !TextRegExpCompiled.MatchString(obs.Note) {
+		message := fmt.Sprintf("%s does not match the regular expression %s.",
+			message,
+			TextRegExp,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+
+	if len(obs.Note) > TextMaxLength {
+		message := fmt.Sprintf("%s field is too long, maximum length allowed is %d.",
+			message,
+			TextMaxLength,
+		)
+		cr.addErrors(message, InvalidFieldPatientsCode, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateObservationsText(patientIndex int, observations repository.ObservationsDAO) error {
+	validObservationCodes, err := observations.GetObservationCodes()
+	if err != nil {
+		return fmt.Errorf("error retrieving observation codes: %v", err)
+	}
+
+	for obsIndex := range cr.Case.Patients[patientIndex].ObservationsText {
+		cr.validateObsTextCode(patientIndex, obsIndex, validObservationCodes)
+		cr.validateObsTextNote(patientIndex, obsIndex)
+	}
+
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateCasePatients(patients []*types.CasePatientBatch, observations repository.ObservationsDAO, onsets repository.OnsetsDAO) error {
 	for patientIndex := range patients {
 		// Validate family history
 		cr.validateFamilyHistory(patientIndex)
+
+		// Validate observations categorical
+		err := cr.validateObservationsCategorical(patientIndex, observations, onsets)
+		if err != nil {
+			return fmt.Errorf("error validating observations categorical for patient index %d: %v", patientIndex, err)
+		}
+
+		// Validate observations text
+		err = cr.validateObservationsText(patientIndex, observations)
+		if err != nil {
+			return fmt.Errorf("error validating observations text for patient index %d: %v", patientIndex, err)
+		}
 	}
 	return nil
 }
 
-func validateCaseRecord(c types.CaseBatch, index int, projects repository.ProjectDAO) (*CaseValidationRecord, error) {
+func validateCaseRecord(c types.CaseBatch, index int, projects repository.ProjectDAO, observations repository.ObservationsDAO, onsets repository.OnsetsDAO) (*CaseValidationRecord, error) {
 	// FIXME: Not Implemented, will be implemented in follow-up tasks
 	cr := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: index},
@@ -173,7 +417,7 @@ func validateCaseRecord(c types.CaseBatch, index int, projects repository.Projec
 	// 1. Validate Case Fields
 
 	// 2. Validate Case Patients
-	if unexpectedErr := cr.validateCasePatients(c.Patients); unexpectedErr != nil {
+	if unexpectedErr := cr.validateCasePatients(c.Patients, observations, onsets); unexpectedErr != nil {
 		return nil, fmt.Errorf("error during case patients validation: %v", unexpectedErr)
 	}
 
@@ -189,7 +433,7 @@ func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.
 		return
 	}
 
-	records, unexpectedErr := validateCaseBatch(caseBatches, ctx.ProjectRepo)
+	records, unexpectedErr := validateCaseBatch(caseBatches, ctx.ProjectRepo, ctx.ObservationRepo, ctx.OnsetRepo)
 	if unexpectedErr != nil {
 		processUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
