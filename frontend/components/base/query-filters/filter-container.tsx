@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { filtersWithTooltip } from '@/apps/case/src/entity/variants/filters/utils';
 import { MultiSelectFilter } from '@/components/base/query-filters/multiselect-filter';
 import { NumericalFilter } from '@/components/base/query-filters/numerical-filter';
 import { ToggleFilter } from '@/components/base/query-filters/toggle-filter';
@@ -24,8 +25,11 @@ export function AccordionContainer({ field, children }: AccordionContainerProps)
   const { t } = useI18n();
 
   const label = t(`common.filters.labels.${field.translation_key}`, { defaultValue: field.key });
-  const tooltipKey = `common.filters.labels.${field.translation_key}_tooltip`;
-  const tooltipContent = t(tooltipKey) === tooltipKey ? null : t(tooltipKey);
+  let tooltipContent: string | null = null;
+  if (filtersWithTooltip.includes(field.key)) {
+    const tooltipKey = `common.filters.labels.${field.translation_key}_tooltip`;
+    tooltipContent = t(tooltipKey) === tooltipKey ? null : t(tooltipKey);
+  }
 
   function renderTrigger() {
     return (

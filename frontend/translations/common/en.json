@@ -114,7 +114,8 @@
       "png": "PNG File",
       "csv": "CSV File",
       "pdf": "PDF File",
-      "txt": "Text File"
+      "txt": "Text File",
+      "gvcf": "GVCF File"
     },
     "data_type_code": {
       "alignment": "Aligned Reads",
@@ -297,6 +298,7 @@
         "clear": "Sort"
       },
       "filters": {
+        "more": "More",
         "more_placeholder": "Filters",
         "no_values_found": "No values found",
         "search": {
@@ -306,7 +308,19 @@
           "run_name": "Run Name",
           "sample_id": "Sample ID",
           "task_id": "Task",
-          "sequencing_experiment_id": "Sequencing"
+          "sequencing_experiment_id": "Sequencing",
+          "placeholder": "Search..."
+        },
+        "buttons": {
+          "clear": "Clear",
+          "apply": "Apply",
+          "show_more": "{{count}} more",
+          "show_less": "Less",
+          "some_not_in": "Some excluded",
+          "all": "All",
+          "not_in": "None",
+          "select_all": "Select all",
+          "clear_selection": "Clear selection"
         }
       },
       "reset": "Reset",
@@ -454,9 +468,9 @@
         "transmission_mode": "Transmission",
         "transmission_mode_tooltip": "Mode of inheritance in the family",
         "unit": "Unit",
-        "variantexternal_reference": "Variant External Reference",
         "variant_class": "Variant Type",
         "variant_type": "Variant Type",
+        "variantexternal_reference": "Variant External Reference",
         "vep_impact": "VEP",
         "vep_impact_tooltip": "Ensembl Variant Effect Predictor",
         "zygosity": "Zygosity"
@@ -468,8 +482,8 @@
           "ig_v_gene": "IG V Gene",
           "ig_v_pseudogene": "IG V Pseudogene",
           "lncrna": "lncRNA",
-          "nonsense_mediated_decay": "Nonsense Mediated Decay",
           "non_stop_decay": "Non Stop Decay",
+          "nonsense_mediated_decay": "Nonsense Mediated Decay",
           "processed_pseudogene": "Processed Pseudogene",
           "processed_transcript": "Processed Transcript",
           "protein_coding": "Protein Coding",
@@ -491,16 +505,13 @@
           "3_prime_utr_variant": "3' UTR Variant",
           "5_prime_utr": "5 Prime Utr",
           "5_prime_utr_variant": "5' UTR Variant",
-          "tfbs_ablation": "Tfbs Ablation",
-          "tfbs_amplification": "Tfbs Amplification",
-          "tf_binding_site": "Tf Binding Site",
-          "nmd_transcript": "Nmd Transcript",
           "coding_sequence": "Coding Sequence",
           "coding_sequence_variant": "Coding Sequence Variant",
           "downstream_gene_variant": "Downstream Gene Variant",
           "feature_elongation": "Feature Elongation",
           "feature_truncation": "Feature Truncation",
           "frameshift": "Frameshift",
+          "frameshift_variant": "Frameshift Variant",
           "incomplete_terminal_codon": "Incomplete Terminal Codon",
           "incomplete_terminal_codon_variant": "Incomplete Terminal Codon Variant",
           "inframe_deletion": "Inframe Deletion",
@@ -513,6 +524,7 @@
           "mature_mirna_variant": "Mature miRNA Variant",
           "missense": "Missense",
           "missense_variant": "Missense Variant",
+          "nmd_transcript": "Nmd Transcript",
           "nmd_transcript_variant": "NMD Transcript Variant",
           "non_coding_transcript": "Non Coding Transcript",
           "non_coding_transcript_exon": "Non Coding Transcript Exon",
@@ -525,11 +537,11 @@
           "splice_acceptor": "Splice Acceptor",
           "splice_acceptor_variant": "Splice Acceptor Variant",
           "splice_donor": "Splice Donor",
-          "splice_donor_variant": "Splice Donor Variant",
-          "splice_donor_region_variant": "Splice Donor Region Variant",
           "splice_donor_5th_base": "Splice Donor 5th Base",
           "splice_donor_5th_base_variant": "Splice Donor 5th Base Variant",
           "splice_donor_region": "Splice Donor Region",
+          "splice_donor_region_variant": "Splice Donor Region Variant",
+          "splice_donor_variant": "Splice Donor Variant",
           "splice_polypyrimidine_tract": "Splice Polypyrimidine Tract",
           "splice_polypyrimidine_tract_variant": "Splice Polypyrimidine Tract Variant",
           "splice_region": "Splice Region",
@@ -542,6 +554,9 @@
           "stop_retained_variant": "Stop Retained Variant",
           "synonymous": "Synonymous",
           "synonymous_variant": "Synonymous Variant",
+          "tf_binding_site": "Tf Binding Site",
+          "tfbs_ablation": "Tfbs Ablation",
+          "tfbs_amplification": "Tfbs Amplification",
           "transcript_ablation": "Transcript Ablation",
           "transcript_amplification": "Transcript Amplification",
           "upstream_gene_variant": "Upstream Gene Variant"
@@ -570,30 +585,30 @@
           "d": "Damaging"
         },
         "transmission_mode": {
-          "autosomal_dominant_de_novo": "Autosomal Dominant De Novo",
-          "autosomal_dominant_de_novo_abbrev": "AD",
           "autosomal_dominant": "Autosomal Dominant",
           "autosomal_dominant_abbrev": "AD",
+          "autosomal_dominant_de_novo": "Autosomal Dominant De Novo",
+          "autosomal_dominant_de_novo_abbrev": "AD",
           "autosomal_recessive": "Autosomal Recessive",
           "autosomal_recessive_abbrev": "AR",
-          "x_linked_dominant_de_novo": "X Linked Dominant De Novo",
-          "x_linked_dominant_de_novo_abbrev": "XLD",
-          "x_linked_recessive_de_novo": "X Linked Recessive De Novo",
-          "x_linked_recessive_de_novo_abbrev": "XLR",
-          "x_linked_dominant": "X Linked Dominant",
-          "x_linked_dominant_abbrev": "XLD",
-          "x_linked_recessive": "X Linked Recessive",
-          "x_linked_recessive_abbrev": "XLR",
           "non_carrier_proband": "Non Carrier Proband",
           "non_carrier_proband_abbrev": "NCP",
-          "unknown_parents_genotype": "Unknown Parents Genotype",
-          "unknown_parents_genotype_abbrev": "UPG",
           "unknown_father_genotype": "Unknown Father Genotype",
           "unknown_father_genotype_abbrev": "UFG",
           "unknown_mother_genotype": "Unknown Mother Genotype",
           "unknown_mother_genotype_abbrev": "UMG",
+          "unknown_parents_genotype": "Unknown Parents Genotype",
+          "unknown_parents_genotype_abbrev": "UPG",
           "unknown_proband_genotype": "Unknown Proband Genotype",
-          "unknown_proband_genotype_abbrev": "UPG"
+          "unknown_proband_genotype_abbrev": "UPG",
+          "x_linked_dominant": "X Linked Dominant",
+          "x_linked_dominant_abbrev": "XLD",
+          "x_linked_dominant_de_novo": "X Linked Dominant De Novo",
+          "x_linked_dominant_de_novo_abbrev": "XLD",
+          "x_linked_recessive": "X Linked Recessive",
+          "x_linked_recessive_abbrev": "XLR",
+          "x_linked_recessive_de_novo": "X Linked Recessive De Novo",
+          "x_linked_recessive_de_novo_abbrev": "XLR"
         },
         "father_zygosity": {
           "het": "Heterozygote",
@@ -647,7 +662,8 @@
       "frequency_divider_my_organization": "My Organization",
       "frequency_divider_pulic_cohorts": "Public Cohorts",
       "zygosity_divider_parental_analysis": "Parental Analysis",
-      "with_dictionary": "Dictionary"
+      "with_dictionary": "Dictionary",
+      "more": "More"
     },
     "upload_id": {
       "upload_a_file": "Upload a file",
@@ -711,14 +727,13 @@
       "germline_family": "Family germline"
     },
     "status": {
-      "unknown": "Unknown",
+      "completed": "Completed",
       "draft": "Draft",
       "in_progress": "In Progress",
-      "revoke": "Revoke",
-      "completed": "Completed",
       "incomplete": "Incomplete",
+      "revoke": "Revoke",
       "submitted": "Submitted",
-      "on-hold": "Submitted"
+      "unknown": "Unknown"
     },
     "case": {
       "title": "Cases",
@@ -1093,11 +1108,11 @@
     },
     "occurrence_details": {
       "title": "Occurrence Details",
+      "patient": "Patient",
+      "assay": "Assay",
       "actions": {
         "view_in_igv": "View in IGV"
       },
-      "patient": "Patient",
-      "assay": "Assay",
       "sections": {
         "inheritance": {
           "title": "Inheritance",
@@ -1158,14 +1173,6 @@
       "franklin": "Franklin",
       "exomiser": "Exomiser"
     },
-    "zygosity": {
-      "title": "Zygosity",
-      "zygosity": "Zygosity",
-      "compound_het": "Compound Het.",
-      "potential_compound_het": "Potential Compound Het.",
-      "inheritance": "Inheritance",
-      "parental_origin": "Parental Origin"
-    },
     "gene": {
       "title": "Gene",
       "pli": "pLI",
@@ -1188,6 +1195,14 @@
       "fathmm": "FATHMM",
       "cadd_raw": "CADD (Raw)",
       "cadd_phred": "CADD (Phred)"
+    },
+    "zygosity": {
+      "title": "Zygosity",
+      "zygosity": "Zygosity",
+      "compound_het": "Compound Het.",
+      "potential_compound_het": "Potential Compound Het.",
+      "inheritance": "Inheritance",
+      "parental_origin": "Parental Origin"
     },
     "inheritance": {
       "title": "Inheritance",
@@ -1234,6 +1249,7 @@
       "managing_org_tooltip": "Organization managing the patient’s file",
       "mother": "Mother",
       "name": "Name (First / Last)",
+      "proband": "Proband",
       "sex": "Sex",
       "submitter_patient_id": "Org. patient ID",
       "submitter_patient_id_tooltip": "Organisation patient ID",
@@ -1298,13 +1314,13 @@
       "status_code": "Seq. Status",
       "status_code_tooltip": "Sequencing Experiment Status",
       "status_options": {
-        "unknown": "Unknown",
+        "completed": "Completed",
         "draft": "Draft",
         "in_progress": "In Progress",
-        "revoke": "Revoke",
-        "completed": "Completed",
         "incomplete": "Incomplete",
-        "submitted": "Submitted"
+        "revoke": "Revoke",
+        "submitted": "Submitted",
+        "unknown": "Unknown"
       },
       "submitter_id": "Submitter ID",
       "task_id": "Task ID",
@@ -1338,18 +1354,7 @@
       }
     },
     "files": {
-      "title": "Files",
-      "name": "File Name",
-      "format_code": "Format",
-      "data_type_code": "Type",
-      "size": "Size",
-      "patient_id": "Patient",
-      "relationship_to_proband_code": "Relationship",
-      "submitter_sample_id": "Sample",
-      "task_id": "Task",
-      "sequencing_experiment_id": "Case",
-      "hash": "Hash",
-      "run_alias": "Run"
+      "title": "Files"
     }
   },
   "file_entity": {
