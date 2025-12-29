@@ -16,20 +16,27 @@ function ManeCell({ isCanonical, isManeSelect, isManePlus }: ManeCellProps) {
     {
       condition: isCanonical,
       icon: <CanonicalBadge />,
+      key: 'canonical',
     },
     {
       condition: isManeSelect,
       icon: <ManeSelectBadge />,
+      key: 'mane-select',
     },
     {
       condition: isManePlus,
       icon: <ManePlusBadge />,
+      key: 'mane-plus',
     },
   ];
 
   return (
     <div className="inline-flex items-center gap-1">
-      {pills.filter(({ condition }) => condition).map(({ icon }) => icon)}
+      {pills
+        .filter(({ condition }) => condition)
+        .map(({ icon, key }) => (
+          <span key={key}>{icon}</span>
+        ))}
     </div>
   );
 }

@@ -511,6 +511,7 @@
           "feature_elongation": "Allongement de la caractéristique",
           "feature_truncation": "Troncature de la caractéristique",
           "frameshift": "Décalage du cadre de lecture",
+          "frameshift_variant": "Variante de décalage du cadre de lecture",
           "incomplete_terminal_codon": "Codon terminal incomplet",
           "incomplete_terminal_codon_variant": "Variante du codon terminal incomplet",
           "inframe_deletion": "Délétion dans le cadre de lecture",

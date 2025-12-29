@@ -511,6 +511,7 @@
           "feature_elongation": "Feature Elongation",
           "feature_truncation": "Feature Truncation",
           "frameshift": "Frameshift",
+          "frameshift_variant": "Frameshift Variant",
           "incomplete_terminal_codon": "Incomplete Terminal Codon",
           "incomplete_terminal_codon_variant": "Incomplete Terminal Codon Variant",
           "inframe_deletion": "Inframe Deletion",

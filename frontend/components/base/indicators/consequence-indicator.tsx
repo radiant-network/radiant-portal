@@ -24,8 +24,7 @@ const consequenceVariant = tv({
   },
 });
 interface ConsequenceIndicatorProps
-  extends VariantProps<typeof consequenceVariant>,
-    React.HTMLAttributes<HTMLDivElement> {
+  extends VariantProps<typeof consequenceVariant>, React.HTMLAttributes<HTMLDivElement> {
   consequence: string;
   vepImpact: VepImpact;
 }
