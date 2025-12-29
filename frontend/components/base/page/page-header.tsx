@@ -64,17 +64,18 @@ function PageHeader({ title, badges, buttons, statuses, description, isLoading =
                 <h1 className="text-2xl font-bold">{title}</h1>
                 <div className="flex items-center gap-2">
                   {(badges ?? []).map((badgeProps, index) => {
-                    if (badgeProps.tooltipText) {
+                    const { tooltipText, ...restBadgeProps } = badgeProps;
+                    if (tooltipText) {
                       return (
                         <Tooltip key={index}>
                           <TooltipTrigger>
-                            <Badge {...badgeProps} />
+                            <Badge {...restBadgeProps} />
                           </TooltipTrigger>
-                          <TooltipContent>{badgeProps.tooltipText}</TooltipContent>
+                          <TooltipContent>{tooltipText}</TooltipContent>
                         </Tooltip>
                       );
                     }
-                    return <Badge key={index} {...badgeProps} />;
+                    return <Badge key={index} {...restBadgeProps} />;
                   })}
                 </div>
               </div>
