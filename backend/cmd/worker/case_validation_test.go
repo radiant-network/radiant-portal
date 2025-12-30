@@ -976,8 +976,8 @@ func Test_validateObsTextCode_Valid(t *testing.T) {
 					SubmitterPatientId:      "PAT-1",
 					ObservationsText: []*types.ObservationTextBatch{
 						{
-							Code: "note",
-							Note: "Free text clinical note",
+							Code:  "note",
+							Value: "Free text clinical note",
 						},
 					},
 				},
@@ -1002,8 +1002,8 @@ func Test_validateObsTextCode_Invalid(t *testing.T) {
 					SubmitterPatientId:      "PAT-1",
 					ObservationsText: []*types.ObservationTextBatch{
 						{
-							Code: "invalid_code",
-							Note: "Free text clinical note",
+							Code:  "invalid_code",
+							Value: "Free text clinical note",
 						},
 					},
 				},
@@ -1019,7 +1019,7 @@ func Test_validateObsTextCode_Invalid(t *testing.T) {
 	assert.Equal(t, "case[0].patients[0].observations_text[0].code", record.Errors[0].Path)
 }
 
-func Test_validateObsTextNote_Valid(t *testing.T) {
+func Test_validateObsTextValue_Valid(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 		Case: types.CaseBatch{
@@ -1031,8 +1031,8 @@ func Test_validateObsTextNote_Valid(t *testing.T) {
 					SubmitterPatientId:      "PAT-1",
 					ObservationsText: []*types.ObservationTextBatch{
 						{
-							Code: "note",
-							Note: "Free text clinical note with details.",
+							Code:  "note",
+							Value: "Free text clinical note with details.",
 						},
 					},
 				},
@@ -1040,11 +1040,11 @@ func Test_validateObsTextNote_Valid(t *testing.T) {
 		},
 	}
 
-	record.validateObsTextNote(0, 0)
+	record.validateObsTextValue(0, 0)
 	assert.Empty(t, record.Errors)
 }
 
-func Test_validateObsTextNote_InvalidRegex(t *testing.T) {
+func Test_validateObsTextValue_InvalidRegex(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 		Case: types.CaseBatch{
@@ -1056,8 +1056,8 @@ func Test_validateObsTextNote_InvalidRegex(t *testing.T) {
 					SubmitterPatientId:      "PAT-1",
 					ObservationsText: []*types.ObservationTextBatch{
 						{
-							Code: "note",
-							Note: "Invalid@note",
+							Code:  "note",
+							Value: "Invalid@value",
 						},
 					},
 				},
@@ -1065,14 +1065,14 @@ func Test_validateObsTextNote_InvalidRegex(t *testing.T) {
 		},
 	}
 
-	record.validateObsTextNote(0, 0)
+	record.validateObsTextValue(0, 0)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, "case[0].patients[0].observations_text[0].note", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_text[0].value", record.Errors[0].Path)
 }
 
-func Test_validateObsTextNote_TooLong(t *testing.T) {
+func Test_validateObsTextValue_TooLong(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 		Case: types.CaseBatch{
@@ -1084,8 +1084,8 @@ func Test_validateObsTextNote_TooLong(t *testing.T) {
 					SubmitterPatientId:      "PAT-1",
 					ObservationsText: []*types.ObservationTextBatch{
 						{
-							Code: "note",
-							Note: createString(101),
+							Code:  "note",
+							Value: createString(101),
 						},
 					},
 				},
@@ -1093,11 +1093,11 @@ func Test_validateObsTextNote_TooLong(t *testing.T) {
 		},
 	}
 
-	record.validateObsTextNote(0, 0)
+	record.validateObsTextValue(0, 0)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, InvalidFieldPatientsCode, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
-	assert.Equal(t, "case[0].patients[0].observations_text[0].note", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_text[0].value", record.Errors[0].Path)
 }
 
 func Test_validateObservationsText_Valid(t *testing.T) {
@@ -1114,12 +1114,12 @@ func Test_validateObservationsText_Valid(t *testing.T) {
 					SubmitterPatientId:      "PAT-1",
 					ObservationsText: []*types.ObservationTextBatch{
 						{
-							Code: "note",
-							Note: "First clinical note",
+							Code:  "note",
+							Value: "First clinical note",
 						},
 						{
-							Code: "phenotype",
-							Note: "Phenotype description",
+							Code:  "phenotype",
+							Value: "Phenotype description",
 						},
 					},
 				},
@@ -1146,8 +1146,8 @@ func Test_validateObservationsText_MultipleErrors(t *testing.T) {
 					SubmitterPatientId:      "PAT-1",
 					ObservationsText: []*types.ObservationTextBatch{
 						{
-							Code: "invalid_code",
-							Note: "invalid@note",
+							Code:  "invalid_code",
+							Value: "invalid@note",
 						},
 					},
 				},
@@ -1551,8 +1551,8 @@ func Test_validateCasePatients_Invalid(t *testing.T) {
 			},
 			ObservationsText: []*types.ObservationTextBatch{
 				{
-					Code: "invalid_text_code",
-					Note: "invalid@note",
+					Code:  "invalid_text_code",
+					Value: "invalid@value",
 				},
 			},
 		},

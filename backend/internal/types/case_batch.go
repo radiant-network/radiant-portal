@@ -24,9 +24,9 @@ type CaseBatch struct {
 
 type CasePatientBatch struct {
 	AffectedStatusCode      string                         `json:"affected_status_code" binding:"required,oneof=affected unaffected unknown"`
-	FamilyHistory           []*FamilyHistoryBatch          `json:"family_history,omitempty" binding:"dive"`           // TODO: should we have min=1 here?
-	ObservationsCategorical []*ObservationCategoricalBatch `json:"observations_categorical,omitempty" binding:"dive"` // TODO: should we have min=1 here?
-	ObservationsText        []*ObservationTextBatch        `json:"observations_text,omitempty" binding:"dive"`        // TODO: should we have min=1 here?
+	FamilyHistory           []*FamilyHistoryBatch          `json:"family_history,omitempty" binding:"dive"`
+	ObservationsCategorical []*ObservationCategoricalBatch `json:"observations_categorical,omitempty" binding:"dive"`
+	ObservationsText        []*ObservationTextBatch        `json:"observations_text,omitempty" binding:"dive"`
 	SubmitterPatientId      string                         `json:"submitter_patient_id" binding:"required"`
 	PatientOrganizationCode string                         `json:"patient_organization_code" binding:"required"`
 	RelationToProbandCode   string                         `json:"relation_to_proband_code" binding:"required,oneof=mother father brother sister sibling proband"`
@@ -42,13 +42,13 @@ type ObservationCategoricalBatch struct {
 	System             string `json:"system" binding:"required"`
 	Value              string `json:"value" binding:"required"`
 	OnsetCode          string `json:"onset_code" binding:"required"`
-	InterpretationCode string `json:"interpretation_code" binding:"required,oneof=positive negative"` // TODO: validate interpretation codes / should it be optional?
+	InterpretationCode string `json:"interpretation_code,omitempty" binding:"oneof=positive negative"`
 	Note               string `json:"note,omitempty"`
 }
 
 type ObservationTextBatch struct {
-	Code string `json:"code" binding:"required"`
-	Note string `json:"note" binding:"required"` // TODO: should it be optional?
+	Code  string `json:"code" binding:"required"`
+	Value string `json:"value" binding:"required"`
 }
 
 type CaseSequencingExperimentBatch struct {

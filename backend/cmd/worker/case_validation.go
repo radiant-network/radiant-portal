@@ -220,7 +220,6 @@ func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int
 		cr.validateSystem(patientIndex, obsIndex)
 		cr.validateValue(patientIndex, obsIndex)
 		cr.validateOnsetCode(patientIndex, obsIndex, validOnsetCodes)
-		// TODO: make sure interpretation oneof tag is containing valid codes (positive, negative)
 		cr.validateObsCategoricalNote(patientIndex, obsIndex)
 	}
 	return nil
@@ -235,11 +234,11 @@ func (cr *CaseValidationRecord) validateObsTextCode(patientIndex int, obsIndex i
 	cr.validateCodeField(obs.Code, fieldName, path, "observation code", patientIndex, validObservationCodes)
 }
 
-func (cr *CaseValidationRecord) validateObsTextNote(patientIndex int, obsIndex int) {
+func (cr *CaseValidationRecord) validateObsTextValue(patientIndex int, obsIndex int) {
 	obs := cr.Case.Patients[patientIndex].ObservationsText[obsIndex]
-	fieldName := "note"
+	fieldName := "value"
 	path := cr.formatPatientsFieldPath(patientIndex, "observations_text", obsIndex, fieldName)
-	cr.validateTextField(obs.Note, fieldName, path, patientIndex, TextRegExpCompiled, TextRegExp, false) // TODO: should note be required?
+	cr.validateTextField(obs.Value, fieldName, path, patientIndex, TextRegExpCompiled, TextRegExp, true)
 }
 
 func (cr *CaseValidationRecord) validateObservationsText(patientIndex int, observations repository.ObservationsDAO) error {
@@ -249,7 +248,7 @@ func (cr *CaseValidationRecord) validateObservationsText(patientIndex int, obser
 	}
 	for obsIndex := range cr.Case.Patients[patientIndex].ObservationsText {
 		cr.validateObsTextCode(patientIndex, obsIndex, validObservationCodes)
-		cr.validateObsTextNote(patientIndex, obsIndex)
+		cr.validateObsTextValue(patientIndex, obsIndex)
 	}
 	return nil
 }
@@ -262,7 +261,7 @@ func (cr *CaseValidationRecord) validatePatientInOrg(patientIndex int, patients 
 	if err != nil {
 		return fmt.Errorf("error getting existing patient: %v", err)
 	}
-	if patient == nil { // TODO: does the patient need to exist?
+	if patient == nil {
 		path := cr.formatPatientsFieldPath(patientIndex, "", 0, "")
 		message := fmt.Sprintf("Patient (%s / %s) for case %d - patient %d does not exist.",
 			p.PatientOrganizationCode,
@@ -310,8 +309,6 @@ func (cr *CaseValidationRecord) validateCasePatients(patientsBatch []*types.Case
 		if patientsBatch[patientIndex].RelationToProbandCode == "proband" {
 			nbProband++
 		}
-
-		// TODO: relation to proband is validated by oneof tag on API side
 
 		// Validate family history
 		cr.validateFamilyHistory(patientIndex)
