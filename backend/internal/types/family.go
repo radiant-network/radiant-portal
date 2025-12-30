@@ -1,7 +1,7 @@
 package types
 
 type Family struct {
-	ID                        int
+	ID                        int `gorm:"unique;primaryKey;autoIncrement"`
 	CaseID                    int
 	Case                      Case `gorm:"foreignKey:ID;references:CaseID"`
 	FamilyMemberID            int

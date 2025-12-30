@@ -400,14 +400,7 @@ func Test_Documents_SearchById(t *testing.T) {
 func Test_GetDocumentsFilters_WithLabAndProject(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
-		searchCriteria := []types.SearchCriterion{
-			{
-				FieldName: types.DocumentDataTypeCodeField.GetAlias(),
-				Value:     []interface{}{"snv"},
-			},
-		}
-		query, err := types.NewAggregationQueryFromCriteria(searchCriteria, DocumentsQueryConfigForTest.AllFields)
-		filters, err := repo.GetDocumentsFilters(query, true)
+		filters, err := repo.GetDocumentsFilters(true)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len((*filters).Project))
 		assert.Equal(t, 2, len((*filters).DiagnosisLab))
@@ -420,14 +413,7 @@ func Test_GetDocumentsFilters_WithLabAndProject(t *testing.T) {
 func Test_GetDocumentsFilters_WithoutLabAndProject(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
-		searchCriteria := []types.SearchCriterion{
-			{
-				FieldName: types.DocumentDataTypeCodeField.GetAlias(),
-				Value:     []interface{}{"snv"},
-			},
-		}
-		query, err := types.NewAggregationQueryFromCriteria(searchCriteria, DocumentsQueryConfigForTest.AllFields)
-		filters, err := repo.GetDocumentsFilters(query, false)
+		filters, err := repo.GetDocumentsFilters(false)
 		assert.NoError(t, err)
 		assert.Nil(t, (*filters).Project)
 		assert.Nil(t, (*filters).DiagnosisLab)
@@ -468,5 +454,26 @@ func Test_GetById_FilteredIndexFile(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Nil(t, document)
 		}
+	})
+}
+
+func Test_GetByUrl_Success(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewDocumentsRepository(db)
+		document, err := repo.GetByUrl("s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz.tbi")
+		assert.NoError(t, err)
+		assert.NotNil(t, document)
+		assert.Equal(t, 236, document.ID)
+		assert.Equal(t, "SH032.exomiser.vcf.gz.tbi", document.Name)
+		assert.Equal(t, "tbi", document.FileFormatCode)
+	})
+}
+
+func Test_GetByUrl_NotFound(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewDocumentsRepository(db)
+		document, err := repo.GetByUrl("s3://radiant-data-test/case_999999/Fi9999999/S99999/Fi9999999.S99999.vcf.gz")
+		assert.NoError(t, err)
+		assert.Nil(t, document)
 	})
 }

@@ -17,11 +17,16 @@ import (
 
 type BatchValidationContext struct {
 	BatchRepo       repository.BatchDAO
+	CasesRepo       repository.CasesDAO
+	DocRepo         repository.DocumentsDAO
+	FamilyRepo      repository.FamilyDAO
+	ObsCat          repository.ObservationCategoricalDAO
 	OrgRepo         repository.OrganizationDAO
 	PatientRepo     repository.PatientsDAO
 	ProjectRepo     repository.ProjectDAO
 	SampleRepo      repository.SamplesDAO
 	SeqExpRepo      repository.SequencingExperimentDAO
+	TaskRepo        repository.TaskDAO
 	ObservationRepo repository.ObservationsDAO
 	OnsetRepo       repository.OnsetsDAO
 }
@@ -36,6 +41,8 @@ func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
 		SeqExpRepo:      repository.NewSequencingExperimentRepository(db),
 		ObservationRepo: repository.NewObservationsRepository(db),
 		OnsetRepo:       repository.NewOnsetsRepository(db),
+		CasesRepo:       repository.NewCasesRepository(db),
+		DocRepo:         repository.NewDocumentsRepository(db),
 	}
 }
 

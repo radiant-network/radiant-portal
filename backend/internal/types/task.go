@@ -5,7 +5,7 @@ import (
 )
 
 type Task struct {
-	ID              int
+	ID              int `gorm:"unique;primaryKey;autoIncrement"`
 	TaskTypeCode    string
 	TaskType        TaskType `gorm:"foreignKey:code;references:TaskTypeCode"`
 	PipelineName    string

@@ -102,7 +102,7 @@ type PaginationSettings = {
 
 type ServerOptions = {
   setAdditionalFields?: (fields: string[]) => void;
-  defaultSorting: SortBody[];
+  defaultSorting?: SortBody[];
   onSortingChange?: (sorting: SortBody[]) => void;
 };
 
@@ -126,7 +126,7 @@ export type TableProps<TData> = {
   rowSelection?: Record<string, boolean>;
   onRowSelectionChange?: OnChangeFn<Record<string, boolean>>;
   pagination: PaginationSettings;
-  serverOptions: ServerOptions;
+  serverOptions?: ServerOptions;
 };
 
 export interface BaseColumnSettings {
@@ -311,7 +311,7 @@ function getHeaderFlexRender(table: TableType<any>, header: Header<any, any>) {
           onMouseDown={header.getResizeHandler()}
           onTouchStart={header.getResizeHandler()}
           className={cn(
-            'absolute top-0 h-full w-[4px] right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
+            'absolute top-0 h-full w-1 right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
             table.options.columnResizeDirection,
             header.column.getIsResizing() ? 'opacity-100' : '',
           )}
@@ -563,10 +563,10 @@ function TranstackTable<T>({
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [sorting, setSorting] = useState<SortingState>(
-    serverOptions.defaultSorting.map(serverSorting => ({
+    (serverOptions?.defaultSorting?.map(serverSorting => ({
       id: serverSorting.field,
       desc: serverSorting.order === SortBodyOrderEnum.Desc,
-    })) as SortingState,
+    })) as SortingState) || [],
   );
   const [internalRowSelection, setInternalRowSelection] = useState<Record<string, boolean>>(rowSelection ?? {});
 
@@ -605,7 +605,7 @@ function TranstackTable<T>({
     updateAdditionalField({
       newAddFields: filteredAdditionalFields,
       prevAddFields: lastFilteredAdditionalFields,
-      setAdditionalFields: serverOptions.setAdditionalFields,
+      setAdditionalFields: serverOptions?.setAdditionalFields,
     });
   }, []);
 
@@ -626,7 +626,7 @@ function TranstackTable<T>({
     data,
     enableColumnResizing: true,
     enableRowSelection: true,
-    getSortedRowModel: serverOptions.onSortingChange === undefined ? getSortedRowModel() : undefined, //client-side sorting
+    getSortedRowModel: serverOptions?.onSortingChange === undefined ? getSortedRowModel() : undefined, //client-side sorting
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -769,9 +769,9 @@ function TranstackTable<T>({
    * Reset pagination at the same time
    */
   useEffect(() => {
-    if (!serverOptions.onSortingChange) return;
+    if (!serverOptions?.onSortingChange) return;
     if (sorting.length === 0) {
-      serverOptions.onSortingChange(serverOptions.defaultSorting);
+      serverOptions.onSortingChange(serverOptions.defaultSorting || []);
     } else {
       serverOptions.onSortingChange(
         sorting.map(s => ({
@@ -861,7 +861,7 @@ function TranstackTable<T>({
                   updateAdditionalField({
                     newAddFields: newAdditionalFields,
                     prevAddFields: lastFilteredAdditionalFields,
-                    setAdditionalFields: serverOptions.setAdditionalFields,
+                    setAdditionalFields: serverOptions?.setAdditionalFields,
                   });
                 }}
                 handleOrderChange={setColumnOrder}
@@ -885,7 +885,7 @@ function TranstackTable<T>({
                     columnVisibility: defaultColumnTableState.columnVisibility,
                     defaultColumnSettings,
                   });
-                  serverOptions.setAdditionalFields?.(allAdditionalFields);
+                  serverOptions?.setAdditionalFields?.(allAdditionalFields);
                 }}
               />
             </>
@@ -946,7 +946,9 @@ function TranstackTable<T>({
                   {headerGroup.headers.map(header => (
                     <TableHead
                       key={header.id}
-                      className={cn('group/header', getColumnPinningExtraCN(header.column, ColumnType.Head))}
+                      className={cn('group/header', getColumnPinningExtraCN(header.column, ColumnType.Head), {
+                        'text-center border-r [&>td:last-child]:border-r-0': header.subHeaders.length > 0, // center header group with subheader
+                      })}
                       style={{
                         width: `calc(var(--header-${header?.id}-size) * 1px)`,
                         ...getColumnPinningExtraStyles(header.column),

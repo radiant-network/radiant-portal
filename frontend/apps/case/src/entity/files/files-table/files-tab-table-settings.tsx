@@ -129,15 +129,14 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
       size: 124,
       minSize: 40,
     }),
+    // Actions Buttons
     columnHelper.display({
       id: 'actions',
       cell: ({ row }) => <DownloadFileCell documentId={row.original.document_id} />,
-      header: '',
-      size: 56,
-      minSize: 56,
-      maxSize: 56,
+      size: 50,
+      maxSize: 50,
       enableSorting: false,
-      enableHiding: false,
+      enableHiding: true,
     }),
   ] as TableColumnDef<DocumentResult, any>[];
 }
@@ -209,6 +208,7 @@ export const defaultSettings = createColumnSettings([
   {
     id: 'actions',
     visible: true,
-    label: '',
+    fixed: true,
+    pinningPosition: 'right',
   },
 ]);

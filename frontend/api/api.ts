@@ -1780,6 +1780,12 @@ export interface ExpandedGermlineSNVOccurrence {
      * @type {string}
      * @memberof ExpandedGermlineSNVOccurrence
      */
+    'ensembl_gene_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'exomiser_acmg_classification'?: string;
     /**
      * 
@@ -1909,6 +1915,18 @@ export interface ExpandedGermlineSNVOccurrence {
     'locus_id': string;
     /**
      * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'lrt_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'lrt_score'?: number;
+    /**
+     * 
      * @type {Array<number>}
      * @memberof ExpandedGermlineSNVOccurrence
      */
@@ -1973,6 +1991,18 @@ export interface ExpandedGermlineSNVOccurrence {
      * @memberof ExpandedGermlineSNVOccurrence
      */
     'pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'polyphen2_hvar_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'polyphen2_hvar_score'?: number;
     /**
      * 
      * @type {number}

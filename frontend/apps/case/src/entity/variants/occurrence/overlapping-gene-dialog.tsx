@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import useSWR from 'swr';
 
-import { CNVGeneOverlap, GermlineCNVOccurrence, SortBodyOrderEnum } from '@/api/api';
+import { CNVGeneOverlap, GermlineCNVOccurrence } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import {
   Dialog,
@@ -22,13 +22,6 @@ import {
   defaultCNVOverlappingGenesSettings,
   getCNVOverlappingGenesColumns,
 } from './table/cnv-overlapping-gene-table-settings';
-
-const DEFAULT_SORTING = [
-  {
-    field: 'document_id',
-    order: SortBodyOrderEnum.Desc,
-  },
-];
 
 type OverlappingGenesInput = {
   caseId: number;
@@ -113,9 +106,6 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
                 hasError={!!fetchList.error}
                 total={fetchList?.data?.length ?? 0}
                 tableIndexResultPosition="top"
-                serverOptions={{
-                  defaultSorting: DEFAULT_SORTING,
-                }}
               />
             </DialogBody>
           </>

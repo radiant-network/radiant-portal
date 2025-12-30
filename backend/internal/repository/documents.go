@@ -25,8 +25,10 @@ type DocumentsRepository struct {
 type DocumentsDAO interface {
 	SearchDocuments(userQuery types.ListQuery) (*[]DocumentResult, *int64, error)
 	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
-	GetDocumentsFilters(userQuery types.AggQuery, withProjectAndLab bool) (*DocumentFilters, error)
+	GetDocumentsFilters(withProjectAndLab bool) (*DocumentFilters, error)
 	GetById(id int) (*Document, error)
+	GetByUrl(url string) (*Document, error)
+	CreateDocument(document *Document) error
 }
 
 func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {
@@ -35,6 +37,22 @@ func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {
 		return nil
 	}
 	return &DocumentsRepository{db: db}
+}
+
+func (r *DocumentsRepository) CreateDocument(document *Document) error {
+	return r.db.Create(&document).Error
+}
+
+func (r *DocumentsRepository) GetByUrl(url string) (*Document, error) {
+	var document Document
+	txUrl := r.db.Table(types.DocumentTable.Name).Where("url = ?", url)
+	if err := txUrl.First(&document).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("error while fetching document by url: %w", err)
+	}
+	return &document, nil
 }
 
 func (r *DocumentsRepository) SearchDocuments(userQuery types.ListQuery) (*[]DocumentResult, *int64, error) {
@@ -125,38 +143,41 @@ func (r *DocumentsRepository) SearchById(prefix string, limit int) (*[]Autocompl
 	return &autocompleteResult, nil
 }
 
-func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery, withProjectAndLab bool) (*DocumentFilters, error) {
+func (r *DocumentsRepository) GetDocumentsFilters(withProjectAndLab bool) (*DocumentFilters, error) {
 
 	var project []Aggregation
 	var diagnosisLab []Aggregation
 	var relationship []Aggregation
 	var format []Aggregation
 	var dataType []Aggregation
-
-	txDocuments := prepareDocumentsQuery(query, r)
-	txDocuments = txDocuments.Select("doc.id, c.project_id, c.diagnosis_lab_id, f.relationship_to_proband_code, doc.format_code, doc.data_type_code")
+	var err error
 
 	if withProjectAndLab {
-		if err := r.getDocumentsFilter(txDocuments, &project, types.ProjectTable, "project_id", "id", "name", nil); err != nil {
+		project, err = utils.GetFilter(r.db, types.ProjectTable, "name", nil)
+		if err != nil {
 			return nil, err
 		}
 
 		isDiagnosisLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.OrganizationTable.Alias)
-		if err := r.getDocumentsFilter(txDocuments, &diagnosisLab, types.OrganizationTable, "diagnosis_lab_id", "id", "name", &isDiagnosisLabCondition); err != nil {
+		diagnosisLab, err = utils.GetFilter(r.db, types.OrganizationTable, "name", &isDiagnosisLabCondition)
+		if err != nil {
 			return nil, err
 		}
 	}
 
-	if err := r.getDocumentsFilter(txDocuments, &relationship, types.FamilyRelationshipTable, "relationship_to_proband_code", "code", "name_en", nil); err != nil {
+	relationship, err = utils.GetFilter(r.db, types.FamilyRelationshipTable, "name_en", nil)
+	if err != nil {
 		return nil, err
 	}
 
 	isNotIndexFormatCodeCondition := fmt.Sprintf("%s.code not in %s", types.FileFormatTable.Alias, INDEX_FORMATS)
-	if err := r.getDocumentsFilter(txDocuments, &format, types.FileFormatTable, "format_code", "code", "name_en", &isNotIndexFormatCodeCondition); err != nil {
+	format, err = utils.GetFilter(r.db, types.FileFormatTable, "name_en", &isNotIndexFormatCodeCondition)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.getDocumentsFilter(txDocuments, &dataType, types.DataTypeTable, "data_type_code", "code", "name_en", nil); err != nil {
+	dataType, err = utils.GetFilter(r.db, types.DataTypeTable, "name_en", nil)
+	if err != nil {
 		return nil, err
 	}
 
@@ -167,22 +188,6 @@ func (r *DocumentsRepository) GetDocumentsFilters(query types.AggQuery, withProj
 		Format:                format,
 		DataType:              dataType,
 	}, nil
-}
-
-func (r *DocumentsRepository) getDocumentsFilter(txDocument *gorm.DB, destination *[]Aggregation, filterTable types.Table, documentsJoinColumn string, filterJoinColumn string, filterLabelColumn string, filterCondition *string) error {
-	tx := r.db.Table(fmt.Sprintf("%s %s", filterTable.FederationName, filterTable.Alias))
-	tx = tx.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label, count(distinct doc.id) as count", filterTable.Alias, filterTable.Alias, filterLabelColumn))
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) doc ON doc.%s = %s.%s", documentsJoinColumn, filterTable.Alias, filterJoinColumn), txDocument)
-	tx = tx.Group(fmt.Sprintf("%s.code, %s.%s", filterTable.Alias, filterTable.Alias, filterLabelColumn))
-	tx = tx.Order("count desc, bucket asc")
-	if filterCondition != nil {
-		tx = tx.Where(*filterCondition)
-	}
-
-	if err := tx.Find(destination).Error; err != nil {
-		return fmt.Errorf("error fetching filter %s: %w", filterTable.FederationName, err)
-	}
-	return nil
 }
 
 func prepareDocumentsQuery(userQuery types.Query, r *DocumentsRepository) *gorm.DB {

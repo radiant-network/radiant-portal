@@ -5,16 +5,96 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 )
 
 type CaseValidationMockRepo struct{}
 
+func (m *CaseValidationMockRepo) GetOrganizationByCode(organizationCode string) (*types.Organization, error) {
+	if organizationCode == "LAB-1" || organizationCode == "LAB-2" {
+		return &types.Organization{ID: 10, Code: organizationCode, Name: "Diagnostic Lab"}, nil
+	}
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error {
+	return nil
+}
+
+func (m *CaseValidationMockRepo) SearchCases(userQuery types.ListQuery) (*[]repository.CaseResult, *int64, error) {
+	return nil, nil, nil
+}
+
+func (m *CaseValidationMockRepo) SearchById(prefix string, limit int) (*[]repository.AutocompleteResult, error) {
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetCasesFilters(userQuery types.AggQuery) (*repository.CaseFilters, error) {
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetCaseEntity(caseId int) (*repository.CaseEntity, error) {
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) CreateCase(c *repository.Case) error {
+	return nil
+}
+
+func (m *CaseValidationMockRepo) GetCaseAnalysisCatalogIdByCode(code string) (*repository.AnalysisCatalog, error) {
+	if code == "WGA" {
+		return &repository.AnalysisCatalog{ID: 1, Code: code, Name: "Whole Genome Analysis"}, nil
+	}
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, sampleOrganizationCode string) (*repository.SequencingExperiment, error) {
+	if aliquot == "ALIQUOT-1" && submitterSampleId == "SAMPLE-1" && sampleOrganizationCode == "LAB-1" {
+		return &repository.SequencingExperiment{
+			ID:      200,
+			Aliquot: aliquot,
+		}, nil
+	}
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetPatientBySubmitterPatientId(organizationId int, submitterPatientId string) (*repository.Patient, error) {
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*repository.Patient, error) {
+	if organizationCode == "LAB-1" && submitterPatientId == "PAT-1" {
+		return &repository.Patient{
+			ID:                 100,
+			SubmitterPatientId: submitterPatientId,
+			OrganizationId:     10,
+		}, nil
+	}
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) CreatePatient(newPatient *repository.Patient) error {
+	return nil
+}
+
 func (m *CaseValidationMockRepo) GetProjectByCode(code string) (*types.Project, error) {
 	if code == "PROJ-1" {
 		return &types.Project{ID: 42, Code: code, Name: "PROJ-1", Description: "Project #1"}, nil
 	}
+	return nil, fmt.Errorf("error fetching project by code")
+}
+
+func (m *CaseValidationMockRepo) CreateSequencingExperiment(experiment *repository.SequencingExperiment) error {
+	return nil
+}
+
+func (m *CaseValidationMockRepo) GetSequencingExperimentBySampleID(sampleID int) ([]repository.SequencingExperiment, error) {
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(aliquot string) ([]repository.SequencingExperiment, error) {
 	return nil, nil
 }
 
@@ -62,18 +142,44 @@ func Test_GetResourceType_OK(t *testing.T) {
 
 func Test_preFetchValidationInfo_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		CasesRepo:   &mockRepo,
+		ProjectRepo: &mockRepo,
+		PatientRepo: &mockRepo,
+		SeqExpRepo:  &mockRepo,
+		OrgRepo:     &mockRepo,
+	}
 	record := CaseValidationRecord{}
 	record.Case.ProjectCode = "PROJ-1"
-	err := record.preFetchValidationInfo(&mockRepo)
+	record.Case.AnalysisCode = "WGA"
+	record.Case.DiagnosticLabCode = "LAB-2"
+	record.Case.OrderingOrganizationCode = "LAB-1"
+	record.Case.SequencingExperiments = []*types.CaseSequencingExperimentBatch{
+		{
+			Aliquot:                "ALIQUOT-1",
+			SubmitterSampleId:      "SAMPLE-1",
+			SampleOrganizationCode: "LAB-1",
+		},
+	}
+	record.Case.Patients = []*types.CasePatientBatch{
+		{
+			SubmitterPatientId: "PAT-1",
+		},
+	}
+	err := record.preFetchValidationInfo(&mockContext)
 	assert.NoError(t, err)
 	assert.Equal(t, 42, *record.ProjectID)
 }
 
 func Test_preFetchValidationInfo_Error(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		ProjectRepo: &mockRepo,
+	}
 	record := CaseValidationRecord{}
-	err := record.preFetchValidationInfo(&mockRepo)
-	assert.NoError(t, err)
+	record.Case.ProjectCode = "UNKNOWN-PROJ"
+	err := record.preFetchValidationInfo(&mockContext)
+	assert.Error(t, err)
 	assert.Nil(t, record.ProjectID)
 }
 
@@ -87,45 +193,45 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 			return nil, nil
 		},
 	}
-	mockObservations := ObservationsMockRepo{}
-	mockOnsets := OnsetsMockRepo{}
-	vr, err := validateCaseBatch([]types.CaseBatch{
+	mockContext := BatchValidationContext{
+		CasesRepo:       &mockRepo,
+		ProjectRepo:     &mockRepo,
+		PatientRepo:     &mockPatients,
+		SeqExpRepo:      &mockRepo,
+		OrgRepo:         &mockRepo,
+		ObservationRepo: &ObservationsMockRepo{},
+		OnsetRepo:       &OnsetsMockRepo{},
+	}
+
+	vr, err := validateCaseBatch(&mockContext, []types.CaseBatch{
 		{
 			ProjectCode:                "PROJ-1",
+			AnalysisCode:               "WGA",
 			SubmitterCaseId:            "CASE-1",
 			Type:                       "germline",
 			StatusCode:                 "in_progress",
-			DiagnosticLabCode:          "LAB-1",
+			OrderingOrganizationCode:   "LAB-1",
+			DiagnosticLabCode:          "LAB-2",
 			PrimaryConditionCodeSystem: "MONDO",
 			PrimaryConditionValue:      "0001234",
 			PriorityCode:               "routine",
 			CategoryCode:               "postnatal",
-			Patients: []*types.CasePatientBatch{
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
 				{
-					PatientOrganizationCode: "CHUSJ",
-					SubmitterPatientId:      "PAT-1",
-					RelationToProbandCode:   "proband",
-					FamilyHistory: []*types.FamilyHistoryBatch{
-						{
-							FamilyMemberCode: "proband",
-							Condition:        "diabetes",
-						},
-					},
-					ObservationsCategorical: []*types.ObservationCategoricalBatch{
-						{
-							Code:               "phenotype",
-							System:             "HPO",
-							Value:              "HP:0001263",
-							OnsetCode:          "unknown",
-							InterpretationCode: "negative",
-							Note:               "Clinical comment",
-						},
-					},
+					Aliquot:                "ALIQUOT-1",
+					SubmitterSampleId:      "SAMPLE-1",
+					SampleOrganizationCode: "LAB-1",
 				},
 			},
-			SequencingExperiments: []*types.CaseSequencingExperimentBatch{},
+			Patients: []*types.CasePatientBatch{
+				{
+					SubmitterPatientId:      "PAT-1",
+					PatientOrganizationCode: "CHUSJ",
+					RelationToProbandCode:   "proband",
+				},
+			},
 		},
-	}, &mockRepo, &mockPatients, &mockObservations, &mockOnsets)
+	})
 	assert.NoError(t, err)
 	assert.Empty(t, vr[0].Infos)
 	assert.Empty(t, vr[0].Warnings)
@@ -142,48 +248,44 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 			return nil, nil
 		},
 	}
-	mockObservations := ObservationsMockRepo{}
-	mockOnsets := OnsetsMockRepo{}
-	vr, err := validateCaseBatch([]types.CaseBatch{
-		{
-			ProjectCode:                "PROJ-1",
-			SubmitterCaseId:            "CASE-1",
-			Type:                       "germline",
-			StatusCode:                 "in_progress",
-			DiagnosticLabCode:          "LAB-1",
-			PrimaryConditionCodeSystem: "MONDO",
-			PrimaryConditionValue:      "0001234",
-			PriorityCode:               "routine",
-			CategoryCode:               "postnatal",
-			Patients: []*types.CasePatientBatch{
-				{
-					PatientOrganizationCode: "CHUSJ",
-					SubmitterPatientId:      "PAT-1",
-					RelationToProbandCode:   "proband",
-				},
+	mockContext := BatchValidationContext{
+		CasesRepo:       &mockRepo,
+		ProjectRepo:     &mockRepo,
+		PatientRepo:     &mockPatients,
+		SeqExpRepo:      &mockRepo,
+		OrgRepo:         &mockRepo,
+		ObservationRepo: &ObservationsMockRepo{},
+		OnsetRepo:       &OnsetsMockRepo{},
+	}
+	batch := types.CaseBatch{
+		ProjectCode:                "PROJ-1",
+		AnalysisCode:               "WGA",
+		SubmitterCaseId:            "CASE-1",
+		Type:                       "germline",
+		StatusCode:                 "in_progress",
+		OrderingOrganizationCode:   "LAB-1",
+		DiagnosticLabCode:          "LAB-2",
+		PrimaryConditionCodeSystem: "MONDO",
+		PrimaryConditionValue:      "0001234",
+		PriorityCode:               "routine",
+		CategoryCode:               "postnatal",
+		SequencingExperiments: []*types.CaseSequencingExperimentBatch{
+			{
+				Aliquot:                "ALIQUOT-1",
+				SubmitterSampleId:      "SAMPLE-1",
+				SampleOrganizationCode: "LAB-1",
 			},
-			SequencingExperiments: []*types.CaseSequencingExperimentBatch{},
 		},
-		{
-			ProjectCode:                "PROJ-1",
-			SubmitterCaseId:            "CASE-1",
-			Type:                       "somatic",
-			StatusCode:                 "completed",
-			DiagnosticLabCode:          "LAB-2",
-			PrimaryConditionCodeSystem: "MONDO",
-			PrimaryConditionValue:      "0001235",
-			PriorityCode:               "routine",
-			CategoryCode:               "postnatal",
-			Patients: []*types.CasePatientBatch{
-				{
-					PatientOrganizationCode: "CHUSJ",
-					SubmitterPatientId:      "PAT-1",
-					RelationToProbandCode:   "proband",
-				},
+		Patients: []*types.CasePatientBatch{
+			{
+				SubmitterPatientId:      "PAT-1",
+				PatientOrganizationCode: "CHUSJ",
+				RelationToProbandCode:   "proband",
 			},
-			SequencingExperiments: []*types.CaseSequencingExperimentBatch{},
 		},
-	}, &mockRepo, &mockPatients, &mockObservations, &mockOnsets)
+	}
+
+	vr, err := validateCaseBatch(&mockContext, []types.CaseBatch{batch, batch})
 	assert.NoError(t, err)
 	assert.Empty(t, vr[0].Infos)
 	assert.Empty(t, vr[0].Warnings)
@@ -1320,8 +1422,11 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 			return nil, nil
 		},
 	}
-	mockObservations := &ObservationsMockRepo{}
-	mockOnsets := &OnsetsMockRepo{}
+	mockContext := &BatchValidationContext{
+		PatientRepo:     mockPatients,
+		ObservationRepo: &ObservationsMockRepo{},
+		OnsetRepo:       &OnsetsMockRepo{},
+	}
 
 	patients := []*types.CasePatientBatch{
 		{
@@ -1340,7 +1445,7 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 		},
 	}
 
-	err := record.validateCasePatients(patients, mockPatients, mockObservations, mockOnsets)
+	err := record.validateCasePatients(mockContext, patients)
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, InvalidNumberOfProbands, record.Errors[0].Code)
@@ -1357,8 +1462,11 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 			return nil, nil
 		},
 	}
-	mockObservations := &ObservationsMockRepo{}
-	mockOnsets := &OnsetsMockRepo{}
+	mockContext := &BatchValidationContext{
+		PatientRepo:     mockPatients,
+		ObservationRepo: &ObservationsMockRepo{},
+		OnsetRepo:       &OnsetsMockRepo{},
+	}
 
 	patients := []*types.CasePatientBatch{
 		{
@@ -1382,7 +1490,7 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 		},
 	}
 
-	err := record.validateCasePatients(patients, mockPatients, mockObservations, mockOnsets)
+	err := record.validateCasePatients(mockContext, patients)
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, InvalidNumberOfProbands, record.Errors[0].Code)
@@ -1399,8 +1507,11 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 			return nil, nil
 		},
 	}
-	mockObservations := &ObservationsMockRepo{}
-	mockOnsets := &OnsetsMockRepo{}
+	mockContext := &BatchValidationContext{
+		PatientRepo:     mockPatients,
+		ObservationRepo: &ObservationsMockRepo{},
+		OnsetRepo:       &OnsetsMockRepo{},
+	}
 
 	patients := []*types.CasePatientBatch{
 		{
@@ -1424,7 +1535,7 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 		},
 	}
 
-	err := record.validateCasePatients(patients, mockPatients, mockObservations, mockOnsets)
+	err := record.validateCasePatients(mockContext, patients)
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1) // Only duplicate patient error (still has exactly 1 proband)
 
@@ -1446,8 +1557,11 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 			return nil, nil
 		},
 	}
-	mockObservations := &ObservationsMockRepo{}
-	mockOnsets := &OnsetsMockRepo{}
+	mockContext := &BatchValidationContext{
+		PatientRepo:     mockPatients,
+		ObservationRepo: &ObservationsMockRepo{},
+		OnsetRepo:       &OnsetsMockRepo{},
+	}
 
 	patients := []*types.CasePatientBatch{
 		{
@@ -1503,7 +1617,7 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 		},
 	}
 
-	err := record.validateCasePatients(patients, mockPatients, mockObservations, mockOnsets)
+	err := record.validateCasePatients(mockContext, patients)
 	assert.NoError(t, err)
 	assert.Empty(t, record.Errors)
 }
@@ -1514,8 +1628,11 @@ func Test_validateCasePatients_Invalid(t *testing.T) {
 			return nil, nil
 		},
 	}
-	mockObservations := &ObservationsMockRepo{}
-	mockOnsets := &OnsetsMockRepo{}
+	mockContext := &BatchValidationContext{
+		PatientRepo:     mockPatients,
+		ObservationRepo: &ObservationsMockRepo{},
+		OnsetRepo:       &OnsetsMockRepo{},
+	}
 
 	patients := []*types.CasePatientBatch{
 		{
@@ -1567,7 +1684,7 @@ func Test_validateCasePatients_Invalid(t *testing.T) {
 		},
 	}
 
-	err := record.validateCasePatients(patients, mockPatients, mockObservations, mockOnsets)
+	err := record.validateCasePatients(mockContext, patients)
 	assert.NoError(t, err)
 	assert.Equal(t, 10, len(record.Errors))
 }

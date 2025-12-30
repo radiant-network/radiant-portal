@@ -926,6 +926,8 @@ components:
           type: string
         end:
           type: integer
+        ensembl_gene_id:
+          type: string
         exomiser_acmg_classification:
           type: string
         exomiser_acmg_classification_counts:
@@ -976,6 +978,10 @@ components:
           type: string
         locus_id:
           type: string
+        lrt_pred:
+          type: string
+        lrt_score:
+          type: number
         mother_calls:
           items:
             type: integer
@@ -1007,6 +1013,10 @@ components:
           type: integer
         pn_wgs_not_affected:
           type: integer
+        polyphen2_hvar_pred:
+          type: string
+        polyphen2_hvar_score:
+          type: number
         qd:
           type: number
         revel_score:

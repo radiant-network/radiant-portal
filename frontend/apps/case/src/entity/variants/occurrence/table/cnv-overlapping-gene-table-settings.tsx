@@ -60,7 +60,6 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
         columnHelper.accessor(row => row.gene_length, {
           id: 'gene_length',
           cell: info => toKiloBases(info.getValue()),
-
           header: () => (
             <TooltipHeader tooltip={t('variant.headers.gene_length_tooltip')}>
               {t('variant.headers.gene_length')}
@@ -80,6 +79,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
         // # Bases
         columnHelper.accessor(row => row.nb_overlap_bases, {
           id: 'nb_overlap_bases',
+          cell: info => toKiloBases(info.getValue()),
           header: () => (
             <TooltipHeader tooltip={t('variant.headers.nb_overlap_bases_tooltip')}>
               {t('variant.headers.nb_overlap_bases')}

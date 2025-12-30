@@ -43,8 +43,8 @@ func Test_GetGeneAutoComplete_FindOnNameFirst(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 10, len(*genes))
 		assert.Equal(t, "ENSA", (*genes)[0].Source.Name)
-		assert.Equal(t, "CFH", (*genes)[1].Source.Name)
-		assert.Equal(t, "ENSG00000000971", (*genes)[1].Source.ID)
+		assert.Equal(t, "BRAF", (*genes)[1].Source.Name)
+		assert.Equal(t, "ENSG00000157764", (*genes)[1].Source.ID)
 	})
 }
 

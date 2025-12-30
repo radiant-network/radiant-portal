@@ -3,7 +3,7 @@ package types
 import "time"
 
 type Case struct {
-	ID                     int
+	ID                     int `gorm:"unique;primaryKey;autoIncrement"`
 	ProbandID              int
 	Proband                Patient `gorm:"foreignKey:ID;references:ProbandID"`
 	ProjectID              int
@@ -150,6 +150,11 @@ type CaseTask struct {
 	PatientsUnparsed string            `json:"-"`
 	Patients         JsonArray[string] `json:"patients" validate:"required"`
 	PatientCount     int64             `json:"-"`
+}
+
+type CaseHasSequencingExperiment struct {
+	CaseID                 int
+	SequencingExperimentID int
 }
 
 var CaseTable = Table{

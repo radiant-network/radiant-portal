@@ -10,8 +10,6 @@ import { documentApi } from '@/utils/api';
 import FilesTableFilters from './files-archive-list-table-filters';
 import { defaultSettings, getFilesArchiveColumns } from './files-archive-table-settings';
 
-const DEFAULT_SORTING: SortBody[] = [];
-
 type DocumentInput = {
   body: ListBodyWithCriteria;
 };
@@ -24,7 +22,7 @@ async function fetchDocuments(input: DocumentInput) {
 function FilesArchiveList() {
   const { t } = useI18n();
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
-  const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
+  const [sorting, setSorting] = useState<SortBody[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 20,
@@ -67,7 +65,6 @@ function FilesArchiveList() {
       tableIndexResultPosition="bottom"
       serverOptions={{
         setAdditionalFields,
-        defaultSorting: DEFAULT_SORTING,
         onSortingChange: setSorting,
       }}
     />

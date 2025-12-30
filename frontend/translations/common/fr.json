@@ -114,7 +114,8 @@
       "png": "Fichier PNG",
       "csv": "Fichier CSV",
       "pdf": "Fichier PDF",
-      "txt": "Fichier texte"
+      "txt": "Fichier texte",
+      "gvcf": "Fichier GVCF"
     },
     "data_type_code": {
       "alignment": "Lectures alignées",
@@ -278,20 +279,26 @@
     "table": {
       "group_by": "Regrouper par",
       "columns": "Colonnes",
-      "headers": {
-        "created_on": "Créé le",
-        "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)"
-      },
       "fullscreen": {
         "maximize": "Plein écran",
         "minimize": "Quitter plein écran"
+      },
+      "headers": {
+        "created_on": "Créé le",
+        "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)"
       },
       "pin": {
         "left": "Épingler à gauche",
         "right": "Épingler à droite",
         "unpin": "Désépingler"
       },
+      "sort": {
+        "descending": "Décroissant",
+        "ascending": "Croissant",
+        "clear": "Trier"
+      },
       "filters": {
+        "more": "Plus",
         "more_placeholder": "Filtres",
         "no_values_found": "Aucune valeur trouvée",
         "search": {
@@ -301,13 +308,20 @@
           "run_name": "Nom du lot",
           "sample_id": "ID Échantillon",
           "task_id": "Tâche",
-          "sequencing_experiment_id": "Séquençage"
+          "sequencing_experiment_id": "Séquençage",
+          "placeholder": "Rechercher..."
+        },
+        "buttons": {
+          "clear": "Effacer",
+          "apply": "Appliquer",
+          "show_more": "{{count}} de plus",
+          "show_less": "Moins",
+          "some_not_in": "Certains exclus",
+          "all": "Tous",
+          "not_in": "Aucun",
+          "select_all": "Tout sélectionner",
+          "clear_selection": "Désélectionner tout"
         }
-      },
-      "sort": {
-        "descending": "Décroissant",
-        "ascending": "Croissant",
-        "clear": "Trier"
       },
       "reset": "Réinitialiser",
       "no_result": "Aucun résultat trouvé",
@@ -397,9 +411,9 @@
         "exomiser_acmg_evidence": "Critères ACMG de Exomiser",
         "exomiser_gene_combined_score": "Score Exomiser",
         "exomiser_gene_combined_score_tooltip": "Score Exomiser basé sur les propriétés des variantes et les phénotypes des patients",
-        "father_zygosity": "Zygosité paternelle",
         "fathmm_pred": "FATHMM",
         "fathmm_pred_tooltip": "Functional Analysis Through Hidden Markov Models",
+        "father_zygosity": "Zygosité paternelle",
         "filter": "Filtre",
         "genotype_quality": "Qualité du Génotype",
         "gnomad_loeuf": "gnomAD LOEUF",
@@ -413,9 +427,9 @@
         "info_qd": "Qualité de Profondeur",
         "lrt_pred": "LRT",
         "lrt_pred_tooltip": "Likelihood Ratio Test",
+        "mother_zygosity": "Zygosité maternelle",
         "nb_snv": "Nombre de SNVs",
         "nb_snv_tooltip": "Nombre de SNVs inclus par le CNV",
-        "mother_zygosity": "Zygosité maternelle",
         "no_data": "Pas de données",
         "omim_gene_panel": "OMIM",
         "omim_gene_panel_tooltip": "Online Mendelian Inheritance in Man",
@@ -497,6 +511,7 @@
           "feature_elongation": "Allongement de la caractéristique",
           "feature_truncation": "Troncature de la caractéristique",
           "frameshift": "Décalage du cadre de lecture",
+          "frameshift_variant": "Variante de décalage du cadre de lecture",
           "incomplete_terminal_codon": "Codon terminal incomplet",
           "incomplete_terminal_codon_variant": "Variante du codon terminal incomplet",
           "inframe_deletion": "Délétion dans le cadre de lecture",
@@ -647,7 +662,8 @@
       "frequency_divider_my_organization": "Mon organisation",
       "frequency_divider_pulic_cohorts": "Cohortes publiques",
       "zygosity_divider_parental_analysis": "Analyse parentale",
-      "with_dictionary": "Dictionnaire"
+      "with_dictionary": "Dictionnaire",
+      "more": "Plus"
     },
     "upload_id": {
       "upload_a_file": "Téléverser un fichier",
@@ -686,14 +702,14 @@
   },
   "case_exploration": {
     "filters_group": {
-      "search_by_id": "Recherche par ID",
-      "priority_code": "Priorité",
-      "status_code": "Statut",
       "analysis_catalog_code": "Analyse",
-      "search_placeholder": "Cas, séquençage, patient ou MRN",
-      "project_code": "Projet",
       "diagnosis_lab": "Laboratoire de diagnostic",
-      "ordering_organization": "Établissement prescripteur"
+      "ordering_organization": "Établissement prescripteur",
+      "priority_code": "Priorité",
+      "project_code": "Projet",
+      "search_by_id": "Recherche par ID",
+      "search_placeholder": "Cas, séquençage, patient ou MRN",
+      "status_code": "Statut"
     },
     "priority": {
       "asap": "ASAP",
@@ -711,14 +727,13 @@
       "germline_family": "Lignée Germinale Familiale"
     },
     "status": {
-      "in_progress": "En cours",
       "completed": "Completé",
       "draft": "Brouillon",
+      "in_progress": "En cours",
       "incomplete": "Incomplet",
-      "submitted": "Soumis",
       "revoke": "Refusé",
-      "unknown": "Inconnu",
-      "on-hold": "Soumis"
+      "submitted": "Soumis",
+      "unknown": "Inconnu"
     },
     "case": {
       "title": "Cas",
@@ -727,12 +742,17 @@
         "view_variant": "Voir variants"
       },
       "filters": {
-        "priority_code": "Priorité",
-        "status_code": "Statut",
         "analysis_catalog_code": "Analyse",
-        "project_code": "Projet",
+        "case_category_code": "Pré/Postnatal",
+        "case_type_code": "Type",
         "diagnosis_lab_code": "Laboratoire de diagnostic",
-        "ordering_organization_code": "Établissement prescripteur"
+        "life_status_code": "Statut vital",
+        "ordering_organization_code": "Établissement prescripteur",
+        "panel_code": "Panel",
+        "priority_code": "Priorité",
+        "project_code": "Projet",
+        "resolution_status_code": "Résolution",
+        "status_code": "Statut"
       },
       "headers": {
         "case_id": "Cas",
@@ -756,7 +776,14 @@
         "managing_organization": "Organisation resp.",
         "managing_organization_tooltip": "Organisation responsable du dossier du patient",
         "created_on": "Créé le",
-        "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)"
+        "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)",
+        "first_name": "Prénom",
+        "last_name": "Nom de famille",
+        "life_status": "Statut vital",
+        "category_code": "Pré/Postnatal",
+        "panel": "Panel",
+        "jhn": "RAMQ",
+        "resolution_status_code": "Résolution"
       }
     },
     "assays": {
@@ -786,7 +813,8 @@
         "frequency": "Fréquence",
         "pathogenicity": "Pathogénicité",
         "occurrence": "Occurrence",
-        "organization": "Mon Organisation"
+        "organization": "Mon Organisation",
+        "metric_qc": "Metric QC"
       }
     }
   },
@@ -844,7 +872,7 @@
       "overlapping_cnv_percent_tooltip": "% de la longueur du CNV chevauché",
       "overlap_type": "Type",
       "overlap_type_tooltip": "Type de chevauchement entre le gène et le CNV",
-      "panels": "Panels",
+      "panels": "Chevauchement avec le CNV",
       "pe": "PE",
       "pe_tooltip": "Nombre de fragments incorrectement appariés au début et à la fin des points de cassure",
       "pf_wgs": "Fréq.",
@@ -906,81 +934,6 @@
       "XLD": "Dominant Lié à l'X",
       "XLR": "Récessif Lié à l'X",
       "YL": "Lié à l'Y"
-    },
-    "consequences": {
-      "transcript_ablation": "Transcript Ablation",
-      "slice_acceptor": "Splice Acceptor",
-      "splice_donor": "Splice Donor",
-      "stop_gained": "Stop Gained",
-      "frameshift": "Frameshift",
-      "stop_lost": "Stop Lost",
-      "start_lost": "Start Lost",
-      "transcript_amplification": "Transcript Amplification",
-      "inframe_insertion": "Inframe Insertion",
-      "inframe_deletion": "Inframe Deletion",
-      "missense": "Missense",
-      "missense_variant": "Variant faux-sens",
-      "protein_altering": "Protein Altering",
-      "splice_region": "Splice Region",
-      "splice_donor_5th_base": "Splice Donor 5th Base",
-      "splice_donor_region": "Splice Donor Region",
-      "splice_polypyrimidine_tract": "Splice Polypyrimidine Tract",
-      "splice_polypyrimidine_tract_variant": "Variant du tract poly-pyrimidine d'épissage",
-      "incomplete_terminal_codon": "Incomplete Terminal Codon",
-      "start_retained": "Start Retained",
-      "stop_retained": "Stop Retained",
-      "synonymous": "Synonymous",
-      "synonymous_variant": "Variant synonyme",
-      "coding_sequence": "Coding Sequence",
-      "mature_miRNA": "Mature MiRna",
-      "5_prime_UTR": "5 Prime Utr",
-      "5_prime_UTR_variant": "Variant de l'UTR 5'",
-      "3_prime_UTR": "3 Prime UTR",
-      "3_prime_UTR_variant": "Variant de l'UTR 3'",
-      "non_coding_transcript_exon": "Non Coding Transcript Exon",
-      "non_coding_transcript_exon_variant": "Variant d'exon de transcrit non codant",
-      "intron": "Intron",
-      "NMD_transcript": "Nmd Transcript",
-      "non_coding_transcript": "Non Coding Transcript",
-      "upstream_gene_variant": "Variant en amont du gène",
-      "downstream_gene_variant": "Variant en aval du gène",
-      "intron_variant": "Variant intronique",
-      "intergenic_variant": "Variant intergénique",
-      "TFBS_ablation": "Tfbs Ablation",
-      "TFBS_amplification": "Tfbs Amplification",
-      "TF_binding_site": "Tf Binding Site",
-      "regulatory_region_ablation": "Regulatory Region Ablation",
-      "regulatory_region_amplification": "Regulatory Region Amplification",
-      "feature_elongation": "Feature Elongation",
-      "regulatory_region": "Regulatory Region",
-      "feature_truncation": "Feature Truncation",
-      "intergenic": "Intergenic"
-    },
-    "transmission_mode": {
-      "autosomal_dominant_de_novo": "Autosomal dominant de novo",
-      "autosomal_dominant_de_novo.abbrev": "AD",
-      "autosomal_dominant": "Autosomique dominant",
-      "autosomal_dominant.abbrev": "AD",
-      "autosomal_recessive": "Autosomique récessif",
-      "autosomal_recessive.abbrev": "AR",
-      "x_linked_dominant_de_novo": "Lié à l'X dominant de novo",
-      "x_linked_dominant_de_novo.abbrev": "XLD",
-      "x_linked_recessive_de_novo": "Lié à l'X récessif de novo",
-      "x_linked_recessive_de_novo.abbrev": "XLR",
-      "x_linked_dominant": "Lié à l'X dominant",
-      "x_linked_dominant.abbrev": "XLD",
-      "x_linked_recessive": "Lié à l'X récessif",
-      "x_linked_recessive.abbrev": "XLR",
-      "non_carrier_proband": "Probant non porteur",
-      "non_carrier_proband.abbrev": "NCP",
-      "unknown_parents_genotype": "Génotype parental inconnu",
-      "unknown_parents_genotype.abbrev": "UPG",
-      "unknown_father_genotype": "Génotype paternel inconnu",
-      "unknown_father_genotype.abbrev": "UFG",
-      "unknown_mother_genotype": "Génotype maternel inconnu",
-      "unknown_mother_genotype.abbrev": "UMG",
-      "unknown_proband_genotype": "Génotype du probant inconnu",
-      "unknown_proband_genotype.abbrev": "UPG"
     },
     "predictions": {
       "sift": "SIFT",
@@ -1251,6 +1204,14 @@
       "inheritance": "Héritabilité",
       "parental_origin": "Origine Parentale"
     },
+    "inheritance": {
+      "title": "Héritabilité",
+      "zygosity": "Zygosité",
+      "compound_het": "Hétérozygote Composite",
+      "potential_compound_het": "Hétérozygote Composite Potentiel",
+      "inheritance": "Héritabilité",
+      "parental_origin": "Origine Parentale"
+    },
     "clinical_association": {
       "title": "Associations Cliniques (OMIM)"
     },
@@ -1277,9 +1238,6 @@
       "priority_tooltip": "Priorité",
       "status_tooltip": "Statut",
       "unknown": "Inconnu"
-    },
-    "files": {
-      "title": "Fichiers"
     },
     "patient_information": {
       "dob": "Date de naissance",
@@ -1356,12 +1314,12 @@
       "status_code": "Statut séq.",
       "status_code_tooltip": "Statut séquençage",
       "status_options": {
-        "in_progress": "En cours",
         "completed": "Completé",
         "draft": "Brouillon",
+        "in_progress": "En cours",
         "incomplete": "Incomplet",
-        "submitted": "Soumis",
         "revoke": "Refusé",
+        "submitted": "Soumis",
         "unknown": "Inconnu"
       },
       "submitter_id": "ID soumissionnaire",
@@ -1394,6 +1352,9 @@
       "dialog": {
         "overlapping_gene": "Liste des gènes chevauchants le CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
       }
+    },
+    "files": {
+      "title": "Fichiers"
     }
   },
   "file_entity": {

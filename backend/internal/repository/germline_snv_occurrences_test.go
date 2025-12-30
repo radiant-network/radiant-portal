@@ -668,6 +668,10 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, "locus1", expandedOccurrence.Locus)
 		assert.Equal(t, float32(0.1), expandedOccurrence.SiftScore)
 		assert.Equal(t, "T", expandedOccurrence.SiftPred)
+		assert.Equal(t, float32(0.01), expandedOccurrence.LrtScore)
+		assert.Equal(t, "U", expandedOccurrence.LrtPred)
+		assert.Equal(t, float32(0.991), expandedOccurrence.Polyphen2HvarScore)
+		assert.Equal(t, "D", expandedOccurrence.Polyphen2HvarPred)
 		assert.Equal(t, 0.7, expandedOccurrence.ExomiserGeneCombinedScore)
 		assert.Equal(t, types.JsonArray[string]{"PS1", "PVS2"}, expandedOccurrence.ExomiserAcmgEvidence)
 		assert.Equal(t, 3, expandedOccurrence.PcWgsAffected)
@@ -680,6 +684,8 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, "T001", expandedOccurrence.TranscriptId)
 		assert.Equal(t, "LA6668-3", expandedOccurrence.InterpretationClassificationCode)
 		assert.Equal(t, "pathogenic", expandedOccurrence.InterpretationClassification)
+		assert.Equal(t, "BRAF", expandedOccurrence.Symbol)
+		assert.Equal(t, "ENSG00000157764", expandedOccurrence.EnsemblGeneId)
 	})
 }
 

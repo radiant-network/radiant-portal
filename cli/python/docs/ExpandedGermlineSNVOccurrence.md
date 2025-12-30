@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **dann_score** | **float** |  | [optional] 
 **dna_change** | **str** |  | [optional] 
 **end** | **int** |  | [optional] 
+**ensembl_gene_id** | **str** |  | [optional] 
 **exomiser_acmg_classification** | **str** |  | [optional] 
 **exomiser_acmg_classification_counts** | **Dict[str, int]** |  | [optional] 
 **exomiser_acmg_evidence** | **List[str]** |  | 
@@ -38,6 +39,8 @@ Name | Type | Description | Notes
 **is_mane_select** | **bool** |  | [optional] 
 **locus** | **str** |  | 
 **locus_id** | **str** |  | 
+**lrt_pred** | **str** |  | [optional] 
+**lrt_score** | **float** |  | [optional] 
 **mother_calls** | **List[int]** |  | [optional] 
 **omim_conditions** | [**List[OmimGenePanel]**](OmimGenePanel.md) |  | [optional] 
 **parental_origin** | **str** |  | [optional] 
@@ -49,6 +52,8 @@ Name | Type | Description | Notes
 **picked_consequences** | **List[str]** |  | 
 **pn_wgs_affected** | **int** |  | [optional] 
 **pn_wgs_not_affected** | **int** |  | [optional] 
+**polyphen2_hvar_pred** | **str** |  | [optional] 
+**polyphen2_hvar_score** | **float** |  | [optional] 
 **qd** | **float** |  | [optional] 
 **revel_score** | **float** |  | [optional] 
 **rsnumber** | **str** |  | [optional] 

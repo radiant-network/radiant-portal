@@ -80,6 +80,10 @@ type ExpandedGermlineSNVOccurrence = struct {
 	CaddPhred                          float32                  `json:"cadd_phred,omitempty"`
 	CaddScore                          float32                  `json:"cadd_score,omitempty"`
 	DannScore                          float32                  `json:"dann_score,omitempty"`
+	LrtPred                            string                   `json:"lrt_pred,omitempty"`
+	LrtScore                           float32                  `json:"lrt_score,omitempty"`
+	Polyphen2HvarPred                  string                   `json:"polyphen2_hvar_pred,omitempty"`
+	Polyphen2HvarScore                 float32                  `json:"polyphen2_hvar_score,omitempty"`
 	Zygosity                           string                   `json:"zygosity,omitempty"`
 	TransmissionMode                   string                   `json:"transmission,omitempty"`
 	ParentalOrigin                     string                   `json:"parental_origin,omitempty"`
@@ -98,6 +102,7 @@ type ExpandedGermlineSNVOccurrence = struct {
 	InterpretationClassificationCounts JsonMap[string, int]     `gorm:"type:json" json:"interpretation_classification_counts,omitempty"`
 	InterpretationClassificationCode   string                   `json:"-"`
 	InterpretationClassification       string                   `json:"interpretation_classification,omitempty"`
+	EnsemblGeneId                      string                   `json:"ensembl_gene_id,omitempty"`
 } // @name ExpandedGermlineSNVOccurrence
 
 var GermlineSNVOccurrenceTable = Table{

@@ -2,14 +2,7 @@ import { useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
-import {
-  ApiError,
-  DocumentsSearchResponse,
-  ListBodyWithCriteria,
-  SearchCriterion,
-  SortBody,
-  SortBodyOrderEnum,
-} from '@/api/api';
+import { ApiError, DocumentsSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
@@ -18,13 +11,6 @@ import { useCaseIdFromParam } from '@/utils/helper';
 
 import { defaultSettings, getCaseEntityDocumentsColumns } from './files-table/files-tab-table-settings';
 import FilesTableFilters from './files-table/files-table-filters';
-
-const DEFAULT_SORTING = [
-  {
-    field: 'relationship_to_proband_code',
-    order: SortBodyOrderEnum.Desc,
-  },
-];
 
 type DocumentInput = {
   caseId: number;
@@ -40,7 +26,7 @@ function FilesTab() {
   const { t } = useI18n();
   const caseId = useCaseIdFromParam();
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
-  const [sorting, setSorting] = useState<SortBody[]>(DEFAULT_SORTING);
+  const [sorting, setSorting] = useState<SortBody[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 20,
@@ -89,7 +75,6 @@ function FilesTab() {
             tableIndexResultPosition="bottom"
             serverOptions={{
               setAdditionalFields,
-              defaultSorting: DEFAULT_SORTING,
               onSortingChange: setSorting,
             }}
           />
