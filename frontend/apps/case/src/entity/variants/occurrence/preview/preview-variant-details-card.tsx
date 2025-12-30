@@ -212,7 +212,8 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
   if (data.sift_pred) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.sift')}>
-        {data.sift_pred} ({data.sift_score})
+        {data.sift_pred}
+        {data.sift_score && ` (${data.sift_score})`}
       </DescriptionRow>,
     );
   }
@@ -221,7 +222,8 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
   if (data.fathmm_pred) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.fathmm')}>
-        {data.fathmm_pred} ({data.fathmm_score})
+        {data.fathmm_pred}
+        {data.fathmm_score && ` (${data.fathmm_score})`}
       </DescriptionRow>,
     );
   }
@@ -237,7 +239,8 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
   if (data.polyphen2_hvar_pred) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.polyphen2_hvar')}>
-        {data.polyphen2_hvar_pred} ({data.polyphen2_hvar_score})
+        {data.polyphen2_hvar_pred}
+        {data.polyphen2_hvar_score && ` (${data.polyphen2_hvar_score})`}
       </DescriptionRow>,
     );
   }

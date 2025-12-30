@@ -1195,7 +1195,7 @@
       "dann": "DANN",
       "fathmm": "FATHMM",
       "lrt": "LRT",
-      "polyphen2hvar": "PolyPhen-2 HVAR",
+      "polyphen2_hvar": "PolyPhen-2 HVAR",
       "revel": "REVEL",
       "sift": "SIFT",
       "title": "Scores Fonctionnels"
