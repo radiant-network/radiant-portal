@@ -529,9 +529,10 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     applyWithOperator(TermOperators.NotIn);
   }, [applyWithOperator]);
 
-  const applyAll = useCallback(() => {
-    applyWithOperator(TermOperators.All);
-  }, [applyWithOperator]);
+  // Waiting back implementation of "all" operator
+  // const applyAll = useCallback(() => {
+  //   applyWithOperator(TermOperators.All);
+  // }, [applyWithOperator]);
 
   const applySomeNotIn = useCallback(() => {
     applyWithOperator(TermOperators.In);
@@ -635,10 +636,11 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
                   label: t('common.filters.buttons.some_not_in'),
                   onClick: applySomeNotIn,
                 },
-                {
-                  label: t('common.filters.buttons.all'),
-                  onClick: applyAll,
-                },
+                // Waiting back implementation of "all" operator
+                // {
+                //   label: t('common.filters.buttons.all'),
+                //   onClick: applyAll,
+                // },
                 {
                   label: t('common.filters.buttons.not_in'),
                   onClick: applyNotIn,
