@@ -266,7 +266,8 @@ func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(caseId int, seq
 		"v.is_mane_select, v.is_mane_plus, c.exon_rank, c.exon_total, v.dna_change, v.vep_impact, v.consequences, " +
 		"v.aa_change, v.rsnumber, v.clinvar_interpretation, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_type, c.spliceai_ds, " +
 		"v.pf_wgs, v.gnomad_v3_af, c.sift_pred, c.sift_score, c.revel_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, " +
-		"c.dann_score, o.zygosity, o.transmission_mode, o.parental_origin, o.father_calls, o.mother_calls, o.info_qd, o.ad_alt, o.ad_total, o.filter, o.gq," +
+		"c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, o.zygosity, o.transmission_mode, o.parental_origin, " +
+		"o.father_calls, o.mother_calls, o.info_qd, o.ad_alt, o.ad_total, o.filter, o.gq," +
 		"o.exomiser_gene_combined_score, o.exomiser_acmg_evidence, o.exomiser_acmg_classification, v.pc_wgs_affected, v.pn_wgs_affected, v.pf_wgs_affected, " +
 		"v.pc_wgs_not_affected, v.pn_wgs_not_affected, v.pf_wgs_not_affected, i.classification as interpretation_classification_code, g.gene_id as ensembl_gene_id")
 

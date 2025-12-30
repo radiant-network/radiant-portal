@@ -80,6 +80,10 @@ type ExpandedGermlineSNVOccurrence = struct {
 	CaddPhred                          float32                  `json:"cadd_phred,omitempty"`
 	CaddScore                          float32                  `json:"cadd_score,omitempty"`
 	DannScore                          float32                  `json:"dann_score,omitempty"`
+	LrtPred                            string                   `json:"lrt_pred,omitempty"`
+	LrtScore                           float32                  `json:"lrt_score,omitempty"`
+	Polyphen2HvarPred                  string                   `json:"polyphen2_hvar_pred,omitempty"`
+	Polyphen2HvarScore                 float32                  `json:"polyphen2_hvar_score,omitempty"`
 	Zygosity                           string                   `json:"zygosity,omitempty"`
 	TransmissionMode                   string                   `json:"transmission,omitempty"`
 	ParentalOrigin                     string                   `json:"parental_origin,omitempty"`
