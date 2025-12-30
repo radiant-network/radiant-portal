@@ -6,10 +6,10 @@ import AnalysisTypeCodeCell, {
   AnalysisTypeCodeCellTooltip,
 } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
-import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
 import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
+import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
@@ -101,7 +101,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Status
     columnHelper.accessor(row => row.status_code, {
       id: 'status_code',
-      cell: info => <AssayStatusCell status={info.getValue()} />,
+      cell: info => <StatusCell status={info.getValue()} />,
       header: t('case_exploration.case.headers.status_code'),
       size: 124,
       minSize: 40,

@@ -1,9 +1,9 @@
 import { createContext, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
-import { CaseAssay, CaseEntity } from '@/api/api';
+import { CaseEntity, CaseSequencingExperiment } from '@/api/api';
 
-import AssayVariantFilters from './filters/assay-variant-filters';
+import SequencingExperimentVariantFilters from './filters/sequencing-experiment-variant-filters';
 import CNVTab from './occurrence/cnv-tab';
 import SNVTab from './occurrence/snv-tab';
 
@@ -22,14 +22,15 @@ type VariantTabProps = {
 function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeInterface, setActiveInterface] = useState<VariantInterface>(VariantInterface.SNV);
-  const [patientSelected, setPatientSelected] = useState<CaseAssay | undefined>(undefined);
+  const [patientSelected, setPatientSelected] = useState<CaseSequencingExperiment | undefined>(undefined);
 
-  // only use assay with variants
-  const assaysWithVariants = caseEntity?.assays.filter(assay => assay.has_variants) ?? [];
+  // only use sequencing experiments with variants
+  const sequencingExperimentsWithVariants =
+    caseEntity?.sequencing_experiments.filter(seqExp => seqExp.has_variants) ?? [];
 
   let defaultSeqId = Number(searchParams.get('seq_id')) ?? -1;
-  if (!defaultSeqId && assaysWithVariants[0]?.seq_id) {
-    defaultSeqId = assaysWithVariants[0]?.seq_id;
+  if (!defaultSeqId && sequencingExperimentsWithVariants[0]?.seq_id) {
+    defaultSeqId = sequencingExperimentsWithVariants[0]?.seq_id;
   }
   const [seqId, setSeqId] = useState<number>(defaultSeqId);
 
@@ -42,27 +43,27 @@ function VariantTab({ caseEntity, isLoading }: VariantTabProps) {
       return;
     }
 
-    const assays = caseEntity?.assays ?? [];
-    if (assays.length === 0) return;
+    const sequencing_experiments = caseEntity?.sequencing_experiments ?? [];
+    if (sequencing_experiments.length === 0) return;
 
-    const assaysWithVariants = assays.filter(assay => assay.has_variants);
-    if (assaysWithVariants.length === 0) return;
+    const sequencingExperimentsWithVariants = sequencing_experiments.filter(seqExp => seqExp.has_variants);
+    if (sequencingExperimentsWithVariants.length === 0) return;
 
-    setSeqId(assaysWithVariants[0].seq_id);
+    setSeqId(sequencingExperimentsWithVariants[0].seq_id);
   }, [searchParams, caseEntity]);
 
   return (
     <SeqIDContext value={seqId}>
       <div className="bg-background flex flex-col">
-        <AssayVariantFilters
+        <SequencingExperimentVariantFilters
           isLoading={isLoading}
-          assays={assaysWithVariants}
+          sequencingExperiments={sequencingExperimentsWithVariants}
           value={seqId}
           handleChange={(value: number) => {
             searchParams.set('seq_id', `${value}`);
             setSearchParams(searchParams, { replace: true });
             setSeqId(value);
-            setPatientSelected(assaysWithVariants.find(assay => assay.seq_id === value));
+            setPatientSelected(sequencingExperimentsWithVariants.find(seqExp => seqExp.seq_id === value));
           }}
           activeInterface={activeInterface}
           onActiveInterfaceChange={setActiveInterface}

@@ -45,7 +45,7 @@ func Test_SecureRoutes(t *testing.T) {
 
 		// GET requests
 		for _, route := range []string{
-			"assays/1",
+			"sequencing/1/details",
 			"cases/1",
 			"cases/autocomplete",
 			"genes/autocomplete",
@@ -128,7 +128,7 @@ func Test_OpenFGA_Authorization(t *testing.T) {
 				route string
 				code  int
 			}{
-				{"assays/1", 200},
+				{"sequencing/1/details", 200},
 				{"cases/1", 200},
 				{"genes/autocomplete", 200},
 				{"hpo/autocomplete", 200},

@@ -1,5 +1,4 @@
 import {
-  AssaysApi,
   CasesApi,
   Configuration,
   DocumentsApi,
@@ -8,6 +7,7 @@ import {
   MondoApi,
   OccurrencesApi,
   SavedFiltersApi,
+  SequencingApi,
   VariantApi,
 } from '../api';
 import { BASE_PATH } from '../api/base';
@@ -25,5 +25,5 @@ export const mondoApi = new MondoApi(config, BASE_PATH, axiosClient);
 export const caseApi = new CasesApi(config, BASE_PATH, axiosClient);
 export const documentApi = new DocumentsApi(config, BASE_PATH, axiosClient);
 export const savedFiltersApi = new SavedFiltersApi(config, BASE_PATH, axiosClient);
-export const assayApi = new AssaysApi(config, BASE_PATH, axiosClient);
+export const sequencingApi = new SequencingApi(config, BASE_PATH, axiosClient);
 export const igvApi = new IgvApi(config, BASE_PATH, axiosClient);

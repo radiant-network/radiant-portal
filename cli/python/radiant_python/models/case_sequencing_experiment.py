@@ -22,9 +22,9 @@ from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class CaseAssay(BaseModel):
+class CaseSequencingExperiment(BaseModel):
     """
-    Assay to display in a Case
+    Sequencing experiment to display in a Case
     """ # noqa: E501
     affected_status_code: StrictStr
     experimental_strategy_code: StrictStr
@@ -58,7 +58,7 @@ class CaseAssay(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of CaseAssay from a JSON string"""
+        """Create an instance of CaseSequencingExperiment from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -83,7 +83,7 @@ class CaseAssay(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of CaseAssay from a dict"""
+        """Create an instance of CaseSequencingExperiment from a dict"""
         if obj is None:
             return None
 

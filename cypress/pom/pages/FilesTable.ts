@@ -130,8 +130,8 @@ const tableColumns = [
     tooltip: 'Date of case creation (yyyy-mm-dd)',
   },
   {
-    id: 'assay',
-    name: 'Assay',
+    id: 'sequencing',
+    name: 'Sequencing',
     apiField: 'seq_id',
     isVisibleByDefault: false,
     pinByDefault: null,

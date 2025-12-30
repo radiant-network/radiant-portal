@@ -1,6 +1,11 @@
 import useSWR from 'swr';
 
-import { CaseAssay, CaseEntity, CasePatientClinicalInformation, ExpandedGermlineSNVOccurrence } from '@/api/api';
+import {
+  CaseEntity,
+  CasePatientClinicalInformation,
+  CaseSequencingExperiment,
+  ExpandedGermlineSNVOccurrence,
+} from '@/api/api';
 import { PROBAND } from '@/components/base/constants';
 import { caseApi, occurrencesApi } from '@/utils/api';
 
@@ -32,7 +37,12 @@ export async function fetchCase(input: CaseInput) {
 /**
  * Hook to fetch occurrence and case data for preview sheets
  */
-export function useOccurrenceAndCase(caseId: number, seqId: number, locusId: string, patientSelected?: CaseAssay) {
+export function useOccurrenceAndCase(
+  caseId: number,
+  seqId: number,
+  locusId: string,
+  patientSelected?: CaseSequencingExperiment,
+) {
   const expandResult = useSWR<ExpandedGermlineSNVOccurrence, any, OccurrenceExpandInput>(
     {
       caseId: caseId,
@@ -59,20 +69,22 @@ export function useOccurrenceAndCase(caseId: number, seqId: number, locusId: str
   );
 
   let patient: CasePatientClinicalInformation | undefined;
-  let assay: CaseAssay | undefined;
+  let caseSequencing: CaseSequencingExperiment | undefined;
   if (patientSelected) {
     patient = caseResult.data?.members.find(member => member.patient_id === patientSelected.patient_id);
-    assay = caseResult.data?.assays.find(assay => assay.patient_id === patientSelected.patient_id);
+    caseSequencing = caseResult.data?.sequencing_experiments.find(
+      seqExp => seqExp.patient_id === patientSelected.patient_id,
+    );
   } else {
     patient = caseResult.data?.members.find(member => member.relationship_to_proband === PROBAND);
-    assay = caseResult.data?.assays.find(assay => assay.patient_id === patient?.patient_id);
+    caseSequencing = caseResult.data?.sequencing_experiments.find(seqExp => seqExp.patient_id === patient?.patient_id);
   }
 
   return {
     expandResult,
     caseResult,
     patient,
-    assay,
+    caseSequencing,
     isLoading: expandResult.isLoading || !expandResult.data || caseResult.isLoading || !caseResult.data,
   };
 }

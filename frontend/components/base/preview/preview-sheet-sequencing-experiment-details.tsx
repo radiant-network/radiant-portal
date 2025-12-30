@@ -6,15 +6,19 @@ import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
 import SequencingInformationsDialog from 'components/base/sequencing/sequencing-information-dialog';
 
-export type PreviewSheetAssayDetailsProps = {
+export type PreviewSheetSequencingExperimentDetailsProps = {
   patientId: number | undefined;
   relationshipToProband?: string;
   seqId: number | undefined;
 };
 
-function PreviewSheetAssayDetails({ patientId, relationshipToProband, seqId }: PreviewSheetAssayDetailsProps) {
+function PreviewSheetSequencingExperimentDetails({
+  patientId,
+  relationshipToProband,
+  seqId,
+}: PreviewSheetSequencingExperimentDetailsProps) {
   const { t } = useI18n();
-  const [assayDialogOpen, setAssayDialogOpen] = useState<boolean>(false);
+  const [sequencingExperimentDetailsDialogOpen, setSequencingExperimentDetailsDialogOpen] = useState<boolean>(false);
 
   return (
     <>
@@ -31,10 +35,15 @@ function PreviewSheetAssayDetails({ patientId, relationshipToProband, seqId }: P
           </div>
         </div>
         <div className="flex flex-col items-start justify-center">
-          <h4 className="font-semibold">{t('preview_sheet.occurrence_details.assay')}</h4>
+          <h4 className="font-semibold">{t('preview_sheet.occurrence_details.sequencing')}</h4>
           <div className="flex gap-1 items-center">
             <p className="text-muted-foreground font-mono">{seqId}</p>
-            <Button variant="ghost" iconOnly className="size-6" onClick={() => setAssayDialogOpen(true)}>
+            <Button
+              variant="ghost"
+              iconOnly
+              className="size-6"
+              onClick={() => setSequencingExperimentDetailsDialogOpen(true)}
+            >
               <Info />
             </Button>
           </div>
@@ -42,8 +51,8 @@ function PreviewSheetAssayDetails({ patientId, relationshipToProband, seqId }: P
       </div>
       {seqId && (
         <SequencingInformationsDialog
-          open={assayDialogOpen}
-          onClose={() => setAssayDialogOpen(false)}
+          open={sequencingExperimentDetailsDialogOpen}
+          onClose={() => setSequencingExperimentDetailsDialogOpen(false)}
           seqId={seqId.toString()}
         />
       )}
@@ -51,4 +60,4 @@ function PreviewSheetAssayDetails({ patientId, relationshipToProband, seqId }: P
   );
 }
 
-export default PreviewSheetAssayDetails;
+export default PreviewSheetSequencingExperimentDetails;

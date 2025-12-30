@@ -42,16 +42,16 @@ configuration = radiant_python.Configuration(
 # Enter a context with an instance of the API client
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = radiant_python.AssaysApi(api_client)
+    api_instance = radiant_python.SequencingApi(api_client)
     seq_id = 'seq_id_example' # str | Seq ID
 
     try:
-        # Get Assay by seq_id
-        api_response = api_instance.get_assay_by_seq_id(seq_id)
-        print("The response of AssaysApi->get_assay_by_seq_id:\n")
+        # Get Sequencing by seq_id
+        api_response = api_instance.get_sequencing(seq_id)
+        print("The response of SequencingApi->get_sequencing:\n")
         pprint(api_response)
     except ApiException as e:
-        print("Exception when calling AssaysApi->get_assay_by_seq_id: %s\n" % e)
+        print("Exception when calling SequencingApi->get_sequencing: %s\n" % e)
 
 ```
 
