@@ -567,22 +567,22 @@
           "uncertain_significance": "Exomiser ACMG"
         },
         "fathmm_pred": {
-          "t": "Tolerated",
-          "d": "Damaging"
+          "T": "Tolerated",
+          "D": "Damaging"
         },
         "lrt_pred": {
-          "n": "Neutral",
-          "d": "Deleterious",
-          "u": "Unknown"
+          "N": "Neutral",
+          "D": "Deleterious",
+          "U": "Unknown"
         },
         "polyphen2_hvar_pred": {
-          "b": "Benign",
-          "d": "Damaging",
-          "p": "Possibly Damaging"
+          "B": "Benign",
+          "D": "Damaging",
+          "P": "Possibly Damaging"
         },
         "sift_pred": {
-          "t": "Tolerated",
-          "d": "Damaging"
+          "T": "Tolerated",
+          "D": "Damaging"
         },
         "transmission_mode": {
           "autosomal_dominant": "Autosomal Dominant",
@@ -947,7 +947,8 @@
       "lrt": "LRT",
       "polyphen2hvar": "PolyPhen-2 HVAR",
       "phylop17way": "PhyloP17Way",
-      "pli": "pLI"
+      "pli": "pLI",
+      "no_prediction": "No prediction"
     },
     "classes": {
       "indel": "Indel",
@@ -1189,12 +1190,15 @@
       "gnomad": "gnomAD"
     },
     "functional_scores": {
-      "title": "Functional Scores",
-      "sift": "SIFT",
-      "revel": "REVEL",
-      "fathmm": "FATHMM",
+      "cadd_phred": "CADD (Phred)",
       "cadd_raw": "CADD (Raw)",
-      "cadd_phred": "CADD (Phred)"
+      "dann": "DANN",
+      "fathmm": "FATHMM",
+      "lrt": "LRT",
+      "polyphen2_hvar": "PolyPhen-2 HVAR",
+      "revel": "REVEL",
+      "sift": "SIFT",
+      "title": "Functional Scores"
     },
     "zygosity": {
       "title": "Zygosity",

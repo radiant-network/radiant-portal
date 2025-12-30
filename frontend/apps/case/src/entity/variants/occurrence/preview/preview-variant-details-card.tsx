@@ -176,32 +176,7 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
 
   const functionalScores = [];
 
-  // revel score
-  if (data.revel_score) {
-    functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.gene.revel')}>{data.revel_score}</DescriptionRow>,
-    );
-  }
-
-  // sift
-  if (data.sift_pred) {
-    functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.sift')}>
-        {data.sift_pred} ({data.sift_score})
-      </DescriptionRow>,
-    );
-  }
-
-  // fathmm
-  if (data.fathmm_pred) {
-    functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.fathmm')}>
-        {data.fathmm_pred} ({data.fathmm_score})
-      </DescriptionRow>,
-    );
-  }
-
-  // caddphred
+  // cadd phred
   if (data.cadd_phred) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.cadd_phred')}>
@@ -215,6 +190,57 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.cadd_raw')}>
         {data.cadd_score.toExponential(2)}
+      </DescriptionRow>,
+    );
+  }
+
+  // DANN score
+  if (data.dann_score) {
+    functionalScores.push(
+      <DescriptionRow label={t('occurrence_expand.functional_scores.dann')}>{data.dann_score}</DescriptionRow>,
+    );
+  }
+
+  // LRT score
+  if (data.lrt_score) {
+    functionalScores.push(
+      <DescriptionRow label={t('occurrence_expand.functional_scores.lrt')}>{data.lrt_score}</DescriptionRow>,
+    );
+  }
+
+  // sift
+  if (data.sift_pred) {
+    functionalScores.push(
+      <DescriptionRow label={t('occurrence_expand.functional_scores.sift')}>
+        {data.sift_pred}
+        {data.sift_score && ` (${data.sift_score})`}
+      </DescriptionRow>,
+    );
+  }
+
+  // fathmm
+  if (data.fathmm_pred) {
+    functionalScores.push(
+      <DescriptionRow label={t('occurrence_expand.functional_scores.fathmm')}>
+        {data.fathmm_pred}
+        {data.fathmm_score && ` (${data.fathmm_score})`}
+      </DescriptionRow>,
+    );
+  }
+
+  // revel score
+  if (data.revel_score) {
+    functionalScores.push(
+      <DescriptionRow label={t('occurrence_expand.functional_scores.revel')}>{data.revel_score}</DescriptionRow>,
+    );
+  }
+
+  // PolyPhen-2 HVAR
+  if (data.polyphen2_hvar_pred) {
+    functionalScores.push(
+      <DescriptionRow label={t('occurrence_expand.functional_scores.polyphen2_hvar')}>
+        {data.polyphen2_hvar_pred}
+        {data.polyphen2_hvar_score && ` (${data.polyphen2_hvar_score})`}
       </DescriptionRow>,
     );
   }

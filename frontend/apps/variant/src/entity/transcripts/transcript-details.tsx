@@ -44,7 +44,11 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
         </div>
       </div>
       <div>
-        <ExpandableList items={getPredictionList(data, t)} visibleCount={2} renderItem={item => item} />
+        <ExpandableList
+          items={getPredictionList(data, t)}
+          visibleCount={2}
+          emptyMessage={<span className="text-xs text-muted-foreground">{t('variant.predictions.no_prediction')}</span>}
+        />
       </div>
       <div className="text-sm">
         {data.phyloP17way_primate ? (

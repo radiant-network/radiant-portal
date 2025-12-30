@@ -947,7 +947,8 @@
       "lrt": "LRT",
       "polyphen2hvar": "PolyPhen-2 HVAR",
       "phylop17way": "PhyloP17Way",
-      "pli": "pLI"
+      "pli": "pLI",
+      "no_prediction": "Aucune prédiction"
     },
     "classes": {
       "indel": "Indel",
@@ -1189,12 +1190,15 @@
       "gnomad": "gnomAD"
     },
     "functional_scores": {
-      "title": "Scores Fonctionnels",
-      "sift": "SIFT",
-      "revel": "REVEL",
-      "fathmm": "FATHMM",
+      "cadd_phred": "CADD (Phred)",
       "cadd_raw": "CADD (Brut)",
-      "cadd_phred": "CADD (Phred)"
+      "dann": "DANN",
+      "fathmm": "FATHMM",
+      "lrt": "LRT",
+      "polyphen2_hvar": "PolyPhen-2 HVAR",
+      "revel": "REVEL",
+      "sift": "SIFT",
+      "title": "Scores Fonctionnels"
     },
     "zygosity": {
       "title": "Zygosité",
