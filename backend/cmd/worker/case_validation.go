@@ -220,7 +220,7 @@ func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int
 		cr.validateSystem(patientIndex, obsIndex)
 		cr.validateValue(patientIndex, obsIndex)
 		cr.validateOnsetCode(patientIndex, obsIndex, validOnsetCodes)
-		// TODO: make sure interpretation oneof tag is containing valid codes
+		// TODO: make sure interpretation oneof tag is containing valid codes (positive, negative)
 		cr.validateObsCategoricalNote(patientIndex, obsIndex)
 	}
 	return nil
