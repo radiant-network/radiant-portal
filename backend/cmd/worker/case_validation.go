@@ -602,6 +602,8 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 		return fmt.Errorf("failed to persist case %w", err)
 	}
 
+	cr.CaseID = &c.ID
+
 	// Persist CaseHasSequencingExperiment relationships
 	for _, se := range cr.SequencingExperiments {
 		chse := types.CaseHasSequencingExperiment{
@@ -722,7 +724,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 
 			err := ctx.TaskRepo.CreateTaskContext(&types.TaskContext{
 				TaskID:                 task.ID,
-				SequencingExperimentID: &se.ID,
+				SequencingExperimentID: se.ID,
 				CaseID:                 c,
 			})
 			if err != nil {

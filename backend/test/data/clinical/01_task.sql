@@ -71,3 +71,5 @@ VALUES (1, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2
        (72, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
        (73, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00')
 ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE task ALTER COLUMN id RESTART WITH 1000;
