@@ -343,15 +343,6 @@ export const CaseEntity_Variants_SNV_Table = {
         })
       );
     },
-    /**
-     * Unsort all columns of the table.
-     */
-    unsortAllColumns() {
-      CaseEntity_Variants_SNV_Table.actions.sortColumn('exomiser');
-      CaseEntity_Variants_SNV_Table.actions.sortColumn('exomiser');
-      CaseEntity_Variants_SNV_Table.actions.sortColumn('consequence');
-      CaseEntity_Variants_SNV_Table.actions.sortColumn('consequence');
-    },
   },
 
   validations: {
@@ -492,7 +483,6 @@ export const CaseEntity_Variants_SNV_Table = {
      */
     shouldRequestOnSort(columnID: string) {
       CaseEntity_Variants_SNV_Table.actions.showAllColumns();
-      CaseEntity_Variants_SNV_Table.actions.unsortAllColumns();
       cy.intercept('POST', '**/list', req => {
         expect(req.body.sort).to.have.length(1);
         expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
@@ -612,7 +602,6 @@ export const CaseEntity_Variants_SNV_Table = {
      */
     shouldShowPinnableColumns() {
       CaseEntity_Variants_SNV_Table.actions.showAllColumns();
-      CaseEntity_Variants_SNV_Table.actions.unsortAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -630,7 +619,6 @@ export const CaseEntity_Variants_SNV_Table = {
      */
     shouldShowSortableColumns() {
       CaseEntity_Variants_SNV_Table.actions.showAllColumns();
-      CaseEntity_Variants_SNV_Table.actions.unsortAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -649,7 +637,6 @@ export const CaseEntity_Variants_SNV_Table = {
      */
     shouldSortColumn(columnID: string) {
       CaseEntity_Variants_SNV_Table.actions.showAllColumns();
-      CaseEntity_Variants_SNV_Table.actions.unsortAllColumns();
       const apiField = tableColumns.find(col => col.id === columnID)?.apiField!;
 
       cy.fixture('RequestBody/SortVariant.json').then(mockRequestBody => {

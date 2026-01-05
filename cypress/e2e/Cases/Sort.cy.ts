@@ -13,7 +13,7 @@ describe('Cases - Sort', () => {
     CasesTable.validations.shouldSortColumn('mrn');
   });
 
-  it('Number [SJRA-1018]', () => {
+  it('Number', () => {
     setupTest();
     CasesTable.validations.shouldSortColumn('case');
   });

@@ -442,7 +442,7 @@ export const CasesTable = {
       CasesTable.actions.showAllColumns();
       cy.intercept('POST', '**/cases/search', req => {
         expect(req.body.sort).to.have.length(1);
-        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
+        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'desc' });
       }).as('sortRequest');
       CasesTable.actions.sortColumn(columnID, false /*needIntercept*/);
       cy.wait('@sortRequest');

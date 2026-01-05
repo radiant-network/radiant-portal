@@ -322,12 +322,6 @@ export const CaseEntity_Variants_CNV_Table = {
         })
       );
     },
-    /**
-     * Unsort all columns of the table.
-     */
-    unsortAllColumns() {
-      CaseEntity_Variants_CNV_Table.actions.sortColumn('cnv_variant');
-    },
   },
 
   validations: {
@@ -474,10 +468,9 @@ export const CaseEntity_Variants_CNV_Table = {
      */
     shouldRequestOnSort(columnID: string) {
       CaseEntity_Variants_CNV_Table.actions.showAllColumns();
-      CaseEntity_Variants_CNV_Table.actions.unsortAllColumns();
       cy.intercept('POST', '**/list', req => {
         expect(req.body.sort).to.have.length(1);
-        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
+        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'desc' });
       }).as('sortRequest');
       CaseEntity_Variants_CNV_Table.actions.sortColumn(columnID, false /*needIntercept*/);
       cy.wait('@sortRequest');
@@ -544,7 +537,6 @@ export const CaseEntity_Variants_CNV_Table = {
      */
     shouldShowPinnableColumns() {
       CaseEntity_Variants_CNV_Table.actions.showAllColumns();
-      CaseEntity_Variants_CNV_Table.actions.unsortAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -562,7 +554,6 @@ export const CaseEntity_Variants_CNV_Table = {
      */
     shouldShowSortableColumns() {
       CaseEntity_Variants_CNV_Table.actions.showAllColumns();
-      CaseEntity_Variants_CNV_Table.actions.unsortAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -581,7 +572,6 @@ export const CaseEntity_Variants_CNV_Table = {
      */
     shouldSortColumn(columnID: string) {
       CaseEntity_Variants_CNV_Table.actions.showAllColumns();
-      CaseEntity_Variants_CNV_Table.actions.unsortAllColumns();
       const apiField = tableColumns.find(col => col.id === columnID)?.apiField!;
 
       cy.fixture('RequestBody/SortVariant.json').then(mockRequestBody => {

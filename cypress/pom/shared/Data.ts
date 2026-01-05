@@ -100,7 +100,7 @@ export const data = {
     interpreted: {
       case: '1',
       relationship: 'proband',
-      date: '2025-12-04',
+      date: '2025-12-22',
       condition_mondo: 'adrenocortical insufficiency',
       mondo_id: 'MONDO:0000004',
       classification: 'LP',
