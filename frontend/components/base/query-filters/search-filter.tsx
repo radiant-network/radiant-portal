@@ -22,7 +22,7 @@ interface SearchFilterProps {
 export function SearchFilter({ search }: SearchFilterProps) {
   const { t } = useI18n();
   const { appId } = useFilterConfig();
-  const { translation_key, type } = search;
+  const { translation_key, key } = search;
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
   const handleAsyncSearch = async (searchTerm: string): Promise<MultiSelectorOption[]> => {
@@ -50,12 +50,12 @@ export function SearchFilter({ search }: SearchFilterProps) {
   return (
     <div className="flex flex-col gap-2 ">
       <div className="flex items-center gap-2">
-        <Label>{t(`common.filters.labels.${type}_${translation_key}`)}</Label>
+        <Label>{t(`common.filters.labels.${translation_key}`)}</Label>
         <Tooltip>
           <TooltipTrigger asChild>
             <InfoIcon size={16} />
           </TooltipTrigger>
-          <TooltipContent>{t(`common.filters.labels.${type}_${translation_key}_tooltip`)}</TooltipContent>
+          <TooltipContent>{t(`common.filters.labels.${translation_key}_tooltip`)}</TooltipContent>
         </Tooltip>
       </div>
       <MultiSelector
@@ -63,18 +63,16 @@ export function SearchFilter({ search }: SearchFilterProps) {
         onChange={newValues => {
           setSelectedValues(newValues);
           queryBuilderRemote.updateActiveQueryField(appId, {
-            field: search.key,
+            field: key.replace(/search_by_/g, ''),
             value: newValues,
-            merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
+            merge_strategy: MERGE_VALUES_STRATEGIES.APPEND_VALUES,
           });
         }}
         onSearch={handleAsyncSearch}
-        placeholder={t(`common.filters.labels.${type}_${translation_key}_placeholder`)}
+        placeholder={t(`common.filters.labels.${translation_key}_placeholder`)}
         className="w-full"
         debounceDelay={300}
         maxSelected={100}
-        // TODO: Customize empty indicator component
-        emptyIndicator={<div className="text-center text-sm">No genes found</div>}
         hidePlaceholderWhenSelected
       />
     </div>

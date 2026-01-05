@@ -455,7 +455,7 @@
         "revel_score_tooltip": "Rare Exome Variant Ensemble Learner",
         "search_by_symbol": "Rechercher par gène",
         "search_by_symbol_placeholder": "ex. BRAF, ENSG00000157764",
-        "search_by_symbol_tooltip": "Recherche par symbole, alias et Ensembl ID",
+        "search_by_symbol_tooltip": "Recherche par symbole et Ensembl ID",
         "select_unit": "Sélectionner une unité",
         "sift_pred": "SIFT",
         "sift_pred_tooltip": "Sorting Intolerant From Tolerant",
@@ -656,6 +656,7 @@
       "search": {
         "placeholder": "Rechercher..."
       },
+      "no_results_found": "Aucun résultat trouvé",
       "no_values_found": "Aucune valeur trouvée",
       "unsupported_type": "Type non pris en charge",
       "gene_divider": "Panels de gènes",

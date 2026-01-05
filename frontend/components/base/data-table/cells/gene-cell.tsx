@@ -40,7 +40,7 @@ function GeneCell({ className, symbol }: GeneCellProps) {
           queryBuilderRemote.updateActiveQueryField(appId, {
             field: `symbol`,
             value: [symbol],
-            merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
+            merge_strategy: MERGE_VALUES_STRATEGIES.APPEND_VALUES,
           });
         }}
       >
