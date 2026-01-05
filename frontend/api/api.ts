@@ -879,7 +879,7 @@ export interface CasePatientBatch {
      * @type {string}
      * @memberof CasePatientBatch
      */
-    'affected_status_code': string;
+    'affected_status_code': CasePatientBatchAffectedStatusCodeEnum;
     /**
      * 
      * @type {Array<FamilyHistoryBatch>}
@@ -909,7 +909,7 @@ export interface CasePatientBatch {
      * @type {string}
      * @memberof CasePatientBatch
      */
-    'relation_to_proband_code': string;
+    'relation_to_proband_code': CasePatientBatchRelationToProbandCodeEnum;
     /**
      * 
      * @type {string}
@@ -917,6 +917,25 @@ export interface CasePatientBatch {
      */
     'submitter_patient_id': string;
 }
+
+export const CasePatientBatchAffectedStatusCodeEnum = {
+    Affected: 'affected',
+    Unaffected: 'unaffected',
+    Unknown: 'unknown'
+} as const;
+
+export type CasePatientBatchAffectedStatusCodeEnum = typeof CasePatientBatchAffectedStatusCodeEnum[keyof typeof CasePatientBatchAffectedStatusCodeEnum];
+export const CasePatientBatchRelationToProbandCodeEnum = {
+    Mother: 'mother',
+    Father: 'father',
+    Brother: 'brother',
+    Sister: 'sister',
+    Sibling: 'sibling',
+    Proband: 'proband'
+} as const;
+
+export type CasePatientBatchRelationToProbandCodeEnum = typeof CasePatientBatchRelationToProbandCodeEnum[keyof typeof CasePatientBatchRelationToProbandCodeEnum];
+
 /**
  * Patient clinical information to display in Case Entity
  * @export
@@ -3135,7 +3154,7 @@ export interface ObservationCategoricalBatch {
      * @type {string}
      * @memberof ObservationCategoricalBatch
      */
-    'interpretation_code': string;
+    'interpretation_code'?: ObservationCategoricalBatchInterpretationCodeEnum;
     /**
      * 
      * @type {string}
@@ -3161,6 +3180,14 @@ export interface ObservationCategoricalBatch {
      */
     'value': string;
 }
+
+export const ObservationCategoricalBatchInterpretationCodeEnum = {
+    Positive: 'positive',
+    Negative: 'negative'
+} as const;
+
+export type ObservationCategoricalBatchInterpretationCodeEnum = typeof ObservationCategoricalBatchInterpretationCodeEnum[keyof typeof ObservationCategoricalBatchInterpretationCodeEnum];
+
 /**
  * 
  * @export
@@ -3178,7 +3205,7 @@ export interface ObservationTextBatch {
      * @type {string}
      * @memberof ObservationTextBatch
      */
-    'note': string;
+    'value': string;
 }
 /**
  * 
