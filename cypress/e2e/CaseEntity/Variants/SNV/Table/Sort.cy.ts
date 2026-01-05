@@ -30,7 +30,6 @@ describe('Case Entity - Variants - SNV - Table - Sort', () => {
 
   it('Multiple', () => {
     setupTest();
-    CaseEntity_Variants_SNV_Table.actions.unsortAllColumns();
     CaseEntity_Variants_SNV_Table.actions.sortColumn('gnomad');
     CaseEntity_Variants_SNV_Table.actions.sortColumn('gq');
     CaseEntity_Variants_SNV_Table.actions.sortColumn('gq');
