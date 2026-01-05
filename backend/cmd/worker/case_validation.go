@@ -251,29 +251,6 @@ func (r *CaseValidationRecord) fetchValidationInfos() error {
 	return nil
 }
 
-func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
-	return db.Transaction(func(tx *gorm.DB) error {
-		batchRepo := repository.NewBatchRepository(tx)
-		txCtx := NewStorageContext(tx)
-		rowsUpdated, unexpectedErrUpdate := updateBatch(batch, records, batchRepo)
-		if unexpectedErrUpdate != nil {
-			return unexpectedErrUpdate
-		}
-		if rowsUpdated == 0 {
-			return fmt.Errorf("no rows updated when updating case batch %v", batch.ID)
-		}
-		if batch.DryRun || batch.Status != types.BatchStatusSuccess {
-			return nil
-		}
-
-		if err := persistCaseRecords(txCtx, records); err != nil {
-			return fmt.Errorf("error during case insertion %w", err)
-		}
-
-		return nil
-	})
-}
-
 func (cr *CaseValidationRecord) formatPatientsErrorMessage(fieldName string, patientIndex int) string {
 	p := cr.Case.Patients[patientIndex]
 	return fmt.Sprintf("Invalid field %s for case %s - patient %s. Reason:",
@@ -553,6 +530,29 @@ func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.
 		processUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), ctx.BatchRepo)
 		return
 	}
+}
+
+func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		batchRepo := repository.NewBatchRepository(tx)
+		txCtx := NewStorageContext(tx)
+		rowsUpdated, unexpectedErrUpdate := updateBatch(batch, records, batchRepo)
+		if unexpectedErrUpdate != nil {
+			return unexpectedErrUpdate
+		}
+		if rowsUpdated == 0 {
+			return fmt.Errorf("no rows updated when updating case batch %v", batch.ID)
+		}
+		if batch.DryRun || batch.Status != types.BatchStatusSuccess {
+			return nil
+		}
+
+		if err := persistCaseRecords(txCtx, records); err != nil {
+			return fmt.Errorf("error during case insertion %w", err)
+		}
+
+		return nil
+	})
 }
 
 func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
