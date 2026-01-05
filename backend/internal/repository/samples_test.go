@@ -65,3 +65,49 @@ func Test_GetTypeCodes(t *testing.T) {
 		assert.Greater(t, len(typeCodes), 0)
 	})
 }
+
+func Test_GetSampleByOrgCodeAndSubmitterSampleId_Found(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewSamplesRepository(db)
+
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("CQGC", "S13224")
+
+		assert.NoError(t, err)
+		assert.NotNil(t, sample)
+		assert.Equal(t, "S13224", sample.SubmitterSampleId)
+		assert.Equal(t, 6, sample.OrganizationId)
+	})
+}
+
+func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidSampleId(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewSamplesRepository(db)
+
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("CQGC", "SAMPLE-UNKNOWN")
+
+		assert.NoError(t, err)
+		assert.Nil(t, sample)
+	})
+}
+
+func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidOrgCode(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewSamplesRepository(db)
+
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("INVALID-ORG", "S13224")
+
+		assert.NoError(t, err)
+		assert.Nil(t, sample)
+	})
+}
+
+func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_BothInvalid(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewSamplesRepository(db)
+
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("INVALID-ORG", "SAMPLE-UNKNOWN")
+
+		assert.NoError(t, err)
+		assert.Nil(t, sample)
+	})
+}

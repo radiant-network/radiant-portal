@@ -28,8 +28,8 @@ const (
 	IdenticalCaseInBatch         = "CASE-001"
 	InvalidNumberOfProbands      = "CASE-007"
 	DuplicatePatientInCase       = "CASE-008"
-	SeqExpNotFoundForCasePatient = "CASE-009" // TODO
-	InvalidSeqExpForGermlineCase = "CASE-010" // TODO
+	SeqExpNotFoundForCasePatient = "CASE-009"
+	InvalidSeqExpForCaseType     = "CASE-010"
 )
 
 // Patients error codes
@@ -350,11 +350,11 @@ func (cr *CaseValidationRecord) validateObservationsText(patientIndex int, obser
 
 // Case patient validation
 
-func (cr *CaseValidationRecord) validatePatientInOrg(patientIndex int, patients repository.PatientsDAO) error {
+func (cr *CaseValidationRecord) validatePatientInOrg(patientIndex int, patients repository.PatientsDAO) (*types.Patient, error) {
 	p := cr.Case.Patients[patientIndex]
 	patient, err := patients.GetPatientByOrgCodeAndSubmitterPatientId(p.PatientOrganizationCode, p.SubmitterPatientId)
 	if err != nil {
-		return fmt.Errorf("error getting existing patient: %v", err)
+		return nil, fmt.Errorf("error getting existing patient: %v", err)
 	}
 	if patient == nil {
 		path := cr.formatPatientsFieldPath(patientIndex, "", 0, "")
@@ -366,7 +366,7 @@ func (cr *CaseValidationRecord) validatePatientInOrg(patientIndex int, patients 
 		)
 		cr.addErrors(message, PatientNotFound, path)
 	}
-	return nil
+	return patient, nil
 }
 
 func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int, visited map[patientsKey]struct{}) {
@@ -387,15 +387,17 @@ func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int
 	visited[patientKey] = struct{}{}
 }
 
-func (cr *CaseValidationRecord) validateCasePatients(ctx *BatchValidationContext, patientsBatch []*types.CasePatientBatch) error {
+func (cr *CaseValidationRecord) validateCasePatients(ctx *BatchValidationContext, patientsBatch []*types.CasePatientBatch) ([]*types.Patient, error) {
 	nbProband := 0
 	visitedPatients := map[patientsKey]struct{}{}
+	patients := make([]*types.Patient, 0, len(patientsBatch))
 
 	for patientIndex := range patientsBatch {
-		err := cr.validatePatientInOrg(patientIndex, ctx.PatientRepo)
+		patient, err := cr.validatePatientInOrg(patientIndex, ctx.PatientRepo)
 		if err != nil {
-			return fmt.Errorf("error validating patient in organization for patient index %d: %v", patientIndex, err)
+			return nil, fmt.Errorf("error validating patient in organization for patient index %d: %v", patientIndex, err)
 		}
+		patients = append(patients, patient)
 
 		// Validate uniqueness of patients in case
 		cr.validatePatientUniquenessInCase(patientIndex, visitedPatients)
@@ -410,13 +412,13 @@ func (cr *CaseValidationRecord) validateCasePatients(ctx *BatchValidationContext
 		// Validate observations categorical
 		err = cr.validateObservationsCategorical(patientIndex, ctx.ObservationRepo, ctx.OnsetRepo)
 		if err != nil {
-			return fmt.Errorf("error validating observations categorical for patient index %d: %v", patientIndex, err)
+			return nil, fmt.Errorf("error validating observations categorical for patient index %d: %v", patientIndex, err)
 		}
 
 		// Validate observations text
 		err = cr.validateObservationsText(patientIndex, ctx.ObservationRepo)
 		if err != nil {
-			return fmt.Errorf("error validating observations text for patient index %d: %v", patientIndex, err)
+			return nil, fmt.Errorf("error validating observations text for patient index %d: %v", patientIndex, err)
 		}
 	}
 
@@ -425,10 +427,10 @@ func (cr *CaseValidationRecord) validateCasePatients(ctx *BatchValidationContext
 		path := cr.formatCollectionPath("patients")
 		cr.addErrors(message, InvalidNumberOfProbands, path)
 	}
-	return nil
+	return patients, nil
 }
 
-func (cr *CaseValidationRecord) validateSeqExpInOrg(seqExpIndex int, seqExps repository.SequencingExperimentDAO) error {
+func (cr *CaseValidationRecord) validateSeqExp(seqExpIndex int, seqExps repository.SequencingExperimentDAO) error {
 	se := cr.Case.SequencingExperiments[seqExpIndex]
 	seqExp, err := seqExps.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
 	if err != nil {
@@ -436,23 +438,93 @@ func (cr *CaseValidationRecord) validateSeqExpInOrg(seqExpIndex int, seqExps rep
 	}
 	if seqExp == nil {
 		path := cr.formatSeqExpFieldPath(seqExpIndex, "")
-		message := fmt.Sprintf("Sequencing Experiment (%s / %s / %s) for case %d - sequencing experiment %d does not exist.",
+		message := fmt.Sprintf("Sequencing experiment (%s / %s / %s) does not exist.",
 			se.SampleOrganizationCode,
 			se.SubmitterSampleId,
 			se.Aliquot,
-			cr.Index,
-			seqExpIndex,
 		)
 		cr.addErrors(message, SeqExpNotFound, path)
 	}
 	return nil
 }
 
-func (cr *CaseValidationRecord) validateCaseSequencingExperiments(ctx *BatchValidationContext, seqExpsBatch []*types.CaseSequencingExperimentBatch) error {
+func (cr *CaseValidationRecord) validateSeqExpSample(seqExpIndex int, samples repository.SamplesDAO) (*types.Sample, error) {
+	se := cr.Case.SequencingExperiments[seqExpIndex]
+	sample, err := samples.GetSampleByOrgCodeAndSubmitterSampleId(se.SampleOrganizationCode, se.SubmitterSampleId)
+	if err != nil {
+		return nil, fmt.Errorf("error getting existing sample: %v", err)
+	}
+	if sample == nil {
+		// TODO handle error
+		return nil, nil
+	}
+	return sample, nil
+}
+
+func (cr *CaseValidationRecord) validateSeqExpPatientInCase(seqExpIndex int, sample *types.Sample, patients []*types.Patient) error {
+	if sample == nil {
+		return nil // TODO handle error
+	}
+
+	se := cr.Case.SequencingExperiments[seqExpIndex]
+	patientFound := false
+	for patientIndex := range patients {
+		if patients[patientIndex].ID == sample.PatientID {
+			patientFound = true
+			break
+		}
+	}
+	if !patientFound {
+		path := cr.formatSeqExpFieldPath(seqExpIndex, "")
+		message := fmt.Sprintf("Sequencing experiment (%s / %s / %s) does not belong to any patient from case %d.",
+			se.SampleOrganizationCode,
+			se.SubmitterSampleId,
+			se.Aliquot,
+			cr.Index,
+		)
+		cr.addErrors(message, SeqExpNotFoundForCasePatient, path)
+	}
+
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateSeqExpCaseType(seqExpIndex int, sample *types.Sample) error {
+	if sample == nil {
+		return nil // TODO handle error
+	}
+
+	se := cr.Case.SequencingExperiments[seqExpIndex]
+	if cr.Case.Type == "germline" && sample.HistologyCode == "tumoral" {
+		path := cr.formatSeqExpFieldPath(seqExpIndex, "")
+		message := fmt.Sprintf("Tumor sequencing experiment (%s / %s / %s) should not be sequenced in a germline case for case %d - sequencing experiment %d.",
+			se.SampleOrganizationCode,
+			se.SubmitterSampleId,
+			se.Aliquot,
+			cr.Index,
+			seqExpIndex,
+		)
+		cr.addErrors(message, InvalidSeqExpForCaseType, path)
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateCaseSequencingExperiments(ctx *BatchValidationContext, seqExpsBatch []*types.CaseSequencingExperimentBatch, patients []*types.Patient) error {
 	for seqExpIndex := range seqExpsBatch {
-		err := cr.validateSeqExpInOrg(seqExpIndex, ctx.SeqExpRepo)
+		err := cr.validateSeqExp(seqExpIndex, ctx.SeqExpRepo)
 		if err != nil {
 			return fmt.Errorf("error validating sequencing experiment in organization for sequencing experiment index %d: %v", seqExpIndex, err)
+		}
+		sample, err := cr.validateSeqExpSample(seqExpIndex, ctx.SampleRepo)
+		if err != nil {
+			return fmt.Errorf("error validating sequencing experiment sample for sequencing experiment index %d: %v", seqExpIndex, err)
+		}
+		err = cr.validateSeqExpCaseType(seqExpIndex, sample)
+		if err != nil {
+			return fmt.Errorf("error validating sequencing experiment for wrong case type for sequencing experiment index %d: %v", seqExpIndex, err)
+		}
+		err = cr.validateSeqExpPatientInCase(seqExpIndex, sample, patients)
+		if err != nil {
+			return fmt.Errorf("error validating sequencing experiment patient in case for sequencing experiment index %d: %v", seqExpIndex, err)
 		}
 	}
 	return nil
@@ -479,12 +551,13 @@ func validateCaseRecord(
 	// 1. Validate Case Fields
 
 	// 2. Validate Case Patients
-	if unexpectedErr := cr.validateCasePatients(ctx, c.Patients); unexpectedErr != nil {
+	patients, unexpectedErr := cr.validateCasePatients(ctx, c.Patients)
+	if unexpectedErr != nil {
 		return nil, fmt.Errorf("error during case patients validation: %v", unexpectedErr)
 	}
 
 	// 3. Validate Case Sequencing Experiments
-	if unexpectedErr := cr.validateCaseSequencingExperiments(ctx, c.SequencingExperiments); unexpectedErr != nil {
+	if unexpectedErr := cr.validateCaseSequencingExperiments(ctx, c.SequencingExperiments, patients); unexpectedErr != nil {
 		return nil, fmt.Errorf("error during case sequencing experiments validation: %v", unexpectedErr)
 	}
 
