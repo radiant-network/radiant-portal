@@ -254,10 +254,12 @@ func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*Case
 			return nil
 		}
 
-		validateUniquenessInBatch(record, key, visited, IdenticalCaseInBatchCode, []string{c.ProjectCode, c.SubmitterCaseId})
-		records = append(records, record)
-	}
-	return records, nil
+		if err := persistCaseRecords(txCtx, records); err != nil {
+			return fmt.Errorf("error during case insertion %w", err)
+		}
+
+		return nil
+	})
 }
 
 func (cr *CaseValidationRecord) formatPatientsErrorMessage(fieldName string, patientIndex int) string {
@@ -501,14 +503,7 @@ func validateCaseRecord(
 	c types.CaseBatch,
 	index int,
 ) (*CaseValidationRecord, error) {
-	cr := CaseValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Index: index},
-		Case:                 c,
-		ProjectID:            nil,
-		SubmitterCaseID:      "",
-		Patients:             make(map[string]*types.Patient),
-		Context:              ctx,
-	}
+	cr := NewCaseValidationRecord(ctx, c, index)
 
 	if unexpectedErr := cr.fetchValidationInfos(); unexpectedErr != nil {
 		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", unexpectedErr)
@@ -521,7 +516,7 @@ func validateCaseRecord(
 		return nil, fmt.Errorf("error during case patients validation: %v", unexpectedErr)
 	}
 
-	return &cr, nil
+	return cr, nil
 }
 
 func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
@@ -546,19 +541,6 @@ func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.
 		processUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), ctx.BatchRepo)
 		return
 	}
-}
-
-func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) {
-	for _, p := range r.Case.Patients {
-		if p.RelationToProbandCode == "proband" {
-			if patient, ok := r.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]; ok {
-				return patient, nil
-			} else {
-				return nil, fmt.Errorf("failed to find proband patient for case %q", r.Case.SubmitterCaseId)
-			}
-		}
-		return nil
-	})
 }
 
 func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
@@ -625,30 +607,6 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 	}
 
 	return nil
-}
-
-func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
-	payload := []byte(batch.Payload)
-	var caseBatches []types.CaseBatch
-
-	if unexpectedErr := json.Unmarshal(payload, &caseBatches); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), ctx.BatchRepo)
-		return
-	}
-
-	records, unexpectedErr := validateCaseBatch(ctx, caseBatches)
-	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), ctx.BatchRepo)
-		return
-	}
-
-	glog.Infof("Case batch %v processed with %d records", batch.ID, len(records))
-
-	err := persistBatchAndCaseRecords(db, batch, records)
-	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), ctx.BatchRepo)
-		return
-	}
 }
 
 func persistCaseRecords(

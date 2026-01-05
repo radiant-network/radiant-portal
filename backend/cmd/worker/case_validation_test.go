@@ -67,7 +67,7 @@ func (m *CaseValidationMockRepo) GetDocumentByUrl(url string) (*types.Document, 
 	return nil, nil // Not found
 }
 
-func (m *CaseValidationMockRepo) GetDocumentsFilters(userQuery types.AggQuery, withProjectAndLab bool) (*repository.DocumentFilters, error) {
+func (m *CaseValidationMockRepo) GetDocumentsFilters(withProjectAndLab bool) (*types.DocumentFilters, error) {
 	return nil, nil
 }
 
