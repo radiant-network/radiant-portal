@@ -5,17 +5,17 @@ import PedigreeFemaleNotAffectedIcon from '@/components/base/icons/pedigree-fema
 import PedigreeMaleNotAffectedIcon from '@/components/base/icons/pedigree-male-not-affected-icon';
 import ShapeTriangleUpIcon from '@/components/base/icons/shape-triangle-up-icon';
 import IGVDialog from '@/components/base/igv/igv-dialog';
-import { DescriptionRow, DescriptionSection } from '@/components/base/preview/description';
-import PreviewCard from '@/components/base/preview/preview-card';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { DescriptionRow, DescriptionSection } from '@/components/base/slider/description';
+import SliderCard from '@/components/base/slider/slider-card';
 import { useI18n } from '@/components/hooks/i18n';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
 
 import EmptyField from '../information/empty-field';
 
-type PreviewOccurrenceDetailsCardProps = {
+type SliderOccurrenceDetailsCardProps = {
   caseId: number;
   seqId: number;
   locus: string;
@@ -58,7 +58,7 @@ function getGenotypeQuality(genotypeQuality?: number): React.ReactNode {
   );
 }
 
-const PreviewOccurrenceDetailsCard = ({
+const SliderOccurrenceDetailsCard = ({
   caseId,
   seqId,
   locus,
@@ -75,7 +75,7 @@ const PreviewOccurrenceDetailsCard = ({
   ad_alt,
   ad_total,
   enableIGV = false,
-}: PreviewOccurrenceDetailsCardProps) => {
+}: SliderOccurrenceDetailsCardProps) => {
   const { t } = useI18n();
   const [igvOpen, setIGVOpen] = useState<boolean>(false);
 
@@ -103,7 +103,7 @@ const PreviewOccurrenceDetailsCard = ({
   }
 
   return (
-    <PreviewCard icon={Users} title={t('preview_sheet.occurrence_details.title')} actions={actions}>
+    <SliderCard icon={Users} title={t('preview_sheet.occurrence_details.title')} actions={actions}>
       <div className="rounded-md w-full border">
         <div className="size-full">
           <div className="flex flex-wrap gap-4 sm:gap-20 items-start p-3 w-full">
@@ -206,8 +206,8 @@ const PreviewOccurrenceDetailsCard = ({
           </div>
         </div>
       </div>
-    </PreviewCard>
+    </SliderCard>
   );
 };
 
-export default PreviewOccurrenceDetailsCard;
+export default SliderOccurrenceDetailsCard;

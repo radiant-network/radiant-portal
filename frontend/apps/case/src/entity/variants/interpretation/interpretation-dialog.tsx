@@ -114,11 +114,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {renderTrigger(handleOpen)}
-      <DialogContent
-        className="max-w-[calc(100vw-60px)] min-h-[calc(100vh-60px)] w-[1200px]"
-        onEscapeKeyDown={e => e.preventDefault()}
-        variant="stickyBoth"
-      >
+      <DialogContent size="lg" onEscapeKeyDown={e => e.preventDefault()} variant="stickyBoth">
         {fetchInterpretation.isLoading || fetchOccurrenceExpand?.isLoading ? (
           <DialogBody className="flex items-center justify-center">
             <Spinner size={32} />
@@ -128,7 +124,7 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
             <DialogHeader>
               <DialogTitle>{t('variant.interpretation_form.title')}</DialogTitle>
             </DialogHeader>
-            <DialogBody className="overflow-scroll space-y-6 h-[calc(95vh-150px)]">
+            <DialogBody className="overflow-scroll space-y-6">
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
               <InterpretationVariantHeader occurrence={occurrence} />
               <InterpretationTranscript occurrence={fetchOccurrenceExpand?.data} />

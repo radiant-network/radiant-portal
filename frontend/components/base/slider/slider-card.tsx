@@ -2,14 +2,14 @@ import { LucideIcon } from 'lucide-react';
 
 import { Card, CardContent, CardHeader } from '@/components/base/shadcn/card';
 
-type PreviewCardProps = {
+type SliderCardProps = {
   icon: LucideIcon;
   title: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
 };
 
-const PreviewCard = ({ icon: Icon, title, actions, children }: PreviewCardProps) => (
+const SliderCard = ({ icon: Icon, title, actions, children }: SliderCardProps) => (
   <Card className="py-4 gap-4">
     <CardHeader className="px-4">
       <div className="content-center flex flex-wrap gap-2 items-center justify-between w-full">
@@ -26,4 +26,4 @@ const PreviewCard = ({ icon: Icon, title, actions, children }: PreviewCardProps)
   </Card>
 );
 
-export default PreviewCard;
+export default SliderCard;

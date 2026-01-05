@@ -1,6 +1,6 @@
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/base/shadcn/sheet';
 
-type PreviewSheetProps = {
+type SliderSheetProps = {
   trigger?: React.ReactNode;
   children: React.ReactNode;
   open?: boolean;
@@ -9,14 +9,14 @@ type PreviewSheetProps = {
   accessibilityDescription?: string;
 };
 
-function PreviewSheet({
+function SliderSheet({
   trigger,
   children,
   open,
   setOpen,
   accessibilityTitle,
   accessibilityDescription,
-}: PreviewSheetProps) {
+}: SliderSheetProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       {trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
@@ -31,4 +31,4 @@ function PreviewSheet({
   );
 }
 
-export default PreviewSheet;
+export default SliderSheet;

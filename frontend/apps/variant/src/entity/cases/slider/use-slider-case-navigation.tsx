@@ -6,7 +6,7 @@ interface CaseItem {
   patient_id: number;
 }
 
-interface UsePreviewCaseNavigationParams<T extends CaseItem> {
+interface UseSliderCaseNavigationParams<T extends CaseItem> {
   casesData: T[];
   searchParams: URLSearchParams;
   setSearchParams: SetURLSearchParams;
@@ -16,7 +16,7 @@ interface UsePreviewCaseNavigationParams<T extends CaseItem> {
   ) => void;
 }
 
-interface UsePreviewCaseNavigationReturn<T extends CaseItem> {
+interface UseSliderCaseNavigationReturn<T extends CaseItem> {
   selectedCase: T | undefined;
   selectedCaseIndex: number;
   hasPrevious: boolean;
@@ -29,13 +29,13 @@ interface UsePreviewCaseNavigationReturn<T extends CaseItem> {
 /**
  * @DESCRIPTION: Patient_id is used to find valid row
  */
-export function usePreviewCaseNavigation<T extends CaseItem>({
+export function useSliderCaseNavigation<T extends CaseItem>({
   casesData,
   searchParams,
   setSearchParams,
   selectedCaseParamKey,
   setRowSelection,
-}: UsePreviewCaseNavigationParams<T>): UsePreviewCaseNavigationReturn<T> {
+}: UseSliderCaseNavigationParams<T>): UseSliderCaseNavigationReturn<T> {
   const selectedId = searchParams.get(selectedCaseParamKey);
   const selectedCase = casesData.find(caseItem => caseItem.patient_id.toString() === selectedId);
 

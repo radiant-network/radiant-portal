@@ -16,20 +16,20 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { useI18n } from '@/components/hooks/i18n';
 import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
-import { DescriptionRow, DescriptionSection } from 'components/base/preview/description';
-import PreviewCard from 'components/base/preview/preview-card';
+import { DescriptionRow, DescriptionSection } from 'components/base/slider/description';
+import SliderCard from 'components/base/slider/slider-card';
 import TranscriptIdLink from 'components/base/variant/transcript-id-link';
 import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from 'components/base/variant/utils';
 
-type PreviewVariantDetailsCardProps = {
+type SliderVariantDetailsCardProps = {
   data: ExpandedGermlineSNVOccurrence;
 };
 
-const PreviewVariantDetailsCard = ({ data }: PreviewVariantDetailsCardProps) => {
+const SliderVariantDetailsCard = ({ data }: SliderVariantDetailsCardProps) => {
   const { t } = useI18n();
 
   return (
-    <PreviewCard
+    <SliderCard
       icon={AudioLines}
       title={t('preview_sheet.variant_details.title')}
       actions={
@@ -61,7 +61,7 @@ const PreviewVariantDetailsCard = ({ data }: PreviewVariantDetailsCardProps) => 
         <PredictionCard data={data} />
         <ClinicalAssociationCard data={data} />
       </div>
-    </PreviewCard>
+    </SliderCard>
   );
 };
 
@@ -422,4 +422,4 @@ const GeneCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
   );
 };
 
-export default PreviewVariantDetailsCard;
+export default SliderVariantDetailsCard;

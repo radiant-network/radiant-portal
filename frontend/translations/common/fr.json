@@ -7,6 +7,7 @@
     "not_available_yet": "Pas encore disponible",
     "no_gene": "Aucun gène",
     "save": "Sauvegarder",
+    "edit": "Éditer",
     "close": "Fermer",
     "view_all": "Voir tout",
     "editor": {
@@ -1056,8 +1057,8 @@
       "download_report": "Télécharger le rapport",
       "open_igv": "Ouvrir IGV",
       "interpret": "Interpréter",
-      "interpretation": "Interprétation",
-      "view_all_variants": "Voir tous les variants",
+      "interpretation": "Interpréter variant",
+      "view_all_variants": "Voir les variants",
       "view_in_case": "Voir dans le cas"
     },
     "variant_details": {
