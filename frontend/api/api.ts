@@ -879,7 +879,7 @@ export interface CasePatientBatch {
      * @type {string}
      * @memberof CasePatientBatch
      */
-    'affected_status_code': string;
+    'affected_status_code': CasePatientBatchAffectedStatusCodeEnum;
     /**
      * 
      * @type {Array<FamilyHistoryBatch>}
@@ -909,7 +909,7 @@ export interface CasePatientBatch {
      * @type {string}
      * @memberof CasePatientBatch
      */
-    'relation_to_proband_code': string;
+    'relation_to_proband_code': CasePatientBatchRelationToProbandCodeEnum;
     /**
      * 
      * @type {string}
@@ -917,6 +917,25 @@ export interface CasePatientBatch {
      */
     'submitter_patient_id': string;
 }
+
+export const CasePatientBatchAffectedStatusCodeEnum = {
+    Affected: 'affected',
+    Unaffected: 'unaffected',
+    Unknown: 'unknown'
+} as const;
+
+export type CasePatientBatchAffectedStatusCodeEnum = typeof CasePatientBatchAffectedStatusCodeEnum[keyof typeof CasePatientBatchAffectedStatusCodeEnum];
+export const CasePatientBatchRelationToProbandCodeEnum = {
+    Mother: 'mother',
+    Father: 'father',
+    Brother: 'brother',
+    Sister: 'sister',
+    Sibling: 'sibling',
+    Proband: 'proband'
+} as const;
+
+export type CasePatientBatchRelationToProbandCodeEnum = typeof CasePatientBatchRelationToProbandCodeEnum[keyof typeof CasePatientBatchRelationToProbandCodeEnum];
+
 /**
  * Patient clinical information to display in Case Entity
  * @export
@@ -1403,25 +1422,6 @@ export interface ClinvarRCV {
      * @memberof ClinvarRCV
      */
     'version'?: number;
-}
-/**
- * 
- * @export
- * @interface ColumnPinningConfig
- */
-export interface ColumnPinningConfig {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ColumnPinningConfig
-     */
-    'left'?: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ColumnPinningConfig
-     */
-    'right'?: Array<string>;
 }
 /**
  * Count represents count result
@@ -3135,7 +3135,7 @@ export interface ObservationCategoricalBatch {
      * @type {string}
      * @memberof ObservationCategoricalBatch
      */
-    'interpretation_code': string;
+    'interpretation_code'?: ObservationCategoricalBatchInterpretationCodeEnum;
     /**
      * 
      * @type {string}
@@ -3161,6 +3161,14 @@ export interface ObservationCategoricalBatch {
      */
     'value': string;
 }
+
+export const ObservationCategoricalBatchInterpretationCodeEnum = {
+    Positive: 'positive',
+    Negative: 'negative'
+} as const;
+
+export type ObservationCategoricalBatchInterpretationCodeEnum = typeof ObservationCategoricalBatchInterpretationCodeEnum[keyof typeof ObservationCategoricalBatchInterpretationCodeEnum];
+
 /**
  * 
  * @export
@@ -3178,7 +3186,7 @@ export interface ObservationTextBatch {
      * @type {string}
      * @memberof ObservationTextBatch
      */
-    'note': string;
+    'value': string;
 }
 /**
  * 
@@ -3253,19 +3261,6 @@ export interface OutputDocumentBatch {
      * @memberof OutputDocumentBatch
      */
     'url': string;
-}
-/**
- * 
- * @export
- * @interface PaginationConfig
- */
-export interface PaginationConfig {
-    /**
-     * 
-     * @type {number}
-     * @memberof PaginationConfig
-     */
-    'pageSize'?: number;
 }
 /**
  * 
@@ -3912,43 +3907,6 @@ export interface StatisticsBodyWithSqon {
 /**
  * 
  * @export
- * @interface TableConfig
- */
-export interface TableConfig {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof TableConfig
-     */
-    'columnOrder'?: Array<string>;
-    /**
-     * 
-     * @type {ColumnPinningConfig}
-     * @memberof TableConfig
-     */
-    'columnPinning'?: ColumnPinningConfig;
-    /**
-     * 
-     * @type {{ [key: string]: number; }}
-     * @memberof TableConfig
-     */
-    'columnSizing'?: { [key: string]: number; };
-    /**
-     * 
-     * @type {{ [key: string]: boolean; }}
-     * @memberof TableConfig
-     */
-    'columnVisibility'?: { [key: string]: boolean; };
-    /**
-     * 
-     * @type {PaginationConfig}
-     * @memberof TableConfig
-     */
-    'pagination'?: PaginationConfig;
-}
-/**
- * 
- * @export
  * @interface Term
  */
 export interface Term {
@@ -4132,10 +4090,16 @@ export interface Transcript {
 export interface UserPreference {
     /**
      * 
-     * @type {{ [key: string]: TableConfig; }}
+     * @type {object}
      * @memberof UserPreference
      */
-    'table_display': { [key: string]: TableConfig; };
+    'content': object;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserPreference
+     */
+    'key': string;
     /**
      * 
      * @type {string}
@@ -9567,11 +9531,15 @@ export const UserPreferencesApiAxiosParamCreator = function (configuration?: Con
         /**
          * Get user preferences
          * @summary Get user preferences
+         * @param {string} key Preference key
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserPreferences: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/preferences`;
+        getUserPreferences: async (key: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'key' is not null or undefined
+            assertParamExists('getUserPreferences', 'key', key)
+            const localVarPath = `/users/preferences/{key}`
+                .replace(`{${"key"}}`, encodeURIComponent(String(key)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -9601,14 +9569,18 @@ export const UserPreferencesApiAxiosParamCreator = function (configuration?: Con
         /**
          * Create or update user preference
          * @summary Create or update user preference
+         * @param {string} key Preference key
          * @param {UserPreference} userPreference User Preference to create or update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postUserPreferences: async (userPreference: UserPreference, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postUserPreferences: async (key: string, userPreference: UserPreference, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'key' is not null or undefined
+            assertParamExists('postUserPreferences', 'key', key)
             // verify required parameter 'userPreference' is not null or undefined
             assertParamExists('postUserPreferences', 'userPreference', userPreference)
-            const localVarPath = `/users/preferences`;
+            const localVarPath = `/users/preferences/{key}`
+                .replace(`{${"key"}}`, encodeURIComponent(String(key)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -9651,11 +9623,12 @@ export const UserPreferencesApiFp = function(configuration?: Configuration) {
         /**
          * Get user preferences
          * @summary Get user preferences
+         * @param {string} key Preference key
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getUserPreferences(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPreference>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserPreferences(options);
+        async getUserPreferences(key: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPreference>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserPreferences(key, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UserPreferencesApi.getUserPreferences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -9663,12 +9636,13 @@ export const UserPreferencesApiFp = function(configuration?: Configuration) {
         /**
          * Create or update user preference
          * @summary Create or update user preference
+         * @param {string} key Preference key
          * @param {UserPreference} userPreference User Preference to create or update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postUserPreferences(userPreference: UserPreference, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPreference>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postUserPreferences(userPreference, options);
+        async postUserPreferences(key: string, userPreference: UserPreference, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPreference>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postUserPreferences(key, userPreference, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UserPreferencesApi.postUserPreferences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -9686,21 +9660,23 @@ export const UserPreferencesApiFactory = function (configuration?: Configuration
         /**
          * Get user preferences
          * @summary Get user preferences
+         * @param {string} key Preference key
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserPreferences(options?: RawAxiosRequestConfig): AxiosPromise<UserPreference> {
-            return localVarFp.getUserPreferences(options).then((request) => request(axios, basePath));
+        getUserPreferences(key: string, options?: RawAxiosRequestConfig): AxiosPromise<UserPreference> {
+            return localVarFp.getUserPreferences(key, options).then((request) => request(axios, basePath));
         },
         /**
          * Create or update user preference
          * @summary Create or update user preference
+         * @param {string} key Preference key
          * @param {UserPreference} userPreference User Preference to create or update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postUserPreferences(userPreference: UserPreference, options?: RawAxiosRequestConfig): AxiosPromise<UserPreference> {
-            return localVarFp.postUserPreferences(userPreference, options).then((request) => request(axios, basePath));
+        postUserPreferences(key: string, userPreference: UserPreference, options?: RawAxiosRequestConfig): AxiosPromise<UserPreference> {
+            return localVarFp.postUserPreferences(key, userPreference, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -9715,24 +9691,26 @@ export class UserPreferencesApi extends BaseAPI {
     /**
      * Get user preferences
      * @summary Get user preferences
+     * @param {string} key Preference key
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UserPreferencesApi
      */
-    public getUserPreferences(options?: RawAxiosRequestConfig) {
-        return UserPreferencesApiFp(this.configuration).getUserPreferences(options).then((request) => request(this.axios, this.basePath));
+    public getUserPreferences(key: string, options?: RawAxiosRequestConfig) {
+        return UserPreferencesApiFp(this.configuration).getUserPreferences(key, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create or update user preference
      * @summary Create or update user preference
+     * @param {string} key Preference key
      * @param {UserPreference} userPreference User Preference to create or update
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UserPreferencesApi
      */
-    public postUserPreferences(userPreference: UserPreference, options?: RawAxiosRequestConfig) {
-        return UserPreferencesApiFp(this.configuration).postUserPreferences(userPreference, options).then((request) => request(this.axios, this.basePath));
+    public postUserPreferences(key: string, userPreference: UserPreference, options?: RawAxiosRequestConfig) {
+        return UserPreferencesApiFp(this.configuration).postUserPreferences(key, userPreference, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,12 +27,22 @@ class ObservationCategoricalBatch(BaseModel):
     ObservationCategoricalBatch
     """ # noqa: E501
     code: StrictStr
-    interpretation_code: StrictStr
+    interpretation_code: Optional[StrictStr] = None
     note: Optional[StrictStr] = None
     onset_code: StrictStr
     system: StrictStr
     value: StrictStr
     __properties: ClassVar[List[str]] = ["code", "interpretation_code", "note", "onset_code", "system", "value"]
+
+    @field_validator('interpretation_code')
+    def interpretation_code_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['positive', 'negative']):
+            raise ValueError("must be one of enum values ('positive', 'negative')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,

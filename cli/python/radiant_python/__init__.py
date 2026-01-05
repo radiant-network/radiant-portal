@@ -71,7 +71,6 @@ from radiant_python.models.case_task import CaseTask
 from radiant_python.models.case_task_batch import CaseTaskBatch
 from radiant_python.models.cases_search_response import CasesSearchResponse
 from radiant_python.models.clinvar_rcv import ClinvarRCV
-from radiant_python.models.column_pinning_config import ColumnPinningConfig
 from radiant_python.models.count import Count
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
 from radiant_python.models.create_batch_response import CreateBatchResponse
@@ -105,7 +104,6 @@ from radiant_python.models.observation_categorical_batch import ObservationCateg
 from radiant_python.models.observation_text_batch import ObservationTextBatch
 from radiant_python.models.omim_gene_panel import OmimGenePanel
 from radiant_python.models.output_document_batch import OutputDocumentBatch
-from radiant_python.models.pagination_config import PaginationConfig
 from radiant_python.models.patient_batch import PatientBatch
 from radiant_python.models.pubmed_citation import PubmedCitation
 from radiant_python.models.pubmed_citation_details import PubmedCitationDetails
@@ -122,7 +120,6 @@ from radiant_python.models.sqon import Sqon
 from radiant_python.models.sqon_content import SqonContent
 from radiant_python.models.statistics import Statistics
 from radiant_python.models.statistics_body_with_sqon import StatisticsBodyWithSqon
-from radiant_python.models.table_config import TableConfig
 from radiant_python.models.term import Term
 from radiant_python.models.transcript import Transcript
 from radiant_python.models.user_preference import UserPreference

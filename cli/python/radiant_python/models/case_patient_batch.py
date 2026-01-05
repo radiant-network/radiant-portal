@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.family_history_batch import FamilyHistoryBatch
 from radiant_python.models.observation_categorical_batch import ObservationCategoricalBatch
@@ -37,6 +37,20 @@ class CasePatientBatch(BaseModel):
     relation_to_proband_code: StrictStr
     submitter_patient_id: StrictStr
     __properties: ClassVar[List[str]] = ["affected_status_code", "family_history", "observations_categorical", "observations_text", "patient_organization_code", "relation_to_proband_code", "submitter_patient_id"]
+
+    @field_validator('affected_status_code')
+    def affected_status_code_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['affected', 'unaffected', 'unknown']):
+            raise ValueError("must be one of enum values ('affected', 'unaffected', 'unknown')")
+        return value
+
+    @field_validator('relation_to_proband_code')
+    def relation_to_proband_code_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['mother', 'father', 'brother', 'sister', 'sibling', 'proband']):
+            raise ValueError("must be one of enum values ('mother', 'father', 'brother', 'sister', 'sibling', 'proband')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,

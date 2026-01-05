@@ -27,8 +27,8 @@ class ObservationTextBatch(BaseModel):
     ObservationTextBatch
     """ # noqa: E501
     code: StrictStr
-    note: StrictStr
-    __properties: ClassVar[List[str]] = ["code", "note"]
+    value: StrictStr
+    __properties: ClassVar[List[str]] = ["code", "value"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -82,7 +82,7 @@ class ObservationTextBatch(BaseModel):
 
         _obj = cls.model_validate({
             "code": obj.get("code"),
-            "note": obj.get("note")
+            "value": obj.get("value")
         })
         return _obj
 

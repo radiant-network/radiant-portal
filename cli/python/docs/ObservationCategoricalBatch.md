@@ -6,7 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **code** | **str** |  | 
-**interpretation_code** | **str** |  | 
+**interpretation_code** | **str** |  | [optional] 
 **note** | **str** |  | [optional] 
 **onset_code** | **str** |  | 
 **system** | **str** |  | 
