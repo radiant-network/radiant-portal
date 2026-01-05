@@ -1,22 +1,22 @@
-import { ClipboardPen } from 'lucide-react';
+import { SquarePen } from 'lucide-react';
 
 import { CaseSequencingExperiment, GermlineSNVOccurrence } from '@/api/api';
-import ClassificationBadge from '@/components/base/badges/classification-badge';
-import PreviewOccurrenceSubHeader from '@/components/base/preview/preview-occurrence-sub-header';
-import PreviewSheet from '@/components/base/preview/preview-sheet';
-import PreviewSheetHeader from '@/components/base/preview/preview-sheet-header';
-import PreviewSheetSkeleton from '@/components/base/preview/preview-sheet-skeleton';
-import { useOccurrenceAndCase } from '@/components/base/preview/preview-sheet-utils';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
+import { useOccurrenceAndCase } from '@/components/base/slider/hooks/use-slider-occurrence-and-case';
 import { useI18n } from '@/components/hooks/i18n';
-import PreviewVariantDetailsCard from '@/entity/variants/occurrence/preview/preview-variant-details-card';
+import SliderVariantDetailsCard from '@/entity/variants/occurrence/slider/slider-variant-details-card';
 import { useCaseIdFromParam } from '@/utils/helper';
-import PreviewOccurrenceDetailsCard from 'components/base/preview/preview-occurrence-details-card';
+import SliderHeader from 'components/base/slider/slider-header';
+import SliderOccurrenceDetailsCard from 'components/base/slider/slider-occurrence-details-card';
+import SliderOccurrenceSubHeader from 'components/base/slider/slider-occurrence-sub-header';
+import SliderPatientRow from 'components/base/slider/slider-patient-row';
+import SliderSheet from 'components/base/slider/slider-sheet';
+import SliderSheetSkeleton from 'components/base/slider/slider-sheet-skeleton';
 
 import InterpretationDialog from '../../interpretation/interpretation-dialog';
 
-type OccurrencePreviewSheetProps = {
+type OccurrenceSliderSheetProps = {
   occurrence?: GermlineSNVOccurrence;
   children?: React.ReactElement;
   open: boolean;
@@ -28,7 +28,7 @@ type OccurrencePreviewSheetProps = {
   patientSelected?: CaseSequencingExperiment;
 };
 
-function OccurrencePreviewSheet({
+function OccurrenceSliderSheet({
   occurrence,
   children,
   open,
@@ -38,9 +38,9 @@ function OccurrencePreviewSheet({
   hasPrevious,
   hasNext,
   patientSelected,
-}: OccurrencePreviewSheetProps) {
+}: OccurrenceSliderSheetProps) {
   return (
-    <PreviewSheet trigger={children} open={open} setOpen={setOpen}>
+    <SliderSheet trigger={children} open={open} setOpen={setOpen}>
       {occurrence && (
         <OccurrenceSheetContent
           occurrence={occurrence}
@@ -51,7 +51,7 @@ function OccurrencePreviewSheet({
           patientSelected={patientSelected}
         />
       )}
-    </PreviewSheet>
+    </SliderSheet>
   );
 }
 
@@ -82,43 +82,36 @@ function OccurrenceSheetContent({
   );
 
   if (isLoading || !expandResult.data) {
-    return <PreviewSheetSkeleton />;
+    return <SliderSheetSkeleton />;
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <PreviewSheetHeader
+      <SliderHeader onPrevious={onPrevious} onNext={onNext} hasPrevious={hasPrevious} hasNext={hasNext}>
+        <SliderPatientRow
+          patientId={patient?.patient_id}
+          relationshipToProband={patient?.relationship_to_proband}
+          seqId={caseSequencing?.seq_id}
+        />
+      </SliderHeader>
+      <Separator />
+      <SliderOccurrenceSubHeader
         locusId={occurrence.locus_id}
         hgvsg={occurrence.hgvsg}
-        onPrevious={onPrevious}
-        onNext={onNext}
-        hasPrevious={hasPrevious}
-        hasNext={hasNext}
-      />
-      <Separator />
-      <PreviewOccurrenceSubHeader
-        patientId={patient?.patient_id}
-        relationshipToProband={patient?.relationship_to_proband}
-        seqId={caseSequencing?.seq_id}
         actions={
           <InterpretationDialog
             occurrence={occurrence}
             renderTrigger={handleOpen => (
               <Button size="sm" onClick={handleOpen}>
-                <ClipboardPen />
-                {t('preview_sheet.actions.interpretation')}
-                {expandResult.data?.interpretation_classification && (
-                  <div className="bg-background rounded-md">
-                    <ClassificationBadge value={expandResult.data.interpretation_classification} abbreviated />
-                  </div>
-                )}
+                <SquarePen />
+                {occurrence.has_interpretation ? t('common.edit') : t('preview_sheet.actions.interpretation')}
               </Button>
             )}
           />
         }
       />
       {caseId && (
-        <PreviewOccurrenceDetailsCard
+        <SliderOccurrenceDetailsCard
           caseId={caseId}
           seqId={occurrence.seq_id}
           locus={occurrence.locus}
@@ -136,9 +129,9 @@ function OccurrenceSheetContent({
           enableIGV
         />
       )}
-      <PreviewVariantDetailsCard data={expandResult.data} />
+      <SliderVariantDetailsCard data={expandResult.data} />
     </div>
   );
 }
 
-export default OccurrencePreviewSheet;
+export default OccurrenceSliderSheet;

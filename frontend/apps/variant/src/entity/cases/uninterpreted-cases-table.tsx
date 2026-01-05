@@ -6,8 +6,8 @@ import useSWR from 'swr';
 import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantUninterpretedCasesSearchResponse } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
-import CasePreviewSheet from '@/entity/cases/preview/preview-case-sheet';
-import { usePreviewCaseNavigation } from '@/entity/cases/preview/use-preview-case-navigation';
+import CaseSliderSheet from '@/entity/cases/slider/slider-case-sheet';
+import { useSliderCaseNavigation } from '@/entity/cases/slider/use-slider-case-navigation';
 import { variantsApi } from '@/utils/api';
 
 import UninterpretedCasesFilters, { UninterpretedCasesFiltersState } from './table/uninterpreted-cases-filters';
@@ -101,7 +101,7 @@ function UninterpretedCasesTable() {
   const casesData = useMemo(() => data?.list || [], [data?.list]);
 
   const { selectedCase, hasPrevious, hasNext, handleClosePreview, handlePreviousCase, handleNextCase } =
-    usePreviewCaseNavigation({
+    useSliderCaseNavigation({
       casesData,
       searchParams,
       setSearchParams,
@@ -130,7 +130,7 @@ function UninterpretedCasesTable() {
           onSortingChange: () => [],
         }}
       />
-      <CasePreviewSheet
+      <CaseSliderSheet
         open={!!selectedCase}
         setOpen={() => handleClosePreview()}
         case={selectedCase!}

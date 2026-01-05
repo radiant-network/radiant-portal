@@ -9,6 +9,7 @@
     "save": "Save",
     "close": "Close",
     "view_all": "View all",
+    "edit": "Edit",
     "editor": {
       "headings": {
         "normal": "Normal",
@@ -1056,7 +1057,7 @@
       "download_report": "Download report",
       "open_igv": "Open IGV",
       "interpret": "Interpret",
-      "interpretation": "Interpretation",
+      "interpretation": "Interpret variant",
       "view_all_variants": "View all variants",
       "view_in_case": "View in case"
     },

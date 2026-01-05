@@ -21,7 +21,7 @@ import { useConfig } from '@/components/cores/applications-config';
 import { ISyntheticSqon } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
-import { usePreviewOccurrenceNavigation } from '@/entity/variants/occurrence/preview/hooks/use-preview-occurrence-navigation';
+import { useSliderOccurrenceNavigation } from '@/entity/variants/occurrence/slider/hooks/use-slider-occurrence-navigation';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 import QueryBuilder from 'components/base/query-builder/query-builder';
@@ -36,7 +36,7 @@ import { queryBuilderRemote } from 'components/cores/query-builder/query-builder
 import { SELECTED_VARIANT_PARAM } from '../constants';
 import { getVisibleAggregations } from '../utils';
 
-import OccurrencePreviewSheet from './preview/preview-occurrence-sheet';
+import OccurrenceSliderSheet from './slider/slider-occurrence-sheet';
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
 
 async function fetchQueryCount(input: SnvOccurrenceLCountInput) {
@@ -156,7 +156,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
     handleClosePreview,
     handlePreviousOccurrence,
     handleNextOccurrence,
-  } = usePreviewOccurrenceNavigation({
+  } = useSliderOccurrenceNavigation({
     occurrencesData,
     searchParams,
     setSearchParams,
@@ -340,7 +340,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
                 />
               </CardContent>
             </Card>
-            <OccurrencePreviewSheet
+            <OccurrenceSliderSheet
               open={!!selectedOccurrence}
               setOpen={() => handleClosePreview()}
               occurrence={selectedOccurrence!}

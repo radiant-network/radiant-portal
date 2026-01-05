@@ -5,7 +5,7 @@ interface OccurrenceItem {
   locus_id: string;
 }
 
-interface UsePreviewOccurrenceNavigationParams<T extends OccurrenceItem> {
+interface UseSliderOccurrenceNavigationParams<T extends OccurrenceItem> {
   occurrencesData: T[];
   searchParams: URLSearchParams;
   setSearchParams: SetURLSearchParams;
@@ -15,7 +15,7 @@ interface UsePreviewOccurrenceNavigationParams<T extends OccurrenceItem> {
   ) => void;
 }
 
-interface UsePreviewOccurrenceNavigationReturn<T extends OccurrenceItem> {
+interface UseSliderOccurrenceNavigationReturn<T extends OccurrenceItem> {
   selectedOccurrence: T | undefined;
   selectedOccurrenceIndex: number;
   hasPrevious: boolean;
@@ -25,13 +25,13 @@ interface UsePreviewOccurrenceNavigationReturn<T extends OccurrenceItem> {
   handleNextOccurrence: () => void;
 }
 
-export function usePreviewOccurrenceNavigation<T extends OccurrenceItem>({
+export function useSliderOccurrenceNavigation<T extends OccurrenceItem>({
   occurrencesData,
   searchParams,
   setSearchParams,
   selectedOccurrenceParamKey,
   setRowSelection,
-}: UsePreviewOccurrenceNavigationParams<T>): UsePreviewOccurrenceNavigationReturn<T> {
+}: UseSliderOccurrenceNavigationParams<T>): UseSliderOccurrenceNavigationReturn<T> {
   const selectedVariant = searchParams.get(selectedOccurrenceParamKey);
   const selectedOccurrence = occurrencesData.find(occurrence => occurrence.locus_id === selectedVariant);
 

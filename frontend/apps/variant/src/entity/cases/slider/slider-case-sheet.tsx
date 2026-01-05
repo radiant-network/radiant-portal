@@ -2,19 +2,20 @@ import { useParams } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
 
 import { VariantUninterpretedCase } from '@/api/api';
-import { ActionButton } from '@/components/base/buttons';
 import Empty from '@/components/base/empty';
-import PreviewOccurrenceSubHeader from '@/components/base/preview/preview-occurrence-sub-header';
+import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
+import { useCase } from '@/components/base/slider/hooks/use-slider-occurrence-and-case';
+import SliderCaseDetailsCard from '@/components/base/slider/slider-case-details-card';
+import SliderHeader from '@/components/base/slider/slider-header';
+import OccurrenceSheetDetailsCard from '@/components/base/slider/slider-occurrence-details-card';
+import SliderOccurrenceSubHeader from '@/components/base/slider/slider-occurrence-sub-header';
+import SliderPatientRow from '@/components/base/slider/slider-patient-row';
+import SliderSheet from '@/components/base/slider/slider-sheet';
+import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
 import { useI18n } from '@/components/hooks/i18n';
-import PreviewCaseDetailsCard from 'components/base/preview/preview-case-details-card';
-import OccurrenceSheetDetailsCard from 'components/base/preview/preview-occurrence-details-card';
-import PreviewSheet from 'components/base/preview/preview-sheet';
-import PreviewSheetHeader from 'components/base/preview/preview-sheet-header';
-import PreviewSheetSkeleton from 'components/base/preview/preview-sheet-skeleton';
-import { useCase } from 'components/base/preview/preview-sheet-utils';
 
-type CasePreviewSheetProps = {
+type CaseSliderSheetProps = {
   case?: VariantUninterpretedCase;
   children?: React.ReactElement;
   open: boolean;
@@ -25,7 +26,7 @@ type CasePreviewSheetProps = {
   hasNext?: boolean;
 };
 
-function CasePreviewSheet({
+function CaseSliderSheet({
   case: caseData,
   children,
   open,
@@ -34,11 +35,11 @@ function CasePreviewSheet({
   onNext,
   hasPrevious,
   hasNext,
-}: CasePreviewSheetProps) {
+}: CaseSliderSheetProps) {
   const { t } = useI18n();
 
   return (
-    <PreviewSheet trigger={children} open={open} setOpen={setOpen}>
+    <SliderSheet trigger={children} open={open} setOpen={setOpen}>
       {caseData ? (
         <CaseSheetContent
           caseData={caseData}
@@ -50,7 +51,7 @@ function CasePreviewSheet({
       ) : (
         <Empty title={t('case.empty.title')} description={t('case.empty.description')} showIcon={false} />
       )}
-    </PreviewSheet>
+    </SliderSheet>
   );
 }
 
@@ -71,43 +72,33 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
   const { expandResult, caseResult, isLoading } = useCase(caseData.case_id, caseData.seq_id, locusId);
 
   if (isLoading || !expandResult.data || !caseResult.data) {
-    return <PreviewSheetSkeleton />;
+    return <SliderSheetSkeleton />;
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <PreviewSheetHeader
-        hgvsg={expandResult.data!.hgvsg}
-        onPrevious={onPrevious}
-        onNext={onNext}
-        hasPrevious={hasPrevious}
-        hasNext={hasNext}
-        locusId={locusId}
-      />
+      <SliderHeader onPrevious={onPrevious} onNext={onNext} hasPrevious={hasPrevious} hasNext={hasNext}>
+        <SliderPatientRow
+          patientId={caseData.patient_id}
+          relationshipToProband={caseData?.relationship_to_proband}
+          seqId={caseData?.seq_id}
+        />
+      </SliderHeader>
       <Separator />
-      <PreviewOccurrenceSubHeader
-        patientId={caseData.patient_id}
-        seqId={caseData.seq_id}
-        relationshipToProband={caseData.relationship_to_proband}
+      <SliderOccurrenceSubHeader
+        hgvsg={expandResult.data.hgvsg}
+        locusId={expandResult.data.locus_id}
         actions={
-          <ActionButton
-            actions={[
-              {
-                icon: <ArrowUpRight />,
-                label: t('preview_sheet.actions.view_all_variants'),
-                onClick: () =>
-                  window.open(
-                    `/case/entity/${caseResult.data?.case_id}?tab=variants&seq_id=${caseData.seq_id}`,
-                    '_blank',
-                  ),
-              },
-            ]}
-            onDefaultAction={() => window.open(`/case/entity/${caseResult.data?.case_id}`, '_blank')}
+          <Button
+            variant="outline"
+            onClick={() => {
+              window.open(`/case/entity/${caseResult.data?.case_id}?tab=variants&seq_id=${caseData.seq_id}`, '_blank');
+            }}
             size="sm"
           >
-            {t('preview_sheet.actions.view_in_case')}
+            {t('preview_sheet.actions.view_all_variants')}
             <ArrowUpRight />
-          </ActionButton>
+          </Button>
         }
       />
       <OccurrenceSheetDetailsCard
@@ -127,9 +118,9 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
         ad_alt={expandResult.data.ad_alt}
         ad_total={expandResult.data.ad_total}
       />
-      <PreviewCaseDetailsCard caseEntity={caseResult.data} />
+      <SliderCaseDetailsCard caseEntity={caseResult.data} />
     </div>
   );
 }
 
-export default CasePreviewSheet;
+export default CaseSliderSheet;

@@ -9,15 +9,15 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
 
-import PreviewCard from './preview-card';
+import SliderCard from './slider-card';
 
 const PHENOTYPES_VISIBLE_COUNT = 6;
 
-const PreviewCaseDetailsCard = ({ caseEntity }: { caseEntity: CaseEntity }) => {
+const SliderCaseDetailsCard = ({ caseEntity }: { caseEntity: CaseEntity }) => {
   const { t } = useI18n();
 
   return (
-    <PreviewCard
+    <SliderCard
       icon={FolderOpen}
       title={t('preview_sheet.case.title', { id: caseEntity.case_id })}
       actions={
@@ -34,7 +34,7 @@ const PreviewCaseDetailsCard = ({ caseEntity }: { caseEntity: CaseEntity }) => {
           <FamilyMemberCard key={member.patient_id} member={member} />
         ))}
       </div>
-    </PreviewCard>
+    </SliderCard>
   );
 };
 
@@ -119,4 +119,4 @@ function FamilyMemberCard({ member }: { member: CasePatientClinicalInformation }
   );
 }
 
-export default PreviewCaseDetailsCard;
+export default SliderCaseDetailsCard;
