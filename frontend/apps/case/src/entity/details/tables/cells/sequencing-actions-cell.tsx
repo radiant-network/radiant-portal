@@ -7,19 +7,19 @@ import SequencingInformationsDialog from 'components/base/sequencing/sequencing-
 
 function SequencingActionsCell({ row }: CellContext<any, any>) {
   const { t } = useI18n();
-  const [assayDialogOpen, setAssayDialogOpen] = useState<boolean>(false);
+  const [sequencingExperimentDialogOpen, setSequencingExperimentDialogOpen] = useState<boolean>(false);
 
   return (
     <>
       <div className="flex items-center justify-center">
         <SequencingInformationsDialog
-          open={assayDialogOpen}
-          onClose={() => setAssayDialogOpen(false)}
+          open={sequencingExperimentDialogOpen}
+          onClose={() => setSequencingExperimentDialogOpen(false)}
           seqId={row.original.seq_id}
         />
         <Button
           onClick={() => {
-            setAssayDialogOpen(true);
+            setSequencingExperimentDialogOpen(true);
           }}
           variant="outline"
           size="xxs"

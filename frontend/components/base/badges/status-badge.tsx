@@ -3,10 +3,10 @@ import { Check, CircleDashed, CircleX, FileQuestion, Hourglass, Pen, RefreshCcwI
 import { Badge, BadgeProps } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
-export type AssayStatus = 'unknown' | 'draft' | 'in_progress' | 'revoke' | 'submitted' | 'completed' | 'incomplete';
+export type Status = 'unknown' | 'draft' | 'in_progress' | 'revoke' | 'submitted' | 'completed' | 'incomplete';
 
-type AssayStatusBadgeProps = {
-  status: AssayStatus;
+type StatusBadgeProps = {
+  status: Status;
   className?: string;
 };
 
@@ -32,7 +32,7 @@ const icons = {
   incomplete: CircleDashed,
 };
 
-function AssayStatusBadge({ status, className }: AssayStatusBadgeProps) {
+function StatusBadge({ status, className }: StatusBadgeProps) {
   const { t } = useI18n();
 
   const color = colors[status];
@@ -46,4 +46,4 @@ function AssayStatusBadge({ status, className }: AssayStatusBadgeProps) {
   );
 }
 
-export default AssayStatusBadge;
+export default StatusBadge;

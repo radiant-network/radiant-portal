@@ -2,9 +2,9 @@ import { useCallback, useEffect } from 'react';
 import { formatDate } from 'date-fns';
 import useSWR from 'swr';
 
-import { Assay } from '@/api/api';
-import { AssayStatus } from '@/components/base/badges/assay-status-badge';
-import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
+import { SequencingExperimentDetail } from '@/api/api';
+import { Status } from '@/components/base/badges/status-badge';
+import StatusCell from '@/components/base/data-table/cells/status-cell';
 import InformationField from '@/components/base/information/information-field';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
@@ -18,15 +18,15 @@ import {
 } from '@/components/base/shadcn/dialog';
 import { Separator } from '@/components/base/shadcn/separator';
 import { useI18n } from '@/components/hooks/i18n';
-import { assayApi } from '@/utils/api';
+import { sequencingApi } from '@/utils/api';
 
-type AssayInput = {
+type SequencingInput = {
   seqId: string;
 };
 
-export function useSequencingHelper(input: AssayInput) {
+export function useSequencingHelper(input: SequencingInput) {
   const fetchSequencingHelper = useCallback(
-    async () => assayApi.getAssayBySeqId(input.seqId).then(response => response.data),
+    async () => sequencingApi.getSequencingExperimentDetailById(input.seqId).then(response => response.data),
     [input],
   );
 
@@ -42,7 +42,7 @@ type SequencingInformationsDialogProps = {
 function SequencingInformationsDialog({ open, seqId, onClose }: SequencingInformationsDialogProps) {
   const { t } = useI18n();
 
-  const fetchSequencing = useSWR<Assay>('fetch-assay', useSequencingHelper({ seqId }), {
+  const fetchSequencing = useSWR<SequencingExperimentDetail>('fetch-sequencing', useSequencingHelper({ seqId }), {
     revalidateOnFocus: false,
     revalidateOnMount: false,
     shouldRetryOnError: false,
@@ -71,7 +71,7 @@ function SequencingInformationsDialog({ open, seqId, onClose }: SequencingInform
             </h2>
 
             <InformationField label={t('case_entity.details.status')}>
-              <AssayStatusCell status={data?.status_code as AssayStatus} />
+              <StatusCell status={data?.status_code as Status} />
             </InformationField>
 
             {/* Created On */}

@@ -14,10 +14,10 @@
 
 import unittest
 
-from radiant_python.models.case_assay import CaseAssay
+from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
 
-class TestCaseAssay(unittest.TestCase):
-    """CaseAssay unit test stubs"""
+class TestCaseSequencingExperiment(unittest.TestCase):
+    """CaseSequencingExperiment unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,16 +25,16 @@ class TestCaseAssay(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> CaseAssay:
-        """Test CaseAssay
+    def make_instance(self, include_optional) -> CaseSequencingExperiment:
+        """Test CaseSequencingExperiment
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `CaseAssay`
+        # uncomment below to create an instance of `CaseSequencingExperiment`
         """
-        model = CaseAssay()
+        model = CaseSequencingExperiment()
         if include_optional:
-            return CaseAssay(
+            return CaseSequencingExperiment(
                 affected_status_code = '',
                 experimental_strategy_code = '',
                 has_variants = True,
@@ -49,7 +49,7 @@ class TestCaseAssay(unittest.TestCase):
                 updated_on = ''
             )
         else:
-            return CaseAssay(
+            return CaseSequencingExperiment(
                 affected_status_code = '',
                 experimental_strategy_code = '',
                 has_variants = True,
@@ -62,8 +62,8 @@ class TestCaseAssay(unittest.TestCase):
         )
         """
 
-    def testCaseAssay(self):
-        """Test CaseAssay"""
+    def testCaseSequencingExperiment(self):
+        """Test CaseSequencingExperiment"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

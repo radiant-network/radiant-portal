@@ -37,8 +37,8 @@ class TestCaseEntity(unittest.TestCase):
             return CaseEntity(
                 analysis_catalog_code = '',
                 analysis_catalog_name = '',
-                assays = [
-                    radiant_python.models.case_assay.CaseAssay(
+                sequencing_experiments = [
+                    radiant_python.models.case_sequencing_experiment.CaseSequencingExperiment(
                         affected_status_code = '', 
                         experimental_strategy_code = '', 
                         has_variants = True, 
@@ -109,8 +109,8 @@ class TestCaseEntity(unittest.TestCase):
             )
         else:
             return CaseEntity(
-                assays = [
-                    radiant_python.models.case_assay.CaseAssay(
+                sequencing_experiments = [
+                    radiant_python.models.case_sequencing_experiment.CaseSequencingExperiment(
                         affected_status_code = '', 
                         experimental_strategy_code = '', 
                         has_variants = True, 

@@ -1,7 +1,7 @@
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 
-import AssayStatusBadge, { AssayStatus } from '@/components/base/badges/assay-status-badge';
+import StatusBadge, { Status } from '@/components/base/badges/status-badge';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 const config: PortalConfig = {
@@ -27,8 +27,8 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Badges/Assay Status Badge',
-  component: AssayStatusBadge,
+  title: 'Status Badge',
+  component: StatusBadge,
   args: {
     status: 'draft',
   },
@@ -41,7 +41,7 @@ const meta = {
       </BrowserRouter>
     ),
   ],
-} satisfies Meta<typeof AssayStatusBadge>;
+} satisfies Meta<typeof StatusBadge>;
 
 export default meta;
 
@@ -52,7 +52,7 @@ export const Default: Story = {
   render: _args => (
     <div className="flex gap-2">
       {['draft', 'submitted', 'revoke', 'in_progress', 'completed', 'incomplete', 'unknown'].map((status, index) => (
-        <AssayStatusBadge key={index} status={status as AssayStatus} />
+        <StatusBadge key={index} status={status as Status} />
       ))}
     </div>
   ),

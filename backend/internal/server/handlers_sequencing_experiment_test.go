@@ -12,8 +12,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetAssayBySeqId(seqId int) (*types.Assay, error) {
-	return &types.Assay{
+func (m *MockRepository) GetSequencing(int) (*types.Sequencing, error) {
+	return &types.Sequencing{
+		SeqId:                1,
+		ExperimentalStrategy: "WGS",
+		AnalysisType:         "germline",
+		AffectedStatus:       "not_affected",
+	}, nil
+}
+
+func (m *MockRepository) GetSequencingExperimentDetailById(seqId int) (*types.SequencingExperimentDetail, error) {
+	return &types.SequencingExperimentDetail{
 		StatusCode: "completed",
 		CreatedOn: time.Date(
 			2021, 9, 12, 13, 8, 0, 0, time.UTC),
@@ -42,12 +51,41 @@ func (m *MockRepository) GetAssayBySeqId(seqId int) (*types.Assay, error) {
 	}, nil
 }
 
-func Test_GetAssayBySeqIdHandler(t *testing.T) {
+func (m *MockRepository) CreateSequencingExperiment(*types.SequencingExperiment) error {
+	return nil
+}
+
+func (m *MockRepository) GetSequencingExperimentBySampleID(sampleID int) ([]types.SequencingExperiment, error) {
+	return []types.SequencingExperiment{}, nil
+}
+
+func (m *MockRepository) GetSequencingExperimentByAliquot(aliquot string) ([]types.SequencingExperiment, error) {
+	return []types.SequencingExperiment{}, nil
+}
+
+func (m *MockRepository) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, sampleOrganizationCode string) (*types.SequencingExperiment, error) {
+	return nil, nil
+}
+
+func Test_GetSequencingHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/assays/:seq_id", GetAssayBySeqIdHandler(repo))
+	router.GET("/sequencing/:seq_id", GetSequencing(repo))
 
-	req, _ := http.NewRequest("GET", "/assays/1", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/sequencing/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"seq_id":1, "experimental_strategy":"WGS", "affected_status":"not_affected", "analysis_type": "germline"}`, w.Body.String())
+}
+
+func Test_GetSequencingExperimentDetailByIdHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/sequencing/:seq_id/details", GetSequencingExperimentDetailByIdHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/sequencing/1/details", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

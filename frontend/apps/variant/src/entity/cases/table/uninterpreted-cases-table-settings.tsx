@@ -3,10 +3,10 @@ import { TFunction } from 'i18next';
 
 import { Term, VariantUninterpretedCase } from '@/api/api';
 import AffectedStatusCell from '@/components/base/data-table/cells/affected-status-cell';
-import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import DialogListCell from '@/components/base/data-table/cells/dialog-list-cell';
+import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
@@ -138,7 +138,7 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     columnHelper.accessor(row => row.status_code, {
       id: 'status_code',
-      cell: info => <AssayStatusCell status={info.getValue()} />,
+      cell: info => <StatusCell status={info.getValue()} />,
       header: t('variant_entity.cases.other_table.headers.status'),
       minSize: 100,
       maxSize: 150,

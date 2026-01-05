@@ -98,15 +98,15 @@ type CaseEntity struct {
 	ProjectName              string                                    `json:"project_name,omitempty"`
 	PanelCode                string                                    `json:"panel_code,omitempty"`
 	PanelName                string                                    `json:"panel_name,omitempty"`
-	Assays                   JsonArray[CaseAssay]                      `json:"assays" validate:"required"`
+	SequencingExperiments    JsonArray[CaseSequencingExperiment]       `json:"sequencing_experiments" validate:"required"`
 	Members                  JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
 	Tasks                    JsonArray[CaseTask]                       `json:"tasks" validate:"required"`
 }
 
-// CaseAssay - Assay to display in a Case
-// @Description Assay to display in a Case
-// @Name CaseAssay
-type CaseAssay struct {
+// CaseSequencingExperiment - Sequencing experiment to display in a Case
+// @Description Sequencing experiment to display in a Case
+// @Name CaseSequencingExperiment
+type CaseSequencingExperiment struct {
 	SeqID                    int       `json:"seq_id" validate:"required"`
 	PatientID                int       `json:"patient_id" validate:"required"`
 	RelationshipToProband    string    `json:"relationship_to_proband" validate:"required"`

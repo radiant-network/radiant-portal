@@ -1,6 +1,6 @@
-# CaseAssay
+# CaseSequencingExperiment
 
-Assay to display in a Case
+Sequencing experiment to display in a Case
 
 ## Properties
 
@@ -22,19 +22,19 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from radiant_python.models.case_assay import CaseAssay
+from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
 
 # TODO update the JSON string below
 json = "{}"
-# create an instance of CaseAssay from a JSON string
-case_assay_instance = CaseAssay.from_json(json)
+# create an instance of CaseSequencingExperiment from a JSON string
+case_sequencing_experiment_instance = CaseSequencingExperiment.from_json(json)
 # print the JSON string representation of the object
-print(CaseAssay.to_json())
+print(CaseSequencingExperiment.to_json())
 
 # convert the object into a dict
-case_assay_dict = case_assay_instance.to_dict()
-# create an instance of CaseAssay from a dict
-case_assay_from_dict = CaseAssay.from_dict(case_assay_dict)
+case_sequencing_experiment_dict = case_sequencing_experiment_instance.to_dict()
+# create an instance of CaseSequencingExperiment from a dict
+case_sequencing_experiment_from_dict = CaseSequencingExperiment.from_dict(case_sequencing_experiment_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

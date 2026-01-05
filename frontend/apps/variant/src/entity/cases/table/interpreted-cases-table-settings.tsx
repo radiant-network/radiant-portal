@@ -3,7 +3,6 @@ import { TFunction } from 'i18next';
 import { EllipsisVertical } from 'lucide-react';
 
 import { VariantInterpretedCase } from '@/api/api';
-import AssayStatusCell from '@/components/base/data-table/cells/assay-status-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ConditionCell from '@/components/base/data-table/cells/condition-cell';
@@ -11,6 +10,7 @@ import DateCell from '@/components/base/data-table/cells/date-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
+import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
@@ -112,7 +112,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     interpretedCasesColumnHelper.accessor(row => row.status_code, {
       id: 'status_code',
-      cell: info => <AssayStatusCell status={info.getValue()} />,
+      cell: info => <StatusCell status={info.getValue()} />,
       header: t('variant_entity.cases.interpreted_table.headers.status'),
       minSize: 100,
       maxSize: 150,

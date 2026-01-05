@@ -1,6 +1,6 @@
 export enum CaseExplorationTabs {
   Case = 'case',
-  Assays = 'assays',
+  SequencingExperiments = 'sequencing_experiments',
 }
 
 export enum CaseEntityTabs {

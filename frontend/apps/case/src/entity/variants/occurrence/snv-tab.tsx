@@ -4,7 +4,15 @@ import { PaginationState } from '@tanstack/react-table';
 import { X } from 'lucide-react';
 import useSWR from 'swr';
 
-import { CaseAssay, Count, CountBodyWithSqon, GermlineSNVOccurrence, SavedFilterType, SortBody, Sqon } from '@/api/api';
+import {
+  CaseSequencingExperiment,
+  Count,
+  CountBodyWithSqon,
+  GermlineSNVOccurrence,
+  SavedFilterType,
+  SortBody,
+  Sqon,
+} from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import { Card, CardContent } from '@/components/base/shadcn/card';
@@ -60,7 +68,7 @@ type SnvOccurrenceLCountInput = {
 
 type SNVTabProps = {
   seqId: number;
-  patientSelected?: CaseAssay;
+  patientSelected?: CaseSequencingExperiment;
 };
 
 function SNVTab({ seqId, patientSelected }: SNVTabProps) {
