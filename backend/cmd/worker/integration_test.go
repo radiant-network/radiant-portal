@@ -856,6 +856,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 		var seqExp types.SequencingExperiment
 		assert.Nil(t, db.Table("sequencing_experiment").Where("aliquot = 'ALIQUOT-12345'").First(&seqExp).Error)
 
+		assert.Equal(t, 1000, seqExp.ID)
 		assert.Equal(t, "ALIQUOT-12345", seqExp.Aliquot)
 		assert.Equal(t, 1, seqExp.SampleID)
 		assert.Equal(t, "wgs", seqExp.ExperimentalStrategyCode)

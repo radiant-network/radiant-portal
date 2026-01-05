@@ -19,7 +19,7 @@ type TaskContext struct {
 	Task                   Task `gorm:"foreignKey:TaskID;references:ID"`
 	CaseID                 *int
 	Case                   Case `gorm:"foreignKey:CaseID;references:ID"`
-	SequencingExperimentID *int
+	SequencingExperimentID int
 	SequencingExperiment   SequencingExperiment `gorm:"foreignKey:SequencingExperimentID;references:ID"`
 }
 

@@ -173,6 +173,10 @@ func (Case) TableName() string {
 	return CaseTable.Name
 }
 
+func (CaseHasSequencingExperiment) TableName() string {
+	return CaseHasSequencingExperimentTable.Name
+}
+
 var CasesFields = []Field{
 	CaseIdField,
 	CaseProbandIdField,
