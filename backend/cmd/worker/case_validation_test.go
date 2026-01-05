@@ -183,6 +183,54 @@ func Test_preFetchValidationInfo_Error(t *testing.T) {
 	assert.Nil(t, record.ProjectID)
 }
 
+func Test_formatFieldPath_WithIndex(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 2},
+	}
+
+	index := 1
+	path := record.formatFieldPath("entity_type", &index, "", 0, "")
+	assert.Equal(t, "case[2].entity_type[1]", path)
+}
+
+func Test_formatFieldPath_WithoutIndex(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	path := record.formatFieldPath("entity_type", nil, "", 0, "")
+	assert.Equal(t, "case[0].entity_type", path)
+}
+
+func Test_formatFieldPath_WithCollection(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	index := 3
+	path := record.formatFieldPath("entity_type", &index, "sub_collection", 2, "")
+	assert.Equal(t, "case[0].entity_type[3].sub_collection[2]", path)
+}
+
+func Test_formatFieldPath_WithCollectionAndField(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 5},
+	}
+
+	index := 0
+	path := record.formatFieldPath("entity_type", &index, "sub_collection", 1, "field_name")
+	assert.Equal(t, "case[5].entity_type[0].sub_collection[1].field_name", path)
+}
+
+func Test_formatCollectionPath(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 2},
+	}
+
+	path := record.formatCollectionPath("entity_type")
+	assert.Equal(t, "case[2].entity_type", path)
+}
+
 func Test_validateCaseBatch_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockPatients := PatientsMockRepo{

@@ -185,8 +185,13 @@ func (cr *CaseValidationRecord) formatPatientsErrorMessage(fieldName string, pat
 	)
 }
 
-func (cr *CaseValidationRecord) formatPatientsFieldPath(patientIndex int, collectionName string, collectionIndex int, fieldName string) string {
-	path := fmt.Sprintf("case[%d].patients[%d]", cr.Index, patientIndex)
+func (cr *CaseValidationRecord) formatFieldPath(entityType string, entityIndex *int, collectionName string, collectionIndex int, fieldName string) string {
+	var path string
+	if entityIndex != nil {
+		path = fmt.Sprintf("case[%d].%s[%d]", cr.Index, entityType, *entityIndex)
+	} else {
+		path = fmt.Sprintf("case[%d].%s", cr.Index, entityType)
+	}
 	if collectionName != "" {
 		path = fmt.Sprintf("%s.%s[%d]", path, collectionName, collectionIndex)
 	}
@@ -194,6 +199,18 @@ func (cr *CaseValidationRecord) formatPatientsFieldPath(patientIndex int, collec
 		path = fmt.Sprintf("%s.%s", path, fieldName)
 	}
 	return path
+}
+
+func (cr *CaseValidationRecord) formatCollectionPath(entityType string) string {
+	return cr.formatFieldPath(entityType, nil, "", 0, "")
+}
+
+func (cr *CaseValidationRecord) formatPatientsFieldPath(patientIndex int, collectionName string, collectionIndex int, fieldName string) string {
+	return cr.formatFieldPath("patients", &patientIndex, collectionName, collectionIndex, fieldName)
+}
+
+func (cr *CaseValidationRecord) formatSeqExpFieldPath(seqExpIndex int, fieldName string) string {
+	return cr.formatFieldPath("sequencing_experiments", &seqExpIndex, "", 0, fieldName)
 }
 
 func (cr *CaseValidationRecord) validateTextField(value, fieldName, path string, patientIndex int, regExp *regexp.Regexp, regExpStr string, required bool) {
@@ -359,7 +376,7 @@ func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int
 		SubmitterPatientId: p.SubmitterPatientId,
 	}
 	if _, exists := visited[patientKey]; exists {
-		path := fmt.Sprintf("case[%d].patients", cr.Index)
+		path := cr.formatCollectionPath("patients")
 		message := fmt.Sprintf("Duplicate patient (%s / %s) for case %d.",
 			p.PatientOrganizationCode,
 			p.SubmitterPatientId,
@@ -405,7 +422,7 @@ func (cr *CaseValidationRecord) validateCasePatients(ctx *BatchValidationContext
 
 	if nbProband != 1 {
 		message := fmt.Sprintf("Case %d should have exactly 1 proband.", cr.Index)
-		path := fmt.Sprintf("case[%d].patients", cr.Index)
+		path := cr.formatCollectionPath("patients")
 		cr.addErrors(message, InvalidNumberOfProbands, path)
 	}
 	return nil
@@ -418,7 +435,7 @@ func (cr *CaseValidationRecord) validateSeqExpInOrg(seqExpIndex int, seqExps rep
 		return fmt.Errorf("error getting existing sequencing experiment: %v", err)
 	}
 	if seqExp == nil {
-		path := fmt.Sprintf("case[%d].sequencing_experiments[%d]", cr.Index, seqExpIndex)
+		path := cr.formatSeqExpFieldPath(seqExpIndex, "")
 		message := fmt.Sprintf("Sequencing Experiment (%s / %s / %s) for case %d - sequencing experiment %d does not exist.",
 			se.SampleOrganizationCode,
 			se.SubmitterSampleId,
