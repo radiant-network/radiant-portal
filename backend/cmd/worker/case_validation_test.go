@@ -203,9 +203,10 @@ func Test_getProbandFromPatients_OK(t *testing.T) {
 				{RelationToProbandCode: "proband", PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-3"},
 			},
 		},
-		Patients: make(map[string]*types.Patient),
+		Patients: make(map[PatientKey]*types.Patient),
 	}
-	record.Patients["LAB-1/PAT-3"] = &types.Patient{ID: 1}
+	key := PatientKey{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-3"}
+	record.Patients[key] = &types.Patient{ID: 1}
 	proband, err := record.getProbandFromPatients()
 	assert.NoError(t, err)
 	assert.Equal(t, 1, proband.ID)
@@ -216,7 +217,7 @@ func Test_getProbandFromPatients_Empty(t *testing.T) {
 		Case: types.CaseBatch{
 			Patients: []*types.CasePatientBatch{},
 		},
-		Patients: make(map[string]*types.Patient),
+		Patients: make(map[PatientKey]*types.Patient),
 	}
 	proband, err := record.getProbandFromPatients()
 	assert.NoError(t, err)
@@ -226,17 +227,18 @@ func Test_getProbandFromPatients_Empty(t *testing.T) {
 func Test_getProbandFromPatients_Error(t *testing.T) {
 	record := CaseValidationRecord{
 		Case: types.CaseBatch{
+			SubmitterCaseId: "CASE-1",
 			Patients: []*types.CasePatientBatch{
 				{RelationToProbandCode: "mother", PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"},
 				{RelationToProbandCode: "father", PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-2"},
 				{RelationToProbandCode: "proband", PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-3"},
 			},
 		},
-		Patients: make(map[string]*types.Patient),
+		Patients: make(map[PatientKey]*types.Patient),
 	}
 	proband, err := record.getProbandFromPatients()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to find proband patient for case")
+	assert.Contains(t, err.Error(), "failed to find proband patient {\"LAB-1\" \"PAT-3\"} for case \"CASE-1\"")
 	assert.Nil(t, proband)
 }
 
@@ -428,7 +430,7 @@ func Test_fetchPatients_PartialOK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Patients: make(map[string]*types.Patient),
+		Patients: make(map[PatientKey]*types.Patient),
 		Case: types.CaseBatch{
 			Patients: []*types.CasePatientBatch{
 				{PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"},
@@ -442,7 +444,7 @@ func Test_fetchPatients_PartialOK(t *testing.T) {
 
 	assert.Len(t, record.Patients, 1)
 
-	validKey := "LAB-1/PAT-1"
+	validKey := PatientKey{"LAB-1", "PAT-1"}
 	assert.Contains(t, record.Patients, validKey)
 	assert.Equal(t, 100, record.Patients[validKey].ID)
 }
@@ -457,7 +459,7 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 	record := CaseValidationRecord{
 		Documents:             make(map[string]*types.Document),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
-		Patients:              make(map[string]*types.Patient),
+		Patients:              make(map[PatientKey]*types.Patient),
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-TASK-TEST",
 			Tasks: []*types.CaseTaskBatch{
@@ -490,7 +492,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 	record := CaseValidationRecord{
 		Documents:             make(map[string]*types.Document),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
-		Patients:              make(map[string]*types.Patient),
+		Patients:              make(map[PatientKey]*types.Patient),
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-FAIL",
 			Tasks: []*types.CaseTaskBatch{
@@ -570,7 +572,7 @@ func Test_fetchValidationInfos_OK(t *testing.T) {
 	assert.Len(t, record.SequencingExperiments, 1)
 	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[200].Aliquot)
 	assert.Len(t, record.Patients, 1)
-	validKey := "LAB-1/PAT-1"
+	validKey := PatientKey{"LAB-1", "PAT-1"}
 	assert.Contains(t, record.Patients, validKey)
 	assert.Equal(t, 100, record.Patients[validKey].ID)
 }

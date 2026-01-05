@@ -41,6 +41,8 @@ const (
 	InvalidFieldObservationCode = "OBS-001"
 )
 
+const RelationshipProbandCode = "proband"
+
 var CaseRelatedTaskTypes = map[string]struct{}{
 	"family_variant_calling":     {},
 	"tumor_only_variant_calling": {},
@@ -49,6 +51,11 @@ var CaseRelatedTaskTypes = map[string]struct{}{
 type CaseKey struct {
 	ProjectCode     string
 	SubmitterCaseID string
+}
+
+type PatientKey struct {
+	OrganizationCode   string
+	SubmitterPatientId string
 }
 
 type StorageContext struct {
@@ -81,7 +88,7 @@ type CaseValidationRecord struct {
 	DiagnosisLabID         *int
 
 	// Necessary to persist the case
-	Patients              map[string]*types.Patient
+	Patients              map[PatientKey]*types.Patient
 	SequencingExperiments map[int]*types.SequencingExperiment
 	Documents             map[string]*types.Document
 }
@@ -93,7 +100,7 @@ func NewCaseValidationRecord(ctx *BatchValidationContext, c types.CaseBatch, ind
 		},
 		Case:                  c,
 		Context:               ctx,
-		Patients:              make(map[string]*types.Patient),
+		Patients:              make(map[PatientKey]*types.Patient),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 		Documents:             make(map[string]*types.Document),
 	}
@@ -109,12 +116,15 @@ func (r *CaseValidationRecord) GetResourceType() string {
 
 func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) {
 	for _, p := range r.Case.Patients {
-		if p.RelationToProbandCode == "proband" {
-			if patient, ok := r.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]; ok {
-				return patient, nil
-			}
-			return nil, fmt.Errorf("failed to find proband patient for case %q", r.Case.SubmitterCaseId)
+		if p.RelationToProbandCode != RelationshipProbandCode {
+			continue
 		}
+
+		key := PatientKey{p.PatientOrganizationCode, p.SubmitterPatientId}
+		if patient, ok := r.Patients[key]; ok {
+			return patient, nil
+		}
+		return nil, fmt.Errorf("failed to find proband patient %q for case %q", key, r.Case.SubmitterCaseId)
 	}
 	return nil, nil
 }
@@ -166,8 +176,10 @@ func (r *CaseValidationRecord) fetchPatients(ctx *BatchValidationContext) error 
 		if err != nil {
 			return fmt.Errorf("failed to get patient by org code %q and submitter patient id %q: %w", cp.PatientOrganizationCode, cp.SubmitterPatientId, err)
 		}
+
+		key := PatientKey{cp.PatientOrganizationCode, cp.SubmitterPatientId}
 		if patients != nil {
-			r.Patients[fmt.Sprintf("%s/%s", cp.PatientOrganizationCode, cp.SubmitterPatientId)] = patients
+			r.Patients[key] = patients
 		}
 	}
 	return nil
@@ -590,13 +602,10 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 		return fmt.Errorf("failed to persist case %w", err)
 	}
 
-	// Gorm automatically sets the ID on the struct after creation
-	cr.CaseID = &c.ID
-
 	// Persist CaseHasSequencingExperiment relationships
 	for _, se := range cr.SequencingExperiments {
 		chse := types.CaseHasSequencingExperiment{
-			CaseID:                 *cr.CaseID,
+			CaseID:                 c.ID, // Gorm automatically sets the ID on the struct after creation
 			SequencingExperimentID: se.ID,
 		}
 
@@ -638,7 +647,9 @@ func persistCaseRecords(
 
 func persistFamily(ctx *StorageContext, cr *CaseValidationRecord) error {
 	for _, p := range cr.Case.Patients {
-		patient, ok := cr.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]
+
+		key := PatientKey{p.PatientOrganizationCode, p.SubmitterPatientId}
+		patient, ok := cr.Patients[key]
 		if !ok {
 			return fmt.Errorf("failed to find patient for family member %q in case %q", p.SubmitterPatientId, cr.Case.SubmitterCaseId)
 		}
@@ -658,7 +669,8 @@ func persistFamily(ctx *StorageContext, cr *CaseValidationRecord) error {
 func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord) error {
 	for _, p := range cr.Case.Patients {
 
-		patient, ok := cr.Patients[fmt.Sprintf("%s/%s", p.PatientOrganizationCode, p.SubmitterPatientId)]
+		key := PatientKey{p.PatientOrganizationCode, p.SubmitterPatientId}
+		patient, ok := cr.Patients[key]
 		if !ok {
 			return fmt.Errorf("failed to find patient for observations for patient %q in case %q", p.SubmitterPatientId, cr.Case.SubmitterCaseId)
 		}
