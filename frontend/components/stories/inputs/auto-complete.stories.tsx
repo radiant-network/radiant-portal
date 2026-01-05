@@ -1,7 +1,7 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useState } from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
+import type { Meta, StoryObj } from '@storybook/react';
 
 import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
 
@@ -46,7 +46,7 @@ const meta = {
   args: {
     value: '',
     options: FRAMEWORKS,
-    onChange: fn(),
+    onChange: () => {},
     placeholder: 'Placeholder',
   },
 } satisfies Meta<typeof AutoComplete>;

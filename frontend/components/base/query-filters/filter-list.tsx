@@ -6,6 +6,8 @@ import { Button } from '@/components/base/shadcn/button';
 import { AggregationConfig, ApplicationId } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
+import { SearchFilter } from './search-filter';
+
 /**
  * Keep appId from ApplicationConfig in memory to be used by filters (multiselect, numeric etc.)
  * to prevent props propagation.
@@ -61,9 +63,13 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
   };
 
   // If groupKey is provided, use that group's aggregations, otherwise get all aggregations from all groups
-  const fields = groupKey
+  const allFields = groupKey
     ? aggregations[groupKey]?.items || []
     : Object.values(aggregations).flatMap(group => group.items);
+
+  // Separate search by filters from other filters
+  const searchByFilters = allFields.filter(item => item.type === 'search_by');
+  const fields = allFields.filter(item => item.type !== 'search_by');
 
   useEffect(() => {
     setToggleExpandAll(false);
@@ -87,6 +93,11 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
   return (
     <FilterConfigContext value={{ appId, aggregations }}>
       <div>
+        <div>
+          {searchByFilters.map((search, index) => (
+            <SearchFilter key={`${search.key}-${index}`} search={search} />
+          ))}
+        </div>
         <div className="flex justify-end">
           <Button
             variant="link"

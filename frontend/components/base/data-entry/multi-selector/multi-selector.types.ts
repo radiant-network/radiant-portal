@@ -1,14 +1,16 @@
+import React from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 
 import { Command } from '@/components/base/shadcn/command';
 
 export interface MultiSelectorOption {
   value: string;
-  label: string;
+  label: string | React.ReactNode;
+  badgeLabel?: string; // Optional simple text for badge display
   fixed?: boolean;
   disable?: boolean;
   /** Group the options by providing key. */
-  [key: string]: string | boolean | undefined;
+  [key: string]: string | boolean | undefined | React.ReactNode;
 }
 
 export interface MultiSelectorGroupOption {

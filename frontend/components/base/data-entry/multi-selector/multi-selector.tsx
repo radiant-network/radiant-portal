@@ -163,7 +163,8 @@ function MultiSelector({
     const doSearch = async () => {
       setIsLoading(true);
       const res = await onSearch?.(debouncedSearchTerm);
-      setOptions(transToGroupOption(res || [], groupBy));
+      const groupedOptions = transToGroupOption(res || [], groupBy);
+      setOptions(groupedOptions);
       setIsLoading(false);
     };
 
@@ -252,7 +253,6 @@ function MultiSelector({
 
   return (
     <Command
-      ref={dropdownRef}
       {...commandProps}
       onKeyDown={e => {
         handleKeyDown(e);
@@ -263,6 +263,7 @@ function MultiSelector({
       filter={commandFilter()}
     >
       <div
+        ref={dropdownRef}
         className={cn(
           'flex min-h-9 shadow-xs rounded-md border border-input text-sm ring-offset-background focus-within:ring-1 focus-within:ring-ring',
           {
@@ -287,7 +288,7 @@ function MultiSelector({
 
             return (
               <Badge key={option.value} data-disabled={disabled || undefined} onClose={() => handleUnselect(option)}>
-                {option.label}
+                {option.badgeLabel || (typeof option.label === 'string' ? option.label : option.value)}
               </Badge>
             );
           })}
@@ -339,7 +340,7 @@ function MultiSelector({
           <XIcon size={18} className="" />
         </button>
       </div>
-      <div className={cn('relative', open ? 'block' : 'hidden')}>
+      <div className={cn('relative', open ? 'block' : 'hidden')} ref={dropdownRef}>
         <CommandList
           className="absolute top-1 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95"
           onMouseLeave={() => {
@@ -347,9 +348,6 @@ function MultiSelector({
           }}
           onMouseEnter={() => {
             setOnScrollbar(true);
-          }}
-          onMouseUp={() => {
-            inputRef?.current?.focus();
           }}
         >
           {isLoading ? (
@@ -370,12 +368,8 @@ function MultiSelector({
                       return (
                         <CommandItem
                           key={option.value}
-                          value={option.label}
+                          value={option.value}
                           disabled={option.disable}
-                          onMouseDown={e => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
                           onSelect={() => {
                             if (selected.length >= maxSelected) {
                               onMaxSelected?.(selected.length);

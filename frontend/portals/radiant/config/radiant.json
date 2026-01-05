@@ -21,6 +21,7 @@
       },
       "gene": {
         "items": [
+          { "key": "symbol", "translation_key": "symbol", "type": "search_by" },
           { "key": "biotype", "translation_key": "biotype", "type": "multiple", "withDictionary": true },
           {
             "key": "gnomad_pli",
@@ -34,14 +35,18 @@
             "type": "numerical",
             "defaults": { "min": 0, "max": 100, "defaultOperator": "LessThan" }
           },
-          { "key": "omim_inheritance", "translation_key": "omim_inheritance", "type": "multiple", "withDictionary": true },
+          {
+            "key": "omim_inheritance",
+            "translation_key": "omim_inheritance",
+            "type": "multiple",
+            "withDictionary": true
+          },
           { "key": "gene_divider", "translation_key": "gene_divider", "type": "divider" },
           { "key": "hpo_gene_panel", "translation_key": "hpo_gene_panel", "type": "multiple" },
           { "key": "orphanet_gene_panel", "translation_key": "orphanet_gene_panel", "type": "multiple" },
           { "key": "omim_gene_panel", "translation_key": "omim_gene_panel", "type": "multiple" },
           { "key": "ddd_gene_panel", "translation_key": "ddd_gene_panel", "type": "multiple" },
-          { "key": "cosmic_gene_panel", "translation_key": "cosmic_gene_panel", "type": "multiple" },
-          { "key": "symbol", "translation_key": "symbol", "type": "multiple", "facetHidden": true }
+          { "key": "cosmic_gene_panel", "translation_key": "cosmic_gene_panel", "type": "multiple" }
         ]
       },
       "pathogenicity": {
@@ -239,7 +244,12 @@
           { "key": "mother_zygosity", "translation_key": "mother_zygosity", "type": "multiple" },
           { "key": "father_zygosity", "translation_key": "father_zygosity", "type": "multiple" },
           { "key": "parental_origin", "translation_key": "parental_origin", "type": "multiple" },
-          { "key": "transmission_mode", "translation_key": "transmission_mode", "type": "multiple", "withDictionary": true },
+          {
+            "key": "transmission_mode",
+            "translation_key": "transmission_mode",
+            "type": "multiple",
+            "withDictionary": true
+          },
           { "key": "occurrence_metrics_divider", "translation_key": "occurrence_metrics_divider", "type": "divider" },
           { "key": "filter", "translation_key": "filter", "type": "multiple" },
           {
