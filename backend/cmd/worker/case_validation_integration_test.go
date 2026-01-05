@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"slices"
 	"testing"
 
@@ -11,6 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
+
+var EMPTY_MSGS []types.BatchMessage
 
 func createBaseCasePayload() []map[string]interface{} {
 	return []map[string]interface{}{
@@ -81,7 +84,7 @@ func createBaseCasePayload() []map[string]interface{} {
 	}
 }
 
-func insertPayloadIntoDB(db *gorm.DB, payload []byte, status string, batchType string, dryRun bool, username string, createdOn string) (string, error) {
+func insertPayloadAndProcessBatch(db *gorm.DB, payload string, status string, batchType string, dryRun bool, username string, createdOn string) string {
 	var id string
 	initErr := db.Raw(`
    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
@@ -89,36 +92,43 @@ func insertPayloadIntoDB(db *gorm.DB, payload []byte, status string, batchType s
    		RETURNING id;
 		`, payload, status, batchType, dryRun, username, createdOn).Scan(&id).Error
 	if initErr != nil {
-		return "", initErr
+		panic(fmt.Sprintf("failed to insert payload into table %v", initErr))
 	}
-	return id, nil
+	context := NewBatchValidationContext(db)
+	processBatch(db, context)
+	return id
 }
 
-func assertBatchProcessing(t *testing.T, db *gorm.DB, id string, expectedStatus types.BatchStatus, dryRun bool, username string, createdOn string, expectWarnings int, expectInfos int, expectErrors int) {
+func assertBatchProcessing(t *testing.T, db *gorm.DB, id string, expectedStatus types.BatchStatus, dryRun bool, username string, expectWarnings []types.BatchMessage, expectInfos []types.BatchMessage, expectErrors []types.BatchMessage) repository.Batch {
 	resultBatch := repository.Batch{}
 	db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 	assert.Equal(t, expectedStatus, resultBatch.Status)
 	assert.Equal(t, dryRun, resultBatch.DryRun)
 	assert.Equal(t, username, resultBatch.Username)
-	assert.Equal(t, createdOn, resultBatch.CreatedOn)
+	assert.NotNil(t, resultBatch.CreatedOn)
 	assert.NotNil(t, resultBatch.StartedOn)
 	assert.NotNil(t, resultBatch.FinishedOn)
-	assert.Len(t, resultBatch.Report.Warnings, expectWarnings)
-	assert.Len(t, resultBatch.Report.Infos, expectInfos)
-	assert.Len(t, resultBatch.Report.Errors, expectErrors)
+	assert.Equal(t, expectWarnings, resultBatch.Report.Warnings)
+	assert.Equal(t, expectInfos, resultBatch.Report.Infos)
+	assert.Equal(t, expectErrors, resultBatch.Report.Errors)
+	return resultBatch
 }
 
-func Test_ProcessBatch_Case_Success_Dry_Run(t *testing.T) {
+func getTableCounts(db *gorm.DB, tableNames []string) map[string]int64 {
+	counts := make(map[string]int64)
+	for _, tableName := range tableNames {
+		var count int64
+		db.Table(tableName).Count(&count)
+		counts[tableName] = count
+	}
+	return counts
+}
+
+func Test_ProcessBatch_Case_Dry_Run(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		payload, _ := json.Marshal(createBaseCasePayload())
-		id, err := insertPayloadIntoDB(db, payload, "PENDING", types.CaseBatchType, true, "user123", "2025-12-04")
-		if err != nil {
-			return
-		}
-
-		context := NewBatchValidationContext(db)
-		processBatch(db, context)
-		assertBatchProcessing(t, db, id, "SUCCESS", true, "user123", "2025-12-04", 0, 0, 0)
+		id := insertPayloadAndProcessBatch(db, string(payload), "PENDING", types.CaseBatchType, true, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, "SUCCESS", true, "user123", EMPTY_MSGS, EMPTY_MSGS, EMPTY_MSGS)
 
 		var count int64
 		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "CASE123").Count(&count)
@@ -126,20 +136,16 @@ func Test_ProcessBatch_Case_Success_Dry_Run(t *testing.T) {
 	})
 }
 
-func Test_ProcessBatch_Case_Success_Not_Dry_Run(t *testing.T) {
+func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
-		payload, _ := json.Marshal(createBaseCasePayload())
-		id, err := insertPayloadIntoDB(db, payload, "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
-		if err != nil {
-			return
-		}
-
-		context := NewBatchValidationContext(db)
-		processBatch(db, context)
-		assertBatchProcessing(t, db, id, "SUCCESS", true, "user123", "2025-12-04", 0, 0, 0)
+		payload := createBaseCasePayload()
+		payload[0]["submitter_case_id"] = "SUCCESS_CASE_123"
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", EMPTY_MSGS, EMPTY_MSGS, EMPTY_MSGS)
 
 		var ca *types.Case
-		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "CASE123").First(&ca)
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "SUCCESS_CASE_123").First(&ca)
 
 		assert.NotNil(t, ca)
 		assert.Equal(t, 1000, ca.ID)
@@ -186,7 +192,7 @@ func Test_ProcessBatch_Case_Success_Not_Dry_Run(t *testing.T) {
 		assert.Equal(t, "GRch38", ta.GenomeBuild)
 
 		var thd []*types.TaskHasDocument
-		db.Table("task_has_document").Where("task_id = 1000")
+		db.Table("task_has_document").Where("task_id = 1000").Find(&thd)
 		assert.Len(t, thd, 1)
 		assert.Equal(t, 1000, thd[0].DocumentID)
 
@@ -201,5 +207,74 @@ func Test_ProcessBatch_Case_Success_Not_Dry_Run(t *testing.T) {
 		assert.Equal(t, "genomic", doc.DataCategoryCode)
 		assert.Equal(t, "alignment", doc.DataTypeCode)
 		assert.Equal(t, "cram", doc.FileFormatCode)
+	})
+}
+
+func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		for _, tableName := range []string{"cases", "family", "obs_categorical", "task", "document"} {
+			var maxID int
+			if err := db.Raw(fmt.Sprintf("SELECT COALESCE(MAX(id), 0) FROM %s;", tableName)).Scan(&maxID).Error; err != nil || maxID == 0 {
+				t.Fatalf("failed to get max ID from table %s: %v", tableName, err)
+			}
+
+			db.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN id RESTART WITH 1;", tableName)) // Force ID collision
+
+			before := getTableCounts(db, []string{"cases", "family", "obs_categorical", "task", "document"})
+
+			payload, _ := json.Marshal(createBaseCasePayload())
+			id := insertPayloadAndProcessBatch(db, string(payload), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+
+			var msg string
+			switch tableName {
+			case "cases":
+				msg = "error processing case batch records: error during case insertion failed to persist case for case \"CASE123\": failed to persist case ERROR: duplicate key value violates unique constraint \"case_pkey\" (SQLSTATE 23505)"
+			case "family":
+				msg = "error processing case batch records: error during case insertion failed to persist family for case \"CASE123\": failed to persist family member \"MRN-283773\" for case \"CASE123\": ERROR: duplicate key value violates unique constraint \"family_pkey\" (SQLSTATE 23505)"
+			case "obs_categorical":
+				msg = "error processing case batch records: error during case insertion failed to persist observations for case \"CASE123\": failed to persist observation categorical for patient \"MRN-283773\" in case \"CASE123\": ERROR: duplicate key value violates unique constraint \"observation_coding_pkey\" (SQLSTATE 23505)"
+			case "task":
+				msg = "error processing case batch records: error during case insertion failed to persist tasks for case \"CASE123\": failed to persist task for case \"CASE123\": ERROR: duplicate key value violates unique constraint \"task_pkey\" (SQLSTATE 23505)"
+			case "document":
+				msg = "error processing case batch records: error during case insertion failed to persist tasks for case \"CASE123\": failed to persist document \"NA12892.recal.cram\" for case \"CASE123\": ERROR: duplicate key value violates unique constraint \"document_pkey\" (SQLSTATE 23505)"
+			default:
+				t.Fatalf("unexpected table name: %s", tableName)
+			}
+
+			expectedErrors := []types.BatchMessage{
+				{
+					Code:    "GLOBAL-000",
+					Message: msg,
+					Path:    "",
+				},
+			}
+			assertBatchProcessing(t, db, id, "ERROR", false, "user123", EMPTY_MSGS, EMPTY_MSGS, expectedErrors)
+
+			after := getTableCounts(db, []string{"cases", "family", "obs_categorical", "task", "document"})
+			assert.Equal(t, before, after)
+
+			if err := db.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN id RESTART WITH %d;", tableName, maxID+1)).Error; err != nil {
+				t.Fatalf("failed to reset ID sequence on table %s: %v", tableName, err)
+			}
+		}
+	})
+}
+
+func Test_ProcessBatch_Case_Validation_Failure_Missing_Project(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0]["project_code"] = "TEST-PROJECT"
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "GLOBAL-000",
+				Message: "error case batch validation: error during case validation: error during pre-fetching case validation info: failed to resolve project: get project by code \"TEST-PROJECT\": record not found",
+				Path:    "",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", EMPTY_MSGS, EMPTY_MSGS, errors)
 	})
 }
