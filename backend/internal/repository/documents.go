@@ -27,7 +27,7 @@ type DocumentsDAO interface {
 	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
 	GetDocumentsFilters(withProjectAndLab bool) (*DocumentFilters, error)
 	GetById(id int) (*Document, error)
-	GetByUrl(url string) (*Document, error)
+	GetDocumentByUrl(url string) (*Document, error)
 	CreateDocument(document *Document) error
 }
 
@@ -43,7 +43,7 @@ func (r *DocumentsRepository) CreateDocument(document *Document) error {
 	return r.db.Create(&document).Error
 }
 
-func (r *DocumentsRepository) GetByUrl(url string) (*Document, error) {
+func (r *DocumentsRepository) GetDocumentByUrl(url string) (*Document, error) {
 	var document Document
 	txUrl := r.db.Table(types.DocumentTable.Name).Where("url = ?", url)
 	if err := txUrl.First(&document).Error; err != nil {

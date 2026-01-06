@@ -9,6 +9,7 @@
     "save": "Save",
     "close": "Close",
     "view_all": "View all",
+    "edit": "Edit",
     "editor": {
       "headings": {
         "normal": "Normal",
@@ -786,8 +787,8 @@
         "resolution_status_code": "Resolution"
       }
     },
-    "assays": {
-      "title": "Assays"
+    "sequencing": {
+      "title": "Sequencing"
     }
   },
   "files": {
@@ -1056,7 +1057,7 @@
       "download_report": "Download report",
       "open_igv": "Open IGV",
       "interpret": "Interpret",
-      "interpretation": "Interpretation",
+      "interpretation": "Interpret variant",
       "view_all_variants": "View all variants",
       "view_in_case": "View in case"
     },
@@ -1110,7 +1111,7 @@
     "occurrence_details": {
       "title": "Occurrence Details",
       "patient": "Patient",
-      "assay": "Assay",
+      "sequencing": "Sequencing",
       "actions": {
         "view_in_igv": "View in IGV"
       },
@@ -1337,7 +1338,7 @@
     "variants": {
       "title": "Variants",
       "filters": {
-        "assay": "Assay",
+        "sequencing": "Sequencing",
         "proband": "Proband",
         "sample_id": "Sample ID",
         "affected_status_code": {
@@ -1363,7 +1364,7 @@
   },
   "file_entity": {
     "title": "Files",
-    "search_by_id_placeholder": "File, sample, patient, case, run, or assay",
+    "search_by_id_placeholder": "File, sample, patient, case, run, or sequencing",
     "name": "File Name",
     "format_code": "Format",
     "data_type_code": "Type",
@@ -1374,7 +1375,7 @@
     "relationship_to_proband_code": "Relationship",
     "submitter_sample_id": "Sample",
     "task_id": "Task",
-    "seq_id": "Assay",
+    "seq_id": "Sequencing",
     "hash": "Hash",
     "run_alias": "Run"
   },
@@ -1555,7 +1556,7 @@
           "test": "Analysis",
           "status": "Status",
           "zygosity_tooltip": "Zygosity",
-          "seq_id": "Assay",
+          "seq_id": "Sequencing",
           "patient_id": "Patient",
           "affected_status": "Aff. Status",
           "sample": "Sample"

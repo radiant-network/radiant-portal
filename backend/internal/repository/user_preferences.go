@@ -10,15 +10,14 @@ import (
 )
 
 type UserPreference = types.UserPreference
-type TableConfig = types.TableConfig
 
 type UserPreferencesRepository struct {
 	db *gorm.DB
 }
 
 type UserPreferencesDAO interface {
-	GetUserPreferences(userId string) (*UserPreference, error)
-	UpdateUserPreferences(userId string, userPreference UserPreference) (*UserPreference, error)
+	GetUserPreferences(userId string, key string) (*types.JsonMap[string, interface{}], error)
+	UpdateUserPreferences(userId string, key string, content types.JsonMap[string, interface{}]) (*types.JsonMap[string, interface{}], error)
 }
 
 func NewUserPreferencesRepository(db *gorm.DB) *UserPreferencesRepository {
@@ -29,10 +28,10 @@ func NewUserPreferencesRepository(db *gorm.DB) *UserPreferencesRepository {
 	return &UserPreferencesRepository{db: db}
 }
 
-func (r *UserPreferencesRepository) GetUserPreferences(userId string) (*UserPreference, error) {
+func (r *UserPreferencesRepository) GetUserPreferences(userId string, key string) (*types.JsonMap[string, interface{}], error) {
 	var userPreference UserPreference
 
-	if err := r.db.First(&userPreference, "user_id = ?", userId).Error; err != nil {
+	if err := r.db.First(&userPreference, "user_id = ? AND key = ?", userId, key).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieve user preference: %w", err)
 		} else {
@@ -40,15 +39,19 @@ func (r *UserPreferencesRepository) GetUserPreferences(userId string) (*UserPref
 		}
 	}
 
-	return &userPreference, nil
+	return &userPreference.Content, nil
 }
 
-func (r *UserPreferencesRepository) UpdateUserPreferences(userId string, userPreference UserPreference) (*UserPreference, error) {
-	userPreference.UserID = userId
+func (r *UserPreferencesRepository) UpdateUserPreferences(userId string, key string, content types.JsonMap[string, interface{}]) (*types.JsonMap[string, interface{}], error) {
+	userPreference := UserPreference{
+		UserID:  userId,
+		Key:     key,
+		Content: content,
+	}
 	tx := r.db.Save(&userPreference)
 	if err := tx.Error; err != nil {
 		return nil, fmt.Errorf("error while updating user preferences: %w", err)
 	}
 
-	return &userPreference, nil
+	return &userPreference.Content, nil
 }

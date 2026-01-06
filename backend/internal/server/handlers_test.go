@@ -15,7 +15,7 @@ import (
 
 type MockRepository struct{}
 
-func (m *MockRepository) GetByUrl(url string) (*repository.Document, error) {
+func (m *MockRepository) GetDocumentByUrl(url string) (*repository.Document, error) {
 	return nil, nil
 }
 
@@ -33,15 +33,6 @@ func (m *MockRepository) GetCaseAnalysisCatalogIdByCode(code string) (*repositor
 
 func (m *MockRepository) CheckDatabaseConnection() string {
 	return "up"
-}
-
-func (m *MockRepository) GetSequencing(int) (*types.Sequencing, error) {
-	return &types.Sequencing{
-		SeqId:                1,
-		ExperimentalStrategy: "WGS",
-		AnalysisType:         "germline",
-		AffectedStatus:       "not_affected",
-	}, nil
 }
 
 func (m *MockRepository) GetTermAutoComplete(string, string, int) (*[]types.AutoCompleteTerm, error) {
@@ -73,19 +64,6 @@ func Test_StatusHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{"status": {"starrocks": "up", "postgres": "up"}}`, w.Body.String())
-}
-
-func Test_GetSequencingHandler(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.GET("/sequencing/:seq_id", GetSequencing(repo))
-
-	req, _ := http.NewRequest("GET", "/sequencing/1", bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"seq_id":1, "experimental_strategy":"WGS", "affected_status":"not_affected", "analysis_type": "germline"}`, w.Body.String())
 }
 
 func Test_MondoTermAutoCompleteHandler(t *testing.T) {

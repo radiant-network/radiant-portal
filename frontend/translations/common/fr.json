@@ -7,6 +7,7 @@
     "not_available_yet": "Pas encore disponible",
     "no_gene": "Aucun gène",
     "save": "Sauvegarder",
+    "edit": "Éditer",
     "close": "Fermer",
     "view_all": "Voir tout",
     "editor": {
@@ -786,8 +787,8 @@
         "resolution_status_code": "Résolution"
       }
     },
-    "assays": {
-      "title": "Prescription"
+    "sequencing": {
+      "title": "Séquençage"
     }
   },
   "files": {
@@ -1056,8 +1057,8 @@
       "download_report": "Télécharger le rapport",
       "open_igv": "Ouvrir IGV",
       "interpret": "Interpréter",
-      "interpretation": "Interprétation",
-      "view_all_variants": "Voir tous les variants",
+      "interpretation": "Interpréter variant",
+      "view_all_variants": "Voir les variants",
       "view_in_case": "Voir dans le cas"
     },
     "variant_details": {
@@ -1110,7 +1111,7 @@
     "occurrence_details": {
       "title": "Détails de l'occurrence",
       "patient": "Patient",
-      "assay": "Essai",
+      "sequencing": "Séquençage",
       "actions": {
         "view_in_igv": "Ouvrir dans IGV"
       },
@@ -1337,7 +1338,7 @@
     "variants": {
       "title": "Variants",
       "filters": {
-        "assay": "Prescription",
+        "sequencing": "Séquençage",
         "proband": "Proband",
         "sample_id": "ID Échantillon",
         "affected_status_code": {
@@ -1363,7 +1364,7 @@
   },
   "file_entity": {
     "title": "Fichiers",
-    "search_by_id_placeholder": "Fichier, échantillon, patient, cas, lot ou essai",
+    "search_by_id_placeholder": "Fichier, échantillon, patient, cas, lot ou séquençage",
     "name": "Nom du fichier",
     "format_code": "Format",
     "data_type_code": "Type",
@@ -1374,7 +1375,7 @@
     "relationship_to_proband_code": "Parenté",
     "submitter_sample_id": "Échantillon",
     "task_id": "Tâche",
-    "seq_id": "Essai",
+    "seq_id": "Séquençage",
     "hash": "Hash",
     "run_alias": "Lot"
   },
@@ -1555,7 +1556,7 @@
           "test": "Analyse",
           "status": "Statut",
           "zygosity_tooltip": "Zygosité",
-          "seq_id": "Essai",
+          "seq_id": "Séquençage",
           "patient_id": "Patient",
           "affected_status": "Statut Aff.",
           "sample": "Échantillon"

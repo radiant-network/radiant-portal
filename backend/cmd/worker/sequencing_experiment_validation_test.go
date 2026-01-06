@@ -69,6 +69,10 @@ func (m *mockSeqExpDAO) GetSequencingExperimentByAliquotAndSubmitterSample(strin
 	return nil, nil
 }
 
+func (m *mockSeqExpDAO) GetSequencingExperimentDetailById(seqId int) (*types.SequencingExperimentDetail, error) {
+	return nil, nil
+}
+
 type mockBatchDAO struct{ mock.Mock }
 
 func (m *mockBatchDAO) CreateBatch(payload any, batchType string, username string, dryRun bool) (*repository.Batch, error) {

@@ -460,7 +460,7 @@ func Test_GetById_FilteredIndexFile(t *testing.T) {
 func Test_GetByUrl_Success(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
-		document, err := repo.GetByUrl("s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz.tbi")
+		document, err := repo.GetDocumentByUrl("s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz.tbi")
 		assert.NoError(t, err)
 		assert.NotNil(t, document)
 		assert.Equal(t, 236, document.ID)
@@ -472,7 +472,7 @@ func Test_GetByUrl_Success(t *testing.T) {
 func Test_GetByUrl_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
-		document, err := repo.GetByUrl("s3://radiant-data-test/case_999999/Fi9999999/S99999/Fi9999999.S99999.vcf.gz")
+		document, err := repo.GetDocumentByUrl("s3://radiant-data-test/case_999999/Fi9999999/S99999/Fi9999999.S99999.vcf.gz")
 		assert.NoError(t, err)
 		assert.Nil(t, document)
 	})

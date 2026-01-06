@@ -1,0 +1,116 @@
+package server
+
+import (
+	"bytes"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/stretchr/testify/assert"
+)
+
+func (m *MockRepository) GetSequencing(int) (*types.Sequencing, error) {
+	return &types.Sequencing{
+		SeqId:                1,
+		ExperimentalStrategy: "WGS",
+		AnalysisType:         "germline",
+		AffectedStatus:       "not_affected",
+	}, nil
+}
+
+func (m *MockRepository) GetSequencingExperimentDetailById(seqId int) (*types.SequencingExperimentDetail, error) {
+	return &types.SequencingExperimentDetail{
+		StatusCode: "completed",
+		CreatedOn: time.Date(
+			2021, 9, 12, 13, 8, 0, 0, time.UTC),
+		UpdatedOn: time.Date(
+			2021, 9, 12, 13, 8, 0, 0, time.UTC),
+		SequencingLabCode: "CQGC",
+		SequencingLabName: "Quebec Clinical Genomic Center",
+		Aliquot:           "NA12892",
+		RunName:           "1617",
+		RunAlias:          "A00516_0169",
+		RunDate: time.Date(
+			2021, 8, 17, 0, 0, 0, 0, time.UTC),
+		SeqID:                        1,
+		ExperimentalStrategyCode:     "wxs",
+		ExperimentalStrategyName:     "Whole Exome Sequencing",
+		PlatformCode:                 "illumina",
+		CaptureKit:                   "SureSelect Custom DNA Target",
+		SequencingReadTechnologyCode: "short_read",
+		SequencingReadTechnologyName: "Short Read",
+		SampleID:                     1,
+		SampleTypeCode:               "dna",
+		TissueSite:                   "",
+		HistologyCode:                "normal",
+		SubmitterSampleID:            "S13224",
+		PatientID:                    3,
+	}, nil
+}
+
+func (m *MockRepository) CreateSequencingExperiment(*types.SequencingExperiment) error {
+	return nil
+}
+
+func (m *MockRepository) GetSequencingExperimentBySampleID(sampleID int) ([]types.SequencingExperiment, error) {
+	return []types.SequencingExperiment{}, nil
+}
+
+func (m *MockRepository) GetSequencingExperimentByAliquot(aliquot string) ([]types.SequencingExperiment, error) {
+	return []types.SequencingExperiment{}, nil
+}
+
+func (m *MockRepository) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, sampleOrganizationCode string) (*types.SequencingExperiment, error) {
+	return nil, nil
+}
+
+func Test_GetSequencingHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/sequencing/:seq_id", GetSequencing(repo))
+
+	req, _ := http.NewRequest("GET", "/sequencing/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"seq_id":1, "experimental_strategy":"WGS", "affected_status":"not_affected", "analysis_type": "germline"}`, w.Body.String())
+}
+
+func Test_GetSequencingExperimentDetailByIdHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/sequencing/:seq_id/details", GetSequencingExperimentDetailByIdHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/sequencing/1/details", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"aliquot":"NA12892", 
+		"capture_kit":"SureSelect Custom DNA Target", 
+		"created_on":"2021-09-12T13:08:00Z", 
+		"experimental_strategy_code":"wxs", 
+		"experimental_strategy_name":"Whole Exome Sequencing", 
+		"histology_code":"normal", 
+		"sequencing_lab_code":"CQGC", 
+		"sequencing_lab_name":"Quebec Clinical Genomic Center", 
+		"patient_id": 3,
+		"platform_code":"illumina", 
+		"run_alias":"A00516_0169", 
+		"run_date":"2021-08-17T00:00:00Z", 
+		"run_name":"1617", 
+		"sample_id":1, 
+		"sample_type_code":"dna", 
+		"seq_id":1, 
+		"sequencing_read_technology_code":"short_read",
+		"sequencing_read_technology_name":"Short Read",
+		"status_code":"completed", 
+		"submitter_sample_id":"S13224", 
+		"updated_on":"2021-09-12T13:08:00Z"
+	}`, w.Body.String())
+}

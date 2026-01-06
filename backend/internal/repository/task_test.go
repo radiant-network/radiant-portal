@@ -63,7 +63,7 @@ func Test_CreateAndGetTaskContext_OK(t *testing.T) {
 		newContext := &types.TaskContext{
 			TaskID:                 1,
 			CaseID:                 nil,
-			SequencingExperimentID: &se,
+			SequencingExperimentID: se,
 		}
 
 		err := repo.CreateTaskContext(newContext)
@@ -73,7 +73,7 @@ func Test_CreateAndGetTaskContext_OK(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Len(t, ctxs, 2)
 		assert.Equal(t, 1, ctxs[1].TaskID)
-		assert.Equal(t, &se, ctxs[1].SequencingExperimentID)
+		assert.Equal(t, se, ctxs[1].SequencingExperimentID)
 		assert.Nil(t, ctxs[1].CaseID)
 
 		// Clean up

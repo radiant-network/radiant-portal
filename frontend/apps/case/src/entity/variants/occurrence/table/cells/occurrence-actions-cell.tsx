@@ -8,7 +8,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useCaseIdFromParam } from '@/utils/helper';
 import IGVDialog from 'components/base/igv/igv-dialog';
 
-import OccurrencePreviewSheet from '../../preview/preview-occurrence-sheet';
+import OccurrenceSliderSheet from '../../slider/slider-occurrence-sheet';
 
 function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) {
   const { t } = useI18n();
@@ -25,7 +25,7 @@ function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>)
 
   return (
     <>
-      <OccurrencePreviewSheet
+      <OccurrenceSliderSheet
         open={sheetOpen}
         setOpen={setSheetOpen}
         occurrence={row.original as GermlineSNVOccurrence}

@@ -34,55 +34,6 @@ components:
       - message
       - status
       type: object
-    Assay:
-      properties:
-        aliquot:
-          type: string
-        capture_kit:
-          type: string
-        created_on:
-          type: string
-        experimental_strategy_code:
-          type: string
-        experimental_strategy_name:
-          type: string
-        histology_code:
-          type: string
-        patient_id:
-          type: integer
-        platform_code:
-          type: string
-        run_alias:
-          type: string
-        run_date:
-          type: string
-        run_name:
-          type: string
-        sample_id:
-          type: integer
-        sample_type_code:
-          type: string
-        seq_id:
-          type: integer
-        sequencing_lab_code:
-          type: string
-        sequencing_lab_name:
-          type: string
-        sequencing_read_technology_code:
-          type: string
-        sequencing_read_technology_name:
-          type: string
-        status_code:
-          type: string
-        submitter_sample_id:
-          type: string
-        tissue_site:
-          type: string
-        updated_on:
-          type: string
-      required:
-      - patient_id
-      type: object
     AutoCompleteGene:
       properties:
         highlight:
@@ -187,44 +138,6 @@ components:
       - overlapping_gene_percent
       - symbol
       type: object
-    CaseAssay:
-      description: Assay to display in a Case
-      properties:
-        affected_status_code:
-          type: string
-        experimental_strategy_code:
-          type: string
-        has_variants:
-          type: boolean
-        histology_code:
-          type: string
-        patient_id:
-          type: integer
-        relationship_to_proband:
-          type: string
-        sample_id:
-          type: integer
-        sample_submitter_id:
-          type: string
-        sample_type_code:
-          type: string
-        seq_id:
-          type: integer
-        status_code:
-          type: string
-        updated_on:
-          type: string
-      required:
-      - affected_status_code
-      - experimental_strategy_code
-      - has_variants
-      - patient_id
-      - relationship_to_proband
-      - sample_id
-      - seq_id
-      - status_code
-      - updated_on
-      type: object
     CaseBatch:
       properties:
         analysis_code:
@@ -296,11 +209,6 @@ components:
           type: string
         analysis_catalog_name:
           type: string
-        assays:
-          items:
-            $ref: '#/components/schemas/CaseAssay'
-          type: array
-          uniqueItems: false
         case_category_code:
           type: string
         case_category_name:
@@ -342,6 +250,11 @@ components:
           type: string
         project_name:
           type: string
+        sequencing_experiments:
+          items:
+            $ref: '#/components/schemas/CaseSequencingExperiment'
+          type: array
+          uniqueItems: false
         status_code:
           type: string
         tasks:
@@ -352,12 +265,12 @@ components:
         updated_on:
           type: string
       required:
-      - assays
       - case_category_code
       - case_category_name
       - case_id
       - created_on
       - members
+      - sequencing_experiments
       - status_code
       - tasks
       - updated_on
@@ -594,6 +507,44 @@ components:
       - status_code
       - updated_on
       type: object
+    CaseSequencingExperiment:
+      description: Sequencing experiment to display in a Case
+      properties:
+        affected_status_code:
+          type: string
+        experimental_strategy_code:
+          type: string
+        has_variants:
+          type: boolean
+        histology_code:
+          type: string
+        patient_id:
+          type: integer
+        relationship_to_proband:
+          type: string
+        sample_id:
+          type: integer
+        sample_submitter_id:
+          type: string
+        sample_type_code:
+          type: string
+        seq_id:
+          type: integer
+        status_code:
+          type: string
+        updated_on:
+          type: string
+      required:
+      - affected_status_code
+      - experimental_strategy_code
+      - has_variants
+      - patient_id
+      - relationship_to_proband
+      - sample_id
+      - seq_id
+      - status_code
+      - updated_on
+      type: object
     CaseSequencingExperimentBatch:
       properties:
         aliquot:
@@ -707,19 +658,6 @@ components:
       required:
       - clinvar_id
       - locus_id
-      type: object
-    ColumnPinningConfig:
-      properties:
-        left:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        right:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
       type: object
     Count:
       description: Count represents count result
@@ -1483,17 +1421,9 @@ components:
         updated_by_name:
           type: string
       type: object
-    JsonMap-string-bool:
-      additionalProperties:
-        type: boolean
-      type: object
     JsonMap-string-int:
       additionalProperties:
         type: integer
-      type: object
-    JsonMap-string-types_TableConfig:
-      additionalProperties:
-        $ref: '#/components/schemas/TableConfig'
       type: object
     LeafContent:
       properties:
@@ -1619,11 +1549,6 @@ components:
       - name
       - size
       - url
-      type: object
-    PaginationConfig:
-      properties:
-        pageSize:
-          type: integer
       type: object
     PatientBatch:
       properties:
@@ -1884,6 +1809,55 @@ components:
       - status_code
       - submitter_sample_id
       type: object
+    SequencingExperimentDetail:
+      properties:
+        aliquot:
+          type: string
+        capture_kit:
+          type: string
+        created_on:
+          type: string
+        experimental_strategy_code:
+          type: string
+        experimental_strategy_name:
+          type: string
+        histology_code:
+          type: string
+        patient_id:
+          type: integer
+        platform_code:
+          type: string
+        run_alias:
+          type: string
+        run_date:
+          type: string
+        run_name:
+          type: string
+        sample_id:
+          type: integer
+        sample_type_code:
+          type: string
+        seq_id:
+          type: integer
+        sequencing_lab_code:
+          type: string
+        sequencing_lab_name:
+          type: string
+        sequencing_read_technology_code:
+          type: string
+        sequencing_read_technology_name:
+          type: string
+        status_code:
+          type: string
+        submitter_sample_id:
+          type: string
+        tissue_site:
+          type: string
+        updated_on:
+          type: string
+      required:
+      - patient_id
+      type: object
     SortBody:
       properties:
         field:
@@ -1938,22 +1912,6 @@ components:
           type: string
         sqon:
           $ref: '#/components/schemas/Sqon'
-      type: object
-    TableConfig:
-      properties:
-        columnOrder:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        columnPinning:
-          $ref: '#/components/schemas/ColumnPinningConfig'
-        columnSizing:
-          $ref: '#/components/schemas/JsonMap-string-int'
-        columnVisibility:
-          $ref: '#/components/schemas/JsonMap-string-bool'
-        pagination:
-          $ref: '#/components/schemas/PaginationConfig'
       type: object
     Term:
       properties:
@@ -2020,12 +1978,15 @@ components:
       type: object
     UserPreference:
       properties:
-        table_display:
-          $ref: '#/components/schemas/JsonMap-string-types_TableConfig'
+        content:
+          type: object
+        key:
+          type: string
         user_id:
           type: string
       required:
-      - table_display
+      - content
+      - key
       - user_id
       type: object
     UserSet:
@@ -2432,41 +2393,6 @@ info:
   version: "1.0"
 openapi: 3.1.0
 paths:
-  /assays/{seq_id}:
-    get:
-      description: Get Assay by seq_id
-      operationId: getAssayBySeqId
-      parameters:
-      - description: Seq ID
-        in: path
-        name: seq_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Assay'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Bad Request
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get Assay by seq_id
-      tags:
-      - assays
   /batches/{batchId}:
     get:
       description: Retrieve a batch by ID
@@ -4320,6 +4246,41 @@ paths:
       summary: Get a Sequencing
       tags:
       - sequencing
+  /sequencing/{seq_id}/details:
+    get:
+      description: Get SequencingExperimentDetail by id
+      operationId: getSequencingExperimentDetailById
+      parameters:
+      - description: Seq ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SequencingExperimentDetail'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get SequencingExperimentDetail by id
+      tags:
+      - sequencing
   /sequencing/batch:
     post:
       description: Create a new sequencing experiment batch
@@ -4383,10 +4344,17 @@ paths:
       summary: Get API status
       tags:
       - status
-  /users/preferences:
+  /users/preferences/{key}:
     get:
       description: Get user preferences
       operationId: getUserPreferences
+      parameters:
+      - description: Preference key
+        in: path
+        name: key
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -4414,6 +4382,13 @@ paths:
     post:
       description: Create or update user preference
       operationId: postUserPreferences
+      parameters:
+      - description: Preference key
+        in: path
+        name: key
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           application/json:

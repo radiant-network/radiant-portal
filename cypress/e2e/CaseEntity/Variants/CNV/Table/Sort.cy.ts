@@ -25,7 +25,6 @@ describe('Case Entity - Variants - CNV - Table - Sort', () => {
 
   it('Multiple', () => {
     setupTest();
-    CaseEntity_Variants_CNV_Table.actions.unsortAllColumns();
     CaseEntity_Variants_CNV_Table.actions.sortColumn('type');
     CaseEntity_Variants_CNV_Table.actions.sortColumn('length');
     CaseEntity_Variants_CNV_Table.actions.sortColumn('length');

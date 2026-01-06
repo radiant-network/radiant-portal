@@ -75,16 +75,17 @@ configuration = radiant_python.Configuration(
 # Enter a context with an instance of the API client
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = radiant_python.AssaysApi(api_client)
-    seq_id = 'seq_id_example' # str | Seq ID
+    api_instance = radiant_python.BatchesApi(api_client)
+    batch_id = 'batch_id_example' # str | Batch ID
+    body = None # object |  (optional)
 
     try:
-        # Get Assay by seq_id
-        api_response = api_instance.get_assay_by_seq_id(seq_id)
-        print("The response of AssaysApi->get_assay_by_seq_id:\n")
+        # Retrieve a batch by ID
+        api_response = api_instance.get_batch(batch_id, body=body)
+        print("The response of BatchesApi->get_batch:\n")
         pprint(api_response)
     except ApiException as e:
-        print("Exception when calling AssaysApi->get_assay_by_seq_id: %s\n" % e)
+        print("Exception when calling BatchesApi->get_batch: %s\n" % e)
 
 ```
 
@@ -94,7 +95,6 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*AssaysApi* | [**get_assay_by_seq_id**](docs/AssaysApi.md#get_assay_by_seq_id) | **GET** /assays/{seq_id} | Get Assay by seq_id
 *BatchesApi* | [**get_batch**](docs/BatchesApi.md#get_batch) | **GET** /batches/{batchId} | Retrieve a batch by ID
 *CasesApi* | [**autocomplete_cases**](docs/CasesApi.md#autocomplete_cases) | **GET** /cases/autocomplete | Get AutocompleteResult list of matching prefix
 *CasesApi* | [**case_entity**](docs/CasesApi.md#case_entity) | **GET** /cases/{case_id} | Get CaseEntity case entity
@@ -141,10 +141,11 @@ Class | Method | HTTP request | Description
 *SavedFiltersApi* | [**post_saved_filter**](docs/SavedFiltersApi.md#post_saved_filter) | **POST** /users/saved_filters | Create a new saved filter
 *SavedFiltersApi* | [**put_saved_filter**](docs/SavedFiltersApi.md#put_saved_filter) | **PUT** /users/saved_filters/{saved_filter_id} | Update a saved filter
 *SequencingApi* | [**get_sequencing**](docs/SequencingApi.md#get_sequencing) | **GET** /sequencing/{seq_id} | Get a Sequencing
+*SequencingApi* | [**get_sequencing_experiment_detail_by_id**](docs/SequencingApi.md#get_sequencing_experiment_detail_by_id) | **GET** /sequencing/{seq_id}/details | Get SequencingExperimentDetail by id
 *SequencingApi* | [**post_sequencing_experiment_batch**](docs/SequencingApi.md#post_sequencing_experiment_batch) | **POST** /sequencing/batch | Create a new sequencing experiment batch
 *StatusApi* | [**status_get**](docs/StatusApi.md#status_get) | **GET** /status | Get API status
-*UserPreferencesApi* | [**get_user_preferences**](docs/UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences | Get user preferences
-*UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences | Create or update user preference
+*UserPreferencesApi* | [**get_user_preferences**](docs/UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences/{key} | Get user preferences
+*UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences/{key} | Create or update user preference
 *UserSetsApi* | [**get_user_set**](docs/UserSetsApi.md#get_user_set) | **GET** /users/sets/{user_set_id} | Get user set by id
 *VariantApi* | [**get_expanded_germline_variant_interpreted_case**](docs/VariantApi.md#get_expanded_germline_variant_interpreted_case) | **GET** /variants/germline/{locus_id}/cases/interpreted/{case_id}/{seq_id}/{transcript_id} | Get expanded germline interpreted case for a given locus, sequencing and transcript
 *VariantApi* | [**get_germline_variant_cases_count**](docs/VariantApi.md#get_germline_variant_cases_count) | **GET** /variants/germline/{locus_id}/cases/count | Get germline cases count for a given locus
@@ -163,7 +164,6 @@ Class | Method | HTTP request | Description
  - [Aggregation](docs/Aggregation.md)
  - [AggregationBodyWithSqon](docs/AggregationBodyWithSqon.md)
  - [ApiError](docs/ApiError.md)
- - [Assay](docs/Assay.md)
  - [AutoCompleteGene](docs/AutoCompleteGene.md)
  - [AutoCompleteTerm](docs/AutoCompleteTerm.md)
  - [AutocompleteResult](docs/AutocompleteResult.md)
@@ -171,19 +171,18 @@ Class | Method | HTTP request | Description
  - [BatchReport](docs/BatchReport.md)
  - [BatchSummary](docs/BatchSummary.md)
  - [CNVGeneOverlap](docs/CNVGeneOverlap.md)
- - [CaseAssay](docs/CaseAssay.md)
  - [CaseBatch](docs/CaseBatch.md)
  - [CaseEntity](docs/CaseEntity.md)
  - [CaseFilters](docs/CaseFilters.md)
  - [CasePatientBatch](docs/CasePatientBatch.md)
  - [CasePatientClinicalInformation](docs/CasePatientClinicalInformation.md)
  - [CaseResult](docs/CaseResult.md)
+ - [CaseSequencingExperiment](docs/CaseSequencingExperiment.md)
  - [CaseSequencingExperimentBatch](docs/CaseSequencingExperimentBatch.md)
  - [CaseTask](docs/CaseTask.md)
  - [CaseTaskBatch](docs/CaseTaskBatch.md)
  - [CasesSearchResponse](docs/CasesSearchResponse.md)
  - [ClinvarRCV](docs/ClinvarRCV.md)
- - [ColumnPinningConfig](docs/ColumnPinningConfig.md)
  - [Count](docs/Count.md)
  - [CountBodyWithSqon](docs/CountBodyWithSqon.md)
  - [CreateBatchResponse](docs/CreateBatchResponse.md)
@@ -217,7 +216,6 @@ Class | Method | HTTP request | Description
  - [ObservationTextBatch](docs/ObservationTextBatch.md)
  - [OmimGenePanel](docs/OmimGenePanel.md)
  - [OutputDocumentBatch](docs/OutputDocumentBatch.md)
- - [PaginationConfig](docs/PaginationConfig.md)
  - [PatientBatch](docs/PatientBatch.md)
  - [PubmedCitation](docs/PubmedCitation.md)
  - [PubmedCitationDetails](docs/PubmedCitationDetails.md)
@@ -229,12 +227,12 @@ Class | Method | HTTP request | Description
  - [SearchCriterion](docs/SearchCriterion.md)
  - [Sequencing](docs/Sequencing.md)
  - [SequencingExperimentBatch](docs/SequencingExperimentBatch.md)
+ - [SequencingExperimentDetail](docs/SequencingExperimentDetail.md)
  - [SortBody](docs/SortBody.md)
  - [Sqon](docs/Sqon.md)
  - [SqonContent](docs/SqonContent.md)
  - [Statistics](docs/Statistics.md)
  - [StatisticsBodyWithSqon](docs/StatisticsBodyWithSqon.md)
- - [TableConfig](docs/TableConfig.md)
  - [Term](docs/Term.md)
  - [Transcript](docs/Transcript.md)
  - [UserPreference](docs/UserPreference.md)

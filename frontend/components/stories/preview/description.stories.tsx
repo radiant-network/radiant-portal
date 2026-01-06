@@ -1,7 +1,7 @@
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { DescriptionSection } from '@/components/base/preview/description';
+import { DescriptionSection } from '@/components/base/slider/description';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 const config: PortalConfig = {

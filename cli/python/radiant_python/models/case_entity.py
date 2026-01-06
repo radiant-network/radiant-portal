@@ -19,8 +19,8 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from radiant_python.models.case_assay import CaseAssay
 from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
+from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
 from radiant_python.models.case_task import CaseTask
 from typing import Optional, Set
 from typing_extensions import Self
@@ -31,7 +31,6 @@ class CaseEntity(BaseModel):
     """ # noqa: E501
     analysis_catalog_code: Optional[StrictStr] = None
     analysis_catalog_name: Optional[StrictStr] = None
-    assays: List[CaseAssay]
     case_category_code: StrictStr
     case_category_name: StrictStr
     case_id: StrictInt
@@ -51,10 +50,11 @@ class CaseEntity(BaseModel):
     priority_code: Optional[StrictStr] = None
     project_code: Optional[StrictStr] = None
     project_name: Optional[StrictStr] = None
+    sequencing_experiments: List[CaseSequencingExperiment]
     status_code: StrictStr
     tasks: List[CaseTask]
     updated_on: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "assays", "case_category_code", "case_category_name", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "members", "note", "ordering_organization_code", "ordering_organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "status_code", "tasks", "updated_on"]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "case_category_code", "case_category_name", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "members", "note", "ordering_organization_code", "ordering_organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "sequencing_experiments", "status_code", "tasks", "updated_on"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -95,13 +95,6 @@ class CaseEntity(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in assays (list)
-        _items = []
-        if self.assays:
-            for _item_assays in self.assays:
-                if _item_assays:
-                    _items.append(_item_assays.to_dict())
-            _dict['assays'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in members (list)
         _items = []
         if self.members:
@@ -109,6 +102,13 @@ class CaseEntity(BaseModel):
                 if _item_members:
                     _items.append(_item_members.to_dict())
             _dict['members'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in sequencing_experiments (list)
+        _items = []
+        if self.sequencing_experiments:
+            for _item_sequencing_experiments in self.sequencing_experiments:
+                if _item_sequencing_experiments:
+                    _items.append(_item_sequencing_experiments.to_dict())
+            _dict['sequencing_experiments'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in tasks (list)
         _items = []
         if self.tasks:
@@ -130,7 +130,6 @@ class CaseEntity(BaseModel):
         _obj = cls.model_validate({
             "analysis_catalog_code": obj.get("analysis_catalog_code"),
             "analysis_catalog_name": obj.get("analysis_catalog_name"),
-            "assays": [CaseAssay.from_dict(_item) for _item in obj["assays"]] if obj.get("assays") is not None else None,
             "case_category_code": obj.get("case_category_code"),
             "case_category_name": obj.get("case_category_name"),
             "case_id": obj.get("case_id"),
@@ -150,6 +149,7 @@ class CaseEntity(BaseModel):
             "priority_code": obj.get("priority_code"),
             "project_code": obj.get("project_code"),
             "project_name": obj.get("project_name"),
+            "sequencing_experiments": [CaseSequencingExperiment.from_dict(_item) for _item in obj["sequencing_experiments"]] if obj.get("sequencing_experiments") is not None else None,
             "status_code": obj.get("status_code"),
             "tasks": [CaseTask.from_dict(_item) for _item in obj["tasks"]] if obj.get("tasks") is not None else None,
             "updated_on": obj.get("updated_on")

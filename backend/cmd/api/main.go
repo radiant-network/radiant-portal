@@ -41,7 +41,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	// Create repository
 	repoStarrocks := repository.NewStarrocksRepository(dbStarrocks)
-	repoSeqExp := repository.NewSequencingRepository(dbStarrocks)
+	repoStagingSeq := repository.NewSequencingRepository(dbStarrocks)
+	repoSeqExp := repository.NewSequencingExperimentRepository(dbStarrocks)
 	repoVariants := repository.NewVariantsRepository(dbStarrocks)
 	repoExomiser := repository.NewExomiserRepository(dbStarrocks)
 	repoGenes := repository.NewGenesRepository(dbStarrocks)
@@ -49,7 +50,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoGermlineSNVOccurrences := repository.NewGermlineSNVOccurrencesRepository(dbStarrocks)
 	repoTerms := repository.NewTermsRepository(dbStarrocks)
 	repoCases := repository.NewCasesRepository(dbStarrocks)
-	repoAssays := repository.NewAssaysRepository(dbStarrocks)
 	repoGenePanels := repository.NewGenePanelsRepository(dbStarrocks)
 	pubmedClient := client.NewPubmedClient()
 	repoPostgres := repository.NewPostgresRepository(dbPostgres, pubmedClient)
@@ -88,9 +88,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	// Use privateRoutes instead of `r` for all private routes to automatically apply the role access middleware
 	privateRoutes := r.Group("/")
 	privateRoutes.Use(roleAccessMiddleware)
-
-	assaysGroup := privateRoutes.Group("/assays")
-	assaysGroup.GET("/:seq_id", server.GetAssayBySeqIdHandler(repoAssays))
 
 	casesGroup := privateRoutes.Group("/cases")
 	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))
@@ -150,7 +147,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineSNVGroup.GET("/dictionary", server.GetGermlineSNVDictionary(repoFacets))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")
-	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoSeqExp))
+	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoStagingSeq))
+	sequencingGroup.GET("/:seq_id/details", server.GetSequencingExperimentDetailByIdHandler(repoSeqExp))
 
 	usersGroup := privateRoutes.Group("/users")
 	usersGroup.POST("/saved_filters", server.PostSavedFilterHandler(repoSavedFilters, auth))
@@ -159,8 +157,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	usersGroup.GET("/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repoSavedFilters))
 	usersGroup.GET("/saved_filters", server.GetSavedFiltersHandler(repoSavedFilters, auth))
 	usersGroup.GET("/sets/:user_set_id", server.GetUserSet(repoPostgres.UserSets))
-	usersGroup.GET("/preferences", server.GetUserPreferencesHandler(repoUserPreferences, auth))
-	usersGroup.POST("/preferences", server.UpdateUserPreferencesHandler(repoUserPreferences, auth))
+	usersGroup.GET("/preferences/:key", server.GetUserPreferencesHandler(repoUserPreferences, auth))
+	usersGroup.POST("/preferences/:key", server.UpdateUserPreferencesHandler(repoUserPreferences, auth))
 
 	variantsGroup := privateRoutes.Group("/variants")
 	variantsGermlineGroup := variantsGroup.Group("/germline")

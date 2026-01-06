@@ -4,12 +4,12 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**get_user_preferences**](UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences | Get user preferences
-[**post_user_preferences**](UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences | Create or update user preference
+[**get_user_preferences**](UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences/{key} | Get user preferences
+[**post_user_preferences**](UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences/{key} | Create or update user preference
 
 
 # **get_user_preferences**
-> UserPreference get_user_preferences()
+> UserPreference get_user_preferences(key)
 
 Get user preferences
 
@@ -45,10 +45,11 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.UserPreferencesApi(api_client)
+    key = 'key_example' # str | Preference key
 
     try:
         # Get user preferences
-        api_response = api_instance.get_user_preferences()
+        api_response = api_instance.get_user_preferences(key)
         print("The response of UserPreferencesApi->get_user_preferences:\n")
         pprint(api_response)
     except Exception as e:
@@ -59,7 +60,10 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **key** | **str**| Preference key | 
 
 ### Return type
 
@@ -85,7 +89,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **post_user_preferences**
-> UserPreference post_user_preferences(user_preference)
+> UserPreference post_user_preferences(key, user_preference)
 
 Create or update user preference
 
@@ -121,11 +125,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.UserPreferencesApi(api_client)
+    key = 'key_example' # str | Preference key
     user_preference = radiant_python.UserPreference() # UserPreference | User Preference to create or update
 
     try:
         # Create or update user preference
-        api_response = api_instance.post_user_preferences(user_preference)
+        api_response = api_instance.post_user_preferences(key, user_preference)
         print("The response of UserPreferencesApi->post_user_preferences:\n")
         pprint(api_response)
     except Exception as e:
@@ -139,6 +144,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **key** | **str**| Preference key | 
  **user_preference** | [**UserPreference**](UserPreference.md)| User Preference to create or update | 
 
 ### Return type

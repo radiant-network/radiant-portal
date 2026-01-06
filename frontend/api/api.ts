@@ -101,145 +101,6 @@ export interface ApiError {
 /**
  * 
  * @export
- * @interface Assay
- */
-export interface Assay {
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'aliquot'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'capture_kit'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'created_on'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'experimental_strategy_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'experimental_strategy_name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'histology_code'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Assay
-     */
-    'patient_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'platform_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'run_alias'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'run_date'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'run_name'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Assay
-     */
-    'sample_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'sample_type_code'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Assay
-     */
-    'seq_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'sequencing_lab_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'sequencing_lab_name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'sequencing_read_technology_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'sequencing_read_technology_name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'status_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'submitter_sample_id'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'tissue_site'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Assay
-     */
-    'updated_on'?: string;
-}
-/**
- * 
- * @export
  * @interface AutoCompleteGene
  */
 export interface AutoCompleteGene {
@@ -437,85 +298,6 @@ export interface CNVGeneOverlap {
     'symbol': string;
 }
 /**
- * Assay to display in a Case
- * @export
- * @interface CaseAssay
- */
-export interface CaseAssay {
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseAssay
-     */
-    'affected_status_code': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseAssay
-     */
-    'experimental_strategy_code': string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof CaseAssay
-     */
-    'has_variants': boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseAssay
-     */
-    'histology_code'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CaseAssay
-     */
-    'patient_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseAssay
-     */
-    'relationship_to_proband': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CaseAssay
-     */
-    'sample_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseAssay
-     */
-    'sample_submitter_id'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseAssay
-     */
-    'sample_type_code'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof CaseAssay
-     */
-    'seq_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseAssay
-     */
-    'status_code': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CaseAssay
-     */
-    'updated_on': string;
-}
-/**
  * 
  * @export
  * @interface CaseBatch
@@ -658,12 +440,6 @@ export interface CaseEntity {
     'analysis_catalog_name'?: string;
     /**
      * 
-     * @type {Array<CaseAssay>}
-     * @memberof CaseEntity
-     */
-    'assays': Array<CaseAssay>;
-    /**
-     * 
      * @type {string}
      * @memberof CaseEntity
      */
@@ -776,6 +552,12 @@ export interface CaseEntity {
      * @memberof CaseEntity
      */
     'project_name'?: string;
+    /**
+     * 
+     * @type {Array<CaseSequencingExperiment>}
+     * @memberof CaseEntity
+     */
+    'sequencing_experiments': Array<CaseSequencingExperiment>;
     /**
      * 
      * @type {string}
@@ -1221,6 +1003,85 @@ export interface CaseResult {
     'updated_on': string;
 }
 /**
+ * Sequencing experiment to display in a Case
+ * @export
+ * @interface CaseSequencingExperiment
+ */
+export interface CaseSequencingExperiment {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperiment
+     */
+    'affected_status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperiment
+     */
+    'experimental_strategy_code': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof CaseSequencingExperiment
+     */
+    'has_variants': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperiment
+     */
+    'histology_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseSequencingExperiment
+     */
+    'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperiment
+     */
+    'relationship_to_proband': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseSequencingExperiment
+     */
+    'sample_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperiment
+     */
+    'sample_submitter_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperiment
+     */
+    'sample_type_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CaseSequencingExperiment
+     */
+    'seq_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperiment
+     */
+    'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseSequencingExperiment
+     */
+    'updated_on': string;
+}
+/**
  * 
  * @export
  * @interface CaseSequencingExperimentBatch
@@ -1422,25 +1283,6 @@ export interface ClinvarRCV {
      * @memberof ClinvarRCV
      */
     'version'?: number;
-}
-/**
- * 
- * @export
- * @interface ColumnPinningConfig
- */
-export interface ColumnPinningConfig {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ColumnPinningConfig
-     */
-    'left'?: Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof ColumnPinningConfig
-     */
-    'right'?: Array<string>;
 }
 /**
  * Count represents count result
@@ -3284,19 +3126,6 @@ export interface OutputDocumentBatch {
 /**
  * 
  * @export
- * @interface PaginationConfig
- */
-export interface PaginationConfig {
-    /**
-     * 
-     * @type {number}
-     * @memberof PaginationConfig
-     */
-    'pageSize'?: number;
-}
-/**
- * 
- * @export
  * @interface PatientBatch
  */
 export interface PatientBatch {
@@ -3820,6 +3649,145 @@ export type SequencingExperimentBatchStatusCodeEnum = typeof SequencingExperimen
 /**
  * 
  * @export
+ * @interface SequencingExperimentDetail
+ */
+export interface SequencingExperimentDetail {
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'aliquot'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'capture_kit'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'created_on'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'experimental_strategy_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'experimental_strategy_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'histology_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SequencingExperimentDetail
+     */
+    'patient_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'platform_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'run_alias'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'run_date'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'run_name'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SequencingExperimentDetail
+     */
+    'sample_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'sample_type_code'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SequencingExperimentDetail
+     */
+    'seq_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'sequencing_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'sequencing_lab_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'sequencing_read_technology_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'sequencing_read_technology_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'status_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'submitter_sample_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'tissue_site'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'updated_on'?: string;
+}
+/**
+ * 
+ * @export
  * @interface SortBody
  */
 export interface SortBody {
@@ -3935,43 +3903,6 @@ export interface StatisticsBodyWithSqon {
      * @memberof StatisticsBodyWithSqon
      */
     'sqon'?: Sqon;
-}
-/**
- * 
- * @export
- * @interface TableConfig
- */
-export interface TableConfig {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof TableConfig
-     */
-    'columnOrder'?: Array<string>;
-    /**
-     * 
-     * @type {ColumnPinningConfig}
-     * @memberof TableConfig
-     */
-    'columnPinning'?: ColumnPinningConfig;
-    /**
-     * 
-     * @type {{ [key: string]: number; }}
-     * @memberof TableConfig
-     */
-    'columnSizing'?: { [key: string]: number; };
-    /**
-     * 
-     * @type {{ [key: string]: boolean; }}
-     * @memberof TableConfig
-     */
-    'columnVisibility'?: { [key: string]: boolean; };
-    /**
-     * 
-     * @type {PaginationConfig}
-     * @memberof TableConfig
-     */
-    'pagination'?: PaginationConfig;
 }
 /**
  * 
@@ -4159,10 +4090,16 @@ export interface Transcript {
 export interface UserPreference {
     /**
      * 
-     * @type {{ [key: string]: TableConfig; }}
+     * @type {object}
      * @memberof UserPreference
      */
-    'table_display': { [key: string]: TableConfig; };
+    'content': object;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserPreference
+     */
+    'key': string;
     /**
      * 
      * @type {string}
@@ -4948,118 +4885,6 @@ export const VepImpact = {
 } as const;
 
 export type VepImpact = typeof VepImpact[keyof typeof VepImpact];
-
-
-
-/**
- * AssaysApi - axios parameter creator
- * @export
- */
-export const AssaysApiAxiosParamCreator = function (configuration?: Configuration) {
-    return {
-        /**
-         * Get Assay by seq_id
-         * @summary Get Assay by seq_id
-         * @param {string} seqId Seq ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getAssayBySeqId: async (seqId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('getAssayBySeqId', 'seqId', seqId)
-            const localVarPath = `/assays/{seq_id}`
-                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-    }
-};
-
-/**
- * AssaysApi - functional programming interface
- * @export
- */
-export const AssaysApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = AssaysApiAxiosParamCreator(configuration)
-    return {
-        /**
-         * Get Assay by seq_id
-         * @summary Get Assay by seq_id
-         * @param {string} seqId Seq ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getAssayBySeqId(seqId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Assay>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAssayBySeqId(seqId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AssaysApi.getAssayBySeqId']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-    }
-};
-
-/**
- * AssaysApi - factory interface
- * @export
- */
-export const AssaysApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = AssaysApiFp(configuration)
-    return {
-        /**
-         * Get Assay by seq_id
-         * @summary Get Assay by seq_id
-         * @param {string} seqId Seq ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getAssayBySeqId(seqId: string, options?: RawAxiosRequestConfig): AxiosPromise<Assay> {
-            return localVarFp.getAssayBySeqId(seqId, options).then((request) => request(axios, basePath));
-        },
-    };
-};
-
-/**
- * AssaysApi - object-oriented interface
- * @export
- * @class AssaysApi
- * @extends {BaseAPI}
- */
-export class AssaysApi extends BaseAPI {
-    /**
-     * Get Assay by seq_id
-     * @summary Get Assay by seq_id
-     * @param {string} seqId Seq ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof AssaysApi
-     */
-    public getAssayBySeqId(seqId: string, options?: RawAxiosRequestConfig) {
-        return AssaysApiFp(this.configuration).getAssayBySeqId(seqId, options).then((request) => request(this.axios, this.basePath));
-    }
-}
 
 
 
@@ -9334,6 +9159,44 @@ export const SequencingApiAxiosParamCreator = function (configuration?: Configur
             };
         },
         /**
+         * Get SequencingExperimentDetail by id
+         * @summary Get SequencingExperimentDetail by id
+         * @param {string} seqId Seq ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSequencingExperimentDetailById: async (seqId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getSequencingExperimentDetailById', 'seqId', seqId)
+            const localVarPath = `/sequencing/{seq_id}/details`
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create a new sequencing experiment batch
          * @summary Create a new sequencing experiment batch
          * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Create Body
@@ -9402,6 +9265,19 @@ export const SequencingApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Get SequencingExperimentDetail by id
+         * @summary Get SequencingExperimentDetail by id
+         * @param {string} seqId Seq ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSequencingExperimentDetailById(seqId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SequencingExperimentDetail>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSequencingExperimentDetailById(seqId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SequencingApi.getSequencingExperimentDetailById']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Create a new sequencing experiment batch
          * @summary Create a new sequencing experiment batch
          * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Create Body
@@ -9436,6 +9312,16 @@ export const SequencingApiFactory = function (configuration?: Configuration, bas
             return localVarFp.getSequencing(seqId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Get SequencingExperimentDetail by id
+         * @summary Get SequencingExperimentDetail by id
+         * @param {string} seqId Seq ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSequencingExperimentDetailById(seqId: string, options?: RawAxiosRequestConfig): AxiosPromise<SequencingExperimentDetail> {
+            return localVarFp.getSequencingExperimentDetailById(seqId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Create a new sequencing experiment batch
          * @summary Create a new sequencing experiment batch
          * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Create Body
@@ -9466,6 +9352,18 @@ export class SequencingApi extends BaseAPI {
      */
     public getSequencing(seqId: string, options?: RawAxiosRequestConfig) {
         return SequencingApiFp(this.configuration).getSequencing(seqId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get SequencingExperimentDetail by id
+     * @summary Get SequencingExperimentDetail by id
+     * @param {string} seqId Seq ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SequencingApi
+     */
+    public getSequencingExperimentDetailById(seqId: string, options?: RawAxiosRequestConfig) {
+        return SequencingApiFp(this.configuration).getSequencingExperimentDetailById(seqId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -9594,11 +9492,15 @@ export const UserPreferencesApiAxiosParamCreator = function (configuration?: Con
         /**
          * Get user preferences
          * @summary Get user preferences
+         * @param {string} key Preference key
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserPreferences: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/users/preferences`;
+        getUserPreferences: async (key: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'key' is not null or undefined
+            assertParamExists('getUserPreferences', 'key', key)
+            const localVarPath = `/users/preferences/{key}`
+                .replace(`{${"key"}}`, encodeURIComponent(String(key)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -9628,14 +9530,18 @@ export const UserPreferencesApiAxiosParamCreator = function (configuration?: Con
         /**
          * Create or update user preference
          * @summary Create or update user preference
+         * @param {string} key Preference key
          * @param {UserPreference} userPreference User Preference to create or update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postUserPreferences: async (userPreference: UserPreference, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postUserPreferences: async (key: string, userPreference: UserPreference, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'key' is not null or undefined
+            assertParamExists('postUserPreferences', 'key', key)
             // verify required parameter 'userPreference' is not null or undefined
             assertParamExists('postUserPreferences', 'userPreference', userPreference)
-            const localVarPath = `/users/preferences`;
+            const localVarPath = `/users/preferences/{key}`
+                .replace(`{${"key"}}`, encodeURIComponent(String(key)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -9678,11 +9584,12 @@ export const UserPreferencesApiFp = function(configuration?: Configuration) {
         /**
          * Get user preferences
          * @summary Get user preferences
+         * @param {string} key Preference key
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getUserPreferences(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPreference>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserPreferences(options);
+        async getUserPreferences(key: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPreference>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserPreferences(key, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UserPreferencesApi.getUserPreferences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -9690,12 +9597,13 @@ export const UserPreferencesApiFp = function(configuration?: Configuration) {
         /**
          * Create or update user preference
          * @summary Create or update user preference
+         * @param {string} key Preference key
          * @param {UserPreference} userPreference User Preference to create or update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postUserPreferences(userPreference: UserPreference, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPreference>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postUserPreferences(userPreference, options);
+        async postUserPreferences(key: string, userPreference: UserPreference, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserPreference>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postUserPreferences(key, userPreference, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['UserPreferencesApi.postUserPreferences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -9713,21 +9621,23 @@ export const UserPreferencesApiFactory = function (configuration?: Configuration
         /**
          * Get user preferences
          * @summary Get user preferences
+         * @param {string} key Preference key
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserPreferences(options?: RawAxiosRequestConfig): AxiosPromise<UserPreference> {
-            return localVarFp.getUserPreferences(options).then((request) => request(axios, basePath));
+        getUserPreferences(key: string, options?: RawAxiosRequestConfig): AxiosPromise<UserPreference> {
+            return localVarFp.getUserPreferences(key, options).then((request) => request(axios, basePath));
         },
         /**
          * Create or update user preference
          * @summary Create or update user preference
+         * @param {string} key Preference key
          * @param {UserPreference} userPreference User Preference to create or update
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postUserPreferences(userPreference: UserPreference, options?: RawAxiosRequestConfig): AxiosPromise<UserPreference> {
-            return localVarFp.postUserPreferences(userPreference, options).then((request) => request(axios, basePath));
+        postUserPreferences(key: string, userPreference: UserPreference, options?: RawAxiosRequestConfig): AxiosPromise<UserPreference> {
+            return localVarFp.postUserPreferences(key, userPreference, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -9742,24 +9652,26 @@ export class UserPreferencesApi extends BaseAPI {
     /**
      * Get user preferences
      * @summary Get user preferences
+     * @param {string} key Preference key
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UserPreferencesApi
      */
-    public getUserPreferences(options?: RawAxiosRequestConfig) {
-        return UserPreferencesApiFp(this.configuration).getUserPreferences(options).then((request) => request(this.axios, this.basePath));
+    public getUserPreferences(key: string, options?: RawAxiosRequestConfig) {
+        return UserPreferencesApiFp(this.configuration).getUserPreferences(key, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create or update user preference
      * @summary Create or update user preference
+     * @param {string} key Preference key
      * @param {UserPreference} userPreference User Preference to create or update
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof UserPreferencesApi
      */
-    public postUserPreferences(userPreference: UserPreference, options?: RawAxiosRequestConfig) {
-        return UserPreferencesApiFp(this.configuration).postUserPreferences(userPreference, options).then((request) => request(this.axios, this.basePath));
+    public postUserPreferences(key: string, userPreference: UserPreference, options?: RawAxiosRequestConfig) {
+        return UserPreferencesApiFp(this.configuration).postUserPreferences(key, userPreference, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

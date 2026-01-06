@@ -140,8 +140,8 @@ const tableColumns = {
       tooltip: null,
     },
     {
-      id: 'assay',
-      name: 'Assay',
+      id: 'sequencing',
+      name: 'Sequencing',
       apiField: 'seq_id',
       isVisibleByDefault: true,
       pinByDefault: null,
