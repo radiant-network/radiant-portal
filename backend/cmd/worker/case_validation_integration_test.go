@@ -260,7 +260,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 	})
 }
 
-func Test_ProcessBatch_Case_Validation_Failure_Missing_Project(t *testing.T) {
+func Test_ProcessBatch_Case_Validation_Missing_Project_Errors(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		payload := createBaseCasePayload()
 		payload[0]["project_code"] = "TEST-PROJECT"
