@@ -204,7 +204,10 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
   // LRT score
   if (data.lrt_score) {
     functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.lrt')}>{data.lrt_score}</DescriptionRow>,
+      <DescriptionRow label={t('occurrence_expand.functional_scores.lrt')}>
+        {data.lrt_pred}
+        {data.lrt_score && ` (${data.lrt_score})`}
+      </DescriptionRow>,
     );
   }
 
