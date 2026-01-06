@@ -259,3 +259,34 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 		}
 	})
 }
+
+func Test_ProcessBatch_Case_Template(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		t.Skipped()
+
+		//// FIXME: The following test is for example purposes only.
+		////        Use this template to create your own test cases for different error scenarios.
+		////        Make sure to adjust the payload and expected error messages accordingly.
+		//
+		//payload := createBaseCasePayload()
+		//
+		//// TODO: Change values for your test case
+		//payload[0]["project_code"] = "TEMPLATE_ERROR_PROJECT_123" // example of an error case
+		//
+		//// TODO: Load the payload into the batch and into the database
+		//payloadBytes, _ := json.Marshal(payload)
+		//id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		//
+		//// TODO: Implement the specific message assertions for your test case
+		//errors := []types.BatchMessage{
+		//	{
+		//		Code:    "CASE-001",
+		//		Message: "project with code \"TEMPLATE_ERROR_PROJECT_123\" not found",
+		//		Path:    "/0/project_code",
+		//	},
+		//}
+		//
+		//// TODO: Call the assertion function with expected messages
+		//assertBatchProcessing(t, db, id, "ERROR", false, "user123", EMPTY_MSGS, EMPTY_MSGS, errors)
+	})
+}
