@@ -310,11 +310,7 @@ function MultiSelector({
             onValueChange={value => {
               setInputValue(value);
               // Open dropdown when user starts typing (at least one character)
-              if (value.length > 0) {
-                setOpen(true);
-              } else {
-                setOpen(false);
-              }
+              setOpen(value.length > 0);
               inputProps?.onValueChange?.(value);
             }}
             onBlur={event => {
