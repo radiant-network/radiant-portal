@@ -526,8 +526,7 @@ func (cr *CaseValidationRecord) validateSeqExpSample(seqExpIndex int) (*types.Sa
 		return nil, fmt.Errorf("error getting existing sample: %v", err)
 	}
 	if sample == nil {
-		// TODO handle error
-		return nil, nil
+		return nil, nil // TODO handle error
 	}
 	return sample, nil
 }
