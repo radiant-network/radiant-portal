@@ -358,6 +358,7 @@
       },
       "gene": {
         "items": [
+          { "key": "search_by_symbol", "translation_key": "search_by_symbol", "type": "search_by" },
           { "key": "cytoband", "translation_key": "cytoband", "type": "multiple" },
           { "key": "gene_divider", "translation_key": "gene_divider", "type": "divider" },
           { "key": "hpo_gene_panel", "translation_key": "hpo_gene_panel", "type": "multiple" },

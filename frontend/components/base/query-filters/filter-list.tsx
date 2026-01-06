@@ -93,7 +93,7 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
   return (
     <FilterConfigContext value={{ appId, aggregations }}>
       <div>
-        <div>
+        <div className="mb-4">
           {searchByFilters.map((search, index) => (
             <SearchFilter key={`${search.key}-${index}`} search={search} />
           ))}
