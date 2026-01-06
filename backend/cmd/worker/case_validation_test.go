@@ -2213,6 +2213,79 @@ func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
 	assert.Equal(t, "case[0].sequencing_experiments[0]", record.Errors[0].Path)
 }
 
+func Test_validateSeqExpSample_Valid(t *testing.T) {
+	samplesMockRepo := &SamplesMockRepo{
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+			if organizationCode == "LAB-1" && submitterSampleId == "SAMPLE-1" {
+				return &types.Sample{
+					ID:                1,
+					PatientID:         100,
+					SubmitterSampleId: "SAMPLE-1",
+					OrganizationId:    10,
+					HistologyCode:     "germline",
+				}, nil
+			}
+			return nil, nil
+		},
+	}
+
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Context: &BatchValidationContext{
+			SampleRepo: samplesMockRepo,
+		},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
+				{
+					Aliquot:                "ALIQUOT-1",
+					SubmitterSampleId:      "SAMPLE-1",
+					SampleOrganizationCode: "LAB-1",
+				},
+			},
+		},
+	}
+
+	sample, err := record.validateSeqExpSample(0)
+	assert.NoError(t, err)
+	assert.NotNil(t, sample)
+	assert.Equal(t, 1, sample.ID)
+	assert.Equal(t, 100, sample.PatientID)
+	assert.Equal(t, "SAMPLE-1", sample.SubmitterSampleId)
+	assert.Equal(t, "germline", sample.HistologyCode)
+}
+
+func Test_validateSeqExpSample_SampleNotFound(t *testing.T) {
+	samplesMockRepo := &SamplesMockRepo{
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+			return nil, nil
+		},
+	}
+
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Context: &BatchValidationContext{
+			SampleRepo: samplesMockRepo,
+		},
+		Case: types.CaseBatch{
+			ProjectCode:     "PROJ-1",
+			SubmitterCaseId: "CASE-1",
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
+				{
+					Aliquot:                "ALIQUOT-1",
+					SubmitterSampleId:      "UNKNOWN-SAMPLE",
+					SampleOrganizationCode: "UNKNOWN-ORG",
+				},
+			},
+		},
+	}
+
+	sample, err := record.validateSeqExpSample(0)
+	assert.NoError(t, err)
+	assert.Nil(t, sample)
+}
+
 func Test_validateCaseSequencingExperiments_NoSeqExps(t *testing.T) {
 	mockContext := BatchValidationContext{
 		SeqExpRepo: &CaseValidationMockRepo{},
