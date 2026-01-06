@@ -1,4 +1,4 @@
-import { type KeyboardEvent, ReactNode, useCallback, useEffect, useState } from 'react';
+import { type KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check, XIcon } from 'lucide-react';
 
@@ -48,6 +48,8 @@ export const AutoComplete = <T extends Option>({
   loading,
   leftAddon,
 }: AutoCompleteProps<T>) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [isOpen, setOpen] = useState(false);
   const [selected, setSelected] = useState<T | undefined>(getSelectedOptionByValue(value, arrayOptions));
   const [inputValue, setInputValue] = useState<string>('');
@@ -56,14 +58,19 @@ export const AutoComplete = <T extends Option>({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
+      const input = inputRef.current;
+      if (!input) {
+        return;
+      }
+
       // Keep the options displayed when the user is typing
       if (!isOpen) {
         setOpen(true);
       }
 
       // This is not a default behaviour of the <input /> field
-      if (event.key === 'Enter' && inputValue !== '') {
-        const optionToSelect = arrayOptions.find(option => option[optionFilterProp] === inputValue);
+      if (event.key === 'Enter' && input.value !== '') {
+        const optionToSelect = arrayOptions.find(option => option[optionFilterProp] === input.value);
         if (optionToSelect) {
           setSelected(optionToSelect);
           onChange?.(optionToSelect.value);
@@ -71,46 +78,31 @@ export const AutoComplete = <T extends Option>({
       }
 
       if (event.key === 'Escape') {
-        setOpen(false);
+        input.blur();
       }
     },
-    [isOpen, arrayOptions, onChange, optionFilterProp, inputValue],
+    [isOpen, arrayOptions, onChange],
   );
 
   const handleBlur = useCallback(() => {
     setOpen(false);
-    // If optionLabelProp points to a ReactNode, use the 'label' property as fallback
-    const labelValue = selected?.[optionLabelProp];
-    const fallbackLabel = selected?.label;
-    let displayValue = '';
-    if (typeof labelValue === 'string') {
-      displayValue = labelValue;
-    } else if (typeof fallbackLabel === 'string') {
-      displayValue = fallbackLabel;
-    }
-    setInputValue(displayValue);
-  }, [selected, optionLabelProp]);
+    setInputValue(selected?.[optionLabelProp] || '');
+  }, [selected]);
 
   const handleSelectOption = useCallback(
     (selectedOption: T) => {
-      // If optionLabelProp points to a ReactNode, use the 'label' property as fallback for the input
-      const labelValue = selectedOption[optionLabelProp];
-      const fallbackLabel = selectedOption.label;
-      let displayValue = '';
-      if (typeof labelValue === 'string') {
-        displayValue = labelValue;
-      } else if (typeof fallbackLabel === 'string') {
-        displayValue = fallbackLabel;
-      }
-      setInputValue(displayValue);
+      setInputValue(selectedOption[optionLabelProp]);
       setSelected(selectedOption);
 
       onChange?.(selectedOption.value);
 
-      // Close the dropdown after selection
-      setOpen(false);
+      // This is a hack to prevent the input from being focused after the user selects an option
+      // We can call this hack: "The next tick"
+      setTimeout(() => {
+        inputRef?.current?.blur();
+      }, 0);
     },
-    [onChange, optionLabelProp],
+    [onChange],
   );
 
   useEffect(() => {
@@ -119,27 +111,18 @@ export const AutoComplete = <T extends Option>({
 
       if (selectedOption) {
         setSelected(selectedOption);
-        // If optionLabelProp points to a ReactNode, use the 'label' property as fallback
-        const labelValue = selectedOption[optionLabelProp];
-        const fallbackLabel = selectedOption.label;
-        let displayValue = '';
-        if (typeof labelValue === 'string') {
-          displayValue = labelValue;
-        } else if (typeof fallbackLabel === 'string') {
-          displayValue = fallbackLabel;
-        }
-        setInputValue(displayValue);
+        setInputValue(selectedOption[optionLabelProp]);
       }
     }
-  }, [value, arrayOptions, optionLabelProp]);
+  }, [value, arrayOptions]);
 
   useEffect(() => {
-    if (!onSearch || !isOpen) return;
+    if (!onSearch || !open) return;
 
     if (debouncedSearchTerm) {
       onSearch?.(debouncedSearchTerm);
     }
-  }, [debouncedSearchTerm, isOpen]);
+  }, [debouncedSearchTerm, open]);
 
   const filteredOptions = arrayOptions.filter(option =>
     option[optionFilterProp].toLowerCase().trim().includes(inputValueSearch.toLowerCase().trim()),
@@ -156,6 +139,7 @@ export const AutoComplete = <T extends Option>({
     >
       <div className="w-full relative shadow-xs outline-none focus-within:ring-1 focus-within:ring-ring rounded-md">
         <CommandInput
+          ref={inputRef}
           value={inputValue}
           onValueChange={
             loading
@@ -169,9 +153,7 @@ export const AutoComplete = <T extends Option>({
           onFocus={() => setOpen(true)}
           placeholder={placeholder}
           disabled={disabled}
-          className={cn('text-sm', {
-            'opacity-0': selected && typeof selected[optionLabelProp] !== 'string',
-          })}
+          className="text-sm"
           leftAddon={leftAddon}
           rightAddon={
             <button
@@ -189,10 +171,6 @@ export const AutoComplete = <T extends Option>({
             </button>
           }
         />
-        {/* Display badge overlay on input when an option with display is selected */}
-        {selected && typeof selected[optionLabelProp] !== 'string' && (
-          <div className="absolute inset-0 flex items-center px-3 pointer-events-none">{selected[optionLabelProp]}</div>
-        )}
       </div>
       <div className="relative">
         <div
