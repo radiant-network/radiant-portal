@@ -262,7 +262,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 
 func Test_ProcessBatch_Case_Template(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
-		t.Skipped()
+		t.Skip("Template test - implement specific error case tests as needed")
 
 		//// FIXME: The following test is for example purposes only.
 		////        Use this template to create your own test cases for different error scenarios.
