@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import parse from 'html-react-parser';
 import { InfoIcon } from 'lucide-react';
 
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
-import { MERGE_VALUES_STRATEGIES } from '@/components/cores/sqon';
+import { IValueFilter, MERGE_VALUES_STRATEGIES, TSqonContentValue } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 import { genesApi } from '@/utils/api';
 
@@ -23,14 +23,47 @@ export function SearchFilter({ search }: SearchFilterProps) {
   const { t } = useI18n();
   const { appId } = useFilterConfig();
   const { translation_key, key } = search;
+  const fieldKey = key.replace(/search_by_/g, '');
+
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<MultiSelectorOption[]>([]);
+  const [lastActiveQuery, setLastActiveQuery] = useState<any>(null);
+
+  // Load initial values from query builder
+  // Listen to query builder changes
+  useEffect(() => {
+    const activeQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
+    if (JSON.stringify(activeQuery) === JSON.stringify(lastActiveQuery)) {
+      return;
+    }
+
+    const fieldFilter = activeQuery.content.find((x: TSqonContentValue) =>
+      'content' in x && 'field' in x.content ? x.content.field === fieldKey : false,
+    ) as IValueFilter | undefined;
+
+    const initialValues = fieldFilter?.content?.value || [];
+    if (Array.isArray(initialValues)) {
+      setSelectedValues(initialValues as string[]);
+    }
+    setLastActiveQuery(activeQuery);
+  }, [appId, fieldKey, queryBuilderRemote.getActiveQuery(appId)]);
+
+  useEffect(() => {
+    // Create options for selected values (for multi selector badges)
+    const selectedOptions = selectedValues.map(value => ({
+      value,
+      label: value,
+      badgeLabel: value,
+    }));
+    setSelectedOptions(selectedOptions);
+  }, [selectedValues]);
 
   const handleAsyncSearch = async (searchTerm: string): Promise<MultiSelectorOption[]> => {
     if (!searchTerm) return [];
 
     try {
       const response = await genesApi.geneAutoComplete(searchTerm);
-      const options = response.data.map(item => ({
+      return response.data.map(item => ({
         value: item.source?.name || '',
         label: (
           <div className="flex flex-col gap-0.5">
@@ -40,11 +73,19 @@ export function SearchFilter({ search }: SearchFilterProps) {
         ),
         badgeLabel: item.source?.name || '',
       }));
-      return options;
     } catch (error) {
       console.error('Error fetching genes:', error);
       return [];
     }
+  };
+
+  const handleChange = (newValues: string[]) => {
+    setSelectedValues(newValues);
+    queryBuilderRemote.updateActiveQueryField(appId, {
+      field: fieldKey,
+      value: newValues,
+      merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
+    });
   };
 
   return (
@@ -60,14 +101,8 @@ export function SearchFilter({ search }: SearchFilterProps) {
       </div>
       <MultiSelector
         value={selectedValues}
-        onChange={newValues => {
-          setSelectedValues(newValues);
-          queryBuilderRemote.updateActiveQueryField(appId, {
-            field: key.replace(/search_by_/g, ''),
-            value: newValues,
-            merge_strategy: MERGE_VALUES_STRATEGIES.APPEND_VALUES,
-          });
-        }}
+        defaultOptions={selectedOptions}
+        onChange={handleChange}
         onSearch={handleAsyncSearch}
         placeholder={t(`common.filters.labels.${translation_key}_placeholder`)}
         className="w-full"
