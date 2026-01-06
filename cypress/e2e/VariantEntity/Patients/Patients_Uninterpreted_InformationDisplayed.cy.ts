@@ -15,9 +15,9 @@ describe('VariantEntity - Patients - Uninterpreted - Information displayed', () 
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('case', data.variantGermline.uninterpreted);
   });
 
-  it('Assay', () => {
+  it('Sequencing', () => {
     setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('assay', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('sequencing', data.variantGermline.uninterpreted);
   });
 
   it('Patient', () => {
