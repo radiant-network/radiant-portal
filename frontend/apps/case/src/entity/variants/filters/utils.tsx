@@ -18,6 +18,7 @@ export const filtersWithTooltip = [
   'pf_wgs',
   'pf_wgs_affected',
   'pf_wgs_not_affected',
+  'transmission_mode',
   // CNV filters
   'nb_snv',
   'hpo_gene_panel',
