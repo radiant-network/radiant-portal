@@ -1,7 +1,7 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useState } from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
 import { action } from '@storybook/addon-actions';
+import type { Meta, StoryObj } from '@storybook/react';
 
 import MultiSelector from '@/components/base/data-entry/multi-selector/multi-selector';
 import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
@@ -11,7 +11,7 @@ const meta = {
   component: MultiSelector,
   args: {
     value: [],
-    onChange: fn(),
+    onChange: () => {},
     placeholder: 'Placeholder',
   },
 } satisfies Meta<typeof MultiSelector>;

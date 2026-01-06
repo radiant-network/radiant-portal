@@ -5,6 +5,7 @@ import { Check, XIcon } from 'lucide-react';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/base/shadcn/command';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
+import { useI18n } from '@/components/hooks/i18n';
 import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +37,7 @@ function MultiSelector({
   renderBadge,
   ref,
 }: MultipleSelectorProps) {
+  const { t } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [onScrollbar, setOnScrollbar] = useState(false);
@@ -163,7 +165,8 @@ function MultiSelector({
     const doSearch = async () => {
       setIsLoading(true);
       const res = await onSearch?.(debouncedSearchTerm);
-      setOptions(transToGroupOption(res || [], groupBy));
+      const groupedOptions = transToGroupOption(res || [], groupBy);
+      setOptions(groupedOptions);
       setIsLoading(false);
     };
 
@@ -206,6 +209,10 @@ function MultiSelector({
             return;
           }
           setInputValue('');
+          // Clear search results by reverting to default options
+          setOptions(transToGroupOption(arrayDefaultOptions, groupBy));
+          // Close the dropdown
+          setOpen(false);
           const newOptions = [...selected, { value, label: value }];
           setSelected(newOptions);
           onChange?.(newOptions.map(o => o.value));
@@ -231,10 +238,14 @@ function MultiSelector({
   const EmptyItem = useCallback(() => {
     // For async search that showing emptyIndicator
     if (onSearch && !creatable && Object.keys(options).length === 0) {
-      return <div className="p-2 py-4 text-center text-sm">No data</div>;
+      return <div className="p-2 py-4 text-center text-sm">{t('common.filters.no_values_found')}</div>;
     }
 
-    return <CommandEmpty>{emptyIndicator || <div className="text-center text-sm">No data</div>}</CommandEmpty>;
+    return (
+      <CommandEmpty>
+        {emptyIndicator || <div className="text-center text-sm">{t('common.filters.no_values_found')}</div>}
+      </CommandEmpty>
+    );
   }, [creatable, emptyIndicator, onSearch, options]);
 
   /** Avoid Creatable Selector freezing or lagging when paste a long string. */
@@ -252,7 +263,6 @@ function MultiSelector({
 
   return (
     <Command
-      ref={dropdownRef}
       {...commandProps}
       onKeyDown={e => {
         handleKeyDown(e);
@@ -263,6 +273,7 @@ function MultiSelector({
       filter={commandFilter()}
     >
       <div
+        ref={dropdownRef}
         className={cn(
           'flex min-h-9 shadow-xs rounded-md border border-input text-sm ring-offset-background focus-within:ring-1 focus-within:ring-ring',
           {
@@ -287,7 +298,7 @@ function MultiSelector({
 
             return (
               <Badge key={option.value} data-disabled={disabled || undefined} onClose={() => handleUnselect(option)}>
-                {option.label}
+                {option.badgeLabel || (typeof option.label === 'string' ? option.label : option.value)}
               </Badge>
             );
           })}
@@ -298,6 +309,8 @@ function MultiSelector({
             disabled={disabled}
             onValueChange={value => {
               setInputValue(value);
+              // Open dropdown when user starts typing (at least one character)
+              setOpen(value.length > 0);
               inputProps?.onValueChange?.(value);
             }}
             onBlur={event => {
@@ -307,7 +320,10 @@ function MultiSelector({
               inputProps?.onBlur?.(event);
             }}
             onFocus={event => {
-              setOpen(true);
+              // Only open dropdown if there's at least one character in input
+              if (inputValue.length > 0) {
+                setOpen(true);
+              }
               inputProps?.onFocus?.(event);
             }}
             placeholder={hidePlaceholderWhenSelected && selected.length !== 0 ? '' : placeholder}
@@ -339,7 +355,7 @@ function MultiSelector({
           <XIcon size={18} className="" />
         </button>
       </div>
-      <div className={cn('relative', open ? 'block' : 'hidden')}>
+      <div className={cn('relative', open ? 'block' : 'hidden')} ref={dropdownRef}>
         <CommandList
           className="absolute top-1 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95"
           onMouseLeave={() => {
@@ -347,9 +363,6 @@ function MultiSelector({
           }}
           onMouseEnter={() => {
             setOnScrollbar(true);
-          }}
-          onMouseUp={() => {
-            inputRef?.current?.focus();
           }}
         >
           {isLoading ? (
@@ -370,18 +383,18 @@ function MultiSelector({
                       return (
                         <CommandItem
                           key={option.value}
-                          value={option.label}
+                          value={option.value}
                           disabled={option.disable}
-                          onMouseDown={e => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
                           onSelect={() => {
                             if (selected.length >= maxSelected) {
                               onMaxSelected?.(selected.length);
                               return;
                             }
                             setInputValue('');
+                            // Clear search results by reverting to default options
+                            setOptions(transToGroupOption(arrayDefaultOptions, groupBy));
+                            // Close the dropdown
+                            setOpen(false);
 
                             let newOptions: MultiSelectorOption[] = [];
 
