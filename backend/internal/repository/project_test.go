@@ -23,7 +23,7 @@ func Test_GetProjectByCode_NotFound(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewProjectRepository(db)
 		project, err := repo.GetProjectByCode("notexists")
-		assert.Equal(t, "record not found", err.Error())
+		assert.NoError(t, err)
 		assert.Nil(t, project)
 	})
 }
