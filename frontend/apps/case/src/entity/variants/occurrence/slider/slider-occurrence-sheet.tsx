@@ -15,6 +15,7 @@ import SliderSheet from 'components/base/slider/slider-sheet';
 import SliderSheetSkeleton from 'components/base/slider/slider-sheet-skeleton';
 
 import InterpretationDialog from '../../interpretation/interpretation-dialog';
+import { useOccurrenceListContext } from '../hooks/use-occurrences-list';
 
 type OccurrenceSliderSheetProps = {
   occurrence?: GermlineSNVOccurrence;
@@ -26,9 +27,10 @@ type OccurrenceSliderSheetProps = {
   hasPrevious?: boolean;
   hasNext?: boolean;
   patientSelected?: CaseSequencingExperiment;
+  handleInterpretationChange?: () => void;
 };
 
-function OccurrenceSliderSheet({
+function SliderOccurrenceSheet({
   occurrence,
   children,
   open,
@@ -74,6 +76,7 @@ function OccurrenceSheetContent({
 }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
   const caseId = useCaseIdFromParam();
+  const { mutate, loading } = useOccurrenceListContext();
   const { patient, caseSequencing, expandResult, isLoading } = useOccurrenceAndCase(
     caseId,
     occurrence.seq_id,
@@ -101,8 +104,9 @@ function OccurrenceSheetContent({
         actions={
           <InterpretationDialog
             occurrence={occurrence}
+            handleSaveCallback={mutate}
             renderTrigger={handleOpen => (
-              <Button size="sm" onClick={handleOpen}>
+              <Button loading={loading} size="sm" onClick={handleOpen}>
                 <SquarePen />
                 {occurrence.has_interpretation ? t('common.edit') : t('preview_sheet.actions.interpretation')}
               </Button>
@@ -134,4 +138,4 @@ function OccurrenceSheetContent({
   );
 }
 
-export default OccurrenceSliderSheet;
+export default SliderOccurrenceSheet;
