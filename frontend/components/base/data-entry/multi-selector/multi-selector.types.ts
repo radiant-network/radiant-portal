@@ -6,7 +6,7 @@ import { Command } from '@/components/base/shadcn/command';
 export interface MultiSelectorOption {
   value: string;
   label: string | React.ReactNode;
-  badgeLabel?: string; // Optional simple text for badge display
+  badgeLabel?: string;
   fixed?: boolean;
   disable?: boolean;
   /** Group the options by providing key. */
