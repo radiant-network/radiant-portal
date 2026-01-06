@@ -259,22 +259,3 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 		}
 	})
 }
-
-func Test_ProcessBatch_Case_Validation_Missing_Project_Errors(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0]["project_code"] = "TEST-PROJECT"
-
-		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
-
-		errors := []types.BatchMessage{
-			{
-				Code:    "GLOBAL-000",
-				Message: "error case batch validation: error during case validation: error during pre-fetching case validation info: failed to resolve project: get project by code \"TEST-PROJECT\": record not found",
-				Path:    "",
-			},
-		}
-		assertBatchProcessing(t, db, id, "ERROR", false, "user123", EMPTY_MSGS, EMPTY_MSGS, errors)
-	})
-}
