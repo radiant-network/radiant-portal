@@ -17,14 +17,16 @@ const TissueSiteRegExp = `^[A-Za-z\- ]+$`
 
 var TissueSiteRegExpCompiled = regexp.MustCompile(TissueSiteRegExp)
 
-const SampleAlreadyExistCode = "SAMPLE-001"
-const SampleExistingSampleDifferentFieldCode = "SAMPLE-002"
-const SampleOrgNotExistCode = "SAMPLE-003"
-const SamplePatientNotExistCode = "SAMPLE-004"
-const SampleUnknownParentSubmitterSampleIdCode = "SAMPLE-005"
-const SampleInvalidValueCode = "SAMPLE-006"
-const SampleInvalidPatientForParentSampleCode = "SAMPLE-007"
-const SampleDuplicateInBatchCode = "SAMPLE-008"
+const (
+	SampleAlreadyExistCode                   = "SAMPLE-001"
+	SampleExistingSampleDifferentFieldCode   = "SAMPLE-002"
+	SampleOrgNotExistCode                    = "SAMPLE-003"
+	SamplePatientNotExistCode                = "SAMPLE-004"
+	SampleUnknownParentSubmitterSampleIdCode = "SAMPLE-005"
+	SampleInvalidValueCode                   = "SAMPLE-006"
+	SampleInvalidPatientForParentSampleCode  = "SAMPLE-007"
+	SampleDuplicateInBatchCode               = "SAMPLE-008"
+)
 
 type SampleValidationRecord struct {
 	BaseValidationRecord

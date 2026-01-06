@@ -20,12 +20,19 @@ var NameRegExpCompiled = regexp.MustCompile(NameRegExp)
 
 var AllowedOrganizationCategories = []string{"healthcare_provider", "research_institute"}
 
-const PatientAlreadyExistCode = "PATIENT-001"
-const PatientExistingPatientDifferentFieldCode = "PATIENT-002"
-const PatientOrganizationNotExistCode = "PATIENT-003"
-const PatientInvalidValueCode = "PATIENT-004"
-const PatientOrganizationTypeCode = "PATIENT-005"
-const PatientDuplicateInBatchCode = "PATIENT-006"
+const (
+	PatientAlreadyExistCode                  = "PATIENT-001"
+	PatientExistingPatientDifferentFieldCode = "PATIENT-002"
+	PatientOrganizationNotExistCode          = "PATIENT-003"
+	PatientInvalidValueCode                  = "PATIENT-004"
+	PatientOrganizationTypeCode              = "PATIENT-005"
+	PatientDuplicateInBatchCode              = "PATIENT-006"
+)
+
+type PatientKey struct {
+	OrganizationCode   string
+	SubmitterPatientId string
+}
 
 type PatientValidationRecord struct {
 	BaseValidationRecord
@@ -227,7 +234,7 @@ func insertPatientRecords(records []*PatientValidationRecord, repo repository.Pa
 
 func validatePatientsBatch(patients []types.PatientBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) ([]*PatientValidationRecord, error) {
 	var records []*PatientValidationRecord
-	seenPatients := map[patientsKey]struct{}{}
+	seenPatients := map[PatientKey]struct{}{}
 	for index, patient := range patients {
 		record, err := validatePatientRecord(patient, index, seenPatients, repoOrganization, repoPatient)
 		if err != nil {
@@ -238,12 +245,7 @@ func validatePatientsBatch(patients []types.PatientBatch, repoOrganization repos
 	return records, nil
 }
 
-type patientsKey struct {
-	OrganizationCode   string
-	SubmitterPatientId string
-}
-
-func validatePatientRecord(patient types.PatientBatch, index int, seenPatients map[patientsKey]struct{}, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) (*PatientValidationRecord, error) {
+func validatePatientRecord(patient types.PatientBatch, index int, seenPatients map[PatientKey]struct{}, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) (*PatientValidationRecord, error) {
 	record := &PatientValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: index},
 		Patient:              patient,
@@ -254,7 +256,7 @@ func validatePatientRecord(patient types.PatientBatch, index int, seenPatients m
 	record.validateJhn()
 
 	validateUniquenessInBatch(record,
-		patientsKey{
+		PatientKey{
 			OrganizationCode:   patient.PatientOrganizationCode,
 			SubmitterPatientId: patient.SubmitterPatientId.String(),
 		},

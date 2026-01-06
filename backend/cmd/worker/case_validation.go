@@ -60,11 +60,6 @@ type CaseKey struct {
 	SubmitterCaseID string
 }
 
-type PatientKey struct {
-	OrganizationCode   string
-	SubmitterPatientId string
-}
-
 type StorageContext struct {
 	CasesRepo  *repository.CasesRepository
 	DocRepo    *repository.DocumentsRepository
@@ -179,14 +174,14 @@ func (r *CaseValidationRecord) fetchOrganizations(ctx *BatchValidationContext) e
 
 func (r *CaseValidationRecord) fetchPatients(ctx *BatchValidationContext) error {
 	for _, cp := range r.Case.Patients {
-		patients, err := ctx.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(cp.PatientOrganizationCode, cp.SubmitterPatientId)
+		patient, err := ctx.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(cp.PatientOrganizationCode, cp.SubmitterPatientId)
 		if err != nil {
 			return fmt.Errorf("failed to get patient by org code %q and submitter patient id %q: %w", cp.PatientOrganizationCode, cp.SubmitterPatientId, err)
 		}
 
 		key := PatientKey{cp.PatientOrganizationCode, cp.SubmitterPatientId}
-		if patients != nil {
-			r.Patients[key] = patients
+		if patient != nil {
+			r.Patients[key] = patient
 		}
 	}
 	return nil
@@ -381,13 +376,13 @@ func (cr *CaseValidationRecord) validateObsCategoricalNote(patientIndex int, obs
 	cr.validateTextField(obs.Note, fieldName, path, patientIndex, TextRegExpCompiled, TextRegExp, false)
 }
 
-func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int, observations repository.ObservationsDAO, onsets repository.OnsetsDAO) error {
-	validObservationCodes, err := observations.GetObservationCodes()
+func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int) error {
+	validObservationCodes, err := cr.Context.ObservationRepo.GetObservationCodes()
 	if err != nil {
 		return fmt.Errorf("error retrieving observation codes: %v", err)
 	}
 
-	validOnsetCodes, err := onsets.GetOnsetCodes()
+	validOnsetCodes, err := cr.Context.OnsetRepo.GetOnsetCodes()
 	if err != nil {
 		return fmt.Errorf("error retrieving onset codes: %v", err)
 	}
@@ -418,8 +413,8 @@ func (cr *CaseValidationRecord) validateObsTextValue(patientIndex int, obsIndex 
 	cr.validateTextField(obs.Value, fieldName, path, patientIndex, TextRegExpCompiled, TextRegExp, true)
 }
 
-func (cr *CaseValidationRecord) validateObservationsText(patientIndex int, observations repository.ObservationsDAO) error {
-	validObservationCodes, err := observations.GetObservationCodes()
+func (cr *CaseValidationRecord) validateObservationsText(patientIndex int) error {
+	validObservationCodes, err := cr.Context.ObservationRepo.GetObservationCodes()
 	if err != nil {
 		return fmt.Errorf("error retrieving observation codes: %v", err)
 	}
@@ -432,13 +427,10 @@ func (cr *CaseValidationRecord) validateObservationsText(patientIndex int, obser
 
 // Case patient validation
 
-func (cr *CaseValidationRecord) validatePatientInOrg(patientIndex int, patients repository.PatientsDAO) (*types.Patient, error) {
+func (cr *CaseValidationRecord) validatePatient(patientIndex int) {
 	p := cr.Case.Patients[patientIndex]
-	patient, err := patients.GetPatientByOrgCodeAndSubmitterPatientId(p.PatientOrganizationCode, p.SubmitterPatientId)
-	if err != nil {
-		return nil, fmt.Errorf("error getting existing patient: %v", err)
-	}
-	if patient == nil {
+	_, exists := cr.Patients[PatientKey{p.PatientOrganizationCode, p.SubmitterPatientId}]
+	if !exists {
 		path := cr.formatPatientsFieldPath(patientIndex, "", 0, "")
 		message := fmt.Sprintf("Patient (%s / %s) for case %d - patient %d does not exist.",
 			p.PatientOrganizationCode,
@@ -448,12 +440,11 @@ func (cr *CaseValidationRecord) validatePatientInOrg(patientIndex int, patients 
 		)
 		cr.addErrors(message, PatientNotFound, path)
 	}
-	return patient, nil
 }
 
-func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int, visited map[patientsKey]struct{}) {
+func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int, visited map[PatientKey]struct{}) {
 	p := cr.Case.Patients[patientIndex]
-	patientKey := patientsKey{
+	patientKey := PatientKey{
 		OrganizationCode:   p.PatientOrganizationCode,
 		SubmitterPatientId: p.SubmitterPatientId,
 	}
@@ -469,22 +460,18 @@ func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int
 	visited[patientKey] = struct{}{}
 }
 
-func (cr *CaseValidationRecord) validateCasePatients(ctx *BatchValidationContext, patientsBatch []*types.CasePatientBatch) ([]*types.Patient, error) {
+func (cr *CaseValidationRecord) validateCasePatients() error {
 	nbProband := 0
-	visitedPatients := map[patientsKey]struct{}{}
-	patients := make([]*types.Patient, 0, len(patientsBatch))
+	visitedPatients := map[PatientKey]struct{}{}
 
-	for patientIndex := range patientsBatch {
-		patient, err := cr.validatePatientInOrg(patientIndex, ctx.PatientRepo)
-		if err != nil {
-			return nil, fmt.Errorf("error validating patient in organization for patient index %d: %v", patientIndex, err)
-		}
-		patients = append(patients, patient)
-
+	for patientIndex := range cr.Case.Patients {
 		// Validate uniqueness of patients in case
 		cr.validatePatientUniquenessInCase(patientIndex, visitedPatients)
 
-		if patientsBatch[patientIndex].RelationToProbandCode == "proband" {
+		// Validate patient exists in organization
+		cr.validatePatient(patientIndex)
+
+		if cr.Case.Patients[patientIndex].RelationToProbandCode == "proband" {
 			nbProband++
 		}
 
@@ -492,29 +479,31 @@ func (cr *CaseValidationRecord) validateCasePatients(ctx *BatchValidationContext
 		cr.validateFamilyHistory(patientIndex)
 
 		// Validate observations categorical
-		err = cr.validateObservationsCategorical(patientIndex, ctx.ObservationRepo, ctx.OnsetRepo)
+		err := cr.validateObservationsCategorical(patientIndex)
 		if err != nil {
-			return nil, fmt.Errorf("error validating observations categorical for patient index %d: %v", patientIndex, err)
+			return fmt.Errorf("error validating observations categorical for patient index %d: %v", patientIndex, err)
 		}
 
 		// Validate observations text
-		err = cr.validateObservationsText(patientIndex, ctx.ObservationRepo)
+		err = cr.validateObservationsText(patientIndex)
 		if err != nil {
-			return nil, fmt.Errorf("error validating observations text for patient index %d: %v", patientIndex, err)
+			return fmt.Errorf("error validating observations text for patient index %d: %v", patientIndex, err)
 		}
 	}
 
+	// Validate number of probands
 	if nbProband != 1 {
 		message := fmt.Sprintf("Case %d should have exactly 1 proband.", cr.Index)
 		path := cr.formatCollectionPath("patients")
 		cr.addErrors(message, InvalidNumberOfProbands, path)
 	}
-	return patients, nil
+
+	return nil
 }
 
-func (cr *CaseValidationRecord) validateSeqExp(seqExpIndex int, seqExps repository.SequencingExperimentDAO) error {
+func (cr *CaseValidationRecord) validateSeqExp(seqExpIndex int) error {
 	se := cr.Case.SequencingExperiments[seqExpIndex]
-	seqExp, err := seqExps.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
+	seqExp, err := cr.Context.SeqExpRepo.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode) // TODO use cache from context
 	if err != nil {
 		return fmt.Errorf("error getting existing sequencing experiment: %v", err)
 	}
@@ -530,9 +519,9 @@ func (cr *CaseValidationRecord) validateSeqExp(seqExpIndex int, seqExps reposito
 	return nil
 }
 
-func (cr *CaseValidationRecord) validateSeqExpSample(seqExpIndex int, samples repository.SamplesDAO) (*types.Sample, error) {
+func (cr *CaseValidationRecord) validateSeqExpSample(seqExpIndex int) (*types.Sample, error) {
 	se := cr.Case.SequencingExperiments[seqExpIndex]
-	sample, err := samples.GetSampleByOrgCodeAndSubmitterSampleId(se.SampleOrganizationCode, se.SubmitterSampleId)
+	sample, err := cr.Context.SampleRepo.GetSampleByOrgCodeAndSubmitterSampleId(se.SampleOrganizationCode, se.SubmitterSampleId) // TODO use cache from context
 	if err != nil {
 		return nil, fmt.Errorf("error getting existing sample: %v", err)
 	}
@@ -543,15 +532,15 @@ func (cr *CaseValidationRecord) validateSeqExpSample(seqExpIndex int, samples re
 	return sample, nil
 }
 
-func (cr *CaseValidationRecord) validateSeqExpPatientInCase(seqExpIndex int, sample *types.Sample, patients []*types.Patient) error {
+func (cr *CaseValidationRecord) validateSeqExpPatientInCase(seqExpIndex int, sample *types.Sample) error {
 	if sample == nil {
 		return nil // TODO handle error
 	}
 
 	se := cr.Case.SequencingExperiments[seqExpIndex]
 	patientFound := false
-	for patientIndex := range patients {
-		if patients[patientIndex].ID == sample.PatientID {
+	for key := range cr.Patients {
+		if cr.Patients[key].ID == sample.PatientID {
 			patientFound = true
 			break
 		}
@@ -590,13 +579,13 @@ func (cr *CaseValidationRecord) validateSeqExpCaseType(seqExpIndex int, sample *
 	return nil
 }
 
-func (cr *CaseValidationRecord) validateCaseSequencingExperiments(ctx *BatchValidationContext, seqExpsBatch []*types.CaseSequencingExperimentBatch, patients []*types.Patient) error {
-	for seqExpIndex := range seqExpsBatch {
-		err := cr.validateSeqExp(seqExpIndex, ctx.SeqExpRepo)
+func (cr *CaseValidationRecord) validateCaseSequencingExperiments() error {
+	for seqExpIndex := range cr.Case.SequencingExperiments {
+		err := cr.validateSeqExp(seqExpIndex)
 		if err != nil {
 			return fmt.Errorf("error validating sequencing experiment in organization for sequencing experiment index %d: %v", seqExpIndex, err)
 		}
-		sample, err := cr.validateSeqExpSample(seqExpIndex, ctx.SampleRepo)
+		sample, err := cr.validateSeqExpSample(seqExpIndex)
 		if err != nil {
 			return fmt.Errorf("error validating sequencing experiment sample for sequencing experiment index %d: %v", seqExpIndex, err)
 		}
@@ -604,7 +593,7 @@ func (cr *CaseValidationRecord) validateCaseSequencingExperiments(ctx *BatchVali
 		if err != nil {
 			return fmt.Errorf("error validating sequencing experiment for wrong case type for sequencing experiment index %d: %v", seqExpIndex, err)
 		}
-		err = cr.validateSeqExpPatientInCase(seqExpIndex, sample, patients)
+		err = cr.validateSeqExpPatientInCase(seqExpIndex, sample)
 		if err != nil {
 			return fmt.Errorf("error validating sequencing experiment patient in case for sequencing experiment index %d: %v", seqExpIndex, err)
 		}
@@ -626,13 +615,13 @@ func validateCaseRecord(
 	// 1. Validate Case Fields
 
 	// 2. Validate Case Patients
-	patients, unexpectedErr := cr.validateCasePatients(ctx, c.Patients)
+	unexpectedErr := cr.validateCasePatients()
 	if unexpectedErr != nil {
 		return nil, fmt.Errorf("error during case patients validation: %v", unexpectedErr)
 	}
 
 	// 3. Validate Case Sequencing Experiments
-	if unexpectedErr := cr.validateCaseSequencingExperiments(ctx, c.SequencingExperiments, patients); unexpectedErr != nil {
+	if unexpectedErr := cr.validateCaseSequencingExperiments(); unexpectedErr != nil {
 		return nil, fmt.Errorf("error during case sequencing experiments validation: %v", unexpectedErr)
 	}
 
