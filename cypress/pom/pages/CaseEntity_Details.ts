@@ -7,7 +7,7 @@ const selectors = {
 
   sequencingCard: {
     tableCell: (dataSeq: any) => `${CommonSelectors.tableRow(selectors.sequencingCard.tableId)}:contains("${dataSeq.relationship}") ${CommonSelectors.tableCellData}`,
-    tableId: '[id="sequencing-and-assays"]',
+    tableId: '[id="sequencing-experiments"]',
   },
 };
 

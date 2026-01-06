@@ -64,9 +64,9 @@ describe('Files - Information displayed', () => {
     FilesTable.validations.shouldShowColumnContent('created_on', data.file);
   });
 
-  it('Assay', () => {
+  it('Sequencing', () => {
     setupTest();
-    FilesTable.validations.shouldShowColumnContent('assay', data.file);
+    FilesTable.validations.shouldShowColumnContent('sequencing', data.file);
   });
 
   it('Hash', () => {
