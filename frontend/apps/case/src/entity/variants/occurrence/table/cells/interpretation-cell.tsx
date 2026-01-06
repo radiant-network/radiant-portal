@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { ClipboardList } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
@@ -8,6 +7,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
 import InterpretationDialog from '../../../interpretation/interpretation-dialog';
+import { useOccurrenceListContext } from '../../hooks/use-occurrences-list';
 
 type InterpretationCellProps = {
   occurrence: GermlineSNVOccurrence;
@@ -15,22 +15,17 @@ type InterpretationCellProps = {
 
 function InterpretationCell({ occurrence }: InterpretationCellProps) {
   const { t } = useI18n();
-  const [hasInterpretation, setHasInterpretation] = useState<boolean>(occurrence.has_interpretation);
-  const handleSaveCallback = () => {
-    if (!occurrence.has_interpretation) {
-      setHasInterpretation(true);
-    }
-  };
+  const { mutate, loading } = useOccurrenceListContext();
 
   return (
     <InterpretationDialog
       occurrence={occurrence}
-      handleSaveCallback={handleSaveCallback}
+      handleSaveCallback={mutate}
       renderTrigger={handleOpen => (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button className={cn('size-6')} iconOnly variant="ghost" onClick={handleOpen}>
-              {hasInterpretation ? (
+            <Button loading={loading} className={cn('size-6')} iconOnly variant="ghost" onClick={handleOpen}>
+              {occurrence.has_interpretation ? (
                 <ClipboardList className="text-primary fill-primary/30" size={16} />
               ) : (
                 <ClipboardList className="text-muted-foreground/40" size={16} />

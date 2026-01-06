@@ -278,22 +278,20 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
           <DescriptionRow label={t('occurrence_expand.gene.pli')}>
             {data.gnomad_pli ? (
               <AnchorLink
-                href={`https://gnomad.broadinstitute.org/gene/${data.transcript_id}?dataset=gnomad_r2_1`}
+                href={`https://gnomad.broadinstitute.org/gene/${data.ensembl_gene_id}?dataset=gnomad_r2_1`}
                 target="_blank"
                 size="sm"
               >
                 {toExponentialNotationAtThreshold(data.gnomad_pli)}
               </AnchorLink>
             ) : (
-              <div className="text-muted-foreground text-xs">
-                {t('preview_sheet.variant_details.sections.gene.no_data')}
-              </div>
+              <EmptyField />
             )}
           </DescriptionRow>
           <DescriptionRow label={t('occurrence_expand.gene.loeuf')}>
             {data.gnomad_loeuf ? (
               <AnchorLink
-                href={`https://gnomad.broadinstitute.org/gene/${data.transcript_id}?dataset=gnomad_r2_1`}
+                href={`https://gnomad.broadinstitute.org/gene/${data.ensembl_gene_id}?dataset=gnomad_r2_1`}
                 target="_blank"
                 size="sm"
               >

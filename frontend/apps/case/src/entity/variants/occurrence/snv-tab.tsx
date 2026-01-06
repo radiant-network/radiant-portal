@@ -21,7 +21,7 @@ import { useConfig } from '@/components/cores/applications-config';
 import { ISyntheticSqon } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
-import { useSliderOccurrenceNavigation } from '@/entity/variants/occurrence/slider/hooks/use-slider-occurrence-navigation';
+import { useSliderOccurrenceNavigation } from '@/entity/variants/occurrence/hooks/use-slider-occurrence-navigation';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 import QueryBuilder from 'components/base/query-builder/query-builder';
@@ -36,17 +36,10 @@ import { queryBuilderRemote } from 'components/cores/query-builder/query-builder
 import { SELECTED_VARIANT_PARAM } from '../constants';
 import { getVisibleAggregations } from '../utils';
 
-import OccurrenceSliderSheet from './slider/slider-occurrence-sheet';
+import { FetchOccurrencesListContext } from './hooks/use-occurrences-list';
+import { isValidSeqId } from './libs/seq-id';
+import SliderOccurrenceSheet from './slider/slider-occurrence-sheet';
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
-
-async function fetchQueryCount(input: SnvOccurrenceLCountInput) {
-  const response = await occurrencesApi.countGermlineSNVOccurrences(input.caseId, input.seqId, input.countBody);
-  return response.data;
-}
-
-export function isValidSeqId(seqId: number) {
-  return seqId > -1;
-}
 
 type SnvOccurrenceListInput = {
   caseId: number;
@@ -70,6 +63,11 @@ type SNVTabProps = {
   seqId: number;
   patientSelected?: CaseSequencingExperiment;
 };
+
+async function fetchQueryCount(input: SnvOccurrenceLCountInput) {
+  const response = await occurrencesApi.countGermlineSNVOccurrences(input.caseId, input.seqId, input.countBody);
+  return response.data;
+}
 
 function SNVTab({ seqId, patientSelected }: SNVTabProps) {
   const { t } = useI18n();
@@ -220,102 +218,108 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
     });
   }, [activeSqon]);
 
+  if (!isValidSeqId(seqId)) {
+    return null;
+  }
+
   return (
-    isValidSeqId(seqId) && (
-      <div className="bg-muted w-full">
-        <div className="flex flex-1 h-screen overflow-hidden">
-          <aside className="w-auto min-w-fit h-full shrink-0">
-            <AggregateContext value={{ seqId, caseId }}>
-              <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
-                <div className="z-10">
-                  <SidebarGroups
-                    aggregationGroups={visibleAggregations}
-                    selectedItemId={selectedSidebarItem}
-                    onItemSelect={setSelectedSidebarItem}
-                  />
-                </div>
-                <div
-                  className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
-                    'w-[280px] p-4 opacity-100 relative': selectedSidebarItem,
-                    'w-0 opacity-0': !selectedSidebarItem,
-                  })}
-                >
-                  <div className="whitespace-nowrap">
-                    <div className="flex justify-end mb-4">
-                      <button
-                        onClick={() => setSelectedSidebarItem(null)}
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                    <FilterList appId={appId} aggregations={visibleAggregations} groupKey={selectedSidebarItem} />
+    <div className="bg-muted w-full">
+      <div className="flex flex-1 h-screen overflow-hidden">
+        <aside className="w-auto min-w-fit h-full shrink-0">
+          <AggregateContext value={{ seqId, caseId }}>
+            <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
+              <div className="z-10">
+                <SidebarGroups
+                  aggregationGroups={visibleAggregations}
+                  selectedItemId={selectedSidebarItem}
+                  onItemSelect={setSelectedSidebarItem}
+                />
+              </div>
+              <div
+                className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
+                  'w-[280px] p-4 opacity-100 relative': selectedSidebarItem,
+                  'w-0 opacity-0': !selectedSidebarItem,
+                })}
+              >
+                <div className="whitespace-nowrap">
+                  <div className="flex justify-end mb-4">
+                    <button
+                      onClick={() => setSelectedSidebarItem(null)}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <X size={16} />
+                    </button>
                   </div>
+                  <FilterList appId={appId} aggregations={visibleAggregations} groupKey={selectedSidebarItem} />
                 </div>
-              </SidebarProvider>
-            </AggregateContext>
-          </aside>
-          <main className="flex-1 flex-shrink-1 px-3 pb-3 overflow-auto">
-            <div className="py-3 space-y-2">
-              <QueryBuilder
-                id={appId}
-                state={qbState}
-                enableCombine
-                enableFavorite
-                enableShowHideLabels
-                loading={isQBLoading}
-                queryCountIcon={<VariantIcon size={14} />}
-                fetchQueryCount={async resolvedSqon => {
-                  if (!isValidSeqId(seqId) || !caseId) {
-                    return Promise.resolve(0);
-                  }
+              </div>
+            </SidebarProvider>
+          </AggregateContext>
+        </aside>
+        <main className="flex-1 flex-shrink-1 px-3 pb-3 overflow-auto">
+          <div className="py-3 space-y-2">
+            <QueryBuilder
+              id={appId}
+              state={qbState}
+              enableCombine
+              enableFavorite
+              enableShowHideLabels
+              loading={isQBLoading}
+              queryCountIcon={<VariantIcon size={14} />}
+              fetchQueryCount={async resolvedSqon => {
+                if (!isValidSeqId(seqId) || !caseId) {
+                  return Promise.resolve(0);
+                }
 
-                  return fetchQueryCount({
-                    caseId,
-                    seqId,
-                    countBody: {
-                      sqon: resolvedSqon,
-                    },
-                  }).then(res => res.count || 0);
-                }}
-                resolveSyntheticSqon={resolveSyntheticSqon}
-                onActiveQueryChange={sqon => {
-                  const newActiveSqon = resolveSyntheticSqon(
-                    sqon,
-                    (qbState?.queries || []) as ISyntheticSqon[],
-                  ) as Sqon;
-                  setActiveSqon(newActiveSqon);
-                }}
-                onStateChange={state => {
-                  setQbState(state);
-
-                  // Get the active query from the new state and update activeSqon
-                  const activeQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
-                  const newActiveSqon = resolveSyntheticSqon(
-                    activeQuery,
-                    (state?.queries || []) as ISyntheticSqon[],
-                  ) as Sqon;
-                  setActiveSqon(newActiveSqon);
-                }}
-                queryPillFacetFilterConfig={{
-                  enable: true,
-                  blacklistedFacets: ['locus_id'],
-                  onFacetClick: filter => (
-                    <FilterComponent field={getAggregationFromConfig(filter.content.field)} isOpen={true} />
-                  ),
-                }}
-                savedFilterType={SavedFilterType.GERMLINE_SNV_OCCURRENCE}
-                dictionary={{
-                  queryPill: {
-                    facet: (key: string) =>
-                      t(`common.filters.labels.${getAggregationFromConfig(key).translation_key}`, {
-                        defaultValue: key,
-                      }),
+                return fetchQueryCount({
+                  caseId,
+                  seqId,
+                  countBody: {
+                    sqon: resolvedSqon,
                   },
-                }}
-                {...UserSavedFiltersProps}
-              />
-            </div>
+                }).then(res => res.count || 0);
+              }}
+              resolveSyntheticSqon={resolveSyntheticSqon}
+              onActiveQueryChange={sqon => {
+                const newActiveSqon = resolveSyntheticSqon(sqon, (qbState?.queries || []) as ISyntheticSqon[]) as Sqon;
+                setActiveSqon(newActiveSqon);
+              }}
+              onStateChange={state => {
+                setQbState(state);
+
+                // Get the active query from the new state and update activeSqon
+                const activeQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
+                const newActiveSqon = resolveSyntheticSqon(
+                  activeQuery,
+                  (state?.queries || []) as ISyntheticSqon[],
+                ) as Sqon;
+                setActiveSqon(newActiveSqon);
+              }}
+              queryPillFacetFilterConfig={{
+                enable: true,
+                blacklistedFacets: ['locus_id'],
+                onFacetClick: filter => (
+                  <FilterComponent field={getAggregationFromConfig(filter.content.field)} isOpen={true} />
+                ),
+              }}
+              savedFilterType={SavedFilterType.GERMLINE_SNV_OCCURRENCE}
+              dictionary={{
+                queryPill: {
+                  facet: (key: string) =>
+                    t(`common.filters.labels.${getAggregationFromConfig(key).translation_key}`, {
+                      defaultValue: key,
+                    }),
+                },
+              }}
+              {...UserSavedFiltersProps}
+            />
+          </div>
+          <FetchOccurrencesListContext
+            value={{
+              mutate: fetchOccurrencesList.mutate,
+              loading: fetchOccurrencesList.isLoading,
+            }}
+          >
             <Card>
               <CardContent>
                 <DataTable
@@ -340,7 +344,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
                 />
               </CardContent>
             </Card>
-            <OccurrenceSliderSheet
+            <SliderOccurrenceSheet
               open={!!selectedOccurrence}
               setOpen={() => handleClosePreview()}
               occurrence={selectedOccurrence!}
@@ -350,10 +354,10 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
               hasNext={hasNext}
               patientSelected={patientSelected}
             />
-          </main>
-        </div>
+          </FetchOccurrencesListContext>
+        </main>
       </div>
-    )
+    </div>
   );
 }
 export default SNVTab;
