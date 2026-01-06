@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var EMPTY_MSGS []types.BatchMessage
+var emptyMsgs []types.BatchMessage
 
 func createBaseCasePayload() []map[string]interface{} {
 	return []map[string]interface{}{
@@ -128,7 +128,7 @@ func Test_ProcessBatch_Case_Dry_Run(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		payload, _ := json.Marshal(createBaseCasePayload())
 		id := insertPayloadAndProcessBatch(db, string(payload), "PENDING", types.CaseBatchType, true, "user123", "2025-12-04")
-		assertBatchProcessing(t, db, id, "SUCCESS", true, "user123", EMPTY_MSGS, EMPTY_MSGS, EMPTY_MSGS)
+		assertBatchProcessing(t, db, id, "SUCCESS", true, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var count int64
 		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "CASE123").Count(&count)
@@ -142,7 +142,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		payload[0]["submitter_case_id"] = "SUCCESS_CASE_123"
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
-		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", EMPTY_MSGS, EMPTY_MSGS, EMPTY_MSGS)
+		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca *types.Case
 		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "SUCCESS_CASE_123").First(&ca)
@@ -248,7 +248,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 					Path:    "",
 				},
 			}
-			assertBatchProcessing(t, db, id, "ERROR", false, "user123", EMPTY_MSGS, EMPTY_MSGS, expectedErrors)
+			assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, expectedErrors)
 
 			after := getTableCounts(db, []string{"cases", "family", "obs_categorical", "task", "document"})
 			assert.Equal(t, before, after)
@@ -287,6 +287,6 @@ func Test_ProcessBatch_Case_Template(t *testing.T) {
 		//}
 		//
 		//// TODO: Call the assertion function with expected messages
-		//assertBatchProcessing(t, db, id, "ERROR", false, "user123", EMPTY_MSGS, EMPTY_MSGS, errors)
+		//assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
 	})
 }
