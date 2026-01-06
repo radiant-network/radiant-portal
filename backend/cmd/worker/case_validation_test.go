@@ -759,7 +759,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 			return nil, nil
 		},
 	}
-	mockSamples := &SamplesMockRepo{
+	mockSamples := SamplesMockRepo{
 		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
 			if organizationCode == "LAB-1" && submitterSampleId == "SAMPLE-1" {
 				return &types.Sample{
@@ -778,7 +778,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		OrgRepo:         &mockRepo,
 		ObservationRepo: &ObservationsMockRepo{},
 		OnsetRepo:       &OnsetsMockRepo{},
-		SampleRepo:      mockSamples,
+		SampleRepo:      &mockSamples,
 	}
 	batch := types.CaseBatch{
 		ProjectCode:                "PROJ-1",
@@ -2339,7 +2339,7 @@ func Test_validateCaseSequencingExperiments_MultipleSeqExps(t *testing.T) {
 }
 
 func Test_validateCaseSequencingExperiments_WithErrors(t *testing.T) {
-	mockSamples := &SamplesMockRepo{
+	mockSamples := SamplesMockRepo{
 		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
 			if organizationCode == "LAB-1" && submitterSampleId == "SAMPLE-1" {
 				return &types.Sample{
@@ -2352,7 +2352,7 @@ func Test_validateCaseSequencingExperiments_WithErrors(t *testing.T) {
 	}
 	mockContext := BatchValidationContext{
 		SeqExpRepo: &CaseValidationMockRepo{},
-		SampleRepo: mockSamples,
+		SampleRepo: &mockSamples,
 	}
 
 	record := CaseValidationRecord{
@@ -2573,7 +2573,7 @@ func Test_validateSeqExpCaseType_SomaticWithTumoralSample(t *testing.T) {
 }
 
 func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T) {
-	mockSamples := &SamplesMockRepo{
+	mockSamples := SamplesMockRepo{
 		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
 			if organizationCode == "LAB-1" && submitterSampleId == "SAMPLE-1" {
 				return &types.Sample{
@@ -2594,7 +2594,7 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 	}
 	mockContext := BatchValidationContext{
 		SeqExpRepo: &CaseValidationMockRepo{},
-		SampleRepo: mockSamples,
+		SampleRepo: &mockSamples,
 	}
 
 	record := CaseValidationRecord{
