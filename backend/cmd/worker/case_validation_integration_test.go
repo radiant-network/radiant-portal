@@ -84,13 +84,13 @@ func createBaseCasePayload() []map[string]interface{} {
 	}
 }
 
-func insertPayloadAndProcessBatch(db *gorm.DB, payload string, status string, batchType string, dryRun bool, username string, createdOn string) string {
+func insertPayloadAndProcessBatch(db *gorm.DB, payload string, status types.BatchStatus, batchType string, dryRun bool, username string, createdOn string) string {
 	var id string
 	initErr := db.Raw(`
    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
    		VALUES (?, ?, ?, ?, ?, ?)
    		RETURNING id;
-		`, payload, status, batchType, dryRun, username, createdOn).Scan(&id).Error
+		`, payload, string(status), batchType, dryRun, username, createdOn).Scan(&id).Error
 	if initErr != nil {
 		panic(fmt.Sprintf("failed to insert payload into table %v", initErr))
 	}
@@ -127,8 +127,8 @@ func getTableCounts(db *gorm.DB, tableNames []string) map[string]int64 {
 func Test_ProcessBatch_Case_Dry_Run(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		payload, _ := json.Marshal(createBaseCasePayload())
-		id := insertPayloadAndProcessBatch(db, string(payload), "PENDING", types.CaseBatchType, true, "user123", "2025-12-04")
-		assertBatchProcessing(t, db, id, "SUCCESS", true, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, true, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, true, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var count int64
 		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "CASE123").Count(&count)
@@ -141,8 +141,8 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		payload := createBaseCasePayload()
 		payload[0]["submitter_case_id"] = "SUCCESS_CASE_123"
 		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
-		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca *types.Case
 		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "SUCCESS_CASE_123").First(&ca)
@@ -223,7 +223,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 			before := getTableCounts(db, []string{"cases", "family", "obs_categorical", "task", "document"})
 
 			payload, _ := json.Marshal(createBaseCasePayload())
-			id := insertPayloadAndProcessBatch(db, string(payload), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+			id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
 
 			var msg string
 			switch tableName {
@@ -248,7 +248,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 					Path:    "",
 				},
 			}
-			assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, expectedErrors)
+			assertBatchProcessing(t, db, id, types.BatchStatusError, false, "user123", emptyMsgs, emptyMsgs, expectedErrors)
 
 			after := getTableCounts(db, []string{"cases", "family", "obs_categorical", "task", "document"})
 			assert.Equal(t, before, after)
