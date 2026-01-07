@@ -125,6 +125,7 @@ function OccurrenceSheetContent({
           transmission={expandResult.data.transmission}
           parental_origin={expandResult.data.parental_origin}
           genotype_quality={expandResult.data.genotype_quality}
+          relationshipToProband={patient?.relationship_to_proband}
           filter={expandResult.data.filter}
           father_calls={expandResult.data.father_calls}
           mother_calls={expandResult.data.mother_calls}

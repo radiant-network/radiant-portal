@@ -130,10 +130,9 @@ const SliderOccurrenceDetailsCard = ({
                   )}
                 </DescriptionRow>
               </DescriptionSection>
-
               {/* only proband has father and mother call */}
               {relationshipToProband === 'proband' && (
-                <DescriptionSection title="Family" values={[father_calls, mother_calls]}>
+                <DescriptionSection title="Family">
                   <DescriptionRow
                     label={
                       <Tooltip>
