@@ -32,7 +32,7 @@ describe('Case Entity - Variants - SNV - Facets - Configuration', () => {
     CaseEntity_Variants_Facets.snv.validations.shouldHaveDictionary();
   });
 
-  it('Tooltip [SJRA-1038]', () => {
+  it('Tooltip', () => {
     setupTest();
     CaseEntity_Variants_Facets.snv.validations.shouldHaveTooltip();
   });
