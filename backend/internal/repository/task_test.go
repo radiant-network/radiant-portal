@@ -143,38 +143,18 @@ func Test_GetTaskHasDocumentByTaskId_NotFound(t *testing.T) {
 func Test_GetTaskHasDocumentByDocumentId_OK(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		result, err := repo.GetTaskHasDocumentByTaskId(1)
+		result, err := repo.GetTaskHasDocumentByDocumentId(1)
 
 		expected := []*types.TaskHasDocument{
 			{
-				TaskID:     1,
-				DocumentID: 27,
-				Type:       "output",
-			},
-			{
-				TaskID:     1,
-				DocumentID: 28,
-				Type:       "output",
-			},
-			{
-				TaskID:     1,
-				DocumentID: 245,
-				Type:       "output",
-			},
-			{
-				TaskID:     1,
-				DocumentID: 246,
-				Type:       "output",
-			},
-			{
-				TaskID:     1,
-				DocumentID: 248,
+				TaskID:     14,
+				DocumentID: 1,
 				Type:       "output",
 			},
 		}
 
 		assert.NoError(t, err)
-		assert.Len(t, result, 5)
+		assert.Len(t, result, 1)
 		assert.Equal(t, expected, result)
 	})
 }
@@ -182,7 +162,7 @@ func Test_GetTaskHasDocumentByDocumentId_OK(t *testing.T) {
 func Test_GetTaskHasDocumentByDocumentId_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		result, err := repo.GetTaskHasDocumentByTaskId(999999)
+		result, err := repo.GetTaskHasDocumentByDocumentId(999999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})

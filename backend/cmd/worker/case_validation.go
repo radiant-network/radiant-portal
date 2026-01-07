@@ -103,7 +103,7 @@ type CaseValidationRecord struct {
 	Patients              map[PatientKey]*types.Patient
 	SequencingExperiments map[int]*types.SequencingExperiment
 	Documents             map[string]*types.Document
-	DocumentsInTasks      map[string]*DocumentRelation
+	DocumentsInTasks      map[string][]*DocumentRelation
 }
 
 func NewCaseValidationRecord(ctx *BatchValidationContext, c types.CaseBatch, index int) *CaseValidationRecord {
@@ -116,7 +116,7 @@ func NewCaseValidationRecord(ctx *BatchValidationContext, c types.CaseBatch, ind
 		Patients:              make(map[PatientKey]*types.Patient),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 		Documents:             make(map[string]*types.Document),
-		DocumentsInTasks:      make(map[string]*DocumentRelation),
+		DocumentsInTasks:      make(map[string][]*DocumentRelation),
 	}
 }
 
@@ -261,9 +261,18 @@ func (cr *CaseValidationRecord) fetchOutputDocumentsFromTask(ctx *BatchValidatio
 		}
 
 		for _, do := range docs {
-			cr.DocumentsInTasks[doc.Url] = &DocumentRelation{
-				TaskID: do.TaskID,
-				Type:   do.Type,
+			if _, ok := cr.DocumentsInTasks[doc.Url]; ok {
+				cr.DocumentsInTasks[doc.Url] = append(cr.DocumentsInTasks[doc.Url], &DocumentRelation{
+					TaskID: do.TaskID,
+					Type:   do.Type,
+				})
+			} else {
+				cr.DocumentsInTasks[doc.Url] = []*DocumentRelation{
+					{
+						TaskID: do.TaskID,
+						Type:   do.Type,
+					},
+				}
 			}
 		}
 	}

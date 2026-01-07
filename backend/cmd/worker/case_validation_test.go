@@ -831,8 +831,9 @@ func Test_fetchOutputDocumentsFromTask_OK(t *testing.T) {
 	assert.Len(t, record.Documents, 1)
 	assert.Equal(t, 500, record.Documents["file://bucket/file.bam"].ID)
 	assert.Len(t, record.DocumentsInTasks, 1)
-	assert.Equal(t, 300, record.DocumentsInTasks["file://bucket/file.bam"].TaskID)
-	assert.Equal(t, "output", record.DocumentsInTasks["file://bucket/file.bam"].Type)
+	assert.Len(t, record.DocumentsInTasks["file://bucket/file.bam"], 1)
+	assert.Equal(t, 300, record.DocumentsInTasks["file://bucket/file.bam"][0].TaskID)
+	assert.Equal(t, "output", record.DocumentsInTasks["file://bucket/file.bam"][0].Type)
 }
 
 func Test_fetchOutputDocumentsFromTask_NotFound(t *testing.T) {
