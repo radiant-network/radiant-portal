@@ -31,6 +31,15 @@ export const ClassificationValueMap: Record<string, BadgeProps['variant']> = {
   no_data: 'neutral',
 };
 
+// ACMG/AMP classification
+export const AcmgAmpClassificationMap: Record<string, string> = {
+  'LA6668-3': 'pathogenic',
+  'LA26332-9': 'likely_pathogenic',
+  'LA26333-7': 'uncertain_significance',
+  'LA26334-5': 'likely_benign',
+  'LA6675-8': 'benign',
+};
+
 /**
  * API can return non-snake-case key. We needs to map
  * the non-snake-case value to the correct classification value
@@ -41,6 +50,14 @@ function getClassificationValue(value: string): { color: BadgeProps['variant']; 
   // value is in snake_case
   if (color) {
     return { color, key: value };
+  }
+
+  const acmgamp = AcmgAmpClassificationMap[value.toUpperCase()];
+  if (acmgamp) {
+    return {
+      color: ClassificationValueMap[acmgamp],
+      key: acmgamp,
+    };
   }
 
   for (const key in ClassificationValueMap) {

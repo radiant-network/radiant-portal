@@ -17,6 +17,8 @@ import SliderSheetSkeleton from 'components/base/slider/slider-sheet-skeleton';
 import InterpretationDialog from '../../interpretation/interpretation-dialog';
 import { useOccurrenceListContext } from '../hooks/use-occurrences-list';
 
+import SliderInterpretationDetailsCard from './slider-interpretation-details-card';
+
 type OccurrenceSliderSheetProps = {
   occurrence?: GermlineSNVOccurrence;
   children?: React.ReactElement;
@@ -102,18 +104,21 @@ function OccurrenceSheetContent({
         locusId={occurrence.locus_id}
         hgvsg={occurrence.hgvsg}
         actions={
-          <InterpretationDialog
-            occurrence={occurrence}
-            handleSaveCallback={mutate}
-            renderTrigger={handleOpen => (
-              <Button loading={loading} size="sm" onClick={handleOpen}>
-                <SquarePen />
-                {occurrence.has_interpretation ? t('common.edit') : t('preview_sheet.actions.interpretation')}
-              </Button>
-            )}
-          />
+          !occurrence.has_interpretation && (
+            <InterpretationDialog
+              occurrence={occurrence}
+              handleSaveCallback={mutate}
+              renderTrigger={handleOpen => (
+                <Button loading={loading} size="sm" onClick={handleOpen}>
+                  <SquarePen />
+                  {t('preview_sheet.actions.interpretation')}
+                </Button>
+              )}
+            />
+          )
         }
       />
+      {occurrence.has_interpretation && <SliderInterpretationDetailsCard occurrence={occurrence} />}
       {caseId && (
         <SliderOccurrenceDetailsCard
           caseId={caseId}
