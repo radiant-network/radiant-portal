@@ -1,1 +1,0 @@
-ALTER TABLE document DROP COLUMN created_on;

@@ -1,4 +1,0 @@
-ALTER TABLE task_has_sequencing_experiment RENAME TO task_has_sequencing_experiments;
-ALTER TABLE task_has_related_task RENAME TO task_has_related_tasks;
-ALTER TABLE task_has_document RENAME TO task_has_documents;
-ALTER TABLE document_has_patient RENAME TO document_has_patients;

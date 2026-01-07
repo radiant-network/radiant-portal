@@ -1,153 +1,2662 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- Dumped from database version 18.1 (Debian 18.1-1.pgdg13+2)
+-- Dumped by pg_dump version 18.1 (Debian 18.1-1.pgdg13+2)
 
-CREATE TABLE IF NOT EXISTS interpretation_germline
-(
-    id                       UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-    sequencing_id            TEXT NOT NULL,
-    locus_id                 TEXT NOT NULL,
-    transcript_id            TEXT NOT NULL,
-    condition                TEXT,
-    classification           TEXT,
-    classification_criterias TEXT,
-    transmission_modes       TEXT,
-    interpretation           TEXT,
-    pubmed                   TEXT,
-    created_by               TEXT,
-    created_by_name          TEXT,
-    created_at               TIMESTAMPTZ      DEFAULT NOW(),
-    updated_by               TEXT,
-    updated_by_name          TEXT,
-    updated_at               TIMESTAMPTZ      DEFAULT NOW(),
-    CONSTRAINT UC_Interpretation_germline UNIQUE (sequencing_id, locus_id, transcript_id)
-);
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
 
-CREATE OR REPLACE FUNCTION tp_history_func() RETURNS TRIGGER AS
-$$
+--
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner:
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
+--
+-- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner:
+--
+
+COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
+
+
+--
+-- Name: tp_history_func(); Type: FUNCTION; Schema: public; Owner: radiant
+--
+
+CREATE FUNCTION public.tp_history_func() RETURNS trigger
+    LANGUAGE plpgsql
+AS $_$
 DECLARE
-tbl_history TEXT        := FORMAT('%I.%I', TG_TABLE_SCHEMA, TG_TABLE_NAME || '_history');
+    tbl_history TEXT        := FORMAT('%I.%I', TG_TABLE_SCHEMA, TG_TABLE_NAME || '_history');
     next_id     BIGINT      := NEXTVAL(TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || '_history_seq');
     curr_time   TIMESTAMPTZ := NOW();
     deleted_by  TEXT        := NULL;
 BEGIN
     IF (TG_OP = 'DELETE') THEN
         deleted_by = current_setting('history.deleted_by', true);
-EXECUTE 'INSERT INTO ' || tbl_history || ' SELECT $1, $2, $3, $4, $5.*'
-    USING next_id, curr_time, deleted_by, TG_OP, OLD;
-RETURN OLD;
-ELSIF (TG_OP = 'UPDATE') THEN
+        EXECUTE 'INSERT INTO ' || tbl_history || ' SELECT $1, $2, $3, $4, $5.*'
+            USING next_id, curr_time, deleted_by, TG_OP, OLD;
+        RETURN OLD;
+    ELSIF (TG_OP = 'UPDATE') THEN
         EXECUTE 'INSERT INTO ' || tbl_history ||
                 ' SELECT $1, $2, $3, $4, $5.*' USING next_id, curr_time, deleted_by, TG_OP, NEW;
-RETURN NEW;
-ELSIF (TG_OP = 'INSERT') THEN
+        RETURN NEW;
+    ELSIF (TG_OP = 'INSERT') THEN
         EXECUTE 'INSERT INTO ' || tbl_history ||
                 ' SELECT $1, $2, $3, $4, $5.*' USING next_id, curr_time, deleted_by, TG_OP, NEW;
-RETURN NEW;
-END IF;
-RETURN NULL;
--- Foreign key violation means required related entity doesn't exist anymore.
+        RETURN NEW;
+    END IF;
+    RETURN NULL;
+    -- Foreign key violation means required related entity doesn't exist anymore.
 -- Just skipping trigger invocation
 EXCEPTION
     WHEN foreign_key_violation THEN
         RETURN NULL;
 END;
-$$
-LANGUAGE plpgsql;
+$_$;
 
 
-CREATE SEQUENCE IF NOT EXISTS interpretation_germline_history_seq
-    INCREMENT BY 1
-    MINVALUE 1
-    MAXVALUE 9223372036854775807
-    START 1
-    CACHE 1
-    NO CYCLE;
+ALTER FUNCTION public.tp_history_func() OWNER TO radiant;
 
-CREATE TRIGGER trg_interpretation_germline
-    AFTER INSERT OR UPDATE OR DELETE
-                    ON interpretation_germline
-                        FOR EACH ROW
-                        EXECUTE PROCEDURE tp_history_func();
+SET default_tablespace = '';
 
-CREATE TABLE IF NOT EXISTS interpretation_germline_history
-(
-    history_id               BIGSERIAL PRIMARY KEY,
-    history_timestamp        TIMESTAMPTZ NOT NULL DEFAULT now(),
-    history_deleted_by       VARCHAR,
-    history_op               VARCHAR     NOT NULL,
-    id                       UUID,
-    sequencing_id            TEXT NOT NULL,
-    locus_id                 TEXT NOT NULL,
-    transcript_id            TEXT NOT NULL,
-    condition                TEXT,
-    classification           TEXT,
-    classification_criterias TEXT,
-    transmission_modes       TEXT,
-    interpretation           TEXT,
-    pubmed                   TEXT,
-    created_by               TEXT,
-    created_by_name          TEXT,
-    created_at               TIMESTAMPTZ      DEFAULT NOW(),
-    updated_by              TEXT,
-    updated_by_name         TEXT,
-    updated_at              TIMESTAMPTZ      DEFAULT NOW()
-    );
+SET default_table_access_method = heap;
 
-CREATE TABLE IF NOT EXISTS interpretation_somatic
-(
-    id                       UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-    sequencing_id            TEXT NOT NULL,
-    locus_id                 TEXT NOT NULL,
-    transcript_id            TEXT NOT NULL,
-    tumoral_type             TEXT,
-    oncogenicity             TEXT,
-    oncogenicity_classification_criterias   TEXT,
-    clinical_utility         TEXT,
-    interpretation           TEXT,
-    pubmed                   TEXT,
-    created_by               TEXT,
-    created_by_name          TEXT,
-    created_at               TIMESTAMPTZ      DEFAULT NOW(),
-    updated_by               TEXT,
-    updated_by_name          TEXT,
-    updated_at               TIMESTAMPTZ      DEFAULT NOW(),
-    CONSTRAINT UC_Interpretation_somatic UNIQUE (sequencing_id, locus_id, transcript_id)
+--
+-- Name: affected_status; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.affected_status (
+                                        code text NOT NULL,
+                                        name_en text NOT NULL
 );
 
-CREATE SEQUENCE IF NOT EXISTS interpretation_somatic_history_seq
+
+ALTER TABLE public.affected_status OWNER TO radiant;
+
+--
+-- Name: analysis_catalog; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.analysis_catalog (
+                                         id integer CONSTRAINT case_analysis_id_not_null NOT NULL,
+                                         code text CONSTRAINT case_analysis_code_not_null NOT NULL,
+                                         name text CONSTRAINT case_analysis_name_not_null NOT NULL,
+                                         panel_id integer,
+                                         description text
+);
+
+
+ALTER TABLE public.analysis_catalog OWNER TO radiant;
+
+--
+-- Name: batch; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.batch (
+                              id uuid DEFAULT gen_random_uuid() NOT NULL,
+                              dry_run boolean DEFAULT false NOT NULL,
+                              batch_type text NOT NULL,
+                              status text NOT NULL,
+                              created_on timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                              started_on timestamp without time zone,
+                              finished_on timestamp without time zone,
+                              username text NOT NULL,
+                              payload jsonb NOT NULL,
+                              summary jsonb,
+                              report jsonb
+);
+
+
+ALTER TABLE public.batch OWNER TO radiant;
+
+--
+-- Name: case_analysis_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.analysis_catalog ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.case_analysis_id_seq
+    START WITH 1
     INCREMENT BY 1
-    MINVALUE 1
-    MAXVALUE 9223372036854775807
-    START 1
+    NO MINVALUE
+    NO MAXVALUE
     CACHE 1
-    NO CYCLE;
-
-CREATE TRIGGER trg_interpretation_somatic
-    AFTER INSERT OR UPDATE OR DELETE
-                    ON interpretation_somatic
-                        FOR EACH ROW
-                        EXECUTE PROCEDURE tp_history_func();
-
-CREATE TABLE IF NOT EXISTS interpretation_somatic_history
-(
-    history_id               BIGSERIAL PRIMARY KEY,
-    history_timestamp        TIMESTAMPTZ NOT NULL DEFAULT now(),
-    history_deleted_by       VARCHAR,
-    history_op               VARCHAR     NOT NULL,
-    id                       UUID,
-    sequencing_id            TEXT NOT NULL,
-    locus_id                 TEXT NOT NULL,
-    transcript_id            TEXT NOT NULL,
-    tumoral_type             TEXT,
-    oncogenicity             TEXT,
-    oncogenicity_classification_criterias   TEXT,
-    clinical_utility         TEXT,
-    interpretation           TEXT,
-    pubmed                   TEXT,
-    created_by               TEXT,
-    created_by_name          TEXT,
-    created_at               TIMESTAMPTZ      DEFAULT NOW(),
-    updated_by               TEXT,
-    updated_by_name          TEXT,
-    updated_at               TIMESTAMPTZ      DEFAULT NOW()
     );
+
+
+--
+-- Name: case_category; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.case_category (
+                                      code text NOT NULL,
+                                      name_en text NOT NULL
+);
+
+
+ALTER TABLE public.case_category OWNER TO radiant;
+
+--
+-- Name: case_has_sequencing_experiment; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.case_has_sequencing_experiment (
+                                                       case_id integer NOT NULL,
+                                                       sequencing_experiment_id integer CONSTRAINT case_has_sequencing_experimen_sequencing_experiment_id_not_null NOT NULL
+);
+
+
+ALTER TABLE public.case_has_sequencing_experiment OWNER TO radiant;
+
+--
+-- Name: cases; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.cases (
+                              id integer CONSTRAINT case_id_not_null NOT NULL,
+                              proband_id integer CONSTRAINT case_proband_id_not_null NOT NULL,
+                              project_id integer CONSTRAINT case_project_id_not_null NOT NULL,
+                              status_code text CONSTRAINT case_status_not_null NOT NULL,
+                              primary_condition text,
+                              diagnosis_lab_id integer,
+                              note text,
+                              created_on timestamp without time zone CONSTRAINT case_created_on_not_null NOT NULL,
+                              updated_on timestamp without time zone CONSTRAINT case_updated_on_not_null NOT NULL,
+                              analysis_catalog_id integer CONSTRAINT case_case_analysis_id_not_null NOT NULL,
+                              priority_code text NOT NULL,
+                              case_type_code text NOT NULL,
+                              case_category_code text NOT NULL,
+                              condition_code_system text,
+                              resolution_status_code text,
+                              ordering_physician text,
+                              ordering_organization_id integer,
+                              submitter_case_id text NOT NULL
+);
+
+
+ALTER TABLE public.cases OWNER TO radiant;
+
+--
+-- Name: case_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.cases ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.case_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: case_type; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.case_type (
+                                  code text CONSTRAINT case_analysis_type_code_not_null NOT NULL,
+                                  name_en text CONSTRAINT case_analysis_type_name_en_not_null NOT NULL
+);
+
+
+ALTER TABLE public.case_type OWNER TO radiant;
+
+--
+-- Name: consanguinity; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.consanguinity (
+                                      code text NOT NULL,
+                                      name_en text NOT NULL
+);
+
+
+ALTER TABLE public.consanguinity OWNER TO radiant;
+
+--
+-- Name: data_category; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.data_category (
+                                      code text NOT NULL,
+                                      name_en text NOT NULL
+);
+
+
+ALTER TABLE public.data_category OWNER TO radiant;
+
+--
+-- Name: data_type; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.data_type (
+                                  code text NOT NULL,
+                                  name_en text NOT NULL
+);
+
+
+ALTER TABLE public.data_type OWNER TO radiant;
+
+--
+-- Name: document; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.document (
+                                 id integer NOT NULL,
+                                 name text NOT NULL,
+                                 data_category_code text CONSTRAINT document_data_category_not_null NOT NULL,
+                                 data_type_code text CONSTRAINT document_data_type_not_null NOT NULL,
+                                 format_code text CONSTRAINT document_format_not_null NOT NULL,
+                                 size bigint NOT NULL,
+                                 url text NOT NULL,
+                                 hash text,
+                                 created_on timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.document OWNER TO radiant;
+
+--
+-- Name: document_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.document ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.document_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: experimental_strategy; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.experimental_strategy (
+                                              code text NOT NULL,
+                                              name_en text NOT NULL
+);
+
+
+ALTER TABLE public.experimental_strategy OWNER TO radiant;
+
+--
+-- Name: family; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.family (
+                               id integer NOT NULL,
+                               case_id integer NOT NULL,
+                               family_member_id integer NOT NULL,
+                               relationship_to_proband_code text CONSTRAINT family_relationship_to_proband_not_null NOT NULL,
+                               affected_status_code text CONSTRAINT family_affected_status_not_null NOT NULL
+);
+
+
+ALTER TABLE public.family OWNER TO radiant;
+
+--
+-- Name: family_history; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.family_history (
+                                       id integer NOT NULL,
+                                       case_id integer NOT NULL,
+                                       patient_id integer NOT NULL,
+                                       family_member_code text NOT NULL,
+                                       condition text NOT NULL
+);
+
+
+ALTER TABLE public.family_history OWNER TO radiant;
+
+--
+-- Name: family_history_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.family_history ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.family_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: family_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.family ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.family_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: family_relationship; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.family_relationship (
+                                            code text NOT NULL,
+                                            name_en text NOT NULL
+);
+
+
+ALTER TABLE public.family_relationship OWNER TO radiant;
+
+--
+-- Name: file_format; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.file_format (
+                                    code text NOT NULL,
+                                    name_en text NOT NULL
+);
+
+
+ALTER TABLE public.file_format OWNER TO radiant;
+
+--
+-- Name: histology_type; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.histology_type (
+                                       code text NOT NULL,
+                                       name_en text NOT NULL
+);
+
+
+ALTER TABLE public.histology_type OWNER TO radiant;
+
+--
+-- Name: interpretation_germline; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.interpretation_germline (
+                                                id uuid DEFAULT gen_random_uuid() NOT NULL,
+                                                sequencing_id text NOT NULL,
+                                                locus_id text NOT NULL,
+                                                transcript_id text NOT NULL,
+                                                condition text,
+                                                classification text,
+                                                classification_criterias text,
+                                                transmission_modes text,
+                                                interpretation text,
+                                                pubmed text,
+                                                created_by text,
+                                                created_by_name text,
+                                                created_at timestamp with time zone DEFAULT now(),
+                                                updated_by text,
+                                                updated_by_name text,
+                                                updated_at timestamp with time zone DEFAULT now(),
+                                                metadata jsonb,
+                                                case_id text
+);
+
+
+ALTER TABLE public.interpretation_germline OWNER TO radiant;
+
+--
+-- Name: interpretation_germline_history; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.interpretation_germline_history (
+                                                        history_id bigint NOT NULL,
+                                                        history_timestamp timestamp with time zone DEFAULT now() NOT NULL,
+                                                        history_deleted_by character varying,
+                                                        history_op character varying NOT NULL,
+                                                        id uuid,
+                                                        sequencing_id text NOT NULL,
+                                                        locus_id text NOT NULL,
+                                                        transcript_id text NOT NULL,
+                                                        condition text,
+                                                        classification text,
+                                                        classification_criterias text,
+                                                        transmission_modes text,
+                                                        interpretation text,
+                                                        pubmed text,
+                                                        created_by text,
+                                                        created_by_name text,
+                                                        created_at timestamp with time zone DEFAULT now(),
+                                                        updated_by text,
+                                                        updated_by_name text,
+                                                        updated_at timestamp with time zone DEFAULT now(),
+                                                        metadata jsonb,
+                                                        case_id text
+);
+
+
+ALTER TABLE public.interpretation_germline_history OWNER TO radiant;
+
+--
+-- Name: interpretation_germline_history_history_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+CREATE SEQUENCE public.interpretation_germline_history_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.interpretation_germline_history_history_id_seq OWNER TO radiant;
+
+--
+-- Name: interpretation_germline_history_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: radiant
+--
+
+ALTER SEQUENCE public.interpretation_germline_history_history_id_seq OWNED BY public.interpretation_germline_history.history_id;
+
+
+--
+-- Name: interpretation_germline_history_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+CREATE SEQUENCE public.interpretation_germline_history_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.interpretation_germline_history_seq OWNER TO radiant;
+
+--
+-- Name: interpretation_somatic; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.interpretation_somatic (
+                                               id uuid DEFAULT gen_random_uuid() NOT NULL,
+                                               sequencing_id text NOT NULL,
+                                               locus_id text NOT NULL,
+                                               transcript_id text NOT NULL,
+                                               tumoral_type text,
+                                               oncogenicity text,
+                                               oncogenicity_classification_criterias text,
+                                               clinical_utility text,
+                                               interpretation text,
+                                               pubmed text,
+                                               created_by text,
+                                               created_by_name text,
+                                               created_at timestamp with time zone DEFAULT now(),
+                                               updated_by text,
+                                               updated_by_name text,
+                                               updated_at timestamp with time zone DEFAULT now(),
+                                               metadata jsonb,
+                                               case_id text
+);
+
+
+ALTER TABLE public.interpretation_somatic OWNER TO radiant;
+
+--
+-- Name: interpretation_somatic_history; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.interpretation_somatic_history (
+                                                       history_id bigint NOT NULL,
+                                                       history_timestamp timestamp with time zone DEFAULT now() NOT NULL,
+                                                       history_deleted_by character varying,
+                                                       history_op character varying NOT NULL,
+                                                       id uuid,
+                                                       sequencing_id text NOT NULL,
+                                                       locus_id text NOT NULL,
+                                                       transcript_id text NOT NULL,
+                                                       tumoral_type text,
+                                                       oncogenicity text,
+                                                       oncogenicity_classification_criterias text,
+                                                       clinical_utility text,
+                                                       interpretation text,
+                                                       pubmed text,
+                                                       created_by text,
+                                                       created_by_name text,
+                                                       created_at timestamp with time zone DEFAULT now(),
+                                                       updated_by text,
+                                                       updated_by_name text,
+                                                       updated_at timestamp with time zone DEFAULT now(),
+                                                       metadata jsonb,
+                                                       case_id text
+);
+
+
+ALTER TABLE public.interpretation_somatic_history OWNER TO radiant;
+
+--
+-- Name: interpretation_somatic_history_history_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+CREATE SEQUENCE public.interpretation_somatic_history_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.interpretation_somatic_history_history_id_seq OWNER TO radiant;
+
+--
+-- Name: interpretation_somatic_history_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: radiant
+--
+
+ALTER SEQUENCE public.interpretation_somatic_history_history_id_seq OWNED BY public.interpretation_somatic_history.history_id;
+
+
+--
+-- Name: interpretation_somatic_history_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+CREATE SEQUENCE public.interpretation_somatic_history_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.interpretation_somatic_history_seq OWNER TO radiant;
+
+--
+-- Name: life_status; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.life_status (
+                                    code text NOT NULL,
+                                    name_en text NOT NULL
+);
+
+
+ALTER TABLE public.life_status OWNER TO radiant;
+
+--
+-- Name: obs_categorical; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.obs_categorical (
+                                        id integer CONSTRAINT observation_coding_id_not_null NOT NULL,
+                                        case_id integer CONSTRAINT observation_coding_case_id_not_null NOT NULL,
+                                        patient_id integer CONSTRAINT observation_coding_patient_id_not_null NOT NULL,
+                                        observation_code text CONSTRAINT observation_coding_observation_code_not_null NOT NULL,
+                                        coding_system text CONSTRAINT observation_coding_coding_system_not_null NOT NULL,
+                                        code_value text CONSTRAINT observation_coding_code_value_not_null NOT NULL,
+                                        onset_code text,
+                                        interpretation_code text,
+                                        note text
+);
+
+
+ALTER TABLE public.obs_categorical OWNER TO radiant;
+
+--
+-- Name: obs_interpretation; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.obs_interpretation (
+                                           code text NOT NULL,
+                                           name_en text NOT NULL
+);
+
+
+ALTER TABLE public.obs_interpretation OWNER TO radiant;
+
+--
+-- Name: obs_string; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.obs_string (
+                                   id integer NOT NULL,
+                                   case_id integer NOT NULL,
+                                   patient_id integer NOT NULL,
+                                   observation_code text NOT NULL,
+                                   value text NOT NULL
+);
+
+
+ALTER TABLE public.obs_string OWNER TO radiant;
+
+--
+-- Name: obs_string_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.obs_string ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.obs_string_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: observation; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.observation (
+                                    code text NOT NULL,
+                                    name_en text NOT NULL
+);
+
+
+ALTER TABLE public.observation OWNER TO radiant;
+
+--
+-- Name: observation_coding_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.obs_categorical ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.observation_coding_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: onset; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.onset (
+                              code text NOT NULL,
+                              name_en text NOT NULL
+);
+
+
+ALTER TABLE public.onset OWNER TO radiant;
+
+--
+-- Name: organization; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.organization (
+                                     id integer NOT NULL,
+                                     code text NOT NULL,
+                                     name text NOT NULL,
+                                     category_code text CONSTRAINT organization_category_not_null NOT NULL
+);
+
+
+ALTER TABLE public.organization OWNER TO radiant;
+
+--
+-- Name: organization_category; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.organization_category (
+                                              code text NOT NULL,
+                                              name_en text NOT NULL
+);
+
+
+ALTER TABLE public.organization_category OWNER TO radiant;
+
+--
+-- Name: organization_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.organization ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.organization_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: panel; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.panel (
+                              id integer NOT NULL,
+                              code text NOT NULL,
+                              name text NOT NULL,
+                              type_code text CONSTRAINT panel_type_code_not_null1 NOT NULL
+);
+
+
+ALTER TABLE public.panel OWNER TO radiant;
+
+--
+-- Name: panel_has_genes; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.panel_has_genes (
+                                        panel_id integer NOT NULL,
+                                        ensembl_id text NOT NULL,
+                                        symbol text NOT NULL
+);
+
+
+ALTER TABLE public.panel_has_genes OWNER TO radiant;
+
+--
+-- Name: panel_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.panel ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.panel_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: panel_type; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.panel_type (
+                                   code text NOT NULL,
+                                   name_en text NOT NULL
+);
+
+
+ALTER TABLE public.panel_type OWNER TO radiant;
+
+--
+-- Name: patient; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.patient (
+                                id integer NOT NULL,
+                                organization_id integer,
+                                sex_code text CONSTRAINT patient_sex_not_null NOT NULL,
+                                date_of_birth date,
+                                life_status_code text NOT NULL,
+                                submitter_patient_id text CONSTRAINT patient_organization_patient_id_not_null NOT NULL,
+                                submitter_patient_id_type text CONSTRAINT patient_organization_patient_id_type_not_null NOT NULL,
+                                first_name text,
+                                last_name text,
+                                jhn text
+);
+
+
+ALTER TABLE public.patient OWNER TO radiant;
+
+--
+-- Name: patient_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.patient ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.patient_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: platform; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.platform (
+                                 code text NOT NULL,
+                                 name_en text NOT NULL
+);
+
+
+ALTER TABLE public.platform OWNER TO radiant;
+
+--
+-- Name: priority; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.priority (
+                                 code text NOT NULL,
+                                 name_en text NOT NULL
+);
+
+
+ALTER TABLE public.priority OWNER TO radiant;
+
+--
+-- Name: project; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.project (
+                                id integer NOT NULL,
+                                code text NOT NULL,
+                                name text NOT NULL,
+                                description text
+);
+
+
+ALTER TABLE public.project OWNER TO radiant;
+
+--
+-- Name: project_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.project ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.project_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: resolution_status; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.resolution_status (
+                                          code text NOT NULL,
+                                          name_en text NOT NULL
+);
+
+
+ALTER TABLE public.resolution_status OWNER TO radiant;
+
+--
+-- Name: sample; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.sample (
+                               id integer NOT NULL,
+                               type_code text CONSTRAINT sample_type_not_null NOT NULL,
+                               parent_sample_id integer,
+                               tissue_site text,
+                               histology_code text,
+                               submitter_sample_id text NOT NULL,
+                               patient_id integer NOT NULL,
+                               organization_id integer CONSTRAINT sample_submitter_organization_id_not_null NOT NULL
+);
+
+
+ALTER TABLE public.sample OWNER TO radiant;
+
+--
+-- Name: sample_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.sample ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.sample_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: sample_type; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.sample_type (
+                                    code text NOT NULL,
+                                    name_en text NOT NULL
+);
+
+
+ALTER TABLE public.sample_type OWNER TO radiant;
+
+--
+-- Name: saved_filter; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.saved_filter (
+                                     user_id text NOT NULL,
+                                     name text NOT NULL,
+                                     type text NOT NULL,
+                                     favorite boolean DEFAULT false,
+                                     queries jsonb,
+                                     created_on timestamp without time zone DEFAULT now() NOT NULL,
+                                     updated_on timestamp without time zone DEFAULT now() NOT NULL,
+                                     id uuid DEFAULT gen_random_uuid() CONSTRAINT saved_filter_new_id_not_null NOT NULL
+);
+
+
+ALTER TABLE public.saved_filter OWNER TO radiant;
+
+--
+-- Name: sequencing_experiment; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.sequencing_experiment (
+                                              id integer NOT NULL,
+                                              sample_id integer NOT NULL,
+                                              status_code text CONSTRAINT sequencing_experiment_status_not_null NOT NULL,
+                                              aliquot text NOT NULL,
+                                              sequencing_lab_id integer,
+                                              run_name text,
+                                              run_alias text,
+                                              run_date timestamp with time zone,
+                                              capture_kit text,
+                                              created_on timestamp without time zone NOT NULL,
+                                              updated_on timestamp without time zone NOT NULL,
+                                              experimental_strategy_code text NOT NULL,
+                                              sequencing_read_technology_code text NOT NULL,
+                                              platform_code text NOT NULL
+);
+
+
+ALTER TABLE public.sequencing_experiment OWNER TO radiant;
+
+--
+-- Name: sequencing_experiment_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.sequencing_experiment ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.sequencing_experiment_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: sequencing_read_technology; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.sequencing_read_technology (
+                                                   code text NOT NULL,
+                                                   name_en text NOT NULL
+);
+
+
+ALTER TABLE public.sequencing_read_technology OWNER TO radiant;
+
+--
+-- Name: sex; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.sex (
+                            code text NOT NULL,
+                            name_en text NOT NULL
+);
+
+
+ALTER TABLE public.sex OWNER TO radiant;
+
+--
+-- Name: status; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.status (
+                               code text NOT NULL,
+                               name_en text NOT NULL
+);
+
+
+ALTER TABLE public.status OWNER TO radiant;
+
+--
+-- Name: task; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.task (
+                             id integer NOT NULL,
+                             task_type_code text CONSTRAINT task_type_not_null NOT NULL,
+                             created_on timestamp without time zone NOT NULL,
+                             pipeline_name text,
+                             pipeline_version text NOT NULL,
+                             genome_build text
+);
+
+
+ALTER TABLE public.task OWNER TO radiant;
+
+--
+-- Name: task_context; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.task_context (
+                                     task_id integer NOT NULL,
+                                     case_id integer,
+                                     sequencing_experiment_id integer NOT NULL
+);
+
+
+ALTER TABLE public.task_context OWNER TO radiant;
+
+--
+-- Name: task_has_document; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.task_has_document (
+                                          task_id integer CONSTRAINT task_has_documents_task_id_not_null NOT NULL,
+                                          document_id integer CONSTRAINT task_has_documents_document_id_not_null NOT NULL,
+                                          type text NOT NULL
+);
+
+
+ALTER TABLE public.task_has_document OWNER TO radiant;
+
+--
+-- Name: task_id_seq; Type: SEQUENCE; Schema: public; Owner: radiant
+--
+
+ALTER TABLE public.task ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.task_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+    );
+
+
+--
+-- Name: task_type; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.task_type (
+                                  code text NOT NULL,
+                                  name_en text NOT NULL
+);
+
+
+ALTER TABLE public.task_type OWNER TO radiant;
+
+--
+-- Name: user_preference; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.user_preference (
+                                        user_id text NOT NULL,
+                                        content jsonb,
+                                        key text NOT NULL
+);
+
+
+ALTER TABLE public.user_preference OWNER TO radiant;
+
+--
+-- Name: user_set; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.user_set (
+                                 id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+                                 user_id character varying(255) NOT NULL,
+                                 name text NOT NULL,
+                                 type text NOT NULL,
+                                 active boolean NOT NULL,
+                                 created_at timestamp with time zone DEFAULT now(),
+                                 updated_at timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.user_set OWNER TO radiant;
+
+--
+-- Name: user_set_biospecimen; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.user_set_biospecimen (
+                                             user_set_id uuid NOT NULL,
+                                             biospecimen_id character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.user_set_biospecimen OWNER TO radiant;
+
+--
+-- Name: user_set_file; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.user_set_file (
+                                      user_set_id uuid NOT NULL,
+                                      file_id character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.user_set_file OWNER TO radiant;
+
+--
+-- Name: user_set_participant; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.user_set_participant (
+                                             user_set_id uuid NOT NULL,
+                                             participant_id character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.user_set_participant OWNER TO radiant;
+
+--
+-- Name: user_set_variant; Type: TABLE; Schema: public; Owner: radiant
+--
+
+CREATE TABLE public.user_set_variant (
+                                         user_set_id uuid NOT NULL,
+                                         variant_id character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.user_set_variant OWNER TO radiant;
+
+--
+-- Name: interpretation_germline_history history_id; Type: DEFAULT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.interpretation_germline_history ALTER COLUMN history_id SET DEFAULT nextval('public.interpretation_germline_history_history_id_seq'::regclass);
+
+
+--
+-- Name: interpretation_somatic_history history_id; Type: DEFAULT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.interpretation_somatic_history ALTER COLUMN history_id SET DEFAULT nextval('public.interpretation_somatic_history_history_id_seq'::regclass);
+
+
+--
+-- Data for Name: affected_status; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.affected_status VALUES ('affected', 'Affected');
+INSERT INTO public.affected_status VALUES ('non_affected', 'Non Affected');
+INSERT INTO public.affected_status VALUES ('unknown', 'Unknown');
+
+
+--
+-- Data for Name: analysis_catalog; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.analysis_catalog VALUES (1, 'WGA', 'Whole Genome Analysis', NULL, 'A description of this analysis');
+INSERT INTO public.analysis_catalog VALUES (2, 'IDGD', 'Intellectual Deficiency and Global Developmental Delay', NULL, 'A description of this analysis');
+INSERT INTO public.analysis_catalog VALUES (3, 'MYOC', 'Congenital Myopathies', NULL, 'A description of this analysis');
+INSERT INTO public.analysis_catalog VALUES (4, 'HYPM', 'Malignant Hyperthermia', NULL, 'A description of this analysis');
+
+--
+-- Data for Name: case_category; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.case_category VALUES ('prenatal', 'Prenatal');
+INSERT INTO public.case_category VALUES ('postnatal', 'Postnatal');
+
+--
+-- Data for Name: case_type; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.case_type VALUES ('germline', 'Germline');
+INSERT INTO public.case_type VALUES ('somatic', 'Somatic');
+
+--
+-- Data for Name: consanguinity; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.consanguinity VALUES ('unknown', 'Unknown');
+INSERT INTO public.consanguinity VALUES ('consanguinity', 'Consanguinity in family');
+INSERT INTO public.consanguinity VALUES ('no_consanguinity', 'No consanguinity in family');
+
+
+--
+-- Data for Name: data_category; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.data_category VALUES ('clinical', 'Clinical');
+INSERT INTO public.data_category VALUES ('genomic', 'Genomic');
+
+
+--
+-- Data for Name: data_type; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.data_type VALUES ('alignment', 'Aligned Reads');
+INSERT INTO public.data_type VALUES ('snv', 'Germline SNV');
+INSERT INTO public.data_type VALUES ('ssnv', 'Somatic SNV');
+INSERT INTO public.data_type VALUES ('gcnv', 'Germline CNV');
+INSERT INTO public.data_type VALUES ('scnv', 'Somatic CNV');
+INSERT INTO public.data_type VALUES ('gsv', 'Germline SV');
+INSERT INTO public.data_type VALUES ('ssv', 'Somatic SV');
+INSERT INTO public.data_type VALUES ('somfu', 'Somatic Fusion Dragen VCF');
+INSERT INTO public.data_type VALUES ('ssup', 'Sequencing Data Supplement');
+INSERT INTO public.data_type VALUES ('igv', 'IGV Track');
+INSERT INTO public.data_type VALUES ('cnvvis', 'CNV Visualization');
+INSERT INTO public.data_type VALUES ('exp', 'Expression PNG');
+INSERT INTO public.data_type VALUES ('covgene', 'Coverage by Gene Report');
+INSERT INTO public.data_type VALUES ('qcrun', 'Sequencing Run QC Report');
+INSERT INTO public.data_type VALUES ('exomiser', 'Exomiser Report');
+
+--
+-- Data for Name: experimental_strategy; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.experimental_strategy VALUES ('wgs', 'Whole Genome Sequencing');
+INSERT INTO public.experimental_strategy VALUES ('wxs', 'Whole Exome Sequencing');
+INSERT INTO public.experimental_strategy VALUES ('rnaseq', 'RNA-Seq');
+INSERT INTO public.experimental_strategy VALUES ('targeted_dna', 'Targeted DNA Sequencing');
+
+--
+-- Data for Name: family_relationship; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.family_relationship VALUES ('mother', 'Mother');
+INSERT INTO public.family_relationship VALUES ('father', 'Father');
+INSERT INTO public.family_relationship VALUES ('brother', 'Brother');
+INSERT INTO public.family_relationship VALUES ('sister', 'Sister');
+INSERT INTO public.family_relationship VALUES ('proband', 'Proband');
+INSERT INTO public.family_relationship VALUES ('sibling', 'Sibling');
+
+
+--
+-- Data for Name: file_format; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.file_format VALUES ('cram', 'CRAM File');
+INSERT INTO public.file_format VALUES ('crai', 'CRAI Index File');
+INSERT INTO public.file_format VALUES ('vcf', 'VCF File');
+INSERT INTO public.file_format VALUES ('tbi', 'TBI Index File');
+INSERT INTO public.file_format VALUES ('tgz', 'TGZ Archive File');
+INSERT INTO public.file_format VALUES ('json', 'JSON File');
+INSERT INTO public.file_format VALUES ('html', 'HTML File');
+INSERT INTO public.file_format VALUES ('tsv', 'TSV File');
+INSERT INTO public.file_format VALUES ('bw', 'BW File');
+INSERT INTO public.file_format VALUES ('bed', 'BED File');
+INSERT INTO public.file_format VALUES ('png', 'PNG File');
+INSERT INTO public.file_format VALUES ('csv', 'CSV File');
+INSERT INTO public.file_format VALUES ('pdf', 'PDF File');
+INSERT INTO public.file_format VALUES ('txt', 'Text File');
+INSERT INTO public.file_format VALUES ('gvcf', 'gVCF File');
+
+
+--
+-- Data for Name: histology_type; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.histology_type VALUES ('tumoral', 'Tumoral');
+INSERT INTO public.histology_type VALUES ('normal', 'Normal');
+
+--
+-- Data for Name: life_status; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.life_status VALUES ('alive', 'Alive');
+INSERT INTO public.life_status VALUES ('deceased', 'Deceased');
+INSERT INTO public.life_status VALUES ('unknown', 'Unknown');
+
+--
+-- Data for Name: obs_interpretation; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.obs_interpretation VALUES ('positive', 'Positive');
+INSERT INTO public.obs_interpretation VALUES ('negative', 'Negative');
+
+--
+-- Data for Name: observation; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.observation VALUES ('phenotype', 'Clinical sign');
+INSERT INTO public.observation VALUES ('condition', 'Condition');
+INSERT INTO public.observation VALUES ('note', 'Clinical Note');
+INSERT INTO public.observation VALUES ('ancestry', 'Ancestry');
+INSERT INTO public.observation VALUES ('consanguinity', 'Consanguinity');
+
+
+--
+-- Data for Name: onset; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.onset VALUES ('unknown', 'Unknown');
+INSERT INTO public.onset VALUES ('antenatal', 'Antenatal');
+INSERT INTO public.onset VALUES ('congenital', 'Congenital');
+INSERT INTO public.onset VALUES ('neonatal', 'Neonatal (< 28 days)');
+INSERT INTO public.onset VALUES ('infantile', 'Infantile (>= 28 days and < 1 year)');
+INSERT INTO public.onset VALUES ('childhood', 'Childhood (>= 1 year and < 5 years)');
+INSERT INTO public.onset VALUES ('juvenile', 'Juvenile (>= 5 years and < 16 years)');
+INSERT INTO public.onset VALUES ('young_adult', 'Young Adult (>= 16 years and < 40 years)');
+INSERT INTO public.onset VALUES ('middle_age', 'Middle Age (>= 40 years and < 60 years)');
+INSERT INTO public.onset VALUES ('senior', 'Senior (>= 60 years)');
+
+--
+-- Data for Name: organization_category; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.organization_category VALUES ('diagnostic_laboratory', 'Diagnostic Laboratory');
+INSERT INTO public.organization_category VALUES ('healthcare_provider', 'Healthcare Provider');
+INSERT INTO public.organization_category VALUES ('research_institute', 'Research Institute');
+INSERT INTO public.organization_category VALUES ('sequencing_center', 'Sequencing Center');
+
+--
+-- Data for Name: panel_type; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.panel_type VALUES ('virtual', 'Virtual');
+INSERT INTO public.panel_type VALUES ('physical', 'Physical');
+
+--
+-- Data for Name: platform; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.platform VALUES ('illumina', 'Illumina');
+INSERT INTO public.platform VALUES ('pacbio', 'Pacbio');
+INSERT INTO public.platform VALUES ('nanopore', 'Nanopore');
+
+
+--
+-- Data for Name: priority; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.priority VALUES ('routine', 'Routine');
+INSERT INTO public.priority VALUES ('urgent', 'Urgent');
+INSERT INTO public.priority VALUES ('asap', 'Asap');
+INSERT INTO public.priority VALUES ('stat', 'Stat');
+
+--
+-- Data for Name: resolution_status; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.resolution_status VALUES ('solved', 'Solved');
+INSERT INTO public.resolution_status VALUES ('unsolved', 'Unsolved');
+INSERT INTO public.resolution_status VALUES ('inconclusive', 'Inconclusive');
+
+--
+-- Data for Name: sample_type; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.sample_type VALUES ('blood', 'Blood');
+INSERT INTO public.sample_type VALUES ('solid_tissue', 'Solid Tissue');
+INSERT INTO public.sample_type VALUES ('dna', 'DNA');
+INSERT INTO public.sample_type VALUES ('rna', 'RNA');
+
+--
+-- Data for Name: sequencing_read_technology; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.sequencing_read_technology VALUES ('short_read', 'Short Read');
+INSERT INTO public.sequencing_read_technology VALUES ('long_read', 'Long Read');
+
+
+--
+-- Data for Name: sex; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.sex VALUES ('male', 'Male');
+INSERT INTO public.sex VALUES ('female', 'Female');
+INSERT INTO public.sex VALUES ('unknown', 'Unknown');
+
+
+--
+-- Data for Name: status; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.status VALUES ('unknown', 'Unknown');
+INSERT INTO public.status VALUES ('draft', 'Draft');
+INSERT INTO public.status VALUES ('revoke', 'Revoke');
+INSERT INTO public.status VALUES ('completed', 'Completed');
+INSERT INTO public.status VALUES ('incomplete', 'Incomplete');
+INSERT INTO public.status VALUES ('submitted', 'Submitted');
+INSERT INTO public.status VALUES ('in_progress', 'In Progress');
+
+--
+-- Data for Name: task_type; Type: TABLE DATA; Schema: public; Owner: radiant
+--
+
+INSERT INTO public.task_type VALUES ('alignment', 'Genome Alignment');
+INSERT INTO public.task_type VALUES ('alignment_germline_variant_calling', 'Genome Alignment and Germline Variant Calling');
+INSERT INTO public.task_type VALUES ('alignment_somatic_variant_calling', 'Genome Alignment and Somatic Variant Calling');
+INSERT INTO public.task_type VALUES ('family_variant_calling', 'Family Joint Genotyping');
+INSERT INTO public.task_type VALUES ('somatic_variant_calling', 'Somatic Variant Calling by Tumor-Normal Paired Samples');
+INSERT INTO public.task_type VALUES ('tumor_only_variant_calling', 'Somatic Variant Calling by Tumor-Only Sample');
+INSERT INTO public.task_type VALUES ('radiant_germline_annotation', 'RADIANT Germline Annotation');
+INSERT INTO public.task_type VALUES ('exomiser', 'Exomiser');
+INSERT INTO public.task_type VALUES ('rnaseq_analysis', 'RNAseq Analysis of Transcriptome Profiling and Gene Fusion Calling');
+
+--
+-- Name: case_analysis_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.case_analysis_id_seq', 1, false);
+
+
+--
+-- Name: case_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.case_id_seq', 1, true);
+
+
+--
+-- Name: document_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.document_id_seq', 1, true);
+
+
+--
+-- Name: family_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.family_history_id_seq', 1, false);
+
+
+--
+-- Name: family_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.family_id_seq', 1, true);
+
+
+--
+-- Name: interpretation_germline_history_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.interpretation_germline_history_history_id_seq', 1, false);
+
+
+--
+-- Name: interpretation_germline_history_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.interpretation_germline_history_seq', 1, false);
+
+
+--
+-- Name: interpretation_somatic_history_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.interpretation_somatic_history_history_id_seq', 1, false);
+
+
+--
+-- Name: interpretation_somatic_history_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.interpretation_somatic_history_seq', 1, false);
+
+
+--
+-- Name: obs_string_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.obs_string_id_seq', 1, false);
+
+
+--
+-- Name: observation_coding_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.observation_coding_id_seq', 1, true);
+
+
+--
+-- Name: organization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.organization_id_seq', 1, true);
+
+
+--
+-- Name: panel_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.panel_id_seq', 1, false);
+
+
+--
+-- Name: patient_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.patient_id_seq', 1, true);
+
+
+--
+-- Name: project_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.project_id_seq', 1, true);
+
+
+--
+-- Name: sample_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.sample_id_seq', 1, true);
+
+
+--
+-- Name: sequencing_experiment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.sequencing_experiment_id_seq', 1, true);
+
+
+--
+-- Name: task_id_seq; Type: SEQUENCE SET; Schema: public; Owner: radiant
+--
+
+SELECT pg_catalog.setval('public.task_id_seq', 1, true);
+
+
+--
+-- Name: affected_status affected_status_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.affected_status
+    ADD CONSTRAINT affected_status_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: batch batch_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.batch
+    ADD CONSTRAINT batch_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: analysis_catalog case_analysis_code_key; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.analysis_catalog
+    ADD CONSTRAINT case_analysis_code_key UNIQUE (code);
+
+
+--
+-- Name: analysis_catalog case_analysis_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.analysis_catalog
+    ADD CONSTRAINT case_analysis_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: case_type case_analysis_type_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.case_type
+    ADD CONSTRAINT case_analysis_type_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: case_category case_category_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.case_category
+    ADD CONSTRAINT case_category_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: cases case_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT case_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: consanguinity consanguinity_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.consanguinity
+    ADD CONSTRAINT consanguinity_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: data_category data_category_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.data_category
+    ADD CONSTRAINT data_category_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: data_type data_type_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.data_type
+    ADD CONSTRAINT data_type_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: document document_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.document
+    ADD CONSTRAINT document_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: experimental_strategy experimental_strategy_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.experimental_strategy
+    ADD CONSTRAINT experimental_strategy_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: family_history family_history_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.family_history
+    ADD CONSTRAINT family_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: family family_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.family
+    ADD CONSTRAINT family_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: family_relationship family_relationship_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.family_relationship
+    ADD CONSTRAINT family_relationship_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: file_format file_format_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.file_format
+    ADD CONSTRAINT file_format_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: histology_type histology_type_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.histology_type
+    ADD CONSTRAINT histology_type_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: interpretation_germline_history interpretation_germline_history_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.interpretation_germline_history
+    ADD CONSTRAINT interpretation_germline_history_pkey PRIMARY KEY (history_id);
+
+
+--
+-- Name: interpretation_germline interpretation_germline_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.interpretation_germline
+    ADD CONSTRAINT interpretation_germline_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: interpretation_somatic_history interpretation_somatic_history_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.interpretation_somatic_history
+    ADD CONSTRAINT interpretation_somatic_history_pkey PRIMARY KEY (history_id);
+
+
+--
+-- Name: interpretation_somatic interpretation_somatic_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.interpretation_somatic
+    ADD CONSTRAINT interpretation_somatic_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: life_status life_status_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.life_status
+    ADD CONSTRAINT life_status_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: obs_interpretation obs_interpretation_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.obs_interpretation
+    ADD CONSTRAINT obs_interpretation_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: obs_string obs_string_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.obs_string
+    ADD CONSTRAINT obs_string_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: obs_categorical observation_coding_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.obs_categorical
+    ADD CONSTRAINT observation_coding_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: observation observation_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.observation
+    ADD CONSTRAINT observation_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: onset onset_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.onset
+    ADD CONSTRAINT onset_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: organization_category organization_category_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.organization_category
+    ADD CONSTRAINT organization_category_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: organization organization_code_key; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.organization
+    ADD CONSTRAINT organization_code_key UNIQUE (code);
+
+
+--
+-- Name: organization organization_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.organization
+    ADD CONSTRAINT organization_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: panel panel_code_key; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.panel
+    ADD CONSTRAINT panel_code_key UNIQUE (code);
+
+
+--
+-- Name: panel_has_genes panel_has_genes_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.panel_has_genes
+    ADD CONSTRAINT panel_has_genes_pkey PRIMARY KEY (panel_id, ensembl_id);
+
+
+--
+-- Name: panel panel_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.panel
+    ADD CONSTRAINT panel_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: panel_type panel_type_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.panel_type
+    ADD CONSTRAINT panel_type_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: patient patient_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.patient
+    ADD CONSTRAINT patient_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: platform platform_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.platform
+    ADD CONSTRAINT platform_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: priority priority_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.priority
+    ADD CONSTRAINT priority_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: project project_code_key; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.project
+    ADD CONSTRAINT project_code_key UNIQUE (code);
+
+
+--
+-- Name: project project_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.project
+    ADD CONSTRAINT project_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: resolution_status resolution_status_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.resolution_status
+    ADD CONSTRAINT resolution_status_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: sample sample_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sample
+    ADD CONSTRAINT sample_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sample_type sample_type_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sample_type
+    ADD CONSTRAINT sample_type_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: saved_filter saved_filter_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.saved_filter
+    ADD CONSTRAINT saved_filter_pkey PRIMARY KEY (id);
+
+--
+-- Name: sequencing_experiment sequencing_experiment_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sequencing_experiment
+    ADD CONSTRAINT sequencing_experiment_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sequencing_read_technology sequencing_read_technology_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sequencing_read_technology
+    ADD CONSTRAINT sequencing_read_technology_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: sex sex_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sex
+    ADD CONSTRAINT sex_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: status status_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.status
+    ADD CONSTRAINT status_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: task_has_document task_has_document_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.task_has_document
+    ADD CONSTRAINT task_has_document_pkey PRIMARY KEY (task_id, document_id, type);
+
+
+--
+-- Name: task task_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.task
+    ADD CONSTRAINT task_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: task_type task_type_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.task_type
+    ADD CONSTRAINT task_type_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: cases uc_cases_submitter_case_id; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT uc_cases_submitter_case_id UNIQUE (project_id, submitter_case_id);
+
+
+--
+-- Name: interpretation_germline uc_interpretation_germline; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.interpretation_germline
+    ADD CONSTRAINT uc_interpretation_germline UNIQUE (case_id, sequencing_id, locus_id, transcript_id);
+
+
+--
+-- Name: interpretation_somatic uc_interpretation_somatic; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.interpretation_somatic
+    ADD CONSTRAINT uc_interpretation_somatic UNIQUE (case_id, sequencing_id, locus_id, transcript_id);
+
+
+--
+-- Name: case_has_sequencing_experiment unique_case_has_seq_exp; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.case_has_sequencing_experiment
+    ADD CONSTRAINT unique_case_has_seq_exp UNIQUE (case_id, sequencing_experiment_id);
+
+
+--
+-- Name: saved_filter unique_saved_filter; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.saved_filter
+    ADD CONSTRAINT unique_saved_filter UNIQUE (name, type, user_id);
+
+
+--
+-- Name: task_context unique_task_context; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.task_context
+    ADD CONSTRAINT unique_task_context UNIQUE (task_id, sequencing_experiment_id, case_id);
+
+
+--
+-- Name: user_preference user_preference_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.user_preference
+    ADD CONSTRAINT user_preference_pkey PRIMARY KEY (user_id, key);
+
+
+--
+-- Name: user_set_biospecimen user_set_biospecimen_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.user_set_biospecimen
+    ADD CONSTRAINT user_set_biospecimen_pkey PRIMARY KEY (user_set_id, biospecimen_id);
+
+
+--
+-- Name: user_set_file user_set_file_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.user_set_file
+    ADD CONSTRAINT user_set_file_pkey PRIMARY KEY (user_set_id, file_id);
+
+
+--
+-- Name: user_set_participant user_set_participant_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.user_set_participant
+    ADD CONSTRAINT user_set_participant_pkey PRIMARY KEY (user_set_id, participant_id);
+
+
+--
+-- Name: user_set user_set_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.user_set
+    ADD CONSTRAINT user_set_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_set_variant user_set_variant_pkey; Type: CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.user_set_variant
+    ADD CONSTRAINT user_set_variant_pkey PRIMARY KEY (user_set_id, variant_id);
+
+
+--
+-- Name: idx_case_created_on; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_case_created_on ON public.cases USING btree (created_on);
+
+
+--
+-- Name: idx_case_primary_condition; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_case_primary_condition ON public.cases USING btree (primary_condition);
+
+
+--
+-- Name: idx_case_proband_id; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_case_proband_id ON public.cases USING btree (proband_id);
+
+
+--
+-- Name: idx_case_project_id; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_case_project_id ON public.cases USING btree (project_id);
+
+
+--
+-- Name: idx_case_status; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_case_status ON public.cases USING btree (status_code);
+
+
+--
+-- Name: idx_document_data_type; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_document_data_type ON public.document USING btree (data_type_code);
+
+
+--
+-- Name: idx_document_format; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_document_format ON public.document USING btree (format_code);
+
+
+--
+-- Name: idx_document_name; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_document_name ON public.document USING btree (name);
+
+
+--
+-- Name: idx_family_case_id; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_family_case_id ON public.family USING btree (case_id);
+
+
+--
+-- Name: idx_interpretation_germline_metadata_analysis_id; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_interpretation_germline_metadata_analysis_id ON public.interpretation_germline USING btree (((metadata ->> 'analysis_id'::text)));
+
+
+--
+-- Name: idx_interpretation_germline_metadata_patient_id; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_interpretation_germline_metadata_patient_id ON public.interpretation_germline USING btree (((metadata ->> 'patient_id'::text)));
+
+
+--
+-- Name: idx_interpretation_germline_metadata_variant_hash; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_interpretation_germline_metadata_variant_hash ON public.interpretation_germline USING btree (((metadata ->> 'variant_hash'::text)));
+
+
+--
+-- Name: idx_interpretation_somatic_metadata_analysis_id; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_interpretation_somatic_metadata_analysis_id ON public.interpretation_somatic USING btree (((metadata ->> 'analysis_id'::text)));
+
+
+--
+-- Name: idx_interpretation_somatic_metadata_patient_id; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_interpretation_somatic_metadata_patient_id ON public.interpretation_somatic USING btree (((metadata ->> 'patient_id'::text)));
+
+
+--
+-- Name: idx_interpretation_somatic_metadata_variant_hash; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_interpretation_somatic_metadata_variant_hash ON public.interpretation_somatic USING btree (((metadata ->> 'variant_hash'::text)));
+
+
+--
+-- Name: idx_observation_case_id; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_observation_case_id ON public.obs_categorical USING btree (case_id);
+
+
+--
+-- Name: idx_observation_patient_id; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_observation_patient_id ON public.obs_categorical USING btree (patient_id);
+
+
+--
+-- Name: idx_sample_parent_id; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_sample_parent_id ON public.sample USING btree (parent_sample_id);
+
+
+--
+-- Name: idx_sequencing_experiment_sample_id; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_sequencing_experiment_sample_id ON public.sequencing_experiment USING btree (sample_id);
+
+
+--
+-- Name: idx_task_type; Type: INDEX; Schema: public; Owner: radiant
+--
+
+CREATE INDEX idx_task_type ON public.task USING btree (task_type_code);
+
+
+--
+-- Name: interpretation_germline trg_interpretation_germline; Type: TRIGGER; Schema: public; Owner: radiant
+--
+
+CREATE TRIGGER trg_interpretation_germline AFTER INSERT OR DELETE OR UPDATE ON public.interpretation_germline FOR EACH ROW EXECUTE FUNCTION public.tp_history_func();
+
+
+--
+-- Name: interpretation_somatic trg_interpretation_somatic; Type: TRIGGER; Schema: public; Owner: radiant
+--
+
+CREATE TRIGGER trg_interpretation_somatic AFTER INSERT OR DELETE OR UPDATE ON public.interpretation_somatic FOR EACH ROW EXECUTE FUNCTION public.tp_history_func();
+
+
+--
+-- Name: analysis_catalog case_analysis_panel_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.analysis_catalog
+    ADD CONSTRAINT case_analysis_panel_id_fkey FOREIGN KEY (panel_id) REFERENCES public.panel(id);
+
+
+--
+-- Name: cases case_case_analysis_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT case_case_analysis_id_fkey FOREIGN KEY (analysis_catalog_id) REFERENCES public.analysis_catalog(id);
+
+
+--
+-- Name: case_has_sequencing_experiment case_has_sequencing_experiment_case_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.case_has_sequencing_experiment
+    ADD CONSTRAINT case_has_sequencing_experiment_case_id_fkey FOREIGN KEY (case_id) REFERENCES public.cases(id);
+
+
+--
+-- Name: case_has_sequencing_experiment case_has_sequencing_experiment_sequencing_experiment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.case_has_sequencing_experiment
+    ADD CONSTRAINT case_has_sequencing_experiment_sequencing_experiment_id_fkey FOREIGN KEY (sequencing_experiment_id) REFERENCES public.sequencing_experiment(id);
+
+
+--
+-- Name: cases case_performer_lab_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT case_performer_lab_id_fkey FOREIGN KEY (diagnosis_lab_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: cases case_proband_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT case_proband_id_fkey FOREIGN KEY (proband_id) REFERENCES public.patient(id);
+
+
+--
+-- Name: cases case_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT case_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.project(id);
+
+
+--
+-- Name: cases case_status_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT case_status_fkey FOREIGN KEY (status_code) REFERENCES public.status(code);
+
+
+--
+-- Name: cases cases_case_category_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT cases_case_category_code_fkey FOREIGN KEY (case_category_code) REFERENCES public.case_category(code);
+
+
+--
+-- Name: cases cases_case_type_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT cases_case_type_code_fkey FOREIGN KEY (case_type_code) REFERENCES public.case_type(code);
+
+
+--
+-- Name: cases cases_ordering_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT cases_ordering_organization_id_fkey FOREIGN KEY (ordering_organization_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: cases cases_priority_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT cases_priority_code_fkey FOREIGN KEY (priority_code) REFERENCES public.priority(code);
+
+
+--
+-- Name: cases cases_resolution_status_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.cases
+    ADD CONSTRAINT cases_resolution_status_code_fkey FOREIGN KEY (resolution_status_code) REFERENCES public.resolution_status(code);
+
+
+--
+-- Name: document document_data_category_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.document
+    ADD CONSTRAINT document_data_category_fkey FOREIGN KEY (data_category_code) REFERENCES public.data_category(code);
+
+
+--
+-- Name: document document_data_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.document
+    ADD CONSTRAINT document_data_type_fkey FOREIGN KEY (data_type_code) REFERENCES public.data_type(code);
+
+
+--
+-- Name: document document_format_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.document
+    ADD CONSTRAINT document_format_fkey FOREIGN KEY (format_code) REFERENCES public.file_format(code);
+
+
+--
+-- Name: family family_affected_status_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.family
+    ADD CONSTRAINT family_affected_status_fkey FOREIGN KEY (affected_status_code) REFERENCES public.affected_status(code);
+
+
+--
+-- Name: family family_case_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.family
+    ADD CONSTRAINT family_case_id_fkey FOREIGN KEY (case_id) REFERENCES public.cases(id);
+
+
+--
+-- Name: family family_family_member_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.family
+    ADD CONSTRAINT family_family_member_id_fkey FOREIGN KEY (family_member_id) REFERENCES public.patient(id);
+
+
+--
+-- Name: family_history family_history_case_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.family_history
+    ADD CONSTRAINT family_history_case_id_fkey FOREIGN KEY (case_id) REFERENCES public.cases(id);
+
+
+--
+-- Name: family_history family_history_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.family_history
+    ADD CONSTRAINT family_history_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patient(id);
+
+
+--
+-- Name: family family_relationship_to_proband_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.family
+    ADD CONSTRAINT family_relationship_to_proband_fkey FOREIGN KEY (relationship_to_proband_code) REFERENCES public.family_relationship(code);
+
+
+--
+-- Name: user_set_biospecimen fk_user_set_biospecimen_user_set; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.user_set_biospecimen
+    ADD CONSTRAINT fk_user_set_biospecimen_user_set FOREIGN KEY (user_set_id) REFERENCES public.user_set(id);
+
+
+--
+-- Name: user_set_file fk_user_set_file_user_set; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.user_set_file
+    ADD CONSTRAINT fk_user_set_file_user_set FOREIGN KEY (user_set_id) REFERENCES public.user_set(id);
+
+
+--
+-- Name: user_set_participant fk_user_set_participant_user_set; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.user_set_participant
+    ADD CONSTRAINT fk_user_set_participant_user_set FOREIGN KEY (user_set_id) REFERENCES public.user_set(id);
+
+
+--
+-- Name: user_set_variant fk_user_set_variant_user_set; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.user_set_variant
+    ADD CONSTRAINT fk_user_set_variant_user_set FOREIGN KEY (user_set_id) REFERENCES public.user_set(id);
+
+
+--
+-- Name: obs_string obs_string_case_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.obs_string
+    ADD CONSTRAINT obs_string_case_id_fkey FOREIGN KEY (case_id) REFERENCES public.cases(id);
+
+
+--
+-- Name: obs_string obs_string_observation_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.obs_string
+    ADD CONSTRAINT obs_string_observation_code_fkey FOREIGN KEY (observation_code) REFERENCES public.observation(code);
+
+
+--
+-- Name: obs_string obs_string_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.obs_string
+    ADD CONSTRAINT obs_string_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patient(id);
+
+
+--
+-- Name: obs_categorical observation_coding_case_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.obs_categorical
+    ADD CONSTRAINT observation_coding_case_id_fkey FOREIGN KEY (case_id) REFERENCES public.cases(id);
+
+
+--
+-- Name: obs_categorical observation_coding_interpretation_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.obs_categorical
+    ADD CONSTRAINT observation_coding_interpretation_fkey FOREIGN KEY (interpretation_code) REFERENCES public.obs_interpretation(code);
+
+
+--
+-- Name: obs_categorical observation_coding_observation_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.obs_categorical
+    ADD CONSTRAINT observation_coding_observation_code_fkey FOREIGN KEY (observation_code) REFERENCES public.observation(code);
+
+
+--
+-- Name: obs_categorical observation_coding_onset_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.obs_categorical
+    ADD CONSTRAINT observation_coding_onset_code_fkey FOREIGN KEY (onset_code) REFERENCES public.onset(code);
+
+
+--
+-- Name: obs_categorical observation_coding_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.obs_categorical
+    ADD CONSTRAINT observation_coding_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patient(id);
+
+
+--
+-- Name: organization organization_category_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.organization
+    ADD CONSTRAINT organization_category_fkey FOREIGN KEY (category_code) REFERENCES public.organization_category(code);
+
+
+--
+-- Name: panel_has_genes panel_has_genes_panel_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.panel_has_genes
+    ADD CONSTRAINT panel_has_genes_panel_id_fkey FOREIGN KEY (panel_id) REFERENCES public.panel(id);
+
+
+--
+-- Name: panel panel_type_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.panel
+    ADD CONSTRAINT panel_type_code_fkey FOREIGN KEY (type_code) REFERENCES public.panel_type(code);
+
+
+--
+-- Name: patient patient_life_status_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.patient
+    ADD CONSTRAINT patient_life_status_code_fkey FOREIGN KEY (life_status_code) REFERENCES public.life_status(code);
+
+
+--
+-- Name: patient patient_managing_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.patient
+    ADD CONSTRAINT patient_managing_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: patient patient_sex_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.patient
+    ADD CONSTRAINT patient_sex_fkey FOREIGN KEY (sex_code) REFERENCES public.sex(code);
+
+
+--
+-- Name: sample sample_histology_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sample
+    ADD CONSTRAINT sample_histology_fkey FOREIGN KEY (histology_code) REFERENCES public.histology_type(code);
+
+
+--
+-- Name: sample sample_parent_sample_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sample
+    ADD CONSTRAINT sample_parent_sample_id_fkey FOREIGN KEY (parent_sample_id) REFERENCES public.sample(id);
+
+
+--
+-- Name: sample sample_patient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sample
+    ADD CONSTRAINT sample_patient_id_fkey FOREIGN KEY (patient_id) REFERENCES public.patient(id);
+
+
+--
+-- Name: sample sample_submitter_organization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sample
+    ADD CONSTRAINT sample_submitter_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: sample sample_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sample
+    ADD CONSTRAINT sample_type_fkey FOREIGN KEY (type_code) REFERENCES public.sample_type(code);
+
+
+--
+-- Name: sequencing_experiment sequencing_experiment_experimental_strategy_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sequencing_experiment
+    ADD CONSTRAINT sequencing_experiment_experimental_strategy_code_fkey FOREIGN KEY (experimental_strategy_code) REFERENCES public.experimental_strategy(code);
+
+
+--
+-- Name: sequencing_experiment sequencing_experiment_performer_lab_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sequencing_experiment
+    ADD CONSTRAINT sequencing_experiment_performer_lab_id_fkey FOREIGN KEY (sequencing_lab_id) REFERENCES public.organization(id);
+
+
+--
+-- Name: sequencing_experiment sequencing_experiment_platform_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sequencing_experiment
+    ADD CONSTRAINT sequencing_experiment_platform_code_fkey FOREIGN KEY (platform_code) REFERENCES public.platform(code);
+
+
+--
+-- Name: sequencing_experiment sequencing_experiment_sample_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sequencing_experiment
+    ADD CONSTRAINT sequencing_experiment_sample_id_fkey FOREIGN KEY (sample_id) REFERENCES public.sample(id);
+
+
+--
+-- Name: sequencing_experiment sequencing_experiment_sequencing_read_technology_code_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sequencing_experiment
+    ADD CONSTRAINT sequencing_experiment_sequencing_read_technology_code_fkey FOREIGN KEY (sequencing_read_technology_code) REFERENCES public.sequencing_read_technology(code);
+
+
+--
+-- Name: sequencing_experiment sequencing_experiment_status_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.sequencing_experiment
+    ADD CONSTRAINT sequencing_experiment_status_fkey FOREIGN KEY (status_code) REFERENCES public.status(code);
+
+
+--
+-- Name: task_context task_context_case_id_sequencing_experiment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.task_context
+    ADD CONSTRAINT task_context_case_id_sequencing_experiment_id_fkey FOREIGN KEY (case_id, sequencing_experiment_id) REFERENCES public.case_has_sequencing_experiment(case_id, sequencing_experiment_id);
+
+
+--
+-- Name: task_context task_context_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.task_context
+    ADD CONSTRAINT task_context_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.task(id);
+
+
+--
+-- Name: task_has_document task_has_documents_document_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.task_has_document
+    ADD CONSTRAINT task_has_documents_document_id_fkey FOREIGN KEY (document_id) REFERENCES public.document(id);
+
+
+--
+-- Name: task_has_document task_has_documents_task_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.task_has_document
+    ADD CONSTRAINT task_has_documents_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.task(id);
+
+
+--
+-- Name: task task_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: radiant
+--
+
+ALTER TABLE ONLY public.task
+    ADD CONSTRAINT task_type_fkey FOREIGN KEY (task_type_code) REFERENCES public.task_type(code);
