@@ -692,7 +692,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 			return nil, nil
 		},
 	}
-	mockSamples := &SamplesMockRepo{
+	mockSamples := SamplesMockRepo{
 		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(organizationCode string, submitterSampleId string) (*types.Sample, error) {
 			if organizationCode == "LAB-1" && submitterSampleId == "SAMPLE-1" {
 				return &types.Sample{
@@ -711,7 +711,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 		OrgRepo:         &mockRepo,
 		ObservationRepo: &ObservationsMockRepo{},
 		OnsetRepo:       &OnsetsMockRepo{},
-		SampleRepo:      mockSamples,
+		SampleRepo:      &mockSamples,
 	}
 
 	vr, err := validateCaseBatch(&mockContext, []types.CaseBatch{
