@@ -578,7 +578,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 
 	err := record.fetchFromTasks(&mockContext)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to get document by url")
+	assert.Contains(t, err.Error(), "failed to get input document by url")
 }
 
 func Test_fetchFromTasks_SeqExpError(t *testing.T) {
@@ -873,7 +873,6 @@ func Test_fetchOutputDocumentsFromTask_Error(t *testing.T) {
 	assert.Equal(t, 999, record.Documents["file://bucket/task-error.bam"].ID)
 	assert.Len(t, record.DocumentsInTasks, 0)
 }
-
 
 // -----------------------------------------------------------------------------
 // Section: Validation Methods Tests
