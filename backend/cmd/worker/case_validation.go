@@ -65,11 +65,6 @@ type CaseKey struct {
 	SubmitterCaseID string
 }
 
-type PatientKey struct {
-	OrganizationCode   string
-	SubmitterPatientId string
-}
-
 type DocumentRelation struct {
 	TaskID int
 	Type   string
