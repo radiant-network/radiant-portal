@@ -16,6 +16,7 @@ type SamplesRepository struct {
 
 type SamplesDAO interface {
 	GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*Sample, error)
+	GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*Sample, error)
 	CreateSample(newSample *Sample) (*Sample, error)
 	GetTypeCodes() ([]string, error)
 }
@@ -29,6 +30,22 @@ func (r *SamplesRepository) GetSampleBySubmitterSampleId(organizationId int, sub
 	tx := r.db.
 		Table("sample").
 		Where("organization_id = ? and submitter_sample_id = ?", organizationId, submitterSampleId)
+	if err := tx.First(&sample).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error retrieve sample its ID: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+	return &sample, nil
+}
+
+func (r *SamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*Sample, error) {
+	var sample Sample
+	tx := r.db.
+		Table("sample").
+		Joins("JOIN organization o ON o.id = sample.organization_id").
+		Where("sample.submitter_sample_id = ? AND o.code = ?", submitterSampleId, organizationCode)
 	if err := tx.First(&sample).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieve sample its ID: %w", err)

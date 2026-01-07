@@ -39,6 +39,10 @@ func (m *mockSampleDAO) GetSampleBySubmitterSampleId(orgID int, submitterID stri
 	return nil, args.Error(1)
 }
 
+func (m *mockSampleDAO) GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+	return nil, nil
+}
+
 type mockSeqExpDAO struct{ mock.Mock }
 
 func (m *mockSeqExpDAO) CreateSequencingExperiment(se *types.SequencingExperiment) error {

@@ -48,6 +48,10 @@ func (m *MockSamplesRepository) GetSampleBySubmitterSampleId(organizationId int,
 	return nil, nil
 }
 
+func (m *MockSamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+	return nil, nil
+}
+
 func (m *MockSamplesRepository) CreateSample(newSample *types.Sample) (*types.Sample, error) {
 	if m.CreateSampleFunc != nil {
 		return m.CreateSampleFunc(newSample)

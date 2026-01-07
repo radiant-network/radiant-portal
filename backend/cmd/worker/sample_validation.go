@@ -17,14 +17,21 @@ const TissueSiteRegExp = `^[A-Za-z\- ]+$`
 
 var TissueSiteRegExpCompiled = regexp.MustCompile(TissueSiteRegExp)
 
-const SampleAlreadyExistCode = "SAMPLE-001"
-const SampleExistingSampleDifferentFieldCode = "SAMPLE-002"
-const SampleOrgNotExistCode = "SAMPLE-003"
-const SamplePatientNotExistCode = "SAMPLE-004"
-const SampleUnknownParentSubmitterSampleIdCode = "SAMPLE-005"
-const SampleInvalidValueCode = "SAMPLE-006"
-const SampleInvalidPatientForParentSampleCode = "SAMPLE-007"
-const SampleDuplicateInBatchCode = "SAMPLE-008"
+const (
+	SampleAlreadyExistCode                   = "SAMPLE-001"
+	SampleExistingSampleDifferentFieldCode   = "SAMPLE-002"
+	SampleOrgNotExistCode                    = "SAMPLE-003"
+	SamplePatientNotExistCode                = "SAMPLE-004"
+	SampleUnknownParentSubmitterSampleIdCode = "SAMPLE-005"
+	SampleInvalidValueCode                   = "SAMPLE-006"
+	SampleInvalidPatientForParentSampleCode  = "SAMPLE-007"
+	SampleDuplicateInBatchCode               = "SAMPLE-008"
+)
+
+type SampleKey struct {
+	OrganizationCode  string
+	SubmitterSampleId string
+}
 
 type SampleValidationRecord struct {
 	BaseValidationRecord
@@ -177,7 +184,7 @@ func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []*Sa
 }
 
 func insertSampleRecords(records []*SampleValidationRecord, repo repository.SamplesDAO) error {
-	createdSamples := make(map[samplesKey]int)
+	createdSamples := make(map[SampleKey]int)
 
 	for _, record := range records {
 		if !record.Skipped {
@@ -185,7 +192,7 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 			if record.ParentSampleId != nil {
 				parentSampleId = record.ParentSampleId
 			} else if record.Sample.SubmitterParentSampleId != "" {
-				parentKey := samplesKey{
+				parentKey := SampleKey{
 					OrganizationCode:  record.Sample.SampleOrganizationCode,
 					SubmitterSampleId: record.Sample.SubmitterParentSampleId.String(),
 				}
@@ -208,7 +215,7 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 				return err
 			}
 
-			sampleKey := samplesKey{
+			sampleKey := SampleKey{
 				OrganizationCode:  record.Sample.SampleOrganizationCode,
 				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
 			}
@@ -218,15 +225,10 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 	return nil
 }
 
-type samplesKey struct {
-	OrganizationCode  string
-	SubmitterSampleId string
-}
-
-func samplesMap(samples []types.SampleBatch) map[samplesKey]*types.SampleBatch {
-	samplesMap := make(map[samplesKey]*types.SampleBatch)
+func samplesMap(samples []types.SampleBatch) map[SampleKey]*types.SampleBatch {
+	samplesMap := make(map[SampleKey]*types.SampleBatch)
 	for i := range samples {
-		key := samplesKey{
+		key := SampleKey{
 			OrganizationCode:  samples[i].SampleOrganizationCode,
 			SubmitterSampleId: samples[i].SubmitterSampleId.String(),
 		}
@@ -236,20 +238,20 @@ func samplesMap(samples []types.SampleBatch) map[samplesKey]*types.SampleBatch {
 }
 
 func reorderSampleRecords(records []*SampleValidationRecord) {
-	keyToRecord := make(map[samplesKey]*SampleValidationRecord, len(records))
+	keyToRecord := make(map[SampleKey]*SampleValidationRecord, len(records))
 	for _, r := range records {
-		key := samplesKey{
+		key := SampleKey{
 			OrganizationCode:  r.Sample.SampleOrganizationCode,
 			SubmitterSampleId: r.Sample.SubmitterSampleId.String(),
 		}
 		keyToRecord[key] = r
 	}
 
-	visited := make(map[samplesKey]bool, len(records))
+	visited := make(map[SampleKey]bool, len(records))
 	var sorted []*SampleValidationRecord
 	var visit func(*SampleValidationRecord)
 	visit = func(r *SampleValidationRecord) {
-		id := samplesKey{
+		id := SampleKey{
 			OrganizationCode:  r.Sample.SampleOrganizationCode,
 			SubmitterSampleId: r.Sample.SubmitterSampleId.String(),
 		}
@@ -258,7 +260,7 @@ func reorderSampleRecords(records []*SampleValidationRecord) {
 		}
 		visited[id] = true
 		if r.Sample.SubmitterParentSampleId != "" {
-			parentID := samplesKey{
+			parentID := SampleKey{
 				OrganizationCode:  r.Sample.SampleOrganizationCode,
 				SubmitterSampleId: r.Sample.SubmitterParentSampleId.String(),
 			}
@@ -320,7 +322,7 @@ func (r *SampleValidationRecord) validateTypeCode(repoSample repository.SamplesD
 func validateSamplesBatch(samples []types.SampleBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO, repoSample repository.SamplesDAO) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
 	samplesMap := samplesMap(samples)
-	seenSamples := make(map[samplesKey]struct{})
+	seenSamples := make(map[SampleKey]struct{})
 
 	for index, sample := range samples {
 		record := &SampleValidationRecord{
@@ -341,7 +343,7 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 		// 2. Validate duplicates in batch
 		validateUniquenessInBatch(
 			record,
-			samplesKey{
+			SampleKey{
 				OrganizationCode:  sample.SampleOrganizationCode,
 				SubmitterSampleId: sample.SubmitterSampleId.String(),
 			},
@@ -383,7 +385,7 @@ func validateSamplesBatch(samples []types.SampleBatch, repoOrganization reposito
 
 				if existingParentSample == nil {
 					// 8. If parent sample does not exist in DB, check if it exists in the current batch
-					_, parentSampleIsInBatch := samplesMap[samplesKey{
+					_, parentSampleIsInBatch := samplesMap[SampleKey{
 						OrganizationCode:  sample.SampleOrganizationCode,
 						SubmitterSampleId: sample.SubmitterParentSampleId.String(),
 					}]
