@@ -43,8 +43,8 @@ function DialogListCell({ visibleCount, header, items = [], renderItem }: Dialog
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>{header}</AlertDialogHeader>
-        <AlertDialogDescription>
-          <div className="flex flex-col gap-2 max-h-[600px] overflow-auto">{items.map(item => renderItem(item))}</div>
+        <AlertDialogDescription className="max-h-[80vh] overflow-y-auto">
+          <div className="flex flex-col gap-2">{items.map(item => renderItem(item))}</div>
         </AlertDialogDescription>
         <AlertDialogFooter>
           <AlertDialogCancel>{t('common.close')}</AlertDialogCancel>
