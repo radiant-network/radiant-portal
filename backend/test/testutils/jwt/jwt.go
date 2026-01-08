@@ -5,7 +5,7 @@ import (
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
-func GenerateMockJWT(roles []string) (string, error) {
+func GenerateMockJWT(azp string, roles []string) (string, error) {
 	claims := jwt.MapClaims{
 		"jti":             "abc123",
 		"exp":             0,
@@ -14,7 +14,7 @@ func GenerateMockJWT(roles []string) (string, error) {
 		"iss":             "test-issuer",
 		"sub":             "test-subject",
 		"typ":             "test-type",
-		"azp":             "radiant",
+		"azp":             azp,
 		"nonce":           "test-nonce",
 		"auth_time":       0,
 		"session_state":   "test-session",

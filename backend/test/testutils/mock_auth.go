@@ -70,11 +70,11 @@ func (m *MockAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, error) {
 	return &m.Username, nil
 }
 
-func (m *MockAuth) UserHasRole(c *gin.Context, role string) (bool, error) {
+func (m *MockAuth) UserHasRole(c *gin.Context, role string, resourceName string) (bool, error) {
 	if m.Error != nil {
 		return false, m.Error
 	}
-	roles, ok := m.ResourceAccess[m.Azp]
+	roles, ok := m.ResourceAccess[resourceName]
 	if !ok {
 		return false, nil
 	}

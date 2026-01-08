@@ -19,7 +19,7 @@ type Auth interface {
 	RetrieveAzpFromToken(c *gin.Context) (*string, error)
 	RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error)
 	RetrieveUsernameFromToken(c *gin.Context) (*string, error)
-	UserHasRole(c *gin.Context, role string) (bool, error)
+	UserHasRole(c *gin.Context, role string, resourceName string) (bool, error)
 }
 
 type KeycloakAuth struct{}
@@ -70,16 +70,21 @@ func (auth KeycloakAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, err
 	return &token.PreferredUsername, nil
 }
 
-func (auth KeycloakAuth) UserHasRole(c *gin.Context, role string) (bool, error) {
-	azp, err := auth.RetrieveAzpFromToken(c)
-	if err != nil || azp == nil {
-		return false, err
+func (auth KeycloakAuth) UserHasRole(c *gin.Context, role string, resourceName string) (bool, error) {
+	resource := resourceName
+	if resource == "" {
+		azp, err := auth.RetrieveAzpFromToken(c)
+		if err != nil || azp == nil {
+			return false, err
+		}
+		resource = *azp
 	}
+
 	resourceAccess, err := auth.RetrieveResourceAccessFromToken(c)
 	if err != nil || resourceAccess == nil {
 		return false, err
 	}
-	roles, ok := (*resourceAccess)[*azp]
+	roles, ok := (*resourceAccess)[resource]
 	if !ok {
 		return false, nil
 	}

@@ -26,7 +26,7 @@ func Test_RetrieveUserIdFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveUserIdFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -81,7 +81,7 @@ func Test_RetrieveAzpFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveAzpFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -137,7 +137,7 @@ func Test_RetrieveResourceAccessFromToken_InvalidKeycloakToken(t *testing.T) {
 func Test_RetrieveResourceAccessFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -173,7 +173,7 @@ func Test_RetrieveUsernameFromToken_ValidKeycloakToken(t *testing.T) {
 func Test_RetrieveUsernameFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -213,10 +213,10 @@ func Test_RetrieveUsernameFromToken_NoTokenInContext(t *testing.T) {
 	assert.Nil(t, username)
 }
 
-func Test_UserHasRole_Success(t *testing.T) {
+func Test_UserHasRole_Success_FallBack_AZP(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -226,7 +226,26 @@ func Test_UserHasRole_Success(t *testing.T) {
 	}
 
 	auth := KeycloakAuth{}
-	hasRole, err := auth.UserHasRole(&c, DataManagerRole)
+	hasRole, err := auth.UserHasRole(&c, DataManagerRole, "")
+
+	assert.NoError(t, err)
+	assert.True(t, hasRole)
+}
+
+func Test_UserHasRole_Success_SpecificResource(t *testing.T) {
+	c := gin.Context{}
+
+	token, err := jwt.GenerateMockJWT("not-radiant", []string{DataManagerRole})
+	assert.NoError(t, err)
+
+	c.Request = &http.Request{
+		Header: http.Header{
+			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
+		},
+	}
+
+	auth := KeycloakAuth{}
+	hasRole, err := auth.UserHasRole(&c, DataManagerRole, "radiant")
 
 	assert.NoError(t, err)
 	assert.True(t, hasRole)
@@ -235,7 +254,7 @@ func Test_UserHasRole_Success(t *testing.T) {
 func Test_UserHasRole_RoleNotPresent(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{
@@ -245,7 +264,7 @@ func Test_UserHasRole_RoleNotPresent(t *testing.T) {
 	}
 
 	auth := KeycloakAuth{}
-	hasRole, err := auth.UserHasRole(&c, "admin")
+	hasRole, err := auth.UserHasRole(&c, "admin", "")
 
 	assert.NoError(t, err)
 	assert.False(t, hasRole)
@@ -257,7 +276,7 @@ func Test_UserHasRole_NoTokenInContext(t *testing.T) {
 	}
 
 	auth := KeycloakAuth{}
-	hasRole, err := auth.UserHasRole(&c, DataManagerRole)
+	hasRole, err := auth.UserHasRole(&c, DataManagerRole, "")
 
 	assert.Error(t, err)
 	assert.False(t, hasRole)
@@ -266,7 +285,7 @@ func Test_UserHasRole_NoTokenInContext(t *testing.T) {
 func Test_ParseJWTFromHeader_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 
-	token, err := jwt.GenerateMockJWT([]string{DataManagerRole})
+	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
 	assert.NoError(t, err)
 
 	c.Request = &http.Request{

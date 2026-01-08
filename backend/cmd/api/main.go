@@ -179,8 +179,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup.POST("/filters", server.DocumentsFiltersHandler(repoDocuments))
 	documentsGroup.GET("/:document_id/download_url", server.GetDocumentsDownloadUrlHandler(repoDocuments, s3Presigner))
 
+	dataManagerResourceName := os.Getenv("KEYCLOAK_CLIENT")
 	dataManagerRoutes := privateRoutes.Group("/")
-	dataManagerRoutes.Use(server.RequireRole(auth, utils.DataManagerRole))
+	dataManagerRoutes.Use(server.RequireRole(auth, utils.DataManagerRole, dataManagerResourceName))
 	{
 		batchesGroup := dataManagerRoutes.Group("/batches")
 		batchesGroup.GET("/:batch_id", server.GetBatchHandler(repoBatches))
