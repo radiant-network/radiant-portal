@@ -72,14 +72,12 @@ func (auth KeycloakAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, err
 
 func (auth KeycloakAuth) UserHasRole(c *gin.Context, role string, resourceName string) (bool, error) {
 	resource := resourceName
-	if resourceName == "" {
+	if resource == "" {
 		azp, err := auth.RetrieveAzpFromToken(c)
 		if err != nil || azp == nil {
 			return false, err
 		}
 		resource = *azp
-	} else {
-		resource = resourceName
 	}
 
 	resourceAccess, err := auth.RetrieveResourceAccessFromToken(c)
