@@ -1,8 +1,10 @@
-import { useEditor, EditorContent, EditorContentProps } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
+import { EditorContent, EditorContentProps, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+
 import { cn } from '@/components/lib/utils';
+
 import RichTextEditorToolbar from './rich-text-editor-toolbar';
 
 export type RichTextEditorProps = Omit<EditorContentProps, 'ref' | 'editor' | 'onChange' | 'onBlur'> & {

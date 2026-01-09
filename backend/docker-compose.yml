@@ -14,7 +14,7 @@ services:
       retries: 5
 
   postgres:
-    image: postgres
+    image: postgres:14
     container_name: postgres_radiant
     ports:
       - "5432:5432"

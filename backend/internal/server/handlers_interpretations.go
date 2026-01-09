@@ -117,7 +117,7 @@ func GetInterpretationGermlineDeprecated(repo repository.InterpretationsDAO) gin
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
-func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
+func GetInterpretationGermline(repo repository.InterpretationsDAO, termsRepo repository.TermsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
 		interpretation, err := repo.FirstGermline(caseId, sequencingId, locusId, transcriptId)
@@ -129,6 +129,16 @@ func GetInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFu
 			HandleNotFoundError(c, "interpretation")
 			return
 		}
+
+		conditionName, err := termsRepo.GetTermNameById(types.MondoTable.Name, interpretation.Condition)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if conditionName != nil {
+			interpretation.ConditionName = *conditionName
+		}
+
 		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
 	}
 }

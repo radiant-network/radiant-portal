@@ -20,7 +20,7 @@ function SliderOccurrenceSubHeader({ hgvsg, locusId, actions }: SliderOccurrence
           mono
           target="_blank"
           rel="noreferrer"
-          className="min-w-0"
+          className="min-w-0 font-semibold"
           external
         >
           <span className="overflow-hidden text-ellipsis max-w-52">{hgvsg}</span>

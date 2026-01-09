@@ -18,6 +18,30 @@ type CaseValidationMockRepo struct {
 	GetCaseBySubmitterCaseIdAndProjectIdFunc func(submitterCaseId string, projectId int) (*repository.Case, error)
 }
 
+func (m *CaseValidationMockRepo) CreateTask(task *repository.Task) error {
+	return nil
+}
+
+func (m *CaseValidationMockRepo) CreateTaskContext(tc *repository.TaskContext) error {
+	return nil
+}
+
+func (m *CaseValidationMockRepo) CreateTaskHasDocument(thd *repository.TaskHasDocument) error {
+	return nil
+}
+
+func (m *CaseValidationMockRepo) GetTaskById(taskId int) (*repository.Task, error) {
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetTaskContextByTaskId(taskId int) ([]*repository.TaskContext, error) {
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetTaskHasDocumentByTaskId(taskId int) ([]*repository.TaskHasDocument, error) {
+	return nil, nil
+}
+
 func (m *CaseValidationMockRepo) CreateCase(c *repository.Case) error {
 	return nil
 }
@@ -69,9 +93,10 @@ func (m *CaseValidationMockRepo) GetCasesFilters(userQuery types.AggQuery) (*rep
 func (m *CaseValidationMockRepo) GetDocumentByUrl(url string) (*types.Document, error) {
 	if url == "file://bucket/file.bam" {
 		return &types.Document{ID: 500, Url: url, Name: "file.bam"}, nil
-	}
-	if url == "file://bucket/error.bam" {
+	} else if url == "file://bucket/error.bam" {
 		return nil, fmt.Errorf("document service unavailable")
+	} else if url == "file://bucket/task-error.bam" {
+		return &types.Document{ID: 999, Url: url, Name: "task-error.bam"}, nil
 	}
 	return nil, nil // Not found
 }
@@ -162,6 +187,17 @@ func (m *CaseValidationMockRepo) SearchCases(userQuery types.ListQuery) (*[]repo
 
 func (m *CaseValidationMockRepo) SearchDocuments(userQuery types.ListQuery) (*[]repository.DocumentResult, *int64, error) {
 	return nil, nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetTaskHasDocumentByDocumentId(docId int) ([]*types.TaskHasDocument, error) {
+	if docId == 500 {
+		return []*types.TaskHasDocument{
+			{TaskID: 300, DocumentID: docId, Type: "output"},
+		}, nil
+	} else if docId == 999 {
+		return nil, fmt.Errorf("database connection failed")
+	}
+	return nil, nil
 }
 
 // -----------------------------------------------------------------------------
@@ -763,7 +799,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 
 	err := record.fetchFromTasks(&mockContext)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to get document by url")
+	assert.Contains(t, err.Error(), "failed to get input document by url")
 }
 
 func Test_fetchFromTasks_SeqExpError(t *testing.T) {
@@ -898,6 +934,167 @@ func Test_formatFieldPath_WithCollectionAndIndex(t *testing.T) {
 	collectionIndex := 1
 	path := record.formatFieldPath("entity_type", &index, "sub_collection", &collectionIndex)
 	assert.Equal(t, "case[5].entity_type[0].sub_collection[1]", path)
+}
+
+func Test_fetchSequencingExperimentsInTask_OK(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		SeqExpRepo: &mockRepo,
+	}
+	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+
+	task := types.CaseTaskBatch{
+		Aliquot: "ALIQUOT-1",
+	}
+	err := record.fetchSequencingExperimentsInTask(record.Context, &task)
+	assert.NoError(t, err)
+	assert.Len(t, record.SequencingExperiments, 1)
+	assert.Equal(t, 200, record.SequencingExperiments[200].ID)
+	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[200].Aliquot)
+}
+
+func Test_fetchSequencingExperimentsInTask_NotFound(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		SeqExpRepo: &mockRepo,
+	}
+	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+
+	task := types.CaseTaskBatch{
+		Aliquot: "ALIQUOT-999",
+	}
+	err := record.fetchSequencingExperimentsInTask(record.Context, &task)
+	assert.NoError(t, err)
+	assert.Len(t, record.SequencingExperiments, 0)
+}
+
+func Test_fetchSequencingExperimentsInTask_Error(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		SeqExpRepo: &mockRepo,
+	}
+	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+
+	task := types.CaseTaskBatch{
+		Aliquot: "ALIQUOT-ERROR",
+	}
+	err := record.fetchSequencingExperimentsInTask(record.Context, &task)
+	assert.Error(t, err)
+	assert.Len(t, record.SequencingExperiments, 0)
+}
+
+func Test_fetchInputDocumentsFromTask_OK(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		DocRepo: &mockRepo,
+	}
+	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+
+	task := types.CaseTaskBatch{
+		InputDocuments: []*types.InputDocumentBatch{{
+			Url: "file://bucket/file.bam",
+		}},
+	}
+	err := record.fetchInputDocumentsFromTask(record.Context, &task)
+	assert.NoError(t, err)
+	assert.Len(t, record.Documents, 1)
+	assert.Equal(t, 500, record.Documents["file://bucket/file.bam"].ID)
+}
+
+func Test_fetchInputDocumentsFromTask_NotFound(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		DocRepo: &mockRepo,
+	}
+	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+
+	task := types.CaseTaskBatch{
+		InputDocuments: []*types.InputDocumentBatch{{
+			Url: "file://bucket/unknown.bam",
+		}},
+	}
+	err := record.fetchInputDocumentsFromTask(record.Context, &task)
+	assert.NoError(t, err)
+	assert.Len(t, record.Documents, 0)
+}
+
+func Test_fetchInputDocumentsFromTask_Error(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		DocRepo: &mockRepo,
+	}
+	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+
+	task := types.CaseTaskBatch{
+		InputDocuments: []*types.InputDocumentBatch{{
+			Url: "file://bucket/error.bam",
+		}},
+	}
+	err := record.fetchInputDocumentsFromTask(record.Context, &task)
+	assert.Error(t, err)
+	assert.Len(t, record.Documents, 0)
+}
+
+func Test_fetchOutputDocumentsFromTask_OK(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		DocRepo:  &mockRepo,
+		TaskRepo: &mockRepo,
+	}
+	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+
+	task := types.CaseTaskBatch{
+		OutputDocuments: []*types.OutputDocumentBatch{{
+			Url: "file://bucket/file.bam",
+		}},
+	}
+	err := record.fetchOutputDocumentsFromTask(record.Context, &task)
+	assert.NoError(t, err)
+	assert.Len(t, record.Documents, 1)
+	assert.Equal(t, 500, record.Documents["file://bucket/file.bam"].ID)
+	assert.Len(t, record.DocumentsInTasks, 1)
+	assert.Len(t, record.DocumentsInTasks["file://bucket/file.bam"], 1)
+	assert.Equal(t, 300, record.DocumentsInTasks["file://bucket/file.bam"][0].TaskID)
+	assert.Equal(t, "output", record.DocumentsInTasks["file://bucket/file.bam"][0].Type)
+}
+
+func Test_fetchOutputDocumentsFromTask_NotFound(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		DocRepo:  &mockRepo,
+		TaskRepo: &mockRepo,
+	}
+	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+
+	task := types.CaseTaskBatch{
+		OutputDocuments: []*types.OutputDocumentBatch{{
+			Url: "file://bucket/unknown.bam",
+		}},
+	}
+	err := record.fetchOutputDocumentsFromTask(record.Context, &task)
+	assert.NoError(t, err)
+	assert.Len(t, record.Documents, 0)
+	assert.Len(t, record.DocumentsInTasks, 0)
+}
+
+func Test_fetchOutputDocumentsFromTask_Error(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		DocRepo:  &mockRepo,
+		TaskRepo: &mockRepo,
+	}
+	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+
+	task := types.CaseTaskBatch{
+		OutputDocuments: []*types.OutputDocumentBatch{{
+			Url: "file://bucket/task-error.bam",
+		}},
+	}
+	err := record.fetchOutputDocumentsFromTask(record.Context, &task)
+	assert.Error(t, err)
+	assert.Len(t, record.Documents, 1)
+	assert.Equal(t, 999, record.Documents["file://bucket/task-error.bam"].ID)
+	assert.Len(t, record.DocumentsInTasks, 0)
 }
 
 // -----------------------------------------------------------------------------

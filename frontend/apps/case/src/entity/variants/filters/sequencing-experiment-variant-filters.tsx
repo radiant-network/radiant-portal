@@ -6,19 +6,22 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
-import ToggleButtonGroup from '@/components/base/toggle-button-group/toggle-button-group';
+import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
 import { VariantInterface } from '../variants-tab';
 
-function SequencingVariantFiltersSelectValue({ relationship_to_proband }: CaseSequencingExperiment) {
+function SequencingVariantFiltersSelectValue({ relationship_to_proband, seq_id }: CaseSequencingExperiment) {
   const { t } = useI18n();
 
   return (
     <div className="inline-flex gap-1">
       <span className="font-bold capitalize">
         {relationship_to_proband ?? t('case_entity.variants.filters.proband')}
+      </span>
+      <span>
+        ({t('case_entity.variants.filters.sequencing_id')} {seq_id})
       </span>
     </div>
   );
@@ -29,7 +32,7 @@ function SequencingVariantFiltersSelectItem(caseSeqExp: CaseSequencingExperiment
   return (
     <div>
       <SequencingVariantFiltersSelectValue {...caseSeqExp} />
-      <div className="flex items-center color-muted text-xs">
+      <div className="flex items-center text-muted-foreground color-muted text-xs">
         {t('case_entity.variants.filters.sample_id')} {caseSeqExp.sample_id}
         {caseSeqExp.affected_status_code && (
           <>
@@ -117,21 +120,20 @@ function SequencingVariantFilters({
       </Badge>
       <Separator className="h-6" orientation="vertical" />
 
-      <ToggleButtonGroup
-        onValueChange={onActiveInterfaceChange}
-        defaultValue={activeInterface}
-        size="xxs"
-        items={[
-          {
-            label: t('case_entity.variants.filters.snv'),
-            value: VariantInterface.SNV,
-          },
-          {
-            label: t('case_entity.variants.filters.cnv'),
-            value: VariantInterface.CNV,
-          },
-        ]}
-      />
+      <Tabs value={activeInterface}>
+        <TabsList className="w-full">
+          {Object.values(VariantInterface).map(variant => (
+            <TabsTrigger
+              key={variant}
+              value={variant}
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
+              onClick={() => onActiveInterfaceChange(variant)}
+            >
+              {t(`case_entity.variants.filters.${variant.toLowerCase()}`)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
     </div>
   );
 }

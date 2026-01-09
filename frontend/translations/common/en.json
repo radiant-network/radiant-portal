@@ -1,6 +1,8 @@
 {
   "common": {
     "date": "yyyy-MM-dd",
+    "time": "hh:mm a",
+    "datetime": "{{date}} at {{time}}",
     "empty_section": "No {{title}} data reported",
     "unspecified": "Unspecified",
     "no_data_available": "No data available",
@@ -909,7 +911,10 @@
       "DL": "Donor Loss"
     },
     "interpretation": {
-      "tooltip": "Open clinical interpretation",
+      "tooltip": {
+        "add": "Add variant interpretation",
+        "edit": "Edit variant interpretation"
+      },
       "classifications": {
         "all_classifications": "All Classifications",
         "pathogenic": "Pathogenic",
@@ -967,9 +972,16 @@
       "title": "Alignment and variant"
     },
     "interpretation_form": {
+      "alert": {
+        "cancel": "Go back",
+        "description": "Saving these changes will overwrite the existing variant interpretation within your organization. This action cannot be undone.",
+        "save": "Save changes",
+        "title": "Overwrite interpretation?"
+
+      },
       "title": "Clinical Interpretation",
       "cancel_text": "Cancel",
-      "ok_text": "Save",
+      "ok_text": "Save Interpretation",
       "last_update": "Last update: <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
       "header": {
         "germline": "Germline",
@@ -1064,6 +1076,18 @@
       "interpretation": "Interpret variant",
       "view_all_variants": "View all variants",
       "view_in_case": "View in case"
+    },
+    "interpretation_details": {
+      "title": "Variant Interpretation",
+      "fields": {
+        "gene": "Gene",
+        "transcript": "Transcript",
+        "classification": "Classification",
+        "primary_condition": "Primary Condition",
+        "classification_criteria": "Classification criteria",
+        "interpretation": "Interpretation",
+        "references": "{{count}} references"
+      }
     },
     "variant_details": {
       "title": "Variant Details",
@@ -1258,6 +1282,7 @@
       "managing_org_tooltip": "Organization managing the patient’s file",
       "mother": "Mother",
       "name": "Name (First / Last)",
+      "no_patient": "No patient information available",
       "proband": "Proband",
       "sex": "Sex",
       "submitter_patient_id": "Org. patient ID",
@@ -1356,7 +1381,8 @@
           "full_cnv": "Gene contains the CNV entirely"
         },
         "snv": "SNV",
-        "cnv": "CNV"
+        "cnv": "CNV",
+        "sequencing_id": "Seq. ID"
       },
       "dialog": {
         "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
@@ -1598,5 +1624,8 @@
     "canonical": "Canonical",
     "mane_select": "Mane Select",
     "mane_plus": "Mane Plus"
+  },
+  "pubmed_list_dialog": {
+    "title": "PubMed Publications"
   }
 }

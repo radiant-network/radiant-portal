@@ -22,7 +22,7 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
   const { t } = useI18n();
 
   if (!member) {
-    return <div className="text-muted-foreground text-sm">No patient information available</div>;
+    return <div className="text-muted-foreground text-sm">{t('case_entity.patient_information.no_patient')}</div>;
   }
 
   return (

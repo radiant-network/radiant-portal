@@ -1325,6 +1325,8 @@ components:
           uniqueItems: false
         condition:
           type: string
+        condition_name:
+          type: string
         created_at:
           type: string
         created_by:

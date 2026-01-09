@@ -2635,6 +2635,12 @@ export interface InterpretationGermline {
      * @type {string}
      * @memberof InterpretationGermline
      */
+    'condition_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationGermline
+     */
     'created_at'?: string;
     /**
      * 

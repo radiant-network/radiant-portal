@@ -4,6 +4,7 @@ import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
+import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import { Button } from '@/components/base/shadcn/button';
 import {
   Dialog,
@@ -114,7 +115,12 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {renderTrigger(handleOpen)}
-      <DialogContent size="lg" onEscapeKeyDown={e => e.preventDefault()} variant="stickyBoth">
+      <DialogContent
+        size="lg"
+        onEscapeKeyDown={e => e.preventDefault()}
+        variant="stickyBoth"
+        className="overflow-hidden"
+      >
         {fetchInterpretation.isLoading || fetchOccurrenceExpand?.isLoading ? (
           <DialogBody className="flex items-center justify-center">
             <Spinner size={32} />
@@ -167,7 +173,23 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
                 type="submit"
                 color="primary"
                 loading={saveInterpretation.isMutating}
-                onClick={handleSave}
+                onClick={() => {
+                  alertDialog.open({
+                    type: 'warning',
+                    title: t('variant.interpretation_form.alert.title'),
+                    description: t('variant.interpretation_form.alert.description'),
+                    actionProps: {
+                      children: t('variant.interpretation_form.alert.save'),
+                      onClick: e => {
+                        e.preventDefault();
+                        handleSave();
+                      },
+                    },
+                    cancelProps: {
+                      children: t('variant.interpretation_form.alert.cancel'),
+                    },
+                  });
+                }}
                 disabled={!isDirty}
               >
                 {t('variant.interpretation_form.ok_text')}

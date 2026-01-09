@@ -50,6 +50,6 @@ describe('Patients - Batch - Process worker - Patient003', () => {
   });
 
   it('Validate report patient[0] patient_organization_code', () => {
-    cy.validateReport(response, 'error', 'PATIENT-003', apiMessages.ProcessWorkerError003('patient', 'UnknownValue', 'Cypress0001'), 'patient[0].patient_organization_code');
+    cy.validateReport(response, 'error', 'PATIENT-003', apiMessages.ProcessWorkerError003('Organization', 'patient', 'UnknownValue', 'Cypress0001'), 'patient[0].patient_organization_code');
   });
 });

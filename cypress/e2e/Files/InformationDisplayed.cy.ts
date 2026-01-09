@@ -7,6 +7,10 @@ describe('Files - Information displayed', () => {
   const setupTest = () => {
     cy.login();
     cy.visitFilesPage(data.file.search_criteria);
+    FilesTable.actions.sortColumn('case');
+    FilesTable.actions.sortColumn('case');
+    FilesTable.actions.sortColumn('name');
+    FilesTable.actions.sortColumn('name');
   };
 
   it('File Name', () => {

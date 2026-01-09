@@ -1,6 +1,8 @@
 {
   "common": {
     "date": "yyyy-MM-dd",
+    "time": "HH'h'mm",
+    "datetime": "{{date}} à {{time}}",
     "empty_section": "Aucune donnée {{title}} signalée",
     "unspecified": "Indéterminée",
     "no_data_available": "Aucune donnée disponible",
@@ -909,7 +911,10 @@
       "DL": "Donor Loss"
     },
     "interpretation": {
-      "tooltip": "Ouvrir l'interprétation clinique",
+      "tooltip": {
+        "add": "Ajouter une interprétation",
+        "edit": "Modifier l’interprétation"
+      },
       "classifications": {
         "all_classifications": "Toutes les classifications",
         "pathogenic": "Pathogénique",
@@ -967,9 +972,15 @@
       "title": "Alignement et variant"
     },
     "interpretation_form": {
+      "alert": {
+        "cancel": "Retourner",
+        "description": "La soumission de ces modifications remplacera l’interprétation du variant existante au sein de votre organisation. Cette action est irréversible.",
+        "save": "Soumettre les modifications ",
+        "title": "Écraser l’interprétation ?"
+      },
       "title": "Interprétation clinique",
       "cancel_text": "Annuler",
-      "ok_text": "Sauvegarder",
+      "ok_text": "Sauvegarder l'interprétation",
       "last_update": "Dernière mise à jour : <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
       "header": {
         "germline": "Germinal",
@@ -1064,6 +1075,18 @@
       "interpretation": "Interpréter variant",
       "view_all_variants": "Voir les variants",
       "view_in_case": "Voir dans le cas"
+    },
+    "interpretation_details": {
+      "title": "Interprétation de variant",
+      "fields": {
+        "gene": "Gène",
+        "transcript": "Transcrit",
+        "classification": "Classification",
+        "primary_condition": "Condition principale",
+        "classification_criteria": "Critères de classification",
+        "interpretation": "Interprétation",
+        "references": "{{count}} références"
+      }
     },
     "variant_details": {
       "title": "Détails du Variant",
@@ -1258,6 +1281,7 @@
       "managing_org_tooltip": "Organisation responsable du dossier du patient",
       "mother": "Mère",
       "name": "Nom (Prénom / Nom de famille)",
+      "no_patient": "Aucune information du patient disponible",
       "proband": "Proband",
       "sex": "Sexe",
       "submitter_patient_id": "ID patient org.",
@@ -1356,7 +1380,8 @@
           "full_cnv": "Gène contient entièrement le CNV"
         },
         "snv": "SNV",
-        "cnv": "CNV"
+        "cnv": "CNV",
+        "sequencing_id": "ID Séq."
       },
       "dialog": {
         "overlapping_gene": "Liste des gènes chevauchants le CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
@@ -1598,5 +1623,8 @@
     "canonical": "Canonical",
     "mane_select": "Mane Select",
     "mane_plus": "Mane Plus"
+  },
+  "pubmed_list_dialog": {
+    "title": "Publications PubMed"
   }
 }

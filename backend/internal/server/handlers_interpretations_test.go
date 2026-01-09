@@ -31,6 +31,7 @@ func (m *MockRepository) FirstGermline(caseId string, sequencingId string, locus
 	var uniqueId = fmt.Sprintf("%s-%s-%s-%s", caseId, sequencingId, locusId, transcriptId)
 	if uniqueId == "10-seq1-locus1-trans1" {
 		return &types.InterpretationGermline{
+			Condition: "MONDO:0000001",
 			InterpretationCommon: types.InterpretationCommon{
 				ID:           uniqueId,
 				CaseId:       caseId,
@@ -94,7 +95,7 @@ func (m *MockRepository) RetrieveGermlineInterpretationClassificationCounts(locu
 func assertGetInterpretationGermline(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationGermline(repo))
+	router.GET("/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationGermline(repo, repo))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/v2/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -105,7 +106,7 @@ func assertGetInterpretationGermline(t *testing.T, caseId string, sequencingId s
 }
 
 func Test_GetInterpretationGermline_ok(t *testing.T) {
-	assertGetInterpretationGermline(t, "10", "seq1", "locus1", "trans1", http.StatusOK, `{"case_id":"10", "created_at":"0001-01-01T00:00:00Z", "id":"10-seq1-locus1-trans1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
+	assertGetInterpretationGermline(t, "10", "seq1", "locus1", "trans1", http.StatusOK, `{"case_id":"10", "condition":"MONDO:0000001", "condition_name":"blood group incompatibility", "created_at":"0001-01-01T00:00:00Z", "id":"10-seq1-locus1-trans1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_GetInterpretationGermline_error(t *testing.T) {

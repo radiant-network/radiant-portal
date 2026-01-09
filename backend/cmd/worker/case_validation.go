@@ -54,6 +54,11 @@ const (
 	SeqExpNotFound = "SEQ-007"
 )
 
+// Documents error codes
+const (
+	InvalidFieldDocumentCode = "DOCUMENT-001"
+)
+
 const RelationshipProbandCode = "proband"
 
 var CaseRelatedTaskTypes = map[string]struct{}{
@@ -64,6 +69,11 @@ var CaseRelatedTaskTypes = map[string]struct{}{
 type CaseKey struct {
 	ProjectCode     string
 	SubmitterCaseID string
+}
+
+type DocumentRelation struct {
+	TaskID int
+	Type   string
 }
 
 type StorageContext struct {
@@ -104,6 +114,7 @@ type CaseValidationRecord struct {
 	Patients              map[PatientKey]*types.Patient
 	SequencingExperiments map[int]*types.SequencingExperiment
 	Documents             map[string]*types.Document
+	DocumentsInTasks      map[string][]*DocumentRelation
 }
 
 func NewCaseValidationRecord(ctx *BatchValidationContext, c types.CaseBatch, index int) *CaseValidationRecord {
@@ -116,6 +127,7 @@ func NewCaseValidationRecord(ctx *BatchValidationContext, c types.CaseBatch, ind
 		Patients:              make(map[PatientKey]*types.Patient),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 		Documents:             make(map[string]*types.Document),
+		DocumentsInTasks:      make(map[string][]*DocumentRelation),
 	}
 }
 
@@ -254,50 +266,105 @@ func (r *CaseValidationRecord) fetchFromSequencingExperiments(ctx *BatchValidati
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchFromTasks(ctx *BatchValidationContext) error {
-	for _, t := range r.Case.Tasks {
-		seqs, err := ctx.SeqExpRepo.GetSequencingExperimentByAliquot(t.Aliquot)
+func (cr *CaseValidationRecord) fetchSequencingExperimentsInTask(ctx *BatchValidationContext, task *types.CaseTaskBatch) error {
+	seqs, err := ctx.SeqExpRepo.GetSequencingExperimentByAliquot(task.Aliquot)
+	if err != nil {
+		return fmt.Errorf("failed to get sequencing experiment by aliquot %q: %w", task.Aliquot, err)
+	}
+
+	for i := range seqs {
+		se := &seqs[i]
+		if _, exists := cr.SequencingExperiments[se.ID]; !exists {
+			cr.SequencingExperiments[se.ID] = se
+		}
+	}
+
+	return nil
+}
+
+func (cr *CaseValidationRecord) fetchInputDocumentsFromTask(ctx *BatchValidationContext, task *types.CaseTaskBatch) error {
+	for _, doc := range task.InputDocuments {
+		d, err := ctx.DocRepo.GetDocumentByUrl(doc.Url)
 		if err != nil {
-			return fmt.Errorf("failed to get sequencing experiment by aliquot %q: %w", t.Aliquot, err)
+			return fmt.Errorf("failed to get input document by url %q: %w", doc.Url, err)
+		}
+		if d != nil {
+			cr.Documents[doc.Url] = d
+		}
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) fetchOutputDocumentsFromTask(ctx *BatchValidationContext, task *types.CaseTaskBatch) error {
+	for _, doc := range task.OutputDocuments {
+		d, err := ctx.DocRepo.GetDocumentByUrl(doc.Url)
+		if err != nil {
+			return fmt.Errorf("failed to get output document by url %q: %w", doc.Url, err)
+		}
+		if d == nil {
+			continue
 		}
 
-		for i := range seqs {
-			se := &seqs[i]
-			if _, exists := r.SequencingExperiments[se.ID]; !exists {
-				r.SequencingExperiments[se.ID] = se
-			}
+		cr.Documents[doc.Url] = d
+		docs, err := ctx.TaskRepo.GetTaskHasDocumentByDocumentId(d.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get task has document by document id %d: %w", d.ID, err)
 		}
 
-		for _, doc := range t.InputDocuments {
-			d, err := ctx.DocRepo.GetDocumentByUrl(doc.Url)
-			if err != nil {
-				return fmt.Errorf("failed to get document by url %q: %w", doc.Url, err)
-			}
-			if d != nil {
-				r.Documents[doc.Url] = d
+		for _, do := range docs {
+			if _, ok := cr.DocumentsInTasks[doc.Url]; ok {
+				cr.DocumentsInTasks[doc.Url] = append(cr.DocumentsInTasks[doc.Url], &DocumentRelation{
+					TaskID: do.TaskID,
+					Type:   do.Type,
+				})
+			} else {
+				cr.DocumentsInTasks[doc.Url] = []*DocumentRelation{
+					{
+						TaskID: do.TaskID,
+						Type:   do.Type,
+					},
+				}
 			}
 		}
 	}
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchValidationInfos() error {
-	if err := r.fetchProject(r.Context); err != nil {
+func (cr *CaseValidationRecord) fetchFromTasks(ctx *BatchValidationContext) error {
+	for _, t := range cr.Case.Tasks {
+		if err := cr.fetchSequencingExperimentsInTask(ctx, t); err != nil {
+			return fmt.Errorf("failed to fetch sequencing experiments from task: %w", err)
+		}
+
+		if err := cr.fetchInputDocumentsFromTask(ctx, t); err != nil {
+			return fmt.Errorf("failed to fetch input documents from task: %w", err)
+		}
+
+		if err := cr.fetchOutputDocumentsFromTask(ctx, t); err != nil {
+			return fmt.Errorf("failed to fetch output documents from task: %w", err)
+		}
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) fetchValidationInfos() error {
+
+	if err := cr.fetchProject(cr.Context); err != nil {
 		return fmt.Errorf("failed to resolve project: %w", err)
 	}
-	if err := r.fetchAnalysisCatalog(r.Context); err != nil {
+	if err := cr.fetchAnalysisCatalog(cr.Context); err != nil {
 		return fmt.Errorf("failed to resolve analysis catalog: %w", err)
 	}
-	if err := r.fetchOrganizations(r.Context); err != nil {
+	if err := cr.fetchOrganizations(cr.Context); err != nil {
 		return fmt.Errorf("failed to resolve organizations: %w", err)
 	}
-	if err := r.fetchPatients(r.Context); err != nil {
+	if err := cr.fetchPatients(cr.Context); err != nil {
 		return fmt.Errorf("failed to resolve patients: %w", err)
 	}
-	if err := r.fetchFromSequencingExperiments(r.Context); err != nil {
+	if err := cr.fetchFromSequencingExperiments(cr.Context); err != nil {
 		return fmt.Errorf("failed to resolve sequencing experiments: %w", err)
 	}
-	if err := r.fetchFromTasks(r.Context); err != nil {
+	if err := cr.fetchFromTasks(cr.Context); err != nil {
 		return fmt.Errorf("failed to resolve tasks: %w", err)
 	}
 	return nil
@@ -319,6 +386,10 @@ func (cr *CaseValidationRecord) formatObservationInvalidFieldMessage(fieldName s
 		observationType,
 		obsIndex,
 	)
+}
+
+func (cr *CaseValidationRecord) formatTaskDocumentFieldErrorMessage(fieldName string, caseIndex, taskIndex, documentIndex int) string {
+	return fmt.Sprintf("Invalid Field %s for case %d - task %d - output document %d. Reason:", fieldName, caseIndex, taskIndex, documentIndex)
 }
 
 func (cr *CaseValidationRecord) formatFieldPath(entityType string, entityIndex *int, collectionName string, collectionIndex *int) string {
@@ -346,6 +417,10 @@ func (cr *CaseValidationRecord) formatPatientsFieldPath(patientIndex *int, colle
 
 func (cr *CaseValidationRecord) formatSeqExpFieldPath(seqExpIndex *int) string {
 	return cr.formatFieldPath("sequencing_experiments", seqExpIndex, "", nil)
+}
+
+func (cr *CaseValidationRecord) formatCollectionPath(entityType string) string {
+	return cr.formatFieldPath(entityType, nil, "", nil)
 }
 
 func (cr *CaseValidationRecord) validatePatientsTextField(value, fieldName, path string, patientIndex int, regExp *regexp.Regexp, regExpStr string, observationType string, obsIndex int, required bool) {
@@ -726,7 +801,13 @@ func (cr *CaseValidationRecord) validateCase() error {
 			cr.addErrors(message, CaseAlreadyExists, path) // CASE-001
 		}
 	}
+	return nil
+}
 
+// Documents validation
+
+func (cr *CaseValidationRecord) validateDocuments(tasks []*types.CaseTaskBatch) error {
+	// TODO: Implement document validation
 	return nil
 }
 
@@ -764,6 +845,11 @@ func validateCaseRecord(
 	}
 
 	// 4. Validate Case Tasks
+
+	// Validate documents
+	if err := cr.validateDocuments(c.Tasks); err != nil {
+		return nil, fmt.Errorf("error validating documents: %w", err)
+	}
 
 	return cr, nil
 }
