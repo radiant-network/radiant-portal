@@ -31,6 +31,7 @@ type InterpretationCommon struct {
 type InterpretationGermline struct {
 	InterpretationCommon
 	Condition               string   `json:"condition,omitempty"`
+	ConditionName           string   `json:"condition_name,omitempty"`
 	Classification          string   `json:"classification,omitempty"`
 	ClassificationCriterias []string `json:"classification_criterias,omitempty"`
 	TransmissionModes       []string `json:"transmission_modes,omitempty"`

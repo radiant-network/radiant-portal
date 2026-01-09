@@ -48,6 +48,26 @@ func (m *MockRepository) GetTermAutoComplete(string, string, int) (*[]types.Auto
 		nil
 }
 
+func (m *MockRepository) GetTermNameById(termsTable string, id string) (*string, error) {
+	if termsTable == types.MondoTable.Name && id == "MONDO:0000001" {
+		name := "blood group incompatibility"
+		return &name, nil
+	}
+	if termsTable == types.MondoTable.Name && id == "MONDO:0000002" {
+		name := "blood vessel neoplasm"
+		return &name, nil
+	}
+	if termsTable == types.MondoTable.Name && id == "MONDO:0000003" {
+		name := "colorblindness, partial"
+		return &name, nil
+	}
+	if termsTable == types.MondoTable.Name && id == "MONDO:0700092" {
+		name := "neurodevelopmental disorder"
+		return &name, nil
+	}
+	return nil, nil
+}
+
 func (m *MockRepository) GetOrganizations() (*[]string, error) {
 	return &[]string{"CHOP"}, nil
 }

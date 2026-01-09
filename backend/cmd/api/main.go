@@ -115,7 +115,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	interpretationsGermlineGroupDeprecated.GET("", server.GetInterpretationGermlineDeprecated(repoPostgres.Interpretations))
 	interpretationsGermlineGroupDeprecated.POST("", server.PostInterpretationGermlineDeprecated(repoPostgres.Interpretations))
 	interpretationsGermlineGroup := interpretationsGroup.Group("/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id")
-	interpretationsGermlineGroup.GET("", server.GetInterpretationGermline(repoPostgres.Interpretations))
+	interpretationsGermlineGroup.GET("", server.GetInterpretationGermline(repoPostgres.Interpretations, repoTerms))
 	interpretationsGermlineGroup.POST("", server.PostInterpretationGermline(repoPostgres.Interpretations))
 
 	interpretationsSomaticGroupDeprecated := interpretationsGroup.Group("/somatic/:sequencing_id/:locus_id/:transcript_id")
