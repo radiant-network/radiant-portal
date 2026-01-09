@@ -14,7 +14,9 @@ import (
 // Section: Repository Mocking
 // -----------------------------------------------------------------------------
 
-type CaseValidationMockRepo struct{}
+type CaseValidationMockRepo struct {
+	GetCaseBySubmitterCaseIdAndProjectIdFunc func(submitterCaseId string, projectId int) (*repository.Case, error)
+}
 
 func (m *CaseValidationMockRepo) CreateTask(task *repository.Task) error {
 	return nil
@@ -74,6 +76,13 @@ func (m *CaseValidationMockRepo) GetCaseAnalysisCatalogIdByCode(code string) (*r
 }
 
 func (m *CaseValidationMockRepo) GetCaseEntity(caseId int) (*repository.CaseEntity, error) {
+	return nil, nil
+}
+
+func (m *CaseValidationMockRepo) GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*repository.Case, error) {
+	if m.GetCaseBySubmitterCaseIdAndProjectIdFunc != nil {
+		return m.GetCaseBySubmitterCaseIdAndProjectIdFunc(submitterCaseId, projectId)
+	}
 	return nil, nil
 }
 
@@ -195,16 +204,37 @@ func (m *CaseValidationMockRepo) GetTaskHasDocumentByDocumentId(docId int) ([]*t
 // Section: Helper Methods Tests
 // -----------------------------------------------------------------------------
 
-type ObservationsMockRepo struct{}
+type ObservationsMockRepo struct {
+	GetObservationCodesFunc func() ([]string, error)
+}
 
 func (m *ObservationsMockRepo) GetObservationCodes() ([]string, error) {
+	if m.GetObservationCodesFunc != nil {
+		return m.GetObservationCodesFunc()
+	}
 	return []string{"phenotype", "condition", "note", "ancestry", "consanguinity"}, nil
 }
 
-type OnsetsMockRepo struct{}
+type OnsetsMockRepo struct {
+	GetOnsetCodesFunc func() ([]string, error)
+}
 
 func (m *OnsetsMockRepo) GetOnsetCodes() ([]string, error) {
+	if m.GetOnsetCodesFunc != nil {
+		return m.GetOnsetCodesFunc()
+	}
 	return []string{"unknown", "antenatal", "congenital", "neonatal", "infantile", "childhood", "juvenile", "young_adult", "middle_age", "senior"}, nil
+}
+
+type StatusMockRepo struct {
+	GetStatusCodesFunc func() ([]string, error)
+}
+
+func (m *StatusMockRepo) GetStatusCodes() ([]string, error) {
+	if m.GetStatusCodesFunc != nil {
+		return m.GetStatusCodesFunc()
+	}
+	return []string{"in_progress", "incomplete", "completed", "unknown"}, nil
 }
 
 type SamplesMockRepo struct {
@@ -315,6 +345,197 @@ func Test_getProbandFromPatients_Error(t *testing.T) {
 // -----------------------------------------------------------------------------
 // Section: Fetching Methods Tests
 // -----------------------------------------------------------------------------
+
+func Test_fetchStatusCodes_OK(t *testing.T) {
+	mockRepo := &StatusMockRepo{}
+	mockContext := &BatchValidationContext{
+		StatusRepo: mockRepo,
+	}
+
+	record := CaseValidationRecord{}
+
+	err := record.fetchStatusCodes(mockContext)
+	assert.NoError(t, err)
+	assert.NotNil(t, record.StatusCodes)
+	assert.GreaterOrEqual(t, len(record.StatusCodes), 1)
+}
+
+func Test_fetchStatusCodes_Error(t *testing.T) {
+	mockRepo := &StatusMockRepo{
+		GetStatusCodesFunc: func() ([]string, error) {
+			return nil, fmt.Errorf("database connection failed")
+		},
+	}
+	mockContext := &BatchValidationContext{
+		StatusRepo: mockRepo,
+	}
+
+	record := CaseValidationRecord{}
+
+	err := record.fetchStatusCodes(mockContext)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error retrieving status codes")
+	assert.Contains(t, err.Error(), "database connection failed")
+	assert.Nil(t, record.StatusCodes)
+}
+
+func Test_fetchObservationCodes_OK(t *testing.T) {
+	mockRepo := &ObservationsMockRepo{}
+	mockContext := &BatchValidationContext{
+		ObservationRepo: mockRepo,
+	}
+
+	record := CaseValidationRecord{}
+
+	err := record.fetchObservationCodes(mockContext)
+	assert.NoError(t, err)
+	assert.NotNil(t, record.ObservationCodes)
+	assert.GreaterOrEqual(t, len(record.ObservationCodes), 1)
+}
+
+func Test_fetchObservationCodes_Error(t *testing.T) {
+	mockRepo := &ObservationsMockRepo{
+		GetObservationCodesFunc: func() ([]string, error) {
+			return nil, fmt.Errorf("database connection failed")
+		},
+	}
+	mockContext := &BatchValidationContext{
+		ObservationRepo: mockRepo,
+	}
+
+	record := CaseValidationRecord{}
+
+	err := record.fetchObservationCodes(mockContext)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error retrieving observation codes")
+	assert.Contains(t, err.Error(), "database connection failed")
+	assert.Nil(t, record.ObservationCodes)
+}
+
+func Test_fetchOnsetCodes_OK(t *testing.T) {
+	mockRepo := &OnsetsMockRepo{}
+	mockContext := &BatchValidationContext{
+		OnsetRepo: mockRepo,
+	}
+
+	record := CaseValidationRecord{}
+
+	err := record.fetchOnsetCodes(mockContext)
+	assert.NoError(t, err)
+	assert.NotNil(t, record.OnsetCodes)
+	assert.GreaterOrEqual(t, len(record.OnsetCodes), 1)
+}
+
+func Test_fetchOnsetCodes_Error(t *testing.T) {
+	mockRepo := &OnsetsMockRepo{
+		GetOnsetCodesFunc: func() ([]string, error) {
+			return nil, fmt.Errorf("database connection failed")
+		},
+	}
+	mockContext := &BatchValidationContext{
+		OnsetRepo: mockRepo,
+	}
+
+	record := CaseValidationRecord{}
+
+	err := record.fetchOnsetCodes(mockContext)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error retrieving onset codes")
+	assert.Contains(t, err.Error(), "database connection failed")
+	assert.Nil(t, record.OnsetCodes)
+}
+
+func Test_fetchCodeInfos_OK(t *testing.T) {
+	mockStatusRepo := &StatusMockRepo{}
+	mockObservationRepo := &ObservationsMockRepo{}
+	mockOnsetRepo := &OnsetsMockRepo{}
+
+	record := CaseValidationRecord{
+		Context: &BatchValidationContext{
+			StatusRepo:      mockStatusRepo,
+			ObservationRepo: mockObservationRepo,
+			OnsetRepo:       mockOnsetRepo,
+		},
+	}
+
+	err := record.fetchCodeInfos()
+	assert.NoError(t, err)
+	assert.NotNil(t, record.StatusCodes)
+	assert.NotNil(t, record.ObservationCodes)
+	assert.NotNil(t, record.OnsetCodes)
+	assert.GreaterOrEqual(t, len(record.StatusCodes), 1)
+	assert.GreaterOrEqual(t, len(record.ObservationCodes), 1)
+	assert.GreaterOrEqual(t, len(record.OnsetCodes), 1)
+}
+
+func Test_fetchCodeInfos_StatusCodesError(t *testing.T) {
+	mockStatusRepo := &StatusMockRepo{
+		GetStatusCodesFunc: func() ([]string, error) {
+			return nil, fmt.Errorf("status database error")
+		},
+	}
+	mockObservationRepo := &ObservationsMockRepo{}
+	mockOnsetRepo := &OnsetsMockRepo{}
+
+	record := CaseValidationRecord{
+		Context: &BatchValidationContext{
+			StatusRepo:      mockStatusRepo,
+			ObservationRepo: mockObservationRepo,
+			OnsetRepo:       mockOnsetRepo,
+		},
+	}
+
+	err := record.fetchCodeInfos()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to retrieve status codes")
+	assert.Contains(t, err.Error(), "status database error")
+}
+
+func Test_fetchCodeInfos_ObservationCodesError(t *testing.T) {
+	mockStatusRepo := &StatusMockRepo{}
+	mockObservationRepo := &ObservationsMockRepo{
+		GetObservationCodesFunc: func() ([]string, error) {
+			return nil, fmt.Errorf("observation database error")
+		},
+	}
+	mockOnsetRepo := &OnsetsMockRepo{}
+
+	record := CaseValidationRecord{
+		Context: &BatchValidationContext{
+			StatusRepo:      mockStatusRepo,
+			ObservationRepo: mockObservationRepo,
+			OnsetRepo:       mockOnsetRepo,
+		},
+	}
+
+	err := record.fetchCodeInfos()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to retrieve observation codes")
+	assert.Contains(t, err.Error(), "observation database error")
+}
+
+func Test_fetchCodeInfos_OnsetCodesError(t *testing.T) {
+	mockStatusRepo := &StatusMockRepo{}
+	mockObservationRepo := &ObservationsMockRepo{}
+	mockOnsetRepo := &OnsetsMockRepo{
+		GetOnsetCodesFunc: func() ([]string, error) {
+			return nil, fmt.Errorf("onset database error")
+		},
+	}
+
+	record := CaseValidationRecord{
+		Context: &BatchValidationContext{
+			StatusRepo:      mockStatusRepo,
+			ObservationRepo: mockObservationRepo,
+			OnsetRepo:       mockOnsetRepo,
+		},
+	}
+
+	err := record.fetchCodeInfos()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to retrieve onset codes")
+	assert.Contains(t, err.Error(), "onset database error")
+}
 
 func Test_fetchProject_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
@@ -666,14 +887,23 @@ func Test_fetchValidationInfos_Error(t *testing.T) {
 	assert.Empty(t, record.Patients)
 }
 
-func Test_formatFieldPath_WithIndex(t *testing.T) {
+func Test_formatFieldPath_WithEntityAndIndex(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 2},
 	}
 
 	index := 1
-	path := record.formatFieldPath("entity_type", &index, "", 0, "")
+	path := record.formatFieldPath("entity_type", &index, "", nil)
 	assert.Equal(t, "case[2].entity_type[1]", path)
+}
+
+func Test_formatFieldPath_WithoutEntity(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	path := record.formatFieldPath("", nil, "", nil)
+	assert.Equal(t, "case[0]", path)
 }
 
 func Test_formatFieldPath_WithoutIndex(t *testing.T) {
@@ -681,7 +911,7 @@ func Test_formatFieldPath_WithoutIndex(t *testing.T) {
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
 
-	path := record.formatFieldPath("entity_type", nil, "", 0, "")
+	path := record.formatFieldPath("entity_type", nil, "", nil)
 	assert.Equal(t, "case[0].entity_type", path)
 }
 
@@ -691,27 +921,19 @@ func Test_formatFieldPath_WithCollection(t *testing.T) {
 	}
 
 	index := 3
-	path := record.formatFieldPath("entity_type", &index, "sub_collection", 2, "")
-	assert.Equal(t, "case[0].entity_type[3].sub_collection[2]", path)
+	path := record.formatFieldPath("entity_type", &index, "sub_collection", nil)
+	assert.Equal(t, "case[0].entity_type[3].sub_collection", path)
 }
 
-func Test_formatFieldPath_WithCollectionAndField(t *testing.T) {
+func Test_formatFieldPath_WithCollectionAndIndex(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 5},
 	}
 
 	index := 0
-	path := record.formatFieldPath("entity_type", &index, "sub_collection", 1, "field_name")
-	assert.Equal(t, "case[5].entity_type[0].sub_collection[1].field_name", path)
-}
-
-func Test_formatCollectionPath(t *testing.T) {
-	record := CaseValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Index: 2},
-	}
-
-	path := record.formatCollectionPath("entity_type")
-	assert.Equal(t, "case[2].entity_type", path)
+	collectionIndex := 1
+	path := record.formatFieldPath("entity_type", &index, "sub_collection", &collectionIndex)
+	assert.Equal(t, "case[5].entity_type[0].sub_collection[1]", path)
 }
 
 func Test_fetchSequencingExperimentsInTask_OK(t *testing.T) {
@@ -876,7 +1098,472 @@ func Test_fetchOutputDocumentsFromTask_Error(t *testing.T) {
 }
 
 // -----------------------------------------------------------------------------
-// Section: Validation Methods Tests
+// Section: Field Validation Tests
+// -----------------------------------------------------------------------------
+
+func Test_validateCaseField_Valid(t *testing.T) {
+	cr := &CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	cr.validateCaseField("Valid-Value_123", "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 100, true)
+
+	assert.Empty(t, cr.Errors)
+}
+
+func Test_validateCaseField_EmptyOptional(t *testing.T) {
+	cr := &CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	cr.validateCaseField("", "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 100, false)
+
+	assert.Empty(t, cr.Errors)
+}
+
+func Test_validateCaseField_EmptyRequired(t *testing.T) {
+	cr := &CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	cr.validateCaseField("", "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 100, true)
+
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
+	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+func Test_validateCaseField_InvalidRegex(t *testing.T) {
+	cr := &CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	cr.validateCaseField("Invalid@Value!", "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 100, true)
+
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
+	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+func Test_validateCaseField_TooLong(t *testing.T) {
+	cr := &CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	longValue := "A-very-long-value-that-exceeds-the-maximum-allowed-length-for-this-field-and-should-trigger-an-error"
+	cr.validateCaseField(longValue, "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 50, true)
+
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
+	assert.Contains(t, cr.Errors[0].Message, "field is too long, maximum length allowed is 50")
+	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+func Test_validateCaseField_MultipleErrors(t *testing.T) {
+	cr := &CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	invalidValue := "Invalid@Value!-This-is-a-very-long-value-that-both-fails-regex-and-exceeds-maximum-length-constraints"
+	cr.validateCaseField(invalidValue, "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 50, true)
+
+	assert.Len(t, cr.Errors, 2)
+	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
+	assert.Contains(t, cr.Errors[1].Message, "field is too long")
+	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+	assert.Equal(t, InvalidFieldCase, cr.Errors[1].Code)
+	assert.Equal(t, "case[0]", cr.Errors[1].Path)
+}
+
+func Test_validateStatusCode_Valid(t *testing.T) {
+	cr := &CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			StatusCode: "in_progress",
+		},
+		StatusCodes: []string{"in_progress", "incomplete", "completed"},
+	}
+
+	cr.validateStatusCode()
+
+	assert.Empty(t, cr.Errors)
+}
+
+func Test_validateStatusCode_Invalid(t *testing.T) {
+	cr := &CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			StatusCode: "unknown_status",
+		},
+		StatusCodes: []string{"in_progress", "revoke", "completed"},
+	}
+
+	cr.validateStatusCode()
+
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code for case 0")
+	assert.Contains(t, cr.Errors[0].Message, "status code \"unknown_status\" is not a valid status code")
+	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+// -----------------------------------------------------------------------------
+// Section: High-Level Validation Tests - validateCase
+// -----------------------------------------------------------------------------
+
+func Test_validateCase_Valid(t *testing.T) {
+	projectID := 42
+	diagnosisLabID := 10
+	analysisID := 1
+	orderingOrgID := 20
+
+	ctx := &BatchValidationContext{}
+	mockRepo := &CaseValidationMockRepo{}
+	ctx.CasesRepo = mockRepo
+
+	cr := &CaseValidationRecord{
+		BaseValidationRecord:   BaseValidationRecord{Index: 0},
+		Context:                ctx,
+		ProjectID:              &projectID,
+		DiagnosisLabID:         &diagnosisLabID,
+		AnalysisCatalogID:      &analysisID,
+		OrderingOrganizationID: &orderingOrgID,
+		SubmitterCaseID:        "CASE-1",
+		StatusCodes:            []string{"completed", "unknown"},
+		Case: types.CaseBatch{
+			SubmitterCaseId:            "CASE-1",
+			StatusCode:                 "completed",
+			DiagnosticLabCode:          "LAB-1",
+			AnalysisCode:               "WGA",
+			OrderingOrganizationCode:   "LAB-2",
+			PrimaryConditionCodeSystem: "HPO",
+			PrimaryConditionValue:      "HP:0001234",
+			ResolutionStatusCode:       "resolved",
+			Note:                       "Test note",
+			OrderingPhysician:          "Dr. Smith",
+		},
+	}
+
+	err := cr.validateCase()
+
+	assert.NoError(t, err)
+	assert.Empty(t, cr.Errors)
+	assert.False(t, cr.Skipped)
+}
+
+func Test_validateCase_MissingProject(t *testing.T) {
+	diagnosisLabID := 10
+	analysisID := 1
+	orderingOrgID := 20
+
+	ctx := &BatchValidationContext{}
+	mockRepo := &CaseValidationMockRepo{}
+	ctx.CasesRepo = mockRepo
+
+	cr := &CaseValidationRecord{
+		BaseValidationRecord:   BaseValidationRecord{Index: 0},
+		Context:                ctx,
+		ProjectID:              nil,
+		DiagnosisLabID:         &diagnosisLabID,
+		AnalysisCatalogID:      &analysisID,
+		OrderingOrganizationID: &orderingOrgID,
+		SubmitterCaseID:        "CASE-1",
+		StatusCodes:            []string{"completed"},
+		Case: types.CaseBatch{
+			SubmitterCaseId: "CASE-1",
+			StatusCode:      "completed",
+			ProjectCode:     "UNKNOWN-PROJ",
+		},
+	}
+
+	err := cr.validateCase()
+
+	assert.NoError(t, err)
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "Project")
+	assert.Contains(t, cr.Errors[0].Message, "UNKNOWN-PROJ")
+	assert.Contains(t, cr.Errors[0].Message, "does not exist")
+	assert.Equal(t, UnknownProjectCode, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
+	projectID := 42
+	analysisID := 1
+	orderingOrgID := 20
+
+	ctx := &BatchValidationContext{}
+	mockRepo := &CaseValidationMockRepo{}
+	ctx.CasesRepo = mockRepo
+
+	cr := &CaseValidationRecord{
+		BaseValidationRecord:   BaseValidationRecord{Index: 0},
+		Context:                ctx,
+		ProjectID:              &projectID,
+		DiagnosisLabID:         nil,
+		AnalysisCatalogID:      &analysisID,
+		OrderingOrganizationID: &orderingOrgID,
+		SubmitterCaseID:        "CASE-1",
+		StatusCodes:            []string{"completed"},
+		Case: types.CaseBatch{
+			SubmitterCaseId:   "CASE-1",
+			StatusCode:        "completed",
+			DiagnosticLabCode: "UNKNOWN-LAB",
+		},
+	}
+
+	err := cr.validateCase()
+
+	assert.NoError(t, err)
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "Diagnostic lab")
+	assert.Contains(t, cr.Errors[0].Message, "does not exist")
+	assert.Equal(t, UnknownDiagnosticLabCode, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
+	projectID := 42
+	diagnosisLabID := 10
+	orderingOrgID := 20
+
+	ctx := &BatchValidationContext{}
+	mockRepo := &CaseValidationMockRepo{}
+	ctx.CasesRepo = mockRepo
+
+	cr := &CaseValidationRecord{
+		BaseValidationRecord:   BaseValidationRecord{Index: 0},
+		Context:                ctx,
+		ProjectID:              &projectID,
+		DiagnosisLabID:         &diagnosisLabID,
+		AnalysisCatalogID:      nil,
+		OrderingOrganizationID: &orderingOrgID,
+		SubmitterCaseID:        "CASE-1",
+		StatusCodes:            []string{"completed"},
+		Case: types.CaseBatch{
+			SubmitterCaseId: "CASE-1",
+			StatusCode:      "completed",
+			AnalysisCode:    "UNKNOWN-ANALYSIS",
+		},
+	}
+
+	err := cr.validateCase()
+
+	assert.NoError(t, err)
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "Analysis")
+	assert.Contains(t, cr.Errors[0].Message, "does not exist")
+	assert.Equal(t, UnknownAnalysisCode, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
+	projectID := 42
+	diagnosisLabID := 10
+	analysisID := 1
+
+	ctx := &BatchValidationContext{}
+	mockRepo := &CaseValidationMockRepo{}
+	ctx.CasesRepo = mockRepo
+
+	cr := &CaseValidationRecord{
+		BaseValidationRecord:   BaseValidationRecord{Index: 0},
+		Context:                ctx,
+		ProjectID:              &projectID,
+		DiagnosisLabID:         &diagnosisLabID,
+		AnalysisCatalogID:      &analysisID,
+		OrderingOrganizationID: nil,
+		SubmitterCaseID:        "CASE-1",
+		StatusCodes:            []string{"completed"},
+		Case: types.CaseBatch{
+			SubmitterCaseId:          "CASE-1",
+			StatusCode:               "completed",
+			OrderingOrganizationCode: "UNKNOWN-ORG",
+		},
+	}
+
+	err := cr.validateCase()
+
+	assert.NoError(t, err)
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "Ordering organization")
+	assert.Contains(t, cr.Errors[0].Message, "does not exist")
+	assert.Equal(t, UnknownOrderingOrganization, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+func Test_validateCase_InvalidStatusCode(t *testing.T) {
+	projectID := 42
+	diagnosisLabID := 10
+	analysisID := 1
+	orderingOrgID := 20
+
+	ctx := &BatchValidationContext{}
+	mockRepo := &CaseValidationMockRepo{}
+	ctx.CasesRepo = mockRepo
+
+	cr := &CaseValidationRecord{
+		BaseValidationRecord:   BaseValidationRecord{Index: 0},
+		Context:                ctx,
+		ProjectID:              &projectID,
+		DiagnosisLabID:         &diagnosisLabID,
+		AnalysisCatalogID:      &analysisID,
+		OrderingOrganizationID: &orderingOrgID,
+		SubmitterCaseID:        "CASE-1",
+		StatusCodes:            []string{"completed", "pending"},
+		Case: types.CaseBatch{
+			SubmitterCaseId: "CASE-1",
+			StatusCode:      "invalid_status",
+		},
+	}
+
+	err := cr.validateCase()
+
+	assert.NoError(t, err)
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code")
+	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+func Test_validateCase_InvalidFieldFormat(t *testing.T) {
+	projectID := 42
+	diagnosisLabID := 10
+	analysisID := 1
+	orderingOrgID := 20
+
+	ctx := &BatchValidationContext{}
+	mockRepo := &CaseValidationMockRepo{}
+	ctx.CasesRepo = mockRepo
+
+	cr := &CaseValidationRecord{
+		BaseValidationRecord:   BaseValidationRecord{Index: 0},
+		Context:                ctx,
+		ProjectID:              &projectID,
+		DiagnosisLabID:         &diagnosisLabID,
+		AnalysisCatalogID:      &analysisID,
+		OrderingOrganizationID: &orderingOrgID,
+		SubmitterCaseID:        "CASE-1",
+		StatusCodes:            []string{"completed"},
+		Case: types.CaseBatch{
+			SubmitterCaseId: "CASE-1",
+			StatusCode:      "completed",
+			Note:            "Invalid@Characters!",
+		},
+	}
+
+	err := cr.validateCase()
+
+	assert.NoError(t, err)
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field note")
+	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+func Test_validateCase_CaseAlreadyExists(t *testing.T) {
+	projectID := 42
+	diagnosisLabID := 10
+	analysisID := 1
+	orderingOrgID := 20
+
+	mockRepo := &CaseValidationMockRepo{
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
+			if submitterCaseId == "CASE-1" && projectId == 42 {
+				return &repository.Case{ID: 100, SubmitterCaseID: "CASE-1"}, nil
+			}
+			return nil, nil
+		},
+	}
+
+	ctx := &BatchValidationContext{}
+	ctx.CasesRepo = mockRepo
+
+	cr := &CaseValidationRecord{
+		BaseValidationRecord:   BaseValidationRecord{Index: 0},
+		Context:                ctx,
+		ProjectID:              &projectID,
+		DiagnosisLabID:         &diagnosisLabID,
+		AnalysisCatalogID:      &analysisID,
+		OrderingOrganizationID: &orderingOrgID,
+		SubmitterCaseID:        "CASE-1",
+		StatusCodes:            []string{"completed"},
+		Case: types.CaseBatch{
+			SubmitterCaseId: "CASE-1",
+			StatusCode:      "completed",
+		},
+	}
+
+	err := cr.validateCase()
+
+	assert.NoError(t, err)
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "already exists")
+	assert.Equal(t, CaseAlreadyExists, cr.Errors[0].Code)
+	assert.True(t, cr.Skipped)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+func Test_validateCase_MultipleErrors(t *testing.T) {
+	projectID := 42
+	analysisID := 1
+	orderingOrgID := 20
+
+	ctx := &BatchValidationContext{}
+	mockRepo := &CaseValidationMockRepo{}
+	ctx.CasesRepo = mockRepo
+
+	cr := &CaseValidationRecord{
+		BaseValidationRecord:   BaseValidationRecord{Index: 0},
+		Context:                ctx,
+		ProjectID:              &projectID,
+		DiagnosisLabID:         nil,
+		AnalysisCatalogID:      &analysisID,
+		OrderingOrganizationID: &orderingOrgID,
+		SubmitterCaseID:        "CASE-1",
+		StatusCodes:            []string{"completed"},
+		Case: types.CaseBatch{
+			SubmitterCaseId:   "CASE-1",
+			StatusCode:        "invalid_status",
+			DiagnosticLabCode: "UNKNOWN-LAB",
+			Note:              "Invalid@Note!",
+		},
+	}
+
+	err := cr.validateCase()
+
+	assert.NoError(t, err)
+	assert.GreaterOrEqual(t, len(cr.Errors), 3)
+
+	// Check for diagnostic lab error
+	hasLabError := false
+	hasStatusError := false
+	hasNoteError := false
+	for _, e := range cr.Errors {
+		if e.Code == UnknownDiagnosticLabCode {
+			hasLabError = true
+		}
+		if e.Code == InvalidFieldCase && strings.Contains(e.Message, "status_code") {
+			hasStatusError = true
+		}
+		if e.Code == InvalidFieldCase && strings.Contains(e.Message, "note") {
+			hasNoteError = true
+		}
+	}
+	assert.True(t, hasLabError, "Should have diagnostic lab error")
+	assert.True(t, hasStatusError, "Should have status code error")
+	assert.True(t, hasNoteError, "Should have note field error")
+}
+
+// -----------------------------------------------------------------------------
+// Section: Batch Validation Tests
 // -----------------------------------------------------------------------------
 
 func Test_validateCaseBatch_OK(t *testing.T) {
@@ -906,6 +1593,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 		PatientRepo:     &mockPatients,
 		SeqExpRepo:      &mockRepo,
 		OrgRepo:         &mockRepo,
+		StatusRepo:      &StatusMockRepo{},
 		ObservationRepo: &ObservationsMockRepo{},
 		OnsetRepo:       &OnsetsMockRepo{},
 		SampleRepo:      &mockSamples,
@@ -917,7 +1605,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 			AnalysisCode:               "WGA",
 			SubmitterCaseId:            "CASE-1",
 			Type:                       "germline",
-			StatusCode:                 "in_progress",
+			StatusCode:                 "completed",
 			OrderingOrganizationCode:   "LAB-1",
 			DiagnosticLabCode:          "LAB-2",
 			PrimaryConditionCodeSystem: "MONDO",
@@ -973,6 +1661,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		PatientRepo:     &mockPatients,
 		SeqExpRepo:      &mockRepo,
 		OrgRepo:         &mockRepo,
+		StatusRepo:      &StatusMockRepo{},
 		ObservationRepo: &ObservationsMockRepo{},
 		OnsetRepo:       &OnsetsMockRepo{},
 		SampleRepo:      &mockSamples,
@@ -1012,10 +1701,14 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 	assert.Empty(t, vr[0].Errors)
 	assert.Empty(t, vr[1].Infos)
 	assert.Empty(t, vr[1].Warnings)
-	assert.Equal(t, vr[1].Errors[0].Code, "CASE-001")
+	assert.Equal(t, vr[1].Errors[0].Code, "CASE-011")
 	assert.Equal(t, vr[1].Errors[0].Message, "Case (PROJ-1 / CASE-1) appears multiple times in the batch.")
 	assert.Equal(t, vr[1].Errors[0].Path, "case[1]")
 }
+
+// -----------------------------------------------------------------------------
+// Section: Patient Field Validation Tests
+// -----------------------------------------------------------------------------
 
 func Test_validateFamilyMemberCode_Valid(t *testing.T) {
 	record := CaseValidationRecord{
@@ -1067,7 +1760,7 @@ func Test_validateFamilyMemberCode_InvalidRegex(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, "case[0].patients[0].family_history[0].family_member_code", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].family_history[0]", record.Errors[0].Path)
 }
 
 func Test_validateFamilyMemberCode_TooLong(t *testing.T) {
@@ -1096,7 +1789,7 @@ func Test_validateFamilyMemberCode_TooLong(t *testing.T) {
 	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
 	assert.Contains(t, record.Errors[0].Message, "maximum length allowed is 100")
-	assert.Equal(t, "case[0].patients[0].family_history[0].family_member_code", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].family_history[0]", record.Errors[0].Path)
 }
 
 func Test_validateFamilyMemberCode_MultipleErrors(t *testing.T) {
@@ -1174,7 +1867,7 @@ func Test_validateCondition_InvalidRegex(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, "case[0].patients[0].family_history[0].condition", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].family_history[0]", record.Errors[0].Path)
 }
 
 func Test_validateCondition_TooLong(t *testing.T) {
@@ -1202,7 +1895,7 @@ func Test_validateCondition_TooLong(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
-	assert.Equal(t, "case[0].patients[0].family_history[0].condition", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].family_history[0]", record.Errors[0].Path)
 }
 
 func Test_validateFamilyHistory_NoHistory(t *testing.T) {
@@ -1286,6 +1979,7 @@ func Test_validateFamilyHistory_WithErrors(t *testing.T) {
 func Test_validateObsCategoricalCode_Valid(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		ObservationCodes:     []string{"phenotype", "condition", "note"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -1308,14 +2002,14 @@ func Test_validateObsCategoricalCode_Valid(t *testing.T) {
 		},
 	}
 
-	validCodes := []string{"phenotype", "condition", "note"}
-	record.validateObsCategoricalCode(0, 0, validCodes)
+	record.validateObsCategoricalCode(0, 0)
 	assert.Empty(t, record.Errors)
 }
 
 func Test_validateObsCategoricalCode_Invalid(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		ObservationCodes:     []string{"phenotype", "condition", "note"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -1338,12 +2032,11 @@ func Test_validateObsCategoricalCode_Invalid(t *testing.T) {
 		},
 	}
 
-	validCodes := []string{"phenotype", "condition", "note"}
-	record.validateObsCategoricalCode(0, 0, validCodes)
+	record.validateObsCategoricalCode(0, 0)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "is not a valid observation code")
-	assert.Equal(t, "case[0].patients[0].observations_categorical[0].code", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
 
 func Test_validateSystem_Valid(t *testing.T) {
@@ -1402,9 +2095,9 @@ func Test_validateSystem_InvalidRegex(t *testing.T) {
 
 	record.validateSystem(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, "case[0].patients[0].observations_categorical[0].system", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
 
 func Test_validateSystem_TooLong(t *testing.T) {
@@ -1434,9 +2127,9 @@ func Test_validateSystem_TooLong(t *testing.T) {
 
 	record.validateSystem(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
-	assert.Equal(t, "case[0].patients[0].observations_categorical[0].system", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
 
 func Test_validateValue_Valid(t *testing.T) {
@@ -1495,9 +2188,9 @@ func Test_validateValue_InvalidRegex(t *testing.T) {
 
 	record.validateValue(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, "case[0].patients[0].observations_categorical[0].value", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
 
 func Test_validateValue_TooLong(t *testing.T) {
@@ -1527,14 +2220,15 @@ func Test_validateValue_TooLong(t *testing.T) {
 
 	record.validateValue(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
-	assert.Equal(t, "case[0].patients[0].observations_categorical[0].value", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
 
 func Test_validateOnsetCode_Valid(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		OnsetCodes:           []string{"childhood"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -1557,14 +2251,14 @@ func Test_validateOnsetCode_Valid(t *testing.T) {
 		},
 	}
 
-	validOnsetCodes := []string{"unknown", "childhood", "juvenile"}
-	record.validateOnsetCode(0, 0, validOnsetCodes)
+	record.validateOnsetCode(0, 0)
 	assert.Empty(t, record.Errors)
 }
 
 func Test_validateOnsetCode_Invalid(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		OnsetCodes:           []string{"childhood"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -1587,12 +2281,11 @@ func Test_validateOnsetCode_Invalid(t *testing.T) {
 		},
 	}
 
-	validOnsetCodes := []string{"unknown", "childhood", "juvenile"}
-	record.validateOnsetCode(0, 0, validOnsetCodes)
+	record.validateOnsetCode(0, 0)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "is not a valid onset code")
-	assert.Equal(t, "case[0].patients[0].observations_categorical[0].onset_code", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
 
 func Test_validateObsCategoricalNote_Valid(t *testing.T) {
@@ -1651,9 +2344,9 @@ func Test_validateObsCategoricalNote_InvalidRegex(t *testing.T) {
 
 	record.validateObsCategoricalNote(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, "case[0].patients[0].observations_categorical[0].note", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
 
 func Test_validateObsCategoricalNote_TooLong(t *testing.T) {
@@ -1683,18 +2376,16 @@ func Test_validateObsCategoricalNote_TooLong(t *testing.T) {
 
 	record.validateObsCategoricalNote(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
-	assert.Equal(t, "case[0].patients[0].observations_categorical[0].note", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
 
 func Test_validateObservationsCategorical_Valid(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
-		Context: &BatchValidationContext{
-			ObservationRepo: &ObservationsMockRepo{},
-			OnsetRepo:       &OnsetsMockRepo{},
-		},
+		ObservationCodes:     []string{"phenotype", "condition"},
+		OnsetCodes:           []string{"childhood", "juvenile"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -1733,10 +2424,6 @@ func Test_validateObservationsCategorical_Valid(t *testing.T) {
 func Test_validateObservationsCategorical_MultipleErrors(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
-		Context: &BatchValidationContext{
-			ObservationRepo: &ObservationsMockRepo{},
-			OnsetRepo:       &OnsetsMockRepo{},
-		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -1767,10 +2454,6 @@ func Test_validateObservationsCategorical_MultipleErrors(t *testing.T) {
 func Test_validateObservationsCategorical_NoObservations(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
-		Context: &BatchValidationContext{
-			ObservationRepo: &ObservationsMockRepo{},
-			OnsetRepo:       &OnsetsMockRepo{},
-		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -1792,6 +2475,7 @@ func Test_validateObservationsCategorical_NoObservations(t *testing.T) {
 func Test_validateObsTextCode_Valid(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		ObservationCodes:     []string{"note", "phenotype", "condition"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -1810,14 +2494,14 @@ func Test_validateObsTextCode_Valid(t *testing.T) {
 		},
 	}
 
-	validCodes := []string{"note", "phenotype", "condition"}
-	record.validateObsTextCode(0, 0, validCodes)
+	record.validateObsTextCode(0, 0)
 	assert.Empty(t, record.Errors)
 }
 
 func Test_validateObsTextCode_Invalid(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		ObservationCodes:     []string{"note", "phenotype", "condition"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -1836,12 +2520,11 @@ func Test_validateObsTextCode_Invalid(t *testing.T) {
 		},
 	}
 
-	validCodes := []string{"note", "phenotype", "condition"}
-	record.validateObsTextCode(0, 0, validCodes)
+	record.validateObsTextCode(0, 0)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "is not a valid observation code")
-	assert.Equal(t, "case[0].patients[0].observations_text[0].code", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_text[0]", record.Errors[0].Path)
 }
 
 func Test_validateObsTextValue_Valid(t *testing.T) {
@@ -1892,9 +2575,9 @@ func Test_validateObsTextValue_InvalidRegex(t *testing.T) {
 
 	record.validateObsTextValue(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, "case[0].patients[0].observations_text[0].value", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_text[0]", record.Errors[0].Path)
 }
 
 func Test_validateObsTextValue_TooLong(t *testing.T) {
@@ -1920,17 +2603,15 @@ func Test_validateObsTextValue_TooLong(t *testing.T) {
 
 	record.validateObsTextValue(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
-	assert.Equal(t, "case[0].patients[0].observations_text[0].value", record.Errors[0].Path)
+	assert.Equal(t, "case[0].patients[0].observations_text[0]", record.Errors[0].Path)
 }
 
 func Test_validateObservationsText_Valid(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
-		Context: &BatchValidationContext{
-			ObservationRepo: &ObservationsMockRepo{},
-		},
+		ObservationCodes:     []string{"phenotype", "note"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -1961,9 +2642,6 @@ func Test_validateObservationsText_Valid(t *testing.T) {
 func Test_validateObservationsText_MultipleErrors(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
-		Context: &BatchValidationContext{
-			ObservationRepo: &ObservationsMockRepo{},
-		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -1990,9 +2668,6 @@ func Test_validateObservationsText_MultipleErrors(t *testing.T) {
 func Test_validateObservationsText_NoObservations(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
-		Context: &BatchValidationContext{
-			ObservationRepo: &ObservationsMockRepo{},
-		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2010,6 +2685,10 @@ func Test_validateObservationsText_NoObservations(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Empty(t, record.Errors)
 }
+
+// -----------------------------------------------------------------------------
+// Section: Patient Entity Validation Tests
+// -----------------------------------------------------------------------------
 
 func Test_validatePatient_PatientExists(t *testing.T) {
 	record := CaseValidationRecord{
@@ -2095,6 +2774,10 @@ func Test_validatePatient_MultiplePatients(t *testing.T) {
 	assert.Contains(t, record.Errors[0].Message, "PAT-999")
 	assert.Equal(t, "case[0].patients[1]", record.Errors[0].Path)
 }
+
+// -----------------------------------------------------------------------------
+// Section: Collection Validation Tests - validateCasePatients
+// -----------------------------------------------------------------------------
 
 func Test_validateCasePatients_NoProband(t *testing.T) {
 	mockContext := &BatchValidationContext{
@@ -2220,11 +2903,6 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 }
 
 func Test_validateCasePatients_Valid(t *testing.T) {
-	mockContext := &BatchValidationContext{
-		ObservationRepo: &ObservationsMockRepo{},
-		OnsetRepo:       &OnsetsMockRepo{},
-	}
-
 	patientsBatch := []*types.CasePatientBatch{
 		{
 			PatientOrganizationCode: "CHUSJ",
@@ -2272,7 +2950,8 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 
 	record := CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
-		Context:              mockContext,
+		OnsetCodes:           []string{"unknown"},
+		ObservationCodes:     []string{"phenotype", "condition"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2354,6 +3033,10 @@ func Test_validateCasePatients_WithErrors(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 10, len(record.Errors))
 }
+
+// -----------------------------------------------------------------------------
+// Section: Sequencing Experiment Validation Tests
+// -----------------------------------------------------------------------------
 
 func Test_validateSeqExp_SeqExpExists(t *testing.T) {
 	mockContext := &BatchValidationContext{
