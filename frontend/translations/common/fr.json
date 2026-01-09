@@ -1281,6 +1281,7 @@
       "managing_org_tooltip": "Organisation responsable du dossier du patient",
       "mother": "Mère",
       "name": "Nom (Prénom / Nom de famille)",
+      "no_patient": "Aucune information du patient disponible",
       "proband": "Proband",
       "sex": "Sexe",
       "submitter_patient_id": "ID patient org.",
@@ -1379,7 +1380,8 @@
           "full_cnv": "Gène contient entièrement le CNV"
         },
         "snv": "SNV",
-        "cnv": "CNV"
+        "cnv": "CNV",
+        "sequencing_id": "ID Séq."
       },
       "dialog": {
         "overlapping_gene": "Liste des gènes chevauchants le CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
