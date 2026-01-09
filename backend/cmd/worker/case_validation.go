@@ -56,7 +56,13 @@ const (
 
 // Documents error codes
 const (
-	InvalidFieldDocumentCode = "DOCUMENT-001"
+	InvalidFieldDocumentCode              = "DOCUMENT-001"
+	DocumentNotFoundAtURL                 = "DOCUMENT-002"
+	IdenticalDocumentExists               = "DOCUMENT-003"
+	DocumentExistsWithDifferentFieldValue = "DOCUMENT-004"
+	DocumentAlreadyOutputOfAnotherTask    = "DOCUMENT-005"
+	DocumentSizeMismatch                  = "DOCUMENT-006"
+	DocumentHashMismatch                  = "DOCUMENT-007"
 )
 
 const RelationshipProbandCode = "proband"
@@ -449,6 +455,16 @@ func (cr *CaseValidationRecord) validatePatientsTextField(value, fieldName, path
 	cr.validateTextLength(path, value, code, message, TextMaxLength)
 }
 
+func (cr *CaseValidationRecord) validatePatientTextField(value, fieldName, path string, patientIndex int, regExp *regexp.Regexp, regExpStr string, required bool) {
+	message := cr.formatPatientsInvalidFieldMessage(fieldName, patientIndex)
+	cr.validateTextField(value, path, regExp, regExpStr, required, message, InvalidFieldPatients)
+}
+
+func (cr *CaseValidationRecord) validateObservationTextField(value, fieldName, path string, patientIndex int, regExp *regexp.Regexp, regExpStr string, required bool, observationType string, obsIndex int) {
+	message := cr.formatObservationInvalidFieldMessage(fieldName, patientIndex, observationType, obsIndex)
+	cr.validateTextField(value, path, regExp, regExpStr, required, message, InvalidFieldObservation)
+}
+
 func (cr *CaseValidationRecord) validateCodeField(code, fieldName, path, codeType string, patientIndex int, validCodes []string, observationType string, obsIndex int) {
 	if !slices.Contains(validCodes, code) {
 		var message string
@@ -464,7 +480,7 @@ func (cr *CaseValidationRecord) validateFamilyMemberCode(patientIndex int, fhInd
 	fh := cr.Case.Patients[patientIndex].FamilyHistory[fhIndex]
 	fieldName := "family_member_code"
 	path := cr.formatPatientsFieldPath(&patientIndex, "family_history", &fhIndex)
-	cr.validatePatientsTextField(fh.FamilyMemberCode, fieldName, path, patientIndex, FamilyMemberCodeRegExpCompiled, "", 0, true)
+	cr.validateTextField(fh.FamilyMemberCode, fieldName, path, patientIndex, FamilyMemberCodeRegExpCompiled, "", 0, true)
 }
 
 func (cr *CaseValidationRecord) validateCondition(patientIndex int, fhIndex int) {
@@ -798,8 +814,109 @@ func (cr *CaseValidationRecord) validateCase() error {
 
 // Documents validation
 
-func (cr *CaseValidationRecord) validateDocuments(tasks []*types.CaseTaskBatch) error {
-	// TODO: Implement document validation
+func (cr *CaseValidationRecord) validateExistingDocument(new *types.OutputDocumentBatch, existing *types.Document, path string) error {
+	diffs := []struct {
+		name string
+		val1 interface{}
+		val2 interface{}
+	}{
+		{"format_code", new.FormatCode, existing.FileFormatCode},
+		{"name", new.Name, existing.Name},
+		{"data_type_code", new.DataTypeCode, existing.DataTypeCode},
+		{"data_category_code", new.DataCategoryCode, existing.DataCategoryCode},
+		{"size", new.Size, existing.Size},
+		{"hash", new.Hash, existing.Hash},
+	}
+
+	var isDiff bool
+	for _, d := range diffs {
+		if d.val1 != d.val2 {
+			isDiff = true
+			msg := fmt.Sprintf("A document with same url %s has been found but with a different %s (%v <> %v).", new.Url, d.name, d.val1, d.val2)
+			cr.addWarnings(msg, DocumentExistsWithDifferentFieldValue, path)
+		}
+	}
+
+	if !isDiff {
+		msg := fmt.Sprintf("Document %s already exists, skipped.", new.Url)
+		cr.addInfos(msg, IdenticalDocumentExists, path)
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateDocumentTextField(fieldValue, fieldName string, path string, taskIndex int, documentIndex int, regExp *regexp.Regexp, regExpStr string, required bool) {
+	msg := cr.formatTaskDocumentFieldErrorMessage(fieldName, cr.Index, taskIndex, documentIndex)
+	cr.validateTextField(fieldValue, path, regExp, regExpStr, required, msg, InvalidFieldDocumentCode)
+}
+
+func (cr *CaseValidationRecord) validateDocumentIsOutputOfAnotherTask(doc *types.Document, path string) {
+	relatedDocs := cr.DocumentsInTasks[doc.Url]
+
+	isOutput := false
+	for _, dr := range relatedDocs {
+		if dr.Type == "output" {
+			isOutput = true
+			break
+		}
+	}
+
+	if isOutput {
+		msg := fmt.Sprintf("A document with same url %s has been found in the output of a different task.", doc.Url)
+		cr.addWarnings(msg, DocumentAlreadyOutputOfAnotherTask, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateFileMetadata(doc *types.OutputDocumentBatch, path string) error {
+	metadata, err := cr.Context.S3FS.GetMetadata(doc.Url)
+	if err != nil {
+		return err
+	}
+	if metadata == nil {
+		cr.addErrors("Document not found at URL", DocumentNotFoundAtURL, path)
+		return nil
+	}
+
+	if metadata.Size != doc.Size {
+		msg := fmt.Sprintf("Document size mismatch for url %s: expected %d, got %d.", doc.Url, doc.Size, metadata.Size)
+		cr.addErrors(msg, DocumentSizeMismatch, path)
+	}
+
+	if metadata.Hash != doc.Hash {
+		msg := fmt.Sprintf("Document hash mismatch for url %s: expected %s, got %s.", doc.Url, doc.Hash, metadata.Hash)
+		cr.addErrors(msg, DocumentHashMismatch, path)
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateDocuments() error {
+	for tid, t := range cr.Case.Tasks {
+		for did, doc := range t.OutputDocuments {
+			path := fmt.Sprintf("case[%d].tasks[%d].output_documents[%d]", cr.Index, tid, did)
+			if d, ok := cr.Documents[doc.Url]; ok {
+				if err := cr.validateExistingDocument(doc, d, path); err != nil {
+					return fmt.Errorf("error validating existing document for case %d - task %d - document %d: %v", cr.Index, tid, did, err)
+				}
+				cr.validateDocumentIsOutputOfAnotherTask(d, path)
+				continue
+			}
+
+			cr.validateDocumentTextField(doc.Url, "url", path, tid, did, nil, "", true)
+			cr.validateDocumentTextField(doc.Hash, "hash", path, tid, did, nil, "", true)
+			cr.validateDocumentTextField(doc.FormatCode, "format_code", path, tid, did, nil, "", true)
+			cr.validateDocumentTextField(doc.Name, "name", path, tid, did, nil, "", true)
+			cr.validateDocumentTextField(doc.DataTypeCode, "data_type_code", path, tid, did, nil, "", true)
+			cr.validateDocumentTextField(doc.DataCategoryCode, "data_category_code", path, tid, did, nil, "", true)
+
+			if doc.Size < 0 {
+				msg := fmt.Sprintf("%s size %d is invalid, must be non-negative.", cr.formatTaskDocumentFieldErrorMessage("size", cr.Index, tid, did), doc.Size)
+				cr.addErrors(msg, InvalidFieldDocumentCode, path)
+			}
+
+			if err := cr.validateFileMetadata(doc, path); err != nil {
+				return fmt.Errorf("error validating file metadata for case %d - document %d: %v", cr.Index, tid, err)
+			}
+		}
+	}
 	return nil
 }
 
@@ -838,8 +955,8 @@ func validateCaseRecord(
 
 	// 4. Validate Case Tasks
 
-	// Validate documents
-	if err := cr.validateDocuments(c.Tasks); err != nil {
+	// 5. Validate Case Documents
+	if err := cr.validateDocuments(); err != nil {
 		return nil, fmt.Errorf("error validating documents: %w", err)
 	}
 

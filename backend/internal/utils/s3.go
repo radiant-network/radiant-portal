@@ -12,6 +12,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
+const DefaultAwsRegion = "us-east-1"
+const DefaultS3PresignedUrlExpire = "60m"
+
 type PreSignedURL struct {
 	URL         string `json:"url"`
 	URLExpireAt int64  `json:"expires_at"`
@@ -21,20 +24,22 @@ type PreSigner interface {
 	GeneratePreSignedURL(url string) (*PreSignedURL, error)
 }
 
-const DEFAULT_AWS_REGION = "us-east-1"
-const DEFAULT_S3_PRESIGNED_URL_EXPIRE = "60m"
-
 type S3PreSigner struct {
 	Config *aws.Config
 	Expire time.Duration
 }
 
+type S3Location struct {
+	Bucket string
+	Key    string
+}
+
 func NewS3PreSigner() *S3PreSigner {
 	endpoint := GetEnvOrDefault("AWS_ENDPOINT_URL", "")
-	region := GetEnvOrDefault("AWS_REGION", DEFAULT_AWS_REGION)
+	region := GetEnvOrDefault("AWS_REGION", DefaultAwsRegion)
 	useSSL := GetEnvOrDefault("AWS_USE_SSL", "true") == "true"
 
-	expireStr := GetEnvOrDefault("S3_PRESIGNED_URL_EXPIRE", DEFAULT_S3_PRESIGNED_URL_EXPIRE)
+	expireStr := GetEnvOrDefault("S3_PRESIGNED_URL_EXPIRE", DefaultS3PresignedUrlExpire)
 	expire, err := time.ParseDuration(expireStr)
 	if err != nil {
 		log.Fatalf("Invalid duration for S3_PRESIGNED_URL_EXPIRE: %v", err)
@@ -54,24 +59,24 @@ func NewS3PreSigner() *S3PreSigner {
 	}
 }
 
-func (ps *S3PreSigner) extractS3BucketAndKey(s3URL string) (string, string, error) {
+func extractS3BucketAndKey(s3URL string) (S3Location, error) {
 	parsed, err := url.Parse(s3URL)
 	if err != nil {
-		return "", "", fmt.Errorf("invalid URL: %w", err)
+		return S3Location{"", ""}, fmt.Errorf("invalid URL: %w", err)
 	}
 
 	if parsed.Scheme != "s3" {
-		return "", "", fmt.Errorf("URL is not an S3 URL")
+		return S3Location{"", ""}, fmt.Errorf("URL is not an S3 URL")
 	}
 
 	bucket := parsed.Host
 	key := strings.TrimPrefix(parsed.Path, "/")
 
-	return bucket, key, nil
+	return S3Location{bucket, key}, nil
 }
 
 func (ps *S3PreSigner) GeneratePreSignedURL(url string) (*PreSignedURL, error) {
-	bucket, key, err := ps.extractS3BucketAndKey(url)
+	s3location, err := extractS3BucketAndKey(url)
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +88,8 @@ func (ps *S3PreSigner) GeneratePreSignedURL(url string) (*PreSignedURL, error) {
 
 	svc := s3.New(sess)
 	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
+		Bucket: aws.String(s3location.Bucket),
+		Key:    aws.String(s3location.Key),
 	})
 
 	urlExpiresAt := time.Now().Add(ps.Expire).Unix()
@@ -96,5 +101,59 @@ func (ps *S3PreSigner) GeneratePreSignedURL(url string) (*PreSignedURL, error) {
 	return &PreSignedURL{
 		URL:         urlStr,
 		URLExpireAt: urlExpiresAt,
+	}, nil
+}
+
+type FileMetadata struct {
+	Size int64
+	Hash string
+}
+
+type FileStore interface {
+	GetMetadata(url string) (*FileMetadata, error)
+}
+
+type S3Store struct {
+	svc *s3.S3
+}
+
+func NewS3Store() *S3Store {
+	endpoint := GetEnvOrDefault("AWS_ENDPOINT_URL", "")
+	region := GetEnvOrDefault("AWS_REGION", DefaultAwsRegion)
+	useSSL := GetEnvOrDefault("AWS_USE_SSL", "true") == "true"
+
+	forcePathStyle := endpoint != ""
+	awsConfig := &aws.Config{
+		Region:           aws.String(region),
+		Endpoint:         aws.String(endpoint),
+		S3ForcePathStyle: aws.Bool(forcePathStyle),
+		DisableSSL:       aws.Bool(!useSSL),
+	}
+
+	sess, err := session.NewSession(awsConfig)
+	if err != nil {
+		log.Fatalf("Failed to create AWS session: %v", err)
+	}
+
+	s3svc := s3.New(sess)
+	return &S3Store{svc: s3svc}
+}
+
+func (s *S3Store) GetMetadata(rawUrl string) (*FileMetadata, error) {
+	s3location, err := extractS3BucketAndKey(rawUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	out, err := s.svc.HeadObject(&s3.HeadObjectInput{
+		Bucket: aws.String(s3location.Bucket),
+		Key:    aws.String(s3location.Key),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &FileMetadata{
+		Size: *out.ContentLength,
+		Hash: strings.Trim(*out.ETag, `"`),
 	}, nil
 }

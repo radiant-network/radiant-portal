@@ -30,6 +30,7 @@ type BatchValidationContext struct {
 	ObservationRepo repository.ObservationsDAO
 	OnsetRepo       repository.OnsetsDAO
 	StatusRepo      repository.StatusDAO
+	S3FS            *utils.S3Store
 }
 
 func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
@@ -45,6 +46,7 @@ func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
 		StatusRepo:      repository.NewStatusRepository(db),
 		CasesRepo:       repository.NewCasesRepository(db),
 		DocRepo:         repository.NewDocumentsRepository(db),
+		S3FS:            utils.NewS3Store(),
 	}
 }
 
