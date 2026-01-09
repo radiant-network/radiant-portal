@@ -39,7 +39,7 @@ func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.TaskContextTable.FederationName, types.TaskContextTable.Alias, types.TaskContextTable.Alias, types.SequencingExperimentTable.Alias))
 	tx = utils.JoinTaskContextWithTaskHasDoc(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.case_id", types.FamilyTable.FederationName, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.CaseHasSequencingExperimentTable.Alias))
+	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
 	tx = utils.JoinTaskHasDocWithDocument(tx)
 	tx = utils.JoinFamilyWithPatient(tx)
 	tx.Where(alignmentFilter)
