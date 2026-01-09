@@ -32,14 +32,15 @@ func NewIGVRepository(db *gorm.DB) *IGVRepository {
 func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 	var igvInternal []IGVTrack
 
-	alignmentFilter := fmt.Sprintf("tctx.case_id=%d AND thd.type='output' AND (doc.data_type_code IN ('alignment', 'alignment_variant_calling') AND doc.format_code in ('cram', 'crai'))", caseID)
+	alignmentFilter := fmt.Sprintf("%s.case_id=%d AND thd.type='output' AND (doc.data_type_code IN ('alignment', 'alignment_variant_calling') AND doc.format_code in ('cram', 'crai'))", types.CaseHasSequencingExperimentTable.Alias, caseID)
 
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias))
-	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id AND %s.case_id=%d", types.TaskContextTable.FederationName, types.TaskContextTable.Alias, types.TaskContextTable.Alias, types.SequencingExperimentTable.Alias, types.TaskContextTable.Alias, caseID))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.TaskContextTable.FederationName, types.TaskContextTable.Alias, types.TaskContextTable.Alias, types.SequencingExperimentTable.Alias))
 	tx = utils.JoinTaskContextWithTaskHasDoc(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
+	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.case_id", types.FamilyTable.FederationName, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.CaseHasSequencingExperimentTable.Alias))
 	tx = utils.JoinTaskHasDocWithDocument(tx)
-	tx = utils.JoinSampleAndTaskContextWithFamily(tx)
 	tx = utils.JoinFamilyWithPatient(tx)
 	tx.Where(alignmentFilter)
 
