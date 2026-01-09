@@ -48,11 +48,11 @@ export const data = {
     patient: PATIENT_VALUE,
     sample: 'S13224',
     task: '63',
-    created_on: '2025-',
+    created_on: '2026-',
     sequencing: '1',
     hash: '5d41402abc4b2a76b9719d911017c726',
     run: 'A00516_0169',
-    search_criteria: '[{"field": "data_type_code","value": ["snv"]},{"field": "format_code","value": ["vcf"]},{"field": "patient_id","value": ["3"]}]',
+    search_criteria: `[{"field":"format_code","value":["vcf"]},{"field":"data_type_code","value":["snv"]},{"field":"relationship_to_proband_code","value":["${REL_VALUE}"]}]`,
   },
   variantGermline: {
     locus_id: '-6314429946999603200',
@@ -100,7 +100,7 @@ export const data = {
     interpreted: {
       case: '1',
       relationship: 'proband',
-      date: '2025-12-22',
+      date: '2026-01-09',
       condition_mondo: 'adrenocortical insufficiency',
       mondo_id: 'MONDO:0000004',
       classification: 'LP',
