@@ -34,4 +34,5 @@ export const apiMessages = {
   Sample004: (code: string, patientId: string, SampleId: string) => `Patient (${code} / ${patientId}) for sample ${SampleId} does not exist.`,
   Sample005: (id: string) => `Sample ${id} does not exist.`,
   Sequencing005: (code: string, id: string) => `Sample (${code} / ${id}) does not exist.`,
+  UnmarshalStringToInt64: (field: string) => `json: cannot unmarshal string into Go struct field ${field} of type int64`,
 };
