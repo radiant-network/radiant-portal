@@ -6,7 +6,7 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
-import ToggleButtonGroup from '@/components/base/toggle-button-group/toggle-button-group';
+import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
@@ -117,21 +117,20 @@ function SequencingVariantFilters({
       </Badge>
       <Separator className="h-6" orientation="vertical" />
 
-      <ToggleButtonGroup
-        onValueChange={onActiveInterfaceChange}
-        defaultValue={activeInterface}
-        size="xxs"
-        items={[
-          {
-            label: t('case_entity.variants.filters.snv'),
-            value: VariantInterface.SNV,
-          },
-          {
-            label: t('case_entity.variants.filters.cnv'),
-            value: VariantInterface.CNV,
-          },
-        ]}
-      />
+      <Tabs value={activeInterface}>
+        <TabsList className="w-full">
+          {Object.values(VariantInterface).map(variant => (
+            <TabsTrigger
+              key={variant}
+              value={variant}
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
+              onClick={() => onActiveInterfaceChange(variant)}
+            >
+              {t(`case_entity.variants.filters.${variant.toLowerCase()}`)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
     </div>
   );
 }

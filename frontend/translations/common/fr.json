@@ -1258,6 +1258,7 @@
       "managing_org_tooltip": "Organisation responsable du dossier du patient",
       "mother": "Mère",
       "name": "Nom (Prénom / Nom de famille)",
+      "no_patient": "Aucune information du patient disponible",
       "proband": "Proband",
       "sex": "Sexe",
       "submitter_patient_id": "ID patient org.",
