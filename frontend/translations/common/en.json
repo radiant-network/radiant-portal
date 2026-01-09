@@ -1357,7 +1357,8 @@
           "full_cnv": "Gene contains the CNV entirely"
         },
         "snv": "SNV",
-        "cnv": "CNV"
+        "cnv": "CNV",
+        "sequencing_id": "Seq. ID"
       },
       "dialog": {
         "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"

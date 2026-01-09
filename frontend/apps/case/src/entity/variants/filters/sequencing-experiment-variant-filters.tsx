@@ -12,13 +12,16 @@ import { cn } from '@/components/lib/utils';
 
 import { VariantInterface } from '../variants-tab';
 
-function SequencingVariantFiltersSelectValue({ relationship_to_proband }: CaseSequencingExperiment) {
+function SequencingVariantFiltersSelectValue({ relationship_to_proband, seq_id }: CaseSequencingExperiment) {
   const { t } = useI18n();
 
   return (
     <div className="inline-flex gap-1">
       <span className="font-bold capitalize">
         {relationship_to_proband ?? t('case_entity.variants.filters.proband')}
+      </span>
+      <span>
+        ({t('case_entity.variants.filters.sequencing_id')} {seq_id})
       </span>
     </div>
   );
@@ -29,7 +32,7 @@ function SequencingVariantFiltersSelectItem(caseSeqExp: CaseSequencingExperiment
   return (
     <div>
       <SequencingVariantFiltersSelectValue {...caseSeqExp} />
-      <div className="flex items-center color-muted text-xs">
+      <div className="flex items-center text-muted-foreground color-muted text-xs">
         {t('case_entity.variants.filters.sample_id')} {caseSeqExp.sample_id}
         {caseSeqExp.affected_status_code && (
           <>
