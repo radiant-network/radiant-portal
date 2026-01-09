@@ -1,7 +1,11 @@
+import { Link } from 'react-router';
+import { ArrowUpRight } from 'lucide-react';
+
 import { GenePanelCondition, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import Empty from '@/components/base/empty';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
+import { Button } from '@/components/base/shadcn/button';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 
@@ -19,22 +23,15 @@ function GeneAccordionItem({ symbol, panelType, conditions }: GeneAccordionItemP
   return (
     <AccordionItem value={symbol} className="border rounded">
       <AccordionTrigger asChild className="py-4 px-5 hover:cursor-pointer">
-        <div className="flex flex-1 ml-4 items-center gap-3">
-          <span className="font-semibold text-base">
-            {symbol ? (
-              <a
-                href={getOmimOrgUrl({ symbol })}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:underline"
-                onClick={e => e.stopPropagation()}
-              >
-                {symbol}
-              </a>
-            ) : (
-              '-'
-            )}
-          </span>
+        <div className="flex flex-1 ml-4 items-center gap-2">
+          <span className="font-semibold text-base">{symbol || t('common.components.empty_cell')}</span>
+          {symbol && (
+            <Link to={getOmimOrgUrl({ symbol })} target="_blank" rel="noreferrer">
+              <Button iconOnly size="xs" variant="ghost">
+                {<ArrowUpRight className="size-4!" />}
+              </Button>
+            </Link>
+          )}
         </div>
       </AccordionTrigger>
       <AccordionContent className="py-4 pt-2 px-5 space-y-4">
