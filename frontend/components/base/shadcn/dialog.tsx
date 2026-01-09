@@ -12,7 +12,7 @@ const dialogVariants = tv({
     close:
       'absolute right-4 top-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&_svg]:size-4',
     header: 'flex flex-row space-y-1.5 px-6 pt-6 text-center sm:text-left items-start self-stretch gap-6',
-    body: 'p-6',
+    body: 'p-6 max-h-[82vh]',
     footer: 'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 px-6 pb-6',
     titleWrapper: 'flex flex-col gap-0.5',
     title: 'text-lg font-semibold leading-none tracking-tight',

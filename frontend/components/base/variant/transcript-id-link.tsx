@@ -26,7 +26,7 @@ function TranscriptIdLink({
   ...props
 }: TranscriptIdLinkProps) {
   return (
-    <div className={cn('flex items-center gap-1', className)} {...props}>
+    <div className={cn('flex items-start mt-0.5 gap-1', className)} {...props}>
       <AnchorLink
         size="sm"
         href={getEnsemblUrl(transcriptId)}

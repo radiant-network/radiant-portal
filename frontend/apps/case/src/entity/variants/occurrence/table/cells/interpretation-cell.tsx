@@ -32,7 +32,11 @@ function InterpretationCell({ occurrence }: InterpretationCellProps) {
               )}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>{t('variant.interpretation.tooltip')}</TooltipContent>
+          <TooltipContent>
+            {occurrence.has_interpretation
+              ? t('variant.interpretation.tooltip.edit')
+              : t('variant.interpretation.tooltip.add')}
+          </TooltipContent>
         </Tooltip>
       )}
     />

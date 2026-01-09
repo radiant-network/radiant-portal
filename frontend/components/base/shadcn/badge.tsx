@@ -97,6 +97,14 @@ const badgeVariants = tv({
         countSeparator: 'bg-neutral-foreground/65',
       },
     },
+    size: {
+      default: {
+        base: '',
+      },
+      lg: {
+        base: 'px-3 py-1.5',
+      },
+    },
   },
   compoundVariants: [
     {
@@ -177,18 +185,19 @@ const badgeVariants = tv({
   ],
   defaultVariants: {
     variant: 'default',
+    size: 'default',
   },
 });
 
 export interface BadgeProps
   extends
-    React.HTMLAttributes<HTMLDivElement>,
-    Omit<VariantProps<typeof badgeVariants>, 'showCount' | 'clickable' | 'closable'> {
+  React.HTMLAttributes<HTMLDivElement>,
+  Omit<VariantProps<typeof badgeVariants>, 'showCount' | 'clickable' | 'closable'> {
   onClose?: () => void;
   count?: number;
 }
 
-function Badge({ className, variant, children, iconOnly, count, ...props }: BadgeProps) {
+function Badge({ className, variant, children, iconOnly, size, count, ...props }: BadgeProps) {
   const showCount = count !== undefined;
   const styles = badgeVariants({
     variant,
@@ -196,6 +205,7 @@ function Badge({ className, variant, children, iconOnly, count, ...props }: Badg
     clickable: !!props.onClick,
     showCount,
     iconOnly,
+    size,
   });
 
   return (

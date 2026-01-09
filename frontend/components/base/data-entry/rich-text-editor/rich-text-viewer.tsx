@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import { EditorContent, EditorContentProps, useEditor } from '@tiptap/react';
@@ -5,33 +6,22 @@ import StarterKit from '@tiptap/starter-kit';
 
 import { cn } from '@/components/lib/utils';
 
-import RichTextEditorToolbar from './rich-text-editor-toolbar';
-
-export type RichTextEditorProps = Omit<EditorContentProps, 'ref' | 'editor' | 'onChange' | 'onBlur'> & {
+export type RichTextViewerProps = Omit<EditorContentProps, 'ref' | 'editor' | 'onChange' | 'onBlur'> & {
   ref?: React.Ref<HTMLDivElement>;
-  value?: string;
+  value: string;
   className?: string;
   wrapperClassName?: string;
-  onChange?: (value: string) => void;
-  onBlur?: () => void;
 };
 
-const RichTextEditor = ({ value, className, wrapperClassName, onChange, onBlur, ...props }: RichTextEditorProps) => {
+const RichTextViewer = ({ value, className, wrapperClassName, ...props }: RichTextViewerProps) => {
   const editor = useEditor(
     {
       editorProps: {
         attributes: {
-          class: cn(
-            'min-h-[80px] w-full rounded-md rounded-tr-none rounded-tl-none border border-input bg-transparent px-3 py-2 border-t-0 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-auto resize-y',
-            className,
-          ),
+          class: cn('w-full bg-transparent text-sm overflow-auto', className),
         },
       },
-      onUpdate: ({ editor }) => {
-        const html = editor.getHTML();
-        onChange?.(html);
-      },
-      onBlur,
+      editable: false,
       extensions: [
         StarterKit.configure({
           orderedList: {
@@ -87,14 +77,15 @@ const RichTextEditor = ({ value, className, wrapperClassName, onChange, onBlur, 
     [],
   );
 
+  useEffect(() => {
+    editor?.commands.setContent(value);
+  }, [value]);
+
   return (
-    <div
-      className={cn('shadow-xs rounded-md bg-background focus-within:ring-1 focus-within:ring-ring', wrapperClassName)}
-    >
-      {editor ? <RichTextEditorToolbar editor={editor} /> : null}
+    <div className={cn('bg-background', wrapperClassName)}>
       <EditorContent editor={editor} {...props} />
     </div>
   );
 };
 
-export default RichTextEditor;
+export default RichTextViewer;
