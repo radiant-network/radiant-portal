@@ -24,7 +24,7 @@ function GeneAccordionItem({ symbol, panelType, conditions }: GeneAccordionItemP
     <AccordionItem value={symbol} className="border rounded">
       <AccordionTrigger asChild className="py-4 px-5 hover:cursor-pointer">
         <div className="flex flex-1 ml-4 items-center gap-2">
-          <span className="font-semibold text-base">{symbol || '-'}</span>
+          <span className="font-semibold text-base">{symbol || t('common.components.empty_cell')}</span>
           {symbol && (
             <Link to={getOmimOrgUrl({ symbol })} target="_blank" rel="noreferrer">
               <Button iconOnly size="xs" variant="ghost">
