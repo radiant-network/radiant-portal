@@ -17,6 +17,7 @@ type TermsRepository struct {
 
 type TermsDAO interface {
 	GetTermAutoComplete(termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error)
+	GetTermNameById(termsTable string, id string) (*string, error)
 }
 
 func NewTermsRepository(db *gorm.DB) *TermsRepository {
@@ -67,6 +68,23 @@ func (r *TermsRepository) GetTermAutoComplete(termsTable string, input string, l
 	for i, term := range terms {
 		output[i] = mapToAutoCompleteTerm(&term, input)
 	}
+
+	return &output, nil
+}
+
+func (r *TermsRepository) GetTermNameById(termsTable string, id string) (*string, error) {
+	tx := r.db.Table(termsTable).Select("name").Where("id = ?", id)
+
+	var term types.Term
+	if err := tx.First(&term).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching term name: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	output := term.Name
 
 	return &output, nil
 }

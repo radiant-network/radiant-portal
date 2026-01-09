@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **classification** | **str** |  | [optional] 
 **classification_criterias** | **List[str]** |  | [optional] 
 **condition** | **str** |  | [optional] 
+**condition_name** | **str** |  | [optional] 
 **created_at** | **str** |  | [optional] 
 **created_by** | **str** |  | [optional] 
 **created_by_name** | **str** |  | [optional] 

@@ -32,6 +32,7 @@ class InterpretationGermline(BaseModel):
     classification: Optional[StrictStr] = None
     classification_criterias: Optional[List[StrictStr]] = None
     condition: Optional[StrictStr] = None
+    condition_name: Optional[StrictStr] = None
     created_at: Optional[StrictStr] = None
     created_by: Optional[StrictStr] = None
     created_by_name: Optional[StrictStr] = None
@@ -46,7 +47,7 @@ class InterpretationGermline(BaseModel):
     updated_at: Optional[StrictStr] = None
     updated_by: Optional[StrictStr] = None
     updated_by_name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["case_id", "classification", "classification_criterias", "condition", "created_at", "created_by", "created_by_name", "id", "interpretation", "locus_id", "metadata", "pubmed", "sequencing_id", "transcript_id", "transmission_modes", "updated_at", "updated_by", "updated_by_name"]
+    __properties: ClassVar[List[str]] = ["case_id", "classification", "classification_criterias", "condition", "condition_name", "created_at", "created_by", "created_by_name", "id", "interpretation", "locus_id", "metadata", "pubmed", "sequencing_id", "transcript_id", "transmission_modes", "updated_at", "updated_by", "updated_by_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -113,6 +114,7 @@ class InterpretationGermline(BaseModel):
             "classification": obj.get("classification"),
             "classification_criterias": obj.get("classification_criterias"),
             "condition": obj.get("condition"),
+            "condition_name": obj.get("condition_name"),
             "created_at": obj.get("created_at"),
             "created_by": obj.get("created_by"),
             "created_by_name": obj.get("created_by_name"),

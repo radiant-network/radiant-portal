@@ -36,11 +36,12 @@ func (m *MockExternalClient) GetCitationById(id string) (*types.PubmedCitation, 
 }
 
 func Test_GetInterpretationGermline(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		pubmedService := &MockExternalClient{}
-		repo := repository.NewPostgresRepository(db, pubmedService)
+		repo := repository.NewPostgresRepository(postgres, pubmedService)
+		termsRepo := repository.NewTermsRepository(starrocks)
 		// not found
-		assertGetInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
+		assertGetInterpretationGermline(t, repo.Interpretations, termsRepo, "10", "seq1", "locus1", "trans1", http.StatusNotFound, `{"status": 404, "message":"interpretation not found"}`)
 		// create
 		interpretation := &types.InterpretationGermline{}
 		actual := assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
@@ -62,19 +63,20 @@ func Test_GetInterpretationGermline(t *testing.T) {
 }
 
 func Test_GetInterpretationGermlineWithPartialContent(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		pubmedService := &MockExternalClient{}
-		repo := repository.NewPostgresRepository(db, pubmedService)
+		repo := repository.NewPostgresRepository(postgres, pubmedService)
+		termsRepo := repository.NewTermsRepository(starrocks)
 		interpretation := &types.InterpretationGermline{}
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "3"})
 		assertPostInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
-		assertGetInterpretationGermline(t, repo.Interpretations, "10", "seq1", "locus1", "trans1", http.StatusPartialContent, "")
+		assertGetInterpretationGermline(t, repo.Interpretations, termsRepo, "10", "seq1", "locus1", "trans1", http.StatusPartialContent, "")
 	})
 }
 
-func assertGetInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
+func assertGetInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, termsRepo repository.TermsDAO, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	router := gin.Default()
-	router.GET("/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationGermline(repo))
+	router.GET("/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationGermline(repo, termsRepo))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/v2/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()

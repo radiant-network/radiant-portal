@@ -45,3 +45,21 @@ func Test_GetTermAutoCompleteNoResult(t *testing.T) {
 		assert.Equal(t, 0, len(*terms))
 	})
 }
+
+func Test_GetTermNameById(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewTermsRepository(db)
+		term, err := repo.GetTermNameById(types.MondoTable.Name, "MONDO:0000003")
+		assert.NoError(t, err)
+		assert.Equal(t, "colorblindness, partial", *term)
+	})
+}
+
+func Test_GetTermNameByIdNoResult(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewTermsRepository(db)
+		term, err := repo.GetTermNameById(types.MondoTable.Name, "MONDO:not_existing")
+		assert.NoError(t, err)
+		assert.Nil(t, term)
+	})
+}
