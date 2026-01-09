@@ -7,7 +7,7 @@ describe('Batches / Patient success', () => {
   before(() => {
     const globalData = Cypress.env('globalData');
     const Auth = globalData.Authorization;
-    batchId = globalData.BatchesId.patientPending;
+    batchId = globalData.BatchesId.patientSuccess;
 
     cy.apiCall('GET', `batches/${batchId}`, '', Auth.token).then(res => {
       response = res;

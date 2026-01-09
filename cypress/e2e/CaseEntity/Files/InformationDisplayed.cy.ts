@@ -7,6 +7,8 @@ describe('CaseEntity - Files - Information displayed', () => {
   const setupTest = () => {
     cy.login();
     cy.visitCaseFilesPage(data.file.case, data.file.search_criteria);
+    FilesTable.actions.sortColumn('name');
+    FilesTable.actions.sortColumn('name');
   };
 
   it('File Name', () => {
