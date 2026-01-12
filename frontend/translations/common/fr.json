@@ -913,7 +913,7 @@
     "interpretation": {
       "tooltip": {
         "add": "Ajouter une interprétation",
-        "edit": "Modifier l’interprétation"
+        "view": "Voir l’interprétation"
       },
       "classifications": {
         "all_classifications": "Toutes les classifications",

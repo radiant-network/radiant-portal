@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Calendar, ClipboardList, LibraryBig, SquarePen, Stethoscope } from 'lucide-react';
+import { CalendarIcon, ClipboardList, LibraryBig, SquarePen, StethoscopeIcon } from 'lucide-react';
 import useSWR from 'swr';
 
 import { GermlineSNVOccurrence, InterpretationGermline } from '@/api/api';
@@ -115,7 +115,7 @@ function SliderInterpretationDetailsCard({ occurrence }: SliderInterpretationDet
                       isCanonical={occurrence.is_canonical}
                       isManeSelect={occurrence.is_mane_select}
                       isManePlus={occurrence.is_mane_plus}
-                      linkClassName="text-sm text-primary"
+                      linkClassName="text-sm text-primary m-[-1px]"
                     />
                   )}
                 </DescriptionSection>
@@ -129,6 +129,7 @@ function SliderInterpretationDetailsCard({ occurrence }: SliderInterpretationDet
             <DescriptionSection title={t('preview_sheet.interpretation_details.fields.primary_condition')}>
               <div className="flex gap-2">
                 <PhenotypeConditionLink
+                  className="capitalize"
                   name={interpretation?.condition_name}
                   code={interpretation?.condition}
                   showCode={false}
@@ -150,15 +151,15 @@ function SliderInterpretationDetailsCard({ occurrence }: SliderInterpretationDet
               </div>
             </DescriptionSection>
             <Separator />
-            <div className="flex gap-6">
-              <div className="flex gap-1 text-sm text-foreground font-mono">
-                <Stethoscope size="14" />
+            <div className="flex gap-6 text-sm text-muted-foreground font-mono">
+              <span className="flex align-center gap-1">
+                <StethoscopeIcon size="16" />
                 {interpretation?.updated_by_name}
-              </div>
-              <div className="flex gap-1 text-sm text-foreground font-mono">
-                <Calendar size="14" />
+              </span>
+              <span className="flex align-center gap-1">
+                <CalendarIcon size="16" />
                 {interpretation?.updated_at && <DateTime date={interpretation.updated_at} />}
-              </div>
+              </span>
             </div>
 
             <DescriptionSection title={t('preview_sheet.interpretation_details.fields.interpretation')}>
