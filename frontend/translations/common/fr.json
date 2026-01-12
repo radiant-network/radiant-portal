@@ -594,7 +594,7 @@
           "autosomal_dominant": "Dominant autosomique",
           "autosomal_dominant_abbrev": "AD",
           "autosomal_dominant_de_novo": "Dominant autosomique de novo",
-          "autosomal_dominant_de_novo_abbrev": "AD",
+          "autosomal_dominant_de_novo_abbrev": "AD DNV",
           "autosomal_recessive": "Récessif autosomique",
           "autosomal_recessive_abbrev": "AR",
           "non_carrier_proband": "Sujet index non porteur",
@@ -606,15 +606,15 @@
           "unknown_parents_genotype": "Génotype des parents inconnu",
           "unknown_parents_genotype_abbrev": "UPG",
           "unknown_proband_genotype": "Génotype du sujet index inconnu",
-          "unknown_proband_genotype_abbrev": "UPG",
+          "unknown_proband_genotype_abbrev": "UPBG",
           "x_linked_dominant": "Dominant lié à l’X",
           "x_linked_dominant_abbrev": "XLD",
           "x_linked_dominant_de_novo": "Dominant lié à l’X de novo",
-          "x_linked_dominant_de_novo_abbrev": "XLD",
+          "x_linked_dominant_de_novo_abbrev": "XLD DNV",
           "x_linked_recessive": "Récessif lié à l’X",
           "x_linked_recessive_abbrev": "XLR",
           "x_linked_recessive_de_novo": "Récessif lié à l’X de novo",
-          "x_linked_recessive_de_novo_abbrev": "XLR"
+          "x_linked_recessive_de_novo_abbrev": "XLR DNV"
         },
         "father_zygosity": {
           "het": "Hétérozygote",
