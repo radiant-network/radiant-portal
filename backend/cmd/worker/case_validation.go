@@ -783,13 +783,13 @@ func (cr *CaseValidationRecord) validateCase() error {
 
 	// Validate case uniqueness in DB
 	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
-		c, err := cr.Context.CasesRepo.GetCaseBySubmitterCaseIdAndProjectId(cr.SubmitterCaseID, *cr.ProjectID)
+		c, err := cr.Context.CasesRepo.GetCaseBySubmitterCaseIdAndProjectId(cr.Case.SubmitterCaseId, *cr.ProjectID)
 		if err != nil {
-			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.SubmitterCaseID, *cr.ProjectID, err)
+			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.Case.SubmitterCaseId, *cr.ProjectID, err)
 		}
 		if c != nil {
 			cr.Skipped = true
-			message := fmt.Sprintf("Case (%d / %s) already exists, skipped.", *cr.ProjectID, cr.SubmitterCaseID)
+			message := fmt.Sprintf("Case (%d / %s) already exists, skipped.", *cr.ProjectID, cr.Case.SubmitterCaseId)
 			cr.addErrors(message, CaseAlreadyExists, path) // CASE-001
 		}
 	}
