@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useParams } from 'react-router';
+import { useParams, useSearchParams } from 'react-router';
 import { PaginationState } from '@tanstack/table-core';
 import useSWR from 'swr';
 
@@ -8,8 +8,11 @@ import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import { variantsApi } from '@/utils/api';
 
+import SliderInterpretedCaseSheet from './slider/slider-interpreted-case-sheet';
+import { useSliderCasePatientIdNavigation } from './slider/use-slider-case-navigation';
 import InterpretedCasesFilters, { InterpretedCasesFiltersState } from './table/interpreted-cases-filters';
 import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table/interpreted-cases-table-settings';
+import { SELECTED_INTERPRETED_CASE_PARAM } from './constants';
 import InterpretedCasesExpand from './interpreted-cases-expand';
 
 type InterpretedCasesSearchInput = {
@@ -26,6 +29,8 @@ async function fetchInterpretedCases(input: InterpretedCasesSearchInput) {
 function InterpretedCasesTable() {
   const { t } = useI18n();
   const params = useParams<{ locusId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [rowSelection, setRowSelection] = useState({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -97,13 +102,24 @@ function InterpretedCasesTable() {
     },
   );
 
+  const casesData = useMemo(() => data?.list || [], [data?.list]);
+
+  const { selectedCase, hasPrevious, hasNext, handleClosePreview, handlePreviousCase, handleNextCase } =
+    useSliderCasePatientIdNavigation({
+      casesData,
+      searchParams,
+      setSearchParams,
+      selectedCaseParamKey: SELECTED_INTERPRETED_CASE_PARAM,
+      setRowSelection,
+    });
+
   return (
     <div className="space-y-6 mt-2">
       <InterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
       <DataTable
         id="interpreted-cases"
         columns={getInterpretedCasesColumns(t)}
-        data={data?.list || []}
+        data={casesData}
         defaultColumnSettings={interpretedCasesDefaultSettings}
         loadingStates={{
           total: isLoading,
@@ -113,9 +129,20 @@ function InterpretedCasesTable() {
         pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
         subComponent={data => <InterpretedCasesExpand locusId={params.locusId!} data={data} />}
         tableIndexResultPosition="bottom"
+        rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
         serverOptions={{
           onSortingChange: () => {},
         }}
+      />
+      <SliderInterpretedCaseSheet
+        open={!!selectedCase}
+        setOpen={() => handleClosePreview()}
+        case={selectedCase!}
+        onPrevious={handlePreviousCase}
+        onNext={handleNextCase}
+        hasPrevious={hasPrevious}
+        hasNext={hasNext}
       />
     </div>
   );

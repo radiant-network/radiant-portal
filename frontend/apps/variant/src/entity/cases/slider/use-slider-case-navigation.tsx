@@ -29,7 +29,7 @@ interface UseSliderCaseNavigationReturn<T extends CaseItem> {
 /**
  * @DESCRIPTION: Patient_id is used to find valid row
  */
-export function useSliderCaseNavigation<T extends CaseItem>({
+export function useSliderCasePatientIdNavigation<T extends CaseItem>({
   casesData,
   searchParams,
   setSearchParams,

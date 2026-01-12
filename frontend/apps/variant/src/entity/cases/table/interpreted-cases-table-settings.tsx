@@ -8,14 +8,14 @@ import ClassificationCell from '@/components/base/data-table/cells/classificatio
 import ConditionCell from '@/components/base/data-table/cells/condition-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
-import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Button } from '@/components/base/shadcn/button';
+
+import InterpretedCasePreviewCell from './cells/interpreted-case-preview-cell';
 
 const interpretedCasesColumnHelper = createColumnHelper<VariantInterpretedCase>();
 
@@ -31,11 +31,11 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
     interpretedCasesColumnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (
-        <RelationshipToProbandCell relationship={info.row.original.relationship_to_proband}>
-          <AnchorLink href={`/case/entity/${info.getValue()}`} mono size="xs" variant="secondary">
-            {info.getValue()}
-          </AnchorLink>
-        </RelationshipToProbandCell>
+        <InterpretedCasePreviewCell
+          caseId={info.getValue()}
+          patiendId={info.row.original.patient_id}
+          relationshipToProband={info.row.original.relationship_to_proband}
+        />
       ),
       header: t('variant_entity.cases.interpreted_table.headers.case'),
       size: 120,

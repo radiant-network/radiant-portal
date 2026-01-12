@@ -1,23 +1,22 @@
+import { useContext } from 'react';
 import { SquarePen } from 'lucide-react';
 
 import { CaseSequencingExperiment, GermlineSNVOccurrence } from '@/api/api';
+import InterpretationDialog from '@/components/base/interpretation/interpretation-dialog';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
 import { useOccurrenceAndCase } from '@/components/base/slider/hooks/use-slider-occurrence-and-case';
+import SliderHeader from '@/components/base/slider/slider-header';
+import SliderInterpretationDetailsCard from '@/components/base/slider/slider-interpretation-details-card';
+import SliderOccurrenceDetailsCard from '@/components/base/slider/slider-occurrence-details-card';
+import SliderOccurrenceSubHeader from '@/components/base/slider/slider-occurrence-sub-header';
+import SliderPatientRow from '@/components/base/slider/slider-patient-row';
+import SliderSheet from '@/components/base/slider/slider-sheet';
+import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
+import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
 import { useI18n } from '@/components/hooks/i18n';
-import SliderVariantDetailsCard from '@/entity/variants/occurrence/slider/slider-variant-details-card';
+import { SeqIDContext } from '@/entity/variants/variants-tab';
 import { useCaseIdFromParam } from '@/utils/helper';
-import SliderHeader from 'components/base/slider/slider-header';
-import SliderOccurrenceDetailsCard from 'components/base/slider/slider-occurrence-details-card';
-import SliderOccurrenceSubHeader from 'components/base/slider/slider-occurrence-sub-header';
-import SliderPatientRow from 'components/base/slider/slider-patient-row';
-import SliderSheet from 'components/base/slider/slider-sheet';
-import SliderSheetSkeleton from 'components/base/slider/slider-sheet-skeleton';
-
-import InterpretationDialog from '../../interpretation/interpretation-dialog';
-import { useOccurrenceListContext } from '../hooks/use-occurrences-list';
-
-import SliderInterpretationDetailsCard from './slider-interpretation-details-card';
 
 type OccurrenceSliderSheetProps = {
   occurrence?: GermlineSNVOccurrence;
@@ -29,7 +28,7 @@ type OccurrenceSliderSheetProps = {
   hasPrevious?: boolean;
   hasNext?: boolean;
   patientSelected?: CaseSequencingExperiment;
-  handleInterpretationChange?: () => void;
+  onInterpretationSaved: () => void;
 };
 
 function SliderOccurrenceSheet({
@@ -42,11 +41,13 @@ function SliderOccurrenceSheet({
   hasPrevious,
   hasNext,
   patientSelected,
+  onInterpretationSaved,
 }: OccurrenceSliderSheetProps) {
   return (
     <SliderSheet trigger={children} open={open} setOpen={setOpen}>
       {occurrence && (
         <OccurrenceSheetContent
+          onInterpretationSaved={onInterpretationSaved}
           occurrence={occurrence}
           onPrevious={onPrevious}
           onNext={onNext}
@@ -61,6 +62,7 @@ function SliderOccurrenceSheet({
 
 type OccurrenceSheetContentProps = {
   occurrence: GermlineSNVOccurrence;
+  onInterpretationSaved: () => void;
   onPrevious?: () => void;
   onNext?: () => void;
   hasPrevious?: boolean;
@@ -75,10 +77,11 @@ function OccurrenceSheetContent({
   hasPrevious,
   hasNext,
   patientSelected,
+  onInterpretationSaved,
 }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
   const caseId = useCaseIdFromParam();
-  const { mutate, loading } = useOccurrenceListContext();
+  const seqId = useContext(SeqIDContext);
   const { patient, caseSequencing, expandResult, isLoading } = useOccurrenceAndCase(
     caseId,
     occurrence.seq_id,
@@ -106,10 +109,12 @@ function OccurrenceSheetContent({
         actions={
           !occurrence.has_interpretation && (
             <InterpretationDialog
-              occurrence={occurrence}
-              handleSaveCallback={mutate}
+              locusId={occurrence.locus_id}
+              transcriptId={occurrence.transcript_id}
+              seqId={seqId}
+              handleSaveCallback={onInterpretationSaved}
               renderTrigger={handleOpen => (
-                <Button loading={loading} size="sm" onClick={handleOpen}>
+                <Button size="sm" onClick={handleOpen}>
                   <SquarePen />
                   {t('preview_sheet.actions.interpretation')}
                 </Button>
@@ -118,7 +123,20 @@ function OccurrenceSheetContent({
           )
         }
       />
-      {occurrence.has_interpretation && <SliderInterpretationDetailsCard occurrence={occurrence} />}
+      {occurrence.has_interpretation && (
+        <SliderInterpretationDetailsCard
+          canEditInterpretation
+          onInterpretationSaved={onInterpretationSaved}
+          seqId={seqId}
+          caseId={caseId}
+          symbol={occurrence?.symbol}
+          locusId={occurrence?.locus_id}
+          isManeSelect={occurrence?.is_mane_select}
+          isManePlus={occurrence?.is_mane_plus}
+          isCanonical={occurrence?.is_canonical}
+          transcriptId={occurrence?.transcript_id}
+        />
+      )}
       {caseId && (
         <SliderOccurrenceDetailsCard
           caseId={caseId}

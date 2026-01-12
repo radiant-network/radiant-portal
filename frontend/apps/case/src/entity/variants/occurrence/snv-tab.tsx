@@ -15,13 +15,14 @@ import {
 } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import VariantIcon from '@/components/base/icons/variant-icon';
+import { FetchOccurrencesListContext } from '@/components/base/occurrence/hooks/use-occurrences-list';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';
+import { useSliderOccurrenceNavigation } from '@/components/base/slider/hooks/use-slider-occurrence-navigation';
 import { useConfig } from '@/components/cores/applications-config';
 import { ISyntheticSqon } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
-import { useSliderOccurrenceNavigation } from '@/entity/variants/occurrence/hooks/use-slider-occurrence-navigation';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 import QueryBuilder from 'components/base/query-builder/query-builder';
@@ -36,7 +37,6 @@ import { queryBuilderRemote } from 'components/cores/query-builder/query-builder
 import { SELECTED_VARIANT_PARAM } from '../constants';
 import { getVisibleAggregations } from '../utils';
 
-import { FetchOccurrencesListContext } from './hooks/use-occurrences-list';
 import { isValidSeqId } from './libs/seq-id';
 import SliderOccurrenceSheet from './slider/slider-occurrence-sheet';
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
@@ -345,6 +345,9 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
               </CardContent>
             </Card>
             <SliderOccurrenceSheet
+              onInterpretationSaved={() => {
+                fetchOccurrencesList.mutate();
+              }}
               open={!!selectedOccurrence}
               setOpen={() => handleClosePreview()}
               occurrence={selectedOccurrence!}

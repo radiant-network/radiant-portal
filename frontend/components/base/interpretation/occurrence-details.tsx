@@ -1,11 +1,10 @@
 import { ExpandedGermlineSNVOccurrence } from '@/api/api';
-
-import ClassificationSection from '../occurrence/classification-section';
-import ClinicalAssociationSection from '../occurrence/clinical-association-section';
-import FrequencySection from '../occurrence/frequency-section';
-import GeneSection from '../occurrence/gene-section';
-import PredictionSection from '../occurrence/prediction-section';
-import ZygositySection from '../occurrence/zygosity-section';
+import ClassificationSection from '@/components/base/occurrence/classification-section';
+import ClinicalAssociationSection from '@/components/base/occurrence/clinical-association-section';
+import FrequencySection from '@/components/base/occurrence/frequency-section';
+import GeneSection from '@/components/base/occurrence/gene-section';
+import PredictionSection from '@/components/base/occurrence/prediction-section';
+import ZygositySection from '@/components/base/occurrence/zygosity-section';
 
 interface OccurrenceDetailsProps {
   occurrence?: ExpandedGermlineSNVOccurrence;
