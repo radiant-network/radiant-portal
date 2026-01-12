@@ -198,6 +198,7 @@ components:
       - project_code
       - sequencing_experiments
       - status_code
+      - submitter_case_id
       - tasks
       - type
       type: object
