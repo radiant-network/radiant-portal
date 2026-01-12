@@ -79,6 +79,7 @@ func Test_SecureRoutes(t *testing.T) {
 		for _, route := range []string{
 			"cases/search",
 			"cases/filters",
+			"genes/search",
 			"interpretations/germline/1/1/1",
 			"interpretations/somatic/1/1/1",
 			"occurrences/germline/snv/1/1/count",

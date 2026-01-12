@@ -12,6 +12,7 @@ import (
 )
 
 type Gene = types.Gene
+type GeneResult = types.GeneResult
 type AutoCompleteGene = types.AutoCompleteGene
 
 type GenesRepository struct {
@@ -20,6 +21,7 @@ type GenesRepository struct {
 
 type GenesDAO interface {
 	GetGeneAutoComplete(prefix string, limit int) (*[]AutoCompleteGene, error)
+	SearchGenes(inputs []string) (*[]GeneResult, error)
 }
 
 func NewGenesRepository(db *gorm.DB) *GenesRepository {
@@ -83,4 +85,29 @@ func (r *GenesRepository) GetGeneAutoComplete(prefix string, limit int) (*[]Auto
 	}
 
 	return &output, nil
+}
+
+func (r *GenesRepository) SearchGenes(inputs []string) (*[]GeneResult, error) {
+	upperInputs := make([]string, 0)
+
+	for _, input := range inputs {
+		upperInputs = append(upperInputs, strings.ToUpper(input))
+	}
+
+	tx := r.db.Table(types.EnsemblGeneTable.Name)
+	tx = tx.Select("gene_id, name")
+	tx = tx.Where("UPPER(name) IN ? OR UPPER(gene_id) IN ?", upperInputs, upperInputs)
+	tx = tx.Order("name ASC")
+
+	var genes []GeneResult
+
+	if err := tx.Find(&genes).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error while fetching genes: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	return &genes, nil
 }
