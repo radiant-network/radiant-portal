@@ -594,7 +594,7 @@
           "autosomal_dominant": "Autosomal Dominant",
           "autosomal_dominant_abbrev": "AD",
           "autosomal_dominant_de_novo": "Autosomal Dominant De Novo",
-          "autosomal_dominant_de_novo_abbrev": "AD",
+          "autosomal_dominant_de_novo_abbrev": "AD DNV",
           "autosomal_recessive": "Autosomal Recessive",
           "autosomal_recessive_abbrev": "AR",
           "non_carrier_proband": "Non Carrier Proband",
@@ -606,15 +606,15 @@
           "unknown_parents_genotype": "Unknown Parents Genotype",
           "unknown_parents_genotype_abbrev": "UPG",
           "unknown_proband_genotype": "Unknown Proband Genotype",
-          "unknown_proband_genotype_abbrev": "UPG",
+          "unknown_proband_genotype_abbrev": "UPBG",
           "x_linked_dominant": "X Linked Dominant",
           "x_linked_dominant_abbrev": "XLD",
           "x_linked_dominant_de_novo": "X Linked Dominant De Novo",
-          "x_linked_dominant_de_novo_abbrev": "XLD",
+          "x_linked_dominant_de_novo_abbrev": "XLD DNV",
           "x_linked_recessive": "X Linked Recessive",
           "x_linked_recessive_abbrev": "XLR",
           "x_linked_recessive_de_novo": "X Linked Recessive De Novo",
-          "x_linked_recessive_de_novo_abbrev": "XLR"
+          "x_linked_recessive_de_novo_abbrev": "XLR DNV"
         },
         "father_zygosity": {
           "het": "Heterozygote",

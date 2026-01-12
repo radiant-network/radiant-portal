@@ -4,10 +4,12 @@ import useSWR from 'swr';
 
 import { GermlineSNVOccurrence, InterpretationGermline } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
+import TransmissionModeBadge from '@/components/base/badges/transmission-mode-badge';
 import RichTextViewer from '@/components/base/data-entry/rich-text-editor/rich-text-viewer';
 import DateTime from '@/components/base/date/datetime';
 import EmptyField from '@/components/base/information/empty-field';
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 import PubmedListDialog from '@/components/base/pubmed/pubmed-list-dialog';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
@@ -125,7 +127,18 @@ function SliderInterpretationDetailsCard({ occurrence }: SliderInterpretationDet
               </div>
             </div>
             <DescriptionSection title={t('preview_sheet.interpretation_details.fields.primary_condition')}>
-              <div className="flex gap-2">{interpretation?.condition}</div>
+              <div className="flex gap-2">
+                <PhenotypeConditionLink
+                  name={interpretation?.condition_name}
+                  code={interpretation?.condition}
+                  showCode={false}
+                />
+                <div className="flex gap-1">
+                  {(interpretation?.transmission_modes ?? []).map(omim => (
+                    <TransmissionModeBadge value={omim} key={omim} />
+                  ))}
+                </div>
+              </div>
             </DescriptionSection>
             <DescriptionSection title={t('preview_sheet.interpretation_details.fields.classification_criteria')}>
               <div className="space-x-1">
