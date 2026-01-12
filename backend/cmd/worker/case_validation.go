@@ -130,6 +130,7 @@ func NewCaseValidationRecord(ctx *BatchValidationContext, c types.CaseBatch, ind
 		},
 		Case:                  c,
 		Context:               ctx,
+		OutputDocuments:       make(map[string]struct{}),
 		Patients:              make(map[PatientKey]*types.Patient),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 		Documents:             make(map[string]*types.Document),
@@ -894,6 +895,15 @@ func (cr *CaseValidationRecord) validateFileMetadata(doc *types.OutputDocumentBa
 	return nil
 }
 
+func (cr *CaseValidationRecord) validateDuplicateDocumentsInBatch(doc *types.OutputDocumentBatch, path string) {
+	if _, exists := cr.OutputDocuments[doc.Url]; exists {
+		msg := fmt.Sprintf("Duplicate output document with URL %s found.", doc.Url)
+		cr.addErrors(msg, DuplicateDocumentInCase, path)
+	} else {
+		cr.OutputDocuments[doc.Url] = struct{}{}
+	}
+}
+
 func (cr *CaseValidationRecord) validateDocuments() error {
 	for tid, t := range cr.Case.Tasks {
 		for did, doc := range t.OutputDocuments {
@@ -922,6 +932,7 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 			if err := cr.validateFileMetadata(doc, path, tid, did); err != nil {
 				return fmt.Errorf("error validating file metadata for case %d - document %d: %v", cr.Index, tid, err)
 			}
+			cr.validateDuplicateDocumentsInBatch(doc, path)
 		}
 	}
 	return nil
