@@ -342,6 +342,184 @@ func Test_getProbandFromPatients_Error(t *testing.T) {
 	assert.Nil(t, proband)
 }
 
+func Test_validateRegexPattern_ValidPattern(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	record.validateRegexPattern(
+		"case[0].field",
+		"Valid-Value123",
+		`^[A-Za-z0-9\-]+$`,
+		"TEST-001",
+		"Test field",
+		TextRegExpCompiled,
+	)
+
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateRegexPattern_InvalidPattern(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	record.validateRegexPattern(
+		"case[0].field",
+		"Invalid@Value",
+		`^[A-Za-z0-9\-]+$`,
+		"TEST-001",
+		"Test field",
+		TextRegExpCompiled,
+	)
+
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, "TEST-001", record.Errors[0].Code)
+	assert.Equal(t, "case[0].field", record.Errors[0].Path)
+	assert.Contains(t, record.Errors[0].Message, "Test field does not match the regular expression")
+}
+
+func Test_validateRegexPattern_EmptyValue(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	record.validateRegexPattern(
+		"case[0].field",
+		"",
+		`^[A-Za-z0-9\-]+$`,
+		"TEST-001",
+		"Test field",
+		TextRegExpCompiled,
+	)
+
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, "TEST-001", record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
+}
+
+func Test_validateRegexPattern_FamilyMemberCode(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	// Valid family member code
+	record.validateRegexPattern(
+		"case[0].patients[0].family_history[0]",
+		"Mother-Paternal",
+		FamilyMemberCodeRegExp,
+		"PATIENT-004",
+		"Family member code",
+		FamilyMemberCodeRegExpCompiled,
+	)
+
+	assert.Empty(t, record.Errors)
+
+	// Invalid family member code (contains numbers)
+	record.validateRegexPattern(
+		"case[0].patients[0].family_history[1]",
+		"Mother123",
+		FamilyMemberCodeRegExp,
+		"PATIENT-004",
+		"Family member code",
+		FamilyMemberCodeRegExpCompiled,
+	)
+
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, "PATIENT-004", record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, "Family member code does not match the regular expression")
+}
+
+func Test_validateTextLength_ValidLength(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	record.validateTextLength(
+		"case[0].field",
+		"Short text",
+		"TEST-002",
+		"Test field",
+		100,
+	)
+
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateTextLength_ExceedsMaxLength(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	longText := strings.Repeat("a", 101)
+	record.validateTextLength(
+		"case[0].field",
+		longText,
+		"TEST-002",
+		"Test field",
+		100,
+	)
+
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, "TEST-002", record.Errors[0].Code)
+	assert.Equal(t, "case[0].field", record.Errors[0].Path)
+	assert.Contains(t, record.Errors[0].Message, "Test field field is too long")
+	assert.Contains(t, record.Errors[0].Message, "maximum length allowed is 100")
+}
+
+func Test_validateTextLength_EmptyString(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	record.validateTextLength(
+		"case[0].field",
+		"",
+		"TEST-002",
+		"Test field",
+		100,
+	)
+
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateTextLength_ExactlyMaxLength(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	exactText := strings.Repeat("a", 100)
+	record.validateTextLength(
+		"case[0].field",
+		exactText,
+		"TEST-002",
+		"Test field",
+		100,
+	)
+
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateTextLength_TextMaxLength(t *testing.T) {
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+	}
+
+	// Test with TextMaxLength constant
+	longText := strings.Repeat("a", TextMaxLength+1)
+	record.validateTextLength(
+		"case[0].note",
+		longText,
+		InvalidFieldCase,
+		"Note",
+		TextMaxLength,
+	)
+
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, InvalidFieldCase, record.Errors[0].Code)
+	assert.Contains(t, record.Errors[0].Message, fmt.Sprintf("maximum length allowed is %d", TextMaxLength))
+}
+
 // -----------------------------------------------------------------------------
 // Section: Fetching Methods Tests
 // -----------------------------------------------------------------------------

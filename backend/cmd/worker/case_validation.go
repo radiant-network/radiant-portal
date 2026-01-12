@@ -370,6 +370,18 @@ func (cr *CaseValidationRecord) fetchValidationInfos() error {
 	return nil
 }
 
+func (cr *CaseValidationRecord) validateRegexPattern(path, value, regExpStr, code, message string, regExp *regexp.Regexp) {
+	if !regExp.MatchString(value) {
+		cr.addErrors(fmt.Sprintf("%s does not match the regular expression %s.", message, regExpStr), code, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateTextLength(path, value, code, message string, maxLength int) {
+	if len(value) > maxLength {
+		cr.addErrors(fmt.Sprintf("%s field is too long, maximum length allowed is %d.", message, maxLength), code, path)
+	}
+}
+
 func (cr *CaseValidationRecord) formatPatientsInvalidFieldMessage(fieldName string, patientIndex int) string {
 	return fmt.Sprintf("Invalid field %s for case %d - patient %d. Reason:",
 		fieldName,
@@ -419,10 +431,6 @@ func (cr *CaseValidationRecord) formatSeqExpFieldPath(seqExpIndex *int) string {
 	return cr.formatFieldPath("sequencing_experiments", seqExpIndex, "", nil)
 }
 
-func (cr *CaseValidationRecord) formatCollectionPath(entityType string) string {
-	return cr.formatFieldPath(entityType, nil, "", nil)
-}
-
 func (cr *CaseValidationRecord) validatePatientsTextField(value, fieldName, path string, patientIndex int, regExp *regexp.Regexp, regExpStr string, observationType string, obsIndex int, required bool) {
 	if !required && value == "" {
 		return
@@ -437,16 +445,8 @@ func (cr *CaseValidationRecord) validatePatientsTextField(value, fieldName, path
 		code = InvalidFieldPatients
 		message = cr.formatPatientsInvalidFieldMessage(fieldName, patientIndex)
 	}
-
-	if !regExp.MatchString(value) {
-		msg := fmt.Sprintf("%s does not match the regular expression %s.", message, regExpStr)
-		cr.addErrors(msg, code, path)
-	}
-
-	if len(value) > TextMaxLength {
-		msg := fmt.Sprintf("%s field is too long, maximum length allowed is %d.", message, TextMaxLength)
-		cr.addErrors(msg, code, path)
-	}
+	cr.validateRegexPattern(path, value, regExpStr, code, message, regExp)
+	cr.validateTextLength(path, value, code, message, TextMaxLength)
 }
 
 func (cr *CaseValidationRecord) validateCodeField(code, fieldName, path, codeType string, patientIndex int, validCodes []string, observationType string, obsIndex int) {
@@ -732,23 +732,15 @@ func (cr *CaseValidationRecord) formatCasesInvalidFieldMessage(fieldName string)
 	)
 }
 
-func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string, regExp *regexp.Regexp, regExpStr string, maxLenght int, required bool) {
+func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string, regExp *regexp.Regexp, regExpStr string, maxLength int, required bool) {
 	if !required && value == "" {
 		return
 	}
 
 	var message string
 	message = cr.formatCasesInvalidFieldMessage(fieldName)
-
-	if !regExp.MatchString(value) {
-		msg := fmt.Sprintf("%s does not match the regular expression %s.", message, regExpStr)
-		cr.addErrors(msg, InvalidFieldCase, path)
-	}
-
-	if len(value) > maxLenght {
-		msg := fmt.Sprintf("%s field is too long, maximum length allowed is %d.", message, maxLenght)
-		cr.addErrors(msg, InvalidFieldCase, path)
-	}
+	cr.validateRegexPattern(path, value, regExpStr, InvalidFieldCase, message, regExp)
+	cr.validateTextLength(path, value, InvalidFieldCase, message, maxLength)
 }
 
 func (cr *CaseValidationRecord) validateStatusCode() {
