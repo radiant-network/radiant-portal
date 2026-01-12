@@ -158,6 +158,15 @@ Cypress.Commands.add('shouldBeActiveTab', { prevSubject: 'element' }, subject =>
 });
 
 /**
+ * Asserts that the given element has data-state attribute.
+ * @param subject The element.
+ * @param state The expected level of the element.
+ */
+Cypress.Commands.add('shouldBeDataState', { prevSubject: 'element' }, (subject, state: string) => {
+  cy.wrap(subject).should('match', `[data-state="${state}"]`);
+});
+
+/**
  * Asserts that a given element is pinnable or not pinnable.
  * @param subject The element to check for pinnability.
  * @param isPinnable Whether the column should be pinnable.
@@ -188,15 +197,6 @@ Cypress.Commands.add('shouldBePinned', { prevSubject: 'element' }, (subject, pos
 Cypress.Commands.add('shouldBeSortable', { prevSubject: 'element' }, (subject, isSortable: boolean) => {
   const strExpectedSortable = isSortable ? 'exist' : 'not.exist';
   cy.wrap(subject).find(CommonSelectors.sortIcon).should(strExpectedSortable);
-});
-
-/**
- * Asserts that the given element has tag pattern level (e.g., [class*="bg-${level} text-${level}-foreground"]).
- * @param subject The element.
- * @param level The expected level of the element.
- */
-Cypress.Commands.add('shouldBeTagPatternLevel', { prevSubject: 'element' }, (subject, level: string) => {
-  cy.wrap(subject).should('match', CommonSelectors.tagLevel(level));
 });
 
 /**
