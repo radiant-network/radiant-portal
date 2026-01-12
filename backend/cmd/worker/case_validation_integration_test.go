@@ -299,7 +299,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload()
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/ABC123.recal.crai"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai"
 		createDocumentsForBatch(context, client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
@@ -310,18 +310,132 @@ func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *t
 		infos := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-003",
-				Message: "Document s3://test-bucket/ABC123.recal.crai already exists, skipped.",
+				Message: "Document s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai already exists, skipped.",
 				Path:    "case[0].tasks[0].output_documents[0]",
 			},
 		}
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-005",
-				Message: "A document with same url s3://test-bucket/ABC123.recal.crai has been found in the output of a different task.",
+				Message: "A document with same url s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai has been found in the output of a different task.",
 				Path:    "case[0].tasks[0].output_documents[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_DocumentField.recal.crai"
+		payload[0].Tasks[0].OutputDocuments[0].Name = "!@#$%^&*()_+"
+		createDocumentsForBatch(context, client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-001",
+				Message: "Invalid Field name for case 0 - task 0 - output document 0. Reason: Field [name] with value [!@#$%^&*()_+],  does not match the regular expression ^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_Error_DocumentNotFoundAtUrl(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_DocumentNotFoundAtUrl.recal.crai"
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-002",
+				Message: "No document can be found on the URL s3://test-bucket/validateDocument_Error_DocumentNotFoundAtUrl.recal.crai for case 0 - task 0 - output document 0.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_Warning_PartiallyDifferentDocumentExists(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		url := "s3://test-bucket/validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai"
+		doc := payload[0].Tasks[0].OutputDocuments[0]
+
+		db.Exec(`
+            INSERT INTO document (name, data_category_code, data_type_code, format_code, size, url, hash)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        `,
+			doc.Name,
+			doc.DataCategoryCode,
+			doc.DataTypeCode,
+			doc.FormatCode,
+			doc.Size,
+			url,
+			doc.Hash,
+		)
+
+		payload[0].SubmitterCaseId = "WARNING_CASE_123"
+		payload[0].Tasks[0].OutputDocuments[0].Url = url
+		payload[0].Tasks[0].OutputDocuments[0].Name = "Something Else"
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		warnings := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-004",
+				Message: "A document with same url s3://test-bucket/validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai has been found but with a different name (NA12891.recal.cram <> Something Else).",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, warnings, emptyMsgs)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_Error_SizeNotMatch(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_SizeNotMatch.recal.crai"
+		createDocumentsForBatch(context, client, payload)
+
+		payload[0].Tasks[0].OutputDocuments[0].Size = 42
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-006",
+				Message: "Document size does not match the actual size of the document s3://test-bucket/validateDocument_Error_SizeNotMatch.recal.crai for case 0 - task 0 - output document 0.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_Error_HashNotMatch(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_HashNotMatch.recal.crai"
+		createDocumentsForBatch(context, client, payload)
+
+		payload[0].Tasks[0].OutputDocuments[0].Hash = "not-the-right-hash"
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-007",
+				Message: "Document hash does not match the actual hash of the document s3://test-bucket/validateDocument_Error_HashNotMatch.recal.crai for case 0 - task 0 - output document 0.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
 	})
 }
 

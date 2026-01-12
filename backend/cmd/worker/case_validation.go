@@ -905,11 +905,11 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 			}
 
 			cr.validateDocumentTextField(doc.Url, "url", path, tid, did, nil, "", true)
-			cr.validateDocumentTextField(doc.Hash, "hash", path, tid, did, nil, "", true)
-			cr.validateDocumentTextField(doc.FormatCode, "format_code", path, tid, did, nil, "", true)
-			cr.validateDocumentTextField(doc.Name, "name", path, tid, did, nil, "", true)
-			cr.validateDocumentTextField(doc.DataTypeCode, "data_type_code", path, tid, did, nil, "", true)
-			cr.validateDocumentTextField(doc.DataCategoryCode, "data_category_code", path, tid, did, nil, "", true)
+			cr.validateDocumentTextField(doc.Hash, "hash", path, tid, did, TextRegExpCompiled, TextRegExp, true)
+			cr.validateDocumentTextField(doc.FormatCode, "format_code", path, tid, did, TextRegExpCompiled, TextRegExp, true)
+			cr.validateDocumentTextField(doc.Name, "name", path, tid, did, TextRegExpCompiled, TextRegExp, true)
+			cr.validateDocumentTextField(doc.DataTypeCode, "data_type_code", path, tid, did, TextRegExpCompiled, TextRegExp, true)
+			cr.validateDocumentTextField(doc.DataCategoryCode, "data_category_code", path, tid, did, TextRegExpCompiled, TextRegExp, true)
 
 			if doc.Size < 0 {
 				msg := fmt.Sprintf(
