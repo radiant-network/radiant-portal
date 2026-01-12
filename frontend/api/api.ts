@@ -392,7 +392,7 @@ export interface CaseBatch {
      * @type {string}
      * @memberof CaseBatch
      */
-    'submitter_case_id': string;
+    'submitter_case_id'?: string;
     /**
      * 
      * @type {Array<CaseTaskBatch>}

@@ -773,7 +773,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 	}
 
 	// Validate fields
-	cr.validateCaseField(cr.Case.SubmitterCaseId, "submitter_case_id", path, ExternalIdRegexpCompiled, TextMaxLength, true)
+	cr.validateCaseField(cr.Case.SubmitterCaseId, "submitter_case_id", path, ExternalIdRegexpCompiled, TextMaxLength, false)
 	cr.validateStatusCode()
 	cr.validateCaseField(cr.Case.PrimaryConditionCodeSystem, "primary_condition_code_system", path, TextRegExpCompiled, TextMaxLength, false) // TODO: validate regex
 	cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextMaxLength, false)            // TODO: validate regex
@@ -782,7 +782,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 	cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, TextRegExpCompiled, TextMaxLength, false)                     // TODO: validate regex
 
 	// Validate case uniqueness in DB
-	if cr.ProjectID != nil {
+	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
 		c, err := cr.Context.CasesRepo.GetCaseBySubmitterCaseIdAndProjectId(cr.SubmitterCaseID, *cr.ProjectID)
 		if err != nil {
 			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.SubmitterCaseID, *cr.ProjectID, err)
@@ -1119,17 +1119,18 @@ func validateCaseBatch(ctx *BatchValidationContext, cases []types.CaseBatch) ([]
 	visited := map[CaseKey]struct{}{}
 
 	for idx, c := range cases {
-		key := CaseKey{
-			ProjectCode:     c.ProjectCode,
-			SubmitterCaseID: c.SubmitterCaseId,
-		}
-
 		record, err := validateCaseRecord(ctx, c, idx)
 		if err != nil {
 			return nil, fmt.Errorf("error during case validation: %v", err)
 		}
 
-		validateUniquenessInBatch(record, key, visited, IdenticalCaseInBatch, []string{c.ProjectCode, c.SubmitterCaseId})
+		key := CaseKey{
+			ProjectCode:     c.ProjectCode,
+			SubmitterCaseID: c.SubmitterCaseId,
+		}
+		if c.SubmitterCaseId != "" {
+			validateUniquenessInBatch(record, key, visited, IdenticalCaseInBatch, []string{c.ProjectCode, c.SubmitterCaseId})
+		}
 		records = append(records, record)
 	}
 	return records, nil
