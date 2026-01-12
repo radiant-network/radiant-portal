@@ -350,7 +350,6 @@ func Test_validateRegexPattern_ValidPattern(t *testing.T) {
 	record.validateRegexPattern(
 		"case[0].field",
 		"Valid-Value123",
-		`^[A-Za-z0-9\-]+$`,
 		"TEST-001",
 		"Test field",
 		TextRegExpCompiled,
@@ -367,7 +366,6 @@ func Test_validateRegexPattern_InvalidPattern(t *testing.T) {
 	record.validateRegexPattern(
 		"case[0].field",
 		"Invalid@Value",
-		`^[A-Za-z0-9\-]+$`,
 		"TEST-001",
 		"Test field",
 		TextRegExpCompiled,
@@ -387,7 +385,6 @@ func Test_validateRegexPattern_EmptyValue(t *testing.T) {
 	record.validateRegexPattern(
 		"case[0].field",
 		"",
-		`^[A-Za-z0-9\-]+$`,
 		"TEST-001",
 		"Test field",
 		TextRegExpCompiled,
@@ -407,7 +404,6 @@ func Test_validateRegexPattern_FamilyMemberCode(t *testing.T) {
 	record.validateRegexPattern(
 		"case[0].patients[0].family_history[0]",
 		"Mother-Paternal",
-		FamilyMemberCodeRegExp,
 		"PATIENT-004",
 		"Family member code",
 		FamilyMemberCodeRegExpCompiled,
@@ -419,7 +415,6 @@ func Test_validateRegexPattern_FamilyMemberCode(t *testing.T) {
 	record.validateRegexPattern(
 		"case[0].patients[0].family_history[1]",
 		"Mother123",
-		FamilyMemberCodeRegExp,
 		"PATIENT-004",
 		"Family member code",
 		FamilyMemberCodeRegExpCompiled,
@@ -1284,7 +1279,7 @@ func Test_validateCaseField_Valid(t *testing.T) {
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
 
-	cr.validateCaseField("Valid-Value_123", "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 100, true)
+	cr.validateCaseField("Valid-Value_123", "test_field", "case[0]", TextRegExpCompiled, 100, true)
 
 	assert.Empty(t, cr.Errors)
 }
@@ -1294,7 +1289,7 @@ func Test_validateCaseField_EmptyOptional(t *testing.T) {
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
 
-	cr.validateCaseField("", "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 100, false)
+	cr.validateCaseField("", "test_field", "case[0]", TextRegExpCompiled, 100, false)
 
 	assert.Empty(t, cr.Errors)
 }
@@ -1304,7 +1299,7 @@ func Test_validateCaseField_EmptyRequired(t *testing.T) {
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
 
-	cr.validateCaseField("", "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 100, true)
+	cr.validateCaseField("", "test_field", "case[0]", TextRegExpCompiled, 100, true)
 
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
@@ -1318,7 +1313,7 @@ func Test_validateCaseField_InvalidRegex(t *testing.T) {
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
 
-	cr.validateCaseField("Invalid@Value!", "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 100, true)
+	cr.validateCaseField("Invalid@Value!", "test_field", "case[0]", TextRegExpCompiled, 100, true)
 
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
@@ -1333,7 +1328,7 @@ func Test_validateCaseField_TooLong(t *testing.T) {
 	}
 
 	longValue := "A-very-long-value-that-exceeds-the-maximum-allowed-length-for-this-field-and-should-trigger-an-error"
-	cr.validateCaseField(longValue, "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 50, true)
+	cr.validateCaseField(longValue, "test_field", "case[0]", TextRegExpCompiled, 50, true)
 
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
@@ -1348,7 +1343,7 @@ func Test_validateCaseField_MultipleErrors(t *testing.T) {
 	}
 
 	invalidValue := "Invalid@Value!-This-is-a-very-long-value-that-both-fails-regex-and-exceeds-maximum-length-constraints"
-	cr.validateCaseField(invalidValue, "test_field", "case[0]", TextRegExpCompiled, TextRegExp, 50, true)
+	cr.validateCaseField(invalidValue, "test_field", "case[0]", TextRegExpCompiled, 50, true)
 
 	assert.Len(t, cr.Errors, 2)
 	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")

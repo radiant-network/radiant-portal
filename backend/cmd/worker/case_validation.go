@@ -370,9 +370,9 @@ func (cr *CaseValidationRecord) fetchValidationInfos() error {
 	return nil
 }
 
-func (cr *CaseValidationRecord) validateRegexPattern(path, value, regExpStr, code, message string, regExp *regexp.Regexp) {
+func (cr *CaseValidationRecord) validateRegexPattern(path, value, code, message string, regExp *regexp.Regexp) {
 	if !regExp.MatchString(value) {
-		cr.addErrors(fmt.Sprintf("%s does not match the regular expression %s.", message, regExpStr), code, path)
+		cr.addErrors(fmt.Sprintf("%s does not match the regular expression %s.", message, regExp.String()), code, path)
 	}
 }
 
@@ -431,7 +431,7 @@ func (cr *CaseValidationRecord) formatSeqExpFieldPath(seqExpIndex *int) string {
 	return cr.formatFieldPath("sequencing_experiments", seqExpIndex, "", nil)
 }
 
-func (cr *CaseValidationRecord) validatePatientsTextField(value, fieldName, path string, patientIndex int, regExp *regexp.Regexp, regExpStr string, observationType string, obsIndex int, required bool) {
+func (cr *CaseValidationRecord) validatePatientsTextField(value, fieldName, path string, patientIndex int, regExp *regexp.Regexp, observationType string, obsIndex int, required bool) {
 	if !required && value == "" {
 		return
 	}
@@ -445,7 +445,7 @@ func (cr *CaseValidationRecord) validatePatientsTextField(value, fieldName, path
 		code = InvalidFieldPatients
 		message = cr.formatPatientsInvalidFieldMessage(fieldName, patientIndex)
 	}
-	cr.validateRegexPattern(path, value, regExpStr, code, message, regExp)
+	cr.validateRegexPattern(path, value, code, message, regExp)
 	cr.validateTextLength(path, value, code, message, TextMaxLength)
 }
 
@@ -464,14 +464,14 @@ func (cr *CaseValidationRecord) validateFamilyMemberCode(patientIndex int, fhInd
 	fh := cr.Case.Patients[patientIndex].FamilyHistory[fhIndex]
 	fieldName := "family_member_code"
 	path := cr.formatPatientsFieldPath(&patientIndex, "family_history", &fhIndex)
-	cr.validatePatientsTextField(fh.FamilyMemberCode, fieldName, path, patientIndex, FamilyMemberCodeRegExpCompiled, FamilyMemberCodeRegExp, "", 0, true)
+	cr.validatePatientsTextField(fh.FamilyMemberCode, fieldName, path, patientIndex, FamilyMemberCodeRegExpCompiled, "", 0, true)
 }
 
 func (cr *CaseValidationRecord) validateCondition(patientIndex int, fhIndex int) {
 	fh := cr.Case.Patients[patientIndex].FamilyHistory[fhIndex]
 	fieldName := "condition"
 	path := cr.formatPatientsFieldPath(&patientIndex, "family_history", &fhIndex)
-	cr.validatePatientsTextField(fh.Condition, fieldName, path, patientIndex, TextRegExpCompiled, TextRegExp, "", 0, true)
+	cr.validatePatientsTextField(fh.Condition, fieldName, path, patientIndex, TextRegExpCompiled, "", 0, true)
 }
 
 func (cr *CaseValidationRecord) validateFamilyHistory(patientIndex int) {
@@ -494,14 +494,14 @@ func (cr *CaseValidationRecord) validateSystem(patientIndex int, obsIndex int) {
 	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
 	fieldName := "system"
 	path := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
-	cr.validatePatientsTextField(obs.System, fieldName, path, patientIndex, TextRegExpCompiled, TextRegExp, "observations_categorical", obsIndex, true)
+	cr.validatePatientsTextField(obs.System, fieldName, path, patientIndex, TextRegExpCompiled, "observations_categorical", obsIndex, true)
 }
 
 func (cr *CaseValidationRecord) validateValue(patientIndex int, obsIndex int) {
 	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
 	fieldName := "value"
 	path := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
-	cr.validatePatientsTextField(obs.Value, fieldName, path, patientIndex, TextRegExpCompiled, TextRegExp, "observations_categorical", obsIndex, true)
+	cr.validatePatientsTextField(obs.Value, fieldName, path, patientIndex, TextRegExpCompiled, "observations_categorical", obsIndex, true)
 }
 
 func (cr *CaseValidationRecord) validateOnsetCode(patientIndex int, obsIndex int) {
@@ -515,7 +515,7 @@ func (cr *CaseValidationRecord) validateObsCategoricalNote(patientIndex int, obs
 	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
 	fieldName := "note"
 	path := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
-	cr.validatePatientsTextField(obs.Note, fieldName, path, patientIndex, TextRegExpCompiled, TextRegExp, "observations_categorical", obsIndex, false)
+	cr.validatePatientsTextField(obs.Note, fieldName, path, patientIndex, TextRegExpCompiled, "observations_categorical", obsIndex, false)
 }
 
 func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int) error {
@@ -542,7 +542,7 @@ func (cr *CaseValidationRecord) validateObsTextValue(patientIndex int, obsIndex 
 	obs := cr.Case.Patients[patientIndex].ObservationsText[obsIndex]
 	fieldName := "value"
 	path := cr.formatPatientsFieldPath(&patientIndex, "observations_text", &obsIndex)
-	cr.validatePatientsTextField(obs.Value, fieldName, path, patientIndex, TextRegExpCompiled, TextRegExp, "observations_text", obsIndex, true)
+	cr.validatePatientsTextField(obs.Value, fieldName, path, patientIndex, TextRegExpCompiled, "observations_text", obsIndex, true)
 }
 
 func (cr *CaseValidationRecord) validateObservationsText(patientIndex int) error {
@@ -732,14 +732,14 @@ func (cr *CaseValidationRecord) formatCasesInvalidFieldMessage(fieldName string)
 	)
 }
 
-func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string, regExp *regexp.Regexp, regExpStr string, maxLength int, required bool) {
+func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string, regExp *regexp.Regexp, maxLength int, required bool) {
 	if !required && value == "" {
 		return
 	}
 
 	var message string
 	message = cr.formatCasesInvalidFieldMessage(fieldName)
-	cr.validateRegexPattern(path, value, regExpStr, InvalidFieldCase, message, regExp)
+	cr.validateRegexPattern(path, value, InvalidFieldCase, message, regExp)
 	cr.validateTextLength(path, value, InvalidFieldCase, message, maxLength)
 }
 
@@ -773,13 +773,13 @@ func (cr *CaseValidationRecord) validateCase() error {
 	}
 
 	// Validate fields
-	cr.validateCaseField(cr.Case.SubmitterCaseId, "submitter_case_id", path, ExternalIdRegexpCompiled, ExternalIdRegexp, TextMaxLength, true)
+	cr.validateCaseField(cr.Case.SubmitterCaseId, "submitter_case_id", path, ExternalIdRegexpCompiled, TextMaxLength, true)
 	cr.validateStatusCode()
-	cr.validateCaseField(cr.Case.PrimaryConditionCodeSystem, "primary_condition_code_system", path, TextRegExpCompiled, TextRegExp, TextMaxLength, false) // TODO: validate regex
-	cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextRegExp, TextMaxLength, false)            // TODO: validate regex
-	cr.validateCaseField(cr.Case.ResolutionStatusCode, "resolution_status_code", path, TextRegExpCompiled, TextRegExp, TextMaxLength, false)              // TODO: validate regex
-	cr.validateCaseField(cr.Case.Note, "note", path, TextRegExpCompiled, TextRegExp, TextMaxLength, false)                                                // TODO: validate regex
-	cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, TextRegExpCompiled, TextRegExp, TextMaxLength, false)                     // TODO: validate regex
+	cr.validateCaseField(cr.Case.PrimaryConditionCodeSystem, "primary_condition_code_system", path, TextRegExpCompiled, TextMaxLength, false) // TODO: validate regex
+	cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextMaxLength, false)            // TODO: validate regex
+	cr.validateCaseField(cr.Case.ResolutionStatusCode, "resolution_status_code", path, TextRegExpCompiled, TextMaxLength, false)              // TODO: validate regex
+	cr.validateCaseField(cr.Case.Note, "note", path, TextRegExpCompiled, TextMaxLength, false)                                                // TODO: validate regex
+	cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, TextRegExpCompiled, TextMaxLength, false)                     // TODO: validate regex
 
 	// Validate case uniqueness in DB
 	if cr.ProjectID != nil {
