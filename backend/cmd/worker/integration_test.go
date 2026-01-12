@@ -1265,6 +1265,7 @@ func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	testutils.StartPostgresContainer()
+	testutils.StartObjectStoreContainer()
 	code := m.Run()
 	testutils.StopAllContainers()
 	os.Exit(code)

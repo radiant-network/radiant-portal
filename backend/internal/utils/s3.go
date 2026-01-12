@@ -59,7 +59,7 @@ func NewS3PreSigner() *S3PreSigner {
 	}
 }
 
-func extractS3BucketAndKey(s3URL string) (S3Location, error) {
+func ExtractS3BucketAndKey(s3URL string) (S3Location, error) {
 	parsed, err := url.Parse(s3URL)
 	if err != nil {
 		return S3Location{"", ""}, fmt.Errorf("invalid URL: %w", err)
@@ -76,7 +76,7 @@ func extractS3BucketAndKey(s3URL string) (S3Location, error) {
 }
 
 func (ps *S3PreSigner) GeneratePreSignedURL(url string) (*PreSignedURL, error) {
-	s3location, err := extractS3BucketAndKey(url)
+	s3location, err := ExtractS3BucketAndKey(url)
 	if err != nil {
 		return nil, err
 	}
@@ -104,13 +104,13 @@ func (ps *S3PreSigner) GeneratePreSignedURL(url string) (*PreSignedURL, error) {
 	}, nil
 }
 
-type FileMetadata struct {
+type S3FileMetadata struct {
 	Size int64
 	Hash string
 }
 
-type FileStore interface {
-	GetMetadata(url string) (*FileMetadata, error)
+type S3FileStore interface {
+	GetMetadata(url string) (*S3FileMetadata, error)
 }
 
 type S3Store struct {
@@ -139,8 +139,8 @@ func NewS3Store() *S3Store {
 	return &S3Store{svc: s3svc}
 }
 
-func (s *S3Store) GetMetadata(rawUrl string) (*FileMetadata, error) {
-	s3location, err := extractS3BucketAndKey(rawUrl)
+func (s *S3Store) GetMetadata(rawUrl string) (*S3FileMetadata, error) {
+	s3location, err := ExtractS3BucketAndKey(rawUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -150,9 +150,12 @@ func (s *S3Store) GetMetadata(rawUrl string) (*FileMetadata, error) {
 		Key:    aws.String(s3location.Key),
 	})
 	if err != nil {
+		if strings.Contains(err.Error(), "status code: 404") {
+			return nil, nil
+		}
 		return nil, err
 	}
-	return &FileMetadata{
+	return &S3FileMetadata{
 		Size: *out.ContentLength,
 		Hash: strings.Trim(*out.ETag, `"`),
 	}, nil

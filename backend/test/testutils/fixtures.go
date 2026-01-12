@@ -105,6 +105,20 @@ func ParallelTestWithOpenFGAAndPostgresAndStarrocks(t *testing.T, dbName string,
 	starrocks.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
 }
 
+func SequentialTestWithMinIO(t *testing.T, testFunc func(t *testing.T, context context.Context, client *minio.Client, endpoint string)) {
+	ctx := context.Background()
+	minioC, err := initMinioContainer(ctx)
+	if err != nil {
+		log.Fatalf("Failed to start MinIO container: %v", err)
+	}
+
+	client, err := initS3Client(minioC.Endpoint)
+	if err != nil {
+		log.Fatalf("Failed to init S3 bucket: %v", err)
+	}
+	testFunc(t, ctx, client, minioC.Endpoint)
+}
+
 func ParallelTestWithAll(t *testing.T, dbName string, testFunc func(t *testing.T, client *minio.Client, endpoint string, postgres *gorm.DB, starrocks *gorm.DB)) {
 	t.Parallel()
 
