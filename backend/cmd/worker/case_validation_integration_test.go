@@ -124,7 +124,7 @@ func insertPayloadAndProcessBatch(db *gorm.DB, payload string, status types.Batc
 	return id
 }
 
-func assertBatchProcessing(t *testing.T, db *gorm.DB, id string, expectedStatus types.BatchStatus, dryRun bool, username string, expectWarnings []types.BatchMessage, expectInfos []types.BatchMessage, expectErrors []types.BatchMessage) repository.Batch {
+func assertBatchProcessing(t *testing.T, db *gorm.DB, id string, expectedStatus types.BatchStatus, dryRun bool, username string, expectInfos []types.BatchMessage, expectWarnings []types.BatchMessage, expectErrors []types.BatchMessage) repository.Batch {
 	resultBatch := repository.Batch{}
 	db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
 	assert.Equal(t, expectedStatus, resultBatch.Status)
@@ -296,29 +296,34 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 	})
 }
 
-//func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *testing.T) {
-//	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-//		payload := createBaseCasePayload()
-//
-//		content := []byte("hello world") // Size: 11 bytes
-//		//size := 11
-//
-//		createMockDocumentAtURL(context, client, "test-bucket", "NA12891.recal.crai", content)
-//
-//		payloadBytes, _ := json.Marshal(payload)
-//		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
-//
-//		errors := []types.BatchMessage{
-//			{
-//				Code:    "CASE-001",
-//				Message: "project with code \"TEMPLATE_ERROR_PROJECT_123\" not found",
-//				Path:    "/0/project_code",
-//			},
-//		}
-//
-//		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
-//	})
-//}
+func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/ABC123.recal.crai"
+		createDocumentsForBatch(context, client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		id = insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+		infos := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-003",
+				Message: "Document s3://test-bucket/ABC123.recal.crai already exists, skipped.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-005",
+				Message: "A document with same url s3://test-bucket/ABC123.recal.crai has been found in the output of a different task.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, emptyMsgs, errors)
+	})
+}
 
 func Test_ProcessBatch_Case_Template(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
