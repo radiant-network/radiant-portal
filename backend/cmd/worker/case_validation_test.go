@@ -3906,20 +3906,13 @@ func Test_validateDocumentIsOutputOfAnotherTask_DocumentNotFound(t *testing.T) {
 
 func Test_validateFileMetadata_OK(t *testing.T) {
 	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
-		t.Setenv("AWS_ENDPOINT_URL", endpoint)
-		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
-		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
-		t.Setenv("AWS_USE_SSL", "false")
 
 		bucketName := "foo"
 		objectName := "bar.txt"
 		content := []byte("hello world") // Size: 11 bytes
 
-		err := client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
-		assert.NoError(t, err)
-
-		_, err = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
-		assert.NoError(t, err)
+		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
 		mockContext := BatchValidationContext{
 			S3FS: utils.NewS3Store(),

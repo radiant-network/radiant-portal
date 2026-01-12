@@ -46,6 +46,9 @@ func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
 		StatusRepo:      repository.NewStatusRepository(db),
 		CasesRepo:       repository.NewCasesRepository(db),
 		DocRepo:         repository.NewDocumentsRepository(db),
+		FamilyRepo:      repository.NewFamilyRepository(db),
+		ObsCat:          repository.NewObservationCategoricalRepository(db),
+		TaskRepo:        repository.NewTaskRepository(db),
 		S3FS:            utils.NewS3Store(),
 	}
 }
