@@ -41,6 +41,8 @@ docs/FamilyHistoryBatch.md
 docs/FiltersBodyWithCriteria.md
 docs/GenePanelCondition.md
 docs/GenePanelConditions.md
+docs/GeneResult.md
+docs/GeneSearchBody.md
 docs/GenesApi.md
 docs/GermlineCNVOccurrence.md
 docs/GermlineSNVOccurrence.md
@@ -167,6 +169,8 @@ radiant_python/models/family_history_batch.py
 radiant_python/models/filters_body_with_criteria.py
 radiant_python/models/gene_panel_condition.py
 radiant_python/models/gene_panel_conditions.py
+radiant_python/models/gene_result.py
+radiant_python/models/gene_search_body.py
 radiant_python/models/germline_cnv_occurrence.py
 radiant_python/models/germline_snv_occurrence.py
 radiant_python/models/get_batch_response.py

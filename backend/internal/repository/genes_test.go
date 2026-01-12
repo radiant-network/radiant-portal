@@ -79,3 +79,34 @@ func Test_GetGeneAutoComplete_NoResult(t *testing.T) {
 		assert.Equal(t, 0, len(*genes))
 	})
 }
+
+func Test_SearchGenes(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewGenesRepository(db)
+		genes, err := repo.SearchGenes([]string{"ENSG00000000003", "TNMD", "ensg00000157764", "ensa", "ENSG000000011671111", "BAD_SYMBOL"})
+		assert.NoError(t, err)
+		assert.Equal(t, 4, len(*genes))
+		assert.Equal(t, "BRAF", (*genes)[0].Name)
+		assert.Equal(t, "ENSA", (*genes)[1].Name)
+		assert.Equal(t, "TNMD", (*genes)[2].Name)
+		assert.Equal(t, "TSPAN6", (*genes)[3].Name)
+	})
+}
+
+func Test_SearchGenes_NoResult(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewGenesRepository(db)
+		genes, err := repo.SearchGenes([]string{"ENSG000000011671111", "BAD_SYMBOL"})
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(*genes))
+	})
+}
+
+func Test_SearchGenes_NoInput(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewGenesRepository(db)
+		genes, err := repo.SearchGenes([]string{})
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(*genes))
+	})
+}
