@@ -530,7 +530,7 @@ func Test_fetchStatusCodes_OK(t *testing.T) {
 	err := record.fetchStatusCodes(mockContext)
 	assert.NoError(t, err)
 	assert.NotNil(t, record.StatusCodes)
-	assert.GreaterOrEqual(t, len(record.StatusCodes), 1)
+	assert.Equal(t, record.StatusCodes, []string{"in_progress", "incomplete", "completed", "unknown"})
 }
 
 func Test_fetchStatusCodes_Error(t *testing.T) {
@@ -563,7 +563,7 @@ func Test_fetchObservationCodes_OK(t *testing.T) {
 	err := record.fetchObservationCodes(mockContext)
 	assert.NoError(t, err)
 	assert.NotNil(t, record.ObservationCodes)
-	assert.GreaterOrEqual(t, len(record.ObservationCodes), 1)
+	assert.Equal(t, record.ObservationCodes, []string{"phenotype", "condition", "note", "ancestry", "consanguinity"})
 }
 
 func Test_fetchObservationCodes_Error(t *testing.T) {
@@ -596,7 +596,7 @@ func Test_fetchOnsetCodes_OK(t *testing.T) {
 	err := record.fetchOnsetCodes(mockContext)
 	assert.NoError(t, err)
 	assert.NotNil(t, record.OnsetCodes)
-	assert.GreaterOrEqual(t, len(record.OnsetCodes), 1)
+	assert.Equal(t, record.OnsetCodes, []string{"unknown", "antenatal", "congenital", "neonatal", "infantile", "childhood", "juvenile", "young_adult", "middle_age", "senior"})
 }
 
 func Test_fetchOnsetCodes_Error(t *testing.T) {
@@ -636,9 +636,9 @@ func Test_fetchCodeInfos_OK(t *testing.T) {
 	assert.NotNil(t, record.StatusCodes)
 	assert.NotNil(t, record.ObservationCodes)
 	assert.NotNil(t, record.OnsetCodes)
-	assert.GreaterOrEqual(t, len(record.StatusCodes), 1)
-	assert.GreaterOrEqual(t, len(record.ObservationCodes), 1)
-	assert.GreaterOrEqual(t, len(record.OnsetCodes), 1)
+	assert.Equal(t, record.StatusCodes, []string{"in_progress", "incomplete", "completed", "unknown"})
+	assert.Equal(t, record.ObservationCodes, []string{"phenotype", "condition", "note", "ancestry", "consanguinity"})
+	assert.Equal(t, record.OnsetCodes, []string{"unknown", "antenatal", "congenital", "neonatal", "infantile", "childhood", "juvenile", "young_adult", "middle_age", "senior"})
 }
 
 func Test_fetchCodeInfos_StatusCodesError(t *testing.T) {
