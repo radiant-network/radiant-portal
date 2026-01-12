@@ -3,7 +3,7 @@ package types
 const CaseBatchType = "case"
 
 type CaseBatch struct {
-	SubmitterCaseId            string                           `json:"submitter_case_id,omitempty"`
+	SubmitterCaseId            string                           `json:"submitter_case_id" binding:"required"`
 	Type                       string                           `json:"type" binding:"required,oneof=germline somatic"`
 	StatusCode                 string                           `json:"status_code" binding:"required"`
 	ProjectCode                string                           `json:"project_code" binding:"required"`
