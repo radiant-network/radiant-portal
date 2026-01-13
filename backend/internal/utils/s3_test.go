@@ -22,6 +22,7 @@ func TestMain(m *testing.M) {
 func Test_extractS3BucketAndKey_Valid(t *testing.T) {
 	s3loc, err := utils.ExtractS3BucketAndKey("s3://test/foo/bar.txt")
 	assert.Nil(t, err)
+	assert.NotNil(t, s3loc)
 	assert.Equal(t, s3loc.Bucket, "test")
 	assert.Equal(t, s3loc.Key, "foo/bar.txt")
 }
@@ -29,6 +30,7 @@ func Test_extractS3BucketAndKey_Valid(t *testing.T) {
 func Test_extractS3BucketAndKey_Invalid_URL(t *testing.T) {
 	s3loc, err := utils.ExtractS3BucketAndKey("//test/foo/bar.txt")
 	assert.NotNil(t, err)
+	assert.NotNil(t, s3loc)
 	assert.Equal(t, s3loc.Bucket, "")
 	assert.Equal(t, s3loc.Key, "")
 }
@@ -36,6 +38,7 @@ func Test_extractS3BucketAndKey_Invalid_URL(t *testing.T) {
 func Test_extractS3BucketAndKey_Not_S3_URL(t *testing.T) {
 	s3loc, err := utils.ExtractS3BucketAndKey("http://test/foo/bar.txt")
 	assert.NotNil(t, err)
+	assert.NotNil(t, s3loc)
 	assert.Equal(t, s3loc.Bucket, "")
 	assert.Equal(t, s3loc.Key, "")
 }

@@ -59,20 +59,20 @@ func NewS3PreSigner() *S3PreSigner {
 	}
 }
 
-func ExtractS3BucketAndKey(s3URL string) (S3Location, error) {
+func ExtractS3BucketAndKey(s3URL string) (*S3Location, error) {
 	parsed, err := url.Parse(s3URL)
 	if err != nil {
-		return S3Location{"", ""}, fmt.Errorf("invalid URL: %w", err)
+		return nil, fmt.Errorf("invalid URL: %w", err)
 	}
 
 	if parsed.Scheme != "s3" {
-		return S3Location{"", ""}, fmt.Errorf("URL is not an S3 URL")
+		return nil, fmt.Errorf("URL is not an S3 URL")
 	}
 
 	bucket := parsed.Host
 	key := strings.TrimPrefix(parsed.Path, "/")
 
-	return S3Location{bucket, key}, nil
+	return &S3Location{bucket, key}, nil
 }
 
 func (ps *S3PreSigner) GeneratePreSignedURL(url string) (*PreSignedURL, error) {

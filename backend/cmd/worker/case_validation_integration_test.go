@@ -95,14 +95,14 @@ func createDocument(ctx context.Context, client *minio.Client, bucket string, ke
 }
 
 func createDocumentsForBatch(ctx context.Context, client *minio.Client, cases []*types.CaseBatch) {
+	store, _ := utils.NewS3Store()
 	for _, c := range cases {
 		for _, task := range c.Tasks {
 			for _, out := range task.OutputDocuments {
 				content := bytes.Repeat([]byte("a"), int(out.Size))
 				location, _ := utils.ExtractS3BucketAndKey(out.Url)
 				_ = createDocument(ctx, client, location.Bucket, location.Key, content)
-
-				metadata, _ := utils.NewS3Store().GetMetadata(out.Url)
+				metadata, _ := store.GetMetadata(out.Url)
 				out.Hash = metadata.Hash
 			}
 		}
@@ -119,8 +119,8 @@ func insertPayloadAndProcessBatch(db *gorm.DB, payload string, status types.Batc
 	if initErr != nil {
 		panic(fmt.Sprintf("failed to insert payload into table %v", initErr))
 	}
-	context := NewBatchValidationContext(db)
-	processBatch(db, context)
+	ctx, _ := NewBatchValidationContext(db)
+	processBatch(db, ctx)
 	return id
 }
 
