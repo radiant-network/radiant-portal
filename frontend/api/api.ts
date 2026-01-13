@@ -2053,6 +2053,38 @@ export interface GenePanelConditions {
     'count_orphanet': number;
 }
 /**
+ * 
+ * @export
+ * @interface GeneResult
+ */
+export interface GeneResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneResult
+     */
+    'ensembl_gene_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneResult
+     */
+    'symbol'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface GeneSearchBody
+ */
+export interface GeneSearchBody {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GeneSearchBody
+     */
+    'inputs'?: Array<string>;
+}
+/**
  * GermlineCNVOccurrence represents a germline CNV occurrence
  * @export
  * @interface GermlineCNVOccurrence
@@ -6004,6 +6036,46 @@ export const GenesApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Retrieve GeneResult list of genes matching input strings
+         * @summary Post search GeneResult list of matching input strings
+         * @param {GeneSearchBody} geneSearchBody Search Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        geneSearch: async (geneSearchBody: GeneSearchBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'geneSearchBody' is not null or undefined
+            assertParamExists('geneSearch', 'geneSearchBody', geneSearchBody)
+            const localVarPath = `/genes/search`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(geneSearchBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -6028,6 +6100,19 @@ export const GenesApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['GenesApi.geneAutoComplete']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Retrieve GeneResult list of genes matching input strings
+         * @summary Post search GeneResult list of matching input strings
+         * @param {GeneSearchBody} geneSearchBody Search Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async geneSearch(geneSearchBody: GeneSearchBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GeneResult>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.geneSearch(geneSearchBody, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GenesApi.geneSearch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -6048,6 +6133,16 @@ export const GenesApiFactory = function (configuration?: Configuration, basePath
          */
         geneAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutoCompleteGene>> {
             return localVarFp.geneAutoComplete(prefix, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve GeneResult list of genes matching input strings
+         * @summary Post search GeneResult list of matching input strings
+         * @param {GeneSearchBody} geneSearchBody Search Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        geneSearch(geneSearchBody: GeneSearchBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<GeneResult>> {
+            return localVarFp.geneSearch(geneSearchBody, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -6070,6 +6165,18 @@ export class GenesApi extends BaseAPI {
      */
     public geneAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
         return GenesApiFp(this.configuration).geneAutoComplete(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve GeneResult list of genes matching input strings
+     * @summary Post search GeneResult list of matching input strings
+     * @param {GeneSearchBody} geneSearchBody Search Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GenesApi
+     */
+    public geneSearch(geneSearchBody: GeneSearchBody, options?: RawAxiosRequestConfig) {
+        return GenesApiFp(this.configuration).geneSearch(geneSearchBody, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

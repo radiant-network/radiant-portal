@@ -6,7 +6,7 @@ import { getColumnName, getColumnPosition } from '../shared/Utils';
 const selectors = {
   tableCell: (dataVariant: any) => `${CommonSelectors.tableRow()}:contains("${dataVariant.variant}") ${CommonSelectors.tableCellData}`,
   tab: '[class*= "lucide-audio-waveform"]',
-  toggle: '[class*= "h-6 p-2"]:contains("SNV")',
+  toggle: 'button[id*= "trigger-snv"]',
 };
 
 const tableColumns = [
@@ -365,7 +365,7 @@ export const CaseEntity_Variants_SNV_Table = {
      */
     shouldHaveActiveTabAndToggle() {
       cy.get(selectors.tab).shouldBeActiveTab();
-      cy.get(selectors.toggle).shouldBeTagPatternLevel('primary');
+      cy.get(selectors.toggle).shouldBeDataState('active');
     },
     /**
      * Checks that custom query is not implemented for this page.

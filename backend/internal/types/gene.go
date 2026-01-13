@@ -22,6 +22,15 @@ type Gene = struct {
 	Lenght          int64             `json:"lenght,omitempty"`
 }
 
+type GeneSearchBody struct {
+	Inputs []string `json:"inputs"`
+}
+
+type GeneResult = struct {
+	GeneID string `json:"ensembl_gene_id,omitempty"`
+	Name   string `json:"symbol,omitempty"`
+}
+
 type AutoCompleteGene = AutoCompleteTerm
 
 var EnsemblGeneTable = Table{

@@ -99,6 +99,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	geneGroup := privateRoutes.Group("/genes")
 	geneGroup.GET("/autocomplete", server.GetGeneAutoCompleteHandler(repoGenes))
+	geneGroup.POST("/search", server.SearchGenesHandler(repoGenes))
 
 	hpoGroup := privateRoutes.Group("/hpo")
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))

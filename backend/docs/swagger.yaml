@@ -1055,6 +1055,21 @@ components:
       - count_omim
       - count_orphanet
       type: object
+    GeneResult:
+      properties:
+        ensembl_gene_id:
+          type: string
+        symbol:
+          type: string
+      type: object
+    GeneSearchBody:
+      properties:
+        inputs:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
     GermlineCNVOccurrence:
       description: GermlineCNVOccurrence represents a germline CNV occurrence
       properties:
@@ -2878,6 +2893,43 @@ paths:
       security:
       - bearerauth: []
       summary: Get AutoCompleteGene list of matching input string with highlighted
+      tags:
+      - genes
+  /genes/search:
+    post:
+      description: Retrieve GeneResult list of genes matching input strings
+      operationId: geneSearch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeneSearchBody'
+        description: Search Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/GeneResult'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Post search GeneResult list of matching input strings
       tags:
       - genes
   /hpo/autocomplete:

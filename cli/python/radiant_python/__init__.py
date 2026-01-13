@@ -85,6 +85,8 @@ from radiant_python.models.family_history_batch import FamilyHistoryBatch
 from radiant_python.models.filters_body_with_criteria import FiltersBodyWithCriteria
 from radiant_python.models.gene_panel_condition import GenePanelCondition
 from radiant_python.models.gene_panel_conditions import GenePanelConditions
+from radiant_python.models.gene_result import GeneResult
+from radiant_python.models.gene_search_body import GeneSearchBody
 from radiant_python.models.germline_cnv_occurrence import GermlineCNVOccurrence
 from radiant_python.models.germline_snv_occurrence import GermlineSNVOccurrence
 from radiant_python.models.get_batch_response import GetBatchResponse

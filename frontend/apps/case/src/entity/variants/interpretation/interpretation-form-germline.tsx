@@ -4,6 +4,7 @@ import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
+import { getTransmissionModeList } from '@/components/base/badges/transmission-mode-badge';
 import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
@@ -12,7 +13,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/base/shadcn/toggle-gr
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { classificationCriterias, getClassificationCriteriaColor, getTransmissionModes } from './data';
+import { classificationCriterias, getClassificationCriteriaColor } from './data';
 import InterpretationFormGeneric from './interpretation-form-generic';
 import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
 import {
@@ -198,7 +199,7 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                 <FormLabel>{t('variant.interpretation_form.germline.mode_of_transmission')}</FormLabel>
                 <FormControl>
                   <MultipleSelector
-                    defaultOptions={getTransmissionModes(t)}
+                    defaultOptions={getTransmissionModeList(t)}
                     placeholder={t('variant.interpretation_form.germline.mode_of_transmission_placeholder')}
                     emptyIndicator={<p>no results found.</p>}
                     {...field}

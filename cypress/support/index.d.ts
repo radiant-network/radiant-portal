@@ -22,10 +22,10 @@ declare namespace Cypress {
     resetColumns(): cy & CyEventEmitter;
     setLang(lang: string): cy & CyEventEmitter;
     shouldBeActiveTab(): cy & CyEventEmitter;
+    shouldBeDataState(state: string): Chainable<JQuery<HTMLElement>>;
     shouldBePinnable(isPinnable: boolean): Chainable<Element>;
     shouldBePinned(position: 'left' | 'right' | null): Chainable<JQuery<HTMLElement>>;
     shouldBeSortable(isSortable: boolean): Chainable<Element>;
-    shouldBeTagPatternLevel(level: string): Chainable<JQuery<HTMLElement>>;
     shouldHaveTooltip(column: any): cy & CyEventEmitter;
     showColumn(column: string): cy & CyEventEmitter;
     sortTableAndIntercept(position: number, routeMatcher: string, nbCalls: number, tableId: string = ''): cy & CyEventEmitter;
