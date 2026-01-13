@@ -806,6 +806,59 @@ func (cr *CaseValidationRecord) validateCase() error {
 	return nil
 }
 
+// Tasks validation
+
+func (cr *CaseValidationRecord) validateTaskFields(taskIndex int) {
+	// FIXME implement appropriate validation
+
+	// TASK-001
+	// case[index].tasks[index_task]
+	// Invalid Field {field_name}for case {index} - task {index_task} . Reason: {reason}
+}
+
+func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
+	// FIXME implement appropriate validation
+
+	// TASK-002
+	// case[index].tasks[index_task]
+	// Sequencing {aliquot}  is not defined for case {index} - task {index_task}
+}
+
+func (cr *CaseValidationRecord) validateTaskInputDocuments(taskIndex int) {
+	// FIXME implement appropriate validation
+
+	// TASK-003
+	// case[index].tasks[index_task]
+	// Missing input documents for case {index} - task {index_type} of type {type_code}
+
+	// TASK-005
+	// case[index].tasks[index_task]
+	// Input document with URL {url} does not exist for case {index} - task {index_type} .
+
+	// TASK-006
+	// case[index].tasks[index_task]
+	// Input document with URL {url} for case {index} - task {index_type} was produced by a sequencing that is not defined in this case.
+}
+
+func (cr *CaseValidationRecord) validateTaskOutputDocuments(taskIndex int) {
+	// FIXME implement appropriate validation
+
+	// TASK-003
+	// case[index].tasks[index_task]
+	// Missing output documents for case {index} - task {index_type} of type {type_code}
+}
+
+func (cr *CaseValidationRecord) validateTasks() error {
+	// FIXME implement appropriate validation
+	for taskIndex, _ := range cr.Case.Tasks {
+		cr.validateTaskFields(taskIndex)
+		cr.validateTaskAliquot(taskIndex)
+		cr.validateTaskInputDocuments(taskIndex)
+		cr.validateTaskOutputDocuments(taskIndex)
+	}
+	return nil
+}
+
 // Documents validation
 
 func (cr *CaseValidationRecord) validateDocumentExists(new *types.OutputDocumentBatch, existing *types.Document, path string) {
@@ -934,36 +987,37 @@ func validateCaseRecord(
 	cr := NewCaseValidationRecord(ctx, c, index)
 
 	// TODO: optimize by fetching all codes at once outside of the record
-	if unexpectedErr := cr.fetchCodeInfos(); unexpectedErr != nil {
-		return nil, fmt.Errorf("error during pre-fetching code infos: %v", unexpectedErr)
+	if err := cr.fetchCodeInfos(); err != nil {
+		return nil, fmt.Errorf("error during pre-fetching code infos: %v", err)
 	}
 
-	if unexpectedErr := cr.fetchValidationInfos(); unexpectedErr != nil {
-		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", unexpectedErr)
+	if err := cr.fetchValidationInfos(); err != nil {
+		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", err)
 	}
 
 	// 1. Validate Case fields
-	unexpectedErr := cr.validateCase()
-	if unexpectedErr != nil {
-		return nil, fmt.Errorf("error during case validation: %v", unexpectedErr)
+	if err := cr.validateCase(); err != nil {
+		return nil, fmt.Errorf("error during case validation: %v", err)
 	}
 
 	// 2. Validate Case Patients
-	unexpectedErr = cr.validateCasePatients()
-	if unexpectedErr != nil {
-		return nil, fmt.Errorf("error during case patients validation: %v", unexpectedErr)
+	if err := cr.validateCasePatients(); err != nil {
+		return nil, fmt.Errorf("error during case patients validation: %v", err)
 	}
 
 	// 3. Validate Case Sequencing Experiments
-	if unexpectedErr := cr.validateCaseSequencingExperiments(); unexpectedErr != nil {
-		return nil, fmt.Errorf("error during case sequencing experiments validation: %v", unexpectedErr)
+	if err := cr.validateCaseSequencingExperiments(); err != nil {
+		return nil, fmt.Errorf("error during case sequencing experiments validation: %v", err)
 	}
 
 	// 4. Validate Case Tasks
+	if err := cr.validateTasks(); err != nil {
+		return nil, fmt.Errorf("error during case tasks validation: %v", err)
+	}
 
 	// 5. Validate Case Documents
 	if err := cr.validateDocuments(); err != nil {
-		return nil, fmt.Errorf("error during documents validation: %w", err)
+		return nil, fmt.Errorf("error validating documents: %w", err)
 	}
 
 	return cr, nil
