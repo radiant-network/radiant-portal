@@ -107,8 +107,8 @@ func validateUniquenessInBatch[K comparable](
 	}
 }
 
-func formatFieldRegexpMatch(r ValidationRecord, fieldName string, regexp string, resourceIds []string) string {
-	reason := fmt.Sprintf("does not match the regular expression %s", regexp)
+func formatFieldRegexpMatch(r ValidationRecord, fieldName string, regExpStr string, resourceIds []string) string {
+	reason := fmt.Sprintf("does not match the regular expression %s", regExpStr)
 	return formatInvalidField(r, fieldName, reason, resourceIds)
 }
 

@@ -35,6 +35,7 @@ type CasesDAO interface {
 	CreateCase(*Case) error
 	CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error
 	GetCaseAnalysisCatalogIdByCode(code string) (*AnalysisCatalog, error)
+	GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*Case, error)
 }
 
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
@@ -409,4 +410,17 @@ func calculateCaseType(caseEntity CaseEntity) string {
 	} else {
 		return fmt.Sprintf("%s_family", caseEntity.CaseTypeCode)
 	}
+}
+
+func (r *CasesRepository) GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*Case, error) {
+	var c Case
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.CaseTable.Name, types.CaseTable.Alias))
+	tx = tx.Where("c.submitter_case_id = ? AND c.project_id = ?", submitterCaseId, projectId)
+	if err := tx.First(&c).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("error fetching case by submitter_case_id and project_id: %w", err)
+	}
+	return &c, nil
 }
