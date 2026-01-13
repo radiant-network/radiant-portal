@@ -104,20 +104,20 @@ func (ps *S3PreSigner) GeneratePreSignedURL(url string) (*PreSignedURL, error) {
 	}, nil
 }
 
-type S3FileMetadata struct {
+type FileMetadata struct {
 	Size int64
 	Hash string
 }
 
-type S3FileStore interface {
-	GetMetadata(url string) (*S3FileMetadata, error)
+type FileMetadataGetter interface {
+	GetMetadata(url string) (*FileMetadata, error)
 }
 
 type S3Store struct {
 	svc *s3.S3
 }
 
-func NewS3Store() *S3Store {
+func NewS3Store() (*S3Store, error) {
 	endpoint := GetEnvOrDefault("AWS_ENDPOINT_URL", "")
 	region := GetEnvOrDefault("AWS_REGION", DefaultAwsRegion)
 	useSSL := GetEnvOrDefault("AWS_USE_SSL", "true") == "true"
@@ -132,14 +132,14 @@ func NewS3Store() *S3Store {
 
 	sess, err := session.NewSession(awsConfig)
 	if err != nil {
-		log.Fatalf("Failed to create AWS session: %v", err)
+		return nil, fmt.Errorf("failed to create s3 store: %w", err)
 	}
 
 	s3svc := s3.New(sess)
-	return &S3Store{svc: s3svc}
+	return &S3Store{svc: s3svc}, nil
 }
 
-func (s *S3Store) GetMetadata(rawUrl string) (*S3FileMetadata, error) {
+func (s *S3Store) GetMetadata(rawUrl string) (*FileMetadata, error) {
 	s3location, err := ExtractS3BucketAndKey(rawUrl)
 	if err != nil {
 		return nil, err
@@ -155,7 +155,7 @@ func (s *S3Store) GetMetadata(rawUrl string) (*S3FileMetadata, error) {
 		}
 		return nil, err
 	}
-	return &S3FileMetadata{
+	return &FileMetadata{
 		Size: *out.ContentLength,
 		Hash: strings.Trim(*out.ETag, `"`),
 	}, nil

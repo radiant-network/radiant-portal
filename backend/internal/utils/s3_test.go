@@ -57,10 +57,10 @@ func Test_GetMetadata_OK(t *testing.T) {
 		_, err = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 		assert.NoError(t, err)
 
-		s3fs := utils.NewS3Store()
+		s3fs, _ := utils.NewS3Store()
 		metadata, err := s3fs.GetMetadata("s3://test-bucket/test-file.txt")
 
-		expected := utils.S3FileMetadata{
+		expected := utils.FileMetadata{
 			Size: 11,
 			Hash: "5eb63bbbe01eeed093cb22bb8f5acdc3",
 		}

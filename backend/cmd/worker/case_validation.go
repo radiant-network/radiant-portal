@@ -816,30 +816,26 @@ func (cr *CaseValidationRecord) validateCase() error {
 // Documents validation
 
 func (cr *CaseValidationRecord) validateExistingDocument(new *types.OutputDocumentBatch, existing *types.Document, path string) {
-	diffs := []struct {
-		name     string
-		new      interface{}
-		existing interface{}
-	}{
-		{"format_code", new.FormatCode, existing.FileFormatCode},
-		{"name", new.Name, existing.Name},
-		{"data_type_code", new.DataTypeCode, existing.DataTypeCode},
-		{"data_category_code", new.DataCategoryCode, existing.DataCategoryCode},
-		{"size", new.Size, existing.Size},
-		{"hash", new.Hash, existing.Hash},
-	}
+	hasDiff := false
 
-	var isDiff bool
-	for _, d := range diffs {
-		if d.new != d.existing {
-			isDiff = true
-			msg := fmt.Sprintf("A document with same url %s has been found but with a different %s (%v <> %v).", new.Url, d.name, d.existing, d.new)
+	check := func(name string, newVal, existingVal any) {
+		if newVal != existingVal {
+			hasDiff = true
+			msg := fmt.Sprintf("A document with same url %s has been found but with a different %s (%v <> %v).",
+				new.Url, name, existingVal, newVal)
 			cr.addWarnings(msg, DocumentExistsWithDifferentFieldValue, path)
 		}
 	}
 
-	if !isDiff {
-		msg := fmt.Sprintf("Document %s already exists, skipped.", new.Url)
+	check("format_code", new.FormatCode, existing.FileFormatCode)
+	check("name", new.Name, existing.Name)
+	check("data_type_code", new.DataTypeCode, existing.DataTypeCode)
+	check("data_category_code", new.DataCategoryCode, existing.DataCategoryCode)
+	check("size", new.Size, existing.Size)
+	check("hash", new.Hash, existing.Hash)
+
+	if !hasDiff {
+		msg := "Document " + new.Url + " already exists, skipped."
 		cr.addInfos(msg, IdenticalDocumentExists, path)
 	}
 }
@@ -852,17 +848,12 @@ func (cr *CaseValidationRecord) validateDocumentTextField(fieldValue, fieldName 
 func (cr *CaseValidationRecord) validateDocumentIsOutputOfAnotherTask(doc *types.Document, path string) {
 	relatedDocs := cr.DocumentsInTasks[doc.Url]
 
-	isOutput := false
 	for _, dr := range relatedDocs {
 		if dr.Type == "output" {
-			isOutput = true
-			break
+			msg := "A document with same url " + doc.Url + " has been found in the output of a different task."
+			cr.addErrors(msg, DocumentAlreadyOutputOfAnotherTask, path)
+			return
 		}
-	}
-
-	if isOutput {
-		msg := fmt.Sprintf("A document with same url %s has been found in the output of a different task.", doc.Url)
-		cr.addErrors(msg, DocumentAlreadyOutputOfAnotherTask, path)
 	}
 }
 
