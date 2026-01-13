@@ -808,7 +808,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 
 // Documents validation
 
-func (cr *CaseValidationRecord) validateExistingDocument(new *types.OutputDocumentBatch, existing *types.Document, path string) {
+func (cr *CaseValidationRecord) validateDocumentExists(new *types.OutputDocumentBatch, existing *types.Document, path string) {
 	hasDiff := false
 
 	check := func(name string, newVal, existingVal any) {
@@ -854,7 +854,7 @@ func (cr *CaseValidationRecord) validateDocumentIsOutputOfAnotherTask(doc *types
 	}
 }
 
-func (cr *CaseValidationRecord) validateFileMetadata(doc *types.OutputDocumentBatch, path string, taskIndex, docIndex int) error {
+func (cr *CaseValidationRecord) validateDocumentMetadata(doc *types.OutputDocumentBatch, path string, taskIndex, docIndex int) error {
 	metadata, err := cr.Context.S3FS.GetMetadata(doc.Url)
 	if err != nil {
 		return err
@@ -883,7 +883,7 @@ func (cr *CaseValidationRecord) validateFileMetadata(doc *types.OutputDocumentBa
 	return nil
 }
 
-func (cr *CaseValidationRecord) validateDuplicateDocumentsInBatch(doc *types.OutputDocumentBatch, path string) {
+func (cr *CaseValidationRecord) validateDocumentDuplicateInBatch(doc *types.OutputDocumentBatch, path string) {
 	if _, exists := cr.OutputDocuments[doc.Url]; exists {
 		msg := fmt.Sprintf("Duplicate output document with URL %s found.", doc.Url)
 		cr.addErrors(msg, DuplicateDocumentInCase, path)
@@ -897,7 +897,7 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 		for did, doc := range t.OutputDocuments {
 			path := fmt.Sprintf("case[%d].tasks[%d].output_documents[%d]", cr.Index, tid, did)
 			if d, ok := cr.Documents[doc.Url]; ok {
-				cr.validateExistingDocument(doc, d, path)
+				cr.validateDocumentExists(doc, d, path)
 				cr.validateDocumentIsOutputOfAnotherTask(d, path)
 				continue
 			}
@@ -917,10 +917,10 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 				cr.addErrors(msg, InvalidFieldDocumentCode, path)
 			}
 
-			if err := cr.validateFileMetadata(doc, path, tid, did); err != nil {
+			if err := cr.validateDocumentMetadata(doc, path, tid, did); err != nil {
 				return fmt.Errorf("error validating file metadata for case %d - document %d: %v", cr.Index, tid, err)
 			}
-			cr.validateDuplicateDocumentsInBatch(doc, path)
+			cr.validateDocumentDuplicateInBatch(doc, path)
 		}
 	}
 	return nil
@@ -963,7 +963,7 @@ func validateCaseRecord(
 
 	// 5. Validate Case Documents
 	if err := cr.validateDocuments(); err != nil {
-		return nil, fmt.Errorf("error validating documents: %w", err)
+		return nil, fmt.Errorf("error during documents validation: %w", err)
 	}
 
 	return cr, nil

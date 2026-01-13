@@ -3720,7 +3720,7 @@ func Test_validateExistingDocument_IdenticalMatch(t *testing.T) {
 		Url:              "s3://foo/bar",
 	}
 
-	record.validateExistingDocument(&batchDoc, &existingDoc, "foo[0].bar")
+	record.validateDocumentExists(&batchDoc, &existingDoc, "foo[0].bar")
 	assert.Len(t, record.Infos, 1)
 	assert.Len(t, record.Warnings, 0)
 	assert.Len(t, record.Errors, 0)
@@ -3758,7 +3758,7 @@ func Test_validateExistingDocument_PartialMatch(t *testing.T) {
 		Url:              "s3://foo/bar",
 	}
 
-	record.validateExistingDocument(&batchDoc, &existingDoc, "foo[0].bar")
+	record.validateDocumentExists(&batchDoc, &existingDoc, "foo[0].bar")
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 1)
 	assert.Len(t, record.Errors, 0)
@@ -3974,7 +3974,7 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 			Hash:             "5eb63bbbe01eeed093cb22bb8f5acdc3",
 		}
 
-		err := record.validateFileMetadata(&doc, "foo[0].bar", 0, 1)
+		err := record.validateDocumentMetadata(&doc, "foo[0].bar", 0, 1)
 		assert.NoError(t, err)
 		assert.Len(t, record.Infos, 0)
 		assert.Len(t, record.Warnings, 0)
@@ -4020,7 +4020,7 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 			Hash:             "5eb63bbbe01eeed093cb22bb8f5acdc3",
 		}
 
-		err := record.validateFileMetadata(&doc, "foo[0].bar", 0, 1)
+		err := record.validateDocumentMetadata(&doc, "foo[0].bar", 0, 1)
 		assert.NoError(t, err)
 		assert.Len(t, record.Infos, 0)
 		assert.Len(t, record.Warnings, 0)
@@ -4066,7 +4066,7 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 			Hash:             "5eb63bbbe01eeed093cb22bb8f5ac",
 		}
 
-		err := record.validateFileMetadata(&doc, "foo[0].bar", 0, 1)
+		err := record.validateDocumentMetadata(&doc, "foo[0].bar", 0, 1)
 		assert.NoError(t, err)
 		assert.Len(t, record.Infos, 0)
 		assert.Len(t, record.Warnings, 0)
