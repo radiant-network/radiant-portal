@@ -63,6 +63,7 @@ const (
 	DocumentAlreadyOutputOfAnotherTask    = "DOCUMENT-005"
 	DocumentSizeMismatch                  = "DOCUMENT-006"
 	DocumentHashMismatch                  = "DOCUMENT-007"
+	DuplicateDocumentInCase               = "DOCUMENT-008"
 )
 
 const RelationshipProbandCode = "proband"
@@ -115,6 +116,8 @@ type CaseValidationRecord struct {
 	StatusCodes      []string
 	ObservationCodes []string
 	OnsetCodes       []string
+
+	OutputDocuments map[string]struct{}
 
 	// Necessary to persist the case
 	Patients              map[PatientKey]*types.Patient
@@ -378,7 +381,7 @@ func (cr *CaseValidationRecord) fetchValidationInfos() error {
 }
 
 func (cr *CaseValidationRecord) validateRegexPattern(path, value, code, message string, regExp *regexp.Regexp) {
-	if !regExp.MatchString(value) {
+	if regExp != nil && !regExp.MatchString(value) {
 		cr.addErrors(fmt.Sprintf("%s does not match the regular expression %s.", message, regExp.String()), code, path)
 	}
 }
@@ -456,16 +459,6 @@ func (cr *CaseValidationRecord) validatePatientsTextField(value, fieldName, path
 	cr.validateTextLength(path, value, code, message, TextMaxLength)
 }
 
-func (cr *CaseValidationRecord) validatePatientTextField(value, fieldName, path string, patientIndex int, regExp *regexp.Regexp, regExpStr string, required bool) {
-	message := cr.formatPatientsInvalidFieldMessage(fieldName, patientIndex)
-	cr.validateTextField(value, path, regExp, regExpStr, required, message, InvalidFieldPatients)
-}
-
-func (cr *CaseValidationRecord) validateObservationTextField(value, fieldName, path string, patientIndex int, regExp *regexp.Regexp, regExpStr string, required bool, observationType string, obsIndex int) {
-	message := cr.formatObservationInvalidFieldMessage(fieldName, patientIndex, observationType, obsIndex)
-	cr.validateTextField(value, path, regExp, regExpStr, required, message, InvalidFieldObservation)
-}
-
 func (cr *CaseValidationRecord) validateCodeField(code, fieldName, path, codeType string, patientIndex int, validCodes []string, observationType string, obsIndex int) {
 	if !slices.Contains(validCodes, code) {
 		var message string
@@ -481,7 +474,7 @@ func (cr *CaseValidationRecord) validateFamilyMemberCode(patientIndex int, fhInd
 	fh := cr.Case.Patients[patientIndex].FamilyHistory[fhIndex]
 	fieldName := "family_member_code"
 	path := cr.formatPatientsFieldPath(&patientIndex, "family_history", &fhIndex)
-	cr.validateTextField(fh.FamilyMemberCode, fieldName, path, patientIndex, FamilyMemberCodeRegExpCompiled, "", 0, true)
+	cr.validatePatientsTextField(fh.FamilyMemberCode, fieldName, path, patientIndex, FamilyMemberCodeRegExpCompiled, "", 0, true)
 }
 
 func (cr *CaseValidationRecord) validateCondition(patientIndex int, fhIndex int) {
@@ -840,9 +833,13 @@ func (cr *CaseValidationRecord) validateExistingDocument(new *types.OutputDocume
 	}
 }
 
-func (cr *CaseValidationRecord) validateDocumentTextField(fieldValue, fieldName string, path string, taskIndex int, documentIndex int, regExp *regexp.Regexp, regExpStr string, required bool) {
-	msg := cr.formatTaskDocumentFieldErrorMessage(fieldName, fieldValue, cr.Index, taskIndex, documentIndex)
-	cr.validateTextField(fieldValue, path, regExp, regExpStr, required, msg, InvalidFieldDocumentCode)
+func (cr *CaseValidationRecord) validateDocumentTextField(fieldValue, fieldName string, path string, taskIndex int, documentIndex int, regExp *regexp.Regexp, required bool) {
+	if !required && fieldValue == "" {
+		return
+	}
+	msg := cr.formatTaskDocumentFieldErrorMessage(fieldName, cr.Index, taskIndex, documentIndex)
+	cr.validateRegexPattern(path, fieldValue, InvalidFieldDocumentCode, msg, regExp)
+	cr.validateTextLength(path, fieldValue, InvalidFieldDocumentCode, msg, TextMaxLength)
 }
 
 func (cr *CaseValidationRecord) validateDocumentIsOutputOfAnotherTask(doc *types.Document, path string) {
@@ -905,17 +902,17 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 				continue
 			}
 
-			cr.validateDocumentTextField(doc.Url, "url", path, tid, did, nil, "", true)
-			cr.validateDocumentTextField(doc.Hash, "hash", path, tid, did, TextRegExpCompiled, TextRegExp, true)
-			cr.validateDocumentTextField(doc.FormatCode, "format_code", path, tid, did, TextRegExpCompiled, TextRegExp, true)
-			cr.validateDocumentTextField(doc.Name, "name", path, tid, did, TextRegExpCompiled, TextRegExp, true)
-			cr.validateDocumentTextField(doc.DataTypeCode, "data_type_code", path, tid, did, TextRegExpCompiled, TextRegExp, true)
-			cr.validateDocumentTextField(doc.DataCategoryCode, "data_category_code", path, tid, did, TextRegExpCompiled, TextRegExp, true)
+			cr.validateDocumentTextField(doc.Url, "url", path, tid, did, nil, true)
+			cr.validateDocumentTextField(doc.Hash, "hash", path, tid, did, TextRegExpCompiled, true)
+			cr.validateDocumentTextField(doc.FormatCode, "format_code", path, tid, did, TextRegExpCompiled, true)
+			cr.validateDocumentTextField(doc.Name, "name", path, tid, did, TextRegExpCompiled, true)
+			cr.validateDocumentTextField(doc.DataTypeCode, "data_type_code", path, tid, did, TextRegExpCompiled, true)
+			cr.validateDocumentTextField(doc.DataCategoryCode, "data_category_code", path, tid, did, TextRegExpCompiled, true)
 
 			if doc.Size < 0 {
 				msg := fmt.Sprintf(
 					"%s size is invalid, must be non-negative.",
-					cr.formatTaskDocumentFieldErrorMessage("size", fmt.Sprintf("%d", doc.Size), cr.Index, tid, did),
+					cr.formatTaskDocumentFieldErrorMessage("size", cr.Index, tid, did),
 				)
 				cr.addErrors(msg, InvalidFieldDocumentCode, path)
 			}

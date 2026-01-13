@@ -299,6 +299,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateDocument_IdenticalDocumentAlreadyExists_1"
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai"
 		createDocumentsForBatch(context, client, payload)
 
@@ -306,6 +307,8 @@ func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *t
 		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
 		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
+		payload[0].SubmitterCaseId = "validateDocument_IdenticalDocumentAlreadyExists_2"
+		payloadBytes, _ = json.Marshal(payload)
 		id = insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
 		infos := []types.BatchMessage{
 			{
@@ -328,6 +331,7 @@ func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *t
 func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateDocument_Error_DocumentField"
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_DocumentField.recal.crai"
 		payload[0].Tasks[0].OutputDocuments[0].Name = "!@#$%^&*()_+"
 		createDocumentsForBatch(context, client, payload)
@@ -337,7 +341,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid Field name for case 0 - task 0 - output document 0. Reason: Field [name] with value [!@#$%^&*()_+],  does not match the regular expression ^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$.",
+				Message: "Invalid Field name for case 0 - task 0 - output document 0. Reason: does not match the regular expression ^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$.",
 				Path:    "case[0].tasks[0].output_documents[0]",
 			},
 		}
@@ -348,6 +352,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
 func Test_ProcessBatch_Case_validateDocument_Error_DocumentNotFoundAtUrl(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateDocument_Error_DocumentNotFoundAtUrl"
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_DocumentNotFoundAtUrl.recal.crai"
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
@@ -400,6 +405,7 @@ func Test_ProcessBatch_Case_validateDocument_Warning_PartiallyDifferentDocumentE
 func Test_ProcessBatch_Case_validateDocument_Error_DuplicateDocumentInBatch(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateDocument_Error_DuplicateDocumentInBatch"
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_DuplicateDocumentInBatch.recal.crai"
 		payload[0].Tasks[0].OutputDocuments = append(payload[0].Tasks[0].OutputDocuments, payload[0].Tasks[0].OutputDocuments[0])
 		createDocumentsForBatch(context, client, payload)
@@ -419,6 +425,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DuplicateDocumentInBatch(t *t
 func Test_ProcessBatch_Case_validateDocument_Error_SizeNotMatch(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateDocument_Error_SizeNotMatch"
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_SizeNotMatch.recal.crai"
 		createDocumentsForBatch(context, client, payload)
 
@@ -440,6 +447,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_SizeNotMatch(t *testing.T) {
 func Test_ProcessBatch_Case_validateDocument_Error_HashNotMatch(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateDocument_Error_HashNotMatch"
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_HashNotMatch.recal.crai"
 		createDocumentsForBatch(context, client, payload)
 

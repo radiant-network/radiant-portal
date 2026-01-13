@@ -3783,7 +3783,7 @@ func Test_validateDocumentTextField_OK(t *testing.T) {
 	regExpStr := "^[a-zA-Z0-9 ]+$"
 	regExp, _ := regexp.Compile(regExpStr)
 
-	record.validateDocumentTextField(fieldValue, fieldName, path, taskIndex, documentIndex, regExp, regExpStr, false)
+	record.validateDocumentTextField(fieldValue, fieldName, path, taskIndex, documentIndex, regExp, false)
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 0)
 	assert.Len(t, record.Errors, 0)
@@ -3803,13 +3803,13 @@ func Test_validateDocumentTextField_RegexError(t *testing.T) {
 	regExpStr := "^[a-zA-Z0-9 ]+$"
 	regExp, _ := regexp.Compile(regExpStr)
 
-	record.validateDocumentTextField(fieldValue, fieldName, path, taskIndex, documentIndex, regExp, regExpStr, false)
+	record.validateDocumentTextField(fieldValue, fieldName, path, taskIndex, documentIndex, regExp, false)
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 0)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, record.Errors[0], types.BatchMessage{
 		Code:    "DOCUMENT-001",
-		Message: "Invalid Field test_field for case 0 - task 0 - output document 1. Reason: Field [test_field] with value [test value %$#%],  does not match the regular expression ^[a-zA-Z0-9 ]+$.",
+		Message: "Invalid Field test_field for case 0 - task 0 - output document 1. Reason: does not match the regular expression ^[a-zA-Z0-9 ]+$.",
 		Path:    "case[0].tasks[0].documents[1]",
 	})
 }
@@ -3828,13 +3828,13 @@ func Test_validateDocumentTextField_LengthError(t *testing.T) {
 	regExpStr := "^[a-zA-Z0-9 ]+$"
 	regExp, _ := regexp.Compile(regExpStr)
 
-	record.validateDocumentTextField(fieldValue, fieldName, path, taskIndex, documentIndex, regExp, regExpStr, false)
+	record.validateDocumentTextField(fieldValue, fieldName, path, taskIndex, documentIndex, regExp, false)
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 0)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, record.Errors[0], types.BatchMessage{
 		Code:    "DOCUMENT-001",
-		Message: "Invalid Field test_field for case 0 - task 0 - output document 1. Reason: Field [test_field] with value [AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...(truncated)],  field is too long, maximum length allowed is 100.",
+		Message: "Invalid Field test_field for case 0 - task 0 - output document 1. Reason: field is too long, maximum length allowed is 100.",
 		Path:    "case[0].tasks[0].documents[1]",
 	})
 }
