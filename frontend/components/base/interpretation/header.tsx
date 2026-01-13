@@ -1,23 +1,18 @@
-import { useContext } from 'react';
-
-import { GermlineSNVOccurrence } from '@/api/api';
+import { CaseEntity, ExpandedGermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { CaseEntityContext } from '../../case-entity';
-import { SeqIDContext } from '../variants-tab';
-
 type InterpretationVariantHeaderProps = {
-  occurrence?: GermlineSNVOccurrence;
+  seqId: number;
+  caseEntity?: CaseEntity;
+  occurrence?: ExpandedGermlineSNVOccurrence;
 };
 
-function InterpretationVariantHeader({ occurrence }: InterpretationVariantHeaderProps) {
+function InterpretationVariantHeader({ seqId, caseEntity, occurrence }: InterpretationVariantHeaderProps) {
   const { t } = useI18n();
-  const caseEntity = useContext(CaseEntityContext);
-  const seqId = useContext(SeqIDContext);
 
   if (!occurrence) return null;
 

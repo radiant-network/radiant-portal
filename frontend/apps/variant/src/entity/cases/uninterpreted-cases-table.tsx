@@ -6,8 +6,8 @@ import useSWR from 'swr';
 import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantUninterpretedCasesSearchResponse } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
-import CaseSliderSheet from '@/entity/cases/slider/slider-case-sheet';
-import { useSliderCaseNavigation } from '@/entity/cases/slider/use-slider-case-navigation';
+import SliderUninterpretedCaseSheet from '@/entity/cases/slider/slider-uninterpreted-case-sheet';
+import { useSliderCasePatientIdNavigation } from '@/entity/cases/slider/use-slider-case-navigation';
 import { variantsApi } from '@/utils/api';
 
 import UninterpretedCasesFilters, { UninterpretedCasesFiltersState } from './table/uninterpreted-cases-filters';
@@ -32,11 +32,11 @@ function UninterpretedCasesTable() {
   const { t } = useI18n();
   const params = useParams<{ locusId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [rowSelection, setRowSelection] = useState({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
-  const [rowSelection, setRowSelection] = useState({});
 
   const [initialFilters, setInitialFilters] = useState<UninterpretedCasesFiltersState>({
     phenotype: '',
@@ -101,7 +101,7 @@ function UninterpretedCasesTable() {
   const casesData = useMemo(() => data?.list || [], [data?.list]);
 
   const { selectedCase, hasPrevious, hasNext, handleClosePreview, handlePreviousCase, handleNextCase } =
-    useSliderCaseNavigation({
+    useSliderCasePatientIdNavigation({
       casesData,
       searchParams,
       setSearchParams,
@@ -130,7 +130,7 @@ function UninterpretedCasesTable() {
           onSortingChange: () => [],
         }}
       />
-      <CaseSliderSheet
+      <SliderUninterpretedCaseSheet
         open={!!selectedCase}
         setOpen={() => handleClosePreview()}
         case={selectedCase!}

@@ -26,7 +26,7 @@ type CaseSliderSheetProps = {
   hasNext?: boolean;
 };
 
-function CaseSliderSheet({
+function SliderUninterpretedCaseSheet({
   case: caseData,
   children,
   open,
@@ -123,4 +123,4 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
   );
 }
 
-export default CaseSliderSheet;
+export default SliderUninterpretedCaseSheet;

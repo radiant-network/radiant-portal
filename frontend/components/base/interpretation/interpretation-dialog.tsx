@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { ExpandedGermlineSNVOccurrence, GermlineSNVOccurrence } from '@/api/api';
+import { ApiError, CaseEntity, ExpandedGermlineSNVOccurrence } from '@/api/api';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import { Button } from '@/components/base/shadcn/button';
 import {
@@ -17,7 +17,7 @@ import {
 } from '@/components/base/shadcn/dialog';
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
-import { occurrencesApi } from '@/utils/api';
+import { caseApi, occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import InterpretationVariantHeader from './header';
@@ -30,7 +30,9 @@ import InterpretationTranscript from './transcript';
 import { Interpretation, InterpretationFormRef } from './types';
 
 type InterpretationDialogButtonProps = {
-  occurrence: GermlineSNVOccurrence;
+  seqId: number;
+  locusId: string;
+  transcriptId?: string;
   handleSaveCallback?: () => void;
   renderTrigger: (handleOpen: () => void) => ReactNode;
 };
@@ -39,32 +41,63 @@ type InterpretationDialogButtonProps = {
 // In the future, this should be determined based on the occurrence type or other criteria
 const isSomatic = false;
 
-function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }: InterpretationDialogButtonProps) {
+type CaseEntityInput = {
+  key: string;
+  caseId: number;
+};
+
+async function fetchCaseEntity(input: CaseEntityInput) {
+  const response = await caseApi.caseEntity(input.caseId);
+  return response.data;
+}
+
+function InterpretationDialog({
+  seqId,
+  locusId,
+  transcriptId,
+  handleSaveCallback,
+  renderTrigger,
+}: InterpretationDialogButtonProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const gerlimeFormRef = useRef<InterpretationFormRef>(null);
   const somaticFormRef = useRef<InterpretationFormRef>(null);
   const caseId = useCaseIdFromParam();
-  const { fetch: fetchInterpretationHelper, save: saveInterpretationHelper } = useInterpretationHelper(
+  const { fetch: fetchInterpretationHelper, save: saveInterpretationHelper } = useInterpretationHelper({
     caseId,
-    occurrence,
+    seqId: seqId,
+    locusId: locusId,
+    transcriptId: transcriptId,
     isSomatic,
+  });
+
+  const { data: caseEntity } = useSWR<CaseEntity, ApiError, CaseEntityInput>(
+    {
+      key: 'case-entity',
+      caseId,
+    },
+    fetchCaseEntity,
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
   );
 
-  const interpretationUniqueKey = `interpretation-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
+  const interpretationUniqueKey = `interpretation-${seqId}-${locusId}-${transcriptId}`;
 
   const fetchOccurrenceExpand = useSWR<ExpandedGermlineSNVOccurrence | undefined>(
     {
       caseId,
-      occurrence,
+      locusId,
+      seqId,
     },
-    async () =>
-      caseId && occurrence.seq_id && occurrence.locus_id
-        ? occurrencesApi
-            .getExpandedGermlineSNVOccurrence(caseId, occurrence.seq_id, occurrence.locus_id)
-            .then(response => response.data)
-        : undefined,
+    async () => {
+      if (caseId && seqId && locusId) {
+        return occurrencesApi.getExpandedGermlineSNVOccurrence(caseId, seqId, locusId).then(response => response.data);
+      }
+      return undefined;
+    },
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,
@@ -132,7 +165,11 @@ function InterpretationDialog({ occurrence, handleSaveCallback, renderTrigger }:
             </DialogHeader>
             <DialogBody className="overflow-scroll space-y-6">
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
-              <InterpretationVariantHeader occurrence={occurrence} />
+              <InterpretationVariantHeader
+                caseEntity={caseEntity}
+                seqId={seqId}
+                occurrence={fetchOccurrenceExpand?.data}
+              />
               <InterpretationTranscript occurrence={fetchOccurrenceExpand?.data} />
               <div className="grid gap-6 grid-cols-12">
                 <div className="rounded-sm col-span-7 border p-6 bg-muted">

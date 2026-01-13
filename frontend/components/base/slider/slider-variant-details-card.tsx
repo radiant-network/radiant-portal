@@ -13,13 +13,13 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { DescriptionRow, DescriptionSection } from '@/components/base/slider/description';
+import SliderCard from '@/components/base/slider/slider-card';
+import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
+import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
-import { DescriptionRow, DescriptionSection } from 'components/base/slider/description';
-import SliderCard from 'components/base/slider/slider-card';
-import TranscriptIdLink from 'components/base/variant/transcript-id-link';
-import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from 'components/base/variant/utils';
 
 type SliderVariantDetailsCardProps = {
   data: ExpandedGermlineSNVOccurrence;

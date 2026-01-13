@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react';
 import { CalendarIcon, ClipboardList, LibraryBig, SquarePen, StethoscopeIcon } from 'lucide-react';
 import useSWR from 'swr';
 
-import { GermlineSNVOccurrence, InterpretationGermline } from '@/api/api';
+import { InterpretationGermline } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import TransmissionModeBadge from '@/components/base/badges/transmission-mode-badge';
 import RichTextViewer from '@/components/base/data-entry/rich-text-editor/rich-text-viewer';
 import DateTime from '@/components/base/date/datetime';
 import EmptyField from '@/components/base/information/empty-field';
+import { getClassificationCriteriaColor } from '@/components/base/interpretation/data';
+import { useInterpretationHelper } from '@/components/base/interpretation/hook';
+import InterpretationDialog from '@/components/base/interpretation/interpretation-dialog';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 import PubmedListDialog from '@/components/base/pubmed/pubmed-list-dialog';
@@ -20,25 +23,43 @@ import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
-import { useCaseIdFromParam } from '@/utils/helper';
-
-import { getClassificationCriteriaColor } from '../../interpretation/data';
-import { useInterpretationHelper } from '../../interpretation/hook';
-import InterpretationDialog from '../../interpretation/interpretation-dialog';
-import { useOccurrenceListContext } from '../hooks/use-occurrences-list';
 
 type SliderInterpretationDetailsCardProps = {
-  occurrence: GermlineSNVOccurrence;
+  seqId: number;
+  caseId: number;
+  locusId: string;
+  symbol?: string;
+  transcriptId?: string;
+  isCanonical?: boolean;
+  isManeSelect?: boolean;
+  isManePlus?: boolean;
+  canEditInterpretation?: boolean;
+  onInterpretationSaved?: () => void;
 };
 
-function SliderInterpretationDetailsCard({ occurrence }: SliderInterpretationDetailsCardProps) {
+function SliderInterpretationDetailsCard({
+  seqId,
+  caseId,
+  locusId,
+  isManeSelect,
+  symbol,
+  isManePlus,
+  isCanonical,
+  transcriptId,
+  canEditInterpretation = false,
+  onInterpretationSaved,
+}: SliderInterpretationDetailsCardProps) {
   const { t } = useI18n();
-  const caseId = useCaseIdFromParam();
-  const { mutate, loading } = useOccurrenceListContext();
   const [isPubmedOpen, setIsPubmedOpen] = useState<boolean>(false);
 
-  const { fetch } = useInterpretationHelper(caseId, occurrence, false);
-  const interpretationUniqueKey = `interpretation-details-${occurrence.seq_id}-${occurrence.locus_id}-${occurrence.transcript_id}`;
+  const { fetch } = useInterpretationHelper({
+    caseId,
+    seqId,
+    locusId,
+    transcriptId,
+    isSomatic: false,
+  });
+  const interpretationUniqueKey = `interpretation-details-${seqId}-${locusId}-${transcriptId}`;
   const fetchInterpretation = useSWR<InterpretationGermline>(interpretationUniqueKey, fetch, {
     revalidateOnFocus: false,
     revalidateOnMount: false,
@@ -70,19 +91,23 @@ function SliderInterpretationDetailsCard({ occurrence }: SliderInterpretationDet
       icon={ClipboardList}
       title={t('preview_sheet.interpretation_details.title')}
       actions={
-        <InterpretationDialog
-          occurrence={occurrence}
-          handleSaveCallback={() => {
-            fetchInterpretation.mutate();
-            mutate();
-          }}
-          renderTrigger={handleOpen => (
-            <Button loading={loading} size="sm" onClick={handleOpen}>
-              <SquarePen />
-              {t('common.edit')}
-            </Button>
-          )}
-        />
+        canEditInterpretation && (
+          <InterpretationDialog
+            seqId={seqId}
+            locusId={locusId}
+            transcriptId={transcriptId}
+            handleSaveCallback={() => {
+              fetchInterpretation.mutate();
+              onInterpretationSaved?.();
+            }}
+            renderTrigger={handleOpen => (
+              <Button size="sm" onClick={handleOpen}>
+                <SquarePen />
+                {t('common.edit')}
+              </Button>
+            )}
+          />
+        )
       }
     >
       <div className="rounded-md w-full border">
@@ -91,15 +116,15 @@ function SliderInterpretationDetailsCard({ occurrence }: SliderInterpretationDet
             <div className="flex grow w-full">
               <div className="flex gap-6">
                 <DescriptionSection title={t('preview_sheet.interpretation_details.fields.gene')} fullWidth={false}>
-                  {occurrence?.symbol ? (
+                  {symbol ? (
                     <AnchorLink
-                      href={getOmimOrgUrl({ symbol: occurrence.symbol })}
+                      href={getOmimOrgUrl({ symbol })}
                       target="_blank"
                       rel="noreferrer"
                       onClick={e => e.stopPropagation()}
                       size="sm"
                     >
-                      {occurrence.symbol}
+                      {symbol}
                     </AnchorLink>
                   ) : (
                     <EmptyField />
@@ -109,12 +134,12 @@ function SliderInterpretationDetailsCard({ occurrence }: SliderInterpretationDet
                   title={t('preview_sheet.interpretation_details.fields.transcript')}
                   fullWidth={false}
                 >
-                  {occurrence?.transcript_id && (
+                  {transcriptId && (
                     <TranscriptIdLink
-                      transcriptId={occurrence.transcript_id}
-                      isCanonical={occurrence.is_canonical}
-                      isManeSelect={occurrence.is_mane_select}
-                      isManePlus={occurrence.is_mane_plus}
+                      transcriptId={transcriptId}
+                      isCanonical={isCanonical}
+                      isManeSelect={isManeSelect}
+                      isManePlus={isManePlus}
                       linkClassName="text-sm text-primary m-[-1px]"
                     />
                   )}
@@ -152,12 +177,12 @@ function SliderInterpretationDetailsCard({ occurrence }: SliderInterpretationDet
             </DescriptionSection>
             <Separator />
             <div className="flex gap-6 text-sm text-muted-foreground font-mono">
-              <span className="flex align-center gap-1">
-                <StethoscopeIcon size="16" />
+              <span className="flex items-center gap-1">
+                <StethoscopeIcon size="14" />
                 {interpretation?.updated_by_name}
               </span>
-              <span className="flex align-center gap-1">
-                <CalendarIcon size="16" />
+              <span className="flex items-center gap-1">
+                <CalendarIcon size="14" />
                 {interpretation?.updated_at && <DateTime date={interpretation.updated_at} />}
               </span>
             </div>
