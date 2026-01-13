@@ -913,7 +913,7 @@
     "interpretation": {
       "tooltip": {
         "add": "Add variant interpretation",
-        "edit": "Edit variant interpretation"
+        "view": "View interpretation"
       },
       "classifications": {
         "all_classifications": "All Classifications",
@@ -981,7 +981,7 @@
       },
       "title": "Clinical Interpretation",
       "cancel_text": "Cancel",
-      "ok_text": "Save Interpretation",
+      "ok_text": "Save interpretation",
       "last_update": "Last update: <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
       "header": {
         "germline": "Germline",
