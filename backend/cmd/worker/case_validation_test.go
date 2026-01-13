@@ -3914,8 +3914,9 @@ func Test_validateFileMetadata_OK(t *testing.T) {
 		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
 		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
+		s3fs, _ := utils.NewS3Store()
 		mockContext := BatchValidationContext{
-			S3FS: utils.NewS3Store(),
+			S3FS: &s3fs,
 		}
 		record := CaseValidationRecord{
 			BaseValidationRecord: BaseValidationRecord{Index: 0},
@@ -3954,8 +3955,9 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
 		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
+		s3fs, _ := utils.NewS3Store()
 		mockContext := BatchValidationContext{
-			S3FS: utils.NewS3Store(),
+			S3FS: &s3fs,
 		}
 		record := CaseValidationRecord{
 			BaseValidationRecord: BaseValidationRecord{Index: 0},
@@ -3999,8 +4001,9 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
 		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
+		s3fs, _ := utils.NewS3Store()
 		mockContext := BatchValidationContext{
-			S3FS: utils.NewS3Store(),
+			S3FS: &s3fs,
 		}
 		record := CaseValidationRecord{
 			BaseValidationRecord: BaseValidationRecord{Index: 0},
@@ -4044,8 +4047,9 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
 		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
 
+		s3fs, _ := utils.NewS3Store()
 		mockContext := BatchValidationContext{
-			S3FS: utils.NewS3Store(),
+			S3FS: &s3fs,
 		}
 		record := CaseValidationRecord{
 			BaseValidationRecord: BaseValidationRecord{Index: 0},

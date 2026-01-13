@@ -117,7 +117,7 @@ type S3Store struct {
 	svc *s3.S3
 }
 
-func NewS3Store() (*S3Store, error) {
+func NewS3Store() (FileMetadataGetter, error) {
 	endpoint := GetEnvOrDefault("AWS_ENDPOINT_URL", "")
 	region := GetEnvOrDefault("AWS_REGION", DefaultAwsRegion)
 	useSSL := GetEnvOrDefault("AWS_USE_SSL", "true") == "true"
