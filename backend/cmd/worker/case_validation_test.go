@@ -3916,7 +3916,7 @@ func Test_validateFileMetadata_OK(t *testing.T) {
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := BatchValidationContext{
-			S3FS: &s3fs,
+			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
 			BaseValidationRecord: BaseValidationRecord{Index: 0},
@@ -3957,7 +3957,7 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := BatchValidationContext{
-			S3FS: &s3fs,
+			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
 			BaseValidationRecord: BaseValidationRecord{Index: 0},
@@ -4003,7 +4003,7 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := BatchValidationContext{
-			S3FS: &s3fs,
+			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
 			BaseValidationRecord: BaseValidationRecord{Index: 0},
@@ -4049,7 +4049,7 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 
 		s3fs, _ := utils.NewS3Store()
 		mockContext := BatchValidationContext{
-			S3FS: &s3fs,
+			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
 			BaseValidationRecord: BaseValidationRecord{Index: 0},

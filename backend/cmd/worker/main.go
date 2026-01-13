@@ -30,7 +30,7 @@ type BatchValidationContext struct {
 	ObservationRepo repository.ObservationsDAO
 	OnsetRepo       repository.OnsetsDAO
 	StatusRepo      repository.StatusDAO
-	S3FS            *utils.FileMetadataGetter
+	S3FS            utils.FileMetadataGetter
 }
 
 func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
@@ -55,7 +55,7 @@ func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
 		FamilyRepo:      repository.NewFamilyRepository(db),
 		ObsCat:          repository.NewObservationCategoricalRepository(db),
 		TaskRepo:        repository.NewTaskRepository(db),
-		S3FS:            &s3fs,
+		S3FS:            s3fs,
 	}, nil
 }
 
