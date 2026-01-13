@@ -30,9 +30,16 @@ type BatchValidationContext struct {
 	ObservationRepo repository.ObservationsDAO
 	OnsetRepo       repository.OnsetsDAO
 	StatusRepo      repository.StatusDAO
+	S3FS            utils.FileMetadataGetter
 }
 
-func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
+func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
+
+	s3fs, err := utils.NewS3Store()
+	if err != nil {
+		return nil, err
+	}
+
 	return &BatchValidationContext{
 		BatchRepo:       repository.NewBatchRepository(db),
 		OrgRepo:         repository.NewOrganizationRepository(db),
@@ -45,7 +52,11 @@ func NewBatchValidationContext(db *gorm.DB) *BatchValidationContext {
 		StatusRepo:      repository.NewStatusRepository(db),
 		CasesRepo:       repository.NewCasesRepository(db),
 		DocRepo:         repository.NewDocumentsRepository(db),
-	}
+		FamilyRepo:      repository.NewFamilyRepository(db),
+		ObsCat:          repository.NewObservationCategoricalRepository(db),
+		TaskRepo:        repository.NewTaskRepository(db),
+		S3FS:            s3fs,
+	}, nil
 }
 
 var supportedProcessors = map[string]func(*BatchValidationContext, *types.Batch, *gorm.DB){
@@ -70,7 +81,11 @@ func main() {
 		glog.Fatalf("Failed to initialize postgres database: %v", initDbErr)
 	}
 
-	context := NewBatchValidationContext(dbPostgres)
+	context, err := NewBatchValidationContext(dbPostgres)
+	if err != nil {
+		glog.Fatalf("Failed to initialize batch validation context: %v", err)
+	}
+
 	StartHealthProbe(dbPostgres)
 	glog.Info("Worker started...")
 	for {

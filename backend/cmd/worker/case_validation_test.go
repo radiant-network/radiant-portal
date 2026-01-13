@@ -1,12 +1,18 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
+	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -3685,4 +3691,390 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 	assert.Contains(t, record.Errors[0].Message, "Tumor sequencing experiment")
 	assert.Contains(t, record.Errors[0].Message, "LAB-2 / SAMPLE-2 / ALIQUOT-2")
 	assert.Equal(t, "case[0].sequencing_experiments[1]", record.Errors[0].Path)
+}
+
+func Test_validateExistingDocument_IdenticalMatch(t *testing.T) {
+	mockContext := BatchValidationContext{}
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Context:              &mockContext,
+	}
+
+	batchDoc := types.OutputDocumentBatch{
+		DataCategoryCode: "FOO",
+		DataTypeCode:     "BAR",
+		FormatCode:       ".foobar",
+		Hash:             "f00bar",
+		Name:             "FooBar Document",
+		Size:             42,
+		Url:              "s3://foo/bar",
+	}
+
+	existingDoc := types.Document{
+		DataCategoryCode: "FOO",
+		DataTypeCode:     "BAR",
+		FileFormatCode:   ".foobar",
+		Hash:             "f00bar",
+		Name:             "FooBar Document",
+		Size:             42,
+		Url:              "s3://foo/bar",
+	}
+
+	record.validateDocumentExists(&batchDoc, &existingDoc, "foo[0].bar")
+	assert.Len(t, record.Infos, 1)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+	assert.Equal(t, record.Infos[0], types.BatchMessage{
+		Code:    "DOCUMENT-003",
+		Message: "Document s3://foo/bar already exists, skipped.",
+		Path:    "foo[0].bar",
+	})
+}
+
+func Test_validateExistingDocument_PartialMatch(t *testing.T) {
+	mockContext := BatchValidationContext{}
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Context:              &mockContext,
+	}
+
+	batchDoc := types.OutputDocumentBatch{
+		DataCategoryCode: "NOTFOO",
+		DataTypeCode:     "BAR",
+		FormatCode:       ".foobar",
+		Hash:             "f00bar",
+		Name:             "FooBar Document",
+		Size:             42,
+		Url:              "s3://foo/bar",
+	}
+
+	existingDoc := types.Document{
+		DataCategoryCode: "FOO",
+		DataTypeCode:     "BAR",
+		FileFormatCode:   ".foobar",
+		Hash:             "f00bar",
+		Name:             "FooBar Document",
+		Size:             42,
+		Url:              "s3://foo/bar",
+	}
+
+	record.validateDocumentExists(&batchDoc, &existingDoc, "foo[0].bar")
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 1)
+	assert.Len(t, record.Errors, 0)
+	assert.Equal(t, record.Warnings[0], types.BatchMessage{
+		Code:    "DOCUMENT-004",
+		Message: "A document with same url s3://foo/bar has been found but with a different data_category_code (FOO <> NOTFOO).",
+		Path:    "foo[0].bar",
+	})
+}
+
+func Test_validateDocumentTextField_OK(t *testing.T) {
+	mockContext := BatchValidationContext{}
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Context:              &mockContext,
+	}
+	fieldValue := "test value"
+	fieldName := "test_field"
+	path := "case[0].tasks[0].documents[1]"
+	taskIndex := 0
+	documentIndex := 1
+	regExpStr := "^[a-zA-Z0-9 ]+$"
+	regExp, _ := regexp.Compile(regExpStr)
+
+	record.validateDocumentTextField(fieldValue, fieldName, path, taskIndex, documentIndex, regExp, false)
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateDocumentTextField_RegexError(t *testing.T) {
+	mockContext := BatchValidationContext{}
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Context:              &mockContext,
+	}
+	fieldValue := "test value %$#%"
+	fieldName := "test_field"
+	path := "case[0].tasks[0].documents[1]"
+	taskIndex := 0
+	documentIndex := 1
+	regExpStr := "^[a-zA-Z0-9 ]+$"
+	regExp, _ := regexp.Compile(regExpStr)
+
+	record.validateDocumentTextField(fieldValue, fieldName, path, taskIndex, documentIndex, regExp, false)
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, record.Errors[0], types.BatchMessage{
+		Code:    "DOCUMENT-001",
+		Message: "Invalid Field test_field for case 0 - task 0 - output document 1. Reason: does not match the regular expression ^[a-zA-Z0-9 ]+$.",
+		Path:    "case[0].tasks[0].documents[1]",
+	})
+}
+
+func Test_validateDocumentTextField_LengthError(t *testing.T) {
+	mockContext := BatchValidationContext{}
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Context:              &mockContext,
+	}
+	fieldValue := strings.Repeat("A", 300)
+	fieldName := "test_field"
+	path := "case[0].tasks[0].documents[1]"
+	taskIndex := 0
+	documentIndex := 1
+	regExpStr := "^[a-zA-Z0-9 ]+$"
+	regExp, _ := regexp.Compile(regExpStr)
+
+	record.validateDocumentTextField(fieldValue, fieldName, path, taskIndex, documentIndex, regExp, false)
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, record.Errors[0], types.BatchMessage{
+		Code:    "DOCUMENT-001",
+		Message: "Invalid Field test_field for case 0 - task 0 - output document 1. Reason: field is too long, maximum length allowed is 100.",
+		Path:    "case[0].tasks[0].documents[1]",
+	})
+}
+
+func Test_validateDocumentIsOutputOfAnotherTask_DocumentFound(t *testing.T) {
+	mockContext := BatchValidationContext{}
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Context:              &mockContext,
+		DocumentsInTasks: map[string][]*DocumentRelation{
+			"s3://foo/bar": {{
+				TaskID: 1,
+				Type:   "output",
+			}},
+		},
+	}
+
+	doc := types.Document{
+		ID:               0,
+		Name:             "Foo Bar",
+		DataCategoryCode: "foobar",
+		DataTypeCode:     "foo",
+		FileFormatCode:   "bar",
+		Size:             11,
+		Url:              "s3://foo/bar",
+		Hash:             "abc123",
+	}
+
+	record.validateDocumentIsOutputOfAnotherTask(&doc, "foo[0].bar")
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 1)
+	assert.Equal(t, record.Errors[0], types.BatchMessage{
+		Code:    "DOCUMENT-005",
+		Message: "A document with same url s3://foo/bar has been found in the output of a different task.",
+		Path:    "foo[0].bar",
+	})
+}
+
+func Test_validateDocumentIsOutputOfAnotherTask_DocumentNotFound(t *testing.T) {
+	mockContext := BatchValidationContext{}
+	record := CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Context:              &mockContext,
+		DocumentsInTasks: map[string][]*DocumentRelation{
+			"s3://foo/bar": {{
+				TaskID: 1,
+				Type:   "output",
+			}},
+		},
+	}
+
+	doc := types.Document{
+		ID:               0,
+		Name:             "Foo Bar",
+		DataCategoryCode: "foobar",
+		DataTypeCode:     "foo",
+		FileFormatCode:   "bar",
+		Size:             11,
+		Url:              "s3://notfoo/bar",
+		Hash:             "abc123",
+	}
+
+	record.validateDocumentIsOutputOfAnotherTask(&doc, "foo[0].bar")
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateFileMetadata_OK(t *testing.T) {
+	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
+
+		bucketName := "foo"
+		objectName := "bar.txt"
+		content := []byte("hello world") // Size: 11 bytes
+
+		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+
+		s3fs, _ := utils.NewS3Store()
+		mockContext := BatchValidationContext{
+			S3FS: s3fs,
+		}
+		record := CaseValidationRecord{
+			BaseValidationRecord: BaseValidationRecord{Index: 0},
+			Context:              &mockContext,
+		}
+
+		doc := types.Document{
+			ID:               0,
+			Name:             "Foo Bar",
+			DataCategoryCode: "foobar",
+			DataTypeCode:     "foo",
+			FileFormatCode:   "bar",
+			Size:             11,
+			Url:              "s3://foo/bar.txt",
+			Hash:             "5eb63bbbe01eeed093cb22bb8f5acdc3",
+		}
+
+		record.validateDocumentIsOutputOfAnotherTask(&doc, "foo[0].bar")
+		assert.Len(t, record.Infos, 0)
+		assert.Len(t, record.Warnings, 0)
+		assert.Len(t, record.Errors, 0)
+	})
+}
+
+func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
+	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
+		t.Setenv("AWS_ENDPOINT_URL", endpoint)
+		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
+		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
+		t.Setenv("AWS_USE_SSL", "false")
+
+		bucketName := "foo"
+		objectName := "bar.txt"
+		content := []byte("hello world") // Size: 11 bytes
+
+		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+
+		s3fs, _ := utils.NewS3Store()
+		mockContext := BatchValidationContext{
+			S3FS: s3fs,
+		}
+		record := CaseValidationRecord{
+			BaseValidationRecord: BaseValidationRecord{Index: 0},
+			Context:              &mockContext,
+		}
+
+		doc := types.OutputDocumentBatch{
+			Name:             "Foo Bar",
+			DataCategoryCode: "foobar",
+			DataTypeCode:     "foo",
+			FormatCode:       "bar",
+			Size:             11,
+			Url:              "s3://notfoo/bar.txt",
+			Hash:             "5eb63bbbe01eeed093cb22bb8f5acdc3",
+		}
+
+		err := record.validateDocumentMetadata(&doc, "foo[0].bar", 0, 1)
+		assert.NoError(t, err)
+		assert.Len(t, record.Infos, 0)
+		assert.Len(t, record.Warnings, 0)
+		assert.Len(t, record.Errors, 1)
+		assert.Equal(t, record.Errors[0], types.BatchMessage{
+			Code:    "DOCUMENT-002",
+			Message: "No document can be found on the URL s3://notfoo/bar.txt for case 0 - task 0 - output document 1.",
+			Path:    "foo[0].bar",
+		})
+	})
+}
+
+func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
+	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
+		t.Setenv("AWS_ENDPOINT_URL", endpoint)
+		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
+		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
+		t.Setenv("AWS_USE_SSL", "false")
+
+		bucketName := "foo"
+		objectName := "bar.txt"
+		content := []byte("hello world") // Size: 11 bytes
+
+		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+
+		s3fs, _ := utils.NewS3Store()
+		mockContext := BatchValidationContext{
+			S3FS: s3fs,
+		}
+		record := CaseValidationRecord{
+			BaseValidationRecord: BaseValidationRecord{Index: 0},
+			Context:              &mockContext,
+		}
+
+		doc := types.OutputDocumentBatch{
+			Name:             "Foo Bar",
+			DataCategoryCode: "foobar",
+			DataTypeCode:     "foo",
+			FormatCode:       "bar",
+			Size:             12,
+			Url:              "s3://foo/bar.txt",
+			Hash:             "5eb63bbbe01eeed093cb22bb8f5acdc3",
+		}
+
+		err := record.validateDocumentMetadata(&doc, "foo[0].bar", 0, 1)
+		assert.NoError(t, err)
+		assert.Len(t, record.Infos, 0)
+		assert.Len(t, record.Warnings, 0)
+		assert.Len(t, record.Errors, 1)
+		assert.Equal(t, record.Errors[0], types.BatchMessage{
+			Code:    "DOCUMENT-006",
+			Message: "Document size does not match the actual size of the document s3://foo/bar.txt for case 0 - task 0 - output document 1.",
+			Path:    "foo[0].bar",
+		})
+	})
+}
+
+func Test_validateFileMetadata_HashMismatch(t *testing.T) {
+	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
+		t.Setenv("AWS_ENDPOINT_URL", endpoint)
+		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
+		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
+		t.Setenv("AWS_USE_SSL", "false")
+
+		bucketName := "foo"
+		objectName := "bar.txt"
+		content := []byte("hello world") // Size: 11 bytes
+
+		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+
+		s3fs, _ := utils.NewS3Store()
+		mockContext := BatchValidationContext{
+			S3FS: s3fs,
+		}
+		record := CaseValidationRecord{
+			BaseValidationRecord: BaseValidationRecord{Index: 0},
+			Context:              &mockContext,
+		}
+
+		doc := types.OutputDocumentBatch{
+			Name:             "Foo Bar",
+			DataCategoryCode: "foobar",
+			DataTypeCode:     "foo",
+			FormatCode:       "bar",
+			Size:             11,
+			Url:              "s3://foo/bar.txt",
+			Hash:             "5eb63bbbe01eeed093cb22bb8f5ac",
+		}
+
+		err := record.validateDocumentMetadata(&doc, "foo[0].bar", 0, 1)
+		assert.NoError(t, err)
+		assert.Len(t, record.Infos, 0)
+		assert.Len(t, record.Warnings, 0)
+		assert.Len(t, record.Errors, 1)
+		assert.Equal(t, record.Errors[0], types.BatchMessage{
+			Code:    "DOCUMENT-007",
+			Message: "Document hash does not match the actual hash of the document s3://foo/bar.txt for case 0 - task 0 - output document 1.",
+			Path:    "foo[0].bar",
+		})
+	})
 }

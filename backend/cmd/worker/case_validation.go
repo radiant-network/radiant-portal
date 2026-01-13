@@ -56,7 +56,14 @@ const (
 
 // Documents error codes
 const (
-	InvalidFieldDocumentCode = "DOCUMENT-001"
+	InvalidFieldDocumentCode              = "DOCUMENT-001"
+	DocumentNotFoundAtURL                 = "DOCUMENT-002"
+	IdenticalDocumentExists               = "DOCUMENT-003"
+	DocumentExistsWithDifferentFieldValue = "DOCUMENT-004"
+	DocumentAlreadyOutputOfAnotherTask    = "DOCUMENT-005"
+	DocumentSizeMismatch                  = "DOCUMENT-006"
+	DocumentHashMismatch                  = "DOCUMENT-007"
+	DuplicateDocumentInCase               = "DOCUMENT-008"
 )
 
 const RelationshipProbandCode = "proband"
@@ -110,6 +117,8 @@ type CaseValidationRecord struct {
 	ObservationCodes []string
 	OnsetCodes       []string
 
+	OutputDocuments map[string]struct{}
+
 	// Necessary to persist the case
 	Patients              map[PatientKey]*types.Patient
 	SequencingExperiments map[int]*types.SequencingExperiment
@@ -124,6 +133,7 @@ func NewCaseValidationRecord(ctx *BatchValidationContext, c types.CaseBatch, ind
 		},
 		Case:                  c,
 		Context:               ctx,
+		OutputDocuments:       make(map[string]struct{}),
 		Patients:              make(map[PatientKey]*types.Patient),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 		Documents:             make(map[string]*types.Document),
@@ -371,7 +381,7 @@ func (cr *CaseValidationRecord) fetchValidationInfos() error {
 }
 
 func (cr *CaseValidationRecord) validateRegexPattern(path, value, code, message string, regExp *regexp.Regexp) {
-	if !regExp.MatchString(value) {
+	if regExp != nil && !regExp.MatchString(value) {
 		cr.addErrors(fmt.Sprintf("%s does not match the regular expression %s.", message, regExp.String()), code, path)
 	}
 }
@@ -798,8 +808,121 @@ func (cr *CaseValidationRecord) validateCase() error {
 
 // Documents validation
 
-func (cr *CaseValidationRecord) validateDocuments(tasks []*types.CaseTaskBatch) error {
-	// TODO: Implement document validation
+func (cr *CaseValidationRecord) validateDocumentExists(new *types.OutputDocumentBatch, existing *types.Document, path string) {
+	hasDiff := false
+
+	check := func(name string, newVal, existingVal any) {
+		if newVal != existingVal {
+			hasDiff = true
+			msg := fmt.Sprintf("A document with same url %s has been found but with a different %s (%v <> %v).",
+				new.Url, name, existingVal, newVal)
+			cr.addWarnings(msg, DocumentExistsWithDifferentFieldValue, path)
+		}
+	}
+
+	check("format_code", new.FormatCode, existing.FileFormatCode)
+	check("name", new.Name, existing.Name)
+	check("data_type_code", new.DataTypeCode, existing.DataTypeCode)
+	check("data_category_code", new.DataCategoryCode, existing.DataCategoryCode)
+	check("size", new.Size, existing.Size)
+	check("hash", new.Hash, existing.Hash)
+
+	if !hasDiff {
+		msg := "Document " + new.Url + " already exists, skipped."
+		cr.addInfos(msg, IdenticalDocumentExists, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateDocumentTextField(fieldValue, fieldName string, path string, taskIndex int, documentIndex int, regExp *regexp.Regexp, required bool) {
+	if !required && fieldValue == "" {
+		return
+	}
+	msg := cr.formatTaskDocumentFieldErrorMessage(fieldName, cr.Index, taskIndex, documentIndex)
+	cr.validateRegexPattern(path, fieldValue, InvalidFieldDocumentCode, msg, regExp)
+	cr.validateTextLength(path, fieldValue, InvalidFieldDocumentCode, msg, TextMaxLength)
+}
+
+func (cr *CaseValidationRecord) validateDocumentIsOutputOfAnotherTask(doc *types.Document, path string) {
+	relatedDocs := cr.DocumentsInTasks[doc.Url]
+
+	for _, dr := range relatedDocs {
+		if dr.Type == "output" {
+			msg := "A document with same url " + doc.Url + " has been found in the output of a different task."
+			cr.addErrors(msg, DocumentAlreadyOutputOfAnotherTask, path)
+			return
+		}
+	}
+}
+
+func (cr *CaseValidationRecord) validateDocumentMetadata(doc *types.OutputDocumentBatch, path string, taskIndex, docIndex int) error {
+	metadata, err := cr.Context.S3FS.GetMetadata(doc.Url)
+	if err != nil {
+		return err
+	}
+	if metadata == nil {
+		cr.addErrors(
+			fmt.Sprintf(
+				"No document can be found on the URL %s for case %d - task %d - output document %d.",
+				doc.Url,
+				cr.Index,
+				taskIndex,
+				docIndex,
+			), DocumentNotFoundAtURL, path)
+		return nil
+	}
+
+	if metadata.Size != doc.Size {
+		msg := fmt.Sprintf("Document size does not match the actual size of the document %s for case %d - task %d - output document %d.", doc.Url, cr.Index, taskIndex, docIndex)
+		cr.addErrors(msg, DocumentSizeMismatch, path)
+	}
+
+	if metadata.Hash != doc.Hash {
+		msg := fmt.Sprintf("Document hash does not match the actual hash of the document %s for case %d - task %d - output document %d.", doc.Url, cr.Index, taskIndex, docIndex)
+		cr.addErrors(msg, DocumentHashMismatch, path)
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateDocumentDuplicateInBatch(doc *types.OutputDocumentBatch, path string) {
+	if _, exists := cr.OutputDocuments[doc.Url]; exists {
+		msg := fmt.Sprintf("Duplicate output document with URL %s found.", doc.Url)
+		cr.addErrors(msg, DuplicateDocumentInCase, path)
+	} else {
+		cr.OutputDocuments[doc.Url] = struct{}{}
+	}
+}
+
+func (cr *CaseValidationRecord) validateDocuments() error {
+	for tid, t := range cr.Case.Tasks {
+		for did, doc := range t.OutputDocuments {
+			path := fmt.Sprintf("case[%d].tasks[%d].output_documents[%d]", cr.Index, tid, did)
+			if d, ok := cr.Documents[doc.Url]; ok {
+				cr.validateDocumentExists(doc, d, path)
+				cr.validateDocumentIsOutputOfAnotherTask(d, path)
+				continue
+			}
+
+			cr.validateDocumentTextField(doc.Url, "url", path, tid, did, nil, true)
+			cr.validateDocumentTextField(doc.Hash, "hash", path, tid, did, TextRegExpCompiled, true)
+			cr.validateDocumentTextField(doc.FormatCode, "format_code", path, tid, did, TextRegExpCompiled, true)
+			cr.validateDocumentTextField(doc.Name, "name", path, tid, did, TextRegExpCompiled, true)
+			cr.validateDocumentTextField(doc.DataTypeCode, "data_type_code", path, tid, did, TextRegExpCompiled, true)
+			cr.validateDocumentTextField(doc.DataCategoryCode, "data_category_code", path, tid, did, TextRegExpCompiled, true)
+
+			if doc.Size < 0 {
+				msg := fmt.Sprintf(
+					"%s size is invalid, must be non-negative.",
+					cr.formatTaskDocumentFieldErrorMessage("size", cr.Index, tid, did),
+				)
+				cr.addErrors(msg, InvalidFieldDocumentCode, path)
+			}
+
+			if err := cr.validateDocumentMetadata(doc, path, tid, did); err != nil {
+				return fmt.Errorf("error validating file metadata for case %d - document %d: %v", cr.Index, tid, err)
+			}
+			cr.validateDocumentDuplicateInBatch(doc, path)
+		}
+	}
 	return nil
 }
 
@@ -838,9 +961,9 @@ func validateCaseRecord(
 
 	// 4. Validate Case Tasks
 
-	// Validate documents
-	if err := cr.validateDocuments(c.Tasks); err != nil {
-		return nil, fmt.Errorf("error validating documents: %w", err)
+	// 5. Validate Case Documents
+	if err := cr.validateDocuments(); err != nil {
+		return nil, fmt.Errorf("error during documents validation: %w", err)
 	}
 
 	return cr, nil
@@ -1119,18 +1242,17 @@ func validateCaseBatch(ctx *BatchValidationContext, cases []types.CaseBatch) ([]
 	visited := map[CaseKey]struct{}{}
 
 	for idx, c := range cases {
+		key := CaseKey{
+			ProjectCode:     c.ProjectCode,
+			SubmitterCaseID: c.SubmitterCaseId,
+		}
+
 		record, err := validateCaseRecord(ctx, c, idx)
 		if err != nil {
 			return nil, fmt.Errorf("error during case validation: %v", err)
 		}
 
-		key := CaseKey{
-			ProjectCode:     c.ProjectCode,
-			SubmitterCaseID: c.SubmitterCaseId,
-		}
-		if c.SubmitterCaseId != "" {
-			validateUniquenessInBatch(record, key, visited, IdenticalCaseInBatch, []string{c.ProjectCode, c.SubmitterCaseId})
-		}
+		validateUniquenessInBatch(record, key, visited, IdenticalCaseInBatch, []string{c.ProjectCode, c.SubmitterCaseId})
 		records = append(records, record)
 	}
 	return records, nil

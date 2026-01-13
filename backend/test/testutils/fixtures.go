@@ -37,6 +37,51 @@ func SequentialTestWithPostgresAndStarrocks(t *testing.T, dbName string, testFun
 	starrocks.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
 }
 
+func SequentialTestWithMinIO(t *testing.T, testFunc func(t *testing.T, context context.Context, client *minio.Client, endpoint string)) {
+	ctx := context.Background()
+	minioC, err := initMinioContainer(ctx)
+	if err != nil {
+		log.Fatalf("Failed to start MinIO container: %v", err)
+	}
+
+	client, err := initS3Client(minioC.Endpoint)
+	if err != nil {
+		log.Fatalf("Failed to init S3 bucket: %v", err)
+	}
+
+	t.Setenv("AWS_ENDPOINT_URL", minioC.Endpoint)
+	t.Setenv("AWS_ACCESS_KEY_ID", "admin")
+	t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
+	t.Setenv("AWS_USE_SSL", "false")
+
+	testFunc(t, ctx, client, minioC.Endpoint)
+}
+
+func SequentialTestWithPostgresAndMinIO(t *testing.T, testFunc func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB)) {
+	ctx := context.Background()
+	minioC, err := initMinioContainer(ctx)
+	if err != nil {
+		log.Fatalf("Failed to start MinIO container: %v", err)
+	}
+
+	client, err := initS3Client(minioC.Endpoint)
+	if err != nil {
+		log.Fatalf("Failed to init S3 bucket: %v", err)
+	}
+
+	gormDb, err := initPostgresDb()
+	if err != nil {
+		log.Fatal("Failed to init db connection: ", err)
+	}
+
+	t.Setenv("AWS_ENDPOINT_URL", minioC.Endpoint)
+	t.Setenv("AWS_ACCESS_KEY_ID", "admin")
+	t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
+	t.Setenv("AWS_USE_SSL", "false")
+
+	testFunc(t, ctx, client, minioC.Endpoint, gormDb)
+}
+
 func ParallelTestWithDb(t *testing.T, dbName string, testFunc func(t *testing.T, db *gorm.DB)) {
 	t.Parallel()
 	db, dbName, err := initDb(dbName)
