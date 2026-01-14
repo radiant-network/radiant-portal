@@ -913,6 +913,7 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 					message := fmt.Sprintf("Input document with URL %s for case %d - task %d was produced by a sequencing experiment that is not defined in this case.",
 						indoc.Url, cr.Index, taskIndex)
 					cr.addErrors(message, TaskInputDocumentNotInSequencingExperiments, path)
+					break
 				}
 			}
 		}
