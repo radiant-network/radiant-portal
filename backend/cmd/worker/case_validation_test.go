@@ -24,6 +24,19 @@ type CaseValidationMockRepo struct {
 	GetCaseBySubmitterCaseIdAndProjectIdFunc func(submitterCaseId string, projectId int) (*repository.Case, error)
 }
 
+func (m *CaseValidationMockRepo) GetTaskTypeCodes() ([]types.TaskType, error) {
+	return []types.TaskType{
+		{types.ValueSet{Code: "alignment", NameEn: "Genome Alignment"}},
+		{types.ValueSet{Code: "alignment_germline_variant_calling", NameEn: "Genome Alignment and Germline Variant calling"}},
+		{types.ValueSet{Code: "family_variant_calling", NameEn: "Family Joint Genotyping"}},
+		{types.ValueSet{Code: "somatic_variant_calling", NameEn: "Somatic Variant Calling by Tumor-Normal Paired Samples"}},
+		{types.ValueSet{Code: "tumor_only_variant_calling", NameEn: "Somatic Variant Calling by Tumor-Only Sample"}},
+		{types.ValueSet{Code: "radiant_germline_annotation", NameEn: "RADIANT Germline Annotation"}},
+		{types.ValueSet{Code: "exomiser", NameEn: "Exomiser"}},
+		{types.ValueSet{Code: "rnaseq_analysis", NameEn: "RNAseq Analysis of Transcriptome Profiling and Gene Fusion Calling"}},
+	}, nil
+}
+
 func (m *CaseValidationMockRepo) GetTaskContextBySequencingExperimentId(seqExpId int) ([]*repository.TaskContext, error) {
 	return nil, nil
 }
@@ -718,6 +731,29 @@ func Test_fetchCodeInfos_OnsetCodesError(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to retrieve onset codes")
 	assert.Contains(t, err.Error(), "onset database error")
+}
+
+func Test_fetchTaskTypeCodes_OK(t *testing.T) {
+	mockRepo := CaseValidationMockRepo{}
+	mockContext := BatchValidationContext{
+		TaskRepo: &mockRepo,
+	}
+	mockRecord := CaseValidationRecord{
+		Context: &mockContext,
+	}
+
+	err := mockRecord.fetchTaskTypeCodes()
+	assert.NoError(t, err)
+	assert.Equal(t, []string{
+		"alignment",
+		"alignment_germline_variant_calling",
+		"family_variant_calling",
+		"somatic_variant_calling",
+		"tumor_only_variant_calling",
+		"radiant_germline_annotation",
+		"exomiser",
+		"rnaseq_analysis",
+	}, mockRecord.TaskTypeCodes)
 }
 
 func Test_fetchProject_OK(t *testing.T) {
@@ -3760,6 +3796,31 @@ func Test_validateTaskTextField_LengthError(t *testing.T) {
 	assert.Equal(t, expected, record.Errors[0])
 }
 
+func Test_validateTaskTypeCode_OK(t *testing.T) {
+	record := CaseValidationRecord{}
+	record.TaskTypeCodes = []string{"foo"}
+	record.validateTaskTypeCode("foo", 0)
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateTaskTypeCode_Error(t *testing.T) {
+	record := CaseValidationRecord{}
+	record.TaskTypeCodes = []string{"foo", "bar"}
+	record.validateTaskTypeCode("foobar", 0)
+
+	expected := types.BatchMessage{
+		Code:    "TASK-001",
+		Message: "Invalid Field type_code for case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: foo, bar",
+		Path:    "case[0].tasks[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
 func Test_validateTaskAliquot_OK(t *testing.T) {
 	record := CaseValidationRecord{
 		Case: types.CaseBatch{
@@ -3839,6 +3900,97 @@ func Test_validateTaskDocuments_OK(t *testing.T) {
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 0)
 	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateExclusiveAliquotInputDocuments_OK(t *testing.T) {
+	record := CaseValidationRecord{
+		Case: types.CaseBatch{
+			Tasks: []*types.CaseTaskBatch{
+				{
+					Aliquot: "ALIQUOT-1",
+					OutputDocuments: []*types.OutputDocumentBatch{
+						{
+							Url: "s3://output/foo/bar.txt",
+						},
+					},
+				},
+			},
+		},
+	}
+	record.validateExclusiveAliquotInputDocuments(record.Case.Tasks[0], 0)
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+
+	record = CaseValidationRecord{
+		Documents: map[string]*types.Document{
+			"s3://input/foo/bar.txt": {},
+		},
+		TaskContexts: map[int][]*types.TaskContext{
+			0: {{TaskID: 0, SequencingExperimentID: 0}},
+		},
+		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
+		Case: types.CaseBatch{
+			Tasks: []*types.CaseTaskBatch{
+				{
+					InputDocuments: []*types.InputDocumentBatch{
+						{
+							Url: "s3://input/foo/bar.txt",
+						},
+					},
+					OutputDocuments: []*types.OutputDocumentBatch{
+						{
+							Url: "s3://output/foo/bar.txt",
+						},
+					},
+				},
+			},
+		},
+	}
+	record.validateExclusiveAliquotInputDocuments(record.Case.Tasks[0], 0)
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateExclusiveAliquotInputDocuments_Error(t *testing.T) {
+	record := CaseValidationRecord{
+		Documents: map[string]*types.Document{
+			"s3://input/foo/bar.txt": {},
+		},
+		TaskContexts: map[int][]*types.TaskContext{
+			0: {{TaskID: 0, SequencingExperimentID: 0}},
+		},
+		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
+		Case: types.CaseBatch{
+			Tasks: []*types.CaseTaskBatch{
+				{
+					Aliquot: "ALIQUOT-1",
+					InputDocuments: []*types.InputDocumentBatch{
+						{
+							Url: "s3://input/foo/bar.txt",
+						},
+					},
+					OutputDocuments: []*types.OutputDocumentBatch{
+						{
+							Url: "s3://output/foo/bar.txt",
+						},
+					},
+				},
+			},
+		},
+	}
+	record.validateExclusiveAliquotInputDocuments(record.Case.Tasks[0], 0)
+
+	expected := types.BatchMessage{
+		Code:    "TASK-007",
+		Message: "Aliquot and Input documents are mutually exclusive. You can provide one or the other, but not both.",
+		Path:    "case[0].tasks[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
 }
 
 func Test_validateTaskDocuments_MissingInputDocuments_OK(t *testing.T) {

@@ -22,6 +22,8 @@ type TaskDAO interface {
 	CreateTaskContext(tc *TaskContext) error
 	CreateTaskHasDocument(thd *TaskHasDocument) error
 
+	GetTaskTypeCodes() ([]types.TaskType, error)
+
 	GetTaskById(taskId int) (*Task, error)
 	GetTaskContextByTaskId(taskId int) ([]*TaskContext, error)
 	GetTaskHasDocumentByTaskId(taskId int) ([]*TaskHasDocument, error)
@@ -47,6 +49,14 @@ func (r *TaskRepository) CreateTaskContext(tc *TaskContext) error {
 
 func (r *TaskRepository) CreateTaskHasDocument(thd *TaskHasDocument) error {
 	return r.db.Create(thd).Error
+}
+
+func (r *TaskRepository) GetTaskTypeCodes() ([]types.TaskType, error) {
+	var taskTypeCodes []types.TaskType
+	if err := r.db.Table(types.TaskTypeTable.Name).Find(&taskTypeCodes).Error; err != nil {
+		return nil, fmt.Errorf("error while fetching task type codes: %w", err)
+	}
+	return taskTypeCodes, nil
 }
 
 func (r *TaskRepository) GetTaskById(taskId int) (*Task, error) {

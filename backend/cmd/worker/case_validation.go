@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"slices"
+	"strings"
 
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -62,6 +63,7 @@ const (
 	TaskMissingOutputDocuments                  = "TASK-004"
 	TaskInputDocumentNotFound                   = "TASK-005"
 	TaskInputDocumentNotInSequencingExperiments = "TASK-006"
+	TaskContainsAliquotAndInputDocuments        = "TASK-007"
 )
 
 // Documents error codes
@@ -134,6 +136,7 @@ type CaseValidationRecord struct {
 	StatusCodes      []string
 	ObservationCodes []string
 	OnsetCodes       []string
+	TaskTypeCodes    []string
 
 	OutputDocuments map[string]struct{}
 
@@ -220,6 +223,17 @@ func (r *CaseValidationRecord) fetchCodeInfos() error {
 	}
 	if err := r.fetchOnsetCodes(); err != nil {
 		return fmt.Errorf("failed to retrieve onset codes: %w", err)
+	}
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchTaskTypeCodes() error {
+	taskTypeCodes, err := r.Context.TaskRepo.GetTaskTypeCodes()
+	if err != nil {
+		return fmt.Errorf("error retrieving task type codes: %v", err)
+	}
+	for _, t := range taskTypeCodes {
+		r.TaskTypeCodes = append(r.TaskTypeCodes, t.Code)
 	}
 	return nil
 }
@@ -858,6 +872,14 @@ func (cr *CaseValidationRecord) validateTaskTextField(fieldValue, fieldName stri
 	cr.validateTextLength(path, fieldValue, TaskInvalidField, msg, TextMaxLength)
 }
 
+func (cr *CaseValidationRecord) validateTaskTypeCode(typeCode string, taskIndex int) {
+	if !slices.Contains(cr.TaskTypeCodes, typeCode) {
+		path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+		msg := cr.formatTaskFieldErrorMessage("type_code", cr.Index, taskIndex) + " invalid task type code `" + typeCode + "`. Valid codes are: " + strings.Join(cr.TaskTypeCodes, ", ")
+		cr.addErrors(msg+"", TaskInvalidField, path)
+	}
+}
+
 func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 	for _, se := range cr.Case.SequencingExperiments {
 		if se.Aliquot == cr.Case.Tasks[taskIndex].Aliquot {
@@ -867,6 +889,14 @@ func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 	path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
 	message := fmt.Sprintf("Sequencing aliquot %q is not defined for case %d - task %d.", cr.Case.Tasks[taskIndex].Aliquot, cr.Index, taskIndex)
 	cr.addErrors(message, TaskUnknownAliquot, path)
+}
+
+func (cr *CaseValidationRecord) validateExclusiveAliquotInputDocuments(task *types.CaseTaskBatch, taskIndex int) {
+	if len(task.InputDocuments) > 0 && task.Aliquot != "" {
+		path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+		message := "Aliquot and Input documents are mutually exclusive. You can provide one or the other, but not both."
+		cr.addErrors(message, TaskContainsAliquotAndInputDocuments, path)
+	}
 }
 
 func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch, taskIndex int) {
@@ -922,13 +952,22 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 
 func (cr *CaseValidationRecord) validateTasks() error {
 	for taskIndex, task := range cr.Case.Tasks {
-		cr.validateTaskTextField(task.Aliquot, "aliquot", taskIndex, TextRegExpCompiled, true)
+
+		if task.Aliquot != "" {
+			cr.validateTaskTextField(task.Aliquot, "aliquot", taskIndex, TextRegExpCompiled, true)
+		}
+
 		cr.validateTaskTextField(task.TypeCode, "type_code", taskIndex, TextRegExpCompiled, true)
+		cr.validateTaskTypeCode(task.TypeCode, taskIndex)
+
 		cr.validateTaskTextField(task.GenomeBuild, "genome_build", taskIndex, TextRegExpCompiled, true)
 		cr.validateTaskTextField(task.PipelineVersion, "pipeline_version", taskIndex, TextRegExpCompiled, true)
 		cr.validateTaskTextField(task.PipelineName, "pipeline_name", taskIndex, TextRegExpCompiled, true)
 
-		cr.validateTaskAliquot(taskIndex)
+		if _, ok := RequiresInputDocumentsTaskTypes[task.TypeCode]; !ok {
+			cr.validateTaskAliquot(taskIndex)
+		}
+		cr.validateExclusiveAliquotInputDocuments(task, taskIndex)
 		cr.validateTaskDocuments(task, taskIndex)
 	}
 	return nil
