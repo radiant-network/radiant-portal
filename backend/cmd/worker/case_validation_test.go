@@ -24,6 +24,11 @@ type CaseValidationMockRepo struct {
 	GetCaseBySubmitterCaseIdAndProjectIdFunc func(submitterCaseId string, projectId int) (*repository.Case, error)
 }
 
+func (m *CaseValidationMockRepo) GetTaskContextBySequencingExperimentId(seqExpId int) ([]*repository.TaskContext, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *CaseValidationMockRepo) CreateTask(task *repository.Task) error {
 	return nil
 }
@@ -511,13 +516,13 @@ func Test_validateTextLength_TextMaxLength(t *testing.T) {
 	record.validateTextLength(
 		"case[0].note",
 		longText,
-		InvalidFieldCase,
+		CaseInvalidField,
 		"Note",
 		TextMaxLength,
 	)
 
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldCase, record.Errors[0].Code)
+	assert.Equal(t, CaseInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, fmt.Sprintf("maximum length allowed is %d", TextMaxLength))
 }
 
@@ -531,9 +536,9 @@ func Test_fetchStatusCodes_OK(t *testing.T) {
 		StatusRepo: mockRepo,
 	}
 
-	record := CaseValidationRecord{}
+	record := CaseValidationRecord{Context: mockContext}
 
-	err := record.fetchStatusCodes(mockContext)
+	err := record.fetchStatusCodes()
 	assert.NoError(t, err)
 	assert.NotNil(t, record.StatusCodes)
 	assert.Equal(t, record.StatusCodes, []string{"in_progress", "incomplete", "completed", "unknown"})
@@ -549,9 +554,9 @@ func Test_fetchStatusCodes_Error(t *testing.T) {
 		StatusRepo: mockRepo,
 	}
 
-	record := CaseValidationRecord{}
+	record := CaseValidationRecord{Context: mockContext}
 
-	err := record.fetchStatusCodes(mockContext)
+	err := record.fetchStatusCodes()
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error retrieving status codes")
 	assert.Contains(t, err.Error(), "database connection failed")
@@ -564,9 +569,9 @@ func Test_fetchObservationCodes_OK(t *testing.T) {
 		ObservationRepo: mockRepo,
 	}
 
-	record := CaseValidationRecord{}
+	record := CaseValidationRecord{Context: mockContext}
 
-	err := record.fetchObservationCodes(mockContext)
+	err := record.fetchObservationCodes()
 	assert.NoError(t, err)
 	assert.NotNil(t, record.ObservationCodes)
 	assert.Equal(t, record.ObservationCodes, []string{"phenotype", "condition", "note", "ancestry", "consanguinity"})
@@ -582,9 +587,9 @@ func Test_fetchObservationCodes_Error(t *testing.T) {
 		ObservationRepo: mockRepo,
 	}
 
-	record := CaseValidationRecord{}
+	record := CaseValidationRecord{Context: mockContext}
 
-	err := record.fetchObservationCodes(mockContext)
+	err := record.fetchObservationCodes()
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error retrieving observation codes")
 	assert.Contains(t, err.Error(), "database connection failed")
@@ -597,9 +602,9 @@ func Test_fetchOnsetCodes_OK(t *testing.T) {
 		OnsetRepo: mockRepo,
 	}
 
-	record := CaseValidationRecord{}
+	record := CaseValidationRecord{Context: mockContext}
 
-	err := record.fetchOnsetCodes(mockContext)
+	err := record.fetchOnsetCodes()
 	assert.NoError(t, err)
 	assert.NotNil(t, record.OnsetCodes)
 	assert.Equal(t, record.OnsetCodes, []string{"unknown", "antenatal", "congenital", "neonatal", "infantile", "childhood", "juvenile", "young_adult", "middle_age", "senior"})
@@ -615,9 +620,9 @@ func Test_fetchOnsetCodes_Error(t *testing.T) {
 		OnsetRepo: mockRepo,
 	}
 
-	record := CaseValidationRecord{}
+	record := CaseValidationRecord{Context: mockContext}
 
-	err := record.fetchOnsetCodes(mockContext)
+	err := record.fetchOnsetCodes()
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error retrieving onset codes")
 	assert.Contains(t, err.Error(), "database connection failed")
@@ -723,12 +728,13 @@ func Test_fetchProject_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context: &mockContext,
 		Case: types.CaseBatch{
 			ProjectCode: "PROJ-1",
 		},
 	}
 
-	err := record.fetchProject(&mockContext)
+	err := record.fetchProject()
 	assert.NoError(t, err)
 	assert.NotNil(t, record.ProjectID)
 	assert.Equal(t, 42, *record.ProjectID)
@@ -741,12 +747,13 @@ func Test_fetchProject_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context: &mockContext,
 		Case: types.CaseBatch{
 			ProjectCode: "PROJ-2",
 		},
 	}
 
-	err := record.fetchProject(&mockContext)
+	err := record.fetchProject()
 	assert.NoError(t, err)
 	assert.Nil(t, record.ProjectID)
 }
@@ -758,12 +765,13 @@ func Test_fetchProject_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context: &mockContext,
 		Case: types.CaseBatch{
 			ProjectCode: "PROJ-ERROR",
 		},
 	}
 
-	err := record.fetchProject(&mockContext)
+	err := record.fetchProject()
 	assert.Error(t, err)
 	assert.Nil(t, record.ProjectID)
 }
@@ -775,12 +783,13 @@ func Test_fetchAnalysisCatalog_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context: &mockContext,
 		Case: types.CaseBatch{
 			AnalysisCode: "WGA",
 		},
 	}
 
-	err := record.fetchAnalysisCatalog(&mockContext)
+	err := record.fetchAnalysisCatalog()
 	assert.NoError(t, err)
 	assert.NotNil(t, record.AnalysisCatalogID)
 	assert.Equal(t, 1, *record.AnalysisCatalogID)
@@ -793,12 +802,13 @@ func Test_fetchAnalysisCatalog_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context: &mockContext,
 		Case: types.CaseBatch{
 			AnalysisCode: "WPGA",
 		},
 	}
 
-	err := record.fetchAnalysisCatalog(&mockContext)
+	err := record.fetchAnalysisCatalog()
 	assert.NoError(t, err)
 	assert.Nil(t, record.AnalysisCatalogID)
 }
@@ -810,12 +820,13 @@ func Test_fetchAnalysisCatalog_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context: &mockContext,
 		Case: types.CaseBatch{
 			AnalysisCode: "WGA-ERROR",
 		},
 	}
 
-	err := record.fetchAnalysisCatalog(&mockContext)
+	err := record.fetchAnalysisCatalog()
 	assert.Error(t, err)
 	assert.Nil(t, record.AnalysisCatalogID)
 }
@@ -827,13 +838,14 @@ func Test_fetchOrganizations_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context: &mockContext,
 		Case: types.CaseBatch{
 			OrderingOrganizationCode: "LAB-1",
 			DiagnosticLabCode:        "LAB-2",
 		},
 	}
 
-	err := record.fetchOrganizations(&mockContext)
+	err := record.fetchOrganizations()
 	assert.NoError(t, err)
 	assert.NotNil(t, record.OrderingOrganizationID)
 	assert.Equal(t, 10, *record.OrderingOrganizationID)
@@ -848,13 +860,14 @@ func Test_fetchOrganizations_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context: &mockContext,
 		Case: types.CaseBatch{
 			OrderingOrganizationCode: "LAB-1",
 			DiagnosticLabCode:        "LAB-3",
 		},
 	}
 
-	err := record.fetchOrganizations(&mockContext)
+	err := record.fetchOrganizations()
 	assert.NoError(t, err)
 	assert.NotNil(t, record.OrderingOrganizationID)
 	assert.Equal(t, 10, *record.OrderingOrganizationID)
@@ -868,25 +881,27 @@ func Test_fetchOrganizations_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context: &mockContext,
 		Case: types.CaseBatch{
 			OrderingOrganizationCode: "LAB-ERROR",
 			DiagnosticLabCode:        "LAB-2",
 		},
 	}
 
-	err := record.fetchOrganizations(&mockContext)
+	err := record.fetchOrganizations()
 	assert.Error(t, err)
 	assert.Nil(t, record.OrderingOrganizationID)
 	assert.Nil(t, record.DiagnosisLabID)
 
 	record = CaseValidationRecord{
+		Context: &mockContext,
 		Case: types.CaseBatch{
 			OrderingOrganizationCode: "LAB-1",
 			DiagnosticLabCode:        "LAB-ERROR",
 		},
 	}
 
-	err = record.fetchOrganizations(&mockContext)
+	err = record.fetchOrganizations()
 	assert.Error(t, err)
 	assert.NotNil(t, record.OrderingOrganizationID)
 	assert.Equal(t, 10, *record.OrderingOrganizationID)
@@ -900,6 +915,7 @@ func Test_fetchPatients_PartialOK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context:  &mockContext,
 		Patients: make(map[PatientKey]*types.Patient),
 		Case: types.CaseBatch{
 			Patients: []*types.CasePatientBatch{
@@ -909,7 +925,7 @@ func Test_fetchPatients_PartialOK(t *testing.T) {
 		},
 	}
 
-	err := record.fetchPatients(&mockContext)
+	err := record.fetchPatients()
 	assert.NoError(t, err)
 
 	assert.Len(t, record.Patients, 1)
@@ -927,6 +943,7 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context:               &mockContext,
 		Documents:             make(map[string]*types.Document),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 		Patients:              make(map[PatientKey]*types.Patient),
@@ -943,7 +960,7 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 		},
 	}
 
-	err := record.fetchFromTasks(&mockContext)
+	err := record.fetchFromTasks()
 	assert.NoError(t, err)
 	assert.Len(t, record.SequencingExperiments, 1)
 	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[200].Aliquot)
@@ -960,6 +977,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context:               &mockContext,
 		Documents:             make(map[string]*types.Document),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 		Patients:              make(map[PatientKey]*types.Patient),
@@ -976,7 +994,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 		},
 	}
 
-	err := record.fetchFromTasks(&mockContext)
+	err := record.fetchFromTasks()
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to get input document by url")
 }
@@ -989,6 +1007,7 @@ func Test_fetchFromTasks_SeqExpError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
+		Context: &mockContext,
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-FAIL",
 			Tasks: []*types.CaseTaskBatch{
@@ -999,7 +1018,7 @@ func Test_fetchFromTasks_SeqExpError(t *testing.T) {
 		},
 	}
 
-	err := record.fetchFromTasks(&mockContext)
+	err := record.fetchFromTasks()
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to get sequencing experiment by aliquot")
 }
@@ -1125,7 +1144,7 @@ func Test_fetchSequencingExperimentsInTask_OK(t *testing.T) {
 	task := types.CaseTaskBatch{
 		Aliquot: "ALIQUOT-1",
 	}
-	err := record.fetchSequencingExperimentsInTask(record.Context, &task)
+	err := record.fetchSequencingExperimentsInTask(&task)
 	assert.NoError(t, err)
 	assert.Len(t, record.SequencingExperiments, 1)
 	assert.Equal(t, 200, record.SequencingExperiments[200].ID)
@@ -1142,7 +1161,7 @@ func Test_fetchSequencingExperimentsInTask_NotFound(t *testing.T) {
 	task := types.CaseTaskBatch{
 		Aliquot: "ALIQUOT-999",
 	}
-	err := record.fetchSequencingExperimentsInTask(record.Context, &task)
+	err := record.fetchSequencingExperimentsInTask(&task)
 	assert.NoError(t, err)
 	assert.Len(t, record.SequencingExperiments, 0)
 }
@@ -1157,7 +1176,7 @@ func Test_fetchSequencingExperimentsInTask_Error(t *testing.T) {
 	task := types.CaseTaskBatch{
 		Aliquot: "ALIQUOT-ERROR",
 	}
-	err := record.fetchSequencingExperimentsInTask(record.Context, &task)
+	err := record.fetchSequencingExperimentsInTask(&task)
 	assert.Error(t, err)
 	assert.Len(t, record.SequencingExperiments, 0)
 }
@@ -1174,7 +1193,7 @@ func Test_fetchInputDocumentsFromTask_OK(t *testing.T) {
 			Url: "file://bucket/file.bam",
 		}},
 	}
-	err := record.fetchInputDocumentsFromTask(record.Context, &task)
+	err := record.fetchInputDocumentsFromTask(&task)
 	assert.NoError(t, err)
 	assert.Len(t, record.Documents, 1)
 	assert.Equal(t, 500, record.Documents["file://bucket/file.bam"].ID)
@@ -1192,7 +1211,7 @@ func Test_fetchInputDocumentsFromTask_NotFound(t *testing.T) {
 			Url: "file://bucket/unknown.bam",
 		}},
 	}
-	err := record.fetchInputDocumentsFromTask(record.Context, &task)
+	err := record.fetchInputDocumentsFromTask(&task)
 	assert.NoError(t, err)
 	assert.Len(t, record.Documents, 0)
 }
@@ -1209,7 +1228,7 @@ func Test_fetchInputDocumentsFromTask_Error(t *testing.T) {
 			Url: "file://bucket/error.bam",
 		}},
 	}
-	err := record.fetchInputDocumentsFromTask(record.Context, &task)
+	err := record.fetchInputDocumentsFromTask(&task)
 	assert.Error(t, err)
 	assert.Len(t, record.Documents, 0)
 }
@@ -1227,7 +1246,7 @@ func Test_fetchOutputDocumentsFromTask_OK(t *testing.T) {
 			Url: "file://bucket/file.bam",
 		}},
 	}
-	err := record.fetchOutputDocumentsFromTask(record.Context, &task)
+	err := record.fetchOutputDocumentsFromTask(&task)
 	assert.NoError(t, err)
 	assert.Len(t, record.Documents, 1)
 	assert.Equal(t, 500, record.Documents["file://bucket/file.bam"].ID)
@@ -1250,7 +1269,7 @@ func Test_fetchOutputDocumentsFromTask_NotFound(t *testing.T) {
 			Url: "file://bucket/unknown.bam",
 		}},
 	}
-	err := record.fetchOutputDocumentsFromTask(record.Context, &task)
+	err := record.fetchOutputDocumentsFromTask(&task)
 	assert.NoError(t, err)
 	assert.Len(t, record.Documents, 0)
 	assert.Len(t, record.DocumentsInTasks, 0)
@@ -1269,7 +1288,7 @@ func Test_fetchOutputDocumentsFromTask_Error(t *testing.T) {
 			Url: "file://bucket/task-error.bam",
 		}},
 	}
-	err := record.fetchOutputDocumentsFromTask(record.Context, &task)
+	err := record.fetchOutputDocumentsFromTask(&task)
 	assert.Error(t, err)
 	assert.Len(t, record.Documents, 1)
 	assert.Equal(t, 999, record.Documents["file://bucket/task-error.bam"].ID)
@@ -1310,7 +1329,7 @@ func Test_validateCaseField_EmptyRequired(t *testing.T) {
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
 	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
@@ -1324,7 +1343,7 @@ func Test_validateCaseField_InvalidRegex(t *testing.T) {
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
 	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
@@ -1339,7 +1358,7 @@ func Test_validateCaseField_TooLong(t *testing.T) {
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field test_field for case 0")
 	assert.Contains(t, cr.Errors[0].Message, "field is too long, maximum length allowed is 50")
-	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
@@ -1354,9 +1373,9 @@ func Test_validateCaseField_MultipleErrors(t *testing.T) {
 	assert.Len(t, cr.Errors, 2)
 	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
 	assert.Contains(t, cr.Errors[1].Message, "field is too long")
-	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
-	assert.Equal(t, InvalidFieldCase, cr.Errors[1].Code)
+	assert.Equal(t, CaseInvalidField, cr.Errors[1].Code)
 	assert.Equal(t, "case[0]", cr.Errors[1].Path)
 }
 
@@ -1388,7 +1407,7 @@ func Test_validateStatusCode_Invalid(t *testing.T) {
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code for case 0")
 	assert.Contains(t, cr.Errors[0].Message, "status code \"unknown_status\" is not a valid status code")
-	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
@@ -1468,7 +1487,7 @@ func Test_validateCase_MissingProject(t *testing.T) {
 	assert.Contains(t, cr.Errors[0].Message, "Project")
 	assert.Contains(t, cr.Errors[0].Message, "UNKNOWN-PROJ")
 	assert.Contains(t, cr.Errors[0].Message, "does not exist")
-	assert.Equal(t, UnknownProjectCode, cr.Errors[0].Code)
+	assert.Equal(t, CaseUnknownProject, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
@@ -1503,7 +1522,7 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Diagnostic lab")
 	assert.Contains(t, cr.Errors[0].Message, "does not exist")
-	assert.Equal(t, UnknownDiagnosticLabCode, cr.Errors[0].Code)
+	assert.Equal(t, CaseUnknownDiagnosticLab, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
@@ -1538,7 +1557,7 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Analysis")
 	assert.Contains(t, cr.Errors[0].Message, "does not exist")
-	assert.Equal(t, UnknownAnalysisCode, cr.Errors[0].Code)
+	assert.Equal(t, CaseUnknownAnalysisCode, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
@@ -1573,7 +1592,7 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Ordering organization")
 	assert.Contains(t, cr.Errors[0].Message, "does not exist")
-	assert.Equal(t, UnknownOrderingOrganization, cr.Errors[0].Code)
+	assert.Equal(t, CaseUnknownOrderingOrganization, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
@@ -1607,7 +1626,7 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code")
-	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
@@ -1643,7 +1662,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field note")
 	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
-	assert.Equal(t, InvalidFieldCase, cr.Errors[0].Code)
+	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
 
@@ -1726,13 +1745,13 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 	hasStatusError := false
 	hasNoteError := false
 	for _, e := range cr.Errors {
-		if e.Code == UnknownDiagnosticLabCode {
+		if e.Code == CaseUnknownDiagnosticLab {
 			hasLabError = true
 		}
-		if e.Code == InvalidFieldCase && strings.Contains(e.Message, "status_code") {
+		if e.Code == CaseInvalidField && strings.Contains(e.Message, "status_code") {
 			hasStatusError = true
 		}
-		if e.Code == InvalidFieldCase && strings.Contains(e.Message, "note") {
+		if e.Code == CaseInvalidField && strings.Contains(e.Message, "note") {
 			hasNoteError = true
 		}
 	}
@@ -1937,7 +1956,7 @@ func Test_validateFamilyMemberCode_InvalidRegex(t *testing.T) {
 
 	record.validateFamilyMemberCode(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, PatientInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
 	assert.Equal(t, "case[0].patients[0].family_history[0]", record.Errors[0].Path)
 }
@@ -1965,7 +1984,7 @@ func Test_validateFamilyMemberCode_TooLong(t *testing.T) {
 
 	record.validateFamilyMemberCode(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, PatientInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
 	assert.Contains(t, record.Errors[0].Message, "maximum length allowed is 100")
 	assert.Equal(t, "case[0].patients[0].family_history[0]", record.Errors[0].Path)
@@ -2044,7 +2063,7 @@ func Test_validateCondition_InvalidRegex(t *testing.T) {
 
 	record.validateCondition(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, PatientInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
 	assert.Equal(t, "case[0].patients[0].family_history[0]", record.Errors[0].Path)
 }
@@ -2072,7 +2091,7 @@ func Test_validateCondition_TooLong(t *testing.T) {
 
 	record.validateCondition(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldPatients, record.Errors[0].Code)
+	assert.Equal(t, PatientInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
 	assert.Equal(t, "case[0].patients[0].family_history[0]", record.Errors[0].Path)
 }
@@ -2213,7 +2232,7 @@ func Test_validateObsCategoricalCode_Invalid(t *testing.T) {
 
 	record.validateObsCategoricalCode(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "is not a valid observation code")
 	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
@@ -2274,7 +2293,7 @@ func Test_validateSystem_InvalidRegex(t *testing.T) {
 
 	record.validateSystem(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
 	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
@@ -2306,7 +2325,7 @@ func Test_validateSystem_TooLong(t *testing.T) {
 
 	record.validateSystem(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
 	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
@@ -2367,7 +2386,7 @@ func Test_validateValue_InvalidRegex(t *testing.T) {
 
 	record.validateValue(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
 	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
@@ -2399,7 +2418,7 @@ func Test_validateValue_TooLong(t *testing.T) {
 
 	record.validateValue(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
 	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
@@ -2462,7 +2481,7 @@ func Test_validateOnsetCode_Invalid(t *testing.T) {
 
 	record.validateOnsetCode(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "is not a valid onset code")
 	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
@@ -2523,7 +2542,7 @@ func Test_validateObsCategoricalNote_InvalidRegex(t *testing.T) {
 
 	record.validateObsCategoricalNote(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
 	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
@@ -2555,7 +2574,7 @@ func Test_validateObsCategoricalNote_TooLong(t *testing.T) {
 
 	record.validateObsCategoricalNote(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
 	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
 }
@@ -2701,7 +2720,7 @@ func Test_validateObsTextCode_Invalid(t *testing.T) {
 
 	record.validateObsTextCode(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "is not a valid observation code")
 	assert.Equal(t, "case[0].patients[0].observations_text[0]", record.Errors[0].Path)
 }
@@ -2754,7 +2773,7 @@ func Test_validateObsTextValue_InvalidRegex(t *testing.T) {
 
 	record.validateObsTextValue(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not match the regular expression")
 	assert.Equal(t, "case[0].patients[0].observations_text[0]", record.Errors[0].Path)
 }
@@ -2782,7 +2801,7 @@ func Test_validateObsTextValue_TooLong(t *testing.T) {
 
 	record.validateObsTextValue(0, 0)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidFieldObservation, record.Errors[0].Code)
+	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "field is too long")
 	assert.Equal(t, "case[0].patients[0].observations_text[0]", record.Errors[0].Path)
 }
@@ -2989,7 +3008,7 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 	err := record.validateCasePatients()
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidNumberOfProbands, record.Errors[0].Code)
+	assert.Equal(t, CaseInvalidNumberOfProbands, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "should have exactly 1 proband")
 	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
 }
@@ -3034,7 +3053,7 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 	err := record.validateCasePatients()
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidNumberOfProbands, record.Errors[0].Code)
+	assert.Equal(t, CaseInvalidNumberOfProbands, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "should have exactly 1 proband")
 	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
 }
@@ -3075,7 +3094,7 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 	err := record.validateCasePatients()
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, DuplicatePatientInCase, record.Errors[0].Code)
+	assert.Equal(t, CaseDuplicatePatient, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "Duplicate patient (CHUSJ / PAT-1)")
 	assert.Contains(t, record.Errors[0].Message, "for case 0")
 	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
@@ -3267,7 +3286,7 @@ func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
 	err := record.validateSeqExp(0)
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, SeqExpNotFound, record.Errors[0].Code)
+	assert.Equal(t, SequencingExperimentNotFound, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not exist")
 	assert.Equal(t, "case[0].sequencing_experiments[0]", record.Errors[0].Path)
 }
@@ -3449,9 +3468,9 @@ func Test_validateCaseSequencingExperiments_WithErrors(t *testing.T) {
 	err := record.validateCaseSequencingExperiments()
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 2)
-	assert.Equal(t, SeqExpNotFound, record.Errors[0].Code)
+	assert.Equal(t, SequencingExperimentNotFound, record.Errors[0].Code)
 	assert.Equal(t, "case[0].sequencing_experiments[1]", record.Errors[0].Path)
-	assert.Equal(t, SeqExpNotFound, record.Errors[1].Code)
+	assert.Equal(t, SequencingExperimentNotFound, record.Errors[1].Code)
 	assert.Equal(t, "case[0].sequencing_experiments[2]", record.Errors[1].Path)
 }
 
@@ -3511,7 +3530,7 @@ func Test_validateSeqExpPatientInCase_PatientNotFound(t *testing.T) {
 	err := record.validateSeqExpPatientInCase(0, sample)
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, SeqExpNotFoundForCasePatient, record.Errors[0].Code)
+	assert.Equal(t, CaseSeqExpNotFoundForPatient, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not belong to any patient from case 0")
 	assert.Equal(t, "case[0].sequencing_experiments[0]", record.Errors[0].Path)
 }
@@ -3540,7 +3559,7 @@ func Test_validateSeqExpPatientInCase_EmptyPatientsList(t *testing.T) {
 	err := record.validateSeqExpPatientInCase(0, sample)
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, SeqExpNotFoundForCasePatient, record.Errors[0].Code)
+	assert.Equal(t, CaseSeqExpNotFoundForPatient, record.Errors[0].Code)
 }
 
 func Test_validateSeqExpCaseType_GermlineWithGermlineSample(t *testing.T) {
@@ -3597,7 +3616,7 @@ func Test_validateSeqExpCaseType_GermlineWithTumoralSample(t *testing.T) {
 	err := record.validateSeqExpCaseType(0, sample)
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidSeqExpForCaseType, record.Errors[0].Code)
+	assert.Equal(t, CaseInvalidSeqExpForType, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "Tumor sequencing experiment")
 	assert.Contains(t, record.Errors[0].Message, "should not be sequenced in a germline case")
 	assert.Equal(t, "case[0].sequencing_experiments[0]", record.Errors[0].Path)
@@ -3687,7 +3706,7 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 	err := record.validateCaseSequencingExperiments()
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, InvalidSeqExpForCaseType, record.Errors[0].Code)
+	assert.Equal(t, CaseInvalidSeqExpForType, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "Tumor sequencing experiment")
 	assert.Contains(t, record.Errors[0].Message, "LAB-2 / SAMPLE-2 / ALIQUOT-2")
 	assert.Equal(t, "case[0].sequencing_experiments[1]", record.Errors[0].Path)

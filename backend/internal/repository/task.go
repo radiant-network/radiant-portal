@@ -26,6 +26,7 @@ type TaskDAO interface {
 	GetTaskContextByTaskId(taskId int) ([]*TaskContext, error)
 	GetTaskHasDocumentByTaskId(taskId int) ([]*TaskHasDocument, error)
 	GetTaskHasDocumentByDocumentId(documentId int) ([]*TaskHasDocument, error)
+	GetTaskContextBySequencingExperimentId(seqExpId int) ([]*TaskContext, error)
 }
 
 func NewTaskRepository(db *gorm.DB) *TaskRepository {
@@ -80,6 +81,17 @@ func (r *TaskRepository) GetTaskHasDocumentByTaskId(taskId int) ([]*TaskHasDocum
 		return nil, nil
 	}
 	return thd, nil
+}
+
+func (r *TaskRepository) GetTaskContextBySequencingExperimentId(seqExpId int) ([]*TaskContext, error) {
+	var tc []*TaskContext
+	if err := r.db.Table(types.TaskContextTable.Name).Where("sequencing_experiment_id = ?", seqExpId).Find(&tc).Error; err != nil {
+		return nil, err
+	}
+	if len(tc) == 0 {
+		return nil, nil
+	}
+	return tc, nil
 }
 
 func (r *TaskRepository) GetTaskHasDocumentByDocumentId(documentId int) ([]*TaskHasDocument, error) {
