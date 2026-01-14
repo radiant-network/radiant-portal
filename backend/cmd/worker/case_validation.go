@@ -876,14 +876,12 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 		if len(task.InputDocuments) == 0 {
 			message := fmt.Sprintf("Missing input documents for case %d - task %d of type %s.", cr.Index, taskIndex, task.TypeCode)
 			cr.addErrors(message, TaskMissingInputDocuments, path)
-			return
 		}
 	}
 
 	if len(task.OutputDocuments) == 0 {
 		message := fmt.Sprintf("Missing output documents for case %d - task %d of type %s.", cr.Index, taskIndex, task.TypeCode)
 		cr.addErrors(message, TaskMissingOutputDocuments, path)
-		return
 	}
 
 	for _, indoc := range task.InputDocuments {
