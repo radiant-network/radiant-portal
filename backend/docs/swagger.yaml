@@ -1998,12 +1998,9 @@ components:
           type: object
         key:
           type: string
-        user_id:
-          type: string
       required:
       - content
       - key
-      - user_id
       type: object
     UserSet:
       properties:

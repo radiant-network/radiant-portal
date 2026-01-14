@@ -7,7 +7,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **content** | **object** |  | 
 **key** | **str** |  | 
-**user_id** | **str** |  | 
 
 ## Example
 

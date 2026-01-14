@@ -10,7 +10,7 @@ func (UserPreference) TableName() string {
 }
 
 type UserPreference struct {
-	UserID  string                       `json:"user_id" validate:"required" gorm:"type:uuid; primary_key;"`
+	UserID  string                       `json:"-" validate:"required" gorm:"type:uuid; primary_key;"`
 	Key     string                       `json:"key" validate:"required" gorm:"primary_key;"`
 	Content JsonMap[string, interface{}] `gorm:"type:json" json:"content" validate:"required"`
 }
