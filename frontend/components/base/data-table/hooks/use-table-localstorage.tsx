@@ -1,50 +1,12 @@
+/**
+ * Hooks to be manage a table with localeStorage
+ */
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
-import {
-  ColumnOrderState,
-  ColumnPinningState,
-  ColumnSizingState,
-  Row,
-  RowPinningState,
-  TableState,
-} from '@tanstack/react-table';
+import { TableState } from '@tanstack/react-table';
 
-import { ColumnVisiblity, DefaultColumnTableState } from '@/components/base/data-table/data-table';
+import { DefaultColumnTableState } from '@/components/base/data-table/data-table';
 
-type TableCacheColumn = {
-  id: string;
-  minSize?: number;
-  maxSize?: number;
-};
-
-export type TableCacheProps = {
-  columnOrder: ColumnOrderState;
-  columnPinning: ColumnPinningState;
-  columnSizing: ColumnSizingState;
-  columnVisibility: ColumnVisiblity;
-  columns: TableCacheColumn[];
-  rowPinning: {
-    rows: Row<any>[];
-    state: RowPinningState;
-  };
-  pagination?: {
-    pageSize: number;
-  };
-};
-
-const DEFAULT_TABLE_CACHE: TableCacheProps = {
-  columnOrder: [],
-  columnPinning: {},
-  columnSizing: {},
-  columnVisibility: {},
-  columns: [],
-  rowPinning: {
-    rows: [],
-    state: {
-      top: [],
-      bottom: [],
-    },
-  },
-};
+import { DEFAULT_TABLE_OBSERVER, TableObserverColumn, TableObserverProps } from '../type/data-table-type';
 
 // SERVER SIDE RENDERING
 export const IS_SERVER = typeof window === 'undefined';
@@ -52,22 +14,15 @@ export const IS_SERVER = typeof window === 'undefined';
 type useTableStateObserverProps = {
   id: string;
   state: TableState;
-  rows: Row<any>[];
-  previousTableCache: TableCacheProps;
+  // rows: Row<any>[];
+  previousTableCache: TableObserverProps;
 };
-
-/**
- * Normalize item name
- */
-function getCacheName(id: string) {
-  return `data-table-cache-${id}`;
-}
 
 /**
  * Sync and create data-table locale storage to load use config localy
  */
-export function useTableStateObserver({ id, state, rows, previousTableCache }: useTableStateObserverProps) {
-  const [tableCache, setTableCache] = useState<TableCacheProps>(previousTableCache);
+export function useTableStorageObserver({ id, state, previousTableCache }: useTableStateObserverProps) {
+  const [tableCache, setTableCache] = useState<TableObserverProps>(previousTableCache);
   const columnResizeRef = useRef<string | false>(false);
 
   // column pinning
@@ -125,17 +80,18 @@ export function useTableStateObserver({ id, state, rows, previousTableCache }: u
   }, [state.columnSizingInfo, state.columnSizing]);
 
   // row pinning
-  useEffect(() => {
-    if (!state.rowPinning.top || !state.rowPinning.bottom) return;
-    const index = [...new Set([...state.rowPinning.top, ...state.rowPinning.bottom])];
-    setTableCache({
-      ...tableCache,
-      rowPinning: {
-        rows: rows.filter(row => index.includes(row.id)),
-        state: state.rowPinning,
-      },
-    });
-  }, [state.rowPinning]);
+  // @TODO: should be re-added when feature is used by table
+  // useEffect(() => {
+  //   if (!state.rowPinning.top || !state.rowPinning.bottom) return;
+  //   const index = [...new Set([...state.rowPinning.top, ...state.rowPinning.bottom])];
+  //   setTableCache({
+  //     ...tableCache,
+  //     rowPinning: {
+  //       rows: rows.filter(row => index.includes(row.id)),
+  //       state: state.rowPinning,
+  //     },
+  //   });
+  // }, [state.rowPinning]);
 
   // visibility
   useEffect(() => {
@@ -154,22 +110,29 @@ export function useTableStateObserver({ id, state, rows, previousTableCache }: u
 }
 
 /**
+ * Normalize item name
+ */
+function getCacheName(id: string) {
+  return `data-table-cache-${id}`;
+}
+
+/**
  * Helper to get locale storage
  * - Will resync and sanitize storage if the table config has changed
  */
 export function getTableLocaleStorage(
   id: string,
-  columns: TableCacheColumn[],
+  columns: TableObserverColumn[],
   defaultColumnTableState: DefaultColumnTableState,
 ) {
   const storage = localStorage.getItem(id);
   if (storage == null) {
-    const defaultCache = { ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState, columns: columns };
+    const defaultCache = { ...DEFAULT_TABLE_OBSERVER, ...defaultColumnTableState, columns: columns };
     localStorage.setItem(getCacheName(id), JSON.stringify(defaultCache));
     return defaultCache;
   }
   // validate cache to the lastest version
-  const cache: TableCacheProps = JSON.parse(storage);
+  const cache: TableObserverProps = JSON.parse(storage);
 
   // sync with default settings, remove depreciated columns and add new one
   const columnIds = columns.map(column => column.id);
@@ -177,7 +140,7 @@ export function getTableLocaleStorage(
   const newColumns = columnIds.filter(id => !cache.columnOrder.includes(id));
 
   if (depreciatedColumns.length > 0 && newColumns.length > 0) {
-    const defaultCache = { ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState, columns: columns };
+    const defaultCache = { ...DEFAULT_TABLE_OBSERVER, ...defaultColumnTableState, columns: columns };
     localStorage.setItem(getCacheName(id), JSON.stringify(defaultCache));
     return defaultCache;
   }
@@ -194,8 +157,8 @@ export function getTableLocaleStorage(
 export function cleanTableLocaleStorage(
   id: string,
   defaultColumnTableState: DefaultColumnTableState,
-  setTableCache: Dispatch<SetStateAction<TableCacheProps>>,
+  setTableCache: Dispatch<SetStateAction<TableObserverProps>>,
 ) {
-  localStorage.setItem(getCacheName(id), JSON.stringify({ ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState }));
-  setTableCache({ ...DEFAULT_TABLE_CACHE, ...defaultColumnTableState });
+  localStorage.setItem(getCacheName(id), JSON.stringify({ ...DEFAULT_TABLE_OBSERVER, ...defaultColumnTableState }));
+  setTableCache({ ...DEFAULT_TABLE_OBSERVER, ...defaultColumnTableState });
 }
