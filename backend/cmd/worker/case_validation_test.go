@@ -651,6 +651,7 @@ func Test_fetchCodeInfos_OK(t *testing.T) {
 			StatusRepo:      mockStatusRepo,
 			ObservationRepo: mockObservationRepo,
 			OnsetRepo:       mockOnsetRepo,
+			TaskRepo:        &CaseValidationMockRepo{},
 		},
 	}
 
@@ -1834,6 +1835,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 		ObservationRepo: &ObservationsMockRepo{},
 		OnsetRepo:       &OnsetsMockRepo{},
 		SampleRepo:      &mockSamples,
+		TaskRepo:        &mockRepo,
 	}
 
 	vr, err := validateCaseBatch(&mockContext, []types.CaseBatch{
@@ -1902,6 +1904,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		ObservationRepo: &ObservationsMockRepo{},
 		OnsetRepo:       &OnsetsMockRepo{},
 		SampleRepo:      &mockSamples,
+		TaskRepo:        &mockRepo,
 	}
 	batch := types.CaseBatch{
 		ProjectCode:                "PROJ-1",

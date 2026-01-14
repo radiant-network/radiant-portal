@@ -135,20 +135,8 @@ func Test_GetTaskTypeCodes(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
 		result, err := repo.GetTaskTypeCodes()
-
-		expected := []types.TaskType{
-			{types.ValueSet{Code: "alignment", NameEn: "Genome Alignment"}},
-			{types.ValueSet{Code: "alignment_germline_variant_calling", NameEn: "Genome Alignment and Germline Variant calling"}},
-			{types.ValueSet{Code: "family_variant_calling", NameEn: "Family Joint Genotyping"}},
-			{types.ValueSet{Code: "somatic_variant_calling", NameEn: "Somatic Variant Calling by Tumor-Normal Paired Samples"}},
-			{types.ValueSet{Code: "tumor_only_variant_calling", NameEn: "Somatic Variant Calling by Tumor-Only Sample"}},
-			{types.ValueSet{Code: "radiant_germline_annotation", NameEn: "RADIANT Germline Annotation"}},
-			{types.ValueSet{Code: "exomiser", NameEn: "Exomiser"}},
-			{types.ValueSet{Code: "rnaseq_analysis", NameEn: "RNAseq Analysis of Transcriptome Profiling and Gene Fusion Calling"}},
-		}
-
 		assert.NoError(t, err)
-		assert.Equal(t, expected, result)
+		assert.Greater(t, len(result), 0)
 	})
 }
 

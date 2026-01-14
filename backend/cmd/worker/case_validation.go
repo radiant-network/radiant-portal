@@ -224,6 +224,9 @@ func (r *CaseValidationRecord) fetchCodeInfos() error {
 	if err := r.fetchOnsetCodes(); err != nil {
 		return fmt.Errorf("failed to retrieve onset codes: %w", err)
 	}
+	if err := r.fetchTaskTypeCodes(); err != nil {
+		return fmt.Errorf("failed to retrieve task type codes: %w", err)
+	}
 	return nil
 }
 
