@@ -4138,12 +4138,6 @@ export interface UserPreference {
      * @memberof UserPreference
      */
     'key': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UserPreference
-     */
-    'user_id': string;
 }
 /**
  * 

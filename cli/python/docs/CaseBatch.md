@@ -19,7 +19,7 @@ Name | Type | Description | Notes
 **resolution_status_code** | **str** |  | [optional] 
 **sequencing_experiments** | [**List[CaseSequencingExperimentBatch]**](CaseSequencingExperimentBatch.md) |  | 
 **status_code** | **str** |  | 
-**submitter_case_id** | **str** |  | 
+**submitter_case_id** | **str** |  | [optional] 
 **tasks** | [**List[CaseTaskBatch]**](CaseTaskBatch.md) |  | 
 **type** | **str** |  | 
 

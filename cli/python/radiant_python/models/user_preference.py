@@ -28,8 +28,7 @@ class UserPreference(BaseModel):
     """ # noqa: E501
     content: Dict[str, Any]
     key: StrictStr
-    user_id: StrictStr
-    __properties: ClassVar[List[str]] = ["content", "key", "user_id"]
+    __properties: ClassVar[List[str]] = ["content", "key"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -83,8 +82,7 @@ class UserPreference(BaseModel):
 
         _obj = cls.model_validate({
             "content": obj.get("content"),
-            "key": obj.get("key"),
-            "user_id": obj.get("user_id")
+            "key": obj.get("key")
         })
         return _obj
 
