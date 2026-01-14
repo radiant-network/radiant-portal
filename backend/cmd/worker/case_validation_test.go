@@ -25,8 +25,7 @@ type CaseValidationMockRepo struct {
 }
 
 func (m *CaseValidationMockRepo) GetTaskContextBySequencingExperimentId(seqExpId int) ([]*repository.TaskContext, error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, nil
 }
 
 func (m *CaseValidationMockRepo) CreateTask(task *repository.Task) error {
@@ -940,6 +939,7 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 	mockContext := BatchValidationContext{
 		SeqExpRepo: &mockRepo,
 		DocRepo:    &mockRepo,
+		TaskRepo:   &mockRepo,
 	}
 
 	record := CaseValidationRecord{
@@ -974,6 +974,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 	mockContext := BatchValidationContext{
 		SeqExpRepo: &mockRepo,
 		DocRepo:    &mockRepo,
+		TaskRepo:   &mockRepo,
 	}
 
 	record := CaseValidationRecord{
@@ -1004,6 +1005,7 @@ func Test_fetchFromTasks_SeqExpError(t *testing.T) {
 	mockContext := BatchValidationContext{
 		SeqExpRepo: &mockRepo,
 		DocRepo:    &mockRepo,
+		TaskRepo:   &mockRepo,
 	}
 
 	record := CaseValidationRecord{
@@ -1031,6 +1033,7 @@ func Test_fetchValidationInfos_OK(t *testing.T) {
 		PatientRepo: &mockRepo,
 		SeqExpRepo:  &mockRepo,
 		OrgRepo:     &mockRepo,
+		TaskRepo:    &mockRepo,
 	}
 	caseBatch := types.CaseBatch{}
 	caseBatch.ProjectCode = "PROJ-1"
@@ -3712,6 +3715,317 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 	assert.Equal(t, "case[0].sequencing_experiments[1]", record.Errors[0].Path)
 }
 
+// -----------------------------------------------------------------------------
+// Section: Tasks Validation Tests
+// -----------------------------------------------------------------------------
+
+func Test_validateTaskTextField_OK(t *testing.T) {
+	record := CaseValidationRecord{}
+	regex := regexp.MustCompile("^[a-zA-Z0-9]+$")
+	record.validateTaskTextField("validText123", "test_field", 0, regex, true)
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateTaskTextField_RegexError(t *testing.T) {
+	record := CaseValidationRecord{}
+	regex := regexp.MustCompile("^[a-zA-Z0-9]+$")
+	record.validateTaskTextField("validText123!", "test_field", 0, regex, true)
+
+	expected := types.BatchMessage{
+		Code:    "TASK-001",
+		Message: "Invalid Field test_field for case 0 - task 0. Reason: does not match the regular expression `^[a-zA-Z0-9]+$`.",
+		Path:    "case[0].tasks[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
+func Test_validateTaskTextField_LengthError(t *testing.T) {
+	record := CaseValidationRecord{}
+	regex := regexp.MustCompile("^[a-zA-Z0-9]+$")
+	record.validateTaskTextField(strings.Repeat("a", 101), "test_field", 0, regex, true)
+
+	expected := types.BatchMessage{
+		Code:    "TASK-001",
+		Message: "Invalid Field test_field for case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
+		Path:    "case[0].tasks[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
+func Test_validateTaskAliquot_OK(t *testing.T) {
+	record := CaseValidationRecord{
+		Case: types.CaseBatch{
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
+				{
+					Aliquot: "ALIQUOT-1",
+				},
+			},
+			Tasks: []*types.CaseTaskBatch{
+				{
+					Aliquot: "ALIQUOT-1",
+				},
+			},
+		},
+	}
+	record.validateTaskAliquot(0)
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateTaskAliquot_Error(t *testing.T) {
+	record := CaseValidationRecord{
+		Case: types.CaseBatch{
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
+				{
+					Aliquot: "ALIQUOT-2",
+				},
+			},
+			Tasks: []*types.CaseTaskBatch{
+				{
+					Aliquot: "ALIQUOT-1",
+				},
+			},
+		},
+	}
+	record.validateTaskAliquot(0)
+
+	expected := types.BatchMessage{
+		Code:    "TASK-002",
+		Message: "Sequencing aliquot \"ALIQUOT-1\" is not defined for case 0 - task 0.",
+		Path:    "case[0].tasks[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
+func Test_validateTaskDocuments_OK(t *testing.T) {
+	record := CaseValidationRecord{
+		Documents: map[string]*types.Document{
+			"s3://input/foo/bar.txt": {},
+		},
+		TaskContexts: map[int][]*types.TaskContext{
+			0: {{TaskID: 0, SequencingExperimentID: 0}},
+		},
+		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
+		Case: types.CaseBatch{
+			Tasks: []*types.CaseTaskBatch{
+				{
+					InputDocuments: []*types.InputDocumentBatch{
+						{
+							Url: "s3://input/foo/bar.txt",
+						},
+					},
+					OutputDocuments: []*types.OutputDocumentBatch{
+						{
+							Url: "s3://output/foo/bar.txt",
+						},
+					},
+				},
+			},
+		},
+	}
+	record.validateTaskDocuments(record.Case.Tasks[0], 0)
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateTaskDocuments_MissingInputDocuments_OK(t *testing.T) {
+	record := CaseValidationRecord{
+		Documents: map[string]*types.Document{
+			"s3://input/foo/bar.txt": {},
+		},
+		TaskContexts: map[int][]*types.TaskContext{
+			0: {{TaskID: 0, SequencingExperimentID: 0}},
+		},
+		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
+		Case: types.CaseBatch{
+			Tasks: []*types.CaseTaskBatch{
+				{
+					TypeCode: "alignment",
+					OutputDocuments: []*types.OutputDocumentBatch{
+						{
+							Url: "s3://output/foo/bar.txt",
+						},
+					},
+				},
+			},
+		},
+	}
+	record.validateTaskDocuments(record.Case.Tasks[0], 0)
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Len(t, record.Errors, 0)
+}
+
+func Test_validateTaskDocuments_MissingInputDocumentsError(t *testing.T) {
+	record := CaseValidationRecord{
+		Documents: map[string]*types.Document{
+			"s3://input/foo/bar.txt": {},
+		},
+		TaskContexts: map[int][]*types.TaskContext{
+			0: {{TaskID: 0, SequencingExperimentID: 0}},
+		},
+		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
+		Case: types.CaseBatch{
+			Tasks: []*types.CaseTaskBatch{
+				{
+					TypeCode: "family_variant_calling",
+					OutputDocuments: []*types.OutputDocumentBatch{
+						{
+							Url: "s3://output/foo/bar.txt",
+						},
+					},
+				},
+			},
+		},
+	}
+	record.validateTaskDocuments(record.Case.Tasks[0], 0)
+
+	expected := types.BatchMessage{
+		Code:    "TASK-003",
+		Message: "Missing input documents for case 0 - task 0 of type family_variant_calling.",
+		Path:    "case[0].tasks[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
+func Test_validateTaskDocuments_MissingOutputDocumentsError(t *testing.T) {
+	record := CaseValidationRecord{
+		Documents: map[string]*types.Document{
+			"s3://input/foo/bar.txt": {},
+		},
+		TaskContexts: map[int][]*types.TaskContext{
+			0: {{TaskID: 0, SequencingExperimentID: 0}},
+		},
+		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
+		Case: types.CaseBatch{
+			Tasks: []*types.CaseTaskBatch{
+				{
+					TypeCode: "family_variant_calling",
+					InputDocuments: []*types.InputDocumentBatch{
+						{
+							Url: "s3://input/foo/bar.txt",
+						},
+					},
+				},
+			},
+		},
+	}
+	record.validateTaskDocuments(record.Case.Tasks[0], 0)
+
+	expected := types.BatchMessage{
+		Code:    "TASK-004",
+		Message: "Missing output documents for case 0 - task 0 of type family_variant_calling.",
+		Path:    "case[0].tasks[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
+func Test_validateTaskDocuments_InputDocumentDoesNotExistsError(t *testing.T) {
+	record := CaseValidationRecord{
+		Documents: map[string]*types.Document{
+			"s3://input/foo/bar.txt": {},
+		},
+		TaskContexts: map[int][]*types.TaskContext{
+			0: {{TaskID: 0, SequencingExperimentID: 0}},
+		},
+		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
+		Case: types.CaseBatch{
+			Tasks: []*types.CaseTaskBatch{
+				{
+					TypeCode: "family_variant_calling",
+					InputDocuments: []*types.InputDocumentBatch{
+						{
+							Url: "s3://input/notfoo/bar.txt",
+						},
+					},
+					OutputDocuments: []*types.OutputDocumentBatch{
+						{
+							Url: "s3://output/foo/bar.txt",
+						},
+					},
+				},
+			},
+		},
+	}
+	record.validateTaskDocuments(record.Case.Tasks[0], 0)
+
+	expected := types.BatchMessage{
+		Code:    "TASK-005",
+		Message: "Input document with URL s3://input/notfoo/bar.txt does not exist for case 0 - task 0.",
+		Path:    "case[0].tasks[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
+func Test_validateTaskDocuments_InputDocumentExternalSeqExpError(t *testing.T) {
+	record := CaseValidationRecord{
+		Documents: map[string]*types.Document{
+			"s3://input/foo/bar.txt": {Url: "s3://input/foo/bar.txt"},
+		},
+		TaskContexts: map[int][]*types.TaskContext{
+			0: {{TaskID: 0, SequencingExperimentID: 22}},
+		},
+		DocumentsInTasks: map[string][]*DocumentRelation{
+			"s3://input/foo/bar.txt": {{TaskID: 0, Type: "output"}},
+		},
+		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
+		Case: types.CaseBatch{
+			Tasks: []*types.CaseTaskBatch{
+				{
+					TypeCode: "family_variant_calling",
+					InputDocuments: []*types.InputDocumentBatch{
+						{
+							Url: "s3://input/foo/bar.txt",
+						},
+					},
+					OutputDocuments: []*types.OutputDocumentBatch{
+						{
+							Url: "s3://output/foo/bar.txt",
+						},
+					},
+				},
+			},
+		},
+	}
+	record.validateTaskDocuments(record.Case.Tasks[0], 0)
+
+	expected := types.BatchMessage{
+		Code:    "TASK-006",
+		Message: "Input document with URL s3://input/foo/bar.txt for case 0 - task 0 was produced by a sequencing experiment that is not defined in this case.",
+		Path:    "case[0].tasks[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
+// -----------------------------------------------------------------------------
+// Section: Documents Validation Tests
+// -----------------------------------------------------------------------------
+
 func Test_validateExistingDocument_IdenticalMatch(t *testing.T) {
 	mockContext := BatchValidationContext{}
 	record := CaseValidationRecord{
@@ -3828,7 +4142,7 @@ func Test_validateDocumentTextField_RegexError(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, record.Errors[0], types.BatchMessage{
 		Code:    "DOCUMENT-001",
-		Message: "Invalid Field test_field for case 0 - task 0 - output document 1. Reason: does not match the regular expression ^[a-zA-Z0-9 ]+$.",
+		Message: "Invalid Field test_field for case 0 - task 0 - output document 1. Reason: does not match the regular expression `^[a-zA-Z0-9 ]+$`.",
 		Path:    "case[0].tasks[0].documents[1]",
 	})
 }

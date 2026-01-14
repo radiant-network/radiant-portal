@@ -418,7 +418,7 @@ func (cr *CaseValidationRecord) fetchValidationInfos() error {
 
 func (cr *CaseValidationRecord) validateRegexPattern(path, value, code, message string, regExp *regexp.Regexp) {
 	if regExp != nil && !regExp.MatchString(value) {
-		cr.addErrors(fmt.Sprintf("%s does not match the regular expression %s.", message, regExp.String()), code, path)
+		cr.addErrors(fmt.Sprintf("%s does not match the regular expression `%s`.", message, regExp.String()), code, path)
 	}
 }
 
@@ -451,7 +451,7 @@ func (cr *CaseValidationRecord) formatTaskDocumentFieldErrorMessage(fieldName st
 }
 
 func (cr *CaseValidationRecord) formatTaskFieldErrorMessage(fieldName string, caseIndex, taskIndex int) string {
-	return fmt.Sprintf("Invalid Field %s for case %d - task %d . Reason: ", fieldName, caseIndex, taskIndex)
+	return fmt.Sprintf("Invalid Field %s for case %d - task %d. Reason:", fieldName, caseIndex, taskIndex)
 }
 
 func (cr *CaseValidationRecord) formatFieldPath(entityType string, entityIndex *int, collectionName string, collectionIndex *int) string {
@@ -854,8 +854,8 @@ func (cr *CaseValidationRecord) validateTaskTextField(fieldValue, fieldName stri
 		return
 	}
 	msg := cr.formatTaskFieldErrorMessage(fieldName, cr.Index, taskIndex)
-	cr.validateRegexPattern(path, fieldValue, DocumentInvalidField, msg, regExp)
-	cr.validateTextLength(path, fieldValue, DocumentInvalidField, msg, TextMaxLength)
+	cr.validateRegexPattern(path, fieldValue, TaskInvalidField, msg, regExp)
+	cr.validateTextLength(path, fieldValue, TaskInvalidField, msg, TextMaxLength)
 }
 
 func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
@@ -869,19 +869,19 @@ func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 	cr.addErrors(message, TaskUnknownAliquot, path)
 }
 
-func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch) {
-	path := cr.formatFieldPath("tasks", nil, "input_documents", nil)
+func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch, taskIndex int) {
+	path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
 
 	if _, ok := RequiresInputDocumentsTaskTypes[task.TypeCode]; ok {
 		if len(task.InputDocuments) == 0 {
-			message := fmt.Sprintf("Missing input documents for case %d - task %d of type %s.", cr.Index, task.TypeCode)
+			message := fmt.Sprintf("Missing input documents for case %d - task %d of type %s.", cr.Index, taskIndex, task.TypeCode)
 			cr.addErrors(message, TaskMissingInputDocuments, path)
 			return
 		}
 	}
 
 	if len(task.OutputDocuments) == 0 {
-		message := fmt.Sprintf("Missing output documents for case %d - task %d of type %s.", cr.Index, task.TypeCode)
+		message := fmt.Sprintf("Missing output documents for case %d - task %d of type %s.", cr.Index, taskIndex, task.TypeCode)
 		cr.addErrors(message, TaskMissingOutputDocuments, path)
 		return
 	}
@@ -889,7 +889,7 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch)
 	for _, indoc := range task.InputDocuments {
 		doc, exists := cr.Documents[indoc.Url]
 		if !exists {
-			message := fmt.Sprintf("Input document with URL %s does not exist for case %d - task %s.", indoc.Url, cr.Index, task.TypeCode)
+			message := fmt.Sprintf("Input document with URL %s does not exist for case %d - task %d.", indoc.Url, cr.Index, taskIndex)
 			cr.addErrors(message, TaskInputDocumentNotFound, path)
 			continue
 		}
@@ -912,8 +912,8 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch)
 			for _, tc := range taskContexts {
 				_, experimentExists := cr.SequencingExperiments[tc.SequencingExperimentID]
 				if !experimentExists {
-					message := fmt.Sprintf("Input document with URL %s for case %d - task %s was produced by a sequencing experiment (%s) not defined in this case.",
-						indoc.Url, cr.Index, task.TypeCode, tc.SequencingExperimentID)
+					message := fmt.Sprintf("Input document with URL %s for case %d - task %d was produced by a sequencing experiment that is not defined in this case.",
+						indoc.Url, cr.Index, taskIndex)
 					cr.addErrors(message, TaskInputDocumentNotInSequencingExperiments, path)
 				}
 			}
@@ -930,7 +930,7 @@ func (cr *CaseValidationRecord) validateTasks() error {
 		cr.validateTaskTextField(task.PipelineName, "pipeline_name", taskIndex, TextRegExpCompiled, true)
 
 		cr.validateTaskAliquot(taskIndex)
-		cr.validateTaskDocuments(task)
+		cr.validateTaskDocuments(task, taskIndex)
 	}
 	return nil
 }
