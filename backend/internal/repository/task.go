@@ -22,10 +22,13 @@ type TaskDAO interface {
 	CreateTaskContext(tc *TaskContext) error
 	CreateTaskHasDocument(thd *TaskHasDocument) error
 
+	GetTaskTypeCodes() ([]types.TaskType, error)
+
 	GetTaskById(taskId int) (*Task, error)
 	GetTaskContextByTaskId(taskId int) ([]*TaskContext, error)
 	GetTaskHasDocumentByTaskId(taskId int) ([]*TaskHasDocument, error)
 	GetTaskHasDocumentByDocumentId(documentId int) ([]*TaskHasDocument, error)
+	GetTaskContextBySequencingExperimentId(seqExpId int) ([]*TaskContext, error)
 }
 
 func NewTaskRepository(db *gorm.DB) *TaskRepository {
@@ -46,6 +49,14 @@ func (r *TaskRepository) CreateTaskContext(tc *TaskContext) error {
 
 func (r *TaskRepository) CreateTaskHasDocument(thd *TaskHasDocument) error {
 	return r.db.Create(thd).Error
+}
+
+func (r *TaskRepository) GetTaskTypeCodes() ([]types.TaskType, error) {
+	var taskTypeCodes []types.TaskType
+	if err := r.db.Table(types.TaskTypeTable.Name).Find(&taskTypeCodes).Error; err != nil {
+		return nil, fmt.Errorf("error while fetching task type codes: %w", err)
+	}
+	return taskTypeCodes, nil
 }
 
 func (r *TaskRepository) GetTaskById(taskId int) (*Task, error) {
@@ -80,6 +91,17 @@ func (r *TaskRepository) GetTaskHasDocumentByTaskId(taskId int) ([]*TaskHasDocum
 		return nil, nil
 	}
 	return thd, nil
+}
+
+func (r *TaskRepository) GetTaskContextBySequencingExperimentId(seqExpId int) ([]*TaskContext, error) {
+	var tc []*TaskContext
+	if err := r.db.Table(types.TaskContextTable.Name).Where("sequencing_experiment_id = ?", seqExpId).Find(&tc).Error; err != nil {
+		return nil, err
+	}
+	if len(tc) == 0 {
+		return nil, nil
+	}
+	return tc, nil
 }
 
 func (r *TaskRepository) GetTaskHasDocumentByDocumentId(documentId int) ([]*TaskHasDocument, error) {

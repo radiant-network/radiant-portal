@@ -131,6 +131,15 @@ func Test_CreateTaskHasDocument_NilError(t *testing.T) {
 	})
 }
 
+func Test_GetTaskTypeCodes(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewTaskRepository(db)
+		result, err := repo.GetTaskTypeCodes()
+		assert.NoError(t, err)
+		assert.Greater(t, len(result), 0)
+	})
+}
+
 func Test_GetTaskHasDocumentByTaskId_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
@@ -163,6 +172,51 @@ func Test_GetTaskHasDocumentByDocumentId_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
 		result, err := repo.GetTaskHasDocumentByDocumentId(999999)
+		assert.NoError(t, err)
+		assert.Nil(t, result)
+	})
+}
+
+func Test_GetTaskContextBySequencingExperimentId_OK(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewTaskRepository(db)
+		result, err := repo.GetTaskContextBySequencingExperimentId(1)
+
+		caseId := 1
+
+		expected := []*types.TaskContext{
+			{
+				CaseID:                 nil,
+				TaskID:                 1,
+				SequencingExperimentID: 1,
+			},
+			{
+				CaseID:                 &caseId,
+				TaskID:                 4,
+				SequencingExperimentID: 1,
+			},
+			{
+				CaseID:                 &caseId,
+				TaskID:                 5,
+				SequencingExperimentID: 1,
+			},
+			{
+				CaseID:                 &caseId,
+				TaskID:                 6,
+				SequencingExperimentID: 1,
+			},
+		}
+
+		assert.NoError(t, err)
+		assert.Len(t, result, 4)
+		assert.Equal(t, expected, result)
+	})
+}
+
+func Test_GetTaskContextBySequencingExperimentId_NotFound(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewTaskRepository(db)
+		result, err := repo.GetTaskContextBySequencingExperimentId(999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
