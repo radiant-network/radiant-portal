@@ -14,6 +14,10 @@ const sidebar: SidebarsConfig = {
             type: "doc",
             id: "technical-guide/api/clients",
         },
+        {
+            type: "doc",
+            id: "technical-guide/api/case_creation",
+        },
     ]
 }
 

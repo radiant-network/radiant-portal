@@ -1,0 +1,114 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
+# Case creation
+
+## Batch API
+
+
+```mermaid
+sequenceDiagram
+    participant Script as External Service
+    participant KC as Keycloak
+    participant API as Radiant API
+
+    Script->>KC: POST /token (grant_type=client_credentials<br>client_id + client_secret)
+    KC-->>Script: 200 OK (access_token)
+    Script->>+API: POST /patient/batch (Authorization: Bearer token)
+    API-->>Script: 202 {"id": "abcd-1234-efgh-5678", "status": "PENDING"}
+    API-->>API: Validate data
+    loop Polling for case creation status
+		Script->>+API: GET /batch/abcd-1234-efgh-5678 (Authorization: Bearer token)
+    	API-->>-Script: 200 {"id": "abcd-1234-efgh-5678", "status": "PENDING"}
+	end
+	API-->>-API: Insert into database
+	Script->>+API: GET /batch/abcd-1234-efgh-5678 (Authorization: Bearer token)
+	API-->>-Script: 200 {"id": "abcd-1234-efgh-5678", "status": "SUCCESS"}
+	```
+
+## Create a batch of patient
+
+<Tabs groupId="languages">
+<TabItem value="bash" label="Bash + cURL">
+```bash
+curl -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=<CLIENT_ID>" \
+  -d "client_secret=<CLIENT_SECRET>" \
+  -d "grant_type=client_credentials" \
+  https://<AUTH_SERVER>/realms/<REALM>/protocol/openid-connect/token
+```
+</TabItem>
+<TabItem value="python" label="Python + requests">
+```python
+from radiant_python import CreatePatientBatchBody, PatientBatch, GetBatchResponse
+from radiant_python.rest import ApiException
+
+token_url = "http://localhost:8282/realms/Radiant/protocol/openid-connect/token"
+data = {
+    "client_id": "radiant-cli",
+    "client_secret": "This1sMyS3cr3t!",
+    "grant_type": "client_credentials"
+}
+response = requests.post(token_url, data=data)
+
+token = response.json()["access_token"]
+print("JWT Token:", token)
+expires_in = response.json()["expires_in"]
+print("Expires in:", expires_in, "seconds")
+
+configuration = radiant_python.Configuration(
+    host="http://localhost:8090",
+    access_token=token
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    try:
+        # Create batch of patients
+        body = CreatePatientBatchBody(patients=[
+            PatientBatch(
+                date_of_birth=datetime.date(2025, 11, 12),
+                patient_organization_code="CHOP",
+                submitter_patient_id="PA001",
+                submitter_patient_id_type="mrn",
+                sex_code="female",
+                first_name="Jan",
+                last_name="Doe",
+                life_status_code="alive"
+            ),
+            PatientBatch(
+                date_of_birth=datetime.date(1999, 1, 9),
+                patient_organization_code="CHOP",
+                submitter_patient_id="PA002",
+                submitter_patient_id_type="mrn",
+                sex_code="male",
+                first_name="John",
+                last_name="Doe",
+                life_status_code="alive"
+            ),
+        ])
+        create_patient_response = radiant_python.PatientsApi(api_client).post_patient_batch(
+            create_patient_batch_body=body, dry_run=False)
+
+        print("The response of PatientApi->post_patient_batch:\n")
+        pprint(create_patient_response)
+        status = create_patient_response.status
+        batch_id = create_patient_response.id
+        batch_response: Optional[GetBatchResponse] = None
+        while status == "PROCESSING" or status == "PENDING":
+            batch_response = radiant_python.BatchesApi(api_client).get_batch(batch_id=batch_id)
+            status = batch_response.status
+            print(f"Batch {batch_id} status: {status}")
+            time.sleep(2)
+
+        print(batch_response.summary)
+        print(batch_response.report)
+
+    except ApiException as e:
+        print("Exception when calling PatientApi->post_patient_batch: %s\n" % e)
+
+```
+</TabItem>
+</Tabs>
