@@ -891,6 +891,7 @@
       "quality_tooltip": "CNV Quality",
       "start": "Start",
       "symbol": "Gene",
+      "symbols": "Genes",
       "symbol_overlapping": "Gene",
       "symbol_tooltip": "List of genes overlapped by CNV",
       "type": "Type",

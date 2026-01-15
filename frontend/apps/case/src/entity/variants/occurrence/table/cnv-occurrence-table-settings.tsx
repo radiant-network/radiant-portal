@@ -25,7 +25,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
         </OverlappingGeneLinkCell>
       ),
       header: () => (
-        <TooltipHeader tooltip={t('variant.headers.symbol_tooltip')}>{t('variant.headers.symbol')}</TooltipHeader>
+        <TooltipHeader tooltip={t('variant.headers.symbol_tooltip')}>{t('variant.headers.symbols')}</TooltipHeader>
       ),
       size: 124,
       minSize: 40,
