@@ -97,7 +97,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
 
   if (isFamilyCase && members.length > 1) {
     return (
-      <Card {...props}>
+      <Card data-cy="patient-information-card" {...props}>
         <CardHeader className="border-b [.border-b]:pb-2">
           <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
         </CardHeader>
@@ -124,7 +124,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
   // Solo case or family case with only one member - show the first member only
   const firstMember = members[0];
   return (
-    <Card {...props}>
+    <Card data-cy="patient-information-card" {...props}>
       <CardHeader className="border-b [.border-b]:pb-2">
         <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
       </CardHeader>

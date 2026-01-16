@@ -11,7 +11,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
   const isEmpty = !data?.clinvar_name && !data?.locus && !data?.rsnumber;
 
   return (
-    <Card {...props}>
+    <Card data-cy="external-references-card" {...props}>
       <CardHeader className="flex flex-row justify-between pb-0">
         <div className="font-semibold">{t('variant_entity.overview.external_references')}</div>
       </CardHeader>

@@ -247,7 +247,7 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
 
   return (
     <>
-      <Card {...props}>
+      <Card data-cy="prediction-scores-card" {...props}>
         <CardHeader className="flex flex-row justify-between pb-0">
           <div className="font-semibold">{t('variant_entity.overview.prediction_scores')}</div>
           {hasAnyPredictionScores && (

@@ -4,7 +4,7 @@ import { getUrlLink, stringToRegExp } from 'pom/shared/Utils';
 import { getColumnName, getColumnPosition } from 'pom/shared/Utils';
 
 const selectors = {
-  tab: '[class*= "lucide-clipboard-list"]',
+  tab: '[data-cy="files-tab"]',
   tableCell: (dataFile: any) => `${CommonSelectors.tableRow()}:contains("${dataFile.name}") ${CommonSelectors.tableCellData}`,
 };
 

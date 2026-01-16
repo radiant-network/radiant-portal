@@ -101,12 +101,12 @@ export default function App() {
         <Header data={data} isLoading={isLoading} />
         <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
           <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
-            <TabsListItem value={CaseEntityTabs.Details}>
+            <TabsListItem data-cy="details-tab" value={CaseEntityTabs.Details}>
               <ClipboardList />
               {t('case_entity.details.title')}
             </TabsListItem>
             {hasVariants ? (
-              <TabsListItem value={CaseEntityTabs.Variants}>
+              <TabsListItem data-cy="variants-tab" value={CaseEntityTabs.Variants}>
                 <AudioWaveform />
                 {t('case_entity.variants.title')}
               </TabsListItem>
@@ -121,7 +121,7 @@ export default function App() {
                 <TooltipContent>{t('case_entity.details.no_variants')}</TooltipContent>
               </Tooltip>
             )}
-            <TabsListItem value={CaseEntityTabs.Files}>
+            <TabsListItem data-cy="files-tab" value={CaseEntityTabs.Files}>
               <FileIcon />
               {t('case_entity.files.title')}
             </TabsListItem>

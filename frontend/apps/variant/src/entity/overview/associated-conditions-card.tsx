@@ -11,7 +11,7 @@ function AssociatedConditionsCard({ data, ...props }: { data: VariantOverview } 
   const isEmpty = !data?.omim_conditions?.length;
 
   return (
-    <Card {...props}>
+    <Card data-cy="associated-conditions-card" {...props}>
       <CardHeader className="flex flex-row justify-between pb-0">
         <div className="font-semibold">{t('variant_entity.overview.associated_conditions_omim')}</div>
       </CardHeader>

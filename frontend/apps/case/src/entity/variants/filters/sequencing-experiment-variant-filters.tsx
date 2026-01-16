@@ -127,6 +127,7 @@ function SequencingVariantFilters({
               key={variant}
               value={variant}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
+              data-cy={`tabs-trigger-${variant}`}
               onClick={() => onActiveInterfaceChange(variant)}
             >
               {t(`case_entity.variants.filters.${variant.toLowerCase()}`)}

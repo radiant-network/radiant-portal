@@ -96,12 +96,18 @@ export default function App() {
       <PageHeader isLoading={isLoading} title={data?.hgvsg} badges={pageHeaderBadges} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
-          <TabsListItem value={VariantEntityTabs.Overview}>{t('variant_entity.overview.title')}</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.EvidenceAndConditions}>
+          <TabsListItem data-cy="overview-tab" value={VariantEntityTabs.Overview}>
+            {t('variant_entity.overview.title')}
+          </TabsListItem>
+          <TabsListItem data-cy="evidence-tab" value={VariantEntityTabs.EvidenceAndConditions}>
             {t('variant_entity.evidence.title')}
           </TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Transcripts}>{t('variant_entity.transcripts.title')}</TabsListItem>
-          <TabsListItem value={VariantEntityTabs.Cases}>{t('variant_entity.cases.tab')}</TabsListItem>
+          <TabsListItem data-cy="transcripts-tab" value={VariantEntityTabs.Transcripts}>
+            {t('variant_entity.transcripts.title')}
+          </TabsListItem>
+          <TabsListItem data-cy="cases-tab" value={VariantEntityTabs.Cases}>
+            {t('variant_entity.cases.tab')}
+          </TabsListItem>
         </TabsList>
         <div className="px-0 sm:px-3">
           <Container>
