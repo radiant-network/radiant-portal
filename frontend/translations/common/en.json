@@ -1554,12 +1554,13 @@
         "headers": {
           "case": "Case",
           "date": "Date",
-          "date.tooltip": "Last intepretation date",
+          "date_tooltip": "Last intepretation date",
           "mondo": "Condition (Mondo)",
           "classification": "Classification",
           "zygosity": "Zygosity",
           "inheritance": "Inheritance",
           "institution": "Diagnostic Lab",
+          "institution_tooltip": "Molecular diagnostic laboratory",
           "test": "Analysis",
           "status": "Status"
         },
@@ -1578,18 +1579,20 @@
         "headers": {
           "case": "Case",
           "date": "Date",
-          "date.tooltip": "Date received",
+          "date_tooltip": "Last interpretation date",
           "mondo": "Condition (Mondo)",
           "phenotypes_hpo": "Phenotype (HPO)",
           "zygosity": "Zygosity",
           "inheritance": "Inheritance",
           "institution": "Diagnostic Lab",
+          "institution_tooltip": "Molecular diagnostic laboratory",
           "test": "Analysis",
           "status": "Status",
           "zygosity_tooltip": "Zygosity",
           "seq_id": "Sequencing",
           "patient_id": "Patient",
           "affected_status": "Aff. Status",
+          "affected_status_tooltip": "Affected Status",
           "sample": "Sample"
         },
         "filters": {
@@ -1622,7 +1625,7 @@
     }
   },
   "occurrence": {
-    "canonical": "Canonical",
+    "canonical": "Canonical transcript",
     "mane_select": "Mane Select",
     "mane_plus": "Mane Plus"
   },

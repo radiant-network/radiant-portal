@@ -357,6 +357,7 @@
       "select_language": "Choisir une langue",
       "collapse_all": "Réduire tout",
       "expand_all": "Développer tout",
+      "see_less": "Moins",
       "see_more": "Plus",
       "clear": "Effacer",
       "copy": "Copier dans le presse-papiers",
@@ -907,10 +908,10 @@
       "litvar": "LitVar"
     },
     "splice_ai": {
-      "AG": "Acceptor Gain",
-      "AL": "Acceptor Loss",
-      "DG": "Donor Gain",
-      "DL": "Donor Loss"
+      "AG": "Gain du site accepteur",
+      "AL": "Perte du site accepteur",
+      "DG": "Gain du site donneur",
+      "DL": "Perte du site donneur"
     },
     "interpretation": {
       "tooltip": {
@@ -1418,7 +1419,7 @@
       "germline": "Germinal"
     },
     "overview": {
-      "title": "Aperçu",
+      "title": "Résumé",
       "interpretation": "Interprétation",
       "my_network": "Mon Réseau",
       "classification": "Classifications",
@@ -1428,9 +1429,9 @@
       "consequence": "Conséquence",
       "clin_var": "ClinVar",
       "patients": "Patients",
-      "patients_tooltip": "Nombre de patients affectés et fréquence dans Mon Organisation",
+      "patients_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
       "gnom_ad": "gnomAD",
-      "gnom_ad_info_tooltip": "gnomAD Génome 3.1.2 (fréquence allélique)",
+      "gnom_ad_info_tooltip": "gnomAD Genome 3.1.2 (fréquence allélique)",
       "exon": "Exon",
       "most_deleterious_consequence_notice": "Ce transcrit a été sélectionné car il représente la conséquence la plus délétère.",
       "view_all_transcripts": "Voir tous les transcrits",
@@ -1465,13 +1466,13 @@
         "table": {
           "headers": {
             "evaluated": "Évalué",
-            "evaluated.tooltip": "Date de la dernière soumission pour ce variant/condition",
+            "evaluated.tooltip": "Soumission la plus récente pour cette combinaison de variant/condition",
             "condition": "Condition",
             "classification": "Classification",
             "submission_count": "Soumissions",
-            "submission_count.tooltip": "Nombre de soumissions pour ce variant/condition (RCV)",
-            "status": "Status",
-            "origin": "Origin"
+            "submission_count.tooltip": "Nombre d’interprétations soumises pour cette combinaison de variant/condition (RCV)",
+            "status": "Statut",
+            "origin": "Origine"
           }
         },
         "origin": {
@@ -1482,18 +1483,18 @@
           "not_applicable": "Non Applicable",
           "maternal": "Maternel",
           "uniparental": "Uniparental",
-          "tested_inconclusive": "Tested inconclusive",
+          "tested_inconclusive": "Tests non concluants",
           "de_novo": "DeNovo",
           "not_reported": "Non Reporté",
           "not_provided": "Non Fournie",
-          "unknown": "Inconnu",
+          "unknown": "Inconnue",
           "somatic": "Somatique"
         }
       },
       "gene": {
-        "title": "Affections et phénotypes associés par gène",
+        "title": "Conditions et phénotypes associés par gène",
         "filters": {
-          "search_placeholder": "Filtrer par condition ou phenotype",
+          "search_placeholder": "Filtrer par condition ou phénotype",
           "omim": "OMIM ({{count}})",
           "orphanet": "Orphanet ({{count}})",
           "hpo": "HPO ({{count}})"
@@ -1518,7 +1519,7 @@
     },
     "transcripts": {
       "title": "Transcrits",
-      "amino_acid_substitution": "Substitution d'acide aminé"
+      "amino_acid_substitution": "Substitution acide aminé"
     },
     "cases": {
       "title": "{{count}} Cas",
@@ -1535,10 +1536,10 @@
       },
       "common_filters": {
         "institutions": {
-          "all_institutions": "Tous les laboratoires de diagnostic"
+          "all_institutions": "Tous les lab. de diagnostic"
         },
         "tests": {
-          "all_tests": "Tous les analyses"
+          "all_tests": "Toutes les analyses"
         },
         "created_on": {
           "most_recent": "Plus récent",
@@ -1550,50 +1551,53 @@
         "completed": "Complété"
       },
       "interpreted_table": {
-        "title": "Cas interprétés ({{count}})",
+        "title": "Interprété ({{count}})",
         "headers": {
           "case": "Cas",
           "date": "Date",
-          "date.tooltip": "Date de dernière interprétation",
+          "date_tooltip": "Date de dernière interprétation",
           "mondo": "Condition (Mondo)",
           "classification": "Classification",
           "zygosity": "Zygosité",
           "inheritance": "Hérédité",
-          "institution": "laboratoires de diagnostic",
+          "institution": "Lab de diagnostic",
+          "institution_tooltip": "Laboratoire de diagnostic moléculaire",
           "test": "Analyse",
           "status": "Statut"
         },
         "filters": {
-          "label": "Conditions",
+          "label": "Condition",
           "search_input_placeholder": "Filtrer les conditions MONDO"
         },
         "expand": {
-          "patient_id": "ID du probant du cas",
+          "patient_id": "ID du proband du cas",
           "copy": "Copier",
           "copy_success": "Copié dans le presse-papiers"
         }
       },
       "other_table": {
-        "title": "Autres cas ({{count}})",
+        "title": "Non-interprété ({{count}})",
         "headers": {
           "case": "Cas",
           "date": "Date",
-          "date.tooltip": "Date de réception",
+          "date_tooltip": "Date de la dernière interprétation",
           "mondo": "Condition (Mondo)",
           "phenotypes_hpo": "Phénotype (HPO)",
           "zygosity": "Zygosité",
           "inheritance": "Hérédité",
-          "institution": "laboratoires de diagnostic",
+          "institution": "Lab de diagnostic",
+          "institution_tooltip": "Laboratoire de diagnostic moléculaire",
           "test": "Analyse",
           "status": "Statut",
           "zygosity_tooltip": "Zygosité",
           "seq_id": "Séquençage",
           "patient_id": "Patient",
           "affected_status": "Statut Aff.",
+          "affected_status_tooltip": "Statut affecté",
           "sample": "Échantillon"
         },
         "filters": {
-          "label": "Phénotypes",
+          "label": "Phénotype",
           "search_input_placeholder": "Filtrer les phénotypes HPO"
         }
       }
@@ -1622,7 +1626,7 @@
     }
   },
   "occurrence": {
-    "canonical": "Canonical",
+    "canonical": "Transcrit canonique",
     "mane_select": "Mane Select",
     "mane_plus": "Mane Plus"
   },

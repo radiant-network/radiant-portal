@@ -61,7 +61,7 @@ function ExpandableList({ visibleCount = 3, emptyMessage, items, size, onExpand,
       </ul>
       {showButton && (
         <Button variant="link" size="xs" className="px-0" onClick={handleExpand}>
-          {t(`common.${collapse ? 'seeMore' : 'seeLess'}`, {
+          {t(`common.actions.${collapse ? 'see_more' : 'see_less'}`, {
             defaultValue: collapse ? 'See more' : 'See less',
           })}
         </Button>

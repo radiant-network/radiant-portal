@@ -47,7 +47,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       id: 'interpretation_updated_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipHeader tooltip={t('variant_entity.cases.interpreted_table.headers.date.tooltip')}>
+        <TooltipHeader tooltip={t('variant_entity.cases.interpreted_table.headers.date_tooltip')}>
           {t('variant_entity.cases.interpreted_table.headers.date')}
         </TooltipHeader>
       ),
@@ -93,7 +93,11 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       cell: info => (
         <TextTooltipCell tooltipText={info.row.original.diagnosis_lab_name}>{info.getValue()}</TextTooltipCell>
       ),
-      header: t('variant_entity.cases.interpreted_table.headers.institution'),
+      header: () => (
+        <TooltipHeader tooltip={t('variant_entity.cases.interpreted_table.headers.institution_tooltip')}>
+          {t('variant_entity.cases.interpreted_table.headers.institution')}
+        </TooltipHeader>
+      ),
       minSize: 100,
       maxSize: 150,
       size: 120,

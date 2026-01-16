@@ -64,7 +64,11 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.affected_status, {
       id: 'affected_status',
       cell: info => <AffectedStatusCell status={info.getValue()} />,
-      header: t('variant_entity.cases.other_table.headers.affected_status'),
+      header: () => (
+        <TooltipHeader tooltip={t('variant_entity.cases.other_table.headers.affected_status_tooltip')}>
+          {t('variant_entity.cases.other_table.headers.affected_status')}
+        </TooltipHeader>
+      ),
       minSize: 80,
       maxSize: 150,
       size: 120,
@@ -74,7 +78,7 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
       id: 'created_on',
       cell: info => <DateCell date={info.getValue()} />,
       header: () => (
-        <TooltipHeader tooltip={t('variant_entity.cases.other_table.headers.date.tooltip')}>
+        <TooltipHeader tooltip={t('variant_entity.cases.other_table.headers.date_tooltip')}>
           {t('variant_entity.cases.other_table.headers.date')}
         </TooltipHeader>
       ),
@@ -119,7 +123,11 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
       cell: info => (
         <TextTooltipCell tooltipText={info.row.original.diagnosis_lab_name}>{info.getValue()}</TextTooltipCell>
       ),
-      header: t('variant_entity.cases.other_table.headers.institution'),
+      header: () => (
+        <TooltipHeader tooltip={t('variant_entity.cases.other_table.headers.institution_tooltip')}>
+          {t('variant_entity.cases.other_table.headers.institution')}
+        </TooltipHeader>
+      ),
       minSize: 100,
       maxSize: 150,
       size: 120,
@@ -194,14 +202,14 @@ const uninterpretedCasesDefaultSettings = createColumnSettings([
     label: 'variant.headers.test',
   },
   {
-    id: 'created_on',
-    visible: true,
-    label: 'variant.headers.date',
-  },
-  {
     id: 'status_code',
     visible: true,
     label: 'variant.headers.status',
+  },
+  {
+    id: 'created_on',
+    visible: true,
+    label: 'variant.headers.date',
   },
 ]);
 
