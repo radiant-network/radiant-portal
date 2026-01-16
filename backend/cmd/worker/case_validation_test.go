@@ -1745,11 +1745,11 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 	err := cr.validateCase()
 
 	assert.NoError(t, err)
-	assert.Len(t, cr.Errors, 1)
-	assert.Contains(t, cr.Errors[0].Message, "already exists")
-	assert.Equal(t, CaseAlreadyExists, cr.Errors[0].Code)
+	assert.Len(t, cr.Infos, 1)
+	assert.Contains(t, cr.Infos[0].Message, "already exists")
+	assert.Equal(t, CaseAlreadyExists, cr.Infos[0].Code)
 	assert.True(t, cr.Skipped)
-	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0]", cr.Infos[0].Path)
 }
 
 func Test_validateCase_MultipleErrors(t *testing.T) {
@@ -4204,7 +4204,7 @@ func Test_validateTaskDocumentOutputInBatch_OK(t *testing.T) {
 			},
 		},
 	}
-	task, doc := record.validateTaskDocumentOutputInBatch(record.Case.Tasks[1].InputDocuments[0].Url)
+	task, doc := record.getOriginTaskForInputDocument(record.Case.Tasks[1].InputDocuments[0].Url)
 	assert.NotNil(t, task)
 	assert.NotNil(t, doc)
 }
@@ -4239,7 +4239,7 @@ func Test_getAliquotFromInputDocuments_OK(t *testing.T) {
 	}
 	aliquot, err := record.getAliquotFromInputDocuments(record.Case.Tasks[1])
 	assert.NoError(t, err)
-	assert.Equal(t, "ALIQUOT-1", aliquot)
+	assert.Equal(t, []string{"ALIQUOT-1"}, aliquot)
 }
 
 // -----------------------------------------------------------------------------

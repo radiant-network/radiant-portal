@@ -824,6 +824,20 @@ func (cr *CaseValidationRecord) validateStatusCode() {
 func (cr *CaseValidationRecord) validateCase() error {
 	path := formatPath(cr, "")
 
+	// Validate case uniqueness in DB
+	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
+		c, err := cr.Context.CasesRepo.GetCaseBySubmitterCaseIdAndProjectId(cr.Case.SubmitterCaseId, *cr.ProjectID)
+		if err != nil {
+			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.Case.SubmitterCaseId, *cr.ProjectID, err)
+		}
+		if c != nil {
+			cr.Skipped = true
+			message := fmt.Sprintf("Case (%d / %s) already exists, skipped.", *cr.ProjectID, cr.Case.SubmitterCaseId)
+			cr.addInfos(message, CaseAlreadyExists, path) // CASE-001
+			return nil
+		}
+	}
+
 	// Validate data in DB
 	if cr.ProjectID == nil {
 		message := fmt.Sprintf("Project %s for case %d does not exist.", cr.Case.ProjectCode, cr.Index)
@@ -851,18 +865,6 @@ func (cr *CaseValidationRecord) validateCase() error {
 	cr.validateCaseField(cr.Case.Note, "note", path, TextRegExpCompiled, TextMaxLength, false)                                                // TODO: validate regex
 	cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, TextRegExpCompiled, TextMaxLength, false)                     // TODO: validate regex
 
-	// Validate case uniqueness in DB
-	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
-		c, err := cr.Context.CasesRepo.GetCaseBySubmitterCaseIdAndProjectId(cr.Case.SubmitterCaseId, *cr.ProjectID)
-		if err != nil {
-			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.Case.SubmitterCaseId, *cr.ProjectID, err)
-		}
-		if c != nil {
-			cr.Skipped = true
-			message := fmt.Sprintf("Case (%d / %s) already exists, skipped.", *cr.ProjectID, cr.Case.SubmitterCaseId)
-			cr.addErrors(message, CaseAlreadyExists, path) // CASE-001
-		}
-	}
 	return nil
 }
 
@@ -905,7 +907,7 @@ func (cr *CaseValidationRecord) validateExclusiveAliquotInputDocuments(task *typ
 	}
 }
 
-func (cr *CaseValidationRecord) validateTaskDocumentOutputInBatch(url string) (*types.CaseTaskBatch, *types.OutputDocumentBatch) {
+func (cr *CaseValidationRecord) getOriginTaskForInputDocument(url string) (*types.CaseTaskBatch, *types.OutputDocumentBatch) {
 	for _, task := range cr.Case.Tasks {
 		for _, outdoc := range task.OutputDocuments {
 			if outdoc.Url == url {
@@ -933,7 +935,7 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 
 	for _, indoc := range task.InputDocuments {
 		_, exists := cr.Documents[indoc.Url]
-		_, d := cr.validateTaskDocumentOutputInBatch(indoc.Url)
+		_, d := cr.getOriginTaskForInputDocument(indoc.Url)
 		exists = exists || (d != nil)
 
 		if !exists {
@@ -1070,7 +1072,7 @@ func (cr *CaseValidationRecord) validateDocumentMetadata(doc *types.OutputDocume
 	return nil
 }
 
-func (cr *CaseValidationRecord) validateDocumentDuplicateInBatch(doc *types.OutputDocumentBatch, path string) {
+func (cr *CaseValidationRecord) validateDocumentDuplicate(doc *types.OutputDocumentBatch, path string) {
 	if _, exists := cr.OutputDocuments[doc.Url]; exists {
 		msg := fmt.Sprintf("Duplicate output document with URL %s found.", doc.Url)
 		cr.addErrors(msg, DocumentDuplicateInBatch, path)
@@ -1107,43 +1109,40 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 			if err := cr.validateDocumentMetadata(doc, path, tid, did); err != nil {
 				return fmt.Errorf("error validating file metadata for case %d - document %d: %v", cr.Index, tid, err)
 			}
-			cr.validateDocumentDuplicateInBatch(doc, path)
+			cr.validateDocumentDuplicate(doc, path)
 		}
 	}
 	return nil
 }
 
-func (cr *CaseValidationRecord) getAliquotFromInputDocuments(task *types.CaseTaskBatch) (string, error) {
+func (cr *CaseValidationRecord) getAliquotFromInputDocuments(task *types.CaseTaskBatch) ([]string, error) {
 	validAliquots := make(map[string]struct{})
 	for _, se := range cr.SequencingExperiments {
 		validAliquots[se.Aliquot] = struct{}{}
 	}
-
-	var detectedAliquot string
-
+	var detectedAliquots []string
 	for _, idoc := range task.InputDocuments {
-		originTask, _ := cr.validateTaskDocumentOutputInBatch(idoc.Url)
+		originTask, _ := cr.getOriginTaskForInputDocument(idoc.Url)
 		if originTask == nil {
-			return "", fmt.Errorf("input document with URL %s not found in case output documents", idoc.Url)
+			return nil, fmt.Errorf("input document with URL %s not found in case output documents", idoc.Url)
 		}
 
 		if _, exists := validAliquots[originTask.Aliquot]; !exists {
 			continue
 		}
 
-		if detectedAliquot == "" {
-			detectedAliquot = originTask.Aliquot
-		} else if originTask.Aliquot != detectedAliquot {
-			return "", fmt.Errorf("mismatched aliquots found: expected %s but found %s",
-				detectedAliquot, originTask.Aliquot)
-		}
+		detectedAliquots = append(detectedAliquots, originTask.Aliquot)
 	}
 
-	if detectedAliquot == "" {
-		return "", fmt.Errorf("no sequencing experiments found for the provided input documents")
+	if len(detectedAliquots) == 0 {
+		return nil, fmt.Errorf("no sequencing experiments found for the provided input documents")
 	}
 
-	return detectedAliquot, nil
+	// Remove duplicates
+	slices.Sort(detectedAliquots)
+	detectedAliquots = slices.Compact(detectedAliquots)
+
+	return detectedAliquots, nil
 }
 
 func validateCaseRecord(
@@ -1165,6 +1164,9 @@ func validateCaseRecord(
 	// 1. Validate Case fields
 	if err := cr.validateCase(); err != nil {
 		return nil, fmt.Errorf("error during case validation: %v", err)
+	}
+	if cr.Skipped {
+		return cr, nil
 	}
 
 	// 2. Validate Case Patients
@@ -1395,30 +1397,35 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 		for _, se := range cr.SequencingExperiments {
 
 			// Aliquot must match to create TaskContext relationship with SequencingExperiment and Task
-			al := t.Aliquot
-			if al == "" {
-				al, err = cr.getAliquotFromInputDocuments(t)
+			var aliquots []string
+			if t.Aliquot != "" {
+				aliquots = []string{t.Aliquot}
+			} else {
+				aliquots, err = cr.getAliquotFromInputDocuments(t)
 				if err != nil {
 					return fmt.Errorf("failed to get aliquot from input documents for task %q in case %q: %w", t.TypeCode, cr.Case.SubmitterCaseId, err)
 				}
 			}
 
-			if al != se.Aliquot {
-				continue
-			}
+			for _, al := range aliquots {
 
-			var c *int
-			if _, isCaseRelated := CaseRelatedTaskTypes[t.TypeCode]; isCaseRelated {
-				c = cr.CaseID
-			}
+				if al != se.Aliquot {
+					continue
+				}
 
-			err := ctx.TaskRepo.CreateTaskContext(&types.TaskContext{
-				TaskID:                 task.ID,
-				SequencingExperimentID: se.ID,
-				CaseID:                 c,
-			})
-			if err != nil {
-				return fmt.Errorf("failed to persist task context for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
+				var c *int
+				if _, isCaseRelated := CaseRelatedTaskTypes[t.TypeCode]; isCaseRelated {
+					c = cr.CaseID
+				}
+
+				err := ctx.TaskRepo.CreateTaskContext(&types.TaskContext{
+					TaskID:                 task.ID,
+					SequencingExperimentID: se.ID,
+					CaseID:                 c,
+				})
+				if err != nil {
+					return fmt.Errorf("failed to persist task context for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
+				}
 			}
 		}
 
