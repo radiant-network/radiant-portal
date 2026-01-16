@@ -14,7 +14,7 @@ function SequencingExperimentInformationsCard({ data, ...props }: SequencingExpe
   const { t } = useI18n();
 
   return (
-    <Card {...props}>
+    <Card data-cy="sequencing-experiments-card" {...props}>
       <CardHeader className="border-b [.border-b]:pb-4">
         <CardTitle size="xl">{t('case_entity.details.sequencing_overview')}</CardTitle>
       </CardHeader>

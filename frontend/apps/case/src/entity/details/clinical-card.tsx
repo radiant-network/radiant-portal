@@ -30,7 +30,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
   const hasVariants = data.sequencing_experiments.some(seqExp => seqExp.has_variants);
 
   return (
-    <Card {...props}>
+    <Card data-cy="clinical-card" {...props}>
       <CardHeader className="border-b [.border-b]:pb-4">
         <CardTitle size="xl">{t('case_entity.details.clinical_overview')}</CardTitle>
         <CardAction>

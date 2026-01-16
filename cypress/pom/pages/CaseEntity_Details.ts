@@ -3,7 +3,7 @@ import { CommonSelectors } from 'pom/shared/Selectors';
 import { getColumnPosition, getStatusColor, getStatusIcon, stringToRegExp } from 'pom/shared/Utils';
 
 const selectors = {
-  tab: '[class*= "lucide-clipboard-list"]',
+  tab: '[data-cy="details-tab"]',
 
   sequencingCard: {
     tableCell: (dataSeq: any) => `${CommonSelectors.tableRow(selectors.sequencingCard.tableId)}:contains("${dataSeq.relationship}") ${CommonSelectors.tableCellData}`,

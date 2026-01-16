@@ -124,6 +124,7 @@ function TableFiltersSearch({
       </label>
       <Command className="relative h-8 w-[340px] overflow-visible" shouldFilter={false}>
         <CommandInput
+          data-cy="table-filters-search-input"
           className="px-1.5"
           variant="search"
           placeholder={placeholder}
@@ -163,6 +164,7 @@ function TableFiltersSearch({
                           className="h-[32px]"
                           key={result.value}
                           value={`${result.value}::${category}`}
+                          data-cy={`table-filters-search-item-${result.value}::${category}`}
                           onSelect={value => {
                             handleAutocompleteSelect(result.type, value.split('::')[0]);
                           }}

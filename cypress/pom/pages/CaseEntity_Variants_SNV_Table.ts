@@ -5,8 +5,8 @@ import { getColumnName, getColumnPosition } from '../shared/Utils';
 
 const selectors = {
   tableCell: (dataVariant: any) => `${CommonSelectors.tableRow()}:contains("${dataVariant.variant}") ${CommonSelectors.tableCellData}`,
-  tab: '[class*= "lucide-audio-waveform"]',
-  toggle: 'button[id*= "trigger-snv"]',
+  tab: '[data-cy="variants-tab"]',
+  toggle: '[data-cy="tabs-trigger-snv"]',
 };
 
 const tableColumns = [

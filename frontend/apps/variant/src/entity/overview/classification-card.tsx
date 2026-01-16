@@ -14,7 +14,7 @@ function ClassificationCard({ data, ...props }: ClassificationCardProps) {
   const { t } = useI18n();
 
   return (
-    <Card {...props}>
+    <Card data-cy="classification-card" {...props}>
       <CardHeader>
         <div className="flex items-center gap-6">
           <BrainCircuit />

@@ -20,7 +20,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
   const pickedConsequence = data?.picked_consequences?.[0];
 
   return (
-    <Card {...props}>
+    <Card data-cy="most-deleterious-consequence-card" {...props}>
       <CardContent className="px-4 md:px-6 py-0 2xl:py-12 grow">
         <div className="flex items-start flex-wrap md:flex-nowrap md:[&>div]:w-40 md:justify-between gap-6">
           <div className="flex flex-col gap-2">

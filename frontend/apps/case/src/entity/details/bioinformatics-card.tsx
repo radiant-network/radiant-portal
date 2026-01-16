@@ -73,12 +73,12 @@ function BioinformaticsCard({ tasks, ...props }: BioinformaticsCardProps) {
   const { t } = useI18n();
 
   return (
-    <Card {...props}>
+    <Card data-cy="bioinformatics-card" {...props}>
       <CardHeader className="border-b [.border-b]:pb-4">
         <CardTitle size="xl">{t('case_entity.details.bioinformatics')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <DisplayTable data={tasks} columns={getColumns(t, tasks, false)} />
+        <DisplayTable data={tasks} columns={getColumns(t, tasks, false)} dataCy="bioinformatics-table" />
       </CardContent>
     </Card>
   );

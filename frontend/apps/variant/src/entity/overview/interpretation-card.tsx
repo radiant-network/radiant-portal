@@ -17,7 +17,7 @@ function InterpretationCard({ data, ...props }: InterpretationCardProps) {
   const params = useParams<{ locusId: string }>();
 
   return (
-    <Card {...props}>
+    <Card data-cy="interpretation-card" {...props}>
       <CardHeader>
         <div className="flex items-center gap-6">
           <HospitalIcon />

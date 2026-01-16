@@ -3,13 +3,13 @@ import { CommonSelectors } from 'pom/shared/Selectors';
 import { getColumnPosition, getStatusColor, getStatusIcon, stringToRegExp } from 'pom/shared/Utils';
 
 const selectors = {
-  tab: '[class*= "z-1 group"]:contains("Patients")',
+  tab: '[data-cy="cases-tab"]',
 
   interpreted: {
     tableId: '[id="interpreted-cases"]',
   },
   uninterpreted: {
-    tab: '[class*= "z-1 group"]:contains("Non-interpreted")',
+    tab: '[data-cy="uninterpreted-tab"]',
     tableId: '[id="uninterpreted-cases"]',
   },
 };
