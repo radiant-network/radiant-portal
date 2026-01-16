@@ -15,6 +15,7 @@ type SimpleTableProps<TData> = {
   variant?: 'default' | 'borderless' | 'border';
   data: TData[];
   columns: TableColumnDef<TData, any>[];
+  dataCy?: string;
 };
 
 /**
@@ -22,7 +23,7 @@ type SimpleTableProps<TData> = {
  * Only display data in a table.
  * @see For more complexe case (needs pagination, re-order, re-sizing etc..) use DataTable instead
  */
-function DisplayTable({ columns, variant = 'default', data }: SimpleTableProps<any>) {
+function DisplayTable({ columns, variant = 'default', data, dataCy }: SimpleTableProps<any>) {
   const { t } = useI18n();
   const table = useReactTable({
     data,
@@ -32,7 +33,7 @@ function DisplayTable({ columns, variant = 'default', data }: SimpleTableProps<a
 
   return (
     <div className="rounded-md w-full overflow-auto" style={{ maxHeight: `${TABLE_MAX_HEIGHT}px` }}>
-      <Table className={cn({ 'border-collapse': variant == 'border' })}>
+      <Table data-cy={dataCy} className={cn({ 'border-collapse': variant == 'border' })}>
         <TableHeader>
           {table.getHeaderGroups().map(headerGroup => (
             <TableRow key={headerGroup.id} variant={variant}>

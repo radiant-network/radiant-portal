@@ -5,7 +5,6 @@ import { getPriorityColor, getStatusColor, getStatusIcon, getUrlLink, stringToRe
 import { getColumnName, getColumnPosition } from '../shared/Utils';
 
 const selectors = {
-  filtersId: 'table-filters',
   tableCell: (dataCase: any) => `${CommonSelectors.tableRow()}:contains("${dataCase.case}") ${CommonSelectors.tableCellData}`,
 };
 
@@ -255,7 +254,7 @@ export const CasesTable = {
      * @param value The value of the suggestion to select.
      */
     selectSuggestion(field: string, value: string) {
-      cy.get(`${CommonSelectors.suggestionList(selectors.filtersId)} ${CommonSelectors.suggestionItem(field, value)}`).clickAndWait({ force: true });
+      cy.get(CommonSelectors.suggestionItem(field, value)).clickAndWait({ force: true });
     },
     /**
      * Shows all columns in the table.
@@ -302,10 +301,10 @@ export const CasesTable = {
     typeSearch(text: string, needIntercept: boolean = true) {
       if (needIntercept) {
         cy.intercept('GET', `**/cases/autocomplete?prefix=${text}**`).as('autocompleteRequest');
-        cy.get(CommonSelectors.searchInput(selectors.filtersId)).type(text);
+        cy.get(CommonSelectors.searchInput).type(text);
         cy.wait('@autocompleteRequest');
       } else {
-        cy.get(CommonSelectors.searchInput(selectors.filtersId)).type(text);
+        cy.get(CommonSelectors.searchInput).type(text);
       }
     },
     /**
@@ -563,7 +562,7 @@ export const CasesTable = {
         cy.wait('@autocompleteResponse');
 
         mockResponseBody.forEach((item: any) => {
-          cy.get(`${CommonSelectors.suggestionList(selectors.filtersId)} ${CommonSelectors.suggestionItem(item.type, item.value)}`).should('exist');
+          cy.get(CommonSelectors.suggestionItem(item.type, item.value)).should('exist');
         });
       });
     },

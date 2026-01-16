@@ -218,10 +218,10 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
                           </TabsTrigger>
                         </TabsList>
                         <TabsContent value="matched">
-                          <DisplayTable data={matched} columns={columns} />
+                          <DisplayTable data={matched} columns={columns} dataCy="matched-table" />
                         </TabsContent>
                         <TabsContent value="unmatched">
-                          <DisplayTable data={unmatched} columns={columns} />
+                          <DisplayTable data={unmatched} columns={columns} dataCy="unmatched-table" />
                         </TabsContent>
                       </Tabs>
                     </div>

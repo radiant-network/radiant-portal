@@ -60,12 +60,12 @@ function CasesTab() {
           <CardContent className="space-y-3">
             <TabsNav value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
-                <TabsListItem value={Tabs.InterpretedCases}>
+                <TabsListItem data-cy="interpreted-tab" value={Tabs.InterpretedCases}>
                   {t('variant_entity.cases.interpreted_table.title', {
                     count: data?.count_interpreted,
                   })}
                 </TabsListItem>
-                <TabsListItem value={Tabs.OtherCases}>
+                <TabsListItem data-cy="uninterpreted-tab" value={Tabs.OtherCases}>
                   {t('variant_entity.cases.other_table.title', {
                     count: data?.count_uninterpreted,
                   })}

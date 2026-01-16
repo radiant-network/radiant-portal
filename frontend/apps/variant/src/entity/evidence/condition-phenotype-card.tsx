@@ -86,17 +86,17 @@ function ConditionPhenotypeCard() {
             onValueChange={value => setPanelType(value as GetGermlineVariantConditionsPanelTypeEnum)}
           >
             <TabsList>
-              <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Omim}>
+              <TabsTrigger data-cy="omim-tab" value={GetGermlineVariantConditionsPanelTypeEnum.Omim}>
                 {t('variant_entity.evidence.gene.filters.omim', {
                   count: data?.count_omim ?? 0,
                 })}
               </TabsTrigger>
-              <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Orphanet}>
+              <TabsTrigger data-cy="orphanet-tab" value={GetGermlineVariantConditionsPanelTypeEnum.Orphanet}>
                 {t('variant_entity.evidence.gene.filters.orphanet', {
                   count: data?.count_orphanet ?? 0,
                 })}
               </TabsTrigger>
-              <TabsTrigger value={GetGermlineVariantConditionsPanelTypeEnum.Hpo}>
+              <TabsTrigger data-cy="hpo-tab" value={GetGermlineVariantConditionsPanelTypeEnum.Hpo}>
                 {' '}
                 {t('variant_entity.evidence.gene.filters.hpo', {
                   count: data?.count_hpo ?? 0,

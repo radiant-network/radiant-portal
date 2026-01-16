@@ -3,7 +3,7 @@ import { CommonSelectors } from 'pom/shared/Selectors';
 import { getColumnPosition, stringToRegExp } from 'pom/shared/Utils';
 
 const selectors = {
-  tab: '[class*= "z-1 group"]:contains("Evidence and conditions")',
+  tab: '[data-cy="evidence-tab"]',
 
   clinvarCard: {
     tableId: '[id="pathogenic-evidence"]',
@@ -13,11 +13,11 @@ const selectors = {
       tableId: '[id="HPSE2-condition-phenotype-table"]',
     },
     orphanet: {
-      tab: '[id*="trigger-orphanet"]',
+      tab: '[data-cy="orphanet-tab"]',
       tableId: '[id="HPSE2-condition-phenotype-table"]',
     },
     hpo: {
-      tab: '[id*="trigger-hpo"]',
+      tab: '[data-cy="hpo-tab"]',
       tableId: '[id="HPSE2-condition-phenotype-table"]',
     },
   },
