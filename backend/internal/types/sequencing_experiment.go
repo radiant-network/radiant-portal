@@ -17,8 +17,8 @@ type SequencingExperiment struct {
 	RunAlias                     string
 	RunDate                      time.Time `gorm:"type:timestamptz"`
 	CaptureKit                   string
-	CreatedOn                    time.Time
-	UpdatedOn                    time.Time
+	CreatedOn                    time.Time `gorm:"autoCreateTime"`
+	UpdatedOn                    time.Time `gorm:"autoUpdateTime:milli"`
 	ExperimentalStrategyCode     string
 	ExperimentalStrategy         ExperimentalStrategy `gorm:"foreignKey:Code;references:ExperimentalStrategyCode"`
 	SequencingReadTechnologyCode string

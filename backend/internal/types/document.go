@@ -14,7 +14,7 @@ type Document struct {
 	Size             int64
 	Url              string
 	Hash             string
-	CreatedOn        time.Time
+	CreatedOn        time.Time `gorm:"autoCreateTime"`
 }
 
 type DocumentResult struct {

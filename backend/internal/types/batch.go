@@ -70,7 +70,7 @@ type Batch struct {
 	DryRun     bool         `json:"dry_run"`
 	BatchType  string       `json:"batch_type"`
 	Status     BatchStatus  `json:"status"`
-	CreatedOn  time.Time    `json:"created_on"`
+	CreatedOn  time.Time    `gorm:"autoCreateTime"`
 	StartedOn  *time.Time   `json:"started_on,omitempty"`
 	FinishedOn *time.Time   `json:"finished_on,omitempty"`
 	Username   string       `json:"username"`
