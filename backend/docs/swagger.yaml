@@ -349,7 +349,7 @@ components:
         affected_status_code:
           enum:
           - affected
-          - unaffected
+          - non_affected
           - unknown
           type: string
         family_history:

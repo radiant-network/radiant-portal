@@ -342,43 +342,30 @@ func (cr *CaseValidationRecord) fetchTaskContextFromSequencingExperiments() erro
 	return nil
 }
 
-func (cr *CaseValidationRecord) fetchInputDocumentsFromTask(task *types.CaseTaskBatch) error {
-	for _, doc := range task.InputDocuments {
-		d, err := cr.Context.DocRepo.GetDocumentByUrl(doc.Url)
+func (cr *CaseValidationRecord) fetchDocumentsFromURLs(urls []string) error {
+	for _, url := range urls {
+		d, err := cr.Context.DocRepo.GetDocumentByUrl(url)
 		if err != nil {
-			return fmt.Errorf("failed to get input document by url %q: %w", doc.Url, err)
-		}
-		if d != nil {
-			cr.Documents[doc.Url] = d
-		}
-	}
-	return nil
-}
-
-func (cr *CaseValidationRecord) fetchOutputDocumentsFromTask(task *types.CaseTaskBatch) error {
-	for _, doc := range task.OutputDocuments {
-		d, err := cr.Context.DocRepo.GetDocumentByUrl(doc.Url)
-		if err != nil {
-			return fmt.Errorf("failed to get output document by url %q: %w", doc.Url, err)
+			return fmt.Errorf("failed to get document by url %q: %w", url, err)
 		}
 		if d == nil {
 			continue
 		}
 
-		cr.Documents[doc.Url] = d
+		cr.Documents[url] = d
 		docs, err := cr.Context.TaskRepo.GetTaskHasDocumentByDocumentId(d.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get task has document by document id %d: %w", d.ID, err)
 		}
 
 		for _, do := range docs {
-			if _, ok := cr.DocumentsInTasks[doc.Url]; ok {
-				cr.DocumentsInTasks[doc.Url] = append(cr.DocumentsInTasks[doc.Url], &DocumentRelation{
+			if _, ok := cr.DocumentsInTasks[url]; ok {
+				cr.DocumentsInTasks[url] = append(cr.DocumentsInTasks[url], &DocumentRelation{
 					TaskID: do.TaskID,
 					Type:   do.Type,
 				})
 			} else {
-				cr.DocumentsInTasks[doc.Url] = []*DocumentRelation{
+				cr.DocumentsInTasks[url] = []*DocumentRelation{
 					{
 						TaskID: do.TaskID,
 						Type:   do.Type,
@@ -388,6 +375,22 @@ func (cr *CaseValidationRecord) fetchOutputDocumentsFromTask(task *types.CaseTas
 		}
 	}
 	return nil
+}
+
+func (cr *CaseValidationRecord) fetchInputDocumentsFromTask(task *types.CaseTaskBatch) error {
+	var urls []string
+	for _, doc := range task.InputDocuments {
+		urls = append(urls, doc.Url)
+	}
+	return cr.fetchDocumentsFromURLs(urls)
+}
+
+func (cr *CaseValidationRecord) fetchOutputDocumentsFromTask(task *types.CaseTaskBatch) error {
+	var urls []string
+	for _, doc := range task.OutputDocuments {
+		urls = append(urls, doc.Url)
+	}
+	return cr.fetchDocumentsFromURLs(urls)
 }
 
 func (cr *CaseValidationRecord) fetchFromTasks() error {
@@ -902,6 +905,17 @@ func (cr *CaseValidationRecord) validateExclusiveAliquotInputDocuments(task *typ
 	}
 }
 
+func (cr *CaseValidationRecord) validateTaskDocumentOutputInBatch(url string) (*types.CaseTaskBatch, *types.OutputDocumentBatch) {
+	for _, task := range cr.Case.Tasks {
+		for _, outdoc := range task.OutputDocuments {
+			if outdoc.Url == url {
+				return task, outdoc
+			}
+		}
+	}
+	return nil, nil
+}
+
 func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch, taskIndex int) {
 	path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
 
@@ -918,14 +932,17 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 	}
 
 	for _, indoc := range task.InputDocuments {
-		doc, exists := cr.Documents[indoc.Url]
+		_, exists := cr.Documents[indoc.Url]
+		_, d := cr.validateTaskDocumentOutputInBatch(indoc.Url)
+		exists = exists || (d != nil)
+
 		if !exists {
 			message := fmt.Sprintf("Input document with URL %s does not exist for case %d - task %d.", indoc.Url, cr.Index, taskIndex)
 			cr.addErrors(message, TaskInputDocumentNotFound, path)
 			continue
 		}
 
-		docUsages, ok := cr.DocumentsInTasks[doc.Url]
+		docUsages, ok := cr.DocumentsInTasks[indoc.Url]
 		if !ok {
 			continue
 		}
@@ -1094,6 +1111,39 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 		}
 	}
 	return nil
+}
+
+func (cr *CaseValidationRecord) getAliquotFromInputDocuments(task *types.CaseTaskBatch) (string, error) {
+	validAliquots := make(map[string]struct{})
+	for _, se := range cr.SequencingExperiments {
+		validAliquots[se.Aliquot] = struct{}{}
+	}
+
+	var detectedAliquot string
+
+	for _, idoc := range task.InputDocuments {
+		originTask, _ := cr.validateTaskDocumentOutputInBatch(idoc.Url)
+		if originTask == nil {
+			return "", fmt.Errorf("input document with URL %s not found in case output documents", idoc.Url)
+		}
+
+		if _, exists := validAliquots[originTask.Aliquot]; !exists {
+			continue
+		}
+
+		if detectedAliquot == "" {
+			detectedAliquot = originTask.Aliquot
+		} else if originTask.Aliquot != detectedAliquot {
+			return "", fmt.Errorf("mismatched aliquots found: expected %s but found %s",
+				detectedAliquot, originTask.Aliquot)
+		}
+	}
+
+	if detectedAliquot == "" {
+		return "", fmt.Errorf("no sequencing experiments found for the provided input documents")
+	}
+
+	return detectedAliquot, nil
 }
 
 func validateCaseRecord(
@@ -1345,7 +1395,15 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 		for _, se := range cr.SequencingExperiments {
 
 			// Aliquot must match to create TaskContext relationship with SequencingExperiment and Task
-			if se.Aliquot != t.Aliquot {
+			al := t.Aliquot
+			if al == "" {
+				al, err = cr.getAliquotFromInputDocuments(t)
+				if err != nil {
+					return fmt.Errorf("failed to get aliquot from input documents for task %q in case %q: %w", t.TypeCode, cr.Case.SubmitterCaseId, err)
+				}
+			}
+
+			if al != se.Aliquot {
 				continue
 			}
 
@@ -1394,6 +1452,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 			if err != nil {
 				return fmt.Errorf("failed to persist document %q for case %q: %w", doc.Name, cr.Case.SubmitterCaseId, err)
 			}
+			cr.Documents[doc.Url] = &d
 
 			err = ctx.TaskRepo.CreateTaskHasDocument(&types.TaskHasDocument{
 				TaskID:     task.ID,
@@ -1403,6 +1462,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 			if err != nil {
 				return fmt.Errorf("failed to persist task has document for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
 			}
+			cr.DocumentsInTasks[doc.Url] = append(cr.DocumentsInTasks[doc.Url], &DocumentRelation{task.ID, "output"})
 		}
 	}
 	return nil

@@ -41,8 +41,8 @@ class CasePatientBatch(BaseModel):
     @field_validator('affected_status_code')
     def affected_status_code_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['affected', 'unaffected', 'unknown']):
-            raise ValueError("must be one of enum values ('affected', 'unaffected', 'unknown')")
+        if value not in set(['affected', 'non_affected', 'unknown']):
+            raise ValueError("must be one of enum values ('affected', 'non_affected', 'unknown')")
         return value
 
     @field_validator('relation_to_proband_code')

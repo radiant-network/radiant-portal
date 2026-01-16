@@ -984,6 +984,7 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 		Documents:             make(map[string]*types.Document),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 		Patients:              make(map[PatientKey]*types.Patient),
+		DocumentsInTasks:      make(map[string][]*DocumentRelation),
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-TASK-TEST",
 			Tasks: []*types.CaseTaskBatch{
@@ -1019,6 +1020,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 		Documents:             make(map[string]*types.Document),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 		Patients:              make(map[PatientKey]*types.Patient),
+		DocumentsInTasks:      make(map[string][]*DocumentRelation),
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-FAIL",
 			Tasks: []*types.CaseTaskBatch{
@@ -1034,7 +1036,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 
 	err := record.fetchFromTasks()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to get input document by url")
+	assert.Contains(t, err.Error(), "failed to get document by url")
 }
 
 func Test_fetchFromTasks_SeqExpError(t *testing.T) {
@@ -1224,7 +1226,8 @@ func Test_fetchSequencingExperimentsInTask_Error(t *testing.T) {
 func Test_fetchInputDocumentsFromTask_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockContext := BatchValidationContext{
-		DocRepo: &mockRepo,
+		DocRepo:  &mockRepo,
+		TaskRepo: &mockRepo,
 	}
 	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
 
@@ -4175,6 +4178,68 @@ func Test_validateTaskDocuments_InputDocumentExternalSeqExpError(t *testing.T) {
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 0)
 	assert.Equal(t, expected, record.Errors[0])
+}
+
+func Test_validateTaskDocumentOutputInBatch_OK(t *testing.T) {
+	record := CaseValidationRecord{
+		DocumentsInTasks: map[string][]*DocumentRelation{
+			"s3://output/foo/bar.txt": {{TaskID: 0, Type: "output"}},
+		},
+		Case: types.CaseBatch{
+			Tasks: []*types.CaseTaskBatch{
+				{
+					OutputDocuments: []*types.OutputDocumentBatch{
+						{
+							Url: "s3://output/foo/bar.txt",
+						},
+					},
+				},
+				{
+					InputDocuments: []*types.InputDocumentBatch{
+						{
+							Url: "s3://output/foo/bar.txt",
+						},
+					},
+				},
+			},
+		},
+	}
+	task, doc := record.validateTaskDocumentOutputInBatch(record.Case.Tasks[1].InputDocuments[0].Url)
+	assert.NotNil(t, task)
+	assert.NotNil(t, doc)
+}
+
+func Test_getAliquotFromInputDocuments_OK(t *testing.T) {
+	record := CaseValidationRecord{
+		SequencingExperiments: map[int]*types.SequencingExperiment{
+			0: {
+				Aliquot: "ALIQUOT-1",
+			},
+		},
+		Case: types.CaseBatch{
+			Tasks: []*types.CaseTaskBatch{
+				{
+					Aliquot: "ALIQUOT-1",
+					OutputDocuments: []*types.OutputDocumentBatch{
+						{
+							Url: "s3://input/foo/bar.txt",
+						},
+					},
+				},
+				{
+					Aliquot: "",
+					InputDocuments: []*types.InputDocumentBatch{
+						{
+							Url: "s3://input/foo/bar.txt",
+						},
+					},
+				},
+			},
+		},
+	}
+	aliquot, err := record.getAliquotFromInputDocuments(record.Case.Tasks[1])
+	assert.NoError(t, err)
+	assert.Equal(t, "ALIQUOT-1", aliquot)
 }
 
 // -----------------------------------------------------------------------------
