@@ -44,5 +44,5 @@ jobs:
 
       - name: Test
         if: steps.filter.outputs.backend == 'true'
-        run: go test -v ./...
+        run: go test ./...
         working-directory: ./backend
