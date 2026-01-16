@@ -235,7 +235,9 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.ad_ratio, {
       id: 'ad_ratio',
       cell: info => <NumberCell value={info.getValue()} />,
-      header: t('variant.headers.ad_ratio'),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.ad_ratio_tooltip')}>{t('variant.headers.ad_ratio')}</TooltipHeader>
+      ),
       size: 124,
       minSize: 40,
     }),
