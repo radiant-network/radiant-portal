@@ -23,7 +23,7 @@ type CaseBatch struct {
 }
 
 type CasePatientBatch struct {
-	AffectedStatusCode      string                         `json:"affected_status_code" binding:"required,oneof=affected unaffected unknown"`
+	AffectedStatusCode      string                         `json:"affected_status_code" binding:"required,oneof=affected non_affected unknown"`
 	FamilyHistory           []*FamilyHistoryBatch          `json:"family_history,omitempty" binding:"dive"`
 	ObservationsCategorical []*ObservationCategoricalBatch `json:"observations_categorical,omitempty" binding:"dive"`
 	ObservationsText        []*ObservationTextBatch        `json:"observations_text,omitempty" binding:"dive"`

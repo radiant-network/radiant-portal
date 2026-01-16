@@ -11,7 +11,7 @@ type Task struct {
 	PipelineName    string
 	PipelineVersion string
 	GenomeBuild     string
-	CreatedOn       time.Time
+	CreatedOn       time.Time `gorm:"autoCreateTime"`
 }
 
 type TaskContext struct {

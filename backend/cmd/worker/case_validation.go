@@ -342,43 +342,30 @@ func (cr *CaseValidationRecord) fetchTaskContextFromSequencingExperiments() erro
 	return nil
 }
 
-func (cr *CaseValidationRecord) fetchInputDocumentsFromTask(task *types.CaseTaskBatch) error {
-	for _, doc := range task.InputDocuments {
-		d, err := cr.Context.DocRepo.GetDocumentByUrl(doc.Url)
+func (cr *CaseValidationRecord) fetchDocumentsFromURLs(urls []string) error {
+	for _, url := range urls {
+		d, err := cr.Context.DocRepo.GetDocumentByUrl(url)
 		if err != nil {
-			return fmt.Errorf("failed to get input document by url %q: %w", doc.Url, err)
-		}
-		if d != nil {
-			cr.Documents[doc.Url] = d
-		}
-	}
-	return nil
-}
-
-func (cr *CaseValidationRecord) fetchOutputDocumentsFromTask(task *types.CaseTaskBatch) error {
-	for _, doc := range task.OutputDocuments {
-		d, err := cr.Context.DocRepo.GetDocumentByUrl(doc.Url)
-		if err != nil {
-			return fmt.Errorf("failed to get output document by url %q: %w", doc.Url, err)
+			return fmt.Errorf("failed to get document by url %q: %w", url, err)
 		}
 		if d == nil {
 			continue
 		}
 
-		cr.Documents[doc.Url] = d
+		cr.Documents[url] = d
 		docs, err := cr.Context.TaskRepo.GetTaskHasDocumentByDocumentId(d.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get task has document by document id %d: %w", d.ID, err)
 		}
 
 		for _, do := range docs {
-			if _, ok := cr.DocumentsInTasks[doc.Url]; ok {
-				cr.DocumentsInTasks[doc.Url] = append(cr.DocumentsInTasks[doc.Url], &DocumentRelation{
+			if _, ok := cr.DocumentsInTasks[url]; ok {
+				cr.DocumentsInTasks[url] = append(cr.DocumentsInTasks[url], &DocumentRelation{
 					TaskID: do.TaskID,
 					Type:   do.Type,
 				})
 			} else {
-				cr.DocumentsInTasks[doc.Url] = []*DocumentRelation{
+				cr.DocumentsInTasks[url] = []*DocumentRelation{
 					{
 						TaskID: do.TaskID,
 						Type:   do.Type,
@@ -388,6 +375,22 @@ func (cr *CaseValidationRecord) fetchOutputDocumentsFromTask(task *types.CaseTas
 		}
 	}
 	return nil
+}
+
+func (cr *CaseValidationRecord) fetchInputDocumentsFromTask(task *types.CaseTaskBatch) error {
+	var urls []string
+	for _, doc := range task.InputDocuments {
+		urls = append(urls, doc.Url)
+	}
+	return cr.fetchDocumentsFromURLs(urls)
+}
+
+func (cr *CaseValidationRecord) fetchOutputDocumentsFromTask(task *types.CaseTaskBatch) error {
+	var urls []string
+	for _, doc := range task.OutputDocuments {
+		urls = append(urls, doc.Url)
+	}
+	return cr.fetchDocumentsFromURLs(urls)
 }
 
 func (cr *CaseValidationRecord) fetchFromTasks() error {
@@ -821,6 +824,20 @@ func (cr *CaseValidationRecord) validateStatusCode() {
 func (cr *CaseValidationRecord) validateCase() error {
 	path := formatPath(cr, "")
 
+	// Validate case uniqueness in DB
+	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
+		c, err := cr.Context.CasesRepo.GetCaseBySubmitterCaseIdAndProjectId(cr.Case.SubmitterCaseId, *cr.ProjectID)
+		if err != nil {
+			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.Case.SubmitterCaseId, *cr.ProjectID, err)
+		}
+		if c != nil {
+			cr.Skipped = true
+			message := fmt.Sprintf("Case (%d / %s) already exists, skipped.", *cr.ProjectID, cr.Case.SubmitterCaseId)
+			cr.addInfos(message, CaseAlreadyExists, path) // CASE-001
+			return nil
+		}
+	}
+
 	// Validate data in DB
 	if cr.ProjectID == nil {
 		message := fmt.Sprintf("Project %s for case %d does not exist.", cr.Case.ProjectCode, cr.Index)
@@ -848,18 +865,6 @@ func (cr *CaseValidationRecord) validateCase() error {
 	cr.validateCaseField(cr.Case.Note, "note", path, TextRegExpCompiled, TextMaxLength, false)                                                // TODO: validate regex
 	cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, TextRegExpCompiled, TextMaxLength, false)                     // TODO: validate regex
 
-	// Validate case uniqueness in DB
-	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
-		c, err := cr.Context.CasesRepo.GetCaseBySubmitterCaseIdAndProjectId(cr.Case.SubmitterCaseId, *cr.ProjectID)
-		if err != nil {
-			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.Case.SubmitterCaseId, *cr.ProjectID, err)
-		}
-		if c != nil {
-			cr.Skipped = true
-			message := fmt.Sprintf("Case (%d / %s) already exists, skipped.", *cr.ProjectID, cr.Case.SubmitterCaseId)
-			cr.addErrors(message, CaseAlreadyExists, path) // CASE-001
-		}
-	}
 	return nil
 }
 
@@ -902,6 +907,17 @@ func (cr *CaseValidationRecord) validateExclusiveAliquotInputDocuments(task *typ
 	}
 }
 
+func (cr *CaseValidationRecord) getOriginTaskForInputDocument(url string) (*types.CaseTaskBatch, *types.OutputDocumentBatch) {
+	for _, task := range cr.Case.Tasks {
+		for _, outdoc := range task.OutputDocuments {
+			if outdoc.Url == url {
+				return task, outdoc
+			}
+		}
+	}
+	return nil, nil
+}
+
 func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch, taskIndex int) {
 	path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
 
@@ -918,14 +934,17 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 	}
 
 	for _, indoc := range task.InputDocuments {
-		doc, exists := cr.Documents[indoc.Url]
+		_, exists := cr.Documents[indoc.Url]
+		_, d := cr.getOriginTaskForInputDocument(indoc.Url)
+		exists = exists || (d != nil)
+
 		if !exists {
 			message := fmt.Sprintf("Input document with URL %s does not exist for case %d - task %d.", indoc.Url, cr.Index, taskIndex)
 			cr.addErrors(message, TaskInputDocumentNotFound, path)
 			continue
 		}
 
-		docUsages, ok := cr.DocumentsInTasks[doc.Url]
+		docUsages, ok := cr.DocumentsInTasks[indoc.Url]
 		if !ok {
 			continue
 		}
@@ -1053,7 +1072,7 @@ func (cr *CaseValidationRecord) validateDocumentMetadata(doc *types.OutputDocume
 	return nil
 }
 
-func (cr *CaseValidationRecord) validateDocumentDuplicateInBatch(doc *types.OutputDocumentBatch, path string) {
+func (cr *CaseValidationRecord) validateDocumentDuplicate(doc *types.OutputDocumentBatch, path string) {
 	if _, exists := cr.OutputDocuments[doc.Url]; exists {
 		msg := fmt.Sprintf("Duplicate output document with URL %s found.", doc.Url)
 		cr.addErrors(msg, DocumentDuplicateInBatch, path)
@@ -1090,10 +1109,40 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 			if err := cr.validateDocumentMetadata(doc, path, tid, did); err != nil {
 				return fmt.Errorf("error validating file metadata for case %d - document %d: %v", cr.Index, tid, err)
 			}
-			cr.validateDocumentDuplicateInBatch(doc, path)
+			cr.validateDocumentDuplicate(doc, path)
 		}
 	}
 	return nil
+}
+
+func (cr *CaseValidationRecord) getAliquotFromInputDocuments(task *types.CaseTaskBatch) ([]string, error) {
+	validAliquots := make(map[string]struct{})
+	for _, se := range cr.SequencingExperiments {
+		validAliquots[se.Aliquot] = struct{}{}
+	}
+	var detectedAliquots []string
+	for _, idoc := range task.InputDocuments {
+		originTask, _ := cr.getOriginTaskForInputDocument(idoc.Url)
+		if originTask == nil {
+			return nil, fmt.Errorf("input document with URL %s not found in case output documents", idoc.Url)
+		}
+
+		if _, exists := validAliquots[originTask.Aliquot]; !exists {
+			continue
+		}
+
+		detectedAliquots = append(detectedAliquots, originTask.Aliquot)
+	}
+
+	if len(detectedAliquots) == 0 {
+		return nil, fmt.Errorf("no sequencing experiments found for the provided input documents")
+	}
+
+	// Remove duplicates
+	slices.Sort(detectedAliquots)
+	detectedAliquots = slices.Compact(detectedAliquots)
+
+	return detectedAliquots, nil
 }
 
 func validateCaseRecord(
@@ -1115,6 +1164,9 @@ func validateCaseRecord(
 	// 1. Validate Case fields
 	if err := cr.validateCase(); err != nil {
 		return nil, fmt.Errorf("error during case validation: %v", err)
+	}
+	if cr.Skipped {
+		return cr, nil
 	}
 
 	// 2. Validate Case Patients
@@ -1345,22 +1397,35 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 		for _, se := range cr.SequencingExperiments {
 
 			// Aliquot must match to create TaskContext relationship with SequencingExperiment and Task
-			if se.Aliquot != t.Aliquot {
-				continue
+			var aliquots []string
+			if t.Aliquot != "" {
+				aliquots = []string{t.Aliquot}
+			} else {
+				aliquots, err = cr.getAliquotFromInputDocuments(t)
+				if err != nil {
+					return fmt.Errorf("failed to get aliquot from input documents for task %q in case %q: %w", t.TypeCode, cr.Case.SubmitterCaseId, err)
+				}
 			}
 
-			var c *int
-			if _, isCaseRelated := CaseRelatedTaskTypes[t.TypeCode]; isCaseRelated {
-				c = cr.CaseID
-			}
+			for _, al := range aliquots {
 
-			err := ctx.TaskRepo.CreateTaskContext(&types.TaskContext{
-				TaskID:                 task.ID,
-				SequencingExperimentID: se.ID,
-				CaseID:                 c,
-			})
-			if err != nil {
-				return fmt.Errorf("failed to persist task context for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
+				if al != se.Aliquot {
+					continue
+				}
+
+				var c *int
+				if _, isCaseRelated := CaseRelatedTaskTypes[t.TypeCode]; isCaseRelated {
+					c = cr.CaseID
+				}
+
+				err := ctx.TaskRepo.CreateTaskContext(&types.TaskContext{
+					TaskID:                 task.ID,
+					SequencingExperimentID: se.ID,
+					CaseID:                 c,
+				})
+				if err != nil {
+					return fmt.Errorf("failed to persist task context for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
+				}
 			}
 		}
 
@@ -1394,6 +1459,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 			if err != nil {
 				return fmt.Errorf("failed to persist document %q for case %q: %w", doc.Name, cr.Case.SubmitterCaseId, err)
 			}
+			cr.Documents[doc.Url] = &d
 
 			err = ctx.TaskRepo.CreateTaskHasDocument(&types.TaskHasDocument{
 				TaskID:     task.ID,
@@ -1403,6 +1469,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 			if err != nil {
 				return fmt.Errorf("failed to persist task has document for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
 			}
+			cr.DocumentsInTasks[doc.Url] = append(cr.DocumentsInTasks[doc.Url], &DocumentRelation{task.ID, "output"})
 		}
 	}
 	return nil

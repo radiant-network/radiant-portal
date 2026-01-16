@@ -702,7 +702,7 @@ export interface CasePatientBatch {
 
 export const CasePatientBatchAffectedStatusCodeEnum = {
     Affected: 'affected',
-    Unaffected: 'unaffected',
+    NonAffected: 'non_affected',
     Unknown: 'unknown'
 } as const;
 

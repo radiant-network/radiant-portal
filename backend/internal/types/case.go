@@ -29,8 +29,8 @@ type Case struct {
 	DiagnosisLab           Organization `gorm:"foreignKey:ID;references:DiagnosisLabID"`
 	SubmitterCaseID        string
 	Note                   string
-	CreatedOn              time.Time
-	UpdatedOn              time.Time
+	CreatedOn              time.Time `gorm:"autoCreateTime"`
+	UpdatedOn              time.Time `gorm:"autoUpdateTime:milli"`
 }
 
 // CaseResult - Search cases result
