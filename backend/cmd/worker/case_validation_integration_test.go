@@ -296,6 +296,175 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 	})
 }
 
+func Test_ProcessBatch_Case_validateTask_Error_TaskField(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateTask_Error_TaskField"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_TaskField.recal.crai"
+		payload[0].Tasks[0].PipelineVersion = "!@#$%^&*()_+"
+		createDocumentsForBatch(context, client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-001",
+				Message: "Invalid Field pipeline_version for case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateTask_Error_InvalidTaskTypeCode"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_InvalidTaskTypeCode.recal.crai"
+		payload[0].Tasks[0].TypeCode = "invalid_task_type"
+		createDocumentsForBatch(context, client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-001",
+				Message: "Invalid Field type_code for case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, family_variant_calling, somatic_variant_calling, tumor_only_variant_calling, radiant_germline_annotation, exomiser, rnaseq_analysis",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateTask_Error_InvalidTaskAliquot"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_InvalidTaskAliquot.recal.crai"
+		payload[0].Tasks[0].Aliquot = "UNKNOWN_ALIQUOT"
+		createDocumentsForBatch(context, client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing aliquot \"UNKNOWN_ALIQUOT\" is not defined for case 0 - task 0.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_ExclusiveAliquotInputDocs(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateTask_Error_ExclusiveAliquotInputDocs"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_ExclusiveAliquotInputDocs.recal.crai"
+		payload[0].Tasks[0].InputDocuments = []*types.InputDocumentBatch{
+			{
+				Url: "s3://cqdg-prod-file-workspace/sarek/preprocessing/",
+			},
+		}
+		createDocumentsForBatch(context, client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-007",
+				Message: "Aliquot and Input documents are mutually exclusive. You can provide one or the other, but not both.",
+				Path:    "case[0].tasks[0]",
+			},
+			{
+				Code:    "TASK-006",
+				Message: "Input document with URL s3://cqdg-prod-file-workspace/sarek/preprocessing/ for case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_MissingInputDocuments(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateTask_Error_MissingInputDocuments"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_MissingInputDocuments.recal.crai"
+		payload[0].Tasks[0].TypeCode = "family_variant_calling"
+		createDocumentsForBatch(context, client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-003",
+				Message: "Missing input documents for case 0 - task 0 of type family_variant_calling.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_MissingOutputDocuments(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateTask_Error_MissingInputDocuments"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_MissingInputDocuments.recal.crai"
+
+		payload[0].Tasks[0].OutputDocuments = []*types.OutputDocumentBatch{}
+		createDocumentsForBatch(context, client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 0 of type alignment_germline_variant_calling.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "validateTask_Error_MissingInputDocuments"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_MissingInputDocuments.recal.crai"
+		payload[0].Tasks[0].TypeCode = "family_variant_calling"
+		payload[0].Tasks[0].Aliquot = ""
+		payload[0].Tasks[0].InputDocuments = []*types.InputDocumentBatch{
+			{
+				Url: "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram",
+			},
+		}
+		createDocumentsForBatch(context, client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-006",
+				Message: "Input document with URL s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram for case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
 func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload()

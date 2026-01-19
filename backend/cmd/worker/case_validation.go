@@ -918,8 +918,41 @@ func (cr *CaseValidationRecord) getOriginTaskForInputDocument(url string) (*type
 	return nil, nil
 }
 
+func (cr *CaseValidationRecord) addMissingExperimentError(url, baseMsg, path string) {
+	msg := fmt.Sprintf("Input document with URL %s for %s was produced by a sequencing experiment not defined in this case.", url, baseMsg)
+	cr.addErrors(msg, TaskInputDocumentNotInSequencingExperiments, path)
+}
+
+func (cr *CaseValidationRecord) validateTaskDocumentsContext(url, path, baseMsg string, isOriginMissing bool) {
+	usages, ok := cr.DocumentsInTasks[url]
+	if !ok {
+		return
+	}
+
+	for _, usage := range usages {
+		if usage.Type == "input" {
+			continue
+		}
+
+		contexts, ok := cr.TaskContexts[usage.TaskID]
+
+		if !ok && isOriginMissing {
+			cr.addMissingExperimentError(url, baseMsg, path)
+			break
+		}
+
+		for _, tc := range contexts {
+			if _, exists := cr.SequencingExperiments[tc.SequencingExperimentID]; !exists {
+				cr.addMissingExperimentError(url, baseMsg, path)
+				return
+			}
+		}
+	}
+}
+
 func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch, taskIndex int) {
 	path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+	baseMsg := fmt.Sprintf("case %d - task %d", cr.Index, taskIndex)
 
 	if _, ok := RequiresInputDocumentsTaskTypes[task.TypeCode]; ok {
 		if len(task.InputDocuments) == 0 {
@@ -934,41 +967,15 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 	}
 
 	for _, indoc := range task.InputDocuments {
-		_, exists := cr.Documents[indoc.Url]
-		_, d := cr.getOriginTaskForInputDocument(indoc.Url)
-		exists = exists || (d != nil)
+		url := indoc.Url
+		_, existsInDocs := cr.Documents[url]
+		_, originTask := cr.getOriginTaskForInputDocument(url)
 
-		if !exists {
-			message := fmt.Sprintf("Input document with URL %s does not exist for case %d - task %d.", indoc.Url, cr.Index, taskIndex)
-			cr.addErrors(message, TaskInputDocumentNotFound, path)
+		if !existsInDocs && originTask == nil {
+			cr.addErrors(fmt.Sprintf("Input document %s does not exist for %s.", url, baseMsg), TaskInputDocumentNotFound, path)
 			continue
 		}
-
-		docUsages, ok := cr.DocumentsInTasks[indoc.Url]
-		if !ok {
-			continue
-		}
-
-		for _, usage := range docUsages {
-			if usage.Type == "input" {
-				continue
-			}
-
-			taskContexts, ok := cr.TaskContexts[usage.TaskID]
-			if !ok {
-				continue
-			}
-
-			for _, tc := range taskContexts {
-				_, experimentExists := cr.SequencingExperiments[tc.SequencingExperimentID]
-				if !experimentExists {
-					message := fmt.Sprintf("Input document with URL %s for case %d - task %d was produced by a sequencing experiment that is not defined in this case.",
-						indoc.Url, cr.Index, taskIndex)
-					cr.addErrors(message, TaskInputDocumentNotInSequencingExperiments, path)
-					break
-				}
-			}
-		}
+		cr.validateTaskDocumentsContext(url, path, baseMsg, originTask == nil)
 	}
 }
 
