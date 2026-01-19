@@ -271,6 +271,32 @@ func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
 	})
 }
 
+func Test_ProcessBatch_Case_Not_Dry_Run_SubmitterCaseId_Collision(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = "SUBMITTER_CASE_ID_COLLISION"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
+
+		payload = append(payload, payload[0])
+
+		payload[1].SubmitterCaseId = "SUBMITTER_CASE_ID_COLLISION"
+		payload[1].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
+
+		createDocumentsForBatch(context, client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "CASE-011",
+				Message: "Case (N1 / SUBMITTER_CASE_ID_COLLISION) appears multiple times in the batch.",
+				Path:    "case[1]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
 func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		for _, tableName := range []string{"cases", "family", "obs_categorical", "task", "document"} {
