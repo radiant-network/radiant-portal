@@ -417,8 +417,8 @@ func Test_ProcessBatch_Case_validateTask_Error_MissingInputDocuments(t *testing.
 func Test_ProcessBatch_Case_validateTask_Error_MissingOutputDocuments(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateTask_Error_MissingInputDocuments"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_MissingInputDocuments.recal.crai"
+		payload[0].SubmitterCaseId = "validateTask_Error_MissingOutputDocuments"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_MissingOutputDocuments.recal.crai"
 
 		payload[0].Tasks[0].OutputDocuments = []*types.OutputDocumentBatch{}
 		createDocumentsForBatch(context, client, payload)
@@ -440,8 +440,8 @@ func Test_ProcessBatch_Case_validateTask_Error_MissingOutputDocuments(t *testing
 func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateTask_Error_MissingInputDocuments"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_MissingInputDocuments.recal.crai"
+		payload[0].SubmitterCaseId = "validateTask_Error_ExternalSequencingExperiment"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_ExternalSequencingExperiment.recal.crai"
 		payload[0].Tasks[0].TypeCode = "family_variant_calling"
 		payload[0].Tasks[0].Aliquot = ""
 		payload[0].Tasks[0].InputDocuments = []*types.InputDocumentBatch{

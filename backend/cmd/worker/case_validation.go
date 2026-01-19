@@ -972,7 +972,7 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 		_, originTask := cr.getOriginTaskForInputDocument(url)
 
 		if !existsInDocs && originTask == nil {
-			cr.addErrors(fmt.Sprintf("Input document %s does not exist for %s.", url, baseMsg), TaskInputDocumentNotFound, path)
+			cr.addErrors(fmt.Sprintf("Input document with URL %s does not exist for %s.", url, baseMsg), TaskInputDocumentNotFound, path)
 			continue
 		}
 		cr.validateTaskDocumentsContext(url, path, baseMsg, originTask == nil)
