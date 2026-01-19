@@ -182,7 +182,7 @@ func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) 
 		if patient, ok := r.Patients[key]; ok {
 			return patient, nil
 		}
-		return nil, fmt.Errorf("failed to find proband patient %q for case %q", key, r.Case.SubmitterCaseId)
+		return nil, fmt.Errorf("failed to find proband patient %q for case %d", key, r.Index)
 	}
 	return nil, nil
 }
@@ -857,7 +857,9 @@ func (cr *CaseValidationRecord) validateCase() error {
 	}
 
 	// Validate fields
-	cr.validateCaseField(cr.Case.SubmitterCaseId, "submitter_case_id", path, ExternalIdRegexpCompiled, TextMaxLength, false)
+	if cr.Case.SubmitterCaseId != "" {
+		cr.validateCaseField(cr.Case.SubmitterCaseId, "submitter_case_id", path, ExternalIdRegexpCompiled, TextMaxLength, false)
+	}
 	cr.validateStatusCode()
 	cr.validateCaseField(cr.Case.PrimaryConditionCodeSystem, "primary_condition_code_system", path, TextRegExpCompiled, TextMaxLength, false) // TODO: validate regex
 	cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextMaxLength, false)            // TODO: validate regex
@@ -1248,7 +1250,7 @@ func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*Case
 
 func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 	if cr.ProjectID == nil {
-		return fmt.Errorf("project ID is nil for case %q", cr.Case.SubmitterCaseId)
+		return fmt.Errorf("project ID is nil for case %d", cr.Index)
 	}
 
 	if cr.AnalysisCatalogID == nil {
@@ -1260,7 +1262,7 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 	}
 
 	if cr.DiagnosisLabID == nil {
-		return fmt.Errorf("diagnosis lab ID is nil for case %q", cr.Case.SubmitterCaseId)
+		return fmt.Errorf("diagnosis lab ID is nil for case %d", cr.Index)
 	}
 
 	proband, err := cr.getProbandFromPatients()
@@ -1268,7 +1270,7 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 		return fmt.Errorf("failed to get proband patient %w", err)
 	}
 	if proband == nil {
-		return fmt.Errorf("proband patient not found for case %q", cr.Case.SubmitterCaseId)
+		return fmt.Errorf("proband patient not found for case %d", cr.Index)
 	}
 
 	c := types.Case{
@@ -1304,7 +1306,7 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 
 		err := ctx.CasesRepo.CreateCaseHasSequencingExperiment(&chse)
 		if err != nil {
-			return fmt.Errorf("failed to persist case has sequencing experiment for case %q and sequencing experiment %q: %w", cr.Case.SubmitterCaseId, se.ID, err)
+			return fmt.Errorf("failed to persist case has sequencing experiment for case %d and sequencing experiment %q: %w", cr.Index, se.ID, err)
 		}
 	}
 
@@ -1320,19 +1322,19 @@ func persistCaseRecords(
 			continue
 		}
 		if err := persistCase(ctx, record); err != nil {
-			return fmt.Errorf("failed to persist case for case %q: %w", record.Case.SubmitterCaseId, err)
+			return fmt.Errorf("failed to persist case for case %d: %w", record.Index, err)
 		}
 		if record.CaseID == nil {
-			return fmt.Errorf("case ID is nil after persisting case for case %q", record.Case.SubmitterCaseId)
+			return fmt.Errorf("case ID is nil after persisting case for case %d", record.Index)
 		}
 		if err := persistFamily(ctx, record); err != nil {
-			return fmt.Errorf("failed to persist family for case %q: %w", record.Case.SubmitterCaseId, err)
+			return fmt.Errorf("failed to persist family for case %d: %w", record.Index, err)
 		}
 		if err := persistObservationCategorical(ctx, record); err != nil {
-			return fmt.Errorf("failed to persist observations for case %q: %w", record.Case.SubmitterCaseId, err)
+			return fmt.Errorf("failed to persist observations for case %d: %w", record.Index, err)
 		}
 		if err := persistTask(ctx, record); err != nil {
-			return fmt.Errorf("failed to persist tasks for case %q: %w", record.Case.SubmitterCaseId, err)
+			return fmt.Errorf("failed to persist tasks for case %d: %w", record.Index, err)
 		}
 	}
 	return nil
@@ -1344,7 +1346,7 @@ func persistFamily(ctx *StorageContext, cr *CaseValidationRecord) error {
 		key := PatientKey{p.PatientOrganizationCode, p.SubmitterPatientId}
 		patient, ok := cr.Patients[key]
 		if !ok {
-			return fmt.Errorf("failed to find patient for family member %q in case %q", p.SubmitterPatientId, cr.Case.SubmitterCaseId)
+			return fmt.Errorf("failed to find patient for family member %q in case %d", p.SubmitterPatientId, cr.Index)
 		}
 		familyMember := types.Family{
 			CaseID:                    *cr.CaseID,
@@ -1353,7 +1355,7 @@ func persistFamily(ctx *StorageContext, cr *CaseValidationRecord) error {
 			AffectedStatusCode:        p.AffectedStatusCode,
 		}
 		if err := ctx.FamilyRepo.CreateFamily(&familyMember); err != nil {
-			return fmt.Errorf("failed to persist family member %q for case %q: %w", p.SubmitterPatientId, cr.Case.SubmitterCaseId, err)
+			return fmt.Errorf("failed to persist family member %q for case %d: %w", p.SubmitterPatientId, cr.Index, err)
 		}
 	}
 	return nil
@@ -1365,7 +1367,7 @@ func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord
 		key := PatientKey{p.PatientOrganizationCode, p.SubmitterPatientId}
 		patient, ok := cr.Patients[key]
 		if !ok {
-			return fmt.Errorf("failed to find patient for observations for patient %q in case %q", p.SubmitterPatientId, cr.Case.SubmitterCaseId)
+			return fmt.Errorf("failed to find patient for observations for patient %s in case %d", p.SubmitterPatientId, cr.Index)
 		}
 
 		for _, o := range p.ObservationsCategorical {
@@ -1381,7 +1383,7 @@ func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord
 			}
 
 			if err := ctx.ObsCatRepo.CreateObservationCategorical(&obs); err != nil {
-				return fmt.Errorf("failed to persist observation categorical for patient %q in case %q: %w", p.SubmitterPatientId, cr.Case.SubmitterCaseId, err)
+				return fmt.Errorf("failed to persist observation categorical for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
 			}
 		}
 	}
@@ -1398,7 +1400,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 		}
 		err := ctx.TaskRepo.CreateTask(&task)
 		if err != nil {
-			return fmt.Errorf("failed to persist task for case %q: %w", cr.Case.SubmitterCaseId, err)
+			return fmt.Errorf("failed to persist task for case %d: %w", cr.Index, err)
 		}
 
 		for _, se := range cr.SequencingExperiments {
@@ -1410,7 +1412,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 			} else {
 				aliquots, err = cr.getAliquotFromInputDocuments(t)
 				if err != nil {
-					return fmt.Errorf("failed to get aliquot from input documents for task %q in case %q: %w", t.TypeCode, cr.Case.SubmitterCaseId, err)
+					return fmt.Errorf("failed to get aliquot from input documents for task %q in case %d: %w", t.TypeCode, cr.Index, err)
 				}
 			}
 
@@ -1431,7 +1433,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 					CaseID:                 c,
 				})
 				if err != nil {
-					return fmt.Errorf("failed to persist task context for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
+					return fmt.Errorf("failed to persist task context for case %d and task %s: %w", cr.Index, t.TypeCode, err)
 				}
 			}
 		}
@@ -1439,7 +1441,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 		for _, doc := range t.InputDocuments {
 			d, ok := cr.Documents[doc.Url]
 			if !ok {
-				return fmt.Errorf("failed to find input document by url %q for task %q in case %q", doc.Url, t.TypeCode, cr.Case.SubmitterCaseId)
+				return fmt.Errorf("failed to find input document by url %q for task %q in case %d", doc.Url, t.TypeCode, cr.Index)
 			}
 
 			err := ctx.TaskRepo.CreateTaskHasDocument(&types.TaskHasDocument{
@@ -1448,7 +1450,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 				Type:       "input",
 			})
 			if err != nil {
-				return fmt.Errorf("failed to persist task has document for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
+				return fmt.Errorf("failed to persist task has document for case %d and task %q: %w", cr.Index, t.TypeCode, err)
 			}
 		}
 
@@ -1464,7 +1466,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 			}
 			err := ctx.DocRepo.CreateDocument(&d)
 			if err != nil {
-				return fmt.Errorf("failed to persist document %q for case %q: %w", doc.Name, cr.Case.SubmitterCaseId, err)
+				return fmt.Errorf("failed to persist document %q for case %d: %w", doc.Name, cr.Index, err)
 			}
 			cr.Documents[doc.Url] = &d
 
@@ -1474,7 +1476,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 				Type:       "output",
 			})
 			if err != nil {
-				return fmt.Errorf("failed to persist task has document for case %q and task %q: %w", cr.Case.SubmitterCaseId, t.TypeCode, err)
+				return fmt.Errorf("failed to persist task has document for case %d and task %q: %w", cr.Index, t.TypeCode, err)
 			}
 			cr.DocumentsInTasks[doc.Url] = append(cr.DocumentsInTasks[doc.Url], &DocumentRelation{task.ID, "output"})
 		}
@@ -1497,7 +1499,9 @@ func validateCaseBatch(ctx *BatchValidationContext, cases []types.CaseBatch) ([]
 			return nil, fmt.Errorf("error during case validation: %v", err)
 		}
 
-		validateUniquenessInBatch(record, key, visited, CaseIdenticalInBatch, []string{c.ProjectCode, c.SubmitterCaseId})
+		if c.ProjectCode != "" && c.SubmitterCaseId != "" {
+			validateUniquenessInBatch(record, key, visited, CaseIdenticalInBatch, []string{c.ProjectCode, c.SubmitterCaseId})
+		}
 		records = append(records, record)
 	}
 	return records, nil

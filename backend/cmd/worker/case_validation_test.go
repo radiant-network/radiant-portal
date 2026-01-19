@@ -361,7 +361,7 @@ func Test_getProbandFromPatients_Error(t *testing.T) {
 	}
 	proband, err := record.getProbandFromPatients()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to find proband patient {\"LAB-1\" \"PAT-3\"} for case \"CASE-1\"")
+	assert.Contains(t, err.Error(), "failed to find proband patient {\"LAB-1\" \"PAT-3\"} for case 0")
 	assert.Nil(t, proband)
 }
 
@@ -1801,6 +1801,46 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 	assert.True(t, hasLabError, "Should have diagnostic lab error")
 	assert.True(t, hasStatusError, "Should have status code error")
 	assert.True(t, hasNoteError, "Should have note field error")
+}
+
+func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
+	projectID := 42
+	diagnosisLabID := 10
+	analysisID := 1
+	orderingOrgID := 20
+
+	ctx := &BatchValidationContext{}
+	mockRepo := &CaseValidationMockRepo{}
+	ctx.CasesRepo = mockRepo
+
+	cr := &CaseValidationRecord{
+		BaseValidationRecord:   BaseValidationRecord{Index: 0},
+		Context:                ctx,
+		ProjectID:              &projectID,
+		DiagnosisLabID:         &diagnosisLabID,
+		AnalysisCatalogID:      &analysisID,
+		OrderingOrganizationID: &orderingOrgID,
+		SubmitterCaseID:        "",
+		StatusCodes:            []string{"completed", "unknown"},
+		Case: types.CaseBatch{
+			SubmitterCaseId:            "CASE-1",
+			StatusCode:                 "completed",
+			DiagnosticLabCode:          "LAB-1",
+			AnalysisCode:               "WGA",
+			OrderingOrganizationCode:   "LAB-2",
+			PrimaryConditionCodeSystem: "HPO",
+			PrimaryConditionValue:      "HP:0001234",
+			ResolutionStatusCode:       "resolved",
+			Note:                       "Test note",
+			OrderingPhysician:          "Dr. Smith",
+		},
+	}
+
+	err := cr.validateCase()
+
+	assert.NoError(t, err)
+	assert.Empty(t, cr.Errors)
+	assert.False(t, cr.Skipped)
 }
 
 // -----------------------------------------------------------------------------

@@ -241,6 +241,29 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 	})
 }
 
+func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload()
+		payload[0].SubmitterCaseId = ""
+		payload[0].OrderingPhysician = "Not_Dry_Run_No_SubmitterCaseId"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_No_SubmitterCaseId.recal.crai"
+
+		createDocumentsForBatch(context, client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		db.Table("cases").Where("project_id = ? AND ordering_physician = ?", 1, "Not_Dry_Run_No_SubmitterCaseId").First(&ca)
+
+		assert.NotNil(t, ca)
+		assert.GreaterOrEqual(t, ca.ID, 1000)
+		assert.Equal(t, "Not_Dry_Run_No_SubmitterCaseId", ca.OrderingPhysician)
+		assert.Equal(t, "", ca.SubmitterCaseID)
+	})
+}
+
 func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		for _, tableName := range []string{"cases", "family", "obs_categorical", "task", "document"} {
@@ -264,15 +287,15 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 			var msg string
 			switch tableName {
 			case "cases":
-				msg = "error processing case batch records: error during case insertion failed to persist case for case \"CASE123\": failed to persist case ERROR: duplicate key value violates unique constraint \"case_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist case for case 0: failed to persist case ERROR: duplicate key value violates unique constraint \"case_pkey\" (SQLSTATE 23505)"
 			case "family":
-				msg = "error processing case batch records: error during case insertion failed to persist family for case \"CASE123\": failed to persist family member \"MRN-283773\" for case \"CASE123\": ERROR: duplicate key value violates unique constraint \"family_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist family for case 0: failed to persist family member \"MRN-283773\" for case 0: ERROR: duplicate key value violates unique constraint \"family_pkey\" (SQLSTATE 23505)"
 			case "obs_categorical":
-				msg = "error processing case batch records: error during case insertion failed to persist observations for case \"CASE123\": failed to persist observation categorical for patient \"MRN-283773\" in case \"CASE123\": ERROR: duplicate key value violates unique constraint \"observation_coding_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist observations for case 0: failed to persist observation categorical for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"observation_coding_pkey\" (SQLSTATE 23505)"
 			case "task":
-				msg = "error processing case batch records: error during case insertion failed to persist tasks for case \"CASE123\": failed to persist task for case \"CASE123\": ERROR: duplicate key value violates unique constraint \"task_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist tasks for case 0: failed to persist task for case 0: ERROR: duplicate key value violates unique constraint \"task_pkey\" (SQLSTATE 23505)"
 			case "document":
-				msg = "error processing case batch records: error during case insertion failed to persist tasks for case \"CASE123\": failed to persist document \"NA12891.recal.cram\" for case \"CASE123\": ERROR: duplicate key value violates unique constraint \"document_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist tasks for case 0: failed to persist document \"NA12891.recal.cram\" for case 0: ERROR: duplicate key value violates unique constraint \"document_pkey\" (SQLSTATE 23505)"
 			default:
 				t.Fatalf("unexpected table name: %s", tableName)
 			}
