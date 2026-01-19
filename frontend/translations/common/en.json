@@ -854,7 +854,7 @@
       "gene_length": "Length",
       "gene_length_tooltip": "Gene base length",
       "genotype_quality": "GQ",
-      "genotype_quality_tooltip": "Genotype quality. Only occurrences with GQ ≥ 20 are taken into account for frequency calculation",
+      "genotype_quality_tooltip": "Genotype quality. Only occurrences with GQ ≥ 20 are taken into account for frequency calculation.",
       "gnomad_sf": "gnomAD",
       "gnomad_sf_tooltip": "gnomAD 4.1.0 (Allele Frequency)",
       "gnomad_v3_af": "gnomAD",
@@ -1592,7 +1592,7 @@
           "seq_id": "Sequencing",
           "patient_id": "Patient",
           "affected_status": "Aff. Status",
-          "affected_status_tooltip": "Affected Status",
+          "affected_status_tooltip": "Affected status",
           "sample": "Sample"
         },
         "filters": {

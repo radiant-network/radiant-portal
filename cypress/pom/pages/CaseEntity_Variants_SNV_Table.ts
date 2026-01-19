@@ -34,7 +34,7 @@ const tableColumns = [
   },
   {
     id: 'gene',
-    name: 'Genes',
+    name: 'Gene',
     apiField: 'symbol',
     isVisibleByDefault: true,
     pinByDefault: null,
@@ -162,7 +162,7 @@ const tableColumns = [
     isSortable: true,
     isPinnable: true,
     position: 13,
-    tooltip: 'Number of germline genomes containing this variant and their frequency across this organization. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculations.',
+    tooltip: 'Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
     id: 'gq',
