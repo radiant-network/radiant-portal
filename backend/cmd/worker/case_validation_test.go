@@ -4171,7 +4171,7 @@ func Test_validateTaskDocuments_InputDocumentExternalSeqExpError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-006",
-		Message: "Input document with URL s3://input/foo/bar.txt for case 0 - task 0 was produced by a sequencing experiment that is not defined in this case.",
+		Message: "Input document with URL s3://input/foo/bar.txt for case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
 		Path:    "case[0].tasks[0]",
 	}
 
