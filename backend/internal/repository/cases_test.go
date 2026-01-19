@@ -614,3 +614,66 @@ func Test_RetrieveCaseTasks(t *testing.T) {
 		assert.True(t, slices.Contains((*tasks)[3].Patients, "father"))
 	})
 }
+
+func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		newCase := &types.Case{
+			ID:                     1000,
+			ProbandID:              3,
+			ProjectID:              1,
+			StatusCode:             "in_progress",
+			PrimaryCondition:       "MONDO:0000001",
+			DiagnosisLabID:         6,
+			Note:                   "This is a test",
+			AnalysisCatalogID:      1,
+			PriorityCode:           "routine",
+			CaseTypeCode:           "germline",
+			CaseCategoryCode:       "postnatal",
+			ConditionCodeSystem:    "MONDO",
+			ResolutionStatusCode:   "unsolved",
+			OrderingPhysician:      "Dr. Test",
+			OrderingOrganizationID: 6,
+			SubmitterCaseID:        "1:1", // Duplicate submitter_case_id
+		}
+		err := repo.CreateCase(newCase)
+		assert.Error(t, err)
+		assert.Equal(t, "ERROR: duplicate key value violates unique constraint \"uc_cases_submitter_case_id_filtered\" (SQLSTATE 23505)", err.Error())
+
+		if err != nil {
+			// Cleanup in case the record was created
+			db.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='1:1';")
+		}
+	})
+}
+
+func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		newCase := &types.Case{
+			ID:                     1000,
+			ProbandID:              3,
+			ProjectID:              1,
+			StatusCode:             "in_progress",
+			PrimaryCondition:       "MONDO:0000001",
+			DiagnosisLabID:         6,
+			Note:                   "This is a test",
+			AnalysisCatalogID:      1,
+			PriorityCode:           "routine",
+			CaseTypeCode:           "germline",
+			CaseCategoryCode:       "postnatal",
+			ConditionCodeSystem:    "MONDO",
+			ResolutionStatusCode:   "unsolved",
+			OrderingPhysician:      "Dr. Test",
+			OrderingOrganizationID: 6,
+			SubmitterCaseID:        "", // Duplicate submitter_case_id
+		}
+		err := repo.CreateCase(newCase)
+		assert.NoError(t, err)
+
+		if err != nil {
+			// Cleanup in case the record was created
+			db.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='';")
+		}
+	})
+}
