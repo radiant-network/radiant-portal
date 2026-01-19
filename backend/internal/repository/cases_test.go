@@ -670,10 +670,6 @@ func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
 		}
 		err := repo.CreateCase(newCase)
 		assert.NoError(t, err)
-
-		if err != nil {
-			// Cleanup in case the record was created
-			db.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='';")
-		}
+		db.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='';")
 	})
 }
