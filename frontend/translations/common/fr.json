@@ -1088,7 +1088,8 @@
         "primary_condition": "Condition principale",
         "classification_criteria": "Critères de classification",
         "interpretation": "Interprétation",
-        "references": "{{count}} références"
+        "references": "{{count}} références",
+        "updated_at_tooltip": "Dernière date d'interprétation"
       }
     },
     "variant_details": {

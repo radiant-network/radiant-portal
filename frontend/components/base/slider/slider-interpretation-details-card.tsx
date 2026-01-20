@@ -24,6 +24,8 @@ import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 
+import { Tooltip, TooltipContent, TooltipTrigger } from '../shadcn/tooltip';
+
 type SliderInterpretationDetailsCardProps = {
   seqId: number;
   caseId: number;
@@ -176,15 +178,22 @@ function SliderInterpretationDetailsCard({
               </div>
             </DescriptionSection>
             <Separator />
-            <div className="flex gap-6 text-sm text-muted-foreground font-mono">
+            <div className="flex gap-6 text-sm text-muted-foreground font-sans">
               <span className="flex items-center gap-1">
                 <StethoscopeIcon size="14" />
                 {interpretation?.updated_by_name}
               </span>
-              <span className="flex items-center gap-1">
-                <CalendarIcon size="14" />
-                {interpretation?.updated_at && <DateTime date={interpretation.updated_at} />}
-              </span>
+              {interpretation?.updated_at && (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <span className="flex items-center gap-1">
+                      <CalendarIcon size="14" />
+                      <DateTime date={interpretation.updated_at} />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>{t('preview_sheet.interpretation_details.fields.updated_at_tooltip')}</TooltipContent>
+                </Tooltip>
+              )}
             </div>
 
             <DescriptionSection title={t('preview_sheet.interpretation_details.fields.interpretation')}>

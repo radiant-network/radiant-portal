@@ -102,7 +102,7 @@ const badgeVariants = tv({
         base: '',
       },
       lg: {
-        base: 'px-3 py-1.5',
+        base: 'px-3 py-1.5 text-sm',
       },
     },
   },
