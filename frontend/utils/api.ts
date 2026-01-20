@@ -9,6 +9,7 @@ import {
   OccurrencesApi,
   SavedFiltersApi,
   SequencingApi,
+  UserPreferencesApi,
   VariantApi,
 } from '../api';
 import { BASE_PATH } from '../api/base';
@@ -22,6 +23,7 @@ const config = new Configuration({
 export const variantsApi = new VariantApi(config, BASE_PATH, axiosClient);
 export const occurrencesApi = new OccurrencesApi(config, BASE_PATH, axiosClient);
 export const interpretationApi = new InterpretationsApi(config, BASE_PATH, axiosClient);
+export const userPreferenceApi = new UserPreferencesApi(config, BASE_PATH, axiosClient);
 export const mondoApi = new MondoApi(config, BASE_PATH, axiosClient);
 export const caseApi = new CasesApi(config, BASE_PATH, axiosClient);
 export const documentApi = new DocumentsApi(config, BASE_PATH, axiosClient);

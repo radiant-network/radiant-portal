@@ -23,6 +23,7 @@ import {
   Table as TableType,
   useReactTable,
 } from '@tanstack/react-table';
+import isEqual from 'lodash/isEqual';
 import { AlertCircle, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
 
 import { SortBody, SortBodyOrderEnum } from '@/api/api';
@@ -31,12 +32,6 @@ import DataTableFullscreenButton from '@/components/base/data-table/data-table-f
 import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
 import TableIndexResult from '@/components/base/data-table/data-table-index-result';
 import DataTableSkeletonLoading from '@/components/base/data-table/data-table-skeleton-loading';
-import {
-  cleanTableLocaleStorage,
-  getTableLocaleStorage,
-  TableCacheProps,
-  useTableStateObserver,
-} from '@/components/base/data-table/hooks/use-table-localstorage';
 import { Button } from '@/components/base/shadcn/button';
 import { Card } from '@/components/base/shadcn/card';
 import {
@@ -62,6 +57,11 @@ import { cn } from '@/lib/utils';
 
 import Empty from '../empty';
 
+import {
+  useTableGetPreferenceEffect,
+  useTableSizingEffect,
+  useTableUpdatePreferenceEffect,
+} from './hooks/use-table-state';
 import DataTableGroupBy from './data-table-group-by';
 import { getFilteredAdditionalFields, updateAdditionalField } from './utils';
 
@@ -150,9 +150,9 @@ export type ColumnVisiblity = {
 };
 
 export type DefaultColumnTableState = {
-  columnVisibility: ColumnVisiblity;
   columnOrder: ColumnOrderState;
   columnPinning: ColumnPinningState;
+  columnVisibility: ColumnVisiblity;
 };
 
 /**
@@ -332,70 +332,68 @@ function getRowFlexRender<T>({
   subComponent?: SubComponentProps<T>;
   containerWidth: number;
 }) {
-  return function (row: Row<any>) {
-    return (
-      <Fragment key={row.id}>
-        <TableRow
-          key={`row-${row.id}`}
-          className={cn(getRowPinningExtraCN(row))}
-          style={{
-            ...getRowPinningExtraStyles(row),
-          }}
-          data-state={row.getIsSelected() && 'selected'}
-        >
-          {row.getVisibleCells().map(cell => (
-            <TableCell
-              key={cell.id}
-              className={cn(
-                'overflow-hidden truncate text-nowrap',
-                getColumnPinningExtraCN(cell.column, ColumnType.Data),
-                getRowPinningCellExtraCN(cell.row),
+  return (row: Row<any>) => (
+    <Fragment key={row.id}>
+      <TableRow
+        key={`row-${row.id}`}
+        className={cn(getRowPinningExtraCN(row))}
+        style={{
+          ...getRowPinningExtraStyles(row),
+        }}
+        data-state={row.getIsSelected() && 'selected'}
+      >
+        {row.getVisibleCells().map(cell => (
+          <TableCell
+            key={cell.id}
+            className={cn(
+              'overflow-hidden truncate text-nowrap',
+              getColumnPinningExtraCN(cell.column, ColumnType.Data),
+              getRowPinningCellExtraCN(cell.row),
+            )}
+            style={{
+              width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
+              ...getColumnPinningExtraStyles(cell.column),
+            }}
+          >
+            <>
+              {/* Group By */}
+              {cell.getIsGrouped() && (
+                <Button
+                  className="self-center"
+                  size="xs"
+                  variant="ghost"
+                  iconOnly
+                  onClick={row.getToggleExpandedHandler()}
+                >
+                  {row.getIsExpanded() ? <ChevronDown /> : <ChevronRight />}
+                </Button>
               )}
-              style={{
-                width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
-                ...getColumnPinningExtraStyles(cell.column),
-              }}
-            >
-              <>
-                {/* Group By */}
-                {cell.getIsGrouped() && (
-                  <Button
-                    className="self-center"
-                    size="xs"
-                    variant="ghost"
-                    iconOnly
-                    onClick={row.getToggleExpandedHandler()}
-                  >
-                    {row.getIsExpanded() ? <ChevronDown /> : <ChevronRight />}
-                  </Button>
-                )}
 
-                {/* Group By: Aggregated */}
-                {cell.getIsAggregated() &&
-                  flexRender(cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell, cell.getContext())}
+              {/* Group By: Aggregated */}
+              {cell.getIsAggregated() &&
+                flexRender(cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell, cell.getContext())}
 
-                {/* Placeholder OR normal rendering */}
-                {!cell.getIsAggregated() &&
-                  !cell.getIsPlaceholder() &&
-                  flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </>
-            </TableCell>
-          ))}
+              {/* Placeholder OR normal rendering */}
+              {!cell.getIsAggregated() &&
+                !cell.getIsPlaceholder() &&
+                flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </>
+          </TableCell>
+        ))}
+      </TableRow>
+
+      {/* SubComponent */}
+      {subComponent && row.getIsExpanded() && (
+        <TableRow key={`subcomponent-${row.id}`} className="bg-muted/30">
+          <TableCell colSpan={row.getVisibleCells().length}>
+            <div className="sticky overflow-hidden left-2" style={{ width: containerWidth - 16 }}>
+              {subComponent(row.original)}
+            </div>
+          </TableCell>
         </TableRow>
-
-        {/* SubComponent */}
-        {subComponent && row.getIsExpanded() && (
-          <TableRow key={`subcomponent-${row.id}`} className="bg-muted/30">
-            <TableCell colSpan={row.getVisibleCells().length}>
-              <div className="sticky overflow-hidden left-2" style={{ width: containerWidth - 16 }}>
-                {subComponent(row.original)}
-              </div>
-            </TableCell>
-          </TableRow>
-        )}
-      </Fragment>
-    );
-  };
+      )}
+    </Fragment>
+  );
 }
 
 /**
@@ -537,17 +535,10 @@ function TranstackTable<T>({
     () => ({
       columnOrder: deserializeColumnOrder(defaultColumnSettings) ?? {},
       columnPinning: deserializeColumnPinning(defaultColumnSettings) ?? {},
-      columnSizing: {}, // keep empty, data means the column has been resized
       columnVisibility: deserializeColumnVisibility(defaultColumnSettings) ?? [],
     }),
     [defaultColumnSettings],
   );
-
-  /**
-   * Load the previous table state
-   * @TODO: should be replaced by userApi
-   */
-  const tableLocaleStorage: TableCacheProps = getTableLocaleStorage(id, columns, defaultColumnTableState);
 
   // container width
   const containerRef = useRef(null);
@@ -556,10 +547,11 @@ function TranstackTable<T>({
   // table interactions
   const [isTableEmpty, setIsTableEmpty] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [rowPinning, setRowPinning] = useState<RowPinningState>(tableLocaleStorage.rowPinning.state);
-  const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(tableLocaleStorage.columnVisibility);
-  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(tableLocaleStorage.columnOrder);
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(tableLocaleStorage.columnPinning);
+  const [rowPinning, setRowPinning] = useState<RowPinningState>({ top: [], bottom: [] });
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(defaultColumnTableState.columnVisibility);
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(defaultColumnTableState.columnOrder);
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(defaultColumnTableState.columnPinning);
+  const [columnSizing, setColumnSizing] = useState<Record<string, number>>({});
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [sorting, setSorting] = useState<SortingState>(
@@ -575,13 +567,6 @@ function TranstackTable<T>({
     pageIndex: pagination.state?.pageIndex || 0,
     pageSize: pagination.state?.pageSize || 10,
   }));
-
-  // Synchronyze internal pagination with props state
-  useEffect(() => {
-    if (pagination.type !== 'hidden' && pagination.state) {
-      setInternalPagination(pagination.state);
-    }
-  }, [pagination.state, pagination.type]);
 
   // Key Input Map
   const handleEscEventListener = () => {
@@ -601,26 +586,9 @@ function TranstackTable<T>({
   // Ref to update only if additional fields change
   const lastFilteredAdditionalFields = useRef<string[]>([]);
 
-  useEffect(() => {
-    updateAdditionalField({
-      newAddFields: filteredAdditionalFields,
-      prevAddFields: lastFilteredAdditionalFields,
-      setAdditionalFields: serverOptions?.setAdditionalFields,
-    });
-  }, []);
-
   // Initialize tanstack table
   const table = useReactTable({
-    columns: columns.map(column => {
-      // load saved size
-      if (tableLocaleStorage.columnSizing[column.id]) {
-        return {
-          ...column,
-          size: tableLocaleStorage.columnSizing[column.id],
-        };
-      }
-      return column;
-    }),
+    columns,
     columnResizeMode: 'onChange',
     columnResizeDirection: 'ltr',
     data,
@@ -689,17 +657,6 @@ function TranstackTable<T>({
     return colSizes;
   }, [table.getState().columnSizingInfo, table.getState().columnSizing, columnVisibility]);
 
-  /**
-   * Sync table state with local storage
-   * Table Cache is to live result of each table interaction
-   */
-  const { tableCache, setTableCache } = useTableStateObserver({
-    id,
-    state: table.getState(),
-    rows: table.getRowModel().rows,
-    previousTableCache: tableLocaleStorage,
-  });
-
   // Table Index display position
   const hasUpperSettings = tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen;
 
@@ -721,6 +678,62 @@ function TranstackTable<T>({
     // Hide pagination if data rows are fewer than total records
     return total < (pageSize || 20);
   }, [pagination.type, pagination.state?.pageSize, total, data.length]);
+
+  /**
+   * On component mount
+   * - update additional field
+   */
+  useEffect(() => {
+    updateAdditionalField({
+      newAddFields: filteredAdditionalFields,
+      prevAddFields: lastFilteredAdditionalFields,
+      setAdditionalFields: serverOptions?.setAdditionalFields,
+    });
+  }, []);
+
+  /**
+   * Get previously saved user-preference
+   */
+  useTableGetPreferenceEffect({
+    id,
+    defaultColumnSettings,
+    setAdditionalFields: serverOptions?.setAdditionalFields,
+    setColumnOrder,
+    setColumnVisibility,
+    setColumnPinning,
+    setColumnSizing,
+  });
+
+  /**
+   * Sync data-table state with user-preference api
+   */
+  useTableUpdatePreferenceEffect({
+    id,
+    state: table.getState(),
+    columns,
+    columnOrder,
+    columnPinning,
+    columnSizing,
+    columnVisibility,
+  });
+
+  /**
+   * Update custom Sizing
+   */
+  useTableSizingEffect({
+    state: table.getState(),
+    columns,
+    setColumnSizing,
+  });
+
+  /**
+   * Synchronyze internal pagination with props state
+   */
+  useEffect(() => {
+    if (pagination.type !== 'hidden' && pagination.state) {
+      setInternalPagination(pagination.state);
+    }
+  }, [pagination.state, pagination.type]);
 
   /**
    * Add 'Esc' keyboard shortcut for fullscreen mode
@@ -848,8 +861,8 @@ function TranstackTable<T>({
             <>
               <TableColumnSettings
                 loading={loadingStates?.list}
-                columnPinning={tableCache.columnPinning}
-                columnOrder={tableLocaleStorage.columnOrder}
+                columnPinning={columnPinning}
+                columnOrder={columnOrder}
                 defaultSettings={defaultColumnSettings}
                 visiblitySettings={columnVisibility}
                 handleVisiblityChange={(target: string, checked: boolean) => {
@@ -866,19 +879,17 @@ function TranstackTable<T>({
                 }}
                 handleOrderChange={setColumnOrder}
                 pristine={
-                  JSON.stringify(defaultColumnTableState) ==
-                  JSON.stringify({
-                    columnOrder: tableCache.columnOrder,
-                    columnPinning: tableCache.columnPinning,
-                    columnSizing: tableCache.columnSizing,
-                    columnVisibility: tableCache.columnVisibility,
-                  })
+                  JSON.stringify(defaultColumnTableState.columnOrder) === JSON.stringify(columnOrder) &&
+                  JSON.stringify(defaultColumnTableState.columnPinning) === JSON.stringify(columnPinning) &&
+                  isEqual(defaultColumnTableState.columnVisibility, columnVisibility)
                 }
                 handleReset={() => {
-                  cleanTableLocaleStorage(id, defaultColumnTableState, setTableCache);
                   setColumnOrder(defaultColumnTableState.columnOrder);
                   setColumnVisibility(defaultColumnTableState.columnVisibility);
                   setColumnPinning(defaultColumnTableState.columnPinning);
+
+                  setColumnSizing({});
+
                   table.resetColumnSizing();
                   table.resetHeaderSizeInfo();
                   const allAdditionalFields = getFilteredAdditionalFields({
