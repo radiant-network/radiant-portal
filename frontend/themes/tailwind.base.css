@@ -61,6 +61,10 @@
   --color-alert-warning-foreground: var(--color-yellow-800);
   --color-alert-error-foreground: var(--color-red-700);
   --color-alert-success-foreground: var(--color-green-800);
+  --color-alert-success: var(--color-green-400);
+  --color-alert-error: var(--color-red-400);
+  --color-alert-warning: var(--color-yellow-400);
+  --color-alert-info: var(--color-blue-400);
 }
 
 .dark {
@@ -118,6 +122,10 @@
   --color-alert-warning-foreground: var(--color-yellow-400);
   --color-alert-error-foreground: var(--color-red-400);
   --color-alert-success-foreground: var(--color-green-300);
+  --color-alert-success: var(--color-green-400);
+  --color-alert-error: var(--color-red-400);
+  --color-alert-warning: var(--color-yellow-400);
+  --color-alert-info: var(--color-blue-400);
 }
 
 @theme inline {
