@@ -666,7 +666,7 @@ func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
 			ResolutionStatusCode:   "unsolved",
 			OrderingPhysician:      "Dr. Test",
 			OrderingOrganizationID: 6,
-			SubmitterCaseID:        "", // Duplicate submitter_case_id
+			SubmitterCaseID:        "",
 		}
 		err := repo.CreateCase(newCase)
 		assert.NoError(t, err)
