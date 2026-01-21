@@ -855,7 +855,7 @@
       "gene_length": "Longueur du gène",
       "gene_length_tooltip": "Longueur du gène en bases",
       "genotype_quality": "QG",
-      "genotype_quality_tooltip": "Qualité du génotypage : seules les occurrences rencontrant le critère QG ≥ 20 sont considérées pour le calcul des fréquences",
+      "genotype_quality_tooltip": "Qualité du génotypage : seules les occurrences rencontrant le critère QG ≥ 20 sont considérées pour le calcul des fréquences.",
       "gnomad_sf": "gnomAD",
       "gnomad_sf_tooltip": "gnomAD 4.1.0 (fréquence allélique)",
       "gnomad_v3_af": "gnomAD",
@@ -1582,7 +1582,7 @@
         "headers": {
           "case": "Cas",
           "date": "Date",
-          "date_tooltip": "Date de la dernière interprétation",
+          "date_tooltip": "Date de création du cas (aaaa-mm-jj)",
           "mondo": "Condition (Mondo)",
           "phenotypes_hpo": "Phénotype (HPO)",
           "zygosity": "Zygosité",
