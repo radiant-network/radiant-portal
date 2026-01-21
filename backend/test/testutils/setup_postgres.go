@@ -95,14 +95,14 @@ func initPostgresDb() (*gorm.DB, error) {
 
 func populateData(db *sql.DB) error {
 	// Read the list of .sql files in the folder
-	files, err := os.ReadDir(filepath.Join(testResources, "clinical"))
+	files, err := os.ReadDir(filepath.Join(TestResources, "clinical"))
 	if err != nil {
 		log.Fatal("failed to read directory test_resoures", err)
 	}
 
 	for _, file := range files {
 		if filepath.Ext(file.Name()) == ".sql" {
-			sqlFilePath := filepath.Join(testResources, "clinical", file.Name())
+			sqlFilePath := filepath.Join(TestResources, "clinical", file.Name())
 
 			// Read the SQL file
 			sqlFile, err := os.ReadFile(sqlFilePath)

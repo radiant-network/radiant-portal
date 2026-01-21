@@ -53,7 +53,7 @@ func initDb(folderName string) (*gorm.DB, string, error) {
 	}
 
 	// Read the list of .tsv files in the folder
-	files, err := os.ReadDir(filepath.Join(testResources, folderName))
+	files, err := os.ReadDir(filepath.Join(TestResources, folderName))
 	if err != nil {
 		log.Fatal("failed to read directory test_resoures", err)
 	}
@@ -99,7 +99,7 @@ func createTableAndPopulateData(db *sql.DB, folderName string, file os.DirEntry)
 	}
 
 	tableName := strings.TrimSuffix(file.Name(), ".tsv")
-	sqlFilePath := filepath.Join(testResources, "sql", tableName+".sql")
+	sqlFilePath := filepath.Join(TestResources, "sql", tableName+".sql")
 
 	// Read the SQL file
 	sqlFile, err := os.ReadFile(sqlFilePath)
@@ -114,7 +114,7 @@ func createTableAndPopulateData(db *sql.DB, folderName string, file os.DirEntry)
 	}
 
 	// Populate the table with data from the .tsv file
-	tsvFilePath := filepath.Join(testResources, folderName, file.Name())
+	tsvFilePath := filepath.Join(TestResources, folderName, file.Name())
 	tsvFile, err := os.Open(tsvFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to open TSV file: %v", err)

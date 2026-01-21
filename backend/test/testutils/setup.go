@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	testResources            = "../../test/data"
+	TestResources            = "../../test/data"
 	OpenFGAContainerName     = "openfga_radiant"
 	StarrocksContainerName   = "starrocks_radiant"
 	PostgresContainerName    = "postgres_radiant"

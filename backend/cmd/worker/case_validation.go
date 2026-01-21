@@ -897,7 +897,7 @@ func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 		}
 	}
 	path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
-	message := fmt.Sprintf("Sequencing aliquot %q is not defined for case %d - task %d.", cr.Case.Tasks[taskIndex].Aliquot, cr.Index, taskIndex)
+	message := fmt.Sprintf("Sequencing aliquot %s is not defined for case %d - task %d.", cr.Case.Tasks[taskIndex].Aliquot, cr.Index, taskIndex)
 	cr.addErrors(message, TaskUnknownAliquot, path)
 }
 

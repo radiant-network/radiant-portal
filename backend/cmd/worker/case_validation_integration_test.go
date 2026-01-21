@@ -19,73 +19,15 @@ import (
 
 var emptyMsgs []types.BatchMessage
 
-func createBaseCasePayload() []*types.CaseBatch {
-	return []*types.CaseBatch{
-		{
-			SubmitterCaseId:            "CASE123",
-			Type:                       "germline",
-			StatusCode:                 "in_progress",
-			ProjectCode:                "N1",
-			DiagnosticLabCode:          "LDM-CHUSJ",
-			PrimaryConditionCodeSystem: "MONDO",
-			PrimaryConditionValue:      "MONDO:0700092",
-			PriorityCode:               "routine",
-			CategoryCode:               "postnatal",
-			AnalysisCode:               "WGA",
-			ResolutionStatusCode:       "unsolved",
-			Note:                       "test case note",
-			OrderingPhysician:          "Dr. Test",
-			OrderingOrganizationCode:   "CHUSJ",
-			Patients: []*types.CasePatientBatch{
-				{
-					SubmitterPatientId:      "MRN-283773",
-					AffectedStatusCode:      "affected",
-					PatientOrganizationCode: "CHUSJ",
-					RelationToProbandCode:   "proband",
-					FamilyHistory:           []*types.FamilyHistoryBatch{},
-					ObservationsText:        []*types.ObservationTextBatch{},
-					ObservationsCategorical: []*types.ObservationCategoricalBatch{
-						{
-							Code:               "phenotype",
-							System:             "HPO",
-							Value:              "TEST:12345",
-							OnsetCode:          "infantile",
-							InterpretationCode: "positive",
-							Note:               "Test clinical note",
-						},
-					},
-				},
-			},
-			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
-				{
-					Aliquot:                "NA12891",
-					SampleOrganizationCode: "CQGC",
-					SubmitterSampleId:      "S13225",
-				},
-			},
-			Tasks: []*types.CaseTaskBatch{
-				{
-					TypeCode:        "alignment_germline_variant_calling",
-					Aliquot:         "NA12891",
-					PipelineName:    "Dragen",
-					PipelineVersion: "4.4.4",
-					GenomeBuild:     "GRch38",
-					InputDocuments:  []*types.InputDocumentBatch{},
-					OutputDocuments: []*types.OutputDocumentBatch{
-						{
-							DataCategoryCode: "genomic",
-							DataTypeCode:     "alignment",
-							FormatCode:       "cram",
-							Hash:             "d57f21e6a273781dbf8b7657940f3b03",
-							Name:             "NA12891.recal.cram",
-							Size:             11,
-							Url:              "s3://test-bucket/NA12891.recal.crai",
-						},
-					},
-				},
-			},
-		},
+func createBaseCasePayload(submitterCaseId string) []*types.CaseBatch {
+	scenario, err := testutils.LoadScenario("base")
+	if err != nil {
+		panic(fmt.Sprintf("failed to load test scenario %q: %v", "base", err))
 	}
+	cases := scenario.Cases
+	cases[0].SubmitterCaseId = submitterCaseId
+	cases[0].Tasks[0].OutputDocuments[0].Url = fmt.Sprintf("s3://test-bucket/%s.recal.crai", submitterCaseId)
+	return cases
 }
 
 func createDocument(ctx context.Context, client *minio.Client, bucket string, key string, content []byte) error {
@@ -151,7 +93,7 @@ func getTableCounts(db *gorm.DB, tableNames []string) map[string]int64 {
 
 func Test_ProcessBatch_Case_Dry_Run(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
+		payload := createBaseCasePayload("Dry_Run")
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
@@ -159,16 +101,14 @@ func Test_ProcessBatch_Case_Dry_Run(t *testing.T) {
 		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, true, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var count int64
-		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "CASE123").Count(&count)
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Dry_Run").Count(&count)
 		assert.Equal(t, int64(0), count)
 	})
 }
 
 func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "SUCCESS_CASE_123"
-
+		payload := createBaseCasePayload("Not_Dry_Run")
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
 
@@ -176,7 +116,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca *types.Case
-		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "SUCCESS_CASE_123").First(&ca)
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Not_Dry_Run").First(&ca)
 
 		assert.NotNil(t, ca)
 		assert.Equal(t, 1000, ca.ID)
@@ -234,7 +174,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		assert.Equal(t, "NA12891.recal.cram", doc.Name)
 		assert.Equal(t, int64(11), doc.Size)
 		assert.Equal(t, "d57f21e6a273781dbf8b7657940f3b03", doc.Hash)
-		assert.Equal(t, "s3://test-bucket/NA12891.recal.crai", doc.Url)
+		assert.Equal(t, "s3://test-bucket/Not_Dry_Run.recal.crai", doc.Url)
 		assert.Equal(t, "genomic", doc.DataCategoryCode)
 		assert.Equal(t, "alignment", doc.DataTypeCode)
 		assert.Equal(t, "cram", doc.FileFormatCode)
@@ -243,7 +183,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 
 func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
+		payload := createBaseCasePayload("")
 		payload[0].SubmitterCaseId = ""
 		payload[0].OrderingPhysician = "Not_Dry_Run_No_SubmitterCaseId"
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_No_SubmitterCaseId_1.recal.crai"
@@ -273,7 +213,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
 
 func Test_ProcessBatch_Case_Not_Dry_Run_SubmitterCaseId_Collision(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
+		payload := createBaseCasePayload("")
 		payload[0].SubmitterCaseId = "SUBMITTER_CASE_ID_COLLISION"
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
 
@@ -309,10 +249,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 
 			before := getTableCounts(db, []string{"cases", "family", "obs_categorical", "task", "document"})
 
-			payload := createBaseCasePayload()
-
-			payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-another-bucket/NA12891.recal.crai"
-
+			payload := createBaseCasePayload("Persist_Failure_ID_Collision_" + tableName)
 			createDocumentsForBatch(context, client, payload)
 			payloadBytes, _ := json.Marshal(payload)
 			id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
@@ -354,9 +291,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 
 func Test_ProcessBatch_Case_validateTask_Error_TaskField(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateTask_Error_TaskField"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_TaskField.recal.crai"
+		payload := createBaseCasePayload("validateTask_Error_TaskField")
 		payload[0].Tasks[0].PipelineVersion = "!@#$%^&*()_+"
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
@@ -375,9 +310,7 @@ func Test_ProcessBatch_Case_validateTask_Error_TaskField(t *testing.T) {
 
 func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateTask_Error_InvalidTaskTypeCode"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_InvalidTaskTypeCode.recal.crai"
+		payload := createBaseCasePayload("validateTask_Error_InvalidTaskTypeCode")
 		payload[0].Tasks[0].TypeCode = "invalid_task_type"
 		createDocumentsForBatch(context, client, payload)
 
@@ -397,9 +330,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 
 func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateTask_Error_InvalidTaskAliquot"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_InvalidTaskAliquot.recal.crai"
+		payload := createBaseCasePayload("validateTask_Error_InvalidTaskAliquot")
 		payload[0].Tasks[0].Aliquot = "UNKNOWN_ALIQUOT"
 		createDocumentsForBatch(context, client, payload)
 
@@ -409,7 +340,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) 
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-002",
-				Message: "Sequencing aliquot \"UNKNOWN_ALIQUOT\" is not defined for case 0 - task 0.",
+				Message: "Sequencing aliquot UNKNOWN_ALIQUOT is not defined for case 0 - task 0.",
 				Path:    "case[0].tasks[0]",
 			},
 		}
@@ -419,9 +350,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) 
 
 func Test_ProcessBatch_Case_validateTask_Error_ExclusiveAliquotInputDocs(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateTask_Error_ExclusiveAliquotInputDocs"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_ExclusiveAliquotInputDocs.recal.crai"
+		payload := createBaseCasePayload("validateTask_Error_ExclusiveAliquotInputDocs")
 		payload[0].Tasks[0].InputDocuments = []*types.InputDocumentBatch{
 			{
 				Url: "s3://cqdg-prod-file-workspace/sarek/preprocessing/",
@@ -450,9 +379,7 @@ func Test_ProcessBatch_Case_validateTask_Error_ExclusiveAliquotInputDocs(t *test
 
 func Test_ProcessBatch_Case_validateTask_Error_MissingInputDocuments(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateTask_Error_MissingInputDocuments"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_MissingInputDocuments.recal.crai"
+		payload := createBaseCasePayload("validateTask_Error_MissingInputDocuments")
 		payload[0].Tasks[0].TypeCode = "family_variant_calling"
 		createDocumentsForBatch(context, client, payload)
 
@@ -472,10 +399,7 @@ func Test_ProcessBatch_Case_validateTask_Error_MissingInputDocuments(t *testing.
 
 func Test_ProcessBatch_Case_validateTask_Error_MissingOutputDocuments(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateTask_Error_MissingOutputDocuments"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_MissingOutputDocuments.recal.crai"
-
+		payload := createBaseCasePayload("validateTask_Error_MissingOutputDocuments")
 		payload[0].Tasks[0].OutputDocuments = []*types.OutputDocumentBatch{}
 		createDocumentsForBatch(context, client, payload)
 
@@ -495,9 +419,7 @@ func Test_ProcessBatch_Case_validateTask_Error_MissingOutputDocuments(t *testing
 
 func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateTask_Error_ExternalSequencingExperiment"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateTask_Error_ExternalSequencingExperiment.recal.crai"
+		payload := createBaseCasePayload("validateTask_Error_ExternalSequencingExperiment")
 		payload[0].Tasks[0].TypeCode = "family_variant_calling"
 		payload[0].Tasks[0].Aliquot = ""
 		payload[0].Tasks[0].InputDocuments = []*types.InputDocumentBatch{
@@ -523,8 +445,7 @@ func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *t
 
 func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateDocument_IdenticalDocumentAlreadyExists_1"
+		payload := createBaseCasePayload("validateDocument_IdenticalDocumentAlreadyExists_1")
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai"
 		createDocumentsForBatch(context, client, payload)
 
@@ -555,9 +476,7 @@ func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *t
 
 func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateDocument_Error_DocumentField"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_DocumentField.recal.crai"
+		payload := createBaseCasePayload("validateDocument_Error_DocumentField")
 		payload[0].Tasks[0].OutputDocuments[0].Name = "!@#$%^&*()_+"
 		createDocumentsForBatch(context, client, payload)
 
@@ -576,9 +495,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
 
 func Test_ProcessBatch_Case_validateDocument_Error_DocumentNotFoundAtUrl(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateDocument_Error_DocumentNotFoundAtUrl"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_DocumentNotFoundAtUrl.recal.crai"
+		payload := createBaseCasePayload("validateDocument_Error_DocumentNotFoundAtUrl")
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
 		errors := []types.BatchMessage{
@@ -594,7 +511,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentNotFoundAtUrl(t *test
 
 func Test_ProcessBatch_Case_validateDocument_Warning_PartiallyDifferentDocumentExists(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
+		payload := createBaseCasePayload("validateDocument_Warning_PartiallyDifferentDocumentExists")
 		url := "s3://test-bucket/validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai"
 		doc := payload[0].Tasks[0].OutputDocuments[0]
 
@@ -629,9 +546,7 @@ func Test_ProcessBatch_Case_validateDocument_Warning_PartiallyDifferentDocumentE
 
 func Test_ProcessBatch_Case_validateDocument_Error_DuplicateDocumentInBatch(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateDocument_Error_DuplicateDocumentInBatch"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_DuplicateDocumentInBatch.recal.crai"
+		payload := createBaseCasePayload("validateDocument_Error_DuplicateDocumentInBatch")
 		payload[0].Tasks[0].OutputDocuments = append(payload[0].Tasks[0].OutputDocuments, payload[0].Tasks[0].OutputDocuments[0])
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
@@ -649,9 +564,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DuplicateDocumentInBatch(t *t
 
 func Test_ProcessBatch_Case_validateDocument_Error_SizeNotMatch(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateDocument_Error_SizeNotMatch"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_SizeNotMatch.recal.crai"
+		payload := createBaseCasePayload("validateDocument_Error_SizeNotMatch")
 		createDocumentsForBatch(context, client, payload)
 
 		payload[0].Tasks[0].OutputDocuments[0].Size = 42
@@ -671,9 +584,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_SizeNotMatch(t *testing.T) {
 
 func Test_ProcessBatch_Case_validateDocument_Error_HashNotMatch(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload()
-		payload[0].SubmitterCaseId = "validateDocument_Error_HashNotMatch"
-		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_Error_HashNotMatch.recal.crai"
+		payload := createBaseCasePayload("validateDocument_Error_HashNotMatch")
 		createDocumentsForBatch(context, client, payload)
 
 		payload[0].Tasks[0].OutputDocuments[0].Hash = "not-the-right-hash"

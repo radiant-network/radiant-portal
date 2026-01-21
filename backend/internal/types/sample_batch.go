@@ -3,14 +3,14 @@ package types
 const SampleBatchType = "sample"
 
 type SampleBatch struct {
-	SubmitterPatientId      TrimmedString `json:"submitter_patient_id" binding:"required"`
-	PatientOrganizationCode string        `json:"patient_organization_code" binding:"required"`
-	TypeCode                string        `json:"type_code" binding:"required"`
-	SubmitterParentSampleId TrimmedString `json:"submitter_parent_sample_id,omitempty"`
-	TissueSite              TrimmedString `json:"tissue_site,omitempty"`
-	HistologyCode           string        `json:"histology_code" binding:"required,oneof=tumoral normal"`
-	SubmitterSampleId       TrimmedString `json:"submitter_sample_id" binding:"required"`
-	SampleOrganizationCode  string        `json:"sample_organization_code" binding:"required"`
+	SubmitterPatientId      TrimmedString `json:"submitter_patient_id" toml:"submitter_patient_id" binding:"required"`
+	PatientOrganizationCode string        `json:"patient_organization_code" toml:"patient_organization_code" binding:"required"`
+	TypeCode                string        `json:"type_code" toml:"type_code" binding:"required"`
+	SubmitterParentSampleId TrimmedString `json:"submitter_parent_sample_id,omitempty" toml:"submitter_parent_sample_id,omitempty"`
+	TissueSite              TrimmedString `json:"tissue_site,omitempty" toml:"tissue_site,omitempty"`
+	HistologyCode           string        `json:"histology_code" toml:"histology_code" binding:"required,oneof=tumoral normal"`
+	SubmitterSampleId       TrimmedString `json:"submitter_sample_id" toml:"submitter_sample_id" binding:"required"`
+	SampleOrganizationCode  string        `json:"sample_organization_code" toml:"sample_organization_code" binding:"required"`
 }
 
 // CreateSampleBatchBody represents the body required to create a sample batch

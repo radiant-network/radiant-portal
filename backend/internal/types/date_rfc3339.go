@@ -44,3 +44,21 @@ func (d *DateRFC3339) UnmarshalJSON(b []byte) error {
 	*d = DateRFC3339(t)
 	return nil
 }
+
+// UnmarshalText parses a text-encoded string into a DateRFC3339 object.
+// It expects the date string to be in RFC3339 format.
+//
+// Parameters:
+// - text: The byte slice containing the date string.
+//
+// Returns:
+// - An error if the date string is not in the expected RFC3339 format.
+func (d *DateRFC3339) UnmarshalText(text []byte) error {
+	t, err := time.Parse(time.RFC3339, string(text))
+	if err != nil {
+		return err
+	}
+
+	*(*time.Time)(d) = t
+	return nil
+}

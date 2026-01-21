@@ -17,6 +17,7 @@ require (
 	github.com/magiconair/properties v1.8.7
 	github.com/minio/minio-go/v7 v7.0.95
 	github.com/openfga/go-sdk v0.7.0
+	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/stretchr/testify v1.11.1
 	github.com/swaggo/swag/v2 v2.0.0-rc4
 	github.com/szuecs/gin-glog v1.1.1
@@ -96,7 +97,6 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
-	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
