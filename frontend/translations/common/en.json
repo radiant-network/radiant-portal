@@ -1088,7 +1088,8 @@
         "classification_criteria": "Classification criteria",
         "interpretation": "Interpretation",
         "references": "{{count}} references",
-        "updated_at_tooltip": "Last interpretation date"
+        "updated_at_tooltip": "Last interpretation date",
+        "updated_by_name_tooltip": "Authored by"
       }
     },
     "variant_details": {
