@@ -179,10 +179,17 @@ function SliderInterpretationDetailsCard({
             </DescriptionSection>
             <Separator />
             <div className="flex gap-6 text-sm text-muted-foreground font-sans">
-              <span className="flex items-center gap-1">
-                <StethoscopeIcon size="14" />
-                {interpretation?.updated_by_name}
-              </span>
+              <Tooltip>
+                <TooltipTrigger>
+                  <span className="flex items-center gap-1">
+                    <StethoscopeIcon size="14" />
+                    {interpretation?.updated_by_name}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t('preview_sheet.interpretation_details.fields.updated_by_name_tooltip')}
+                </TooltipContent>
+              </Tooltip>
               {interpretation?.updated_at && (
                 <Tooltip>
                   <TooltipTrigger>
