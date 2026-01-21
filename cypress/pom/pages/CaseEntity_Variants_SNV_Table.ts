@@ -173,7 +173,7 @@ const tableColumns = [
     isSortable: true,
     isPinnable: true,
     position: 14,
-    tooltip: 'Genotype quality. Only occurrences with GQ ≥ 20 are taken into account for frequency calculation.',
+    tooltip: 'Genotype quality: only occurrences with GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
     id: 'zyg',
