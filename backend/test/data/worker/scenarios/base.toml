@@ -1,0 +1,87 @@
+# scenarios/base_case.toml
+
+[[patients]]
+submitter_patient_id = "123456789"
+submitter_patient_id_type = "NHS"
+patient_organization_code = "ORG001"
+life_status_code = "alive"
+first_name = "John"
+last_name = "Doe"
+sex_code = "male"
+date_of_birth = "1980-01-01"
+jhn = "JHN123456"
+
+[[samples]]
+submitter_patient_id = "MRN-283773"
+patient_organization_code = "CHUSJ"
+type_code = "dna"
+submitter_parent_sample_id = ""
+tissue_site = "blood"
+histology_code = "8041/3"
+submitter_sample_id = "S13225"
+sample_organization_code = "CQGC"
+
+[[sequencing_experiments]]
+aliquot = "NA12891"
+sample_organization_code = "CQGC"
+submitter_sample_id = "S13225"
+experimental_strategy_code = "wgs"
+sequencing_read_technology_code = "short_read"
+platform_code = "illumina"
+sequencing_lab_code = "CQGC"
+capture_kit = ""
+run_alias = ""
+run_date = "2023-01-01T00:00:00Z"
+run_name = ""
+status_code = "draft"
+
+[[cases]]
+submitter_case_id = "CASE-12345"
+type = "germline"
+status_code = "in_progress"
+project_code = "N1"
+diagnostic_lab_code = "LDM-CHUSJ"
+primary_condition_code_system = "MONDO"
+primary_condition_value = "MONDO:0700092"
+priority_code = "routine"
+category_code = "postnatal"
+analysis_code = "WGA"
+resolution_status_code = "unsolved"
+note = "test case note"
+ordering_physician = "Dr. Test"
+ordering_organization_code = "CHUSJ"
+
+  [[cases.patients]]
+  submitter_patient_id = "MRN-283773"
+  affected_status_code = "affected"
+  patient_organization_code = "CHUSJ"
+  relation_to_proband_code = "proband"
+
+    [[cases.patients.observations_categorical]]
+    code = "phenotype"
+    system = "HPO"
+    value = "TEST:12345"
+    onset_code = "infantile"
+    interpretation_code = "positive"
+    note = "Test clinical note"
+
+  [[cases.sequencing_experiments]]
+  aliquot = "NA12891"
+  sample_organization_code = "CQGC"
+  submitter_sample_id = "S13225"
+
+  [[cases.tasks]]
+  type_code = "alignment_germline_variant_calling"
+  aliquot = "NA12891"
+  pipeline_name = "Dragen"
+  pipeline_version = "4.4.4"
+  genome_build = "GRch38"
+
+    [[cases.tasks.output_documents]]
+    data_category_code = "genomic"
+    data_type_code = "alignment"
+    format_code = "cram"
+    hash = "d57f21e6a273781dbf8b7657940f3b03"
+    name = "NA12891.recal.cram"
+    size = 11
+    url = "s3://test-bucket/CASE-12345.recal.crai"

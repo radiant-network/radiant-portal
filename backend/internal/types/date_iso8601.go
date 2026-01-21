@@ -10,6 +10,16 @@ const DateISO8601Format = "2006-01-02"
 
 type DateISO8601 time.Time
 
+func (d *DateISO8601) UnmarshalText(text []byte) error {
+	t, err := time.Parse(DateISO8601Format, string(text))
+	if err != nil {
+		return err
+	}
+
+	*(*time.Time)(d) = t
+	return nil
+}
+
 func (d *DateISO8601) UnmarshalJSON(b []byte) (err error) {
 	s := strings.Trim(string(b), `"`)
 	if s == "null" || s == "" {
