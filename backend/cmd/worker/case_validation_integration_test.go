@@ -22,7 +22,7 @@ var emptyMsgs []types.BatchMessage
 func createBaseCasePayload(submitterCaseId string) []*types.CaseBatch {
 	scenario, err := testutils.LoadScenario("base")
 	if err != nil {
-		return nil
+		panic(fmt.Sprintf("failed to load test scenario %q: %v", "base", err))
 	}
 	cases := scenario.Cases
 	cases[0].SubmitterCaseId = submitterCaseId

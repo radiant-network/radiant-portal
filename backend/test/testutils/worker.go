@@ -17,6 +17,14 @@ type ScenarioWrapper struct {
 	Cases                 []*types.CaseBatch                 `toml:"cases"`
 }
 
+// LoadScenario loads a test worker scenario from a TOML file and returns it as a ScenarioWrapper.
+//
+// The dataSetName parameter identifies the scenario file, which is expected to be located under
+// TestResources/WorkerScenariosPath with a ".toml" extension.
+//
+// It returns a populated ScenarioWrapper
+// on success, or an error if the file cannot be opened or the TOML content cannot be decoded.
+// The function will panic if closing the underlying file descriptor fails.
 func LoadScenario(dataSetName string) (*ScenarioWrapper, error) {
 	var wrapper ScenarioWrapper
 	scenarioPath := filepath.Join(TestResources, WorkerScenariosPath, dataSetName+".toml")

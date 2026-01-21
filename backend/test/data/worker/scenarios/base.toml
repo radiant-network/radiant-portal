@@ -17,7 +17,7 @@ patient_organization_code = "CHUSJ"
 type_code = "dna"
 submitter_parent_sample_id = ""
 tissue_site = "blood"
-histology_code = "8041/3"
+histology_code = "normal"
 submitter_sample_id = "S13225"
 sample_organization_code = "CQGC"
 
