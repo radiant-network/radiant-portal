@@ -10,6 +10,8 @@ const DateISO8601Format = "2006-01-02"
 
 type DateISO8601 time.Time
 
+// UnmarshalText parses a byte slice containing a date in ISO8601 format (YYYY-MM-DD)
+// and sets the value of the DateISO8601 receiver. Returns an error if parsing fails.
 func (d *DateISO8601) UnmarshalText(text []byte) error {
 	t, err := time.Parse(DateISO8601Format, string(text))
 	if err != nil {
