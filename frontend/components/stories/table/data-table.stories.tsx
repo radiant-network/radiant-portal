@@ -5,7 +5,11 @@ import { createColumnHelper } from '@tanstack/react-table';
 
 import { SortBodyOrderEnum } from '@/api/api';
 import TableFilters from '@/apps/case/src/exploration/table/case-exploration-table-filters';
+import PinRowCell from '@/components/base/data-table/cells/pin-row-cell';
+import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
 import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
+import { Card, CardContent } from '@/components/base/shadcn/card';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 import { data, MockData } from './table-mock';
@@ -75,6 +79,16 @@ const meta = {
       onSortingChange: sorting => {},
     },
     defaultColumnSettings: createColumnSettings([
+      {
+        id: 'pinRow',
+        visible: true,
+        variant: 'ghost',
+      },
+      {
+        id: 'rowSelection',
+        visible: true,
+        variant: 'ghost',
+      },
       {
         id: 'firstName',
         visible: true,
@@ -302,34 +316,116 @@ export const HeaderGroups: Story = {
     enableFullscreen: true,
     enableColumnOrdering: true,
     columns: [
-      columnHelper.group({
-        id: 'group_1',
-        header: () => <span>Group 1</span>,
+      {
+        header: 'Group Left',
+        size: 400,
+        minSize: 200,
         columns: [
+          {
+            id: 'pinRow',
+            cell: PinRowCell,
+            enableResizing: false,
+            enablePinning: false,
+          },
+          {
+            id: 'rowSelection',
+            header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+            cell: info => <RowSelectionCell row={info.row} />,
+            enableResizing: false,
+            enablePinning: false,
+          },
           columnHelper.accessor('firstName', {
             cell: info => info.getValue(),
-            footer: props => props.column.id,
           }),
-          columnHelper.accessor(row => row.lastName, {
+          columnHelper.accessor('lastName', {
             id: 'lastName',
             cell: info => info.getValue(),
-            header: () => <span>Last Name</span>,
-            footer: props => props.column.id,
+            header: 'Last Name',
           }),
         ],
-      }),
-      columnHelper.group({
-        header: 'group_2',
+      },
+      {
+        header: 'Group Right',
+        size: 400,
+        minSize: 200,
         columns: [
           columnHelper.accessor('age', {
             header: () => 'Age',
-            footer: props => props.column.id,
           }),
+          columnHelper.accessor('visits', {
+            header: 'Visits',
+          }),
+          columnHelper.accessor('status', {
+            header: 'Status',
+          }),
+          columnHelper.accessor('progress', {
+            header: 'Profile Progress',
+          }),
+        ],
+      },
+    ] as TableColumnDef<MockData, any>[],
+  },
+  render: args => (
+    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+      <Card className="h-auto size-max w-full">
+        <CardContent>
+          <div className="bg-background pt-4">
+            <DataTable {...args} />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  ),
+};
+
+export const HeaderGroupsWithSubgroup: Story = {
+  args: {
+    data: data.slice(0, 10),
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+    columns: [
+      {
+        header: 'Group Left',
+        columns: [
           columnHelper.group({
-            header: 'More Info',
+            id: 'sub-group-left',
             columns: [
+              {
+                id: 'pinRow',
+                cell: PinRowCell,
+                enableResizing: false,
+                enablePinning: false,
+              },
+              {
+                id: 'rowSelection',
+                header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
+                cell: info => <RowSelectionCell row={info.row} />,
+                enableResizing: false,
+                enablePinning: false,
+              },
+              columnHelper.accessor('firstName', {
+                cell: info => info.getValue(),
+              }),
+              columnHelper.accessor('lastName', {
+                id: 'lastName',
+                cell: info => info.getValue(),
+                header: 'Last Name',
+              }),
+            ],
+          }),
+        ],
+      },
+      {
+        header: 'Group Right',
+        columns: [
+          columnHelper.group({
+            header: 'Sub Group',
+            columns: [
+              columnHelper.accessor('age', {
+                header: () => 'Age',
+              }),
               columnHelper.accessor('visits', {
-                header: () => <span>Visits</span>,
+                header: 'Visits',
               }),
               columnHelper.accessor('status', {
                 header: 'Status',
@@ -340,7 +436,7 @@ export const HeaderGroups: Story = {
             ],
           }),
         ],
-      }),
+      },
     ] as TableColumnDef<MockData, any>[],
   },
   render: args => <DataTable {...args} />,

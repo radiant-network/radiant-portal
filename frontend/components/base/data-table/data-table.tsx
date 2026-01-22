@@ -62,10 +62,9 @@ import {
   useTableSizingEffect,
   useTableUpdatePreferenceEffect,
 } from './hooks/use-table-state';
+import { getFlatSubheaders } from './libs/header-group';
 import DataTableGroupBy from './data-table-group-by';
 import { getFilteredAdditionalFields, updateAdditionalField } from './utils';
-
-export const IS_SERVER = typeof window === 'undefined';
 
 export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id'> {
   id: string;
@@ -78,16 +77,6 @@ export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TVa
  */
 export const HEADER_HEIGHT = 43;
 export const ROW_HEIGHT = 41;
-
-/**
- * Used for some use case
- * when we need specific class for
- * <TableHead /> and <TableCell />
- */
-enum ColumnType {
-  Head,
-  Data,
-}
 
 /**
  * Interface and types
@@ -138,6 +127,7 @@ export interface BaseColumnSettings {
   header?: string;
   label?: string;
   additionalFields?: string[];
+  variant?: 'default' | 'ghost';
 }
 
 export interface ColumnSettings extends BaseColumnSettings {
@@ -194,7 +184,6 @@ function deserializeColumnOrder(settings: ColumnSettings[]): ColumnOrderState {
 /**
  * Read a settings config to return isPinned value
  * @param settings
- * @returns
  */
 function deserializeColumnPinning(settings: ColumnSettings[]): ColumnPinningState {
   const result: { left: string[]; right: string[] } = {
@@ -212,6 +201,14 @@ function deserializeColumnPinning(settings: ColumnSettings[]): ColumnPinningStat
 }
 
 /**
+ * Read a settings config to return the variant for a given id
+ * @param settings
+ */
+function getColumnSettingsVariant(settings: ColumnSettings[], id: string) {
+  return settings.find(setting => setting.id === id)?.variant ?? 'default';
+}
+
+/**
  * @param pagination
  * @param total
  */
@@ -220,18 +217,102 @@ function getPageCount(pagination: PaginationState, total: number) {
 }
 
 /**
- * Return the needed tailwind class to pin a column. Must be applied to <TableCell />
+ * <TableHead /> specific function to return the needed tailwind class when pinned. Must be applied to <TableCell />
  *
+ * @DESCRIPTION:
+ * When a Row is pinned and this row is contained in a header group. All depth of the group are considered pinned.
+ * So if Header > SubHeader > Sub SubHeader is pinned, [Header, SubHeader, Sub SubHeader] are considered pinned.
+ *
+ * But if the header is on the far left, there is another group in the center and we pin it to the right. Two groups are
+ * created with the same name.
+ *
+ * | Left Header | Middle Header | Right Header |
+ * - User pin a left header column to the right
+ * | Left Header | Middle Header | Right Header | Left Header |
+ *
+ * So Left Header and his duplicate Left Header (pinned to the right) are both considered pin since they share the same columns.
+ * That why we must determ in witch header the pinned column is displayed to applied the correct css class
+ * For that, we use subheaders property.
  */
-function getColumnPinningExtraCN(column: Column<any>, type: ColumnType): string {
+function getColumnHeaderPinningExtraCN(header: Header<any, any>): string {
+  const column = header.column;
   const isPinned = column.getIsPinned();
   if (!isPinned) return '';
+
+  const isLeftPinned = isPinned === 'left';
+  const isRightPinned = isPinned === 'right';
+
+  // Column is a common header, not a headerGroup
+  if (header.subHeaders.length === 0) {
+    return cn('sticky z-10 group-data-[state=selected]:bg-table-active', {
+      'border-r-[3px]': isLeftPinned && column.getIsLastColumn('left'),
+      'border-l-[3px]': isRightPinned && column.getIsFirstColumn('right'),
+    });
+  }
+
+  let isLastLeftPinnedColumn = false;
+  let isFirstRightPinnedColumn = false;
+  const targetPinnedColumn = column.getFlatColumns().find(c => {
+    if (c.getIsPinned()) {
+      if (isLeftPinned) {
+        isLastLeftPinnedColumn = true;
+        return c.getIsLastColumn('left');
+      }
+      if (isRightPinned) {
+        isFirstRightPinnedColumn = true;
+        return c.getIsFirstColumn('right');
+      }
+    }
+    return false;
+  });
+
+  if (!targetPinnedColumn || !getFlatSubheaders(header).some(header => header.id === targetPinnedColumn.id)) {
+    return '';
+  }
+
+  return cn('sticky z-10 group-data-[state=selected]:bg-table-active', {
+    'border-r-[3px]': isLastLeftPinnedColumn,
+    'border-l-[3px]': isFirstRightPinnedColumn,
+  });
+}
+
+/**
+ * Return the needed style to pin a column. Must be applied to <TableHead />
+ * @see https://tanstack.com/table/latest/docs/framework/react/examples/column-pinning-sticky
+ */
+function getColumnHeaderPinningExtraStyles(header: Header<any, any>): CSSProperties {
+  const column = header.column;
+  const isPinned = column.getIsPinned();
+
+  const isLeftPinned = isPinned === 'left';
+  const isRightPinned = isPinned === 'right';
+
+  if (header.subHeaders.length > 0) {
+    return {
+      left: isLeftPinned ? `0px` : undefined,
+      right: isRightPinned ? `0px` : undefined,
+      width: header.getSize(),
+    };
+  }
+
+  return {
+    left: isLeftPinned ? `${column.getStart('left')}px` : undefined,
+    right: isRightPinned ? `${column.getAfter('right')}px` : undefined,
+    width: header.getSize(),
+  };
+}
+
+/**
+ * <TableCell /> specific function to return the needed tailwind class when pinned.
+ */
+function getColumnRowPinningExtraCN(column: Column<any>): string {
+  const isPinned = column.getIsPinned();
+  if (!isPinned) return '';
+
   const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
   const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
 
-  return cn({
-    'sticky z-10 group-data-[state=selected]:bg-table-active': isPinned,
-    'bg-background': type == ColumnType.Data,
+  return cn('sticky z-10 group-data-[state=selected]:bg-table-active bg-background', {
     'border-r-[3px]': isLastLeftPinnedColumn,
     'border-l-[3px]': isFirstRightPinnedColumn,
   });
@@ -239,11 +320,10 @@ function getColumnPinningExtraCN(column: Column<any>, type: ColumnType): string 
 
 /**
  * Return the needed style to pin a column. Must be applied to <TableCell />
- * @see https://tanstack.com/table/v8/docs/framework/react/examples/column-pinning-sticky?panel=code
+ * @see https://tanstack.com/table/latest/docs/framework/react/examples/column-pinning-sticky
  */
-function getColumnPinningExtraStyles(column: Column<any>): CSSProperties {
+function getColumnRowPinningExtraStyles(column: Column<any>): CSSProperties {
   const isPinned = column.getIsPinned();
-  if (!isPinned) return {};
 
   return {
     left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
@@ -256,10 +336,7 @@ function getColumnPinningExtraStyles(column: Column<any>): CSSProperties {
  * Return the needed tailwind class to pin a row. Must be applied to <TableRow />
  */
 function getRowPinningExtraCN(row: Row<any>): string {
-  const isPinned = row.getIsPinned();
-  if (!isPinned) return '';
-
-  return cn({ 'sticky z-20 bg-muted': isPinned });
+  return cn({ 'sticky z-20 bg-muted': row.getIsPinned() });
 }
 
 /**
@@ -279,10 +356,7 @@ function getRowPinningExtraStyles(row: Row<any>): CSSProperties {
  * Return the needed tailwind class to pin a row. Must be applied to <TableCell />
  */
 function getRowPinningCellExtraCN(row: Row<any>): string {
-  const isPinned = row.getIsPinned();
-  if (!isPinned) return '';
-
-  return cn({ 'bg-muted': isPinned });
+  return cn({ 'bg-muted': row.getIsPinned() });
 }
 
 /**
@@ -291,7 +365,6 @@ function getRowPinningCellExtraCN(row: Row<any>): string {
  */
 function getHeaderFlexRender(table: TableType<any>, header: Header<any, any>) {
   if (header.isPlaceholder) return null;
-
   return (
     <>
       <div className="flex items-center justify-between gap-1">
@@ -313,7 +386,9 @@ function getHeaderFlexRender(table: TableType<any>, header: Header<any, any>) {
           className={cn(
             'absolute top-0 h-full w-1 right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
             table.options.columnResizeDirection,
-            header.column.getIsResizing() ? 'opacity-100' : '',
+            {
+              'opacity-100': header.column.getIsResizing(),
+            },
           )}
         />
       )}
@@ -347,13 +422,10 @@ function getRowFlexRender<T>({
             key={cell.id}
             className={cn(
               'overflow-hidden truncate text-nowrap',
-              getColumnPinningExtraCN(cell.column, ColumnType.Data),
+              getColumnRowPinningExtraCN(cell.column),
               getRowPinningCellExtraCN(cell.row),
             )}
-            style={{
-              width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
-              ...getColumnPinningExtraStyles(cell.column),
-            }}
+            style={getColumnRowPinningExtraStyles(cell.column)}
           >
             <>
               {/* Group By */}
@@ -399,10 +471,12 @@ function getRowFlexRender<T>({
 /**
  * Data-Table
  * Should be used for complex and interactive table.
- * @SEE: If you needs to only display data in a table without interaction, local storage or pagination,
+ * @SEE: If you needs to only display data in a table without interaction, user-preference or pagination,
  * use DisplayTable instead
  * @SEE: Storybook provide an example of all custom cell
- 
+ *
+ * @ISSUE: Because headerGroups, we can't use performance resizing since we don't want a static table total size
+ *
  * @ISSUE: For full-width table, 'table-fixed` must be used Added in `<Table />` shadcn component
  * @LINK: https://github.com/TanStack/table/issues/4825#issuecomment-1749665597
  *
@@ -436,7 +510,7 @@ function getRowFlexRender<T>({
  *   size: 52,
  *   enableResizing: false,
  *   enablePinning: false,
- *  }]*
+ *  }]
  *
  * @DESCRIPTION: add a row selection checkbox for each row
  * @EXAMPLE:
@@ -496,8 +570,8 @@ function getRowFlexRender<T>({
  *     pageSize: 10,
  *   },
  *  onPaginationChange: (newPagination) => { ... },
- * } 
- * 
+ * }
+ *
  * @DESCRIPTION: additional fields are managed by the table to be able to request extra data from server
  *              based on the column visibility.
  *              In defaultColumnSettings, you can enter the IDs of the relevant columns in additionalFields.
@@ -506,7 +580,7 @@ function getRowFlexRender<T>({
  * }
  */
 // eslint-disable-next-line complexity
-function TranstackTable<T>({
+function DataTable<T>({
   id,
   columns,
   className,
@@ -640,22 +714,6 @@ function TranstackTable<T>({
     () => getRowFlexRender<T>({ subComponent, containerWidth }),
     [subComponent, containerWidth],
   );
-
-  /*
-   * Prevent calling of `column.getSize()` on every render
-   * @see https://tanstack.com/table/latest/docs/framework/react/examples/column-resizing-performant
-   *
-   * Must be re-calculated when columnVisibility changes
-   */
-  const columnSizeVars = useMemo(() => {
-    const headers = table.getFlatHeaders();
-    const colSizes: { [key: string]: number } = {};
-    headers.forEach(header => {
-      colSizes[`--header-${header.id}-size`] = header.getSize();
-      colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
-    });
-    return colSizes;
-  }, [table.getState().columnSizingInfo, table.getState().columnSizing, columnVisibility]);
 
   // Table Index display position
   const hasUpperSettings = tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen;
@@ -950,21 +1008,19 @@ function TranstackTable<T>({
 
       <div ref={containerRef}>
         {loadingStates?.list === false && !hasError && !isTableEmpty && (
-          <Table id={id} style={{ ...columnSizeVars }}>
+          <Table id={id}>
             <TableHeader className={cn({ 'sticky top-0 bg-background z-20': table.getTopRows().length > 0 })}>
               {table.getHeaderGroups().map(headerGroup => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
                     <TableHead
                       key={header.id}
-                      className={cn('group/header', getColumnPinningExtraCN(header.column, ColumnType.Head), {
-                        'text-center border-r [&>td:last-child]:border-r-0': header.subHeaders.length > 0, // center header group with subheader
+                      className={cn('group/header', getColumnHeaderPinningExtraCN(header), {
+                        'text-center': header.subHeaders.length > 0, // center header group with subheader
                       })}
-                      style={{
-                        width: `calc(var(--header-${header?.id}-size) * 1px)`,
-                        ...getColumnPinningExtraStyles(header.column),
-                      }}
+                      style={getColumnHeaderPinningExtraStyles(header)}
                       colSpan={header.colSpan}
+                      variant={getColumnSettingsVariant(defaultColumnSettings, header.id)}
                     >
                       {getHeaderFlexRender(table, header)}
                     </TableHead>
@@ -1050,25 +1106,6 @@ function TranstackTable<T>({
       )}
     </div>
   );
-}
-
-/**
- * Tanstack can cause some side effects with SSR when using
- * - localStorage
- * - loading and resize columns
- *
- * @fixme to be disabled when using userApi to see if the same issues happens
- */
-function DataTable<T>(props: TableProps<T>) {
-  const [isClient, setIsClient] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  if (IS_SERVER || !isClient) return null;
-
-  return <TranstackTable {...props} />;
 }
 
 export default DataTable;
