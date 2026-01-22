@@ -4563,7 +4563,7 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 			DataTypeCode:     "foo",
 			FormatCode:       "bar",
 			Size:             11,
-			Url:              "s3://notfoo/bar.txt",
+			Url:              "s3://fake-enterprise-medical-records-storage-bucket-na-east-1/environment/production/validated-records/patient-metadata/2026/01/22/batch-uuid-9842-adfa-1123-lkjh/validation_report_full_final_version_v2_alpha_release.parquet", // Validates long URLs are accepted
 			Hash:             "5eb63bbbe01eeed093cb22bb8f5acdc3",
 		}
 
@@ -4574,7 +4574,7 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 		assert.Len(t, record.Errors, 1)
 		assert.Equal(t, record.Errors[0], types.BatchMessage{
 			Code:    "DOCUMENT-002",
-			Message: "No document can be found on the URL s3://notfoo/bar.txt for case 0 - task 0 - output document 1.",
+			Message: "No document can be found on the URL s3://fake-enterprise-medical-records-storage-bucket-na-east-1/environment/production/validated-records/patient-metadata/2026/01/22/batch-uuid-9842-adfa-1123-lkjh/validation_report_full_final_version_v2_alpha_release.parquet for case 0 - task 0 - output document 1.",
 			Path:    "foo[0].bar",
 		})
 	})
