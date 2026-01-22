@@ -340,22 +340,38 @@ func (r *VariantsRepository) GetVariantExternalFrequencies(locusId int) (*Varian
 	txVariant := r.db.Table(types.VariantTable.Name).Where("locus_id = ?", locusId).Select("locus")
 
 	if err := txTopmed.First(&topmed).Error; err != nil {
-		return nil, fmt.Errorf("error fetching topmed frequency: %w", err)
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error fetching topmed frequency: %w", err)
+		} else {
+			topmed = types.ExternalFrequencies{}
+		}
 	}
 	topmed.Cohort = types.TopmedTable.Name
 
 	if err := txGnomadV3.First(&gnomadV3).Error; err != nil {
-		return nil, fmt.Errorf("error fetching gnomad_genomes_v3 frequency: %w", err)
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error fetching gnomad_genomes_v3 frequency: %w", err)
+		} else {
+			gnomadV3 = types.ExternalFrequencies{}
+		}
 	}
 	gnomadV3.Cohort = types.GnomadGenomesV3Table.Name
 
 	if err := tx1000Genomes.First(&thousandGenomes).Error; err != nil {
-		return nil, fmt.Errorf("error fetching 1000_genomes frequency: %w", err)
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error fetching 1000_genomes frequency: %w", err)
+		} else {
+			thousandGenomes = types.ExternalFrequencies{}
+		}
 	}
 	thousandGenomes.Cohort = types.ThousandGenomesTable.Name
 
 	if err := txVariant.First(&variant).Error; err != nil {
-		return nil, fmt.Errorf("error fetching variant locus: %w", err)
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error fetching variant locus: %w", err)
+		} else {
+			return nil, nil
+		}
 	}
 
 	var result = VariantExternalFrequencies{

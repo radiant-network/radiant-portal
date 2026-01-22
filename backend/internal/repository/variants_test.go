@@ -322,19 +322,63 @@ func Test_GetVariantExternalFrequencies(t *testing.T) {
 		gnomadV3 := (*externalFrequencies).ExternalFrequencies[1]
 		thousandGenomes := (*externalFrequencies).ExternalFrequencies[2]
 
+		assert.Equal(t, "topmed_bravo", topmed.Cohort)
 		assert.Equal(t, 0.001, *(topmed.Af))
 		assert.Equal(t, 1, *(topmed.Ac))
 		assert.Equal(t, 1000, *(topmed.An))
 		assert.Equal(t, 0, *(topmed.Hom))
 
+		assert.Equal(t, "gnomad_genomes_v3", gnomadV3.Cohort)
 		assert.Equal(t, 0.01, *(gnomadV3.Af))
 		assert.Equal(t, 1, *(gnomadV3.Ac))
 		assert.Equal(t, 100, *(gnomadV3.An))
 		assert.Equal(t, 0, *(gnomadV3.Hom))
 
+		assert.Equal(t, "1000_genomes", thousandGenomes.Cohort)
 		assert.Equal(t, 0.0001, *(thousandGenomes.Af))
 		assert.Equal(t, 1, *(thousandGenomes.Ac))
 		assert.Equal(t, 10000, *(thousandGenomes.An))
 		assert.Nil(t, thousandGenomes.Hom)
+	})
+}
+
+func Test_GetVariantExternalFrequencies_PartialFound(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		externalFrequencies, err := repo.GetVariantExternalFrequencies(3000)
+		assert.NoError(t, err)
+		assert.Equal(t, "locus3", (*externalFrequencies).Locus)
+		assert.Equal(t, 3, len((*externalFrequencies).ExternalFrequencies))
+
+		topmed := (*externalFrequencies).ExternalFrequencies[0]
+		gnomadV3 := (*externalFrequencies).ExternalFrequencies[1]
+		thousandGenomes := (*externalFrequencies).ExternalFrequencies[2]
+
+		assert.Equal(t, "topmed_bravo", topmed.Cohort)
+		assert.Nil(t, topmed.Af)
+		assert.Nil(t, topmed.Ac)
+		assert.Nil(t, topmed.An)
+		assert.Nil(t, topmed.Hom)
+
+		assert.Equal(t, "gnomad_genomes_v3", gnomadV3.Cohort)
+		assert.Equal(t, 0.03, *(gnomadV3.Af))
+		assert.Equal(t, 2, *(gnomadV3.Ac))
+		assert.Equal(t, 600, *(gnomadV3.An))
+		assert.Equal(t, 1, *(gnomadV3.Hom))
+
+		assert.Equal(t, "1000_genomes", thousandGenomes.Cohort)
+		assert.Nil(t, thousandGenomes.Af)
+		assert.Nil(t, thousandGenomes.Ac)
+		assert.Nil(t, thousandGenomes.An)
+		assert.Nil(t, thousandGenomes.Hom)
+	})
+}
+
+func Test_GetVariantExternalFrequencies_VariantNotFound(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		externalFrequencies, err := repo.GetVariantExternalFrequencies(4000)
+		assert.NoError(t, err)
+		assert.Nil(t, externalFrequencies)
 	})
 }

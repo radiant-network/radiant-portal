@@ -408,6 +408,10 @@ func GetGermlineVariantExternalFrequenciesHandler(repo repository.VariantsDAO) g
 			HandleError(c, err)
 			return
 		}
+		if variantExternalFrequencies == nil {
+			HandleNotFoundError(c, "variant")
+			return
+		}
 		c.JSON(http.StatusOK, variantExternalFrequencies)
 	}
 }
