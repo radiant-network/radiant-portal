@@ -1100,7 +1100,6 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 				continue
 			}
 
-			cr.validateDocumentTextField(doc.Url, "url", path, tid, did, nil, true)
 			cr.validateDocumentTextField(doc.Hash, "hash", path, tid, did, TextRegExpCompiled, true)
 			cr.validateDocumentTextField(doc.FormatCode, "format_code", path, tid, did, TextRegExpCompiled, true)
 			cr.validateDocumentTextField(doc.Name, "name", path, tid, did, TextRegExpCompiled, true)
