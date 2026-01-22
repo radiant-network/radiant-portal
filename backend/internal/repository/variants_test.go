@@ -309,3 +309,32 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 		assert.Equal(t, 2, len((*filters).DiagnosisLab))
 	})
 }
+
+func Test_GetVariantExternalFrequencies(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		externalFrequencies, err := repo.GetVariantExternalFrequencies(1000)
+		assert.NoError(t, err)
+		assert.Equal(t, "locus1", (*externalFrequencies).Locus)
+		assert.Equal(t, 3, len((*externalFrequencies).ExternalFrequencies))
+
+		topmed := (*externalFrequencies).ExternalFrequencies[0]
+		gnomadV3 := (*externalFrequencies).ExternalFrequencies[1]
+		thousandGenomes := (*externalFrequencies).ExternalFrequencies[2]
+
+		assert.Equal(t, 0.001, *(topmed.Af))
+		assert.Equal(t, 1, *(topmed.Ac))
+		assert.Equal(t, 1000, *(topmed.An))
+		assert.Equal(t, 0, *(topmed.Hom))
+
+		assert.Equal(t, 0.01, *(gnomadV3.Af))
+		assert.Equal(t, 1, *(gnomadV3.Ac))
+		assert.Equal(t, 100, *(gnomadV3.An))
+		assert.Equal(t, 0, *(gnomadV3.Hom))
+
+		assert.Equal(t, 0.0001, *(thousandGenomes.Af))
+		assert.Equal(t, 1, *(thousandGenomes.Ac))
+		assert.Equal(t, 10000, *(thousandGenomes.An))
+		assert.Nil(t, thousandGenomes.Hom)
+	})
+}

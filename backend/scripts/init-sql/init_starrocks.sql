@@ -554,6 +554,41 @@ INSERT INTO test_db.cytoband (chromosome, cytoband, start, end, gie_stain) VALUE
 ('1', 'p36.11', 23900000, 28000000, 'gneg'),
 ('1', 'p35.3', 28000000, 30200000, 'gpos75');
 
+CREATE TABLE IF NOT EXISTS gnomad_genomes_v3 (
+    `locus_id` bigint(20) NOT NULL COMMENT "",
+    `af` double NULL COMMENT "",
+    `ac` INT(11) COMMENT "",
+    `an` INT(11) COMMENT "",
+    `hom` INT(11) COMMENT ""
+);
+
+INSERT INTO gnomad_genomes_v3 (locus_id, af, ac, an, hom) VALUES
+                                                              (1000, 0.01, 1, 100, 0),
+                                                              (2000, 0.02, 4, 200, 2);
+
+CREATE TABLE IF NOT EXISTS topmed_bravo (
+    `locus_id` bigint(20) NOT NULL COMMENT "",
+    `af` double NULL COMMENT "",
+    `ac` INT(11) COMMENT "",
+    `an` INT(11) COMMENT "",
+    `hom` INT(11) COMMENT ""
+);
+
+INSERT INTO topmed_bravo (locus_id, af, ac, an, hom) VALUES
+                                                              (1000, 0.001, 1, 1000, 0),
+                                                              (2000, 0.002, 4, 2000, 2);
+
+CREATE TABLE IF NOT EXISTS 1000_genomes (
+    `locus_id` bigint(20) NOT NULL COMMENT "",
+    `af` double NULL COMMENT "",
+    `ac` INT(11) COMMENT "",
+    `an` INT(11) COMMENT ""
+);
+
+INSERT INTO 1000_genomes (locus_id, af, ac, an) VALUES
+                                                         (1000, 0.0001, 1, 10000),
+                                                         (2000, 0.0002, 4, 20000);
+
 CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc
 		PROPERTIES
 		(

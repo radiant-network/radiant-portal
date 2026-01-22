@@ -19,6 +19,7 @@ type VariantUninterpretedCase = types.VariantUninterpretedCase
 type VariantExpandedInterpretedCase = types.VariantExpandedInterpretedCase
 type VariantCasesFilters = types.VariantCasesFilters
 type VariantCasesCount = types.VariantCasesCount
+type VariantExternalFrequencies = types.VariantExternalFrequencies
 
 type VariantsRepository struct {
 	db *gorm.DB
@@ -33,6 +34,7 @@ type VariantsDAO interface {
 	GetVariantExpandedInterpretedCase(locusId int, caseId int, seqId int, transcriptId string) (*VariantExpandedInterpretedCase, error)
 	GetVariantCasesCount(locusId int) (*VariantCasesCount, error)
 	GetVariantCasesFilters() (*VariantCasesFilters, error)
+	GetVariantExternalFrequencies(locusId int) (*VariantExternalFrequencies, error)
 }
 
 func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
@@ -324,4 +326,42 @@ func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, err
 		AnalysisCatalog: analysisCatalog,
 		DiagnosisLab:    diagnosisLab,
 	}, nil
+}
+
+func (r *VariantsRepository) GetVariantExternalFrequencies(locusId int) (*VariantExternalFrequencies, error) {
+	var topmed types.ExternalFrequencies
+	var gnomadV3 types.ExternalFrequencies
+	var thousandGenomes types.ExternalFrequencies
+	var variant types.VariantOverview
+
+	txTopmed := r.db.Table(types.TopmedTable.Name).Where("locus_id = ?", locusId)
+	txGnomadV3 := r.db.Table(types.GnomadGenomesV3Table.Name).Where("locus_id = ?", locusId)
+	tx1000Genomes := r.db.Table(types.ThousandGenomesTable.Name).Where("locus_id = ?", locusId)
+	txVariant := r.db.Table(types.VariantTable.Name).Where("locus_id = ?", locusId).Select("locus")
+
+	if err := txTopmed.First(&topmed).Error; err != nil {
+		return nil, fmt.Errorf("error fetching topmed frequency: %w", err)
+	}
+	topmed.Cohort = types.TopmedTable.Name
+
+	if err := txGnomadV3.First(&gnomadV3).Error; err != nil {
+		return nil, fmt.Errorf("error fetching gnomad_genomes_v3 frequency: %w", err)
+	}
+	gnomadV3.Cohort = types.GnomadGenomesV3Table.Name
+
+	if err := tx1000Genomes.First(&thousandGenomes).Error; err != nil {
+		return nil, fmt.Errorf("error fetching 1000_genomes frequency: %w", err)
+	}
+	thousandGenomes.Cohort = types.ThousandGenomesTable.Name
+
+	if err := txVariant.First(&variant).Error; err != nil {
+		return nil, fmt.Errorf("error fetching variant locus: %w", err)
+	}
+
+	var result = VariantExternalFrequencies{
+		Locus:               variant.Locus,
+		ExternalFrequencies: []types.ExternalFrequencies{topmed, gnomadV3, thousandGenomes},
+	}
+
+	return &result, nil
 }

@@ -693,8 +693,6 @@ components:
           type: string
       type: object
     CreateCaseBatchBody:
-      description: CreateCaseBatchBody represents the body required to create a case
-        batch
       properties:
         cases:
           items:
@@ -992,6 +990,21 @@ components:
       - locus
       - locus_id
       - picked_consequences
+      type: object
+    ExternalFrequencies:
+      properties:
+        ac:
+          type: integer
+        af:
+          type: number
+        an:
+          type: integer
+        cohort:
+          type: string
+        hom:
+          type: integer
+      required:
+      - cohort
       type: object
     Facet:
       properties:
@@ -2115,6 +2128,19 @@ components:
       - patient_id
       - patient_sex_code
       - pubmed_ids
+      type: object
+    VariantExternalFrequencies:
+      properties:
+        external_frequencies:
+          items:
+            $ref: '#/components/schemas/ExternalFrequencies'
+          type: array
+          uniqueItems: false
+        locus:
+          type: string
+      required:
+      - external_frequencies
+      - locus
       type: object
     VariantHeader:
       properties:
@@ -5002,6 +5028,41 @@ paths:
       security:
       - bearerauth: []
       summary: Get list of VariantConsequences for a germline variant
+      tags:
+      - variant
+  /variants/germline/{locus_id}/external_frequencies:
+    get:
+      description: Retrieve external frequencies for a given locus id
+      operationId: getGermlineVariantExternalFrequencies
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantExternalFrequencies'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get external frequencies
       tags:
       - variant
   /variants/germline/{locus_id}/header:

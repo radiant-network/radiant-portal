@@ -383,3 +383,31 @@ func GetGermlineVariantConditionsClinvar(repo repository.ClinvarRCVDAO) gin.Hand
 		c.JSON(http.StatusOK, clinvarConditions)
 	}
 }
+
+// GetGermlineVariantExternalFrequenciesHandler handles retrieving external frequencies for a given locus id
+// @Summary Get external frequencies
+// @Id getGermlineVariantExternalFrequencies
+// @Description Retrieve external frequencies for a given locus id
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Produce json
+// @Success 200 {object} types.VariantExternalFrequencies
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/germline/{locus_id}/external_frequencies [get]
+func GetGermlineVariantExternalFrequenciesHandler(repo repository.VariantsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		locusID, err := strconv.Atoi(c.Param("locus_id"))
+		if err != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		variantExternalFrequencies, err := repo.GetVariantExternalFrequencies(locusID)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, variantExternalFrequencies)
+	}
+}

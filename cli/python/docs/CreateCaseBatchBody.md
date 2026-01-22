@@ -1,6 +1,5 @@
 # CreateCaseBatchBody
 
-CreateCaseBatchBody represents the body required to create a case batch
 
 ## Properties
 
