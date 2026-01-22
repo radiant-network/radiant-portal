@@ -87,12 +87,15 @@ func (r *SampleValidationRecord) validateOrganization(organization *types.Organi
 
 func (r *SampleValidationRecord) validateExistingSampleInDb(existingSample *types.Sample) {
 	if existingSample != nil {
-		message := fmt.Sprintf("Sample (%s / %s) already exists, skipped.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
-		r.addInfos(message, SampleAlreadyExistCode, formatPath(r, ""))
 		r.Skipped = true
-		validateExistingSampleField(r, "type_code", existingSample.TypeCode, r.Sample.TypeCode)
-		validateExistingSampleField(r, "tissue_site", existingSample.TissueSite, r.Sample.TissueSite.String())
-		validateExistingSampleField(r, "histology_code", existingSample.HistologyCode, r.Sample.HistologyCode)
+		different := validateIsDifferentExistingSampleField(r, "type_code", existingSample.TypeCode, r.Sample.TypeCode)
+		different = validateIsDifferentExistingSampleField(r, "tissue_site", existingSample.TissueSite, r.Sample.TissueSite.String()) || different
+		different = validateIsDifferentExistingSampleField(r, "histology_code", existingSample.HistologyCode, r.Sample.HistologyCode) || different
+
+		if !different {
+			message := fmt.Sprintf("Sample (%s / %s) already exists, skipped.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+			r.addInfos(message, SampleAlreadyExistCode, formatPath(r, ""))
+		}
 	}
 }
 
@@ -104,7 +107,7 @@ func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParent
 			message := fmt.Sprintf("Invalid field %s for sample (%s / %s). Reason: Invalid parent sample %s for this sample.", fieldName, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
 			r.addErrors(message, SampleInvalidPatientForParentSampleCode, path)
 		} else {
-			validateExistingSampleField(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
+			validateIsDifferentExistingSampleField(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
 		}
 	}
 }
@@ -118,12 +121,12 @@ func (r *SampleValidationRecord) validateExistingParentSampleInBatch(parentSampl
 	}
 }
 
-func validateExistingSampleField[T comparable](
+func validateIsDifferentExistingSampleField[T comparable](
 	r *SampleValidationRecord,
 	fieldName string,
 	existingSampleValue T,
 	recordValue T,
-) {
+) bool {
 	if existingSampleValue != recordValue {
 		path := formatPath(r, fieldName)
 		message := fmt.Sprintf("A sample with same ids (%s / %s) has been found but with a different %s (%v <> %v).",
@@ -134,7 +137,9 @@ func validateExistingSampleField[T comparable](
 			recordValue,
 		)
 		r.addWarnings(message, SampleExistingSampleDifferentFieldCode, path)
+		return true
 	}
+	return false
 }
 
 func processSampleBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {

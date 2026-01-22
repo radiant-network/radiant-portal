@@ -1,0 +1,67 @@
+# scenarios/sample_all_codes.toml
+# This file contains data entities for all sample validation code tests.
+
+# Should trigger SAMPLE-001 sample exist for the same org and all fields are the same
+# (1, 'dna', 62, NULL, 'normal', 'S13224', 3, 6),
+[[samples]]
+submitter_patient_id = "MRN-283775"
+patient_organization_code = "CHUSJ"
+type_code = "dna"
+submitter_parent_sample_id = "B-803.1"
+tissue_site = ""
+histology_code = "normal"
+submitter_sample_id = "S13224"
+sample_organization_code = "CQGC"
+
+# Should trigger SAMPLE-002 sample exist for the same org but a field is different
+# (3, 'dna', 64, NULL, 'normal', 'S13226', 2, 6)
+[[samples]]
+submitter_patient_id = "MRN-283774"
+patient_organization_code = "CHUSJ"
+type_code = "dna"
+submitter_parent_sample_id = "" # Different from existing record
+tissue_site = "blood"
+histology_code = "normal"
+submitter_sample_id = "S13226"
+sample_organization_code = "CQGC"
+
+[[samples]]
+submitter_patient_id = "MRN-283775"
+patient_organization_code = "CHUSJJ" # Should trigger SAMPLE-004 patient / organization not found
+type_code = "dna!" # Should trigger SAMPLE-006 regex error
+submitter_parent_sample_id = "ABC123" # Should trigger SAMPLE-005 parent sample not found
+tissue_site = "dnaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"  # Should trigger SAMPLE-006 size error
+histology_code = "normal"
+submitter_sample_id = "ABCD1"
+sample_organization_code = "CCMG"  # Should trigger SAMPLE-003 organization not found
+
+[[samples]]
+submitter_patient_id = "MRN-283775"
+patient_organization_code = "CHUSJ"
+type_code = "dna"
+submitter_parent_sample_id = "B-950.1" # Should trigger SAMPLE-007 parent sample patient mismatch
+tissue_site = ""
+histology_code = "normal"
+submitter_sample_id = "ABCD2"
+sample_organization_code = "CQGC"
+
+# Should trigger SAMPLE-008 Sample appears multiple times in the batch
+[[samples]]
+submitter_patient_id = "MRN-283775"
+patient_organization_code = "CHUSJ"
+type_code = "dna"
+submitter_parent_sample_id = ""
+tissue_site = ""
+histology_code = "normal"
+submitter_sample_id = "ABCD3"
+sample_organization_code = "CQGC"
+
+[[samples]]
+submitter_patient_id = "MRN-283775"
+patient_organization_code = "CHUSJ"
+type_code = "dna"
+submitter_parent_sample_id = ""
+tissue_site = ""
+histology_code = "normal"
+submitter_sample_id = "ABCD3"
+sample_organization_code = "CQGC"

@@ -1,0 +1,77 @@
+# scenarios/sequencing_experiment_all_codes.toml
+# This file contains data entities for all sequencing_experiment validation code tests.
+
+# Should trigger SEQ-001 identical sequencing experiment exists
+# (1, 1, 'completed', 'NA12892', 6, 1617, 'A00516_0169', '2021-08-17', 'SureSelect Custom DNA Target', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina')
+[[sequencing_experiments]]
+aliquot = "NA12892"
+sample_organization_code = "CQGC"
+submitter_sample_id = "S13224"
+experimental_strategy_code = "wgs"
+sequencing_read_technology_code = "short_read"
+platform_code = "illumina"
+sequencing_lab_code = "CQGC"
+capture_kit = "SureSelect Custom DNA Target"
+run_alias = "A00516_0169"
+run_date = "2021-08-17T00:00:00Z"
+run_name = "1617"
+status_code = "completed"
+
+[[sequencing_experiments]]
+aliquot = "ABCD1"
+sample_organization_code = "CQGC"
+submitter_sample_id = "S13224"
+experimental_strategy_code = "wgs"
+sequencing_read_technology_code = "short_read"
+platform_code = "!@#$%^&"  # Should trigger SEQ-002 regex error
+sequencing_lab_code = "CQGCC"  # Should trigger SEQ-003 organization unknown
+capture_kit = "SureSelect Custom DNA Target"
+run_alias = "A00516_0169aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" # Should trigger SEQ-002 size error
+run_date = "2021-08-17T00:00:00Z"
+run_name = "1617"
+status_code = "completed"
+
+# Should trigger SEQ-004 identical sequencing experiment exists but a field is different
+# (2, 2, 'completed', 'NA12891', 6, 1618, 'A00516_0170', '2021-08-17', 'SureSelect Custom DNA Target', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina')
+[[sequencing_experiments]]
+aliquot = "NA12891"
+sample_organization_code = "CQGC"
+submitter_sample_id = "S13225"
+experimental_strategy_code = "wgs"
+sequencing_read_technology_code = "short_read"
+platform_code = "illumina"
+sequencing_lab_code = "CQGC"
+capture_kit = "SureSelect Custom DNA Target"
+run_alias = "A00516_0170"
+run_date = "2021-08-17T00:00:00Z"
+run_name = "1618"
+status_code = "draft"  # Different status_code to trigger SEQ-004
+
+[[sequencing_experiments]]
+aliquot = "ABCD1"
+sample_organization_code = "CHUSJ"  # Should trigger SEQ-005 sample org / id unknown
+submitter_sample_id = "S13224"
+experimental_strategy_code = "wgs"
+sequencing_read_technology_code = "short_read"
+platform_code = "illumina"
+sequencing_lab_code = "CQGC"
+capture_kit = "SureSelect Custom DNA Target"
+run_alias = "A00516_0169"
+run_date = "2021-08-17T00:00:00Z"
+run_name = "1617"
+status_code = "draft"
+
+# Should trigger SEQ-006 duplicate sequencing experiment
+[[sequencing_experiments]]
+aliquot = "ABCD1"
+sample_organization_code = "CQGC"
+submitter_sample_id = "S13224"
+experimental_strategy_code = "wgs"
+sequencing_read_technology_code = "short_read"
+platform_code = "illumina"
+sequencing_lab_code = "CQGC"
+capture_kit = "SureSelect Custom DNA Target"
+run_alias = "A00516_0169"
+run_date = "2021-08-17T00:00:00Z"
+run_name = "1617"
+status_code = "completed"

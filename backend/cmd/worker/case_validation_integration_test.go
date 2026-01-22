@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/minio/minio-go/v7"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -49,36 +48,6 @@ func createDocumentsForBatch(ctx context.Context, client *minio.Client, cases []
 			}
 		}
 	}
-}
-
-func insertPayloadAndProcessBatch(db *gorm.DB, payload string, status types.BatchStatus, batchType string, dryRun bool, username string, createdOn string) string {
-	var id string
-	initErr := db.Raw(`
-   		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-   		VALUES (?, ?, ?, ?, ?, ?)
-   		RETURNING id;
-		`, payload, string(status), batchType, dryRun, username, createdOn).Scan(&id).Error
-	if initErr != nil {
-		panic(fmt.Sprintf("failed to insert payload into table %v", initErr))
-	}
-	ctx, _ := NewBatchValidationContext(db)
-	processBatch(db, ctx)
-	return id
-}
-
-func assertBatchProcessing(t *testing.T, db *gorm.DB, id string, expectedStatus types.BatchStatus, dryRun bool, username string, expectInfos []types.BatchMessage, expectWarnings []types.BatchMessage, expectErrors []types.BatchMessage) repository.Batch {
-	resultBatch := repository.Batch{}
-	db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
-	assert.Equal(t, expectedStatus, resultBatch.Status)
-	assert.Equal(t, dryRun, resultBatch.DryRun)
-	assert.Equal(t, username, resultBatch.Username)
-	assert.NotNil(t, resultBatch.CreatedOn)
-	assert.NotNil(t, resultBatch.StartedOn)
-	assert.NotNil(t, resultBatch.FinishedOn)
-	assert.Equal(t, expectWarnings, resultBatch.Report.Warnings)
-	assert.Equal(t, expectInfos, resultBatch.Report.Infos)
-	assert.Equal(t, expectErrors, resultBatch.Report.Errors)
-	return resultBatch
 }
 
 func getTableCounts(db *gorm.DB, tableNames []string) map[string]int64 {

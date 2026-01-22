@@ -294,7 +294,7 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 	rec := PatientValidationRecord{Patient: patient}
 	rec.validateExistingPatient(existing)
 	assert.True(t, rec.Skipped)
-	assert.Len(t, rec.Infos, 1)
+	assert.Len(t, rec.Infos, 0)
 	// All 6 differing fields should produce 6 warnings
 	assert.Len(t, rec.Warnings, 6)
 	for _, w := range rec.Warnings {

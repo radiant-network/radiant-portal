@@ -205,7 +205,7 @@ func Test_ValidateExistingSampleInDb_DifferentValues(t *testing.T) {
 	rec.validateExistingSampleInDb(existing)
 
 	assert.True(t, rec.Skipped)
-	assert.Len(t, rec.Infos, 1)
+	assert.Len(t, rec.Infos, 0)
 	assert.Len(t, rec.Warnings, 3)
 	for _, w := range rec.Warnings {
 		assert.Equal(t, SampleExistingSampleDifferentFieldCode, w.Code)
