@@ -5,6 +5,10 @@ import { getColumnPosition, getStatusColor, getStatusIcon, stringToRegExp } from
 const selectors = {
   tab: '[data-cy="details-tab"]',
 
+  bioinformaticsCard: {
+    tableCell: (bioinfoSeq: any) => `${CommonSelectors.tableRow(selectors.bioinformaticsCard.tableId)}:contains("${bioinfoSeq.type}") ${CommonSelectors.tableCellData}`,
+    tableId: '[data-cy="bioinformatics-table"]',
+  },
   sequencingCard: {
     tableCell: (dataSeq: any) => `${CommonSelectors.tableRow(selectors.sequencingCard.tableId)}:contains("${dataSeq.relationship}") ${CommonSelectors.tableCellData}`,
     tableId: '[id="sequencing-experiments"]',
@@ -12,6 +16,52 @@ const selectors = {
 };
 
 const tableColumns = {
+  bioinformaticsCard: [
+    {
+      id: 'task_id',
+      name: 'Task ID',
+      apiField: 'task_id',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: false,
+      position: 0,
+      tooltip: null,
+    },
+    {
+      id: 'type',
+      name: 'Type',
+      apiField: 'type_name',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: false,
+      position: 1,
+      tooltip: null,
+    },
+    {
+      id: 'patient',
+      name: 'Patient',
+      apiField: 'patients',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: false,
+      position: 2,
+      tooltip: null,
+    },
+    {
+      id: 'created_on',
+      name: 'Created On',
+      apiField: 'created_on',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: false,
+      position: 3,
+      tooltip: 'yyyy-mm-dd',
+    },
+  ],
   sequencingCard: [
     {
       id: 'seq_id',
@@ -115,6 +165,288 @@ const tableColumns = {
   ],
 };
 
+const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
+  /**
+   * Select an object view with the table action button.
+   * @param data The data object.
+   * @param tableCellSelector Function that returns the table cell selector.
+   */
+  clickDetailsButton(data: any, tableCellSelector: (data: any) => string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, 'actions').then(position => {
+        if (position !== -1) {
+          cy.get(tableCellSelector(data)).eq(position).find(CommonSelectors.detailsButton).clickAndWait({ force: true });
+        } else {
+          cy.handleColumnNotFound('actions');
+        }
+      })
+    );
+  },
+  /**
+   * Pins a column in the table by its ID.
+   * @param columnID The ID of the column to pin.
+   */
+  pinColumn(columnID: string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        cy.pinColumn(position, tableId);
+      })
+    );
+  },
+  /**
+   * Sorts a column, optionally using an intercept.
+   * @param columnID The ID of the column to sort.
+   */
+  sortColumn(columnID: string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        if (position !== -1) {
+          cy.sortTableAndWait(position, tableId);
+        } else {
+          cy.handleColumnNotFound(columnID);
+        }
+      })
+    );
+  },
+  /**
+   * Unpins a column in the table by its ID.
+   * @param columnID The ID of the column to unpin.
+   */
+  unpinColumn(columnID: string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        cy.unpinColumn(position, tableId);
+      })
+    );
+  },
+});
+
+const generateTableValidationsFunctions = (tableId: string, columns: any[], customColumnContent?: (columnID: string, data: any, position: number) => void) => ({
+  /**
+   * Validates the value of the first row for a given column.
+   * @param value The expected value (string or RegExp).
+   * @param columnID The ID of the column to check.
+   */
+  shouldHaveFirstRowValue(value: string | RegExp, columnID: string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        cy.validateTableFirstRowContent(value, position, tableId);
+      })
+    );
+  },
+  /**
+   * Validates the default visibility of each column.
+   */
+  shouldMatchDefaultColumnVisibility() {
+    columns.forEach(column => {
+      const expectedExist = column.isVisibleByDefault ? 'exist' : 'not.exist';
+      if (column.name.startsWith('[')) {
+        cy.get(CommonSelectors.tableHead(tableId)).find(column.name).should(expectedExist);
+      } else {
+        cy.get(CommonSelectors.tableHead(tableId)).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
+      }
+    });
+  },
+  /**
+   * Validates the default pin state of each column.
+   */
+  shouldMatchDefaultPinnedColumns() {
+    columns.forEach(column => {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
+          if (position !== -1) {
+            cy.get(CommonSelectors.tableHeadCell(tableId))
+              .eq(position)
+              .shouldBePinned(column.pinByDefault as 'right' | 'left' | null);
+          } else {
+            cy.handleColumnNotFound(column.id);
+          }
+        })
+      );
+    });
+  },
+  /**
+   * Validates that all columns are displayed in the correct order in the table.
+   */
+  shouldShowAllColumns() {
+    columns.forEach(column => {
+      if (column.name.startsWith('[')) {
+        cy.get(CommonSelectors.tableHeadCell(tableId)).eq(column.position).find(column.name).should('exist');
+      } else {
+        cy.get(CommonSelectors.tableHeadCell(tableId)).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
+      }
+    });
+  },
+  /**
+   * Validates the content of a specific column in the table for a given Seq.
+   * @param columnID The ID of the column to validate.
+   * @param data The data object containing the expected values.
+   */
+  shouldShowColumnContent(columnID: string, data: any, sortAction: () => void) {
+    sortAction();
+    sortAction();
+    getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+      if (position !== -1) {
+        if (customColumnContent) {
+          customColumnContent(columnID, data, position);
+        } else {
+          cy.validateTableFirstRowContent(data[columnID], position, tableId);
+        }
+      } else {
+        cy.handleColumnNotFound(columnID);
+      }
+    });
+  },
+  /**
+   * Validates the tooltips on columns.
+   */
+  shouldShowColumnTooltips() {
+    columns.forEach(column => {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
+          if (position !== -1) {
+            cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldHaveTooltip(column);
+          } else {
+            cy.handleColumnNotFound(column.id);
+          }
+        })
+      );
+    });
+  },
+  /**
+   * Validates that pinnable columns are correctly marked as pinnable.
+   */
+  shouldShowPinnableColumns() {
+    columns.forEach(column => {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
+          if (position !== -1) {
+            cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinnable(column.isPinnable);
+          } else {
+            cy.handleColumnNotFound(column.id);
+          }
+        })
+      );
+    });
+  },
+  /**
+   * Validates that a specific column is pinned.
+   * @param columnID The ID of the column to check.
+   */
+  shouldPinnedColumn(columnID: string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinned('left');
+      })
+    );
+  },
+  /**
+   * Validates that sortable columns are correctly marked as sortable.
+   */
+  shouldShowSortableColumns() {
+    columns.forEach(column => {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
+          if (position !== -1) {
+            cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBeSortable(column.isSortable);
+          } else {
+            cy.handleColumnNotFound(column.id);
+          }
+        })
+      );
+    });
+  },
+  /**
+   * Validates that a specific column is unpinned.
+   * @param columnID The ID of the column to check.
+   */
+  shouldUnpinnedColumn(columnID: string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinned(null);
+      })
+    );
+  },
+  /**
+   * Validates the sorting functionality of a column.
+   * @param columnID The ID of the column to sort.
+   */
+  shouldSortColumn(columnID: string, sortAction: () => void) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        if (position !== -1) {
+          sortAction();
+          cy.get(CommonSelectors.tableRow(tableId))
+            .eq(0)
+            .find(CommonSelectors.tableCellData)
+            .eq(position)
+            .invoke('text')
+            .then(biggestValue => {
+              const biggest = biggestValue.trim();
+
+              sortAction();
+              cy.get(CommonSelectors.tableRow(tableId))
+                .eq(0)
+                .find(CommonSelectors.tableCellData)
+                .eq(position)
+                .invoke('text')
+                .then(smallestValue => {
+                  const smallest = smallestValue.trim();
+                  if (biggest.localeCompare(smallest) < 0) {
+                    throw new Error(`Error: "${biggest}" should be >= "${smallest}"`);
+                  }
+                });
+            });
+        }
+      })
+    );
+  },
+});
+
+const bioinformaticsColumnContentHandler = (columnID: string, data: any, position: number) => {
+  const tableId = selectors.bioinformaticsCard.tableId;
+    switch (columnID) {
+      case 'patient':
+        cy.validateTableFirstRowContent(data[columnID], position, tableId);
+        cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
+        break;
+      case 'type':
+        cy.validateTableFirstRowContent(data[columnID], position, tableId);
+        cy.validateTableFirstRowClass(CommonSelectors.tagLevel('secondary'), position, tableId);
+        break;
+      default:
+        cy.validateTableFirstRowContent(data[columnID], position, tableId);
+        break;
+    }
+};
+
+const sequencingColumnContentHandler = (columnID: string, data: any, position: number) => {
+  const tableId = selectors.sequencingCard.tableId;
+    switch (columnID) {
+      case 'relationship':
+      case 'histology':
+        cy.validateTableFirstRowContent(data[columnID], position, tableId);
+        cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
+        break;
+      case 'sample_type':
+      case 'exp_strat':
+        cy.validateTableFirstRowContent(data[columnID], position, tableId);
+        cy.validateTableFirstRowClass(CommonSelectors.tagLevel('secondary'), position, tableId);
+        break;
+      case 'seq_status':
+        cy.validateTableFirstRowContent(data[columnID], position, tableId);
+        cy.validateTableFirstRowClass(CommonSelectors.statusIcon(getStatusIcon(data[columnID])), position, tableId);
+        cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(data[columnID])), position, tableId);
+        break;
+      case 'actions':
+        cy.validateTableFirstRowClass(CommonSelectors.detailsButton, position, tableId);
+        break;
+      default:
+        cy.validateTableFirstRowContent(data[columnID], position, tableId);
+        break;
+    }
+};
+
 export const CaseEntity_Details = {
   validations: {
     /**
@@ -140,259 +472,53 @@ export const CaseEntity_Details = {
     },
   },
 
-  sequencingCard: {
-    actions: {
-      /**
-       * Select an object view with the table action button.
-       * @param dataSeq The seq object.
-       */
-      clickDetailsButton(dataSeq: any) {
-        cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, 'actions').then(position => {
-            if (position !== -1) {
-              cy.get(selectors.sequencingCard.tableCell(dataSeq)).eq(position).find(CommonSelectors.detailsButton).clickAndWait({ force: true });
-            } else {
-              cy.handleColumnNotFound('actions');
-            }
-          })
-        );
-      },
-      /**
-       * Pins a column in the table by its ID.
-       * @param columnID The ID of the column to pin.
-       */
-      pinColumn(columnID: string) {
-        cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
-            cy.pinColumn(position, selectors.sequencingCard.tableId);
-          })
-        );
-      },
-      /**
-       * Sorts a column, optionally using an intercept.
-       * @param columnID The ID of the column to sort.
-       */
-      sortColumn(columnID: string) {
-        cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
-            if (position !== -1) {
-              cy.sortTableAndWait(position, selectors.sequencingCard.tableId);
-            } else {
-              cy.handleColumnNotFound(columnID);
-            }
-          })
-        );
-      },
-      /**
-       * Unpins a column in the table by its ID.
-       * @param columnID The ID of the column to unpin.
-       */
-      unpinColumn(columnID: string) {
-        cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
-            cy.unpinColumn(position, selectors.sequencingCard.tableId);
-          })
-        );
-      },
-    },
-    validations: {
-      /**
-       * Validates the value of the first row for a given column.
-       * @param value The expected value (string or RegExp).
-       * @param columnID The ID of the column to check.
-       */
-      shouldHaveFirstRowValue(value: string | RegExp, columnID: string) {
-        cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
-            cy.validateTableFirstRowContent(value, position, selectors.sequencingCard.tableId);
-          })
-        );
-      },
-      /**
-       * Validates the default visibility of each column.
-       */
-      shouldMatchDefaultColumnVisibility() {
-        tableColumns.sequencingCard.forEach(column => {
-          const expectedExist = column.isVisibleByDefault ? 'exist' : 'not.exist';
-          if (column.name.startsWith('[')) {
-            cy.get(CommonSelectors.tableHead(selectors.sequencingCard.tableId)).find(column.name).should(expectedExist);
-          } else {
-            cy.get(CommonSelectors.tableHead(selectors.sequencingCard.tableId)).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
-          }
-        });
-      },
-      /**
-       * Validates the default pin state of each column.
-       */
-      shouldMatchDefaultPinnedColumns() {
-        tableColumns.sequencingCard.forEach(column => {
-          cy.then(() =>
-            getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, column.id).then(position => {
-              if (position !== -1) {
-                cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId))
-                  .eq(position)
-                  .shouldBePinned(column.pinByDefault as 'right' | 'left' | null);
-              } else {
-                cy.handleColumnNotFound(column.id);
-              }
-            })
-          );
-        });
-      },
-      /**
-       * Validates that all columns are displayed in the correct order in the table.
-       */
-      shouldShowAllColumns() {
-        tableColumns.sequencingCard.forEach(column => {
-          if (column.name.startsWith('[')) {
-            cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(column.position).find(column.name).should('exist');
-          } else {
-            cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
-          }
-        });
-      },
-      /**
-       * Validates the content of a specific column in the table for a given Seq.
-       * @param columnID The ID of the column to validate.
-       * @param dataSeq The Seq object containing the expected values.
-       */
-      shouldShowColumnContent(columnID: string, dataSeq: any) {
-        CaseEntity_Details.sequencingCard.actions.sortColumn('seq_id');
-        CaseEntity_Details.sequencingCard.actions.sortColumn('seq_id');
-        getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
-          if (position !== -1) {
-            switch (columnID) {
-              case 'relationship':
-              case 'histology':
-                cy.validateTableFirstRowContent(dataSeq[columnID], position, selectors.sequencingCard.tableId);
-                cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
-                break;
-              case 'sample_type':
-              case 'exp_strat':
-                cy.validateTableFirstRowContent(dataSeq[columnID], position, selectors.sequencingCard.tableId);
-                cy.validateTableFirstRowClass(CommonSelectors.tagLevel('secondary'), position, selectors.sequencingCard.tableId);
-                break;
-              case 'seq_status':
-                cy.validateTableFirstRowContent(dataSeq[columnID], position, selectors.sequencingCard.tableId);
-                cy.validateTableFirstRowClass(CommonSelectors.statusIcon(getStatusIcon(dataSeq[columnID])), position, selectors.sequencingCard.tableId);
-                cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(dataSeq[columnID])), position, selectors.sequencingCard.tableId);
-                break;
-              case 'actions':
-                cy.validateTableFirstRowClass(CommonSelectors.detailsButton, position, selectors.sequencingCard.tableId);
-                break;
-              default:
-                cy.validateTableFirstRowContent(dataSeq[columnID], position, selectors.sequencingCard.tableId);
-                break;
-            }
-          } else {
-            cy.handleColumnNotFound(columnID);
-          }
-        });
-      },
-      /**
-       * Validates the tooltips on columns.
-       */
-      shouldShowColumnTooltips() {
-        tableColumns.sequencingCard.forEach(column => {
-          cy.then(() =>
-            getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, column.id).then(position => {
-              if (position !== -1) {
-                cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(position).shouldHaveTooltip(column);
-              } else {
-                cy.handleColumnNotFound(column.id);
-              }
-            })
-          );
-        });
-      },
-      /**
-       * Validates that pinnable columns are correctly marked as pinnable.
-       */
-      shouldShowPinnableColumns() {
-        tableColumns.sequencingCard.forEach(column => {
-          cy.then(() =>
-            getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, column.id).then(position => {
-              if (position !== -1) {
-                cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(position).shouldBePinnable(column.isPinnable);
-              } else {
-                cy.handleColumnNotFound(column.id);
-              }
-            })
-          );
-        });
-      },
-      /**
-       * Validates that a specific column is pinned.
-       * @param columnID The ID of the column to check.
-       */
-      shouldPinnedColumn(columnID: string) {
-        cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
-            cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(position).shouldBePinned('left');
-          })
-        );
-      },
-      /**
-       * Validates that sortable columns are correctly marked as sortable.
-       */
-      shouldShowSortableColumns() {
-        tableColumns.sequencingCard.forEach(column => {
-          cy.then(() =>
-            getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, column.id).then(position => {
-              if (position !== -1) {
-                cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(position).shouldBeSortable(column.isSortable);
-              } else {
-                cy.handleColumnNotFound(column.id);
-              }
-            })
-          );
-        });
-      },
-      /**
-       * Validates that a specific column is unpinned.
-       * @param columnID The ID of the column to check.
-       */
-      shouldUnpinnedColumn(columnID: string) {
-        cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
-            cy.get(CommonSelectors.tableHeadCell(selectors.sequencingCard.tableId)).eq(position).shouldBePinned(null);
-          })
-        );
-      },
-      /**
-       * Validates the sorting functionality of a column.
-       * @param columnID The ID of the column to sort.
-       */
-      shouldSortColumn(columnID: string) {
-        cy.then(() =>
-          getColumnPosition(CommonSelectors.tableHead(selectors.sequencingCard.tableId), tableColumns.sequencingCard, columnID).then(position => {
-            if (position !== -1) {
-              CaseEntity_Details.sequencingCard.actions.sortColumn(columnID);
-              cy.get(CommonSelectors.tableRow(selectors.sequencingCard.tableId))
-                .eq(0)
-                .find(CommonSelectors.tableCellData)
-                .eq(position)
-                .invoke('text')
-                .then(biggestValue => {
-                  const biggest = biggestValue.trim();
 
-                  CaseEntity_Details.sequencingCard.actions.sortColumn(columnID);
-                  cy.get(CommonSelectors.tableRow(selectors.sequencingCard.tableId))
-                    .eq(0)
-                    .find(CommonSelectors.tableCellData)
-                    .eq(position)
-                    .invoke('text')
-                    .then(smallestValue => {
-                      const smallest = smallestValue.trim();
-                      if (biggest.localeCompare(smallest) < 0) {
-                        throw new Error(`Error: "${biggest}" should be >= "${smallest}"`);
-                      }
-                    });
-                });
-            }
-          })
-        );
-      },
-    },
+  bioinformaticsCard: {
+    actions: (() => {
+      const baseActions = generateTableActionsFunctions(selectors.bioinformaticsCard.tableId, tableColumns.bioinformaticsCard);
+      return {
+        ...baseActions,
+        clickDetailsButton(data: any) {
+          baseActions.clickDetailsButton(data, (data) => selectors.bioinformaticsCard.tableCell(data));
+        },
+      };
+    })(),
+    validations: (() => {
+      const actions = generateTableActionsFunctions(selectors.bioinformaticsCard.tableId, tableColumns.bioinformaticsCard);
+      const baseValidations = generateTableValidationsFunctions(selectors.bioinformaticsCard.tableId, tableColumns.bioinformaticsCard, bioinformaticsColumnContentHandler);
+      return {
+        ...baseValidations,
+        shouldShowColumnContent(columnID: string, data: any) {
+          baseValidations.shouldShowColumnContent(columnID, data, () => null);
+        },
+        shouldSortColumn(columnID: string) {
+          baseValidations.shouldSortColumn(columnID, () => actions.sortColumn(columnID));
+        },
+      };
+    })(),
+  },
+  sequencingCard: {
+    actions: (() => {
+      const baseActions = generateTableActionsFunctions(selectors.sequencingCard.tableId, tableColumns.sequencingCard);
+      return {
+        ...baseActions,
+        clickDetailsButton(data: any) {
+          baseActions.clickDetailsButton(data, (data) => selectors.sequencingCard.tableCell(data));
+        },
+      };
+    })(),
+    validations: (() => {
+      const actions = generateTableActionsFunctions(selectors.sequencingCard.tableId, tableColumns.sequencingCard);
+      const baseValidations = generateTableValidationsFunctions(selectors.sequencingCard.tableId, tableColumns.sequencingCard, sequencingColumnContentHandler);
+      return {
+        ...baseValidations,
+        shouldShowColumnContent(columnID: string, data: any) {
+          baseValidations.shouldShowColumnContent(columnID, data, () => actions.sortColumn('seq_id'));
+        },
+        shouldSortColumn(columnID: string) {
+          baseValidations.shouldSortColumn(columnID, () => actions.sortColumn(columnID));
+        },
+      };
+    })(),
   },
 };

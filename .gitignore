@@ -52,6 +52,7 @@ bin/
 /cypress/results
 /cypress/.cached-data.json
 .testquality
+.copilot
 
 test.http
 /http-client.private.env.json
