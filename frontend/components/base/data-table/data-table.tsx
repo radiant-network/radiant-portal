@@ -143,6 +143,7 @@ export type DefaultColumnTableState = {
   columnOrder: ColumnOrderState;
   columnPinning: ColumnPinningState;
   columnVisibility: ColumnVisiblity;
+  columnSizing: Record<string, number>;
 };
 
 /**
@@ -609,6 +610,7 @@ function DataTable<T>({
     () => ({
       columnOrder: deserializeColumnOrder(defaultColumnSettings) ?? {},
       columnPinning: deserializeColumnPinning(defaultColumnSettings) ?? {},
+      columnSizing: {},
       columnVisibility: deserializeColumnVisibility(defaultColumnSettings) ?? [],
     }),
     [defaultColumnSettings],
@@ -625,7 +627,7 @@ function DataTable<T>({
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(defaultColumnTableState.columnVisibility);
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(defaultColumnTableState.columnOrder);
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(defaultColumnTableState.columnPinning);
-  const [columnSizing, setColumnSizing] = useState<Record<string, number>>({});
+  const [columnSizing, setColumnSizing] = useState<Record<string, number>>(defaultColumnTableState.columnSizing);
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const [sorting, setSorting] = useState<SortingState>(
@@ -682,6 +684,7 @@ function DataTable<T>({
     onColumnOrderChange: setColumnOrder,
     onColumnVisibilityChange: setColumnVisibility,
     onExpandedChange: setExpanded,
+    onColumnSizingChange: setColumnSizing,
     onGroupingChange: setGrouping,
     onPaginationChange: (() => {
       if (pagination.type === 'hidden') return undefined;
@@ -697,6 +700,7 @@ function DataTable<T>({
       columnVisibility,
       columnPinning,
       grouping,
+      columnSizing,
       pagination: (() => (pagination.type !== 'hidden' ? internalPagination : undefined))(),
       expanded,
       rowPinning,
@@ -921,6 +925,7 @@ function DataTable<T>({
                 loading={loadingStates?.list}
                 columnPinning={columnPinning}
                 columnOrder={columnOrder}
+                setColumnOrder={setColumnOrder}
                 defaultSettings={defaultColumnSettings}
                 visiblitySettings={columnVisibility}
                 handleVisiblityChange={(target: string, checked: boolean) => {
@@ -939,14 +944,14 @@ function DataTable<T>({
                 pristine={
                   JSON.stringify(defaultColumnTableState.columnOrder) === JSON.stringify(columnOrder) &&
                   JSON.stringify(defaultColumnTableState.columnPinning) === JSON.stringify(columnPinning) &&
+                  isEqual(defaultColumnTableState.columnSizing, columnSizing) &&
                   isEqual(defaultColumnTableState.columnVisibility, columnVisibility)
                 }
                 handleReset={() => {
                   setColumnOrder(defaultColumnTableState.columnOrder);
-                  setColumnVisibility(defaultColumnTableState.columnVisibility);
-                  setColumnPinning(defaultColumnTableState.columnPinning);
-
                   setColumnSizing({});
+                  setColumnPinning(defaultColumnTableState.columnPinning);
+                  setColumnVisibility(defaultColumnTableState.columnVisibility);
 
                   table.resetColumnSizing();
                   table.resetHeaderSizeInfo();
