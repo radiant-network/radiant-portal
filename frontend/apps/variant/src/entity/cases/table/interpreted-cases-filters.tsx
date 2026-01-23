@@ -1,15 +1,14 @@
+import FilterButton from '@/components/base/buttons/filter-button';
 import { useI18n } from '@/components/hooks/i18n';
 
-import AnalysisSelectFilter from './filters/analysis-select-filter';
-import ClassificationSelectFilter from './filters/classification-select-filter';
+import { useCasesFilters } from './filters/cases-filters-context';
 import ConditionCasesFilter from './filters/condition-cases-filter';
-import InstitutionSelectFilter from './filters/institution-select-filter';
 
 export interface InterpretedCasesFiltersState {
   mondo: string;
-  institution: 'all' | string;
-  test: 'all' | string;
-  classification: 'all' | string;
+  institution: string[];
+  test: string[];
+  classification: string[];
 }
 
 interface CasesFilterBarProps {
@@ -19,25 +18,58 @@ interface CasesFilterBarProps {
 
 function InterpretedCasesFilters({ filters, onFiltersChange }: CasesFilterBarProps) {
   const { t } = useI18n();
+  const { filters: casesFilters } = useCasesFilters();
 
-  const handleFilterChange = (field: keyof InterpretedCasesFiltersState, value: string) => {
+  const handleFilterChange = (field: keyof InterpretedCasesFiltersState, value: string | string[]) => {
     onFiltersChange({ ...filters, [field]: value });
   };
 
   return (
-    <div className="space-y-2">
-      <div className="text-sm">{t('variant_entity.cases.interpreted_table.filters.label')}</div>
-      <div className="flex items-center gap-2">
+    <div className="space-y-2 mb-4 mt-6">
+      <div className="flex items-end gap-2">
         <ConditionCasesFilter onChange={value => handleFilterChange('mondo', value)} />
-        <ClassificationSelectFilter
-          value={filters.classification}
-          onChange={value => handleFilterChange('classification', value)}
+        <FilterButton
+          key="classification-filter"
+          popoverSize="md"
+          label={t('variant_entity.cases.interpreted_table.filters.classification')}
+          options={
+            casesFilters?.classification.map(classification => ({
+              key: classification.key!,
+              label: t(`variant.interpretation.classifications.${classification.label}`),
+            })) || []
+          }
+          selected={filters.classification}
+          onSelect={selected => handleFilterChange('classification', selected)}
+          withTooltip={false}
         />
-        <InstitutionSelectFilter
-          value={filters.institution}
-          onChange={value => handleFilterChange('institution', value)}
+        <FilterButton
+          key="institution-filter"
+          popoverSize="md"
+          label={t('variant_entity.cases.interpreted_table.filters.institution')}
+          options={
+            casesFilters?.diagnosis_lab_code.map(lab => ({
+              key: lab.key!,
+              label: lab.label!,
+            })) || []
+          }
+          selected={filters.institution}
+          onSelect={selected => handleFilterChange('institution', selected)}
+          withTooltip={false}
         />
-        <AnalysisSelectFilter value={filters.test} onChange={value => handleFilterChange('test', value)} />
+        <FilterButton
+          key="test-filter"
+          popoverSize="md"
+          label={t('variant_entity.cases.interpreted_table.filters.test')}
+          options={
+            casesFilters?.analysis_catalog_code.map(analysis => ({
+              key: analysis.key!,
+              label: analysis.label!,
+            })) || []
+          }
+          selected={filters.test}
+          onSelect={selected => handleFilterChange('test', selected)}
+          withTooltip={false}
+        />
       </div>
     </div>
   );
