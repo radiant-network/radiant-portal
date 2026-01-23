@@ -1601,8 +1601,10 @@
           "sample": "Sample"
         },
         "filters": {
-          "label": "Phenotype",
-          "search_input_placeholder": "Filter HPO phenotype"
+          "institution": "Diagnostic Lab",
+          "search_hpo": "Phenotype",
+          "search_hpo_placeholder": "Filter HPO phenotype",
+          "test": "Analysis"
         }
       }
     }

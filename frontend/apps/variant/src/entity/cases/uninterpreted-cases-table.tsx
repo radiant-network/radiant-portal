@@ -40,8 +40,8 @@ function UninterpretedCasesTable() {
 
   const [initialFilters, setInitialFilters] = useState<UninterpretedCasesFiltersState>({
     phenotype: '',
-    institution: 'all',
-    test: 'all',
+    institution: [],
+    test: [],
   });
 
   const searchCriteria: SearchCriterion[] = useMemo(() => {
@@ -55,19 +55,17 @@ function UninterpretedCasesTable() {
       });
     }
 
-    if (initialFilters.institution && initialFilters.institution !== 'all') {
+    if (initialFilters.institution && initialFilters.institution.length > 0) {
       criteria.push({
         field: 'diagnosis_lab_code',
-        value: [initialFilters.institution],
-        operator: 'contains',
+        value: [...initialFilters.institution],
       });
     }
 
-    if (initialFilters.test && initialFilters.test !== 'all') {
+    if (initialFilters.test && initialFilters.test.length > 0) {
       criteria.push({
         field: 'analysis_catalog_code',
-        value: [initialFilters.test],
-        operator: 'contains',
+        value: [...initialFilters.test],
       });
     }
 
@@ -111,10 +109,10 @@ function UninterpretedCasesTable() {
 
   return (
     <div className="space-y-6 mt-2">
-      <UninterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
       <DataTable
         id="uninterpreted-cases"
         columns={getUninterpretedCasesColumns(t)}
+        TableFilters={<UninterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />}
         data={casesData}
         defaultColumnSettings={uninterpretedCasesDefaultSettings}
         loadingStates={{
