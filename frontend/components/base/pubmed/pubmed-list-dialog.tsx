@@ -50,7 +50,7 @@ function PubmedListDialog({ pubmeds, open, onClose }: PubmedListDialogProps) {
               <span className="mr-1">{pubmed.citation}</span>
               <AnchorLink
                 variant="primary"
-                className="underline"
+                className="underline hover:no-underline"
                 target="_blank"
                 href={`https://pubmed.ncbi.nlm.nih.gov/${pubmed.citation_id}`}
               >
