@@ -697,7 +697,7 @@ func (cr *CaseValidationRecord) validateCasePatients() error {
 
 	// Validate number of probands
 	if nbProband != 1 {
-		message := fmt.Sprintf("Case %d should have exactly 1 proband.", cr.Index)
+		message := fmt.Sprintf("Case %d must have exactly 1 proband.", cr.Index)
 		path := cr.formatFieldPath("patients", nil, "", nil)
 		cr.addErrors(message, CaseInvalidNumberOfProbands, path)
 	}

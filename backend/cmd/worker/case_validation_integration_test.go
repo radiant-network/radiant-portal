@@ -617,7 +617,7 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 			},
 			{
 				Code:    "CASE-007",
-				Message: "Case 1 should have exactly 1 proband.",
+				Message: "Case 1 must have exactly 1 proband.",
 				Path:    "case[1].patients",
 			},
 			{
@@ -627,12 +627,12 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 			},
 			{
 				Code:    "CASE-007",
-				Message: "Case 2 should have exactly 1 proband.",
+				Message: "Case 2 must have exactly 1 proband.",
 				Path:    "case[2].patients",
 			},
 			{
 				Code:    "CASE-007",
-				Message: "Case 3 should have exactly 1 proband.",
+				Message: "Case 3 must have exactly 1 proband.",
 				Path:    "case[3].patients",
 			},
 			{

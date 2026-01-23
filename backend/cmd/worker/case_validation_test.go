@@ -3087,7 +3087,7 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseInvalidNumberOfProbands, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, "should have exactly 1 proband")
+	assert.Contains(t, record.Errors[0].Message, "must have exactly 1 proband")
 	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
 }
 
@@ -3132,7 +3132,7 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseInvalidNumberOfProbands, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, "should have exactly 1 proband")
+	assert.Contains(t, record.Errors[0].Message, "must have exactly 1 proband")
 	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
 }
 
