@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
   closestCenter,
   DndContext,
   DragEndEvent,
   KeyboardSensor,
   PointerSensor,
-  UniqueIdentifier,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -31,6 +30,21 @@ import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
+type TableColumnSettingsProps = {
+  loading?: boolean;
+  columnOrder: ColumnOrderState;
+  setColumnOrder: (value: string[]) => void;
+  columnPinning: ColumnPinningState;
+  defaultSettings: ColumnSettings[];
+  visiblitySettings: {
+    [key: string]: boolean;
+  };
+  pristine: boolean;
+  handleVisiblityChange: (target: string, checked: boolean) => void;
+  handleOrderChange: (columnOrder: ColumnOrderState) => void;
+  handleReset: () => void;
+};
+
 /**
  * Read user config to return column order (in asc)
  * @param settings
@@ -46,9 +60,7 @@ function deserializeColumnsFixed(settings: ColumnSettings[]): string[] {
 }
 
 function filterColumnById(defaultSettings: ColumnSettings[]) {
-  return function (id: string) {
-    return defaultSettings.find(column => column.id === id);
-  };
+  return (id: string) => defaultSettings.find(column => column.id === id);
 }
 
 /**
@@ -58,22 +70,9 @@ function filterColumnById(defaultSettings: ColumnSettings[]) {
  * @WARNING: There is a small workaround to make tooltip works with DropdownMenu.
  *           it must be set has a child of Button and edit his sideOffset manualy
  */
-type TableColumnSettingsProps = {
-  loading?: boolean;
-  columnOrder: ColumnOrderState;
-  columnPinning: ColumnPinningState;
-  defaultSettings: ColumnSettings[];
-  visiblitySettings: {
-    [key: string]: boolean;
-  };
-  pristine: boolean;
-  handleVisiblityChange: (target: string, checked: boolean) => void;
-  handleOrderChange: (columnOrder: ColumnOrderState) => void;
-  handleReset: () => void;
-};
-
 function TableColumnSettings({
   columnOrder,
+  setColumnOrder,
   columnPinning,
   defaultSettings,
   loading = true,
@@ -87,7 +86,6 @@ function TableColumnSettings({
   const fixedColumns = deserializeColumnsFixed(defaultSettings);
   const columnsLeft = (columnPinning.left ?? []).map(filterColumnById(defaultSettings));
   const columnsRight = (columnPinning.right ?? []).map(filterColumnById(defaultSettings));
-  const [columnsMiddle, setColumnsMiddle] = useState<UniqueIdentifier[]>(columnOrder);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -99,15 +97,17 @@ function TableColumnSettings({
     const { active, over } = event;
     if (!over) return;
     if (active.id !== over.id) {
-      setColumnsMiddle(items => arrayMove(items, items.indexOf(active.id), items.indexOf(over.id)));
+      setColumnOrder(
+        arrayMove(columnOrder, columnOrder.indexOf(active.id as string), columnOrder.indexOf(over.id as string)),
+      );
     }
   }
 
   useEffect(() => {
-    handleOrderChange(columnsMiddle as ColumnOrderState);
-  }, [columnsMiddle]);
+    handleOrderChange(columnOrder as ColumnOrderState);
+  }, [columnOrder]);
 
-  if (loading) return <Skeleton className="w-[24px] h-[24px] mr-2" />;
+  if (loading) return <Skeleton className="w-6 h-6 mr-2" />;
 
   return (
     <span>
@@ -127,7 +127,7 @@ function TableColumnSettings({
         <DropdownMenuPortal>
           <DropdownMenuContent>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={columnsMiddle} strategy={verticalListSortingStrategy}>
+              <SortableContext items={columnOrder} strategy={verticalListSortingStrategy}>
                 {columnsLeft.map(column => {
                   if (!column || fixedColumns.includes(column.id)) return null;
                   return (
@@ -142,7 +142,7 @@ function TableColumnSettings({
                   );
                 })}
 
-                {columnsMiddle.map(itemId => {
+                {columnOrder.map(itemId => {
                   const column = defaultSettings.find(column => column.id === itemId);
                   if (
                     !column ||
@@ -185,7 +185,6 @@ function TableColumnSettings({
               variant="ghost"
               className="mt-2"
               onClick={() => {
-                setColumnsMiddle(columnOrder);
                 handleReset();
               }}
             >

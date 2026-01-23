@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { ColumnOrderState, ColumnPinningState, TableState } from '@tanstack/react-table';
 import useSWRImmutable from 'swr/immutable';
 import useSWRMutation from 'swr/mutation';
@@ -83,7 +83,6 @@ export function useTableGetPreferenceEffect({
       setColumnPinning(tablePreference.columnPinning);
       setColumnSizing(tablePreference.columnSizing);
       setColumnVisibility(tablePreference.columnVisibility);
-
       setAdditionalFields?.(
         getFilteredAdditionalFields({ columnVisibility: tablePreference.columnVisibility, defaultColumnSettings }),
       );
@@ -93,7 +92,6 @@ export function useTableGetPreferenceEffect({
 
 /**
  * Update user-preference of the table with a POST request
- * @TODO: columnSizing is saved but it's not loaded in the table
  */
 export function useTableUpdatePreferenceEffect({
   id,
@@ -104,56 +102,31 @@ export function useTableUpdatePreferenceEffect({
   columnSizing,
   columnVisibility,
 }: useTableStateObserverProps) {
-  const [tableState, setTableState] = useState<TableObserverProps>({
-    columnOrder,
-    columnPinning,
-    columnSizing,
-    columnVisibility,
-    columns,
-  });
-
   const { trigger } = useSWRMutation(`post-${id}`, postUserPreference);
-
-  // column pinning
-  useEffect(() => {
-    setTableState({ ...tableState, columnPinning });
-  }, [columnPinning]);
-
-  // pagination
-  useEffect(() => {
-    setTableState({
-      ...tableState,
-      pagination: {
-        pageSize: state.pagination?.pageSize,
-      },
-    });
-  }, [state.pagination]);
-
-  // column order
-  useEffect(() => {
-    setTableState({ ...tableState, columnOrder });
-  }, [columnOrder]);
-
-  // column order
-  useEffect(() => {
-    setTableState({ ...tableState, columnSizing });
-  }, [columnSizing]);
-
-  // visibility
-  useEffect(() => {
-    setTableState({ ...tableState, columnVisibility });
-  }, [columnVisibility]);
-
-  // Save TableState inside user-preference api
   useEffect(() => {
     const handler = setTimeout(() => {
-      trigger({ key: id, userPreference: { content: tableState, key: id } });
-    }, 500);
+      trigger({
+        key: id,
+        userPreference: {
+          content: {
+            columnOrder,
+            columnPinning,
+            columnSizing,
+            columnVisibility,
+            columns,
+            pagination: {
+              pageSize: state.pagination?.pageSize,
+            },
+          },
+          key: id,
+        },
+      });
+    }, 350);
 
     return () => {
       if (handler) clearTimeout(handler);
     };
-  }, [tableState]);
+  }, [columnPinning, state.pagination, columnOrder, columnSizing, columnVisibility]);
 }
 
 /**
