@@ -269,7 +269,7 @@ func Test_ProcessBatch_Case_validateTask_Error_TaskField(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-001",
-				Message: "Invalid Field pipeline_version for case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Message: "Invalid field pipeline_version for case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
 				Path:    "case[0].tasks[0]",
 			},
 		}
@@ -289,7 +289,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-001",
-				Message: "Invalid Field type_code for case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, family_variant_calling, somatic_variant_calling, tumor_only_variant_calling, radiant_germline_annotation, exomiser, rnaseq_analysis",
+				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, family_variant_calling, somatic_variant_calling, tumor_only_variant_calling, radiant_germline_annotation, exomiser, rnaseq_analysis",
 				Path:    "case[0].tasks[0]",
 			},
 		}
@@ -454,7 +454,7 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid Field name for case 0 - task 0 - output document 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Message: "Invalid field name for case 0 - task 0 - output document 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
 				Path:    "case[0].tasks[0].output_documents[0]",
 			},
 		}
@@ -568,6 +568,200 @@ func Test_ProcessBatch_Case_validateDocument_Error_HashNotMatch(t *testing.T) {
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		scenario, _ := testutils.LoadScenario("cases_case_codes")
+		payload, _ := json.Marshal(scenario.Cases)
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+
+		infos := []types.BatchMessage{
+			{
+				Code:    "CASE-001",
+				Message: "Case (1 / 1:1) already exists, skipped.",
+				Path:    "case[0]",
+			},
+		}
+		errors := []types.BatchMessage{
+			{
+				Code:    "CASE-003",
+				Message: "Project non_existing_project for case 1 does not exist.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-004",
+				Message: "Diagnostic lab \"LDM-CHUSJJ\" for case 1 does not exist.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-005",
+				Message: "Analysis \"WGAA\" for case 1 does not exist.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-006",
+				Message: "Ordering organization \"CHUSJJ\" for case 1 does not exist.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-002",
+				Message: "Invalid field primary_condition_value for case 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-002",
+				Message: "Invalid field ordering_physician for case 1. Reason: field is too long, maximum length allowed is 100.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-007",
+				Message: "Case 1 should have exactly 1 proband.",
+				Path:    "case[1].patients",
+			},
+			{
+				Code:    "CASE-008",
+				Message: "Duplicate patient (CHUSJ / MRN-283773) for case 2.",
+				Path:    "case[2].patients",
+			},
+			{
+				Code:    "CASE-007",
+				Message: "Case 2 should have exactly 1 proband.",
+				Path:    "case[2].patients",
+			},
+			{
+				Code:    "CASE-007",
+				Message: "Case 3 should have exactly 1 proband.",
+				Path:    "case[3].patients",
+			},
+			{
+				Code:    "CASE-011",
+				Message: "Case (N1 / CASE-12345) appears multiple times in the batch.",
+				Path:    "case[3]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		scenario, _ := testutils.LoadScenario("cases_inner_codes")
+		payload, _ := json.Marshal(scenario.Cases)
+
+		// Create document to validate size and hash checks
+		_ = createDocument(context, client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+
+		infos := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-003",
+				Message: "Document s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz already exists, skipped.",
+				Path:    "case[0].tasks[2].output_documents[0]",
+			},
+		}
+		warnings := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-004",
+				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found but with a different data_category_code (genomic <> genomic!@#$%^&).",
+				Path:    "case[0].tasks[2].output_documents[1]",
+			},
+		}
+		errors := []types.BatchMessage{
+			{
+				Code:    "PATIENT-004",
+				Message: "Invalid field submitter_patient_id for case 0 - patient 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].patients[0]",
+			},
+			{
+				Code:    "PATIENT-006",
+				Message: "Patient (CHUSJ / MRN-283773!@#$%^) for case 0 - patient 0 does not exist.",
+				Path:    "case[0].patients[0]",
+			},
+			{
+				Code:    "OBS-001",
+				Message: "Invalid field system for case 0 - patient 0 - observations_categorical 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].patients[0].observations_categorical[0]",
+			},
+			{
+				Code:    "OBS-001",
+				Message: "Invalid field onset_code for case 0 - patient 0 - observations_categorical 0. Reason: onset code \"infantilee\" is not a valid onset code.",
+				Path:    "case[0].patients[0].observations_categorical[0]",
+			},
+			{
+				Code:    "SEQ-007",
+				Message: "Sequencing experiment (CQGC / S13225 / NA128911) does not exist.",
+				Path:    "case[0].sequencing_experiments[0]",
+			},
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field pipeline_name for case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].tasks[0]",
+			},
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing aliquot NA12891111 is not defined for case 0 - task 0.",
+				Path:    "case[0].tasks[0]",
+			},
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field pipeline_name for case 0 - task 1. Reason: field is too long, maximum length allowed is 100.",
+				Path:    "case[0].tasks[1]",
+			},
+			{
+				Code:    "TASK-003",
+				Message: "Missing input documents for case 0 - task 1 of type family_variant_calling.",
+				Path:    "case[0].tasks[1]",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 1 of type family_variant_calling.",
+				Path:    "case[0].tasks[1]",
+			},
+			{
+				Code:    "TASK-007",
+				Message: "Aliquot and Input documents are mutually exclusive. You can provide one or the other, but not both.",
+				Path:    "case[0].tasks[2]",
+			},
+			{
+				Code:    "DOCUMENT-002",
+				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for case 0 - task 0 - output document 0.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-006",
+				Message: "Document size does not match the actual size of the document s3://test-bucket/existing_document.recal.crai for case 0 - task 0 - output document 1.",
+				Path:    "case[0].tasks[0].output_documents[1]",
+			},
+			{
+				Code:    "DOCUMENT-007",
+				Message: "Document hash does not match the actual hash of the document s3://test-bucket/existing_document.recal.crai for case 0 - task 0 - output document 1.",
+				Path:    "case[0].tasks[0].output_documents[1]",
+			},
+			{
+				Code:    "DOCUMENT-005",
+				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found in the output of a different task.",
+				Path:    "case[0].tasks[2].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-005",
+				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found in the output of a different task.",
+				Path:    "case[0].tasks[2].output_documents[1]",
+			},
+			{
+				Code:    "DOCUMENT-002",
+				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for case 0 - task 3 - output document 0.",
+				Path:    "case[0].tasks[3].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-008",
+				Message: "Duplicate output document with URL s3://test-bucket/CASE-12345.recal.crai found.",
+				Path:    "case[0].tasks[3].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, warnings, errors)
 	})
 }
 

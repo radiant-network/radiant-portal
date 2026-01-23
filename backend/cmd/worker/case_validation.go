@@ -13,6 +13,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const NoteMaxLength = 1000
+
 // FamilyMemberCodeRegExp defines a regular expression pattern that matches strings containing
 // uppercase and lowercase letters (A-Z, a-z) and hyphens.
 const FamilyMemberCodeRegExp = `^[A-Za-z\- ]+$`
@@ -467,11 +469,11 @@ func (cr *CaseValidationRecord) formatObservationInvalidFieldMessage(fieldName s
 }
 
 func (cr *CaseValidationRecord) formatTaskDocumentFieldErrorMessage(fieldName string, caseIndex, taskIndex, documentIndex int) string {
-	return fmt.Sprintf("Invalid Field %s for case %d - task %d - output document %d. Reason:", fieldName, caseIndex, taskIndex, documentIndex)
+	return fmt.Sprintf("Invalid field %s for case %d - task %d - output document %d. Reason:", fieldName, caseIndex, taskIndex, documentIndex)
 }
 
 func (cr *CaseValidationRecord) formatTaskFieldErrorMessage(fieldName string, caseIndex, taskIndex int) string {
-	return fmt.Sprintf("Invalid Field %s for case %d - task %d. Reason:", fieldName, caseIndex, taskIndex)
+	return fmt.Sprintf("Invalid field %s for case %d - task %d. Reason:", fieldName, caseIndex, taskIndex)
 }
 
 func (cr *CaseValidationRecord) formatFieldPath(entityType string, entityIndex *int, collectionName string, collectionIndex *int) string {
@@ -663,6 +665,10 @@ func (cr *CaseValidationRecord) validateCasePatients() error {
 	visitedPatients := map[PatientKey]struct{}{}
 
 	for patientIndex := range cr.Case.Patients {
+
+		path := cr.formatPatientsFieldPath(&patientIndex, "", nil)
+		cr.validatePatientsTextField(cr.Case.Patients[patientIndex].SubmitterPatientId, "submitter_patient_id", path, patientIndex, TextRegExpCompiled, "", 0, true)
+
 		// Validate uniqueness of patients in case
 		cr.validatePatientUniquenessInCase(patientIndex, visitedPatients)
 
@@ -699,11 +705,11 @@ func (cr *CaseValidationRecord) validateCasePatients() error {
 	return nil
 }
 
-func (cr *CaseValidationRecord) validateSeqExp(seqExpIndex int) error {
+func (cr *CaseValidationRecord) validateSeqExpExists(seqExpIndex int) (error, bool) {
 	se := cr.Case.SequencingExperiments[seqExpIndex]
 	seqExp, err := cr.Context.SeqExpRepo.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode) // TODO use cache from context
 	if err != nil {
-		return fmt.Errorf("error getting existing sequencing experiment: %v", err)
+		return fmt.Errorf("error getting existing sequencing experiment: %v", err), false
 	}
 	if seqExp == nil {
 		path := cr.formatSeqExpFieldPath(&seqExpIndex)
@@ -713,8 +719,9 @@ func (cr *CaseValidationRecord) validateSeqExp(seqExpIndex int) error {
 			se.Aliquot,
 		)
 		cr.addErrors(message, SequencingExperimentNotFound, path)
+		return nil, false
 	}
-	return nil
+	return nil, true
 }
 
 func (cr *CaseValidationRecord) validateSeqExpSample(seqExpIndex int) (*types.Sample, error) {
@@ -775,9 +782,12 @@ func (cr *CaseValidationRecord) validateSeqExpCaseType(seqExpIndex int, sample *
 
 func (cr *CaseValidationRecord) validateCaseSequencingExperiments() error {
 	for seqExpIndex := range cr.Case.SequencingExperiments {
-		err := cr.validateSeqExp(seqExpIndex)
+		err, exists := cr.validateSeqExpExists(seqExpIndex)
 		if err != nil {
 			return fmt.Errorf("error validating sequencing experiment in organization for sequencing experiment index %d: %v", seqExpIndex, err)
+		}
+		if !exists {
+			continue
 		}
 		sample, err := cr.validateSeqExpSample(seqExpIndex)
 		if err != nil {
@@ -864,7 +874,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 	cr.validateCaseField(cr.Case.PrimaryConditionCodeSystem, "primary_condition_code_system", path, TextRegExpCompiled, TextMaxLength, false) // TODO: validate regex
 	cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextMaxLength, false)            // TODO: validate regex
 	cr.validateCaseField(cr.Case.ResolutionStatusCode, "resolution_status_code", path, TextRegExpCompiled, TextMaxLength, false)              // TODO: validate regex
-	cr.validateCaseField(cr.Case.Note, "note", path, TextRegExpCompiled, TextMaxLength, false)                                                // TODO: validate regex
+	cr.validateCaseField(cr.Case.Note, "note", path, nil, NoteMaxLength, false)                                                               // TODO: validate regex
 	cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, TextRegExpCompiled, TextMaxLength, false)                     // TODO: validate regex
 
 	return nil
@@ -1074,9 +1084,12 @@ func (cr *CaseValidationRecord) validateDocumentMetadata(doc *types.OutputDocume
 		cr.addErrors(msg, DocumentSizeMismatch, path)
 	}
 
-	if metadata.Hash != doc.Hash {
-		msg := fmt.Sprintf("Document hash does not match the actual hash of the document %s for case %d - task %d - output document %d.", doc.Url, cr.Index, taskIndex, docIndex)
-		cr.addErrors(msg, DocumentHashMismatch, path)
+	// Hash is optional, validate only if provided
+	if doc.Hash != "" {
+		if metadata.Hash != doc.Hash {
+			msg := fmt.Sprintf("Document hash does not match the actual hash of the document %s for case %d - task %d - output document %d.", doc.Url, cr.Index, taskIndex, docIndex)
+			cr.addErrors(msg, DocumentHashMismatch, path)
+		}
 	}
 	return nil
 }
@@ -1100,7 +1113,9 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 				continue
 			}
 
-			cr.validateDocumentTextField(doc.Hash, "hash", path, tid, did, TextRegExpCompiled, true)
+			if doc.Hash != "" {
+				cr.validateDocumentTextField(doc.Hash, "hash", path, tid, did, TextRegExpCompiled, true)
+			}
 			cr.validateDocumentTextField(doc.FormatCode, "format_code", path, tid, did, TextRegExpCompiled, true)
 			cr.validateDocumentTextField(doc.Name, "name", path, tid, did, TextRegExpCompiled, true)
 			cr.validateDocumentTextField(doc.DataTypeCode, "data_type_code", path, tid, did, TextRegExpCompiled, true)
