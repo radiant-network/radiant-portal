@@ -1567,8 +1567,11 @@
           "status": "Status"
         },
         "filters": {
-          "label": "Condition",
-          "search_input_placeholder": "Filter MONDO conditions"
+          "classification": "Classification",
+          "institution": "Diagnostic Lab",
+          "search_condition": "Condition",
+          "search_condition_placeholder": "Filter MONDO conditions",
+          "test": "Analysis"
         },
         "expand": {
           "patient_id": "Case's proband ID",
@@ -1598,8 +1601,10 @@
           "sample": "Sample"
         },
         "filters": {
-          "label": "Phenotype",
-          "search_input_placeholder": "Filter HPO phenotype"
+          "institution": "Diagnostic Lab",
+          "search_hpo": "Phenotype",
+          "search_hpo_placeholder": "Filter HPO phenotype",
+          "test": "Analysis"
         }
       }
     }

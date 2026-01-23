@@ -1,13 +1,13 @@
+import FilterButton from '@/components/base/buttons/filter-button';
 import { useI18n } from '@/components/hooks/i18n';
 
-import AnalysisSelectFilter from './filters/analysis-select-filter';
-import InstitutionSelectFilter from './filters/institution-select-filter';
+import { useCasesFilters } from './filters/cases-filters-context';
 import PhenotypeCasesFilter from './filters/phenotype-cases-filter';
 
 export interface UninterpretedCasesFiltersState {
   phenotype: string;
-  institution: 'all' | string;
-  test: 'all' | string;
+  institution: string[];
+  test: string[];
 }
 
 interface CasesFilterBarProps {
@@ -17,21 +17,44 @@ interface CasesFilterBarProps {
 
 function UninterpretedCasesFilters({ filters, onFiltersChange }: CasesFilterBarProps) {
   const { t } = useI18n();
+  const { filters: casesFilters } = useCasesFilters();
 
-  const handleFilterChange = (field: keyof UninterpretedCasesFiltersState, value: string) => {
+  const handleFilterChange = (field: keyof UninterpretedCasesFiltersState, value: string | string[]) => {
     onFiltersChange({ ...filters, [field]: value });
   };
 
   return (
-    <div className="space-y-2">
-      <div className="text-sm">{t('variant_entity.cases.other_table.filters.label')}</div>
-      <div className="flex items-center gap-2">
+    <div className="space-y-2 mb-4 mt-6">
+      <div className="flex items-end gap-2">
         <PhenotypeCasesFilter onChange={value => handleFilterChange('phenotype', value)} />
-        <InstitutionSelectFilter
-          value={filters.institution}
-          onChange={value => handleFilterChange('institution', value)}
+        <FilterButton
+          key="institution-filter"
+          popoverSize="md"
+          label={t('variant_entity.cases.other_table.filters.institution')}
+          options={
+            casesFilters?.diagnosis_lab_code.map(lab => ({
+              key: lab.key!,
+              label: lab.label!,
+            })) || []
+          }
+          selected={filters.institution}
+          onSelect={selected => handleFilterChange('institution', selected)}
+          withTooltip={false}
         />
-        <AnalysisSelectFilter value={filters.test} onChange={value => handleFilterChange('test', value)} />
+        <FilterButton
+          key="test-filter"
+          popoverSize="md"
+          label={t('variant_entity.cases.other_table.filters.test')}
+          options={
+            casesFilters?.analysis_catalog_code.map(analysis => ({
+              key: analysis.key!,
+              label: analysis.label!,
+            })) || []
+          }
+          selected={filters.test}
+          onSelect={selected => handleFilterChange('test', selected)}
+          withTooltip={false}
+        />
       </div>
     </div>
   );

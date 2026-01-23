@@ -38,9 +38,9 @@ function InterpretedCasesTable() {
 
   const [initialFilters, setInitialFilters] = useState<InterpretedCasesFiltersState>({
     mondo: '',
-    institution: 'all',
-    test: 'all',
-    classification: 'all',
+    institution: [],
+    test: [],
+    classification: [],
   });
 
   const searchCriteria: SearchCriterion[] = useMemo(() => {
@@ -54,24 +54,24 @@ function InterpretedCasesTable() {
       });
     }
 
-    if (initialFilters.institution && initialFilters.institution !== 'all') {
+    if (initialFilters.institution && initialFilters.institution.length > 0) {
       criteria.push({
         field: 'diagnosis_lab_code',
-        value: [initialFilters.institution],
+        value: [...initialFilters.institution],
       });
     }
 
-    if (initialFilters.test && initialFilters.test !== 'all') {
+    if (initialFilters.test && initialFilters.test.length > 0) {
       criteria.push({
         field: 'analysis_catalog_code',
-        value: [initialFilters.test],
+        value: [...initialFilters.test],
       });
     }
 
-    if (initialFilters.classification && initialFilters.classification !== 'all') {
+    if (initialFilters.classification && initialFilters.classification.length > 0) {
       criteria.push({
         field: 'classification',
-        value: [initialFilters.classification],
+        value: [...initialFilters.classification],
       });
     }
 
@@ -115,10 +115,10 @@ function InterpretedCasesTable() {
 
   return (
     <div className="space-y-6 mt-2">
-      <InterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />
       <DataTable
         id="interpreted-cases"
         columns={getInterpretedCasesColumns(t)}
+        TableFilters={<InterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />}
         data={casesData}
         defaultColumnSettings={interpretedCasesDefaultSettings}
         loadingStates={{

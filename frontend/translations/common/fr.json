@@ -1568,8 +1568,11 @@
           "status": "Statut"
         },
         "filters": {
-          "label": "Condition",
-          "search_input_placeholder": "Filtrer les conditions MONDO"
+          "classification": "Classification",
+          "institution": "Lab de diagnostic",
+          "search_condition": "Condition",
+          "search_condition_placeholder": "Filtrer les conditions MONDO",
+          "test": "Analyse"
         },
         "expand": {
           "patient_id": "ID du proband du cas",
@@ -1599,8 +1602,10 @@
           "sample": "Échantillon"
         },
         "filters": {
-          "label": "Phénotype",
-          "search_input_placeholder": "Filtrer les phénotypes HPO"
+          "institution": "Lab de diagnostic",
+          "search_hpo": "Phénotype",
+          "search_hpo_placeholder": "Filtrer les phénotypes HPO",
+          "test": "Analyse"
         }
       }
     }
