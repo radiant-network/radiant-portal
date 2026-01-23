@@ -1695,7 +1695,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-1",
 			StatusCode:      "completed",
-			Note:            "Invalid@Characters!",
+			Note:            strings.Repeat("a", 1001),
 		},
 	}
 
@@ -1703,8 +1703,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
-	assert.Contains(t, cr.Errors[0].Message, "Invalid field note")
-	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "Invalid field note for case 0. Reason: field is too long, maximum length allowed is 1000.", cr.Errors[0].Message)
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
@@ -1774,19 +1773,17 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 			SubmitterCaseId:   "CASE-1",
 			StatusCode:        "invalid_status",
 			DiagnosticLabCode: "UNKNOWN-LAB",
-			Note:              "Invalid@Note!",
 		},
 	}
 
 	err := cr.validateCase()
 
 	assert.NoError(t, err)
-	assert.GreaterOrEqual(t, len(cr.Errors), 3)
+	assert.GreaterOrEqual(t, len(cr.Errors), 2)
 
 	// Check for diagnostic lab error
 	hasLabError := false
 	hasStatusError := false
-	hasNoteError := false
 	for _, e := range cr.Errors {
 		if e.Code == CaseUnknownDiagnosticLab {
 			hasLabError = true
@@ -1794,13 +1791,9 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 		if e.Code == CaseInvalidField && strings.Contains(e.Message, "status_code") {
 			hasStatusError = true
 		}
-		if e.Code == CaseInvalidField && strings.Contains(e.Message, "note") {
-			hasNoteError = true
-		}
 	}
 	assert.True(t, hasLabError, "Should have diagnostic lab error")
 	assert.True(t, hasStatusError, "Should have status code error")
-	assert.True(t, hasNoteError, "Should have note field error")
 }
 
 func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
@@ -3345,7 +3338,7 @@ func Test_validateSeqExp_SeqExpExists(t *testing.T) {
 	err, exists := record.validateSeqExpExists(0)
 	assert.NoError(t, err)
 	assert.Empty(t, record.Errors)
-	assert.False(t, exists)
+	assert.True(t, exists)
 }
 
 func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
@@ -3371,7 +3364,7 @@ func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
 
 	err, exists := record.validateSeqExpExists(0)
 	assert.NoError(t, err)
-	assert.True(t, exists)
+	assert.False(t, exists)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, SequencingExperimentNotFound, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not exist")
