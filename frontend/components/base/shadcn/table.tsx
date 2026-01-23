@@ -119,13 +119,25 @@ function TableRow({ className, variant = 'default', ...props }: TableRowType) {
 }
 TableRow.displayName = 'TableRow';
 
-function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
-  return (
-    <th
-      className={cn('relative text-left align-middle font-medium text-foreground bg-table-header', className)}
-      {...props}
-    />
-  );
+const tableHeadVariants = tv({
+  slots: {
+    base: 'relative text-left align-middle font-medium text-foreground bg-table-header',
+  },
+  variants: {
+    variant: {
+      default: 'border-r [&>td:last-child]:border-r-0',
+      ghost: '',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+});
+
+type TableHeadType = React.ThHTMLAttributes<HTMLTableCellElement> & VariantProps<typeof tableHeadVariants>;
+function TableHead({ className, variant, ...props }: TableHeadType) {
+  const styles = tableHeadVariants({ variant });
+  return <th className={styles.base({ className })} {...props} />;
 }
 TableHead.displayName = 'TableHead';
 
