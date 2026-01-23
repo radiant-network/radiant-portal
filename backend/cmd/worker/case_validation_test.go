@@ -1695,7 +1695,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-1",
 			StatusCode:      "completed",
-			Note:            "Invalid@Characters!",
+			Note:            strings.Repeat("a", 1001),
 		},
 	}
 
@@ -1703,8 +1703,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
-	assert.Contains(t, cr.Errors[0].Message, "Invalid field note")
-	assert.Contains(t, cr.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "Invalid field note for case 0. Reason: field is too long, maximum length allowed is 1000.", cr.Errors[0].Message)
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
@@ -1774,19 +1773,17 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 			SubmitterCaseId:   "CASE-1",
 			StatusCode:        "invalid_status",
 			DiagnosticLabCode: "UNKNOWN-LAB",
-			Note:              "Invalid@Note!",
 		},
 	}
 
 	err := cr.validateCase()
 
 	assert.NoError(t, err)
-	assert.GreaterOrEqual(t, len(cr.Errors), 3)
+	assert.GreaterOrEqual(t, len(cr.Errors), 2)
 
 	// Check for diagnostic lab error
 	hasLabError := false
 	hasStatusError := false
-	hasNoteError := false
 	for _, e := range cr.Errors {
 		if e.Code == CaseUnknownDiagnosticLab {
 			hasLabError = true
@@ -1794,13 +1791,9 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 		if e.Code == CaseInvalidField && strings.Contains(e.Message, "status_code") {
 			hasStatusError = true
 		}
-		if e.Code == CaseInvalidField && strings.Contains(e.Message, "note") {
-			hasNoteError = true
-		}
 	}
 	assert.True(t, hasLabError, "Should have diagnostic lab error")
 	assert.True(t, hasStatusError, "Should have status code error")
-	assert.True(t, hasNoteError, "Should have note field error")
 }
 
 func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
@@ -3094,7 +3087,7 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseInvalidNumberOfProbands, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, "should have exactly 1 proband")
+	assert.Contains(t, record.Errors[0].Message, "must have exactly 1 proband")
 	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
 }
 
@@ -3139,7 +3132,7 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseInvalidNumberOfProbands, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, "should have exactly 1 proband")
+	assert.Contains(t, record.Errors[0].Message, "must have exactly 1 proband")
 	assert.Equal(t, "case[0].patients", record.Errors[0].Path)
 }
 
@@ -3342,9 +3335,10 @@ func Test_validateSeqExp_SeqExpExists(t *testing.T) {
 		},
 	}
 
-	err := record.validateSeqExp(0)
+	err, exists := record.validateSeqExpExists(0)
 	assert.NoError(t, err)
 	assert.Empty(t, record.Errors)
+	assert.True(t, exists)
 }
 
 func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
@@ -3368,8 +3362,9 @@ func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
 		},
 	}
 
-	err := record.validateSeqExp(0)
+	err, exists := record.validateSeqExpExists(0)
 	assert.NoError(t, err)
+	assert.False(t, exists)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, SequencingExperimentNotFound, record.Errors[0].Code)
 	assert.Contains(t, record.Errors[0].Message, "does not exist")
@@ -3817,7 +3812,7 @@ func Test_validateTaskTextField_RegexError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
-		Message: "Invalid Field test_field for case 0 - task 0. Reason: does not match the regular expression `^[a-zA-Z0-9]+$`.",
+		Message: "Invalid field test_field for case 0 - task 0. Reason: does not match the regular expression `^[a-zA-Z0-9]+$`.",
 		Path:    "case[0].tasks[0]",
 	}
 
@@ -3833,7 +3828,7 @@ func Test_validateTaskTextField_LengthError(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
-		Message: "Invalid Field test_field for case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
+		Message: "Invalid field test_field for case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
 		Path:    "case[0].tasks[0]",
 	}
 
@@ -3858,7 +3853,7 @@ func Test_validateTaskTypeCode_Error(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
-		Message: "Invalid Field type_code for case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: foo, bar",
+		Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: foo, bar",
 		Path:    "case[0].tasks[0]",
 	}
 
@@ -3907,7 +3902,7 @@ func Test_validateTaskAliquot_Error(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-002",
-		Message: "Sequencing aliquot ALIQUOT-1 is not defined for case 0 - task 0.",
+		Message: "Sequencing \"ALIQUOT-1\" is not defined for case 0 - task 0.",
 		Path:    "case[0].tasks[0]",
 	}
 
@@ -4030,7 +4025,7 @@ func Test_validateExclusiveAliquotInputDocuments_Error(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-007",
-		Message: "Aliquot and Input documents are mutually exclusive. You can provide one or the other, but not both.",
+		Message: "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both.",
 		Path:    "case[0].tasks[0]",
 	}
 
@@ -4402,7 +4397,7 @@ func Test_validateDocumentTextField_RegexError(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, record.Errors[0], types.BatchMessage{
 		Code:    "DOCUMENT-001",
-		Message: "Invalid Field test_field for case 0 - task 0 - output document 1. Reason: does not match the regular expression `^[a-zA-Z0-9 ]+$`.",
+		Message: "Invalid field test_field for case 0 - task 0 - output document 1. Reason: does not match the regular expression `^[a-zA-Z0-9 ]+$`.",
 		Path:    "case[0].tasks[0].documents[1]",
 	})
 }
@@ -4427,7 +4422,7 @@ func Test_validateDocumentTextField_LengthError(t *testing.T) {
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, record.Errors[0], types.BatchMessage{
 		Code:    "DOCUMENT-001",
-		Message: "Invalid Field test_field for case 0 - task 0 - output document 1. Reason: field is too long, maximum length allowed is 100.",
+		Message: "Invalid field test_field for case 0 - task 0 - output document 1. Reason: field is too long, maximum length allowed is 100.",
 		Path:    "case[0].tasks[0].documents[1]",
 	})
 }
@@ -4563,7 +4558,7 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 			DataTypeCode:     "foo",
 			FormatCode:       "bar",
 			Size:             11,
-			Url:              "s3://notfoo/bar.txt",
+			Url:              "s3://fake-enterprise-medical-records-storage-bucket-na-east-1/environment/production/validated-records/patient-metadata/2026/01/22/batch-uuid-9842-adfa-1123-lkjh/validation_report_full_final_version_v2_alpha_release.parquet", // Validates long URLs are accepted
 			Hash:             "5eb63bbbe01eeed093cb22bb8f5acdc3",
 		}
 
@@ -4574,7 +4569,7 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 		assert.Len(t, record.Errors, 1)
 		assert.Equal(t, record.Errors[0], types.BatchMessage{
 			Code:    "DOCUMENT-002",
-			Message: "No document can be found on the URL s3://notfoo/bar.txt for case 0 - task 0 - output document 1.",
+			Message: "No document can be found on the URL s3://fake-enterprise-medical-records-storage-bucket-na-east-1/environment/production/validated-records/patient-metadata/2026/01/22/batch-uuid-9842-adfa-1123-lkjh/validation_report_full_final_version_v2_alpha_release.parquet for case 0 - task 0 - output document 1.",
 			Path:    "foo[0].bar",
 		})
 	})
@@ -4669,5 +4664,46 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 			Message: "Document hash does not match the actual hash of the document s3://foo/bar.txt for case 0 - task 0 - output document 1.",
 			Path:    "foo[0].bar",
 		})
+	})
+}
+
+func Test_validateFileMetadata_OptionalHash(t *testing.T) {
+	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
+		t.Setenv("AWS_ENDPOINT_URL", endpoint)
+		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
+		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
+		t.Setenv("AWS_USE_SSL", "false")
+
+		bucketName := "foo"
+		objectName := "bar.txt"
+		content := []byte("hello world") // Size: 11 bytes
+
+		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+
+		s3fs, _ := utils.NewS3Store()
+		mockContext := BatchValidationContext{
+			S3FS: s3fs,
+		}
+		record := CaseValidationRecord{
+			BaseValidationRecord: BaseValidationRecord{Index: 0},
+			Context:              &mockContext,
+		}
+
+		doc := types.OutputDocumentBatch{
+			Name:             "Foo Bar",
+			DataCategoryCode: "foobar",
+			DataTypeCode:     "foo",
+			FormatCode:       "bar",
+			Size:             11,
+			Url:              "s3://foo/bar.txt",
+			Hash:             "",
+		}
+
+		err := record.validateDocumentMetadata(&doc, "foo[0].bar", 0, 1)
+		assert.NoError(t, err)
+		assert.Len(t, record.Infos, 0)
+		assert.Len(t, record.Warnings, 0)
+		assert.Len(t, record.Errors, 0)
 	})
 }

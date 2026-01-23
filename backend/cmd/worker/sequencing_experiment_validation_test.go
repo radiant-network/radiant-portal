@@ -100,7 +100,7 @@ func Test_VerifyIdentical_DifferentField_AddsWarning(t *testing.T) {
 	r := &SequencingExperimentValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
-	verifyIdenticalField(1, 2, r, "key", "sample_id")
+	verifyIsDifferentField(1, 2, r, "key", "sample_id")
 	assert.Len(t, r.Warnings, 1)
 	assert.Equal(t, ExistingAliquotForSequencingLabCode, r.Warnings[0].Code)
 	assert.Equal(t, "A sequencing with same ids (key) has been found but with a different sample_id (1 <> 2).", r.Warnings[0].Message)
@@ -111,7 +111,7 @@ func Test_VerifyIdentical_AddsInfo(t *testing.T) {
 	r := &SequencingExperimentValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
-	verifyIdenticalField("same", "same", r, "key", "field")
+	verifyIsDifferentField("same", "same", r, "key", "field")
 	assert.Empty(t, r.Warnings)
 }
 
@@ -240,23 +240,27 @@ func Test_ValidateRunDateField_FutureDateAddsError(t *testing.T) {
 
 func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 	r := newBaseRecord()
+	seqExpId := 70
 	sampleId := 10
 	r.SampleID = &sampleId
+	r.SequencingLabID = &seqExpId
 	r.SequencingExperiment.SubmitterSampleId = "S1"
 	r.SequencingExperiment.Aliquot = "A1"
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
 
-	sampleDAO := &mockSampleDAO{}
 	seqDAO := &mockSeqExpDAO{}
 
-	sampleDAO.On("GetSampleBySubmitterSampleId", 1, "S1").
-		Return(&types.Sample{ID: 10}, nil)
-	seqDAO.On("GetSequencingExperimentBySampleID", 10).
+	seqDAO.On("GetSequencingExperimentByAliquot", "A1").
 		Return([]types.SequencingExperiment{
-			{Aliquot: "A1"},
+			{
+				ID:              70,
+				Aliquot:         "A1",
+				SampleID:        10,
+				SequencingLabID: 70,
+			},
 		}, nil)
 
-	err := r.validateIdenticalSequencingExperiment(seqDAO)
+	err := r.validateExistingAliquotForSequencingLabCode(seqDAO)
 	assert.NoError(t, err)
 	assert.Len(t, r.Infos, 1)
 	assert.Equal(t, IdenticalSequencingExperimentInDBCode, r.Infos[0].Code)

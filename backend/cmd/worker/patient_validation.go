@@ -61,6 +61,19 @@ func (r *PatientValidationRecord) validateSubmitterPatientId() {
 	}
 }
 
+func (r *PatientValidationRecord) validateSubmitterPatientIdType() {
+	resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
+	path := formatPath(r, "submitter_patient_id_type")
+	if len(r.Patient.SubmitterPatientIdType) > TextMaxLength {
+		message := formatFieldTooLong(r, "submitter_patient_id_type", TextMaxLength, resIds)
+		r.addErrors(message, PatientInvalidValueCode, path)
+	}
+	if !ExternalIdRegexpCompiled.MatchString(r.Patient.SubmitterPatientIdType.String()) {
+		message := formatFieldRegexpMatch(r, "submitter_patient_id_type", ExternalIdRegexp, resIds)
+		r.addErrors(message, PatientInvalidValueCode, path)
+	}
+}
+
 func (r *PatientValidationRecord) validateLastName() {
 	if r.Patient.LastName == "" {
 		return
@@ -127,27 +140,44 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 	}
 }
 
-func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types.Patient) {
-	if existingPatient != nil {
-		message := fmt.Sprintf("Patient (%s / %s) already exists, skipped.", r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
-		r.addInfos(message, PatientAlreadyExistCode, formatPath(r, ""))
-		r.Skipped = true
-		validateExistingPatientField(r, "sex_code", existingPatient.SexCode, r.Patient.SexCode)
-		validateExistingPatientField(r, "life_status_code", existingPatient.LifeStatusCode, r.Patient.LifeStatusCode)
-		validateExistingPatientField(r, "date_of_birth", existingPatient.DateOfBirth, time.Time(*r.Patient.DateOfBirth))
-		validateExistingPatientField(r, "last_name", existingPatient.LastName, r.Patient.LastName.String())
-		validateExistingPatientField(r, "first_name", existingPatient.FirstName, r.Patient.FirstName.String())
-		validateExistingPatientField(r, "jhn", existingPatient.Jhn, r.Patient.Jhn.String())
+func (r *PatientValidationRecord) validateDateOfBirth() {
+	if r.Patient.DateOfBirth == nil {
+		resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
+		message := formatInvalidField(r, "date_of_birth", "missing value, date of birth is required", resIds)
+		r.addErrors(message, PatientInvalidValueCode, formatPath(r, "date_of_birth"))
 	}
 }
 
-func validateExistingPatientField[T comparable](
+func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types.Patient) {
+	if existingPatient == nil {
+		return
+	}
+
+	r.Skipped = true
+	anyDifference := validateIsDifferentExistingPatientField(r, "sex_code", existingPatient.SexCode, r.Patient.SexCode)
+	anyDifference = validateIsDifferentExistingPatientField(r, "life_status_code", existingPatient.LifeStatusCode, r.Patient.LifeStatusCode) || anyDifference
+	if r.Patient.DateOfBirth != nil {
+		anyDifference = validateIsDifferentExistingPatientField(r, "date_of_birth", existingPatient.DateOfBirth, time.Time(*r.Patient.DateOfBirth)) || anyDifference
+	} else {
+		anyDifference = validateIsDifferentExistingPatientField(r, "date_of_birth", existingPatient.DateOfBirth, time.Time{}) || anyDifference
+	}
+	anyDifference = validateIsDifferentExistingPatientField(r, "last_name", existingPatient.LastName, r.Patient.LastName.String()) || anyDifference
+	anyDifference = validateIsDifferentExistingPatientField(r, "first_name", existingPatient.FirstName, r.Patient.FirstName.String()) || anyDifference
+	anyDifference = validateIsDifferentExistingPatientField(r, "jhn", existingPatient.Jhn, r.Patient.Jhn.String()) || anyDifference
+
+	if !anyDifference {
+		message := fmt.Sprintf("Patient (%s / %s) already exists, skipped.",
+			r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
+		r.addInfos(message, PatientAlreadyExistCode, formatPath(r, ""))
+	}
+}
+
+func validateIsDifferentExistingPatientField[T comparable](
 	r *PatientValidationRecord,
 	fieldName string,
 	existingPatientValue T,
 	recordValue T,
-
-) {
+) bool {
 	if existingPatientValue != recordValue {
 		path := formatPath(r, fieldName)
 		message := fmt.Sprintf("A patient with same ids (%s / %s) has been found but with a different %s (%v <> %v).",
@@ -158,7 +188,9 @@ func validateExistingPatientField[T comparable](
 			recordValue,
 		)
 		r.addWarnings(message, PatientExistingPatientDifferentFieldCode, path)
+		return true
 	}
+	return false
 }
 
 func processPatientBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
@@ -251,9 +283,11 @@ func validatePatientRecord(patient types.PatientBatch, index int, seenPatients m
 		Patient:              patient,
 	}
 	record.validateSubmitterPatientId()
+	record.validateSubmitterPatientIdType()
 	record.validateFirstName()
 	record.validateLastName()
 	record.validateJhn()
+	record.validateDateOfBirth()
 
 	validateUniquenessInBatch(record,
 		PatientKey{

@@ -1,0 +1,81 @@
+# scenarios/cases_case_codes.toml
+
+# Should trigger CASE-001 identical case exists
+[[cases]]
+submitter_case_id = "1:1"
+type = "germline"
+status_code = "in_progress"
+project_code = "N1"
+diagnostic_lab_code = "LDM-CHUSJ"
+primary_condition_code_system = "MONDO"
+primary_condition_value = "MONDO:0700092"
+priority_code = "routine"
+category_code = "postnatal"
+analysis_code = "WGA"
+resolution_status_code = "unsolved"
+note = "test case note"
+ordering_physician = "Dr. Test"
+ordering_organization_code = "CHUSJ"
+
+# Cases top-level codes
+[[cases]]
+submitter_case_id = "CASE-12345"
+type = "germline"
+status_code = "in_progress"
+project_code = "non_existing_project"  # CASE-003 project not known
+diagnostic_lab_code = "LDM-CHUSJJ" # CASE-004 diagnostic lab not known
+primary_condition_code_system = "MONDO"
+primary_condition_value = "MONDO:0700092!@#$$#@%^^%$^%" # CASE-002 primary condition regex error
+priority_code = "routine"
+category_code = "postnatal"
+analysis_code = "WGAA" # CASE-005 analysis code not known
+resolution_status_code = "unsolved"
+note = "test case note"
+ordering_physician = "Dr. Testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"  # CASE-002 size error
+ordering_organization_code = "CHUSJJ" # CASE-006 ordering organization not known
+
+# Duplicate cases
+[[cases]]
+submitter_case_id = "CASE-12345"
+type = "germline"
+status_code = "in_progress"
+project_code = "N1"
+diagnostic_lab_code = "LDM-CHUSJ"
+primary_condition_code_system = "MONDO"
+primary_condition_value = "MONDO:0700092"
+priority_code = "routine"
+category_code = "postnatal"
+analysis_code = "WGA"
+resolution_status_code = "unsolved"
+note = "test case note"
+ordering_physician = "Dr. Test"
+ordering_organization_code = "CHUSJ"
+
+  [[cases.patients]]
+  submitter_patient_id = "MRN-283773"
+  affected_status_code = "affected"
+  patient_organization_code = "CHUSJ"
+  relation_to_proband_code = "proband"
+
+  [[cases.patients]]
+  submitter_patient_id = "MRN-283773"  # CASE-008 duplicate patient
+  affected_status_code = "affected"
+  patient_organization_code = "CHUSJ"
+  relation_to_proband_code = "proband" # CASE-007 duplicate proband
+
+[[cases]]
+submitter_case_id = "CASE-12345"  # CASE-011 duplicate case
+type = "germline"
+status_code = "in_progress"
+project_code = "N1"
+diagnostic_lab_code = "LDM-CHUSJ"
+primary_condition_code_system = "MONDO"
+primary_condition_value = "MONDO:0700092"
+priority_code = "routine"
+category_code = "postnatal"
+analysis_code = "WGA"
+resolution_status_code = "unsolved"
+note = "test case note"
+ordering_physician = "Dr. Test"
+ordering_organization_code = "CHUSJ"
+# Missing patients should trigger CASE-007 missing proband

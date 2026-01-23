@@ -1,0 +1,116 @@
+# scenarios/cases_inner_codes.toml
+
+# Non-Case codes
+[[cases]]
+submitter_case_id = "ABC123"
+type = "germline"
+status_code = "in_progress"
+project_code = "N1"
+diagnostic_lab_code = "LDM-CHUSJ"
+primary_condition_code_system = "MONDO"
+primary_condition_value = "MONDO:0700092"
+priority_code = "routine"
+category_code = "postnatal"
+analysis_code = "WGA"
+resolution_status_code = "unsolved"
+note = "test case note"
+ordering_physician = "Dr. Test"
+ordering_organization_code = "CHUSJ"
+
+  [[cases.patients]]
+  submitter_patient_id = "MRN-283773!@#$%^" # PATIENT-006 unknown patient and PATIENT-004 regex error
+  affected_status_code = "affected"
+  patient_organization_code = "CHUSJ"
+  relation_to_proband_code = "proband"
+
+    [[cases.patients.observations_categorical]]
+    code = "phenotype"
+    system = "HPO~!@#@!$!"  # OBS-001 regex error
+    value = "TEST:12345"
+    onset_code = "infantilee" # OBS-001 invalid onset code
+    interpretation_code = "positive"
+    note = "Test clinical note"
+
+  [[cases.sequencing_experiments]]
+  aliquot = "NA128911"  # SEQ-007 unknown seq exp
+  sample_organization_code = "CQGC"
+  submitter_sample_id = "S13225"
+
+  [[cases.tasks]]
+  type_code = "alignment"  #
+  aliquot = "NA12891111"  # TASK-002 unknown aliquot
+  pipeline_name = "Dragen!@#$%^&*())" # TASK-001 regex error
+  pipeline_version = "4.4.4"
+  genome_build = "GRch38"
+
+    [[cases.tasks.output_documents]]
+    data_category_code = "genomic"
+    data_type_code = "alignment"
+    format_code = "cram"
+    hash = ""
+    name = "NA12891.recal.cram"
+    size = 11
+    url = "s3://test-bucket/CASE-12345.recal.crai"  # DOCUMENT-002 document not found at URL
+
+    [[cases.tasks.output_documents]]
+    data_category_code = "genomic!@#$%"  # DOCUMENT-001 regex error
+    data_type_code = "alignment"
+    format_code = "cram"
+    hash = "d57f21e6a273781dbf8b7657940f3b03333"  # DOCUMENT-006 incorrect hash
+    name = "NA12891.recal.cram"
+    size = 11  # DOCUMENT-006 incorrect size
+    url = "s3://test-bucket/existing_document.recal.crai"
+
+  [[cases.tasks]] # TASK-004 missing output documents
+  type_code = "family_variant_calling"  # TASK-003 missing input documents
+  aliquot = ""
+  pipeline_name = "Dragennnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn" # TASK-001 size error
+  pipeline_version = "4.4.4"
+  genome_build = "GRch38"
+
+  [[cases.tasks]]
+  type_code = "family_variant_calling"
+  aliquot = "NA12891"  # TASK-007 contains both input documents and aliquot
+  pipeline_name = "Dragen"
+  pipeline_version = "4.4.4"
+  genome_build = "GRch38"
+
+    [[cases.tasks.input_documents]]
+    url = "s3://test-bucket/CASE-12345.recal.crai"  # TASK-005 unknown input document
+
+    [[cases.tasks.output_documents]]  # DOCUMENT-003 document already exists
+    data_category_code = "genomic"
+    data_type_code = "snv"
+    format_code = "vcf"
+    hash = "5d41402abc4b2a76b9719d911017c826"
+    name = "SH032.exomiser.vcf.gz"
+    size = 307610255
+    url = "s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz"
+
+    [[cases.tasks.output_documents]]
+    data_category_code = "genomicc"
+    data_type_code = "snv"
+    format_code = "vcf"
+    hash = "5d41402abc4b2a76b9719d911017c826"
+    name = "SH032.exomiser.vcf.gz"
+    size = 307610255
+    url = "s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz"  # DOCUMENT-004 document already exist with different fields (data_category_code)
+
+  [[cases.tasks]]
+  type_code = "radiant_germline_annotation"
+  aliquot = ""
+  pipeline_name = "Dragen"
+  pipeline_version = "4.4.4"
+  genome_build = "GRch38"
+
+    [[cases.tasks.input_documents]]
+    url = "s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz"  # TASK-006 input document from external sequencing experiment (not in case)
+
+    [[cases.tasks.output_documents]]
+    data_category_code = "genomic"
+    data_type_code = "alignment"
+    format_code = "cram"
+    hash = ""
+    name = "NA12891.recal.cram"
+    size = 11
+    url = "s3://test-bucket/CASE-12345.recal.crai"  # DOCUMENT-008 document already exists in the batch

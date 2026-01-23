@@ -1,0 +1,75 @@
+# scenarios/patient_all_codes.toml
+# This file contains data entities for all patient validation code tests.
+
+# Should trigger PATIENT-001 patient exist for the same org and all fields are the same
+# (1, 'MRN-283773','mrn',3,'female', '2012-02-03', 'alive', 'Juliette', 'Gagnon', 'GAG1202030277'),
+[[patients]]
+submitter_patient_id = "MRN-283773"
+submitter_patient_id_type = "mrn"
+patient_organization_code = "CHUSJ"
+life_status_code = "alive"
+first_name = "Juliette"
+last_name = "Gagnon"
+sex_code = "female"
+date_of_birth = "2012-02-03"
+jhn = "GAG1202030277"
+
+[[patients]]
+submitter_patient_id = "123456789!@#$%?&*()_+"  # Should trigger PATIENT-004 regex error
+# Should trigger PATIENT-004 size error
+submitter_patient_id_type = "NHSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS"
+patient_organization_code = "ORG001"  # Should trigger PATIENT-003 organization not found
+life_status_code = "alive"
+first_name = "John"
+last_name = "Doe"
+sex_code = "male"
+date_of_birth = "1980-01-01"
+jhn = "JHN123456"
+
+# Should trigger PATIENT-002 patient exist for the same org but a field is different
+# (2, 'MRN-283774','mrn',3,'male', '1970-01-30', 'alive', 'Antoine', 'Lefebvre', 'LEF7001303889'),
+[[patients]]
+submitter_patient_id = "MRN-283774"
+submitter_patient_id_type = "mrn"
+patient_organization_code = "CHUSJ"
+life_status_code = "alive"
+first_name = "Antoine"
+last_name = "Lefebvre"
+sex_code = "female"  # Different from existing record
+date_of_birth = "1970-01-30"
+jhn = "LEF7001303889"
+
+# Should trigger PATIENT-005 Organisation type is not in this list : healthcare_provider, research_institute
+[[patients]]
+submitter_patient_id = "ABC123456"
+submitter_patient_id_type = "mrn"
+patient_organization_code = "CQGC"  # Organization exists but type is not allowed
+life_status_code = "alive"
+first_name = "Juliette"
+last_name = "Gagnon"
+sex_code = "female"
+date_of_birth = "2012-02-03"
+jhn = "GAG1202030278"
+
+# Should trigger PATIENT-006 Patient appears multiple times in the batch
+[[patients]]
+submitter_patient_id = "ABC123457"
+submitter_patient_id_type = "mrn"
+patient_organization_code = "CHUSJ"
+life_status_code = "alive"
+first_name = "Juliette"
+last_name = "Gagnon"
+sex_code = "female"
+date_of_birth = "2012-02-03"
+jhn = "GAG1202030279"
+
+[[patients]]
+submitter_patient_id = "ABC123457"
+submitter_patient_id_type = "mrn"
+patient_organization_code = "CHUSJ"
+life_status_code = "alive"
+first_name = "Juliette"
+last_name = "Gagnon"
+sex_code = "female"
+date_of_birth = "2012-02-03"
+jhn = "GAG1202030279"

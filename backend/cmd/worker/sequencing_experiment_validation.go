@@ -106,15 +106,16 @@ func processSequencingExperimentBatch(ctx *BatchValidationContext, batch *types.
 	}
 }
 
-func verifyIdenticalField[T comparable](left T, right T, r *SequencingExperimentValidationRecord, key string, fieldName string) {
+func verifyIsDifferentField[T comparable](left T, right T, r *SequencingExperimentValidationRecord, key string, fieldName string) bool {
 	if left == right {
-		return
+		return false
 	}
 
 	msg := fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different %s (%v <> %v).", key, fieldName, left, right)
 
 	r.addWarnings(msg, ExistingAliquotForSequencingLabCode, r.getPath())
 	r.Skipped = true
+	return true
 }
 
 func (r *SequencingExperimentValidationRecord) verifyStringField(value string, fieldName string, maxLength int, re *regexp.Regexp, reSrc string, resourceIDs []string, isRequired bool) {
@@ -194,29 +195,6 @@ func (r *SequencingExperimentValidationRecord) validateStatusCodeField() {
 	}
 }
 
-func (r *SequencingExperimentValidationRecord) validateIdenticalSequencingExperiment(repoSeqExp repository.SequencingExperimentDAO) error {
-	if r.SampleID == nil {
-		return nil
-	}
-
-	seqExps, err := repoSeqExp.GetSequencingExperimentBySampleID(*r.SampleID)
-	if err != nil {
-		return err
-	}
-
-	for _, s := range seqExps {
-		if s.Aliquot == r.SequencingExperiment.Aliquot.String() {
-			r.addInfos(
-				fmt.Sprintf("Sequencing (%s / %s / %s) already exists, skipped.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId, r.SequencingExperiment.Aliquot),
-				IdenticalSequencingExperimentInDBCode,
-				r.getPath(),
-			)
-			r.Skipped = true
-		}
-	}
-	return nil
-}
-
 func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error {
 	if r.SequencingLabID == nil {
 		r.addErrors(
@@ -226,6 +204,10 @@ func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error
 		)
 	}
 	return nil
+}
+
+func (r *SequencingExperimentValidationRecord) validatePlatformCodeField() {
+	r.verifyStringField(r.SequencingExperiment.PlatformCode, "platform_code", TextMaxLength, TextRegExpCompiled, TextRegExp, r.getResId(), false)
 }
 
 func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequencingLabCode(repoSeqExp repository.SequencingExperimentDAO) error {
@@ -240,22 +222,33 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 	key := fmt.Sprintf("%s / %s / %s", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String())
 	for _, s := range seqExps {
 		if s.SequencingLabID == *r.SequencingLabID {
-			verifyIdenticalField(s.SampleID, *r.SampleID, r, key, "sample_id")
-			verifyIdenticalField(s.StatusCode, r.SequencingExperiment.StatusCode, r, key, "status_code")
-			verifyIdenticalField(s.ExperimentalStrategyCode, r.SequencingExperiment.ExperimentalStrategyCode, r, key, "experimental_strategy_code")
-			verifyIdenticalField(s.SequencingReadTechnologyCode, r.SequencingExperiment.SequencingReadTechnologyCode, r, key, "sequencing_read_technology_code")
-			verifyIdenticalField(s.PlatformCode, r.SequencingExperiment.PlatformCode, r, key, "platform_code")
-			verifyIdenticalField(s.RunName, r.SequencingExperiment.RunName.String(), r, key, "run_name")
-			verifyIdenticalField(s.RunAlias, r.SequencingExperiment.RunAlias.String(), r, key, "run_alias")
-			verifyIdenticalField(s.CaptureKit, r.SequencingExperiment.CaptureKit.String(), r, key, "capture_kit")
+			different := verifyIsDifferentField(s.SampleID, *r.SampleID, r, key, "sample_id")
+			different = verifyIsDifferentField(s.StatusCode, r.SequencingExperiment.StatusCode, r, key, "status_code") || different
+			different = verifyIsDifferentField(s.ExperimentalStrategyCode, r.SequencingExperiment.ExperimentalStrategyCode, r, key, "experimental_strategy_code") || different
+			different = verifyIsDifferentField(s.SequencingReadTechnologyCode, r.SequencingExperiment.SequencingReadTechnologyCode, r, key, "sequencing_read_technology_code") || different
+			different = verifyIsDifferentField(s.PlatformCode, r.SequencingExperiment.PlatformCode, r, key, "platform_code") || different
+			different = verifyIsDifferentField(s.RunName, r.SequencingExperiment.RunName.String(), r, key, "run_name") || different
+			different = verifyIsDifferentField(s.RunAlias, r.SequencingExperiment.RunAlias.String(), r, key, "run_alias") || different
+			different = verifyIsDifferentField(s.CaptureKit, r.SequencingExperiment.CaptureKit.String(), r, key, "capture_kit") || different
 
 			if r.SequencingExperiment.RunDate != nil && !time.Time(*r.SequencingExperiment.RunDate).Equal(s.RunDate) {
+				different = true
 				r.addWarnings(
 					fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different run_date (%v <> %v).", key, r.SequencingExperiment.RunDate, s.RunDate),
 					ExistingAliquotForSequencingLabCode,
 					r.getPath(),
 				)
 			}
+
+			if !different {
+				r.addInfos(
+					fmt.Sprintf("Sequencing (%s / %s / %s) already exists, skipped.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId, r.SequencingExperiment.Aliquot),
+					IdenticalSequencingExperimentInDBCode,
+					r.getPath(),
+				)
+				r.Skipped = true
+			}
+			return nil
 		}
 	}
 	return nil
@@ -392,15 +385,13 @@ func validateSequencingExperimentRecord(seqExp types.SequencingExperimentBatch, 
 	record.validateExperimentalStrategyCodeField()
 	record.validateSequencingReadTechnologyCodeField()
 	record.validateSequencingLabCodeField()
+	record.validatePlatformCodeField()
 	record.validateCaptureKitField()
 	record.validateRunAliasField()
 	record.validateRunDateField()
 	record.validateRunNameField()
 	record.validateStatusCodeField()
 
-	if err := record.validateIdenticalSequencingExperiment(repoSeqExp); err != nil {
-		return nil, fmt.Errorf("validate identical experiment: %w", err)
-	}
 	if err := record.validateSequencingLabCode(); err != nil {
 		return nil, fmt.Errorf("validate sequencing lab code: %w", err)
 	}

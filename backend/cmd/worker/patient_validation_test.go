@@ -58,6 +58,7 @@ func Test_SubmitterPatientId_Valid(t *testing.T) {
 	patientValidationRecord.validateSubmitterPatientId()
 	assert.Nil(t, patientValidationRecord.Errors)
 }
+
 func Test_ValidateLastName(t *testing.T) {
 	// Empty last name: no errors
 	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LastName: ""}
@@ -230,6 +231,20 @@ func Test_ValidateOrganization(t *testing.T) {
 	assert.Nil(t, rec.Errors)
 }
 
+func Test_ValidateDateOfBirth(t *testing.T) {
+	// Nil date of birth: no errors
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", DateOfBirth: nil}
+	rec := PatientValidationRecord{Patient: patient}
+	rec.validateDateOfBirth()
+
+	expected := types.BatchMessage{
+		Code:    "PATIENT-004",
+		Message: "Invalid field date_of_birth for patient (CHUSJ / id1). Reason: missing value, date of birth is required.",
+		Path:    "patient[0].date_of_birth",
+	}
+	assert.Equal(t, expected, rec.Errors[0])
+}
+
 func Test_ValidateExistingPatient_Nil(t *testing.T) {
 	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1"}
 	rec := PatientValidationRecord{Patient: patient}
@@ -294,13 +309,14 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 	rec := PatientValidationRecord{Patient: patient}
 	rec.validateExistingPatient(existing)
 	assert.True(t, rec.Skipped)
-	assert.Len(t, rec.Infos, 1)
+	assert.Len(t, rec.Infos, 0)
 	// All 6 differing fields should produce 6 warnings
 	assert.Len(t, rec.Warnings, 6)
 	for _, w := range rec.Warnings {
 		assert.Equal(t, PatientExistingPatientDifferentFieldCode, w.Code)
 	}
 }
+
 func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		/* This test verifies that rollback occurs when there is an error inserting patient records. */
