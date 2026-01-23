@@ -5,14 +5,11 @@ import { createColumnHelper } from '@tanstack/react-table';
 
 import { SortBodyOrderEnum } from '@/api/api';
 import TableFilters from '@/apps/case/src/exploration/table/case-exploration-table-filters';
-import PinRowCell from '@/components/base/data-table/cells/pin-row-cell';
-import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
-import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
-import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
+import DataTable, { TableColumnDef } from '@/components/base/data-table/data-table';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
-import { data, MockData } from './table-mock';
+import { data, mockColumns, MockData, mockDefaultColumnSettings } from './table-mock';
 
 const columnHelper = createColumnHelper<MockData>();
 
@@ -43,30 +40,7 @@ const meta = {
   component: DataTable,
   args: {
     id: 'storybook',
-    columns: [
-      columnHelper.accessor('firstName', {
-        cell: info => info.getValue(),
-        header: () => <span>First Name</span>,
-      }),
-      columnHelper.accessor(row => row.lastName, {
-        id: 'lastName',
-        cell: info => <i>{info.getValue()}</i>,
-        header: () => <span>Last Name</span>,
-      }),
-      columnHelper.accessor('age', {
-        header: () => 'Age',
-        cell: info => info.renderValue(),
-      }),
-      columnHelper.accessor('visits', {
-        header: () => <span>Visits</span>,
-      }),
-      columnHelper.accessor('status', {
-        header: 'Status',
-      }),
-      columnHelper.accessor('progress', {
-        header: 'Profile Progress',
-      }),
-    ] as TableColumnDef<MockData, any>[],
+    columns: mockColumns,
     data,
     serverOptions: {
       defaultSorting: [
@@ -78,48 +52,7 @@ const meta = {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       onSortingChange: sorting => {},
     },
-    defaultColumnSettings: createColumnSettings([
-      {
-        id: 'pinRow',
-        visible: true,
-        variant: 'ghost',
-      },
-      {
-        id: 'rowSelection',
-        visible: true,
-        variant: 'ghost',
-      },
-      {
-        id: 'firstName',
-        visible: true,
-        label: 'First Name',
-      },
-      {
-        id: 'lastName',
-        visible: true,
-        label: 'Last Name',
-      },
-      {
-        id: 'age',
-        visible: true,
-        label: 'Age',
-      },
-      {
-        id: 'visits',
-        visible: true,
-        label: 'firstName',
-      },
-      {
-        id: 'status',
-        visible: true,
-        label: 'Status',
-      },
-      {
-        id: 'progress',
-        visible: true,
-        label: 'Profile Progress',
-      },
-    ]),
+    defaultColumnSettings: mockDefaultColumnSettings,
     loadingStates: {
       total: false,
       list: false,
@@ -156,7 +89,15 @@ export const Loading: Story = {
       total: true,
     },
   },
-  render: args => <DataTable {...args} />,
+  render: args => (
+    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+      <Card className="h-auto size-max w-full">
+        <CardContent>
+          <DataTable {...args} />
+        </CardContent>
+      </Card>
+    </div>
+  ),
 };
 
 export const Empty: Story = {
@@ -167,7 +108,15 @@ export const Empty: Story = {
     },
     data: [],
   },
-  render: args => <DataTable {...args} />,
+  render: args => (
+    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+      <Card className="h-auto size-max w-full">
+        <CardContent>
+          <DataTable {...args} />
+        </CardContent>
+      </Card>
+    </div>
+  ),
 };
 
 export const Error: Story = {
@@ -179,7 +128,15 @@ export const Error: Story = {
     data: [],
     hasError: true,
   },
-  render: args => <DataTable {...args} />,
+  render: args => (
+    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+      <Card className="h-auto size-max w-full">
+        <CardContent>
+          <DataTable {...args} />
+        </CardContent>
+      </Card>
+    </div>
+  ),
 };
 
 export const Default: Story = {
@@ -188,22 +145,15 @@ export const Default: Story = {
     enableFullscreen: true,
     enableColumnOrdering: true,
   },
-  render: args => <DataTable {...args} />,
-};
-
-export const DefaultTableFilters: Story = {
-  args: {
-    loadingStates: {
-      list: false,
-      total: false,
-    },
-    data,
-    enableColumnOrdering: false,
-    enableFullscreen: true,
-    tableIndexResultPosition: 'hidden',
-    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
-  },
-  render: args => <DataTable {...args} />,
+  render: args => (
+    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+      <Card className="h-auto size-max w-full">
+        <CardContent>
+          <DataTable {...args} />
+        </CardContent>
+      </Card>
+    </div>
+  ),
 };
 
 export const Fullscreen: Story = {
@@ -211,11 +161,15 @@ export const Fullscreen: Story = {
     enableFullscreen: true,
   },
   render: args => (
-    <div>
-      <span>
-        <i>Use &quot;Open in new canvas&quot; button at the top right of the screen a better preview</i>
-      </span>
-      <DataTable {...args} />
+    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+      <Card className="h-auto size-max w-full">
+        <CardContent>
+          <span>
+            <i>Use &quot;Open in new canvas&quot; button at the top right of the screen a better preview</i>
+          </span>
+          <DataTable {...args} />
+        </CardContent>
+      </Card>
     </div>
   ),
 };
@@ -227,7 +181,15 @@ export const LessThan10Results: Story = {
     enableFullscreen: true,
     enableColumnOrdering: true,
   },
-  render: args => <DataTable {...args} />,
+  render: args => (
+    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+      <Card className="h-auto size-max w-full">
+        <CardContent>
+          <DataTable {...args} />
+        </CardContent>
+      </Card>
+    </div>
+  ),
 };
 
 export const DataTableFiltersAndLessThan10Results: Story = {
@@ -239,21 +201,45 @@ export const DataTableFiltersAndLessThan10Results: Story = {
     enableColumnOrdering: true,
     tableIndexResultPosition: 'bottom',
   },
-  render: args => <DataTable {...args} />,
+  render: args => (
+    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+      <Card className="h-auto size-max w-full">
+        <CardContent>
+          <DataTable {...args} />
+        </CardContent>
+      </Card>
+    </div>
+  ),
 };
 
 export const PaginationHidden: Story = {
   args: {
     pagination: { type: 'hidden' },
   },
-  render: args => <DataTable {...args} />,
+  render: args => (
+    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+      <Card className="h-auto size-max w-full">
+        <CardContent>
+          <DataTable {...args} />
+        </CardContent>
+      </Card>
+    </div>
+  ),
 };
 
 export const PaginationLocale: Story = {
   args: {
     pagination: { type: 'locale', state: { pageIndex: 0, pageSize: 5 } },
   },
-  render: args => <DataTable {...args} />,
+  render: args => (
+    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+      <Card className="h-auto size-max w-full">
+        <CardContent>
+          <DataTable {...args} />
+        </CardContent>
+      </Card>
+    </div>
+  ),
 };
 
 export const GroupBy: Story = {
@@ -301,145 +287,17 @@ export const GroupBy: Story = {
     ] as TableColumnDef<MockData, any>[],
   },
   render: args => (
-    <>
-      <span>
-        You can group by <b>status</b>
-      </span>
-      <DataTable {...args} />
-    </>
-  ),
-};
-
-export const HeaderGroups: Story = {
-  args: {
-    data: data.slice(0, 10),
-    enableFullscreen: true,
-    enableColumnOrdering: true,
-    columns: [
-      {
-        header: 'Group Left',
-        size: 400,
-        minSize: 200,
-        columns: [
-          {
-            id: 'pinRow',
-            cell: PinRowCell,
-            enableResizing: false,
-            enablePinning: false,
-          },
-          {
-            id: 'rowSelection',
-            header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
-            cell: info => <RowSelectionCell row={info.row} />,
-            enableResizing: false,
-            enablePinning: false,
-          },
-          columnHelper.accessor('firstName', {
-            cell: info => info.getValue(),
-          }),
-          columnHelper.accessor('lastName', {
-            id: 'lastName',
-            cell: info => info.getValue(),
-            header: 'Last Name',
-          }),
-        ],
-      },
-      {
-        header: 'Group Right',
-        size: 400,
-        minSize: 200,
-        columns: [
-          columnHelper.accessor('age', {
-            header: () => 'Age',
-          }),
-          columnHelper.accessor('visits', {
-            header: 'Visits',
-          }),
-          columnHelper.accessor('status', {
-            header: 'Status',
-          }),
-          columnHelper.accessor('progress', {
-            header: 'Profile Progress',
-          }),
-        ],
-      },
-    ] as TableColumnDef<MockData, any>[],
-  },
-  render: args => (
     <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
       <Card className="h-auto size-max w-full">
         <CardContent>
-          <div className="bg-background pt-4">
-            <DataTable {...args} />
-          </div>
+          <span>
+            You can group by <b>status</b>
+          </span>
+          <DataTable {...args} />
         </CardContent>
       </Card>
     </div>
   ),
-};
-
-export const HeaderGroupsWithSubgroup: Story = {
-  args: {
-    data: data.slice(0, 10),
-    enableFullscreen: true,
-    enableColumnOrdering: true,
-    columns: [
-      {
-        header: 'Group Left',
-        columns: [
-          columnHelper.group({
-            id: 'sub-group-left',
-            columns: [
-              {
-                id: 'pinRow',
-                cell: PinRowCell,
-                enableResizing: false,
-                enablePinning: false,
-              },
-              {
-                id: 'rowSelection',
-                header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
-                cell: info => <RowSelectionCell row={info.row} />,
-                enableResizing: false,
-                enablePinning: false,
-              },
-              columnHelper.accessor('firstName', {
-                cell: info => info.getValue(),
-              }),
-              columnHelper.accessor('lastName', {
-                id: 'lastName',
-                cell: info => info.getValue(),
-                header: 'Last Name',
-              }),
-            ],
-          }),
-        ],
-      },
-      {
-        header: 'Group Right',
-        columns: [
-          columnHelper.group({
-            header: 'Sub Group',
-            columns: [
-              columnHelper.accessor('age', {
-                header: () => 'Age',
-              }),
-              columnHelper.accessor('visits', {
-                header: 'Visits',
-              }),
-              columnHelper.accessor('status', {
-                header: 'Status',
-              }),
-              columnHelper.accessor('progress', {
-                header: 'Profile Progress',
-              }),
-            ],
-          }),
-        ],
-      },
-    ] as TableColumnDef<MockData, any>[],
-  },
-  render: args => <DataTable {...args} />,
 };
 
 export const Footer: Story = {
@@ -475,5 +333,13 @@ export const Footer: Story = {
       }),
     ],
   },
-  render: args => <DataTable {...args} />,
+  render: args => (
+    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+      <Card className="h-auto size-max w-full">
+        <CardContent>
+          <DataTable {...args} />
+        </CardContent>
+      </Card>
+    </div>
+  ),
 };
