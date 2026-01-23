@@ -309,7 +309,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) 
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-002",
-				Message: "Sequencing aliquot UNKNOWN_ALIQUOT is not defined for case 0 - task 0.",
+				Message: "Sequencing \"UNKNOWN_ALIQUOT\" is not defined for case 0 - task 0.",
 				Path:    "case[0].tasks[0]",
 			},
 		}
@@ -702,7 +702,7 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			},
 			{
 				Code:    "TASK-002",
-				Message: "Sequencing aliquot NA12891111 is not defined for case 0 - task 0.",
+				Message: "Sequencing \"NA12891111\" is not defined for case 0 - task 0.",
 				Path:    "case[0].tasks[0]",
 			},
 			{

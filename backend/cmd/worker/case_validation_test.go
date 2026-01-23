@@ -3902,7 +3902,7 @@ func Test_validateTaskAliquot_Error(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-002",
-		Message: "Sequencing aliquot ALIQUOT-1 is not defined for case 0 - task 0.",
+		Message: "Sequencing \"ALIQUOT-1\" is not defined for case 0 - task 0.",
 		Path:    "case[0].tasks[0]",
 	}
 
