@@ -19,6 +19,7 @@ type VariantUninterpretedCase = types.VariantUninterpretedCase
 type VariantExpandedInterpretedCase = types.VariantExpandedInterpretedCase
 type VariantCasesFilters = types.VariantCasesFilters
 type VariantCasesCount = types.VariantCasesCount
+type VariantExternalFrequencies = types.VariantExternalFrequencies
 
 type VariantsRepository struct {
 	db *gorm.DB
@@ -33,6 +34,7 @@ type VariantsDAO interface {
 	GetVariantExpandedInterpretedCase(locusId int, caseId int, seqId int, transcriptId string) (*VariantExpandedInterpretedCase, error)
 	GetVariantCasesCount(locusId int) (*VariantCasesCount, error)
 	GetVariantCasesFilters() (*VariantCasesFilters, error)
+	GetVariantExternalFrequencies(locusId int) (*VariantExternalFrequencies, error)
 }
 
 func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
@@ -324,4 +326,56 @@ func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, err
 		AnalysisCatalog: analysisCatalog,
 		DiagnosisLab:    diagnosisLab,
 	}, nil
+}
+
+func (r *VariantsRepository) GetVariantExternalFrequencies(locusId int) (*VariantExternalFrequencies, error) {
+	var topmed types.ExternalFrequencies
+	var gnomadV3 types.ExternalFrequencies
+	var thousandGenomes types.ExternalFrequencies
+	var result types.VariantExternalFrequencies
+
+	tx := r.db.Table(fmt.Sprintf("%s v", types.VariantTable.Name))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s topmed ON topmed.locus_id = v.locus_id", types.TopmedTable.Name))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s gnomad ON gnomad.locus_id = v.locus_id", types.GnomadGenomesV3Table.Name))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s thousand ON thousand.locus_id = v.locus_id", types.ThousandGenomesTable.Name))
+	tx = tx.Where("v.locus_id = ?", locusId)
+	tx = tx.Select("v.locus, " +
+		"topmed.af as topmed_af, topmed.ac as topmed_ac, topmed.an as topmed_an, topmed.hom as topmed_hom, " +
+		"gnomad.af as gnomad_v3_af, gnomad.ac as gnomad_v3_ac, gnomad.an as gnomad_v3_an, gnomad.hom as gnomad_v3_hom, " +
+		"thousand.af as thousand_genomes_af, thousand.ac as thousand_genomes_ac, thousand.an as thousand_genomes_an")
+
+	if err := tx.First(&result).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error fetching external frequencies: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	topmed = types.ExternalFrequencies{
+		Cohort: types.TopmedTable.Name,
+		Af:     result.TopmedAf,
+		Ac:     result.TopmedAc,
+		An:     result.TopmedAn,
+		Hom:    result.TopmedHom,
+	}
+
+	gnomadV3 = types.ExternalFrequencies{
+		Cohort: types.GnomadGenomesV3Table.Name,
+		Af:     result.GnomadV3Af,
+		Ac:     result.GnomadV3Ac,
+		An:     result.GnomadV3An,
+		Hom:    result.GnomadV3Hom,
+	}
+
+	thousandGenomes = types.ExternalFrequencies{
+		Cohort: types.ThousandGenomesTable.Name,
+		Af:     result.ThousandGenomesAf,
+		Ac:     result.ThousandGenomesAc,
+		An:     result.ThousandGenomesAn,
+	}
+
+	result.ExternalFrequencies = []types.ExternalFrequencies{topmed, gnomadV3, thousandGenomes}
+
+	return &result, nil
 }

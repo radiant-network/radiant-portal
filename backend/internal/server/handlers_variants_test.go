@@ -192,6 +192,38 @@ func (m *MockRepository) GetVariantClinvarConditions(locusId int) ([]types.Clinv
 	}, nil
 }
 
+func (m *MockRepository) GetVariantExternalFrequencies(locusId int) (*types.VariantExternalFrequencies, error) {
+	af := 0.01
+	ac := 1
+	an := 100
+	hom := 0
+	return &types.VariantExternalFrequencies{
+		Locus: "1-123-A-C",
+		ExternalFrequencies: types.JsonArray[types.ExternalFrequencies]{
+			{
+				Cohort: "topmed_bravo",
+				Af:     &af,
+				Ac:     &ac,
+				An:     &an,
+				Hom:    &hom,
+			},
+			{
+				Cohort: "gnomad_genomes_v3",
+				Af:     &af,
+				Ac:     &ac,
+				An:     &an,
+				Hom:    &hom,
+			},
+			{
+				Cohort: "1000_genomes",
+				Af:     &af,
+				Ac:     &ac,
+				An:     &an,
+			},
+		},
+	}, nil
+}
+
 type MockExomiserRepository struct{}
 type MockEmptyExomiserRepository struct{}
 
@@ -573,6 +605,28 @@ func Test_GetGermlineVariantConditionsClinvar(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	expected := `[{"locus_id":"1000","clinvar_id":"123456","accession":"RCV000123456","clinical_significance":["Pathogenic"],"date_last_evaluated":"2023-01-01T00:00:00Z","submission_count":1,"review_status":"criteria_provided","review_status_stars":3,"version":1,"traits":["Trait1","Trait2"],"origins":["somatic"]}]`
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetGermlineVariantExternalFrequenciesHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/variants/germline/:locus_id/external_frequencies", GetGermlineVariantExternalFrequenciesHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/variants/germline/1000/external_frequencies", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `{
+		"external_frequencies":[
+			{"ac":1, "af":0.01, "an":100, "cohort":"topmed_bravo", "hom":0}, 
+			{"ac":1, "af":0.01, "an":100, "cohort":"gnomad_genomes_v3", "hom":0}, 
+			{"ac":1, "af":0.01, "an":100, "cohort":"1000_genomes"}
+		], 
+		"locus":"1-123-A-C"
+	}`
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())

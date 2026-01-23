@@ -160,6 +160,22 @@ type VariantCasesCount struct {
 	CountUninterpreted int64 `json:"count_uninterpreted" validate:"required"`
 } // @name VariantCasesCount
 
+type VariantExternalFrequencies struct {
+	Locus               string                         `json:"locus" validate:"required"`
+	ExternalFrequencies JsonArray[ExternalFrequencies] `json:"external_frequencies" validate:"required"`
+	TopmedAf            *float64                       `json:"-"`
+	TopmedAc            *int                           `json:"-"`
+	TopmedAn            *int                           `json:"-"`
+	TopmedHom           *int                           `json:"-"`
+	GnomadV3Af          *float64                       `json:"-"`
+	GnomadV3Ac          *int                           `json:"-"`
+	GnomadV3An          *int                           `json:"-"`
+	GnomadV3Hom         *int                           `json:"-"`
+	ThousandGenomesAf   *float64                       `json:"-"`
+	ThousandGenomesAc   *int                           `json:"-"`
+	ThousandGenomesAn   *int                           `json:"-"`
+} // @name VariantExternalFrequencies
+
 var VariantTable = Table{
 	Name:  "germline__snv__variant",
 	Alias: "v",

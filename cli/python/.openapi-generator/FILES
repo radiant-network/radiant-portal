@@ -36,6 +36,7 @@ docs/DocumentResult.md
 docs/DocumentsApi.md
 docs/DocumentsSearchResponse.md
 docs/ExpandedGermlineSNVOccurrence.md
+docs/ExternalFrequencies.md
 docs/Facet.md
 docs/FamilyHistoryBatch.md
 docs/FiltersBodyWithCriteria.md
@@ -100,6 +101,7 @@ docs/VariantCasesCount.md
 docs/VariantCasesFilters.md
 docs/VariantConsequence.md
 docs/VariantExpandedInterpretedCase.md
+docs/VariantExternalFrequencies.md
 docs/VariantHeader.md
 docs/VariantInterpretedCase.md
 docs/VariantInterpretedCasesSearchResponse.md
@@ -164,6 +166,7 @@ radiant_python/models/document_filters.py
 radiant_python/models/document_result.py
 radiant_python/models/documents_search_response.py
 radiant_python/models/expanded_germline_snv_occurrence.py
+radiant_python/models/external_frequencies.py
 radiant_python/models/facet.py
 radiant_python/models/family_history_batch.py
 radiant_python/models/filters_body_with_criteria.py
@@ -214,6 +217,7 @@ radiant_python/models/variant_cases_count.py
 radiant_python/models/variant_cases_filters.py
 radiant_python/models/variant_consequence.py
 radiant_python/models/variant_expanded_interpreted_case.py
+radiant_python/models/variant_external_frequencies.py
 radiant_python/models/variant_header.py
 radiant_python/models/variant_interpreted_case.py
 radiant_python/models/variant_interpreted_cases_search_response.py

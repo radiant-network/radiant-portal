@@ -17,19 +17,21 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field
-from typing import Any, ClassVar, Dict, List
-from typing_extensions import Annotated
-from radiant_python.models.case_batch import CaseBatch
+from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-class CreateCaseBatchBody(BaseModel):
+class ExternalFrequencies(BaseModel):
     """
-    CreateCaseBatchBody
+    ExternalFrequencies
     """ # noqa: E501
-    cases: Annotated[List[CaseBatch], Field(min_length=1)]
-    __properties: ClassVar[List[str]] = ["cases"]
+    ac: Optional[StrictInt] = None
+    af: Optional[Union[StrictFloat, StrictInt]] = None
+    an: Optional[StrictInt] = None
+    cohort: StrictStr
+    hom: Optional[StrictInt] = None
+    __properties: ClassVar[List[str]] = ["ac", "af", "an", "cohort", "hom"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +51,7 @@ class CreateCaseBatchBody(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of CreateCaseBatchBody from a JSON string"""
+        """Create an instance of ExternalFrequencies from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,18 +72,11 @@ class CreateCaseBatchBody(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in cases (list)
-        _items = []
-        if self.cases:
-            for _item_cases in self.cases:
-                if _item_cases:
-                    _items.append(_item_cases.to_dict())
-            _dict['cases'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of CreateCaseBatchBody from a dict"""
+        """Create an instance of ExternalFrequencies from a dict"""
         if obj is None:
             return None
 
@@ -89,7 +84,11 @@ class CreateCaseBatchBody(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "cases": [CaseBatch.from_dict(_item) for _item in obj["cases"]] if obj.get("cases") is not None else None
+            "ac": obj.get("ac"),
+            "af": obj.get("af"),
+            "an": obj.get("an"),
+            "cohort": obj.get("cohort"),
+            "hom": obj.get("hom")
         })
         return _obj
 

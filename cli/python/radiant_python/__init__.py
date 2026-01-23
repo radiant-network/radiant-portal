@@ -80,6 +80,7 @@ from radiant_python.models.document_filters import DocumentFilters
 from radiant_python.models.document_result import DocumentResult
 from radiant_python.models.documents_search_response import DocumentsSearchResponse
 from radiant_python.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
+from radiant_python.models.external_frequencies import ExternalFrequencies
 from radiant_python.models.facet import Facet
 from radiant_python.models.family_history_batch import FamilyHistoryBatch
 from radiant_python.models.filters_body_with_criteria import FiltersBodyWithCriteria
@@ -130,6 +131,7 @@ from radiant_python.models.variant_cases_count import VariantCasesCount
 from radiant_python.models.variant_cases_filters import VariantCasesFilters
 from radiant_python.models.variant_consequence import VariantConsequence
 from radiant_python.models.variant_expanded_interpreted_case import VariantExpandedInterpretedCase
+from radiant_python.models.variant_external_frequencies import VariantExternalFrequencies
 from radiant_python.models.variant_header import VariantHeader
 from radiant_python.models.variant_interpreted_case import VariantInterpretedCase
 from radiant_python.models.variant_interpreted_cases_search_response import VariantInterpretedCasesSearchResponse

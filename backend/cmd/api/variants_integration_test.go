@@ -359,3 +359,30 @@ func Test_GetGermlineVariantConditions_Clinvar(t *testing.T) {
 		assert.JSONEq(t, expected, w.Body.String())
 	})
 }
+
+func assertGetGermlineVariantExternalFrequencies(t *testing.T, data string, locusId int, expected string) {
+	testutils.ParallelTestWithPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+		repo := repository.NewVariantsRepository(starrocks)
+		router := gin.Default()
+		router.GET("/variants/germline/:locus_id/external_frequencies", server.GetGermlineVariantExternalFrequenciesHandler(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/external_frequencies", locusId), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetGermlineVariantExternalFrequenciesHandler(t *testing.T) {
+	expected := `{
+		"external_frequencies":[
+			{"ac":1, "af":0.001, "an":1000, "cohort":"topmed_bravo", "hom":0}, 
+			{"ac":1, "af":0.01, "an":100, "cohort":"gnomad_genomes_v3", "hom":0}, 
+			{"ac":1, "af":0.0001, "an":10000, "cohort":"1000_genomes"}
+		], 
+		"locus":"locus1"
+	}`
+	assertGetGermlineVariantExternalFrequencies(t, "simple", 1000, expected)
+}

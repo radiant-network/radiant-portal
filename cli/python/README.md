@@ -154,6 +154,7 @@ Class | Method | HTTP request | Description
 *VariantApi* | [**get_germline_variant_conditions**](docs/VariantApi.md#get_germline_variant_conditions) | **GET** /variants/germline/{locus_id}/conditions/{panel_type} | Get conditions for germline variant entity for a specific gene panel
 *VariantApi* | [**get_germline_variant_conditions_clinvar**](docs/VariantApi.md#get_germline_variant_conditions_clinvar) | **GET** /variants/germline/{locus_id}/conditions/clinvar | Get ClinVar conditions for germline variant entity
 *VariantApi* | [**get_germline_variant_consequences**](docs/VariantApi.md#get_germline_variant_consequences) | **GET** /variants/germline/{locus_id}/consequences | Get list of VariantConsequences for a germline variant
+*VariantApi* | [**get_germline_variant_external_frequencies**](docs/VariantApi.md#get_germline_variant_external_frequencies) | **GET** /variants/germline/{locus_id}/external_frequencies | Get external frequencies
 *VariantApi* | [**get_germline_variant_header**](docs/VariantApi.md#get_germline_variant_header) | **GET** /variants/germline/{locus_id}/header | Get a germline VariantHeader
 *VariantApi* | [**get_germline_variant_interpreted_cases**](docs/VariantApi.md#get_germline_variant_interpreted_cases) | **POST** /variants/germline/{locus_id}/cases/interpreted | Get list of interpreted Cases for a germline variant
 *VariantApi* | [**get_germline_variant_overview**](docs/VariantApi.md#get_germline_variant_overview) | **GET** /variants/germline/{locus_id}/overview | Get a germline VariantOverview
@@ -195,6 +196,7 @@ Class | Method | HTTP request | Description
  - [DocumentResult](docs/DocumentResult.md)
  - [DocumentsSearchResponse](docs/DocumentsSearchResponse.md)
  - [ExpandedGermlineSNVOccurrence](docs/ExpandedGermlineSNVOccurrence.md)
+ - [ExternalFrequencies](docs/ExternalFrequencies.md)
  - [Facet](docs/Facet.md)
  - [FamilyHistoryBatch](docs/FamilyHistoryBatch.md)
  - [FiltersBodyWithCriteria](docs/FiltersBodyWithCriteria.md)
@@ -245,6 +247,7 @@ Class | Method | HTTP request | Description
  - [VariantCasesFilters](docs/VariantCasesFilters.md)
  - [VariantConsequence](docs/VariantConsequence.md)
  - [VariantExpandedInterpretedCase](docs/VariantExpandedInterpretedCase.md)
+ - [VariantExternalFrequencies](docs/VariantExternalFrequencies.md)
  - [VariantHeader](docs/VariantHeader.md)
  - [VariantInterpretedCase](docs/VariantInterpretedCase.md)
  - [VariantInterpretedCasesSearchResponse](docs/VariantInterpretedCasesSearchResponse.md)
