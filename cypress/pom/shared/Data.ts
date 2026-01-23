@@ -36,6 +36,12 @@ export const data = {
       seq_status: 'Completed',
       last_update: '2021-10-12',
     },
+    task: {
+      task_id: /^1$/,
+      type: 'Genome Alignment and Germline Variant Calling',
+      patient: REL_VALUE,
+      created_on: '2021-10-12',
+    },
   },
   file: {
     name: 'variants.CEPH-1463.snv.vep.vcf.gz',
