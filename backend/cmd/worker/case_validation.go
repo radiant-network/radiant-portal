@@ -914,7 +914,7 @@ func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 func (cr *CaseValidationRecord) validateExclusiveAliquotInputDocuments(task *types.CaseTaskBatch, taskIndex int) {
 	if len(task.InputDocuments) > 0 && task.Aliquot != "" {
 		path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
-		message := "Aliquot and Input documents are mutually exclusive. You can provide one or the other, but not both."
+		message := "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both."
 		cr.addErrors(message, TaskContainsAliquotAndInputDocuments, path)
 	}
 }

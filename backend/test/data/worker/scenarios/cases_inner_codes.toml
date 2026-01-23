@@ -53,7 +53,7 @@ ordering_organization_code = "CHUSJ"
     url = "s3://test-bucket/CASE-12345.recal.crai"  # DOCUMENT-002 document not found at URL
 
     [[cases.tasks.output_documents]]
-    data_category_code = "genomic"
+    data_category_code = "genomic!@#$%"  # DOCUMENT-001 regex error
     data_type_code = "alignment"
     format_code = "cram"
     hash = "d57f21e6a273781dbf8b7657940f3b03333"  # DOCUMENT-006 incorrect hash
@@ -88,7 +88,7 @@ ordering_organization_code = "CHUSJ"
     url = "s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz"
 
     [[cases.tasks.output_documents]]
-    data_category_code = "genomic!@#$%^&"  # DOCUMENT-001 regex error
+    data_category_code = "genomicc"
     data_type_code = "snv"
     format_code = "vcf"
     hash = "5d41402abc4b2a76b9719d911017c826"

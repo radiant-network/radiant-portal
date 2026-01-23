@@ -4025,7 +4025,7 @@ func Test_validateExclusiveAliquotInputDocuments_Error(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-007",
-		Message: "Aliquot and Input documents are mutually exclusive. You can provide one or the other, but not both.",
+		Message: "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both.",
 		Path:    "case[0].tasks[0]",
 	}
 

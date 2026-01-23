@@ -333,7 +333,7 @@ func Test_ProcessBatch_Case_validateTask_Error_ExclusiveAliquotInputDocs(t *test
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-007",
-				Message: "Aliquot and Input documents are mutually exclusive. You can provide one or the other, but not both.",
+				Message: "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both.",
 				Path:    "case[0].tasks[0]",
 			},
 			{
@@ -665,7 +665,7 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 		warnings := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-004",
-				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found but with a different data_category_code (genomic <> genomic!@#$%^&).",
+				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found but with a different data_category_code (genomic <> genomicc).",
 				Path:    "case[0].tasks[2].output_documents[1]",
 			},
 		}
@@ -722,13 +722,18 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			},
 			{
 				Code:    "TASK-007",
-				Message: "Aliquot and Input documents are mutually exclusive. You can provide one or the other, but not both.",
+				Message: "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both.",
 				Path:    "case[0].tasks[2]",
 			},
 			{
 				Code:    "DOCUMENT-002",
 				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for case 0 - task 0 - output document 0.",
 				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-001",
+				Message: "Invalid field data_category_code for case 0 - task 0 - output document 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].tasks[0].output_documents[1]",
 			},
 			{
 				Code:    "DOCUMENT-006",
