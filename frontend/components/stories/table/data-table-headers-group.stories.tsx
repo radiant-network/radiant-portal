@@ -20,12 +20,14 @@ const defaultMockColumnSettings = createColumnSettings([
     id: 'pinRow',
     visible: true,
     label: 'Pin Row',
+    pinningPosition: 'left',
     fixed: true,
   },
   {
     id: 'rowSelection',
     visible: true,
     label: 'Row Selection',
+    pinningPosition: 'left',
     fixed: true,
   },
   {
@@ -66,12 +68,14 @@ const defaultAdvancedColumnSettings = createColumnSettings([
     visible: true,
     label: 'Pin Row',
     fixed: true,
+    pinningPosition: 'left',
   },
   {
     id: 'rowSelection',
     visible: true,
     label: 'Row Selection',
     fixed: true,
+    pinningPosition: 'left',
   },
   {
     id: 'firstName',
@@ -262,11 +266,15 @@ export const Default: Story = {
           {
             id: 'pinRow',
             cell: PinRowCell,
+            size: 10,
+            maxSize: 10,
             enableResizing: false,
             enablePinning: false,
           },
           {
             id: 'rowSelection',
+            size: 48,
+            maxSize: 48,
             header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
             cell: info => <RowSelectionCell row={info.row} />,
             enableResizing: false,
@@ -325,6 +333,7 @@ export const WithSubgroups: Story = {
     columns: [
       {
         header: 'Group Left',
+        size: 96,
         columns: [
           columnHelper.group({
             id: 'sub-group-left',
@@ -332,6 +341,8 @@ export const WithSubgroups: Story = {
               {
                 id: 'pinRow',
                 cell: PinRowCell,
+                size: 48,
+                maxSize: 48,
                 enableResizing: false,
                 enablePinning: false,
               },
@@ -339,6 +350,8 @@ export const WithSubgroups: Story = {
                 id: 'rowSelection',
                 header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
                 cell: info => <RowSelectionCell row={info.row} />,
+                size: 48,
+                maxSize: 48,
                 enableResizing: false,
                 enablePinning: false,
               },
@@ -399,7 +412,7 @@ export const Advanced: Story = {
       // group actions
       {
         id: 'actions',
-        size: 100,
+        size: 96,
         columns: [
           columnHelper.group({
             id: 'sub-group-user',
@@ -408,6 +421,7 @@ export const Advanced: Story = {
                 id: 'pinRow',
                 cell: PinRowCell,
                 size: 48,
+                maxSize: 48,
                 enableResizing: false,
                 enablePinning: false,
               },
@@ -416,6 +430,7 @@ export const Advanced: Story = {
                 header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
                 cell: info => <RowSelectionCell row={info.row} />,
                 size: 48,
+                maxSize: 48,
                 enableResizing: false,
                 enablePinning: false,
               },
@@ -577,7 +592,7 @@ export const AdvancedWith50users: Story = {
       // group actions
       {
         id: 'actions',
-        size: 100,
+        size: 96,
         columns: [
           columnHelper.group({
             id: 'sub-group-user',
@@ -586,6 +601,7 @@ export const AdvancedWith50users: Story = {
                 id: 'pinRow',
                 cell: PinRowCell,
                 size: 48,
+                maxSize: 48,
                 enableResizing: false,
                 enablePinning: false,
               },
@@ -594,6 +610,7 @@ export const AdvancedWith50users: Story = {
                 header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
                 cell: info => <RowSelectionCell row={info.row} />,
                 size: 48,
+                maxSize: 48,
                 enableResizing: false,
                 enablePinning: false,
               },
