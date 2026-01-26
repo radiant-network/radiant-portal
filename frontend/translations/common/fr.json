@@ -994,7 +994,7 @@
       },
       "notification": {
         "success": {
-          "title": "Interprétation enrgistrée",
+          "title": "Interprétation enregistrée",
           "button": "Voir l'interprétation"
         },
         "error": {
