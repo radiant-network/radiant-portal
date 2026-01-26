@@ -26,7 +26,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
-          toast: '!items-start !text-sm !shadow-lg !rounded-lg',
+          toast: '!items-start !text-sm !shadow-lg !rounded-lg !gap-3',
           title: '!text-base-popover-foreground',
           description: '!text-muted-foreground',
           actionButton:

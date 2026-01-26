@@ -49,27 +49,27 @@ export const WithFieldVariant: Story = {
   render: () => (
     <div className="flex flex-col gap-6 max-w-[400px]">
       {/* Basic Field with Label */}
-      <Field>
+      <Field className="gap-2">
         <FieldLabel>Basic Input with Label</FieldLabel>
         <Input size="sm" placeholder="Placeholder" />
       </Field>
 
       {/* Field with Label and Description */}
-      <Field>
+      <Field className="gap-2">
         <FieldLabel>Input with Description</FieldLabel>
         <FieldDescription>This is a helpful description to guide the user</FieldDescription>
         <Input size="sm" placeholder="Enter your text here" />
       </Field>
 
       {/* Field with Title (alternative to Label) */}
-      <Field>
+      <Field className="gap-2">
         <FieldTitle>Input with Title</FieldTitle>
         <FieldDescription>Titles can be used as an alternative to labels</FieldDescription>
         <Input size="sm" placeholder="Placeholder" />
       </Field>
 
       {/* Field with Label, Description and Error */}
-      <Field>
+      <Field className="gap-2">
         <FieldLabel>Input with Error State</FieldLabel>
         <FieldDescription>This field shows an error message below</FieldDescription>
         <Input size="sm" placeholder="Placeholder" className="border-destructive" />
@@ -77,14 +77,14 @@ export const WithFieldVariant: Story = {
       </Field>
 
       {/* Field with multiple errors */}
-      <Field>
+      <Field className="gap-2">
         <FieldLabel>Input with Multiple Errors</FieldLabel>
         <Input size="sm" placeholder="Placeholder" className="border-destructive" />
         <FieldError errors={[{ message: 'This field is required' }, { message: 'Must be at least 3 characters' }]} />
       </Field>
 
       {/* Complete Field with all elements */}
-      <Field>
+      <Field className="gap-2">
         <FieldLabel>Complete Field Example</FieldLabel>
         <FieldDescription>
           This field demonstrates all available components: Label, Description, Input, and helper text.
