@@ -8,7 +8,6 @@ import ClassificationCell from '@/components/base/data-table/cells/classificatio
 import ConditionCell from '@/components/base/data-table/cells/condition-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
@@ -21,13 +20,6 @@ const interpretedCasesColumnHelper = createColumnHelper<VariantInterpretedCase>(
 
 function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
   return [
-    {
-      id: 'rowExpand',
-      cell: RowExpandCell,
-      size: 40,
-      enableResizing: false,
-      enablePinning: false,
-    },
     interpretedCasesColumnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (

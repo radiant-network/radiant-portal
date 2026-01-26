@@ -13,7 +13,6 @@ import { useSliderCasePatientIdNavigation } from './slider/use-slider-case-navig
 import InterpretedCasesFilters, { InterpretedCasesFiltersState } from './table/interpreted-cases-filters';
 import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table/interpreted-cases-table-settings';
 import { SELECTED_INTERPRETED_CASE_PARAM } from './constants';
-import InterpretedCasesExpand from './interpreted-cases-expand';
 
 type InterpretedCasesSearchInput = {
   key: string;
@@ -127,7 +126,6 @@ function InterpretedCasesTable() {
         }}
         total={data?.count || 0}
         pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
-        subComponent={data => <InterpretedCasesExpand locusId={params.locusId!} data={data} />}
         tableIndexResultPosition="bottom"
         rowSelection={rowSelection}
         onRowSelectionChange={setRowSelection}
