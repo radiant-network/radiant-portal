@@ -141,7 +141,7 @@ function InterpretationDialog({
             },
             closeButton: true,
           })
-        : toast.success(t('variant.interpretation_form.notification.success'));
+        : toast.success(t('variant.interpretation_form.notification.success.title'));
     },
     onError: () => {
       setOpen(false);
