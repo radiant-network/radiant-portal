@@ -21,6 +21,7 @@
       "variant/*": ["../../apps/variant/src/*"],
       "case/*": ["../../apps/case/src/*"],
       "file-archive/*": ["../../apps/file-archive/src/*"],
+      "query-builder-v3/*": ["../../apps/query-builder-v3/src/*"],
       "~/*": ["./app/*"],
       "react": ["./node_modules/@types/react"]
     },
