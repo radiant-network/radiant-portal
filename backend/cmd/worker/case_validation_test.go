@@ -260,14 +260,9 @@ func (m *StatusMockRepo) GetStatusCodes() ([]string, error) {
 	return []string{"in_progress", "incomplete", "completed", "unknown"}, nil
 }
 
-type ResolutionStatusMockRepo struct {
-	GetResolutionStatusCodesFunc func() ([]string, error)
-}
+type ResolutionStatusMockRepo struct{}
 
 func (m *ResolutionStatusMockRepo) GetResolutionStatusCodes() ([]string, error) {
-	if m.GetResolutionStatusCodesFunc != nil {
-		return m.GetResolutionStatusCodes()
-	}
 	return []string{"solved", "unsolved", "inconclusive"}, nil
 }
 
