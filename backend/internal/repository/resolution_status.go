@@ -20,7 +20,7 @@ type ResolutionStatusDAO interface {
 
 func NewResolutionStatusRepository(db *gorm.DB) *ResolutionStatusRepository {
 	if db == nil {
-		log.Print("OnsetsRepository: db is nil")
+		log.Print("ResolutionStatusRepository: db is nil")
 		return nil
 	}
 	return &ResolutionStatusRepository{db: db}
