@@ -45,7 +45,7 @@ func NewValueSetsRepository(db *gorm.DB) *ValueSetsRepository {
 		log.Panic("ValueSetsRepository: provided gorm.DB is nil")
 	}
 
-	tNameMap := map[ValueSetType]string{
+	tableNameMap := map[ValueSetType]string{
 		ValueSetAffectedStatus:   types.AffectedStatusTable.Name,
 		ValueSetAnalysisCatalog:  types.AnalysisCatalogTable.Name,
 		ValueSetCaseCategory:     types.CaseCategoryTable.Name,
@@ -68,7 +68,7 @@ func NewValueSetsRepository(db *gorm.DB) *ValueSetsRepository {
 
 	return &ValueSetsRepository{
 		db:       db,
-		tableMap: tNameMap,
+		tableMap: tableNameMap,
 	}
 }
 
