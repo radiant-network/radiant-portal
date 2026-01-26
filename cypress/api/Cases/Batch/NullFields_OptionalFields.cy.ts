@@ -8,7 +8,7 @@ describe('Cases - Batch - Null fields - Optional fields', () => {
     const body: string = `{
       "cases": [
         {
-        "submitter_case_id": "Cypress0001",
+        "submitter_case_id": null,
         "type": "germline",
         "status_code": "completed",
         "project_code": "Cypress",

@@ -44,15 +44,15 @@ describe('Sequencing - Batch - Process worker - Seq001', () => {
     expect(response.status).to.eq(200);
   });
 
-  it('Validate summary', () => {
+  it('Validate summary [SJRA-1133]', () => {
     cy.validateSummary(response, 0 /*created*/, 0 /*updated*/, 1 /*skipped*/, 0 /*errors*/);
   });
 
-  it('Validate report info count', () => {
+  it('Validate report info count [SJRA-1133]', () => {
     expect(Object.keys(response.body.report.info)).to.have.lengthOf(1);
   });
 
-  it('Validate report sequencing_experiment[0]', () => {
+  it('Validate report sequencing_experiment[0] [SJRA-1133]', () => {
     cy.validateReport(response, 'info', 'SEQ-001', apiMessages.ProcessWorkerError001('Sequencing', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0]');
   });
 });
