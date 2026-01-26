@@ -191,7 +191,7 @@ func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) 
 }
 
 func (r *CaseValidationRecord) fetchStatusCodes() error {
-	statusCodes, err := r.Context.StatusRepo.GetStatusCodes()
+	statusCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetStatus)
 	if err != nil {
 		return fmt.Errorf("error retrieving status codes: %v", err)
 	}
@@ -200,7 +200,7 @@ func (r *CaseValidationRecord) fetchStatusCodes() error {
 }
 
 func (r *CaseValidationRecord) fetchObservationCodes() error {
-	observationCodes, err := r.Context.ObservationRepo.GetObservationCodes()
+	observationCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetObservation)
 	if err != nil {
 		return fmt.Errorf("error retrieving observation codes: %v", err)
 	}
@@ -209,7 +209,7 @@ func (r *CaseValidationRecord) fetchObservationCodes() error {
 }
 
 func (r *CaseValidationRecord) fetchOnsetCodes() error {
-	onsetCodes, err := r.Context.OnsetRepo.GetOnsetCodes()
+	onsetCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetOnset)
 	if err != nil {
 		return fmt.Errorf("error retrieving onset codes: %v", err)
 	}
@@ -218,7 +218,7 @@ func (r *CaseValidationRecord) fetchOnsetCodes() error {
 }
 
 func (r *CaseValidationRecord) fetchResolutionStatusCodes() error {
-	rsCodes, err := r.Context.ResolutionStatusRepo.GetResolutionStatusCodes()
+	rsCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetResolutionStatus)
 	if err != nil {
 		return fmt.Errorf("error retrieving resolution status codes: %v", err)
 	}

@@ -227,37 +227,31 @@ func (m *CaseValidationMockRepo) GetTaskHasDocumentByDocumentId(docId int) ([]*t
 // Section: Helper Methods Tests
 // -----------------------------------------------------------------------------
 
-type ObservationsMockRepo struct {
-	GetObservationCodesFunc func() ([]string, error)
+type CodesMockRepo struct {
+	GetCodesFunc func(setType repository.ValueSetType) ([]string, error)
 }
 
-func (m *ObservationsMockRepo) GetObservationCodes() ([]string, error) {
-	if m.GetObservationCodesFunc != nil {
-		return m.GetObservationCodesFunc()
+func (m *CodesMockRepo) GetCodes(setType repository.ValueSetType) ([]string, error) {
+	if m.GetCodesFunc != nil {
+		return m.GetCodesFunc(setType)
 	}
-	return []string{"phenotype", "condition", "note", "ancestry", "consanguinity"}, nil
-}
 
-type OnsetsMockRepo struct {
-	GetOnsetCodesFunc func() ([]string, error)
-}
+	switch setType {
+	case repository.ValueSetStatus:
+		return []string{"in_progress", "incomplete", "completed", "unknown"}, nil
 
-func (m *OnsetsMockRepo) GetOnsetCodes() ([]string, error) {
-	if m.GetOnsetCodesFunc != nil {
-		return m.GetOnsetCodesFunc()
+	case repository.ValueSetOnset:
+		return []string{"unknown", "antenatal", "congenital", "neonatal", "infantile", "childhood", "juvenile", "young_adult", "middle_age", "senior"}, nil
+
+	case repository.ValueSetResolutionStatus:
+		return []string{"solved", "unsolved", "inconclusive"}, nil
+
+	case repository.ValueSetObservation:
+		return []string{"phenotype", "condition", "note", "ancestry", "consanguinity"}, nil
+
+	default:
+		return nil, nil
 	}
-	return []string{"unknown", "antenatal", "congenital", "neonatal", "infantile", "childhood", "juvenile", "young_adult", "middle_age", "senior"}, nil
-}
-
-type StatusMockRepo struct {
-	GetStatusCodesFunc func() ([]string, error)
-}
-
-func (m *StatusMockRepo) GetStatusCodes() ([]string, error) {
-	if m.GetStatusCodesFunc != nil {
-		return m.GetStatusCodesFunc()
-	}
-	return []string{"in_progress", "incomplete", "completed", "unknown"}, nil
 }
 
 type ResolutionStatusMockRepo struct{}
@@ -549,9 +543,8 @@ func Test_validateTextLength_TextMaxLength(t *testing.T) {
 // -----------------------------------------------------------------------------
 
 func Test_fetchStatusCodes_OK(t *testing.T) {
-	mockRepo := &StatusMockRepo{}
 	mockContext := &BatchValidationContext{
-		StatusRepo: mockRepo,
+		ValueSetsRepo: &CodesMockRepo{},
 	}
 
 	record := CaseValidationRecord{Context: mockContext}
@@ -563,13 +556,13 @@ func Test_fetchStatusCodes_OK(t *testing.T) {
 }
 
 func Test_fetchStatusCodes_Error(t *testing.T) {
-	mockRepo := &StatusMockRepo{
-		GetStatusCodesFunc: func() ([]string, error) {
+	mockRepo := &CodesMockRepo{
+		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
 			return nil, fmt.Errorf("database connection failed")
 		},
 	}
 	mockContext := &BatchValidationContext{
-		StatusRepo: mockRepo,
+		ValueSetsRepo: mockRepo,
 	}
 
 	record := CaseValidationRecord{Context: mockContext}
@@ -582,9 +575,8 @@ func Test_fetchStatusCodes_Error(t *testing.T) {
 }
 
 func Test_fetchObservationCodes_OK(t *testing.T) {
-	mockRepo := &ObservationsMockRepo{}
 	mockContext := &BatchValidationContext{
-		ObservationRepo: mockRepo,
+		ValueSetsRepo: &CodesMockRepo{},
 	}
 
 	record := CaseValidationRecord{Context: mockContext}
@@ -596,13 +588,13 @@ func Test_fetchObservationCodes_OK(t *testing.T) {
 }
 
 func Test_fetchObservationCodes_Error(t *testing.T) {
-	mockRepo := &ObservationsMockRepo{
-		GetObservationCodesFunc: func() ([]string, error) {
+	mockRepo := &CodesMockRepo{
+		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
 			return nil, fmt.Errorf("database connection failed")
 		},
 	}
 	mockContext := &BatchValidationContext{
-		ObservationRepo: mockRepo,
+		ValueSetsRepo: mockRepo,
 	}
 
 	record := CaseValidationRecord{Context: mockContext}
@@ -615,9 +607,9 @@ func Test_fetchObservationCodes_Error(t *testing.T) {
 }
 
 func Test_fetchOnsetCodes_OK(t *testing.T) {
-	mockRepo := &OnsetsMockRepo{}
+	mockRepo := &CodesMockRepo{}
 	mockContext := &BatchValidationContext{
-		OnsetRepo: mockRepo,
+		ValueSetsRepo: mockRepo,
 	}
 
 	record := CaseValidationRecord{Context: mockContext}
@@ -629,13 +621,13 @@ func Test_fetchOnsetCodes_OK(t *testing.T) {
 }
 
 func Test_fetchOnsetCodes_Error(t *testing.T) {
-	mockRepo := &OnsetsMockRepo{
-		GetOnsetCodesFunc: func() ([]string, error) {
+	mockRepo := &CodesMockRepo{
+		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
 			return nil, fmt.Errorf("database connection failed")
 		},
 	}
 	mockContext := &BatchValidationContext{
-		OnsetRepo: mockRepo,
+		ValueSetsRepo: mockRepo,
 	}
 
 	record := CaseValidationRecord{Context: mockContext}
@@ -648,18 +640,10 @@ func Test_fetchOnsetCodes_Error(t *testing.T) {
 }
 
 func Test_fetchCodeInfos_OK(t *testing.T) {
-	mockStatusRepo := &StatusMockRepo{}
-	mockObservationRepo := &ObservationsMockRepo{}
-	mockOnsetRepo := &OnsetsMockRepo{}
-	mockResStatusRepo := &ResolutionStatusMockRepo{}
-
 	record := CaseValidationRecord{
 		Context: &BatchValidationContext{
-			StatusRepo:           mockStatusRepo,
-			ObservationRepo:      mockObservationRepo,
-			OnsetRepo:            mockOnsetRepo,
-			ResolutionStatusRepo: mockResStatusRepo,
-			TaskRepo:             &CaseValidationMockRepo{},
+			ValueSetsRepo: &CodesMockRepo{},
+			TaskRepo:      &CaseValidationMockRepo{},
 		},
 	}
 
@@ -674,72 +658,60 @@ func Test_fetchCodeInfos_OK(t *testing.T) {
 }
 
 func Test_fetchCodeInfos_StatusCodesError(t *testing.T) {
-	mockStatusRepo := &StatusMockRepo{
-		GetStatusCodesFunc: func() ([]string, error) {
-			return nil, fmt.Errorf("status database error")
+	mockRepo := &CodesMockRepo{
+		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
+			return nil, fmt.Errorf("database connection failed")
 		},
 	}
-	mockObservationRepo := &ObservationsMockRepo{}
-	mockOnsetRepo := &OnsetsMockRepo{}
 
 	record := CaseValidationRecord{
 		Context: &BatchValidationContext{
-			StatusRepo:      mockStatusRepo,
-			ObservationRepo: mockObservationRepo,
-			OnsetRepo:       mockOnsetRepo,
+			ValueSetsRepo: mockRepo,
 		},
 	}
 
 	err := record.fetchCodeInfos()
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to retrieve status codes")
-	assert.Contains(t, err.Error(), "status database error")
+	assert.Contains(t, err.Error(), "database connection failed")
 }
 
 func Test_fetchCodeInfos_ObservationCodesError(t *testing.T) {
-	mockStatusRepo := &StatusMockRepo{}
-	mockObservationRepo := &ObservationsMockRepo{
-		GetObservationCodesFunc: func() ([]string, error) {
-			return nil, fmt.Errorf("observation database error")
+	mockRepo := &CodesMockRepo{
+		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
+			return nil, fmt.Errorf("database connection failed")
 		},
 	}
-	mockOnsetRepo := &OnsetsMockRepo{}
 
 	record := CaseValidationRecord{
 		Context: &BatchValidationContext{
-			StatusRepo:      mockStatusRepo,
-			ObservationRepo: mockObservationRepo,
-			OnsetRepo:       mockOnsetRepo,
+			ValueSetsRepo: mockRepo,
 		},
 	}
 
-	err := record.fetchCodeInfos()
+	err := record.fetchObservationCodes()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to retrieve observation codes")
-	assert.Contains(t, err.Error(), "observation database error")
+	assert.Contains(t, err.Error(), "error retrieving observation codes")
+	assert.Contains(t, err.Error(), "database connection failed")
 }
 
 func Test_fetchCodeInfos_OnsetCodesError(t *testing.T) {
-	mockStatusRepo := &StatusMockRepo{}
-	mockObservationRepo := &ObservationsMockRepo{}
-	mockOnsetRepo := &OnsetsMockRepo{
-		GetOnsetCodesFunc: func() ([]string, error) {
-			return nil, fmt.Errorf("onset database error")
+	mockRepo := &CodesMockRepo{
+		GetCodesFunc: func(setType repository.ValueSetType) ([]string, error) {
+			return nil, fmt.Errorf("database connection failed")
 		},
 	}
 
 	record := CaseValidationRecord{
 		Context: &BatchValidationContext{
-			StatusRepo:      mockStatusRepo,
-			ObservationRepo: mockObservationRepo,
-			OnsetRepo:       mockOnsetRepo,
+			ValueSetsRepo: mockRepo,
 		},
 	}
 
-	err := record.fetchCodeInfos()
+	err := record.fetchOnsetCodes()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to retrieve onset codes")
-	assert.Contains(t, err.Error(), "onset database error")
+	assert.Contains(t, err.Error(), "error retrieving onset codes")
+	assert.Contains(t, err.Error(), "database connection failed")
 }
 
 func Test_fetchTaskTypeCodes_OK(t *testing.T) {
@@ -1924,17 +1896,14 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 		},
 	}
 	mockContext := BatchValidationContext{
-		CasesRepo:            &mockRepo,
-		ProjectRepo:          &mockRepo,
-		PatientRepo:          &mockPatients,
-		SeqExpRepo:           &mockRepo,
-		OrgRepo:              &mockRepo,
-		StatusRepo:           &StatusMockRepo{},
-		ObservationRepo:      &ObservationsMockRepo{},
-		OnsetRepo:            &OnsetsMockRepo{},
-		ResolutionStatusRepo: &ResolutionStatusMockRepo{},
-		SampleRepo:           &mockSamples,
-		TaskRepo:             &mockRepo,
+		CasesRepo:     &mockRepo,
+		ProjectRepo:   &mockRepo,
+		PatientRepo:   &mockPatients,
+		SeqExpRepo:    &mockRepo,
+		OrgRepo:       &mockRepo,
+		ValueSetsRepo: &CodesMockRepo{},
+		SampleRepo:    &mockSamples,
+		TaskRepo:      &mockRepo,
 	}
 
 	vr, err := validateCaseBatch(&mockContext, []types.CaseBatch{
@@ -1995,17 +1964,14 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		},
 	}
 	mockContext := BatchValidationContext{
-		CasesRepo:            &mockRepo,
-		ProjectRepo:          &mockRepo,
-		PatientRepo:          &mockPatients,
-		SeqExpRepo:           &mockRepo,
-		OrgRepo:              &mockRepo,
-		StatusRepo:           &StatusMockRepo{},
-		ObservationRepo:      &ObservationsMockRepo{},
-		OnsetRepo:            &OnsetsMockRepo{},
-		ResolutionStatusRepo: &ResolutionStatusMockRepo{},
-		SampleRepo:           &mockSamples,
-		TaskRepo:             &mockRepo,
+		CasesRepo:     &mockRepo,
+		ProjectRepo:   &mockRepo,
+		PatientRepo:   &mockPatients,
+		SeqExpRepo:    &mockRepo,
+		OrgRepo:       &mockRepo,
+		ValueSetsRepo: &CodesMockRepo{},
+		SampleRepo:    &mockSamples,
+		TaskRepo:      &mockRepo,
 	}
 	batch := types.CaseBatch{
 		ProjectCode:                "PROJ-1",
@@ -3123,8 +3089,7 @@ func Test_validatePatient_MultiplePatients(t *testing.T) {
 
 func Test_validateCasePatients_NoProband(t *testing.T) {
 	mockContext := &BatchValidationContext{
-		ObservationRepo: &ObservationsMockRepo{},
-		OnsetRepo:       &OnsetsMockRepo{},
+		ValueSetsRepo: &CodesMockRepo{},
 	}
 
 	record := CaseValidationRecord{
@@ -3159,8 +3124,7 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 
 func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 	mockContext := &BatchValidationContext{
-		ObservationRepo: &ObservationsMockRepo{},
-		OnsetRepo:       &OnsetsMockRepo{},
+		ValueSetsRepo: &CodesMockRepo{},
 	}
 
 	record := CaseValidationRecord{
@@ -3204,8 +3168,7 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 
 func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 	mockContext := &BatchValidationContext{
-		ObservationRepo: &ObservationsMockRepo{},
-		OnsetRepo:       &OnsetsMockRepo{},
+		ValueSetsRepo: &CodesMockRepo{},
 	}
 
 	record := CaseValidationRecord{
@@ -3318,8 +3281,7 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 
 func Test_validateCasePatients_WithErrors(t *testing.T) {
 	mockContext := &BatchValidationContext{
-		ObservationRepo: &ObservationsMockRepo{},
-		OnsetRepo:       &OnsetsMockRepo{},
+		ValueSetsRepo: &CodesMockRepo{},
 	}
 
 	record := CaseValidationRecord{

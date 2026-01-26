@@ -16,22 +16,19 @@ import (
 )
 
 type BatchValidationContext struct {
-	BatchRepo            repository.BatchDAO
-	CasesRepo            repository.CasesDAO
-	DocRepo              repository.DocumentsDAO
-	FamilyRepo           repository.FamilyDAO
-	ObsCat               repository.ObservationCategoricalDAO
-	OrgRepo              repository.OrganizationDAO
-	PatientRepo          repository.PatientsDAO
-	ProjectRepo          repository.ProjectDAO
-	SampleRepo           repository.SamplesDAO
-	SeqExpRepo           repository.SequencingExperimentDAO
-	TaskRepo             repository.TaskDAO
-	ObservationRepo      repository.ObservationsDAO
-	OnsetRepo            repository.OnsetsDAO
-	StatusRepo           repository.StatusDAO
-	ResolutionStatusRepo repository.ResolutionStatusDAO
-	S3FS                 utils.FileMetadataGetter
+	BatchRepo     repository.BatchDAO
+	CasesRepo     repository.CasesDAO
+	DocRepo       repository.DocumentsDAO
+	FamilyRepo    repository.FamilyDAO
+	ObsCat        repository.ObservationCategoricalDAO
+	OrgRepo       repository.OrganizationDAO
+	PatientRepo   repository.PatientsDAO
+	ProjectRepo   repository.ProjectDAO
+	SampleRepo    repository.SamplesDAO
+	SeqExpRepo    repository.SequencingExperimentDAO
+	TaskRepo      repository.TaskDAO
+	ValueSetsRepo repository.ValueSetsDAO
+	S3FS          utils.FileMetadataGetter
 }
 
 func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
@@ -42,22 +39,19 @@ func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
 	}
 
 	return &BatchValidationContext{
-		BatchRepo:            repository.NewBatchRepository(db),
-		OrgRepo:              repository.NewOrganizationRepository(db),
-		PatientRepo:          repository.NewPatientsRepository(db),
-		ProjectRepo:          repository.NewProjectRepository(db),
-		SampleRepo:           repository.NewSamplesRepository(db),
-		SeqExpRepo:           repository.NewSequencingExperimentRepository(db),
-		ObservationRepo:      repository.NewObservationsRepository(db),
-		OnsetRepo:            repository.NewOnsetsRepository(db),
-		StatusRepo:           repository.NewStatusRepository(db),
-		ResolutionStatusRepo: repository.NewResolutionStatusRepository(db),
-		CasesRepo:            repository.NewCasesRepository(db),
-		DocRepo:              repository.NewDocumentsRepository(db),
-		FamilyRepo:           repository.NewFamilyRepository(db),
-		ObsCat:               repository.NewObservationCategoricalRepository(db),
-		TaskRepo:             repository.NewTaskRepository(db),
-		S3FS:                 s3fs,
+		BatchRepo:     repository.NewBatchRepository(db),
+		OrgRepo:       repository.NewOrganizationRepository(db),
+		PatientRepo:   repository.NewPatientsRepository(db),
+		ProjectRepo:   repository.NewProjectRepository(db),
+		SampleRepo:    repository.NewSamplesRepository(db),
+		SeqExpRepo:    repository.NewSequencingExperimentRepository(db),
+		ValueSetsRepo: repository.NewValueSetsRepository(db),
+		CasesRepo:     repository.NewCasesRepository(db),
+		DocRepo:       repository.NewDocumentsRepository(db),
+		FamilyRepo:    repository.NewFamilyRepository(db),
+		ObsCat:        repository.NewObservationCategoricalRepository(db),
+		TaskRepo:      repository.NewTaskRepository(db),
+		S3FS:          s3fs,
 	}, nil
 }
 
