@@ -1,9 +1,11 @@
 import { ReactNode, useCallback, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import { ApiError, CaseEntity, ExpandedGermlineSNVOccurrence } from '@/api/api';
+import { SELECTED_VARIANT_PARAM } from '@/apps/case/src/entity/variants/constants';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import { Button } from '@/components/base/shadcn/button';
 import {
@@ -35,6 +37,7 @@ type InterpretationDialogButtonProps = {
   transcriptId?: string;
   handleSaveCallback?: () => void;
   renderTrigger: (handleOpen: () => void) => ReactNode;
+  isCreation?: boolean;
 };
 
 // Temporary flag to switch between somatic and germline interpretation forms
@@ -57,6 +60,7 @@ function InterpretationDialog({
   transcriptId,
   handleSaveCallback,
   renderTrigger,
+  isCreation = false,
 }: InterpretationDialogButtonProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
@@ -111,6 +115,14 @@ function InterpretationDialog({
     shouldRetryOnError: false,
   });
 
+  const [_, setSearchParams] = useSearchParams();
+  const handleClickSuccessBtn = () => {
+    setSearchParams(prev => {
+      prev.set(SELECTED_VARIANT_PARAM, locusId);
+      return prev;
+    });
+  };
+
   const saveInterpretation = useSWRMutation<
     Interpretation,
     any,
@@ -121,12 +133,21 @@ function InterpretationDialog({
     onSuccess: () => {
       setOpen(false);
       handleSaveCallback && handleSaveCallback();
-      toast(t('variant.interpretation_form.notification.success'));
+      isCreation
+        ? toast.success(t('variant.interpretation_form.notification.success.title'), {
+            action: {
+              label: t('variant.interpretation_form.notification.success.button'),
+              onClick: handleClickSuccessBtn,
+            },
+            closeButton: true,
+          })
+        : toast.success(t('variant.interpretation_form.notification.success'));
     },
     onError: () => {
       setOpen(false);
-      toast(t('variant.interpretation_form.notification.error.title'), {
+      toast.error(t('variant.interpretation_form.notification.error.title'), {
         description: t('variant.interpretation_form.notification.error.text'),
+        closeButton: true,
       });
     },
   });
