@@ -995,7 +995,7 @@
       "notification": {
         "success": {
           "title": "Interprétation enrgistrée",
-          "button": "Voir interprétation"
+          "button": "Voir l'interprétation"
         },
         "error": {
           "title": "La sauvegarde d'interprétation a échouée",
