@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 
-import { Field, FieldLabel } from '@/components/base/shadcn/field';
+import { Field } from '@/components/base/shadcn/field';
 import { Input } from '@/components/base/shadcn/input';
+import { Label } from '@/components/base/shadcn/label';
 import { useI18n } from '@/components/hooks/i18n';
 import { useDebounce } from '@/components/hooks/useDebounce';
 
@@ -20,8 +21,8 @@ const PhenotypeCasesFilter = ({ onChange }: PhenotypeCasesFilterProps) => {
   }, [debouncedValue]);
 
   return (
-    <Field className="w-full min-w-[250px] max-w-[385px] gap-2">
-      <FieldLabel>{t('variant_entity.cases.other_table.filters.search_hpo')}</FieldLabel>
+    <Field className="w-full min-w-[250px] max-w-[385px]">
+      <Label>{t('variant_entity.cases.other_table.filters.search_hpo')}</Label>
       <Input
         onChange={value => setSearchValue(value.target.value)}
         placeholder={t('variant_entity.cases.other_table.filters.search_hpo_placeholder')}
