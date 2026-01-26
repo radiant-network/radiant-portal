@@ -1525,8 +1525,8 @@
     },
     "cases": {
       "title": "{{count}} Cas",
-      "tab": "Patients",
-      "description": "Cas cliniques portant cette variante",
+      "tab": "Cas",
+      "description": "Cas du réseau porteurs de ce variant, répartis par statut d'interprétation.",
       "affected_status": {
         "affected": "Affecté",
         "non_affected": "Non affecté",
