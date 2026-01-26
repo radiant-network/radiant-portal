@@ -839,12 +839,12 @@ func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string,
 func (cr *CaseValidationRecord) validateCodes() {
 	if !slices.Contains(cr.StatusCodes, cr.Case.StatusCode) {
 		path := formatPath(cr, "")
-		message := fmt.Sprintf("%s status code %q is not a valid status code.", cr.formatCasesInvalidFieldMessage("status_code"), cr.Case.StatusCode)
+		message := fmt.Sprintf("%s status code %q is not a valid status code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("status_code"), cr.Case.StatusCode, strings.Join(cr.StatusCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
 	}
 	if !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
 		path := formatPath(cr, "")
-		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code.", cr.formatCasesInvalidFieldMessage("resolution_status_code"), cr.Case.ResolutionStatusCode)
+		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("resolution_status_code"), cr.Case.ResolutionStatusCode, strings.Join(cr.ResolutionStatusCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
 	}
 }

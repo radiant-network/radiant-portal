@@ -21,7 +21,7 @@ ordering_organization_code = "CHUSJ"
 [[cases]]
 submitter_case_id = "CASE-12345"
 type = "germline"
-status_code = "in_progress"
+status_code = "not_in_progress"  # CASE-002 invalid status_code
 project_code = "non_existing_project"  # CASE-003 project not known
 diagnostic_lab_code = "LDM-CHUSJJ" # CASE-004 diagnostic lab not known
 primary_condition_code_system = "MONDO"
@@ -29,7 +29,7 @@ primary_condition_value = "MONDO:0700092!@#$$#@%^^%$^%" # CASE-002 primary condi
 priority_code = "routine"
 category_code = "postnatal"
 analysis_code = "WGAA" # CASE-005 analysis code not known
-resolution_status_code = "unsolved"
+resolution_status_code = "unresolved"  # CASE-002 ivalid resolution_status_code
 note = "test case note"
 ordering_physician = "Dr. Testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt"  # CASE-002 size error
 ordering_organization_code = "CHUSJJ" # CASE-006 ordering organization not known

@@ -608,6 +608,16 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 			},
 			{
 				Code:    "CASE-002",
+				Message: "Invalid field status_code for case 1. Reason: status code \"not_in_progress\" is not a valid status code. Valid values [completed, draft, incomplete, in_progress, revoke, submitted, unknown]",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-002",
+				Message: "Invalid field resolution_status_code for case 1. Reason: resolution status code \"unresolved\" is not a valid resolution status code. Valid values [inconclusive, solved, unsolved]",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-002",
 				Message: "Invalid field primary_condition_value for case 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
 				Path:    "case[1]",
 			},
