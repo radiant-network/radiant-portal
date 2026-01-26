@@ -992,10 +992,10 @@
         "exon": "Exon"
       },
       "notification": {
-        "success": "Interpretation successfully saved",
+        "success": { "title": "Interpretation saved", "button": "View interpretation" },
         "error": {
           "title": "Failed to save interpretation",
-          "text": "An error has occurred and we were unable to save your interpretation. Please try again."
+          "text": "Failed to save interpretation. Please try again."
         }
       },
       "generic": {

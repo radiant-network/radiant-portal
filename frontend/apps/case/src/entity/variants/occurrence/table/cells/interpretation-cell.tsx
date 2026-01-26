@@ -46,6 +46,7 @@ function InterpretationCell({ occurrence }: InterpretationCellProps) {
             <TooltipContent>{t('variant.interpretation.tooltip.add')}</TooltipContent>
           </Tooltip>
         )}
+        isCreation
       />
     );
   }

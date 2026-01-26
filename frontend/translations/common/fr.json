@@ -993,10 +993,13 @@
         "exon": "Exon"
       },
       "notification": {
-        "success": "Interprétation sauvegardée avec succès",
+        "success": {
+          "title": "Interprétation enregistrée",
+          "button": "Voir l'interprétation"
+        },
         "error": {
           "title": "La sauvegarde d'interprétation a échouée",
-          "text": "Une erreur s'est produite et nous n'avons pas été en mesure de sauvegarder votre interprétation. Veuillez réessayer."
+          "text": "L’enregistrement de l’interprétation a échoué. Veuillez réessayer."
         }
       },
       "generic": {
