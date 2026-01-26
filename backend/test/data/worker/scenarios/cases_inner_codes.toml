@@ -58,7 +58,7 @@ ordering_organization_code = "CHUSJ"
     format_code = "cram"
     hash = "d57f21e6a273781dbf8b7657940f3b03333"  # DOCUMENT-006 incorrect hash
     name = "NA12891.recal.cram"
-    size = 11  # DOCUMENT-006 incorrect size
+    size = 0  # DOCUMENT-006 incorrect size
     url = "s3://test-bucket/existing_document.recal.crai"
 
   [[cases.tasks]] # TASK-004 missing output documents

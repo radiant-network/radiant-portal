@@ -60,6 +60,13 @@ func TestPostCaseBatchHandler_Success(t *testing.T) {
 					"name": "output.vcf",
 					"size": 1024,
 					"url": "https://example.com/output.vcf"
+				}, {
+					"data_category_code": "variant",
+					"data_type_code": "vcf",
+					"format_code": "vcf",
+					"name": "output.vcf",
+					"size": 0,
+					"url": "https://another-example.com/output.vcf"
 				}],
 				"pipeline_version": "v1.0.0"
 			}]
