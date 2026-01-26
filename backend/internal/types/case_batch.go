@@ -77,7 +77,7 @@ type OutputDocumentBatch struct {
 	FormatCode       string `json:"format_code" toml:"format_code" binding:"required"`
 	Hash             string `json:"hash,omitempty" toml:"hash"`
 	Name             string `json:"name" toml:"name" binding:"required"`
-	Size             int64  `json:"size" toml:"size" binding:"required"`
+	Size             *int64 `json:"size" toml:"size" binding:"required"`
 	Url              string `json:"url" toml:"url" binding:"required"`
 }
 

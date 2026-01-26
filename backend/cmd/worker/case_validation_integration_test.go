@@ -40,7 +40,7 @@ func createDocumentsForBatch(ctx context.Context, client *minio.Client, cases []
 	for _, c := range cases {
 		for _, task := range c.Tasks {
 			for _, out := range task.OutputDocuments {
-				content := bytes.Repeat([]byte("a"), int(out.Size))
+				content := bytes.Repeat([]byte("a"), int(*out.Size))
 				location, _ := utils.ExtractS3BucketAndKey(out.Url)
 				_ = createDocument(ctx, client, location.Bucket, location.Key, content)
 				metadata, _ := store.GetMetadata(out.Url)
@@ -536,7 +536,8 @@ func Test_ProcessBatch_Case_validateDocument_Error_SizeNotMatch(t *testing.T) {
 		payload := createBaseCasePayload("validateDocument_Error_SizeNotMatch")
 		createDocumentsForBatch(context, client, payload)
 
-		payload[0].Tasks[0].OutputDocuments[0].Size = 42
+		size := int64(42)
+		payload[0].Tasks[0].OutputDocuments[0].Size = &size
 
 		payloadBytes, _ := json.Marshal(payload)
 		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")

@@ -260,6 +260,17 @@ func (m *StatusMockRepo) GetStatusCodes() ([]string, error) {
 	return []string{"in_progress", "incomplete", "completed", "unknown"}, nil
 }
 
+type ResolutionStatusMockRepo struct {
+	GetResolutionStatusCodesFunc func() ([]string, error)
+}
+
+func (m *ResolutionStatusMockRepo) GetResolutionStatusCodes() ([]string, error) {
+	if m.GetResolutionStatusCodesFunc != nil {
+		return m.GetResolutionStatusCodes()
+	}
+	return []string{"solved", "unsolved", "inconclusive"}, nil
+}
+
 type SamplesMockRepo struct {
 	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(organizationCode string, submitterSampleId string) (*types.Sample, error)
 }
@@ -645,13 +656,15 @@ func Test_fetchCodeInfos_OK(t *testing.T) {
 	mockStatusRepo := &StatusMockRepo{}
 	mockObservationRepo := &ObservationsMockRepo{}
 	mockOnsetRepo := &OnsetsMockRepo{}
+	mockResStatusRepo := &ResolutionStatusMockRepo{}
 
 	record := CaseValidationRecord{
 		Context: &BatchValidationContext{
-			StatusRepo:      mockStatusRepo,
-			ObservationRepo: mockObservationRepo,
-			OnsetRepo:       mockOnsetRepo,
-			TaskRepo:        &CaseValidationMockRepo{},
+			StatusRepo:           mockStatusRepo,
+			ObservationRepo:      mockObservationRepo,
+			OnsetRepo:            mockOnsetRepo,
+			ResolutionStatusRepo: mockResStatusRepo,
+			TaskRepo:             &CaseValidationMockRepo{},
 		},
 	}
 
@@ -1426,12 +1439,30 @@ func Test_validateStatusCode_Valid(t *testing.T) {
 	cr := &CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 		Case: types.CaseBatch{
-			StatusCode: "in_progress",
+			StatusCode:           "in_progress",
+			ResolutionStatusCode: "unsolved",
 		},
-		StatusCodes: []string{"in_progress", "incomplete", "completed"},
+		StatusCodes:           []string{"in_progress", "revoke", "completed"},
+		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
 	}
 
-	cr.validateStatusCode()
+	cr.validateCodes()
+
+	assert.Empty(t, cr.Errors)
+}
+
+func Test_validateResolutionStatusCode_Valid(t *testing.T) {
+	cr := &CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			StatusCode:           "in_progress",
+			ResolutionStatusCode: "unsolved",
+		},
+		StatusCodes:           []string{"in_progress", "revoke", "completed"},
+		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
+	}
+
+	cr.validateCodes()
 
 	assert.Empty(t, cr.Errors)
 }
@@ -1440,16 +1471,38 @@ func Test_validateStatusCode_Invalid(t *testing.T) {
 	cr := &CaseValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 		Case: types.CaseBatch{
-			StatusCode: "unknown_status",
+			StatusCode:           "unknown_status",
+			ResolutionStatusCode: "unsolved",
 		},
-		StatusCodes: []string{"in_progress", "revoke", "completed"},
+		StatusCodes:           []string{"in_progress", "revoke", "completed"},
+		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
 	}
 
-	cr.validateStatusCode()
+	cr.validateCodes()
 
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code for case 0")
 	assert.Contains(t, cr.Errors[0].Message, "status code \"unknown_status\" is not a valid status code")
+	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
+	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+}
+
+func Test_validateResolutionStatusCode_Invalid(t *testing.T) {
+	cr := &CaseValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Index: 0},
+		Case: types.CaseBatch{
+			StatusCode:           "in_progress",
+			ResolutionStatusCode: "nan",
+		},
+		StatusCodes:           []string{"in_progress", "revoke", "completed"},
+		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
+	}
+
+	cr.validateCodes()
+
+	assert.Len(t, cr.Errors, 1)
+	assert.Contains(t, cr.Errors[0].Message, "Invalid field resolution_status_code for case 0")
+	assert.Contains(t, cr.Errors[0].Message, "resolution status code \"nan\" is not a valid resolution status code")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
 	assert.Equal(t, "case[0]", cr.Errors[0].Path)
 }
@@ -1477,6 +1530,7 @@ func Test_validateCase_Valid(t *testing.T) {
 		OrderingOrganizationID: &orderingOrgID,
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed", "unknown"},
+		ResolutionStatusCodes:  []string{"solved", "unsolved", "unknown"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:            "CASE-1",
 			StatusCode:                 "completed",
@@ -1485,7 +1539,7 @@ func Test_validateCase_Valid(t *testing.T) {
 			OrderingOrganizationCode:   "LAB-2",
 			PrimaryConditionCodeSystem: "HPO",
 			PrimaryConditionValue:      "HP:0001234",
-			ResolutionStatusCode:       "resolved",
+			ResolutionStatusCode:       "solved",
 			Note:                       "Test note",
 			OrderingPhysician:          "Dr. Smith",
 		},
@@ -1516,10 +1570,12 @@ func Test_validateCase_MissingProject(t *testing.T) {
 		OrderingOrganizationID: &orderingOrgID,
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed"},
+		ResolutionStatusCodes:  []string{"solved"},
 		Case: types.CaseBatch{
-			SubmitterCaseId: "CASE-1",
-			StatusCode:      "completed",
-			ProjectCode:     "UNKNOWN-PROJ",
+			SubmitterCaseId:      "CASE-1",
+			StatusCode:           "completed",
+			ResolutionStatusCode: "solved",
+			ProjectCode:          "UNKNOWN-PROJ",
 		},
 	}
 
@@ -1552,10 +1608,12 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 		OrderingOrganizationID: &orderingOrgID,
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed"},
+		ResolutionStatusCodes:  []string{"solved"},
 		Case: types.CaseBatch{
-			SubmitterCaseId:   "CASE-1",
-			StatusCode:        "completed",
-			DiagnosticLabCode: "UNKNOWN-LAB",
+			SubmitterCaseId:      "CASE-1",
+			StatusCode:           "completed",
+			ResolutionStatusCode: "solved",
+			DiagnosticLabCode:    "UNKNOWN-LAB",
 		},
 	}
 
@@ -1587,10 +1645,12 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 		OrderingOrganizationID: &orderingOrgID,
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed"},
+		ResolutionStatusCodes:  []string{"solved"},
 		Case: types.CaseBatch{
-			SubmitterCaseId: "CASE-1",
-			StatusCode:      "completed",
-			AnalysisCode:    "UNKNOWN-ANALYSIS",
+			SubmitterCaseId:      "CASE-1",
+			StatusCode:           "completed",
+			ResolutionStatusCode: "solved",
+			AnalysisCode:         "UNKNOWN-ANALYSIS",
 		},
 	}
 
@@ -1622,9 +1682,11 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 		OrderingOrganizationID: nil,
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed"},
+		ResolutionStatusCodes:  []string{"solved"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:          "CASE-1",
 			StatusCode:               "completed",
+			ResolutionStatusCode:     "solved",
 			OrderingOrganizationCode: "UNKNOWN-ORG",
 		},
 	}
@@ -1658,9 +1720,11 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 		OrderingOrganizationID: &orderingOrgID,
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed", "pending"},
+		ResolutionStatusCodes:  []string{"solved"},
 		Case: types.CaseBatch{
-			SubmitterCaseId: "CASE-1",
-			StatusCode:      "invalid_status",
+			SubmitterCaseId:      "CASE-1",
+			StatusCode:           "invalid_status",
+			ResolutionStatusCode: "solved",
 		},
 	}
 
@@ -1692,10 +1756,12 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 		OrderingOrganizationID: &orderingOrgID,
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed"},
+		ResolutionStatusCodes:  []string{"solved"},
 		Case: types.CaseBatch{
-			SubmitterCaseId: "CASE-1",
-			StatusCode:      "completed",
-			Note:            strings.Repeat("a", 1001),
+			SubmitterCaseId:      "CASE-1",
+			StatusCode:           "completed",
+			ResolutionStatusCode: "solved",
+			Note:                 strings.Repeat("a", 1001),
 		},
 	}
 
@@ -1815,6 +1881,7 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 		OrderingOrganizationID: &orderingOrgID,
 		SubmitterCaseID:        "",
 		StatusCodes:            []string{"completed", "unknown"},
+		ResolutionStatusCodes:  []string{"solved"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:            "CASE-1",
 			StatusCode:                 "completed",
@@ -1823,7 +1890,7 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 			OrderingOrganizationCode:   "LAB-2",
 			PrimaryConditionCodeSystem: "HPO",
 			PrimaryConditionValue:      "HP:0001234",
-			ResolutionStatusCode:       "resolved",
+			ResolutionStatusCode:       "solved",
 			Note:                       "Test note",
 			OrderingPhysician:          "Dr. Smith",
 		},
@@ -1862,16 +1929,17 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 		},
 	}
 	mockContext := BatchValidationContext{
-		CasesRepo:       &mockRepo,
-		ProjectRepo:     &mockRepo,
-		PatientRepo:     &mockPatients,
-		SeqExpRepo:      &mockRepo,
-		OrgRepo:         &mockRepo,
-		StatusRepo:      &StatusMockRepo{},
-		ObservationRepo: &ObservationsMockRepo{},
-		OnsetRepo:       &OnsetsMockRepo{},
-		SampleRepo:      &mockSamples,
-		TaskRepo:        &mockRepo,
+		CasesRepo:            &mockRepo,
+		ProjectRepo:          &mockRepo,
+		PatientRepo:          &mockPatients,
+		SeqExpRepo:           &mockRepo,
+		OrgRepo:              &mockRepo,
+		StatusRepo:           &StatusMockRepo{},
+		ObservationRepo:      &ObservationsMockRepo{},
+		OnsetRepo:            &OnsetsMockRepo{},
+		ResolutionStatusRepo: &ResolutionStatusMockRepo{},
+		SampleRepo:           &mockSamples,
+		TaskRepo:             &mockRepo,
 	}
 
 	vr, err := validateCaseBatch(&mockContext, []types.CaseBatch{
@@ -1881,6 +1949,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 			SubmitterCaseId:            "CASE-1",
 			Type:                       "germline",
 			StatusCode:                 "completed",
+			ResolutionStatusCode:       "solved",
 			OrderingOrganizationCode:   "LAB-1",
 			DiagnosticLabCode:          "LAB-2",
 			PrimaryConditionCodeSystem: "MONDO",
@@ -1931,16 +2000,17 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		},
 	}
 	mockContext := BatchValidationContext{
-		CasesRepo:       &mockRepo,
-		ProjectRepo:     &mockRepo,
-		PatientRepo:     &mockPatients,
-		SeqExpRepo:      &mockRepo,
-		OrgRepo:         &mockRepo,
-		StatusRepo:      &StatusMockRepo{},
-		ObservationRepo: &ObservationsMockRepo{},
-		OnsetRepo:       &OnsetsMockRepo{},
-		SampleRepo:      &mockSamples,
-		TaskRepo:        &mockRepo,
+		CasesRepo:            &mockRepo,
+		ProjectRepo:          &mockRepo,
+		PatientRepo:          &mockPatients,
+		SeqExpRepo:           &mockRepo,
+		OrgRepo:              &mockRepo,
+		StatusRepo:           &StatusMockRepo{},
+		ObservationRepo:      &ObservationsMockRepo{},
+		OnsetRepo:            &OnsetsMockRepo{},
+		ResolutionStatusRepo: &ResolutionStatusMockRepo{},
+		SampleRepo:           &mockSamples,
+		TaskRepo:             &mockRepo,
 	}
 	batch := types.CaseBatch{
 		ProjectCode:                "PROJ-1",
@@ -1948,6 +2018,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		SubmitterCaseId:            "CASE-1",
 		Type:                       "germline",
 		StatusCode:                 "in_progress",
+		ResolutionStatusCode:       "solved",
 		OrderingOrganizationCode:   "LAB-1",
 		DiagnosticLabCode:          "LAB-2",
 		PrimaryConditionCodeSystem: "MONDO",
@@ -4288,13 +4359,14 @@ func Test_validateExistingDocument_IdenticalMatch(t *testing.T) {
 		Context:              &mockContext,
 	}
 
+	size := int64(42)
 	batchDoc := types.OutputDocumentBatch{
 		DataCategoryCode: "FOO",
 		DataTypeCode:     "BAR",
 		FormatCode:       ".foobar",
 		Hash:             "f00bar",
 		Name:             "FooBar Document",
-		Size:             42,
+		Size:             &size,
 		Url:              "s3://foo/bar",
 	}
 
@@ -4326,13 +4398,14 @@ func Test_validateExistingDocument_PartialMatch(t *testing.T) {
 		Context:              &mockContext,
 	}
 
+	size := int64(42)
 	batchDoc := types.OutputDocumentBatch{
 		DataCategoryCode: "NOTFOO",
 		DataTypeCode:     "BAR",
 		FormatCode:       ".foobar",
 		Hash:             "f00bar",
 		Name:             "FooBar Document",
-		Size:             42,
+		Size:             &size,
 		Url:              "s3://foo/bar",
 	}
 
@@ -4552,12 +4625,13 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 			Context:              &mockContext,
 		}
 
+		size := int64(11)
 		doc := types.OutputDocumentBatch{
 			Name:             "Foo Bar",
 			DataCategoryCode: "foobar",
 			DataTypeCode:     "foo",
 			FormatCode:       "bar",
-			Size:             11,
+			Size:             &size,
 			Url:              "s3://fake-enterprise-medical-records-storage-bucket-na-east-1/environment/production/validated-records/patient-metadata/2026/01/22/batch-uuid-9842-adfa-1123-lkjh/validation_report_full_final_version_v2_alpha_release.parquet", // Validates long URLs are accepted
 			Hash:             "5eb63bbbe01eeed093cb22bb8f5acdc3",
 		}
@@ -4598,12 +4672,13 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 			Context:              &mockContext,
 		}
 
+		size := int64(12)
 		doc := types.OutputDocumentBatch{
 			Name:             "Foo Bar",
 			DataCategoryCode: "foobar",
 			DataTypeCode:     "foo",
 			FormatCode:       "bar",
-			Size:             12,
+			Size:             &size,
 			Url:              "s3://foo/bar.txt",
 			Hash:             "5eb63bbbe01eeed093cb22bb8f5acdc3",
 		}
@@ -4644,12 +4719,13 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 			Context:              &mockContext,
 		}
 
+		size := int64(11)
 		doc := types.OutputDocumentBatch{
 			Name:             "Foo Bar",
 			DataCategoryCode: "foobar",
 			DataTypeCode:     "foo",
 			FormatCode:       "bar",
-			Size:             11,
+			Size:             &size,
 			Url:              "s3://foo/bar.txt",
 			Hash:             "5eb63bbbe01eeed093cb22bb8f5ac",
 		}
@@ -4690,12 +4766,13 @@ func Test_validateFileMetadata_OptionalHash(t *testing.T) {
 			Context:              &mockContext,
 		}
 
+		size := int64(11)
 		doc := types.OutputDocumentBatch{
 			Name:             "Foo Bar",
 			DataCategoryCode: "foobar",
 			DataTypeCode:     "foo",
 			FormatCode:       "bar",
-			Size:             11,
+			Size:             &size,
 			Url:              "s3://foo/bar.txt",
 			Hash:             "",
 		}

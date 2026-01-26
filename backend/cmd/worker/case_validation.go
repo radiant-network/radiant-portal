@@ -135,10 +135,11 @@ type CaseValidationRecord struct {
 	DiagnosisLabID         *int
 
 	// Codes
-	StatusCodes      []string
-	ObservationCodes []string
-	OnsetCodes       []string
-	TaskTypeCodes    []string
+	StatusCodes           []string
+	ObservationCodes      []string
+	OnsetCodes            []string
+	TaskTypeCodes         []string
+	ResolutionStatusCodes []string
 
 	OutputDocuments map[string]struct{}
 
@@ -216,6 +217,15 @@ func (r *CaseValidationRecord) fetchOnsetCodes() error {
 	return nil
 }
 
+func (r *CaseValidationRecord) fetchResolutionStatusCodes() error {
+	rsCodes, err := r.Context.ResolutionStatusRepo.GetResolutionStatusCodes()
+	if err != nil {
+		return fmt.Errorf("error retrieving resolution status codes: %v", err)
+	}
+	r.ResolutionStatusCodes = rsCodes
+	return nil
+}
+
 func (r *CaseValidationRecord) fetchCodeInfos() error {
 	if err := r.fetchStatusCodes(); err != nil {
 		return fmt.Errorf("failed to retrieve status codes: %w", err)
@@ -228,6 +238,9 @@ func (r *CaseValidationRecord) fetchCodeInfos() error {
 	}
 	if err := r.fetchTaskTypeCodes(); err != nil {
 		return fmt.Errorf("failed to retrieve task type codes: %w", err)
+	}
+	if err := r.fetchResolutionStatusCodes(); err != nil {
+		return fmt.Errorf("failed to retrieve resolution status codes: %w", err)
 	}
 	return nil
 }
@@ -823,10 +836,15 @@ func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string,
 	cr.validateTextLength(path, value, CaseInvalidField, message, maxLength)
 }
 
-func (cr *CaseValidationRecord) validateStatusCode() {
+func (cr *CaseValidationRecord) validateCodes() {
 	if !slices.Contains(cr.StatusCodes, cr.Case.StatusCode) {
 		path := formatPath(cr, "")
 		message := fmt.Sprintf("%s status code %q is not a valid status code.", cr.formatCasesInvalidFieldMessage("status_code"), cr.Case.StatusCode)
+		cr.addErrors(message, CaseInvalidField, path)
+	}
+	if !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
+		path := formatPath(cr, "")
+		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code.", cr.formatCasesInvalidFieldMessage("resolution_status_code"), cr.Case.ResolutionStatusCode)
 		cr.addErrors(message, CaseInvalidField, path)
 	}
 }
@@ -870,7 +888,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 	if cr.Case.SubmitterCaseId != "" {
 		cr.validateCaseField(cr.Case.SubmitterCaseId, "submitter_case_id", path, ExternalIdRegexpCompiled, TextMaxLength, false)
 	}
-	cr.validateStatusCode()
+	cr.validateCodes()
 	cr.validateCaseField(cr.Case.PrimaryConditionCodeSystem, "primary_condition_code_system", path, TextRegExpCompiled, TextMaxLength, false) // TODO: validate regex
 	cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextMaxLength, false)            // TODO: validate regex
 	cr.validateCaseField(cr.Case.ResolutionStatusCode, "resolution_status_code", path, TextRegExpCompiled, TextMaxLength, false)              // TODO: validate regex
@@ -1032,8 +1050,17 @@ func (cr *CaseValidationRecord) validateDocumentExists(new *types.OutputDocument
 	check("name", new.Name, existing.Name)
 	check("data_type_code", new.DataTypeCode, existing.DataTypeCode)
 	check("data_category_code", new.DataCategoryCode, existing.DataCategoryCode)
-	check("size", new.Size, existing.Size)
 	check("hash", new.Hash, existing.Hash)
+
+	if new.Size == nil {
+		hasDiff = true
+		msg := fmt.Sprintf("A document with same url %s has been found but with a different size (%d <> nil).", new.Url, existing.Size)
+		cr.addWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
+	} else if existing.Size != *new.Size {
+		hasDiff = true
+		msg := fmt.Sprintf("A document with same url %s has been found but with a different size (%d <> %d).", new.Url, existing.Size, *new.Size)
+		cr.addWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
+	}
 
 	if !hasDiff {
 		msg := "Document " + new.Url + " already exists, skipped."
@@ -1079,7 +1106,7 @@ func (cr *CaseValidationRecord) validateDocumentMetadata(doc *types.OutputDocume
 		return nil
 	}
 
-	if metadata.Size != doc.Size {
+	if doc.Size == nil || metadata.Size != *doc.Size {
 		msg := fmt.Sprintf("Document size does not match the actual size of the document %s for case %d - task %d - output document %d.", doc.Url, cr.Index, taskIndex, docIndex)
 		cr.addErrors(msg, DocumentSizeMismatch, path)
 	}
@@ -1121,7 +1148,7 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 			cr.validateDocumentTextField(doc.DataTypeCode, "data_type_code", path, tid, did, TextRegExpCompiled, true)
 			cr.validateDocumentTextField(doc.DataCategoryCode, "data_category_code", path, tid, did, TextRegExpCompiled, true)
 
-			if doc.Size < 0 {
+			if doc.Size != nil && *doc.Size < 0 {
 				msg := fmt.Sprintf(
 					"%s size is invalid, must be non-negative.",
 					cr.formatTaskDocumentFieldErrorMessage("size", cr.Index, tid, did),
@@ -1474,7 +1501,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 				DataCategoryCode: doc.DataCategoryCode,
 				DataTypeCode:     doc.DataTypeCode,
 				FileFormatCode:   doc.FormatCode,
-				Size:             doc.Size,
+				Size:             *doc.Size,
 				Url:              doc.Url,
 				Hash:             doc.Hash,
 			}
