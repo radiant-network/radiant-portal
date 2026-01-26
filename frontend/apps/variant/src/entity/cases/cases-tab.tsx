@@ -4,7 +4,7 @@ import useSWR from 'swr';
 
 import { ApiError, VariantCasesCount, VariantCasesFilters } from '@/api/api';
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
-import { Card, CardContent } from '@/components/base/shadcn/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 import { tabContentClassName } from '@/style';
 import { variantsApi } from '@/utils/api';
@@ -57,6 +57,14 @@ function CasesTab() {
     <div className={tabContentClassName}>
       <CasesFiltersProvider filters={filtersQuery.data} isLoading={filtersQuery.isLoading}>
         <Card>
+          <CardHeader size="sm" className="gap-1">
+            <CardTitle className="text-xl">
+              {t('variant_entity.cases.title', {
+                count: data ? data.count_interpreted + data.count_uninterpreted : 0,
+              })}
+            </CardTitle>
+            <CardDescription className="font-normal">{t('variant_entity.cases.description')}</CardDescription>
+          </CardHeader>
           <CardContent className="space-y-3">
             <TabsNav value={activeTab} onValueChange={setActiveTab}>
               <TabsList>

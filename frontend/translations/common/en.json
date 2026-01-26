@@ -1524,8 +1524,8 @@
     },
     "cases": {
       "title": "{{count}} Cases",
-      "tab": "Patients",
-      "description": "Clinical cases which carry this variant",
+      "tab": "Cases",
+      "description": "Network cases carrying this variant, split by interpretation status.",
       "affected_status": {
         "affected": "Affected",
         "non_affected": "Unaffected",
