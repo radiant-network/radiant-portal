@@ -49,7 +49,7 @@ describe('Sequencing - Batch - Process worker - Seq002', () => {
   });
 
   it('Validate report error count', () => {
-    expect(Object.keys(response.body.report.error)).to.have.lengthOf(3);
+    expect(Object.keys(response.body.report.error)).to.have.lengthOf(5);
   });
 
   it('Validate report sequencing_experiment[0] aliquot 1', () => {
@@ -58,6 +58,14 @@ describe('Sequencing - Batch - Process worker - Seq002', () => {
 
   it('Validate report sequencing_experiment[0] aliquot 2', () => {
     cy.validateReport(response, 'error', 'SEQ-002', apiMessages.ProcessWorkerErrorRegExpAliquot('sequencing_experiment', 'aliquot', 'CQGC', 'S13224', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sequencing_experiment[0]');
+  });
+
+  it('Validate report sequencing_experiment[0] platform_code 1', () => {
+    cy.validateReport(response, 'error', 'SEQ-002', apiMessages.ProcessWorkerErrorTooLong('sequencing_experiment', 'aliquot', 'CQGC', 'S13224', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sequencing_experiment[0]');
+  });
+
+  it('Validate report sequencing_experiment[0] platform_code 2', () => {
+    cy.validateReport(response, 'error', 'SEQ-002', apiMessages.ProcessWorkerErrorRegExpPlatform('sequencing_experiment', 'platform_code', 'CQGC', 'S13224', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sequencing_experiment[0]');
   });
 
   it('Validate report sequencing_experiment[0] run_date', () => {

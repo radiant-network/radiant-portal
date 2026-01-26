@@ -26,6 +26,7 @@ export const apiMessages = {
   ProcessWorkerErrorRegExp: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: does not match the regular expression ^[a-zA-Z0-9\\- .'À-ÿ]*$.`,
   ProcessWorkerErrorRegExpId: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$.`,
   ProcessWorkerErrorRegExpAliquot: (type: string, field: string, code: string, id: string, aliquot: string) => `Invalid field ${field} for ${type} (${code} / ${id} / ${aliquot}). Reason: does not match the regular expression ^[A-Za-z0-9\\-_.]+$.`,
+  ProcessWorkerErrorRegExpPlatform: (type: string, field: string, code: string, id: string, platform: string) => `Invalid field ${field} for ${type} (${code} / ${id} / ${platform}). Reason: does not match the regular expression ^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$.`,
   ProcessWorkerErrorRegExpTissue: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: does not match the regular expression ^[A-Za-z\\- ]+$.`,
   ProcessWorkerErrorTooLong: (type: string, field: string, code: string, id: string, aliquot?: string) => {
     const identifier = aliquot ? `${code} / ${id} / ${aliquot}` : `${code} / ${id}`;

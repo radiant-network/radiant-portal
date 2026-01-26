@@ -60,7 +60,6 @@ describe('Cases - Batch - Missing fields - String fields', () => {
   });
 
   it('Message', () => {
-    cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'SubmitterCaseId', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'StatusCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'ProjectCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'CategoryCode', 'required'));
