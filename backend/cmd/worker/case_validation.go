@@ -1239,20 +1239,19 @@ func (cr *CaseValidationRecord) validateDocumentDuplicate(doc *types.OutputDocum
 	}
 }
 
-func (cr *CaseValidationRecord) validateDocumentCodes(doc *types.OutputDocumentBatch) {
+func (cr *CaseValidationRecord) validateDocumentCodes(doc *types.OutputDocumentBatch, taskIndex int, docIndex int) {
+	path := fmt.Sprintf("case[%d].tasks[%d].output_documents[%d]", cr.Index, taskIndex, docIndex)
+
 	if doc.DataTypeCode != "" && !slices.Contains(cr.DocumentDataTypeCodes, doc.DataTypeCode) {
-		path := fmt.Sprintf("case[%d].document[%s]", cr.Index, doc.Url)
-		msg := fmt.Sprintf("%s data type code %q is not a valid data type code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("data_type_code"), doc.DataTypeCode, strings.Join(cr.DocumentDataTypeCodes, ", "))
+		msg := fmt.Sprintf("%s data type code %q is not a valid data type code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("data_type_code"), doc.DataTypeCode, strings.Join(cr.DocumentDataTypeCodes, ", "))
 		cr.addErrors(msg, DocumentInvalidField, path)
 	}
 	if doc.DataCategoryCode != "" && !slices.Contains(cr.DocumentDataCategoryCodes, doc.DataCategoryCode) {
-		path := fmt.Sprintf("case[%d].document[%s]", cr.Index, doc.Url)
-		msg := fmt.Sprintf("%s data category code %q is not a valid data category code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("data_category_code"), doc.DataCategoryCode, strings.Join(cr.DocumentDataCategoryCodes, ", "))
+		msg := fmt.Sprintf("%s data category code %q is not a valid data category code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("data_category_code"), doc.DataCategoryCode, strings.Join(cr.DocumentDataCategoryCodes, ", "))
 		cr.addErrors(msg, DocumentInvalidField, path)
 	}
 	if doc.FormatCode != "" && !slices.Contains(cr.DocumentFormatCodes, doc.FormatCode) {
-		path := fmt.Sprintf("case[%d].document[%s]", cr.Index, doc.Url)
-		msg := fmt.Sprintf("%s format code %q is not a valid format code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("format_code"), doc.FormatCode, strings.Join(cr.DocumentFormatCodes, ", "))
+		msg := fmt.Sprintf("%s format code %q is not a valid format code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("format_code"), doc.FormatCode, strings.Join(cr.DocumentFormatCodes, ", "))
 		cr.addErrors(msg, DocumentInvalidField, path)
 	}
 }
@@ -1270,12 +1269,9 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 			if doc.Hash != "" {
 				cr.validateDocumentTextField(doc.Hash, "hash", path, tid, did, TextRegExpCompiled, true)
 			}
-			cr.validateDocumentTextField(doc.FormatCode, "format_code", path, tid, did, TextRegExpCompiled, true)
 			cr.validateDocumentTextField(doc.Name, "name", path, tid, did, TextRegExpCompiled, true)
-			cr.validateDocumentTextField(doc.DataTypeCode, "data_type_code", path, tid, did, TextRegExpCompiled, true)
-			cr.validateDocumentTextField(doc.DataCategoryCode, "data_category_code", path, tid, did, TextRegExpCompiled, true)
 
-			cr.validateDocumentCodes(doc)
+			cr.validateDocumentCodes(doc, tid, did)
 			if doc.Size != nil && *doc.Size < 0 {
 				msg := fmt.Sprintf(
 					"%s size is invalid, must be non-negative.",

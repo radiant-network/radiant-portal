@@ -743,7 +743,7 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			},
 			{
 				Code:    "DOCUMENT-001",
-				Message: "Invalid field data_category_code for case 0 - task 0 - output document 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Message: "Invalid field data_category_code for case 0. Reason: data category code \"genomic!@#$%\" is not a valid data category code. Valid values [clinical, genomic].",
 				Path:    "case[0].tasks[0].output_documents[1]",
 			},
 			{

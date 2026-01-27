@@ -1394,6 +1394,11 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 			},
 			{
 				Code:    "SEQ-002",
+				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: value not allowed.",
+				Path:    "sequencing_experiment[1]",
+			},
+			{
+				Code:    "SEQ-002",
 				Message: "Invalid field run_alias for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: field is too long, maximum length allowed is 100.",
 				Path:    "sequencing_experiment[1]",
 			},
