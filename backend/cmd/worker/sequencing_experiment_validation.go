@@ -178,7 +178,7 @@ func (r *SequencingExperimentValidationRecord) validateRunNameField() {
 }
 
 func (r *SequencingExperimentValidationRecord) validateStatusCodeField() error {
-	r.verifyStringField(r.SequencingExperiment.StatusCode, "status_code", TextMaxLength, nil, "", r.getResId(), false)
+	r.verifyStringField(r.SequencingExperiment.StatusCode, "status_code", TextMaxLength, nil, "", r.getResId(), true)
 
 	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetStatus)
 	if err != nil {
@@ -202,7 +202,7 @@ func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error
 }
 
 func (r *SequencingExperimentValidationRecord) validatePlatformCodeField() error {
-	r.verifyStringField(r.SequencingExperiment.PlatformCode, "platform_code", TextMaxLength, TextRegExpCompiled, TextRegExp, r.getResId(), false)
+	r.verifyStringField(r.SequencingExperiment.PlatformCode, "platform_code", TextMaxLength, TextRegExpCompiled, TextRegExp, r.getResId(), true)
 
 	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetPlatform)
 	if err != nil {
@@ -399,15 +399,23 @@ func validateSequencingExperimentRecord(ctx *BatchValidationContext, seqExp type
 	}
 
 	record.validateAliquotField()
-	record.validateExperimentalStrategyCodeField()
-	record.validateSequencingReadTechnologyCodeField()
+	if err := record.validateExperimentalStrategyCodeField(); err != nil {
+		return nil, fmt.Errorf("validate experimental strategy code: %w", err)
+	}
+	if err := record.validateSequencingReadTechnologyCodeField(); err != nil {
+		return nil, fmt.Errorf("validate sequencing read technology code: %w", err)
+	}
 	record.validateSequencingLabCodeField()
-	record.validatePlatformCodeField()
+	if err := record.validatePlatformCodeField(); err != nil {
+		return nil, fmt.Errorf("validate platform code: %w", err)
+	}
 	record.validateCaptureKitField()
 	record.validateRunAliasField()
 	record.validateRunDateField()
 	record.validateRunNameField()
-	record.validateStatusCodeField()
+	if err := record.validateStatusCodeField(); err != nil {
+		return nil, fmt.Errorf("validate status code: %w", err)
+	}
 
 	if err := record.validateSequencingLabCode(); err != nil {
 		return nil, fmt.Errorf("validate sequencing lab code: %w", err)
