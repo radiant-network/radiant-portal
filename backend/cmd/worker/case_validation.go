@@ -938,22 +938,22 @@ func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string,
 func (cr *CaseValidationRecord) validateCodes() {
 	if !slices.Contains(cr.StatusCodes, cr.Case.StatusCode) {
 		path := formatPath(cr, "")
-		message := fmt.Sprintf("%s status code %q is not a valid status code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("status_code"), cr.Case.StatusCode, strings.Join(cr.StatusCodes, ", "))
+		message := fmt.Sprintf("%s status code %q is not a valid status code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("status_code"), cr.Case.StatusCode, strings.Join(cr.StatusCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
 	}
 	if !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
 		path := formatPath(cr, "")
-		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("resolution_status_code"), cr.Case.ResolutionStatusCode, strings.Join(cr.ResolutionStatusCodes, ", "))
+		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("resolution_status_code"), cr.Case.ResolutionStatusCode, strings.Join(cr.ResolutionStatusCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
 	}
 	if !slices.Contains(cr.PriorityCodes, cr.Case.PriorityCode) {
 		path := formatPath(cr, "")
-		message := fmt.Sprintf("%s priority code %q is not a valid priority code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("priority_code"), cr.Case.PriorityCode, strings.Join(cr.PriorityCodes, ", "))
+		message := fmt.Sprintf("%s priority code %q is not a valid priority code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("priority_code"), cr.Case.PriorityCode, strings.Join(cr.PriorityCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
 	}
 	if !slices.Contains(cr.CategoryCodes, cr.Case.CategoryCode) {
 		path := formatPath(cr, "")
-		message := fmt.Sprintf("%s category code %q is not a valid category code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("category_code"), cr.Case.CategoryCode, strings.Join(cr.CategoryCodes, ", "))
+		message := fmt.Sprintf("%s category code %q is not a valid category code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("category_code"), cr.Case.CategoryCode, strings.Join(cr.CategoryCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
 	}
 }
@@ -1022,7 +1022,7 @@ func (cr *CaseValidationRecord) validateTaskTextField(fieldValue, fieldName stri
 func (cr *CaseValidationRecord) validateTaskTypeCode(typeCode string, taskIndex int) {
 	if !slices.Contains(cr.TaskTypeCodes, typeCode) {
 		path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
-		msg := cr.formatTaskFieldErrorMessage("type_code", cr.Index, taskIndex) + " invalid task type code `" + typeCode + "`. Valid codes are: " + strings.Join(cr.TaskTypeCodes, ", ")
+		msg := cr.formatTaskFieldErrorMessage("type_code", cr.Index, taskIndex) + " invalid task type code `" + typeCode + "`. Valid codes are: [" + strings.Join(cr.TaskTypeCodes, ", ") + "]."
 		cr.addErrors(msg+"", TaskInvalidField, path)
 	}
 }

@@ -608,12 +608,22 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field status_code for case 1. Reason: status code \"not_in_progress\" is not a valid status code. Valid values [completed, draft, incomplete, in_progress, revoke, submitted, unknown]",
+				Message: "Invalid field status_code for case 1. Reason: status code \"not_in_progress\" is not a valid status code. Valid values [completed, draft, incomplete, in_progress, revoke, submitted, unknown].",
 				Path:    "case[1]",
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field resolution_status_code for case 1. Reason: resolution status code \"unresolved\" is not a valid resolution status code. Valid values [inconclusive, solved, unsolved]",
+				Message: "Invalid field resolution_status_code for case 1. Reason: resolution status code \"unresolved\" is not a valid resolution status code. Valid values [inconclusive, solved, unsolved].",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-002",
+				Message: "Invalid field priority_code for case 1. Reason: priority code \"not-routine\" is not a valid priority code. Valid values [asap, routine, stat, urgent].",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-002",
+				Message: "Invalid field category_code for case 1. Reason: category code \"not-postnatal\" is not a valid category code. Valid values [postnatal, prenatal].",
 				Path:    "case[1]",
 			},
 			{
@@ -692,6 +702,16 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 				Path:    "case[0].patients[0]",
 			},
 			{
+				Code:    "PATIENT-004",
+				Message: "Invalid field affected_status_code for case 0 - patient 0. Reason: affected status code \"super-affected\" must be in [affected, non_affected, unknown].",
+				Path:    "case[0].patients[0]",
+			},
+			{
+				Code:    "PATIENT-004",
+				Message: "Invalid field relation_to_proband_code for case 0 - patient 0. Reason: relationship to proband code \"not-proband\" must be in [brother, father, mother, proband, sibling, sister].",
+				Path:    "case[0].patients[0]",
+			},
+			{
 				Code:    "OBS-001",
 				Message: "Invalid field system for case 0 - patient 0 - observations_categorical 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
 				Path:    "case[0].patients[0].observations_categorical[0]",
@@ -702,9 +722,19 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 				Path:    "case[0].patients[0].observations_categorical[0]",
 			},
 			{
+				Code:    "CASE-007",
+				Message: "Case 0 must have exactly 1 proband.",
+				Path:    "case[0].patients",
+			},
+			{
 				Code:    "SEQ-007",
 				Message: "Sequencing experiment (CQGC / S13225 / NA128911) does not exist.",
 				Path:    "case[0].sequencing_experiments[0]",
+			},
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, family_variant_calling, somatic_variant_calling, tumor_only_variant_calling, radiant_germline_annotation, exomiser, rnaseq_analysis].",
+				Path:    "case[0].tasks[0]",
 			},
 			{
 				Code:    "TASK-001",
@@ -735,6 +765,21 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 				Code:    "TASK-007",
 				Message: "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both.",
 				Path:    "case[0].tasks[2]",
+			},
+			{
+				Code:    "DOCUMENT-001",
+				Message: "Invalid field data_type_code for case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [alignment, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv].",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-001",
+				Message: "Invalid field data_category_code for case 0. Reason: data category code \"not-genomic\" is not a valid data category code. Valid values [clinical, genomic].",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-001",
+				Message: "Invalid field format_code for case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, pdf, png, tbi, tgz, tsv, txt, vcf].",
+				Path:    "case[0].tasks[0].output_documents[0]",
 			},
 			{
 				Code:    "DOCUMENT-002",
