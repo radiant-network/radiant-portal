@@ -3,25 +3,6 @@ import { PinIcon, PinOffIcon } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
 
-/**
- * @FIXME unused at the time
- * Config for TableColumnDef
- * {
- *   id: 'pinRow',
- *   cell: PinRowCell,
- *   size: 40,
- *   enableResizing: false,
- *   enablePinning: false,
- * },
- *
- * Config for ColumnSettings
- * {
- *   id: 'pinRow',
- *   visible: true,
- *   fixed: true,
- *   pinningPosition: 'left',
- * },
- */
 function PinRowCell({ row }: CellContext<any, any>) {
   return (
     <div className="flex justify-center items-center">

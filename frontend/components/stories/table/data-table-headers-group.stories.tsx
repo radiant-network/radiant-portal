@@ -22,6 +22,7 @@ const defaultMockColumnSettings = createColumnSettings([
     label: 'Pin Row',
     pinningPosition: 'left',
     fixed: true,
+    variant: 'ghost',
   },
   {
     id: 'rowSelection',
@@ -69,6 +70,7 @@ const defaultAdvancedColumnSettings = createColumnSettings([
     label: 'Pin Row',
     fixed: true,
     pinningPosition: 'left',
+    variant: 'ghost',
   },
   {
     id: 'rowSelection',
@@ -259,9 +261,7 @@ export const Default: Story = {
     enableColumnOrdering: true,
     columns: [
       {
-        header: 'Group Left',
-        size: 400,
-        minSize: 200,
+        id: 'actions',
         columns: [
           {
             id: 'pinRow',
@@ -280,6 +280,13 @@ export const Default: Story = {
             enableResizing: false,
             enablePinning: false,
           },
+        ],
+      },
+      {
+        header: 'Group Left',
+        size: 400,
+        minSize: 200,
+        columns: [
           columnHelper.accessor('firstName', {
             cell: info => info.getValue(),
           }),
@@ -332,11 +339,10 @@ export const WithSubgroups: Story = {
     enableColumnOrdering: true,
     columns: [
       {
-        header: 'Group Left',
-        size: 96,
+        id: 'actions',
         columns: [
           columnHelper.group({
-            id: 'sub-group-left',
+            id: 'sub-group-actions',
             columns: [
               {
                 id: 'pinRow',
@@ -355,6 +361,16 @@ export const WithSubgroups: Story = {
                 enableResizing: false,
                 enablePinning: false,
               },
+            ],
+          }),
+        ],
+      },
+      {
+        header: 'Group Left',
+        columns: [
+          columnHelper.group({
+            id: 'sub-group-left',
+            columns: [
               columnHelper.accessor('firstName', {
                 cell: info => info.getValue(),
               }),
