@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 
+	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -64,6 +65,24 @@ func (m *MockSamplesRepository) GetTypeCodes() ([]string, error) {
 		return m.GetTypeCodesFunc()
 	}
 	return nil, nil
+}
+
+type MockValueSetRepository struct {
+	GetCodesFunc func(vsType repository.ValueSetType) ([]string, error)
+}
+
+func (m *MockValueSetRepository) GetCodes(vsType repository.ValueSetType) ([]string, error) {
+	if m.GetCodesFunc != nil {
+		return m.GetCodesFunc(vsType)
+	}
+	switch vsType {
+	case repository.ValueSetSampleType:
+		return []string{"blood", "dna", "rna", "solid_tissue"}, nil
+	case repository.ValueSetHistologyType:
+		return []string{"tumoral", "normal"}, nil
+	default:
+		return []string{}, nil
+	}
 }
 
 func Test_SampleField_Too_Long(t *testing.T) {
@@ -156,28 +175,64 @@ func Test_ValidateTissueSite_Invalid(t *testing.T) {
 
 func Test_ValidateTypeCode_Valid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood"}
-	rec := SampleValidationRecord{Sample: sample}
-	mockSampleRepo := &MockSamplesRepository{
-		GetTypeCodesFunc: func() ([]string, error) {
+	mockValueSetRepo := &MockValueSetRepository{
+		GetCodesFunc: func(vsType repository.ValueSetType) ([]string, error) {
 			return []string{"blood", "dna"}, nil
 		},
 	}
-	rec.validateTypeCode(mockSampleRepo)
+	rec := SampleValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Context: &BatchValidationContext{ValueSetsRepo: mockValueSetRepo}},
+		Sample:               sample,
+	}
+	err := rec.validateTypeCode()
+	assert.NoError(t, err)
 	assert.Empty(t, rec.Errors)
 }
 
 func Test_ValidateTypeCode_Invalid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "invalid_type"}
-	rec := SampleValidationRecord{Sample: sample}
-	mockSampleRepo := &MockSamplesRepository{
-		GetTypeCodesFunc: func() ([]string, error) {
+	mockValueSetRepo := &MockValueSetRepository{
+		GetCodesFunc: func(vsType repository.ValueSetType) ([]string, error) {
 			return []string{"blood", "dna"}, nil
 		},
 	}
-	rec.validateTypeCode(mockSampleRepo)
+	rec := SampleValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Context: &BatchValidationContext{ValueSetsRepo: mockValueSetRepo}},
+		Sample:               sample,
+	}
+	err := rec.validateTypeCode()
+	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
 	assert.Contains(t, rec.Errors[0].Message, "must be one of: blood, dna")
+}
+
+func Test_ValidateHistologyTypeCode_Valid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood", HistologyCode: "normal"}
+	rec := SampleValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Context: &BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}},
+		Sample:               sample,
+	}
+	err := rec.validateHistologyCode()
+	assert.NoError(t, err)
+	assert.Empty(t, rec.Errors)
+}
+
+func Test_ValidateHistologyTypeCode_Invalid(t *testing.T) {
+	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood", HistologyCode: "invalid_histology"}
+	rec := SampleValidationRecord{
+		BaseValidationRecord: BaseValidationRecord{Context: &BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}},
+		Sample:               sample,
+	}
+	err := rec.validateHistologyCode()
+	expected := types.BatchMessage{
+		Code:    SampleInvalidValueCode,
+		Message: "Invalid field histology_code for sample (CHUSJ / S1). Reason: value \"invalid_histology\" must be one of: [tumoral, normal].",
+		Path:    "sample[0].histology_code",
+	}
+	assert.NoError(t, err)
+	assert.Len(t, rec.Errors, 1)
+	assert.Equal(t, expected, rec.Errors[0])
 }
 
 func Test_ValidatePatient_NotFound(t *testing.T) {
@@ -225,7 +280,7 @@ func Test_ValidateParentSample_DifferentPatient(t *testing.T) {
 func Test_ValidateSamplesBatch(t *testing.T) {
 	org := &types.Organization{ID: 1, Code: "CHUSJ"}
 	patient := &types.Patient{ID: 10, SubmitterPatientId: "P1"}
-	existingSampleInDb := &types.Sample{SubmitterSampleId: "S2", TypeCode: "blood", PatientID: 10}
+	existingSampleInDb := &types.Sample{SubmitterSampleId: "S2", TypeCode: "blood", PatientID: 10, HistologyCode: "normal"}
 	parentInDb := &types.Sample{SubmitterSampleId: "P-DB", PatientID: 10}
 
 	mockOrgRepo := &MockOrganizationRepository{
@@ -256,22 +311,25 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 			}
 			return nil, nil
 		},
-		GetTypeCodesFunc: func() ([]string, error) {
-			return []string{"blood", "dna", "rna", "solid_tissue"}, nil
-		},
+	}
+	mockContext := &BatchValidationContext{
+		OrgRepo:       mockOrgRepo,
+		PatientRepo:   mockPatientRepo,
+		SampleRepo:    mockSampleRepo,
+		ValueSetsRepo: &MockValueSetRepository{},
 	}
 
 	samples := []types.SampleBatch{
-		{SubmitterSampleId: "S1", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna"},                                           // 1. Valid new sample
-		{SubmitterSampleId: "S2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna"},                                           // 2. Conflict with DB
-		{SubmitterSampleId: "S3", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-BATCH"},       // 3. Parent in batch
-		{SubmitterSampleId: "S4", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-DB"},          // 4. Parent in DB
-		{SubmitterSampleId: "S5", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-NONE"},        // 5. Parent not found
-		{SubmitterSampleId: "P-BATCH", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-BATCH2"}, // 6. The parent for S3
-		{SubmitterSampleId: "P-BATCH2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna"},                                     // 7. The grandparent for S3
+		{SubmitterSampleId: "S1", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", HistologyCode: "normal"},                                           // 1. Valid new sample
+		{SubmitterSampleId: "S2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", HistologyCode: "normal"},                                           // 2. Conflict with DB
+		{SubmitterSampleId: "S3", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-BATCH", HistologyCode: "normal"},       // 3. Parent in batch
+		{SubmitterSampleId: "S4", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-DB", HistologyCode: "normal"},          // 4. Parent in DB
+		{SubmitterSampleId: "S5", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-NONE", HistologyCode: "normal"},        // 5. Parent not found
+		{SubmitterSampleId: "P-BATCH", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", SubmitterParentSampleId: "P-BATCH2", HistologyCode: "normal"}, // 6. The parent for S3
+		{SubmitterSampleId: "P-BATCH2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", HistologyCode: "normal"},                                     // 7. The grandparent for S3
 	}
 
-	records, err := validateSamplesBatch(samples, mockOrgRepo, mockPatientRepo, mockSampleRepo)
+	records, err := validateSamplesBatch(mockContext, samples)
 	assert.NoError(t, err)
 	assert.Len(t, records, 7) // Updated from 6 to 7 to include P-BATCH2
 

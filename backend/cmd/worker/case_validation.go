@@ -135,11 +135,18 @@ type CaseValidationRecord struct {
 	DiagnosisLabID         *int
 
 	// Codes
-	StatusCodes           []string
-	ObservationCodes      []string
-	OnsetCodes            []string
-	TaskTypeCodes         []string
-	ResolutionStatusCodes []string
+	StatusCodes                       []string
+	ObservationCodes                  []string
+	OnsetCodes                        []string
+	TaskTypeCodes                     []string
+	ResolutionStatusCodes             []string
+	PriorityCodes                     []string
+	CategoryCodes                     []string
+	PatientAffectedStatusCodes        []string
+	PatientRelationshipToProbandCodes []string
+	DocumentDataCategoryCodes         []string
+	DocumentDataTypeCodes             []string
+	DocumentFormatCodes               []string
 
 	OutputDocuments map[string]struct{}
 
@@ -226,6 +233,61 @@ func (r *CaseValidationRecord) fetchResolutionStatusCodes() error {
 	return nil
 }
 
+func (r *CaseValidationRecord) fetchPriorityCodes() error {
+	priorityCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetPriority)
+	if err != nil {
+		return fmt.Errorf("error retrieving priority codes: %v", err)
+	}
+	r.PriorityCodes = priorityCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchCategoryCodes() error {
+	categoryCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetCaseCategory)
+	if err != nil {
+		return fmt.Errorf("error retrieving category codes: %v", err)
+	}
+	r.CategoryCodes = categoryCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchPatientCodes() error {
+	affectedStatusCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetAffectedStatus)
+	if err != nil {
+		return fmt.Errorf("error retrieving patient affected status codes: %v", err)
+	}
+	r.PatientAffectedStatusCodes = affectedStatusCodes
+
+	relationshipToProbandCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetFamilyRelationship)
+	if err != nil {
+		return fmt.Errorf("error retrieving patient relationship to proband codes: %v", err)
+	}
+	r.PatientRelationshipToProbandCodes = relationshipToProbandCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchDocumentCodes() error {
+	dataCategoryCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetDataCategory)
+	if err != nil {
+		return fmt.Errorf("error retrieving document data category codes: %v", err)
+	}
+	r.DocumentDataCategoryCodes = dataCategoryCodes
+
+	dataTypeCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetDataType)
+	if err != nil {
+		return fmt.Errorf("error retrieving document data type codes: %v", err)
+	}
+	r.DocumentDataTypeCodes = dataTypeCodes
+
+	formatCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetFileFormat)
+	if err != nil {
+		return fmt.Errorf("error retrieving document format codes: %v", err)
+	}
+	r.DocumentFormatCodes = formatCodes
+
+	return nil
+}
+
 func (r *CaseValidationRecord) fetchCodeInfos() error {
 	if err := r.fetchStatusCodes(); err != nil {
 		return fmt.Errorf("failed to retrieve status codes: %w", err)
@@ -241,6 +303,18 @@ func (r *CaseValidationRecord) fetchCodeInfos() error {
 	}
 	if err := r.fetchResolutionStatusCodes(); err != nil {
 		return fmt.Errorf("failed to retrieve resolution status codes: %w", err)
+	}
+	if err := r.fetchPriorityCodes(); err != nil {
+		return fmt.Errorf("failed to retrieve priority codes: %w", err)
+	}
+	if err := r.fetchCategoryCodes(); err != nil {
+		return fmt.Errorf("failed to retrieve category codes: %w", err)
+	}
+	if err := r.fetchPatientCodes(); err != nil {
+		return fmt.Errorf("failed to retrieve patient codes: %w", err)
+	}
+	if err := r.fetchDocumentCodes(); err != nil {
+		return fmt.Errorf("failed to retrieve document codes: %w", err)
 	}
 	return nil
 }
@@ -673,6 +747,28 @@ func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int
 	visited[patientKey] = struct{}{}
 }
 
+func (cr *CaseValidationRecord) validateAffectedStatusCode(patientIndex int) {
+	a := cr.Case.Patients[patientIndex].AffectedStatusCode
+	if !slices.Contains(cr.PatientAffectedStatusCodes, a) {
+		fieldName := "affected_status_code"
+		path := cr.formatPatientsFieldPath(&patientIndex, "", nil)
+		message := cr.formatPatientsInvalidFieldMessage(fieldName, patientIndex)
+		msg := fmt.Sprintf("%s affected status code %q must be in [%s].", message, a, strings.Join(cr.PatientAffectedStatusCodes, ", "))
+		cr.addErrors(msg, PatientInvalidField, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateRelationshipToProbandCode(patientIndex int) {
+	r := cr.Case.Patients[patientIndex].RelationToProbandCode
+	if !slices.Contains(cr.PatientRelationshipToProbandCodes, r) {
+		fieldName := "relation_to_proband_code"
+		path := cr.formatPatientsFieldPath(&patientIndex, "", nil)
+		message := cr.formatPatientsInvalidFieldMessage(fieldName, patientIndex)
+		msg := fmt.Sprintf("%s relationship to proband code %q must be in [%s].", message, r, strings.Join(cr.PatientRelationshipToProbandCodes, ", "))
+		cr.addErrors(msg, PatientInvalidField, path)
+	}
+}
+
 func (cr *CaseValidationRecord) validateCasePatients() error {
 	nbProband := 0
 	visitedPatients := map[PatientKey]struct{}{}
@@ -691,6 +787,9 @@ func (cr *CaseValidationRecord) validateCasePatients() error {
 		if cr.Case.Patients[patientIndex].RelationToProbandCode == "proband" {
 			nbProband++
 		}
+
+		cr.validateAffectedStatusCode(patientIndex)
+		cr.validateRelationshipToProbandCode(patientIndex)
 
 		// Validate family history
 		cr.validateFamilyHistory(patientIndex)
@@ -845,6 +944,16 @@ func (cr *CaseValidationRecord) validateCodes() {
 	if !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
 		path := formatPath(cr, "")
 		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("resolution_status_code"), cr.Case.ResolutionStatusCode, strings.Join(cr.ResolutionStatusCodes, ", "))
+		cr.addErrors(message, CaseInvalidField, path)
+	}
+	if !slices.Contains(cr.PriorityCodes, cr.Case.PriorityCode) {
+		path := formatPath(cr, "")
+		message := fmt.Sprintf("%s priority code %q is not a valid priority code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("priority_code"), cr.Case.PriorityCode, strings.Join(cr.PriorityCodes, ", "))
+		cr.addErrors(message, CaseInvalidField, path)
+	}
+	if !slices.Contains(cr.CategoryCodes, cr.Case.CategoryCode) {
+		path := formatPath(cr, "")
+		message := fmt.Sprintf("%s category code %q is not a valid category code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("category_code"), cr.Case.CategoryCode, strings.Join(cr.CategoryCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
 	}
 }
@@ -1130,6 +1239,24 @@ func (cr *CaseValidationRecord) validateDocumentDuplicate(doc *types.OutputDocum
 	}
 }
 
+func (cr *CaseValidationRecord) validateDocumentCodes(doc *types.OutputDocumentBatch) {
+	if doc.DataTypeCode != "" && !slices.Contains(cr.DocumentDataTypeCodes, doc.DataTypeCode) {
+		path := fmt.Sprintf("case[%d].document[%s]", cr.Index, doc.Url)
+		msg := fmt.Sprintf("%s data type code %q is not a valid data type code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("data_type_code"), doc.DataTypeCode, strings.Join(cr.DocumentDataTypeCodes, ", "))
+		cr.addErrors(msg, DocumentInvalidField, path)
+	}
+	if doc.DataCategoryCode != "" && !slices.Contains(cr.DocumentDataCategoryCodes, doc.DataCategoryCode) {
+		path := fmt.Sprintf("case[%d].document[%s]", cr.Index, doc.Url)
+		msg := fmt.Sprintf("%s data category code %q is not a valid data category code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("data_category_code"), doc.DataCategoryCode, strings.Join(cr.DocumentDataCategoryCodes, ", "))
+		cr.addErrors(msg, DocumentInvalidField, path)
+	}
+	if doc.FormatCode != "" && !slices.Contains(cr.DocumentFormatCodes, doc.FormatCode) {
+		path := fmt.Sprintf("case[%d].document[%s]", cr.Index, doc.Url)
+		msg := fmt.Sprintf("%s format code %q is not a valid format code. Valid values [%s]", cr.formatCasesInvalidFieldMessage("format_code"), doc.FormatCode, strings.Join(cr.DocumentFormatCodes, ", "))
+		cr.addErrors(msg, DocumentInvalidField, path)
+	}
+}
+
 func (cr *CaseValidationRecord) validateDocuments() error {
 	for tid, t := range cr.Case.Tasks {
 		for did, doc := range t.OutputDocuments {
@@ -1148,6 +1275,7 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 			cr.validateDocumentTextField(doc.DataTypeCode, "data_type_code", path, tid, did, TextRegExpCompiled, true)
 			cr.validateDocumentTextField(doc.DataCategoryCode, "data_category_code", path, tid, did, TextRegExpCompiled, true)
 
+			cr.validateDocumentCodes(doc)
 			if doc.Size != nil && *doc.Size < 0 {
 				msg := fmt.Sprintf(
 					"%s size is invalid, must be non-negative.",

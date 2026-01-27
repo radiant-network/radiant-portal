@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"slices"
 	"time"
 
 	"github.com/golang/glog"
@@ -21,17 +22,6 @@ var (
 )
 
 var EMPTY = struct{}{}
-var AllowedExperimentalStrategyCodes = map[string]struct{}{
-	"wgs":          EMPTY,
-	"wxs":          EMPTY,
-	"rnaseq":       EMPTY,
-	"targeted_dna": EMPTY,
-}
-
-var AllowedSequencingReadTechnologyCode = map[string]struct{}{
-	"short_read": EMPTY,
-	"long_read":  EMPTY,
-}
 
 var AllowedStatusCode = map[string]struct{}{
 	"unknown":     EMPTY,
@@ -82,40 +72,30 @@ func (r *SequencingExperimentValidationRecord) getResId() []string {
 	return []string{r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String()}
 }
 
-func processSequencingExperimentBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
-	payload := []byte(batch.Payload)
-	var experimentsBatch []types.SequencingExperimentBatch
-
-	if unexpectedErr := json.Unmarshal(payload, &experimentsBatch); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), ctx.BatchRepo)
-		return
-	}
-
-	records, unexpectedErr := validateSequencingExperimentBatch(experimentsBatch, ctx.OrgRepo, ctx.SampleRepo, ctx.SeqExpRepo)
-	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), ctx.BatchRepo)
-		return
-	}
-
-	glog.Infof("Sequencing experiment batch %v processed with %d records", batch.ID, len(records))
-
-	err := persistBatchAndSequencingExperimentRecords(db, batch, records)
+func (r *SequencingExperimentValidationRecord) preFetchValidationInfo() error {
+	soc, err := r.Context.OrgRepo.GetOrganizationByCode(r.SequencingExperiment.SampleOrganizationCode)
 	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), ctx.BatchRepo)
-		return
+		return err
 	}
-}
-
-func verifyIsDifferentField[T comparable](left T, right T, r *SequencingExperimentValidationRecord, key string, fieldName string) bool {
-	if left == right {
-		return false
+	if soc != nil {
+		r.SubmitterOrganizationID = &soc.ID
+		sample, err := r.Context.SampleRepo.GetSampleBySubmitterSampleId(*r.SubmitterOrganizationID, r.SequencingExperiment.SubmitterSampleId.String())
+		if err != nil {
+			return err
+		}
+		if sample != nil {
+			r.SampleID = &sample.ID
+		}
 	}
 
-	msg := fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different %s (%v <> %v).", key, fieldName, left, right)
-
-	r.addWarnings(msg, ExistingAliquotForSequencingLabCode, r.getPath())
-	r.Skipped = true
-	return true
+	sequencingLab, err := r.Context.OrgRepo.GetOrganizationByCode(r.SequencingExperiment.SequencingLabCode)
+	if err != nil {
+		return err
+	}
+	if sequencingLab != nil {
+		r.SequencingLabID = &sequencingLab.ID
+	}
+	return nil
 }
 
 func (r *SequencingExperimentValidationRecord) verifyStringField(value string, fieldName string, maxLength int, re *regexp.Regexp, reSrc string, resourceIDs []string, isRequired bool) {
@@ -142,20 +122,30 @@ func (r *SequencingExperimentValidationRecord) validateAliquotField() {
 	r.verifyStringField(r.SequencingExperiment.Aliquot.String(), "aliquot", TextMaxLength, AlphanumericIdentifierRegExpCompiled, AlphanumericIdentifierRegExp, r.getResId(), true)
 }
 
-func (r *SequencingExperimentValidationRecord) validateExperimentalStrategyCodeField() {
+func (r *SequencingExperimentValidationRecord) validateExperimentalStrategyCodeField() error {
 	r.verifyStringField(r.SequencingExperiment.ExperimentalStrategyCode, "experimental_strategy_code", TextMaxLength, nil, "", r.getResId(), true)
 
-	if _, ok := AllowedExperimentalStrategyCodes[r.SequencingExperiment.ExperimentalStrategyCode]; !ok {
+	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetExperimentalStrategy)
+	if err != nil {
+		return fmt.Errorf("error fetching experimental strategy codes: %w", err)
+	}
+	if !slices.Contains(codes, r.SequencingExperiment.ExperimentalStrategyCode) {
 		r.addErrors(formatInvalidField(r, "experimental_strategy_code", "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath())
 	}
+	return nil
 }
 
-func (r *SequencingExperimentValidationRecord) validateSequencingReadTechnologyCodeField() {
+func (r *SequencingExperimentValidationRecord) validateSequencingReadTechnologyCodeField() error {
 	r.verifyStringField(r.SequencingExperiment.SequencingReadTechnologyCode, "sequencing_read_technology_code", TextMaxLength, nil, "", r.getResId(), true)
 
-	if _, ok := AllowedSequencingReadTechnologyCode[r.SequencingExperiment.SequencingReadTechnologyCode]; !ok {
+	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetSequencingReadTechnology)
+	if err != nil {
+		return fmt.Errorf("error fetching sequencing read technology codes: %w", err)
+	}
+	if !slices.Contains(codes, r.SequencingExperiment.SequencingReadTechnologyCode) {
 		r.addErrors(formatInvalidField(r, "sequencing_read_technology_code", "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath())
 	}
+	return nil
 }
 
 func (r *SequencingExperimentValidationRecord) validateSequencingLabCodeField() {
@@ -187,12 +177,17 @@ func (r *SequencingExperimentValidationRecord) validateRunNameField() {
 	r.verifyStringField(r.SequencingExperiment.RunName.String(), "run_name", TextMaxLength, nil, "", r.getResId(), false)
 }
 
-func (r *SequencingExperimentValidationRecord) validateStatusCodeField() {
+func (r *SequencingExperimentValidationRecord) validateStatusCodeField() error {
 	r.verifyStringField(r.SequencingExperiment.StatusCode, "status_code", TextMaxLength, nil, "", r.getResId(), false)
 
-	if _, ok := AllowedStatusCode[r.SequencingExperiment.StatusCode]; !ok {
+	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetStatus)
+	if err != nil {
+		return fmt.Errorf("error fetching status codes: %w", err)
+	}
+	if !slices.Contains(codes, r.SequencingExperiment.StatusCode) {
 		r.addErrors(formatInvalidField(r, "status_code", "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath())
 	}
+	return nil
 }
 
 func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error {
@@ -206,16 +201,25 @@ func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error
 	return nil
 }
 
-func (r *SequencingExperimentValidationRecord) validatePlatformCodeField() {
+func (r *SequencingExperimentValidationRecord) validatePlatformCodeField() error {
 	r.verifyStringField(r.SequencingExperiment.PlatformCode, "platform_code", TextMaxLength, TextRegExpCompiled, TextRegExp, r.getResId(), false)
+
+	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetPlatform)
+	if err != nil {
+		return fmt.Errorf("error fetching platform codes: %w", err)
+	}
+	if !slices.Contains(codes, r.SequencingExperiment.PlatformCode) {
+		r.addErrors(formatInvalidField(r, "platform_code", "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath())
+	}
+	return nil
 }
 
-func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequencingLabCode(repoSeqExp repository.SequencingExperimentDAO) error {
+func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequencingLabCode() error {
 	if r.SequencingLabID == nil || r.SampleID == nil {
 		return nil
 	}
 
-	seqExps, err := repoSeqExp.GetSequencingExperimentByAliquot(r.SequencingExperiment.Aliquot.String())
+	seqExps, err := r.Context.SeqExpRepo.GetSequencingExperimentByAliquot(r.SequencingExperiment.Aliquot.String())
 	if err != nil {
 		return err
 	}
@@ -263,6 +267,42 @@ func (r *SequencingExperimentValidationRecord) validateUnknownSampleForOrganizat
 		)
 	}
 	return nil
+}
+
+func verifyIsDifferentField[T comparable](left T, right T, r *SequencingExperimentValidationRecord, key string, fieldName string) bool {
+	if left == right {
+		return false
+	}
+
+	msg := fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different %s (%v <> %v).", key, fieldName, left, right)
+
+	r.addWarnings(msg, ExistingAliquotForSequencingLabCode, r.getPath())
+	r.Skipped = true
+	return true
+}
+
+func processSequencingExperimentBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+	payload := []byte(batch.Payload)
+	var experimentsBatch []types.SequencingExperimentBatch
+
+	if unexpectedErr := json.Unmarshal(payload, &experimentsBatch); unexpectedErr != nil {
+		processUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), ctx.BatchRepo)
+		return
+	}
+
+	records, unexpectedErr := validateSequencingExperimentBatch(ctx, experimentsBatch)
+	if unexpectedErr != nil {
+		processUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), ctx.BatchRepo)
+		return
+	}
+
+	glog.Infof("Sequencing experiment batch %v processed with %d records", batch.ID, len(records))
+
+	err := persistBatchAndSequencingExperimentRecords(db, batch, records)
+	if err != nil {
+		processUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), ctx.BatchRepo)
+		return
+	}
 }
 
 func persistBatchAndSequencingExperimentRecords(db *gorm.DB, batch *types.Batch, records []*SequencingExperimentValidationRecord) error {
@@ -324,7 +364,7 @@ func insertSequencingExperimentRecords(records []*SequencingExperimentValidation
 	return nil
 }
 
-func validateSequencingExperimentBatch(seqExps []types.SequencingExperimentBatch, repoOrganization repository.OrganizationDAO, repoSample repository.SamplesDAO, repoSeqExp repository.SequencingExperimentDAO) ([]*SequencingExperimentValidationRecord, error) {
+func validateSequencingExperimentBatch(ctx *BatchValidationContext, seqExps []types.SequencingExperimentBatch) ([]*SequencingExperimentValidationRecord, error) {
 	var records []*SequencingExperimentValidationRecord
 	visited := map[SequencingExperimentKey]struct{}{}
 
@@ -334,7 +374,7 @@ func validateSequencingExperimentBatch(seqExps []types.SequencingExperimentBatch
 			SubmitterSampleId:      seqExp.SubmitterSampleId.String(),
 			Aliquot:                seqExp.Aliquot.String(),
 		}
-		record, err := validateSequencingExperimentRecord(seqExp, index, repoOrganization, repoSample, repoSeqExp)
+		record, err := validateSequencingExperimentRecord(ctx, seqExp, index)
 		if err != nil {
 			return nil, fmt.Errorf("error during sequencing experiment validation: %v", err)
 		}
@@ -344,39 +384,16 @@ func validateSequencingExperimentBatch(seqExps []types.SequencingExperimentBatch
 	return records, nil
 }
 
-func (r *SequencingExperimentValidationRecord) preFetchValidationInfo(repoOrg repository.OrganizationDAO, repoSample repository.SamplesDAO) error {
-	soc, err := repoOrg.GetOrganizationByCode(r.SequencingExperiment.SampleOrganizationCode)
-	if err != nil {
-		return err
-	}
-	if soc != nil {
-		r.SubmitterOrganizationID = &soc.ID
-		sample, err := repoSample.GetSampleBySubmitterSampleId(*r.SubmitterOrganizationID, r.SequencingExperiment.SubmitterSampleId.String())
-		if err != nil {
-			return err
-		}
-		if sample != nil {
-			r.SampleID = &sample.ID
-		}
-	}
-
-	sequencingLab, err := repoOrg.GetOrganizationByCode(r.SequencingExperiment.SequencingLabCode)
-	if err != nil {
-		return err
-	}
-	if sequencingLab != nil {
-		r.SequencingLabID = &sequencingLab.ID
-	}
-	return nil
-}
-
-func validateSequencingExperimentRecord(seqExp types.SequencingExperimentBatch, index int, repoOrg repository.OrganizationDAO, repoSample repository.SamplesDAO, repoSeqExp repository.SequencingExperimentDAO) (*SequencingExperimentValidationRecord, error) {
+func validateSequencingExperimentRecord(ctx *BatchValidationContext, seqExp types.SequencingExperimentBatch, index int) (*SequencingExperimentValidationRecord, error) {
 	record := SequencingExperimentValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Index: index},
+		BaseValidationRecord: BaseValidationRecord{
+			Context: ctx,
+			Index:   index,
+		},
 		SequencingExperiment: seqExp,
 	}
 
-	err := record.preFetchValidationInfo(repoOrg, repoSample)
+	err := record.preFetchValidationInfo()
 	if err != nil {
 		return nil, fmt.Errorf("prefetch validation info: %w", err)
 	}
@@ -395,7 +412,7 @@ func validateSequencingExperimentRecord(seqExp types.SequencingExperimentBatch, 
 	if err := record.validateSequencingLabCode(); err != nil {
 		return nil, fmt.Errorf("validate sequencing lab code: %w", err)
 	}
-	if err := record.validateExistingAliquotForSequencingLabCode(repoSeqExp); err != nil {
+	if err := record.validateExistingAliquotForSequencingLabCode(); err != nil {
 		return nil, fmt.Errorf("validate existing aliquot: %w", err)
 	}
 	if err := record.validateUnknownSampleForOrganizationCode(); err != nil {

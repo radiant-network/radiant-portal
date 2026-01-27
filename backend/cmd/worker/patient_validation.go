@@ -172,6 +172,32 @@ func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types
 	}
 }
 
+func (r *PatientValidationRecord) validateLifeStatusCode() error {
+	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetLifeStatus)
+	if err != nil {
+		return fmt.Errorf("error getting life status codes: %v", err)
+	}
+	if r.Patient.LifeStatusCode == "" || !slices.Contains(codes, r.Patient.LifeStatusCode) {
+		resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
+		message := formatInvalidField(r, "life_status_code", fmt.Sprintf("value %q must be one of the allowed codes: [%s]", r.Patient.LifeStatusCode, strings.Join(codes, ", ")), resIds)
+		r.addErrors(message, PatientInvalidValueCode, formatPath(r, "life_status_code"))
+	}
+	return nil
+}
+
+func (r *PatientValidationRecord) validateSexCode() error {
+	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetSex)
+	if err != nil {
+		return err
+	}
+	if r.Patient.SexCode == "" || !slices.Contains(codes, r.Patient.SexCode) {
+		resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
+		message := formatInvalidField(r, "sex_code", fmt.Sprintf("value %q must be one of the allowed codes: [%s]", r.Patient.SexCode, strings.Join(codes, ", ")), resIds)
+		r.addErrors(message, PatientInvalidValueCode, formatPath(r, "sex_code"))
+	}
+	return nil
+}
+
 func validateIsDifferentExistingPatientField[T comparable](
 	r *PatientValidationRecord,
 	fieldName string,
@@ -202,7 +228,7 @@ func processPatientBatch(ctx *BatchValidationContext, batch *types.Batch, db *go
 		return
 	}
 
-	records, unexpectedErr := validatePatientsBatch(patients, ctx.OrgRepo, ctx.PatientRepo)
+	records, unexpectedErr := validatePatientsBatch(ctx, patients)
 	if unexpectedErr != nil {
 		processUnexpectedError(batch, fmt.Errorf("error patient batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
@@ -264,11 +290,11 @@ func insertPatientRecords(records []*PatientValidationRecord, repo repository.Pa
 	return nil
 }
 
-func validatePatientsBatch(patients []types.PatientBatch, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) ([]*PatientValidationRecord, error) {
+func validatePatientsBatch(ctx *BatchValidationContext, patients []types.PatientBatch) ([]*PatientValidationRecord, error) {
 	var records []*PatientValidationRecord
 	seenPatients := map[PatientKey]struct{}{}
 	for index, patient := range patients {
-		record, err := validatePatientRecord(patient, index, seenPatients, repoOrganization, repoPatient)
+		record, err := validatePatientRecord(ctx, patient, index, seenPatients)
 		if err != nil {
 			return nil, fmt.Errorf("error during patient validation: %v", err)
 		}
@@ -277,10 +303,13 @@ func validatePatientsBatch(patients []types.PatientBatch, repoOrganization repos
 	return records, nil
 }
 
-func validatePatientRecord(patient types.PatientBatch, index int, seenPatients map[PatientKey]struct{}, repoOrganization repository.OrganizationDAO, repoPatient repository.PatientsDAO) (*PatientValidationRecord, error) {
+func validatePatientRecord(ctx *BatchValidationContext, patient types.PatientBatch, index int, seenPatients map[PatientKey]struct{}) (*PatientValidationRecord, error) {
 	record := &PatientValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Index: index},
-		Patient:              patient,
+		BaseValidationRecord: BaseValidationRecord{
+			Context: ctx,
+			Index:   index,
+		},
+		Patient: patient,
 	}
 	record.validateSubmitterPatientId()
 	record.validateSubmitterPatientIdType()
@@ -288,6 +317,13 @@ func validatePatientRecord(patient types.PatientBatch, index int, seenPatients m
 	record.validateLastName()
 	record.validateJhn()
 	record.validateDateOfBirth()
+
+	if err := record.validateLifeStatusCode(); err != nil {
+		return nil, fmt.Errorf("error validating life status code: %v", err)
+	}
+	if err := record.validateSexCode(); err != nil {
+		return nil, fmt.Errorf("error validating sex code: %v", err)
+	}
 
 	validateUniquenessInBatch(record,
 		PatientKey{
@@ -299,14 +335,14 @@ func validatePatientRecord(patient types.PatientBatch, index int, seenPatients m
 		[]string{patient.PatientOrganizationCode, patient.SubmitterPatientId.String()},
 	)
 
-	organization, orgErr := repoOrganization.GetOrganizationByCode(patient.PatientOrganizationCode)
+	organization, orgErr := ctx.OrgRepo.GetOrganizationByCode(patient.PatientOrganizationCode)
 	if orgErr != nil {
 		return nil, fmt.Errorf("error getting existing organization: %v", orgErr)
 	} else {
 		record.validateOrganization(organization)
 	}
 	if organization != nil {
-		existingPatient, patientErr := repoPatient.GetPatientBySubmitterPatientId(organization.ID, patient.SubmitterPatientId.String())
+		existingPatient, patientErr := ctx.PatientRepo.GetPatientBySubmitterPatientId(organization.ID, patient.SubmitterPatientId.String())
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		} else {
