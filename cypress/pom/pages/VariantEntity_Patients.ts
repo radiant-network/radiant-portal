@@ -17,17 +17,6 @@ const selectors = {
 const tableColumns = {
   interpreted: [
     {
-      id: 'expand',
-      name: '',
-      apiField: '',
-      isVisibleByDefault: true,
-      pinByDefault: null,
-      isSortable: false,
-      isPinnable: false,
-      position: 0,
-      tooltip: null,
-    },
-    {
       id: 'case',
       name: 'Case',
       apiField: 'case_id',
@@ -35,7 +24,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: false,
       isPinnable: true,
-      position: 1,
+      position: 0,
       tooltip: null,
     },
     {
@@ -46,7 +35,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: true,
       isPinnable: true,
-      position: 2,
+      position: 1,
       tooltip: 'Last intepretation date',
     },
     {
@@ -57,7 +46,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: false,
       isPinnable: true,
-      position: 3,
+      position: 2,
       tooltip: null,
     },
     {
@@ -68,7 +57,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: true,
       isPinnable: true,
-      position: 4,
+      position: 3,
       tooltip: null,
     },
     {
@@ -79,7 +68,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: false,
       isPinnable: true,
-      position: 5,
+      position: 4,
       tooltip: null,
     },
     {
@@ -90,7 +79,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: false,
       isPinnable: true,
-      position: 6,
+      position: 5,
       tooltip: null,
     },
     {
@@ -101,7 +90,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: false,
       isPinnable: true,
-      position: 7,
+      position: 6,
       tooltip: 'Molecular diagnostic laboratory',
     },
     {
@@ -112,7 +101,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: false,
       isPinnable: true,
-      position: 8,
+      position: 7,
       tooltip: null,
     },
     {
@@ -123,7 +112,7 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: true,
       isPinnable: true,
-      position: 9,
+      position: 8,
       tooltip: null,
     },
   ],

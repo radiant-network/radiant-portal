@@ -9,11 +9,6 @@ describe('VariantEntity - Patients - Interpreted - Information displayed', () =>
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
   };
 
-  it('Expand', () => {
-    setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('expand', data.variantGermline.interpreted);
-  });
-
   it('Case', () => {
     setupTest();
     VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('case', data.variantGermline.interpreted);
