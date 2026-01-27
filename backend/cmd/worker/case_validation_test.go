@@ -3982,7 +3982,7 @@ func Test_validateTaskTypeCode_Error(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
-		Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: foo, bar",
+		Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: [foo, bar].",
 		Path:    "case[0].tasks[0]",
 	}
 
