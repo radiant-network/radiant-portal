@@ -54,10 +54,13 @@
   --sidebar-brand-foreground: var(--color-slate-50);
   --sidebar-brand-primary: var(--color-radiant-900);
   --sidebar-brand-primary-foreground: var(--color-slate-50);
-  --sidebar-brand-accent: rgb(255 255 255 / 0.1); /* white with 10% opacity */
+  /* white with 10% opacity */
+  --sidebar-brand-accent: rgb(255 255 255 / 0.1);
   --sidebar-brand-accent-foreground: var(--color-slate-50);
-  --sidebar-brand-border: rgb(255 255 255 / 0.8); /* alpha-80 */
-  --sidebar-brand-ring: rgb(255 255 255 / 0.5); /* alpha-50 */
+  /* alpha-80 */
+  --sidebar-brand-border: rgb(255 255 255 / 0.8);
+  /* alpha-50 */
+  --sidebar-brand-ring: rgb(255 255 255 / 0.5);
 
   --table-accent: var(--color-slate-50);
   --table-active: var(--color-slate-100);
@@ -113,5 +116,5 @@
 
   --table-accent: var(--color-slate-900);
   --table-active: var(--color-slate-800);
-  --table-header: var(--color-slate-800);
+  --table-header: var(--color-slate-900);
 }
