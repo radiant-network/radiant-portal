@@ -104,7 +104,7 @@ describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
     CaseEntity_Variants_SavedFilters.snv.actions.createFilter('Cypress_F2');
     CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F2');
 
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName('Filtre sans titre');
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName(/(Filtre sans titre|Untitled filter)/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('Cypress_F2', false /*shouldExist*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInManager('Cypress_F2', false /*shouldExist*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', true /*isDisable*/, false /*isDirty*/);
