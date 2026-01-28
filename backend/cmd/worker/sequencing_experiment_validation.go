@@ -65,10 +65,11 @@ func (r *SequencingExperimentValidationRecord) GetResourceType() string {
 }
 
 func (r *SequencingExperimentValidationRecord) getPath(fieldName string) string {
-	if fieldName == "" {
-		return fmt.Sprintf("sequencing_experiment[%d]", r.Index)
+	path := fmt.Sprintf("sequencing_experiment[%d]", r.Index)
+	if fieldName != "" {
+		path += "." + fieldName
 	}
-	return fmt.Sprintf("sequencing_experiment[%d].%s", r.Index, fieldName)
+	return path
 }
 
 func (r *SequencingExperimentValidationRecord) getResId() []string {
