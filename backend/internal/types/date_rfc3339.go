@@ -62,9 +62,3 @@ func (d *DateRFC3339) UnmarshalText(text []byte) error {
 	*(*time.Time)(d) = t
 	return nil
 }
-
-// String returns the string representation of the date in RFC3339 format.
-// This satisfies the fmt.Stringer interface. Necessary when used in fmt.Printf and similar functions.
-func (d DateRFC3339) String() string {
-	return time.Time(d).String()
-}
