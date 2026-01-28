@@ -19,9 +19,9 @@ ordering_organization_code = "CHUSJ"
 
   [[cases.patients]]
   submitter_patient_id = "MRN-283773!@#$%^" # PATIENT-006 unknown patient and PATIENT-004 regex error
-  affected_status_code = "affected"
+  affected_status_code = "super-affected"  # PATIENT-004 invalid affected status code
   patient_organization_code = "CHUSJ"
-  relation_to_proband_code = "proband"
+  relation_to_proband_code = "not-proband" # PATIENT-004 invalid relation to proband code
 
     [[cases.patients.observations_categorical]]
     code = "phenotype"
@@ -37,16 +37,16 @@ ordering_organization_code = "CHUSJ"
   submitter_sample_id = "S13225"
 
   [[cases.tasks]]
-  type_code = "alignment"  #
+  type_code = "desalignment"  # TASK-001 invalid type
   aliquot = "NA12891111"  # TASK-002 unknown aliquot
   pipeline_name = "Dragen!@#$%^&*())" # TASK-001 regex error
   pipeline_version = "4.4.4"
   genome_build = "GRch38"
 
     [[cases.tasks.output_documents]]
-    data_category_code = "genomic"
-    data_type_code = "alignment"
-    format_code = "cram"
+    data_category_code = "not-genomic" # DOCUMENT-001 invalid data_category_code
+    data_type_code = "not-alignment" # DOCUMENT-001 invalid data_type_code
+    format_code = "not-cram" # DOCUMENT-001 invalid format_code
     hash = ""
     name = "NA12891.recal.cram"
     size = 11

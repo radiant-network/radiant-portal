@@ -11,24 +11,29 @@ import (
 type ValueSetType string
 
 const (
-	ValueSetAffectedStatus   ValueSetType = "affected_status"
-	ValueSetAnalysisCatalog  ValueSetType = "analysis_catalog"
-	ValueSetCaseCategory     ValueSetType = "case_category"
-	ValueSetCaseType         ValueSetType = "case_type"
-	ValueSetConsanguinity    ValueSetType = "consanguinity"
-	ValueSetDataCategory     ValueSetType = "data_category"
-	ValueSetDataType         ValueSetType = "data_type"
-	ValueSetFileFormat       ValueSetType = "file_format"
-	ValueSetHistologyType    ValueSetType = "histology_type"
-	ValueSetLifeStatus       ValueSetType = "life_status"
-	ValueSetObservation      ValueSetType = "observation"
-	ValueSetOnset            ValueSetType = "onset"
-	ValueSetPanelType        ValueSetType = "panel_type"
-	ValueSetPlatform         ValueSetType = "platform"
-	ValueSetResolutionStatus ValueSetType = "resolution_status"
-	ValueSetSex              ValueSetType = "sex"
-	ValueSetStatus           ValueSetType = "status"
-	ValueSetTaskType         ValueSetType = "task_type"
+	ValueSetAffectedStatus           ValueSetType = "affected_status"
+	ValueSetAnalysisCatalog          ValueSetType = "analysis_catalog"
+	ValueSetCaseCategory             ValueSetType = "case_category"
+	ValueSetCaseType                 ValueSetType = "case_type"
+	ValueSetConsanguinity            ValueSetType = "consanguinity"
+	ValueSetDataCategory             ValueSetType = "data_category"
+	ValueSetDataType                 ValueSetType = "data_type"
+	ValueSetExperimentalStrategy     ValueSetType = "experimental_strategy"
+	ValueSetFamilyRelationship       ValueSetType = "family_relationship"
+	ValueSetFileFormat               ValueSetType = "file_format"
+	ValueSetHistologyType            ValueSetType = "histology_type"
+	ValueSetLifeStatus               ValueSetType = "life_status"
+	ValueSetObservation              ValueSetType = "observation"
+	ValueSetOnset                    ValueSetType = "onset"
+	ValueSetPanelType                ValueSetType = "panel_type"
+	ValueSetPlatform                 ValueSetType = "platform"
+	ValueSetPriority                 ValueSetType = "priority"
+	ValueSetResolutionStatus         ValueSetType = "resolution_status"
+	ValueSetSampleType               ValueSetType = "sample_type"
+	ValueSetSequencingReadTechnology ValueSetType = "sequencing_read_technology"
+	ValueSetSex                      ValueSetType = "sex"
+	ValueSetStatus                   ValueSetType = "status"
+	ValueSetTaskType                 ValueSetType = "task_type"
 )
 
 type ValueSetsDAO interface {
@@ -46,24 +51,29 @@ func NewValueSetsRepository(db *gorm.DB) *ValueSetsRepository {
 	}
 
 	tableNameMap := map[ValueSetType]string{
-		ValueSetAffectedStatus:   types.AffectedStatusTable.Name,
-		ValueSetAnalysisCatalog:  types.AnalysisCatalogTable.Name,
-		ValueSetCaseCategory:     types.CaseCategoryTable.Name,
-		ValueSetCaseType:         types.CaseTypeTable.Name,
-		ValueSetConsanguinity:    types.ConsanguinityTable.Name,
-		ValueSetDataCategory:     types.DataCategoryTable.Name,
-		ValueSetDataType:         types.DataTypeTable.Name,
-		ValueSetFileFormat:       types.FileFormatTable.Name,
-		ValueSetHistologyType:    types.HistologyTypeTable.Name,
-		ValueSetLifeStatus:       types.LifeStatusTable.Name,
-		ValueSetObservation:      types.ObservationTable.Name,
-		ValueSetOnset:            types.OnsetTable.Name,
-		ValueSetPanelType:        types.PanelTypeTable.Name,
-		ValueSetPlatform:         types.PlatformTable.Name,
-		ValueSetResolutionStatus: types.ResolutionStatusTable.Name,
-		ValueSetSex:              types.SexTable.Name,
-		ValueSetStatus:           types.StatusTable.Name,
-		ValueSetTaskType:         types.TaskTypeTable.Name,
+		ValueSetAffectedStatus:           types.AffectedStatusTable.Name,
+		ValueSetAnalysisCatalog:          types.AnalysisCatalogTable.Name,
+		ValueSetCaseCategory:             types.CaseCategoryTable.Name,
+		ValueSetCaseType:                 types.CaseTypeTable.Name,
+		ValueSetConsanguinity:            types.ConsanguinityTable.Name,
+		ValueSetDataCategory:             types.DataCategoryTable.Name,
+		ValueSetDataType:                 types.DataTypeTable.Name,
+		ValueSetExperimentalStrategy:     types.ExperimentalStrategyTable.Name,
+		ValueSetFamilyRelationship:       types.FamilyRelationshipTable.Name,
+		ValueSetFileFormat:               types.FileFormatTable.Name,
+		ValueSetHistologyType:            types.HistologyTypeTable.Name,
+		ValueSetLifeStatus:               types.LifeStatusTable.Name,
+		ValueSetObservation:              types.ObservationTable.Name,
+		ValueSetOnset:                    types.OnsetTable.Name,
+		ValueSetPanelType:                types.PanelTypeTable.Name,
+		ValueSetPlatform:                 types.PlatformTable.Name,
+		ValueSetPriority:                 types.PriorityTable.Name,
+		ValueSetResolutionStatus:         types.ResolutionStatusTable.Name,
+		ValueSetSampleType:               types.SampleTypeTable.Name,
+		ValueSetSequencingReadTechnology: types.SequencingReadTechnologyTable.Name,
+		ValueSetSex:                      types.SexTable.Name,
+		ValueSetStatus:                   types.StatusTable.Name,
+		ValueSetTaskType:                 types.TaskTypeTable.Name,
 	}
 
 	return &ValueSetsRepository{

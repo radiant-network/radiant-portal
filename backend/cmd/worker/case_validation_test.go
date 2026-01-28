@@ -249,6 +249,29 @@ func (m *CodesMockRepo) GetCodes(setType repository.ValueSetType) ([]string, err
 	case repository.ValueSetObservation:
 		return []string{"phenotype", "condition", "note", "ancestry", "consanguinity"}, nil
 
+	case repository.ValueSetPriority:
+		return []string{"routine", "asap", "urgent", "stat"}, nil
+
+	case repository.ValueSetCaseCategory:
+		return []string{"prenatal", "postnatal"}, nil
+
+	case repository.ValueSetAnalysisCatalog:
+		return []string{"WGA", "WES", "Panel"}, nil
+
+	case repository.ValueSetAffectedStatus:
+		return []string{"affected", "unaffected", "unknown"}, nil
+
+	case repository.ValueSetFamilyRelationship:
+		return []string{"proband", "mother", "father", "sibling"}, nil
+
+	case repository.ValueSetDataCategory:
+		return []string{"clinical", "genomic"}, nil
+
+	case repository.ValueSetDataType:
+		return []string{"alignment", "snv", "ssnv", "gcnv", "igv"}, nil
+
+	case repository.ValueSetFileFormat:
+		return []string{"cram", "crai", "vcf", "tbi", "csv", "tsv", "gvcf"}, nil
 	default:
 		return nil, nil
 	}
@@ -1408,9 +1431,14 @@ func Test_validateStatusCode_Valid(t *testing.T) {
 		Case: types.CaseBatch{
 			StatusCode:           "in_progress",
 			ResolutionStatusCode: "unsolved",
+			PriorityCode:         "routine",
+			CategoryCode:         "clinical",
+			AnalysisCode:         "wgs",
 		},
 		StatusCodes:           []string{"in_progress", "revoke", "completed"},
 		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
+		PriorityCodes:         []string{"routine"},
+		CategoryCodes:         []string{"clinical"},
 	}
 
 	cr.validateCodes()
@@ -1424,9 +1452,14 @@ func Test_validateResolutionStatusCode_Valid(t *testing.T) {
 		Case: types.CaseBatch{
 			StatusCode:           "in_progress",
 			ResolutionStatusCode: "unsolved",
+			PriorityCode:         "routine",
+			CategoryCode:         "clinical",
+			AnalysisCode:         "wgs",
 		},
 		StatusCodes:           []string{"in_progress", "revoke", "completed"},
 		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
+		PriorityCodes:         []string{"routine"},
+		CategoryCodes:         []string{"clinical"},
 	}
 
 	cr.validateCodes()
@@ -1440,9 +1473,14 @@ func Test_validateStatusCode_Invalid(t *testing.T) {
 		Case: types.CaseBatch{
 			StatusCode:           "unknown_status",
 			ResolutionStatusCode: "unsolved",
+			PriorityCode:         "routine",
+			CategoryCode:         "clinical",
+			AnalysisCode:         "wgs",
 		},
 		StatusCodes:           []string{"in_progress", "revoke", "completed"},
 		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
+		PriorityCodes:         []string{"routine"},
+		CategoryCodes:         []string{"clinical"},
 	}
 
 	cr.validateCodes()
@@ -1460,9 +1498,14 @@ func Test_validateResolutionStatusCode_Invalid(t *testing.T) {
 		Case: types.CaseBatch{
 			StatusCode:           "in_progress",
 			ResolutionStatusCode: "nan",
+			PriorityCode:         "routine",
+			CategoryCode:         "clinical",
+			AnalysisCode:         "wgs",
 		},
 		StatusCodes:           []string{"in_progress", "revoke", "completed"},
 		ResolutionStatusCodes: []string{"solved", "unsolved", "unknown"},
+		PriorityCodes:         []string{"routine"},
+		CategoryCodes:         []string{"clinical"},
 	}
 
 	cr.validateCodes()
@@ -1498,6 +1541,8 @@ func Test_validateCase_Valid(t *testing.T) {
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed", "unknown"},
 		ResolutionStatusCodes:  []string{"solved", "unsolved", "unknown"},
+		PriorityCodes:          []string{"routine", "urgent"},
+		CategoryCodes:          []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:            "CASE-1",
 			StatusCode:                 "completed",
@@ -1509,6 +1554,8 @@ func Test_validateCase_Valid(t *testing.T) {
 			ResolutionStatusCode:       "solved",
 			Note:                       "Test note",
 			OrderingPhysician:          "Dr. Smith",
+			PriorityCode:               "routine",
+			CategoryCode:               "clinical",
 		},
 	}
 
@@ -1538,11 +1585,16 @@ func Test_validateCase_MissingProject(t *testing.T) {
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed"},
 		ResolutionStatusCodes:  []string{"solved"},
+		PriorityCodes:          []string{"routine", "urgent"},
+		CategoryCodes:          []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:      "CASE-1",
 			StatusCode:           "completed",
 			ResolutionStatusCode: "solved",
 			ProjectCode:          "UNKNOWN-PROJ",
+			PriorityCode:         "routine",
+			CategoryCode:         "clinical",
+			AnalysisCode:         "WGA",
 		},
 	}
 
@@ -1576,11 +1628,16 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed"},
 		ResolutionStatusCodes:  []string{"solved"},
+		PriorityCodes:          []string{"routine", "urgent"},
+		CategoryCodes:          []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:      "CASE-1",
 			StatusCode:           "completed",
 			ResolutionStatusCode: "solved",
 			DiagnosticLabCode:    "UNKNOWN-LAB",
+			PriorityCode:         "routine",
+			CategoryCode:         "clinical",
+			AnalysisCode:         "WGA",
 		},
 	}
 
@@ -1613,11 +1670,15 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed"},
 		ResolutionStatusCodes:  []string{"solved"},
+		PriorityCodes:          []string{"routine", "urgent"},
+		CategoryCodes:          []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:      "CASE-1",
 			StatusCode:           "completed",
 			ResolutionStatusCode: "solved",
 			AnalysisCode:         "UNKNOWN-ANALYSIS",
+			PriorityCode:         "routine",
+			CategoryCode:         "clinical",
 		},
 	}
 
@@ -1650,11 +1711,16 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed"},
 		ResolutionStatusCodes:  []string{"solved"},
+		PriorityCodes:          []string{"routine", "urgent"},
+		CategoryCodes:          []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:          "CASE-1",
 			StatusCode:               "completed",
 			ResolutionStatusCode:     "solved",
 			OrderingOrganizationCode: "UNKNOWN-ORG",
+			PriorityCode:             "routine",
+			CategoryCode:             "clinical",
+			AnalysisCode:             "WGA",
 		},
 	}
 
@@ -1688,10 +1754,15 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed", "pending"},
 		ResolutionStatusCodes:  []string{"solved"},
+		PriorityCodes:          []string{"routine", "urgent"},
+		CategoryCodes:          []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:      "CASE-1",
 			StatusCode:           "invalid_status",
 			ResolutionStatusCode: "solved",
+			PriorityCode:         "routine",
+			CategoryCode:         "clinical",
+			AnalysisCode:         "WGA",
 		},
 	}
 
@@ -1724,11 +1795,16 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 		SubmitterCaseID:        "CASE-1",
 		StatusCodes:            []string{"completed"},
 		ResolutionStatusCodes:  []string{"solved"},
+		PriorityCodes:          []string{"routine", "urgent"},
+		CategoryCodes:          []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:      "CASE-1",
 			StatusCode:           "completed",
 			ResolutionStatusCode: "solved",
 			Note:                 strings.Repeat("a", 1001),
+			PriorityCode:         "routine",
+			CategoryCode:         "clinical",
+			AnalysisCode:         "WGA",
 		},
 	}
 
@@ -1849,6 +1925,8 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 		SubmitterCaseID:        "",
 		StatusCodes:            []string{"completed", "unknown"},
 		ResolutionStatusCodes:  []string{"solved"},
+		PriorityCodes:          []string{"routine", "urgent"},
+		CategoryCodes:          []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:            "CASE-1",
 			StatusCode:                 "completed",
@@ -1860,6 +1938,8 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 			ResolutionStatusCode:       "solved",
 			Note:                       "Test note",
 			OrderingPhysician:          "Dr. Smith",
+			PriorityCode:               "routine",
+			CategoryCode:               "clinical",
 		},
 	}
 
@@ -1931,6 +2011,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 				{
 					SubmitterPatientId:      "PAT-1",
 					PatientOrganizationCode: "CHUSJ",
+					AffectedStatusCode:      "affected",
 					RelationToProbandCode:   "proband",
 				},
 			},
@@ -1998,6 +2079,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 				SubmitterPatientId:      "PAT-1",
 				PatientOrganizationCode: "CHUSJ",
 				RelationToProbandCode:   "proband",
+				AffectedStatusCode:      "affected",
 			},
 		},
 	}
@@ -3103,6 +3185,7 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 					PatientOrganizationCode: "CHUSJ",
 					SubmitterPatientId:      "PAT-1",
 					RelationToProbandCode:   "mother",
+					AffectedStatusCode:      "affected",
 				},
 			},
 		},
@@ -3112,6 +3195,8 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 				SubmitterPatientId: "PAT-1",
 			},
 		},
+		PatientAffectedStatusCodes:        []string{"affected", "unaffected", "unknown"},
+		PatientRelationshipToProbandCodes: []string{"proband", "mother", "father", "sibling"},
 	}
 
 	err := record.validateCasePatients()
@@ -3138,11 +3223,13 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 					PatientOrganizationCode: "CHUSJ",
 					SubmitterPatientId:      "PAT-1",
 					RelationToProbandCode:   "proband",
+					AffectedStatusCode:      "affected",
 				},
 				{
 					PatientOrganizationCode: "CHUSJ",
 					SubmitterPatientId:      "PAT-2",
 					RelationToProbandCode:   "proband",
+					AffectedStatusCode:      "affected",
 				},
 			},
 		},
@@ -3156,6 +3243,8 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 				SubmitterPatientId: "PAT-2",
 			},
 		},
+		PatientAffectedStatusCodes:        []string{"affected", "unaffected", "unknown"},
+		PatientRelationshipToProbandCodes: []string{"proband", "mother", "father", "sibling"},
 	}
 
 	err := record.validateCasePatients()
@@ -3182,11 +3271,13 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 					PatientOrganizationCode: "CHUSJ",
 					SubmitterPatientId:      "PAT-1",
 					RelationToProbandCode:   "proband",
+					AffectedStatusCode:      "affected",
 				},
 				{
 					PatientOrganizationCode: "CHUSJ",
 					SubmitterPatientId:      "PAT-1",
 					RelationToProbandCode:   "mother",
+					AffectedStatusCode:      "affected",
 				},
 			},
 		},
@@ -3196,6 +3287,8 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 				SubmitterPatientId: "PAT-1",
 			},
 		},
+		PatientAffectedStatusCodes:        []string{"affected", "unaffected", "unknown"},
+		PatientRelationshipToProbandCodes: []string{"proband", "mother", "father", "sibling"},
 	}
 
 	err := record.validateCasePatients()
@@ -3229,6 +3322,7 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 					Note:               "Test note",
 				},
 			},
+			AffectedStatusCode: "affected",
 		},
 		{
 			PatientOrganizationCode: "CHUSJ",
@@ -3250,6 +3344,7 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 					Note:               "Another test note",
 				},
 			},
+			AffectedStatusCode: "affected",
 		},
 	}
 
@@ -3272,6 +3367,8 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 				SubmitterPatientId: "PAT-2",
 			},
 		},
+		PatientAffectedStatusCodes:        []string{"affected", "unaffected", "unknown"},
+		PatientRelationshipToProbandCodes: []string{"proband", "mother", "father", "sibling"},
 	}
 
 	err := record.validateCasePatients()
@@ -3311,6 +3408,7 @@ func Test_validateCasePatients_WithErrors(t *testing.T) {
 							Note:               "Clinical note",
 						},
 					},
+					AffectedStatusCode: "affected",
 				},
 				{
 					PatientOrganizationCode: "CHUSJ",
@@ -3328,9 +3426,12 @@ func Test_validateCasePatients_WithErrors(t *testing.T) {
 							Value: "invalid@value",
 						},
 					},
+					AffectedStatusCode: "affected",
 				},
 			},
 		},
+		PatientAffectedStatusCodes:        []string{"affected", "unaffected", "unknown"},
+		PatientRelationshipToProbandCodes: []string{"proband", "mother", "father", "sibling"},
 	}
 
 	err := record.validateCasePatients()
@@ -3881,7 +3982,7 @@ func Test_validateTaskTypeCode_Error(t *testing.T) {
 
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
-		Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: foo, bar",
+		Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: [foo, bar].",
 		Path:    "case[0].tasks[0]",
 	}
 

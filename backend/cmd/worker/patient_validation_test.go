@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -382,4 +383,70 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 
 	})
 
+}
+
+func Test_ValidateLifeStatusCode_Valid(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
+		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "alive"}
+		rec := PatientValidationRecord{
+			BaseValidationRecord: BaseValidationRecord{
+				Context: &BatchValidationContext{
+					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
+				},
+			},
+			Patient: patient,
+		}
+		err := rec.validateLifeStatusCode()
+		assert.NoError(t, err)
+		assert.Nil(t, rec.Errors)
+	})
+}
+
+func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
+		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "unalive"}
+		rec := PatientValidationRecord{
+			BaseValidationRecord: BaseValidationRecord{
+				Context: &BatchValidationContext{
+					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
+				},
+			},
+			Patient: patient,
+		}
+		err := rec.validateLifeStatusCode()
+
+		expected := types.BatchMessage{
+			Code:    "PATIENT-004",
+			Message: "Invalid field life_status_code for patient (CHUSJ / id1). Reason: value \"unalive\" must be one of the allowed codes: [alive, deceased, unknown].",
+			Path:    "patient[0].life_status_code",
+		}
+
+		assert.NoError(t, err)
+		assert.Len(t, rec.Errors, 1)
+		assert.Equal(t, expected, rec.Errors[0])
+	})
+}
+
+func Test_ValidateLifeStatusCode_Missing(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
+		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: ""}
+		rec := PatientValidationRecord{
+			BaseValidationRecord: BaseValidationRecord{
+				Context: &BatchValidationContext{
+					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
+				},
+			},
+			Patient: patient,
+		}
+		err := rec.validateLifeStatusCode()
+		expected := types.BatchMessage{
+			Code:    "PATIENT-004",
+			Message: "Invalid field life_status_code for patient (CHUSJ / id1). Reason: value \"\" must be one of the allowed codes: [alive, deceased, unknown].",
+			Path:    "patient[0].life_status_code",
+		}
+
+		assert.NoError(t, err)
+		assert.Len(t, rec.Errors, 1)
+		assert.Equal(t, expected, rec.Errors[0])
+	})
 }
