@@ -1,11 +1,12 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants_SNV_Table } from 'pom/pages/CaseEntity_Variants_SNV_Table';
 
 describe('Case Entity - Variants - SNV - Table - Sort', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage('1', 'SNV');
+    cy.visitCaseVariantsPage(data.case.case, 'SNV');
   };
 
   it('Alphanumeric', () => {

@@ -1,11 +1,12 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants_Facets } from 'pom/pages/CaseEntity_Variants_Facets';
 
 describe('Case Entity - Variants - CNV - Facets - Configuration', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage('1', 'CNV');
+    cy.visitCaseVariantsPage(data.case.case, 'CNV');
   };
 
   it('Order', () => {

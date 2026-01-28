@@ -50,6 +50,7 @@ export const CommonSelectors = {
   menuItem: (text: string) => `[role="menuitem"]:contains("${text}")`,
   menuPopper: '[data-radix-popper-content-wrapper]',
   modal: '[role="dialog"]',
+  paginationButton: (name: string) => `[data-cy="Pagination${name}"]`,
   pillQueryActive: '[data-query-active="true"] [class="flex items-center py-[2px]"]',
   pinIcon: '[class*="lucide-pin"]',
   pinLeftIcon: '[class*="lucide-pin rotate-90"]',

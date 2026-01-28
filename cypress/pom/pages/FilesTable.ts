@@ -167,6 +167,13 @@ const tableColumns = [
 export const FilesTable = {
   actions: {
     /**
+     * Click the specific button to change table paging
+     * @param buttonName The button name to click (First | Last | Previous | Next | Select)
+     */
+    clickPaginationButton(buttonName: string) {
+      cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
+    },
+    /**
      * Clicks the link in a specific table cell for a given file and column.
      * @param dataFile The file object.
      * @param columnID The ID of the column.
@@ -366,6 +373,67 @@ export const FilesTable = {
       );
     },
     /**
+     * Validates the sent requests to api on page change functionality.
+     */
+    shouldRequestOnPageChange() {
+      cy.intercept('POST', '**/search', req => {
+        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.page_index).to.deep.equal(0);
+        req.continue();
+      }).as('searchRequest1');
+      cy.visitFilesPage();
+      cy.wait('@searchRequest1');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/search', req => {
+        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.page_index).to.deep.equal(1);
+        req.continue();
+      }).as('searchRequest2');
+      FilesTable.actions.clickPaginationButton('Next');
+      cy.wait('@searchRequest2');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/search', req => {
+        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.page_index).to.deep.equal(2);
+        req.continue();
+      }).as('searchRequest3');
+      FilesTable.actions.clickPaginationButton('Next');
+      cy.wait('@searchRequest3');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/search', req => {
+        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.page_index).to.deep.equal(1);
+        req.continue();
+      }).as('searchRequest4');
+      FilesTable.actions.clickPaginationButton('Previous');
+      cy.wait('@searchRequest4');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/search', req => {
+        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.page_index).to.deep.equal(0);
+        req.continue();
+      }).as('searchRequest5');
+      FilesTable.actions.clickPaginationButton('First');
+      cy.wait('@searchRequest5');
+    },
+    /**
+     * Validates the sent request to api on sorting functionality of a column.
+     * @param columnID The ID of the column to sort.
+     */
+    shouldRequestOnSort(columnID: string) {
+      FilesTable.actions.showAllColumns();
+      cy.intercept('POST', '**/documents/search', req => {
+        expect(req.body.sort).to.have.length(1);
+        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
+      }).as('sortRequest');
+      FilesTable.actions.sortColumn(columnID, false /*needIntercept*/);
+      cy.wait('@sortRequest');
+    },
+    /**
      * Validates that all columns are displayed in the correct order in the table.
      */
     shouldShowAllColumns() {
@@ -455,30 +523,6 @@ export const FilesTable = {
       });
     },
     /**
-     * Validates that a specific column is unpinned.
-     * @param columnID The ID of the column to check.
-     */
-    shouldUnpinnedColumn(columnID: string) {
-      cy.then(() =>
-        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
-          cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinned(null);
-        })
-      );
-    },
-    /**
-     * Validates the request sent to api on sorting functionality of a column.
-     * @param columnID The ID of the column to sort.
-     */
-    shouldRequestOnSort(columnID: string) {
-      FilesTable.actions.showAllColumns();
-      cy.intercept('POST', '**/documents/search', req => {
-        expect(req.body.sort).to.have.length(1);
-        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
-      }).as('sortRequest');
-      FilesTable.actions.sortColumn(columnID, false /*needIntercept*/);
-      cy.wait('@sortRequest');
-    },
-    /**
      * Validates the sorting functionality of a column with mocked data.
      * @param columnID The ID of the column to sort.
      */
@@ -516,6 +560,17 @@ export const FilesTable = {
           });
         });
       });
+    },
+    /**
+     * Validates that a specific column is unpinned.
+     * @param columnID The ID of the column to check.
+     */
+    shouldUnpinnedColumn(columnID: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinned(null);
+        })
+      );
     },
   },
 };

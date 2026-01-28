@@ -1,43 +1,44 @@
 /// <reference types="cypress"/>
 import 'support/commands';
-import { FilesTable } from 'pom/pages/FilesTable';
+import { data } from 'pom/shared/Data';
+import { CaseEntity_Files } from 'pom/pages/CaseEntity_Files';
 
 describe('CaseEntity - Files - Sort', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitFilesPage();
+    cy.visitCaseFilesPage(data.case.case);
   };
 
   it('Alphanumeric', () => {
     setupTest();
-    FilesTable.validations.shouldSortColumn('sample');
+    CaseEntity_Files.validations.shouldSortColumn('sample');
   });
 
   it('Number', () => {
     setupTest();
-    FilesTable.validations.shouldSortColumn('patient');
+    CaseEntity_Files.validations.shouldSortColumn('patient');
   });
 
   it('Tag', () => {
     setupTest();
-    FilesTable.validations.shouldSortColumn('format');
+    CaseEntity_Files.validations.shouldSortColumn('format');
   });
 
   it('Date', () => {
     setupTest();
-    FilesTable.validations.shouldSortColumn('created_on');
+    CaseEntity_Files.validations.shouldSortColumn('created_on');
   });
 
   it('Size', () => {
     setupTest();
-    FilesTable.validations.shouldSortColumn('size');
+    CaseEntity_Files.validations.shouldSortColumn('size');
   });
 
   it('Multiple', () => {
     setupTest();
-    FilesTable.actions.sortColumn('name');
-    FilesTable.actions.sortColumn('patient');
-    FilesTable.actions.sortColumn('patient');
-    FilesTable.validations.shouldHaveFirstRowValue('3', 'patient');
+    CaseEntity_Files.actions.sortColumn('name');
+    CaseEntity_Files.actions.sortColumn('patient');
+    CaseEntity_Files.actions.sortColumn('patient');
+    CaseEntity_Files.validations.shouldHaveFirstRowValue('3', 'patient');
   });
 });

@@ -6,7 +6,7 @@ import { CaseEntity_Variants_SNV_Table } from 'pom/pages/CaseEntity_Variants_SNV
 describe('Case Entity - Variants - SNV - Table - Custom query', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage('1', 'SNV', data.variantGermline.sqon);
+    cy.visitCaseVariantsPage(data.case.case, 'SNV', data.variantGermline.sqon);
   };
 
   it('Save icon', () => {

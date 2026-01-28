@@ -6,7 +6,7 @@ import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_
 describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage('1', 'SNV', data.variantGermline.sqon);
+    cy.visitCaseVariantsPage(data.case.case, 'SNV', data.variantGermline.sqon);
     CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton();
   };
 

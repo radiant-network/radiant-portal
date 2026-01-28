@@ -213,6 +213,13 @@ const tableColumns = [
 export const CaseEntity_Variants_SNV_Table = {
   actions: {
     /**
+     * Click the specific button to change table paging
+     * @param buttonName The button name to click (First | Last | Previous | Next | Select)
+     */
+    clickPaginationButton(buttonName: string) {
+      cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
+    },
+    /**
      * Clicks the link in a specific table cell for a given variant and column.
      * @param dataVariant The variant object.
      * @param columnID The ID of the column.
@@ -478,7 +485,56 @@ export const CaseEntity_Variants_SNV_Table = {
       );
     },
     /**
-     * Validates the request sent to api on sorting functionality of a column.
+     * Validates the sent requests to api on page change functionality.
+     * @param dataCase The case object.
+     */
+    shouldRequestOnPageChange(dataCase: any) {
+      cy.intercept('POST', '**/list', req => {
+        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.page_index).to.deep.equal(0);
+        req.continue();
+      }).as('listRequest1');
+      cy.visitCaseVariantsPage(dataCase.case, 'SNV');
+      cy.wait('@listRequest1');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/list', req => {
+        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.page_index).to.deep.equal(1);
+        req.continue();
+      }).as('listRequest2');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Next');
+      cy.wait('@listRequest2');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/list', req => {
+        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.page_index).to.deep.equal(2);
+        req.continue();
+      }).as('listRequest3');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Next');
+      cy.wait('@listRequest3');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/list', req => {
+        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.page_index).to.deep.equal(1);
+        req.continue();
+      }).as('listRequest4');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Previous');
+      cy.wait('@listRequest4');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/list', req => {
+        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.page_index).to.deep.equal(0);
+        req.continue();
+      }).as('listRequest5');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('First');
+      cy.wait('@listRequest5');
+    },
+    /**
+     * Validates the sent request to api on sorting functionality of a column.
      * @param columnID The ID of the column to sort.
      */
     shouldRequestOnSort(columnID: string) {

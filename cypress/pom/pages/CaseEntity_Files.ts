@@ -358,6 +358,19 @@ export const CaseEntity_Files = {
       );
     },
     /**
+     * Validates the sent request to api on sorting functionality of a column.
+     * @param columnID The ID of the column to sort.
+     */
+    shouldRequestOnSort(columnID: string) {
+      CaseEntity_Files.actions.showAllColumns();
+      cy.intercept('POST', '**/documents/search', req => {
+        expect(req.body.sort).to.have.length(1);
+        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
+      }).as('sortRequest');
+      CaseEntity_Files.actions.sortColumn(columnID, false /*needIntercept*/);
+      cy.wait('@sortRequest');
+    },
+    /**
      * Validates that all columns are displayed in the correct order in the table.
      */
     shouldShowAllColumns() {
@@ -447,30 +460,6 @@ export const CaseEntity_Files = {
       });
     },
     /**
-     * Validates that a specific column is unpinned.
-     * @param columnID The ID of the column to check.
-     */
-    shouldUnpinnedColumn(columnID: string) {
-      cy.then(() =>
-        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
-          cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinned(null);
-        })
-      );
-    },
-    /**
-     * Validates the request sent to api on sorting functionality of a column.
-     * @param columnID The ID of the column to sort.
-     */
-    shouldRequestOnSort(columnID: string) {
-      CaseEntity_Files.actions.showAllColumns();
-      cy.intercept('POST', '**/documents/search', req => {
-        expect(req.body.sort).to.have.length(1);
-        expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
-      }).as('sortRequest');
-      CaseEntity_Files.actions.sortColumn(columnID, false /*needIntercept*/);
-      cy.wait('@sortRequest');
-    },
-    /**
      * Validates the sorting functionality of a column with mocked data.
      * @param columnID The ID of the column to sort.
      */
@@ -508,6 +497,17 @@ export const CaseEntity_Files = {
           });
         });
       });
+    },
+    /**
+     * Validates that a specific column is unpinned.
+     * @param columnID The ID of the column to check.
+     */
+    shouldUnpinnedColumn(columnID: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldBePinned(null);
+        })
+      );
     },
   },
 };
