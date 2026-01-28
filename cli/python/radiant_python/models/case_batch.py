@@ -45,7 +45,7 @@ class CaseBatch(BaseModel):
     sequencing_experiments: Annotated[List[CaseSequencingExperimentBatch], Field(min_length=1)]
     status_code: StrictStr
     submitter_case_id: Optional[StrictStr] = None
-    tasks: Annotated[List[CaseTaskBatch], Field(min_length=1)]
+    tasks: List[CaseTaskBatch]
     type: StrictStr
     __properties: ClassVar[List[str]] = ["analysis_code", "category_code", "diagnostic_lab_code", "note", "ordering_organization_code", "ordering_physician", "patients", "primary_condition_code_system", "primary_condition_value", "priority_code", "project_code", "resolution_status_code", "sequencing_experiments", "status_code", "submitter_case_id", "tasks", "type"]
 
