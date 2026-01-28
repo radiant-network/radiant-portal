@@ -270,7 +270,7 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 			if !t.Equal(s.RunDate) {
 				different = true
 				r.addWarnings(
-					fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different run_date (%v <> %v).", key, s.RunDate, t),
+					fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different run_date (%v <> %v).", key, s.RunDate.UTC(), t.UTC()),
 					ExistingAliquotForSequencingLabCode,
 					r.getPath("run_date"),
 				)

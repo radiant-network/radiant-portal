@@ -1397,12 +1397,12 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 			},
 			{
 				Code:    "SEQ-004",
-				Message: "A sequencing with same ids (CQGC / S13225 / NA12891) has been found but with a different run_date (2021-08-16 20:00:00 -0400 EDT <> 0001-01-01 00:00:00 +0000 UTC).",
+				Message: "A sequencing with same ids (CQGC / S13225 / NA12891) has been found but with a different run_date (2021-08-17 00:00:00 +0000 UTC <> 0001-01-01 00:00:00 +0000 UTC).",
 				Path:    "sequencing_experiment[2].run_date",
 			},
 			{
 				Code:    "SEQ-004",
-				Message: "A sequencing with same ids (CQGC / S13224 / NA12892) has been found but with a different run_date (2021-08-16 20:00:00 -0400 EDT <> 2025-01-01 00:00:00 +0000 UTC).",
+				Message: "A sequencing with same ids (CQGC / S13224 / NA12892) has been found but with a different run_date (2021-08-17 00:00:00 +0000 UTC <> 2025-01-01 00:00:00 +0000 UTC).",
 				Path:    "sequencing_experiment[5].run_date",
 			},
 		}
