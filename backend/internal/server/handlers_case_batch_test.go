@@ -86,6 +86,59 @@ func TestPostCaseBatchHandler_Success(t *testing.T) {
 	assert.Equal(t, types.BatchStatusPending, response.Status)
 }
 
+func TestPostCaseBatchHandler_EmptyTasks(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{
+		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+			return &types.Batch{
+				ID:        uuid.NewString(),
+				BatchType: batchType,
+				Status:    types.BatchStatusPending,
+				CreatedOn: time.Now(),
+				Username:  username,
+				DryRun:    dryRun,
+			}, nil
+		},
+	}
+	auth := &testutils.MockAuth{Username: "testuser"}
+
+	router := gin.Default()
+	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	body := `{
+		"cases": [{
+			"submitter_case_id": "case1",
+			"type": "germline",
+			"status_code": "active",
+			"project_code": "proj1",
+			"category_code": "postnatal",
+			"patients": [{
+				"affected_status_code": "affected",
+				"submitter_patient_id": "p1",
+				"patient_organization_code": "org1",
+				"relation_to_proband_code": "proband"
+			}],
+			"sequencing_experiments": [{
+				"aliquot": "alq1",
+				"sample_organization_code": "org1",
+				"submitter_sample_id": "s1"
+			}],
+			"tasks": []
+		}]
+	}`
+	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusAccepted, w.Code)
+	var response types.CreateBatchResponse
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "case", response.BatchType)
+	assert.Equal(t, "testuser", response.Username)
+	assert.Equal(t, types.BatchStatusPending, response.Status)
+}
+
 func TestPostCaseBatchHandler_MissingRequiredFields(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}
@@ -381,7 +434,7 @@ func TestPostCaseBatchHandler_MissingTasks(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func TestPostCaseBatchHandler_EmptyTasks(t *testing.T) {
+func TestPostCaseBatchHandler_NoTasks(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
@@ -405,8 +458,7 @@ func TestPostCaseBatchHandler_EmptyTasks(t *testing.T) {
 				"aliquot": "alq1",
 				"sample_organization_code": "org1",
 				"submitter_sample_id": "s1"
-			}],
-			"tasks": []
+			}]
 		}]
 	}`
 	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))

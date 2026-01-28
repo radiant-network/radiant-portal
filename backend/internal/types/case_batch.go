@@ -19,7 +19,7 @@ type CaseBatch struct {
 	OrderingOrganizationCode   string                           `json:"ordering_organization_code,omitempty" toml:"ordering_organization_code"`
 	Patients                   []*CasePatientBatch              `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
 	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments" toml:"sequencing_experiments" binding:"required,min=1,dive,required"`
-	Tasks                      []*CaseTaskBatch                 `json:"tasks" toml:"tasks" binding:"required,min=1,dive,required"`
+	Tasks                      []*CaseTaskBatch                 `json:"tasks" toml:"tasks" binding:"required,dive,required"`
 }
 
 type CasePatientBatch struct {

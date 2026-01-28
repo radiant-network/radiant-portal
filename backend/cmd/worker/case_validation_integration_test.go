@@ -826,6 +826,88 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 	})
 }
 
+func Test_ProcessBatch_Case_Not_Dry_Run_Empty_Tasks(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload("Not_Dry_Run_No_Tasks")
+		payload[0].Tasks = []*types.CaseTaskBatch{}
+
+		case0 := *payload[0]
+
+		payload = append(payload, &case0)
+
+		payload[1].SubmitterCaseId = "Not_Dry_Run_No_Task_ReUse_SequencingExperiments_From_Existing_Case"
+		payload[1].Tasks = []*types.CaseTaskBatch{}
+		payload[1].SequencingExperiments = []*types.CaseSequencingExperimentBatch{
+			{
+				Aliquot:                "NA12892",
+				SampleOrganizationCode: "CQGC",
+				SubmitterSampleId:      "S13224",
+			},
+			{
+				Aliquot:                "NA12891",
+				SampleOrganizationCode: "CQGC",
+				SubmitterSampleId:      "S13225",
+			},
+			{
+				Aliquot:                "NA12878",
+				SampleOrganizationCode: "CQGC",
+				SubmitterSampleId:      "S13226",
+			},
+		}
+		payload[1].Patients = []*types.CasePatientBatch{
+			{
+				AffectedStatusCode:      "affected",
+				SubmitterPatientId:      "MRN-283775",
+				PatientOrganizationCode: "CHUSJ",
+				RelationToProbandCode:   "proband",
+			},
+			{
+				AffectedStatusCode:      "affected",
+				SubmitterPatientId:      "MRN-283774",
+				PatientOrganizationCode: "CHUSJ",
+				RelationToProbandCode:   "father",
+			},
+			{
+				AffectedStatusCode:      "affected",
+				SubmitterPatientId:      "MRN-283773",
+				PatientOrganizationCode: "CHUSJ",
+				RelationToProbandCode:   "mother",
+			},
+		}
+
+		createDocumentsForBatch(context, client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca0 []*types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Not_Dry_Run_No_Tasks").Find(&ca0)
+
+		assert.NotNil(t, ca0)
+		assert.Len(t, ca0, 1)
+		assert.GreaterOrEqual(t, ca0[0].ID, 1000)
+
+		var ca1 []*types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Not_Dry_Run_No_Task_ReUse_SequencingExperiments_From_Existing_Case").Find(&ca1)
+
+		assert.NotNil(t, ca1)
+		assert.Len(t, ca1, 1)
+		assert.GreaterOrEqual(t, ca1[0].ID, 1000)
+
+		var chse []*types.CaseHasSequencingExperiment
+		db.Table("case_has_sequencing_experiment").Where("case_id = ?", ca1[0].ID).Find(&chse)
+		assert.Len(t, chse, 3)
+
+		var tc []*types.TaskContext
+		db.Table("task_context").Where("case_id = ?", ca0[0].ID).Find(&tc)
+		assert.Len(t, tc, 0)
+
+		db.Table("task_context").Where("case_id = ?", ca1[0].ID).Find(&tc)
+		assert.Len(t, tc, 0)
+	})
+}
+
 func Test_ProcessBatch_Case_Template(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		t.Skip("Template test - implement specific error case tests as needed")
