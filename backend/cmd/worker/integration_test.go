@@ -215,6 +215,11 @@ func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
 				Message: "A patient with same ids (CHUSJ / MRN-283774) has been found but with a different sex_code (male <> female).",
 				Path:    "patient[2].sex_code",
 			},
+			{
+				Code:    "PATIENT-002",
+				Message: "A patient with same ids (CHUSJ / MRN-283774) has been found but with a different date_of_birth (1970-01-30 00:00:00 +0000 UTC <> 2025-01-30 00:00:00 +0000 UTC).",
+				Path:    "patient[2].date_of_birth",
+			},
 		}
 		errors := []types.BatchMessage{
 			{
@@ -231,6 +236,11 @@ func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
 				Code:    "PATIENT-003",
 				Message: "Organization ORG001 for patient 123456789!@#$%?&*()_+ does not exist.",
 				Path:    "patient[1].patient_organization_code",
+			},
+			{
+				Code:    "PATIENT-004",
+				Message: "Invalid field date_of_birth for patient (CQGC / ABC123456). Reason: missing value, date of birth is required.",
+				Path:    "patient[3].date_of_birth",
 			},
 			{
 				Code:    "PATIENT-005",
