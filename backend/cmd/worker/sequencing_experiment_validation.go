@@ -262,10 +262,15 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 			different = verifyIsDifferentField(s.RunAlias, r.SequencingExperiment.RunAlias.String(), r, key, "run_alias") || different
 			different = verifyIsDifferentField(s.CaptureKit, r.SequencingExperiment.CaptureKit.String(), r, key, "capture_kit") || different
 
-			if r.SequencingExperiment.RunDate != nil && !time.Time(*r.SequencingExperiment.RunDate).Equal(s.RunDate) {
+			t := time.Time{}
+			if r.SequencingExperiment.RunDate != nil {
+				t = time.Time(*r.SequencingExperiment.RunDate)
+			}
+
+			if !t.Equal(s.RunDate) {
 				different = true
 				r.addWarnings(
-					fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different run_date (%v <> %v).", key, r.SequencingExperiment.RunDate, s.RunDate),
+					fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different run_date (%v <> %v).", key, s.RunDate.UTC(), t.UTC()),
 					ExistingAliquotForSequencingLabCode,
 					r.getPath("run_date"),
 				)

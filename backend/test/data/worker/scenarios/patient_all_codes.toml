@@ -23,7 +23,7 @@ life_status_code = "alive"
 first_name = "John"
 last_name = "Doe"
 sex_code = "male"
-date_of_birth = "1980-01-01"
+date_of_birth = "9999-01-01" # Future date, should not trigger any info/warning/error
 jhn = "JHN123456"
 
 # Should trigger PATIENT-002 patient exist for the same org but a field is different
@@ -36,10 +36,11 @@ life_status_code = "alive"
 first_name = "Antoine"
 last_name = "Lefebvre"
 sex_code = "female"  # Different from existing record
-date_of_birth = "1970-01-30"
+date_of_birth = "2025-01-30"  # Different from existing record
 jhn = "LEF7001303889"
 
 # Should trigger PATIENT-005 Organisation type is not in this list : healthcare_provider, research_institute
+# Missing date_of_birth should trigger PATIENT-004
 [[patients]]
 submitter_patient_id = "ABC123456"
 submitter_patient_id_type = "mrn"
@@ -48,7 +49,6 @@ life_status_code = "alive"
 first_name = "Juliette"
 last_name = "Gagnon"
 sex_code = "female"
-date_of_birth = "2012-02-03"
 jhn = "GAG1202030278"
 
 # Should trigger PATIENT-006 Patient appears multiple times in the batch
