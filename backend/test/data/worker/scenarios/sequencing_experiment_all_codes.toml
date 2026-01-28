@@ -33,7 +33,7 @@ status_code = "completed"
 
 # Should trigger SEQ-004 identical sequencing experiment exists but a field is different
 # (2, 2, 'completed', 'NA12891', 6, 1618, 'A00516_0170', '2021-08-17', 'SureSelect Custom DNA Target', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina')
-[[sequencing_experiments]] # SEQ-002 null run date
+[[sequencing_experiments]] # SEQ-004 null run date
 aliquot = "NA12891"
 sample_organization_code = "CQGC"
 submitter_sample_id = "S13225"
