@@ -121,7 +121,7 @@ func Test_VerifyIdentical_DifferentField_AddsWarning(t *testing.T) {
 	}
 	verifyIsDifferentField(1, 2, r, "key", "mock_field")
 	assert.Len(t, r.Warnings, 1)
-	assert.Equal(t, ExistingAliquotForSequencingLabCode, r.Warnings[0].Code)
+	assert.Equal(t, "SEQ-004", r.Warnings[0].Code)
 	assert.Equal(t, "A sequencing with same ids (key) has been found but with a different mock_field (1 <> 2).", r.Warnings[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].mock_field", r.Warnings[0].Path)
 }
@@ -140,7 +140,7 @@ func Test_VerifyStringField_RequiredMissing(t *testing.T) {
 	}
 	r.verifyStringField("", "aliquot", 10, nil, "", nil, true)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field aliquot for sequencing_experiment. Reason: field is missing.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].aliquot", r.Errors[0].Path)
 }
@@ -151,7 +151,7 @@ func Test_VerifyStringField_TooLong(t *testing.T) {
 	}
 	r.verifyStringField("0123456789", "aliquot", 5, nil, "", nil, true)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field aliquot for sequencing_experiment. Reason: field is too long, maximum length allowed is 5.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].aliquot", r.Errors[0].Path)
 }
@@ -163,7 +163,7 @@ func Test_VerifyStringField_RegexpMismatch(t *testing.T) {
 	re := regexp.MustCompile(`^[A-Z]+$`)
 	r.verifyStringField("abc", "mock", 10, re, "^[A-Z]+$", nil, true)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field mock for sequencing_experiment. Reason: does not match the regular expression ^[A-Z]+$.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].mock", r.Errors[0].Path)
 }
@@ -192,7 +192,7 @@ func Test_ValidateExperimentalStrategyCodeField_NotAllowed(t *testing.T) {
 	err := r.validateExperimentalStrategyCodeField()
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field experimental_strategy_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].experimental_strategy_code", r.Errors[0].Path)
 }
@@ -220,7 +220,7 @@ func Test_ValidateSequencingReadTechnologyCodeField_NotAllowed(t *testing.T) {
 	err := r.validateSequencingReadTechnologyCodeField()
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field sequencing_read_technology_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].sequencing_read_technology_code", r.Errors[0].Path)
 }
@@ -248,7 +248,7 @@ func Test_ValidateStatusCodeField_NotAllowed(t *testing.T) {
 	err := r.validateStatusCodeField()
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field status_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].status_code", r.Errors[0].Path)
 }
@@ -276,7 +276,7 @@ func Test_ValidatePlatformCodeField_NotAllowed(t *testing.T) {
 	err := r.validatePlatformCodeField()
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field platform_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].platform_code", r.Errors[0].Path)
 }
@@ -298,7 +298,7 @@ func Test_ValidateRunDateField_FutureDateAddsError(t *testing.T) {
 	r.SequencingExperiment.RunDate = (*types.DateRFC3339)(&future)
 	r.validateRunDateField()
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field run_date for sequencing_experiment (ORG / S1 / A1). Reason: must be a past date.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].run_date", r.Errors[0].Path)
 }
@@ -339,7 +339,7 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 	err := r.validateExistingAliquotForSequencingLabCode()
 	assert.NoError(t, err)
 	assert.Len(t, r.Infos, 1)
-	assert.Equal(t, IdenticalSequencingExperimentInDBCode, r.Infos[0].Code)
+	assert.Equal(t, "SEQ-001", r.Infos[0].Code)
 	assert.Equal(t, "Sequencing (ORG / S1 / A1) already exists, skipped.", r.Infos[0].Message)
 	assert.Equal(t, "sequencing_experiment[0]", r.Infos[0].Path)
 }
@@ -358,7 +358,7 @@ func Test_ValidateSequencingLabCode_UnknownOrg_AddsError(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, UnknownSequencingLabCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-003", r.Errors[0].Code)
 	assert.Equal(t, "Sequencing lab LABX for sequencing A1 does not exist.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].sequencing_lab_code", r.Errors[0].Path)
 }
@@ -417,10 +417,10 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 	assert.NotEmpty(t, r.Warnings)
 	assert.Empty(t, r.Errors)
 	assert.Len(t, r.Warnings, 9)
-	assert.Equal(t, ExistingAliquotForSequencingLabCode, r.Warnings[0].Code)
+	assert.Equal(t, "SEQ-004", r.Warnings[0].Code)
 	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different submitter_sample_id (S1 <> S2).", r.Warnings[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].submitter_sample_id", r.Warnings[0].Path)
-	assert.Equal(t, ExistingAliquotForSequencingLabCode, r.Warnings[7].Code)
+	assert.Equal(t, "SEQ-004", r.Warnings[7].Code)
 	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different capture_kit (OTHER <> CK1).", r.Warnings[7].Message)
 	assert.Equal(t, "sequencing_experiment[0].capture_kit", r.Warnings[7].Path)
 }
@@ -440,7 +440,7 @@ func Test_ValidateUnknownSampleForOrganizationCode_Nil_AddsError(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, UnknownSampleForOrganizationCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-005", r.Errors[0].Code)
 	assert.Equal(t, "Sample (ORG / S1) does not exist.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
 }
@@ -536,7 +536,7 @@ func Test_ValidateSequencingExperimentBatch_DuplicateInBatch_AddsError(t *testin
 	assert.Len(t, records, 2)
 	assert.Empty(t, records[0].Errors)
 	assert.Equal(t, 1, len(records[1].Errors))
-	assert.Equal(t, IdenticalSequencingExperimentInBatchCode, records[1].Errors[0].Code)
+	assert.Equal(t, "SEQ-006", records[1].Errors[0].Code)
 	assert.Equal(t, "Sequencing_experiment (ORG / S1 / A1) appears multiple times in the batch.", records[1].Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[1]", records[1].Errors[0].Path)
 }
