@@ -12,6 +12,10 @@ type MockOrganizationRepository struct {
 	GetOrganizationByCodeFunc func(code string) (*types.Organization, error)
 }
 
+func (m *MockOrganizationRepository) GetOrganizationById(id int) (*types.Organization, error) {
+	return nil, nil
+}
+
 func (m *MockOrganizationRepository) GetOrganizationByCode(code string) (*types.Organization, error) {
 	if m.GetOrganizationByCodeFunc != nil {
 		return m.GetOrganizationByCodeFunc(code)
@@ -40,6 +44,10 @@ type MockSamplesRepository struct {
 	GetSampleBySubmitterSampleIdFunc func(organizationId int, submitterSampleId string) (*types.Sample, error)
 	CreateSampleFunc                 func(newSample *types.Sample) (*types.Sample, error)
 	GetTypeCodesFunc                 func() ([]string, error)
+}
+
+func (m *MockSamplesRepository) GetSampleById(id int) (*types.Sample, error) {
+	return nil, nil
 }
 
 func (m *MockSamplesRepository) GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*types.Sample, error) {

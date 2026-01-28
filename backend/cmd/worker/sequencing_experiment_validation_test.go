@@ -13,6 +13,14 @@ import (
 
 type mockOrgDAO struct{ mock.Mock }
 
+func (m *mockOrgDAO) GetOrganizationById(id int) (*types.Organization, error) {
+	args := m.Called(id)
+	if s, ok := args.Get(0).(*types.Organization); ok {
+		return s, args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
 func (m *mockOrgDAO) GetOrganizationByCode(code string) (*types.Organization, error) {
 	args := m.Called(code)
 	if org, ok := args.Get(0).(*types.Organization); ok {
@@ -29,6 +37,14 @@ func (m *mockSampleDAO) CreateSample(*types.Sample) (*types.Sample, error) {
 
 func (m *mockSampleDAO) GetTypeCodes() ([]string, error) {
 	return nil, nil
+}
+
+func (m *mockSampleDAO) GetSampleById(id int) (*types.Sample, error) {
+	args := m.Called(id)
+	if s, ok := args.Get(0).(*types.Sample); ok {
+		return s, args.Error(1)
+	}
+	return nil, args.Error(1)
 }
 
 func (m *mockSampleDAO) GetSampleBySubmitterSampleId(orgID int, submitterID string) (*types.Sample, error) {
@@ -103,11 +119,11 @@ func Test_VerifyIdentical_DifferentField_AddsWarning(t *testing.T) {
 	r := &SequencingExperimentValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
-	verifyIsDifferentField(1, 2, r, "key", "sample_id")
+	verifyIsDifferentField(1, 2, r, "key", "mock_field")
 	assert.Len(t, r.Warnings, 1)
-	assert.Equal(t, ExistingAliquotForSequencingLabCode, r.Warnings[0].Code)
-	assert.Equal(t, "A sequencing with same ids (key) has been found but with a different sample_id (1 <> 2).", r.Warnings[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Warnings[0].Path)
+	assert.Equal(t, "SEQ-004", r.Warnings[0].Code)
+	assert.Equal(t, "A sequencing with same ids (key) has been found but with a different mock_field (1 <> 2).", r.Warnings[0].Message)
+	assert.Equal(t, "sequencing_experiment[0].mock_field", r.Warnings[0].Path)
 }
 
 func Test_VerifyIdentical_AddsInfo(t *testing.T) {
@@ -124,9 +140,9 @@ func Test_VerifyStringField_RequiredMissing(t *testing.T) {
 	}
 	r.verifyStringField("", "aliquot", 10, nil, "", nil, true)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field aliquot for sequencing_experiment. Reason: field is missing.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
+	assert.Equal(t, "sequencing_experiment[0].aliquot", r.Errors[0].Path)
 }
 
 func Test_VerifyStringField_TooLong(t *testing.T) {
@@ -135,9 +151,9 @@ func Test_VerifyStringField_TooLong(t *testing.T) {
 	}
 	r.verifyStringField("0123456789", "aliquot", 5, nil, "", nil, true)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field aliquot for sequencing_experiment. Reason: field is too long, maximum length allowed is 5.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
+	assert.Equal(t, "sequencing_experiment[0].aliquot", r.Errors[0].Path)
 }
 
 func Test_VerifyStringField_RegexpMismatch(t *testing.T) {
@@ -147,9 +163,9 @@ func Test_VerifyStringField_RegexpMismatch(t *testing.T) {
 	re := regexp.MustCompile(`^[A-Z]+$`)
 	r.verifyStringField("abc", "mock", 10, re, "^[A-Z]+$", nil, true)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field mock for sequencing_experiment. Reason: does not match the regular expression ^[A-Z]+$.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
+	assert.Equal(t, "sequencing_experiment[0].mock", r.Errors[0].Path)
 }
 
 func Test_ValidateExperimentalStrategyCodeField_Allowed(t *testing.T) {
@@ -176,9 +192,9 @@ func Test_ValidateExperimentalStrategyCodeField_NotAllowed(t *testing.T) {
 	err := r.validateExperimentalStrategyCodeField()
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field experimental_strategy_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
+	assert.Equal(t, "sequencing_experiment[0].experimental_strategy_code", r.Errors[0].Path)
 }
 
 func Test_ValidateSequencingReadTechnologyCodeField_Allowed(t *testing.T) {
@@ -204,9 +220,9 @@ func Test_ValidateSequencingReadTechnologyCodeField_NotAllowed(t *testing.T) {
 	err := r.validateSequencingReadTechnologyCodeField()
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field sequencing_read_technology_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
+	assert.Equal(t, "sequencing_experiment[0].sequencing_read_technology_code", r.Errors[0].Path)
 }
 
 func Test_ValidateStatusCodeField_Allowed(t *testing.T) {
@@ -232,9 +248,9 @@ func Test_ValidateStatusCodeField_NotAllowed(t *testing.T) {
 	err := r.validateStatusCodeField()
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field status_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
+	assert.Equal(t, "sequencing_experiment[0].status_code", r.Errors[0].Path)
 }
 
 func Test_ValidatePlatformCodeField_Allowed(t *testing.T) {
@@ -260,9 +276,9 @@ func Test_ValidatePlatformCodeField_NotAllowed(t *testing.T) {
 	err := r.validatePlatformCodeField()
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field platform_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
+	assert.Equal(t, "sequencing_experiment[0].platform_code", r.Errors[0].Path)
 }
 
 func Test_ValidateRunDateField_PastDateOK(t *testing.T) {
@@ -282,9 +298,9 @@ func Test_ValidateRunDateField_FutureDateAddsError(t *testing.T) {
 	r.SequencingExperiment.RunDate = (*types.DateRFC3339)(&future)
 	r.validateRunDateField()
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, InvalidFieldValueCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
 	assert.Equal(t, "Invalid field run_date for sequencing_experiment (ORG / S1 / A1). Reason: must be a past date.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
+	assert.Equal(t, "sequencing_experiment[0].run_date", r.Errors[0].Path)
 }
 
 func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
@@ -298,7 +314,6 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
 
 	seqDAO := &mockSeqExpDAO{}
-
 	seqDAO.On("GetSequencingExperimentByAliquot", "A1").
 		Return([]types.SequencingExperiment{
 			{
@@ -308,14 +323,23 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 				SequencingLabID: 70,
 			},
 		}, nil)
+
+	orgDAO := &mockOrgDAO{}
+	orgDAO.On("GetOrganizationById", 70).Return(&types.Organization{Code: "ORG"}, nil)
+
+	sampleDAO := &mockSampleDAO{}
+	sampleDAO.On("GetSampleById", 10).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationId: 70}, nil)
+
 	r.Context = &BatchValidationContext{
 		SeqExpRepo: seqDAO,
+		OrgRepo:    orgDAO,
+		SampleRepo: sampleDAO,
 	}
 
 	err := r.validateExistingAliquotForSequencingLabCode()
 	assert.NoError(t, err)
 	assert.Len(t, r.Infos, 1)
-	assert.Equal(t, IdenticalSequencingExperimentInDBCode, r.Infos[0].Code)
+	assert.Equal(t, "SEQ-001", r.Infos[0].Code)
 	assert.Equal(t, "Sequencing (ORG / S1 / A1) already exists, skipped.", r.Infos[0].Message)
 	assert.Equal(t, "sequencing_experiment[0]", r.Infos[0].Path)
 }
@@ -334,9 +358,9 @@ func Test_ValidateSequencingLabCode_UnknownOrg_AddsError(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, UnknownSequencingLabCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-003", r.Errors[0].Code)
 	assert.Equal(t, "Sequencing lab LABX for sequencing A1 does not exist.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
+	assert.Equal(t, "sequencing_experiment[0].sequencing_lab_code", r.Errors[0].Path)
 }
 
 func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarnings(t *testing.T) {
@@ -375,8 +399,16 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 			},
 		}, nil)
 
+	orgDAO := &mockOrgDAO{}
+	orgDAO.On("GetOrganizationById", 70).Return(&types.Organization{Code: "ORG", ID: 70}, nil)
+
+	sampleDAO := &mockSampleDAO{}
+	sampleDAO.On("GetSampleById", 1).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationId: 70}, nil)
+
 	r.Context = &BatchValidationContext{
 		SeqExpRepo: seqDAO,
+		OrgRepo:    orgDAO,
+		SampleRepo: sampleDAO,
 	}
 
 	err := r.validateExistingAliquotForSequencingLabCode()
@@ -385,12 +417,12 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 	assert.NotEmpty(t, r.Warnings)
 	assert.Empty(t, r.Errors)
 	assert.Len(t, r.Warnings, 9)
-	assert.Equal(t, ExistingAliquotForSequencingLabCode, r.Warnings[0].Code)
-	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different sample_id (1 <> 99).", r.Warnings[0].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Warnings[0].Path)
-	assert.Equal(t, ExistingAliquotForSequencingLabCode, r.Warnings[7].Code)
+	assert.Equal(t, "SEQ-004", r.Warnings[0].Code)
+	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different submitter_sample_id (S1 <> S2).", r.Warnings[0].Message)
+	assert.Equal(t, "sequencing_experiment[0].submitter_sample_id", r.Warnings[0].Path)
+	assert.Equal(t, "SEQ-004", r.Warnings[7].Code)
 	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different capture_kit (OTHER <> CK1).", r.Warnings[7].Message)
-	assert.Equal(t, "sequencing_experiment[0]", r.Warnings[7].Path)
+	assert.Equal(t, "sequencing_experiment[0].capture_kit", r.Warnings[7].Path)
 }
 
 func Test_ValidateUnknownSampleForOrganizationCode_Nil_AddsError(t *testing.T) {
@@ -408,7 +440,7 @@ func Test_ValidateUnknownSampleForOrganizationCode_Nil_AddsError(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, UnknownSampleForOrganizationCode, r.Errors[0].Code)
+	assert.Equal(t, "SEQ-005", r.Errors[0].Code)
 	assert.Equal(t, "Sample (ORG / S1) does not exist.", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0]", r.Errors[0].Path)
 }
@@ -504,7 +536,7 @@ func Test_ValidateSequencingExperimentBatch_DuplicateInBatch_AddsError(t *testin
 	assert.Len(t, records, 2)
 	assert.Empty(t, records[0].Errors)
 	assert.Equal(t, 1, len(records[1].Errors))
-	assert.Equal(t, IdenticalSequencingExperimentInBatchCode, records[1].Errors[0].Code)
+	assert.Equal(t, "SEQ-006", records[1].Errors[0].Code)
 	assert.Equal(t, "Sequencing_experiment (ORG / S1 / A1) appears multiple times in the batch.", records[1].Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[1]", records[1].Errors[0].Path)
 }
