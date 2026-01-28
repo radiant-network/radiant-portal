@@ -223,6 +223,10 @@ func (m *CaseValidationMockRepo) GetTaskHasDocumentByDocumentId(docId int) ([]*t
 	return nil, nil
 }
 
+func (m *CaseValidationMockRepo) GetOrganizationById(id int) (*types.Organization, error) {
+	return nil, nil
+}
+
 // -----------------------------------------------------------------------------
 // Section: Helper Methods Tests
 // -----------------------------------------------------------------------------
@@ -285,6 +289,10 @@ func (m *ResolutionStatusMockRepo) GetResolutionStatusCodes() ([]string, error) 
 
 type SamplesMockRepo struct {
 	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(organizationCode string, submitterSampleId string) (*types.Sample, error)
+}
+
+func (m *SamplesMockRepo) GetSampleById(id int) (*repository.Sample, error) {
+	return nil, nil
 }
 
 func (m *SamplesMockRepo) GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*types.Sample, error) {

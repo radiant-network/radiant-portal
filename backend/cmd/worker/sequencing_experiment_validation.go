@@ -64,8 +64,11 @@ func (r *SequencingExperimentValidationRecord) GetResourceType() string {
 	return types.SequencingExperimentBatchType
 }
 
-func (r *SequencingExperimentValidationRecord) getPath() string {
-	return fmt.Sprintf("sequencing_experiment[%d]", r.Index)
+func (r *SequencingExperimentValidationRecord) getPath(fieldName string) string {
+	if fieldName == "" {
+		return fmt.Sprintf("sequencing_experiment[%d]", r.Index)
+	}
+	return fmt.Sprintf("sequencing_experiment[%d].%s", r.Index, fieldName)
 }
 
 func (r *SequencingExperimentValidationRecord) getResId() []string {
@@ -102,19 +105,19 @@ func (r *SequencingExperimentValidationRecord) verifyStringField(value string, f
 	if value == "" {
 		if isRequired {
 			msg := formatInvalidField(r, fieldName, "field is missing", resourceIDs)
-			r.addErrors(msg, InvalidFieldValueCode, r.getPath())
+			r.addErrors(msg, InvalidFieldValueCode, r.getPath(fieldName))
 		}
 		return
 	}
 
 	if len(value) > maxLength {
 		msg := formatFieldTooLong(r, fieldName, maxLength, resourceIDs)
-		r.addErrors(msg, InvalidFieldValueCode, r.getPath())
+		r.addErrors(msg, InvalidFieldValueCode, r.getPath(fieldName))
 	}
 
 	if re != nil && !re.MatchString(value) {
 		msg := formatFieldRegexpMatch(r, fieldName, reSrc, resourceIDs)
-		r.addErrors(msg, InvalidFieldValueCode, r.getPath())
+		r.addErrors(msg, InvalidFieldValueCode, r.getPath(fieldName))
 	}
 }
 
@@ -123,27 +126,29 @@ func (r *SequencingExperimentValidationRecord) validateAliquotField() {
 }
 
 func (r *SequencingExperimentValidationRecord) validateExperimentalStrategyCodeField() error {
-	r.verifyStringField(r.SequencingExperiment.ExperimentalStrategyCode, "experimental_strategy_code", TextMaxLength, nil, "", r.getResId(), true)
+	fieldName := "experimental_strategy_code"
+	r.verifyStringField(r.SequencingExperiment.ExperimentalStrategyCode, fieldName, TextMaxLength, nil, "", r.getResId(), true)
 
 	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetExperimentalStrategy)
 	if err != nil {
 		return fmt.Errorf("error fetching experimental strategy codes: %w", err)
 	}
 	if !slices.Contains(codes, r.SequencingExperiment.ExperimentalStrategyCode) {
-		r.addErrors(formatInvalidField(r, "experimental_strategy_code", "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath())
+		r.addErrors(formatInvalidField(r, fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
 
 func (r *SequencingExperimentValidationRecord) validateSequencingReadTechnologyCodeField() error {
-	r.verifyStringField(r.SequencingExperiment.SequencingReadTechnologyCode, "sequencing_read_technology_code", TextMaxLength, nil, "", r.getResId(), true)
+	fieldName := "sequencing_read_technology_code"
+	r.verifyStringField(r.SequencingExperiment.SequencingReadTechnologyCode, fieldName, TextMaxLength, nil, "", r.getResId(), true)
 
 	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetSequencingReadTechnology)
 	if err != nil {
 		return fmt.Errorf("error fetching sequencing read technology codes: %w", err)
 	}
 	if !slices.Contains(codes, r.SequencingExperiment.SequencingReadTechnologyCode) {
-		r.addErrors(formatInvalidField(r, "sequencing_read_technology_code", "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath())
+		r.addErrors(formatInvalidField(r, fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
@@ -165,11 +170,12 @@ func (r *SequencingExperimentValidationRecord) validateRunDateField() {
 		return
 	}
 
+	fieldName := "run_date"
 	resIds := []string{r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String()}
 	now := time.Now()
 
 	if time.Time(*r.SequencingExperiment.RunDate).After(now) {
-		r.addErrors(formatInvalidField(r, "run_date", "must be a past date", resIds), InvalidFieldValueCode, r.getPath())
+		r.addErrors(formatInvalidField(r, fieldName, "must be a past date", resIds), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 }
 
@@ -178,14 +184,16 @@ func (r *SequencingExperimentValidationRecord) validateRunNameField() {
 }
 
 func (r *SequencingExperimentValidationRecord) validateStatusCodeField() error {
-	r.verifyStringField(r.SequencingExperiment.StatusCode, "status_code", TextMaxLength, nil, "", r.getResId(), true)
+	fieldName := "status_code"
+	r.verifyStringField(r.SequencingExperiment.StatusCode, fieldName, TextMaxLength, nil, "", r.getResId(), true)
 
 	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetStatus)
 	if err != nil {
 		return fmt.Errorf("error fetching status codes: %w", err)
 	}
+
 	if !slices.Contains(codes, r.SequencingExperiment.StatusCode) {
-		r.addErrors(formatInvalidField(r, "status_code", "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath())
+		r.addErrors(formatInvalidField(r, fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
@@ -195,21 +203,22 @@ func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error
 		r.addErrors(
 			fmt.Sprintf("Sequencing lab %s for sequencing %s does not exist.", r.SequencingExperiment.SequencingLabCode, r.SequencingExperiment.Aliquot.String()),
 			UnknownSequencingLabCode,
-			r.getPath(),
+			r.getPath("sequencing_lab_code"),
 		)
 	}
 	return nil
 }
 
 func (r *SequencingExperimentValidationRecord) validatePlatformCodeField() error {
-	r.verifyStringField(r.SequencingExperiment.PlatformCode, "platform_code", TextMaxLength, TextRegExpCompiled, TextRegExp, r.getResId(), true)
+	fieldName := "platform_code"
+	r.verifyStringField(r.SequencingExperiment.PlatformCode, fieldName, TextMaxLength, TextRegExpCompiled, TextRegExp, r.getResId(), true)
 
 	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetPlatform)
 	if err != nil {
 		return fmt.Errorf("error fetching platform codes: %w", err)
 	}
 	if !slices.Contains(codes, r.SequencingExperiment.PlatformCode) {
-		r.addErrors(formatInvalidField(r, "platform_code", "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath())
+		r.addErrors(formatInvalidField(r, fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
@@ -225,8 +234,23 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 	}
 	key := fmt.Sprintf("%s / %s / %s", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String())
 	for _, s := range seqExps {
+
+		sample, err := r.Context.SampleRepo.GetSampleById(s.SampleID)
+		if err != nil {
+			return fmt.Errorf("error fetching sample by id %d: %w", s.SampleID, err)
+		}
+		if sample == nil {
+			continue
+		}
+
+		sampleOrg, err := r.Context.OrgRepo.GetOrganizationById(sample.OrganizationId)
+		if err != nil {
+			return fmt.Errorf("error fetching organization by id %d: %w", sample.OrganizationId, err)
+		}
+
 		if s.SequencingLabID == *r.SequencingLabID {
-			different := verifyIsDifferentField(s.SampleID, *r.SampleID, r, key, "sample_id")
+			different := verifyIsDifferentField(sample.SubmitterSampleId, r.SequencingExperiment.SubmitterSampleId.String(), r, key, "submitter_sample_id")
+			different = verifyIsDifferentField(sampleOrg.Code, r.SequencingExperiment.SampleOrganizationCode, r, key, "sample_organization_code") || different
 			different = verifyIsDifferentField(s.StatusCode, r.SequencingExperiment.StatusCode, r, key, "status_code") || different
 			different = verifyIsDifferentField(s.ExperimentalStrategyCode, r.SequencingExperiment.ExperimentalStrategyCode, r, key, "experimental_strategy_code") || different
 			different = verifyIsDifferentField(s.SequencingReadTechnologyCode, r.SequencingExperiment.SequencingReadTechnologyCode, r, key, "sequencing_read_technology_code") || different
@@ -240,7 +264,7 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 				r.addWarnings(
 					fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different run_date (%v <> %v).", key, r.SequencingExperiment.RunDate, s.RunDate),
 					ExistingAliquotForSequencingLabCode,
-					r.getPath(),
+					r.getPath("run_date"),
 				)
 			}
 
@@ -248,7 +272,7 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 				r.addInfos(
 					fmt.Sprintf("Sequencing (%s / %s / %s) already exists, skipped.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId, r.SequencingExperiment.Aliquot),
 					IdenticalSequencingExperimentInDBCode,
-					r.getPath(),
+					r.getPath(""),
 				)
 				r.Skipped = true
 			}
@@ -263,7 +287,7 @@ func (r *SequencingExperimentValidationRecord) validateUnknownSampleForOrganizat
 		r.addErrors(
 			fmt.Sprintf("Sample (%s / %s) does not exist.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId),
 			UnknownSampleForOrganizationCode,
-			r.getPath(),
+			r.getPath(""),
 		)
 	}
 	return nil
@@ -276,7 +300,7 @@ func verifyIsDifferentField[T comparable](left T, right T, r *SequencingExperime
 
 	msg := fmt.Sprintf("A sequencing with same ids (%s) has been found but with a different %s (%v <> %v).", key, fieldName, left, right)
 
-	r.addWarnings(msg, ExistingAliquotForSequencingLabCode, r.getPath())
+	r.addWarnings(msg, ExistingAliquotForSequencingLabCode, r.getPath(fieldName))
 	r.Skipped = true
 	return true
 }

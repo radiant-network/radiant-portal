@@ -1383,29 +1383,29 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 			{
 				Code:    "SEQ-004",
 				Message: "A sequencing with same ids (CQGC / S13225 / NA12891) has been found but with a different status_code (completed <> draft).",
-				Path:    "sequencing_experiment[2]",
+				Path:    "sequencing_experiment[2].status_code",
 			},
 		}
 		errors := []types.BatchMessage{
 			{
 				Code:    "SEQ-002",
 				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: does not match the regular expression ^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$.",
-				Path:    "sequencing_experiment[1]",
+				Path:    "sequencing_experiment[1].platform_code",
 			},
 			{
 				Code:    "SEQ-002",
 				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: value not allowed.",
-				Path:    "sequencing_experiment[1]",
+				Path:    "sequencing_experiment[1].platform_code",
 			},
 			{
 				Code:    "SEQ-002",
 				Message: "Invalid field run_alias for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: field is too long, maximum length allowed is 100.",
-				Path:    "sequencing_experiment[1]",
+				Path:    "sequencing_experiment[1].run_alias",
 			},
 			{
 				Code:    "SEQ-003",
 				Message: "Sequencing lab CQGCC for sequencing ABCD1 does not exist.",
-				Path:    "sequencing_experiment[1]",
+				Path:    "sequencing_experiment[1].sequencing_lab_code",
 			},
 			{
 				Code:    "SEQ-005",
