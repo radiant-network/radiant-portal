@@ -7,7 +7,7 @@ import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 describe('Case Entity - Variants - SNV - Table - Hyperlinks', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage('1', 'SNV', data.variantGermline.sqon);
+    cy.visitCaseVariantsPage(data.case.case, 'SNV', data.variantGermline.sqon);
     CaseEntity_Variants_SNV_Table.actions.showAllColumns();
   };
 

@@ -43,6 +43,7 @@ const PaginationFirst = ({ className, ...props }: React.ComponentProps<typeof Pa
     <PaginationLink
       aria-label={t('common.pagination.aria.first')}
       className={cn(defaultPaginationStyle, 'border-none shadow-none', className)}
+      data-cy="PaginationFirst"
       {...props}
     >
       <ChevronsLeft className="h-4 w-4" />
@@ -58,6 +59,7 @@ const PaginationLast = ({ className, ...props }: React.ComponentProps<typeof Pag
     <PaginationLink
       aria-label={t('common.pagination.aria.last')}
       className={cn(defaultPaginationStyle, 'border-none shadow-none', className)}
+      data-cy="PaginationLast"
       {...props}
     >
       <ChevronsRight className="h-4 w-4" />
@@ -73,6 +75,7 @@ const PaginationPrevious = ({ className, ...props }: React.ComponentProps<typeof
     <PaginationLink
       aria-label={t('common.pagination.aria.previous')}
       className={cn(defaultPaginationStyle, className)}
+      data-cy="PaginationPrevious"
       {...props}
     >
       <span>{t('common.pagination.previous')}</span>
@@ -87,6 +90,7 @@ const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof Pag
     <PaginationLink
       aria-label={t('common.pagination.aria.next')}
       className={cn(defaultPaginationStyle, className)}
+      data-cy="PaginationNext"
       {...props}
     >
       <span>{t('common.pagination.next')}</span>
@@ -127,7 +131,7 @@ const PaginationPageSize = ({
         onPageSizeChange(Number(value));
       }}
     >
-      <SelectTrigger className={cn(defaultPaginationStyle, className)}>
+      <SelectTrigger className={cn(defaultPaginationStyle, className)} data-cy="PaginationSelect">
         <SelectValue>{t('common.pagination.size', { size: pageSize })}</SelectValue>
       </SelectTrigger>
       <SelectContent className="min-w-0 ">

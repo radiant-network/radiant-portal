@@ -190,6 +190,13 @@ const tableColumns = [
 export const CasesTable = {
   actions: {
     /**
+     * Click the specific button to change table paging
+     * @param buttonName The button name to click (First | Last | Previous | Next | Select)
+     */
+    clickPaginationButton(buttonName: string) {
+      cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
+    },
+    /**
      * Clicks the link in a specific table cell for a given case and column.
      * @param dataCase The case object.
      * @param columnID The ID of the column.
@@ -411,7 +418,55 @@ export const CasesTable = {
       );
     },
     /**
-     * Validates the request sent to api on search selecting functionality.
+     * Validates the sent requests to api on page change functionality.
+     */
+    shouldRequestOnPageChange() {
+      cy.intercept('POST', '**/search', req => {
+        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.page_index).to.deep.equal(0);
+        req.continue();
+      }).as('searchRequest1');
+      cy.visitCasesPage();
+      cy.wait('@searchRequest1');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/search', req => {
+        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.page_index).to.deep.equal(1);
+        req.continue();
+      }).as('searchRequest2');
+      CasesTable.actions.clickPaginationButton('Next');
+      cy.wait('@searchRequest2');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/search', req => {
+        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.page_index).to.deep.equal(0);
+        req.continue();
+      }).as('searchRequest3');
+      CasesTable.actions.clickPaginationButton('Previous');
+      cy.wait('@searchRequest3');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/search', req => {
+        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.page_index).to.deep.equal(1);
+        req.continue();
+      }).as('searchRequest4');
+      CasesTable.actions.clickPaginationButton('Next');
+      cy.wait('@searchRequest4');
+      cy.waitWhileLoad(60*1000);
+
+      cy.intercept('POST', '**/search', req => {
+        expect(req.body.limit).to.deep.equal(20);
+        expect(req.body.page_index).to.deep.equal(0);
+        req.continue();
+      }).as('searchRequest5');
+      CasesTable.actions.clickPaginationButton('First');
+      cy.wait('@searchRequest5');
+    },
+    /**
+     * Validates the sent request to api on search selecting functionality.
      */
     shouldRequestOnSearchSelect() {
       const caseField = tableColumns.find(col => col.id === 'case')?.apiField || '';
@@ -425,7 +480,7 @@ export const CasesTable = {
       cy.wait('@searchRequest');
     },
     /**
-     * Validates the request sent to api on search typing functionality.
+     * Validates the sent request to api on search typing functionality.
      */
     shouldRequestOnSearchTyping() {
       const caseValue = data.case.case;
@@ -434,7 +489,7 @@ export const CasesTable = {
       cy.wait('@autocompleteRequest');
     },
     /**
-     * Validates the request sent to api on sorting functionality of a column.
+     * Validates the sent request to api on sorting functionality of a column.
      * @param columnID The ID of the column to sort.
      */
     shouldRequestOnSort(columnID: string) {

@@ -6,7 +6,7 @@ import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV
 describe('Case Entity - Variants - CNV - Table - Information displayed', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage('1', 'CNV', data.cnvGermline.sqon);
+    cy.visitCaseVariantsPage(data.case.case, 'CNV', data.cnvGermline.sqon);
   };
 
   it('Genes', () => {
