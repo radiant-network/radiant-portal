@@ -239,9 +239,6 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 		if err != nil {
 			return fmt.Errorf("error fetching sample by id %d: %w", s.SampleID, err)
 		}
-		if sample == nil {
-			continue
-		}
 
 		sampleOrg, err := r.Context.OrgRepo.GetOrganizationById(sample.OrganizationId)
 		if err != nil {
@@ -250,7 +247,12 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 
 		if s.SequencingLabID == *r.SequencingLabID {
 			different := verifyIsDifferentField(sample.SubmitterSampleId, r.SequencingExperiment.SubmitterSampleId.String(), r, key, "submitter_sample_id")
-			different = verifyIsDifferentField(sampleOrg.Code, r.SequencingExperiment.SampleOrganizationCode, r, key, "sample_organization_code") || different
+
+			if sampleOrg != nil {
+				different = verifyIsDifferentField(sampleOrg.Code, r.SequencingExperiment.SampleOrganizationCode, r, key, "sample_organization_code") || different
+			} else {
+				different = verifyIsDifferentField("", r.SequencingExperiment.SampleOrganizationCode, r, key, "sample_organization_code") || different
+			}
 			different = verifyIsDifferentField(s.StatusCode, r.SequencingExperiment.StatusCode, r, key, "status_code") || different
 			different = verifyIsDifferentField(s.ExperimentalStrategyCode, r.SequencingExperiment.ExperimentalStrategyCode, r, key, "experimental_strategy_code") || different
 			different = verifyIsDifferentField(s.SequencingReadTechnologyCode, r.SequencingExperiment.SequencingReadTechnologyCode, r, key, "sequencing_read_technology_code") || different

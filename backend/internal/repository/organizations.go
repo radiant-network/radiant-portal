@@ -39,9 +39,8 @@ func (r *OrganizationRepository) GetOrganizationByCode(organizationCode string) 
 	if err := tx.First(&organization).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieving organization by code: %w", err)
-		} else {
-			return nil, nil
 		}
+		return nil, nil
 	}
 	return &organization, nil
 }

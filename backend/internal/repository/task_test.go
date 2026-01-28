@@ -25,7 +25,7 @@ func Test_CreateAndGetTask_OK(t *testing.T) {
 		err := repo.CreateTask(newTask)
 		assert.NoError(t, err)
 
-		// Test GetOrganizationById
+		// Test GetTaskById
 		result, err := repo.GetTaskById(8888)
 		assert.NoError(t, err)
 		assert.Equal(t, 8888, result.ID)
