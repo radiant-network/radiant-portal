@@ -15,7 +15,7 @@ type SequencingExperiment struct {
 	SequencingLab                Organization `gorm:"foreignKey:ID;references:SequencingLabID"`
 	RunName                      string
 	RunAlias                     string
-	RunDate                      time.Time `gorm:"type:timestamptz"`
+	RunDate                      time.Time `gorm:"type:timestamptz;default:null"`
 	CaptureKit                   string
 	CreatedOn                    time.Time `gorm:"autoCreateTime"`
 	UpdatedOn                    time.Time `gorm:"autoUpdateTime:milli"`
