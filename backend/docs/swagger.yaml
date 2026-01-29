@@ -184,7 +184,6 @@ components:
         tasks:
           items:
             $ref: '#/components/schemas/CaseTaskBatch'
-          minItems: 1
           type: array
           uniqueItems: false
         type:
