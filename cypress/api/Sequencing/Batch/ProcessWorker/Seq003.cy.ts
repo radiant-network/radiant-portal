@@ -15,7 +15,7 @@ describe('Sequencing - Batch - Process worker - Seq003', () => {
           "submitter_sample_id": "S13224",
           "experimental_strategy_code": "wgs",
           "sequencing_read_technology_code": "short_read",
-          "platform_code": "Cypress",
+          "platform_code": "illumina",
           "sequencing_lab_code": "UnknownValue",
           "capture_kit": "Cypress",
           "run_alias": "Cypress",
@@ -53,6 +53,6 @@ describe('Sequencing - Batch - Process worker - Seq003', () => {
   });
 
   it('Validate report sequencing_experiment[0] sequencing_lab_code', () => {
-    cy.validateReport(response, 'error', 'SEQ-003', apiMessages.ProcessWorkerError003('Sequencing lab', 'sequencing', 'UnknownValue', 'Cypress0001'), 'sequencing_experiment[0]');
+    cy.validateReport(response, 'error', 'SEQ-003', apiMessages.ProcessWorkerError003('Sequencing lab', 'sequencing', 'UnknownValue', 'Cypress0001'), 'sequencing_experiment[0].sequencing_lab_code');
   });
 });
