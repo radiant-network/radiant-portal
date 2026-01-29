@@ -58,18 +58,15 @@ import { cn } from '@/lib/utils';
 import Empty from '../empty';
 
 import {
+  DataTableState,
   useTableGetPreferenceEffect,
   useTableSizingEffect,
+  useTableState,
   useTableUpdatePreferenceEffect,
 } from './hooks/use-table-state';
 import { getFlatSubheaders } from './libs/header-group';
 import DataTableGroupBy from './data-table-group-by';
 import { getFilteredAdditionalFields, updateAdditionalField } from './utils';
-
-export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id'> {
-  id: string;
-  subComponent?: string;
-}
 
 /**
  * Static value for header and row height
@@ -81,6 +78,10 @@ export const ROW_HEIGHT = 41;
 /**
  * Interface and types
  */
+export interface TableColumnDef<TData, TValue> extends Omit<ColumnDef<TData, TValue>, 'id'> {
+  id: string;
+  subComponent?: string;
+}
 type SubComponentProps<TData> = (data: TData) => React.JSX.Element;
 
 type PaginationSettings = {
@@ -95,6 +96,11 @@ type ServerOptions = {
   onSortingChange?: (sorting: SortBody[]) => void;
 };
 
+export type LoadingStates = {
+  total?: boolean;
+  list?: boolean;
+};
+
 export type TableProps<TData> = {
   id: string;
   columns: TableColumnDef<TData, any>[];
@@ -102,10 +108,7 @@ export type TableProps<TData> = {
   data: TData[];
   hasError?: boolean;
   defaultColumnSettings: ColumnSettings[];
-  loadingStates?: {
-    total?: boolean;
-    list?: boolean;
-  };
+  loadingStates?: LoadingStates;
   subComponent?: SubComponentProps<TData>;
   TableFilters?: React.JSX.Element;
   total?: number;
@@ -621,6 +624,7 @@ function DataTable<T>({
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   // table interactions
+  const [isUserPreferenceFetched, setIsUserPreferenceFetched] = useState<boolean>(false);
   const [isTableEmpty, setIsTableEmpty] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [rowPinning, setRowPinning] = useState<RowPinningState>({ top: [], bottom: [] });
@@ -638,11 +642,19 @@ function DataTable<T>({
   );
   const [internalRowSelection, setInternalRowSelection] = useState<Record<string, boolean>>(rowSelection ?? {});
 
+  // Global Table State
+  const tableState = useTableState({
+    loadingStates,
+    isUserPreferenceFetched,
+    hasError,
+    isTableEmpty,
+  });
+
   // Default internal pagination state for locale and server pagination
-  const [internalPagination, setInternalPagination] = useState<PaginationState>(() => ({
+  const [internalPagination, setInternalPagination] = useState<PaginationState>({
     pageIndex: pagination.state?.pageIndex || 0,
     pageSize: pagination.state?.pageSize || 10,
-  }));
+  });
 
   // Key Input Map
   const handleEscEventListener = () => {
@@ -758,6 +770,7 @@ function DataTable<T>({
    */
   useTableGetPreferenceEffect({
     id,
+    setFetched: setIsUserPreferenceFetched,
     defaultColumnSettings,
     setAdditionalFields: serverOptions?.setAdditionalFields,
     setColumnOrder,
@@ -771,7 +784,6 @@ function DataTable<T>({
    */
   useTableUpdatePreferenceEffect({
     id,
-    state: table.getState(),
     columns,
     columnOrder,
     columnPinning,
@@ -952,9 +964,6 @@ function DataTable<T>({
                   setColumnSizing({});
                   setColumnPinning(defaultColumnTableState.columnPinning);
                   setColumnVisibility(defaultColumnTableState.columnVisibility);
-
-                  table.resetColumnSizing();
-                  table.resetHeaderSizeInfo();
                   const allAdditionalFields = getFilteredAdditionalFields({
                     columnVisibility: defaultColumnTableState.columnVisibility,
                     defaultColumnSettings,
@@ -977,7 +986,7 @@ function DataTable<T>({
       </div>
 
       {/* Skeleton */}
-      {loadingStates?.list === true && (
+      {tableState === DataTableState.LOADING && (
         <DataTableSkeletonLoading
           headerGroups={table.getHeaderGroups()}
           pagination={pagination.state || { pageIndex: 0, pageSize: 20 }}
@@ -986,7 +995,7 @@ function DataTable<T>({
       )}
 
       {/* Empty State */}
-      {loadingStates?.list === false && !hasError && isTableEmpty && (
+      {tableState === DataTableState.EMPTY && (
         <Card className="shadow-none">
           <Empty
             title={t('common.table.no_result')}
@@ -999,7 +1008,7 @@ function DataTable<T>({
       )}
 
       {/* Error state */}
-      {loadingStates?.list === false && hasError && (
+      {tableState === DataTableState.ERROR && (
         <Card className="w-full shadow-none">
           <Empty
             title={t('common.table.has_error')}
@@ -1012,7 +1021,7 @@ function DataTable<T>({
       )}
 
       <div ref={containerRef}>
-        {loadingStates?.list === false && !hasError && !isTableEmpty && (
+        {tableState === DataTableState.READY && (
           <Table id={id}>
             <TableHeader className={cn({ 'sticky top-0 bg-background z-20': table.getTopRows().length > 0 })}>
               {table.getHeaderGroups().map(headerGroup => (
