@@ -215,6 +215,11 @@ func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
 				Message: "A patient with same ids (CHUSJ / MRN-283774) has been found but with a different sex_code (male <> female).",
 				Path:    "patient[2].sex_code",
 			},
+			{
+				Code:    "PATIENT-002",
+				Message: "A patient with same ids (CHUSJ / MRN-283774) has been found but with a different date_of_birth (1970-01-30 00:00:00 +0000 UTC <> 2025-01-30 00:00:00 +0000 UTC).",
+				Path:    "patient[2].date_of_birth",
+			},
 		}
 		errors := []types.BatchMessage{
 			{
@@ -231,6 +236,11 @@ func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
 				Code:    "PATIENT-003",
 				Message: "Organization ORG001 for patient 123456789!@#$%?&*()_+ does not exist.",
 				Path:    "patient[1].patient_organization_code",
+			},
+			{
+				Code:    "PATIENT-004",
+				Message: "Invalid field date_of_birth for patient (CQGC / ABC123456). Reason: missing value, date of birth is required.",
+				Path:    "patient[3].date_of_birth",
 			},
 			{
 				Code:    "PATIENT-005",
@@ -1385,6 +1395,16 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 				Message: "A sequencing with same ids (CQGC / S13225 / NA12891) has been found but with a different status_code (completed <> draft).",
 				Path:    "sequencing_experiment[2].status_code",
 			},
+			{
+				Code:    "SEQ-004",
+				Message: "A sequencing with same ids (CQGC / S13225 / NA12891) has been found but with a different run_date (2021-08-17 00:00:00 +0000 UTC <> 0001-01-01 00:00:00 +0000 UTC).",
+				Path:    "sequencing_experiment[2].run_date",
+			},
+			{
+				Code:    "SEQ-004",
+				Message: "A sequencing with same ids (CQGC / S13224 / NA12892) has been found but with a different run_date (2021-08-17 00:00:00 +0000 UTC <> 2025-01-01 00:00:00 +0000 UTC).",
+				Path:    "sequencing_experiment[5].run_date",
+			},
 		}
 		errors := []types.BatchMessage{
 			{
@@ -1403,6 +1423,11 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 				Path:    "sequencing_experiment[1].run_alias",
 			},
 			{
+				Code:    "SEQ-002",
+				Message: "Invalid field run_date for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: must be a past date.",
+				Path:    "sequencing_experiment[1].run_date",
+			},
+			{
 				Code:    "SEQ-003",
 				Message: "Sequencing lab CQGCC for sequencing ABCD1 does not exist.",
 				Path:    "sequencing_experiment[1].sequencing_lab_code",
@@ -1416,6 +1441,11 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 				Code:    "SEQ-006",
 				Message: "Sequencing_experiment (CQGC / S13224 / ABCD1) appears multiple times in the batch.",
 				Path:    "sequencing_experiment[4]",
+			},
+			{
+				Code:    "SEQ-006",
+				Message: "Sequencing_experiment (CQGC / S13224 / NA12892) appears multiple times in the batch.",
+				Path:    "sequencing_experiment[5]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, warnings, errors)
