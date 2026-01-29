@@ -14,7 +14,7 @@ describe('Sequencing - Batch - Process worker - Trim', () => {
           "submitter_sample_id": "  S13224  ",
           "experimental_strategy_code": "wgs",
           "sequencing_read_technology_code": "short_read",
-          "platform_code": "Cypress",
+          "platform_code": "illumina",
           "sequencing_lab_code": "CHUSJ",
           "capture_kit": "  Cypress  ",
           "run_alias": "  Cypress  ",

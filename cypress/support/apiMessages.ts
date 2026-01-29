@@ -22,6 +22,7 @@ export const apiMessages = {
     return `${type} (${identifier}) appears multiple times in the batch.`;
   },
   ProcessWorkerErrorNotSamePatient: (type: string, field: string, code: string, id: string, parentId: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: Invalid parent ${type} ${parentId} for this ${type}.`,
+  ProcessWorkerErrorOneOfTypeCode: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: must be one of: blood, dna, not_reported, rna, saliva, solid_tissue.`,
   ProcessWorkerErrorPastDate: (type: string, field: string, code: string, id: string, aliquot: string) => `Invalid field ${field} for ${type} (${code} / ${id} / ${aliquot}). Reason: must be a past date.`,
   ProcessWorkerErrorRegExp: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: does not match the regular expression ^[a-zA-Z0-9\\- .'À-ÿ]*$.`,
   ProcessWorkerErrorRegExpId: (type: string, field: string, code: string, id: string) => `Invalid field ${field} for ${type} (${code} / ${id}). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$.`,
@@ -32,6 +33,7 @@ export const apiMessages = {
     const identifier = aliquot ? `${code} / ${id} / ${aliquot}` : `${code} / ${id}`;
     return `Invalid field ${field} for ${type} (${identifier}). Reason: field is too long, maximum length allowed is 100.`;
   },
+  ProcessWorkerErrorValueNotAllowed: (type: string, field: string, code: string, id: string, aliquot: string) => `Invalid field ${field} for ${type} (${code} / ${id} / ${aliquot}). Reason: value not allowed.`,
   Sample004: (code: string, patientId: string, SampleId: string) => `Patient (${code} / ${patientId}) for sample ${SampleId} does not exist.`,
   Sample005: (id: string) => `Sample ${id} does not exist.`,
   Sequencing005: (code: string, id: string) => `Sample (${code} / ${id}) does not exist.`,

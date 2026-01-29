@@ -12,7 +12,7 @@ describe('Samples - Batch - Process worker - Sample006', () => {
         {
           "submitter_patient_id": "MRN-283775",
           "patient_organization_code": "CHUSJ",
-          "type_code": "dna",
+          "type_code": "Cypress",
           "tissue_site": "dna!",
           "histology_code": "normal",
           "submitter_sample_id": "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!",
@@ -57,5 +57,9 @@ describe('Samples - Batch - Process worker - Sample006', () => {
 
   it('Validate report sample[0] submitter_sample_id 2', () => {
     cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorTooLong('sample', 'submitter_sample_id', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sample[0].submitter_sample_id');
+  });
+
+  it('Validate report sample[0] type_code', () => {
+    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorOneOfTypeCode('sample', 'type_code', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sample[0].type_code');
   });
 });
