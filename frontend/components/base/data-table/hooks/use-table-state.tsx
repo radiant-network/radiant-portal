@@ -1,19 +1,26 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ColumnOrderState, ColumnPinningState, TableState } from '@tanstack/react-table';
-import useSWRImmutable from 'swr/immutable';
+import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import { UserPreference } from '@/api/api';
 import { userPreferenceApi } from '@/utils/api';
 
-import { ColumnSettings, ColumnVisiblity } from '../data-table';
+import { ColumnSettings, ColumnVisiblity, LoadingStates } from '../data-table';
 import { TableObserverColumn, TableObserverProps } from '../type/data-table-type';
 import { getFilteredAdditionalFields } from '../utils';
+
+export enum DataTableState {
+  PENDING,
+  LOADING,
+  ERROR,
+  EMPTY,
+  READY,
+}
 
 type useTableStateObserverProps = {
   id: string;
   columns: TableObserverColumn[];
-  state: TableState;
   columnOrder: ColumnOrderState;
   columnPinning: ColumnPinningState;
   columnSizing: Record<string, number>;
@@ -23,11 +30,19 @@ type useTableStateObserverProps = {
 type useTableStateFetchProps = {
   id: string;
   defaultColumnSettings: ColumnSettings[];
+  setFetched: (value: boolean) => void;
   setColumnOrder: (value: ColumnOrderState) => void;
   setColumnPinning: (value: ColumnPinningState) => void;
   setColumnSizing: (value: Record<string, number>) => void;
   setColumnVisibility: (value: ColumnVisiblity) => void;
   setAdditionalFields?: (value: string[]) => void;
+};
+
+type useTableStateProps = {
+  loadingStates: LoadingStates;
+  isUserPreferenceFetched: boolean;
+  hasError: boolean;
+  isTableEmpty: boolean;
 };
 
 type useTableColumnSizingProps = {
@@ -61,22 +76,30 @@ async function postUserPreference(_url: string, { arg }: { arg: PostUserPreferen
 }
 
 /**
- * Get and sync table with user-preference
+ * Load user preference
+ * Will return an 404 if the config has never been set before
+ * In that case, the data table falls back to its default configuration.
  */
 export function useTableGetPreferenceEffect({
   id,
   defaultColumnSettings,
+  setFetched,
   setColumnOrder,
   setColumnPinning,
   setColumnSizing,
   setColumnVisibility,
   setAdditionalFields,
 }: useTableStateFetchProps) {
-  const tableUserPreference = useSWRImmutable(`get-${id}`, () => fetchUserPreference({ key: id }));
+  const tableUserPreference = useSWR(`get-${id}`, () => fetchUserPreference({ key: id }), {
+    revalidateOnMount: true,
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+  });
 
   useEffect(() => {
-    if (tableUserPreference.isLoading) return;
-
+    if (tableUserPreference.error) {
+      setFetched(true);
+    }
     if (tableUserPreference.data) {
       const tablePreference = tableUserPreference.data.content as TableObserverProps;
       setColumnOrder(tablePreference.columnOrder);
@@ -86,23 +109,24 @@ export function useTableGetPreferenceEffect({
       setAdditionalFields?.(
         getFilteredAdditionalFields({ columnVisibility: tablePreference.columnVisibility, defaultColumnSettings }),
       );
+      setFetched(true);
     }
-  }, [tableUserPreference.isLoading]);
+  }, [tableUserPreference.isLoading, tableUserPreference.isValidating, tableUserPreference.data]);
 }
 
 /**
  * Update user-preference of the table with a POST request
+ * A debounce of 350 is used to prevent multiple post when use onChange event of data-table
  */
 export function useTableUpdatePreferenceEffect({
   id,
-  state,
-  columns,
   columnOrder,
   columnPinning,
   columnSizing,
   columnVisibility,
 }: useTableStateObserverProps) {
   const { trigger } = useSWRMutation(`post-${id}`, postUserPreference);
+
   useEffect(() => {
     const handler = setTimeout(() => {
       trigger({
@@ -113,10 +137,6 @@ export function useTableUpdatePreferenceEffect({
             columnPinning,
             columnSizing,
             columnVisibility,
-            columns,
-            pagination: {
-              pageSize: state.pagination?.pageSize,
-            },
           },
           key: id,
         },
@@ -126,7 +146,7 @@ export function useTableUpdatePreferenceEffect({
     return () => {
       if (handler) clearTimeout(handler);
     };
-  }, [columnPinning, state.pagination, columnOrder, columnSizing, columnVisibility]);
+  }, [columnPinning, columnOrder, columnSizing, columnVisibility]);
 }
 
 /**
@@ -164,4 +184,25 @@ export function useTableSizingEffect({ state: tableState, columns, setColumnSizi
     }
     columnResizeRef.current = tableState.columnSizingInfo?.isResizingColumn;
   }, [tableState.columnSizingInfo, tableState.columnSizing]);
+}
+
+/**
+ * Hook to manage global data-table state
+ */
+export function useTableState({ loadingStates, isUserPreferenceFetched, hasError, isTableEmpty }: useTableStateProps) {
+  const [tableState, setTableState] = useState<DataTableState>(DataTableState.PENDING);
+
+  useEffect(() => {
+    if (loadingStates?.list || !isUserPreferenceFetched) {
+      setTableState(DataTableState.LOADING);
+    } else if (hasError) {
+      setTableState(DataTableState.ERROR);
+    } else if (isTableEmpty) {
+      setTableState(DataTableState.EMPTY);
+    } else {
+      setTableState(DataTableState.READY);
+    }
+  }, [loadingStates, isUserPreferenceFetched, hasError, isTableEmpty]);
+
+  return tableState;
 }
