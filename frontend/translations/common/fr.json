@@ -750,7 +750,7 @@
       "unknown": "Inconnu"
     },
     "case": {
-      "title": "Cas",
+      "title": "{{total}} Cas",
       "actions": {
         "view_case": "Voir cas",
         "view_variant": "Voir variants"

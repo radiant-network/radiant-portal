@@ -49,7 +49,11 @@ export default function App() {
   );
   return (
     <>
-      <PageHeader isLoading={false} title={t('case_exploration.case.title')} variant="info" />
+      <PageHeader
+        isLoading={false}
+        title={t('case_exploration.case.title', { total: data?.count ?? 0 })}
+        variant="info"
+      />
       <main className={`bg-muted h-screen overflow-auto p-3`}>
         <Card className="h-auto size-max w-full ">
           <CardContent>
