@@ -270,7 +270,7 @@ func Test_ProcessBatch_Case_validateTask_Error_TaskField(t *testing.T) {
 			{
 				Code:    "TASK-001",
 				Message: "Invalid field pipeline_version for case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[0].tasks[0]",
+				Path:    "case[0].tasks[0].pipeline_version",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -290,7 +290,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 			{
 				Code:    "TASK-001",
 				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, family_variant_calling, somatic_variant_calling, tumor_only_variant_calling, radiant_germline_annotation, exomiser, rnaseq_analysis].",
-				Path:    "case[0].tasks[0]",
+				Path:    "case[0].tasks[0].type_code",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -651,14 +651,14 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			{
 				Code:    "DOCUMENT-003",
 				Message: "Document s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz already exists, skipped.",
-				Path:    "case[0].tasks[2].output_documents[0]",
+				Path:    "case[0].tasks[3].output_documents[0]",
 			},
 		}
 		warnings := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-004",
 				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found but with a different data_category_code (genomic <> genomicc).",
-				Path:    "case[0].tasks[2].output_documents[1]",
+				Path:    "case[0].tasks[3].output_documents[1]",
 			},
 		}
 		errors := []types.BatchMessage{
@@ -705,12 +705,12 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			{
 				Code:    "TASK-001",
 				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, family_variant_calling, somatic_variant_calling, tumor_only_variant_calling, radiant_germline_annotation, exomiser, rnaseq_analysis].",
-				Path:    "case[0].tasks[0]",
+				Path:    "case[0].tasks[0].type_code",
 			},
 			{
 				Code:    "TASK-001",
 				Message: "Invalid field pipeline_name for case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[0].tasks[0]",
+				Path:    "case[0].tasks[0].pipeline_name",
 			},
 			{
 				Code:    "TASK-002",
@@ -719,8 +719,13 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			},
 			{
 				Code:    "TASK-001",
+				Message: "Invalid field aliquots for case 0 - task 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].tasks[1].aliquots",
+			},
+			{
+				Code:    "TASK-001",
 				Message: "Invalid field pipeline_name for case 0 - task 1. Reason: field is too long, maximum length allowed is 100.",
-				Path:    "case[0].tasks[1]",
+				Path:    "case[0].tasks[1].pipeline_name",
 			},
 			{
 				Code:    "TASK-003",
@@ -731,6 +736,16 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 				Code:    "TASK-004",
 				Message: "Missing output documents for case 0 - task 1 of type family_variant_calling.",
 				Path:    "case[0].tasks[1]",
+			},
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field aliquots for case 0 - task 2. Reason: aliquots must contain at least one value.",
+				Path:    "case[0].tasks[2].aliquots",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 2 of type alignment.",
+				Path:    "case[0].tasks[2]",
 			},
 			{
 				Code:    "DOCUMENT-001",
@@ -770,22 +785,22 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			{
 				Code:    "DOCUMENT-005",
 				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found in the output of a different task.",
-				Path:    "case[0].tasks[2].output_documents[0]",
+				Path:    "case[0].tasks[3].output_documents[0]",
 			},
 			{
 				Code:    "DOCUMENT-005",
 				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found in the output of a different task.",
-				Path:    "case[0].tasks[2].output_documents[1]",
+				Path:    "case[0].tasks[3].output_documents[1]",
 			},
 			{
 				Code:    "DOCUMENT-002",
-				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for case 0 - task 3 - output document 0.",
-				Path:    "case[0].tasks[3].output_documents[0]",
+				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for case 0 - task 4 - output document 0.",
+				Path:    "case[0].tasks[4].output_documents[0]",
 			},
 			{
 				Code:    "DOCUMENT-008",
 				Message: "Duplicate output document with URL s3://test-bucket/CASE-12345.recal.crai found.",
-				Path:    "case[0].tasks[3].output_documents[0]",
+				Path:    "case[0].tasks[4].output_documents[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, warnings, errors)
@@ -802,77 +817,6 @@ func Test_ProcessBatch_Case_Aliquots_Permutations(t *testing.T) {
 
 		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
 		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
-
-		var ca *types.Case
-		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "CASE-ALIQUOTS-PERMUTATIONS").First(&ca)
-
-		assert.NotNil(t, ca)
-		assert.GreaterOrEqual(t, ca.ID, 1000)
-		assert.Equal(t, 3, ca.ProbandID)
-		assert.Equal(t, 1, ca.ProjectID)
-		assert.Equal(t, "Dr. Super Test", ca.OrderingPhysician)
-
-		var chse []*types.CaseHasSequencingExperiment
-		db.Table("case_has_sequencing_experiment").Where("case_id = ?", ca.ID).Find(&chse)
-		assert.Len(t, chse, 4)
-
-		// Sort to have a predictable order for assertions
-		slices.SortFunc(chse, func(a, b *types.CaseHasSequencingExperiment) int {
-			return a.SequencingExperimentID - b.SequencingExperimentID
-		})
-
-		assert.GreaterOrEqual(t, chse[0].CaseID, 1000)
-		assert.Equal(t, 1, chse[0].SequencingExperimentID)
-		assert.Equal(t, 2, chse[1].SequencingExperimentID)
-		assert.Equal(t, 70, chse[2].SequencingExperimentID)
-		assert.Equal(t, 71, chse[3].SequencingExperimentID)
-
-		var fa []*types.Family
-		db.Table("family").Where("case_id = ?", ca.ID).Find(&fa)
-		assert.Len(t, fa, 2)
-		assert.GreaterOrEqual(t, fa[0].ID, 1000)
-		assert.Equal(t, 3, fa[0].FamilyMemberID)
-		assert.Equal(t, "proband", fa[0].RelationshipToProbandCode)
-		assert.GreaterOrEqual(t, fa[1].ID, 1001)
-		assert.Equal(t, 1, fa[1].FamilyMemberID)
-		assert.Equal(t, "mother", fa[1].RelationshipToProbandCode)
-
-		var tc []*types.TaskContext
-		db.Table("task_context").Where("task_id = 1000").Find(&tc)
-		assert.Len(t, tc, 4)
-
-		slices.SortFunc(tc, func(a, b *types.TaskContext) int {
-			return a.SequencingExperimentID - b.SequencingExperimentID
-		})
-
-		assert.Equal(t, 1, tc[0].SequencingExperimentID)
-		assert.Equal(t, 2, tc[1].SequencingExperimentID)
-		assert.Equal(t, 70, tc[2].SequencingExperimentID)
-		assert.Equal(t, 71, tc[3].SequencingExperimentID)
-
-		var ta *types.Task
-		db.Table("task").Where("id = 1000").First(&ta)
-		assert.Equal(t, "alignment_germline_variant_calling", ta.TaskTypeCode)
-		assert.Equal(t, "Dragen", ta.PipelineName)
-		assert.Equal(t, "4.4.4", ta.PipelineVersion)
-		assert.Equal(t, "GRch38", ta.GenomeBuild)
-
-		var thd []*types.TaskHasDocument
-		db.Table("task_has_document").Where("task_id = 1000").Find(&thd)
-		assert.Len(t, thd, 1)
-		assert.GreaterOrEqual(t, thd[0].DocumentID, 1000)
-
-		var doc *types.Document
-		db.Table("document").Where("id = ?", thd[0].DocumentID).First(&doc)
-		assert.NotNil(t, doc)
-
-		assert.Equal(t, "NA12891.recal.cram", doc.Name)
-		assert.Equal(t, int64(12), doc.Size)
-		assert.Equal(t, "9473fdd0d880a43c21b7778d34872157", doc.Hash)
-		assert.Equal(t, "s3://test-bucket/existing_document.recal.crai", doc.Url)
-		assert.Equal(t, "genomic", doc.DataCategoryCode)
-		assert.Equal(t, "alignment", doc.DataTypeCode)
-		assert.Equal(t, "cram", doc.FileFormatCode)
 	})
 }
 

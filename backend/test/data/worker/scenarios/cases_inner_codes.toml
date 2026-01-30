@@ -63,8 +63,14 @@ ordering_organization_code = "CHUSJ"
 
   [[cases.tasks]] # TASK-004 missing output documents
   type_code = "family_variant_calling"  # TASK-003 missing input documents
-  aliquots = ["NA12891"]
+  aliquots = [""] # TASK-002 missing aliquot
   pipeline_name = "Dragennnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn" # TASK-001 size error
+  pipeline_version = "4.4.4"
+  genome_build = "GRch38"
+
+  [[cases.tasks]] # TASK-004 missing output documents and TASK-002 missing aliquot
+  type_code = "alignment"  # TASK-003 missing input documents
+  pipeline_name = "Dragen"
   pipeline_version = "4.4.4"
   genome_build = "GRch38"
 

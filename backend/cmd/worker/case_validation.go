@@ -1010,7 +1010,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 // Tasks validation
 
 func (cr *CaseValidationRecord) validateTaskTextField(fieldValue, fieldName string, taskIndex int, regExp *regexp.Regexp, required bool) {
-	path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+	path := cr.formatFieldPath("tasks", &taskIndex, fieldName, nil)
 	if !required && fieldValue == "" {
 		return
 	}
@@ -1021,7 +1021,7 @@ func (cr *CaseValidationRecord) validateTaskTextField(fieldValue, fieldName stri
 
 func (cr *CaseValidationRecord) validateTaskTypeCode(typeCode string, taskIndex int) {
 	if !slices.Contains(cr.TaskTypeCodes, typeCode) {
-		path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+		path := cr.formatFieldPath("tasks", &taskIndex, "type_code", nil)
 		msg := cr.formatTaskFieldErrorMessage("type_code", cr.Index, taskIndex) + " invalid task type code `" + typeCode + "`. Valid codes are: [" + strings.Join(cr.TaskTypeCodes, ", ") + "]."
 		cr.addErrors(msg+"", TaskInvalidField, path)
 	}
@@ -1029,6 +1029,12 @@ func (cr *CaseValidationRecord) validateTaskTypeCode(typeCode string, taskIndex 
 
 func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 	task := cr.Case.Tasks[taskIndex]
+	if len(task.Aliquots) == 0 {
+		path := cr.formatFieldPath("tasks", &taskIndex, "aliquots", nil)
+		msg := cr.formatTaskFieldErrorMessage("aliquots", cr.Index, taskIndex)
+		cr.addErrors(fmt.Sprintf("%s aliquots must contain at least one value.", msg), TaskInvalidField, path)
+		return
+	}
 
 	existingAliquots := make(map[string]struct{}, len(cr.Case.SequencingExperiments))
 	for _, se := range cr.Case.SequencingExperiments {
