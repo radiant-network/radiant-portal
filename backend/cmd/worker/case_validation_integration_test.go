@@ -374,6 +374,11 @@ func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *t
 
 		errors := []types.BatchMessage{
 			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"ABC123\" is not defined for case 0 - task 0.",
+				Path:    "case[0].tasks[0]",
+			},
+			{
 				Code:    "TASK-006",
 				Message: "Input document with URL s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram for case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
 				Path:    "case[0].tasks[0]",
@@ -728,6 +733,11 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 				Path:    "case[0].tasks[1].pipeline_name",
 			},
 			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"\" is not defined for case 0 - task 1.",
+				Path:    "case[0].tasks[1]",
+			},
+			{
 				Code:    "TASK-003",
 				Message: "Missing input documents for case 0 - task 1 of type family_variant_calling.",
 				Path:    "case[0].tasks[1]",
@@ -746,6 +756,16 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 				Code:    "TASK-004",
 				Message: "Missing output documents for case 0 - task 2 of type alignment.",
 				Path:    "case[0].tasks[2]",
+			},
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"NA12891\" is not defined for case 0 - task 3.",
+				Path:    "case[0].tasks[3]",
+			},
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"NA12891\" is not defined for case 0 - task 4.",
+				Path:    "case[0].tasks[4]",
 			},
 			{
 				Code:    "DOCUMENT-001",

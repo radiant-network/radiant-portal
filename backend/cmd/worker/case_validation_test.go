@@ -3950,7 +3950,7 @@ func Test_validateTaskTextField_RegexError(t *testing.T) {
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
 		Message: "Invalid field test_field for case 0 - task 0. Reason: does not match the regular expression `^[a-zA-Z0-9]+$`.",
-		Path:    "case[0].tasks[0]",
+		Path:    "case[0].tasks[0].test_field",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3966,7 +3966,7 @@ func Test_validateTaskTextField_LengthError(t *testing.T) {
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
 		Message: "Invalid field test_field for case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
-		Path:    "case[0].tasks[0]",
+		Path:    "case[0].tasks[0].test_field",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3991,7 +3991,7 @@ func Test_validateTaskTypeCode_Error(t *testing.T) {
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
 		Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: [foo, bar].",
-		Path:    "case[0].tasks[0]",
+		Path:    "case[0].tasks[0].type_code",
 	}
 
 	assert.Len(t, record.Infos, 0)

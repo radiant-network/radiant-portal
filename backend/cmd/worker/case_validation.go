@@ -405,7 +405,7 @@ func (cr *CaseValidationRecord) fetchSequencingExperimentsInTask(task *types.Cas
 	for _, aliquot := range task.Aliquots {
 		seqs, err := cr.Context.SeqExpRepo.GetSequencingExperimentByAliquot(aliquot)
 		if err != nil {
-			return fmt.Errorf("failed to get sequencing experiment by aliquot %q: %w", task.Aliquots, err)
+			return fmt.Errorf("failed to get sequencing experiment by aliquot %q: %w", aliquot, err)
 		}
 
 		for i := range seqs {
@@ -1136,9 +1136,7 @@ func (cr *CaseValidationRecord) validateTasks() error {
 		cr.validateTaskTextField(task.PipelineVersion, "pipeline_version", taskIndex, TextRegExpCompiled, true)
 		cr.validateTaskTextField(task.PipelineName, "pipeline_name", taskIndex, TextRegExpCompiled, true)
 
-		if _, ok := RequiresInputDocumentsTaskTypes[task.TypeCode]; !ok {
-			cr.validateTaskAliquot(taskIndex)
-		}
+		cr.validateTaskAliquot(taskIndex)
 		cr.validateTaskDocuments(task, taskIndex)
 	}
 	return nil
