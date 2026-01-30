@@ -15,6 +15,7 @@ import { variantsApi } from '@/utils/api';
 
 import CasesTab from './cases/cases-tab';
 import EvidenceTab from './evidence/evidence-tab';
+import FrequencyTab from './frequency/frequency-tab';
 import OverviewTab from './overview/overview-tab';
 import TranscriptsTab from './transcripts/transcripts-tab';
 
@@ -99,6 +100,9 @@ export default function App() {
           <TabsListItem data-cy="overview-tab" value={VariantEntityTabs.Overview}>
             {t('variant_entity.overview.title')}
           </TabsListItem>
+          <TabsListItem data-cy="frequency-tab" value={VariantEntityTabs.Frequency}>
+            {t('variant_entity.frequency.title')}
+          </TabsListItem>
           <TabsListItem data-cy="evidence-tab" value={VariantEntityTabs.EvidenceAndConditions}>
             {t('variant_entity.evidence.title')}
           </TabsListItem>
@@ -114,6 +118,9 @@ export default function App() {
             <div className="max-w-8xl mx-auto w-full">
               <TabsContent value={VariantEntityTabs.Overview} className="p-0 sm:py-3">
                 <OverviewTab />
+              </TabsContent>
+              <TabsContent value={VariantEntityTabs.Frequency} className="p-0 sm:py-3">
+                <FrequencyTab />
               </TabsContent>
               <TabsContent value={VariantEntityTabs.EvidenceAndConditions} className="p-0 sm:py-3">
                 <EvidenceTab />
