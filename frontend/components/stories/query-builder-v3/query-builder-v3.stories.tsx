@@ -18,7 +18,7 @@ import {
 import { filterListConfig } from '../query-builder/facets/filter-list.stories';
 
 const meta = {
-  title: 'QueryBuilderV3',
+  title: 'QueryBuilder/QueryBuilderV3',
   component: QueryBuilder,
   args: {},
   decorators: [

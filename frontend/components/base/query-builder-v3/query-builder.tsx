@@ -10,10 +10,10 @@ function QueryBuilder() {
             className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none hover:cursor-pointer"
             asChild
           >
-            Allo
+            Query Builder V3
           </AccordionTrigger>
           <AccordionContent className="py-4 px-6 space-y-4">
-            <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">Allo</div>
+            <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">Content</div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
