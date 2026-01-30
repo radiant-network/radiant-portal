@@ -49,11 +49,19 @@ export interface IFilterTextInputConfig {
 }
 
 export type TFilterGroupConfig = IFilterRangeConfig | IFilterTextInputConfig | IFilterCheckboxConfig;
+export enum FilterTypes {
+  MULTIPLE = 'multiple',
+  BOOLEAN = 'boolean',
+  NUMERICAL = 'numerical',
+  DIVIDER = 'divider',
+  SEARCH_BY = 'search_by',
+  UPLOAD_LIST = 'upload_list',
+}
 
 export interface Aggregation {
   key: string;
   translation_key: string;
-  type: 'multiple' | 'boolean' | 'numerical' | 'divider' | 'search_by';
+  type: FilterTypes;
   defaults?: TFilterGroupConfig;
   tooltips?: string[];
   intervalDecimal?: { [key: string]: number };

@@ -1,9 +1,8 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useRef, useState } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { uniqBy } from 'lodash';
-import { Paperclip, UploadIcon } from 'lucide-react';
+import { InfoIcon, Paperclip, UploadIcon } from 'lucide-react';
 
+import { GeneResult } from '@/api/api';
 import { Button } from '@/components/base/shadcn/button';
 import {
   Dialog,
@@ -15,16 +14,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/base/shadcn/dialog';
-import { Form, FormItem, FormLabel } from '@/components/base/shadcn/form';
 import { Input } from '@/components/base/shadcn/input';
 import { Label } from '@/components/base/shadcn/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { Textarea } from '@/components/base/shadcn/textarea';
+import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
+import { MERGE_VALUES_STRATEGIES } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
+import { useDebounce } from '@/components/hooks/useDebounce';
+import { genesApi } from '@/utils/api';
 
 import CollapsibleCard from '../cards/collapsible-card';
 import { TableColumnDef } from '../data-table/data-table';
 import DisplayTable from '../data-table/display-table';
+import { useFilterConfig } from '../query-filters/filter-list';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '../shadcn/hover-card';
 
 type UploadIdTableEntry = {
   entry: string;
@@ -32,37 +36,32 @@ type UploadIdTableEntry = {
   omim_gene_id: string;
 };
 
-// const data = [{ entry: 'entry', symbol: 'symbol', omim_gene_id: 'omim_gene_id' }];
-
 const columnHelper = createColumnHelper<UploadIdTableEntry>();
 
-const columns = [
-  columnHelper.accessor('entry', {
-    cell: info => info.getValue(),
-    header: 'Submitted Gene identifiers', // TODO: to translate
-  }),
-  columnHelper.group({
-    id: 'mapped_to',
-    header: () => <span>Mapped To</span>, // TODO: to translate
-    columns: [
-      columnHelper.accessor('symbol', {
-        cell: info => info.getValue(),
-      }),
-      columnHelper.accessor('omim_gene_id', {
-        cell: info => info.getValue(),
-      }),
-    ],
-  }),
-] as TableColumnDef<UploadIdTableEntry, any>[];
-
-const MOCK: UploadIdTableEntry[] = [1, 1, 2, 2, 5, 6, 7, 8, 9, 10].map(index => ({
-  entry: `entry_${index}`,
-  symbol: `symbol_${index}`,
-  omim_gene_id: `symbol_${index}`,
-}));
+const getColumns = (variant: string, t: any) =>
+  [
+    columnHelper.accessor('entry', {
+      cell: info => info.getValue(),
+      header: t(`common.upload_id.${variant}.submitted_identifier`),
+    }),
+    columnHelper.group({
+      id: 'mapped_to',
+      header: () => <span className="flex justify-center w-full">{t('common.upload_id.mapped_to')}</span>,
+      columns: [
+        columnHelper.accessor('omim_gene_id', {
+          header: t(`common.upload_id.${variant}.omim_gene_id`),
+          cell: info => info.getValue(),
+        }),
+        columnHelper.accessor('symbol', {
+          header: t(`common.upload_id.${variant}.symbol`),
+          cell: info => info.getValue(),
+        }),
+      ],
+    }),
+  ] as TableColumnDef<UploadIdTableEntry, any>[];
 
 type UploadIdModalProps = {
-  variant: 'gene';
+  variant: string;
 };
 
 /**
@@ -88,30 +87,88 @@ async function readFile(file: File): Promise<string> {
   });
 }
 
-/**
- * @TODO:Wait for api to add
- * - Live api validation when a user write inside the textarea (with debounce)
- * - Api validation when uploading multiples files
- * - Update Matched and Unmachted
- * - Create table
- */
 function UploadIdModal({ variant }: UploadIdModalProps) {
   const { t } = useI18n();
-  const form = useForm();
+  const { appId } = useFilterConfig();
+  const [value, setValue] = useState('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [files, setFiles] = useState<File[]>([]);
-  const [items, setItems] = useState<UploadIdTableEntry[]>([]);
   const [matched, setMatched] = useState<UploadIdTableEntry[]>([]);
   const [unmatched, setUnmatched] = useState<UploadIdTableEntry[]>([]);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  const debouncedValue = useDebounce(value, 500);
+
+  const getRawValueList = () => value.split(/[\n,\r ]/).filter(val => !!val);
+  const getValueSet = () => new Set(getRawValueList());
+
+  const getUnmatchList = (results: GeneResult[]): UploadIdTableEntry[] => {
+    const rawList = getRawValueList();
+    const matchedIds = new Set(
+      results.flatMap(item => [item.symbol?.toLowerCase(), item.ensembl_gene_id?.toLowerCase()].filter(Boolean)),
+    );
+    const unmatchs = Array.from(getValueSet())
+      .filter(id => !matchedIds.has(id.toLowerCase()))
+      .map((id, index) => ({
+        key: index,
+        submittedId: id,
+      }));
+
+    return unmatchs.map(unmatch => {
+      const submittedId = rawList.find(val => val.toLowerCase() === unmatch.submittedId?.toLowerCase());
+      return {
+        entry: submittedId ?? unmatch.submittedId,
+        symbol: '',
+        omim_gene_id: '',
+      };
+    });
+  };
+
+  const getMatchList = (results: GeneResult[]): UploadIdTableEntry[] => {
+    const rawList = getRawValueList();
+    return results.map(result => {
+      const submittedId = rawList.find(
+        val =>
+          val.toLowerCase() === result.symbol?.toLowerCase() ||
+          val.toLowerCase() === result.ensembl_gene_id?.toLowerCase(),
+      );
+      return {
+        entry: submittedId ?? result.symbol ?? '',
+        symbol: result.symbol ?? '',
+        omim_gene_id: result.ensembl_gene_id ?? '',
+      };
+    });
+  };
+
+  const onClear = () => {
+    setUnmatched([]);
+    setMatched([]);
+    setValue('');
+    setFiles([]);
+  };
+
+  useEffect(() => {
+    if (debouncedValue) {
+      (async () => {
+        setIsLoading(true);
+        const results = await genesApi.geneSearch({ inputs: debouncedValue.split(/[\n,\r ]/).filter(val => !!val) });
+        setMatched(getMatchList(results.data));
+        setUnmatched(getUnmatchList(results.data));
+        setIsLoading(false);
+      })();
+    } else {
+      onClear();
+    }
+  }, [debouncedValue]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     setIsLoading(true);
     const uploadedFiles = Array.from(e.target.files);
 
-    Promise.all(uploadedFiles.map(readFile)).then(filesContent => {
-      // @TODO: use result to get files content
-      const _result = filesContent
+    try {
+      const filesContent = await Promise.all(uploadedFiles.map(readFile));
+      const result = filesContent
         .flatMap(
           content =>
             content
@@ -120,122 +177,161 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
               .map(entry => entry.replace(/^"+|"+$/g, '')), // remove surrounding quotes
         )
         .filter(entry => entry.length > 0); // remove empty strings
-      setIsLoading(false);
-      setFiles(uploadedFiles);
 
-      // @TODO: To remove
-      setItems(MOCK);
-      setMatched(MOCK.slice(0, 4));
-      setUnmatched(MOCK.slice(4));
-    });
+      setValue(result.join('\n'));
+      setFiles(uploadedFiles);
+    } catch (error) {
+      console.error('Error processing files:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <Dialog>
-      <DialogTrigger>
-        <Button>
+    <Dialog onOpenChange={onClear}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="w-full mb-2">
           <UploadIcon />
-          {t(`common.upload_id.${variant}.trigger`)}
+          {t(`common.upload_id.${variant}.button`)}
         </Button>
       </DialogTrigger>
-      <DialogContent className="md:min-w-[800px]">
+      <DialogContent size="lg" variant="stickyBoth">
         <DialogHeader>
-          <DialogTitle>{t(`common.upload_id.${variant}.dialog_header`)}</DialogTitle>
+          <DialogTitle>{t(`common.upload_id.${variant}.dialog_title`)}</DialogTitle>
         </DialogHeader>
-        <DialogBody className="space-y-4">
-          <Form {...form}>
-            <FormItem>
-              <FormLabel
-                infoCardContent={
-                  <div className="leading-6">
-                    {t('common.upload_id.identifiers.tooltips.identifiers')}
-                    {t('common.upload_id.identifiers.tooltips.separated_by')}
-                    {t('common.upload_id.identifiers.tooltips.upload_file_format')}
-                  </div>
-                }
+        <DialogBody className="flex flex-col gap-3 max-h-[80vh] overflow-y-auto">
+          <div className="flex gap-2">
+            <Label>{t('common.upload_id.input_label')}</Label>
+            <HoverCard>
+              <HoverCardTrigger asChild>
+                <InfoIcon size={16} />
+              </HoverCardTrigger>
+              <HoverCardContent className="w-full">
+                <h4 className="font-semibold mb-3">{t(`common.upload_id.popover_title`)}</h4>
+                <div className="flex gap-2 items-center">
+                  <Label className="font-semibold">{t(`common.upload_id.popover_identifiers`)}</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {t(`common.upload_id.${variant}.popover_identifiers_values`)}
+                  </span>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <Label className="font-semibold">{t(`common.upload_id.popover_separators`)}</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {t(`common.upload_id.popover_separators_values`)}
+                  </span>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <Label className="font-semibold">{t(`common.upload_id.popover_file_formats`)}</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {t(`common.upload_id.popover_file_formats_values`)}
+                  </span>
+                </div>
+              </HoverCardContent>
+            </HoverCard>
+          </div>
+          <Textarea
+            id="upload-id-textarea"
+            onChange={e => setValue(e.target.value)}
+            placeholder={t(`common.upload_id.${variant}.input_placeholder`)}
+            rows={5}
+            value={value}
+            className="flex-shrink-0"
+          />
+          <div className="flex gap-1">
+            <>
+              <Button
+                loading={isLoading}
+                variant="outline"
+                onClick={() => fileInput?.current && fileInput.current.click()}
               >
-                {t('common.upload_id.identifiers.label')}
-              </FormLabel>
-              <Textarea rows={5} />
-            </FormItem>
-          </Form>
-          <div className="flex flex-col gap-2">
-            <div>
-              <Button loading={isLoading} variant="outline">
-                <Label className="cursor-pointer" htmlFor="file">
-                  {t('common.upload_id.upload_a_file')}
-                </Label>
-                <Input
-                  id="file"
-                  type="file"
-                  accept=".txt,.csv,.tsv"
-                  placeholder={t('common.upload_id.upload_a_file')}
-                  className="hidden"
-                  multiple
-                  onChange={handleFileChange}
-                />
+                {t('common.upload_id.upload_a_file')}
               </Button>
-              {files.length > 0 && (
-                <Button variant="ghost" onClick={() => setFiles([])}>
-                  {t('common.actions.clear')}
-                </Button>
-              )}
-            </div>
-            {files.length > 0 && (
-              <>
-                <div className="flex flex-col gap-1">
-                  {files.map((file, index) => (
-                    <div key={index} className="flex items-center gap-1">
-                      <Paperclip size={14} /> {file.name}
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <CollapsibleCard
-                    title={t('common.upload_id.summary_table', {
-                      matched: matched.length,
-                      unmatched: unmatched.length,
-                    })}
-                  >
-                    <div className="flex flex-col gap-3">
-                      <span>
-                        {t('common.upload_id.resume', {
-                          total: items.length,
-                          unique: uniqBy(items, 'entry').length,
-                        })}
-                      </span>
-                      <Tabs defaultValue="matched">
-                        <TabsList>
-                          <TabsTrigger value="matched">
-                            {t('common.upload_id.matched', {
-                              total: matched.length,
-                            })}
-                          </TabsTrigger>
-                          <TabsTrigger value="unmatched">
-                            {t('common.upload_id.unmatched', {
-                              total: matched.length,
-                            })}
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="matched">
-                          <DisplayTable data={matched} columns={columns} dataCy="matched-table" />
-                        </TabsContent>
-                        <TabsContent value="unmatched">
-                          <DisplayTable data={unmatched} columns={columns} dataCy="unmatched-table" />
-                        </TabsContent>
-                      </Tabs>
-                    </div>
-                  </CollapsibleCard>
-                </div>
-              </>
+              <Input
+                id="file"
+                type="file"
+                ref={fileInput}
+                accept=".txt,.csv,.tsv"
+                className="hidden"
+                multiple
+                onChange={handleFileChange}
+              />
+            </>
+            {(unmatched.length > 0 || matched.length > 0) && (
+              <Button variant="ghost" onClick={onClear}>
+                {t('common.upload_id.clear')}
+              </Button>
             )}
           </div>
+          {files.length > 0 && (
+            <div className="flex flex-col gap-1">
+              {files.map((file, index) => (
+                <div key={index} className="flex items-center gap-1">
+                  <Paperclip size={14} /> {file.name}
+                </div>
+              ))}
+            </div>
+          )}
+          {(unmatched.length > 0 || matched.length > 0) && (
+            <div className="mt-6">
+              <CollapsibleCard
+                title={t('common.upload_id.summary_table', {
+                  matched: matched.length,
+                  unmatched: unmatched.length,
+                })}
+                cardClassName="py-4"
+                cardHeaderClassName="px-4 !gap-0"
+              >
+                <div className="flex flex-col gap-3 mt-3">
+                  <span>
+                    {t('common.upload_id.resume', {
+                      total: getRawValueList().length,
+                      unique: matched.length,
+                    })}
+                  </span>
+                  <Tabs defaultValue="matched">
+                    <TabsList>
+                      <TabsTrigger value="matched">
+                        {t('common.upload_id.matched', {
+                          total: matched.length,
+                        })}
+                      </TabsTrigger>
+                      <TabsTrigger value="unmatched">
+                        {t('common.upload_id.unmatched', {
+                          total: unmatched.length,
+                        })}
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="matched">
+                      <DisplayTable data={matched} columns={getColumns(variant, t)} dataCy="matched-table" />
+                    </TabsContent>
+                    <TabsContent value="unmatched">
+                      <DisplayTable data={unmatched} columns={getColumns(variant, t)} dataCy="unmatched-table" />
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </CollapsibleCard>
+            </div>
+          )}
         </DialogBody>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="secondary">{t('common.actions.cancel')}</Button>
+            <Button variant="outline">{t('common.actions.cancel')}</Button>
           </DialogClose>
-          <Button disabled={files.length === 0}>{t('common.actions.upload')}</Button>
+          <DialogClose asChild>
+            <Button
+              disabled={matched.length === 0}
+              onClick={() => {
+                // When we will add more variants, we will need to update field accordingly
+                queryBuilderRemote.updateActiveQueryField(appId, {
+                  field: 'symbol',
+                  value: matched.map(item => item.symbol),
+                  merge_strategy: MERGE_VALUES_STRATEGIES.APPEND_VALUES,
+                });
+              }}
+            >
+              {t('common.actions.upload')}
+            </Button>
+          </DialogClose>
         </DialogFooter>
       </DialogContent>
     </Dialog>

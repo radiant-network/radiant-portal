@@ -63,7 +63,7 @@ function DisplayTable({ columns, variant = 'default', data, dataCy }: SimpleTabl
             ))
           ) : (
             <TableRow variant={variant}>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={table.getAllLeafColumns().length} className="h-24 text-center">
                 <Empty title={t('common.table.no_result')} iconType="custom" icon={SearchIcon} size="mini" />
               </TableCell>
             </TableRow>

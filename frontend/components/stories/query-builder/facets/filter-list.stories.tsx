@@ -6,7 +6,7 @@ import { delay, http, HttpResponse } from 'msw';
 import { FilterConfigContext, FilterList } from '@/components/base/query-filters/filter-list';
 import { AggregateContext } from '@/components/base/query-filters/use-aggregation-builder';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';
-import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
+import { ApplicationId, ConfigProvider, FilterTypes, PortalConfig } from '@/components/cores/applications-config';
 import { RangeOperators } from '@/components/cores/sqon';
 
 import {
@@ -28,18 +28,18 @@ const config: PortalConfig = {
           {
             key: 'multiple',
             translation_key: 'multiple',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
           },
           {
             key: 'multiple (with dictionary)',
             translation_key: 'multiple (with dictionary)',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
             withDictionary: true,
           },
           {
             key: 'numerical (decimal)',
             translation_key: 'numerical (decimal)',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -51,7 +51,7 @@ const config: PortalConfig = {
           {
             key: 'numerical (integer)',
             translation_key: 'numerical (integer)',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -63,7 +63,7 @@ const config: PortalConfig = {
           {
             key: 'numerical (with unit)',
             translation_key: 'numerical (with unit)',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 120,
@@ -81,7 +81,7 @@ const config: PortalConfig = {
           {
             key: 'numerical (no data)',
             translation_key: 'numerical (no data)',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: undefined,
               max: undefined,
@@ -92,7 +92,7 @@ const config: PortalConfig = {
           {
             key: 'toggle filter',
             translation_key: 'toggle filter',
-            type: 'boolean',
+            type: FilterTypes.BOOLEAN,
           },
         ],
       },
@@ -106,12 +106,12 @@ const config: PortalConfig = {
           {
             key: 'multiple',
             translation_key: 'multiple',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
           },
           {
             key: 'numerical (decimal)',
             translation_key: 'numerical (decimal)',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -123,7 +123,7 @@ const config: PortalConfig = {
           {
             key: 'numerical (integer)',
             translation_key: 'numerical (integer)',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -135,7 +135,7 @@ const config: PortalConfig = {
           {
             key: 'has_interpretation',
             translation_key: 'has_interpretation',
-            type: 'boolean',
+            type: FilterTypes.BOOLEAN,
           },
         ],
       },

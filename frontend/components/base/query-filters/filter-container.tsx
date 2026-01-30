@@ -7,7 +7,7 @@ import { ToggleFilter } from '@/components/base/query-filters/toggle-filter';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
 import { Card, CardHeader } from '@/components/base/shadcn/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
-import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
+import { type Aggregation as AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
 interface FilterContainerProps {
@@ -72,13 +72,13 @@ export function FilterComponent({ field }: FilterContainerProps) {
   let filterElement;
 
   switch (field.type) {
-    case 'multiple':
+    case FilterTypes.MULTIPLE:
       filterElement = <MultiSelectFilter field={field} />;
       break;
-    case 'numerical':
+    case FilterTypes.NUMERICAL:
       filterElement = <NumericalFilter field={field} />;
       break;
-    case 'boolean':
+    case FilterTypes.BOOLEAN:
       filterElement = <ToggleFilter field={field} />;
       break;
     default:
@@ -95,7 +95,7 @@ export function FilterContainer({ field, isOpen }: FilterContainerProps) {
   const { t } = useI18n();
   const fieldType = field.type;
 
-  if (fieldType === 'divider') {
+  if (fieldType === FilterTypes.DIVIDER) {
     return (
       <h4 className="px-2 h-8 text-sidebar-foreground/70 text-xs font-medium line-height-xs text-ellipsis overflow-hidden flex justify-between items-center">
         {t(`common.filters.${field.key}`)}
@@ -106,21 +106,21 @@ export function FilterContainer({ field, isOpen }: FilterContainerProps) {
   let filterElement;
 
   switch (fieldType) {
-    case 'multiple':
+    case FilterTypes.MULTIPLE:
       filterElement = (
         <AccordionContainer field={field} isOpen={isOpen}>
           <MultiSelectFilter field={field} />
         </AccordionContainer>
       );
       break;
-    case 'numerical':
+    case FilterTypes.NUMERICAL:
       filterElement = (
         <AccordionContainer field={field} isOpen={isOpen}>
           <NumericalFilter field={field} />
         </AccordionContainer>
       );
       break;
-    case 'boolean':
+    case FilterTypes.BOOLEAN:
       filterElement = (
         <AccordionContainer field={field} isOpen={isOpen}>
           <ToggleFilter field={field} />
