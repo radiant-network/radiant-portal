@@ -546,5 +546,3 @@ VALUES (1, 'FI0037662.S13230.cram', 'genomic', 'alignment', 'cram', 110187385978
        (265, 'FI0005568.S14359.vcf.gz.tbi', 'genomic', 'snv', 'tbi', 2411724,
         's3://cqdg-prod-file-workspace/sarek/preprocessing/', '5d41402abc4b2a76b9719d911017c856', '2021-09-12T13:08:00-04:00')
 ON CONFLICT(id) DO NOTHING;
-
-ALTER TABLE document ALTER COLUMN id RESTART WITH 1000;
