@@ -9,14 +9,22 @@ type CollapsibleCardProps = {
   defaultOpen?: boolean;
   children: React.ReactElement;
   title: string;
+  cardClassName?: string;
+  cardHeaderClassName?: string;
 };
-function CollapsibleCard({ defaultOpen = false, title, children }: CollapsibleCardProps) {
+function CollapsibleCard({
+  defaultOpen = false,
+  title,
+  children,
+  cardClassName,
+  cardHeaderClassName,
+}: CollapsibleCardProps) {
   const [open, setOpen] = useState<boolean>(defaultOpen);
 
   return (
-    <Card>
+    <Card className={cardClassName}>
       <Collapsible open={open} onOpenChange={setOpen}>
-        <CardHeader>
+        <CardHeader className={cardHeaderClassName}>
           <CollapsibleTrigger className="flex justify-start">
             <CardTitle className="flex items-center justify-start gap-2 ">
               {open ? <ChevronUp /> : <ChevronDown />} <span>{title}</span>

@@ -104,9 +104,11 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
 
   const getUnmatchList = (results: GeneResult[]): UploadIdTableEntry[] => {
     const rawList = getRawValueList();
-    const symbolsSet = new Set(results.map(item => item.symbol?.toLowerCase()));
+    const matchedIds = new Set(
+      results.flatMap(item => [item.symbol?.toLowerCase(), item.ensembl_gene_id?.toLowerCase()].filter(Boolean)),
+    );
     const unmatchs = Array.from(getValueSet())
-      .filter(id => !symbolsSet.has(id.toLowerCase()))
+      .filter(id => !matchedIds.has(id.toLowerCase()))
       .map((id, index) => ({
         key: index,
         submittedId: id,
@@ -125,7 +127,11 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
   const getMatchList = (results: GeneResult[]): UploadIdTableEntry[] => {
     const rawList = getRawValueList();
     return results.map(result => {
-      const submittedId = rawList.find(val => val.toLowerCase() === result.symbol?.toLowerCase());
+      const submittedId = rawList.find(
+        val =>
+          val.toLowerCase() === result.symbol?.toLowerCase() ||
+          val.toLowerCase() === result.ensembl_gene_id?.toLowerCase(),
+      );
       return {
         entry: submittedId ?? result.symbol ?? '',
         symbol: result.symbol ?? '',
@@ -224,6 +230,7 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
             </HoverCard>
           </div>
           <Textarea
+            id="upload-id-textarea"
             onChange={e => setValue(e.target.value)}
             placeholder={t(`common.upload_id.${variant}.input_placeholder`)}
             rows={5}
@@ -271,6 +278,8 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
                   matched: matched.length,
                   unmatched: unmatched.length,
                 })}
+                cardClassName="py-4"
+                cardHeaderClassName="px-4 !gap-0"
               >
                 <div className="flex flex-col gap-3 mt-3">
                   <span>
