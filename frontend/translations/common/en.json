@@ -749,7 +749,7 @@
       "unknown": "Unknown"
     },
     "case": {
-      "title": "Cases",
+      "title": "{{total}} Cases",
       "actions": {
         "view_case": "View Case",
         "view_variant": "View Variants"
