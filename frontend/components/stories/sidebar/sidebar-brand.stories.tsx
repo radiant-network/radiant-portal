@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { SidebarGroups } from '@/components/base/query-filters/sidebar-groups';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';
+import { FilterTypes } from '@/components/cores/applications-config';
 import { RangeOperators } from '@/components/cores/sqon';
 
 const meta = {
@@ -31,12 +32,12 @@ export const Default: Story = {
           {
             key: 'type',
             translation_key: 'variant_type',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
           },
           {
             key: 'cn',
             translation_key: 'cn',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -46,7 +47,7 @@ export const Default: Story = {
           {
             key: 'length',
             translation_key: 'cnv_length',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -56,12 +57,12 @@ export const Default: Story = {
           {
             key: 'chromosome',
             translation_key: 'chromosome',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
           },
           {
             key: 'start',
             translation_key: 'cnv_start',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -71,7 +72,7 @@ export const Default: Story = {
           {
             key: 'end',
             translation_key: 'cnv_end',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -81,7 +82,7 @@ export const Default: Story = {
           {
             key: 'nb_snv',
             translation_key: 'nb_snv',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -95,37 +96,37 @@ export const Default: Story = {
           {
             key: 'cytoband',
             translation_key: 'cytoband',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
           },
           {
             key: 'gene_divider',
             translation_key: 'gene_divider',
-            type: 'divider',
+            type: FilterTypes.DIVIDER,
           },
           {
             key: 'hpo_gene_panel',
             translation_key: 'hpo_gene_panel',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
           },
           {
             key: 'orphanet_gene_panel',
             translation_key: 'orphanet_gene_panel',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
           },
           {
             key: 'omim_gene_panel',
             translation_key: 'omim_gene_panel',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
           },
           {
             key: 'ddd_gene_panel',
             translation_key: 'ddd_gene_panel',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
           },
           {
             key: 'cosmic_gene_panel',
             translation_key: 'cosmic_gene_panel',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
           },
         ],
       },
@@ -134,12 +135,12 @@ export const Default: Story = {
           {
             key: 'frequency_divider_pulic_cohorts',
             translation_key: 'frequency_divider_pulic_cohorts',
-            type: 'divider',
+            type: FilterTypes.DIVIDER,
           },
           {
             key: 'gnomad_sf',
             translation_key: 'gnomad_sf',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -151,7 +152,7 @@ export const Default: Story = {
           {
             key: 'gnomad_sc',
             translation_key: 'gnomad_sc',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -167,12 +168,12 @@ export const Default: Story = {
           {
             key: 'filter',
             translation_key: 'filter',
-            type: 'multiple',
+            type: FilterTypes.MULTIPLE,
           },
           {
             key: 'quality',
             translation_key: 'cnv_quality',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -184,7 +185,7 @@ export const Default: Story = {
           {
             key: 'pe',
             translation_key: 'pe',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,
@@ -196,7 +197,7 @@ export const Default: Story = {
           {
             key: 'sm',
             translation_key: 'sm',
-            type: 'numerical',
+            type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
               max: 100,

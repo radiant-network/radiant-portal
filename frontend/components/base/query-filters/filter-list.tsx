@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { FilterContainer } from '@/components/base/query-filters/filter-container';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
-import { AggregationConfig, ApplicationId } from '@/components/cores/applications-config';
+import { AggregationConfig, ApplicationId, FilterTypes } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
 import UploadIdModal from '../modals/upload-id-modal';
@@ -70,9 +70,9 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
     : Object.values(aggregations).flatMap(group => group.items);
 
   // Separate search by filters from other filters
-  const searchByFilters = allFields.filter(item => item.type === 'search_by');
-  const uploadListFilters = allFields.filter(item => item.type === 'upload_list');
-  const fields = allFields.filter(item => item.type !== 'search_by' && item.type !== 'upload_list');
+  const searchByFilters = allFields.filter(item => item.type === FilterTypes.SEARCH_BY);
+  const uploadListFilters = allFields.filter(item => item.type === FilterTypes.UPLOAD_LIST);
+  const fields = allFields.filter(item => item.type !== FilterTypes.SEARCH_BY && item.type !== FilterTypes.UPLOAD_LIST);
 
   useEffect(() => {
     setToggleExpandAll(false);
