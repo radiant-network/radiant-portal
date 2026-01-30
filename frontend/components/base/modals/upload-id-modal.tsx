@@ -104,9 +104,9 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
 
   const getUnmatchList = (results: GeneResult[]): UploadIdTableEntry[] => {
     const rawList = getRawValueList();
-    const symbolsSet = new Set(results.map(item => item.symbol));
+    const symbolsSet = new Set(results.map(item => item.symbol?.toLowerCase()));
     const unmatchs = Array.from(getValueSet())
-      .filter(id => !symbolsSet.has(id))
+      .filter(id => !symbolsSet.has(id.toLowerCase()))
       .map((id, index) => ({
         key: index,
         submittedId: id,
@@ -174,11 +174,6 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
 
       setValue(result.join('\n'));
       setFiles(uploadedFiles);
-
-      const apiResults = await genesApi.geneSearch({ inputs: result });
-
-      setMatched(getMatchList(apiResults.data));
-      setUnmatched(getUnmatchList(apiResults.data));
     } catch (error) {
       console.error('Error processing files:', error);
     } finally {
