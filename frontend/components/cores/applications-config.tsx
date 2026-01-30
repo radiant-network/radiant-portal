@@ -53,7 +53,7 @@ export type TFilterGroupConfig = IFilterRangeConfig | IFilterTextInputConfig | I
 export interface Aggregation {
   key: string;
   translation_key: string;
-  type: 'multiple' | 'boolean' | 'numerical' | 'divider' | 'search_by';
+  type: 'multiple' | 'boolean' | 'numerical' | 'divider' | 'search_by' | 'upload_list';
   defaults?: TFilterGroupConfig;
   tooltips?: string[];
   intervalDecimal?: { [key: string]: number };

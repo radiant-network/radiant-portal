@@ -673,23 +673,29 @@
       "more": "More"
     },
     "upload_id": {
+      "clear": "Clear",
       "upload_a_file": "Upload a file",
-      "summary_table": "Summary Table ({{matched}} matched, {{unmatched}} unmatched)",
-      "resume": "{{total}} submitted identifiers mapped to {{unique}} unique system identifiers",
+      "summary_table": "Summary table ({{matched}} mapped, {{unmatched}} unmapped)",
+      "resume": "{{total}} submitted identifiers mapped to {{unique}} unique system identifier",
       "matched": "Matched ({{total}})",
       "unmatched": "Unmatched ({{total}})",
       "gene": {
-        "trigger": "Upload a gene list",
-        "dialog_header": "Upload a gene list"
+        "button": "Upload a gene list",
+        "dialog_title": "Upload a gene list",
+        "input_placeholder": "e.g. ENSG00000157764, TP53",
+        "popover_identifiers_values": "Gene Symbol, Ensembl ID",
+        "submitted_identifier": "Submitted Gene Identifier",
+        "symbol": "Symbol",
+        "omim_gene_id": "Ensembl ID"
       },
-      "identifiers": {
-        "label": "Copy-paste a list of identifiers or upload a file",
-        "tooltips": {
-          "identifiers": "Identifiers: Gene Symbol, Gene Alias, Ensembl ID",
-          "separated_by": "Separated by: comma, space, new line",
-          "upload_file_format": "Upload file formats: tsv, csv"
-        }
-      }
+      "input_label": "Copy-paste a list of identifiers or upload a file",
+      "mapped_to": "Mapped to",
+      "popover_file_formats": "Upload file formats:",
+      "popover_file_formats_values": ".txt, .csv, .tsv",
+      "popover_identifiers": "Identifiers:",
+      "popover_separators": "Separated by:",
+      "popover_separators_values": "comma, space, new line",
+      "popover_title": "Identifiers and File Formats"
     },
     "user_selection": {
       "search_placeholder": "Search",

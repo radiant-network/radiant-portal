@@ -6,6 +6,8 @@ import { Button } from '@/components/base/shadcn/button';
 import { AggregationConfig, ApplicationId } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
+import UploadIdModal from '../modals/upload-id-modal';
+
 import { SearchFilter } from './search-filter';
 
 /**
@@ -69,7 +71,8 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
 
   // Separate search by filters from other filters
   const searchByFilters = allFields.filter(item => item.type === 'search_by');
-  const fields = allFields.filter(item => item.type !== 'search_by');
+  const uploadListFilters = allFields.filter(item => item.type === 'upload_list');
+  const fields = allFields.filter(item => item.type !== 'search_by' && item.type !== 'upload_list');
 
   useEffect(() => {
     setToggleExpandAll(false);
@@ -93,9 +96,12 @@ export function FilterList({ groupKey, appId, aggregations }: FilterListProps) {
   return (
     <FilterConfigContext value={{ appId, aggregations }}>
       <div>
-        <div className="mb-4">
+        <div className="flex flex-col gap-3 mb-3">
           {searchByFilters.map((search, index) => (
             <SearchFilter key={`${search.key}-${index}`} search={search} />
+          ))}
+          {uploadListFilters.map((uploadList, index) => (
+            <UploadIdModal key={`${uploadList.key}-${index}`} variant={uploadList.key.replace(/upload_list_/g, '')} />
           ))}
         </div>
         <div className="flex justify-end">

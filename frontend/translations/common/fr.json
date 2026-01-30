@@ -363,7 +363,7 @@
       "copy": "Copier dans le presse-papiers",
       "copied": "Copié!",
       "cancel": "Annuler",
-      "upload": "Télécharger"
+      "upload": "Téléverser"
     },
     "download": {
       "tooltip": "Télécharger le fichier",
@@ -674,23 +674,29 @@
       "more": "Plus"
     },
     "upload_id": {
+      "clear": "Supprimer",
       "upload_a_file": "Téléverser un fichier",
-      "summary_table": "Tableau récapitulatif ({{matched}} correspondances, {{unmatched}} non correspondantes)",
-      "resume": "{{total}} identifiants soumis correspondant à {{unique}} identifiants système uniques",
+      "summary_table": "Résumé ({{matched}} reconnus, {{unmatched}} inconnus)",
+      "resume": "{{total}} identifiants soumis correspondant à {{unique}} identifiants uniques au système",
       "matched": "Correspondants ({{total}})",
       "unmatched": "Non correspondants ({{total}})",
       "gene": {
-        "trigger": "Téléverser une liste de gènes",
-        "dialog_header": "Téléverser une liste de gènes"
+        "button": "Téléverser une liste de gènes",
+        "dialog_title": "Téléverser une liste de gènes",
+        "input_placeholder": "ex. ENSG00000157764, TP53",
+        "popover_identifiers_values": "Symbole du gène, Ensembl ID",
+        "submitted_identifier": "Identifiant soumis",
+        "symbol": "Symbole",
+        "omim_gene_id": "ID Ensembl"
       },
-      "identifiers": {
-        "label": "Copiez-collez une liste d'identifiants ou téléversez un fichier",
-        "tooltips": {
-          "identifiers": "Identifiants : symbole de gène, alias de gène, identifiant Ensembl",
-          "separated_by": "Séparés par : virgule, espace, saut de ligne",
-          "upload_file_format": "Formats de fichiers acceptés : tsv, csv"
-        }
-      }
+      "input_label": "Copier-coller une liste d'identifiants ou téléverser un fichier",
+      "mapped_to": "Correspondant à",
+      "popover_file_formats": "Formats de fichiers :",
+      "popover_file_formats_values": ".txt, .csv, .tsv",
+      "popover_identifiers": "Identifiants :",
+      "popover_separators": "Séparateur :",
+      "popover_separators_values": "virgule, espace, retour de ligne",
+      "popover_title": "Identifiants et formats de fichier"
     },
     "user_selection": {
       "search_placeholder": "Rechercher",
