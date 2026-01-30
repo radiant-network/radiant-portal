@@ -471,5 +471,3 @@ VALUES (1, 16, 44, 'phenotype', 'HPO', 'HP:0001263', 'unknown', 'negative', 'Cli
        (462, 20, 58, 'phenotype', 'HPO', 'HP:0001562', 'unknown', 'negative', 'Clinical comment'),
        (463, 20, 58, 'phenotype', 'HPO', 'HP:0001622', 'childhood', 'negative', 'Clinical comment')
 ON CONFLICT (id) DO NOTHING;
-
-ALTER TABLE obs_categorical ALTER COLUMN id RESTART WITH 1000;

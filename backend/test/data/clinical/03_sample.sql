@@ -122,6 +122,3 @@ VALUES (1, 'dna', 62, NULL, 'normal', 'S13224', 3, 6),
        (121,  'blood', NULL, NULL, 'normal', 'B-990.2',61,6),
        (122,  'blood', NULL, NULL, 'normal', 'B-990.3',59,6)
 ON CONFLICT (id) DO NOTHING;
-
-/* Reset id, so the next inserted row will start at 1000 */
-ALTER TABLE sample ALTER COLUMN id RESTART WITH 1000;
