@@ -49,5 +49,9 @@ export const Default: Story = {
   args: {
     variant: 'gene',
   },
-  render: args => <UploadIdModal {...args} />,
+  render: args => (
+    <div className="w-80">
+      <UploadIdModal {...args} />
+    </div>
+  ),
 };
