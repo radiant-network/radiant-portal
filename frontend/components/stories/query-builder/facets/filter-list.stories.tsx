@@ -16,7 +16,7 @@ import {
   statisticApi,
 } from '../../api/api-occurrence';
 
-const config: PortalConfig = {
+export const filterListConfig: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
   },
@@ -155,8 +155,8 @@ const meta = {
   title: 'QueryBuilder/Facets/FilterList',
   component: FilterList,
   args: {
-    appId: config.snv_occurrence.app_id,
-    aggregations: config.snv_occurrence.aggregations,
+    appId: filterListConfig.snv_occurrence.app_id,
+    aggregations: filterListConfig.snv_occurrence.aggregations,
     groupKey: 'variant',
   },
   decorators: [
@@ -166,9 +166,12 @@ const meta = {
           <Route
             path="/case/:caseId"
             element={
-              <ConfigProvider config={config}>
+              <ConfigProvider config={filterListConfig}>
                 <FilterConfigContext.Provider
-                  value={{ appId: config.snv_occurrence.app_id, aggregations: config.snv_occurrence.aggregations }}
+                  value={{
+                    appId: filterListConfig.snv_occurrence.app_id,
+                    aggregations: filterListConfig.snv_occurrence.aggregations,
+                  }}
                 >
                   <AggregateContext.Provider value={{ caseId: 1, seqId: 1 }}>
                     <SidebarProvider className="h-full flex flex-row">

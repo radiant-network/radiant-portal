@@ -9,6 +9,7 @@ export default [
     route('case/entity/:caseId', './routes/cases/entity.tsx'),
     route('file/', './routes/files/list.tsx'),
     route('admin/features', './routes/admin/beta-features.tsx'),
+    route('query-builder-v3', './routes/query-builder-v3/entity.tsx'),
   ]),
   route('auth/callback', './routes/auth/callback.ts'),
   route('auth/logout', './routes/auth/logout.ts'),
