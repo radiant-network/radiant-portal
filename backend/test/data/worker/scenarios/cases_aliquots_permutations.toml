@@ -1,0 +1,63 @@
+# scenarios/cases_aliquots_permutations.toml
+
+[[cases]]
+submitter_case_id = "CASE-ALIQUOTS-PERMUTATIONS"
+type = "germline"
+status_code = "in_progress"
+project_code = "N1"
+diagnostic_lab_code = "LDM-CHUSJ"
+primary_condition_code_system = "MONDO"
+primary_condition_value = "MONDO:0700092"
+priority_code = "routine"
+category_code = "postnatal"
+analysis_code = "WGA"
+resolution_status_code = "unsolved"
+note = "test case note"
+ordering_physician = "Dr. Super Test"
+ordering_organization_code = "CHUSJ"
+
+    [[cases.patients]]
+    submitter_patient_id = "MRN-283775"
+    affected_status_code = "affected"
+    patient_organization_code = "CHUSJ"
+    relation_to_proband_code = "proband"
+
+    [[cases.patients]]
+    submitter_patient_id = "MRN-283773"
+    affected_status_code = "affected"
+    patient_organization_code = "CHUSJ"
+    relation_to_proband_code = "mother"
+
+        [[cases.patients.observations_categorical]]
+        code = "phenotype"
+        system = "HPO"
+        value = "TEST:12345"
+        onset_code = "infantile"
+        interpretation_code = "positive"
+        note = "Test clinical note"
+
+    [[cases.sequencing_experiments]]
+    aliquot = "NA12891"
+    sample_organization_code = "CQGC"
+    submitter_sample_id = "S13225"
+
+    [[cases.sequencing_experiments]]
+    aliquot = "NA12892"
+    sample_organization_code = "CQGC"
+    submitter_sample_id = "S13224"
+
+    [[cases.tasks]]
+    type_code = "alignment_germline_variant_calling"
+    aliquots = ["NA12891", "NA12892"]
+    pipeline_name = "Dragen"
+    pipeline_version = "4.4.4"
+    genome_build = "GRch38"
+
+        [[cases.tasks.output_documents]]
+        data_category_code = "genomic"
+        data_type_code = "alignment"
+        format_code = "cram"
+        hash = "9473fdd0d880a43c21b7778d34872157"
+        name = "NA12891.recal.cram"
+        size = 12
+        url = "s3://test-bucket/existing_document.recal.crai"

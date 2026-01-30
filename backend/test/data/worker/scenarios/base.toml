@@ -72,7 +72,7 @@ ordering_organization_code = "CHUSJ"
 
   [[cases.tasks]]
   type_code = "alignment_germline_variant_calling"
-  aliquot = "NA12891"
+  aliquots = ["NA12891"]
   pipeline_name = "Dragen"
   pipeline_version = "4.4.4"
   genome_build = "GRch38"

@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**aliquot** | **str** |  | [optional] 
+**aliquots** | **List[str]** |  | 
 **genome_build** | **str** |  | [optional] 
 **input_documents** | [**List[InputDocumentBatch]**](InputDocumentBatch.md) |  | [optional] 
 **output_documents** | [**List[OutputDocumentBatch]**](OutputDocumentBatch.md) |  | 

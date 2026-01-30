@@ -28,14 +28,14 @@ class CaseTaskBatch(BaseModel):
     """
     CaseTaskBatch
     """ # noqa: E501
-    aliquot: Optional[StrictStr] = None
+    aliquots: List[StrictStr]
     genome_build: Optional[StrictStr] = None
     input_documents: Optional[List[InputDocumentBatch]] = None
     output_documents: List[OutputDocumentBatch]
     pipeline_name: Optional[StrictStr] = None
     pipeline_version: StrictStr
     type_code: StrictStr
-    __properties: ClassVar[List[str]] = ["aliquot", "genome_build", "input_documents", "output_documents", "pipeline_name", "pipeline_version", "type_code"]
+    __properties: ClassVar[List[str]] = ["aliquots", "genome_build", "input_documents", "output_documents", "pipeline_name", "pipeline_version", "type_code"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -102,7 +102,7 @@ class CaseTaskBatch(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "aliquot": obj.get("aliquot"),
+            "aliquots": obj.get("aliquots"),
             "genome_build": obj.get("genome_build"),
             "input_documents": [InputDocumentBatch.from_dict(_item) for _item in obj["input_documents"]] if obj.get("input_documents") is not None else None,
             "output_documents": [OutputDocumentBatch.from_dict(_item) for _item in obj["output_documents"]] if obj.get("output_documents") is not None else None,

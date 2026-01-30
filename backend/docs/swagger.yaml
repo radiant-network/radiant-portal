@@ -580,8 +580,11 @@ components:
       type: object
     CaseTaskBatch:
       properties:
-        aliquot:
-          type: string
+        aliquots:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         genome_build:
           type: string
         input_documents:
@@ -601,6 +604,7 @@ components:
         type_code:
           type: string
       required:
+      - aliquots
       - output_documents
       - pipeline_version
       - type_code

@@ -300,7 +300,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload("validateTask_Error_InvalidTaskAliquot")
-		payload[0].Tasks[0].Aliquot = "UNKNOWN_ALIQUOT"
+		payload[0].Tasks[0].Aliquots = []string{"UNKNOWN_ALIQUOT"}
 		createDocumentsForBatch(context, client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
@@ -310,35 +310,6 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) 
 			{
 				Code:    "TASK-002",
 				Message: "Sequencing \"UNKNOWN_ALIQUOT\" is not defined for case 0 - task 0.",
-				Path:    "case[0].tasks[0]",
-			},
-		}
-		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
-	})
-}
-
-func Test_ProcessBatch_Case_validateTask_Error_ExclusiveAliquotInputDocs(t *testing.T) {
-	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload("validateTask_Error_ExclusiveAliquotInputDocs")
-		payload[0].Tasks[0].InputDocuments = []*types.InputDocumentBatch{
-			{
-				Url: "s3://cqdg-prod-file-workspace/sarek/preprocessing/",
-			},
-		}
-		createDocumentsForBatch(context, client, payload)
-
-		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
-
-		errors := []types.BatchMessage{
-			{
-				Code:    "TASK-007",
-				Message: "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both.",
-				Path:    "case[0].tasks[0]",
-			},
-			{
-				Code:    "TASK-006",
-				Message: "Input document with URL s3://cqdg-prod-file-workspace/sarek/preprocessing/ for case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
 				Path:    "case[0].tasks[0]",
 			},
 		}
@@ -390,7 +361,7 @@ func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *t
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload("validateTask_Error_ExternalSequencingExperiment")
 		payload[0].Tasks[0].TypeCode = "family_variant_calling"
-		payload[0].Tasks[0].Aliquot = ""
+		payload[0].Tasks[0].Aliquots = []string{"NA12891", "ABC123"} // One Aliquot not-matching
 		payload[0].Tasks[0].InputDocuments = []*types.InputDocumentBatch{
 			{
 				Url: "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram",
@@ -762,11 +733,6 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 				Path:    "case[0].tasks[1]",
 			},
 			{
-				Code:    "TASK-007",
-				Message: "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both.",
-				Path:    "case[0].tasks[2]",
-			},
-			{
 				Code:    "DOCUMENT-001",
 				Message: "Invalid field data_type_code for case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [alignment, cnvvis, covgene, exomiser, exp, gcnv, gsv, igv, qcrun, scnv, snv, somfu, ssnv, ssup, ssv].",
 				Path:    "case[0].tasks[0].output_documents[0]",
@@ -823,6 +789,90 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, warnings, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_Aliquots_Permutations(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		scenario, _ := testutils.LoadScenario("cases_aliquots_permutations")
+		payload, _ := json.Marshal(scenario.Cases)
+
+		// Create document to validate size and hash checks
+		_ = createDocument(context, client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "CASE-ALIQUOTS-PERMUTATIONS").First(&ca)
+
+		assert.NotNil(t, ca)
+		assert.GreaterOrEqual(t, ca.ID, 1000)
+		assert.Equal(t, 3, ca.ProbandID)
+		assert.Equal(t, 1, ca.ProjectID)
+		assert.Equal(t, "Dr. Super Test", ca.OrderingPhysician)
+
+		var chse []*types.CaseHasSequencingExperiment
+		db.Table("case_has_sequencing_experiment").Where("case_id = ?", ca.ID).Find(&chse)
+		assert.Len(t, chse, 4)
+
+		// Sort to have a predictable order for assertions
+		slices.SortFunc(chse, func(a, b *types.CaseHasSequencingExperiment) int {
+			return a.SequencingExperimentID - b.SequencingExperimentID
+		})
+
+		assert.GreaterOrEqual(t, chse[0].CaseID, 1000)
+		assert.Equal(t, 1, chse[0].SequencingExperimentID)
+		assert.Equal(t, 2, chse[1].SequencingExperimentID)
+		assert.Equal(t, 70, chse[2].SequencingExperimentID)
+		assert.Equal(t, 71, chse[3].SequencingExperimentID)
+
+		var fa []*types.Family
+		db.Table("family").Where("case_id = ?", ca.ID).Find(&fa)
+		assert.Len(t, fa, 2)
+		assert.GreaterOrEqual(t, fa[0].ID, 1000)
+		assert.Equal(t, 3, fa[0].FamilyMemberID)
+		assert.Equal(t, "proband", fa[0].RelationshipToProbandCode)
+		assert.GreaterOrEqual(t, fa[1].ID, 1001)
+		assert.Equal(t, 1, fa[1].FamilyMemberID)
+		assert.Equal(t, "mother", fa[1].RelationshipToProbandCode)
+
+		var tc []*types.TaskContext
+		db.Table("task_context").Where("task_id = 1000").Find(&tc)
+		assert.Len(t, tc, 4)
+
+		slices.SortFunc(tc, func(a, b *types.TaskContext) int {
+			return a.SequencingExperimentID - b.SequencingExperimentID
+		})
+
+		assert.Equal(t, 1, tc[0].SequencingExperimentID)
+		assert.Equal(t, 2, tc[1].SequencingExperimentID)
+		assert.Equal(t, 70, tc[2].SequencingExperimentID)
+		assert.Equal(t, 71, tc[3].SequencingExperimentID)
+
+		var ta *types.Task
+		db.Table("task").Where("id = 1000").First(&ta)
+		assert.Equal(t, "alignment_germline_variant_calling", ta.TaskTypeCode)
+		assert.Equal(t, "Dragen", ta.PipelineName)
+		assert.Equal(t, "4.4.4", ta.PipelineVersion)
+		assert.Equal(t, "GRch38", ta.GenomeBuild)
+
+		var thd []*types.TaskHasDocument
+		db.Table("task_has_document").Where("task_id = 1000").Find(&thd)
+		assert.Len(t, thd, 1)
+		assert.GreaterOrEqual(t, thd[0].DocumentID, 1000)
+
+		var doc *types.Document
+		db.Table("document").Where("id = ?", thd[0].DocumentID).First(&doc)
+		assert.NotNil(t, doc)
+
+		assert.Equal(t, "NA12891.recal.cram", doc.Name)
+		assert.Equal(t, int64(12), doc.Size)
+		assert.Equal(t, "9473fdd0d880a43c21b7778d34872157", doc.Hash)
+		assert.Equal(t, "s3://test-bucket/existing_document.recal.crai", doc.Url)
+		assert.Equal(t, "genomic", doc.DataCategoryCode)
+		assert.Equal(t, "alignment", doc.DataTypeCode)
+		assert.Equal(t, "cram", doc.FileFormatCode)
 	})
 }
 
