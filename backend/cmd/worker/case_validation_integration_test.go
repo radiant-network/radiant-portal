@@ -270,7 +270,7 @@ func Test_ProcessBatch_Case_validateTask_Error_TaskField(t *testing.T) {
 			{
 				Code:    "TASK-001",
 				Message: "Invalid field pipeline_version for case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[0].tasks[0]",
+				Path:    "case[0].tasks[0].pipeline_version",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -290,7 +290,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 			{
 				Code:    "TASK-001",
 				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, family_variant_calling, somatic_variant_calling, tumor_only_variant_calling, radiant_germline_annotation, exomiser, rnaseq_analysis].",
-				Path:    "case[0].tasks[0]",
+				Path:    "case[0].tasks[0].type_code",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
@@ -300,7 +300,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload("validateTask_Error_InvalidTaskAliquot")
-		payload[0].Tasks[0].Aliquot = "UNKNOWN_ALIQUOT"
+		payload[0].Tasks[0].Aliquots = []string{"UNKNOWN_ALIQUOT"}
 		createDocumentsForBatch(context, client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
@@ -310,35 +310,6 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) 
 			{
 				Code:    "TASK-002",
 				Message: "Sequencing \"UNKNOWN_ALIQUOT\" is not defined for case 0 - task 0.",
-				Path:    "case[0].tasks[0]",
-			},
-		}
-		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
-	})
-}
-
-func Test_ProcessBatch_Case_validateTask_Error_ExclusiveAliquotInputDocs(t *testing.T) {
-	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		payload := createBaseCasePayload("validateTask_Error_ExclusiveAliquotInputDocs")
-		payload[0].Tasks[0].InputDocuments = []*types.InputDocumentBatch{
-			{
-				Url: "s3://cqdg-prod-file-workspace/sarek/preprocessing/",
-			},
-		}
-		createDocumentsForBatch(context, client, payload)
-
-		payloadBytes, _ := json.Marshal(payload)
-		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
-
-		errors := []types.BatchMessage{
-			{
-				Code:    "TASK-007",
-				Message: "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both.",
-				Path:    "case[0].tasks[0]",
-			},
-			{
-				Code:    "TASK-006",
-				Message: "Input document with URL s3://cqdg-prod-file-workspace/sarek/preprocessing/ for case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
 				Path:    "case[0].tasks[0]",
 			},
 		}
@@ -390,7 +361,7 @@ func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *t
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload("validateTask_Error_ExternalSequencingExperiment")
 		payload[0].Tasks[0].TypeCode = "family_variant_calling"
-		payload[0].Tasks[0].Aliquot = ""
+		payload[0].Tasks[0].Aliquots = []string{"NA12891", "ABC123"} // One Aliquot not-matching
 		payload[0].Tasks[0].InputDocuments = []*types.InputDocumentBatch{
 			{
 				Url: "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram",
@@ -402,6 +373,11 @@ func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *t
 		id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CaseBatchType, false, "user123", "2025-12-04")
 
 		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"ABC123\" is not defined for case 0 - task 0.",
+				Path:    "case[0].tasks[0]",
+			},
 			{
 				Code:    "TASK-006",
 				Message: "Input document with URL s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram for case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
@@ -680,14 +656,14 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			{
 				Code:    "DOCUMENT-003",
 				Message: "Document s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz already exists, skipped.",
-				Path:    "case[0].tasks[2].output_documents[0]",
+				Path:    "case[0].tasks[3].output_documents[0]",
 			},
 		}
 		warnings := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-004",
 				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found but with a different data_category_code (genomic <> genomicc).",
-				Path:    "case[0].tasks[2].output_documents[1]",
+				Path:    "case[0].tasks[3].output_documents[1]",
 			},
 		}
 		errors := []types.BatchMessage{
@@ -734,12 +710,12 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			{
 				Code:    "TASK-001",
 				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, family_variant_calling, somatic_variant_calling, tumor_only_variant_calling, radiant_germline_annotation, exomiser, rnaseq_analysis].",
-				Path:    "case[0].tasks[0]",
+				Path:    "case[0].tasks[0].type_code",
 			},
 			{
 				Code:    "TASK-001",
 				Message: "Invalid field pipeline_name for case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[0].tasks[0]",
+				Path:    "case[0].tasks[0].pipeline_name",
 			},
 			{
 				Code:    "TASK-002",
@@ -748,7 +724,17 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			},
 			{
 				Code:    "TASK-001",
+				Message: "Invalid field aliquots for case 0 - task 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].tasks[1].aliquots",
+			},
+			{
+				Code:    "TASK-001",
 				Message: "Invalid field pipeline_name for case 0 - task 1. Reason: field is too long, maximum length allowed is 100.",
+				Path:    "case[0].tasks[1].pipeline_name",
+			},
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"\" is not defined for case 0 - task 1.",
 				Path:    "case[0].tasks[1]",
 			},
 			{
@@ -762,9 +748,24 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 				Path:    "case[0].tasks[1]",
 			},
 			{
-				Code:    "TASK-007",
-				Message: "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both.",
+				Code:    "TASK-001",
+				Message: "Invalid field aliquots for case 0 - task 2. Reason: aliquots must contain at least one value.",
+				Path:    "case[0].tasks[2].aliquots",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 2 of type alignment.",
 				Path:    "case[0].tasks[2]",
+			},
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"NA12891\" is not defined for case 0 - task 3.",
+				Path:    "case[0].tasks[3]",
+			},
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"NA12891\" is not defined for case 0 - task 4.",
+				Path:    "case[0].tasks[4]",
 			},
 			{
 				Code:    "DOCUMENT-001",
@@ -804,25 +805,38 @@ func Test_ProcessBatch_Case_Inner_Codes(t *testing.T) {
 			{
 				Code:    "DOCUMENT-005",
 				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found in the output of a different task.",
-				Path:    "case[0].tasks[2].output_documents[0]",
+				Path:    "case[0].tasks[3].output_documents[0]",
 			},
 			{
 				Code:    "DOCUMENT-005",
 				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found in the output of a different task.",
-				Path:    "case[0].tasks[2].output_documents[1]",
+				Path:    "case[0].tasks[3].output_documents[1]",
 			},
 			{
 				Code:    "DOCUMENT-002",
-				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for case 0 - task 3 - output document 0.",
-				Path:    "case[0].tasks[3].output_documents[0]",
+				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for case 0 - task 4 - output document 0.",
+				Path:    "case[0].tasks[4].output_documents[0]",
 			},
 			{
 				Code:    "DOCUMENT-008",
 				Message: "Duplicate output document with URL s3://test-bucket/CASE-12345.recal.crai found.",
-				Path:    "case[0].tasks[3].output_documents[0]",
+				Path:    "case[0].tasks[4].output_documents[0]",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", infos, warnings, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_Aliquots_Permutations(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		scenario, _ := testutils.LoadScenario("cases_aliquots_permutations")
+		payload, _ := json.Marshal(scenario.Cases)
+
+		// Create document to validate size and hash checks
+		_ = createDocument(context, client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 	})
 }
 

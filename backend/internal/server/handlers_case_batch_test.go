@@ -52,6 +52,7 @@ func TestPostCaseBatchHandler_Success(t *testing.T) {
 				"submitter_sample_id": "s1"
 			}],
 			"tasks": [{
+				"aliquots": ["alq1"],
 				"type_code": "analysis",
 				"output_documents": [{
 					"data_category_code": "variant",

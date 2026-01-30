@@ -1151,10 +1151,10 @@ export interface CaseTask {
 export interface CaseTaskBatch {
     /**
      * 
-     * @type {string}
+     * @type {Array<string>}
      * @memberof CaseTaskBatch
      */
-    'aliquot'?: string;
+    'aliquots': Array<string>;
     /**
      * 
      * @type {string}

@@ -1000,7 +1000,7 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 			SubmitterCaseId: "CASE-TASK-TEST",
 			Tasks: []*types.CaseTaskBatch{
 				{
-					Aliquot: "ALIQUOT-1",
+					Aliquots: []string{"ALIQUOT-1"},
 					InputDocuments: []*types.InputDocumentBatch{
 						{Url: "file://bucket/file.bam"},
 					},
@@ -1036,7 +1036,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 			SubmitterCaseId: "CASE-FAIL",
 			Tasks: []*types.CaseTaskBatch{
 				{
-					Aliquot: "ALIQUOT-1",
+					Aliquots: []string{"ALIQUOT-1"},
 					InputDocuments: []*types.InputDocumentBatch{
 						{Url: "file://bucket/error.bam"},
 					},
@@ -1064,7 +1064,7 @@ func Test_fetchFromTasks_SeqExpError(t *testing.T) {
 			SubmitterCaseId: "CASE-FAIL",
 			Tasks: []*types.CaseTaskBatch{
 				{
-					Aliquot: "ALIQUOT-ERROR",
+					Aliquots: []string{"ALIQUOT-ERROR"},
 				},
 			},
 		},
@@ -1195,7 +1195,7 @@ func Test_fetchSequencingExperimentsInTask_OK(t *testing.T) {
 	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
-		Aliquot: "ALIQUOT-1",
+		Aliquots: []string{"ALIQUOT-1"},
 	}
 	err := record.fetchSequencingExperimentsInTask(&task)
 	assert.NoError(t, err)
@@ -1212,7 +1212,7 @@ func Test_fetchSequencingExperimentsInTask_NotFound(t *testing.T) {
 	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
-		Aliquot: "ALIQUOT-999",
+		Aliquots: []string{"ALIQUOT-999"},
 	}
 	err := record.fetchSequencingExperimentsInTask(&task)
 	assert.NoError(t, err)
@@ -1227,7 +1227,7 @@ func Test_fetchSequencingExperimentsInTask_Error(t *testing.T) {
 	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
-		Aliquot: "ALIQUOT-ERROR",
+		Aliquots: []string{"ALIQUOT-ERROR"},
 	}
 	err := record.fetchSequencingExperimentsInTask(&task)
 	assert.Error(t, err)
@@ -3950,7 +3950,7 @@ func Test_validateTaskTextField_RegexError(t *testing.T) {
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
 		Message: "Invalid field test_field for case 0 - task 0. Reason: does not match the regular expression `^[a-zA-Z0-9]+$`.",
-		Path:    "case[0].tasks[0]",
+		Path:    "case[0].tasks[0].test_field",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3966,7 +3966,7 @@ func Test_validateTaskTextField_LengthError(t *testing.T) {
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
 		Message: "Invalid field test_field for case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
-		Path:    "case[0].tasks[0]",
+		Path:    "case[0].tasks[0].test_field",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -3991,7 +3991,7 @@ func Test_validateTaskTypeCode_Error(t *testing.T) {
 	expected := types.BatchMessage{
 		Code:    "TASK-001",
 		Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `foobar`. Valid codes are: [foo, bar].",
-		Path:    "case[0].tasks[0]",
+		Path:    "case[0].tasks[0].type_code",
 	}
 
 	assert.Len(t, record.Infos, 0)
@@ -4009,7 +4009,7 @@ func Test_validateTaskAliquot_OK(t *testing.T) {
 			},
 			Tasks: []*types.CaseTaskBatch{
 				{
-					Aliquot: "ALIQUOT-1",
+					Aliquots: []string{"ALIQUOT-1"},
 				},
 			},
 		},
@@ -4030,7 +4030,7 @@ func Test_validateTaskAliquot_Error(t *testing.T) {
 			},
 			Tasks: []*types.CaseTaskBatch{
 				{
-					Aliquot: "ALIQUOT-1",
+					Aliquots: []string{"ALIQUOT-1"},
 				},
 			},
 		},
@@ -4078,97 +4078,6 @@ func Test_validateTaskDocuments_OK(t *testing.T) {
 	assert.Len(t, record.Infos, 0)
 	assert.Len(t, record.Warnings, 0)
 	assert.Len(t, record.Errors, 0)
-}
-
-func Test_validateExclusiveAliquotInputDocuments_OK(t *testing.T) {
-	record := CaseValidationRecord{
-		Case: types.CaseBatch{
-			Tasks: []*types.CaseTaskBatch{
-				{
-					Aliquot: "ALIQUOT-1",
-					OutputDocuments: []*types.OutputDocumentBatch{
-						{
-							Url: "s3://output/foo/bar.txt",
-						},
-					},
-				},
-			},
-		},
-	}
-	record.validateExclusiveAliquotInputDocuments(record.Case.Tasks[0], 0)
-	assert.Len(t, record.Infos, 0)
-	assert.Len(t, record.Warnings, 0)
-	assert.Len(t, record.Errors, 0)
-
-	record = CaseValidationRecord{
-		Documents: map[string]*types.Document{
-			"s3://input/foo/bar.txt": {},
-		},
-		TaskContexts: map[int][]*types.TaskContext{
-			0: {{TaskID: 0, SequencingExperimentID: 0}},
-		},
-		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
-		Case: types.CaseBatch{
-			Tasks: []*types.CaseTaskBatch{
-				{
-					InputDocuments: []*types.InputDocumentBatch{
-						{
-							Url: "s3://input/foo/bar.txt",
-						},
-					},
-					OutputDocuments: []*types.OutputDocumentBatch{
-						{
-							Url: "s3://output/foo/bar.txt",
-						},
-					},
-				},
-			},
-		},
-	}
-	record.validateExclusiveAliquotInputDocuments(record.Case.Tasks[0], 0)
-	assert.Len(t, record.Infos, 0)
-	assert.Len(t, record.Warnings, 0)
-	assert.Len(t, record.Errors, 0)
-}
-
-func Test_validateExclusiveAliquotInputDocuments_Error(t *testing.T) {
-	record := CaseValidationRecord{
-		Documents: map[string]*types.Document{
-			"s3://input/foo/bar.txt": {},
-		},
-		TaskContexts: map[int][]*types.TaskContext{
-			0: {{TaskID: 0, SequencingExperimentID: 0}},
-		},
-		SequencingExperiments: map[int]*types.SequencingExperiment{0: {ID: 0}},
-		Case: types.CaseBatch{
-			Tasks: []*types.CaseTaskBatch{
-				{
-					Aliquot: "ALIQUOT-1",
-					InputDocuments: []*types.InputDocumentBatch{
-						{
-							Url: "s3://input/foo/bar.txt",
-						},
-					},
-					OutputDocuments: []*types.OutputDocumentBatch{
-						{
-							Url: "s3://output/foo/bar.txt",
-						},
-					},
-				},
-			},
-		},
-	}
-	record.validateExclusiveAliquotInputDocuments(record.Case.Tasks[0], 0)
-
-	expected := types.BatchMessage{
-		Code:    "TASK-007",
-		Message: "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both.",
-		Path:    "case[0].tasks[0]",
-	}
-
-	assert.Len(t, record.Infos, 0)
-	assert.Len(t, record.Warnings, 0)
-	assert.Equal(t, expected, record.Errors[0])
 }
 
 func Test_validateTaskDocuments_MissingInputDocuments_OK(t *testing.T) {
@@ -4379,39 +4288,6 @@ func Test_validateTaskDocumentOutputInBatch_OK(t *testing.T) {
 	task, doc := record.getOriginTaskForInputDocument(record.Case.Tasks[1].InputDocuments[0].Url)
 	assert.NotNil(t, task)
 	assert.NotNil(t, doc)
-}
-
-func Test_getAliquotFromInputDocuments_OK(t *testing.T) {
-	record := CaseValidationRecord{
-		SequencingExperiments: map[int]*types.SequencingExperiment{
-			0: {
-				Aliquot: "ALIQUOT-1",
-			},
-		},
-		Case: types.CaseBatch{
-			Tasks: []*types.CaseTaskBatch{
-				{
-					Aliquot: "ALIQUOT-1",
-					OutputDocuments: []*types.OutputDocumentBatch{
-						{
-							Url: "s3://input/foo/bar.txt",
-						},
-					},
-				},
-				{
-					Aliquot: "",
-					InputDocuments: []*types.InputDocumentBatch{
-						{
-							Url: "s3://input/foo/bar.txt",
-						},
-					},
-				},
-			},
-		},
-	}
-	aliquot, err := record.getAliquotFromInputDocuments(record.Case.Tasks[1])
-	assert.NoError(t, err)
-	assert.Equal(t, []string{"ALIQUOT-1"}, aliquot)
 }
 
 // -----------------------------------------------------------------------------

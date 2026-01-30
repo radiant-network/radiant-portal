@@ -65,7 +65,6 @@ const (
 	TaskMissingOutputDocuments                  = "TASK-004"
 	TaskInputDocumentNotFound                   = "TASK-005"
 	TaskInputDocumentNotInSequencingExperiments = "TASK-006"
-	TaskContainsAliquotAndInputDocuments        = "TASK-007"
 )
 
 // Documents error codes
@@ -403,18 +402,19 @@ func (r *CaseValidationRecord) fetchFromSequencingExperiments() error {
 }
 
 func (cr *CaseValidationRecord) fetchSequencingExperimentsInTask(task *types.CaseTaskBatch) error {
-	seqs, err := cr.Context.SeqExpRepo.GetSequencingExperimentByAliquot(task.Aliquot)
-	if err != nil {
-		return fmt.Errorf("failed to get sequencing experiment by aliquot %q: %w", task.Aliquot, err)
-	}
+	for _, aliquot := range task.Aliquots {
+		seqs, err := cr.Context.SeqExpRepo.GetSequencingExperimentByAliquot(aliquot)
+		if err != nil {
+			return fmt.Errorf("failed to get sequencing experiment by aliquot %q: %w", aliquot, err)
+		}
 
-	for i := range seqs {
-		se := &seqs[i]
-		if _, exists := cr.SequencingExperiments[se.ID]; !exists {
-			cr.SequencingExperiments[se.ID] = se
+		for i := range seqs {
+			se := &seqs[i]
+			if _, exists := cr.SequencingExperiments[se.ID]; !exists {
+				cr.SequencingExperiments[se.ID] = se
+			}
 		}
 	}
-
 	return nil
 }
 
@@ -1010,7 +1010,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 // Tasks validation
 
 func (cr *CaseValidationRecord) validateTaskTextField(fieldValue, fieldName string, taskIndex int, regExp *regexp.Regexp, required bool) {
-	path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+	path := cr.formatFieldPath("tasks", &taskIndex, fieldName, nil)
 	if !required && fieldValue == "" {
 		return
 	}
@@ -1021,28 +1021,32 @@ func (cr *CaseValidationRecord) validateTaskTextField(fieldValue, fieldName stri
 
 func (cr *CaseValidationRecord) validateTaskTypeCode(typeCode string, taskIndex int) {
 	if !slices.Contains(cr.TaskTypeCodes, typeCode) {
-		path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+		path := cr.formatFieldPath("tasks", &taskIndex, "type_code", nil)
 		msg := cr.formatTaskFieldErrorMessage("type_code", cr.Index, taskIndex) + " invalid task type code `" + typeCode + "`. Valid codes are: [" + strings.Join(cr.TaskTypeCodes, ", ") + "]."
 		cr.addErrors(msg+"", TaskInvalidField, path)
 	}
 }
 
 func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
-	for _, se := range cr.Case.SequencingExperiments {
-		if se.Aliquot == cr.Case.Tasks[taskIndex].Aliquot {
-			return
-		}
+	task := cr.Case.Tasks[taskIndex]
+	if len(task.Aliquots) == 0 {
+		path := cr.formatFieldPath("tasks", &taskIndex, "aliquots", nil)
+		msg := cr.formatTaskFieldErrorMessage("aliquots", cr.Index, taskIndex)
+		cr.addErrors(fmt.Sprintf("%s aliquots must contain at least one value.", msg), TaskInvalidField, path)
+		return
 	}
-	path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
-	message := fmt.Sprintf("Sequencing %q is not defined for case %d - task %d.", cr.Case.Tasks[taskIndex].Aliquot, cr.Index, taskIndex)
-	cr.addErrors(message, TaskUnknownAliquot, path)
-}
 
-func (cr *CaseValidationRecord) validateExclusiveAliquotInputDocuments(task *types.CaseTaskBatch, taskIndex int) {
-	if len(task.InputDocuments) > 0 && task.Aliquot != "" {
-		path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
-		message := "Aliquot and input documents are mutually exclusive. You can provide one or the other, but not both."
-		cr.addErrors(message, TaskContainsAliquotAndInputDocuments, path)
+	existingAliquots := make(map[string]struct{}, len(cr.Case.SequencingExperiments))
+	for _, se := range cr.Case.SequencingExperiments {
+		existingAliquots[se.Aliquot] = struct{}{}
+	}
+
+	for _, aliquot := range task.Aliquots {
+		if _, found := existingAliquots[aliquot]; !found {
+			path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+			message := fmt.Sprintf("Sequencing %q is not defined for case %d - task %d.", aliquot, cr.Index, taskIndex)
+			cr.addErrors(message, TaskUnknownAliquot, path)
+		}
 	}
 }
 
@@ -1094,7 +1098,7 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 	baseMsg := fmt.Sprintf("case %d - task %d", cr.Index, taskIndex)
 
 	if _, ok := RequiresInputDocumentsTaskTypes[task.TypeCode]; ok {
-		if len(task.InputDocuments) == 0 {
+		if task.InputDocuments == nil || len(task.InputDocuments) == 0 {
 			message := fmt.Sprintf("Missing input documents for case %d - task %d of type %s.", cr.Index, taskIndex, task.TypeCode)
 			cr.addErrors(message, TaskMissingInputDocuments, path)
 		}
@@ -1121,8 +1125,8 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 func (cr *CaseValidationRecord) validateTasks() error {
 	for taskIndex, task := range cr.Case.Tasks {
 
-		if task.Aliquot != "" {
-			cr.validateTaskTextField(task.Aliquot, "aliquot", taskIndex, TextRegExpCompiled, true)
+		for _, aliquot := range task.Aliquots {
+			cr.validateTaskTextField(aliquot, "aliquots", taskIndex, TextRegExpCompiled, true)
 		}
 
 		cr.validateTaskTextField(task.TypeCode, "type_code", taskIndex, TextRegExpCompiled, true)
@@ -1132,10 +1136,7 @@ func (cr *CaseValidationRecord) validateTasks() error {
 		cr.validateTaskTextField(task.PipelineVersion, "pipeline_version", taskIndex, TextRegExpCompiled, true)
 		cr.validateTaskTextField(task.PipelineName, "pipeline_name", taskIndex, TextRegExpCompiled, true)
 
-		if _, ok := RequiresInputDocumentsTaskTypes[task.TypeCode]; !ok {
-			cr.validateTaskAliquot(taskIndex)
-		}
-		cr.validateExclusiveAliquotInputDocuments(task, taskIndex)
+		cr.validateTaskAliquot(taskIndex)
 		cr.validateTaskDocuments(task, taskIndex)
 	}
 	return nil
@@ -1287,36 +1288,6 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 		}
 	}
 	return nil
-}
-
-func (cr *CaseValidationRecord) getAliquotFromInputDocuments(task *types.CaseTaskBatch) ([]string, error) {
-	validAliquots := make(map[string]struct{})
-	for _, se := range cr.SequencingExperiments {
-		validAliquots[se.Aliquot] = struct{}{}
-	}
-	var detectedAliquots []string
-	for _, idoc := range task.InputDocuments {
-		originTask, _ := cr.getOriginTaskForInputDocument(idoc.Url)
-		if originTask == nil {
-			return nil, fmt.Errorf("input document with URL %s not found in case output documents", idoc.Url)
-		}
-
-		if _, exists := validAliquots[originTask.Aliquot]; !exists {
-			continue
-		}
-
-		detectedAliquots = append(detectedAliquots, originTask.Aliquot)
-	}
-
-	if len(detectedAliquots) == 0 {
-		return nil, fmt.Errorf("no sequencing experiments found for the provided input documents")
-	}
-
-	// Remove duplicates
-	slices.Sort(detectedAliquots)
-	detectedAliquots = slices.Compact(detectedAliquots)
-
-	return detectedAliquots, nil
 }
 
 func validateCaseRecord(
@@ -1569,19 +1540,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 		}
 
 		for _, se := range cr.SequencingExperiments {
-
-			// Aliquot must match to create TaskContext relationship with SequencingExperiment and Task
-			var aliquots []string
-			if t.Aliquot != "" {
-				aliquots = []string{t.Aliquot}
-			} else {
-				aliquots, err = cr.getAliquotFromInputDocuments(t)
-				if err != nil {
-					return fmt.Errorf("failed to get aliquot from input documents for task %q in case %d: %w", t.TypeCode, cr.Index, err)
-				}
-			}
-
-			for _, al := range aliquots {
+			for _, al := range t.Aliquots {
 
 				if al != se.Aliquot {
 					continue

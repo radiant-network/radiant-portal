@@ -59,7 +59,7 @@ type CaseSequencingExperimentBatch struct {
 
 type CaseTaskBatch struct {
 	TypeCode        string                 `json:"type_code" toml:"type_code" binding:"required"`
-	Aliquot         string                 `json:"aliquot,omitempty" toml:"aliquot"`
+	Aliquots        []string               `json:"aliquots" toml:"aliquots" binding:"required"`
 	InputDocuments  []*InputDocumentBatch  `json:"input_documents,omitempty" toml:"input_documents" binding:"dive"`
 	OutputDocuments []*OutputDocumentBatch `json:"output_documents" toml:"output_documents" binding:"required,dive"`
 	PipelineName    string                 `json:"pipeline_name,omitempty" toml:"pipeline_name"`
