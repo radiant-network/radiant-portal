@@ -32,6 +32,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
           size: 124,
           minSize: 40,
           enableSorting: false,
+          enablePinning: false,
         }),
         // Cytoband
         columnHelper.accessor(row => row.cytoband, {
@@ -40,6 +41,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
           size: 124,
           minSize: 40,
           enableSorting: false,
+          enablePinning: false,
         }),
         // ClinGen
         columnHelper.accessor(row => row.symbol, {
@@ -55,6 +57,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
           size: 124,
           minSize: 40,
           enableSorting: false,
+          enablePinning: false,
         }),
         // Length
         columnHelper.accessor(row => row.gene_length, {
@@ -68,6 +71,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
           size: 124,
           minSize: 40,
           enableSorting: true,
+          enablePinning: false,
         }),
       ],
     }),
@@ -88,6 +92,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
           size: 124,
           minSize: 40,
           enableSorting: true,
+          enablePinning: false,
         }),
         // # Exons
         columnHelper.accessor(row => row.nb_exons, {
@@ -100,6 +105,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
           size: 124,
           minSize: 40,
           enableSorting: true,
+          enablePinning: false,
         }),
         // % Gene
         columnHelper.accessor(row => row.overlapping_gene_percent, {
@@ -112,6 +118,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
           size: 124,
           minSize: 40,
           enableSorting: true,
+          enablePinning: false,
         }),
         // % CNV
         columnHelper.accessor(row => row.overlapping_cnv_percent, {
@@ -124,6 +131,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
           size: 124,
           minSize: 40,
           enableSorting: true,
+          enablePinning: false,
         }),
         // Type
         columnHelper.accessor(row => row.overlap_type, {
@@ -137,6 +145,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
           size: 124,
           minSize: 40,
           enableSorting: true,
+          enablePinning: false,
         }),
       ],
     }),
