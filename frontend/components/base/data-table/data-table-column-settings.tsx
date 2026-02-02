@@ -26,12 +26,10 @@ import {
   DropdownMenuPortal,
   DropdownMenuTrigger,
 } from '@/components/base/shadcn/dropdown-menu';
-import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
 type TableColumnSettingsProps = {
-  loading?: boolean;
   columnOrder: ColumnOrderState;
   setColumnOrder: (value: string[]) => void;
   columnPinning: ColumnPinningState;
@@ -75,7 +73,6 @@ function TableColumnSettings({
   setColumnOrder,
   columnPinning,
   defaultSettings,
-  loading = true,
   pristine,
   visiblitySettings,
   handleVisiblityChange,
@@ -106,8 +103,6 @@ function TableColumnSettings({
   useEffect(() => {
     handleOrderChange(columnOrder as ColumnOrderState);
   }, [columnOrder]);
-
-  if (loading) return <Skeleton className="w-6 h-6 mr-2" />;
 
   return (
     <span>
