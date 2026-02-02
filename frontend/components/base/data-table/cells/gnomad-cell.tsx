@@ -1,6 +1,7 @@
+import { Circle } from 'lucide-react';
+
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { toExponentialNotation } from '@/components/lib/number-format';
-import { Circle } from 'lucide-react';
 
 const GNOMAD_THRESHOLD = 0.01;
 
