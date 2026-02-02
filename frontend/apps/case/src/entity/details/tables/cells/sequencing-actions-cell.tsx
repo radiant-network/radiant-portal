@@ -12,11 +12,13 @@ function SequencingActionsCell({ row }: CellContext<any, any>) {
   return (
     <>
       <div className="flex items-center justify-center">
-        <SequencingInformationsDialog
-          open={sequencingExperimentDialogOpen}
-          onClose={() => setSequencingExperimentDialogOpen(false)}
-          seqId={row.original.seq_id}
-        />
+        {sequencingExperimentDialogOpen && (
+          <SequencingInformationsDialog
+            open={sequencingExperimentDialogOpen}
+            onClose={() => setSequencingExperimentDialogOpen(false)}
+            seqId={row.original.seq_id}
+          />
+        )}
         <Button
           onClick={() => {
             setSequencingExperimentDialogOpen(true);
