@@ -934,7 +934,6 @@ function DataTable<T>({
           {enableColumnOrdering && (
             <>
               <TableColumnSettings
-                loading={loadingStates?.list}
                 columnPinning={columnPinning}
                 columnOrder={columnOrder}
                 setColumnOrder={setColumnOrder}
@@ -975,13 +974,7 @@ function DataTable<T>({
           )}
 
           {/* fullscreen toggle */}
-          {enableFullscreen && (
-            <DataTableFullscreenButton
-              loading={loadingStates?.list}
-              active={isFullscreen}
-              handleClick={setIsFullscreen}
-            />
-          )}
+          {enableFullscreen && <DataTableFullscreenButton active={isFullscreen} handleClick={setIsFullscreen} />}
         </div>
       </div>
 

@@ -1,20 +1,16 @@
 import { Maximize, Minimize } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
-import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
 type DataTableFullscreenButtonProps = {
   active: boolean;
   handleClick: (value: boolean) => void;
-  loading?: boolean;
 };
 
-function DataTableFullscreenButton({ active, loading = true, handleClick }: DataTableFullscreenButtonProps) {
+function DataTableFullscreenButton({ active, handleClick }: DataTableFullscreenButtonProps) {
   const { t } = useI18n();
-
-  if (loading) return <Skeleton className="w-[24px] h-[24px]" />;
 
   return (
     <Tooltip>
