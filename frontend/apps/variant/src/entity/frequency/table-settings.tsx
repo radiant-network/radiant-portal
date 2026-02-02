@@ -2,48 +2,21 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
 import { ExternalFrequencies } from '@/api/api';
+import CohortCell from '@/components/base/data-table/cells/cohort-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
-import AnchorLink from '@/components/base/navigation/anchor-link';
 import { toExponentialNotation } from '@/components/lib/number-format';
 
 const publicCohortsColumnHelper = createColumnHelper<ExternalFrequencies>();
-
-const getCohortLink = (cohort: string, locusId?: string) => {
-  if (!locusId) return undefined;
-  switch (cohort) {
-    case 'topmed_bravo':
-      return `https://bravo.sph.umich.edu/freeze8/hg38/variant/snv/${locusId}`;
-    case 'gnomad_genomes_v3':
-      return `https://gnomad.broadinstitute.org/region/${locusId}?dataset=gnomad_r3`;
-    default:
-      return undefined;
-  }
-};
 
 function getPublicCohortsColumns(t: TFunction<string, undefined>, locusId?: string) {
   return [
     // Cohort
     publicCohortsColumnHelper.accessor(row => row.cohort, {
       id: 'cohort',
-      cell: info => {
-        const cohortLink = getCohortLink(info.getValue(), locusId);
-        return cohortLink ? (
-          <AnchorLink
-            size="sm"
-            href={cohortLink}
-            className="hover:underline font-mono"
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t(`variant_entity.frequency.public_cohorts.${info.getValue()}`)}
-          </AnchorLink>
-        ) : (
-          <TextCell>{t(`variant_entity.frequency.public_cohorts.${info.getValue()}`)}</TextCell>
-        );
-      },
+      cell: info => <CohortCell cohort={info.getValue()} locusId={locusId} />,
       header: t('variant_entity.frequency.public_cohorts.cohort'),
     }),
     // ALT Alleles
