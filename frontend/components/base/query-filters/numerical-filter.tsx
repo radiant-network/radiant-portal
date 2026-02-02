@@ -99,7 +99,6 @@ import {
 } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 import { occurrencesApi } from '@/utils/api';
-import { useCaseIdFromParam } from '@/utils/helper';
 
 import { useFilterConfig } from './filter-list';
 
@@ -261,8 +260,7 @@ interface IProps {
 export function NumericalFilter({ field }: IProps) {
   const { t } = useI18n();
   const { appId, aggregations } = useFilterConfig();
-  const { seqId } = useContext(AggregateContext);
-  const caseId = useCaseIdFromParam();
+  const { seqId, caseId } = useContext(AggregateContext);
   const fieldKey = field.key;
   const RANGE_OPERATOR_LABELS: Record<
     RangeOperators,
