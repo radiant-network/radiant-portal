@@ -1,5 +1,7 @@
+import PublicCochortsCard from './public-cohorts-card';
+
 function FrequencyTab() {
-  return <div>coucou</div>;
+  return <PublicCochortsCard />;
 }
 
 export default FrequencyTab;

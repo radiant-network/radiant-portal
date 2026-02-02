@@ -1522,7 +1522,22 @@
       }
     },
     "frequency": {
-      "title": "Frequency"
+      "title": "Frequency",
+      "public_cohorts": {
+        "title": "Public Cohorts",
+        "cohort": "Cohort",
+        "ac": "# ALT Alleles",
+        "ac_tooltip": "Number of alternative alleles",
+        "an": "# Alleles (ALT + REF)",
+        "an_tooltip": "Number of alternative alleles + reference alleles",
+        "hom": "# Homo",
+        "hom_tooltip": "Number of homozygote variants",
+        "af": "Frequency",
+        "af_tooltip": "Allele Frequency",
+        "topmed_bravo": "TopMed",
+        "gnomad_genomes_v3": "gnomAD Genomes (v3.1.2)",
+        "1000_genomes": "1000 Genomes"
+      }
     },
     "transcripts": {
       "title": "Transcripts",

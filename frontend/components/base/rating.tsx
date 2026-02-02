@@ -1,5 +1,6 @@
-import { Star } from 'lucide-react';
 import React from 'react';
+import { Star } from 'lucide-react';
+
 import { cn } from '../lib/utils';
 
 export interface RatingProps extends React.HTMLAttributes<HTMLDivElement> {

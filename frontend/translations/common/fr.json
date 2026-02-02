@@ -1526,7 +1526,22 @@
       }
     },
     "frequency": {
-      "title": "Fréquence"
+      "title": "Fréquence",
+      "public_cohorts": {
+        "title": "Cohortes publiques",
+        "cohort": "Cohorte",
+        "ac": "# Allèles alternatives",
+        "ac_tooltip": "Nombre d'allèles alternatives",
+        "an": "# Allèles (ALT + REF)",
+        "an_tooltip": "Nombre d’allèles alternatives + allèles références",
+        "hom": "# Homo",
+        "hom_tooltip": "Nombre de variants homozygotes",
+        "af": "Fréquence",
+        "af_tooltip": "Fréquence allélique",
+        "topmed_bravo": "TopMed",
+        "gnomad_genomes_v3": "gnomAD Génomes (v3.1.2)",
+        "1000_genomes": "1000 Génomes"
+      }
     },
     "transcripts": {
       "title": "Transcrits",
