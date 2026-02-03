@@ -23,3 +23,5 @@ VALUES
     (21, 60, 2, 2, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 3, '2:21'),
     (70, 3, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Isabella Murphy', 1, '1:70')
 ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE cases ALTER COLUMN id RESTART WITH 1000;
