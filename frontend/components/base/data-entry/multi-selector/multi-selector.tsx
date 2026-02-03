@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import { KeyboardEvent, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check, XIcon } from 'lucide-react';
@@ -39,14 +40,17 @@ function MultiSelector({
 }: MultipleSelectorProps) {
   const { t } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
+  const badgesContainerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [onScrollbar, setOnScrollbar] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null); // Added this
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [selected, setSelected] = useState<MultiSelectorOption[]>(
     getSelectedOptionByValue(value || [], arrayDefaultOptions),
   );
+  const [visibleBadgesCount, setVisibleBadgesCount] = useState<number>(0);
+  const [showHiddenBadgesDropdown, setShowHiddenBadgesDropdown] = useState(false);
   const [options, setOptions] = useState<MultiSelectorGroupOption>(transToGroupOption(arrayDefaultOptions, groupBy));
   const [inputValue, setInputValue] = useState('');
   const debouncedSearchTerm = useDebounce(inputValue, debounceDelay);
@@ -125,6 +129,62 @@ function MultiSelector({
       setSelected(getSelectedOptionByValue(value, arrayDefaultOptions));
     }
   }, [value, arrayDefaultOptions]);
+
+  // Calculate how many badges can fit on one line
+  useEffect(() => {
+    if (!badgesContainerRef.current || selected.length === 0) {
+      setVisibleBadgesCount(selected.length);
+      return;
+    }
+
+    // When user is typing, show only 1 badge + "+X" to make room for input
+    if (inputValue.length > 0) {
+      setVisibleBadgesCount(1);
+      return;
+    }
+
+    const calculateVisibleBadges = () => {
+      const container = badgesContainerRef.current;
+      if (!container) return;
+
+      const badges = Array.from(container.children) as HTMLElement[];
+      if (badges.length === 0) return;
+
+      const containerWidth = container.offsetWidth;
+      const gap = 4; // gap-1 = 4px
+      let totalWidth = 0;
+      let count = 0;
+
+      // Reserve space for the "+X" badge and input (approximately 60px)
+      const reservedSpace = 60;
+
+      for (let i = 0; i < badges.length; i++) {
+        const badgeWidth = badges[i].offsetWidth;
+        totalWidth += badgeWidth + (i > 0 ? gap : 0);
+
+        if (totalWidth + reservedSpace > containerWidth) {
+          break;
+        }
+        count++;
+      }
+
+      // Ensure at least one badge is visible
+      setVisibleBadgesCount(Math.max(1, count));
+    };
+
+    // Initial calculation
+    calculateVisibleBadges();
+
+    // Recalculate on window resize
+    const resizeObserver = new ResizeObserver(calculateVisibleBadges);
+    if (badgesContainerRef.current) {
+      resizeObserver.observe(badgesContainerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [selected, inputValue]);
 
   useEffect(() => {
     /** If `onSearch` is provided, do not trigger options updated. */
@@ -287,8 +347,8 @@ function MultiSelector({
           inputRef?.current?.focus();
         }}
       >
-        <div className="relative flex flex-1 flex-wrap gap-1">
-          {selected.map(option => {
+        <div ref={badgesContainerRef} className="relative flex flex-1 flex-wrap gap-1">
+          {selected.slice(0, visibleBadgesCount).map(option => {
             if (renderBadge) {
               return renderBadge({
                 option,
@@ -302,6 +362,18 @@ function MultiSelector({
               </Badge>
             );
           })}
+          {selected.length > visibleBadgesCount && (
+            <Badge
+              className="cursor-pointer"
+              onClick={e => {
+                e.stopPropagation();
+                setShowHiddenBadgesDropdown(true);
+                setOpen(true);
+              }}
+            >
+              +{selected.length - visibleBadgesCount}
+            </Badge>
+          )}
           <CommandPrimitive.Input
             {...inputProps}
             ref={inputRef}
@@ -309,6 +381,7 @@ function MultiSelector({
             disabled={disabled}
             onValueChange={value => {
               setInputValue(value);
+              setShowHiddenBadgesDropdown(false);
               // Open dropdown when user starts typing (at least one character)
               setOpen(value.length > 0);
               inputProps?.onValueChange?.(value);
@@ -316,6 +389,7 @@ function MultiSelector({
             onBlur={event => {
               if (!onScrollbar) {
                 setOpen(false);
+                setShowHiddenBadgesDropdown(false);
               }
               inputProps?.onBlur?.(event);
             }}
@@ -352,7 +426,7 @@ function MultiSelector({
               'hidden',
           )}
         >
-          <XIcon size={18} className="" />
+          <XIcon size={18} />
         </button>
       </div>
       <div className={cn('relative', open ? 'block' : 'hidden')} ref={dropdownRef}>
@@ -369,6 +443,26 @@ function MultiSelector({
             <div className="p-1">
               <Skeleton className="h-8 w-full" />
             </div>
+          ) : showHiddenBadgesDropdown ? (
+            <CommandGroup className="h-full overflow-auto">
+              {selected.slice(visibleBadgesCount).map(option => (
+                <CommandItem
+                  key={option.value}
+                  value={option.value}
+                  onSelect={() => {
+                    handleUnselect(option);
+                    if (selected.length - 1 <= visibleBadgesCount) {
+                      setShowHiddenBadgesDropdown(false);
+                      setOpen(false);
+                    }
+                  }}
+                  className="cursor-pointer"
+                >
+                  <span className="flex-1">{option.label}</span>
+                  <Check className="w-4" />
+                </CommandItem>
+              ))}
+            </CommandGroup>
           ) : (
             <>
               {EmptyItem()}

@@ -694,7 +694,7 @@
       "popover_file_formats": "Formats de fichiers :",
       "popover_file_formats_values": ".txt, .csv, .tsv",
       "popover_identifiers": "Identifiants :",
-      "popover_separators": "Séparateur :",
+      "popover_separators": "Séparateurs :",
       "popover_separators_values": "virgule, espace, retour de ligne",
       "popover_title": "Identifiants et formats de fichier"
     },
