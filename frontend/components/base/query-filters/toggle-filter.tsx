@@ -18,7 +18,7 @@ interface IProps {
 }
 
 export function ToggleFilter({ data, field }: IProps) {
-  const { t } = useI18n();
+  const { t, i18n } = useI18n();
   const { appId } = useFilterConfig();
 
   // Use the aggregation builder hook to fetch data automatically
@@ -38,7 +38,7 @@ export function ToggleFilter({ data, field }: IProps) {
   useEffect(() => {
     // Update items when data changes (either from props or aggregation builder)
     setItems(data || aggregationData || []);
-  }, [data, aggregationData]);
+  }, [data, aggregationData, i18n.language]);
 
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder
