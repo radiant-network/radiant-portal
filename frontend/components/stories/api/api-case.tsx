@@ -1,7 +1,7 @@
 import { HttpResponse } from 'msw';
 
-export const caseFiltersApi = '/api/cases/filters';
-export const caseSearchApi = '/api/cases/search';
+export const caseFiltersApi = 'api/cases/filters';
+export const caseSearchApi = 'api/cases/search';
 export const caseAutocomplete = 'api/cases/autocomplete';
 
 export async function httpCaseSearchApiResponse() {
