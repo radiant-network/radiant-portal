@@ -570,7 +570,7 @@
         "exomiser_acmg_classification": {
           "likely_benign": "Likely Benign",
           "pathogenic": "Pathogenic",
-          "uncertain_significance": "Exomiser ACMG"
+          "uncertain_significance": "Uncertain Significance"
         },
         "fathmm_pred": {
           "T": "Tolerated",

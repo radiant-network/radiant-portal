@@ -66,7 +66,7 @@ function isWithDictionaryEnabled(field: AggregationConfig, globalStorageKey: str
 }
 
 export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
-  const { t, sanitize, lazyTranslate } = useI18n();
+  const { t, sanitize, lazyTranslate, i18n } = useI18n();
   const { appId } = useFilterConfig();
 
   // Unique key for all temporary selections
@@ -385,6 +385,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
     hasUnappliedItems,
     isFromSessionStorage,
     searchTerm,
+    i18n.language,
   ]);
 
   // Save temporarily in global sessionStorage
