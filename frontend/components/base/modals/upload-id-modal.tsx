@@ -38,7 +38,7 @@ type UploadIdTableEntry = {
 
 const columnHelper = createColumnHelper<UploadIdTableEntry>();
 
-const getColumns = (variant: string, t: any) =>
+const getMatchedColumns = (variant: string, t: any) =>
   [
     columnHelper.accessor('entry', {
       cell: info => info.getValue(),
@@ -57,6 +57,14 @@ const getColumns = (variant: string, t: any) =>
           cell: info => info.getValue(),
         }),
       ],
+    }),
+  ] as TableColumnDef<UploadIdTableEntry, any>[];
+
+const getUnmatchedColumns = (variant: string, t: any) =>
+  [
+    columnHelper.accessor('entry', {
+      cell: info => info.getValue(),
+      header: t(`common.upload_id.${variant}.submitted_identifier`),
     }),
   ] as TableColumnDef<UploadIdTableEntry, any>[];
 
@@ -302,10 +310,14 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="matched">
-                      <DisplayTable data={matched} columns={getColumns(variant, t)} dataCy="matched-table" />
+                      <DisplayTable data={matched} columns={getMatchedColumns(variant, t)} dataCy="matched-table" />
                     </TabsContent>
                     <TabsContent value="unmatched">
-                      <DisplayTable data={unmatched} columns={getColumns(variant, t)} dataCy="unmatched-table" />
+                      <DisplayTable
+                        data={unmatched}
+                        columns={getUnmatchedColumns(variant, t)}
+                        dataCy="unmatched-table"
+                      />
                     </TabsContent>
                   </Tabs>
                 </div>
