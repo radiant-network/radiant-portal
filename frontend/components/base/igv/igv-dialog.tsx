@@ -47,7 +47,7 @@ const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, ren
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {renderTrigger?.(() => setOpen(true))}
-      <DialogContent className="max-w-[calc(100vw-60px)] min-h-[calc(100vh-60px)] w-[1200px]">
+      <DialogContent size="full" variant="stickyHeader">
         {fetchIGV.isLoading ? (
           <DialogBody className="flex items-center justify-center">
             <Spinner size={32} />
@@ -57,7 +57,7 @@ const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, ren
             <DialogHeader>
               <DialogTitle>{t('variant.igv.title')}</DialogTitle>
             </DialogHeader>
-            <DialogBody className="relative">
+            <DialogBody className="relative max-h-[85vh] overflow-y-auto">
               <IgvContainer tracks={fetchIGV.data?.alignment || []} locus={formatLocus(start, chromosome, 100)} />
             </DialogBody>
           </div>
