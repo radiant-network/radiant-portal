@@ -50,12 +50,58 @@ export function SearchFilter({ search }: SearchFilterProps) {
 
   useEffect(() => {
     // Create options for selected values (for multi selector badges)
-    const selectedOptions = selectedValues.map(value => ({
-      value,
-      label: value,
-      badgeLabel: value,
-    }));
-    setSelectedOptions(selectedOptions);
+    const fetchGeneDetails = async () => {
+      if (selectedValues.length === 0) {
+        setSelectedOptions([]);
+        return;
+      }
+
+      try {
+        // Fetch details for each selected gene
+        const optionsPromises = selectedValues.map(async value => {
+          try {
+            const response = await genesApi.geneAutoComplete(value);
+            const geneData = response.data.find(item => item.source?.name === value);
+
+            if (geneData) {
+              return {
+                value,
+                label: (
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm text-foreground">{geneData.source?.name || value}</span>
+                    <span className="text-xs text-muted-foreground">{geneData.source?.id || ''}</span>
+                  </div>
+                ),
+                badgeLabel: value,
+              };
+            }
+          } catch (error) {
+            console.error(`Error fetching gene ${value}:`, error);
+          }
+
+          // Fallback if fetch fails
+          return {
+            value,
+            label: value,
+            badgeLabel: value,
+          };
+        });
+
+        const resolvedOptions = await Promise.all(optionsPromises);
+        setSelectedOptions(resolvedOptions);
+      } catch (error) {
+        console.error('Error fetching gene details:', error);
+        // Fallback to simple options
+        const fallbackOptions = selectedValues.map(value => ({
+          value,
+          label: value,
+          badgeLabel: value,
+        }));
+        setSelectedOptions(fallbackOptions);
+      }
+    };
+
+    fetchGeneDetails();
   }, [selectedValues]);
 
   const handleAsyncSearch = async (searchTerm: string): Promise<MultiSelectorOption[]> => {

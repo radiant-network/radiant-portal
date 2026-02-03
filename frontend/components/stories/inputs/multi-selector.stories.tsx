@@ -51,6 +51,7 @@ export const Default: Story = {
           className: 'max-w-[300px]',
         }}
         defaultOptions={defaultOptions}
+        hidePlaceholderWhenSelected
       />
     );
   },
