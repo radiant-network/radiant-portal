@@ -47,7 +47,7 @@ const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, ren
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {renderTrigger?.(() => setOpen(true))}
-      <DialogContent size="lg" variant="stickyHeader">
+      <DialogContent size="full" variant="stickyHeader">
         {fetchIGV.isLoading ? (
           <DialogBody className="flex items-center justify-center">
             <Spinner size={32} />
