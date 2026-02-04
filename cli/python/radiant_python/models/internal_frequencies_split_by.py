@@ -28,8 +28,9 @@ class InternalFrequenciesSplitBy(BaseModel):
     InternalFrequenciesSplitBy
     """ # noqa: E501
     frequencies: InternalFrequencies
-    split_value: StrictStr
-    __properties: ClassVar[List[str]] = ["frequencies", "split_value"]
+    split_value_code: StrictStr
+    split_value_name: StrictStr
+    __properties: ClassVar[List[str]] = ["frequencies", "split_value_code", "split_value_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -86,7 +87,8 @@ class InternalFrequenciesSplitBy(BaseModel):
 
         _obj = cls.model_validate({
             "frequencies": InternalFrequencies.from_dict(obj["frequencies"]) if obj.get("frequencies") is not None else None,
-            "split_value": obj.get("split_value")
+            "split_value_code": obj.get("split_value_code"),
+            "split_value_name": obj.get("split_value_name")
         })
         return _obj
 

@@ -234,6 +234,3 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
-test/test_internal_frequencies.py
-test/test_internal_frequencies_split_by.py
-test/test_variant_internal_frequencies.py

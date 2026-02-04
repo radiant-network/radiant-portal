@@ -384,18 +384,20 @@ func (r *VariantsRepository) GetVariantExternalFrequencies(locusId int) (*Varian
 }
 
 func (r *VariantsRepository) GetVariantInternalFrequenciesSplitByProject(locusId int) (*VariantInternalFrequencies, error) {
-	//+----------+--------------------+--+--+---+-------------------+
-	//|project_id|affected_status_code|pn|pc|hom|pf                 |
-	//+----------+--------------------+--+--+---+-------------------+
-	//|1         |all                 |25|4 |4  |0.16               |
-	//|1         |affected            |13|3 |3  |0.23076923076923078|
-	//|1         |non_affected        |11|1 |1  |0.09090909090909091|
-	//|2         |non_affected        |18|1 |1  |0.05555555555555555|
-	//|2         |all                 |40|4 |4  |0.1                |
-	//|2         |affected            |19|3 |3  |0.15789473684210525|
-	//+----------+--------------------+--+--+---+-------------------+
-	type TempFreqByProjectId struct {
+	//+------------+-----------------+--------------------+--+--+---+------------------+
+	//|project_code|project_name     |affected_status_code|pn|pc|hom|pf                |
+	//+------------+-----------------+--------------------+--+--+---+------------------+
+	//|N1          |NeuroDev Phase I |affected            |3 |2 |0  |0.6666666666666666|
+	//|N1          |NeuroDev Phase I |non_affected        |1 |0 |0  |0                 |
+	//|N1          |NeuroDev Phase I |all                 |4 |2 |0  |0.5               |
+	//|N2          |NeuroDev Phase II|non_affected        |1 |0 |0  |0                 |
+	//|N2          |NeuroDev Phase II|all                 |4 |2 |0  |0.5               |
+	//|N2          |NeuroDev Phase II|affected            |3 |2 |0  |0.6666666666666666|
+	//+------------+-----------------+--------------------+--+--+---+------------------+
+
+	type TempFreqByProject struct {
 		ProjectCode        string
+		ProjectName        string
 		AffectedStatusCode string
 		Pn                 *int
 		Pc                 *int
@@ -404,7 +406,7 @@ func (r *VariantsRepository) GetVariantInternalFrequenciesSplitByProject(locusId
 	}
 
 	var totalFrequencies types.InternalFrequencies
-	var frequenciesByProjectIds []TempFreqByProjectId
+	var frequenciesByProjectIds []TempFreqByProject
 	var splitRows []types.InternalFrequenciesSplitBy
 
 	txTotal := r.db.Table(fmt.Sprintf("%s v", types.VariantTable.Name))
@@ -420,63 +422,53 @@ func (r *VariantsRepository) GetVariantInternalFrequenciesSplitByProject(locusId
 	}
 
 	tx := r.db.Raw(`
-		WITH base AS (
+		WITH
+			base AS (
+				SELECT
+					p.code as project_code,
+					p.name as project_name,
+					seq.patient_id,
+					seq.affected_status as affected_status_code,
+					o.zygosity
+				FROM radiant_jdbc.public.cases c
+						JOIN radiant_jdbc.public.project p ON p.id = c.project_id
+						 LEFT JOIN radiant_jdbc.public.case_has_sequencing_experiment chse ON chse.case_id = c.id
+						 JOIN staging_sequencing_experiment seq ON seq.seq_id = chse.sequencing_experiment_id AND seq.experimental_strategy = 'wgs'
+						 LEFT JOIN germline__snv__occurrence o ON o.seq_id = seq.seq_id AND o.locus_id = ? AND o.gq >= 20 AND o.filter = 'PASS' AND o.ad_alt > 3
+			),
+			result AS (
+				SELECT
+					project_code,
+					project_name,
+					affected_status_code,
+					COUNT(DISTINCT patient_id) AS pn,
+					COUNT(DISTINCT CASE WHEN zygosity IS NOT NULL THEN patient_id END) AS pc,
+					COUNT(DISTINCT CASE WHEN zygosity = 'HOM' THEN patient_id END) AS hom
+				FROM (
+						 SELECT project_code, project_name, patient_id, affected_status_code, zygosity
+						 FROM base
+						 WHERE affected_status_code IN ('affected', 'non_affected')
+		
+						 UNION ALL
+		
+						 SELECT project_code, project_name, patient_id, 'all' AS affected_status_code, zygosity
+						 FROM base
+					 ) x
+				GROUP BY project_code, affected_status_code, project_name
+			)
 			SELECT
-				prj.code AS project_code,
-				p.id AS patient_id,
-				f.affected_status_code,
-				o.zygosity
-			FROM radiant_jdbc.public.cases c
-			JOIN radiant_jdbc.public.project prj
-                  ON prj.id = c.project_id
-             LEFT JOIN radiant_jdbc.public.case_has_sequencing_experiment chse
-                       ON chse.case_id = c.id
-             JOIN radiant_jdbc.public.sequencing_experiment seq
-                  ON seq.id = chse.sequencing_experiment_id
-             JOIN radiant_jdbc.public.sample s
-                  ON s.id = seq.sample_id
-             JOIN radiant_jdbc.public.patient p
-                  ON p.id = s.patient_id
-             JOIN radiant_jdbc.public.family f
-                  ON f.case_id = c.id and p.id = f.family_member_id
-             LEFT JOIN germline__snv__occurrence o
-                       ON o.seq_id = seq.id
-                           AND o.locus_id = ?
-		)
-		SELECT
-			project_code,
-			affected_status_code,
-			pn,
-			pc,
-			hom,
-			CASE
-				WHEN pn = 0 THEN NULL
-				ELSE CONVERT(pc / pn, CHAR)
-				END AS pf
-		FROM (
-				 SELECT
-					 project_code,
-					 affected_status_code,
-					 COUNT(DISTINCT patient_id) AS pn,
-					 COUNT(DISTINCT CASE
-										WHEN zygosity IS NOT NULL THEN patient_id
-						 END) AS pc,
-					 COUNT(DISTINCT CASE
-										WHEN zygosity = 'HOM' THEN patient_id
-						 END) AS hom
-				 FROM (
-						  SELECT project_code, patient_id, affected_status_code, zygosity
-						  FROM base
-						  WHERE affected_status_code IN ('affected', 'non_affected')
-		
-						  UNION ALL
-		
-						  SELECT project_code, patient_id, 'all' AS affected_status_code, zygosity
-						  FROM base
-					  ) x
-				 GROUP BY project_code, affected_status_code
-			 ) r
-		ORDER BY project_code;
+				project_code,
+				project_name,
+				affected_status_code,
+				pn,
+				pc,
+				hom,
+				CASE
+					WHEN pn = 0 THEN NULL
+					ELSE pc / pn
+					END AS pf
+			FROM result
+			ORDER BY project_code;
 	`, locusId)
 
 	if err := tx.Scan(&frequenciesByProjectIds).Error; err != nil {
@@ -487,7 +479,7 @@ func (r *VariantsRepository) GetVariantInternalFrequenciesSplitByProject(locusId
 		}
 	}
 
-	byProject := make(map[string][]TempFreqByProjectId)
+	byProject := make(map[string][]TempFreqByProject)
 
 	for _, f := range frequenciesByProjectIds {
 		byProject[f.ProjectCode] = append(byProject[f.ProjectCode], f)
@@ -495,10 +487,11 @@ func (r *VariantsRepository) GetVariantInternalFrequenciesSplitByProject(locusId
 
 	for key, val := range byProject {
 		internalFreq := types.InternalFrequenciesSplitBy{
-			SplitValue: key,
+			SplitValueCode: key,
 		}
 
 		for _, af := range val {
+			internalFreq.SplitValueName = af.ProjectName
 			switch af.AffectedStatusCode {
 			case "all":
 				internalFreq.Frequencies.PcAll = af.Pc
@@ -524,7 +517,7 @@ func (r *VariantsRepository) GetVariantInternalFrequenciesSplitByProject(locusId
 	}
 
 	sort.Slice(splitRows, func(i, j int) bool {
-		return splitRows[i].SplitValue < splitRows[j].SplitValue
+		return splitRows[i].SplitValueCode < splitRows[j].SplitValueCode
 	})
 
 	result := VariantInternalFrequencies{

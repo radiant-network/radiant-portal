@@ -2765,7 +2765,13 @@ export interface InternalFrequenciesSplitBy {
      * @type {string}
      * @memberof InternalFrequenciesSplitBy
      */
-    'split_value': string;
+    'split_value_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InternalFrequenciesSplitBy
+     */
+    'split_value_name': string;
 }
 /**
  * 

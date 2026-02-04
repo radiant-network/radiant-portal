@@ -6,7 +6,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **frequencies** | [**InternalFrequencies**](InternalFrequencies.md) |  | 
-**split_value** | **str** |  | 
+**split_value_code** | **str** |  | 
+**split_value_name** | **str** |  | 
 
 ## Example
 

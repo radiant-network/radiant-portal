@@ -1373,11 +1373,14 @@ components:
       properties:
         frequencies:
           $ref: '#/components/schemas/InternalFrequencies'
-        split_value:
+        split_value_code:
+          type: string
+        split_value_name:
           type: string
       required:
       - frequencies
-      - split_value
+      - split_value_code
+      - split_value_name
       type: object
     InterpretationGermline:
       properties:

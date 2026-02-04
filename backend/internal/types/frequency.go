@@ -24,6 +24,7 @@ type InternalFrequencies struct {
 }
 
 type InternalFrequenciesSplitBy struct {
-	SplitValue  string              `json:"split_value" validate:"required"`
-	Frequencies InternalFrequencies `json:"frequencies" validate:"required"`
+	SplitValueCode string              `json:"split_value_code" validate:"required"`
+	SplitValueName string              `json:"split_value_name" validate:"required"`
+	Frequencies    InternalFrequencies `json:"frequencies" validate:"required"`
 }

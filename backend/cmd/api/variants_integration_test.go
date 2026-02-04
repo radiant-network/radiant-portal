@@ -405,8 +405,8 @@ func assertGetGermlineVariantInternalFrequencies(t *testing.T, data string, locu
 func Test_GetGermlineVariantInternalFrequenciesHandler(t *testing.T) {
 	expected := `{
 		"split_rows":[
-			{"split_value":"N1", "frequencies":{"pc_all": 5, "pn_all": 22, "pf_all": 0.22727272727272727, "hom_all": 2, "pc_affected": 4, "pn_affected": 12, "pf_affected": 0.3333333333333333, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 11, "pf_non_affected": 0.09090909090909091, "hom_non_affected": 1}}, 
-			{"split_value":"N2", "frequencies":{"pc_all": 1, "pn_all": 39, "pf_all": 0.02564102564102564, "hom_all": 0, "pc_affected": 1, "pn_affected": 18, "pf_affected": 0.05555555555555555, "hom_affected": 0, "pc_non_affected": 0, "pn_non_affected": 18, "pf_non_affected": 0.0, "hom_non_affected": 0}}
+			{"split_value_code":"N1", "split_value_name": "NeuroDev Phase I", "frequencies":{"pc_all": 5, "pn_all": 5, "pf_all": 1.0, "hom_all": 2, "pc_affected": 4, "pn_affected": 4, "pf_affected": 1.0, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 1, "pf_non_affected": 1.0, "hom_non_affected": 1}}, 
+			{"split_value_code":"N2", "split_value_name": "NeuroDev Phase II", "frequencies":{"pc_all": 1, "pn_all": 2, "pf_all": 0.5, "hom_all": 0, "pc_affected": 1, "pn_affected": 1, "pf_affected": 1.0, "hom_affected": 0, "pc_non_affected": 0, "pn_non_affected": 1, "pf_non_affected": 0.0, "hom_non_affected": 0}}
 		], 
 		"total_frequencies":{"pc_all": 3, "pf_all": 0.99, "pc_affected": 3, "pn_affected": 3, "pf_affected": 1.0, "pc_non_affected": 0, "pn_non_affected": 0, "pf_non_affected": 0.0}
 	}`

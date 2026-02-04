@@ -246,7 +246,8 @@ func (m *MockRepository) GetVariantInternalFrequenciesSplitByProject(locusId int
 		},
 		SplitRows: types.JsonArray[types.InternalFrequenciesSplitBy]{
 			{
-				SplitValue: "N1",
+				SplitValueCode: "N1",
+				SplitValueName: "NeuroDev Phase I",
 				Frequencies: types.InternalFrequencies{
 					PcAll:          &ac,
 					PnAll:          &an,
@@ -263,7 +264,8 @@ func (m *MockRepository) GetVariantInternalFrequenciesSplitByProject(locusId int
 				},
 			},
 			{
-				SplitValue: "N2",
+				SplitValueCode: "N2",
+				SplitValueName: "NeuroDev Phase II",
 				Frequencies: types.InternalFrequencies{
 					PcAll:          &ac,
 					PnAll:          &an,
@@ -702,8 +704,8 @@ func Test_GetGermlineVariantInternalFrequenciesHandler(t *testing.T) {
 
 	expected := `{
 		"split_rows":[
-			{"split_value":"N1", "frequencies":{"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0}}, 
-			{"split_value":"N2", "frequencies":{"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0}}
+			{"split_value_code":"N1", "split_value_name": "NeuroDev Phase I", "frequencies":{"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0}}, 
+			{"split_value_code":"N2", "split_value_name": "NeuroDev Phase II", "frequencies":{"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0}}
 		], 
 		"total_frequencies":{"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0}
 	}`
