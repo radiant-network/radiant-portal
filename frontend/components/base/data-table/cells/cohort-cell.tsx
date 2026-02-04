@@ -33,7 +33,7 @@ function CohortCell({ cohort, locusId }: CohortCellProps) {
   }
 
   return (
-    <AnchorLink size="sm" href={cohortLink} className="hover:underline font-mono" target="_blank" rel="noreferrer">
+    <AnchorLink size="sm" href={cohortLink} className="hover:underline" target="_blank" rel="noreferrer">
       {t(`variant_entity.frequency.public_cohorts.${cohort}`)}
     </AnchorLink>
   );
