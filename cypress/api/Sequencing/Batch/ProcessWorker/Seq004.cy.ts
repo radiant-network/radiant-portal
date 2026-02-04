@@ -76,7 +76,7 @@ describe('Sequencing - Batch - Process worker - Seq004', () => {
     cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'capture_kit', '', 'Cypress', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0].capture_kit');
   });
 
-  it('Validate report sequencing_experiment[0] run_date [SJRA-1064]', () => {
-    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'run_date', '2025-01-01 00:00:00 +0000 UTC', '2021-08-17 00:00:00 +0000 UTC', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0].run_date');
+  it('Validate report sequencing_experiment[0] run_date', () => {
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'run_date', '2021-08-17 00:00:00 +0000 UTC', '2025-01-01 00:00:00 +0000 UTC', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0].run_date');
   });
 });

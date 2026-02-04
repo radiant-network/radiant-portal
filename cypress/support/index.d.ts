@@ -4,13 +4,14 @@
 declare namespace Cypress {
   interface Chainable {
     // apiCommands
-    apiCall(method: string, query: string, body: string, token: string, retries?: number): cy & CyEventEmitter;
+    apiCall(method: string, query: string, body: string, token: string, retries?: number): Cypress.Chainable;
     getToken(): Chainable<string>;
     validateAcceptedBatchResponse(response: any, batch_type: string): cy & CyEventEmitter;
+    validateItemCount(response: any, count: number, field?: string): cy & CyEventEmitter;
+    validateMessage(response: any, message: string): cy & CyEventEmitter;
     validateReport(response: any, level: string, code: string, message: string, path: string): cy & CyEventEmitter;
     validateSuccessBatchProcessed(response: any, batch_type: string, batch_id: string): cy & CyEventEmitter;
     validateSummary(response: any, created: number, updated: number, skipped: number, errors: number): cy & CyEventEmitter;
-    validateMessage(response: any, message: string): cy & CyEventEmitter;
 
     // commands
     clickAndWait(options?: Partial<ClickOptions>): Chainable<Element>;

@@ -366,7 +366,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    * @param columnID The ID of the column to validate.
    * @param data The data object containing the expected values.
    */
-  shouldShowColumnContent(columnID: string, data: any) {
+  shouldShowColumnContent(columnID: string, data: any, sortAction: () => void) {
     getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
       if (position !== -1) {
         if (customColumnContent) {
@@ -453,8 +453,9 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates the sorting functionality of a column.
    * @param columnID The ID of the column to sort.
+   * @param hasUniqueValues The data of the column to sort has unique values.
    */
-  shouldSortColumn(columnID: string, sortAction: () => void) {
+  shouldSortColumn(columnID: string, hasUniqueValues: boolean, sortAction: () => void) {
     cy.then(() =>
       getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
         if (position !== -1) {
@@ -475,8 +476,14 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
                 .invoke('text')
                 .then(smallestValue => {
                   const smallest = smallestValue.trim();
-                  if (biggest.localeCompare(smallest) < 0) {
-                    throw new Error(`Error: "${biggest}" should be >= "${smallest}"`);
+                  if (hasUniqueValues) {
+                    if (biggest.localeCompare(smallest) !== 0) {
+                      throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
+                    }
+                  } else {
+                    if (biggest.localeCompare(smallest) <= 0) {
+                      throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                    }
                   }
                 });
             });
@@ -571,8 +578,11 @@ export const VariantEntity_Patients = {
       const baseValidations = generateTableValidationsFunctions(selectors.interpreted.tableId, tableColumns.interpreted, interpretedColumnContentHandler);
       return {
         ...baseValidations,
-        shouldSortColumn(columnID: string) {
-          baseValidations.shouldSortColumn(columnID, () => actions.sortColumn(columnID));
+        shouldShowColumnContent(columnID: string, data: any) {
+          baseValidations.shouldShowColumnContent(columnID, data, () => actions.sortColumn('date'));
+        },
+        shouldSortColumn(columnID: string, hasUniqueValues: boolean) {
+          baseValidations.shouldSortColumn(columnID, hasUniqueValues, () => actions.sortColumn(columnID));
         },
       };
     })(),
@@ -595,8 +605,11 @@ export const VariantEntity_Patients = {
       const baseValidations = generateTableValidationsFunctions(selectors.uninterpreted.tableId, tableColumns.uninterpreted, uninterpretedColumnContentHandler);
       return {
         ...baseValidations,
-        shouldSortColumn(columnID: string) {
-          baseValidations.shouldSortColumn(columnID, () => actions.sortColumn(columnID));
+        shouldShowColumnContent(columnID: string, data: any) {
+          baseValidations.shouldShowColumnContent(columnID, data, () => actions.sortColumn('date'));
+        },
+        shouldSortColumn(columnID: string, hasUniqueValues: boolean) {
+          baseValidations.shouldSortColumn(columnID, hasUniqueValues, () => actions.sortColumn(columnID));
         },
       };
     })(),

@@ -11,11 +11,11 @@ describe('VariantEntity - Patients - Interpreted - Sort', () => {
 
   it('Date', () => {
     setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldSortColumn('date');
+    VariantEntity_Patients.interpreted.validations.shouldSortColumn('date', true /*hasUniqueValues*/);
   });
 
   it('Tag', () => {
     setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldSortColumn('classification');
+    VariantEntity_Patients.interpreted.validations.shouldSortColumn('classification', true /*hasUniqueValues*/);
   });
 });

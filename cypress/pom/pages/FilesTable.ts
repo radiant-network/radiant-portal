@@ -171,6 +171,7 @@ export const FilesTable = {
      * @param buttonName The button name to click (First | Last | Previous | Next | Select)
      */
     clickPaginationButton(buttonName: string) {
+      cy.waitWhileLoad(60*1000);
       cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
     },
     /**

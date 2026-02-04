@@ -10,22 +10,22 @@ describe('Cases - Sort', () => {
 
   it('Alphanumeric', () => {
     setupTest();
-    CasesTable.validations.shouldSortColumn('mrn');
+    CasesTable.validations.shouldSortColumn('mrn', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Number', () => {
     setupTest();
-    CasesTable.validations.shouldSortColumn('case');
+    CasesTable.validations.shouldSortColumn('case', false /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
   it('Tag', () => {
     setupTest();
-    CasesTable.validations.shouldSortColumn('status');
+    CasesTable.validations.shouldSortColumn('status', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Date', () => {
     setupTest();
-    CasesTable.validations.shouldSortColumn('updated_on');
+    CasesTable.validations.shouldSortColumn('updated_on', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Multiple', () => {

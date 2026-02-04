@@ -11,12 +11,12 @@ describe('VariantEntity - EvidCond - ClinVar - Sort', () => {
 
   it('Number', () => {
     setupTest();
-    VariantEntity_EvidCond.clinvarCard.validations.shouldSortColumn('submission_count');
+    VariantEntity_EvidCond.clinvarCard.validations.shouldSortColumn('submission_count', false /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
   it('Tag', () => {
     setupTest();
-    VariantEntity_EvidCond.clinvarCard.validations.shouldSortColumn('classification');
+    VariantEntity_EvidCond.clinvarCard.validations.shouldSortColumn('classification', false /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
   it('Multiple [SJRA-719]', () => {

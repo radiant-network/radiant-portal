@@ -217,6 +217,7 @@ export const CaseEntity_Variants_SNV_Table = {
      * @param buttonName The button name to click (First | Last | Previous | Next | Select)
      */
     clickPaginationButton(buttonName: string) {
+      cy.waitWhileLoad(60*1000);
       cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
     },
     /**
@@ -688,43 +689,47 @@ export const CaseEntity_Variants_SNV_Table = {
       });
     },
     /**
-     * Validates the sorting functionality of a column with mocked data.
+     * Validates the sorting functionality of a column with mocked request.
      * @param columnID The ID of the column to sort.
+     * @param hasUniqueValues The data of the column to sort has unique values.
+     * @param isReverseSorting The first sort of the column is Ascending (compare to Descending by default).
      */
-    shouldSortColumn(columnID: string) {
+    shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean) {
       CaseEntity_Variants_SNV_Table.actions.showAllColumns();
-      const apiField = tableColumns.find(col => col.id === columnID)?.apiField!;
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          if (position !== -1) {
+            CaseEntity_Variants_SNV_Table.actions.sortColumn(columnID);
+            cy.get(CommonSelectors.tableRow())
+              .eq(0)
+              .find(CommonSelectors.tableCellData)
+              .eq(position)
+              .invoke('text')
+              .then(biggestValue => {
+                const biggest = biggestValue.trim();
 
-      cy.fixture('RequestBody/SortVariant.json').then(mockRequestBody => {
-        cy.intercept('POST', '**/list', req => {
-          const mockBody = { ...mockRequestBody };
-          mockBody.sort.field = apiField;
-          mockBody.sort.order = 'asc';
-          req.alias = 'sortRequestAsc';
-          req.body = mockBody;
-        });
-        CaseEntity_Variants_SNV_Table.actions.sortColumn(columnID, false /*needIntercept*/);
-        cy.wait('@sortRequestAsc').then(interceptionAsc => {
-          const smallest = interceptionAsc.response?.body[0][apiField];
-
-          cy.fixture('RequestBody/SortVariant.json').then(mockRequestBody => {
-            cy.intercept('POST', '**/list', req => {
-              const mockBody = { ...mockRequestBody };
-              mockBody.sort.field = apiField;
-              mockBody.sort.order = 'desc';
-              req.alias = 'sortRequestDesc';
-              req.body = mockBody;
-            });
-            CaseEntity_Variants_SNV_Table.actions.sortColumn(columnID, false /*needIntercept*/);
-            cy.wait('@sortRequestDesc').then(interceptionDesc => {
-              const biggest = interceptionDesc.response?.body[0][apiField];
-              if (typeof smallest === 'number' ? Number(biggest) - Number(smallest) : String(biggest).localeCompare(String(smallest)) < 0) {
-                throw new Error(`Error: "${biggest}" should be >= "${smallest}"`);
-              }
-            });
-          });
-        });
-      });
+                CaseEntity_Variants_SNV_Table.actions.sortColumn(columnID);
+                cy.get(CommonSelectors.tableRow())
+                  .eq(0)
+                  .find(CommonSelectors.tableCellData)
+                  .eq(position)
+                  .invoke('text')
+                  .then(smallestValue => {
+                    const smallest = smallestValue.trim();
+                    if (hasUniqueValues) {
+                      if (biggest.localeCompare(smallest) !== 0) {
+                        throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
+                      }
+                    } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
+                        throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                    } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
+                      throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
+                    }
+                  });
+              });
+          }
+        })
+      );
     },
     /**
      * Validates that a specific column is unpinned.

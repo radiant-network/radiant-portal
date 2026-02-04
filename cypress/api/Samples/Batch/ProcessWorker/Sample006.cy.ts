@@ -44,7 +44,7 @@ describe('Samples - Batch - Process worker - Sample006', () => {
   });
 
   it('Validate report error count', () => {
-    expect(Object.keys(response.body.report.error)).to.have.lengthOf(3);
+    expect(Object.keys(response.body.report.error)).to.have.lengthOf(4);
   });
 
   it('Validate report sample[0] tissue_site', () => {

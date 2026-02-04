@@ -400,8 +400,10 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates the sorting functionality of a column.
    * @param columnID The ID of the column to sort.
+   * @param hasUniqueValues The data of the column to sort has unique values.
+   * @param isReverseSorting The first sort of the column is Ascending (compare to Descending by default).
    */
-  shouldSortColumn(columnID: string, sortAction: () => void) {
+    shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean, sortAction: () => void) {
     cy.then(() =>
       getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
         if (position !== -1) {
@@ -422,8 +424,14 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
                 .invoke('text')
                 .then(smallestValue => {
                   const smallest = smallestValue.trim();
-                  if (biggest.localeCompare(smallest) < 0) {
-                    throw new Error(`Error: "${biggest}" should be >= "${smallest}"`);
+                  if (hasUniqueValues) {
+                    if (biggest.localeCompare(smallest) !== 0) {
+                      throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
+                    }
+                  } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
+                      throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                  } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
+                    throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
                   }
                 });
             });
@@ -532,8 +540,8 @@ export const VariantEntity_EvidCond = {
       const baseValidations = generateTableValidationsFunctions(selectors.clinvarCard.tableId, tableColumns.clinvarCard, clinvarColumnContentHandler);
       return {
         ...baseValidations,
-        shouldSortColumn(columnID: string) {
-          baseValidations.shouldSortColumn(columnID, () => actions.sortColumn(columnID));
+        shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean) {
+          baseValidations.shouldSortColumn(columnID, hasUniqueValues, isReverseSorting, () => actions.sortColumn(columnID));
         },
       };
     })(),
@@ -547,8 +555,8 @@ export const VariantEntity_EvidCond = {
         const baseValidations = generateTableValidationsFunctions(selectors.condPhenCard.omim.tableId, tableColumns.condPhenCard.omim, omimColumnContentHandler);
         return {
           ...baseValidations,
-          shouldSortColumn(columnID: string) {
-            baseValidations.shouldSortColumn(columnID, () => actions.sortColumn(columnID));
+          shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean) {
+            baseValidations.shouldSortColumn(columnID, hasUniqueValues, isReverseSorting, () => actions.sortColumn(columnID));
           },
         };
       })(),
@@ -571,8 +579,8 @@ export const VariantEntity_EvidCond = {
         const baseValidations = generateTableValidationsFunctions(selectors.condPhenCard.orphanet.tableId, tableColumns.condPhenCard.orphanet, orphanetColumnContentHandler);
         return {
           ...baseValidations,
-          shouldSortColumn(columnID: string) {
-            baseValidations.shouldSortColumn(columnID, () => actions.sortColumn(columnID));
+          shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean) {
+            baseValidations.shouldSortColumn(columnID, hasUniqueValues, isReverseSorting, () => actions.sortColumn(columnID));
           },
         };
       })(),
@@ -595,8 +603,8 @@ export const VariantEntity_EvidCond = {
         const baseValidations = generateTableValidationsFunctions(selectors.condPhenCard.hpo.tableId, tableColumns.condPhenCard.hpo, hpoColumnContentHandler);
         return {
           ...baseValidations,
-          shouldSortColumn(columnID: string) {
-            baseValidations.shouldSortColumn(columnID, () => actions.sortColumn(columnID));
+          shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean) {
+            baseValidations.shouldSortColumn(columnID, hasUniqueValues, isReverseSorting, () => actions.sortColumn(columnID));
           },
         };
       })(),

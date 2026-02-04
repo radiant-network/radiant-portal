@@ -11,17 +11,17 @@ describe('CaseEntity - Details - Sequencing - Sort', () => {
 
   it('Number', () => {
     setupTest();
-    CaseEntity_Details.sequencingCard.validations.shouldSortColumn('seq_id');
+    CaseEntity_Details.sequencingCard.validations.shouldSortColumn('seq_id', false /*hasUniqueValues*/);
   });
 
   it('Tag', () => {
     setupTest();
-    CaseEntity_Details.sequencingCard.validations.shouldSortColumn('seq_status');
+    CaseEntity_Details.sequencingCard.validations.shouldSortColumn('seq_status', true /*hasUniqueValues*/);
   });
 
   it('Date', () => {
     setupTest();
-    CaseEntity_Details.sequencingCard.validations.shouldSortColumn('last_update');
+    CaseEntity_Details.sequencingCard.validations.shouldSortColumn('last_update', true /*hasUniqueValues*/);
   });
 
   it('Multiple', () => {

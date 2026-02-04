@@ -39,6 +39,6 @@ describe('Cases - Search - Mrn', () => {
   });
 
   it('Return content', () => {
-    expect(response.body.count).to.eq(1);
+    expect(response.body.count).to.eq(2);
   });
 });

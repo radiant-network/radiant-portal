@@ -46,6 +46,7 @@ describe('Cases - Batch - Blank fields - Int fields', () => {
         "sequencing_experiments": [
             {
             "aliquot": "Cypress0001",
+            "aliquots": ["Cypress0001"],
             "sample_organization_code": "Cypress",
             "submitter_sample_id": "Cypress0001"
             }
