@@ -166,6 +166,14 @@ export const CaseEntity_Files = {
       );
     },
     /**
+     * Filters the table. This function is added temporary to solve a sorting issue. It will be better integrated later.
+     * @param dataValue The data value to filter.
+     */
+    filterFormat(dataValue: string) {
+      cy.get('button:has([class*="lucide-circle-plus"]):contains("Format")').clickAndWait({ force: true });
+      cy.get(`[data-value="${dataValue}"] button[role="checkbox"]`).click({ force:true });
+    },
+    /**
      * Hides a specific column in the table.
      * @param columnID The ID of the column to hide.
      */
@@ -460,43 +468,47 @@ export const CaseEntity_Files = {
       });
     },
     /**
-     * Validates the sorting functionality of a column with mocked data.
+     * Validates the sorting functionality of a column with mocked request.
      * @param columnID The ID of the column to sort.
+     * @param hasUniqueValues The data of the column to sort has unique values.
+     * @param isReverseSorting The first sort of the column is Ascending (compare to Descending by default).
      */
-    shouldSortColumn(columnID: string) {
+    shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean) {
       CaseEntity_Files.actions.showAllColumns();
-      const apiField = tableColumns.find(col => col.id === columnID)?.apiField!;
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          if (position !== -1) {
+            CaseEntity_Files.actions.sortColumn(columnID);
+            cy.get(CommonSelectors.tableRow())
+              .eq(0)
+              .find(CommonSelectors.tableCellData)
+              .eq(position)
+              .invoke('text')
+              .then(biggestValue => {
+                const biggest = biggestValue.trim();
 
-      cy.fixture('RequestBody/SortFile.json').then(mockRequestBody => {
-        cy.intercept('POST', '**/documents/search', req => {
-          const mockBody = { ...mockRequestBody };
-          mockBody.sort.field = apiField;
-          mockBody.sort.order = 'asc';
-          req.alias = 'sortRequestAsc';
-          req.body = mockBody;
-        });
-        CaseEntity_Files.actions.sortColumn(columnID, false /*needIntercept*/);
-        cy.wait('@sortRequestAsc').then(interceptionAsc => {
-          const smallest = interceptionAsc.response?.body.list[0][apiField];
-
-          cy.fixture('RequestBody/SortFile.json').then(mockRequestBody => {
-            cy.intercept('POST', '**/documents/search', req => {
-              const mockBody = { ...mockRequestBody };
-              mockBody.sort.field = apiField;
-              mockBody.sort.order = 'desc';
-              req.alias = 'sortRequestDesc';
-              req.body = mockBody;
-            });
-            CaseEntity_Files.actions.sortColumn(columnID, false /*needIntercept*/);
-            cy.wait('@sortRequestDesc').then(interceptionDesc => {
-              const biggest = interceptionDesc.response?.body.list[0][apiField];
-              if (typeof smallest === 'number' ? Number(biggest) - Number(smallest) : String(biggest).localeCompare(String(smallest)) < 0) {
-                throw new Error(`Error: "${biggest}" should be >= "${smallest}"`);
-              }
-            });
-          });
-        });
-      });
+                CaseEntity_Files.actions.sortColumn(columnID);
+                cy.get(CommonSelectors.tableRow())
+                  .eq(0)
+                  .find(CommonSelectors.tableCellData)
+                  .eq(position)
+                  .invoke('text')
+                  .then(smallestValue => {
+                    const smallest = smallestValue.trim();
+                    if (hasUniqueValues) {
+                      if (biggest.localeCompare(smallest) !== 0) {
+                        throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
+                      }
+                    } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
+                        throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                    } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
+                      throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
+                    }
+                  });
+              });
+          }
+        })
+      );
     },
     /**
      * Validates that a specific column is unpinned.

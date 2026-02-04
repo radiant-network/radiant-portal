@@ -21,8 +21,8 @@ Cypress.Commands.add('apiCall', (method: string, query: string, body: string, to
     cy.log('with body: ' + body);
   }
 
-  const makeRequest = (attemptsLeft: number) => {
-    cy.request({
+  const makeRequest = (attemptsLeft: number): Cypress.Chainable => {
+    return cy.request({
       method: method,
       url: `${apiUrl}${query}`,
       headers: { Authorization: `Bearer ${token}` },
@@ -32,14 +32,14 @@ Cypress.Commands.add('apiCall', (method: string, query: string, body: string, to
     }).then(res => {
       if (res.status === 500 && attemptsLeft > 0) {
         cy.log(`Retrying API call, remaining retries: ${attemptsLeft - 1}`);
-        makeRequest(attemptsLeft - 1);
+        return makeRequest(attemptsLeft - 1);
       } else {
         return res;
       }
     });
   };
 
-  makeRequest(retries);
+  return makeRequest(retries);
 });
 
 /**
@@ -90,6 +90,30 @@ Cypress.Commands.add('validateAcceptedBatchResponse', (response: any, batch_type
     .to.be.a('string')
     .and.match(/^\d{4}-\d{2}-\d{2}T/);
   expect(new Date(response.body.created_on).getTime()).to.be.closeTo(Date.now(), 60000); // ±60s
+});
+
+/**
+ * Validates that an API response contains a specific message.
+ * @param response The API response object to validate.
+ * @param count The expected size of the response body array.
+ * @param field The array field (optionnal)
+ */
+Cypress.Commands.add('validateItemCount', (response: any, count: number, field?: string) => {
+  if (field == undefined) {
+    expect(response.body).to.have.lengthOf(count);
+  }
+  else {
+    expect(response.body[field]).to.have.lengthOf(count);
+  }
+});
+
+/**
+ * Validates that an API response contains a specific message.
+ * @param response The API response object to validate.
+ * @param message The expected message that should be included in response.body.message.
+ */
+Cypress.Commands.add('validateMessage', (response: any, message: string) => {
+  expect(response.body.message).to.include(message);
 });
 
 /**
@@ -159,13 +183,4 @@ Cypress.Commands.add('validateSummary', (response: any, created: number, updated
     skipped: skipped,
     errors: errors,
   });
-});
-
-/**
- * Validates that an API response contains a specific message.
- * @param response The API response object to validate.
- * @param message The expected message that should be included in response.body.message.
- */
-Cypress.Commands.add('validateMessage', (response: any, message: string) => {
-  expect(response.body.message).to.include(message);
 });

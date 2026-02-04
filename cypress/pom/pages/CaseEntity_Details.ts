@@ -370,8 +370,9 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates the sorting functionality of a column.
    * @param columnID The ID of the column to sort.
+   * @param hasUniqueValues The data of the column to sort has unique values.
    */
-  shouldSortColumn(columnID: string, sortAction: () => void) {
+  shouldSortColumn(columnID: string, hasUniqueValues: boolean, sortAction: () => void) {
     cy.then(() =>
       getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
         if (position !== -1) {
@@ -392,8 +393,14 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
                 .invoke('text')
                 .then(smallestValue => {
                   const smallest = smallestValue.trim();
-                  if (biggest.localeCompare(smallest) < 0) {
-                    throw new Error(`Error: "${biggest}" should be >= "${smallest}"`);
+                  if (hasUniqueValues) {
+                    if (biggest.localeCompare(smallest) !== 0) {
+                      throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
+                    }
+                  } else {
+                    if (biggest.localeCompare(smallest) <= 0) {
+                      throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                    }
                   }
                 });
             });
@@ -491,8 +498,8 @@ export const CaseEntity_Details = {
         shouldShowColumnContent(columnID: string, data: any) {
           baseValidations.shouldShowColumnContent(columnID, data, () => null);
         },
-        shouldSortColumn(columnID: string) {
-          baseValidations.shouldSortColumn(columnID, () => actions.sortColumn(columnID));
+        shouldSortColumn(columnID: string, hasUniqueValues: boolean) {
+          baseValidations.shouldSortColumn(columnID, hasUniqueValues, () => actions.sortColumn(columnID));
         },
       };
     })(),
@@ -515,8 +522,8 @@ export const CaseEntity_Details = {
         shouldShowColumnContent(columnID: string, data: any) {
           baseValidations.shouldShowColumnContent(columnID, data, () => actions.sortColumn('seq_id'));
         },
-        shouldSortColumn(columnID: string) {
-          baseValidations.shouldSortColumn(columnID, () => actions.sortColumn(columnID));
+        shouldSortColumn(columnID: string, hasUniqueValues: boolean) {
+          baseValidations.shouldSortColumn(columnID, hasUniqueValues, () => actions.sortColumn(columnID));
         },
       };
     })(),

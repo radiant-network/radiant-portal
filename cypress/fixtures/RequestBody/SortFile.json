@@ -1,5 +1,5 @@
 {
-  "additional_fields": ["seq_id", "hash", "run_alias"],
+  "additional_fields": [],
   "search_criteria": [],
   "limit": 2,
   "page_index": 0,

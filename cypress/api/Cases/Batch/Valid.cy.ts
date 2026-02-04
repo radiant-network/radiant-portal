@@ -62,7 +62,7 @@ describe('Cases - Batch - Valid', () => {
         "tasks": [
             {
             "type_code": "Cypress",
-            "aliquot": "Cypress0001",
+            "aliquots": ["Cypress0001"],
             "input_documents": [
                 {
                     "url": "Cypress"

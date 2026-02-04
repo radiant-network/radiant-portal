@@ -11,27 +11,28 @@ describe('CaseEntity - Files - Sort', () => {
 
   it('Alphanumeric', () => {
     setupTest();
-    CaseEntity_Files.validations.shouldSortColumn('sample');
+    CaseEntity_Files.validations.shouldSortColumn('sample', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Number', () => {
     setupTest();
-    CaseEntity_Files.validations.shouldSortColumn('patient');
+    CaseEntity_Files.validations.shouldSortColumn('patient', false /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
   it('Tag', () => {
     setupTest();
-    CaseEntity_Files.validations.shouldSortColumn('format');
+    CaseEntity_Files.validations.shouldSortColumn('format', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Date', () => {
     setupTest();
-    CaseEntity_Files.validations.shouldSortColumn('created_on');
+    CaseEntity_Files.validations.shouldSortColumn('created_on', true /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
   it('Size', () => {
     setupTest();
-    CaseEntity_Files.validations.shouldSortColumn('size');
+    CaseEntity_Files.actions.filterFormat('VCF File');
+    CaseEntity_Files.validations.shouldSortColumn('size', false /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
   it('Multiple', () => {

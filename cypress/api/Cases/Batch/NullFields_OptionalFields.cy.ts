@@ -62,7 +62,7 @@ describe('Cases - Batch - Null fields - Optional fields', () => {
         "tasks": [
             {
             "type_code": "Cypress",
-            "aliquot": null,
+            "aliquots": ["Cypress0001"],
             "input_documents": [
                 {
                     "url": "Cypress"

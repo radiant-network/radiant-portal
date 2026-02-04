@@ -11,22 +11,22 @@ describe('Case Entity - Variants - SNV - Table - Sort', () => {
 
   it('Alphanumeric', () => {
     setupTest();
-    CaseEntity_Variants_SNV_Table.validations.shouldSortColumn('variant');
+    CaseEntity_Variants_SNV_Table.validations.shouldSortColumn('variant', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Number', () => {
     setupTest();
-    CaseEntity_Variants_SNV_Table.validations.shouldSortColumn('exomiser');
+    CaseEntity_Variants_SNV_Table.validations.shouldSortColumn('exomiser', false /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
   it('Tag', () => {
     setupTest();
-    CaseEntity_Variants_SNV_Table.validations.shouldSortColumn('acmg_exomiser');
+    CaseEntity_Variants_SNV_Table.validations.shouldSortColumn('acmg_exomiser', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Scientific number', () => {
     setupTest();
-    CaseEntity_Variants_SNV_Table.validations.shouldSortColumn('gnomad');
+    CaseEntity_Variants_SNV_Table.validations.shouldSortColumn('gnomad', false /*hasUniqueValues*/, false /*isReverseSorting*/);
   });
 
   it('Multiple', () => {

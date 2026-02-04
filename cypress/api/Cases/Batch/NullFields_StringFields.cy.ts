@@ -53,6 +53,7 @@ describe('Cases - Batch - Null fields - String fields', () => {
         "tasks": [
             {
             "type_code": null,
+            "aliquots": ["Cypress0001"],
             "input_documents": [
                 {
                     "url": null
