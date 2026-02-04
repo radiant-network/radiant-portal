@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -413,5 +414,49 @@ func GetGermlineVariantExternalFrequenciesHandler(repo repository.VariantsDAO) g
 			return
 		}
 		c.JSON(http.StatusOK, variantExternalFrequencies)
+	}
+}
+
+// GetGermlineVariantInternalFrequenciesHandler handles retrieving internal frequencies for a given locus id
+// @Summary Get internal frequencies
+// @Id getGermlineVariantInternalFrequencies
+// @Description Retrieve internal frequencies for a given locus id
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Param split query string true "split type (project or primary_condition)"
+// @Produce json
+// @Success 200 {object} types.VariantInternalFrequencies
+// @Failure 400 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/germline/{locus_id}/internal_frequencies [get]
+func GetGermlineVariantInternalFrequenciesHandler(repo repository.VariantsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var variantInternalFrequencies *types.VariantInternalFrequencies
+
+		locusID, err := strconv.Atoi(c.Param("locus_id"))
+		if err != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		split := c.Request.URL.Query().Get("split")
+		switch split {
+		case "project":
+			variantInternalFrequencies, err = repo.GetVariantInternalFrequenciesSplitByProject(locusID)
+			break
+		default:
+			HandleValidationError(c, fmt.Errorf("incorrect split"))
+			return
+		}
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if variantInternalFrequencies == nil {
+			HandleNotFoundError(c, "variant")
+			return
+		}
+		c.JSON(http.StatusOK, variantInternalFrequencies)
 	}
 }

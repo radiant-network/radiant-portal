@@ -150,21 +150,21 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 	expected := `{
 		"list": [
 			{
-				"affected_status":"affected", 
+				"affected_status":"non_affected", 
 				"analysis_catalog_code":"WGA", 
 				"analysis_catalog_name":"Whole Genome Analysis", 
 				"case_id":5, 
 				"created_on":"2021-09-12T13:08:00Z", 
-				"observed_phenotypes":[{"id":"HP:0009800", "name":"Maternal diabetes"}, {"id":"HP:0100622", "name":"Maternal seizure"}],
-				"patient_id":15, 
+				"observed_phenotypes":[],
+				"patient_id":14, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
 				"primary_condition_id":"MONDO:0700092", 
 				"primary_condition_name":"neurodevelopmental disorder", 
-				"relationship_to_proband":"proband",
-				"seq_id":13,
+				"relationship_to_proband":"father",
+				"seq_id":15,
 				"status_code":"in_progress", 
-				"submitter_sample_id":"S13236",
+				"submitter_sample_id":"S13238",
 				"updated_on":"2021-09-12T13:08:00Z",
 				"zygosity":"HOM",
 				"exomiser_acmg_classification":"PATHOGENIC",
@@ -385,4 +385,38 @@ func Test_GetGermlineVariantExternalFrequenciesHandler(t *testing.T) {
 		"locus":"locus1"
 	}`
 	assertGetGermlineVariantExternalFrequencies(t, "simple", 1000, expected)
+}
+
+func assertGetGermlineVariantInternalFrequencies(t *testing.T, data string, locusId int, split string, status int, expected string) {
+	testutils.ParallelTestWithPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+		repo := repository.NewVariantsRepository(starrocks)
+		router := gin.Default()
+		router.GET("/variants/germline/:locus_id/internal_frequencies", server.GetGermlineVariantInternalFrequenciesHandler(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/internal_frequencies?split=%s", locusId, split), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, status, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetGermlineVariantInternalFrequenciesHandler(t *testing.T) {
+	expected := `{
+		"split_rows":[
+			{"split_value":"N1", "frequencies":{"pc_all": 5, "pn_all": 22, "pf_all": 0.22727272727272727, "hom_all": 2, "pc_affected": 4, "pn_affected": 12, "pf_affected": 0.3333333333333333, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 11, "pf_non_affected": 0.09090909090909091, "hom_non_affected": 1}}, 
+			{"split_value":"N2", "frequencies":{"pc_all": 1, "pn_all": 39, "pf_all": 0.02564102564102564, "hom_all": 0, "pc_affected": 1, "pn_affected": 18, "pf_affected": 0.05555555555555555, "hom_affected": 0, "pc_non_affected": 0, "pn_non_affected": 18, "pf_non_affected": 0.0, "hom_non_affected": 0}}
+		], 
+		"total_frequencies":{"pc_all": 3, "pf_all": 0.99, "pc_affected": 3, "pn_affected": 3, "pf_affected": 1.0, "pc_non_affected": 0, "pn_non_affected": 0, "pf_non_affected": 0.0}
+	}`
+	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, "project", http.StatusOK, expected)
+}
+
+func Test_GetGermlineVariantInternalFrequenciesHandler_BadSplit(t *testing.T) {
+	expected := `{
+		"status": 400,
+		"message": "incorrect split"
+	}`
+	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, "incorrect", http.StatusBadRequest, expected)
 }

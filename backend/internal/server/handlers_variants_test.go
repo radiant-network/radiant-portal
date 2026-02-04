@@ -224,6 +224,65 @@ func (m *MockRepository) GetVariantExternalFrequencies(locusId int) (*types.Vari
 	}, nil
 }
 
+func (m *MockRepository) GetVariantInternalFrequenciesSplitByProject(locusId int) (*types.VariantInternalFrequencies, error) {
+	af := 0.01
+	ac := 1
+	an := 100
+	hom := 0
+	return &types.VariantInternalFrequencies{
+		TotalFrequencies: types.InternalFrequencies{
+			PcAll:          &ac,
+			PnAll:          &an,
+			PfAll:          &af,
+			HomAll:         &hom,
+			PcAffected:     &ac,
+			PnAffected:     &an,
+			PfAffected:     &af,
+			HomAffected:    &hom,
+			PcNonAffected:  &ac,
+			PnNonAffected:  &an,
+			PfNonAffected:  &af,
+			HomNonAffected: &hom,
+		},
+		SplitRows: types.JsonArray[types.InternalFrequenciesSplitBy]{
+			{
+				SplitValue: "N1",
+				Frequencies: types.InternalFrequencies{
+					PcAll:          &ac,
+					PnAll:          &an,
+					PfAll:          &af,
+					HomAll:         &hom,
+					PcAffected:     &ac,
+					PnAffected:     &an,
+					PfAffected:     &af,
+					HomAffected:    &hom,
+					PcNonAffected:  &ac,
+					PnNonAffected:  &an,
+					PfNonAffected:  &af,
+					HomNonAffected: &hom,
+				},
+			},
+			{
+				SplitValue: "N2",
+				Frequencies: types.InternalFrequencies{
+					PcAll:          &ac,
+					PnAll:          &an,
+					PfAll:          &af,
+					HomAll:         &hom,
+					PcAffected:     &ac,
+					PnAffected:     &an,
+					PfAffected:     &af,
+					HomAffected:    &hom,
+					PcNonAffected:  &ac,
+					PnNonAffected:  &an,
+					PfNonAffected:  &af,
+					HomNonAffected: &hom,
+				},
+			},
+		},
+	}, nil
+}
+
 type MockExomiserRepository struct{}
 type MockEmptyExomiserRepository struct{}
 
@@ -629,5 +688,44 @@ func Test_GetGermlineVariantExternalFrequenciesHandler(t *testing.T) {
 	}`
 
 	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetGermlineVariantInternalFrequenciesHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/variants/germline/:locus_id/internal_frequencies", GetGermlineVariantInternalFrequenciesHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/variants/germline/1000/internal_frequencies?split=project", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `{
+		"split_rows":[
+			{"split_value":"N1", "frequencies":{"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0}}, 
+			{"split_value":"N2", "frequencies":{"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0}}
+		], 
+		"total_frequencies":{"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0}
+	}`
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetGermlineVariantInternalFrequenciesHandler_BadSplit(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/variants/germline/:locus_id/internal_frequencies", GetGermlineVariantInternalFrequenciesHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/variants/germline/1000/internal_frequencies?split=incorrect", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `{
+		"status": 400,
+		"message": "incorrect split"
+	}`
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }

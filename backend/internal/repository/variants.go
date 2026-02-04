@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sort"
 
 	"github.com/radiant-network/radiant-api/internal/utils"
 
@@ -20,6 +21,7 @@ type VariantExpandedInterpretedCase = types.VariantExpandedInterpretedCase
 type VariantCasesFilters = types.VariantCasesFilters
 type VariantCasesCount = types.VariantCasesCount
 type VariantExternalFrequencies = types.VariantExternalFrequencies
+type VariantInternalFrequencies = types.VariantInternalFrequencies
 
 type VariantsRepository struct {
 	db *gorm.DB
@@ -35,6 +37,7 @@ type VariantsDAO interface {
 	GetVariantCasesCount(locusId int) (*VariantCasesCount, error)
 	GetVariantCasesFilters() (*VariantCasesFilters, error)
 	GetVariantExternalFrequencies(locusId int) (*VariantExternalFrequencies, error)
+	GetVariantInternalFrequenciesSplitByProject(locusId int) (*VariantInternalFrequencies, error)
 }
 
 func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
@@ -376,6 +379,158 @@ func (r *VariantsRepository) GetVariantExternalFrequencies(locusId int) (*Varian
 	}
 
 	result.ExternalFrequencies = []types.ExternalFrequencies{topmed, gnomadV3, thousandGenomes}
+
+	return &result, nil
+}
+
+func (r *VariantsRepository) GetVariantInternalFrequenciesSplitByProject(locusId int) (*VariantInternalFrequencies, error) {
+	//+----------+--------------------+--+--+---+-------------------+
+	//|project_id|affected_status_code|pn|pc|hom|pf                 |
+	//+----------+--------------------+--+--+---+-------------------+
+	//|1         |all                 |25|4 |4  |0.16               |
+	//|1         |affected            |13|3 |3  |0.23076923076923078|
+	//|1         |non_affected        |11|1 |1  |0.09090909090909091|
+	//|2         |non_affected        |18|1 |1  |0.05555555555555555|
+	//|2         |all                 |40|4 |4  |0.1                |
+	//|2         |affected            |19|3 |3  |0.15789473684210525|
+	//+----------+--------------------+--+--+---+-------------------+
+	type TempFreqByProjectId struct {
+		ProjectCode        string
+		AffectedStatusCode string
+		Pn                 *int
+		Pc                 *int
+		Pf                 *float64
+		Hom                *int
+	}
+
+	var totalFrequencies types.InternalFrequencies
+	var frequenciesByProjectIds []TempFreqByProjectId
+	var splitRows []types.InternalFrequenciesSplitBy
+
+	txTotal := r.db.Table(fmt.Sprintf("%s v", types.VariantTable.Name))
+	txTotal = txTotal.Select("v.pc_wgs as pc_all, v.pn_wgs as pn_all, v.pf_wgs as pf_all, v.pc_wgs_affected as pc_affected, v.pn_wgs_affected as pn_affected, v.pf_wgs_affected as pf_affected, v.pc_wgs_not_affected as pc_non_affected, v.pn_wgs_not_affected as pn_non_affected, v.pf_wgs_not_affected as pf_non_affected")
+	txTotal = txTotal.Where("v.locus_id = ?", locusId)
+
+	if err := txTotal.First(&totalFrequencies).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error fetching internal frequencies: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	tx := r.db.Raw(`
+		WITH base AS (
+			SELECT
+				prj.code AS project_code,
+				p.id AS patient_id,
+				f.affected_status_code,
+				o.zygosity
+			FROM radiant_jdbc.public.cases c
+			JOIN radiant_jdbc.public.project prj
+                  ON prj.id = c.project_id
+             LEFT JOIN radiant_jdbc.public.case_has_sequencing_experiment chse
+                       ON chse.case_id = c.id
+             JOIN radiant_jdbc.public.sequencing_experiment seq
+                  ON seq.id = chse.sequencing_experiment_id
+             JOIN radiant_jdbc.public.sample s
+                  ON s.id = seq.sample_id
+             JOIN radiant_jdbc.public.patient p
+                  ON p.id = s.patient_id
+             JOIN radiant_jdbc.public.family f
+                  ON f.case_id = c.id and p.id = f.family_member_id
+             LEFT JOIN germline__snv__occurrence o
+                       ON o.seq_id = seq.id
+                           AND o.locus_id = ?
+		)
+		SELECT
+			project_code,
+			affected_status_code,
+			pn,
+			pc,
+			hom,
+			CASE
+				WHEN pn = 0 THEN NULL
+				ELSE CONVERT(pc / pn, CHAR)
+				END AS pf
+		FROM (
+				 SELECT
+					 project_code,
+					 affected_status_code,
+					 COUNT(DISTINCT patient_id) AS pn,
+					 COUNT(DISTINCT CASE
+										WHEN zygosity IS NOT NULL THEN patient_id
+						 END) AS pc,
+					 COUNT(DISTINCT CASE
+										WHEN zygosity = 'HOM' THEN patient_id
+						 END) AS hom
+				 FROM (
+						  SELECT project_code, patient_id, affected_status_code, zygosity
+						  FROM base
+						  WHERE affected_status_code IN ('affected', 'non_affected')
+		
+						  UNION ALL
+		
+						  SELECT project_code, patient_id, 'all' AS affected_status_code, zygosity
+						  FROM base
+					  ) x
+				 GROUP BY project_code, affected_status_code
+			 ) r
+		ORDER BY project_code;
+	`, locusId)
+
+	if err := tx.Scan(&frequenciesByProjectIds).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error fetching internal frequencies: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	byProject := make(map[string][]TempFreqByProjectId)
+
+	for _, f := range frequenciesByProjectIds {
+		byProject[f.ProjectCode] = append(byProject[f.ProjectCode], f)
+	}
+
+	for key, val := range byProject {
+		internalFreq := types.InternalFrequenciesSplitBy{
+			SplitValue: key,
+		}
+
+		for _, af := range val {
+			switch af.AffectedStatusCode {
+			case "all":
+				internalFreq.Frequencies.PcAll = af.Pc
+				internalFreq.Frequencies.PnAll = af.Pn
+				internalFreq.Frequencies.PfAll = af.Pf
+				internalFreq.Frequencies.HomAll = af.Hom
+				break
+			case "affected":
+				internalFreq.Frequencies.PcAffected = af.Pc
+				internalFreq.Frequencies.PnAffected = af.Pn
+				internalFreq.Frequencies.PfAffected = af.Pf
+				internalFreq.Frequencies.HomAffected = af.Hom
+				break
+			case "non_affected":
+				internalFreq.Frequencies.PcNonAffected = af.Pc
+				internalFreq.Frequencies.PnNonAffected = af.Pn
+				internalFreq.Frequencies.PfNonAffected = af.Pf
+				internalFreq.Frequencies.HomNonAffected = af.Hom
+				break
+			}
+		}
+		splitRows = append(splitRows, internalFreq)
+	}
+
+	sort.Slice(splitRows, func(i, j int) bool {
+		return splitRows[i].SplitValue < splitRows[j].SplitValue
+	})
+
+	result := VariantInternalFrequencies{
+		TotalFrequencies: totalFrequencies,
+		SplitRows:        splitRows,
+	}
 
 	return &result, nil
 }

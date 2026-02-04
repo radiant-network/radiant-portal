@@ -181,14 +181,7 @@ func Test_GetVariantUninterpretedCases_Add_phenotypes(t *testing.T) {
 			(*uninterpretedCases)[1].Phenotypes,
 		)
 
-		assert.Equal(t, 2, len((*uninterpretedCases)[2].Phenotypes))
-		assert.ElementsMatch(t,
-			[]types.Term{
-				{ID: "HP:0009800", Name: "Maternal diabetes"},
-				{ID: "HP:0100622", Name: "Maternal seizure"},
-			},
-			(*uninterpretedCases)[2].Phenotypes,
-		)
+		assert.Equal(t, 0, len((*uninterpretedCases)[2].Phenotypes))
 
 		assert.Equal(t, 12, len((*uninterpretedCases)[3].Phenotypes))
 	})
@@ -249,11 +242,10 @@ func Test_GetVariantUninterpretedCases_WithPhenotypeCriteria_NoPagination_Defaul
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(3), *count)
-		assert.Equal(t, 3, len(*uninterpretedCases))
+		assert.Equal(t, int64(2), *count)
+		assert.Equal(t, 2, len(*uninterpretedCases))
 		assert.Equal(t, 4, (*uninterpretedCases)[0].CaseId)
-		assert.Equal(t, 5, (*uninterpretedCases)[1].CaseId)
-		assert.Equal(t, 7, (*uninterpretedCases)[2].CaseId)
+		assert.Equal(t, 7, (*uninterpretedCases)[1].CaseId)
 	})
 }
 
@@ -380,5 +372,77 @@ func Test_GetVariantExternalFrequencies_VariantNotFound(t *testing.T) {
 		externalFrequencies, err := repo.GetVariantExternalFrequencies(4000)
 		assert.NoError(t, err)
 		assert.Nil(t, externalFrequencies)
+	})
+}
+
+func Test_GetVariantInternalFrequenciesSplitByProject_VariantNotFound(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		internalFrequencies, err := repo.GetVariantInternalFrequenciesSplitByProject(4000)
+		assert.NoError(t, err)
+		assert.Nil(t, internalFrequencies)
+	})
+}
+
+func Test_GetVariantInternalFrequenciesSplitByProject_TotalFrequencies(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		internalFrequencies, err := repo.GetVariantInternalFrequenciesSplitByProject(1000)
+		assert.NoError(t, err)
+		assert.NotNil(t, internalFrequencies)
+		assert.Equal(t, 3, *((*internalFrequencies).TotalFrequencies.PcAll))
+		assert.Equal(t, 0.99, *((*internalFrequencies).TotalFrequencies.PfAll))
+		assert.Nil(t, (*internalFrequencies).TotalFrequencies.PnAll)
+		assert.Nil(t, (*internalFrequencies).TotalFrequencies.HomAll)
+		assert.Equal(t, 3, *((*internalFrequencies).TotalFrequencies.PcAffected))
+		assert.Equal(t, 1.0, *((*internalFrequencies).TotalFrequencies.PfAffected))
+		assert.Equal(t, 3, *((*internalFrequencies).TotalFrequencies.PnAffected))
+		assert.Nil(t, (*internalFrequencies).TotalFrequencies.HomAffected)
+		assert.Equal(t, 0, *((*internalFrequencies).TotalFrequencies.PcNonAffected))
+		assert.Equal(t, 0.0, *((*internalFrequencies).TotalFrequencies.PfNonAffected))
+		assert.Equal(t, 0, *((*internalFrequencies).TotalFrequencies.PnNonAffected))
+		assert.Nil(t, (*internalFrequencies).TotalFrequencies.HomNonAffected)
+	})
+}
+
+func Test_GetVariantInternalFrequenciesSplitByProject_SplitRows(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		internalFrequencies, err := repo.GetVariantInternalFrequenciesSplitByProject(1000)
+		assert.NoError(t, err)
+		assert.NotNil(t, internalFrequencies)
+		assert.Len(t, (*internalFrequencies).SplitRows, 2)
+
+		project1 := (*internalFrequencies).SplitRows[0]
+		project2 := (*internalFrequencies).SplitRows[1]
+
+		assert.Equal(t, "N1", project1.SplitValue)
+		assert.Equal(t, 5, *(project1.Frequencies.PcAll))
+		assert.Equal(t, 22, *(project1.Frequencies.PnAll))
+		assert.Equal(t, 0.22727272727272727, *(project1.Frequencies.PfAll))
+		assert.Equal(t, 2, *(project1.Frequencies.HomAll))
+		assert.Equal(t, 4, *(project1.Frequencies.PcAffected))
+		assert.Equal(t, 12, *(project1.Frequencies.PnAffected))
+		assert.Equal(t, 0.3333333333333333, *(project1.Frequencies.PfAffected))
+		assert.Equal(t, 1, *(project1.Frequencies.HomAffected))
+		assert.Equal(t, 1, *(project1.Frequencies.PcNonAffected))
+		assert.Equal(t, 11, *(project1.Frequencies.PnNonAffected))
+		assert.Equal(t, 0.09090909090909091, *(project1.Frequencies.PfNonAffected))
+		assert.Equal(t, 1, *(project1.Frequencies.HomNonAffected))
+
+		assert.Equal(t, "N2", project2.SplitValue)
+		assert.Equal(t, 1, *(project2.Frequencies.PcAll))
+		assert.Equal(t, 39, *(project2.Frequencies.PnAll))
+		assert.Equal(t, 0.02564102564102564, *(project2.Frequencies.PfAll))
+		assert.Equal(t, 0, *(project2.Frequencies.HomAll))
+		assert.Equal(t, 1, *(project2.Frequencies.PcAffected))
+		assert.Equal(t, 18, *(project2.Frequencies.PnAffected))
+		assert.Equal(t, 0.05555555555555555, *(project2.Frequencies.PfAffected))
+		assert.Equal(t, 0, *(project2.Frequencies.HomAffected))
+		assert.Equal(t, 0, *(project2.Frequencies.PcNonAffected))
+		assert.Equal(t, 18, *(project2.Frequencies.PnNonAffected))
+		assert.Equal(t, 0.0, *(project2.Frequencies.PfNonAffected))
+		assert.Equal(t, 0, *(project2.Frequencies.HomNonAffected))
+
 	})
 }

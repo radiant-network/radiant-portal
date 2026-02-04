@@ -174,6 +174,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	variantsGermlineGroup.GET("/:locus_id/conditions/:panel_type", server.GetGermlineVariantConditions(repoGenePanels))
 	variantsGermlineGroup.GET("/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repoClinvarRCV))
 	variantsGermlineGroup.GET("/:locus_id/external_frequencies", server.GetGermlineVariantExternalFrequenciesHandler(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/internal_frequencies", server.GetGermlineVariantInternalFrequenciesHandler(repoVariants))
 
 	documentsGroup := privateRoutes.Group("/documents")
 	documentsGroup.POST("/search", server.SearchDocumentsHandler(repoDocuments))

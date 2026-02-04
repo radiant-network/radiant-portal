@@ -1342,6 +1342,43 @@ components:
       required:
       - url
       type: object
+    InternalFrequencies:
+      properties:
+        hom_affected:
+          type: integer
+        hom_all:
+          type: integer
+        hom_non_affected:
+          type: integer
+        pc_affected:
+          type: integer
+        pc_all:
+          type: integer
+        pc_non_affected:
+          type: integer
+        pf_affected:
+          type: number
+        pf_all:
+          type: number
+        pf_non_affected:
+          type: number
+        pn_affected:
+          type: integer
+        pn_all:
+          type: integer
+        pn_non_affected:
+          type: integer
+      type: object
+    InternalFrequenciesSplitBy:
+      properties:
+        frequencies:
+          $ref: '#/components/schemas/InternalFrequencies'
+        split_value:
+          type: string
+      required:
+      - frequencies
+      - split_value
+      type: object
     InterpretationGermline:
       properties:
         case_id:
@@ -2158,6 +2195,19 @@ components:
           uniqueItems: false
       required:
       - hgvsg
+      type: object
+    VariantInternalFrequencies:
+      properties:
+        split_rows:
+          items:
+            $ref: '#/components/schemas/InternalFrequenciesSplitBy'
+          type: array
+          uniqueItems: false
+        total_frequencies:
+          $ref: '#/components/schemas/InternalFrequencies'
+      required:
+      - split_rows
+      - total_frequencies
       type: object
     VariantInterpretedCase:
       properties:
@@ -5101,6 +5151,53 @@ paths:
       security:
       - bearerauth: []
       summary: Get a germline VariantHeader
+      tags:
+      - variant
+  /variants/germline/{locus_id}/internal_frequencies:
+    get:
+      description: Retrieve internal frequencies for a given locus id
+      operationId: getGermlineVariantInternalFrequencies
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: split type (project or primary_condition)
+        in: query
+        name: split
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantInternalFrequencies'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get internal frequencies
       tags:
       - variant
   /variants/germline/{locus_id}/overview:
