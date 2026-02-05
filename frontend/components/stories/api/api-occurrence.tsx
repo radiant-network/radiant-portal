@@ -1,10 +1,17 @@
 import { HttpResponse } from 'msw';
 
-export const occurrenceApi = '/api/occurrences/germline/snv/1/1/aggregate';
-export const statisticApi = '/api/occurrences/germline/snv/1/1/statistics';
+export const occurrenceApi = 'api/occurrences/germline/snv/:case_id/:seq_id/aggregate';
+export const statisticApi = 'api/occurrences/germline/snv/:case_id/:seq_id/statistics';
+
+export type OccurenceHandler = {
+  case_id: string;
+  seq_id: string;
+};
 
 export async function httpOccurrenceApiResponse({ request }: any) {
   const body = await request.clone().json();
+  const url = new URL(request.url);
+  const dictionary = url.searchParams.get('with_dictionary');
 
   if (body.field.includes('toggle filter')) {
     return HttpResponse.json([
@@ -19,7 +26,7 @@ export async function httpOccurrenceApiResponse({ request }: any) {
     ]);
   }
 
-  return HttpResponse.json([
+  const multiSelectResponse = [
     {
       key: 'lorem_ipsum',
       count: 2,
@@ -31,10 +38,6 @@ export async function httpOccurrenceApiResponse({ request }: any) {
     {
       key: 'iaculis',
       count: 39,
-    },
-    {
-      key: 'porttitor_nec_ligula.',
-      count: 40,
     },
     {
       key: 'etiam_pharetra_ornare_porttitor',
@@ -49,18 +52,19 @@ export async function httpOccurrenceApiResponse({ request }: any) {
       count: 77,
     },
     {
-      key: 'IG_J_pseudogene',
-      count: 168,
-    },
-    {
       key: 'lorem_ipsum_dolor_sit_amet_consectetur_adipiscing_elit',
       count: 191,
     },
-    {
-      key: 'nam_diam_urna',
-      count: 227,
-    },
-  ]);
+  ];
+
+  if (dictionary && dictionary == 'true') {
+    multiSelectResponse.push({
+      key: 'dictionary',
+      count: 200,
+    });
+  }
+
+  return HttpResponse.json(multiSelectResponse);
 }
 
 export async function httpStatisticsApiResponse({ request }: any) {

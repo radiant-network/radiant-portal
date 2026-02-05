@@ -1,7 +1,6 @@
 import '@styles/theme.css';
 import '@styles/tailwind.css';
 
-import React from 'react';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import type { Preview } from '@storybook/react';
 import { withThemeByClassName } from '@storybook/addon-themes';
@@ -24,7 +23,6 @@ if (location.hostname === 'radiant-network.github.io') {
 initialize(options);
 
 const preview: Preview = {
-  loaders: [mswLoader],
   parameters: {
     controls: {
       matchers: {
@@ -33,6 +31,7 @@ const preview: Preview = {
       },
     },
   },
+  loaders: [mswLoader],
   decorators: [
     withThemeByClassName({
       themes: {

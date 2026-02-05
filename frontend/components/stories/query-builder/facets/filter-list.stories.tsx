@@ -12,11 +12,12 @@ import { RangeOperators } from '@/components/cores/sqon';
 import {
   httpOccurrenceApiResponse,
   httpStatisticsApiResponse,
+  OccurenceHandler,
   occurrenceApi,
   statisticApi,
 } from '../../api/api-occurrence';
 
-export const filterListConfig: PortalConfig = {
+const filterListConfig: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
   },
@@ -205,8 +206,8 @@ export const Default: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post(occurrenceApi, httpOccurrenceApiResponse),
-        http.post(statisticApi, httpStatisticsApiResponse),
+        http.post<OccurenceHandler>(occurrenceApi, httpOccurrenceApiResponse),
+        http.post<OccurenceHandler>(statisticApi, httpStatisticsApiResponse),
       ],
     },
   },
