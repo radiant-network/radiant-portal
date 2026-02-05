@@ -133,15 +133,18 @@ function InterpretationDialog({
     onSuccess: () => {
       setOpen(false);
       handleSaveCallback && handleSaveCallback();
-      isCreation
-        ? toast.success(t('variant.interpretation_form.notification.success.title'), {
-            action: {
-              label: t('variant.interpretation_form.notification.success.button'),
-              onClick: handleClickSuccessBtn,
-            },
-            closeButton: true,
-          })
-        : toast.success(t('variant.interpretation_form.notification.success.title'));
+
+      if (isCreation) {
+        toast.success(t('variant.interpretation_form.notification.success.title'), {
+          action: {
+            label: t('variant.interpretation_form.notification.success.button'),
+            onClick: handleClickSuccessBtn,
+          },
+          closeButton: true,
+        });
+        return;
+      }
+      toast.success(t('variant.interpretation_form.notification.success.title'));
     },
     onError: () => {
       setOpen(false);
@@ -232,6 +235,11 @@ function InterpretationDialog({
                 color="primary"
                 loading={saveInterpretation.isMutating}
                 onClick={() => {
+                  // Do not warn use if the interpretation is created. Only show if edited
+                  if (isCreation) {
+                    handleSave();
+                    return;
+                  }
                   alertDialog.open({
                     type: 'warning',
                     title: t('variant.interpretation_form.alert.title'),
