@@ -16,7 +16,7 @@ const getCohortLink = (cohort: string, locusId?: string) => {
     case 'topmed_bravo':
       return `https://bravo.sph.umich.edu/freeze8/hg38/variant/snv/${locusId}`;
     case 'gnomad_genomes_v3':
-      return `https://gnomad.broadinstitute.org/region/${locusId}?dataset=gnomad_r3`;
+      return `https://gnomad.broadinstitute.org/variant/${locusId}?dataset=gnomad_r3`;
     default:
       return undefined;
   }
@@ -33,7 +33,7 @@ function CohortCell({ cohort, locusId }: CohortCellProps) {
   }
 
   return (
-    <AnchorLink size="sm" href={cohortLink} className="hover:underline font-mono" target="_blank" rel="noreferrer">
+    <AnchorLink size="sm" href={cohortLink} className="hover:underline" target="_blank" rel="noreferrer">
       {t(`variant_entity.frequency.public_cohorts.${cohort}`)}
     </AnchorLink>
   );
