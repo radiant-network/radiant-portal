@@ -2253,7 +2253,7 @@ class VariantApi:
     def get_germline_variant_internal_frequencies(
         self,
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
-        split: Annotated[StrictStr, Field(description="split type (project or primary_condition)")],
+        split: Annotated[StrictStr, Field(description="split type")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2273,7 +2273,7 @@ class VariantApi:
 
         :param locus_id: Locus ID (required)
         :type locus_id: str
-        :param split: split type (project or primary_condition) (required)
+        :param split: split type (required)
         :type split: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2327,7 +2327,7 @@ class VariantApi:
     def get_germline_variant_internal_frequencies_with_http_info(
         self,
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
-        split: Annotated[StrictStr, Field(description="split type (project or primary_condition)")],
+        split: Annotated[StrictStr, Field(description="split type")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2347,7 +2347,7 @@ class VariantApi:
 
         :param locus_id: Locus ID (required)
         :type locus_id: str
-        :param split: split type (project or primary_condition) (required)
+        :param split: split type (required)
         :type split: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2401,7 +2401,7 @@ class VariantApi:
     def get_germline_variant_internal_frequencies_without_preload_content(
         self,
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
-        split: Annotated[StrictStr, Field(description="split type (project or primary_condition)")],
+        split: Annotated[StrictStr, Field(description="split type")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2421,7 +2421,7 @@ class VariantApi:
 
         :param locus_id: Locus ID (required)
         :type locus_id: str
-        :param split: split type (project or primary_condition) (required)
+        :param split: split type (required)
         :type split: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

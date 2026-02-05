@@ -28,3 +28,12 @@ type InternalFrequenciesSplitBy struct {
 	SplitValueName string              `json:"split_value_name" validate:"required"`
 	Frequencies    InternalFrequencies `json:"frequencies" validate:"required"`
 }
+
+type SplitType = string
+
+const (
+	SPLIT_BY_PROJECT           SplitType = "project"
+	SPLIT_BY_PRIMARY_CONDITION SplitType = "primary_condition"
+)
+
+var SplitTypes = []SplitType{SPLIT_BY_PROJECT, SPLIT_BY_PRIMARY_CONDITION}

@@ -10406,11 +10406,11 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
          * Retrieve internal frequencies for a given locus id
          * @summary Get internal frequencies
          * @param {string} locusId Locus ID
-         * @param {string} split split type (project or primary_condition)
+         * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantInternalFrequencies: async (locusId: string, split: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantInternalFrequencies: async (locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantInternalFrequencies', 'locusId', locusId)
             // verify required parameter 'split' is not null or undefined
@@ -10695,11 +10695,11 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * Retrieve internal frequencies for a given locus id
          * @summary Get internal frequencies
          * @param {string} locusId Locus ID
-         * @param {string} split split type (project or primary_condition)
+         * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantInternalFrequencies(locusId: string, split: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantInternalFrequencies>> {
+        async getGermlineVariantInternalFrequencies(locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantInternalFrequencies>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantInternalFrequencies(locusId, split, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantInternalFrequencies']?.[localVarOperationServerIndex]?.url;
@@ -10844,11 +10844,11 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * Retrieve internal frequencies for a given locus id
          * @summary Get internal frequencies
          * @param {string} locusId Locus ID
-         * @param {string} split split type (project or primary_condition)
+         * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantInternalFrequencies(locusId: string, split: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantInternalFrequencies> {
+        getGermlineVariantInternalFrequencies(locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig): AxiosPromise<VariantInternalFrequencies> {
             return localVarFp.getGermlineVariantInternalFrequencies(locusId, split, options).then((request) => request(axios, basePath));
         },
         /**
@@ -10997,12 +10997,12 @@ export class VariantApi extends BaseAPI {
      * Retrieve internal frequencies for a given locus id
      * @summary Get internal frequencies
      * @param {string} locusId Locus ID
-     * @param {string} split split type (project or primary_condition)
+     * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantInternalFrequencies(locusId: string, split: string, options?: RawAxiosRequestConfig) {
+    public getGermlineVariantInternalFrequencies(locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantInternalFrequencies(locusId, split, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -11054,5 +11054,13 @@ export const GetGermlineVariantConditionsPanelTypeEnum = {
     Orphanet: 'orphanet'
 } as const;
 export type GetGermlineVariantConditionsPanelTypeEnum = typeof GetGermlineVariantConditionsPanelTypeEnum[keyof typeof GetGermlineVariantConditionsPanelTypeEnum];
+/**
+ * @export
+ */
+export const GetGermlineVariantInternalFrequenciesSplitEnum = {
+    Project: 'project',
+    PrimaryCondition: 'primary_condition'
+} as const;
+export type GetGermlineVariantInternalFrequenciesSplitEnum = typeof GetGermlineVariantInternalFrequenciesSplitEnum[keyof typeof GetGermlineVariantInternalFrequenciesSplitEnum];
 
 
