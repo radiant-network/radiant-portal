@@ -493,6 +493,15 @@ Cypress.Commands.add('visitVariantEvidCondPage', (locusID: string) => {
 });
 
 /**
+ * Visits the variant frequency page for a specific variant.
+ * @param locusID The locus ID to visit.
+ */
+Cypress.Commands.add('visitVariantFrequencyPage', (locusID: string) => {
+  cy.visitAndIntercept(`/variants/entity/${locusID}?tab=frequency`, 'GET', `**/external_frequencies`, 1);
+  cy.setLang('EN');
+});
+
+/**
  * Visits the variant patients page for a specific variant.
  * @param locusID The locus ID to visit.
  */

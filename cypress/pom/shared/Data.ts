@@ -62,6 +62,7 @@ export const data = {
   },
   variantGermline: {
     locus_id: '-6314429946999603200',
+    locus: '10-99235506-G-A',
     variant: 'chr10:g.99235506G>A',
     type: 'SNV',
     dbsnp: 'rs72840396',
@@ -103,6 +104,13 @@ export const data = {
     gq: '99.00',
     zyg: '0/1',
     ad_ratio: '0.46',
+    publicCohorts: {
+      cohort: 'TopMed',
+      alt: '194',
+      alt_ref: '125568',
+      homo: '0',
+      freq: '1.54e-3',
+    },
     interpreted: {
       case: '1',
       relationship: 'proband',
