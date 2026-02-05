@@ -2,7 +2,7 @@ INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_cod
 VALUES
     (1, 3, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Felix Laflamme', 3, '1:1'),
     (2, 4, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 3, '1:2'),
-    (3, 8, 1, 1, 'incomplete', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Christopher Watson', 1, '1:3'),
+    (3, 8, 1, 2, 'incomplete', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Christopher Watson', 1, '1:3'),
     (4, 10, 1, 1, 'incomplete', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 1, '1:4'),
     (5, 15, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Antoine Paré', 1, '1:5'),
     (6, 16, 1, 1, 'draft', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Jonathan Frye', 1, '1:6'),

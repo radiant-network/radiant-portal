@@ -303,7 +303,7 @@ func Test_SearchCases_OnPanelCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(17), *count)
+		assert.Equal(t, int64(16), *count)
 	})
 }
 

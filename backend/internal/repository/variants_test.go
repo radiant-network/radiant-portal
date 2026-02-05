@@ -408,7 +408,7 @@ func Test_GetVariantGlobalInternalFrequencies(t *testing.T) {
 func Test_GetVariantInternalFrequenciesSplitBy_ByProject(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
-		splitRows, err := repo.GetVariantInternalFrequenciesSplitBy(1000, "project")
+		splitRows, err := repo.GetVariantInternalFrequenciesSplitBy(1000, types.SPLIT_BY_PROJECT)
 		assert.NoError(t, err)
 		assert.NotNil(t, splitRows)
 		assert.Len(t, *splitRows, 2)
@@ -451,7 +451,7 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByProject(t *testing.T) {
 func Test_GetVariantInternalFrequenciesSplitBy_ByPrimaryCondition(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
-		splitRows, err := repo.GetVariantInternalFrequenciesSplitBy(1000, "primary_condition")
+		splitRows, err := repo.GetVariantInternalFrequenciesSplitBy(1000, types.SPLIT_BY_PRIMARY_CONDITION)
 		assert.NoError(t, err)
 		assert.NotNil(t, splitRows)
 		assert.Len(t, *splitRows, 2)
@@ -488,5 +488,57 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByPrimaryCondition(t *testing.T) 
 		assert.Equal(t, 2, *(mondo0700092.Frequencies.PnNonAffected))
 		assert.Equal(t, 0.5, *(mondo0700092.Frequencies.PfNonAffected))
 		assert.Equal(t, 1, *(mondo0700092.Frequencies.HomNonAffected))
+	})
+}
+
+func Test_GetVariantInternalFrequenciesSplitBy_ByAnalysis(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		splitRows, err := repo.GetVariantInternalFrequenciesSplitBy(1000, types.SPLIT_BY_ANALYSIS)
+		assert.NoError(t, err)
+		assert.NotNil(t, splitRows)
+		assert.Len(t, *splitRows, 2)
+
+		IDGD := (*splitRows)[0]
+		WGA := (*splitRows)[1]
+
+		assert.Equal(t, "IDGD", IDGD.SplitValueCode)
+		assert.Equal(t, "Intellectual Deficiency and Global Developmental Delay", IDGD.SplitValueName)
+		assert.Equal(t, 1, *(IDGD.Frequencies.PcAll))
+		assert.Equal(t, 1, *(IDGD.Frequencies.PnAll))
+		assert.Equal(t, 1.0, *(IDGD.Frequencies.PfAll))
+		assert.Equal(t, 0, *(IDGD.Frequencies.HomAll))
+		assert.Equal(t, 1, *(IDGD.Frequencies.PcAffected))
+		assert.Equal(t, 1, *(IDGD.Frequencies.PnAffected))
+		assert.Equal(t, 1.0, *(IDGD.Frequencies.PfAffected))
+		assert.Equal(t, 0, *(IDGD.Frequencies.HomAffected))
+		assert.Nil(t, IDGD.Frequencies.PcNonAffected)
+		assert.Nil(t, IDGD.Frequencies.PnNonAffected)
+		assert.Nil(t, IDGD.Frequencies.PfNonAffected)
+		assert.Nil(t, IDGD.Frequencies.HomNonAffected)
+
+		assert.Equal(t, "WGA", WGA.SplitValueCode)
+		assert.Equal(t, "Whole Genome Analysis", WGA.SplitValueName)
+		assert.Equal(t, 5, *(WGA.Frequencies.PcAll))
+		assert.Equal(t, 6, *(WGA.Frequencies.PnAll))
+		assert.Equal(t, 0.8333333333333334, *(WGA.Frequencies.PfAll))
+		assert.Equal(t, 2, *(WGA.Frequencies.HomAll))
+		assert.Equal(t, 4, *(WGA.Frequencies.PcAffected))
+		assert.Equal(t, 4, *(WGA.Frequencies.PnAffected))
+		assert.Equal(t, 1.0, *(WGA.Frequencies.PfAffected))
+		assert.Equal(t, 1, *(WGA.Frequencies.HomAffected))
+		assert.Equal(t, 1, *(WGA.Frequencies.PcNonAffected))
+		assert.Equal(t, 2, *(WGA.Frequencies.PnNonAffected))
+		assert.Equal(t, 0.5, *(WGA.Frequencies.PfNonAffected))
+		assert.Equal(t, 1, *(WGA.Frequencies.HomNonAffected))
+	})
+}
+
+func Test_GetVariantInternalFrequenciesSplitBy_IncorrectSplit(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		splitRows, err := repo.GetVariantInternalFrequenciesSplitBy(1000, "incorrect")
+		assert.Nil(t, splitRows)
+		assert.Error(t, err)
 	})
 }
