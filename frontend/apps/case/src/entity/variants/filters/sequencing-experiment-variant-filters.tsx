@@ -8,6 +8,7 @@ import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
 
 import { VariantInterface } from '../variants-tab';
@@ -21,7 +22,7 @@ function SequencingVariantFiltersSelectValue({ relationship_to_proband, seq_id }
         {relationship_to_proband ?? t('case_entity.variants.filters.proband')}
       </span>
       <span>
-        ({t('case_entity.variants.filters.sequencing_id')} {seq_id})
+        ({t('case_entity.variants.filters.sequencing_id')} {thousandNumberFormat(seq_id)})
       </span>
     </div>
   );
@@ -33,7 +34,7 @@ function SequencingVariantFiltersSelectItem(caseSeqExp: CaseSequencingExperiment
     <div>
       <SequencingVariantFiltersSelectValue {...caseSeqExp} />
       <div className="flex items-center text-muted-foreground color-muted text-xs">
-        {t('case_entity.variants.filters.sample_id')} {caseSeqExp.sample_id}
+        {t('case_entity.variants.filters.sample_id')} {thousandNumberFormat(caseSeqExp.sample_id)}
         {caseSeqExp.affected_status_code && (
           <>
             <DotIcon />
@@ -114,10 +115,12 @@ function SequencingVariantFilters({
       {selectedSequencingExperiment?.affected_status_code && (
         <AffectedStatusBadge status={selectedSequencingExperiment.affected_status_code as AffectedStatusProps} />
       )}
-      <Badge variant="outline">
-        <FlaskConical />
-        {selectedSequencingExperiment?.sample_id}
-      </Badge>
+      {selectedSequencingExperiment?.sample_id && (
+        <Badge variant="outline">
+          <FlaskConical />
+          {thousandNumberFormat(selectedSequencingExperiment.sample_id)}
+        </Badge>
+      )}
       <Separator className="h-6" orientation="vertical" />
 
       <Tabs value={activeInterface}>

@@ -7,11 +7,13 @@ import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import DocumentSizeCell from '@/components/base/data-table/cells/document-size-cell';
 import DownloadFileCell from '@/components/base/data-table/cells/download-file-cell';
+import NumberCell from '@/components/base/data-table/cells/number-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 
 const columnHelper = createColumnHelper<DocumentResult>();
 
@@ -64,7 +66,9 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (
-        <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>
+        <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>
+          {thousandNumberFormat(info.getValue())}
+        </AnchorLinkCell>
       ),
       header: t('file_entity.case_id'),
       size: 124,
@@ -94,7 +98,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
     // Patient
     columnHelper.accessor(row => row.patient_id, {
       id: 'patient_id',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
       header: t('file_entity.patient_id'),
       size: 124,
       minSize: 40,
@@ -111,7 +115,7 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
     // Task
     columnHelper.accessor(row => row.task_id, {
       id: 'task_id',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
       header: t('file_entity.task_id'),
       size: 124,
       minSize: 40,

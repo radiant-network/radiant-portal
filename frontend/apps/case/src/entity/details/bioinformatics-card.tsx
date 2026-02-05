@@ -6,6 +6,7 @@ import { CaseTask } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import BadgeListCell from '@/components/base/data-table/cells/badge-list-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
+import NumberCell from '@/components/base/data-table/cells/number-cell';
 import { TableColumnDef } from '@/components/base/data-table/data-table';
 import DisplayTable from '@/components/base/data-table/display-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
@@ -27,7 +28,7 @@ const columnHelper = createColumnHelper<CaseTask>();
 function getColumns(t: TFunction<string, undefined>, tasks: CaseTask[], hasViewAll: boolean) {
   const columns = [
     columnHelper.accessor('id', {
-      cell: info => info.getValue(),
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
       header: t('case_entity.details.task_id'),
       maxSize: 80,
     }),

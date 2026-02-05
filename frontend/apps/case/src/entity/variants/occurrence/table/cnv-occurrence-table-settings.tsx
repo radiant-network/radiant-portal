@@ -3,10 +3,12 @@ import { TFunction } from 'i18next';
 
 import { GermlineCNVOccurrence } from '@/api/api';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
+import NumberCell from '@/components/base/data-table/cells/number-cell';
+import NumberListCell from '@/components/base/data-table/cells/number-list-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
-import { toKiloBases } from '@/components/lib/number-format';
+import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
 
 import ClingenCell from './cells/clingen-cell';
 import CNVNameCell from './cells/cnv-name-cell';
@@ -47,7 +49,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // # SNVs
     columnHelper.accessor(row => row.nb_snv, {
       id: 'nb_snv',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.nb_snv_tooltip')}>{t('variant.headers.nb_snv')}</TooltipHeader>
       ),
@@ -89,7 +91,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // Start
     columnHelper.accessor(row => row.start, {
       id: 'start',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
       header: t('variant.headers.start'),
       size: 124,
       minSize: 40,
@@ -98,7 +100,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // End
     columnHelper.accessor(row => row.end, {
       id: 'end',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
       header: t('variant.headers.end'),
       size: 124,
       minSize: 40,
@@ -127,7 +129,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // CN
     columnHelper.accessor(row => row.cn, {
       id: 'cn',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
       header: () => <TooltipHeader tooltip={t('variant.headers.cn_tooltip')}>{t('variant.headers.cn')}</TooltipHeader>,
       size: 96,
       minSize: 40,
@@ -147,7 +149,11 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // # Genes
     columnHelper.accessor(row => row.nb_genes, {
       id: 'nb_genes',
-      cell: info => <OverlappingGeneLinkCell occurrence={info.row.original}>{info.getValue()}</OverlappingGeneLinkCell>,
+      cell: info => (
+        <OverlappingGeneLinkCell occurrence={info.row.original}>
+          {info.getValue() ? <>{thousandNumberFormat(info.getValue())}</> : undefined}
+        </OverlappingGeneLinkCell>
+      ),
 
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.nb_genes_tooltip')}>{t('variant.headers.nb_genes')}</TooltipHeader>
@@ -159,7 +165,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // GT
     columnHelper.accessor(row => row.calls, {
       id: 'calls',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <NumberListCell values={info.getValue()} fractionDigits={0} />,
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.calls_tooltip')}>{t('variant.headers.calls')}</TooltipHeader>
       ),
@@ -179,7 +185,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // Qual.
     columnHelper.accessor(row => row.quality, {
       id: 'quality',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.quality_tooltip')}>{t('variant.headers.quality')}</TooltipHeader>
       ),
@@ -190,7 +196,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // BC
     columnHelper.accessor(row => row.bc, {
       id: 'bc',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
       header: () => <TooltipHeader tooltip={t('variant.headers.bc_tooltip')}>{t('variant.headers.bc')}</TooltipHeader>,
       size: 124,
       minSize: 40,
@@ -199,7 +205,7 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // PE
     columnHelper.accessor(row => row.pe, {
       id: 'pe',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: info => <NumberListCell values={info.getValue()} fractionDigits={0} />,
       header: () => <TooltipHeader tooltip={t('variant.headers.pe_tooltip')}>{t('variant.headers.pe')}</TooltipHeader>,
       size: 124,
       minSize: 40,

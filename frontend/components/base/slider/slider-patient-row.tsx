@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Info } from 'lucide-react';
 
 import { useI18n } from '@/components/hooks/i18n';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 
 import SequencingInformationsDialog from '../sequencing/sequencing-information-dialog';
 import { Badge } from '../shadcn/badge';
@@ -21,7 +22,7 @@ function SliderPatientRow({ patientId, relationshipToProband, seqId }: SliderPat
       <div className="flex gap-6 items-center">
         <div className="space-x-2">
           <span className="font-semibold">{t('preview_sheet.occurrence_details.patient')}</span>
-          <span className="text-muted-foreground font-mono">{patientId}</span>
+          <span className="text-muted-foreground font-mono">{patientId && thousandNumberFormat(patientId)}</span>
           {relationshipToProband && (
             <Badge variant="outline" className="bg-background">
               {relationshipToProband}
@@ -31,7 +32,7 @@ function SliderPatientRow({ patientId, relationshipToProband, seqId }: SliderPat
         <div className="flex gap-2">
           <div className="space-x-2">
             <span className="font-semibold">{t('preview_sheet.occurrence_details.sequencing')}</span>
-            <span className="text-muted-foreground font-mono">{seqId}</span>
+            <span className="text-muted-foreground font-mono">{seqId && thousandNumberFormat(seqId)}</span>
           </div>
           <Button
             variant="ghost"

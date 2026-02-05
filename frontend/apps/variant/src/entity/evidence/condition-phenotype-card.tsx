@@ -16,6 +16,7 @@ import { Input } from '@/components/base/shadcn/input';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 import { variantsApi } from '@/utils/api';
 
 import GeneAccordionItem from './gene-accordion-item';
@@ -88,18 +89,17 @@ function ConditionPhenotypeCard() {
             <TabsList>
               <TabsTrigger data-cy="omim-tab" value={GetGermlineVariantConditionsPanelTypeEnum.Omim}>
                 {t('variant_entity.evidence.gene.filters.omim', {
-                  count: data?.count_omim ?? 0,
+                  count: +thousandNumberFormat(data?.count_omim ?? 0),
                 })}
               </TabsTrigger>
               <TabsTrigger data-cy="orphanet-tab" value={GetGermlineVariantConditionsPanelTypeEnum.Orphanet}>
                 {t('variant_entity.evidence.gene.filters.orphanet', {
-                  count: data?.count_orphanet ?? 0,
+                  count: +thousandNumberFormat(data?.count_orphanet ?? 0),
                 })}
               </TabsTrigger>
               <TabsTrigger data-cy="hpo-tab" value={GetGermlineVariantConditionsPanelTypeEnum.Hpo}>
-                {' '}
                 {t('variant_entity.evidence.gene.filters.hpo', {
-                  count: data?.count_hpo ?? 0,
+                  count: +thousandNumberFormat(data?.count_hpo ?? 0),
                 })}
               </TabsTrigger>
             </TabsList>

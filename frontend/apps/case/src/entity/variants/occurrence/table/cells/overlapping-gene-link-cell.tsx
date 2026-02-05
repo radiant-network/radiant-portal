@@ -6,7 +6,7 @@ import OverlappingGeneDialog from '../../overlapping-gene-dialog';
 
 type OverlappingGeneLinkCellProps = {
   occurrence: GermlineCNVOccurrence;
-  children: React.ReactElement;
+  children?: React.ReactElement;
 };
 
 function OverlappingGeneLinkCell({ occurrence, children }: OverlappingGeneLinkCellProps) {

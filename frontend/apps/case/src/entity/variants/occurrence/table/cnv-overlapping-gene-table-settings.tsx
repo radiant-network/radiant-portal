@@ -3,6 +3,7 @@ import { TFunction } from 'i18next';
 
 import { CNVGeneOverlap } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
+import NumberCell from '@/components/base/data-table/cells/number-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { toKiloBases } from '@/components/lib/number-format';
@@ -102,6 +103,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
               {t('variant.headers.nb_exons')}
             </TooltipHeader>
           ),
+          cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
           size: 124,
           minSize: 40,
           enableSorting: true,
@@ -115,6 +117,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
               {t('variant.headers.overlapping_gene_percent')}
             </TooltipHeader>
           ),
+          cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
           size: 124,
           minSize: 40,
           enableSorting: true,
@@ -128,6 +131,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
               {t('variant.headers.overlapping_cnv_percent')}
             </TooltipHeader>
           ),
+          cell: info => <NumberCell value={info.getValue()} />,
           size: 124,
           minSize: 40,
           enableSorting: true,

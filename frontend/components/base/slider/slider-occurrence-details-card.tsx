@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { DescriptionRow, DescriptionSection } from '@/components/base/slider/description';
 import SliderCard from '@/components/base/slider/slider-card';
 import { useI18n } from '@/components/hooks/i18n';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
 
 import EmptyField from '../information/empty-field';
@@ -53,7 +54,7 @@ function getGenotypeQuality(genotypeQuality?: number): React.ReactNode {
       ) : (
         <ShapeTriangleUpIcon className="w-[13px] h-[13px] text-destructive" />
       )}
-      {genotypeQuality}
+      {thousandNumberFormat(genotypeQuality)}
     </span>
   );
 }
@@ -189,10 +190,10 @@ const SliderOccurrenceDetailsCard = ({
                   <EmptyField />
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.allele_depth_alt')}>
-                  <span className="font-mono">{ad_alt ? ad_alt : <EmptyField />}</span>
+                  <span className="font-mono">{ad_alt ? thousandNumberFormat(ad_alt) : <EmptyField />}</span>
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.total_depth_alt_ref')}>
-                  <span className="font-mono">{ad_total ? ad_total : <EmptyField />}</span>
+                  <span className="font-mono">{ad_total ? thousandNumberFormat(ad_total) : <EmptyField />}</span>
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.genotype_quality')}>
                   {getGenotypeQuality(genotype_quality)}

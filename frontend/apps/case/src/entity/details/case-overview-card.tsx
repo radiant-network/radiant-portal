@@ -6,6 +6,7 @@ import AnalysisTypeCodeBadge, { AnalysisTypeCode } from '@/components/base/badge
 import InformationField from '@/components/base/information/information-field';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 
 function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentProps<'div'>) {
   const { t } = useI18n();
@@ -22,7 +23,9 @@ function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentPr
           <div className="flex w-full justify-between gap-4">
             <div className="flex flex-col gap-2 flex-1">
               {data.case_id && (
-                <InformationField label={t('case_entity.details.case_id')}>{data.case_id}</InformationField>
+                <InformationField label={t('case_entity.details.case_id')}>
+                  {thousandNumberFormat(data.case_id)}
+                </InformationField>
               )}
 
               {data.case_type && (

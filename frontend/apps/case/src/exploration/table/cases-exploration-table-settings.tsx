@@ -7,12 +7,14 @@ import AnalysisTypeCodeCell, {
 } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
+import NumberCell from '@/components/base/data-table/cells/number-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
 import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 
 import CaseActionsMenuCell from './cells/case-actions-menu-cell';
 
@@ -24,7 +26,9 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (
-        <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>
+        <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>
+          {thousandNumberFormat(info.getValue())}
+        </AnchorLinkCell>
       ),
       header: t('case_exploration.case.headers.case_id'),
       size: 48,
@@ -33,7 +37,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Patient
     columnHelper.accessor(row => row.proband_id, {
       id: 'proband_id',
-      cell: info => <>{info.getValue()}</>,
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
       header: t('case_exploration.case.headers.patient_id'),
       size: 48,
       minSize: 40,
