@@ -276,7 +276,7 @@ func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(22), *count)
+		assert.Equal(t, int64(21), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{

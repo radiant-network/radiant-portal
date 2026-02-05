@@ -6,7 +6,7 @@ VALUES
     (4, 10, 1, 1, 'incomplete', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 1, '1:4'),
     (5, 15, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Antoine Paré', 1, '1:5'),
     (6, 16, 1, 1, 'draft', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Jonathan Frye', 1, '1:6'),
-    (7, 20, 1, 1, 'revoke', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Dawn Taylor', 1, '1:7'),
+    (7, 20, 2, 1, 'revoke', 6, 'MONDO:0000003', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Dawn Taylor', 1, '1:7'),
     (8, 22, 1, 1, 'submitted', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Lauren Maxwell', 1, '1:8'),
     (9, 23, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Elliot Duchesne', 1, '1:9'),
     (10, 27, 2, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Alex Williams', 1, '2:10'),

@@ -1,7 +1,8 @@
-seq_id	task_id	part	analysis_type	affected_status	ingested_at	task_type
-1	1	1	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation
-2	2	1	germline	not_affected	1969-12-31 19:00:00.0	radiant_germline_annotation
-7	7	2	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation
-10	10	2	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation
-13	13	3	germline	not_affected	1969-12-31 19:00:00.0	radiant_germline_annotation
-19	19	4	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation
+seq_id	task_id	part	analysis_type	affected_status	ingested_at	task_type	experimental_strategy	patient_id
+1	1	1	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation	wgs	3
+2	2	1	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation	wgs	1
+7	7	2	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation	wgs	8
+10	10	2	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation	wgs	10
+15	22	3	germline	non_affected	1969-12-31 19:00:00.0	radiant_germline_annotation	wgs	14
+19	19	4	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation	wgs	20
+46	55	4	germline	non_affected	1969-12-31 19:00:00.0	radiant_germline_annotation	wgs	45

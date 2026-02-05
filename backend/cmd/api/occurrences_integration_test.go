@@ -398,6 +398,7 @@ func assertGetExpandedOccurrence(t *testing.T, data string, caseId int, seqId in
 func Test_GetExpandedOccurrence(t *testing.T) {
 	expected := `{
 		"aa_change":"p.Arg19His", 
+		"ad_alt":5, 
 		"cadd_phred":0.1, 
 		"cadd_score":0.1, 
 		"chromosome":"1", 

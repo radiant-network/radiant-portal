@@ -53,6 +53,8 @@ docs/IGVTrackEnriched.md
 docs/IGVTracks.md
 docs/IgvApi.md
 docs/InputDocumentBatch.md
+docs/InternalFrequencies.md
+docs/InternalFrequenciesSplitBy.md
 docs/InterpretationGermline.md
 docs/InterpretationMetadata.md
 docs/InterpretationPubmed.md
@@ -103,6 +105,7 @@ docs/VariantConsequence.md
 docs/VariantExpandedInterpretedCase.md
 docs/VariantExternalFrequencies.md
 docs/VariantHeader.md
+docs/VariantInternalFrequencies.md
 docs/VariantInterpretedCase.md
 docs/VariantInterpretedCasesSearchResponse.md
 docs/VariantOverview.md
@@ -180,6 +183,8 @@ radiant_python/models/get_batch_response.py
 radiant_python/models/igv_track_enriched.py
 radiant_python/models/igv_tracks.py
 radiant_python/models/input_document_batch.py
+radiant_python/models/internal_frequencies.py
+radiant_python/models/internal_frequencies_split_by.py
 radiant_python/models/interpretation_germline.py
 radiant_python/models/interpretation_metadata.py
 radiant_python/models/interpretation_pubmed.py
@@ -219,6 +224,7 @@ radiant_python/models/variant_consequence.py
 radiant_python/models/variant_expanded_interpreted_case.py
 radiant_python/models/variant_external_frequencies.py
 radiant_python/models/variant_header.py
+radiant_python/models/variant_internal_frequencies.py
 radiant_python/models/variant_interpreted_case.py
 radiant_python/models/variant_interpreted_cases_search_response.py
 radiant_python/models/variant_overview.py

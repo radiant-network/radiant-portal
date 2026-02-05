@@ -2672,6 +2672,110 @@ export interface InputDocumentBatch {
 /**
  * 
  * @export
+ * @interface InternalFrequencies
+ */
+export interface InternalFrequencies {
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'hom_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'hom_all'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'hom_non_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'pc_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'pc_all'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'pc_non_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'pf_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'pf_all'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'pf_non_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'pn_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'pn_all'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof InternalFrequencies
+     */
+    'pn_non_affected'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface InternalFrequenciesSplitBy
+ */
+export interface InternalFrequenciesSplitBy {
+    /**
+     * 
+     * @type {InternalFrequencies}
+     * @memberof InternalFrequenciesSplitBy
+     */
+    'frequencies': InternalFrequencies;
+    /**
+     * 
+     * @type {string}
+     * @memberof InternalFrequenciesSplitBy
+     */
+    'split_value_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InternalFrequenciesSplitBy
+     */
+    'split_value_name': string;
+}
+/**
+ * 
+ * @export
  * @interface InterpretationGermline
  */
 export interface InterpretationGermline {
@@ -4441,6 +4545,25 @@ export interface VariantHeader {
      * @memberof VariantHeader
      */
     'source'?: Array<string>;
+}
+/**
+ * 
+ * @export
+ * @interface VariantInternalFrequencies
+ */
+export interface VariantInternalFrequencies {
+    /**
+     * 
+     * @type {Array<InternalFrequenciesSplitBy>}
+     * @memberof VariantInternalFrequencies
+     */
+    'split_rows': Array<InternalFrequenciesSplitBy>;
+    /**
+     * 
+     * @type {InternalFrequencies}
+     * @memberof VariantInternalFrequencies
+     */
+    'total_frequencies': InternalFrequencies;
 }
 /**
  * 
@@ -10280,6 +10403,51 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Retrieve internal frequencies for a given locus id
+         * @summary Get internal frequencies
+         * @param {string} locusId Locus ID
+         * @param {string} split split type (project or primary_condition)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineVariantInternalFrequencies: async (locusId: string, split: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getGermlineVariantInternalFrequencies', 'locusId', locusId)
+            // verify required parameter 'split' is not null or undefined
+            assertParamExists('getGermlineVariantInternalFrequencies', 'split', split)
+            const localVarPath = `/variants/germline/{locus_id}/internal_frequencies`
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (split !== undefined) {
+                localVarQueryParameter['split'] = split;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve Germline Variant interpreted cases for a given locus
          * @summary Get list of interpreted Cases for a germline variant
          * @param {string} locusId Locus ID
@@ -10524,6 +10692,20 @@ export const VariantApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve internal frequencies for a given locus id
+         * @summary Get internal frequencies
+         * @param {string} locusId Locus ID
+         * @param {string} split split type (project or primary_condition)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGermlineVariantInternalFrequencies(locusId: string, split: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantInternalFrequencies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantInternalFrequencies(locusId, split, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantInternalFrequencies']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve Germline Variant interpreted cases for a given locus
          * @summary Get list of interpreted Cases for a germline variant
          * @param {string} locusId Locus ID
@@ -10657,6 +10839,17 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          */
         getGermlineVariantHeader(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantHeader> {
             return localVarFp.getGermlineVariantHeader(locusId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve internal frequencies for a given locus id
+         * @summary Get internal frequencies
+         * @param {string} locusId Locus ID
+         * @param {string} split split type (project or primary_condition)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineVariantInternalFrequencies(locusId: string, split: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantInternalFrequencies> {
+            return localVarFp.getGermlineVariantInternalFrequencies(locusId, split, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve Germline Variant interpreted cases for a given locus
@@ -10798,6 +10991,19 @@ export class VariantApi extends BaseAPI {
      */
     public getGermlineVariantHeader(locusId: string, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantHeader(locusId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve internal frequencies for a given locus id
+     * @summary Get internal frequencies
+     * @param {string} locusId Locus ID
+     * @param {string} split split type (project or primary_condition)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VariantApi
+     */
+    public getGermlineVariantInternalFrequencies(locusId: string, split: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantInternalFrequencies(locusId, split, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -156,6 +156,7 @@ Class | Method | HTTP request | Description
 *VariantApi* | [**get_germline_variant_consequences**](docs/VariantApi.md#get_germline_variant_consequences) | **GET** /variants/germline/{locus_id}/consequences | Get list of VariantConsequences for a germline variant
 *VariantApi* | [**get_germline_variant_external_frequencies**](docs/VariantApi.md#get_germline_variant_external_frequencies) | **GET** /variants/germline/{locus_id}/external_frequencies | Get external frequencies
 *VariantApi* | [**get_germline_variant_header**](docs/VariantApi.md#get_germline_variant_header) | **GET** /variants/germline/{locus_id}/header | Get a germline VariantHeader
+*VariantApi* | [**get_germline_variant_internal_frequencies**](docs/VariantApi.md#get_germline_variant_internal_frequencies) | **GET** /variants/germline/{locus_id}/internal_frequencies | Get internal frequencies
 *VariantApi* | [**get_germline_variant_interpreted_cases**](docs/VariantApi.md#get_germline_variant_interpreted_cases) | **POST** /variants/germline/{locus_id}/cases/interpreted | Get list of interpreted Cases for a germline variant
 *VariantApi* | [**get_germline_variant_overview**](docs/VariantApi.md#get_germline_variant_overview) | **GET** /variants/germline/{locus_id}/overview | Get a germline VariantOverview
 *VariantApi* | [**get_germline_variant_uninterpreted_cases**](docs/VariantApi.md#get_germline_variant_uninterpreted_cases) | **POST** /variants/germline/{locus_id}/cases/uninterpreted | Get list of uninterpreted Cases for a germline variant
@@ -210,6 +211,8 @@ Class | Method | HTTP request | Description
  - [IGVTrackEnriched](docs/IGVTrackEnriched.md)
  - [IGVTracks](docs/IGVTracks.md)
  - [InputDocumentBatch](docs/InputDocumentBatch.md)
+ - [InternalFrequencies](docs/InternalFrequencies.md)
+ - [InternalFrequenciesSplitBy](docs/InternalFrequenciesSplitBy.md)
  - [InterpretationGermline](docs/InterpretationGermline.md)
  - [InterpretationMetadata](docs/InterpretationMetadata.md)
  - [InterpretationPubmed](docs/InterpretationPubmed.md)
@@ -249,6 +252,7 @@ Class | Method | HTTP request | Description
  - [VariantExpandedInterpretedCase](docs/VariantExpandedInterpretedCase.md)
  - [VariantExternalFrequencies](docs/VariantExternalFrequencies.md)
  - [VariantHeader](docs/VariantHeader.md)
+ - [VariantInternalFrequencies](docs/VariantInternalFrequencies.md)
  - [VariantInterpretedCase](docs/VariantInterpretedCase.md)
  - [VariantInterpretedCasesSearchResponse](docs/VariantInterpretedCasesSearchResponse.md)
  - [VariantOverview](docs/VariantOverview.md)

@@ -31,7 +31,7 @@ func assertGetSequencing(t *testing.T, data string, seqId int, expected string) 
 }
 
 func Test_GetSequencing(t *testing.T) {
-	expected := `{"affected_status":"affected", "analysis_type":"germline", "experimental_strategy":"WGS", "part":1, "seq_id":1, "task_id":1}`
+	expected := `{"affected_status":"affected", "analysis_type":"germline", "experimental_strategy":"WGS", "part":1, "patient_id": 3, "seq_id":1, "task_id":1}`
 	assertGetSequencing(t, "simple", 1, expected)
 }
 

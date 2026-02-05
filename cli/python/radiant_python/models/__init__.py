@@ -61,6 +61,8 @@ from radiant_python.models.get_batch_response import GetBatchResponse
 from radiant_python.models.igv_track_enriched import IGVTrackEnriched
 from radiant_python.models.igv_tracks import IGVTracks
 from radiant_python.models.input_document_batch import InputDocumentBatch
+from radiant_python.models.internal_frequencies import InternalFrequencies
+from radiant_python.models.internal_frequencies_split_by import InternalFrequenciesSplitBy
 from radiant_python.models.interpretation_germline import InterpretationGermline
 from radiant_python.models.interpretation_metadata import InterpretationMetadata
 from radiant_python.models.interpretation_pubmed import InterpretationPubmed
@@ -100,6 +102,7 @@ from radiant_python.models.variant_consequence import VariantConsequence
 from radiant_python.models.variant_expanded_interpreted_case import VariantExpandedInterpretedCase
 from radiant_python.models.variant_external_frequencies import VariantExternalFrequencies
 from radiant_python.models.variant_header import VariantHeader
+from radiant_python.models.variant_internal_frequencies import VariantInternalFrequencies
 from radiant_python.models.variant_interpreted_case import VariantInterpretedCase
 from radiant_python.models.variant_interpreted_cases_search_response import VariantInterpretedCasesSearchResponse
 from radiant_python.models.variant_overview import VariantOverview

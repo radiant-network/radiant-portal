@@ -241,7 +241,7 @@ func Test_SearchDocumentsFilterOnProjectCode(t *testing.T) {
 		documents, count, err := repo.SearchDocuments(query)
 		assert.NoError(t, err)
 		assert.Len(t, *documents, 10)
-		assert.Equal(t, int64(72), *count)
+		assert.Equal(t, int64(66), *count)
 
 		document264 := (*documents)[0]
 		assert.Equal(t, 264, document264.DocumentID)
