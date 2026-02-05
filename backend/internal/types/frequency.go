@@ -34,6 +34,7 @@ type SplitType = string
 const (
 	SPLIT_BY_PROJECT           SplitType = "project"
 	SPLIT_BY_PRIMARY_CONDITION SplitType = "primary_condition"
+	SPLIT_BY_ANALYSIS          SplitType = "analysis"
 )
 
-var SplitTypes = []SplitType{SPLIT_BY_PROJECT, SPLIT_BY_PRIMARY_CONDITION}
+var SplitTypes = []SplitType{SPLIT_BY_PROJECT, SPLIT_BY_PRIMARY_CONDITION, SPLIT_BY_ANALYSIS}

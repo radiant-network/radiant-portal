@@ -5175,6 +5175,7 @@ paths:
           enum:
           - project
           - primary_condition
+          - analysis
           type: string
       responses:
         "200":

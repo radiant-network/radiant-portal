@@ -433,6 +433,11 @@ func (r *VariantsRepository) GetVariantInternalFrequenciesSplitBy(locusId int, s
 		joinToRetrieveSplitCode = ""
 		joinToRetrieveSplitName = "JOIN mondo_term m on m.id = split_code"
 		break
+	case types.SPLIT_BY_ANALYSIS:
+		splitCodeColumn = "ac.code"
+		splitNameColumn = "ac.name"
+		joinToRetrieveSplitCode = "JOIN radiant_jdbc.public.analysis_catalog ac ON ac.id = c.analysis_catalog_id"
+		joinToRetrieveSplitName = "JOIN radiant_jdbc.public.analysis_catalog ac ON ac.code = split_code"
 	default:
 		return nil, fmt.Errorf("unsupported split type")
 	}

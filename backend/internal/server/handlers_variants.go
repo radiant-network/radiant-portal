@@ -425,7 +425,7 @@ func GetGermlineVariantExternalFrequenciesHandler(repo repository.VariantsDAO) g
 // @Tags variant
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
-// @Param split query string true "split type" Enums(project, primary_condition)
+// @Param split query string true "split type" Enums(project, primary_condition, analysis)
 // @Produce json
 // @Success 200 {object} types.VariantInternalFrequencies
 // @Failure 400 {object} types.ApiError

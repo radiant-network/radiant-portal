@@ -11059,7 +11059,8 @@ export type GetGermlineVariantConditionsPanelTypeEnum = typeof GetGermlineVarian
  */
 export const GetGermlineVariantInternalFrequenciesSplitEnum = {
     Project: 'project',
-    PrimaryCondition: 'primary_condition'
+    PrimaryCondition: 'primary_condition',
+    Analysis: 'analysis'
 } as const;
 export type GetGermlineVariantInternalFrequenciesSplitEnum = typeof GetGermlineVariantInternalFrequenciesSplitEnum[keyof typeof GetGermlineVariantInternalFrequenciesSplitEnum];
 
