@@ -5167,11 +5167,14 @@ paths:
         required: true
         schema:
           type: string
-      - description: split type (project or primary_condition)
+      - description: split type
         in: query
         name: split
         required: true
         schema:
+          enum:
+          - project
+          - primary_condition
           type: string
       responses:
         "200":

@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -402,7 +403,7 @@ func assertGetGermlineVariantInternalFrequencies(t *testing.T, data string, locu
 	})
 }
 
-func Test_GetGermlineVariantInternalFrequenciesHandler(t *testing.T) {
+func Test_GetGermlineVariantInternalFrequenciesHandler_SplitByProject(t *testing.T) {
 	expected := `{
 		"split_rows":[
 			{"split_value_code":"N1", "split_value_name": "NeuroDev Phase I", "frequencies":{"pc_all": 5, "pn_all": 5, "pf_all": 1.0, "hom_all": 2, "pc_affected": 4, "pn_affected": 4, "pf_affected": 1.0, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 1, "pf_non_affected": 1.0, "hom_non_affected": 1}}, 
@@ -410,7 +411,18 @@ func Test_GetGermlineVariantInternalFrequenciesHandler(t *testing.T) {
 		], 
 		"total_frequencies":{"pc_all": 3, "pf_all": 0.99, "pc_affected": 3, "pn_affected": 3, "pf_affected": 1.0, "pc_non_affected": 0, "pn_non_affected": 0, "pf_non_affected": 0.0}
 	}`
-	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, "project", http.StatusOK, expected)
+	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, types.SPLIT_BY_PROJECT, http.StatusOK, expected)
+}
+
+func Test_GetGermlineVariantInternalFrequenciesHandler_SplitByPrimaryCondition(t *testing.T) {
+	expected := `{
+		"split_rows":[
+			{"split_value_code":"MONDO:0000003", "split_value_name": "colorblindness, partial", "frequencies":{"pc_all": 1, "pn_all": 1, "pf_all": 1.0, "hom_all": 0, "pc_affected": 1, "pn_affected": 1, "pf_affected": 1.0, "hom_affected": 0}}, 
+			{"split_value_code":"MONDO:0700092", "split_value_name": "neurodevelopmental disorder", "frequencies":{"pc_all": 5, "pn_all": 6, "pf_all": 0.8333333333333334, "hom_all": 2, "pc_affected": 4, "pn_affected": 4, "pf_affected": 1.0, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 2, "pf_non_affected": 0.5, "hom_non_affected": 1}}
+		], 
+		"total_frequencies":{"pc_all": 3, "pf_all": 0.99, "pc_affected": 3, "pn_affected": 3, "pf_affected": 1.0, "pc_non_affected": 0, "pn_non_affected": 0, "pf_non_affected": 0.0}
+	}`
+	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, types.SPLIT_BY_PRIMARY_CONDITION, http.StatusOK, expected)
 }
 
 func Test_GetGermlineVariantInternalFrequenciesHandler_BadSplit(t *testing.T) {

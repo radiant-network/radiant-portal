@@ -37,7 +37,8 @@ type VariantsDAO interface {
 	GetVariantCasesCount(locusId int) (*VariantCasesCount, error)
 	GetVariantCasesFilters() (*VariantCasesFilters, error)
 	GetVariantExternalFrequencies(locusId int) (*VariantExternalFrequencies, error)
-	GetVariantInternalFrequenciesSplitByProject(locusId int) (*VariantInternalFrequencies, error)
+	GetVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error)
+	GetVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error)
 }
 
 func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
@@ -383,21 +384,28 @@ func (r *VariantsRepository) GetVariantExternalFrequencies(locusId int) (*Varian
 	return &result, nil
 }
 
-func (r *VariantsRepository) GetVariantInternalFrequenciesSplitByProject(locusId int) (*VariantInternalFrequencies, error) {
-	//+------------+-----------------+--------------------+--+--+---+------------------+
-	//|project_code|project_name     |affected_status_code|pn|pc|hom|pf                |
-	//+------------+-----------------+--------------------+--+--+---+------------------+
-	//|N1          |NeuroDev Phase I |affected            |3 |2 |0  |0.6666666666666666|
-	//|N1          |NeuroDev Phase I |non_affected        |1 |0 |0  |0                 |
-	//|N1          |NeuroDev Phase I |all                 |4 |2 |0  |0.5               |
-	//|N2          |NeuroDev Phase II|non_affected        |1 |0 |0  |0                 |
-	//|N2          |NeuroDev Phase II|all                 |4 |2 |0  |0.5               |
-	//|N2          |NeuroDev Phase II|affected            |3 |2 |0  |0.6666666666666666|
-	//+------------+-----------------+--------------------+--+--+---+------------------+
+func (r *VariantsRepository) GetVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error) {
+	var globalFrequencies types.InternalFrequencies
 
-	type TempFreqByProject struct {
-		ProjectCode        string
-		ProjectName        string
+	tx := r.db.Table(fmt.Sprintf("%s v", types.VariantTable.Name))
+	tx = tx.Select("v.pc_wgs as pc_all, v.pn_wgs as pn_all, v.pf_wgs as pf_all, v.pc_wgs_affected as pc_affected, v.pn_wgs_affected as pn_affected, v.pf_wgs_affected as pf_affected, v.pc_wgs_not_affected as pc_non_affected, v.pn_wgs_not_affected as pn_non_affected, v.pf_wgs_not_affected as pf_non_affected")
+	tx = tx.Where("v.locus_id = ?", locusId)
+
+	if err := tx.First(&globalFrequencies).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error fetching global internal frequencies: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+
+	return &globalFrequencies, nil
+}
+
+func (r *VariantsRepository) GetVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
+	type TempFreqBySplit struct {
+		SplitCode          string
+		SplitName          string
 		AffectedStatusCode string
 		Pn                 *int
 		Pc                 *int
@@ -405,73 +413,79 @@ func (r *VariantsRepository) GetVariantInternalFrequenciesSplitByProject(locusId
 		Hom                *int
 	}
 
-	var totalFrequencies types.InternalFrequencies
-	var frequenciesByProjectIds []TempFreqByProject
+	var frequenciesByPrimaryCondition []TempFreqBySplit
 	var splitRows []types.InternalFrequenciesSplitBy
+	var splitCodeColumn string
+	var splitNameColumn string
+	var joinToRetrieveSplitCode string
+	var joinToRetrieveSplitName string
 
-	txTotal := r.db.Table(fmt.Sprintf("%s v", types.VariantTable.Name))
-	txTotal = txTotal.Select("v.pc_wgs as pc_all, v.pn_wgs as pn_all, v.pf_wgs as pf_all, v.pc_wgs_affected as pc_affected, v.pn_wgs_affected as pn_affected, v.pf_wgs_affected as pf_affected, v.pc_wgs_not_affected as pc_non_affected, v.pn_wgs_not_affected as pn_non_affected, v.pf_wgs_not_affected as pf_non_affected")
-	txTotal = txTotal.Where("v.locus_id = ?", locusId)
-
-	if err := txTotal.First(&totalFrequencies).Error; err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("error fetching internal frequencies: %w", err)
-		} else {
-			return nil, nil
-		}
+	switch splitType {
+	case types.SPLIT_BY_PROJECT:
+		splitCodeColumn = "p.code"
+		splitNameColumn = "p.name"
+		joinToRetrieveSplitCode = "JOIN radiant_jdbc.public.project p ON p.id = c.project_id"
+		joinToRetrieveSplitName = "JOIN radiant_jdbc.public.project p ON p.code = split_code"
+		break
+	case types.SPLIT_BY_PRIMARY_CONDITION:
+		splitCodeColumn = "c.primary_condition"
+		splitNameColumn = "m.name"
+		joinToRetrieveSplitCode = ""
+		joinToRetrieveSplitName = "JOIN mondo_term m on m.id = split_code"
+		break
+	default:
+		return nil, fmt.Errorf("unsupported split type")
 	}
 
-	tx := r.db.Raw(`
+	tx := r.db.Raw(fmt.Sprintf(`
 		WITH
 			base AS (
 				SELECT
-					p.code as project_code,
-					p.name as project_name,
+					%s as split_code,
 					seq.patient_id,
 					seq.affected_status as affected_status_code,
 					o.zygosity
 				FROM radiant_jdbc.public.cases c
-						JOIN radiant_jdbc.public.project p ON p.id = c.project_id
-						 LEFT JOIN radiant_jdbc.public.case_has_sequencing_experiment chse ON chse.case_id = c.id
-						 JOIN staging_sequencing_experiment seq ON seq.seq_id = chse.sequencing_experiment_id AND seq.experimental_strategy = 'wgs'
-						 LEFT JOIN germline__snv__occurrence o ON o.seq_id = seq.seq_id AND o.locus_id = ? AND o.gq >= 20 AND o.filter = 'PASS' AND o.ad_alt > 3
+				%s
+				LEFT JOIN radiant_jdbc.public.case_has_sequencing_experiment chse ON chse.case_id = c.id
+				JOIN staging_sequencing_experiment seq ON seq.seq_id = chse.sequencing_experiment_id AND seq.experimental_strategy = 'wgs'
+				LEFT JOIN germline__snv__occurrence o ON o.seq_id = seq.seq_id AND o.locus_id = ? AND o.gq >= 20 AND o.filter = 'PASS' AND o.ad_alt > 3
 			),
 			result AS (
 				SELECT
-					project_code,
-					project_name,
+					split_code,
 					affected_status_code,
 					COUNT(DISTINCT patient_id) AS pn,
 					COUNT(DISTINCT CASE WHEN zygosity IS NOT NULL THEN patient_id END) AS pc,
 					COUNT(DISTINCT CASE WHEN zygosity = 'HOM' THEN patient_id END) AS hom
 				FROM (
-						 SELECT project_code, project_name, patient_id, affected_status_code, zygosity
-						 FROM base
-						 WHERE affected_status_code IN ('affected', 'non_affected')
-		
-						 UNION ALL
-		
-						 SELECT project_code, project_name, patient_id, 'all' AS affected_status_code, zygosity
-						 FROM base
-					 ) x
-				GROUP BY project_code, affected_status_code, project_name
-			)
-			SELECT
-				project_code,
-				project_name,
-				affected_status_code,
-				pn,
-				pc,
-				hom,
-				CASE
-					WHEN pn = 0 THEN NULL
-					ELSE pc / pn
-					END AS pf
-			FROM result
-			ORDER BY project_code;
-	`, locusId)
+					SELECT split_code, patient_id, affected_status_code, zygosity
+					FROM base
+					WHERE affected_status_code IN ('affected', 'non_affected')
 
-	if err := tx.Scan(&frequenciesByProjectIds).Error; err != nil {
+					UNION ALL
+			
+					SELECT split_code, patient_id, 'all' AS affected_status_code, zygosity
+					FROM base
+				) x
+				GROUP BY split_code, affected_status_code
+				)
+		SELECT
+			split_code,
+			%s AS split_name,
+			affected_status_code,
+			pn,
+			pc,
+			hom,
+			CASE
+				WHEN pn = 0 THEN NULL
+				ELSE pc / pn
+			END AS pf
+		FROM result
+		%s
+		ORDER BY split_code;`, splitCodeColumn, joinToRetrieveSplitCode, splitNameColumn, joinToRetrieveSplitName), locusId)
+
+	if err := tx.Scan(&frequenciesByPrimaryCondition).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error fetching internal frequencies: %w", err)
 		} else {
@@ -479,19 +493,19 @@ func (r *VariantsRepository) GetVariantInternalFrequenciesSplitByProject(locusId
 		}
 	}
 
-	byProject := make(map[string][]TempFreqByProject)
+	bySplit := make(map[string][]TempFreqBySplit)
 
-	for _, f := range frequenciesByProjectIds {
-		byProject[f.ProjectCode] = append(byProject[f.ProjectCode], f)
+	for _, f := range frequenciesByPrimaryCondition {
+		bySplit[f.SplitCode] = append(bySplit[f.SplitCode], f)
 	}
 
-	for key, val := range byProject {
+	for key, val := range bySplit {
 		internalFreq := types.InternalFrequenciesSplitBy{
 			SplitValueCode: key,
 		}
 
 		for _, af := range val {
-			internalFreq.SplitValueName = af.ProjectName
+			internalFreq.SplitValueName = af.SplitName
 			switch af.AffectedStatusCode {
 			case "all":
 				internalFreq.Frequencies.PcAll = af.Pc
@@ -520,10 +534,5 @@ func (r *VariantsRepository) GetVariantInternalFrequenciesSplitByProject(locusId
 		return splitRows[i].SplitValueCode < splitRows[j].SplitValueCode
 	})
 
-	result := VariantInternalFrequencies{
-		TotalFrequencies: totalFrequencies,
-		SplitRows:        splitRows,
-	}
-
-	return &result, nil
+	return &splitRows, nil
 }

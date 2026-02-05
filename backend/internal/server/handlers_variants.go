@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -424,7 +425,7 @@ func GetGermlineVariantExternalFrequenciesHandler(repo repository.VariantsDAO) g
 // @Tags variant
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
-// @Param split query string true "split type (project or primary_condition)"
+// @Param split query string true "split type" Enums(project, primary_condition)
 // @Produce json
 // @Success 200 {object} types.VariantInternalFrequencies
 // @Failure 400 {object} types.ApiError
@@ -434,29 +435,42 @@ func GetGermlineVariantExternalFrequenciesHandler(repo repository.VariantsDAO) g
 func GetGermlineVariantInternalFrequenciesHandler(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var variantInternalFrequencies *types.VariantInternalFrequencies
+		var splitRows *[]types.InternalFrequenciesSplitBy
+		var globalFrequencies *types.InternalFrequencies
 
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
 		if err != nil {
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		split := c.Request.URL.Query().Get("split")
-		switch split {
-		case "project":
-			variantInternalFrequencies, err = repo.GetVariantInternalFrequenciesSplitByProject(locusID)
-			break
-		default:
-			HandleValidationError(c, fmt.Errorf("incorrect split"))
-			return
-		}
+
+		globalFrequencies, err = repo.GetVariantGlobalInternalFrequencies(locusID)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
-		if variantInternalFrequencies == nil {
+		if globalFrequencies == nil {
 			HandleNotFoundError(c, "variant")
 			return
 		}
+
+		split := c.Request.URL.Query().Get("split")
+
+		if !slices.Contains(types.SplitTypes, split) {
+			HandleValidationError(c, fmt.Errorf("incorrect split"))
+			return
+		}
+		splitRows, err = repo.GetVariantInternalFrequenciesSplitBy(locusID, split)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		variantInternalFrequencies = &types.VariantInternalFrequencies{
+			TotalFrequencies: *globalFrequencies,
+			SplitRows:        *splitRows,
+		}
+
 		c.JSON(http.StatusOK, variantInternalFrequencies)
 	}
 }

@@ -702,7 +702,7 @@ with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.VariantApi(api_client)
     locus_id = 'locus_id_example' # str | Locus ID
-    split = 'split_example' # str | split type (project or primary_condition)
+    split = 'split_example' # str | split type
 
     try:
         # Get internal frequencies
@@ -721,7 +721,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **locus_id** | **str**| Locus ID | 
- **split** | **str**| split type (project or primary_condition) | 
+ **split** | **str**| split type | 
 
 ### Return type
 

@@ -224,62 +224,68 @@ func (m *MockRepository) GetVariantExternalFrequencies(locusId int) (*types.Vari
 	}, nil
 }
 
-func (m *MockRepository) GetVariantInternalFrequenciesSplitByProject(locusId int) (*types.VariantInternalFrequencies, error) {
+func (m *MockRepository) GetVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error) {
 	af := 0.01
 	ac := 1
 	an := 100
 	hom := 0
-	return &types.VariantInternalFrequencies{
-		TotalFrequencies: types.InternalFrequencies{
-			PcAll:          &ac,
-			PnAll:          &an,
-			PfAll:          &af,
-			HomAll:         &hom,
-			PcAffected:     &ac,
-			PnAffected:     &an,
-			PfAffected:     &af,
-			HomAffected:    &hom,
-			PcNonAffected:  &ac,
-			PnNonAffected:  &an,
-			PfNonAffected:  &af,
-			HomNonAffected: &hom,
-		},
-		SplitRows: types.JsonArray[types.InternalFrequenciesSplitBy]{
-			{
-				SplitValueCode: "N1",
-				SplitValueName: "NeuroDev Phase I",
-				Frequencies: types.InternalFrequencies{
-					PcAll:          &ac,
-					PnAll:          &an,
-					PfAll:          &af,
-					HomAll:         &hom,
-					PcAffected:     &ac,
-					PnAffected:     &an,
-					PfAffected:     &af,
-					HomAffected:    &hom,
-					PcNonAffected:  &ac,
-					PnNonAffected:  &an,
-					PfNonAffected:  &af,
-					HomNonAffected: &hom,
-				},
+
+	return &types.InternalFrequencies{
+		PcAll:          &ac,
+		PnAll:          &an,
+		PfAll:          &af,
+		HomAll:         &hom,
+		PcAffected:     &ac,
+		PnAffected:     &an,
+		PfAffected:     &af,
+		HomAffected:    &hom,
+		PcNonAffected:  &ac,
+		PnNonAffected:  &an,
+		PfNonAffected:  &af,
+		HomNonAffected: &hom,
+	}, nil
+}
+
+func (m *MockRepository) GetVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
+	af := 0.01
+	ac := 1
+	an := 100
+	hom := 0
+	return &[]types.InternalFrequenciesSplitBy{
+		{
+			SplitValueCode: "N1",
+			SplitValueName: "NeuroDev Phase I",
+			Frequencies: types.InternalFrequencies{
+				PcAll:          &ac,
+				PnAll:          &an,
+				PfAll:          &af,
+				HomAll:         &hom,
+				PcAffected:     &ac,
+				PnAffected:     &an,
+				PfAffected:     &af,
+				HomAffected:    &hom,
+				PcNonAffected:  &ac,
+				PnNonAffected:  &an,
+				PfNonAffected:  &af,
+				HomNonAffected: &hom,
 			},
-			{
-				SplitValueCode: "N2",
-				SplitValueName: "NeuroDev Phase II",
-				Frequencies: types.InternalFrequencies{
-					PcAll:          &ac,
-					PnAll:          &an,
-					PfAll:          &af,
-					HomAll:         &hom,
-					PcAffected:     &ac,
-					PnAffected:     &an,
-					PfAffected:     &af,
-					HomAffected:    &hom,
-					PcNonAffected:  &ac,
-					PnNonAffected:  &an,
-					PfNonAffected:  &af,
-					HomNonAffected: &hom,
-				},
+		},
+		{
+			SplitValueCode: "N2",
+			SplitValueName: "NeuroDev Phase II",
+			Frequencies: types.InternalFrequencies{
+				PcAll:          &ac,
+				PnAll:          &an,
+				PfAll:          &af,
+				HomAll:         &hom,
+				PcAffected:     &ac,
+				PnAffected:     &an,
+				PfAffected:     &af,
+				HomAffected:    &hom,
+				PcNonAffected:  &ac,
+				PnNonAffected:  &an,
+				PfNonAffected:  &af,
+				HomNonAffected: &hom,
 			},
 		},
 	}, nil
