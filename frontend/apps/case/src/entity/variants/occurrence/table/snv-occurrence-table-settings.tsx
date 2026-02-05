@@ -47,7 +47,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
           </TooltipHeader>
         </div>
       ),
-      size: 40,
+      size: 48,
       enablePinning: false,
       enableResizing: false,
       enableSorting: false,
