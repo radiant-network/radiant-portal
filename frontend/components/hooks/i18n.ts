@@ -51,7 +51,7 @@ const initializeI18n = async () => {
 
         // Detection options for browser
         detection: {
-          order: ['querystring', 'cookie', 'localStorage', 'navigator'],
+          order: ['localStorage', 'querystring', 'cookie', 'navigator'],
           lookupQuerystring: 'lng',
           lookupCookie: 'i18next',
           lookupLocalStorage: 'i18nextLng',
@@ -119,6 +119,7 @@ export const useI18n = () => {
         console.log(`Loading translations for ${lang}...`);
         const translations = await loadTranslations(lang);
         i18n.addResourceBundle(lang, 'common', translations, true, true);
+        localStorage.setItem('language', lang);
         console.log(`✅ Translations loaded for ${lang}`);
       } catch (error) {
         console.error(`Failed to load translations for ${lang}:`, error);
