@@ -9,7 +9,8 @@ import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { SELECTED_VARIANT_PARAM } from '@/entity/variants/constants';
-import { SeqIDContext } from '@/entity/variants/variants-tab';
+
+import { useSeqIdContext } from '../../hooks/use-seq-id';
 
 type InterpretationCellProps = {
   occurrence: GermlineSNVOccurrence;
@@ -18,7 +19,7 @@ type InterpretationCellProps = {
 function InterpretationCell({ occurrence }: InterpretationCellProps) {
   const { t } = useI18n();
   const { mutate, loading } = useOccurrenceListContext();
-  const seqId = useContext(SeqIDContext);
+  const seqId = useSeqIdContext();
 
   const [_, setSearchParams] = useSearchParams();
 

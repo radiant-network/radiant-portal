@@ -42,36 +42,12 @@
  * }
  * ```
  *
- * ## Statistics API Integration:
- * The component fetches statistical data using the `statisticsGermlineSNVOccurrences` API:
- * - Automatically retrieves min/max values from the current dataset
- * - Uses the active query context to filter statistics appropriately
- * - Falls back to configuration defaults when statistics are unavailable
- * - Updates decimal precision based on the data type returned by the API
- *
- * ## Usage Example:
- * ```tsx
- * <NumericalFilter field={{
- *   key: 'age',
- *   type: 'numerical',
- *   defaults: {
- *     min: 0,
- *     max: 120,
- *     intervalDecimal: 0,
- *     defaultOperator: RangeOperators.Between,
- *     rangeTypes: [
- *       { key: 'years', name: 'Years' },
- *       { key: 'months', name: 'Months' }
- *     ]
- *   }
- * }} />
- * ```
  */
 
 import { useCallback, useContext, useEffect, useState } from 'react';
-import useSWR from 'swr';
+import { TFunction } from 'i18next';
 
-import { type SqonContent, SqonOpEnum, type Statistics, type StatisticsBodyWithSqon } from '@/api/api';
+import { type Statistics } from '@/api/api';
 import ElementOperatorIcon from '@/components/base/icons/element-operator-icon';
 import EqualOperatorIcon from '@/components/base/icons/equal-operator-icon';
 import GreaterThanOperatorIcon from '@/components/base/icons/greater-than-operator-icon';
@@ -88,66 +64,15 @@ import { Label } from '@/components/base/shadcn/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { TextMuted } from '@/components/base/typography/text-muted';
-import { ApplicationId, IFilterRangeConfig } from '@/components/cores/applications-config';
+import { IFilterRangeConfig } from '@/components/cores/applications-config';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { DEFAULT_EMPTY_QUERY, queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
-import {
-  ISqonGroupFilter,
-  IValueFilter,
-  MERGE_VALUES_STRATEGIES,
-  RangeOperators,
-  TSqonContentValue,
-} from '@/components/cores/sqon';
 import i18n, { useI18n } from '@/components/hooks/i18n';
-import { occurrencesApi } from '@/utils/api';
 
-import { useQBDispatch } from '../hooks/query-builder-context';
-import { QBActionFlag } from '../hooks/type';
+import { QBActionFlag, useQBContext, useQBDispatch } from '../hooks/use-query-builder';
+import { ISqonGroupFacet, IValueFacet, RangeOperators, TSqonContentValue } from '../type';
 
 const API_DEFAULT_TYPE = 'integer';
-
-type OccurrenceStatisticsInput = {
-  caseId: number;
-  seqId: number;
-  statisticsBody: StatisticsBodyWithSqon;
-};
-
-const statisticsFetcher = (appId: ApplicationId) => {
-  switch (appId) {
-    case ApplicationId.cnv_occurrence:
-      return (input: OccurrenceStatisticsInput): Promise<Statistics> =>
-        occurrencesApi
-          .statisticsGermlineCNVOccurrences(input.caseId, input.seqId, input.statisticsBody)
-          .then(response => response.data);
-    default:
-      return (input: OccurrenceStatisticsInput): Promise<Statistics> =>
-        occurrencesApi
-          .statisticsGermlineSNVOccurrences(input.caseId, input.seqId, input.statisticsBody)
-          .then(response => response.data);
-  }
-};
-
-function useStatisticsBuilder(field: string, appId: string, caseId: number, seqId: number, useEmptyQuery = false) {
-  const data: OccurrenceStatisticsInput = {
-    caseId,
-    seqId,
-    statisticsBody: {
-      field: field,
-    },
-  };
-
-  const activeQuery = useEmptyQuery ? DEFAULT_EMPTY_QUERY : queryBuilderRemote.getResolvedActiveQuery(appId);
-  if (activeQuery) {
-    data.statisticsBody.sqon = {
-      content: activeQuery.content as SqonContent,
-      op: activeQuery.op as SqonOpEnum,
-    };
-  }
-
-  return useSWR<Statistics, any, OccurrenceStatisticsInput>(data, statisticsFetcher(appId as ApplicationId), {
-    revalidateOnFocus: false,
-  });
-}
 
 /**
  * noData
@@ -155,7 +80,7 @@ function useStatisticsBuilder(field: string, appId: string, caseId: number, seqI
  */
 function getNumericalValue(
   fieldKey: string,
-  activeQuery: ISqonGroupFilter,
+  activeQuery: ISqonGroupFacet,
   aggConfig: IFilterRangeConfig,
   statistics?: Statistics,
 ) {
@@ -170,7 +95,7 @@ function getNumericalValue(
   // Find the main numeric field filter
   const numericFilter = activeQuery.content.find((x: TSqonContentValue) =>
     'content' in x && 'field' in x.content ? x.content.field === fieldKey : false,
-  ) as IValueFilter | undefined;
+  ) as IValueFacet | undefined;
 
   // Find the unit field filter if it exists
   const unitFilter = activeQuery.content.find((x: TSqonContentValue) => {
@@ -178,7 +103,7 @@ function getNumericalValue(
       return x.content.field === `${fieldKey}_unit`;
     }
     return false;
-  }) as IValueFilter | undefined;
+  }) as IValueFacet | undefined;
 
   if (numericFilter) {
     const values = numericFilter.content.value;
@@ -254,21 +179,14 @@ function getNumericalValue(
   };
 }
 
-interface IProps {
-  field: AggregationConfig;
-}
+type RangeOperatorLabelProps = {
+  display: string;
+  dropdown: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+};
 
-// eslint-disable-next-line complexity
-export function NumericalFacet({ field }: IProps) {
-  const { t } = useI18n();
-  const dispatch = useQBDispatch();
-  const { appId, aggregations } = useFacetConfig();
-  const { seqId, caseId } = useContext(AggregateContext);
-  const fieldKey = field.key;
-  const RANGE_OPERATOR_LABELS: Record<
-    RangeOperators,
-    { display: string; dropdown: string; icon: React.ComponentType<{ size?: number; className?: string }> }
-  > = {
+function getRangeOperatorLabels(t: TFunction<string, undefined>): Record<RangeOperators, RangeOperatorLabelProps> {
+  return {
     [RangeOperators.GreaterThan]: {
       display: t('common.filters.operators.greater_than'),
       dropdown: t('common.filters.operators.greater_than'),
@@ -300,9 +218,24 @@ export function NumericalFacet({ field }: IProps) {
       icon: EqualOperatorIcon,
     },
   };
+}
+
+interface IProps {
+  field: AggregationConfig;
+}
+
+// eslint-disable-next-line complexity
+export function NumericalFacet({ field }: IProps) {
+  const { t } = useI18n();
+  const dispatch = useQBDispatch();
+  const { aggregations } = useQBContext();
+  const { appId } = useFacetConfig();
+  const { statisticFetcher } = useFacetConfig();
+  const fieldKey = field.key;
+  const RANGE_OPERATOR_LABELS = getRangeOperatorLabels(t);
 
   // Fetch statistics for min/max values
-  const { data: statistics, isLoading: isLoadingStats } = useStatisticsBuilder(fieldKey, appId, caseId, seqId, false);
+  const { data: statistics, isLoading: isLoadingStats } = statisticFetcher({ field: fieldKey });
   const decimal = statistics?.type === API_DEFAULT_TYPE ? 0 : 3;
   const [selectedRange, setSelectedRange] = useState<RangeOperators>(RangeOperators.GreaterThan);
   const [numericValue, setNumericValue] = useState<string>('0');
@@ -375,12 +308,12 @@ export function NumericalFacet({ field }: IProps) {
 
     // Handle no data case
     if (hasNoData) {
+      // @TODO: change action-flag type
       dispatch({
-        type: QBActionFlag.UPDATE_ACTIVE_QUERY,
+        type: QBActionFlag.ADD_IVALUEFACET,
         payload: {
           field: fieldKey,
           value: ['__missing__'],
-          merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
         },
       });
       return;
@@ -394,25 +327,24 @@ export function NumericalFacet({ field }: IProps) {
         : [parseFloat(numericValue.toString())];
 
     // Update the main field with numeric values
+    // @TODO: change action-flag type
     dispatch({
-      type: QBActionFlag.UPDATE_ACTIVE_QUERY,
+      type: QBActionFlag.ADD_IVALUEFACET,
       payload: {
         field: fieldKey,
         value: values,
-        merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
         operator: selectedRange,
       },
     });
 
     // If a unit is selected, update the unit field
     if (selectedUnit) {
-      // @TODO: should be a different dispatch ^
+      // @TODO: change action-flag type
       dispatch({
-        type: QBActionFlag.UPDATE_ACTIVE_QUERY,
+        type: QBActionFlag.ADD_IVALUEFACET,
         payload: {
           field: `${fieldKey}_unit`,
           value: [selectedUnit],
-          merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
         },
       });
     }

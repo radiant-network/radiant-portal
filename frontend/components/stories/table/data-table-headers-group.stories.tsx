@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { SortBodyOrderEnum } from '@/api/api';
@@ -11,9 +11,16 @@ import RowSelectionHeader from '@/components/base/data-table/headers/table-row-s
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
-import { advancedData, AdvancedMockData, data, mockColumns, MockData, mockDefaultColumnSettings } from './table-mock';
+import {
+  advancedData,
+  AdvancedTableMockData,
+  data,
+  mockColumns,
+  mockDefaultColumnSettings,
+  TableMockData,
+} from './table-mock';
 
-const columnHelper = createColumnHelper<MockData>();
+const columnHelper = createColumnHelper<TableMockData>();
 
 const defaultMockColumnSettings = createColumnSettings([
   {
@@ -223,7 +230,7 @@ const meta = {
         },
       ],
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      onSortingChange: sorting => {},
+      onSortingChange: sorting => { },
     },
     defaultColumnSettings: mockDefaultColumnSettings,
     loadingStates: {
@@ -236,7 +243,7 @@ const meta = {
         pageIndex: 0,
         pageSize: 10,
       },
-      onPaginationChange: () => {},
+      onPaginationChange: () => { },
     },
     total: 10,
   },
@@ -316,7 +323,7 @@ export const Default: Story = {
           }),
         ],
       },
-    ] as TableColumnDef<MockData, any>[],
+    ] as TableColumnDef<TableMockData, any>[],
     defaultColumnSettings: defaultMockColumnSettings,
   },
   render: args => (
@@ -405,7 +412,7 @@ export const WithSubgroups: Story = {
           }),
         ],
       },
-    ] as TableColumnDef<MockData, any>[],
+    ] as TableColumnDef<TableMockData, any>[],
     defaultColumnSettings: defaultMockColumnSettings,
   },
   render: args => (
@@ -574,7 +581,7 @@ export const Advanced: Story = {
           }),
         ],
       },
-    ] as TableColumnDef<AdvancedMockData, any>[],
+    ] as TableColumnDef<AdvancedTableMockData, any>[],
     defaultColumnSettings: defaultAdvancedColumnSettings,
     loadingStates: {
       total: false,
@@ -754,7 +761,7 @@ export const AdvancedWith50users: Story = {
           }),
         ],
       },
-    ] as TableColumnDef<AdvancedMockData, any>[],
+    ] as TableColumnDef<AdvancedTableMockData, any>[],
     defaultColumnSettings: defaultAdvancedColumnSettings,
     loadingStates: {
       total: false,

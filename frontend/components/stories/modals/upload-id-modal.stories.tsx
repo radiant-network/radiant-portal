@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import UploadIdModal from '@/components/base/modals/upload-id-modal';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';

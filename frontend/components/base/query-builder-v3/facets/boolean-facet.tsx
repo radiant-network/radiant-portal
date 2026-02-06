@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { Aggregation } from '@/api/api';
-import { useFacetConfig } from '@/components/base/query-builder-v3/facets/hooks/use-facet-config';
-import { useOccurrenceAggregationBuilder } from '@/components/base/query-builder-v3/facets/hooks/use-occurrence-aggregation-builder';
 import { Button } from '@/components/base/shadcn/button';
 import { Label } from '@/components/base/shadcn/label';
 import { RadioGroup, RadioGroupItem } from '@/components/base/shadcn/radio-group';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
-import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
-import { IValueFilter, MERGE_VALUES_STRATEGIES } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { useQBDispatch } from '../hooks/query-builder-context';
-import { QBActionFlag } from '../hooks/type';
+import { QBActionFlag, useQBDispatch } from '../hooks/use-query-builder';
+import { IValueFacet } from '../type';
+
+import { useFacetConfig } from './hooks/use-facet-config';
 
 type BooleanFacetProps = {
   data?: Aggregation[];
@@ -21,17 +19,14 @@ type BooleanFacetProps = {
 
 export function BooleanFacet({ data, field }: BooleanFacetProps) {
   const { t } = useI18n();
-  const { appId } = useFacetConfig();
+  const { builderFetcher } = useFacetConfig();
   const dispatch = useQBDispatch();
 
   // Use the aggregation builder hook to fetch data automatically
-  const { data: aggregationData } = useOccurrenceAggregationBuilder(
-    field.key,
-    undefined,
-    true,
-    false, // withDictionary false for boolean filters
-    appId,
-  );
+  const { data: aggregationData } = builderFetcher({
+    field: field.key,
+    size: 30,
+  });
 
   // Use data from props or from the aggregation builder
   const [items, setItems] = useState<Aggregation[]>(data || aggregationData || []);
@@ -45,10 +40,12 @@ export function BooleanFacet({ data, field }: BooleanFacetProps) {
 
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder
-    const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
-      .getActiveQuery(appId)
-      // @ts-ignore
-      .content.find((x: IValueFilter) => x.content.field === field.key);
+    // @TODO: to implement with new hooks
+    const prevSelectedItems: IValueFacet | undefined = undefined;
+    // const prevSelectedItems: IValueFacet | undefined = queryBuilderRemote
+    //   .getActiveQuery(appId)
+    //   // @ts-ignore
+    //   .content.find((x: IValueFacet) => x.content.field === field.key);
     if (prevSelectedItems) {
       const items = prevSelectedItems.content.value;
       if (items.length >= 1) {
@@ -57,7 +54,7 @@ export function BooleanFacet({ data, field }: BooleanFacetProps) {
     } else {
       setSelectedItem(null);
     }
-  }, [appId, field.key]);
+  }, [field.key]);
 
   // Memoize these functions with useCallback
   const onSelect = useCallback(
@@ -68,11 +65,10 @@ export function BooleanFacet({ data, field }: BooleanFacetProps) {
       setSelectedItem(item.key || null);
 
       dispatch({
-        type: QBActionFlag.UPDATE_ACTIVE_QUERY,
+        type: QBActionFlag.ADD_IVALUEFACET,
         payload: {
           field: field.key,
           value: [...item.key],
-          merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
         },
       });
     },

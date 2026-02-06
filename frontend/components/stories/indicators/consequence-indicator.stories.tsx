@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { VepImpact } from '@/api/api';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';

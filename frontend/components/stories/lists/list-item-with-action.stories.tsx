@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { action } from 'storybook/actions';
 import List from '@/components/base/list/list';
 import ListItemWithAction from '@/components/base/list/list-item-with-action';
 

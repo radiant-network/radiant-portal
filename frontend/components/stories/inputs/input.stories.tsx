@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Car } from 'lucide-react';
 
 import { Field, FieldDescription, FieldError, FieldLabel, FieldTitle } from '@/components/base/shadcn/field';

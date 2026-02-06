@@ -1,17 +1,18 @@
-// @TODO: Facets > FilterTypes should be renamed to FacetTypes
-// @TODO: Facets > i18n should not use filter for his key by facet
-// @TODO: Facets > useOccurrenceAggregationBuilder should be able to have optional withDictionary params. Use object insteads of multiples parameters
 import { useState } from 'react';
 import { X } from 'lucide-react';
 
-import { SidebarGroups } from '@/components/base/query-builder-v3/facets/sidebar-groups';
+import { SidebarGroups } from '@/components/base/query-builder-v3//facets/sidebar-groups';
+import { FacetList } from '@/components/base/query-builder-v3/facets/facet-list';
+import { FacetConfigContext } from '@/components/base/query-builder-v3/facets/hooks/use-facet-config';
+import { getAggregationsFetcher } from '@/components/base/query-builder-v3/hooks/use-aggregation-builder';
+import { IQBContext, QBProvider } from '@/components/base/query-builder-v3/hooks/use-query-builder';
+import { useQueryBuilderGetPreferenceEffect } from '@/components/base/query-builder-v3/hooks/use-query-builder-preference';
+import { getVisibleAggregations } from '@/components/base/query-builder-v3/libs/facet-libs';
+import QueriesBarCard from '@/components/base/query-builder-v3/queries-bar-card';
+import { QueryBuilderSkeleton } from '@/components/base/query-builder-v3/query-builder-skeleton';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';
 import { AggregationConfig, ApplicationId, AppsConfig, useConfig } from '@/components/cores/applications-config';
 import { cn } from '@/components/lib/utils';
-
-import { FacetList } from './facets/facet-list';
-import { QBProvider } from './hooks/query-builder-context';
-import Query from './query';
 
 type QueryBuilderLayoutProps = {
   appId: ApplicationId;
@@ -19,28 +20,26 @@ type QueryBuilderLayoutProps = {
   defaultSidebarOpen?: boolean;
 };
 
-export function getVisibleAggregations(aggregationGroups: AggregationConfig) {
-  return Object.fromEntries(
-    Object.entries(aggregationGroups)
-      .map(([key, group]) => {
-        const filteredGroup = {
-          ...group,
-          items: group.items.filter(item => item.facetHidden !== true),
-        };
-        return [key, filteredGroup];
-      })
-      .filter(([_, group]) => (group as any).items.length > 0), // Remove groups with no visible items
-  ) as AggregationConfig;
-}
-
+/**
+ * Query-Builder (facets + query-bar)
+ */
 function QueryBuilder({ appId, defaultSidebarOpen = false, children }: QueryBuilderLayoutProps) {
   const [open, setOpen] = useState(defaultSidebarOpen);
   const config = useConfig();
-  const visibleAggregations = getVisibleAggregations((config[appId] as AppsConfig).aggregations);
+  const aggregations: AggregationConfig = (config[appId] as AppsConfig).aggregations;
+  const visibleAggregations = getVisibleAggregations(aggregations);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
+  const [preference, setPreference] = useState<IQBContext | undefined>();
+  const facetFetchers = getAggregationsFetcher(appId);
+
+  useQueryBuilderGetPreferenceEffect({ appId, setPreference });
+
+  if (!preference) {
+    return <QueryBuilderSkeleton defaultSidebarOpen={defaultSidebarOpen} aggregations={aggregations} />;
+  }
 
   return (
-    <QBProvider>
+    <QBProvider {...preference} aggregations={aggregations}>
       <div className="bg-muted w-full">
         <div className="flex flex-1 h-screen overflow-hidden">
           <aside className="w-auto min-w-fit h-full shrink-0">
@@ -67,14 +66,16 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, children }: QueryBuil
                       <X size={16} />
                     </button>
                   </div>
-                  <FacetList appId={appId} aggregations={visibleAggregations} groupKey={selectedSidebarItem} />
+                  <FacetConfigContext value={{ appId, ...facetFetchers }}>
+                    <FacetList aggregations={visibleAggregations} groupKey={selectedSidebarItem} />
+                  </FacetConfigContext>
                 </div>
               </div>
             </SidebarProvider>
           </aside>
           <main className="flex-1 shrink px-3 pb-3 overflow-auto">
             <div className="py-3 space-y-2">
-              <Query />
+              <QueriesBarCard />
             </div>
             {children}
           </main>

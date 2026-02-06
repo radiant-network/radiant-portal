@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import CollapsibleCard from '@/components/base/cards/collapsible-card';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';

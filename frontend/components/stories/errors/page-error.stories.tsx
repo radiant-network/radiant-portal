@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import PageError from '@/components/base/page/page-error';
 import { Button } from '@/components/base/shadcn/button';

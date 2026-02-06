@@ -275,6 +275,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
       .getResolvedActiveQuery(appId)
       // @ts-ignore
       .content.find((x: IValueFilter) => x.content.field === field.key);
+
     const queryBuilderItems = (prevSelectedItems?.content.value as string[]) || [];
 
     const hasUnapplied = JSON.stringify([...selectedItems].sort()) !== JSON.stringify([...queryBuilderItems].sort());

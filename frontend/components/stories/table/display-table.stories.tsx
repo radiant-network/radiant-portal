@@ -1,14 +1,14 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { TableColumnDef } from '@/components/base/data-table/data-table';
 import DisplayTable from '@/components/base/data-table/display-table';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
-import { data, MockData } from './table-mock';
+import { data, TableMockData } from './table-mock';
 
-const columnHelper = createColumnHelper<MockData>();
+const columnHelper = createColumnHelper<TableMockData>();
 
 const config: PortalConfig = {
   variant_entity: {
@@ -60,7 +60,7 @@ const meta = {
       columnHelper.accessor('progress', {
         header: 'Profile Progress',
       }),
-    ] as TableColumnDef<MockData, any>[],
+    ] as TableColumnDef<TableMockData, any>[],
   },
   decorators: [
     Story => (
@@ -139,7 +139,7 @@ export const WithHeaderGroups: Story = {
           }),
         ],
       }),
-    ] as TableColumnDef<MockData, any>[],
+    ] as TableColumnDef<TableMockData, any>[],
   },
   render: args => <DisplayTable {...args} />,
 };

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Command, Command as CommandPrimitive } from 'cmdk';
 import { User } from 'lucide-react';
 

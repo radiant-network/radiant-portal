@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import ElementOperatorIcon from '@/components/base/icons/element-operator-icon';
 import EqualOperatorIcon from '@/components/base/icons/equal-operator-icon';

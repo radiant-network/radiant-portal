@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import ToggleButtonGroup from '@/components/base/toggle-button-group/toggle-button-group';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';

@@ -2,14 +2,11 @@ import { useEffect, useState } from 'react';
 
 import UploadIdModal from '@/components/base/modals/upload-id-modal';
 import { FacetContainer } from '@/components/base/query-builder-v3/facets/facet-container';
-import {
-  FacetConfigContext,
-  getGlobalStorageKey,
-} from '@/components/base/query-builder-v3/facets/hooks/use-facet-config';
+import { useGlobalStorageKey } from '@/components/base/query-builder-v3/facets/hooks/use-facet-config';
 import { SearchFacet } from '@/components/base/query-builder-v3/facets/search-facet';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
-import { AggregationConfig, ApplicationId, FilterTypes } from '@/components/cores/applications-config';
+import { AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
 /**
@@ -18,17 +15,16 @@ import { useI18n } from '@/components/hooks/i18n';
 interface FacetListProps {
   groupKey?: string | null;
   aggregations: AggregationConfig;
-  appId: ApplicationId;
 }
 
-export function FacetList({ groupKey, appId, aggregations }: FacetListProps) {
+export function FacetList({ groupKey, aggregations }: FacetListProps) {
   const { t } = useI18n();
   const [toggleExpandAll, setToggleExpandAll] = useState<boolean>(false);
   const [expandedFilters, setExpandedFilters] = useState<string[]>([]);
   const [prevGroupKey, setPrevGroupKey] = useState<string | null | undefined>(groupKey);
 
   // Unique key for all temporary selections
-  const globalStorageKey = getGlobalStorageKey(appId);
+  const globalStorageKey = useGlobalStorageKey();
 
   // Simple function to clean all temporary selections
   const clearUnappliedFilters = () => {
@@ -65,45 +61,43 @@ export function FacetList({ groupKey, appId, aggregations }: FacetListProps) {
   }, [groupKey, prevGroupKey]);
 
   return (
-    <FacetConfigContext value={{ appId, aggregations }}>
-      <div>
-        <div className="flex flex-col gap-3 mb-3">
-          {searchByFilters.map((search, index) => (
-            <SearchFacet key={`${search.key}-${index}`} search={search} />
-          ))}
-          {uploadListFilters.map((uploadList, index) => (
-            <UploadIdModal key={`${uploadList.key}-${index}`} variant={uploadList.key.replace(/upload_list_/g, '')} />
-          ))}
-        </div>
-        <div className="flex justify-end">
-          <Button
-            variant="link"
-            size="xs"
-            onClick={() => {
-              const newToggleExpandAll = !toggleExpandAll;
-              setToggleExpandAll(newToggleExpandAll);
-
-              if (newToggleExpandAll) {
-                setExpandedFilters(fields.map(field => field.key));
-              } else {
-                setExpandedFilters([]);
-              }
-            }}
-          >
-            {toggleExpandAll ? t('common.actions.collapse_all') : t('common.actions.expand_all')}
-          </Button>
-        </div>
-        <Accordion
-          className="flex flex-col gap-1"
-          type="multiple"
-          value={expandedFilters}
-          onValueChange={value => setExpandedFilters(value)}
-        >
-          {fields.map((field, index) => (
-            <FacetContainer key={`${field.key}-${index}`} isOpen={expandedFilters.includes(field.key)} field={field} />
-          ))}
-        </Accordion>
+    <div>
+      <div className="flex flex-col gap-3 mb-3">
+        {searchByFilters.map((search, index) => (
+          <SearchFacet key={`${search.key}-${index}`} search={search} />
+        ))}
+        {uploadListFilters.map((uploadList, index) => (
+          <UploadIdModal key={`${uploadList.key}-${index}`} variant={uploadList.key.replace(/upload_list_/g, '')} />
+        ))}
       </div>
-    </FacetConfigContext>
+      <div className="flex justify-end">
+        <Button
+          variant="link"
+          size="xs"
+          onClick={() => {
+            const newToggleExpandAll = !toggleExpandAll;
+            setToggleExpandAll(newToggleExpandAll);
+
+            if (newToggleExpandAll) {
+              setExpandedFilters(fields.map(field => field.key));
+            } else {
+              setExpandedFilters([]);
+            }
+          }}
+        >
+          {toggleExpandAll ? t('common.actions.collapse_all') : t('common.actions.expand_all')}
+        </Button>
+      </div>
+      <Accordion
+        className="flex flex-col gap-1"
+        type="multiple"
+        value={expandedFilters}
+        onValueChange={value => setExpandedFilters(value)}
+      >
+        {fields.map((field, index) => (
+          <FacetContainer key={`${field.key}-${index}`} isOpen={expandedFilters.includes(field.key)} field={field} />
+        ))}
+      </Accordion>
+    </div>
   );
 }
