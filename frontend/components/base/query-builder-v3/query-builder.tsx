@@ -1,5 +1,3 @@
-// @TODO: Facets > FilterTypes should be renamed to FacetTypes
-// @TODO: Facets > i18n should not use filter for his key by facet
 // @TODO: Facets > useOccurrenceAggregationBuilder should be able to have optional withDictionary params. Use object insteads of multiples parameters
 import { useState } from 'react';
 import { X } from 'lucide-react';
@@ -10,8 +8,10 @@ import { AggregationConfig, ApplicationId, AppsConfig, useConfig } from '@/compo
 import { cn } from '@/components/lib/utils';
 
 import { FacetList } from './facets/facet-list';
-import { QBProvider } from './hooks/query-builder-context';
-import Query from './query';
+import { IQBContext, QBProvider } from './hooks/query-builder-context';
+import { useQueryBuilderGetPreferenceEffect } from './hooks/use-query-builder-preference';
+import QueriesBarCard from './queries-bar-card';
+import { QueryBuilderSkeleton } from './query-builder-skeleton';
 
 type QueryBuilderLayoutProps = {
   appId: ApplicationId;
@@ -33,14 +33,28 @@ export function getVisibleAggregations(aggregationGroups: AggregationConfig) {
   ) as AggregationConfig;
 }
 
+/**
+ * Query-Builder (facets + query-bar)
+ */
 function QueryBuilder({ appId, defaultSidebarOpen = false, children }: QueryBuilderLayoutProps) {
   const [open, setOpen] = useState(defaultSidebarOpen);
   const config = useConfig();
-  const visibleAggregations = getVisibleAggregations((config[appId] as AppsConfig).aggregations);
+  const aggregations: AggregationConfig = (config[appId] as AppsConfig).aggregations;
+  const visibleAggregations = getVisibleAggregations(aggregations);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
+  const [preference, setPreference] = useState<IQBContext | undefined>();
+
+  useQueryBuilderGetPreferenceEffect({
+    appId,
+    setPreference,
+  });
+
+  if (!preference) {
+    return <QueryBuilderSkeleton defaultSidebarOpen={defaultSidebarOpen} aggregations={aggregations} />;
+  }
 
   return (
-    <QBProvider>
+    <QBProvider {...preference} aggregations={aggregations}>
       <div className="bg-muted w-full">
         <div className="flex flex-1 h-screen overflow-hidden">
           <aside className="w-auto min-w-fit h-full shrink-0">
@@ -74,7 +88,7 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, children }: QueryBuil
           </aside>
           <main className="flex-1 shrink px-3 pb-3 overflow-auto">
             <div className="py-3 space-y-2">
-              <Query />
+              <QueriesBarCard />
             </div>
             {children}
           </main>

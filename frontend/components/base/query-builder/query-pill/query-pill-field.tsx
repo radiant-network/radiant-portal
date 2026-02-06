@@ -48,8 +48,8 @@ function QueryPillField({ valueFilter, customPillEditEnabled }: QueryPillFieldPr
 
   const isFacetFilterEnabled = Boolean(
     !customPillEditEnabled &&
-      queryPillFacetFilterConfig?.enable &&
-      !queryPillFacetFilterConfig?.blacklistedFacets?.includes(valueFilter.content.field),
+    queryPillFacetFilterConfig?.enable &&
+    !queryPillFacetFilterConfig?.blacklistedFacets?.includes(valueFilter.content.field),
   );
 
   const handleFacetClick = useCallback(() => {

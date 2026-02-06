@@ -8,11 +8,10 @@ import { Label } from '@/components/base/shadcn/label';
 import { RadioGroup, RadioGroupItem } from '@/components/base/shadcn/radio-group';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
-import { IValueFilter, MERGE_VALUES_STRATEGIES } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { useQBDispatch } from '../hooks/query-builder-context';
-import { QBActionFlag } from '../hooks/type';
+import { QBActionFlag, useQBDispatch } from '../hooks/query-builder-context';
+import { IValueFacet } from '../type';
 
 type BooleanFacetProps = {
   data?: Aggregation[];
@@ -45,10 +44,10 @@ export function BooleanFacet({ data, field }: BooleanFacetProps) {
 
   useEffect(() => {
     // if page reload and there is item selected in the querybuilder
-    const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+    const prevSelectedItems: IValueFacet | undefined = queryBuilderRemote
       .getActiveQuery(appId)
       // @ts-ignore
-      .content.find((x: IValueFilter) => x.content.field === field.key);
+      .content.find((x: IValueFacet) => x.content.field === field.key);
     if (prevSelectedItems) {
       const items = prevSelectedItems.content.value;
       if (items.length >= 1) {
@@ -68,11 +67,10 @@ export function BooleanFacet({ data, field }: BooleanFacetProps) {
       setSelectedItem(item.key || null);
 
       dispatch({
-        type: QBActionFlag.UPDATE_ACTIVE_QUERY,
+        type: QBActionFlag.ADD_IVALUEFACET,
         payload: {
           field: field.key,
           value: [...item.key],
-          merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
         },
       });
     },

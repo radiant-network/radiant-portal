@@ -75,6 +75,10 @@ async function postUserPreference(_url: string, { arg }: { arg: PostUserPreferen
   return response.data;
 }
 
+function getUserPreferenceKey(id: string) {
+  return `data-table-${id}`;
+}
+
 /**
  * Load user preference
  * Will return an 404 if the config has never been set before
@@ -90,11 +94,15 @@ export function useTableGetPreferenceEffect({
   setColumnVisibility,
   setAdditionalFields,
 }: useTableStateFetchProps) {
-  const tableUserPreference = useSWR(`get-${id}`, () => fetchUserPreference({ key: id }), {
-    revalidateOnMount: true,
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-  });
+  const tableUserPreference = useSWR(
+    `data-table-get-${id}`,
+    () => fetchUserPreference({ key: getUserPreferenceKey(id) }),
+    {
+      revalidateOnMount: true,
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+    },
+  );
 
   useEffect(() => {
     if (tableUserPreference.error) {
@@ -125,12 +133,12 @@ export function useTableUpdatePreferenceEffect({
   columnSizing,
   columnVisibility,
 }: useTableStateObserverProps) {
-  const { trigger } = useSWRMutation(`post-${id}`, postUserPreference);
+  const { trigger } = useSWRMutation(`data-table-post-${id}`, postUserPreference);
 
   useEffect(() => {
     const handler = setTimeout(() => {
       trigger({
-        key: id,
+        key: getUserPreferenceKey(id),
         userPreference: {
           content: {
             columnOrder,
@@ -138,7 +146,7 @@ export function useTableUpdatePreferenceEffect({
             columnSizing,
             columnVisibility,
           },
-          key: id,
+          key: getUserPreferenceKey(id),
         },
       });
     }, 350);

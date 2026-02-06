@@ -91,18 +91,11 @@ import { TextMuted } from '@/components/base/typography/text-muted';
 import { ApplicationId, IFilterRangeConfig } from '@/components/cores/applications-config';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { DEFAULT_EMPTY_QUERY, queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
-import {
-  ISqonGroupFilter,
-  IValueFilter,
-  MERGE_VALUES_STRATEGIES,
-  RangeOperators,
-  TSqonContentValue,
-} from '@/components/cores/sqon';
 import i18n, { useI18n } from '@/components/hooks/i18n';
 import { occurrencesApi } from '@/utils/api';
 
-import { useQBDispatch } from '../hooks/query-builder-context';
-import { QBActionFlag } from '../hooks/type';
+import { QBActionFlag, useQBDispatch } from '../hooks/query-builder-context';
+import { ISqonGroupFacet, IValueFacet, RangeOperators, TSqonContentValue } from '../type';
 
 const API_DEFAULT_TYPE = 'integer';
 
@@ -155,7 +148,7 @@ function useStatisticsBuilder(field: string, appId: string, caseId: number, seqI
  */
 function getNumericalValue(
   fieldKey: string,
-  activeQuery: ISqonGroupFilter,
+  activeQuery: ISqonGroupFacet,
   aggConfig: IFilterRangeConfig,
   statistics?: Statistics,
 ) {
@@ -170,7 +163,7 @@ function getNumericalValue(
   // Find the main numeric field filter
   const numericFilter = activeQuery.content.find((x: TSqonContentValue) =>
     'content' in x && 'field' in x.content ? x.content.field === fieldKey : false,
-  ) as IValueFilter | undefined;
+  ) as IValueFacet | undefined;
 
   // Find the unit field filter if it exists
   const unitFilter = activeQuery.content.find((x: TSqonContentValue) => {
@@ -178,7 +171,7 @@ function getNumericalValue(
       return x.content.field === `${fieldKey}_unit`;
     }
     return false;
-  }) as IValueFilter | undefined;
+  }) as IValueFacet | undefined;
 
   if (numericFilter) {
     const values = numericFilter.content.value;
@@ -375,12 +368,12 @@ export function NumericalFacet({ field }: IProps) {
 
     // Handle no data case
     if (hasNoData) {
+      // @TODO: change action-flag type
       dispatch({
-        type: QBActionFlag.UPDATE_ACTIVE_QUERY,
+        type: QBActionFlag.ADD_IVALUEFACET,
         payload: {
           field: fieldKey,
           value: ['__missing__'],
-          merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
         },
       });
       return;
@@ -394,25 +387,24 @@ export function NumericalFacet({ field }: IProps) {
         : [parseFloat(numericValue.toString())];
 
     // Update the main field with numeric values
+    // @TODO: change action-flag type
     dispatch({
-      type: QBActionFlag.UPDATE_ACTIVE_QUERY,
+      type: QBActionFlag.ADD_IVALUEFACET,
       payload: {
         field: fieldKey,
         value: values,
-        merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
         operator: selectedRange,
       },
     });
 
     // If a unit is selected, update the unit field
     if (selectedUnit) {
-      // @TODO: should be a different dispatch ^
+      // @TODO: change action-flag type
       dispatch({
-        type: QBActionFlag.UPDATE_ACTIVE_QUERY,
+        type: QBActionFlag.ADD_IVALUEFACET,
         payload: {
           field: `${fieldKey}_unit`,
           value: [selectedUnit],
-          merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
         },
       });
     }

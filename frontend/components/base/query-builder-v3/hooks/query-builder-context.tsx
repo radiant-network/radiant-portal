@@ -1,18 +1,34 @@
-// @TODO: to be changed for api
 import { createContext, Dispatch, useContext, useReducer } from 'react';
+import { v4 } from 'uuid';
 
-import { ActiveQueryProps, QBActionFlag, QueryProps } from './type';
+import { AggregationConfig } from '@/components/cores/applications-config';
 
-export type QBContextProps = {
-  activeQuery?: QueryProps;
-};
+import { createEmptyQuery, hasFieldProperty } from '../libs/facet-libs';
+import { BooleanOperators, ISyntheticSqon, IValueFacet } from '../type';
+
+export enum QBActionFlag {
+  INITIALIZE = 'initialize',
+  SET_ACTIVE_QUERY = 'set-active-query',
+  ADD_IVALUEFACET = 'update-active-query',
+}
+
+export interface IQBContext {
+  aggregations: AggregationConfig;
+  sqons: ISyntheticSqon[];
+  activeQueryId: string;
+}
 
 type QBDispatch = Dispatch<QBAction>;
 
 /**
  * Context
  */
-export const QBContext = createContext<QBContextProps>({});
+export const DEFAULT_QBCONTEXT = {
+  aggregations: {},
+  activeQueryId: v4(),
+  sqons: [],
+};
+export const QBContext = createContext<IQBContext>(DEFAULT_QBCONTEXT);
 export const QBDispatchContext = createContext<QBDispatch>(() => {
   console.warn('QueryBuilderDispatchContext has been initialized without any dispatch props');
 });
@@ -20,14 +36,51 @@ export const QBDispatchContext = createContext<QBDispatch>(() => {
 /**
  * Reducer
  */
-export type QBAction = { type: QBActionFlag.UPDATE_ACTIVE_QUERY; payload: ActiveQueryProps };
-export function qBReducer(context: QBContextProps, action: QBAction) {
+// Defined each payload by action type
+type QBSetQueryAction = {
+  type: QBActionFlag.SET_ACTIVE_QUERY;
+  payload: string;
+};
+type QBUpdateQueryAction = {
+  type: QBActionFlag.ADD_IVALUEFACET;
+  payload: IValueFacet;
+};
+export type QBAction = QBSetQueryAction | QBUpdateQueryAction | any;
+
+export function qBReducer(context: IQBContext, action: QBAction) {
   switch (action.type) {
-    case QBActionFlag.UPDATE_ACTIVE_QUERY: {
+    case QBActionFlag.SET_ACTIVE_QUERY: {
       return {
         ...context,
         activeQuery: action.payload,
       };
+    }
+    /**
+     * Add or update a query with a IValueFacet
+     */
+    case QBActionFlag.ADD_IVALUEFACET: {
+      const { activeQueryId } = context;
+      const { sqons } = context;
+      const index = context.sqons.findIndex(sqon => sqon.id === activeQueryId);
+      // active query is empty
+      if (index < 0) {
+        sqons.push({
+          id: activeQueryId,
+          content: [action.payload],
+          op: BooleanOperators.And,
+        });
+      } else {
+        const fieldIndex = sqons[index].content.findIndex(c => hasFieldProperty(c) && c.field === action.payload.field);
+        if (fieldIndex < 0) {
+          // add new field
+          sqons[index].content = [...sqons[index].content, action.payload];
+        } else {
+          // update existing field
+          sqons[index].content[fieldIndex] = action.payload;
+        }
+      }
+
+      return { context, sqons: [...sqons] };
     }
     default: {
       throw Error('Unknown action: ' + action.type);
@@ -38,11 +91,14 @@ export function qBReducer(context: QBContextProps, action: QBAction) {
 /**
  * Provider
  */
-export function QBProvider({ children }: { children: React.ReactElement }) {
-  const [tasks, dispatch] = useReducer(qBReducer, { activeQuery: {} });
+type QBProviderProps = IQBContext & {
+  children: React.ReactElement;
+};
+export function QBProvider({ children, ...props }: QBProviderProps) {
+  const [value, dispatch] = useReducer(qBReducer, props);
 
   return (
-    <QBContext value={tasks}>
+    <QBContext value={value}>
       <QBDispatchContext value={dispatch}>{children}</QBDispatchContext>
     </QBContext>
   );
@@ -57,4 +113,12 @@ export function useQBContext() {
 
 export function useQBDispatch() {
   return useContext(QBDispatchContext);
+}
+
+/**
+ * Retrieve active query
+ */
+export function useQBActiveQueryContext() {
+  const { activeQueryId, sqons } = useQBContext();
+  return sqons.find(sqon => sqon.id === activeQueryId) ?? createEmptyQuery();
 }

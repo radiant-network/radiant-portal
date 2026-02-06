@@ -16,12 +16,11 @@ import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Switch } from '@/components/base/shadcn/switch';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
-import { IValueFilter, MERGE_VALUES_STRATEGIES, TermOperators } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 
-import { useQBDispatch } from '../hooks/query-builder-context';
-import { QBActionFlag } from '../hooks/type';
+import { QBActionFlag, useQBDispatch } from '../hooks/query-builder-context';
+import { IValueFacet, TermOperators } from '../type';
 
 interface IProps {
   field: AggregationConfig;
@@ -143,10 +142,10 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: IProps) {
       (window as any)[windowKey] = true;
 
       // Use query builder values for fresh page load
-      const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+      const prevSelectedItems: IValueFacet | undefined = queryBuilderRemote
         .getResolvedActiveQuery(appId)
         // @ts-ignore
-        .content.find((x: IValueFilter) => x.content.field === field.key);
+        .content.find((x: IValueFacet) => x.content.field === field.key);
       return (prevSelectedItems?.content.value as string[]) || [];
     }
 
@@ -167,10 +166,10 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: IProps) {
     }
 
     // Otherwise use query builder
-    const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+    const prevSelectedItems: IValueFacet | undefined = queryBuilderRemote
       .getResolvedActiveQuery(appId)
       // @ts-ignore
-      .content.find((x: IValueFilter) => x.content.field === field.key);
+      .content.find((x: IValueFacet) => x.content.field === field.key);
 
     const queryBuilderItems = (prevSelectedItems?.content.value as string[]) || [];
     return queryBuilderItems;
@@ -225,10 +224,10 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: IProps) {
       clearUnappliedFilters();
 
       // Update selectedItems with new query builder values
-      const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+      const prevSelectedItems: IValueFacet | undefined = queryBuilderRemote
         .getResolvedActiveQuery(appId)
         // @ts-ignore
-        .content.find((x: IValueFilter) => x.content.field === field.key);
+        .content.find((x: IValueFacet) => x.content.field === field.key);
 
       const queryBuilderItems = (prevSelectedItems?.content.value as string[]) || [];
       setSelectedItems(queryBuilderItems);
@@ -257,10 +256,11 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: IProps) {
       return;
     }
 
-    const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+    // @TODO: To be changed by our reducer
+    const prevSelectedItems: IValueFacet | undefined = queryBuilderRemote
       .getResolvedActiveQuery(appId)
       // @ts-ignore
-      .content.find((x: IValueFilter) => x.content.field === field.key);
+      .content.find((x: IValueFacet) => x.content.field === field.key);
 
     const queryBuilderItems = (prevSelectedItems?.content.value as string[]) || [];
 
@@ -276,12 +276,14 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: IProps) {
     }
   }, [appId, field.key, selectedItems, hasUnappliedItems, globalStorageKey]);
 
+  // @TODO: Should be a custom hook
   useEffect(() => {
     // Check if there are items in the query builder
-    const prevSelectedItems: IValueFilter | undefined = queryBuilderRemote
+    // @TODO: should use our provider
+    const prevSelectedItems: IValueFacet | undefined = queryBuilderRemote
       .getResolvedActiveQuery(appId)
       // @ts-ignore
-      .content.find((x: IValueFilter) => x.content.field === field.key);
+      .content.find((x: IValueFacet) => x.content.field === field.key);
     const queryBuilderItems = (prevSelectedItems?.content.value as string[]) || [];
 
     const hasUnapplied = JSON.stringify([...selectedItems].sort()) !== JSON.stringify([...queryBuilderItems].sort());
@@ -516,16 +518,17 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: IProps) {
   }, [clearAllSelections]);
 
   const applyWithOperator = useCallback(
-    (operator?: TermOperators) => {
+    (operator: TermOperators) => {
       setHasUnappliedItems(false);
       setHasBeenReset(false); // Reset the reset flag
       dispatch({
-        type: QBActionFlag.UPDATE_ACTIVE_QUERY,
+        type: QBActionFlag.ADD_IVALUEFACET,
         payload: {
-          field: field.key,
-          value: [...selectedItems],
-          merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
-          operator: operator,
+          content: {
+            field: field.key,
+            value: [...selectedItems],
+          },
+          op: operator,
         },
       });
       clearUnappliedFilters();

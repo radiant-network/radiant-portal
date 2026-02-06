@@ -8,9 +8,10 @@ import { Label } from '@/components/base/shadcn/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
-import { IValueFilter, MERGE_VALUES_STRATEGIES, TSqonContentValue } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 import { genesApi } from '@/utils/api';
+
+import { IValueFacet, MERGE_VALUES_STRATEGIES, TSqonContentValue } from '../type';
 
 import { useFacetConfig } from './hooks/use-facet-config';
 
@@ -40,7 +41,7 @@ export function SearchFacet({ search }: SearchFilterProps) {
 
     const fieldFilter = activeQuery.content.find((x: TSqonContentValue) =>
       'content' in x && 'field' in x.content ? x.content.field === fieldKey : false,
-    ) as IValueFilter | undefined;
+    ) as IValueFacet | undefined;
 
     const initialValues = fieldFilter?.content?.value || [];
     if (Array.isArray(initialValues)) {
