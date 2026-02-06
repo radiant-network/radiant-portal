@@ -1,5 +1,6 @@
 import { Skeleton } from '@/components/base/shadcn/skeleton';
-import { numberWithCommas } from '@/components/lib/number-format';
+import { useI18n } from '@/components/hooks/i18n';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 
 /**
  * TableIndexResult
@@ -13,6 +14,7 @@ type TableIndexResultProp = {
 };
 
 function TableIndexResult({ loading, pageIndex, pageSize, total }: TableIndexResultProp) {
+  const { t } = useI18n();
   if (loading) return <Skeleton className="h-[24px] w-[250px]" />;
 
   let to = pageSize * pageIndex;
@@ -24,7 +26,8 @@ function TableIndexResult({ loading, pageIndex, pageSize, total }: TableIndexRes
 
   return (
     <span className="text-xs text-muted-foreground">
-      Results {numberWithCommas(from)} - {numberWithCommas(to)} of {numberWithCommas(total)}
+      {t('common.table.results')} {thousandNumberFormat(from)} - {thousandNumberFormat(to)} of{' '}
+      {thousandNumberFormat(total)}
     </span>
   );
 }

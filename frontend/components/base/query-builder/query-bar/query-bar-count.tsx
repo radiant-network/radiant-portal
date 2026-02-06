@@ -5,7 +5,7 @@ import { Sqon } from '@/api/api';
 import { Spinner } from '@/components/base/spinner';
 import { resolveSyntheticSqon } from '@/components/cores/query-builder';
 import { ISqonGroupFilter } from '@/components/cores/sqon';
-import { numberFormat } from '@/components/lib/number-format';
+import { numberFormatWithAbbrv } from '@/components/lib/number-format';
 
 import { useQueryBuilderContext } from '../query-builder-context';
 
@@ -47,7 +47,7 @@ function QueryBarCount() {
       ) : (
         <>
           {queryCountIcon}
-          <span className="font-medium">{numberFormat(total)}</span>
+          <span className="font-medium">{numberFormatWithAbbrv(total)}</span>
         </>
       )}
     </div>

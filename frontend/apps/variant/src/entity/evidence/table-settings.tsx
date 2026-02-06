@@ -1,9 +1,10 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
-import { ClinvarRCV, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
+import { ClinvarRCV, GenePanelCondition, GetGermlineVariantConditionsPanelTypeEnum } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
+import NumberCell from '@/components/base/data-table/cells/number-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
@@ -48,7 +49,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
     }),
     pathogenicEvidenceColumnHelper.accessor(row => row.submission_count, {
       id: 'submission_count',
-      cell: info => <div>{info.getValue()}</div>,
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
       header: () => (
         <TooltipHeader tooltip={t('variant_entity.evidence.clin_var.table.headers.submission_count.tooltip')}>
           {t('variant_entity.evidence.clin_var.table.headers.submission_count')}
@@ -160,7 +161,7 @@ function getConditionPhenotypeColumns(
       },
       enableSorting: false,
     }),
-  ] as TableColumnDef<any, any>[]; // todo replace with correct type when api is updated
+  ] as TableColumnDef<GenePanelCondition, any>[]; // todo replace with correct type when api is updated
 }
 
 const pathogenicEvidenceDefaultSettings = createColumnSettings([

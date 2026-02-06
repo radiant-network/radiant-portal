@@ -1,3 +1,5 @@
+import { i18n } from '../hooks/i18n';
+
 const VALUE_SYMBOLE_LIST = [
   { symbol: 'K', value: 1e3 },
   { symbol: 'M', value: 1e6 },
@@ -20,16 +22,23 @@ export function getDefaultDigits(num: number): number {
   }
 }
 
-export function numberFormat(num: number, digits = 0): number | string {
-  if (!num) return 0;
+export function thousandNumberFormat(value: number, options?: Intl.NumberFormatOptions) {
+  return new Intl.NumberFormat(i18n.language, {
+    useGrouping: true,
+    ...options,
+  }).format(value);
+}
 
-  const locale = localStorage.getItem('locale') === 'fr' ? 'fr-CA' : 'en-US';
+export function numberFormatWithAbbrv(num: number, digits = 0): number | string {
+  if (!num) return 0;
 
   let index: number;
   digits = digits ? digits : getDefaultDigits(num);
 
   if (BLACK_LIST_LENGTH.includes(num.toString().length)) {
-    return num.toLocaleString(locale);
+    return new Intl.NumberFormat(i18n.language, {
+      useGrouping: true,
+    }).format(num);
   }
 
   VALUE_SYMBOLE_LIST.forEach((si: any, i) => {
@@ -43,10 +52,6 @@ export function numberFormat(num: number, digits = 0): number | string {
     (num / VALUE_SYMBOLE_LIST[index!].value).toFixed(digits).replace(NUM_FORMAT_REGEX, '$1') +
     VALUE_SYMBOLE_LIST[index!].symbol
   );
-}
-
-export function numberWithCommas(number: number): string {
-  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 export function toExponentialNotation(numberCandidate?: number, fractionDigits = 2): string {
@@ -85,12 +90,12 @@ export function formatQuotientOrElse(num: number, denum: number, defaultValue = 
  */
 export function toKiloBases(num: number): string {
   if (num < 1000) {
-    return `${num} bp`;
+    return `${thousandNumberFormat(num)} bp`;
   }
 
   if (num < 1000000) {
-    return `${num.toFixed(1)} kb`;
+    return `${thousandNumberFormat(num / 1000, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} kb`;
   }
 
-  return `${num.toFixed(1)} mb`;
+  return `${thousandNumberFormat(num / 1000000, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} mb`;
 }

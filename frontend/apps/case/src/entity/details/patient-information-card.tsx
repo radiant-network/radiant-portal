@@ -7,6 +7,7 @@ import InformationField from '@/components/base/information/information-field';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 import { titleCase } from '@/components/lib/string-format';
 
 enum CaseType {
@@ -28,7 +29,9 @@ function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
   return (
     <div className="flex w-full justify-between gap-4">
       <div className="flex flex-col gap-2 flex-1">
-        <InformationField label={t('case_entity.patient_information.id')}>{member.patient_id}</InformationField>
+        <InformationField label={t('case_entity.patient_information.id')}>
+          {thousandNumberFormat(member.patient_id)}
+        </InformationField>
 
         {(member.first_name || member.last_name) && (
           <InformationField label={t('case_entity.patient_information.name')}>

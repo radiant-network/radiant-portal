@@ -3,7 +3,7 @@ import { tv, VariantProps } from 'tailwind-variants';
 
 import { Checkbox, checkboxVariants } from '@/components/base/shadcn/checkbox';
 import { Label } from '@/components/base/shadcn/label';
-import { numberFormat } from '@/components/lib/number-format';
+import { numberFormatWithAbbrv } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
 
 export const checkboxFilterVariants = tv({
@@ -88,7 +88,7 @@ function CheckboxFilter({
 
       {count != undefined && (
         <span className={cn('text-muted-foreground font-mono text-right min-w-12', styles.label({ size }))}>
-          {numberFormat(count)}
+          {numberFormatWithAbbrv(count)}
         </span>
       )}
     </div>

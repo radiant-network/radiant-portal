@@ -98,6 +98,7 @@ import {
   TSqonContentValue,
 } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
+import { i18n } from '@/components/hooks/i18n';
 import { occurrencesApi } from '@/utils/api';
 
 import { useFilterConfig } from './filter-list';
@@ -200,11 +201,11 @@ function getNumericalValue(
     // Handle numeric values
     if (values.length === 2) {
       selectedRange = RangeOperators.Between;
-      minValue = Number(values[0]).toFixed(decimal);
-      maxValue = Number(values[1]).toFixed(decimal);
+      minValue = Number(Number(values[0]).toFixed(decimal)).toLocaleString(i18n.language);
+      maxValue = Number(Number(values[1]).toFixed(decimal)).toLocaleString(i18n.language);
     } else {
       // Single value case
-      numericalValue = values[0] as string;
+      numericalValue = Number(values[0]).toLocaleString(i18n.language);
     }
 
     if (numericFilter.op) {
@@ -218,17 +219,17 @@ function getNumericalValue(
 
     // Use defaults from config if available
     if (aggConfig?.defaultMin !== undefined) {
-      minValue = aggConfig.defaultMin.toString();
-      numericalValue = aggConfig.defaultMin.toString();
+      minValue = aggConfig.defaultMin.toLocaleString(i18n.language);
+      numericalValue = aggConfig.defaultMin.toLocaleString(i18n.language);
     } else if (statistics?.min !== undefined) {
-      minValue = Number(statistics.min.toFixed(decimal)).toString();
-      numericalValue = Number(statistics.min.toFixed(decimal)).toString();
+      minValue = Number(statistics.min.toFixed(decimal)).toLocaleString(i18n.language);
+      numericalValue = Number(statistics.min.toFixed(decimal)).toLocaleString(i18n.language);
     }
 
     if (aggConfig?.defaultMax !== undefined) {
-      maxValue = aggConfig.defaultMax.toString();
+      maxValue = aggConfig.defaultMax.toLocaleString(i18n.language);
     } else if (statistics?.max !== undefined) {
-      maxValue = Number(statistics.max.toFixed(decimal)).toString();
+      maxValue = Number(statistics.max.toFixed(decimal)).toLocaleString(i18n.language);
     }
 
     if (aggConfig?.defaultOperator) {
@@ -492,8 +493,14 @@ export function NumericalFilter({ field }: IProps) {
             {hasInterval && (
               <div id={`${fieldKey}_interval`}>
                 <TextMuted size="xs">
-                  {t('common.filters.labels.actual_interval')} : {statistics?.min?.toFixed(decimal)} -{' '}
-                  {statistics?.max?.toFixed(decimal)}
+                  {t('common.filters.labels.actual_interval')} :{' '}
+                  {statistics?.min !== undefined
+                    ? Number(statistics.min.toFixed(decimal)).toLocaleString(i18n.language)
+                    : ''}{' '}
+                  -{' '}
+                  {statistics?.max !== undefined
+                    ? Number(statistics.max.toFixed(decimal)).toLocaleString(i18n.language)
+                    : ''}
                 </TextMuted>
               </div>
             )}

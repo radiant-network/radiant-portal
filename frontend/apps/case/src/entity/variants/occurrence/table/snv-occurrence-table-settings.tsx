@@ -232,6 +232,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
       minSize: 40,
       enableSorting: false,
     }),
+    // Ratio PA
     columnHelper.accessor(row => row.ad_ratio, {
       id: 'ad_ratio',
       cell: info => <NumberCell value={info.getValue()} />,

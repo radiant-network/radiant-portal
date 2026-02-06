@@ -28,6 +28,7 @@ import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
 import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
+import NumberListCell from '@/components/base/data-table/cells/number-list-cell';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
 import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
@@ -126,6 +127,7 @@ export type BaseCellMockData = {
   text?: string;
   tooltips?: string;
   number_value?: number;
+  number_list_value?: number[];
   clinvar?: string[];
   rsnumber?: string;
   symbol?: string;
@@ -156,6 +158,20 @@ export type BaseCellMockData = {
   size?: number;
   case_id?: number;
   patient_id?: number;
+  ad_ratio?: number;
+  chromosome?: string;
+  exomiser_acmg_classification?: string;
+  exomiser_acmg_evidence?: string;
+  start?: number;
+  end?: number;
+  ref?: string;
+  alt?: string;
+  hgvsg?: string;
+  type?: string;
+  name?: string;
+  length?: number;
+  cnv_id?: string;
+  seq_id?: string;
 };
 
 const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
@@ -248,6 +264,12 @@ export const firstSetCellColumns = [
     header: 'NumberCell',
     minSize: 100,
   }),
+  baseCellColumnHelper.accessor(row => row.number_list_value, {
+    id: 'number_list_value',
+    cell: info => <NumberListCell values={info.getValue()} fractionDigits={2} />,
+    header: 'NumberListCell',
+    minSize: 250,
+  }),
   baseCellColumnHelper.accessor(row => row.date, {
     id: 'date',
     cell: info => <DateCell date={info.getValue()} />,
@@ -267,7 +289,7 @@ export const firstSetCellData = [
     baseText: 'text 1',
     text: 'no tooltips',
     tooltips: undefined,
-    number_value: 101,
+    number_list_value: [10, 20, 30],
   },
   {
     link: 'AnchorLinkCell 2',
@@ -281,6 +303,7 @@ export const firstSetCellData = [
     text: 'no tooltips',
     tooltips: undefined,
     number_value: 100,
+    number_list_value: [5.5, 12.75, 8.25, 15.0],
   },
   {
     link: 'AnchorLinkCell 3',
@@ -293,6 +316,7 @@ export const firstSetCellData = [
     text: 'Tooltips',
     tooltips: 'This is a tooltips',
     number_value: 1,
+    number_list_value: [100.123, 200.456],
   },
   {
     link: 'AnchorLinkCell 4',
@@ -306,6 +330,7 @@ export const firstSetCellData = [
     text: 'Tooltips',
     tooltips: 'This is a tooltips',
     number_value: 0.1,
+    number_list_value: [1, 2, 3, 4, 5],
   },
   {
     link: 'AnchorLinkCell 5',
@@ -319,6 +344,7 @@ export const firstSetCellData = [
     text: 'Tooltips',
     tooltips: 'This is a tooltips',
     number_value: 0.5,
+    number_list_value: [42.0, 84.5],
   },
   {
     link: 'AnchorLinkCell 6',
@@ -331,6 +357,7 @@ export const firstSetCellData = [
     text: 'Tooltips',
     tooltips: 'This is a tooltips',
     number_value: 0.95,
+    number_list_value: [0.01, 0.02, 0.03],
   },
   {
     link: 'AnchorLinkCell 7',
@@ -343,6 +370,7 @@ export const firstSetCellData = [
     text: 'Tooltips',
     tooltips: 'This is a tooltips',
     number_value: 0.005,
+    number_list_value: [1000.01, 1234.56, 7890.12],
   },
   {
     link: undefined,
@@ -356,6 +384,7 @@ export const firstSetCellData = [
     text: undefined,
     tooltips: undefined,
     number_value: undefined,
+    number_list_value: undefined,
   },
 ];
 
@@ -817,12 +846,12 @@ export const thirdSetCellData = [
 export const applicationFirstSetCellColumns = [
   baseCellColumnHelper.accessor(row => row, {
     id: 'hgvsg',
-    cell: info => <HgvsgCell occurrence={info.row.original} />,
+    cell: info => <HgvsgCell occurrence={info.row.original as any} />,
     header: 'HgvsgCell',
   }),
   baseCellColumnHelper.accessor(row => row, {
     id: 'clinical_interpretation',
-    cell: info => <InterpretationCell occurrence={info.getValue()} />,
+    cell: info => <InterpretationCell occurrence={info.getValue() as any} />,
     header: 'InterpretationCell (Variant-Entity)',
     size: 40,
     enablePinning: false,
@@ -831,7 +860,7 @@ export const applicationFirstSetCellColumns = [
   }),
   baseCellColumnHelper.accessor(row => row, {
     id: 'cnv_name',
-    cell: info => <CNVNameCell occurrence={info.getValue()} />,
+    cell: info => <CNVNameCell occurrence={info.getValue() as any} />,
     header: 'CNVNameCell(Variant-Tab/CNV)',
     size: 40,
     enablePinning: false,
@@ -840,7 +869,7 @@ export const applicationFirstSetCellColumns = [
   }),
   baseCellColumnHelper.accessor(row => row, {
     id: 'clingen',
-    cell: info => <ClingenCell occurrence={info.getValue()} />,
+    cell: info => <ClingenCell occurrence={info.getValue() as any} />,
     header: 'Clingen (Variant-Tab/CNV)',
     size: 40,
     enablePinning: false,
@@ -859,7 +888,9 @@ export const applicationFirstSetCellColumns = [
   baseCellColumnHelper.accessor(row => row, {
     id: 'overlap_type_link_cell',
     cell: info => (
-      <OverlappingGeneLinkCell occurrence={info.getValue()}>{info.getValue().symbol}</OverlappingGeneLinkCell>
+      <OverlappingGeneLinkCell occurrence={info.getValue() as any}>
+        <>{info.getValue().symbol}</>
+      </OverlappingGeneLinkCell>
     ),
     header: 'Clingen (Variant-Tab/CNV)',
     size: 40,
@@ -916,6 +947,7 @@ export const applicationCellData = [
     relationship_to_proband: 'proband',
     priority_code: 'asap',
     case_type: 'somatic',
+    sample_id: 1,
     review_status_stars: 1,
     review_status: 'review status 1 stars',
     affected_status: 'affected',
@@ -957,6 +989,8 @@ export const applicationCellData = [
     ],
     case_id: 1,
     patient_id: 1,
+    cnv_id: 'cnv-1',
+    seq_id: 'seq-1',
   },
   {
     locus_id: '-7485572602358923261',
@@ -981,6 +1015,8 @@ export const applicationCellData = [
     symbol: ['MIR650', 'IGLV3-2', 'IGLV2-8', 'IGLV3-10', 'IGLC1', 'IGLV3-4'],
     case_id: 2,
     patient_id: 2,
+    cnv_id: 'cnv-2',
+    seq_id: 'seq-2',
   },
   {
     locus_id: '-7485572602358923261',
@@ -1005,6 +1041,8 @@ export const applicationCellData = [
     symbol: ['IGLV2-8', 'IGLV3-10', 'IGLC1', 'IGLV3-4'],
     case_id: 3,
     patient_id: 3,
+    cnv_id: 'cnv-3',
+    seq_id: 'seq-3',
   },
   {
     locus_id: '-7485572602358923261',
@@ -1029,6 +1067,8 @@ export const applicationCellData = [
     symbol: ['IGLV3-10', 'IGLC1', 'IGLV3-4'],
     case_id: 4,
     patient_id: 4,
+    cnv_id: 'cnv-4',
+    seq_id: 'seq-4',
   },
   {
     locus_id: '-7485572602358923261',
@@ -1053,6 +1093,8 @@ export const applicationCellData = [
     symbol: ['IGLC1', 'IGLV3-4'],
     case_id: 5,
     patient_id: 5,
+    cnv_id: 'cnv-5',
+    seq_id: 'seq-5',
   },
   {
     locus_id: '-7485572602358923261',
@@ -1077,6 +1119,8 @@ export const applicationCellData = [
     symbol: ['IGLV3-4'],
     case_id: 6,
     patient_id: 6,
+    cnv_id: 'cnv-6',
+    seq_id: 'seq-6',
   },
   {
     locus_id: '-7485572602358923261',
@@ -1100,5 +1144,7 @@ export const applicationCellData = [
     type: 'full_cnv',
     case_id: undefined,
     patient_id: undefined,
+    cnv_id: undefined,
+    seq_id: undefined,
   },
 ];
