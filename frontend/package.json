@@ -45,6 +45,7 @@
     "commitlint": "^19.8.1",
     "date-fns": "^4.1.0",
     "html-react-parser": "^5.2.11",
+    "lodash": "^4.17.23",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-hook-form": "^7.54.2",

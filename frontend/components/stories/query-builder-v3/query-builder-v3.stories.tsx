@@ -1,19 +1,25 @@
+/* eslint-disable no-use-before-define */
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
 import { http } from 'msw';
+import useSWR from 'swr';
 
 import DataTable from '@/components/base/data-table/data-table';
 import QueryBuilder from '@/components/base/query-builder-v3/query-builder';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { ApplicationId, ConfigProvider, FilterTypes, PortalConfig } from '@/components/cores/applications-config';
 import { RangeOperators } from '@/components/cores/sqon';
+import { occurrencesApi } from '@/utils/api';
 
 import {
-  httpOccurrenceApiResponse,
-  httpStatisticsApiResponse,
-  occurrenceApi,
-  statisticApi,
+  httpOccurrenceAggregateApiResponse,
+  httpOccurrenceAggregateStatisticsApiResponse,
+  httpOccurrenceListApiResponse,
+  occurrenceAggregateApi,
+  occurrenceAggregateStatisticApi,
+  occurrenceListApi,
 } from '../api/api-occurrence';
+import { mockColumnHelper, mockColumns } from '../table/table-mock';
 
 const facetListConfig: PortalConfig = {
   variant_entity: {
@@ -25,18 +31,28 @@ const facetListConfig: PortalConfig = {
       variant: {
         items: [
           {
-            key: 'multiple',
+            key: 'firstName',
             translation_key: 'multiple',
             type: FilterTypes.MULTIPLE,
           },
           {
-            key: 'multiple (with dictionary)',
+            key: 'lastName',
             translation_key: 'multiple (with dictionary)',
+            type: FilterTypes.MULTIPLE,
+          },
+          {
+            key: 'status',
+            translation_key: 'status (with dictionary)',
             type: FilterTypes.MULTIPLE,
             withDictionary: true,
           },
           {
-            key: 'numerical (decimal)',
+            key: 'divider',
+            translation_key: 'Divider',
+            type: FilterTypes.DIVIDER,
+          },
+          {
+            key: 'progress',
             translation_key: 'numerical (decimal)',
             type: FilterTypes.NUMERICAL,
             defaults: {
@@ -48,8 +64,8 @@ const facetListConfig: PortalConfig = {
             },
           },
           {
-            key: 'numerical (integer)',
-            translation_key: 'numerical (integer)',
+            key: 'age',
+            translation_key: 'Age (integer)',
             type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
@@ -60,37 +76,20 @@ const facetListConfig: PortalConfig = {
             },
           },
           {
-            key: 'numerical (with unit)',
-            translation_key: 'numerical (with unit)',
+            key: 'visits',
+            translation_key: 'Visits (integer)',
             type: FilterTypes.NUMERICAL,
             defaults: {
               min: 0,
-              max: 120,
-              defaultOperator: RangeOperators.Between,
+              max: 1000,
+              defaultOperator: RangeOperators.LessThan,
               defaultMin: 0,
-              defaultMax: 120,
-              intervalDecimal: 0,
-              rangeTypes: [
-                { key: 'year', name: 'Year' },
-                { key: 'month', name: 'Month' },
-                { key: 'day', name: 'Day' },
-              ],
+              defaultMax: 1000,
             },
           },
           {
-            key: 'numerical (no data)',
-            translation_key: 'numerical (no data)',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: undefined,
-              max: undefined,
-              defaultOperator: RangeOperators.GreaterThan,
-              noDataInputOption: true,
-            },
-          },
-          {
-            key: 'toggle filter',
-            translation_key: 'toggle filter',
+            key: 'isActive',
+            translation_key: 'isActive (boolean)',
             type: FilterTypes.BOOLEAN,
           },
         ],
@@ -141,33 +140,67 @@ export const Default: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post(occurrenceApi, httpOccurrenceApiResponse),
-        http.post(statisticApi, httpStatisticsApiResponse),
+        http.post(occurrenceListApi, httpOccurrenceListApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
       ],
     },
   },
   args: {},
-  render: () => (
-    <QueryBuilder appId={ApplicationId.snv_occurrence} defaultSidebarOpen>
-      <Card>
-        <CardContent>
-          <DataTable
-            id="storybook-query-builder"
-            columns={[]}
-            data={[]}
-            loadingStates={{
-              total: false,
-              list: false,
-            }}
-            defaultColumnSettings={[]}
-            pagination={{
-              type: 'hidden',
-              state: undefined,
-              onPaginationChange: undefined,
-            }}
-          />
-        </CardContent>
-      </Card>
-    </QueryBuilder>
-  ),
+  render: () => {
+    const activeSqon = {
+      op: 'and',
+      content: [],
+    };
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const fetchOccurrencesList = useSWR<any[]>(
+      {
+        caseId: 1,
+        seqId: 1,
+        listBody: {
+          limit: 10,
+          page_index: 0,
+          sort: [],
+          sqon: activeSqon,
+        },
+      },
+      async (params: any) =>
+        occurrencesApi.listGermlineSNVOccurrences(1, 1, params.listBody).then(response => response.data),
+      {
+        revalidateOnFocus: false,
+        revalidateOnMount: true,
+        shouldRetryOnError: false,
+      },
+    );
+
+    return (
+      <QueryBuilder appId={ApplicationId.snv_occurrence} defaultSidebarOpen>
+        <Card>
+          <CardContent>
+            <DataTable
+              id="storybook-query-builder"
+              columns={[
+                ...mockColumns,
+                mockColumnHelper.accessor('isActive', {
+                  header: 'Active',
+                }),
+              ]}
+              data={fetchOccurrencesList.data ?? []}
+              loadingStates={{
+                total: false,
+                list: false,
+              }}
+              defaultColumnSettings={[]}
+              pagination={{
+                type: 'hidden',
+                state: undefined,
+                onPaginationChange: undefined,
+              }}
+            />
+          </CardContent>
+        </Card>
+      </QueryBuilder>
+    );
+  },
 };
