@@ -6,6 +6,7 @@ import (
 	"log"
 	"sort"
 
+	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/utils"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -213,6 +214,10 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 		utils.AddWhere(userQuery, tx)
 	}
 
+	var columns = sliceutils.Map(userQuery.SelectedFields(), func(field types.Field, index int, slice []types.Field) string {
+		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
+	})
+
 	if err := tx.Count(&count).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil, fmt.Errorf("error while counting variant uninterpreted cases: %w", err)
@@ -221,13 +226,9 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 		}
 	}
 
-	tx = tx.Select("c.id as case_id, s.id as seq_id, spl.patient_id as patient_id, "+
-		"spl.submitter_sample_id as submitter_sample_id, c.created_on, c.updated_on, mondo.id as primary_condition_id, "+
-		"mondo.name as primary_condition_name, o.zygosity, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, "+
-		"ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.status_code, "+
-		"agg_phenotypes.phenotypes_term as phenotypes_unparsed, o.exomiser_acmg_classification, o.exomiser_acmg_evidence",
-		"f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code as affected_status")
+	tx = tx.Select(columns)
 
+	utils.AddLimitAndSort(tx, userQuery)
 	utils.AddLimitAndSort(tx, userQuery)
 
 	var variantUninterpretedCases []VariantUninterpretedCase

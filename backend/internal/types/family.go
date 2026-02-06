@@ -26,6 +26,12 @@ var FamilyRelationshipToProbandCodeField = Field{
 	Table:         FamilyTable,
 }
 
+var FamilyAffectedStatusCodeField = Field{
+	Name:          "affected_status_code",
+	CanBeSelected: true,
+	Table:         FamilyTable,
+}
+
 func (Family) TableName() string {
 	return FamilyTable.Name
 }
