@@ -43,6 +43,13 @@ var AggregatedPhenotypeTermField = Field{
 	Table:         ObsCategoricalAggregatedTmpTable,
 }
 
+var AggregatedPhenotypeUnparsedField = Field{
+	Name:          "phenotypes_term",
+	Alias:         "phenotypes_unparsed",
+	CanBeSelected: true,
+	Table:         ObsCategoricalAggregatedTmpTable,
+}
+
 func (ObsCategorical) TableName() string {
 	return ObsCategoricalTable.Name
 }

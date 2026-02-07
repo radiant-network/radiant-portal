@@ -119,8 +119,8 @@ type VariantUninterpretedCase = struct {
 	CreatedOn                  time.Time         `json:"created_on" validate:"required"`
 	UpdatedOn                  time.Time         `json:"updated_on" validate:"required"`
 	SubmitterSampleId          string            `json:"submitter_sample_id,omitempty"`
-	RelationshipToProband      string            `json:"relationship_to_proband,omitempty"`
-	AffectedStatus             string            `json:"affected_status,omitempty"`
+	RelationshipToProbandCode  string            `json:"relationship_to_proband,omitempty"`
+	AffectedStatusCode         string            `json:"affected_status,omitempty"`
 	PrimaryConditionId         string            `json:"primary_condition_id,omitempty"`
 	PrimaryConditionName       string            `json:"primary_condition_name,omitempty"`
 	Zygosity                   string            `json:"zygosity" validate:"required"`
@@ -190,6 +190,28 @@ var VariantInterpretedCasesFields = append(CasesFields, GermlineInterpretationCl
 var VariantUninterpretedCasesFields = append(CasesFields, ConditionTermField, AggregatedPhenotypeTermField)
 var VariantInterpretedCasesDefaultSort = []SortField{{Field: GermlineInterpretationUpdatedOnField, Order: "desc"}}
 
+var VariantUninterpretedCasesDefaultFields = []Field{
+	CaseIdField,
+	FamilyRelationshipToProbandCodeField,
+	SequencingExperimentIdField,
+	SamplePatientIdField,
+	SampleSubmitterSampleIdField,
+	FamilyAffectedStatusCodeField,
+	GermlineSNVZygosityField,
+	CaseDiagnosisLabCodeField,
+	CaseDiagnosisLabNameField,
+	AnalysisCatalogCodeField,
+	AnalysisCatalogNameField,
+	CaseStatusCodeField,
+	CaseCreatedOnField,
+	CaseUpdatedOnField,
+	GermlineSNVExomiserAcmgClassificationField,
+	GermlineSNVExomiserAcmgEvidenceField,
+	AggregatedPhenotypeUnparsedField,
+	CasePrimaryConditionIdField,
+	CasePrimaryConditionNameField,
+}
+
 var VariantInterpretedCasesQueryConfig = QueryConfig{
 	AllFields:     VariantInterpretedCasesFields,
 	DefaultFields: []Field{},
@@ -199,7 +221,7 @@ var VariantInterpretedCasesQueryConfig = QueryConfig{
 
 var VariantUninterpretedCasesQueryConfig = QueryConfig{
 	AllFields:     VariantUninterpretedCasesFields,
-	DefaultFields: []Field{},
+	DefaultFields: VariantUninterpretedCasesDefaultFields,
 	DefaultSort:   CasesDefaultSort,
 	IdField:       CaseIdField,
 }
