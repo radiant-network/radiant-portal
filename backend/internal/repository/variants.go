@@ -229,7 +229,6 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	tx = tx.Select(columns)
 
 	utils.AddLimitAndSort(tx, userQuery)
-	utils.AddLimitAndSort(tx, userQuery)
 
 	var variantUninterpretedCases []VariantUninterpretedCase
 	if err := tx.Find(&variantUninterpretedCases).Error; err != nil {
