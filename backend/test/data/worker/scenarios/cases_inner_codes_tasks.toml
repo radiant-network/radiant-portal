@@ -1,0 +1,59 @@
+# scenarios/cases_inner_codes_tasks_and_documents.toml
+
+# Tasks & Documents codes
+[[cases]]
+submitter_case_id = "ABC123"
+type = "germline"
+status_code = "in_progress"
+project_code = "N1"
+diagnostic_lab_code = "LDM-CHUSJ"
+primary_condition_code_system = "MONDO"
+primary_condition_value = "MONDO:0700092"
+priority_code = "routine"
+category_code = "postnatal"
+analysis_code = "WGA"
+resolution_status_code = "unsolved"
+note = "test case note"
+ordering_physician = "Dr. Test"
+ordering_organization_code = "CHUSJ"
+
+    [[cases.patients]]
+    submitter_patient_id = "MRN-283773"
+    affected_status_code = "affected"
+    patient_organization_code = "CHUSJ"
+    relation_to_proband_code = "proband"
+
+    [[cases.sequencing_experiments]]
+    aliquot = "NA12891"
+    sample_organization_code = "CQGC"
+    submitter_sample_id = "S13225"
+
+    [[cases.tasks]] # TASK-004 missing output documents
+    type_code = "desalignment"  # TASK-001 invalid type & TASK-003 missing input documents
+    aliquots = [""] # TASK-001 invalid aliquot
+    pipeline_name = "Dragennnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn" # TASK-001 size error
+    pipeline_version = "4.4.4"
+    genome_build = "GRch38"
+
+    [[cases.tasks]] # TASK-004 missing output documents and TASK-002 missing aliquot
+    type_code = "alignment"  # TASK-003 missing input documents
+    pipeline_name = "Dragen"
+    pipeline_version = "4.4.4"
+    genome_build = "GRch38"
+
+    [[cases.tasks]] # TASK-004 missing output documents
+    type_code = "radiant_germline_annotation"
+    aliquots = ["NA12891111"]  # TASK-002 unknown aliquot
+    pipeline_name = "Dragen!@#$%^&*())" # TASK-001 regex error
+    pipeline_version = "4.4.4"
+    genome_build = "GRch38"
+
+        [[cases.tasks.input_documents]]
+        url = "s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz"  # TASK-006 input document from external sequencing experiment (not in case)
+
+    [[cases.tasks]] # TASK-003/4 missing input/output documents
+    type_code = "family_variant_calling"
+    aliquots = ["NA12891"]
+    pipeline_name = "Dragen"
+    pipeline_version = "4.4.4"
+    genome_build = "GRch38"

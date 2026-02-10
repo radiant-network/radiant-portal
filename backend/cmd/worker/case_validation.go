@@ -672,6 +672,9 @@ func (cr *CaseValidationRecord) validateOnsetCode(patientIndex int, obsIndex int
 
 func (cr *CaseValidationRecord) validateObsCategoricalNote(patientIndex int, obsIndex int) {
 	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
+	if obs.Note == "" {
+		return
+	}
 	fieldName := "note"
 	path := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
 	cr.validatePatientsTextField(obs.Note, fieldName, path, patientIndex, TextRegExpCompiled, "observations_categorical", obsIndex, false)
@@ -941,12 +944,12 @@ func (cr *CaseValidationRecord) validateCodes() {
 		message := fmt.Sprintf("%s status code %q is not a valid status code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("status_code"), cr.Case.StatusCode, strings.Join(cr.StatusCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
 	}
-	if !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
+	if cr.Case.ResolutionStatusCode != "" && !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
 		path := formatPath(cr, "")
 		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("resolution_status_code"), cr.Case.ResolutionStatusCode, strings.Join(cr.ResolutionStatusCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
 	}
-	if !slices.Contains(cr.PriorityCodes, cr.Case.PriorityCode) {
+	if cr.Case.PriorityCode != "" && !slices.Contains(cr.PriorityCodes, cr.Case.PriorityCode) {
 		path := formatPath(cr, "")
 		message := fmt.Sprintf("%s priority code %q is not a valid priority code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("priority_code"), cr.Case.PriorityCode, strings.Join(cr.PriorityCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
@@ -998,12 +1001,22 @@ func (cr *CaseValidationRecord) validateCase() error {
 		cr.validateCaseField(cr.Case.SubmitterCaseId, "submitter_case_id", path, ExternalIdRegexpCompiled, TextMaxLength, false)
 	}
 	cr.validateCodes()
-	cr.validateCaseField(cr.Case.PrimaryConditionCodeSystem, "primary_condition_code_system", path, TextRegExpCompiled, TextMaxLength, false) // TODO: validate regex
-	cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextMaxLength, false)            // TODO: validate regex
-	cr.validateCaseField(cr.Case.ResolutionStatusCode, "resolution_status_code", path, TextRegExpCompiled, TextMaxLength, false)              // TODO: validate regex
-	cr.validateCaseField(cr.Case.Note, "note", path, nil, NoteMaxLength, false)                                                               // TODO: validate regex
-	cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, TextRegExpCompiled, TextMaxLength, false)                     // TODO: validate regex
 
+	if cr.Case.PrimaryConditionCodeSystem != "" {
+		cr.validateCaseField(cr.Case.PrimaryConditionCodeSystem, "primary_condition_code_system", path, TextRegExpCompiled, TextMaxLength, false)
+	}
+	if cr.Case.PrimaryConditionValue != "" {
+		cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextMaxLength, false)
+	}
+	if cr.Case.ResolutionStatusCode != "" {
+		cr.validateCaseField(cr.Case.ResolutionStatusCode, "resolution_status_code", path, TextRegExpCompiled, TextMaxLength, false)
+	}
+	if cr.Case.Note != "" {
+		cr.validateCaseField(cr.Case.Note, "note", path, nil, NoteMaxLength, false)
+	}
+	if cr.Case.OrderingPhysician != "" {
+		cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, TextRegExpCompiled, TextMaxLength, false)
+	}
 	return nil
 }
 
@@ -1131,13 +1144,17 @@ func (cr *CaseValidationRecord) validateTasks() error {
 
 		cr.validateTaskTextField(task.TypeCode, "type_code", taskIndex, TextRegExpCompiled, true)
 		cr.validateTaskTypeCode(task.TypeCode, taskIndex)
-
-		cr.validateTaskTextField(task.GenomeBuild, "genome_build", taskIndex, TextRegExpCompiled, true)
 		cr.validateTaskTextField(task.PipelineVersion, "pipeline_version", taskIndex, TextRegExpCompiled, true)
-		cr.validateTaskTextField(task.PipelineName, "pipeline_name", taskIndex, TextRegExpCompiled, true)
-
 		cr.validateTaskAliquot(taskIndex)
 		cr.validateTaskDocuments(task, taskIndex)
+
+		// Optional fields
+		if task.GenomeBuild != "" {
+			cr.validateTaskTextField(task.GenomeBuild, "genome_build", taskIndex, TextRegExpCompiled, true)
+		}
+		if task.PipelineName != "" {
+			cr.validateTaskTextField(task.PipelineName, "pipeline_name", taskIndex, TextRegExpCompiled, true)
+		}
 	}
 	return nil
 }

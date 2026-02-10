@@ -1,0 +1,45 @@
+# scenarios/cases_inner_codes_patients_and_observations.toml
+
+# Patients codes
+[[cases]]
+submitter_case_id = "ABC123"
+type = "germline"
+status_code = "in_progress"
+project_code = "N1"
+diagnostic_lab_code = "LDM-CHUSJ"
+primary_condition_code_system = "MONDO"
+primary_condition_value = "MONDO:0700092"
+priority_code = "routine"
+category_code = "postnatal"
+analysis_code = "WGA"
+resolution_status_code = "unsolved"
+note = "test case note"
+ordering_physician = "Dr. Test"
+ordering_organization_code = "CHUSJ"
+
+    # Valid patient to avoid errors related to missing proband
+    [[cases.patients]]
+    submitter_patient_id = "MRN-283773"
+    affected_status_code = "affected"
+    patient_organization_code = "CHUSJ"
+    relation_to_proband_code = "proband"
+
+    # Invalid patient
+    [[cases.patients]]
+    submitter_patient_id = "MRN-283773!@#$%^" # PATIENT-006 unknown patient and PATIENT-004 regex error
+    affected_status_code = "super-affected"  # PATIENT-004 invalid affected status code
+    patient_organization_code = "CHUSJ"
+    relation_to_proband_code = "not-proband" # PATIENT-004 invalid relation to proband code
+
+        [[cases.patients.observations_categorical]]
+        code = "phenotype"
+        system = "HPO~!@#@!$!"  # OBS-001 regex error
+        value = "TEST:12345"
+        onset_code = "infantilee" # OBS-001 invalid onset code
+        interpretation_code = "positive"
+        note = "Test clinical note"
+
+    [[cases.sequencing_experiments]]
+    aliquot = "NA12891"
+    sample_organization_code = "CQGC"
+    submitter_sample_id = "S13225"
