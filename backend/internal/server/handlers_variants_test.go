@@ -699,6 +699,23 @@ func Test_GetGermlineVariantExternalFrequenciesHandler(t *testing.T) {
 	assert.JSONEq(t, expected, w.Body.String())
 }
 
+func Test_GetGermlineVariantGlobalInternalFrequenciesHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/variants/germline/:locus_id/internal_frequencies/global", GetGermlineVariantGlobalInternalFrequenciesHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/variants/germline/1000/internal_frequencies/global", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `{
+		"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0
+	}`
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
 func Test_GetGermlineVariantInternalFrequenciesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -712,8 +729,7 @@ func Test_GetGermlineVariantInternalFrequenciesHandler(t *testing.T) {
 		"split_rows":[
 			{"split_value_code":"N1", "split_value_name": "NeuroDev Phase I", "frequencies":{"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0}}, 
 			{"split_value_code":"N2", "split_value_name": "NeuroDev Phase II", "frequencies":{"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0}}
-		], 
-		"total_frequencies":{"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0}
+		] 
 	}`
 
 	assert.Equal(t, http.StatusOK, w.Code)

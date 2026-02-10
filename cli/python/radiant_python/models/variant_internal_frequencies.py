@@ -19,7 +19,6 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
-from radiant_python.models.internal_frequencies import InternalFrequencies
 from radiant_python.models.internal_frequencies_split_by import InternalFrequenciesSplitBy
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,8 +28,7 @@ class VariantInternalFrequencies(BaseModel):
     VariantInternalFrequencies
     """ # noqa: E501
     split_rows: List[InternalFrequenciesSplitBy]
-    total_frequencies: InternalFrequencies
-    __properties: ClassVar[List[str]] = ["split_rows", "total_frequencies"]
+    __properties: ClassVar[List[str]] = ["split_rows"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -78,9 +76,6 @@ class VariantInternalFrequencies(BaseModel):
                 if _item_split_rows:
                     _items.append(_item_split_rows.to_dict())
             _dict['split_rows'] = _items
-        # override the default output from pydantic by calling `to_dict()` of total_frequencies
-        if self.total_frequencies:
-            _dict['total_frequencies'] = self.total_frequencies.to_dict()
         return _dict
 
     @classmethod
@@ -93,8 +88,7 @@ class VariantInternalFrequencies(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "split_rows": [InternalFrequenciesSplitBy.from_dict(_item) for _item in obj["split_rows"]] if obj.get("split_rows") is not None else None,
-            "total_frequencies": InternalFrequencies.from_dict(obj["total_frequencies"]) if obj.get("total_frequencies") is not None else None
+            "split_rows": [InternalFrequenciesSplitBy.from_dict(_item) for _item in obj["split_rows"]] if obj.get("split_rows") is not None else None
         })
         return _obj
 

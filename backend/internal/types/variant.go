@@ -177,8 +177,7 @@ type VariantExternalFrequencies struct {
 } // @name VariantExternalFrequencies
 
 type VariantInternalFrequencies struct {
-	SplitRows        JsonArray[InternalFrequenciesSplitBy] `json:"split_rows" validate:"required"`
-	TotalFrequencies InternalFrequencies                   `json:"total_frequencies" validate:"required"`
+	SplitRows JsonArray[InternalFrequenciesSplitBy] `json:"split_rows" validate:"required"`
 }
 
 var VariantTable = Table{

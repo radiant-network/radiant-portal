@@ -4558,12 +4558,6 @@ export interface VariantInternalFrequencies {
      * @memberof VariantInternalFrequencies
      */
     'split_rows': Array<InternalFrequenciesSplitBy>;
-    /**
-     * 
-     * @type {InternalFrequencies}
-     * @memberof VariantInternalFrequencies
-     */
-    'total_frequencies': InternalFrequencies;
 }
 /**
  * 
@@ -10365,6 +10359,44 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Retrieve global internal frequencies for a given locus id
+         * @summary Get global internal frequencies
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineVariantGlobalInternalFrequencies: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getGermlineVariantGlobalInternalFrequencies', 'locusId', locusId)
+            const localVarPath = `/variants/germline/{locus_id}/internal_frequencies/global`
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve germline Variant Header data for a given locus
          * @summary Get a germline VariantHeader
          * @param {string} locusId Locus ID
@@ -10679,6 +10711,19 @@ export const VariantApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve global internal frequencies for a given locus id
+         * @summary Get global internal frequencies
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGermlineVariantGlobalInternalFrequencies(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InternalFrequencies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantGlobalInternalFrequencies(locusId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantGlobalInternalFrequencies']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve germline Variant Header data for a given locus
          * @summary Get a germline VariantHeader
          * @param {string} locusId Locus ID
@@ -10831,6 +10876,16 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getGermlineVariantExternalFrequencies(locusId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve global internal frequencies for a given locus id
+         * @summary Get global internal frequencies
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGermlineVariantGlobalInternalFrequencies(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<InternalFrequencies> {
+            return localVarFp.getGermlineVariantGlobalInternalFrequencies(locusId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve germline Variant Header data for a given locus
          * @summary Get a germline VariantHeader
          * @param {string} locusId Locus ID
@@ -10979,6 +11034,18 @@ export class VariantApi extends BaseAPI {
      */
     public getGermlineVariantExternalFrequencies(locusId: string, options?: RawAxiosRequestConfig) {
         return VariantApiFp(this.configuration).getGermlineVariantExternalFrequencies(locusId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve global internal frequencies for a given locus id
+     * @summary Get global internal frequencies
+     * @param {string} locusId Locus ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VariantApi
+     */
+    public getGermlineVariantGlobalInternalFrequencies(locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantGlobalInternalFrequencies(locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

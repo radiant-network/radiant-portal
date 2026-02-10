@@ -2206,11 +2206,8 @@ components:
             $ref: '#/components/schemas/InternalFrequenciesSplitBy'
           type: array
           uniqueItems: false
-        total_frequencies:
-          $ref: '#/components/schemas/InternalFrequencies'
       required:
       - split_rows
-      - total_frequencies
       type: object
     VariantInterpretedCase:
       properties:
@@ -5205,6 +5202,41 @@ paths:
       security:
       - bearerauth: []
       summary: Get internal frequencies
+      tags:
+      - variant
+  /variants/germline/{locus_id}/internal_frequencies/global:
+    get:
+      description: Retrieve global internal frequencies for a given locus id
+      operationId: getGermlineVariantGlobalInternalFrequencies
+      parameters:
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalFrequencies'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get global internal frequencies
       tags:
       - variant
   /variants/germline/{locus_id}/overview:
