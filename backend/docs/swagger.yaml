@@ -192,6 +192,7 @@ components:
           - somatic
           type: string
       required:
+      - analysis_code
       - category_code
       - patients
       - project_code

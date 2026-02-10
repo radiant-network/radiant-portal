@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**analysis_code** | **str** |  | [optional] 
+**analysis_code** | **str** |  | 
 **category_code** | **str** |  | 
 **diagnostic_lab_code** | **str** |  | [optional] 
 **note** | **str** |  | [optional] 

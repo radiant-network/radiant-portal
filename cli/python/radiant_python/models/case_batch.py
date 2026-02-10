@@ -30,7 +30,7 @@ class CaseBatch(BaseModel):
     """
     CaseBatch
     """ # noqa: E501
-    analysis_code: Optional[StrictStr] = None
+    analysis_code: StrictStr
     category_code: StrictStr
     diagnostic_lab_code: Optional[StrictStr] = None
     note: Optional[StrictStr] = None

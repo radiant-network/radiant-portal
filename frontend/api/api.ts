@@ -308,7 +308,7 @@ export interface CaseBatch {
      * @type {string}
      * @memberof CaseBatch
      */
-    'analysis_code'?: string;
+    'analysis_code': string;
     /**
      * 
      * @type {string}
