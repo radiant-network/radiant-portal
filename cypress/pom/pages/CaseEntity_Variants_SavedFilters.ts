@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
-
 import { CommonSelectors } from 'pom/shared/Selectors';
+
 const generateSavedFiltersFunctions = () => {
   const actions = {
     /**
@@ -38,12 +38,6 @@ const generateSavedFiltersFunctions = () => {
      */
     clickShareButton() {
       cy.get(`${CommonSelectors.querybuilderHeader} ${CommonSelectors.shareIcon}`).clickAndWait({ force: true });
-    },
-    /**
-     * Closes the manager filter modal.
-     */
-    closeManager() {
-      cy.get(`${CommonSelectors.modal} ${CommonSelectors.closeButton}`).eq(0).clickAndWait({ force: true });
     },
     /**
      * Create a filter.
@@ -84,37 +78,6 @@ const generateSavedFiltersFunctions = () => {
             cy.get('body').contains(name).should('not.exist');
           }
         });
-    },
-    /**
-     * Edist the filter name from the manager filter modal
-     * @param name The filter name.
-     */
-    deleteFilterFromManager(name: string) {
-      cy.get(`${CommonSelectors.modal} ${CommonSelectors.listItemAction(name)}`).realHover();
-      cy.get(`${CommonSelectors.modal} ${CommonSelectors.deleteIcon}:visible`).clickAndWait({ force: true });
-
-      cy.intercept('**/saved_filters{,/**}').as('deleteSavedFilters');
-      cy.get(`${CommonSelectors.alert} ${CommonSelectors.destructiveButton}`).click({ force: true });
-      cy.wait('@deleteSavedFilters');
-
-      actions.closeManager();
-    },
-    /**
-     * Edits the filter name from the manager filter modal
-     * @param oldName The filter name to edit.
-     * @param newName The new filter name.
-     */
-    editFilterNameFromManager(oldName: string, newName: string) {
-      cy.get(`${CommonSelectors.modal} ${CommonSelectors.listItemAction(oldName)}`).realHover();
-      cy.get(`${CommonSelectors.modal} ${CommonSelectors.editIcon}:visible`).clickAndWait({ force: true });
-
-      cy.get(`${CommonSelectors.modal} ${CommonSelectors.input}`).clear();
-      cy.get(`${CommonSelectors.modal} ${CommonSelectors.input}`).type(newName);
-      cy.get(`${CommonSelectors.modal} ${CommonSelectors.inputValue(newName)}`).should('exist');
-
-      cy.intercept('**/saved_filters{,/**}').as('postSavedFilters');
-      cy.get(CommonSelectors.submitTypeButton).click({ force: true });
-      cy.wait('@postSavedFilters');
     },
     /**
      * Edits the filter name from the query builder.
@@ -182,17 +145,6 @@ const generateSavedFiltersFunctions = () => {
       const strExist = shouldExist ? 'exist' : 'not.exist';
       actions.openMyFiltersDropdown();
       cy.get('body').contains(name).should(strExist);
-    },
-    /**
-     * Checks that the filter name is displayed in the manager modal.
-     * @param name The filter name.
-     * @param shouldExist Whether the filter should exist (default: true).
-     */
-    shouldDisplayInManager(name: string, shouldExist: boolean = true) {
-      const strExist = shouldExist ? 'exist' : 'not.exist';
-      actions.openManager();
-      cy.get(CommonSelectors.modal).contains(name).should(strExist);
-      actions.closeManager();
     },
     /**
      * Checks that the icon have the expected enabled/disabled and dirty states.

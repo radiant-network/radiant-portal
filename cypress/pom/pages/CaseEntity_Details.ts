@@ -465,13 +465,6 @@ export const CaseEntity_Details = {
     },
     /**
      * Validates the title of the page.
-     * @param dataSeq The seq object.
-     */
-    shouldHaveSeqDetailsModal(dataSeq: any) {
-      cy.get(CommonSelectors.modal).contains(`Sequencing ${dataSeq.seq_id}`).should('exist');
-    },
-    /**
-     * Validates the title of the page.
      * @param dataCase The case object.
      */
     shouldHaveTitle(dataCase: any) {
