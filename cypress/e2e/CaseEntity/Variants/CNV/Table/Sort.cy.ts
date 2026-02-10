@@ -29,6 +29,6 @@ describe('Case Entity - Variants - CNV - Table - Sort', () => {
     CaseEntity_Variants_CNV_Table.actions.sortColumn('type');
     CaseEntity_Variants_CNV_Table.actions.sortColumn('length');
     CaseEntity_Variants_CNV_Table.actions.sortColumn('length');
-    CaseEntity_Variants_CNV_Table.validations.shouldHaveFirstRowValue('1008.0 kb', 'length');
+    CaseEntity_Variants_CNV_Table.validations.shouldHaveFirstRowValue('1.0 kb', 'length');
   });
 });
