@@ -987,7 +987,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 		message := fmt.Sprintf("Diagnostic lab %q for case %d does not exist.", cr.Case.DiagnosticLabCode, cr.Index)
 		cr.addErrors(message, CaseUnknownDiagnosticLab, path) // CASE-004
 	}
-	if cr.Case.AnalysisCode != "" && cr.AnalysisCatalogID == nil {
+	if cr.AnalysisCatalogID == nil {
 		message := fmt.Sprintf("Analysis %q for case %d does not exist.", cr.Case.AnalysisCode, cr.Index)
 		cr.addErrors(message, CaseUnknownAnalysisCode, path) // CASE-005
 	}
@@ -1410,11 +1410,11 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 		return fmt.Errorf("analysis catalog ID is nil for case %q", cr.Case.SubmitterCaseId)
 	}
 
-	if cr.OrderingOrganizationID == nil {
+	if cr.Case.OrderingOrganizationCode != "" && cr.OrderingOrganizationID == nil {
 		return fmt.Errorf("ordering organization ID is nil for case %q", cr.Case.SubmitterCaseId)
 	}
 
-	if cr.DiagnosisLabID == nil {
+	if cr.Case.DiagnosticLabCode != "" && cr.DiagnosisLabID == nil {
 		return fmt.Errorf("diagnosis lab ID is nil for case %d", cr.Index)
 	}
 
@@ -1427,21 +1427,26 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 	}
 
 	c := types.Case{
-		ProbandID:              proband.ID,
-		ProjectID:              *cr.ProjectID,
-		AnalysisCatalogID:      *cr.AnalysisCatalogID,
-		CaseTypeCode:           cr.Case.Type,
-		CaseCategoryCode:       cr.Case.CategoryCode,
-		PriorityCode:           cr.Case.PriorityCode,
-		StatusCode:             cr.Case.StatusCode,
-		ResolutionStatusCode:   cr.Case.ResolutionStatusCode,
-		PrimaryCondition:       cr.Case.PrimaryConditionValue,
-		ConditionCodeSystem:    cr.Case.PrimaryConditionCodeSystem,
-		OrderingPhysician:      cr.Case.OrderingPhysician,
-		OrderingOrganizationID: *cr.OrderingOrganizationID,
-		DiagnosisLabID:         *cr.DiagnosisLabID,
-		SubmitterCaseID:        cr.Case.SubmitterCaseId,
-		Note:                   cr.Case.Note,
+		ProbandID:            proband.ID,
+		ProjectID:            *cr.ProjectID,
+		AnalysisCatalogID:    *cr.AnalysisCatalogID,
+		CaseTypeCode:         cr.Case.Type,
+		CaseCategoryCode:     cr.Case.CategoryCode,
+		PriorityCode:         cr.Case.PriorityCode,
+		StatusCode:           cr.Case.StatusCode,
+		ResolutionStatusCode: cr.Case.ResolutionStatusCode,
+		PrimaryCondition:     cr.Case.PrimaryConditionValue,
+		ConditionCodeSystem:  cr.Case.PrimaryConditionCodeSystem,
+		OrderingPhysician:    cr.Case.OrderingPhysician,
+		SubmitterCaseID:      cr.Case.SubmitterCaseId,
+		Note:                 cr.Case.Note,
+	}
+
+	if cr.OrderingOrganizationID != nil {
+		c.OrderingOrganizationID = cr.OrderingOrganizationID
+	}
+	if cr.DiagnosisLabID != nil {
+		c.DiagnosisLabID = cr.DiagnosisLabID
 	}
 
 	if err := ctx.CasesRepo.CreateCase(&c); err != nil {

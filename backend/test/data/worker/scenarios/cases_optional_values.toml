@@ -6,6 +6,7 @@ type = "germline"
 status_code = "in_progress"
 project_code = "N1"
 category_code = "postnatal"
+analysis_code = "WGA"
 
     [[cases.patients]]
     submitter_patient_id = "MRN-283773"

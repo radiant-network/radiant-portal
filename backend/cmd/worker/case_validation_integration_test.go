@@ -628,6 +628,11 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 				Path:    "case[2].patients",
 			},
 			{
+				Code:    "CASE-005",
+				Message: "Analysis \"\" for case 3 does not exist.",
+				Path:    "case[3]",
+			},
+			{
 				Code:    "CASE-007",
 				Message: "Case 3 must have exactly 1 proband.",
 				Path:    "case[3].patients",
@@ -883,8 +888,16 @@ func Test_ProcessBatch_Case_Optional_Values_NoError(t *testing.T) {
 		// Create document to validate size and hash checks
 		_ = createDocument(context, client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
 
-		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, true, "user123", "2025-10-10")
-		assertBatchProcessing(t, db, id, "SUCCESS", true, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+		// Get count of cases existing in DB
+		var before int64
+		db.Table("cases").Count(&before)
+
+		id := insertPayloadAndProcessBatch(db, string(payload), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-10-10")
+		assertBatchProcessing(t, db, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var after int64
+		db.Table("cases").Count(&after)
+		assert.Equal(t, before+1, after)
 	})
 }
 

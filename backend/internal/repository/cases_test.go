@@ -31,13 +31,15 @@ var CasesQueryConfigForTest = types.QueryConfig{
 func Test_CreateCases(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
+		orgId := 1
+		labId := 6
 		newCase := &types.Case{
 			ID:                     999,
 			ProbandID:              3,
 			ProjectID:              1,
 			StatusCode:             "in_progress",
 			PrimaryCondition:       "MONDO:0000001",
-			DiagnosisLabID:         6,
+			DiagnosisLabID:         &labId,
 			Note:                   "This is a test",
 			AnalysisCatalogID:      1,
 			AnalysisCatalog:        types.AnalysisCatalog{},
@@ -47,7 +49,7 @@ func Test_CreateCases(t *testing.T) {
 			ConditionCodeSystem:    "MONDO",
 			ResolutionStatusCode:   "unsolved",
 			OrderingPhysician:      "Dr. Test",
-			OrderingOrganizationID: 1,
+			OrderingOrganizationID: &orgId,
 		}
 		err := repo.CreateCase(newCase)
 		assert.NoError(t, err)
@@ -618,13 +620,16 @@ func Test_RetrieveCaseTasks(t *testing.T) {
 func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
+
+		diagLab := 6
+		orgId := 6
 		newCase := &types.Case{
 			ID:                     1000,
 			ProbandID:              3,
 			ProjectID:              1,
 			StatusCode:             "in_progress",
 			PrimaryCondition:       "MONDO:0000001",
-			DiagnosisLabID:         6,
+			DiagnosisLabID:         &diagLab,
 			Note:                   "This is a test",
 			AnalysisCatalogID:      1,
 			PriorityCode:           "routine",
@@ -633,7 +638,7 @@ func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
 			ConditionCodeSystem:    "MONDO",
 			ResolutionStatusCode:   "unsolved",
 			OrderingPhysician:      "Dr. Test",
-			OrderingOrganizationID: 6,
+			OrderingOrganizationID: &orgId,
 			SubmitterCaseID:        "1:1", // Duplicate submitter_case_id
 		}
 		err := repo.CreateCase(newCase)
@@ -650,13 +655,16 @@ func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
 func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
+
+		diagLab := 6
+		orgId := 6
 		newCase := &types.Case{
 			ID:                     1000,
 			ProbandID:              3,
 			ProjectID:              1,
 			StatusCode:             "in_progress",
 			PrimaryCondition:       "MONDO:0000001",
-			DiagnosisLabID:         6,
+			DiagnosisLabID:         &diagLab,
 			Note:                   "This is a test",
 			AnalysisCatalogID:      1,
 			PriorityCode:           "routine",
@@ -665,7 +673,7 @@ func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
 			ConditionCodeSystem:    "MONDO",
 			ResolutionStatusCode:   "unsolved",
 			OrderingPhysician:      "Dr. Test",
-			OrderingOrganizationID: 6,
+			OrderingOrganizationID: &orgId,
 			SubmitterCaseID:        "",
 		}
 		err := repo.CreateCase(newCase)
