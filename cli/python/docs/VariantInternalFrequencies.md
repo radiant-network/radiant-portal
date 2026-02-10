@@ -6,7 +6,6 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **split_rows** | [**List[InternalFrequenciesSplitBy]**](InternalFrequenciesSplitBy.md) |  | 
-**total_frequencies** | [**InternalFrequencies**](InternalFrequencies.md) |  | 
 
 ## Example
 

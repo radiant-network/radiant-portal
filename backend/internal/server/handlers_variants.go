@@ -436,6 +436,47 @@ func GetGermlineVariantInternalFrequenciesHandler(repo repository.VariantsDAO) g
 	return func(c *gin.Context) {
 		var variantInternalFrequencies *types.VariantInternalFrequencies
 		var splitRows *[]types.InternalFrequenciesSplitBy
+
+		locusID, err := strconv.Atoi(c.Param("locus_id"))
+		if err != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+
+		split := c.Request.URL.Query().Get("split")
+
+		if !slices.Contains(types.SplitTypes, split) {
+			HandleValidationError(c, fmt.Errorf("incorrect split"))
+			return
+		}
+		splitRows, err = repo.GetVariantInternalFrequenciesSplitBy(locusID, split)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		variantInternalFrequencies = &types.VariantInternalFrequencies{
+			SplitRows: *splitRows,
+		}
+
+		c.JSON(http.StatusOK, variantInternalFrequencies)
+	}
+}
+
+// GetGermlineVariantGlobalInternalFrequenciesHandler handles retrieving global internal frequencies for a given locus id
+// @Summary Get global internal frequencies
+// @Id getGermlineVariantGlobalInternalFrequencies
+// @Description Retrieve global internal frequencies for a given locus id
+// @Tags variant
+// @Security bearerauth
+// @Param locus_id path string true "Locus ID"
+// @Produce json
+// @Success 200 {object} types.InternalFrequencies
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /variants/germline/{locus_id}/internal_frequencies/global [get]
+func GetGermlineVariantGlobalInternalFrequenciesHandler(repo repository.VariantsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		var globalFrequencies *types.InternalFrequencies
 
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
@@ -454,23 +495,6 @@ func GetGermlineVariantInternalFrequenciesHandler(repo repository.VariantsDAO) g
 			return
 		}
 
-		split := c.Request.URL.Query().Get("split")
-
-		if !slices.Contains(types.SplitTypes, split) {
-			HandleValidationError(c, fmt.Errorf("incorrect split"))
-			return
-		}
-		splitRows, err = repo.GetVariantInternalFrequenciesSplitBy(locusID, split)
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-
-		variantInternalFrequencies = &types.VariantInternalFrequencies{
-			TotalFrequencies: *globalFrequencies,
-			SplitRows:        *splitRows,
-		}
-
-		c.JSON(http.StatusOK, variantInternalFrequencies)
+		c.JSON(http.StatusOK, globalFrequencies)
 	}
 }
