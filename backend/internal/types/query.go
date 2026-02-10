@@ -2,8 +2,9 @@ package types
 
 import (
 	"fmt"
-	"github.com/Goldziher/go-utils/sliceutils"
 	"slices"
+
+	"github.com/Goldziher/go-utils/sliceutils"
 )
 
 type Query interface {
@@ -90,7 +91,7 @@ func ResolvePagination(limit int, offset int, pageIndex int) *Pagination {
 	} else if limit != 0 {
 		p = Pagination{Limit: limit, Offset: 0}
 	} else {
-		p = Pagination{Limit: 10, Offset: 0}
+		p = Pagination{Limit: 25, Offset: 0}
 	}
 	return &p
 }
