@@ -897,7 +897,7 @@ func Test_ProcessBatch_Case_Optional_Values_NoError(t *testing.T) {
 
 		var after int64
 		db.Table("cases").Count(&after)
-		assert.Equal(t, before+1, after)
+		assert.Equal(t, before+2, after)
 	})
 }
 

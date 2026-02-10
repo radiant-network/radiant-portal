@@ -672,9 +672,6 @@ func (cr *CaseValidationRecord) validateOnsetCode(patientIndex int, obsIndex int
 
 func (cr *CaseValidationRecord) validateObsCategoricalNote(patientIndex int, obsIndex int) {
 	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
-	if obs.Note == "" {
-		return
-	}
 	fieldName := "note"
 	path := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
 	cr.validatePatientsTextField(obs.Note, fieldName, path, patientIndex, TextRegExpCompiled, "observations_categorical", obsIndex, false)

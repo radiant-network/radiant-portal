@@ -1,6 +1,6 @@
-# scenarios/cases_inner_codes_tasks_and_documents.toml
+# scenarios/cases_inner_codes_tasks.toml
 
-# Tasks & Documents codes
+# Tasks codes
 [[cases]]
 submitter_case_id = "ABC123"
 type = "germline"

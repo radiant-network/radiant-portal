@@ -25,3 +25,40 @@ analysis_code = "WGA"
     aliquot = "NA12891"
     sample_organization_code = "CQGC"
     submitter_sample_id = "S13225"
+
+
+# No errors for optional values
+[[cases]]
+type = "germline"
+status_code = "in_progress"
+project_code = "N1"
+category_code = "postnatal"
+analysis_code = "WGA"
+submitter_case_id = ""
+diagnostic_lab_code = ""
+primary_condition_code_system = ""
+primary_condition_value = ""
+priority_code = ""
+resolution_status_code = ""
+note = ""
+ordering_physician = ""
+ordering_organization_code = ""
+
+    [[cases.patients]]
+    submitter_patient_id = "MRN-283773"
+    affected_status_code = "affected"
+    patient_organization_code = "CHUSJ"
+    relation_to_proband_code = "proband"
+
+    [[cases.patients.observations_categorical]]
+    code = "phenotype"
+    system = "HPO"
+    value = "TEST:12345"
+    onset_code = "infantile"
+    interpretation_code = "positive"
+    note = ""
+
+    [[cases.sequencing_experiments]]
+    aliquot = "NA12891"
+    sample_organization_code = "CQGC"
+    submitter_sample_id = "S13225"
