@@ -16,6 +16,7 @@ import { type Aggregation as AggregationConfig } from '@/components/cores/applic
 import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
 import { IValueFilter, MERGE_VALUES_STRATEGIES, TermOperators } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 
 import { getGlobalStorageKey, useFilterConfig } from './filter-list';
 import { useAggregationBuilder } from './use-aggregation-builder';
@@ -612,7 +613,9 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
 
         {!isLoading && items.length > visibleItemsCount && (
           <Button className="mt-2 px-0" onClick={showMore} size="xs" variant="link">
-            {t('common.filters.buttons.show_more', { count: items.length - visibleItemsCount })}
+            {t('common.filters.buttons.show_more', {
+              value: thousandNumberFormat(items.length - visibleItemsCount),
+            })}
           </Button>
         )}
         {!isLoading && visibleItemsCount > maxVisibleItems && (

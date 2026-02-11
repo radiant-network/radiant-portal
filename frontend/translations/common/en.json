@@ -651,7 +651,7 @@
         "apply": "Apply",
         "all": "All",
         "none": "None",
-        "show_more": "{{count}} More",
+        "show_more": "{{value}} More",
         "show_less": "Less",
         "some_not_in": "Any of",
         "not_in": "None of"
@@ -1503,9 +1503,9 @@
         "title": "Associated Conditions and Phenotypes by Gene",
         "filters": {
           "search_placeholder": "Filter condition or phenotype",
-          "omim": "OMIM ({{count}})",
-          "orphanet": "Orphanet ({{count}})",
-          "hpo": "HPO ({{count}})"
+          "omim": "OMIM ({{value}})",
+          "orphanet": "Orphanet ({{value}})",
+          "hpo": "HPO ({{value}})"
         },
         "table": {
           "headers": {

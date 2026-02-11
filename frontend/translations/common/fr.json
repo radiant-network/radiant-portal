@@ -652,7 +652,7 @@
         "apply": "Appliquer",
         "all": "Tous",
         "none": "Aucun",
-        "show_more": "{{count}} de plus",
+        "show_more": "{{value}} de plus",
         "show_less": "Moins",
         "some_not_in": "Certains des",
         "not_in": "Aucun des"
@@ -1507,9 +1507,9 @@
         "title": "Conditions et phénotypes associés par gène",
         "filters": {
           "search_placeholder": "Filtrer par condition ou phénotype",
-          "omim": "OMIM ({{count}})",
-          "orphanet": "Orphanet ({{count}})",
-          "hpo": "HPO ({{count}})"
+          "omim": "OMIM ({{value}})",
+          "orphanet": "Orphanet ({{value}})",
+          "hpo": "HPO ({{value}})"
         },
         "table": {
           "headers": {
