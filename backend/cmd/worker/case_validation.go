@@ -80,6 +80,7 @@ const (
 )
 
 const RelationshipProbandCode = "proband"
+const RadiantGermlineAnnotationTask = "radiant_germline_annotation"
 
 var CaseRelatedTaskTypes = map[string]struct{}{
 	"family_variant_calling":            {},
@@ -92,7 +93,7 @@ var RequiresInputDocumentsTaskTypes = map[string]struct{}{
 	"family_variant_calling":      {},
 	"somatic_variant_calling":     {},
 	"tumor_only_variant_calling":  {},
-	"radiant_germline_annotation": {},
+	RadiantGermlineAnnotationTask: {},
 	"exomiser":                    {},
 }
 
@@ -1570,7 +1571,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 				var c *int
 				if _, isCaseRelated := CaseRelatedTaskTypes[t.TypeCode]; isCaseRelated {
 					c = cr.CaseID
-				} else if t.TypeCode == "radiant_germline_annotation" && len(t.InputDocuments) > 1 {
+				} else if t.TypeCode == RadiantGermlineAnnotationTask && len(t.InputDocuments) > 1 {
 					// special case for radiant_germline_annotation if there's more than 1 input document
 					c = cr.CaseID
 				}
