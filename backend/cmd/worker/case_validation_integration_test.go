@@ -1021,7 +1021,6 @@ func Test_ProcessBatch_Case_Exomiser_TaskContext(t *testing.T) {
 		assert.Equal(t, "GRch38", exo.GenomeBuild)
 
 		// Retrieve the radiant_germline_annotation task from the linked case_id in task_context
-		// because there's more than 1 input document
 		var rGA *types.Task
 		db.Table("task").Where("id = ?", tc[2].TaskID).First(&rGA)
 		assert.Equal(t, "radiant_germline_annotation", rGA.TaskTypeCode)
