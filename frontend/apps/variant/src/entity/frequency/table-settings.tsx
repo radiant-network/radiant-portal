@@ -9,7 +9,7 @@ import {
 import CohortCell from '@/components/base/data-table/cells/cohort-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
-import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
+import { TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { toExponentialNotation } from '@/components/lib/number-format';
@@ -168,40 +168,4 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
   ] as TableColumnDef<InternalFrequenciesSplitBy, any>[];
 }
 
-const publicCohortsDefaultSettings = createColumnSettings([
-  {
-    id: 'cohort',
-    visible: true,
-    label: 'variant_entity.frequency.public_cohorts.cohort',
-  },
-  {
-    id: 'ac',
-    visible: true,
-    label: 'variant_entity.frequency.public_cohorts.ac',
-  },
-  {
-    id: 'an',
-    visible: true,
-    label: 'variant_entity.frequency.public_cohorts.an',
-  },
-  {
-    id: 'hom',
-    visible: true,
-    label: 'variant_entity.frequency.public_cohorts.hom',
-  },
-  {
-    id: 'af',
-    visible: true,
-    label: 'variant_entity.frequency.public_cohorts.af',
-  },
-]);
-
-const myNetworkDefaultSettings = createColumnSettings([
-  {
-    id: 'cohort',
-    visible: true,
-    label: 'variant_entity.frequency.public_cohorts.cohort',
-  },
-]);
-
-export { getPublicCohortsColumns, getMyNetworkColumns, publicCohortsDefaultSettings, myNetworkDefaultSettings };
+export { getPublicCohortsColumns, getMyNetworkColumns };

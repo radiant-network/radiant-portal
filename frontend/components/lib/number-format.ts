@@ -99,3 +99,7 @@ export function toKiloBases(num: number): string {
 
   return `${thousandNumberFormat(num / 1000000, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} mb`;
 }
+
+export function toPercentage(num?: number, fractionDigits = 2): string {
+  return num ? `${(num * 100).toFixed(fractionDigits)}%` : '0%';
+}

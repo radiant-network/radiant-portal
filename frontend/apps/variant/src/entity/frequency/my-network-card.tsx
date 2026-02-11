@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
 import useSWR from 'swr';
+import useSWRImmutable from 'swr/immutable';
 
 import {
   ApiError,
@@ -8,14 +9,15 @@ import {
   InternalFrequencies,
   VariantInternalFrequencies,
 } from '@/api/index';
-import DataTable from '@/components/base/data-table/data-table';
+import DisplayTable from '@/components/base/data-table/display-table';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { toPercentage } from '@/components/lib/number-format';
 import { variantsApi } from '@/utils/api';
 
-import { getMyNetworkColumns, myNetworkDefaultSettings } from './table-settings';
+import { getMyNetworkColumns } from './table-settings';
 
 type MyNetworkInput = {
   locusId: string;
@@ -48,23 +50,23 @@ const TABS_CONFIG = [
     value: GetGermlineVariantInternalFrequenciesSplitEnum.Analysis,
     tableId: 'analysis-table',
   },
-] as const;
+];
 
 function MyNetworkCard() {
   const { t } = useI18n();
   const params = useParams<{ locusId: string }>();
   const [activeTab, setActiveTab] = useState<string>(GetGermlineVariantInternalFrequenciesSplitEnum.PrimaryCondition);
 
-  const { data: globalFrequencies, isLoading: isGlobalLoading } = useSWR<InternalFrequencies, ApiError, string>(
-    `global-frequencies-${params.locusId}`,
-    () => fetchGlobalFrequencies(params.locusId!),
-    {
-      revalidateOnFocus: false,
-      shouldRetryOnError: false,
-    },
-  );
+  const { data: globalFrequencies, isLoading: isGlobalLoading } = useSWRImmutable<
+    InternalFrequencies,
+    ApiError,
+    string
+  >(`global-frequencies-${params.locusId}`, () => fetchGlobalFrequencies(params.locusId!), {
+    revalidateOnFocus: false,
+    shouldRetryOnError: false,
+  });
 
-  const { data, isLoading } = useSWR<VariantInternalFrequencies, ApiError, MyNetworkInput>(
+  const { data } = useSWR<VariantInternalFrequencies, ApiError, MyNetworkInput>(
     { locusId: params.locusId!, split: activeTab as GetGermlineVariantInternalFrequenciesSplitEnum },
     fetchFrequenciesBySplit,
     {
@@ -93,7 +95,7 @@ function MyNetworkCard() {
               </Tooltip>
               <span>
                 {globalFrequencies?.pc_all}/{globalFrequencies?.pn_all}
-                {globalFrequencies?.pf_all ? ` (${(globalFrequencies.pf_all * 100).toFixed(0)}%)` : ' (0%)'}
+                {` (${toPercentage(globalFrequencies?.pf_all, 0)})`}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -109,7 +111,7 @@ function MyNetworkCard() {
               </Tooltip>
               <span>
                 {globalFrequencies?.pc_affected}/{globalFrequencies?.pn_affected}
-                {globalFrequencies?.pf_affected ? ` (${(globalFrequencies.pf_affected * 100).toFixed(0)}%)` : ' (0%)'}
+                {` (${toPercentage(globalFrequencies?.pf_affected, 0)})`}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -125,9 +127,7 @@ function MyNetworkCard() {
               </Tooltip>
               <span>
                 {globalFrequencies?.pc_non_affected}/{globalFrequencies?.pn_non_affected}
-                {globalFrequencies?.pf_non_affected
-                  ? ` (${(globalFrequencies.pf_non_affected * 100).toFixed(0)}%)`
-                  : ' (0%)'}
+                {` (${toPercentage(globalFrequencies?.pf_non_affected, 0)})`}
               </span>
             </div>
           </CardAction>
@@ -152,18 +152,10 @@ function MyNetworkCard() {
 
           {TABS_CONFIG.map(tab => (
             <TabsContent key={tab.key} value={tab.value}>
-              <DataTable
-                id={tab.tableId}
+              <DisplayTable
+                dataCy={tab.tableId}
                 columns={getMyNetworkColumns(t, activeTab)}
                 data={data?.split_rows || []}
-                defaultColumnSettings={myNetworkDefaultSettings}
-                loadingStates={{
-                  total: isLoading,
-                  list: isLoading,
-                }}
-                pagination={{ type: 'hidden' }}
-                total={data?.split_rows?.length}
-                tableIndexResultPosition="hidden"
               />
             </TabsContent>
           ))}
