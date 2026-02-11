@@ -44,7 +44,7 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
   const { t } = useI18n();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
-  const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('files-filters', {
+  const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-files-filters', {
     ...FILTER_DEFAULTS,
   });
   const { data: apiFilters } = useSWR<DocumentFilters>(
