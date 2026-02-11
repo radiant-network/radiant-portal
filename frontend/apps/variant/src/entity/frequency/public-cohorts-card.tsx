@@ -19,8 +19,8 @@ function PublicCohortsCard() {
   const params = useParams<{ locusId: string }>();
 
   const { data, isLoading } = useSWR<VariantExternalFrequencies, ApiError, string>(
-    params.locusId!,
-    fetchPublicCohorts,
+    `public-cohorts-${params.locusId}`,
+    () => fetchPublicCohorts(params.locusId!),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
@@ -43,7 +43,7 @@ function PublicCohortsCard() {
             list: isLoading,
           }}
           pagination={{ type: 'hidden' }}
-          total={data?.external_frequencies.length}
+          total={data?.external_frequencies?.length}
           tableIndexResultPosition="hidden"
         />
       </CardContent>
