@@ -86,8 +86,9 @@ const ExomiserTaskTypeCode = "exomiser"
 var CaseRelatedTaskTypes = map[string]struct{}{
 	"family_variant_calling":            {},
 	"tumor_only_variant_calling":        {},
-	"exomiser":                          {},
 	"alignment_somatic_variant_calling": {},
+	RadiantGermlineAnnotationTask:       {},
+	ExomiserTaskTypeCode:                {},
 }
 
 var RequiresInputDocumentsTaskTypes = map[string]struct{}{
@@ -1578,9 +1579,6 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 
 				var c *int
 				if _, isCaseRelated := CaseRelatedTaskTypes[t.TypeCode]; isCaseRelated {
-					c = cr.CaseID
-				} else if t.TypeCode == RadiantGermlineAnnotationTask && len(t.InputDocuments) > 1 {
-					// special case for radiant_germline_annotation if there's more than 1 input document
 					c = cr.CaseID
 				}
 

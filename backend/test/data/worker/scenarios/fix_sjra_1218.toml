@@ -78,9 +78,6 @@ ordering_organization_code = "CHUSJ"
         [[cases.tasks.input_documents]]
         url = "s3://test-bucket/NA12878.recall.cram"
 
-        [[cases.tasks.input_documents]]
-        url = "s3://test-bucket/NA12878.variants.tsv"
-
         [[cases.tasks.output_documents]]
         data_category_code = "genomic"
         data_type_code = "alignment"
