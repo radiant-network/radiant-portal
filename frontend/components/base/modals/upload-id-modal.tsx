@@ -22,6 +22,7 @@ import { queryBuilderRemote } from '@/components/cores/query-builder/query-build
 import { MERGE_VALUES_STRATEGIES } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 import { useDebounce } from '@/components/hooks/useDebounce';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 import { genesApi } from '@/utils/api';
 
 import CollapsibleCard from '../cards/collapsible-card';
@@ -283,8 +284,8 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
             <div className="mt-6">
               <CollapsibleCard
                 title={t('common.upload_id.summary_table', {
-                  matched: matched.length,
-                  unmatched: unmatched.length,
+                  matched: thousandNumberFormat(matched.length),
+                  unmatched: thousandNumberFormat(unmatched.length),
                 })}
                 cardClassName="py-4"
                 cardHeaderClassName="px-4 !gap-0"
@@ -292,20 +293,20 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
                 <div className="flex flex-col gap-3 mt-3">
                   <span>
                     {t('common.upload_id.resume', {
-                      total: getRawValueList().length,
-                      unique: matched.length,
+                      total: thousandNumberFormat(getRawValueList().length),
+                      unique: thousandNumberFormat(matched.length),
                     })}
                   </span>
                   <Tabs defaultValue="matched">
                     <TabsList>
                       <TabsTrigger value="matched">
                         {t('common.upload_id.matched', {
-                          total: matched.length,
+                          total: thousandNumberFormat(matched.length),
                         })}
                       </TabsTrigger>
                       <TabsTrigger value="unmatched">
                         {t('common.upload_id.unmatched', {
-                          total: unmatched.length,
+                          total: thousandNumberFormat(unmatched.length),
                         })}
                       </TabsTrigger>
                     </TabsList>

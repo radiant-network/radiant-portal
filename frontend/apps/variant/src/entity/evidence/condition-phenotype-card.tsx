@@ -89,17 +89,17 @@ function ConditionPhenotypeCard() {
             <TabsList>
               <TabsTrigger data-cy="omim-tab" value={GetGermlineVariantConditionsPanelTypeEnum.Omim}>
                 {t('variant_entity.evidence.gene.filters.omim', {
-                  count: +thousandNumberFormat(data?.count_omim ?? 0),
+                  value: thousandNumberFormat(data?.count_omim ?? 0),
                 })}
               </TabsTrigger>
               <TabsTrigger data-cy="orphanet-tab" value={GetGermlineVariantConditionsPanelTypeEnum.Orphanet}>
                 {t('variant_entity.evidence.gene.filters.orphanet', {
-                  count: +thousandNumberFormat(data?.count_orphanet ?? 0),
+                  value: thousandNumberFormat(data?.count_orphanet ?? 0),
                 })}
               </TabsTrigger>
               <TabsTrigger data-cy="hpo-tab" value={GetGermlineVariantConditionsPanelTypeEnum.Hpo}>
                 {t('variant_entity.evidence.gene.filters.hpo', {
-                  count: +thousandNumberFormat(data?.count_hpo ?? 0),
+                  value: thousandNumberFormat(data?.count_hpo ?? 0),
                 })}
               </TabsTrigger>
             </TabsList>
