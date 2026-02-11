@@ -996,6 +996,40 @@ func Test_ProcessBatch_Case_Not_Dry_Run_Empty_Tasks(t *testing.T) {
 	})
 }
 
+func Test_ProcessBatch_Case_Exomiser_TaskContext(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		scenario, _ := testutils.LoadScenario("fix_sjra_1218")
+		createDocumentsForBatch(context, client, scenario.Cases)
+		payloadBytes, _ := json.Marshal(scenario.Cases)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "FIX-SJRA-1218").First(&ca)
+
+		var tc []*types.TaskContext
+		db.Table("task_context").Where("case_id = ?", ca.ID).Find(&tc)
+		assert.Len(t, tc, 4)
+
+		// Retrieve the exomiser task from the linked case_id in task_context
+		var exo *types.Task
+		db.Table("task").Where("id = ?", tc[0].TaskID).First(&exo)
+		assert.Equal(t, "exomiser", exo.TaskTypeCode)
+		assert.Equal(t, "Dragen", exo.PipelineName)
+		assert.Equal(t, "4.4.4", exo.PipelineVersion)
+		assert.Equal(t, "GRch38", exo.GenomeBuild)
+
+		// Retrieve the radiant_germline_annotation task from the linked case_id in task_context
+		var rGA *types.Task
+		db.Table("task").Where("id = ?", tc[2].TaskID).First(&rGA)
+		assert.Equal(t, "radiant_germline_annotation", rGA.TaskTypeCode)
+		assert.Equal(t, "Dragen", rGA.PipelineName)
+		assert.Equal(t, "4.4.4", rGA.PipelineVersion)
+		assert.Equal(t, "GRch38", rGA.GenomeBuild)
+	})
+}
+
 func Test_ProcessBatch_Case_Template(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		t.Skip("Template test - implement specific error case tests as needed")

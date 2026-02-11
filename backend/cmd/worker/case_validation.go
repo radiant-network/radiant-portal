@@ -80,18 +80,22 @@ const (
 )
 
 const RelationshipProbandCode = "proband"
+const RadiantGermlineAnnotationTask = "radiant_germline_annotation"
 const ExomiserTaskTypeCode = "exomiser"
 
 var CaseRelatedTaskTypes = map[string]struct{}{
-	"family_variant_calling":     {},
-	"tumor_only_variant_calling": {},
+	"family_variant_calling":            {},
+	"tumor_only_variant_calling":        {},
+	"alignment_somatic_variant_calling": {},
+	RadiantGermlineAnnotationTask:       {},
+	ExomiserTaskTypeCode:                {},
 }
 
 var RequiresInputDocumentsTaskTypes = map[string]struct{}{
 	"family_variant_calling":      {},
 	"somatic_variant_calling":     {},
 	"tumor_only_variant_calling":  {},
-	"radiant_germline_annotation": {},
+	RadiantGermlineAnnotationTask: {},
 	ExomiserTaskTypeCode:          {},
 }
 
