@@ -1524,6 +1524,26 @@
     },
     "frequency": {
       "title": "Frequency",
+      "my_network": {
+        "title": "My Network",
+        "description": "Frequencies within the network showing the number of variant carriers within each category, along with the number of homozygous individuals for the alternate allele.",
+        "primary_condition": "Primary Condition",
+        "project": "Project",
+        "analysis": "Analysis",
+        "global_frequencies": {
+          "all_patients": "Global",
+          "all_patients_tooltip": "Number and proportion of patients who carry this variant across the network. The fraction represents all patients with the variant / total patients in the network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
+          "affected": "Affected",
+          "affected_tooltip": "Number and proportion of patients affected by the primary condition who carry this variant in the network. The fraction represents affected patients with the variant / total affected patients. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
+          "non_affected": "Non-Affected",
+          "non_affected_tooltip": "Number and proportion of patients not affected by the primary condition who carry this variant in the network. The fraction represents non-affected patients with the variant / total non-affected patients. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation."
+        },
+        "all_patients": "All Patients",
+        "affected_patients": "Affected Patients",
+        "non_affected_patients": "Non-Affected Patients",
+        "frequency": "Frequency",
+        "homozygotes": "Homozygotes"
+      },
       "public_cohorts": {
         "title": "Public Cohorts",
         "cohort": "Cohort",

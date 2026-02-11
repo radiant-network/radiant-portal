@@ -1528,6 +1528,26 @@
     },
     "frequency": {
       "title": "Fréquence",
+      "my_network": {
+        "title": "Mon réseau",
+        "description": "Fréquences du réseau indiquant le nombre de patients porteurs du variant dans chaque catégorie, ainsi que le nombre d’individus homozygotes pour l’allèle alternatif.",
+        "primary_condition": "Condition principale",
+        "project": "Projet",
+        "analysis": "Analyse",
+        "global_frequencies": {
+          "all_patients": "Globale",
+          "all_patients_tooltip": "Nombre et proportion de patients porteurs du variant sur l’ensemble du réseau. La fraction représente le nombre de tous les patients porteurs du variant / le nombre total de patients dans le réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
+          "affected": "Atteint",
+          "affected_tooltip": "Nombre et proportion de patients atteints par la condition principale et porteurs du variant dans le réseau. La fraction représente le nombre de patients atteints qui sont porteurs du variant / le nombre total de patients atteints. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
+          "non_affected": "Non atteint",
+          "non_affected_tooltip": "Nombre et proportion de patients non atteints par la condition principale et porteurs du variant dans le réseau. La fraction représente le nombre de patients non atteints qui sont porteurs du variant / le nombre total de patients non atteints. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences."
+        },
+        "all_patients": "Tous les patients",
+        "affected_patients": "Patients atteints",
+        "non_affected_patients": "Patients non atteints",
+        "frequency": "Fréquence",
+        "homozygotes": "Homozygotes"
+      },
       "public_cohorts": {
         "title": "Cohortes publiques",
         "cohort": "Cohorte",
