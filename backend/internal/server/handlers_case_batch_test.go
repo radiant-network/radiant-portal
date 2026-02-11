@@ -40,6 +40,7 @@ func TestPostCaseBatchHandler_Success(t *testing.T) {
 			"status_code": "active",
 			"project_code": "proj1",
 			"category_code": "postnatal",
+			"analysis_code": "WGA",
 			"patients": [{
 				"affected_status_code": "affected",
 				"submitter_patient_id": "p1",
@@ -112,6 +113,7 @@ func TestPostCaseBatchHandler_EmptyTasks(t *testing.T) {
 			"status_code": "active",
 			"project_code": "proj1",
 			"category_code": "postnatal",
+			"analysis_code": "WGA",
 			"patients": [{
 				"affected_status_code": "affected",
 				"submitter_patient_id": "p1",

@@ -941,12 +941,12 @@ func (cr *CaseValidationRecord) validateCodes() {
 		message := fmt.Sprintf("%s status code %q is not a valid status code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("status_code"), cr.Case.StatusCode, strings.Join(cr.StatusCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
 	}
-	if !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
+	if cr.Case.ResolutionStatusCode != "" && !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
 		path := formatPath(cr, "")
 		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("resolution_status_code"), cr.Case.ResolutionStatusCode, strings.Join(cr.ResolutionStatusCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
 	}
-	if !slices.Contains(cr.PriorityCodes, cr.Case.PriorityCode) {
+	if cr.Case.PriorityCode != "" && !slices.Contains(cr.PriorityCodes, cr.Case.PriorityCode) {
 		path := formatPath(cr, "")
 		message := fmt.Sprintf("%s priority code %q is not a valid priority code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("priority_code"), cr.Case.PriorityCode, strings.Join(cr.PriorityCodes, ", "))
 		cr.addErrors(message, CaseInvalidField, path)
@@ -984,7 +984,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 		message := fmt.Sprintf("Diagnostic lab %q for case %d does not exist.", cr.Case.DiagnosticLabCode, cr.Index)
 		cr.addErrors(message, CaseUnknownDiagnosticLab, path) // CASE-004
 	}
-	if cr.Case.AnalysisCode != "" && cr.AnalysisCatalogID == nil {
+	if cr.AnalysisCatalogID == nil {
 		message := fmt.Sprintf("Analysis %q for case %d does not exist.", cr.Case.AnalysisCode, cr.Index)
 		cr.addErrors(message, CaseUnknownAnalysisCode, path) // CASE-005
 	}
@@ -998,12 +998,22 @@ func (cr *CaseValidationRecord) validateCase() error {
 		cr.validateCaseField(cr.Case.SubmitterCaseId, "submitter_case_id", path, ExternalIdRegexpCompiled, TextMaxLength, false)
 	}
 	cr.validateCodes()
-	cr.validateCaseField(cr.Case.PrimaryConditionCodeSystem, "primary_condition_code_system", path, TextRegExpCompiled, TextMaxLength, false) // TODO: validate regex
-	cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextMaxLength, false)            // TODO: validate regex
-	cr.validateCaseField(cr.Case.ResolutionStatusCode, "resolution_status_code", path, TextRegExpCompiled, TextMaxLength, false)              // TODO: validate regex
-	cr.validateCaseField(cr.Case.Note, "note", path, nil, NoteMaxLength, false)                                                               // TODO: validate regex
-	cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, TextRegExpCompiled, TextMaxLength, false)                     // TODO: validate regex
 
+	if cr.Case.PrimaryConditionCodeSystem != "" {
+		cr.validateCaseField(cr.Case.PrimaryConditionCodeSystem, "primary_condition_code_system", path, TextRegExpCompiled, TextMaxLength, false)
+	}
+	if cr.Case.PrimaryConditionValue != "" {
+		cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextMaxLength, false)
+	}
+	if cr.Case.ResolutionStatusCode != "" {
+		cr.validateCaseField(cr.Case.ResolutionStatusCode, "resolution_status_code", path, TextRegExpCompiled, TextMaxLength, false)
+	}
+	if cr.Case.Note != "" {
+		cr.validateCaseField(cr.Case.Note, "note", path, nil, NoteMaxLength, false)
+	}
+	if cr.Case.OrderingPhysician != "" {
+		cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, TextRegExpCompiled, TextMaxLength, false)
+	}
 	return nil
 }
 
@@ -1131,13 +1141,17 @@ func (cr *CaseValidationRecord) validateTasks() error {
 
 		cr.validateTaskTextField(task.TypeCode, "type_code", taskIndex, TextRegExpCompiled, true)
 		cr.validateTaskTypeCode(task.TypeCode, taskIndex)
-
-		cr.validateTaskTextField(task.GenomeBuild, "genome_build", taskIndex, TextRegExpCompiled, true)
 		cr.validateTaskTextField(task.PipelineVersion, "pipeline_version", taskIndex, TextRegExpCompiled, true)
-		cr.validateTaskTextField(task.PipelineName, "pipeline_name", taskIndex, TextRegExpCompiled, true)
-
 		cr.validateTaskAliquot(taskIndex)
 		cr.validateTaskDocuments(task, taskIndex)
+
+		// Optional fields
+		if task.GenomeBuild != "" {
+			cr.validateTaskTextField(task.GenomeBuild, "genome_build", taskIndex, TextRegExpCompiled, true)
+		}
+		if task.PipelineName != "" {
+			cr.validateTaskTextField(task.PipelineName, "pipeline_name", taskIndex, TextRegExpCompiled, true)
+		}
 	}
 	return nil
 }
@@ -1393,11 +1407,11 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 		return fmt.Errorf("analysis catalog ID is nil for case %q", cr.Case.SubmitterCaseId)
 	}
 
-	if cr.OrderingOrganizationID == nil {
+	if cr.Case.OrderingOrganizationCode != "" && cr.OrderingOrganizationID == nil {
 		return fmt.Errorf("ordering organization ID is nil for case %q", cr.Case.SubmitterCaseId)
 	}
 
-	if cr.DiagnosisLabID == nil {
+	if cr.Case.DiagnosticLabCode != "" && cr.DiagnosisLabID == nil {
 		return fmt.Errorf("diagnosis lab ID is nil for case %d", cr.Index)
 	}
 
@@ -1410,21 +1424,26 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 	}
 
 	c := types.Case{
-		ProbandID:              proband.ID,
-		ProjectID:              *cr.ProjectID,
-		AnalysisCatalogID:      *cr.AnalysisCatalogID,
-		CaseTypeCode:           cr.Case.Type,
-		CaseCategoryCode:       cr.Case.CategoryCode,
-		PriorityCode:           cr.Case.PriorityCode,
-		StatusCode:             cr.Case.StatusCode,
-		ResolutionStatusCode:   cr.Case.ResolutionStatusCode,
-		PrimaryCondition:       cr.Case.PrimaryConditionValue,
-		ConditionCodeSystem:    cr.Case.PrimaryConditionCodeSystem,
-		OrderingPhysician:      cr.Case.OrderingPhysician,
-		OrderingOrganizationID: *cr.OrderingOrganizationID,
-		DiagnosisLabID:         *cr.DiagnosisLabID,
-		SubmitterCaseID:        cr.Case.SubmitterCaseId,
-		Note:                   cr.Case.Note,
+		ProbandID:            proband.ID,
+		ProjectID:            *cr.ProjectID,
+		AnalysisCatalogID:    *cr.AnalysisCatalogID,
+		CaseTypeCode:         cr.Case.Type,
+		CaseCategoryCode:     cr.Case.CategoryCode,
+		PriorityCode:         cr.Case.PriorityCode,
+		StatusCode:           cr.Case.StatusCode,
+		ResolutionStatusCode: cr.Case.ResolutionStatusCode,
+		PrimaryCondition:     cr.Case.PrimaryConditionValue,
+		ConditionCodeSystem:  cr.Case.PrimaryConditionCodeSystem,
+		OrderingPhysician:    cr.Case.OrderingPhysician,
+		SubmitterCaseID:      cr.Case.SubmitterCaseId,
+		Note:                 cr.Case.Note,
+	}
+
+	if cr.OrderingOrganizationID != nil {
+		c.OrderingOrganizationID = cr.OrderingOrganizationID
+	}
+	if cr.DiagnosisLabID != nil {
+		c.DiagnosisLabID = cr.DiagnosisLabID
 	}
 
 	if err := ctx.CasesRepo.CreateCase(&c); err != nil {

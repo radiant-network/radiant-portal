@@ -14,18 +14,18 @@ type Case struct {
 	CaseType               CaseType `gorm:"foreignKey:Code;references:CaseTypeCode"`
 	CaseCategoryCode       string
 	CaseCategory           CaseCategory `gorm:"foreignKey:Code;references:CaseCategoryCode"`
-	PriorityCode           string
-	Priority               Priority `gorm:"foreignKey:Code;references:PriorityCode"`
+	PriorityCode           string       `gorm:"default:routine"`
+	Priority               Priority     `gorm:"foreignKey:PriorityCode;references:Code"`
 	StatusCode             string
-	Status                 Status `gorm:"foreignKey:Code;references:StatusCode"`
-	ResolutionStatusCode   string
+	Status                 Status           `gorm:"foreignKey:Code;references:StatusCode"`
+	ResolutionStatusCode   string           `gorm:"default:unsolved"`
 	ResolutionStatus       ResolutionStatus `gorm:"foreignKey:Code;references:ResolutionStatusCode"`
 	PrimaryCondition       string
 	ConditionCodeSystem    string
 	OrderingPhysician      string
-	OrderingOrganizationID int
+	OrderingOrganizationID *int
 	OrderingOrganization   Organization `gorm:"foreignKey:ID;references:OrderingOrganizationID"`
-	DiagnosisLabID         int
+	DiagnosisLabID         *int
 	DiagnosisLab           Organization `gorm:"foreignKey:ID;references:DiagnosisLabID"`
 	SubmitterCaseID        string
 	Note                   string

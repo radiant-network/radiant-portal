@@ -12,7 +12,7 @@ type CaseBatch struct {
 	PrimaryConditionValue      string                           `json:"primary_condition_value,omitempty" toml:"primary_condition_value"`
 	PriorityCode               string                           `json:"priority_code,omitempty" toml:"priority_code"`
 	CategoryCode               string                           `json:"category_code" toml:"category_code" binding:"required,oneof=prenatal postnatal"`
-	AnalysisCode               string                           `json:"analysis_code,omitempty" toml:"analysis_code"`
+	AnalysisCode               string                           `json:"analysis_code" toml:"analysis_code" binding:"required"`
 	ResolutionStatusCode       string                           `json:"resolution_status_code,omitempty" toml:"resolution_status_code"`
 	Note                       string                           `json:"note,omitempty" toml:"note"`
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty" toml:"ordering_physician"`
