@@ -4020,7 +4020,7 @@ func Test_validateTaskAliquot_OK(t *testing.T) {
 	assert.Len(t, record.Errors, 0)
 }
 
-func Test_validateTaskAliquot_Error(t *testing.T) {
+func Test_validateTaskAliquot_ErrorNoAliquot(t *testing.T) {
 	record := CaseValidationRecord{
 		Case: types.CaseBatch{
 			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
@@ -4041,6 +4041,38 @@ func Test_validateTaskAliquot_Error(t *testing.T) {
 		Code:    "TASK-002",
 		Message: "Sequencing \"ALIQUOT-1\" is not defined for case 0 - task 0.",
 		Path:    "case[0].tasks[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
+func Test_validateTaskAliquot_ErrorExomiserNotExactly1Aliquot(t *testing.T) {
+	record := CaseValidationRecord{
+		Case: types.CaseBatch{
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
+				{
+					Aliquot: "ALIQUOT-1",
+				},
+				{
+					Aliquot: "ALIQUOT-2",
+				},
+			},
+			Tasks: []*types.CaseTaskBatch{
+				{
+					TypeCode: ExomiserTaskTypeCode,
+					Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
+				},
+			},
+		},
+	}
+	record.validateTaskAliquot(0)
+
+	expected := types.BatchMessage{
+		Code:    "TASK-001",
+		Message: "Invalid field aliquots for case 0 - task 0. Reason: aliquots must contain exactly one value for exomiser task.",
+		Path:    "case[0].tasks[0].aliquots",
 	}
 
 	assert.Len(t, record.Infos, 0)
