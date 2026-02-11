@@ -1010,15 +1010,24 @@ func Test_ProcessBatch_Case_Exomiser_TaskContext(t *testing.T) {
 
 		var tc []*types.TaskContext
 		db.Table("task_context").Where("case_id = ?", ca.ID).Find(&tc)
-		assert.Len(t, tc, 2)
+		assert.Len(t, tc, 4)
 
 		// Retrieve the exomiser task from the linked case_id in task_context
-		var ta *types.Task
-		db.Table("task").Where("id = ?", tc[0].TaskID).First(&ta)
-		assert.Equal(t, "exomiser", ta.TaskTypeCode)
-		assert.Equal(t, "Dragen", ta.PipelineName)
-		assert.Equal(t, "4.4.4", ta.PipelineVersion)
-		assert.Equal(t, "GRch38", ta.GenomeBuild)
+		var exo *types.Task
+		db.Table("task").Where("id = ?", tc[0].TaskID).First(&exo)
+		assert.Equal(t, "exomiser", exo.TaskTypeCode)
+		assert.Equal(t, "Dragen", exo.PipelineName)
+		assert.Equal(t, "4.4.4", exo.PipelineVersion)
+		assert.Equal(t, "GRch38", exo.GenomeBuild)
+
+		// Retrieve the radiant_germline_annotation task from the linked case_id in task_context
+		// because there's more than 1 input document
+		var rGA *types.Task
+		db.Table("task").Where("id = ?", tc[2].TaskID).First(&rGA)
+		assert.Equal(t, "radiant_germline_annotation", rGA.TaskTypeCode)
+		assert.Equal(t, "Dragen", rGA.PipelineName)
+		assert.Equal(t, "4.4.4", rGA.PipelineVersion)
+		assert.Equal(t, "GRch38", rGA.GenomeBuild)
 	})
 }
 

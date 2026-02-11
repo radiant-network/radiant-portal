@@ -42,8 +42,8 @@ ordering_organization_code = "CHUSJ"
 
         [[cases.tasks.output_documents]]
         data_category_code = "genomic"
-        data_type_code = "exomiser"
-        format_code = "tsv"
+        data_type_code = "alignment"
+        format_code = "cram"
         hash = "d57f21e6a273781dbf8b7657940f3b03"
         name = "NA12878.recall.cram"
         size = 11
@@ -67,3 +67,25 @@ ordering_organization_code = "CHUSJ"
         name = "NA12878.variants.tsv"
         size = 11
         url = "s3://test-bucket/NA12878.variants.tsv"
+
+    [[cases.tasks]]
+    type_code = "radiant_germline_annotation"
+    aliquots = ["NA12878"]
+    pipeline_name = "Dragen"
+    pipeline_version = "4.4.4"
+    genome_build = "GRch38"
+
+        [[cases.tasks.input_documents]]
+        url = "s3://test-bucket/NA12878.recall.cram"
+
+        [[cases.tasks.input_documents]]
+        url = "s3://test-bucket/NA12878.variants.tsv"
+
+        [[cases.tasks.output_documents]]
+        data_category_code = "genomic"
+        data_type_code = "alignment"
+        format_code = "cram"
+        hash = "d57f21e6a273781dbf8b7657940f3b03"
+        name = "NA12878.annotation.cram"
+        size = 11
+        url = "s3://test-bucket/NA12878.annotation.cram"
