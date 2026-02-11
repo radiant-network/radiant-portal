@@ -160,12 +160,14 @@ export const getTextOperator = (operator: string) => {
  * @returns The constructed URL as a string, or undefined if not applicable.
  */
 export const getUrlLink = (columnID: string, data: any): string | undefined => {
+  const strStart = data.start.replace(/,/g, '');
+  const strEnd = data.end.replace(/,/g, '');
   switch (columnID) {
     case 'clingen':
-      return data.cnv_variant ? `https://search.clinicalgenome.org/kb/regions?page=1&type=GRCh38&region=chr${data.chromosome}%3A${data.start}-${data.end}&size=25&search=` : undefined;
+      return data.cnv_variant ? `https://search.clinicalgenome.org/kb/regions?page=1&type=GRCh38&region=chr${data.chromosome}%3A${strStart}-${strEnd}&size=25&search=` : undefined;
     case 'cnv_variant':
       const DupDel = data.type == 'GAIN' ? 'DUP' : 'DEL';
-      return data.cnv_variant ? `https://franklin.genoox.com/clinical-db/variant/sv/chr${data.chromosome}-${data.start}-${data.end}-${DupDel}-HG38` : undefined;
+      return data.cnv_variant ? `https://franklin.genoox.com/clinical-db/variant/sv/chr${data.chromosome}-${strStart}-${strEnd}-${DupDel}-HG38` : undefined;
     case 'cohort':
       return data.locus ? `https://bravo.sph.umich.edu/freeze8/hg38/variant/snv/${data.locus}` : undefined;
     case 'dbsnp':
