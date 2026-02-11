@@ -80,6 +80,7 @@ const (
 )
 
 const RelationshipProbandCode = "proband"
+const ExomiserTaskTypeCode = "exomiser"
 
 var CaseRelatedTaskTypes = map[string]struct{}{
 	"family_variant_calling":     {},
@@ -91,7 +92,7 @@ var RequiresInputDocumentsTaskTypes = map[string]struct{}{
 	"somatic_variant_calling":     {},
 	"tumor_only_variant_calling":  {},
 	"radiant_germline_annotation": {},
-	"exomiser":                    {},
+	ExomiserTaskTypeCode:          {},
 }
 
 type CaseKey struct {
@@ -1043,6 +1044,13 @@ func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 		path := cr.formatFieldPath("tasks", &taskIndex, "aliquots", nil)
 		msg := cr.formatTaskFieldErrorMessage("aliquots", cr.Index, taskIndex)
 		cr.addErrors(fmt.Sprintf("%s aliquots must contain at least one value.", msg), TaskInvalidField, path)
+		return
+	}
+
+	if len(task.Aliquots) > 1 && task.TypeCode == ExomiserTaskTypeCode {
+		path := cr.formatFieldPath("tasks", &taskIndex, "aliquots", nil)
+		msg := cr.formatTaskFieldErrorMessage("aliquots", cr.Index, taskIndex)
+		cr.addErrors(fmt.Sprintf("%s aliquots must contain exactly one value for exomiser task.", msg), TaskInvalidField, path)
 		return
 	}
 
