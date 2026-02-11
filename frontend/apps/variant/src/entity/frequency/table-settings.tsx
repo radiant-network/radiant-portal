@@ -9,6 +9,7 @@ import {
 import CohortCell from '@/components/base/data-table/cells/cohort-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
+import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
 import { TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -80,7 +81,13 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
           id: 'split_value_code',
           cell: info => {
             if (activeTab === GetGermlineVariantInternalFrequenciesSplitEnum.PrimaryCondition) {
-              return info.getValue();
+              return (
+                <PhenotypeConditionLinkCell
+                  name={info.row.original.split_value_name}
+                  code={info.getValue()}
+                  showCode={false}
+                />
+              );
             }
             return (
               <Tooltip>
