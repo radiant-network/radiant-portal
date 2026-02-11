@@ -1,0 +1,69 @@
+[[cases]]
+submitter_case_id = "FIX-SJRA-1218"
+type = "germline"
+status_code = "in_progress"
+project_code = "N1"
+diagnostic_lab_code = "LDM-CHUSJ"
+primary_condition_code_system = "MONDO"
+primary_condition_value = "MONDO:0700092"
+priority_code = "routine"
+category_code = "postnatal"
+analysis_code = "WGA"
+resolution_status_code = "unsolved"
+note = "test case note"
+ordering_physician = "Dr. Test"
+ordering_organization_code = "CHUSJ"
+
+    [[cases.patients]]
+    submitter_patient_id = "MRN-283774"
+    affected_status_code = "affected"
+    patient_organization_code = "CHUSJ"
+    relation_to_proband_code = "proband"
+
+        [[cases.patients.observations_categorical]]
+        code = "phenotype"
+        system = "HPO"
+        value = "TEST:12345"
+        onset_code = "infantile"
+        interpretation_code = "positive"
+        note = "Test clinical note"
+
+    [[cases.sequencing_experiments]]
+    aliquot = "NA12878"
+    sample_organization_code = "CQGC"
+    submitter_sample_id = "S13226"
+
+    [[cases.tasks]]
+    type_code = "alignment"
+    aliquots = ["NA12878"]
+    pipeline_name = "Dragen"
+    pipeline_version = "4.4.4"
+    genome_build = "GRch38"
+
+        [[cases.tasks.output_documents]]
+        data_category_code = "genomic"
+        data_type_code = "exomiser"
+        format_code = "tsv"
+        hash = "d57f21e6a273781dbf8b7657940f3b03"
+        name = "NA12878.recall.cram"
+        size = 11
+        url = "s3://test-bucket/NA12878.recall.cram"
+
+    [[cases.tasks]]
+    type_code = "exomiser"
+    aliquots = ["NA12878"]
+    pipeline_name = "Dragen"
+    pipeline_version = "4.4.4"
+    genome_build = "GRch38"
+
+        [[cases.tasks.input_documents]]
+        url = "s3://test-bucket/NA12878.recall.cram"
+
+        [[cases.tasks.output_documents]]
+        data_category_code = "genomic"
+        data_type_code = "exomiser"
+        format_code = "tsv"
+        hash = "d57f21e6a273781dbf8b7657940f3b03"
+        name = "NA12878.variants.tsv"
+        size = 11
+        url = "s3://test-bucket/NA12878.variants.tsv"
