@@ -77,11 +77,50 @@ func Test_CreateObservationCategorical_NilError(t *testing.T) {
 	})
 }
 
-func Test_CreateObservationCategorical_NotFound(t *testing.T) {
+func Test_CreateObservationCategorical_CaseNotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		newObs := &types.ObsCategorical{
+			ID:                 4242,
+			CaseID:             9876,
+			PatientID:          1,
+			ObservationCode:    "phenotype",
+			CodingSystem:       "HPO",
+			CodeValue:          "HP:00314159",
+			OnsetCode:          "unknown",
+			InterpretationCode: "negative",
+			Note:               "Super note",
+		}
+
 		repo := NewObservationCategoricalRepository(db)
-		results, err := repo.GetById(99999)
+		err := repo.CreateObservationCategorical(newObs)
+		assert.Error(t, err)
+
+		result, err := repo.GetById(4242)
 		assert.NoError(t, err)
-		assert.Nil(t, results)
+		assert.Nil(t, result)
+	})
+}
+
+func Test_CreateObservationCategorical_PatientNotFound(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		newObs := &types.ObsCategorical{
+			ID:                 4242,
+			CaseID:             1,
+			PatientID:          9876,
+			ObservationCode:    "phenotype",
+			CodingSystem:       "HPO",
+			CodeValue:          "HP:00314159",
+			OnsetCode:          "unknown",
+			InterpretationCode: "negative",
+			Note:               "Super note",
+		}
+
+		repo := NewObservationCategoricalRepository(db)
+		err := repo.CreateObservationCategorical(newObs)
+		assert.Error(t, err)
+
+		result, err := repo.GetById(4242)
+		assert.NoError(t, err)
+		assert.Nil(t, result)
 	})
 }

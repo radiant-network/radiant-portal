@@ -113,6 +113,27 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		assert.Equal(t, 1, fa[0].FamilyMemberID)
 		assert.Equal(t, "proband", fa[0].RelationshipToProbandCode)
 
+		var obscat []*types.ObsCategorical
+		db.Table("obs_categorical").Where("case_id = ?", ca.ID).Find(&obscat)
+		assert.Len(t, obscat, 1)
+		assert.Equal(t, 1000, obscat[0].ID)
+		assert.Equal(t, 1, obscat[0].PatientID)
+		assert.Equal(t, "TEST:12345", obscat[0].CodeValue)
+
+		var obsstr []*types.ObsString
+		db.Table("obs_string").Where("case_id = ?", ca.ID).Find(&obsstr)
+		assert.Len(t, obsstr, 1)
+		assert.Equal(t, 1000, obsstr[0].ID)
+		assert.Equal(t, 1, obsstr[0].PatientID)
+		assert.Equal(t, "TEST:678901", obsstr[0].Value)
+
+		var famhist []*types.FamilyHistory
+		db.Table("family_history").Where("case_id = ?", ca.ID).Find(&famhist)
+		assert.Len(t, famhist, 1)
+		assert.Equal(t, 1000, famhist[0].ID)
+		assert.Equal(t, 1, famhist[0].PatientID)
+		assert.Equal(t, "Seizure", famhist[0].Condition)
+
 		var tc []*types.TaskContext
 		db.Table("task_context").Where("task_id = 1000").Find(&tc)
 		assert.Len(t, tc, 2)
@@ -208,7 +229,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run_SubmitterCaseId_Collision(t *testing.T) 
 
 func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
-		for _, tableName := range []string{"cases", "family", "obs_categorical", "task", "document"} {
+		for _, tableName := range []string{"cases", "family", "obs_categorical", "obs_string", "family_history", "task", "document"} {
 			var maxID int
 			if err := db.Raw(fmt.Sprintf("SELECT COALESCE(MAX(id), 0) FROM %s;", tableName)).Scan(&maxID).Error; err != nil || maxID == 0 {
 				t.Fatalf("failed to get max ID from table %s: %v", tableName, err)
@@ -216,7 +237,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 
 			db.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN id RESTART WITH 1;", tableName)) // Force ID collision
 
-			before := getTableCounts(db, []string{"cases", "family", "obs_categorical", "task", "document"})
+			before := getTableCounts(db, []string{"cases", "family", "obs_categorical", "obs_string", "family_history", "task", "document"})
 
 			payload := createBaseCasePayload("Persist_Failure_ID_Collision_" + tableName)
 			createDocumentsForBatch(context, client, payload)
@@ -230,7 +251,11 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 			case "family":
 				msg = "error processing case batch records: error during case insertion failed to persist family for case 0: failed to persist family member \"MRN-283773\" for case 0: ERROR: duplicate key value violates unique constraint \"family_pkey\" (SQLSTATE 23505)"
 			case "obs_categorical":
-				msg = "error processing case batch records: error during case insertion failed to persist observations for case 0: failed to persist observation categorical for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"observation_coding_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist observations categorical for case 0: failed to persist observation categorical for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"observation_coding_pkey\" (SQLSTATE 23505)"
+			case "obs_string":
+				msg = "error processing case batch records: error during case insertion failed to persist observations text for case 0: failed to persist observation text for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"obs_string_pkey\" (SQLSTATE 23505)"
+			case "family_history":
+				msg = "error processing case batch records: error during case insertion failed to persist family history for case 0: failed to persist family history for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"family_history_pkey\" (SQLSTATE 23505)"
 			case "task":
 				msg = "error processing case batch records: error during case insertion failed to persist tasks for case 0: failed to persist task for case 0: ERROR: duplicate key value violates unique constraint \"task_pkey\" (SQLSTATE 23505)"
 			case "document":
@@ -248,7 +273,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 			}
 			assertBatchProcessing(t, db, id, types.BatchStatusError, false, "user123", emptyMsgs, emptyMsgs, expectedErrors)
 
-			after := getTableCounts(db, []string{"cases", "family", "obs_categorical", "task", "document"})
+			after := getTableCounts(db, []string{"cases", "family", "obs_categorical", "obs_string", "family_history", "task", "document"})
 			assert.Equal(t, before, after)
 
 			if err := db.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN id RESTART WITH %d;", tableName, maxID+1)).Error; err != nil {
