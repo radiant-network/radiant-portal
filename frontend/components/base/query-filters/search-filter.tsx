@@ -19,6 +19,8 @@ interface SearchFilterProps {
   search: AggregationConfig;
 }
 
+const MAX_API_CALLS = 2;
+
 export function SearchFilter({ search }: SearchFilterProps) {
   const { t } = useI18n();
   const { appId } = useFilterConfig();
@@ -53,6 +55,19 @@ export function SearchFilter({ search }: SearchFilterProps) {
     const fetchGeneDetails = async () => {
       if (selectedValues.length === 0) {
         setSelectedOptions([]);
+        return;
+      }
+
+      // An user can only fill search by with one value, so this should not affect normal usage.
+      // But when we add values from upload ID dialog we can have a lot of values at once
+      // which would trigger a lot of API calls not needed in this case, so we skip it.
+      if (selectedValues.length > MAX_API_CALLS) {
+        const fallbackOptions = selectedValues.map(value => ({
+          value,
+          label: value,
+          badgeLabel: value,
+        }));
+        setSelectedOptions(fallbackOptions);
         return;
       }
 
