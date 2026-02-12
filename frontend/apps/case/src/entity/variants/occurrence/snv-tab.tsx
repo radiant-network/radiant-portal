@@ -218,6 +218,10 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
     });
   }, [activeSqon]);
 
+  const onInterpretationSaved = () => {
+    fetchOccurrencesList.mutate();
+  };
+
   if (!isValidSeqId(seqId)) {
     return null;
   }
@@ -324,7 +328,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
               <CardContent>
                 <DataTable
                   id={appId}
-                  columns={getSNVOccurrenceColumns(t)}
+                  columns={getSNVOccurrenceColumns(t, onInterpretationSaved)}
                   data={fetchOccurrencesList.data ?? []}
                   defaultColumnSettings={defaultSNVSettings}
                   loadingStates={{
@@ -345,9 +349,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
               </CardContent>
             </Card>
             <SliderOccurrenceSheet
-              onInterpretationSaved={() => {
-                fetchOccurrencesList.mutate();
-              }}
+              onInterpretationSaved={onInterpretationSaved}
               open={!!selectedOccurrence}
               setOpen={() => handleClosePreview()}
               occurrence={selectedOccurrence!}

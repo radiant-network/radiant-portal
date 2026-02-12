@@ -909,10 +909,10 @@
     },
     "actions": {
       "preview": "Aperçu",
-      "open_page": "Ouvrir la page",
       "open_in_igv": "Ouvrir dans IGV ",
       "ucsc": "UCSC",
-      "litvar": "LitVar"
+      "litvar": "LitVar",
+      "view_variant": "Voir variant"
     },
     "splice_ai": {
       "AG": "Gain du site accepteur",
