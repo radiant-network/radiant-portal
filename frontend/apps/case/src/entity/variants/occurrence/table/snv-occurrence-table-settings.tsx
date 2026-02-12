@@ -25,7 +25,7 @@ import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
-function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
+function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretationSaved: () => void) {
   return [
     // TODO: To be enabled when row selection function are implemented
     // {
@@ -245,7 +245,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // Actions Buttons
     {
       id: 'actions',
-      cell: OccurrenceActionsMenu,
+      cell: info => <OccurrenceActionsMenu row={info.row} onInterpretationSaved={onInterpretationSaved} />,
       size: 74,
       enableResizing: false,
       enablePinning: true,

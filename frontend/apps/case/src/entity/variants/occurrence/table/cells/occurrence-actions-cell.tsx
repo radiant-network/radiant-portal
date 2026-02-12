@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CellContext } from '@tanstack/react-table';
+import { Row } from '@tanstack/react-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
@@ -10,7 +10,12 @@ import IGVDialog from 'components/base/igv/igv-dialog';
 
 import OccurrenceSliderSheet from '../../slider/slider-occurrence-sheet';
 
-function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>) {
+type OccurrenceActionsMenuProps = {
+  row: Row<GermlineSNVOccurrence>;
+  onInterpretationSaved: () => void;
+};
+
+function OccurrenceActionsMenu({ row, onInterpretationSaved }: OccurrenceActionsMenuProps) {
   const { t } = useI18n();
   const [sheetOpen, setSheetOpen] = useState<boolean>(false);
   const [igvOpen, setIgvOpen] = useState<boolean>(false);
@@ -29,6 +34,7 @@ function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>)
         open={sheetOpen}
         setOpen={setSheetOpen}
         occurrence={row.original as GermlineSNVOccurrence}
+        onInterpretationSaved={onInterpretationSaved}
       />
       {caseId && (
         <IGVDialog
@@ -45,6 +51,8 @@ function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>)
         className="px-0"
         variant="outline"
         size="xxs"
+        tooltip={t('variant.actions.view_variant')}
+        tooltipSide="top"
         actions={[
           {
             icon: <EyeIcon />,
@@ -53,7 +61,7 @@ function OccurrenceActionsMenu({ row }: CellContext<GermlineSNVOccurrence, any>)
           },
           {
             icon: <ArrowUpRight />,
-            label: t('variant.actions.open_page'),
+            label: t('variant.actions.view_variant'),
             onClick: onNavigateToVariantPage,
             hasSeparator: true,
           },

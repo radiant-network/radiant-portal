@@ -908,10 +908,10 @@
     },
     "actions": {
       "preview": "Preview",
-      "open_page": "Open Page",
       "open_in_igv": "Open in IGV ",
       "ucsc": "UCSC",
-      "litvar": "LitVar"
+      "litvar": "LitVar",
+      "view_variant": "View variant"
     },
     "splice_ai": {
       "AG": "Acceptor Gain",
