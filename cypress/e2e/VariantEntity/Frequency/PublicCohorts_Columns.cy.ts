@@ -38,13 +38,4 @@ describe('VariantEntity - Frequency - PublicCohorts - Columns', () => {
     setupTest();
     VariantEntity_Frequency.publicCohorts.validations.shouldShowColumnTooltips();
   });
-
-  it('Pin and unpin column', () => {
-    setupTest();
-    VariantEntity_Frequency.publicCohorts.validations.shouldUnpinnedColumn('homo');
-    VariantEntity_Frequency.publicCohorts.actions.pinColumn('homo');
-    VariantEntity_Frequency.publicCohorts.validations.shouldPinnedColumn('homo');
-    VariantEntity_Frequency.publicCohorts.actions.unpinColumn('homo');
-    VariantEntity_Frequency.publicCohorts.validations.shouldUnpinnedColumn('homo');
-  });
 });

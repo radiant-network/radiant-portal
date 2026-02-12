@@ -160,8 +160,8 @@ export const getTextOperator = (operator: string) => {
  * @returns The constructed URL as a string, or undefined if not applicable.
  */
 export const getUrlLink = (columnID: string, data: any): string | undefined => {
-  const strStart = data.start.replace(/,/g, '');
-  const strEnd = data.end.replace(/,/g, '');
+  const strStart = data.start ? data.start.replace(/,/g, '') : '';
+  const strEnd = data.end ? data.end.replace(/,/g, '') : '';
   switch (columnID) {
     case 'clingen':
       return data.cnv_variant ? `https://search.clinicalgenome.org/kb/regions?page=1&type=GRCh38&region=chr${data.chromosome}%3A${strStart}-${strEnd}&size=25&search=` : undefined;
