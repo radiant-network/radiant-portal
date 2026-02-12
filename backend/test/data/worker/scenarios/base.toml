@@ -65,6 +65,14 @@ ordering_organization_code = "CHUSJ"
     interpretation_code = "positive"
     note = "Test clinical note"
 
+    [[cases.patients.observations_text]]
+    code = "phenotype"
+    value = "TEST:678901"
+
+    [[cases.patients.family_history]]
+    family_member_code = "grand-father"
+    condition = "Seizure"
+
   [[cases.sequencing_experiments]]
   aliquot = "NA12891"
   sample_organization_code = "CQGC"

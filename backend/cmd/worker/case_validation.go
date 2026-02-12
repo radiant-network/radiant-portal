@@ -110,20 +110,24 @@ type DocumentRelation struct {
 }
 
 type StorageContext struct {
-	CasesRepo  *repository.CasesRepository
-	DocRepo    *repository.DocumentsRepository
-	ObsCatRepo *repository.ObservationCategoricalRepository
-	FamilyRepo *repository.FamilyRepository
-	TaskRepo   *repository.TaskRepository
+	CasesRepo         *repository.CasesRepository
+	DocRepo           *repository.DocumentsRepository
+	ObsCatRepo        *repository.ObservationCategoricalRepository
+	ObsStringRepo     *repository.ObservationStringRepository
+	FamilyHistoryRepo *repository.FamilyHistoryRepository
+	FamilyRepo        *repository.FamilyRepository
+	TaskRepo          *repository.TaskRepository
 }
 
 func NewStorageContext(db *gorm.DB) *StorageContext {
 	return &StorageContext{
-		CasesRepo:  repository.NewCasesRepository(db),
-		DocRepo:    repository.NewDocumentsRepository(db),
-		ObsCatRepo: repository.NewObservationCategoricalRepository(db),
-		FamilyRepo: repository.NewFamilyRepository(db),
-		TaskRepo:   repository.NewTaskRepository(db),
+		CasesRepo:         repository.NewCasesRepository(db),
+		DocRepo:           repository.NewDocumentsRepository(db),
+		ObsCatRepo:        repository.NewObservationCategoricalRepository(db),
+		ObsStringRepo:     repository.NewObservationStringRepository(db),
+		FamilyHistoryRepo: repository.NewFamilyHistoryRepository(db),
+		FamilyRepo:        repository.NewFamilyRepository(db),
+		TaskRepo:          repository.NewTaskRepository(db),
 	}
 }
 
@@ -1498,7 +1502,13 @@ func persistCaseRecords(
 			return fmt.Errorf("failed to persist family for case %d: %w", record.Index, err)
 		}
 		if err := persistObservationCategorical(ctx, record); err != nil {
-			return fmt.Errorf("failed to persist observations for case %d: %w", record.Index, err)
+			return fmt.Errorf("failed to persist observations categorical for case %d: %w", record.Index, err)
+		}
+		if err := persistObservationText(ctx, record); err != nil {
+			return fmt.Errorf("failed to persist observations text for case %d: %w", record.Index, err)
+		}
+		if err := persistFamilyHistory(ctx, record); err != nil {
+			return fmt.Errorf("failed to persist family history for case %d: %w", record.Index, err)
 		}
 		if err := persistTask(ctx, record); err != nil {
 			return fmt.Errorf("failed to persist tasks for case %d: %w", record.Index, err)
@@ -1534,7 +1544,7 @@ func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord
 		key := PatientKey{p.PatientOrganizationCode, p.SubmitterPatientId}
 		patient, ok := cr.Patients[key]
 		if !ok {
-			return fmt.Errorf("failed to find patient for observations for patient %s in case %d", p.SubmitterPatientId, cr.Index)
+			return fmt.Errorf("failed to find patient for observations categorical for patient %s in case %d", p.SubmitterPatientId, cr.Index)
 		}
 
 		for _, o := range p.ObservationsCategorical {
@@ -1551,6 +1561,56 @@ func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord
 
 			if err := ctx.ObsCatRepo.CreateObservationCategorical(&obs); err != nil {
 				return fmt.Errorf("failed to persist observation categorical for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
+			}
+		}
+	}
+	return nil
+}
+
+func persistObservationText(ctx *StorageContext, cr *CaseValidationRecord) error {
+	for _, p := range cr.Case.Patients {
+
+		key := PatientKey{p.PatientOrganizationCode, p.SubmitterPatientId}
+		patient, ok := cr.Patients[key]
+		if !ok {
+			return fmt.Errorf("failed to find patient for observations text for patient %s in case %d", p.SubmitterPatientId, cr.Index)
+		}
+
+		for _, o := range p.ObservationsText {
+			obs := types.ObsString{
+				CaseID:          *cr.CaseID,
+				PatientID:       patient.ID,
+				ObservationCode: o.Code,
+				Value:           o.Value,
+			}
+
+			if err := ctx.ObsStringRepo.CreateObservationString(&obs); err != nil {
+				return fmt.Errorf("failed to persist observation text for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
+			}
+		}
+	}
+	return nil
+}
+
+func persistFamilyHistory(ctx *StorageContext, cr *CaseValidationRecord) error {
+	for _, p := range cr.Case.Patients {
+
+		key := PatientKey{p.PatientOrganizationCode, p.SubmitterPatientId}
+		patient, ok := cr.Patients[key]
+		if !ok {
+			return fmt.Errorf("failed to find patient for family history for patient %s in case %d", p.SubmitterPatientId, cr.Index)
+		}
+
+		for _, o := range p.FamilyHistory {
+			familyHistory := types.FamilyHistory{
+				CaseID:           *cr.CaseID,
+				PatientID:        patient.ID,
+				FamilyMemberCode: o.FamilyMemberCode,
+				Condition:        o.Condition,
+			}
+
+			if err := ctx.FamilyHistoryRepo.CreateFamilyHistory(&familyHistory); err != nil {
+				return fmt.Errorf("failed to persist family history for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
 			}
 		}
 	}
