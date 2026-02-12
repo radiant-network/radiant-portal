@@ -14,6 +14,7 @@ describe('Cases - Batch - Invalid values - Enum fields', () => {
         "status_code": "completed",
         "project_code": "Cypress",
         "category_code": "InvalidValue",
+        "analysis_code": "Cypress",
         "patients": [
             {
             "affected_status_code": "InvalidValue",

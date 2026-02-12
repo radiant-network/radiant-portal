@@ -14,6 +14,7 @@ describe('Cases - Batch - Null fields - Int fields', () => {
         "status_code": "completed",
         "project_code": "Cypress",
         "category_code": "postnatal",
+        "analysis_code": "Cypress",
         "patients": [
             {
             "affected_status_code": "affected",

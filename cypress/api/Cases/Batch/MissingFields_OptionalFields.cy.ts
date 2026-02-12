@@ -12,7 +12,7 @@ describe('Cases - Batch - Missing fields - Optional fields', () => {
         "status_code": "completed",
         "project_code": "Cypress",
         "category_code": "postnatal",
-        "analysis_code": "WGA",
+        "analysis_code": "Cypress",
         "patients": [
             {
             "affected_status_code": "affected",
