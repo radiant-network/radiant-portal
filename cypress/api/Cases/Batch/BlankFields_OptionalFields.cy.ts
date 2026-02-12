@@ -17,7 +17,7 @@ describe('Cases - Batch - Blank fields - Optional fields', () => {
         "primary_condition_value": "",
         "priority_code": "",
         "category_code": "postnatal",
-        "analysis_code": "",
+        "analysis_code": "WGA",
         "resolution_status_code": "",
         "note": "",
         "ordering_physician": "",
