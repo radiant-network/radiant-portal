@@ -10,7 +10,7 @@ import CohortCell from '@/components/base/data-table/cells/cohort-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
-import { TableColumnDef } from '@/components/base/data-table/data-table';
+import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { toExponentialNotation } from '@/components/lib/number-format';
@@ -79,6 +79,9 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
         // Split
         myNetworkColumnHelper.accessor(row => row.split_value_code, {
           id: 'split_value_code',
+          header: t(`variant_entity.frequency.my_network.${activeTab}`),
+          size: 350,
+          minSize: 150,
           cell: info => {
             if (activeTab === GetGermlineVariantInternalFrequenciesSplitEnum.PrimaryCondition) {
               return (
@@ -96,17 +99,20 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
               </Tooltip>
             );
           },
-          header: t(`variant_entity.frequency.my_network.${activeTab}`),
         }),
       ],
     }),
     myNetworkColumnHelper.group({
       id: 'all_patients',
       header: t('variant_entity.frequency.my_network.all_patients'),
+      size: 300,
+      minSize: 100,
       columns: [
         // Frequency
         myNetworkColumnHelper.accessor(row => row.frequencies.pc_all, {
           id: 'frequencies.pc_all',
+          size: 150,
+          minSize: 50,
           cell: info => (
             <FrequencyCell
               pc={info.getValue()}
@@ -116,9 +122,11 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
           ),
           header: t(`variant_entity.frequency.my_network.frequency`),
         }),
-        // Homozgyotes
+        // Homozygotes
         myNetworkColumnHelper.accessor(row => row.frequencies.hom_all, {
           id: 'frequencies.hom_all',
+          size: 150,
+          minSize: 50,
           cell: info => (info.getValue() != null ? info.getValue() : <EmptyCell />),
           header: t(`variant_entity.frequency.my_network.homozygotes`),
         }),
@@ -127,10 +135,14 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
     myNetworkColumnHelper.group({
       id: 'affected_patients',
       header: t('variant_entity.frequency.my_network.affected_patients'),
+      size: 300,
+      minSize: 100,
       columns: [
         // Frequency
         myNetworkColumnHelper.accessor(row => row.frequencies.pc_affected, {
           id: 'frequencies.pc_affected',
+          size: 150,
+          minSize: 50,
           cell: info => (
             <FrequencyCell
               pc={info.getValue()}
@@ -140,9 +152,11 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
           ),
           header: t(`variant_entity.frequency.my_network.frequency`),
         }),
-        // Homozgyotes
+        // Homozygotes
         myNetworkColumnHelper.accessor(row => row.frequencies.hom_affected, {
           id: 'frequencies.hom_affected',
+          size: 150,
+          minSize: 50,
           cell: info => (info.getValue() != null ? info.getValue() : <EmptyCell />),
           header: t(`variant_entity.frequency.my_network.homozygotes`),
         }),
@@ -151,10 +165,14 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
     myNetworkColumnHelper.group({
       id: 'non_affected_patients',
       header: t('variant_entity.frequency.my_network.non_affected_patients'),
+      size: 300,
+      minSize: 100,
       columns: [
         // Frequency
         myNetworkColumnHelper.accessor(row => row.frequencies.pc_non_affected, {
           id: 'frequencies.pc_non_affected',
+          size: 150,
+          minSize: 50,
           cell: info => (
             <FrequencyCell
               pc={info.getValue()}
@@ -164,9 +182,11 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
           ),
           header: t(`variant_entity.frequency.my_network.frequency`),
         }),
-        // Homozgyotes
+        // Homozygotes
         myNetworkColumnHelper.accessor(row => row.frequencies.hom_non_affected, {
           id: 'frequencies.hom_non_affected',
+          size: 150,
+          minSize: 50,
           cell: info => (info.getValue() != null ? info.getValue() : <EmptyCell />),
           header: t(`variant_entity.frequency.my_network.homozygotes`),
         }),
@@ -175,4 +195,42 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
   ] as TableColumnDef<InternalFrequenciesSplitBy, any>[];
 }
 
-export { getPublicCohortsColumns, getMyNetworkColumns };
+const myNetworkDefaultSettings = createColumnSettings([
+  {
+    id: 'split_value_code',
+    visible: true,
+    label: 'variant_entity.frequency.my_network.primary_condition',
+  },
+  {
+    id: 'frequencies.pc_all',
+    visible: true,
+    label: 'variant_entity.frequency.my_network.frequency',
+  },
+  {
+    id: 'frequencies.hom_all',
+    visible: true,
+    label: 'variant_entity.frequency.my_network.homozygotes',
+  },
+  {
+    id: 'frequencies.pc_affected',
+    visible: true,
+    label: 'variant_entity.frequency.my_network.frequency',
+  },
+  {
+    id: 'frequencies.hom_affected',
+    visible: true,
+    label: 'variant_entity.frequency.my_network.homozygotes',
+  },
+  {
+    id: 'frequencies.pc_non_affected',
+    visible: true,
+    label: 'variant_entity.frequency.my_network.frequency',
+  },
+  {
+    id: 'frequencies.hom_non_affected',
+    visible: true,
+    label: 'variant_entity.frequency.my_network.homozygotes',
+  },
+]);
+
+export { getPublicCohortsColumns, getMyNetworkColumns, myNetworkDefaultSettings };
