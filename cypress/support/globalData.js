@@ -42,7 +42,7 @@ const globalData = {
           field: 'biotype',
           value: 'protein_coding',
           op: 'in',
-          count: 2104890,
+          count: 2099265,
         },
         {
           field: 'gnomad_pli',
@@ -184,19 +184,19 @@ const globalData = {
           field: 'pf_wgs',
           value: '0.5',
           op: '<',
-          count: 799136,
+          count: 2073057,
         },
         {
           field: 'pf_wgs_affected',
           value: '0.5',
           op: '<',
-          count: 1315681,
+          count: 2006606,
         },
         {
           field: 'pf_wgs_not_affected',
           value: '0.5',
           op: '<',
-          count: 1662876,
+          count: 1866517,
         },
         {
           field: 'gnomad_v3_af',
