@@ -12,7 +12,6 @@ import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cel
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
-import { thousandNumberFormat } from '@/components/lib/number-format';
 
 import UninterpretedCasePreviewCell from './cells/uninterpreted-case-preview-cell';
 
@@ -37,7 +36,7 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     columnHelper.accessor(row => row.seq_id, {
       id: 'seq_id',
-      cell: info => <span>{thousandNumberFormat(info.getValue())}</span>,
+      cell: info => info.getValue(),
       header: t('variant_entity.cases.other_table.headers.seq_id'),
       minSize: 80,
       maxSize: 150,
@@ -46,7 +45,7 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     columnHelper.accessor(row => row.patient_id, {
       id: 'patient_id',
-      cell: info => <span>{thousandNumberFormat(info.getValue())}</span>,
+      cell: info => info.getValue(),
       header: t('variant_entity.cases.other_table.headers.patient_id'),
       minSize: 80,
       maxSize: 150,

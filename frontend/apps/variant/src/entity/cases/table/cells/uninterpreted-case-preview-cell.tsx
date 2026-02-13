@@ -2,7 +2,6 @@ import { useSearchParams } from 'react-router';
 
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import { thousandNumberFormat } from '@/components/lib/number-format';
 
 import { SELECTED_UNINTERPRETED_CASE_PARAM } from '../../constants';
 
@@ -28,7 +27,7 @@ function UninterpretedCasePreviewCell({ caseId, patientId, relationshipToProband
   return (
     <RelationshipToProbandCell relationship={relationshipToProband}>
       <AnchorLink mono size="xs" onClick={handleClick}>
-        {thousandNumberFormat(caseId)}
+        {caseId}
       </AnchorLink>
     </RelationshipToProbandCell>
   );

@@ -7,14 +7,12 @@ import AnalysisTypeCodeCell, {
 } from '@/components/base/data-table/cells/analysis-type-code-cell';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
-import NumberCell from '@/components/base/data-table/cells/number-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
 import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
-import { thousandNumberFormat } from '@/components/lib/number-format';
 
 import CaseActionsMenuCell from './cells/case-actions-menu-cell';
 
@@ -26,9 +24,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.case_id, {
       id: 'case_id',
       cell: info => (
-        <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>
-          {thousandNumberFormat(info.getValue())}
-        </AnchorLinkCell>
+        <AnchorLinkCell href={`/case/entity/${info.row.original.case_id}`}>{info.getValue()}</AnchorLinkCell>
       ),
       header: t('case_exploration.case.headers.case_id'),
       size: 48,
@@ -37,7 +33,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Patient
     columnHelper.accessor(row => row.proband_id, {
       id: 'proband_id',
-      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
+      cell: info => info.getValue(),
       header: t('case_exploration.case.headers.patient_id'),
       size: 48,
       minSize: 40,
@@ -45,7 +41,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // MRN
     columnHelper.accessor(row => row.submitter_proband_id, {
       id: 'submitter_proband_id',
-      cell: info => <>{info.getValue()}</>,
+      cell: info => info.getValue(),
       header: () => (
         <TooltipHeader tooltip={t('case_exploration.case.headers.submitter_patient_id_tooltip')}>
           {t('case_exploration.case.headers.submitter_patient_id')}
@@ -57,7 +53,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // First name
     columnHelper.accessor(row => row.proband_first_name, {
       id: 'proband_first_name',
-      cell: info => <>{info.getValue()}</>,
+      cell: info => info.getValue(),
       header: t('case_exploration.case.headers.first_name'),
       size: 124,
       minSize: 40,
@@ -65,7 +61,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Last name
     columnHelper.accessor(row => row.proband_last_name, {
       id: 'proband_last_name',
-      cell: info => <>{info.getValue()}</>,
+      cell: info => info.getValue(),
       header: t('case_exploration.case.headers.last_name'),
       size: 124,
       minSize: 40,
@@ -73,7 +69,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Vital status
     columnHelper.accessor(row => row.proband_life_status_code, {
       id: 'proband_life_status_code',
-      cell: info => <>{info.getValue()}</>,
+      cell: info => info.getValue(),
       header: t('case_exploration.case.headers.life_status'),
       size: 124,
       minSize: 40,
@@ -81,7 +77,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Pre/Postnatal
     columnHelper.accessor(row => row.case_category_code, {
       id: 'case_category_code',
-      cell: info => <>{info.getValue()}</>,
+      cell: info => info.getValue(),
       header: t('case_exploration.case.headers.category_code'),
       size: 124,
       minSize: 40,
@@ -89,7 +85,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // JHN
     columnHelper.accessor(row => row.proband_jhn, {
       id: 'proband_jhn',
-      cell: info => <>{info.getValue()}</>,
+      cell: info => info.getValue(),
       header: t('case_exploration.case.headers.jhn'),
       size: 124,
       minSize: 40,
@@ -113,7 +109,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     // Resolution
     columnHelper.accessor(row => row.resolution_status_code, {
       id: 'resolution_status_code',
-      cell: info => <>{info.getValue()}</>,
+      cell: info => info.getValue(),
       header: t('case_exploration.case.headers.resolution_status_code'),
       size: 124,
       minSize: 40,
