@@ -1021,7 +1021,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 		cr.validateCaseField(cr.Case.Note, "note", path, nil, NoteMaxLength, false)
 	}
 	if cr.Case.OrderingPhysician != "" {
-		cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, TextRegExpCompiled, TextMaxLength, false)
+		cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, NameRegExpCompiled, TextMaxLength, false)
 	}
 	return nil
 }
