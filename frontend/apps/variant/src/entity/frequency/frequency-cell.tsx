@@ -15,7 +15,7 @@ function FrequencyCell({ pc, pn, pf }: FrequencyCellProps) {
   return (
     <span>
       {pc}/{pn}
-      {pf && ` (${toExponentialNotation(pf)})`}
+      {pf != null && pf !== 0 && ` (${toExponentialNotation(pf)})`}
     </span>
   );
 }

@@ -9,7 +9,7 @@ import {
   InternalFrequencies,
   VariantInternalFrequencies,
 } from '@/api/index';
-import DisplayTable from '@/components/base/data-table/display-table';
+import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -17,7 +17,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { toPercentage } from '@/components/lib/number-format';
 import { variantsApi } from '@/utils/api';
 
-import { getMyNetworkColumns } from './table-settings';
+import { getMyNetworkColumns, myNetworkDefaultSettings } from './table-settings';
 
 type MyNetworkInput = {
   locusId: string;
@@ -152,10 +152,18 @@ function MyNetworkCard() {
 
           {TABS_CONFIG.map(tab => (
             <TabsContent key={tab.key} value={tab.value}>
-              <DisplayTable
-                dataCy={tab.tableId}
+              <DataTable
+                id={tab.key}
                 columns={getMyNetworkColumns(t, activeTab)}
+                defaultColumnSettings={myNetworkDefaultSettings}
                 data={data?.split_rows || []}
+                loadingStates={{
+                  total: false,
+                  list: false,
+                }}
+                total={data?.split_rows?.length}
+                pagination={{ type: 'hidden' }}
+                tableIndexResultPosition="hidden"
               />
             </TabsContent>
           ))}
