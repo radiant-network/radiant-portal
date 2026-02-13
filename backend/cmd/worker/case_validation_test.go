@@ -1561,7 +1561,7 @@ func Test_validateCase_Valid(t *testing.T) {
 			PrimaryConditionValue:      "HP:0001234",
 			ResolutionStatusCode:       "solved",
 			Note:                       "Test note",
-			OrderingPhysician:          "Dr. Smith",
+			OrderingPhysician:          "Dr. Smîth",
 			PriorityCode:               "routine",
 			CategoryCode:               "clinical",
 		},
