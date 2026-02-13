@@ -5,7 +5,6 @@ import { CaseSequencingExperiment } from '@/api/api';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import ExperimentalStrategyCell from '@/components/base/data-table/cells/experimental-strategy-code-cell';
-import NumberCell from '@/components/base/data-table/cells/number-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import StatusCell from 'components/base/data-table/cells/status-cell';
@@ -19,7 +18,7 @@ function getColumns(t: TFunction<string, undefined>) {
     // Sequencing ID
     columnHelper.accessor(row => row.seq_id, {
       id: 'seq_id',
-      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
+      cell: info => info.getValue(),
       header: () => (
         <TooltipHeader tooltip={t('case_entity.details.sequencing_id_tooltip')}>
           {t('case_entity.details.sequencing_id')}
