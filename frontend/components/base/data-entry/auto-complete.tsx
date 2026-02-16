@@ -135,6 +135,15 @@ export const AutoComplete = <T extends Option>({
     option[optionFilterProp].toLowerCase().trim().includes(inputValueSearch.toLowerCase().trim()),
   );
 
+  const hasSearchStarted = inputValueSearch.length > minSearchLength;
+
+  const getEmptyStateIndicator = () => {
+    if (hasSearchStarted) {
+      return emptyIndicator || <div className="text-center text-sm">{t('common.auto_complete.no_data')}</div>;
+    }
+    return noSearchIndicator || <div className="text-center text-sm">{t('common.auto_complete.type_to_search')}</div>;
+  };
+
   return (
     <CommandPrimitive
       onKeyDown={handleKeyDown}
@@ -213,15 +222,7 @@ export const AutoComplete = <T extends Option>({
                 ))}
               </CommandGroup>
             ) : null}
-            {!loading && (
-              <CommandEmpty>
-                {inputValueSearch.length > minSearchLength
-                  ? emptyIndicator || <div className="text-center text-sm">{t('common.auto_complete.no_data')}</div>
-                  : noSearchIndicator || (
-                      <div className="text-center text-sm">{t('common.auto_complete.type_to_search')}</div>
-                    )}
-              </CommandEmpty>
-            )}
+            {!loading && <CommandEmpty>{getEmptyStateIndicator()}</CommandEmpty>}
           </CommandList>
         </div>
       </div>
