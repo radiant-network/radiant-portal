@@ -173,7 +173,7 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                   <MultipleSelector
                     defaultOptions={classificationCriterias}
                     placeholder={t('variant.interpretation_form.germline.classification_criteria_placeholder')}
-                    emptyIndicator={<>no results found.</>}
+                    emptyIndicator={<>{t('variant.interpretation_form.germline.no_results')}</>}
                     renderBadge={({ option, onRemove }) => (
                       <Badge
                         key={option.value}
@@ -184,6 +184,7 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                         {option.label}
                       </Badge>
                     )}
+                    openOnFocus
                     {...field}
                   />
                 </FormControl>
@@ -201,7 +202,8 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                   <MultipleSelector
                     defaultOptions={getTransmissionModeList(t)}
                     placeholder={t('variant.interpretation_form.germline.mode_of_transmission_placeholder')}
-                    emptyIndicator={<p>no results found.</p>}
+                    emptyIndicator={<p>{t('variant.interpretation_form.germline.no_results')}</p>}
+                    openOnFocus
                     {...field}
                   />
                 </FormControl>

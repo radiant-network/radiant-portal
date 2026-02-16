@@ -1035,7 +1035,8 @@
         "classification_criteria": "Critères de classification",
         "classification_criteria_placeholder": "Ex : PM1, PS2",
         "mode_of_transmission": "Mode de transmission",
-        "mode_of_transmission_placeholder": "Ex : Autosomal dominant de novo"
+        "mode_of_transmission_placeholder": "Ex : Autosomal dominant de novo",
+        "no_results": "Aucun résultat trouvé"
       },
       "somatic": {
         "tumoral_type": "Type tumoral",

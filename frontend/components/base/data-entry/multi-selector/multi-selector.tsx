@@ -35,6 +35,7 @@ function MultiSelector({
   commandProps,
   inputProps,
   hideClearAllButton = false,
+  openOnFocus = false,
   renderBadge,
   ref,
 }: MultipleSelectorProps) {
@@ -382,8 +383,16 @@ function MultiSelector({
             onValueChange={value => {
               setInputValue(value);
               setShowHiddenBadgesDropdown(false);
-              // Open dropdown when user starts typing (at least one character)
-              setOpen(value.length > 0);
+              // Open dropdown based on openOnFocus prop and input value
+              if (openOnFocus) {
+                // Keep dropdown open when typing or clearing input
+                if (!open && value.length > 0) {
+                  setOpen(true);
+                }
+              } else {
+                // Only open when there's text in the input
+                setOpen(value.length > 0);
+              }
               inputProps?.onValueChange?.(value);
             }}
             onBlur={event => {
@@ -394,8 +403,10 @@ function MultiSelector({
               inputProps?.onBlur?.(event);
             }}
             onFocus={event => {
-              // Only open dropdown if there's at least one character in input
-              if (inputValue.length > 0) {
+              // Open dropdown based on openOnFocus prop
+              if (openOnFocus) {
+                setOpen(true);
+              } else if (inputValue.length > 0) {
                 setOpen(true);
               }
               inputProps?.onFocus?.(event);

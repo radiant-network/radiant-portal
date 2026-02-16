@@ -70,6 +70,12 @@ export interface MultipleSelectorProps {
   >;
   /** hide the clear all button. */
   hideClearAllButton?: boolean;
+  /**
+   * Open dropdown on focus to show all available options.
+   * When false, dropdown only opens when user starts typing.
+   * @default false
+   */
+  openOnFocus?: boolean;
 
   /**
    * Render the badge for each option.
