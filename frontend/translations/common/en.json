@@ -23,6 +23,10 @@
         "h6": "Heading 6"
       }
     },
+    "auto_complete": {
+      "type_to_search": "Type to search",
+      "no_data": "No data"
+    },
     "sex": {
       "male": "Male",
       "female": "Female",
@@ -1021,6 +1025,8 @@
         "condition_placeholder": "e.g. muscular dystrophy",
         "condition_popover": "Search for a medical condition in",
         "condition_popover_link": "MONDO ontology",
+        "condition_empty_indicator": "No results found",
+        "condition_no_search_indicator": "Minimum 3 characters",
         "classification": "ACMG/AMP classification",
         "classification_popover": {
           "consult": "Consult",

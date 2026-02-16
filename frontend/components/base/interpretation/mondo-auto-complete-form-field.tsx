@@ -28,6 +28,7 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
   const form = useFormContext();
   const [options, setOptions] = useState<Option[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
+  const minSearchLength = 3;
 
   const mondoSearch = useSWR(
     searchValue || form.getValues(name),
@@ -75,7 +76,7 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
             <AutoComplete
               placeholder={placeholder}
               onSearch={value => {
-                if (value.length >= 3) {
+                if (value.length >= minSearchLength) {
                   debouncedSearch(value);
                 }
               }}
@@ -83,6 +84,17 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
               loading={mondoSearch.isValidating}
               optionFilterProp="filter"
               optionLabelProp="display"
+              minSearchLength={minSearchLength}
+              emptyIndicator={
+                <div className="text-center text-sm">
+                  {t('variant.interpretation_form.germline.condition_empty_indicator')}
+                </div>
+              }
+              noSearchIndicator={
+                <div className="text-center text-sm">
+                  {t('variant.interpretation_form.germline.condition_no_search_indicator')}
+                </div>
+              }
               {...field}
             />
           </FormControl>
