@@ -4,6 +4,7 @@ import { Check, XIcon } from 'lucide-react';
 
 import { CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/base/shadcn/command';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
+import { useI18n } from '@/components/hooks/i18n';
 import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +17,7 @@ export type Option = {
 export type AutoCompleteProps<T extends Option> = {
   options?: T[];
   emptyIndicator?: ReactNode;
+  noSearchIndicator?: ReactNode;
   value?: string;
   onChange?: (value: string) => void;
   onSearch?: (value: string) => void;
@@ -27,6 +29,8 @@ export type AutoCompleteProps<T extends Option> = {
   optionFilterProp?: keyof T;
   loading?: boolean;
   leftAddon?: ReactNode;
+  /** Minimum length to consider a search has started. @default 0 */
+  minSearchLength?: number;
 };
 
 export function getSelectedOptionByValue<T extends Option>(value: string | undefined, options: T[]): T | undefined {
@@ -37,6 +41,7 @@ export const AutoComplete = <T extends Option>({
   options: arrayOptions = [],
   placeholder,
   emptyIndicator,
+  noSearchIndicator,
   value,
   onChange,
   disabled,
@@ -47,8 +52,10 @@ export const AutoComplete = <T extends Option>({
   className,
   loading,
   leftAddon,
+  minSearchLength = 0,
 }: AutoCompleteProps<T>) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useI18n();
 
   const [isOpen, setOpen] = useState(false);
   const [selected, setSelected] = useState<T | undefined>(getSelectedOptionByValue(value, arrayOptions));
@@ -128,6 +135,15 @@ export const AutoComplete = <T extends Option>({
     option[optionFilterProp].toLowerCase().trim().includes(inputValueSearch.toLowerCase().trim()),
   );
 
+  const hasSearchStarted = inputValueSearch.length > minSearchLength;
+
+  const getEmptyStateIndicator = () => {
+    if (hasSearchStarted) {
+      return emptyIndicator || <div className="text-center text-sm">{t('common.auto_complete.no_data')}</div>;
+    }
+    return noSearchIndicator || <div className="text-center text-sm">{t('common.auto_complete.type_to_search')}</div>;
+  };
+
   return (
     <CommandPrimitive
       onKeyDown={handleKeyDown}
@@ -206,9 +222,7 @@ export const AutoComplete = <T extends Option>({
                 ))}
               </CommandGroup>
             ) : null}
-            {!loading && (
-              <CommandEmpty>{emptyIndicator || <div className="text-center text-sm">No data</div>}</CommandEmpty>
-            )}
+            {!loading && <CommandEmpty>{getEmptyStateIndicator()}</CommandEmpty>}
           </CommandList>
         </div>
       </div>

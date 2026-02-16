@@ -55,36 +55,31 @@ type CommandInputProps = React.ComponentPropsWithoutRef<typeof CommandPrimitive.
     rightAddon?: React.ReactNode;
     leftAddon?: React.ReactNode;
   };
-function CommandInput({
-  className,
-  wrapperClassName,
-  leftAddon,
-  rightAddon,
-  disabled,
-  variant,
-  ...props
-}: CommandInputProps) {
-  const styles = CommandInputVariants({ variant });
-  return (
-    <div
-      className={cn(styles.base({ variant }), wrapperClassName, {
-        'cursor-not-allowed opacity-50': disabled,
-      })}
-      cmdk-input-wrapper=""
-    >
-      {leftAddon}
-      <CommandPrimitive.Input
-        className={cn(
-          'flex w-full rounded-md bg-background text-sm outline-none placeholder:text-muted-foreground',
-          className,
-        )}
-        disabled={disabled}
-        {...props}
-      />
-      {rightAddon}
-    </div>
-  );
-}
+const CommandInput = React.forwardRef<React.ElementRef<typeof CommandPrimitive.Input>, CommandInputProps>(
+  ({ className, wrapperClassName, leftAddon, rightAddon, disabled, variant, ...props }, ref) => {
+    const styles = CommandInputVariants({ variant });
+    return (
+      <div
+        className={cn(styles.base({ variant }), wrapperClassName, {
+          'cursor-not-allowed opacity-50': disabled,
+        })}
+        cmdk-input-wrapper=""
+      >
+        {leftAddon}
+        <CommandPrimitive.Input
+          ref={ref}
+          className={cn(
+            'flex w-full rounded-md bg-background text-sm outline-none placeholder:text-muted-foreground',
+            className,
+          )}
+          disabled={disabled}
+          {...props}
+        />
+        {rightAddon}
+      </div>
+    );
+  },
+);
 CommandInput.displayName = CommandPrimitive.Input.displayName;
 
 function CommandList({ className, ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>) {
