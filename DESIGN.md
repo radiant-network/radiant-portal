@@ -6,15 +6,15 @@ The worker validates batch payloads for four entity types: **patient**, **sample
 
 ### Files today
 
-| File | Responsibility |
-|---|---|
-| `main.go` | Entry point, `BatchValidationContext`, health probe, processor dispatch |
-| `base_validation.go` | `ValidationRecord` interface, `BaseValidationRecord`, shared formatters, `validateUniquenessInBatch`, `updateBatch`, `copyRecordIntoBatch` |
-| `batch_utils.go` | `processUnexpectedError` |
-| `patient_validation.go` | Patient processing, validation, persistence |
-| `sample_validation.go` | Sample processing, validation, persistence |
-| `sequencing_experiment_validation.go` | Seq-exp processing, validation, persistence |
-| `case_validation.go` | Case processing, validation, persistence (~1630 lines) |
+| File                                  | Responsibility                                                                                                                             |
+|---------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `main.go`                             | Entry point, `BatchValidationContext`, health probe, processor dispatch                                                                    |
+| `base_validation.go`                  | `ValidationRecord` interface, `BaseValidationRecord`, shared formatters, `validateUniquenessInBatch`, `updateBatch`, `copyRecordIntoBatch` |
+| `batch_utils.go`                      | `processUnexpectedError`                                                                                                                   |
+| `patient_validation.go`               | Patient processing, validation, persistence                                                                                                |
+| `sample_validation.go`                | Sample processing, validation, persistence                                                                                                 |
+| `sequencing_experiment_validation.go` | Seq-exp processing, validation, persistence                                                                                                |
+| `case_validation.go`                  | Case processing, validation, persistence (~1630 lines)                                                                                     |
 
 ### Key issues
 
@@ -30,12 +30,12 @@ They differ only in the record type used for `addWarnings` and in how the messag
 
 **2. Four different approaches to string field validation**
 
-| Type | Approach |
-|---|---|
-| Patient | One method per field with inline `len()` + `regexp.MatchString()` checks |
-| Sample | `validateFieldWithRegexp()` helper + separate `validateFieldLength()` |
-| Seq-exp | `verifyStringField()` -- the most consolidated: handles required, max-length, regex in one call |
-| Case | `validateCaseField()`, `validatePatientsTextField()`, `validateTaskTextField()`, `validateDocumentTextField()` -- four slightly different signatures for the same logic |
+| Type    | Approach                                                                                                                                                                |
+|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Patient | One method per field with inline `len()` + `regexp.MatchString()` checks                                                                                                |
+| Sample  | `validateFieldWithRegexp()` helper + separate `validateFieldLength()`                                                                                                   |
+| Seq-exp | `verifyStringField()` -- the most consolidated: handles required, max-length, regex in one call                                                                         |
+| Case    | `validateCaseField()`, `validatePatientsTextField()`, `validateTaskTextField()`, `validateDocumentTextField()` -- four slightly different signatures for the same logic |
 
 **3. Copy-paste batch processing pipeline**
 
@@ -53,13 +53,13 @@ The structural logic is identical; only the types and the insert functions diffe
 
 Regex constants are declared wherever first needed:
 
-| Regex | Declared in |
-|---|---|
-| `ExternalIdRegexp` | `base_validation.go` |
-| `NameRegExp` | `patient_validation.go` |
-| `TissueSiteRegExp` | `sample_validation.go` |
-| `AlphanumericIdentifierRegExp` | `sequencing_experiment_validation.go` |
-| `FamilyMemberCodeRegExp`, `TextRegExp` | `case_validation.go` |
+| Regex                                  | Declared in                           |
+|----------------------------------------|---------------------------------------|
+| `ExternalIdRegexp`                     | `base_validation.go`                  |
+| `NameRegExp`                           | `patient_validation.go`               |
+| `TissueSiteRegExp`                     | `sample_validation.go`                |
+| `AlphanumericIdentifierRegExp`         | `sequencing_experiment_validation.go` |
+| `FamilyMemberCodeRegExp`, `TextRegExp` | `case_validation.go`                  |
 
 **5. Redundant path helper**
 

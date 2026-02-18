@@ -10,10 +10,17 @@ import (
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/validation"
 	"gorm.io/gorm"
 )
 
+const TextMaxLength = 100
 const NoteMaxLength = 1000
+
+// Regular expressions for external IDs (Ex: SubmitterPatientId, JHN).
+const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
+
+var ExternalIdRegexpCompiled = regexp.MustCompile(ExternalIdRegexp)
 
 // FamilyMemberCodeRegExp defines a regular expression pattern that matches strings containing
 // uppercase and lowercase letters (A-Z, a-z) and hyphens.
@@ -132,8 +139,8 @@ func NewStorageContext(db *gorm.DB) *StorageContext {
 }
 
 type CaseValidationRecord struct {
-	BaseValidationRecord
-	Context                *BatchValidationContext
+	validation.BaseValidationRecord
+	Context                *validation.BatchValidationContext
 	Case                   types.CaseBatch
 	CaseID                 *int
 	ProjectID              *int
@@ -166,9 +173,9 @@ type CaseValidationRecord struct {
 	TaskContexts          map[int][]*types.TaskContext
 }
 
-func NewCaseValidationRecord(ctx *BatchValidationContext, c types.CaseBatch, index int) *CaseValidationRecord {
+func NewCaseValidationRecord(ctx *validation.BatchValidationContext, c types.CaseBatch, index int) *CaseValidationRecord {
 	return &CaseValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{
+		BaseValidationRecord: validation.BaseValidationRecord{
 			Index: index,
 		},
 		Case:                  c,
@@ -182,7 +189,7 @@ func NewCaseValidationRecord(ctx *BatchValidationContext, c types.CaseBatch, ind
 	}
 }
 
-func (r *CaseValidationRecord) GetBase() *BaseValidationRecord {
+func (r *CaseValidationRecord) GetBase() *validation.BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
@@ -536,13 +543,13 @@ func (cr *CaseValidationRecord) fetchValidationInfos() error {
 
 func (cr *CaseValidationRecord) validateRegexPattern(path, value, code, message string, regExp *regexp.Regexp) {
 	if regExp != nil && !regExp.MatchString(value) {
-		cr.addErrors(fmt.Sprintf("%s does not match the regular expression `%s`.", message, regExp.String()), code, path)
+		cr.AddErrors(fmt.Sprintf("%s does not match the regular expression `%s`.", message, regExp.String()), code, path)
 	}
 }
 
 func (cr *CaseValidationRecord) validateTextLength(path, value, code, message string, maxLength int) {
 	if len(value) > maxLength {
-		cr.addErrors(fmt.Sprintf("%s field is too long, maximum length allowed is %d.", message, maxLength), code, path)
+		cr.AddErrors(fmt.Sprintf("%s field is too long, maximum length allowed is %d.", message, maxLength), code, path)
 	}
 }
 
@@ -622,7 +629,7 @@ func (cr *CaseValidationRecord) validateCodeField(code, fieldName, path, codeTyp
 		var message string
 		message = cr.formatObservationInvalidFieldMessage(fieldName, patientIndex, observationType, obsIndex)
 		msg := fmt.Sprintf("%s %s %q is not a valid %s.", message, codeType, code, codeType)
-		cr.addErrors(msg, ObservationInvalidField, path) // OBS-001
+		cr.AddErrors(msg, ObservationInvalidField, path) // OBS-001
 	}
 }
 
@@ -734,7 +741,7 @@ func (cr *CaseValidationRecord) validatePatient(patientIndex int) {
 			cr.Index,
 			patientIndex,
 		)
-		cr.addErrors(message, PatientNotFound, path)
+		cr.AddErrors(message, PatientNotFound, path)
 	}
 }
 
@@ -751,7 +758,7 @@ func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int
 			p.SubmitterPatientId,
 			cr.Index,
 		)
-		cr.addErrors(message, CaseDuplicatePatient, path)
+		cr.AddErrors(message, CaseDuplicatePatient, path)
 	}
 	visited[patientKey] = struct{}{}
 }
@@ -763,7 +770,7 @@ func (cr *CaseValidationRecord) validateAffectedStatusCode(patientIndex int) {
 		path := cr.formatPatientsFieldPath(&patientIndex, "", nil)
 		message := cr.formatPatientsInvalidFieldMessage(fieldName, patientIndex)
 		msg := fmt.Sprintf("%s affected status code %q must be in [%s].", message, a, strings.Join(cr.PatientAffectedStatusCodes, ", "))
-		cr.addErrors(msg, PatientInvalidField, path)
+		cr.AddErrors(msg, PatientInvalidField, path)
 	}
 }
 
@@ -774,7 +781,7 @@ func (cr *CaseValidationRecord) validateRelationshipToProbandCode(patientIndex i
 		path := cr.formatPatientsFieldPath(&patientIndex, "", nil)
 		message := cr.formatPatientsInvalidFieldMessage(fieldName, patientIndex)
 		msg := fmt.Sprintf("%s relationship to proband code %q must be in [%s].", message, r, strings.Join(cr.PatientRelationshipToProbandCodes, ", "))
-		cr.addErrors(msg, PatientInvalidField, path)
+		cr.AddErrors(msg, PatientInvalidField, path)
 	}
 }
 
@@ -820,7 +827,7 @@ func (cr *CaseValidationRecord) validateCasePatients() error {
 	if nbProband != 1 {
 		message := fmt.Sprintf("Case %d must have exactly 1 proband.", cr.Index)
 		path := cr.formatFieldPath("patients", nil, "", nil)
-		cr.addErrors(message, CaseInvalidNumberOfProbands, path)
+		cr.AddErrors(message, CaseInvalidNumberOfProbands, path)
 	}
 
 	return nil
@@ -839,7 +846,7 @@ func (cr *CaseValidationRecord) validateSeqExpExists(seqExpIndex int) (error, bo
 			se.SubmitterSampleId,
 			se.Aliquot,
 		)
-		cr.addErrors(message, SequencingExperimentNotFound, path)
+		cr.AddErrors(message, SequencingExperimentNotFound, path)
 		return nil, false
 	}
 	return nil, true
@@ -875,7 +882,7 @@ func (cr *CaseValidationRecord) validateSeqExpPatientInCase(seqExpIndex int, sam
 			se.Aliquot,
 			cr.Index,
 		)
-		cr.addErrors(message, CaseSeqExpNotFoundForPatient, path)
+		cr.AddErrors(message, CaseSeqExpNotFoundForPatient, path)
 	}
 
 	return nil
@@ -896,7 +903,7 @@ func (cr *CaseValidationRecord) validateSeqExpCaseType(seqExpIndex int, sample *
 			cr.Index,
 			seqExpIndex,
 		)
-		cr.addErrors(message, CaseInvalidSeqExpForType, path)
+		cr.AddErrors(message, CaseInvalidSeqExpForType, path)
 	}
 	return nil
 }
@@ -946,29 +953,29 @@ func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string,
 
 func (cr *CaseValidationRecord) validateCodes() {
 	if !slices.Contains(cr.StatusCodes, cr.Case.StatusCode) {
-		path := formatPath(cr, "")
+		path := validation.FormatPath(cr, "")
 		message := fmt.Sprintf("%s status code %q is not a valid status code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("status_code"), cr.Case.StatusCode, strings.Join(cr.StatusCodes, ", "))
-		cr.addErrors(message, CaseInvalidField, path)
+		cr.AddErrors(message, CaseInvalidField, path)
 	}
-	if cr.Case.ResolutionStatusCode != "" && !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
-		path := formatPath(cr, "")
+	if !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
+		path := validation.FormatPath(cr, "")
 		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("resolution_status_code"), cr.Case.ResolutionStatusCode, strings.Join(cr.ResolutionStatusCodes, ", "))
-		cr.addErrors(message, CaseInvalidField, path)
+		cr.AddErrors(message, CaseInvalidField, path)
 	}
-	if cr.Case.PriorityCode != "" && !slices.Contains(cr.PriorityCodes, cr.Case.PriorityCode) {
-		path := formatPath(cr, "")
+	if !slices.Contains(cr.PriorityCodes, cr.Case.PriorityCode) {
+		path := validation.FormatPath(cr, "")
 		message := fmt.Sprintf("%s priority code %q is not a valid priority code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("priority_code"), cr.Case.PriorityCode, strings.Join(cr.PriorityCodes, ", "))
-		cr.addErrors(message, CaseInvalidField, path)
+		cr.AddErrors(message, CaseInvalidField, path)
 	}
 	if !slices.Contains(cr.CategoryCodes, cr.Case.CategoryCode) {
-		path := formatPath(cr, "")
+		path := validation.FormatPath(cr, "")
 		message := fmt.Sprintf("%s category code %q is not a valid category code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("category_code"), cr.Case.CategoryCode, strings.Join(cr.CategoryCodes, ", "))
-		cr.addErrors(message, CaseInvalidField, path)
+		cr.AddErrors(message, CaseInvalidField, path)
 	}
 }
 
 func (cr *CaseValidationRecord) validateCase() error {
-	path := formatPath(cr, "")
+	path := validation.FormatPath(cr, "")
 
 	// Validate case uniqueness in DB
 	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
@@ -979,7 +986,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 		if c != nil {
 			cr.Skipped = true
 			message := fmt.Sprintf("Case (%d / %s) already exists, skipped.", *cr.ProjectID, cr.Case.SubmitterCaseId)
-			cr.addInfos(message, CaseAlreadyExists, path) // CASE-001
+			cr.AddInfos(message, CaseAlreadyExists, path) // CASE-001
 			return nil
 		}
 	}
@@ -987,19 +994,19 @@ func (cr *CaseValidationRecord) validateCase() error {
 	// Validate data in DB
 	if cr.ProjectID == nil {
 		message := fmt.Sprintf("Project %s for case %d does not exist.", cr.Case.ProjectCode, cr.Index)
-		cr.addErrors(message, CaseUnknownProject, path) // CASE-003
+		cr.AddErrors(message, CaseUnknownProject, path) // CASE-003
 	}
 	if cr.Case.DiagnosticLabCode != "" && cr.DiagnosisLabID == nil {
 		message := fmt.Sprintf("Diagnostic lab %q for case %d does not exist.", cr.Case.DiagnosticLabCode, cr.Index)
-		cr.addErrors(message, CaseUnknownDiagnosticLab, path) // CASE-004
+		cr.AddErrors(message, CaseUnknownDiagnosticLab, path) // CASE-004
 	}
 	if cr.AnalysisCatalogID == nil {
 		message := fmt.Sprintf("Analysis %q for case %d does not exist.", cr.Case.AnalysisCode, cr.Index)
-		cr.addErrors(message, CaseUnknownAnalysisCode, path) // CASE-005
+		cr.AddErrors(message, CaseUnknownAnalysisCode, path) // CASE-005
 	}
 	if cr.Case.OrderingOrganizationCode != "" && cr.OrderingOrganizationID == nil {
 		message := fmt.Sprintf("Ordering organization %q for case %d does not exist.", cr.Case.OrderingOrganizationCode, cr.Index)
-		cr.addErrors(message, CaseUnknownOrderingOrganization, path) // CASE-006
+		cr.AddErrors(message, CaseUnknownOrderingOrganization, path) // CASE-006
 	}
 
 	// Validate fields
@@ -1042,7 +1049,7 @@ func (cr *CaseValidationRecord) validateTaskTypeCode(typeCode string, taskIndex 
 	if !slices.Contains(cr.TaskTypeCodes, typeCode) {
 		path := cr.formatFieldPath("tasks", &taskIndex, "type_code", nil)
 		msg := cr.formatTaskFieldErrorMessage("type_code", cr.Index, taskIndex) + " invalid task type code `" + typeCode + "`. Valid codes are: [" + strings.Join(cr.TaskTypeCodes, ", ") + "]."
-		cr.addErrors(msg+"", TaskInvalidField, path)
+		cr.AddErrors(msg+"", TaskInvalidField, path)
 	}
 }
 
@@ -1051,7 +1058,7 @@ func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 	if len(task.Aliquots) == 0 {
 		path := cr.formatFieldPath("tasks", &taskIndex, "aliquots", nil)
 		msg := cr.formatTaskFieldErrorMessage("aliquots", cr.Index, taskIndex)
-		cr.addErrors(fmt.Sprintf("%s aliquots must contain at least one value.", msg), TaskInvalidField, path)
+		cr.AddErrors(fmt.Sprintf("%s aliquots must contain at least one value.", msg), TaskInvalidField, path)
 		return
 	}
 
@@ -1071,7 +1078,7 @@ func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 		if _, found := existingAliquots[aliquot]; !found {
 			path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
 			message := fmt.Sprintf("Sequencing %q is not defined for case %d - task %d.", aliquot, cr.Index, taskIndex)
-			cr.addErrors(message, TaskUnknownAliquot, path)
+			cr.AddErrors(message, TaskUnknownAliquot, path)
 		}
 	}
 }
@@ -1089,7 +1096,7 @@ func (cr *CaseValidationRecord) getOriginTaskForInputDocument(url string) (*type
 
 func (cr *CaseValidationRecord) addMissingExperimentError(url, baseMsg, path string) {
 	msg := fmt.Sprintf("Input document with URL %s for %s was produced by a sequencing experiment not defined in this case.", url, baseMsg)
-	cr.addErrors(msg, TaskInputDocumentNotInSequencingExperiments, path)
+	cr.AddErrors(msg, TaskInputDocumentNotInSequencingExperiments, path)
 }
 
 func (cr *CaseValidationRecord) validateTaskDocumentsContext(url, path, baseMsg string, isOriginMissing bool) {
@@ -1126,13 +1133,13 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 	if _, ok := RequiresInputDocumentsTaskTypes[task.TypeCode]; ok {
 		if task.InputDocuments == nil || len(task.InputDocuments) == 0 {
 			message := fmt.Sprintf("Missing input documents for case %d - task %d of type %s.", cr.Index, taskIndex, task.TypeCode)
-			cr.addErrors(message, TaskMissingInputDocuments, path)
+			cr.AddErrors(message, TaskMissingInputDocuments, path)
 		}
 	}
 
 	if len(task.OutputDocuments) == 0 {
 		message := fmt.Sprintf("Missing output documents for case %d - task %d of type %s.", cr.Index, taskIndex, task.TypeCode)
-		cr.addErrors(message, TaskMissingOutputDocuments, path)
+		cr.AddErrors(message, TaskMissingOutputDocuments, path)
 	}
 
 	for _, indoc := range task.InputDocuments {
@@ -1141,7 +1148,7 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 		_, originTask := cr.getOriginTaskForInputDocument(url)
 
 		if !existsInDocs && originTask == nil {
-			cr.addErrors(fmt.Sprintf("Input document with URL %s does not exist for %s.", url, baseMsg), TaskInputDocumentNotFound, path)
+			cr.AddErrors(fmt.Sprintf("Input document with URL %s does not exist for %s.", url, baseMsg), TaskInputDocumentNotFound, path)
 			continue
 		}
 		cr.validateTaskDocumentsContext(url, path, baseMsg, originTask == nil)
@@ -1182,7 +1189,7 @@ func (cr *CaseValidationRecord) validateDocumentExists(new *types.OutputDocument
 			hasDiff = true
 			msg := fmt.Sprintf("A document with same url %s has been found but with a different %s (%v <> %v).",
 				new.Url, name, existingVal, newVal)
-			cr.addWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
+			cr.AddWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
 		}
 	}
 
@@ -1195,16 +1202,16 @@ func (cr *CaseValidationRecord) validateDocumentExists(new *types.OutputDocument
 	if new.Size == nil {
 		hasDiff = true
 		msg := fmt.Sprintf("A document with same url %s has been found but with a different size (%d <> nil).", new.Url, existing.Size)
-		cr.addWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
+		cr.AddWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
 	} else if existing.Size != *new.Size {
 		hasDiff = true
 		msg := fmt.Sprintf("A document with same url %s has been found but with a different size (%d <> %d).", new.Url, existing.Size, *new.Size)
-		cr.addWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
+		cr.AddWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
 	}
 
 	if !hasDiff {
 		msg := "Document " + new.Url + " already exists, skipped."
-		cr.addInfos(msg, DocumentDuplicateInDB, path)
+		cr.AddInfos(msg, DocumentDuplicateInDB, path)
 	}
 }
 
@@ -1223,7 +1230,7 @@ func (cr *CaseValidationRecord) validateDocumentIsOutputOfAnotherTask(doc *types
 	for _, dr := range relatedDocs {
 		if dr.Type == "output" {
 			msg := "A document with same url " + doc.Url + " has been found in the output of a different task."
-			cr.addErrors(msg, DocumentAlreadyOutputOfAnotherTask, path)
+			cr.AddErrors(msg, DocumentAlreadyOutputOfAnotherTask, path)
 			return
 		}
 	}
@@ -1235,7 +1242,7 @@ func (cr *CaseValidationRecord) validateDocumentMetadata(doc *types.OutputDocume
 		return err
 	}
 	if metadata == nil {
-		cr.addErrors(
+		cr.AddErrors(
 			fmt.Sprintf(
 				"No document can be found on the URL %s for case %d - task %d - output document %d.",
 				doc.Url,
@@ -1248,14 +1255,14 @@ func (cr *CaseValidationRecord) validateDocumentMetadata(doc *types.OutputDocume
 
 	if doc.Size == nil || metadata.Size != *doc.Size {
 		msg := fmt.Sprintf("Document size does not match the actual size of the document %s for case %d - task %d - output document %d.", doc.Url, cr.Index, taskIndex, docIndex)
-		cr.addErrors(msg, DocumentSizeMismatch, path)
+		cr.AddErrors(msg, DocumentSizeMismatch, path)
 	}
 
 	// Hash is optional, validate only if provided
 	if doc.Hash != "" {
 		if metadata.Hash != doc.Hash {
 			msg := fmt.Sprintf("Document hash does not match the actual hash of the document %s for case %d - task %d - output document %d.", doc.Url, cr.Index, taskIndex, docIndex)
-			cr.addErrors(msg, DocumentHashMismatch, path)
+			cr.AddErrors(msg, DocumentHashMismatch, path)
 		}
 	}
 	return nil
@@ -1264,7 +1271,7 @@ func (cr *CaseValidationRecord) validateDocumentMetadata(doc *types.OutputDocume
 func (cr *CaseValidationRecord) validateDocumentDuplicate(doc *types.OutputDocumentBatch, path string) {
 	if _, exists := cr.OutputDocuments[doc.Url]; exists {
 		msg := fmt.Sprintf("Duplicate output document with URL %s found.", doc.Url)
-		cr.addErrors(msg, DocumentDuplicateInBatch, path)
+		cr.AddErrors(msg, DocumentDuplicateInBatch, path)
 	} else {
 		cr.OutputDocuments[doc.Url] = struct{}{}
 	}
@@ -1275,15 +1282,15 @@ func (cr *CaseValidationRecord) validateDocumentCodes(doc *types.OutputDocumentB
 
 	if doc.DataTypeCode != "" && !slices.Contains(cr.DocumentDataTypeCodes, doc.DataTypeCode) {
 		msg := fmt.Sprintf("%s data type code %q is not a valid data type code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("data_type_code"), doc.DataTypeCode, strings.Join(cr.DocumentDataTypeCodes, ", "))
-		cr.addErrors(msg, DocumentInvalidField, path)
+		cr.AddErrors(msg, DocumentInvalidField, path)
 	}
 	if doc.DataCategoryCode != "" && !slices.Contains(cr.DocumentDataCategoryCodes, doc.DataCategoryCode) {
 		msg := fmt.Sprintf("%s data category code %q is not a valid data category code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("data_category_code"), doc.DataCategoryCode, strings.Join(cr.DocumentDataCategoryCodes, ", "))
-		cr.addErrors(msg, DocumentInvalidField, path)
+		cr.AddErrors(msg, DocumentInvalidField, path)
 	}
 	if doc.FormatCode != "" && !slices.Contains(cr.DocumentFormatCodes, doc.FormatCode) {
 		msg := fmt.Sprintf("%s format code %q is not a valid format code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("format_code"), doc.FormatCode, strings.Join(cr.DocumentFormatCodes, ", "))
-		cr.addErrors(msg, DocumentInvalidField, path)
+		cr.AddErrors(msg, DocumentInvalidField, path)
 	}
 }
 
@@ -1308,7 +1315,7 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 					"%s size is invalid, must be non-negative.",
 					cr.formatTaskDocumentFieldErrorMessage("size", cr.Index, tid, did),
 				)
-				cr.addErrors(msg, DocumentInvalidField, path)
+				cr.AddErrors(msg, DocumentInvalidField, path)
 			}
 
 			if err := cr.validateDocumentMetadata(doc, path, tid, did); err != nil {
@@ -1321,7 +1328,7 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 }
 
 func validateCaseRecord(
-	ctx *BatchValidationContext,
+	ctx *validation.BatchValidationContext,
 	c types.CaseBatch,
 	index int,
 ) (*CaseValidationRecord, error) {
@@ -1367,7 +1374,7 @@ func validateCaseRecord(
 	return cr, nil
 }
 
-func processCaseBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+func processCaseBatch(ctx *validation.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
 	payload := []byte(batch.Payload)
 	var caseBatches []types.CaseBatch
 
@@ -1395,7 +1402,7 @@ func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*Case
 	return db.Transaction(func(tx *gorm.DB) error {
 		batchRepo := repository.NewBatchRepository(tx)
 		txCtx := NewStorageContext(tx)
-		rowsUpdated, unexpectedErrUpdate := updateBatch(batch, records, batchRepo)
+		rowsUpdated, unexpectedErrUpdate := validation.UpdateBatch(batch, records, batchRepo)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
 		}

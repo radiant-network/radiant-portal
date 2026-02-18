@@ -5,6 +5,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/validation"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -189,7 +190,7 @@ func Test_ValidateTypeCode_Valid(t *testing.T) {
 		},
 	}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Context: &BatchValidationContext{ValueSetsRepo: mockValueSetRepo}},
+		BaseValidationRecord: validation.BaseValidationRecord{Context: &validation.BatchValidationContext{ValueSetsRepo: mockValueSetRepo}},
 		Sample:               sample,
 	}
 	err := rec.validateTypeCode()
@@ -205,7 +206,7 @@ func Test_ValidateTypeCode_Invalid(t *testing.T) {
 		},
 	}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Context: &BatchValidationContext{ValueSetsRepo: mockValueSetRepo}},
+		BaseValidationRecord: validation.BaseValidationRecord{Context: &validation.BatchValidationContext{ValueSetsRepo: mockValueSetRepo}},
 		Sample:               sample,
 	}
 	err := rec.validateTypeCode()
@@ -218,7 +219,7 @@ func Test_ValidateTypeCode_Invalid(t *testing.T) {
 func Test_ValidateHistologyTypeCode_Valid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood", HistologyCode: "normal"}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Context: &BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}},
+		BaseValidationRecord: validation.BaseValidationRecord{Context: &validation.BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}},
 		Sample:               sample,
 	}
 	err := rec.validateHistologyCode()
@@ -229,7 +230,7 @@ func Test_ValidateHistologyTypeCode_Valid(t *testing.T) {
 func Test_ValidateHistologyTypeCode_Invalid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood", HistologyCode: "invalid_histology"}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Context: &BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}},
+		BaseValidationRecord: validation.BaseValidationRecord{Context: &validation.BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}},
 		Sample:               sample,
 	}
 	err := rec.validateHistologyCode()
@@ -320,7 +321,7 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 			return nil, nil
 		},
 	}
-	mockContext := &BatchValidationContext{
+	mockContext := &validation.BatchValidationContext{
 		OrgRepo:       mockOrgRepo,
 		PatientRepo:   mockPatientRepo,
 		SampleRepo:    mockSampleRepo,

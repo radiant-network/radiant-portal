@@ -9,53 +9,13 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/database"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
+	"github.com/radiant-network/radiant-api/internal/validation"
 	"gorm.io/gorm"
 )
 
-type BatchValidationContext struct {
-	BatchRepo     repository.BatchDAO
-	CasesRepo     repository.CasesDAO
-	DocRepo       repository.DocumentsDAO
-	FamilyRepo    repository.FamilyDAO
-	ObsCat        repository.ObservationCategoricalDAO
-	OrgRepo       repository.OrganizationDAO
-	PatientRepo   repository.PatientsDAO
-	ProjectRepo   repository.ProjectDAO
-	SampleRepo    repository.SamplesDAO
-	SeqExpRepo    repository.SequencingExperimentDAO
-	TaskRepo      repository.TaskDAO
-	ValueSetsRepo repository.ValueSetsDAO
-	S3FS          utils.FileMetadataGetter
-}
-
-func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
-
-	s3fs, err := utils.NewS3Store()
-	if err != nil {
-		return nil, err
-	}
-
-	return &BatchValidationContext{
-		BatchRepo:     repository.NewBatchRepository(db),
-		OrgRepo:       repository.NewOrganizationRepository(db),
-		PatientRepo:   repository.NewPatientsRepository(db),
-		ProjectRepo:   repository.NewProjectRepository(db),
-		SampleRepo:    repository.NewSamplesRepository(db),
-		SeqExpRepo:    repository.NewSequencingExperimentRepository(db),
-		ValueSetsRepo: repository.NewValueSetsRepository(db),
-		CasesRepo:     repository.NewCasesRepository(db),
-		DocRepo:       repository.NewDocumentsRepository(db),
-		FamilyRepo:    repository.NewFamilyRepository(db),
-		ObsCat:        repository.NewObservationCategoricalRepository(db),
-		TaskRepo:      repository.NewTaskRepository(db),
-		S3FS:          s3fs,
-	}, nil
-}
-
-var supportedProcessors = map[string]func(*BatchValidationContext, *types.Batch, *gorm.DB){
+var supportedProcessors = map[string]func(*validation.BatchValidationContext, *types.Batch, *gorm.DB){
 	types.PatientBatchType:              processPatientBatch,
 	types.SampleBatchType:               processSampleBatch,
 	types.SequencingExperimentBatchType: processSequencingExperimentBatch,
@@ -77,7 +37,7 @@ func main() {
 		glog.Fatalf("Failed to initialize postgres database: %v", initDbErr)
 	}
 
-	context, err := NewBatchValidationContext(dbPostgres)
+	context, err := validation.NewBatchValidationContext(dbPostgres)
 	if err != nil {
 		glog.Fatalf("Failed to initialize batch validation context: %v", err)
 	}
@@ -90,7 +50,7 @@ func main() {
 	}
 }
 
-func processBatch(db *gorm.DB, ctx *BatchValidationContext) {
+func processBatch(db *gorm.DB, ctx *validation.BatchValidationContext) {
 	nextBatch, err := ctx.BatchRepo.ClaimNextBatch()
 	if err != nil {
 		glog.Errorf("Error claiming next batch: %v", err)

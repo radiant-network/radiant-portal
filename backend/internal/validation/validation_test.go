@@ -1,4 +1,4 @@
-package main
+package validation
 
 import (
 	"testing"
@@ -19,67 +19,7 @@ func (r *TestValidationRecord) GetResourceType() string {
 	return "test_resource"
 }
 
-func Test_formatPath(t *testing.T) {
-	record := &TestValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Index: 5},
-	}
-
-	pathWithField := formatPath(record, "last_name")
-	assert.Equal(t, "test_resource[5].last_name", pathWithField)
-
-	pathWithoutField := formatPath(record, "")
-	assert.Equal(t, "test_resource[5]", pathWithoutField)
-}
-
-func Test_formatIds(t *testing.T) {
-	result := formatIds([]string{})
-	assert.Equal(t, "", result)
-
-	result = formatIds([]string{"ORG1"})
-	assert.Equal(t, "(ORG1)", result)
-
-	result = formatIds([]string{"ORG1", "P123"})
-	assert.Equal(t, "(ORG1 / P123)", result)
-
-	result = formatIds(nil)
-	assert.Equal(t, "", result)
-}
-
-func Test_formatInvalidField(t *testing.T) {
-	record := &TestValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Index: 0},
-	}
-
-	messageWithIds := formatInvalidField(record, "tissue_site", "is empty", []string{"ORG1", "S1"})
-	expectedMsgWithIds := "Invalid field tissue_site for test_resource (ORG1 / S1). Reason: is empty."
-	assert.Equal(t, expectedMsgWithIds, messageWithIds)
-
-	messageWithoutIds := formatInvalidField(record, "type_code", "is unknown", []string{})
-	expectedMsgWithoutIds := "Invalid field type_code for test_resource. Reason: is unknown."
-	assert.Equal(t, expectedMsgWithoutIds, messageWithoutIds)
-}
-
-func Test_formatFieldTooLong(t *testing.T) {
-	record := &TestValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Index: 2},
-	}
-
-	message := formatFieldTooLong(record, "first_name", 50, []string{"ORG2", "P2"})
-	expectedMessage := "Invalid field first_name for test_resource (ORG2 / P2). Reason: field is too long, maximum length allowed is 50."
-	assert.Equal(t, expectedMessage, message)
-}
-
-func Test_formatDuplicateInBatch(t *testing.T) {
-	record := &TestValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{Index: 3},
-	}
-
-	message := formatDuplicateInBatch(record, []string{"ORG1", "P123"})
-	expected := "Test_resource (ORG1 / P123) appears multiple times in the batch."
-	assert.Equal(t, expected, message)
-}
-
-func Test_validateUniquenessInBatch_NoDuplicate(t *testing.T) {
+func Test_ValidateUniquenessInBatch_NoDuplicate(t *testing.T) {
 	record := &TestValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
@@ -92,7 +32,7 @@ func Test_validateUniquenessInBatch_NoDuplicate(t *testing.T) {
 	seenBatchMap := map[testKey]struct{}{}
 	key := testKey{OrgCode: "ORG1", ID: "P1"}
 
-	validateUniquenessInBatch(
+	ValidateUniquenessInBatch(
 		record,
 		key,
 		seenBatchMap,
@@ -105,7 +45,7 @@ func Test_validateUniquenessInBatch_NoDuplicate(t *testing.T) {
 	assert.True(t, exists)
 }
 
-func Test_validateUniquenessInBatch_DuplicateFound(t *testing.T) {
+func Test_ValidateUniquenessInBatch_DuplicateFound(t *testing.T) {
 	record := &TestValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 5},
 	}
@@ -119,7 +59,7 @@ func Test_validateUniquenessInBatch_DuplicateFound(t *testing.T) {
 	key := testKey{OrgCode: "ORG1", ID: "P1"}
 	seenBatchMap[key] = struct{}{}
 
-	validateUniquenessInBatch(
+	ValidateUniquenessInBatch(
 		record,
 		key,
 		seenBatchMap,
@@ -133,7 +73,7 @@ func Test_validateUniquenessInBatch_DuplicateFound(t *testing.T) {
 	assert.Equal(t, "test_resource[5]", record.Errors[0].Path)
 }
 
-func Test_validateUniquenessInBatch_MultipleDuplicates(t *testing.T) {
+func Test_ValidateUniquenessInBatch_MultipleDuplicates(t *testing.T) {
 	type testKey struct {
 		OrgCode string
 		ID      string
@@ -145,7 +85,7 @@ func Test_validateUniquenessInBatch_MultipleDuplicates(t *testing.T) {
 	}
 	key := testKey{OrgCode: "ORG1", ID: "P1"}
 	seenBatchMap[key] = struct{}{}
-	validateUniquenessInBatch(
+	ValidateUniquenessInBatch(
 		record1,
 		key,
 		seenBatchMap,
@@ -156,7 +96,7 @@ func Test_validateUniquenessInBatch_MultipleDuplicates(t *testing.T) {
 	record2 := &TestValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 3},
 	}
-	validateUniquenessInBatch(
+	ValidateUniquenessInBatch(
 		record2,
 		key,
 		seenBatchMap,
@@ -170,7 +110,7 @@ func Test_validateUniquenessInBatch_MultipleDuplicates(t *testing.T) {
 	assert.Equal(t, "test_resource[3]", record2.Errors[0].Path)
 }
 
-func Test_validateUniquenessInBatch_DifferentKeys(t *testing.T) {
+func Test_ValidateUniquenessInBatch_DifferentKeys(t *testing.T) {
 	type testKey struct {
 		OrgCode string
 		ID      string
@@ -182,7 +122,7 @@ func Test_validateUniquenessInBatch_DifferentKeys(t *testing.T) {
 	record := &TestValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 2},
 	}
-	validateUniquenessInBatch(
+	ValidateUniquenessInBatch(
 		record,
 		testKey{OrgCode: "ORG1", ID: "P2"}, // Different ID
 		seenBatchMap,
@@ -193,7 +133,7 @@ func Test_validateUniquenessInBatch_DifferentKeys(t *testing.T) {
 	assert.Empty(t, record.Errors)
 }
 
-func Test_validateUniquenessInBatch_EmptyBatchMap(t *testing.T) {
+func Test_ValidateUniquenessInBatch_EmptyBatchMap(t *testing.T) {
 	record := &TestValidationRecord{
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
@@ -206,7 +146,7 @@ func Test_validateUniquenessInBatch_EmptyBatchMap(t *testing.T) {
 	seenBatchMap := map[testKey]struct{}{}
 	key := testKey{OrgCode: "ORG1", ID: "P1"}
 
-	validateUniquenessInBatch(
+	ValidateUniquenessInBatch(
 		record,
 		key,
 		seenBatchMap,
@@ -236,7 +176,7 @@ func Test_CopyRecordIntoBatch_Success(t *testing.T) {
 		}},
 	}
 
-	copyRecordIntoBatch(batch, records)
+	CopyRecordIntoBatch(batch, records)
 
 	assert.Equal(t, types.BatchStatusSuccess, batch.Status)
 	assert.Equal(t, 2, batch.Summary.Created)
@@ -261,7 +201,7 @@ func Test_CopyRecordIntoBatch_WithErrors(t *testing.T) {
 		},
 		}}
 
-	copyRecordIntoBatch(batch, records)
+	CopyRecordIntoBatch(batch, records)
 
 	assert.Equal(t, types.BatchStatusError, batch.Status)
 	assert.Equal(t, 0, batch.Summary.Created)
@@ -287,7 +227,7 @@ func Test_CopyRecordIntoBatch_WithSkipped(t *testing.T) {
 		}},
 	}
 
-	copyRecordIntoBatch(batch, records)
+	CopyRecordIntoBatch(batch, records)
 
 	assert.Equal(t, types.BatchStatusSuccess, batch.Status)
 	assert.Equal(t, 1, batch.Summary.Created)
@@ -321,7 +261,7 @@ func Test_CopyRecordIntoBatch_MixedRecords(t *testing.T) {
 		}},
 	}
 
-	copyRecordIntoBatch(batch, records)
+	CopyRecordIntoBatch(batch, records)
 
 	assert.Equal(t, types.BatchStatusError, batch.Status)
 	assert.Equal(t, 0, batch.Summary.Created)
@@ -337,7 +277,7 @@ func Test_CopyRecordIntoBatch_EmptyRecords(t *testing.T) {
 
 	records := []*TestValidationRecord{}
 
-	copyRecordIntoBatch(batch, records)
+	CopyRecordIntoBatch(batch, records)
 
 	assert.Equal(t, types.BatchStatusSuccess, batch.Status)
 	assert.Equal(t, 0, batch.Summary.Created)
@@ -364,7 +304,7 @@ func Test_CopyRecordIntoBatch_MultipleMessages(t *testing.T) {
 		}},
 	}
 
-	copyRecordIntoBatch(batch, records)
+	CopyRecordIntoBatch(batch, records)
 
 	assert.Equal(t, types.BatchStatusError, batch.Status)
 	assert.Equal(t, 1, batch.Summary.Errors)

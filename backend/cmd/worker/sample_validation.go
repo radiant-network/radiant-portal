@@ -10,6 +10,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/validation"
 	"gorm.io/gorm"
 )
 
@@ -34,14 +35,14 @@ type SampleKey struct {
 }
 
 type SampleValidationRecord struct {
-	BaseValidationRecord
+	validation.BaseValidationRecord
 	Sample         types.SampleBatch
 	PatientId      int
 	OrganizationId int
 	ParentSampleId *int
 }
 
-func (r *SampleValidationRecord) GetBase() *BaseValidationRecord {
+func (r *SampleValidationRecord) GetBase() *validation.BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
@@ -51,7 +52,7 @@ func (r *SampleValidationRecord) GetResourceType() string {
 
 func (r *SampleValidationRecord) formatFieldRegexpMatch(fieldName string, regexp string) string {
 	reason := fmt.Sprintf("does not match the regular expression %s", regexp)
-	return formatInvalidField(r, fieldName, reason, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+	return validation.FormatInvalidField(r, fieldName, reason, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
 }
 
 func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValue string) {
@@ -59,17 +60,17 @@ func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValu
 		return
 	}
 	if len(fieldValue) > TextMaxLength {
-		path := formatPath(r, fieldName)
-		message := formatFieldTooLong(r, fieldName, TextMaxLength, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
-		r.addErrors(message, SampleInvalidValueCode, path)
+		path := validation.FormatPath(r, fieldName)
+		message := validation.FormatFieldTooLong(r, fieldName, TextMaxLength, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+		r.AddErrors(message, SampleInvalidValueCode, path)
 	}
 }
 
 func (r *SampleValidationRecord) validatePatient(patient *types.Patient) {
 	if patient == nil {
-		path := formatPath(r, "submitter_patient_id")
+		path := validation.FormatPath(r, "submitter_patient_id")
 		message := fmt.Sprintf("Patient (%s / %s) for sample %s does not exist.", r.Sample.PatientOrganizationCode, r.Sample.SubmitterPatientId, r.Sample.SubmitterSampleId)
-		r.addErrors(message, SamplePatientNotExistCode, path)
+		r.AddErrors(message, SamplePatientNotExistCode, path)
 	} else {
 		r.PatientId = patient.ID
 	}
@@ -77,9 +78,9 @@ func (r *SampleValidationRecord) validatePatient(patient *types.Patient) {
 
 func (r *SampleValidationRecord) validateOrganization(organization *types.Organization) {
 	if organization == nil {
-		path := formatPath(r, "sample_organization_code")
+		path := validation.FormatPath(r, "sample_organization_code")
 		message := fmt.Sprintf("Organization %s for sample %s does not exist.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
-		r.addErrors(message, SampleOrgNotExistCode, path)
+		r.AddErrors(message, SampleOrgNotExistCode, path)
 	} else {
 		r.OrganizationId = organization.ID
 	}
@@ -94,18 +95,18 @@ func (r *SampleValidationRecord) validateExistingSampleInDb(existingSample *type
 
 		if !different {
 			message := fmt.Sprintf("Sample (%s / %s) already exists, skipped.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
-			r.addInfos(message, SampleAlreadyExistCode, formatPath(r, ""))
+			r.AddInfos(message, SampleAlreadyExistCode, validation.FormatPath(r, ""))
 		}
 	}
 }
 
 func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParentSample *types.Sample) {
 	fieldName := "submitter_parent_sample_id"
-	path := formatPath(r, fieldName)
+	path := validation.FormatPath(r, fieldName)
 	if existingParentSample != nil {
 		if existingParentSample.PatientID != r.PatientId {
 			message := fmt.Sprintf("Invalid field %s for sample (%s / %s). Reason: Invalid parent sample %s for this sample.", fieldName, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
-			r.addErrors(message, SampleInvalidPatientForParentSampleCode, path)
+			r.AddErrors(message, SampleInvalidPatientForParentSampleCode, path)
 		} else {
 			validateIsDifferentExistingSampleField(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
 		}
@@ -114,10 +115,10 @@ func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParent
 
 func (r *SampleValidationRecord) validateExistingParentSampleInBatch(parentSampleInBatch bool) {
 	fieldName := "submitter_parent_sample_id"
-	path := formatPath(r, fieldName)
+	path := validation.FormatPath(r, fieldName)
 	if !parentSampleInBatch {
 		message := fmt.Sprintf("Sample %s does not exist.", r.Sample.SubmitterParentSampleId)
-		r.addErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
+		r.AddErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
 	}
 }
 
@@ -128,7 +129,7 @@ func validateIsDifferentExistingSampleField[T comparable](
 	recordValue T,
 ) bool {
 	if existingSampleValue != recordValue {
-		path := formatPath(r, fieldName)
+		path := validation.FormatPath(r, fieldName)
 		message := fmt.Sprintf("A sample with same ids (%s / %s) has been found but with a different %s (%v <> %v).",
 			r.Sample.SampleOrganizationCode,
 			r.Sample.SubmitterSampleId,
@@ -136,13 +137,13 @@ func validateIsDifferentExistingSampleField[T comparable](
 			existingSampleValue,
 			recordValue,
 		)
-		r.addWarnings(message, SampleExistingSampleDifferentFieldCode, path)
+		r.AddWarnings(message, SampleExistingSampleDifferentFieldCode, path)
 		return true
 	}
 	return false
 }
 
-func processSampleBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+func processSampleBatch(ctx *validation.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
 	payload := []byte(batch.Payload)
 	var samplesbatch []types.SampleBatch
 
@@ -170,7 +171,7 @@ func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []*Sa
 	return db.Transaction(func(tx *gorm.DB) error {
 		txRepoSample := repository.NewSamplesRepository(tx)
 		txRepoBatch := repository.NewBatchRepository(tx)
-		rowsUpdated, unexpectedErrUpdate := updateBatch(batch, records, txRepoBatch)
+		rowsUpdated, unexpectedErrUpdate := validation.UpdateBatch(batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
 		}
@@ -289,8 +290,8 @@ func (r *SampleValidationRecord) validateFieldWithRegexp(fieldName string, field
 	r.validateFieldLength(fieldName, fieldValue)
 	if !regexpCompiled.MatchString(fieldValue) {
 		message := r.formatFieldRegexpMatch(fieldName, regexpStr)
-		path := formatPath(r, fieldName)
-		r.addErrors(message, SampleInvalidValueCode, path)
+		path := validation.FormatPath(r, fieldName)
+		r.AddErrors(message, SampleInvalidValueCode, path)
 	}
 }
 
@@ -317,9 +318,9 @@ func (r *SampleValidationRecord) validateTypeCode() error {
 	}
 	if !slices.Contains(allowedTypeCodes, r.Sample.TypeCode) {
 		fieldName := "type_code"
-		path := formatPath(r, fieldName)
-		message := formatInvalidField(r, fieldName, fmt.Sprintf("must be one of: %s", strings.Join(allowedTypeCodes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
-		r.addErrors(message, SampleInvalidValueCode, path)
+		path := validation.FormatPath(r, fieldName)
+		message := validation.FormatInvalidField(r, fieldName, fmt.Sprintf("must be one of: %s", strings.Join(allowedTypeCodes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+		r.AddErrors(message, SampleInvalidValueCode, path)
 	}
 	return nil
 }
@@ -331,21 +332,21 @@ func (r *SampleValidationRecord) validateHistologyCode() error {
 	}
 	if !slices.Contains(codes, r.Sample.HistologyCode) {
 		fieldName := "histology_code"
-		path := formatPath(r, fieldName)
-		message := formatInvalidField(r, fieldName, fmt.Sprintf("value %q must be one of: [%s]", r.Sample.HistologyCode, strings.Join(codes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
-		r.addErrors(message, SampleInvalidValueCode, path)
+		path := validation.FormatPath(r, fieldName)
+		message := validation.FormatInvalidField(r, fieldName, fmt.Sprintf("value %q must be one of: [%s]", r.Sample.HistologyCode, strings.Join(codes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+		r.AddErrors(message, SampleInvalidValueCode, path)
 	}
 	return nil
 }
 
-func validateSamplesBatch(ctx *BatchValidationContext, samples []types.SampleBatch) ([]*SampleValidationRecord, error) {
+func validateSamplesBatch(ctx *validation.BatchValidationContext, samples []types.SampleBatch) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
 	samplesMap := samplesMap(samples)
 	seenSamples := make(map[SampleKey]struct{})
 
 	for index, sample := range samples {
 		record := &SampleValidationRecord{
-			BaseValidationRecord: BaseValidationRecord{
+			BaseValidationRecord: validation.BaseValidationRecord{
 				Context: ctx,
 				Index:   index,
 			},
@@ -366,7 +367,7 @@ func validateSamplesBatch(ctx *BatchValidationContext, samples []types.SampleBat
 		}
 
 		// 2. Validate duplicates in batch
-		validateUniquenessInBatch(
+		validation.ValidateUniquenessInBatch(
 			record,
 			SampleKey{
 				OrganizationCode:  sample.SampleOrganizationCode,

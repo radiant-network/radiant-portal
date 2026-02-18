@@ -11,6 +11,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/validation"
 	"gorm.io/gorm"
 )
 
@@ -35,12 +36,12 @@ type PatientKey struct {
 }
 
 type PatientValidationRecord struct {
-	BaseValidationRecord
+	validation.BaseValidationRecord
 	Patient        types.PatientBatch
 	OrganizationId int
 }
 
-func (r *PatientValidationRecord) GetBase() *BaseValidationRecord {
+func (r *PatientValidationRecord) GetBase() *validation.BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
@@ -50,27 +51,27 @@ func (r *PatientValidationRecord) GetResourceType() string {
 
 func (r *PatientValidationRecord) validateSubmitterPatientId() {
 	resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
-	path := formatPath(r, "submitter_patient_id")
+	path := validation.FormatPath(r, "submitter_patient_id")
 	if len(r.Patient.SubmitterPatientId) > TextMaxLength {
-		message := formatFieldTooLong(r, "submitter_patient_id", TextMaxLength, resIds)
-		r.addErrors(message, PatientInvalidValueCode, path)
+		message := validation.FormatFieldTooLong(r, "submitter_patient_id", TextMaxLength, resIds)
+		r.AddErrors(message, PatientInvalidValueCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.SubmitterPatientId.String()) {
-		message := formatFieldRegexpMatch(r, "submitter_patient_id", ExternalIdRegexp, resIds)
-		r.addErrors(message, PatientInvalidValueCode, path)
+		message := validation.FormatFieldRegexpMatch(r, "submitter_patient_id", ExternalIdRegexp, resIds)
+		r.AddErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
 func (r *PatientValidationRecord) validateSubmitterPatientIdType() {
 	resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
-	path := formatPath(r, "submitter_patient_id_type")
+	path := validation.FormatPath(r, "submitter_patient_id_type")
 	if len(r.Patient.SubmitterPatientIdType) > TextMaxLength {
-		message := formatFieldTooLong(r, "submitter_patient_id_type", TextMaxLength, resIds)
-		r.addErrors(message, PatientInvalidValueCode, path)
+		message := validation.FormatFieldTooLong(r, "submitter_patient_id_type", TextMaxLength, resIds)
+		r.AddErrors(message, PatientInvalidValueCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.SubmitterPatientIdType.String()) {
-		message := formatFieldRegexpMatch(r, "submitter_patient_id_type", ExternalIdRegexp, resIds)
-		r.addErrors(message, PatientInvalidValueCode, path)
+		message := validation.FormatFieldRegexpMatch(r, "submitter_patient_id_type", ExternalIdRegexp, resIds)
+		r.AddErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
@@ -79,14 +80,14 @@ func (r *PatientValidationRecord) validateLastName() {
 		return
 	}
 	resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
-	path := formatPath(r, "last_name")
+	path := validation.FormatPath(r, "last_name")
 	if len(r.Patient.LastName) > TextMaxLength {
-		message := formatFieldTooLong(r, "last_name", TextMaxLength, resIds)
-		r.addErrors(message, PatientInvalidValueCode, path)
+		message := validation.FormatFieldTooLong(r, "last_name", TextMaxLength, resIds)
+		r.AddErrors(message, PatientInvalidValueCode, path)
 	}
 	if !NameRegExpCompiled.MatchString(r.Patient.LastName.String()) {
-		message := formatFieldRegexpMatch(r, "last_name", NameRegExp, resIds)
-		r.addErrors(message, PatientInvalidValueCode, path)
+		message := validation.FormatFieldRegexpMatch(r, "last_name", NameRegExp, resIds)
+		r.AddErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
@@ -95,14 +96,14 @@ func (r *PatientValidationRecord) validateFirstName() {
 		return
 	}
 	resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
-	path := formatPath(r, "first_name")
+	path := validation.FormatPath(r, "first_name")
 	if len(r.Patient.FirstName) > TextMaxLength {
-		message := formatFieldTooLong(r, "first_name", TextMaxLength, resIds)
-		r.addErrors(message, PatientInvalidValueCode, path)
+		message := validation.FormatFieldTooLong(r, "first_name", TextMaxLength, resIds)
+		r.AddErrors(message, PatientInvalidValueCode, path)
 	}
 	if !NameRegExpCompiled.MatchString(r.Patient.FirstName.String()) {
-		message := formatFieldRegexpMatch(r, "first_name", NameRegExp, resIds)
-		r.addErrors(message, PatientInvalidValueCode, path)
+		message := validation.FormatFieldRegexpMatch(r, "first_name", NameRegExp, resIds)
+		r.AddErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
@@ -111,22 +112,22 @@ func (r *PatientValidationRecord) validateJhn() {
 		return
 	}
 	resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
-	path := formatPath(r, "jhn")
+	path := validation.FormatPath(r, "jhn")
 	if len(r.Patient.Jhn) > TextMaxLength {
-		message := formatFieldTooLong(r, "jhn", TextMaxLength, resIds)
-		r.addErrors(message, PatientInvalidValueCode, path)
+		message := validation.FormatFieldTooLong(r, "jhn", TextMaxLength, resIds)
+		r.AddErrors(message, PatientInvalidValueCode, path)
 	}
 	if !ExternalIdRegexpCompiled.MatchString(r.Patient.Jhn.String()) {
-		message := formatFieldRegexpMatch(r, "jhn", ExternalIdRegexp, resIds)
-		r.addErrors(message, PatientInvalidValueCode, path)
+		message := validation.FormatFieldRegexpMatch(r, "jhn", ExternalIdRegexp, resIds)
+		r.AddErrors(message, PatientInvalidValueCode, path)
 	}
 }
 
 func (r *PatientValidationRecord) validateOrganization(organization *types.Organization) {
-	path := formatPath(r, "patient_organization_code")
+	path := validation.FormatPath(r, "patient_organization_code")
 	if organization == nil {
 		message := fmt.Sprintf("Organization %s for patient %s does not exist.", r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
-		r.addErrors(message, PatientOrganizationNotExistCode, path)
+		r.AddErrors(message, PatientOrganizationNotExistCode, path)
 	} else if !slices.Contains(AllowedOrganizationCategories, organization.CategoryCode) {
 		message := fmt.Sprintf("Organization type (%s) defined for patient (%s / %s) is not in this list : %s.",
 			organization.CategoryCode,
@@ -134,7 +135,7 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 			r.Patient.SubmitterPatientId,
 			strings.Join(AllowedOrganizationCategories, ", "),
 		)
-		r.addErrors(message, PatientOrganizationTypeCode, path)
+		r.AddErrors(message, PatientOrganizationTypeCode, path)
 	} else {
 		r.OrganizationId = organization.ID
 	}
@@ -143,8 +144,8 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 func (r *PatientValidationRecord) validateDateOfBirth() {
 	if r.Patient.DateOfBirth == nil {
 		resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
-		message := formatInvalidField(r, "date_of_birth", "missing value, date of birth is required", resIds)
-		r.addErrors(message, PatientInvalidValueCode, formatPath(r, "date_of_birth"))
+		message := validation.FormatInvalidField(r, "date_of_birth", "missing value, date of birth is required", resIds)
+		r.AddErrors(message, PatientInvalidValueCode, validation.FormatPath(r, "date_of_birth"))
 	}
 }
 
@@ -168,7 +169,7 @@ func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types
 	if !anyDifference {
 		message := fmt.Sprintf("Patient (%s / %s) already exists, skipped.",
 			r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
-		r.addInfos(message, PatientAlreadyExistCode, formatPath(r, ""))
+		r.AddInfos(message, PatientAlreadyExistCode, validation.FormatPath(r, ""))
 	}
 }
 
@@ -179,8 +180,8 @@ func (r *PatientValidationRecord) validateLifeStatusCode() error {
 	}
 	if r.Patient.LifeStatusCode == "" || !slices.Contains(codes, r.Patient.LifeStatusCode) {
 		resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
-		message := formatInvalidField(r, "life_status_code", fmt.Sprintf("value %q must be one of the allowed codes: [%s]", r.Patient.LifeStatusCode, strings.Join(codes, ", ")), resIds)
-		r.addErrors(message, PatientInvalidValueCode, formatPath(r, "life_status_code"))
+		message := validation.FormatInvalidField(r, "life_status_code", fmt.Sprintf("value %q must be one of the allowed codes: [%s]", r.Patient.LifeStatusCode, strings.Join(codes, ", ")), resIds)
+		r.AddErrors(message, PatientInvalidValueCode, validation.FormatPath(r, "life_status_code"))
 	}
 	return nil
 }
@@ -192,8 +193,8 @@ func (r *PatientValidationRecord) validateSexCode() error {
 	}
 	if r.Patient.SexCode == "" || !slices.Contains(codes, r.Patient.SexCode) {
 		resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
-		message := formatInvalidField(r, "sex_code", fmt.Sprintf("value %q must be one of the allowed codes: [%s]", r.Patient.SexCode, strings.Join(codes, ", ")), resIds)
-		r.addErrors(message, PatientInvalidValueCode, formatPath(r, "sex_code"))
+		message := validation.FormatInvalidField(r, "sex_code", fmt.Sprintf("value %q must be one of the allowed codes: [%s]", r.Patient.SexCode, strings.Join(codes, ", ")), resIds)
+		r.AddErrors(message, PatientInvalidValueCode, validation.FormatPath(r, "sex_code"))
 	}
 	return nil
 }
@@ -205,7 +206,7 @@ func validateIsDifferentExistingPatientField[T comparable](
 	recordValue T,
 ) bool {
 	if existingPatientValue != recordValue {
-		path := formatPath(r, fieldName)
+		path := validation.FormatPath(r, fieldName)
 		message := fmt.Sprintf("A patient with same ids (%s / %s) has been found but with a different %s (%v <> %v).",
 			r.Patient.PatientOrganizationCode,
 			r.Patient.SubmitterPatientId,
@@ -213,13 +214,13 @@ func validateIsDifferentExistingPatientField[T comparable](
 			existingPatientValue,
 			recordValue,
 		)
-		r.addWarnings(message, PatientExistingPatientDifferentFieldCode, path)
+		r.AddWarnings(message, PatientExistingPatientDifferentFieldCode, path)
 		return true
 	}
 	return false
 }
 
-func processPatientBatch(ctx *BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+func processPatientBatch(ctx *validation.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
 	payload := []byte(batch.Payload)
 	var patients []types.PatientBatch
 
@@ -247,7 +248,7 @@ func persistBatchAndPatientRecords(db *gorm.DB, batch *types.Batch, records []*P
 	return db.Transaction(func(tx *gorm.DB) error {
 		txRepoPatient := repository.NewPatientsRepository(tx)
 		txRepoBatch := repository.NewBatchRepository(tx)
-		rowsUpdated, unexpectedErrUpdate := updateBatch(batch, records, txRepoBatch)
+		rowsUpdated, unexpectedErrUpdate := validation.UpdateBatch(batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
 		}
@@ -290,7 +291,7 @@ func insertPatientRecords(records []*PatientValidationRecord, repo repository.Pa
 	return nil
 }
 
-func validatePatientsBatch(ctx *BatchValidationContext, patients []types.PatientBatch) ([]*PatientValidationRecord, error) {
+func validatePatientsBatch(ctx *validation.BatchValidationContext, patients []types.PatientBatch) ([]*PatientValidationRecord, error) {
 	var records []*PatientValidationRecord
 	seenPatients := map[PatientKey]struct{}{}
 	for index, patient := range patients {
@@ -303,9 +304,9 @@ func validatePatientsBatch(ctx *BatchValidationContext, patients []types.Patient
 	return records, nil
 }
 
-func validatePatientRecord(ctx *BatchValidationContext, patient types.PatientBatch, index int, seenPatients map[PatientKey]struct{}) (*PatientValidationRecord, error) {
+func validatePatientRecord(ctx *validation.BatchValidationContext, patient types.PatientBatch, index int, seenPatients map[PatientKey]struct{}) (*PatientValidationRecord, error) {
 	record := &PatientValidationRecord{
-		BaseValidationRecord: BaseValidationRecord{
+		BaseValidationRecord: validation.BaseValidationRecord{
 			Context: ctx,
 			Index:   index,
 		},
@@ -325,7 +326,7 @@ func validatePatientRecord(ctx *BatchValidationContext, patient types.PatientBat
 		return nil, fmt.Errorf("error validating sex code: %v", err)
 	}
 
-	validateUniquenessInBatch(record,
+	validation.ValidateUniquenessInBatch(record,
 		PatientKey{
 			OrganizationCode:   patient.PatientOrganizationCode,
 			SubmitterPatientId: patient.SubmitterPatientId.String(),
