@@ -339,22 +339,6 @@ func Test_GetVariantUninterpretedCases_WithCaseAnalysisCriteria_NoPagination_Def
 	})
 }
 
-func Test_GetVariantUninterpretedCases_WithPatientSexCriteria_NoPagination_DefaultSort(t *testing.T) {
-	// TODO: Waiting for answer about proband or patient sex code
-	//testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-	//	repo := NewVariantsRepository(db)
-	//	criteria := []types.SearchCriterion{
-	//		{FieldName: types.PatientSexCodeField.Alias, Value: []interface{}{"IDGD"}, Operator: "in"},
-	//	}
-	//	query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
-	//	uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
-	//	assert.NoError(t, err)
-	//	assert.Equal(t, int64(1), *count)
-	//	assert.Equal(t, 1, len(*uninterpretedCases))
-	//	assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
-	//})
-}
-
 func Test_GetVariantUninterpretedCases_WithExomiserACMGClassification_NoPagination_DefaultSort(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "exomiser", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
