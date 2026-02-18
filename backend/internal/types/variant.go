@@ -225,7 +225,7 @@ var VariantInterpretedCasesQueryConfig = QueryConfig{
 var VariantUninterpretedCasesQueryConfig = QueryConfig{
 	AllFields:     VariantUninterpretedCasesFields,
 	DefaultFields: VariantUninterpretedCasesDefaultFields,
-	DefaultSort:   CasesDefaultSort,
+	DefaultSort:   append(CasesDefaultSort, SortField{Field: CaseIdField, Order: "asc"}, SortField{Field: SequencingExperimentIdField, Order: "desc"}),
 	IdField:       CaseIdField,
 }
 
