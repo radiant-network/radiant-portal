@@ -1,7 +1,8 @@
-package main
+package validation
 
 import (
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -26,7 +27,7 @@ func Test_Process_Unexpected_Errors(t *testing.T) {
 		}
 
 		err := errors.New("some unexpected error")
-		processUnexpectedError(&types.Batch{ID: id}, err, repo)
+		ProcessUnexpectedError(&types.Batch{ID: id}, err, repo)
 
 		resultBatch := types.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
@@ -43,4 +44,12 @@ func Test_Process_Unexpected_Errors(t *testing.T) {
 		}
 
 	})
+}
+
+func TestMain(m *testing.M) {
+	testutils.StartPostgresContainer()
+	testutils.StartObjectStoreContainer()
+	code := m.Run()
+	testutils.StopAllContainers()
+	os.Exit(code)
 }

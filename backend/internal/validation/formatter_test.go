@@ -37,11 +37,11 @@ func Test_FormatInvalidField(t *testing.T) {
 		BaseValidationRecord: BaseValidationRecord{Index: 0},
 	}
 
-	messageWithIds := FormatInvalidField(record, "tissue_site", "is empty", []string{"ORG1", "S1"})
+	messageWithIds := FormatInvalidField(record.GetResourceType(), "tissue_site", "is empty", []string{"ORG1", "S1"})
 	expectedMsgWithIds := "Invalid field tissue_site for test_resource (ORG1 / S1). Reason: is empty."
 	assert.Equal(t, expectedMsgWithIds, messageWithIds)
 
-	messageWithoutIds := FormatInvalidField(record, "type_code", "is unknown", []string{})
+	messageWithoutIds := FormatInvalidField(record.GetResourceType(), "type_code", "is unknown", []string{})
 	expectedMsgWithoutIds := "Invalid field type_code for test_resource. Reason: is unknown."
 	assert.Equal(t, expectedMsgWithoutIds, messageWithoutIds)
 }
@@ -51,7 +51,7 @@ func Test_FormatFieldTooLong(t *testing.T) {
 		BaseValidationRecord: BaseValidationRecord{Index: 2},
 	}
 
-	message := FormatFieldTooLong(record, "first_name", 50, []string{"ORG2", "P2"})
+	message := FormatFieldTooLong(record.GetResourceType(), "first_name", 50, []string{"ORG2", "P2"})
 	expectedMessage := "Invalid field first_name for test_resource (ORG2 / P2). Reason: field is too long, maximum length allowed is 50."
 	assert.Equal(t, expectedMessage, message)
 }
@@ -61,7 +61,7 @@ func Test_FormatDuplicateInBatch(t *testing.T) {
 		BaseValidationRecord: BaseValidationRecord{Index: 3},
 	}
 
-	message := FormatDuplicateInBatch(record, []string{"ORG1", "P123"})
+	message := FormatDuplicateInBatch(record.GetResourceType(), []string{"ORG1", "P123"})
 	expected := "Test_resource (ORG1 / P123) appears multiple times in the batch."
 	assert.Equal(t, expected, message)
 }

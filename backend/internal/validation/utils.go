@@ -1,4 +1,4 @@
-package main
+package validation
 
 import (
 	"time"
@@ -8,7 +8,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-func processUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch repository.BatchDAO) {
+func ProcessUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch repository.BatchDAO) {
 	glog.Errorf("unexpected error for batch %v: %v", batch.ID, unexpectedErr)
 	now := time.Now()
 	batch.FinishedOn = &now

@@ -541,18 +541,6 @@ func (cr *CaseValidationRecord) fetchValidationInfos() error {
 	return nil
 }
 
-func (cr *CaseValidationRecord) validateRegexPattern(path, value, code, message string, regExp *regexp.Regexp) {
-	if regExp != nil && !regExp.MatchString(value) {
-		cr.AddErrors(fmt.Sprintf("%s does not match the regular expression `%s`.", message, regExp.String()), code, path)
-	}
-}
-
-func (cr *CaseValidationRecord) validateTextLength(path, value, code, message string, maxLength int) {
-	if len(value) > maxLength {
-		cr.AddErrors(fmt.Sprintf("%s field is too long, maximum length allowed is %d.", message, maxLength), code, path)
-	}
-}
-
 func (cr *CaseValidationRecord) formatPatientsInvalidFieldMessage(fieldName string, patientIndex int) string {
 	return fmt.Sprintf("Invalid field %s for case %d - patient %d. Reason:",
 		fieldName,
@@ -620,8 +608,8 @@ func (cr *CaseValidationRecord) validatePatientsTextField(value, fieldName, path
 		code = PatientInvalidField
 		message = cr.formatPatientsInvalidFieldMessage(fieldName, patientIndex)
 	}
-	cr.validateRegexPattern(path, value, code, message, regExp)
-	cr.validateTextLength(path, value, code, message, TextMaxLength)
+	cr.ValidateRegexPattern(path, value, code, message, regExp)
+	cr.ValidateTextLength(path, value, code, message, TextMaxLength)
 }
 
 func (cr *CaseValidationRecord) validateCodeField(code, fieldName, path, codeType string, patientIndex int, validCodes []string, observationType string, obsIndex int) {
@@ -933,43 +921,36 @@ func (cr *CaseValidationRecord) validateCaseSequencingExperiments() error {
 	return nil
 }
 
-func (cr *CaseValidationRecord) formatCasesInvalidFieldMessage(fieldName string) string {
-	return fmt.Sprintf("Invalid field %s for case %d. Reason:",
-		fieldName,
-		cr.Index,
-	)
-}
-
 func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string, regExp *regexp.Regexp, maxLength int, required bool) {
 	if !required && value == "" {
 		return
 	}
 
 	var message string
-	message = cr.formatCasesInvalidFieldMessage(fieldName)
-	cr.validateRegexPattern(path, value, CaseInvalidField, message, regExp)
-	cr.validateTextLength(path, value, CaseInvalidField, message, maxLength)
+	message = cr.FormatCasesInvalidFieldMessage(fieldName, fmt.Sprintf("case %d", cr.Index))
+	cr.ValidateRegexPattern(path, value, CaseInvalidField, message, regExp)
+	cr.ValidateTextLength(path, value, CaseInvalidField, message, maxLength)
 }
 
 func (cr *CaseValidationRecord) validateCodes() {
 	if !slices.Contains(cr.StatusCodes, cr.Case.StatusCode) {
 		path := validation.FormatPath(cr, "")
-		message := fmt.Sprintf("%s status code %q is not a valid status code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("status_code"), cr.Case.StatusCode, strings.Join(cr.StatusCodes, ", "))
+		message := fmt.Sprintf("%s status code %q is not a valid status code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("status_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.StatusCode, strings.Join(cr.StatusCodes, ", "))
 		cr.AddErrors(message, CaseInvalidField, path)
 	}
 	if !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
 		path := validation.FormatPath(cr, "")
-		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("resolution_status_code"), cr.Case.ResolutionStatusCode, strings.Join(cr.ResolutionStatusCodes, ", "))
+		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("resolution_status_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.ResolutionStatusCode, strings.Join(cr.ResolutionStatusCodes, ", "))
 		cr.AddErrors(message, CaseInvalidField, path)
 	}
 	if !slices.Contains(cr.PriorityCodes, cr.Case.PriorityCode) {
 		path := validation.FormatPath(cr, "")
-		message := fmt.Sprintf("%s priority code %q is not a valid priority code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("priority_code"), cr.Case.PriorityCode, strings.Join(cr.PriorityCodes, ", "))
+		message := fmt.Sprintf("%s priority code %q is not a valid priority code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("priority_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.PriorityCode, strings.Join(cr.PriorityCodes, ", "))
 		cr.AddErrors(message, CaseInvalidField, path)
 	}
 	if !slices.Contains(cr.CategoryCodes, cr.Case.CategoryCode) {
 		path := validation.FormatPath(cr, "")
-		message := fmt.Sprintf("%s category code %q is not a valid category code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("category_code"), cr.Case.CategoryCode, strings.Join(cr.CategoryCodes, ", "))
+		message := fmt.Sprintf("%s category code %q is not a valid category code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("category_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.CategoryCode, strings.Join(cr.CategoryCodes, ", "))
 		cr.AddErrors(message, CaseInvalidField, path)
 	}
 }
@@ -1041,8 +1022,8 @@ func (cr *CaseValidationRecord) validateTaskTextField(fieldValue, fieldName stri
 		return
 	}
 	msg := cr.formatTaskFieldErrorMessage(fieldName, cr.Index, taskIndex)
-	cr.validateRegexPattern(path, fieldValue, TaskInvalidField, msg, regExp)
-	cr.validateTextLength(path, fieldValue, TaskInvalidField, msg, TextMaxLength)
+	cr.ValidateRegexPattern(path, fieldValue, TaskInvalidField, msg, regExp)
+	cr.ValidateTextLength(path, fieldValue, TaskInvalidField, msg, TextMaxLength)
 }
 
 func (cr *CaseValidationRecord) validateTaskTypeCode(typeCode string, taskIndex int) {
@@ -1220,8 +1201,8 @@ func (cr *CaseValidationRecord) validateDocumentTextField(fieldValue, fieldName 
 		return
 	}
 	msg := cr.formatTaskDocumentFieldErrorMessage(fieldName, cr.Index, taskIndex, documentIndex)
-	cr.validateRegexPattern(path, fieldValue, DocumentInvalidField, msg, regExp)
-	cr.validateTextLength(path, fieldValue, DocumentInvalidField, msg, TextMaxLength)
+	cr.ValidateRegexPattern(path, fieldValue, DocumentInvalidField, msg, regExp)
+	cr.ValidateTextLength(path, fieldValue, DocumentInvalidField, msg, TextMaxLength)
 }
 
 func (cr *CaseValidationRecord) validateDocumentIsOutputOfAnotherTask(doc *types.Document, path string) {
@@ -1281,15 +1262,15 @@ func (cr *CaseValidationRecord) validateDocumentCodes(doc *types.OutputDocumentB
 	path := fmt.Sprintf("case[%d].tasks[%d].output_documents[%d]", cr.Index, taskIndex, docIndex)
 
 	if doc.DataTypeCode != "" && !slices.Contains(cr.DocumentDataTypeCodes, doc.DataTypeCode) {
-		msg := fmt.Sprintf("%s data type code %q is not a valid data type code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("data_type_code"), doc.DataTypeCode, strings.Join(cr.DocumentDataTypeCodes, ", "))
+		msg := fmt.Sprintf("%s data type code %q is not a valid data type code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("data_type_code", fmt.Sprintf("case %d", cr.Index)), doc.DataTypeCode, strings.Join(cr.DocumentDataTypeCodes, ", "))
 		cr.AddErrors(msg, DocumentInvalidField, path)
 	}
 	if doc.DataCategoryCode != "" && !slices.Contains(cr.DocumentDataCategoryCodes, doc.DataCategoryCode) {
-		msg := fmt.Sprintf("%s data category code %q is not a valid data category code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("data_category_code"), doc.DataCategoryCode, strings.Join(cr.DocumentDataCategoryCodes, ", "))
+		msg := fmt.Sprintf("%s data category code %q is not a valid data category code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("data_category_code", fmt.Sprintf("case %d", cr.Index)), doc.DataCategoryCode, strings.Join(cr.DocumentDataCategoryCodes, ", "))
 		cr.AddErrors(msg, DocumentInvalidField, path)
 	}
 	if doc.FormatCode != "" && !slices.Contains(cr.DocumentFormatCodes, doc.FormatCode) {
-		msg := fmt.Sprintf("%s format code %q is not a valid format code. Valid values [%s].", cr.formatCasesInvalidFieldMessage("format_code"), doc.FormatCode, strings.Join(cr.DocumentFormatCodes, ", "))
+		msg := fmt.Sprintf("%s format code %q is not a valid format code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("format_code", fmt.Sprintf("case %d", cr.Index)), doc.FormatCode, strings.Join(cr.DocumentFormatCodes, ", "))
 		cr.AddErrors(msg, DocumentInvalidField, path)
 	}
 }
@@ -1379,13 +1360,13 @@ func processCaseBatch(ctx *validation.BatchValidationContext, batch *types.Batch
 	var caseBatches []types.CaseBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &caseBatches); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), ctx.BatchRepo)
+		validation.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
 	records, unexpectedErr := validateCaseBatch(ctx, caseBatches)
 	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), ctx.BatchRepo)
+		validation.ProcessUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
@@ -1393,7 +1374,7 @@ func processCaseBatch(ctx *validation.BatchValidationContext, batch *types.Batch
 
 	err := persistBatchAndCaseRecords(db, batch, records)
 	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), ctx.BatchRepo)
+		validation.ProcessUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), ctx.BatchRepo)
 		return
 	}
 }

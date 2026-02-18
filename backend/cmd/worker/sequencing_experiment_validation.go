@@ -103,68 +103,48 @@ func (r *SequencingExperimentValidationRecord) preFetchValidationInfo() error {
 	return nil
 }
 
-func (r *SequencingExperimentValidationRecord) verifyStringField(value string, fieldName string, maxLength int, re *regexp.Regexp, reSrc string, resourceIDs []string, isRequired bool) {
-	if value == "" {
-		if isRequired {
-			msg := validation.FormatInvalidField(r, fieldName, "field is missing", resourceIDs)
-			r.AddErrors(msg, InvalidFieldValueCode, r.getPath(fieldName))
-		}
-		return
-	}
-
-	if len(value) > maxLength {
-		msg := validation.FormatFieldTooLong(r, fieldName, maxLength, resourceIDs)
-		r.AddErrors(msg, InvalidFieldValueCode, r.getPath(fieldName))
-	}
-
-	if re != nil && !re.MatchString(value) {
-		msg := validation.FormatFieldRegexpMatch(r, fieldName, reSrc, resourceIDs)
-		r.AddErrors(msg, InvalidFieldValueCode, r.getPath(fieldName))
-	}
-}
-
 func (r *SequencingExperimentValidationRecord) validateAliquotField() {
-	r.verifyStringField(r.SequencingExperiment.Aliquot.String(), "aliquot", TextMaxLength, AlphanumericIdentifierRegExpCompiled, AlphanumericIdentifierRegExp, r.getResId(), true)
+	r.ValidateStringField(r.SequencingExperiment.Aliquot.String(), "aliquot", r.getPath("aliquot"), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, AlphanumericIdentifierRegExpCompiled, r.getResId(), true)
 }
 
 func (r *SequencingExperimentValidationRecord) validateExperimentalStrategyCodeField() error {
 	fieldName := "experimental_strategy_code"
-	r.verifyStringField(r.SequencingExperiment.ExperimentalStrategyCode, fieldName, TextMaxLength, nil, "", r.getResId(), true)
+	r.ValidateStringField(r.SequencingExperiment.ExperimentalStrategyCode, fieldName, r.getPath(fieldName), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getResId(), true)
 
 	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetExperimentalStrategy)
 	if err != nil {
 		return fmt.Errorf("error fetching experimental strategy codes: %w", err)
 	}
 	if !slices.Contains(codes, r.SequencingExperiment.ExperimentalStrategyCode) {
-		r.AddErrors(validation.FormatInvalidField(r, fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
+		r.AddErrors(validation.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
 
 func (r *SequencingExperimentValidationRecord) validateSequencingReadTechnologyCodeField() error {
 	fieldName := "sequencing_read_technology_code"
-	r.verifyStringField(r.SequencingExperiment.SequencingReadTechnologyCode, fieldName, TextMaxLength, nil, "", r.getResId(), true)
+	r.ValidateStringField(r.SequencingExperiment.SequencingReadTechnologyCode, fieldName, r.getPath(fieldName), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getResId(), true)
 
 	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetSequencingReadTechnology)
 	if err != nil {
 		return fmt.Errorf("error fetching sequencing read technology codes: %w", err)
 	}
 	if !slices.Contains(codes, r.SequencingExperiment.SequencingReadTechnologyCode) {
-		r.AddErrors(validation.FormatInvalidField(r, fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
+		r.AddErrors(validation.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
 
 func (r *SequencingExperimentValidationRecord) validateSequencingLabCodeField() {
-	r.verifyStringField(r.SequencingExperiment.SequencingLabCode, "sequencing_lab_code", TextMaxLength, nil, "", r.getResId(), false)
+	r.ValidateStringField(r.SequencingExperiment.SequencingLabCode, "sequencing_lab_code", r.getPath("sequencing_lab_code"), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getResId(), false)
 }
 
 func (r *SequencingExperimentValidationRecord) validateCaptureKitField() {
-	r.verifyStringField(r.SequencingExperiment.CaptureKit.String(), "capture_kit", TextMaxLength, nil, "", r.getResId(), false)
+	r.ValidateStringField(r.SequencingExperiment.CaptureKit.String(), "capture_kit", r.getPath("capture_kit"), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getResId(), false)
 }
 
 func (r *SequencingExperimentValidationRecord) validateRunAliasField() {
-	r.verifyStringField(r.SequencingExperiment.RunAlias.String(), "run_alias", TextMaxLength, AlphanumericIdentifierRegExpCompiled, AlphanumericIdentifierRegExp, r.getResId(), false)
+	r.ValidateStringField(r.SequencingExperiment.RunAlias.String(), "run_alias", r.getPath("run_alias"), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, AlphanumericIdentifierRegExpCompiled, r.getResId(), false)
 }
 
 func (r *SequencingExperimentValidationRecord) validateRunDateField() {
@@ -177,17 +157,17 @@ func (r *SequencingExperimentValidationRecord) validateRunDateField() {
 	now := time.Now()
 
 	if time.Time(*r.SequencingExperiment.RunDate).After(now) {
-		r.AddErrors(validation.FormatInvalidField(r, fieldName, "must be a past date", resIds), InvalidFieldValueCode, r.getPath(fieldName))
+		r.AddErrors(validation.FormatInvalidField(r.GetResourceType(), fieldName, "must be a past date", resIds), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 }
 
 func (r *SequencingExperimentValidationRecord) validateRunNameField() {
-	r.verifyStringField(r.SequencingExperiment.RunName.String(), "run_name", TextMaxLength, nil, "", r.getResId(), false)
+	r.ValidateStringField(r.SequencingExperiment.RunName.String(), "run_name", r.getPath("run_name"), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getResId(), false)
 }
 
 func (r *SequencingExperimentValidationRecord) validateStatusCodeField() error {
 	fieldName := "status_code"
-	r.verifyStringField(r.SequencingExperiment.StatusCode, fieldName, TextMaxLength, nil, "", r.getResId(), true)
+	r.ValidateStringField(r.SequencingExperiment.StatusCode, fieldName, r.getPath(fieldName), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getResId(), true)
 
 	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetStatus)
 	if err != nil {
@@ -195,7 +175,7 @@ func (r *SequencingExperimentValidationRecord) validateStatusCodeField() error {
 	}
 
 	if !slices.Contains(codes, r.SequencingExperiment.StatusCode) {
-		r.AddErrors(validation.FormatInvalidField(r, fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
+		r.AddErrors(validation.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
@@ -213,14 +193,14 @@ func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error
 
 func (r *SequencingExperimentValidationRecord) validatePlatformCodeField() error {
 	fieldName := "platform_code"
-	r.verifyStringField(r.SequencingExperiment.PlatformCode, fieldName, TextMaxLength, TextRegExpCompiled, TextRegExp, r.getResId(), true)
+	r.ValidateStringField(r.SequencingExperiment.PlatformCode, fieldName, r.getPath(fieldName), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getResId(), true)
 
 	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetPlatform)
 	if err != nil {
 		return fmt.Errorf("error fetching platform codes: %w", err)
 	}
 	if !slices.Contains(codes, r.SequencingExperiment.PlatformCode) {
-		r.AddErrors(validation.FormatInvalidField(r, fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
+		r.AddErrors(validation.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
@@ -319,13 +299,13 @@ func processSequencingExperimentBatch(ctx *validation.BatchValidationContext, ba
 	var experimentsBatch []types.SequencingExperimentBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &experimentsBatch); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), ctx.BatchRepo)
+		validation.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
 	records, unexpectedErr := validateSequencingExperimentBatch(ctx, experimentsBatch)
 	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), ctx.BatchRepo)
+		validation.ProcessUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
@@ -333,7 +313,7 @@ func processSequencingExperimentBatch(ctx *validation.BatchValidationContext, ba
 
 	err := persistBatchAndSequencingExperimentRecords(db, batch, records)
 	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), ctx.BatchRepo)
+		validation.ProcessUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), ctx.BatchRepo)
 		return
 	}
 }

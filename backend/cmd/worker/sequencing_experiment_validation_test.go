@@ -1,7 +1,6 @@
 package main
 
 import (
-	"regexp"
 	"testing"
 	"time"
 
@@ -133,40 +132,6 @@ func Test_VerifyIdentical_AddsInfo(t *testing.T) {
 	}
 	verifyIsDifferentField("same", "same", r, "key", "field")
 	assert.Empty(t, r.Warnings)
-}
-
-func Test_VerifyStringField_RequiredMissing(t *testing.T) {
-	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: validation.BaseValidationRecord{Index: 0},
-	}
-	r.verifyStringField("", "aliquot", 10, nil, "", nil, true)
-	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field aliquot for sequencing_experiment. Reason: field is missing.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0].aliquot", r.Errors[0].Path)
-}
-
-func Test_VerifyStringField_TooLong(t *testing.T) {
-	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: validation.BaseValidationRecord{Index: 0},
-	}
-	r.verifyStringField("0123456789", "aliquot", 5, nil, "", nil, true)
-	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field aliquot for sequencing_experiment. Reason: field is too long, maximum length allowed is 5.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0].aliquot", r.Errors[0].Path)
-}
-
-func Test_VerifyStringField_RegexpMismatch(t *testing.T) {
-	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: validation.BaseValidationRecord{Index: 0},
-	}
-	re := regexp.MustCompile(`^[A-Z]+$`)
-	r.verifyStringField("abc", "mock", 10, re, "^[A-Z]+$", nil, true)
-	assert.Len(t, r.Errors, 1)
-	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field mock for sequencing_experiment. Reason: does not match the regular expression ^[A-Z]+$.", r.Errors[0].Message)
-	assert.Equal(t, "sequencing_experiment[0].mock", r.Errors[0].Path)
 }
 
 func Test_ValidateExperimentalStrategyCodeField_Allowed(t *testing.T) {

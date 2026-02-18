@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -309,4 +310,38 @@ func Test_CopyRecordIntoBatch_MultipleMessages(t *testing.T) {
 	assert.Equal(t, types.BatchStatusError, batch.Status)
 	assert.Equal(t, 1, batch.Summary.Errors)
 	assert.Equal(t, 0, batch.Summary.Skipped)
+}
+
+func Test_VerifyStringField_RequiredMissing(t *testing.T) {
+	r := &BaseValidationRecord{
+		Index: 0,
+	}
+	r.ValidateStringField("", "foobar", "type[0].foobar", "ERROR-001", "resourceType", 100, nil, []string{"res1", "res2"}, true)
+	assert.Len(t, r.Errors, 1)
+	assert.Equal(t, "ERROR-001", r.Errors[0].Code)
+	assert.Equal(t, "Invalid field foobar for resourceType (res1 / res2). Reason: field is missing.", r.Errors[0].Message)
+	assert.Equal(t, "type[0].foobar", r.Errors[0].Path)
+}
+
+func Test_VerifyStringField_TooLong(t *testing.T) {
+	r := &BaseValidationRecord{
+		Index: 0,
+	}
+	r.ValidateStringField("0123456789", "foobar", "type[0].field", "ERROR-001", "resourceType", 5, nil, []string{"res1", "res2"}, true)
+	assert.Len(t, r.Errors, 1)
+	assert.Equal(t, "ERROR-001", r.Errors[0].Code)
+	assert.Equal(t, "Invalid field foobar for resourceType (res1 / res2). Reason: field is too long, maximum length allowed is 5.", r.Errors[0].Message)
+	assert.Equal(t, "type[0].field", r.Errors[0].Path)
+}
+
+func Test_VerifyStringField_RegexpMismatch(t *testing.T) {
+	r := &BaseValidationRecord{
+		Index: 0,
+	}
+	re := regexp.MustCompile(`^[A-Z]+$`)
+	r.ValidateStringField("abc", "foobar", "type[0].field", "ERROR-001", "resourceType", 5, re, []string{"res1", "res2"}, true)
+	assert.Len(t, r.Errors, 1)
+	assert.Equal(t, "ERROR-001", r.Errors[0].Code)
+	assert.Equal(t, "Invalid field foobar for resourceType (res1 / res2). Reason: does not match the regular expression ^[A-Z]+$.", r.Errors[0].Message)
+	assert.Equal(t, "type[0].field", r.Errors[0].Path)
 }

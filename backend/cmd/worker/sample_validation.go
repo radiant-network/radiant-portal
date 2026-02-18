@@ -52,7 +52,7 @@ func (r *SampleValidationRecord) GetResourceType() string {
 
 func (r *SampleValidationRecord) formatFieldRegexpMatch(fieldName string, regexp string) string {
 	reason := fmt.Sprintf("does not match the regular expression %s", regexp)
-	return validation.FormatInvalidField(r, fieldName, reason, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+	return validation.FormatInvalidField(r.GetResourceType(), fieldName, reason, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
 }
 
 func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValue string) {
@@ -61,7 +61,7 @@ func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValu
 	}
 	if len(fieldValue) > TextMaxLength {
 		path := validation.FormatPath(r, fieldName)
-		message := validation.FormatFieldTooLong(r, fieldName, TextMaxLength, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+		message := validation.FormatFieldTooLong(r.GetResourceType(), fieldName, TextMaxLength, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
 		r.AddErrors(message, SampleInvalidValueCode, path)
 	}
 }
@@ -148,13 +148,13 @@ func processSampleBatch(ctx *validation.BatchValidationContext, batch *types.Bat
 	var samplesbatch []types.SampleBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &samplesbatch); unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error unmarshalling sample batch: %v", unexpectedErr), ctx.BatchRepo)
+		validation.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling sample batch: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
 	records, unexpectedErr := validateSamplesBatch(ctx, samplesbatch)
 	if unexpectedErr != nil {
-		processUnexpectedError(batch, fmt.Errorf("error sample batch validation: %v", unexpectedErr), ctx.BatchRepo)
+		validation.ProcessUnexpectedError(batch, fmt.Errorf("error sample batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
@@ -162,7 +162,7 @@ func processSampleBatch(ctx *validation.BatchValidationContext, batch *types.Bat
 
 	err := persistBatchAndSampleRecords(db, batch, records)
 	if err != nil {
-		processUnexpectedError(batch, fmt.Errorf("error processing sample batch records: %v", err), ctx.BatchRepo)
+		validation.ProcessUnexpectedError(batch, fmt.Errorf("error processing sample batch records: %v", err), ctx.BatchRepo)
 		return
 	}
 }
@@ -319,7 +319,7 @@ func (r *SampleValidationRecord) validateTypeCode() error {
 	if !slices.Contains(allowedTypeCodes, r.Sample.TypeCode) {
 		fieldName := "type_code"
 		path := validation.FormatPath(r, fieldName)
-		message := validation.FormatInvalidField(r, fieldName, fmt.Sprintf("must be one of: %s", strings.Join(allowedTypeCodes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+		message := validation.FormatInvalidField(r.GetResourceType(), fieldName, fmt.Sprintf("must be one of: %s", strings.Join(allowedTypeCodes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
 		r.AddErrors(message, SampleInvalidValueCode, path)
 	}
 	return nil
@@ -333,7 +333,7 @@ func (r *SampleValidationRecord) validateHistologyCode() error {
 	if !slices.Contains(codes, r.Sample.HistologyCode) {
 		fieldName := "histology_code"
 		path := validation.FormatPath(r, fieldName)
-		message := validation.FormatInvalidField(r, fieldName, fmt.Sprintf("value %q must be one of: [%s]", r.Sample.HistologyCode, strings.Join(codes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+		message := validation.FormatInvalidField(r.GetResourceType(), fieldName, fmt.Sprintf("value %q must be one of: [%s]", r.Sample.HistologyCode, strings.Join(codes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
 		r.AddErrors(message, SampleInvalidValueCode, path)
 	}
 	return nil

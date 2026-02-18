@@ -402,7 +402,7 @@ func Test_validateRegexPattern_ValidPattern(t *testing.T) {
 		BaseValidationRecord: validation.BaseValidationRecord{Index: 0},
 	}
 
-	record.validateRegexPattern(
+	record.ValidateRegexPattern(
 		"case[0].field",
 		"Valid-Value123",
 		"TEST-001",
@@ -418,7 +418,7 @@ func Test_validateRegexPattern_InvalidPattern(t *testing.T) {
 		BaseValidationRecord: validation.BaseValidationRecord{Index: 0},
 	}
 
-	record.validateRegexPattern(
+	record.ValidateRegexPattern(
 		"case[0].field",
 		"Invalid@Value",
 		"TEST-001",
@@ -437,7 +437,7 @@ func Test_validateRegexPattern_EmptyValue(t *testing.T) {
 		BaseValidationRecord: validation.BaseValidationRecord{Index: 0},
 	}
 
-	record.validateRegexPattern(
+	record.ValidateRegexPattern(
 		"case[0].field",
 		"",
 		"TEST-001",
@@ -456,7 +456,7 @@ func Test_validateRegexPattern_FamilyMemberCode(t *testing.T) {
 	}
 
 	// Valid family member code
-	record.validateRegexPattern(
+	record.ValidateRegexPattern(
 		"case[0].patients[0].family_history[0]",
 		"Mother-Paternal",
 		"PATIENT-004",
@@ -467,7 +467,7 @@ func Test_validateRegexPattern_FamilyMemberCode(t *testing.T) {
 	assert.Empty(t, record.Errors)
 
 	// Invalid family member code (contains numbers)
-	record.validateRegexPattern(
+	record.ValidateRegexPattern(
 		"case[0].patients[0].family_history[1]",
 		"Mother123",
 		"PATIENT-004",
@@ -485,7 +485,7 @@ func Test_validateTextLength_ValidLength(t *testing.T) {
 		BaseValidationRecord: validation.BaseValidationRecord{Index: 0},
 	}
 
-	record.validateTextLength(
+	record.ValidateTextLength(
 		"case[0].field",
 		"Short text",
 		"TEST-002",
@@ -502,7 +502,7 @@ func Test_validateTextLength_ExceedsMaxLength(t *testing.T) {
 	}
 
 	longText := strings.Repeat("a", 101)
-	record.validateTextLength(
+	record.ValidateTextLength(
 		"case[0].field",
 		longText,
 		"TEST-002",
@@ -522,7 +522,7 @@ func Test_validateTextLength_EmptyString(t *testing.T) {
 		BaseValidationRecord: validation.BaseValidationRecord{Index: 0},
 	}
 
-	record.validateTextLength(
+	record.ValidateTextLength(
 		"case[0].field",
 		"",
 		"TEST-002",
@@ -539,7 +539,7 @@ func Test_validateTextLength_ExactlyMaxLength(t *testing.T) {
 	}
 
 	exactText := strings.Repeat("a", 100)
-	record.validateTextLength(
+	record.ValidateTextLength(
 		"case[0].field",
 		exactText,
 		"TEST-002",
@@ -557,7 +557,7 @@ func Test_validateTextLength_TextMaxLength(t *testing.T) {
 
 	// Test with TextMaxLength constant
 	longText := strings.Repeat("a", TextMaxLength+1)
-	record.validateTextLength(
+	record.ValidateTextLength(
 		"case[0].note",
 		longText,
 		CaseInvalidField,

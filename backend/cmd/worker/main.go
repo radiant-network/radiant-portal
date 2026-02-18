@@ -64,7 +64,7 @@ func processBatch(db *gorm.DB, ctx *validation.BatchValidationContext) {
 	processFn, ok := supportedProcessors[nextBatch.BatchType]
 	if !ok {
 		err = fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
-		processUnexpectedError(nextBatch, err, ctx.BatchRepo)
+		validation.ProcessUnexpectedError(nextBatch, err, ctx.BatchRepo)
 		return
 	}
 

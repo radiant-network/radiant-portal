@@ -2,6 +2,7 @@ package validation
 
 import (
 	"fmt"
+	"regexp"
 	"slices"
 	"time"
 
@@ -89,6 +90,42 @@ func (r *BaseValidationRecord) AddInfos(message string, code string, path string
 	})
 }
 
+func (r *BaseValidationRecord) FormatCasesInvalidFieldMessage(fieldName, fieldResource string) string {
+	return fmt.Sprintf("Invalid field %s for %s. Reason:",
+		fieldName,
+		fieldResource,
+	)
+}
+
+func (r *BaseValidationRecord) ValidateRegexPattern(path, value, code, prefixMessage string, regExp *regexp.Regexp) {
+	if regExp != nil && !regExp.MatchString(value) {
+		r.AddErrors(fmt.Sprintf("%s does not match the regular expression `%s`.", prefixMessage, regExp.String()), code, path)
+	}
+}
+
+func (r *BaseValidationRecord) ValidateTextLength(path, value, code, prefixMessage string, maxLength int) {
+	if len(value) > maxLength {
+		r.AddErrors(fmt.Sprintf("%s field is too long, maximum length allowed is %d.", prefixMessage, maxLength), code, path)
+	}
+}
+
+func (r *BaseValidationRecord) ValidateStringField(value, fieldName, path, errorCode, resourceType string, maxLength int, re *regexp.Regexp, resourceIDs []string, isRequired bool) {
+	if value == "" {
+		if isRequired {
+			msg := FormatInvalidField(resourceType, fieldName, "field is missing", resourceIDs)
+			r.AddErrors(msg, errorCode, path)
+		}
+		return
+	}
+
+	prefix := FormatInvalidField(resourceType, fieldName, "", resourceIDs)
+	r.ValidateTextLength(path, value, errorCode, prefix, maxLength)
+
+	if re != nil {
+		r.ValidateRegexPattern(path, value, errorCode, prefix, re)
+	}
+}
+
 func ValidateUniquenessInBatch[K comparable](
 	record ValidationRecord,
 	key K,
@@ -97,7 +134,7 @@ func ValidateUniquenessInBatch[K comparable](
 	ids []string,
 ) {
 	if _, exists := seenBatchMap[key]; exists {
-		message := FormatDuplicateInBatch(record, ids)
+		message := FormatDuplicateInBatch(record.GetResourceType(), ids)
 		path := FormatPath(record, "")
 		record.GetBase().AddErrors(message, duplicateCode, path)
 	} else {
@@ -105,9 +142,9 @@ func ValidateUniquenessInBatch[K comparable](
 	}
 }
 
-func FormatFieldRegexpMatch(r ValidationRecord, fieldName string, regExpStr string, resourceIds []string) string {
+func FormatFieldRegexpMatch(resourceType string, fieldName string, regExpStr string, resourceIds []string) string {
 	reason := fmt.Sprintf("does not match the regular expression %s", regExpStr)
-	return FormatInvalidField(r, fieldName, reason, resourceIds)
+	return FormatInvalidField(resourceType, fieldName, reason, resourceIds)
 }
 
 func UpdateBatch[T interface{ GetBase() *BaseValidationRecord }](batch *types.Batch, records []T, r *repository.BatchRepository) (int64, error) {

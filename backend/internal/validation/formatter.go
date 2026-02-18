@@ -20,22 +20,21 @@ func FormatIds(resourceIds []string) string {
 	return formatResourceIds
 }
 
-func FormatInvalidField(r ValidationRecord, fieldName string, reason string, ids []string) string {
+func FormatInvalidField(resourceType string, fieldName string, reason string, ids []string) string {
 	formatResourceIds := FormatIds(ids)
-	invalidFieldMessage := strings.TrimSpace(fmt.Sprintf("Invalid field %s for %s %s", fieldName, r.GetResourceType(), formatResourceIds))
+	invalidFieldMessage := strings.TrimSpace(fmt.Sprintf("Invalid field %s for %s %s", fieldName, resourceType, formatResourceIds))
 	reasonMessage := fmt.Sprintf("Reason: %s", reason)
 	message := strings.TrimSpace(fmt.Sprintf("%s. %s.", invalidFieldMessage, reasonMessage))
 	return message
 }
 
-func FormatFieldTooLong(r ValidationRecord, fieldName string, maxLength int, ids []string) string {
+func FormatFieldTooLong(resourceType, fieldName string, maxLength int, ids []string) string {
 	reason := fmt.Sprintf("field is too long, maximum length allowed is %d", maxLength)
-	return FormatInvalidField(r, fieldName, reason, ids)
+	return FormatInvalidField(resourceType, fieldName, reason, ids)
 }
 
-func FormatDuplicateInBatch(r ValidationRecord, ids []string) string {
+func FormatDuplicateInBatch(resourceType string, ids []string) string {
 	formatResourceIds := FormatIds(ids)
-	resourceType := r.GetResourceType()
 	capitalizedResourceType := strings.ToUpper(string(resourceType[0])) + resourceType[1:]
 	message := fmt.Sprintf("%s %s appears multiple times in the batch.", capitalizedResourceType, formatResourceIds)
 	return message
