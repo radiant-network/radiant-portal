@@ -2404,6 +2404,8 @@ components:
             type: string
           type: array
           uniqueItems: false
+        filter_is_pass:
+          type: boolean
         observed_phenotypes:
           items:
             $ref: '#/components/schemas/Term'

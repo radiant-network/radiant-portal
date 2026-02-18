@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **diagnosis_lab_name** | **str** |  | [optional] 
 **exomiser_acmg_classification** | **str** |  | [optional] 
 **exomiser_acmg_evidence** | **List[str]** |  | [optional] 
+**filter_is_pass** | **bool** |  | [optional] 
 **observed_phenotypes** | [**List[Term]**](Term.md) |  | [optional] 
 **patient_id** | **int** |  | 
 **primary_condition_id** | **str** |  | [optional] 
