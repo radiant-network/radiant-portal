@@ -1,0 +1,6 @@
+import{j as e}from"./iframe-DiydeeGO.js";import{D as o}from"./document-size-CkBBZRh4.js";import{C as c,A as a}from"./applications-config-vsfwkDJy.js";import{B as d}from"./chunk-EPOLDU6W-CThPyvmJ.js";import"./preload-helper-Dp1pzeXC.js";import"./empty-field-CPIfPEqd.js";const m={variant_entity:{app_id:a.variant_entity},snv_occurrence:{app_id:a.snv_occurrence,aggregations:[]},cnv_occurrence:{app_id:a.cnv_occurrence,aggregations:[]},admin:{admin_code:"admin",app_id:a.admin},portal:{name:"",navigation:{}}},g={title:"Informations/DocumentSizeField",component:o,args:{},decorators:[r=>e.jsx(d,{children:e.jsx(c,{config:m,children:e.jsx(r,{})})})]},n={render:()=>e.jsxs("div",{children:[[1,10,1e6,1e7,1e9,1e10,1e12,1e13].map(r=>e.jsx(o,{value:r},r)),e.jsx(o,{value:void 0})]})};var i,t,s;n.parameters={...n.parameters,docs:{...(i=n.parameters)==null?void 0:i.docs,source:{originalSource:`{
+  render: () => <div>
+      {[1, 10, 1000000, 10000000, 1000000000, 10000000000, 1000000000000, 10000000000000].map(value => <DocumentSize key={value} value={value} />)}
+      <DocumentSize value={undefined} />
+    </div>
+}`,...(s=(t=n.parameters)==null?void 0:t.docs)==null?void 0:s.source}}};const x=["Default"];export{n as Default,x as __namedExportsOrder,g as default};
