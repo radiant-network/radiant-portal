@@ -181,7 +181,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
 		payload = append(payload, payload[0])
 
 		payload[1].SubmitterCaseId = ""
-		payload[1].OrderingPhysician = "Not_Dry_Run_No_SubmitterCaseId"
+		payload[1].OrderingPhysician = "Not Dry Run No SubmitterCaseId"
 		payload[1].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_No_SubmitterCaseId_2.recal.crai"
 
 		createDocumentsForBatch(context, client, payload)
@@ -191,12 +191,12 @@ func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
 		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
 
 		var ca []*types.Case
-		db.Table("cases").Where("project_id = ? AND ordering_physician = ?", 1, "Not_Dry_Run_No_SubmitterCaseId").Find(&ca)
+		db.Table("cases").Where("project_id = ? AND ordering_physician = ?", 1, "Not Dry Run No SubmitterCaseId").Find(&ca)
 
 		assert.NotNil(t, ca)
 		assert.Len(t, ca, 2)
 		assert.GreaterOrEqual(t, ca[0].ID, 1000)
-		assert.Equal(t, "Not_Dry_Run_No_SubmitterCaseId", ca[0].OrderingPhysician)
+		assert.Equal(t, "Not Dry Run No SubmitterCaseId", ca[0].OrderingPhysician)
 		assert.Equal(t, "", ca[0].SubmitterCaseID)
 	})
 }
