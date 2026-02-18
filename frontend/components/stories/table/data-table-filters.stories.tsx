@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { createColumnHelper } from '@tanstack/react-table';
 import { http } from 'msw';
 
@@ -18,9 +18,9 @@ import {
   httpCaseSearchApiResponse,
 } from '../api/api-case';
 
-import { data, MockData } from './table-mock';
+import { data, TableMockData } from './table-mock';
 
-const columnHelper = createColumnHelper<MockData>();
+const columnHelper = createColumnHelper<TableMockData>();
 
 const config: PortalConfig = {
   variant_entity: {
@@ -72,7 +72,7 @@ const meta = {
       columnHelper.accessor('progress', {
         header: 'Profile Progress',
       }),
-    ] as TableColumnDef<MockData, any>[],
+    ] as TableColumnDef<TableMockData, any>[],
     data,
     serverOptions: {
       defaultSorting: [
@@ -82,7 +82,7 @@ const meta = {
         },
       ],
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      onSortingChange: sorting => {},
+      onSortingChange: sorting => { },
     },
     defaultColumnSettings: createColumnSettings([
       {
@@ -126,7 +126,7 @@ const meta = {
         pageIndex: 0,
         pageSize: 10,
       },
-      onPaginationChange: () => {},
+      onPaginationChange: () => { },
     },
     total: 10,
   },
@@ -154,7 +154,7 @@ export const Loading: Story = {
     enableColumnOrdering: false,
     enableFullscreen: true,
     tableIndexResultPosition: 'hidden',
-    TableFilters: <TableFilters loading={true} setSearchCriteria={() => {}} />,
+    TableFilters: <TableFilters loading={true} setSearchCriteria={() => { }} />,
   },
   render: args => <DataTable {...args} />,
 };
@@ -178,7 +178,7 @@ export const Default: Story = {
     enableColumnOrdering: false,
     enableFullscreen: true,
     tableIndexResultPosition: 'hidden',
-    TableFilters: <TableFilters loading={false} setSearchCriteria={() => {}} />,
+    TableFilters: <TableFilters loading={false} setSearchCriteria={() => { }} />,
   },
   render: args => <DataTable {...args} />,
 };

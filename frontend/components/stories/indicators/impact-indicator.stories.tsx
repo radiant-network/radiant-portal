@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { VepImpact } from '@/api/api';
 import ImpactIndicator from '@/components/base/indicators/impact-indicator';

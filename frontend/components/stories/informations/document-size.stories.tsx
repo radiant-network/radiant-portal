@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import DocumentSize from '@/components/base/information/document-size';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';

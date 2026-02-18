@@ -2,13 +2,17 @@ import '@styles/theme.css';
 import '@styles/tailwind.css';
 
 import { initialize, mswLoader } from 'msw-storybook-addon';
-import type { Preview } from '@storybook/react';
+import type { Preview } from '@storybook/react-vite';
 import { withThemeByClassName } from '@storybook/addon-themes';
 import { TooltipProvider } from '../base/shadcn/tooltip';
 import { AlertDialogProvider } from '../base/dialog/alert-dialog-provider';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n'; // Use the Storybook-specific i18n instance
 import ThemeProvider from '../base/theme-toggle/theme-provider';
+import { sb } from 'storybook/test';
+
+// mock
+sb.mock(import('../../utils/helper.ts'), { spy: true });
 
 let options = {};
 if (location.hostname === 'radiant-network.github.io') {
@@ -35,7 +39,7 @@ const preview: Preview = {
   decorators: [
     withThemeByClassName({
       themes: {
-        light: 'light',
+        light: '',
         dark: 'dark',
       },
       defaultTheme: 'light',

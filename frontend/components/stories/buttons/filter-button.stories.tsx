@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Calendar, Database, FileText, Filter, Settings, Users } from 'lucide-react';
 
 import FilterButton, { IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { SidebarGroups } from '@/components/base/query-filters/sidebar-groups';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';

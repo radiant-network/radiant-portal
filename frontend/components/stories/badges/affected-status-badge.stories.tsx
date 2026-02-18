@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';

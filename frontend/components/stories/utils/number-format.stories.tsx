@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import { toKiloBases } from '@/components/lib/number-format';

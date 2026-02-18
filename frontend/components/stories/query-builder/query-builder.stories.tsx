@@ -1,6 +1,6 @@
-import { action } from '@storybook/addon-actions';
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
+import { action } from 'storybook/actions';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import { UserIcon } from 'lucide-react';
 import { v4 } from 'uuid';
 

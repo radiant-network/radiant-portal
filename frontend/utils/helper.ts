@@ -1,4 +1,4 @@
-import { useParams } from 'react-router';
+import { useParams, useSearchParams } from 'react-router';
 
 /**
  * Sanitize HTML to prevent XSS attacks
@@ -42,7 +42,7 @@ export function decodeHtmlEntities(html: string): string {
  * @returns case id.
  * @throws Error if case id is not found or not a number.
  */
-export const useCaseIdFromParam = function (): number {
+export function useCaseIdFromParam(): number {
   const { caseId: caseIdParam } = useParams<{ caseId: string }>();
   const caseId = caseIdParam ? Number(caseIdParam) : undefined;
 
@@ -51,4 +51,20 @@ export const useCaseIdFromParam = function (): number {
   }
 
   return caseId;
-};
+}
+
+/**
+ * Retrieve seq id from params.
+ * @returns seq id.
+ * @throws Error if seq id is not found or not a number.
+ */
+export function useSeqIdFromSearchParam(): number {
+  const [searchParams] = useSearchParams();
+  const seqId = Number(searchParams.get('seq_id')) ?? -1;
+
+  if (seqId == undefined) {
+    throw new Error('Required search parameter seqId was null or undefined.');
+  }
+
+  return seqId;
+}

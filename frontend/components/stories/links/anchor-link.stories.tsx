@@ -1,5 +1,5 @@
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { anchorLinkSizes, anchorLinkVariants } from './utils';
 
 const meta = {

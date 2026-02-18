@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import ConditionalField from '@/components/base/information/conditional-field';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';

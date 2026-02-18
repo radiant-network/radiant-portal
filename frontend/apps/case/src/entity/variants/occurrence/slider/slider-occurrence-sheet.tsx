@@ -1,4 +1,3 @@
-import { useContext } from 'react';
 import { SquarePen } from 'lucide-react';
 
 import { CaseSequencingExperiment, GermlineSNVOccurrence } from '@/api/api';
@@ -15,8 +14,9 @@ import SliderSheet from '@/components/base/slider/slider-sheet';
 import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
 import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
 import { useI18n } from '@/components/hooks/i18n';
-import { SeqIDContext } from '@/entity/variants/variants-tab';
 import { useCaseIdFromParam } from '@/utils/helper';
+
+import { useSeqIdContext } from '../hooks/use-seq-id';
 
 type OccurrenceSliderSheetProps = {
   occurrence?: GermlineSNVOccurrence;
@@ -81,7 +81,7 @@ function OccurrenceSheetContent({
 }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
   const caseId = useCaseIdFromParam();
-  const seqId = useContext(SeqIDContext);
+  const seqId = useSeqIdContext();
   const { patient, caseSequencing, expandResult, isLoading } = useOccurrenceAndCase(
     caseId,
     occurrence.seq_id,

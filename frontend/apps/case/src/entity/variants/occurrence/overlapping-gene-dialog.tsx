@@ -16,8 +16,7 @@ import { toKiloBases } from '@/components/lib/number-format';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
-import { SeqIDContext } from '../variants-tab';
-
+import { useSeqIdContext } from './hooks/use-seq-id';
 import {
   defaultCNVOverlappingGenesSettings,
   getCNVOverlappingGenesColumns,
@@ -51,7 +50,8 @@ export function useCNVOverlappingGenesListHelper(input: OverlappingGenesInput) {
 function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState<boolean>(false);
-  const seqId = Number(useContext(SeqIDContext));
+  const seqId = useSeqIdContext();
+
   const caseId = useCaseIdFromParam();
 
   const { fetch: fetchCNVOverlappingListHelper } = useCNVOverlappingGenesListHelper({

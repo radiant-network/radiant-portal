@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { FlaskConicalIcon } from 'lucide-react';
 import { toast } from 'sonner';
 

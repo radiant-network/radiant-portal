@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { SortBodyOrderEnum } from '@/api/api';
@@ -9,9 +9,9 @@ import DataTable, { TableColumnDef } from '@/components/base/data-table/data-tab
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
-import { data, mockColumns, MockData, mockDefaultColumnSettings } from './table-mock';
+import { data, mockColumns, TableMockData, mockDefaultColumnSettings } from './table-mock';
 
-const columnHelper = createColumnHelper<MockData>();
+const columnHelper = createColumnHelper<TableMockData>();
 
 const config: PortalConfig = {
   variant_entity: {
@@ -50,7 +50,7 @@ const meta = {
         },
       ],
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      onSortingChange: sorting => {},
+      onSortingChange: sorting => { },
     },
     defaultColumnSettings: mockDefaultColumnSettings,
     loadingStates: {
@@ -63,7 +63,7 @@ const meta = {
         pageIndex: 0,
         pageSize: 10,
       },
-      onPaginationChange: () => {},
+      onPaginationChange: () => { },
     },
     total: 10,
   },
@@ -196,7 +196,7 @@ export const DataTableFiltersAndLessThan10Results: Story = {
   args: {
     data: data.slice(0, 1),
     total: 1,
-    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
+    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => { }} />,
     enableFullscreen: true,
     enableColumnOrdering: true,
     tableIndexResultPosition: 'bottom',
@@ -284,7 +284,7 @@ export const GroupBy: Story = {
         aggregationFn: 'mean',
         aggregatedCell: ({ getValue }) => `~${Math.round(getValue<number>() * 100) / 100}%`,
       }),
-    ] as TableColumnDef<MockData, any>[],
+    ] as TableColumnDef<TableMockData, any>[],
   },
   render: args => (
     <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">

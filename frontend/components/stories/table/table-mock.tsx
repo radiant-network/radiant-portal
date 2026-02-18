@@ -1,17 +1,21 @@
+/* eslint-disable no-use-before-define */
 import { createColumnHelper } from '@tanstack/react-table';
+import uniqBy from 'lodash/uniqBy';
 
+import NumberCell from '@/components/base/data-table/cells/number-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 
-export type MockData = {
+export type TableMockData = {
   firstName: string;
   lastName: string;
   age: number;
   visits: number;
   status: string;
   progress: number;
+  isActive?: boolean;
 };
 
-const mockColumnHelper = createColumnHelper<MockData>();
+export const mockColumnHelper = createColumnHelper<TableMockData>();
 export const mockColumns = [
   mockColumnHelper.accessor('firstName', {
     cell: info => info.getValue(),
@@ -24,18 +28,20 @@ export const mockColumns = [
   }),
   mockColumnHelper.accessor('age', {
     header: () => 'Age',
-    cell: info => info.renderValue(),
+    cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
   }),
   mockColumnHelper.accessor('visits', {
     header: () => <span>Visits</span>,
+    cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
   }),
   mockColumnHelper.accessor('status', {
     header: 'Status',
   }),
   mockColumnHelper.accessor('progress', {
     header: 'Profile Progress',
+    cell: info => <NumberCell value={info.getValue()} fractionDigits={2} />,
   }),
-] as TableColumnDef<MockData, any>[];
+] as TableColumnDef<TableMockData, any>[];
 
 export const mockDefaultColumnSettings = createColumnSettings([
   {
@@ -70,7 +76,7 @@ export const mockDefaultColumnSettings = createColumnSettings([
   },
 ]);
 
-export type AdvancedMockData = MockData & {
+export type AdvancedTableMockData = TableMockData & {
   hobbies: string[];
   email: string;
   phoneNumber: string;
@@ -78,7 +84,6 @@ export type AdvancedMockData = MockData & {
   city: string;
   accountCreatedAt: Date;
   lastLoginAt: Date | null;
-  isActive: boolean;
   role: 'user' | 'admin' | 'moderator';
   lastVisitAt: Date;
   preferredLanguage: string;
@@ -88,12 +93,12 @@ export type AdvancedMockData = MockData & {
   notes?: string;
 };
 
-export const data: MockData[] = [
+export const data: TableMockData[] = [
   {
     firstName: 'tanner',
     lastName: 'linsley',
     age: 24,
-    visits: 100,
+    visits: 1000,
     status: 'In Relationship',
     progress: 50,
   },
@@ -101,7 +106,7 @@ export const data: MockData[] = [
     firstName: 'tandy',
     lastName: 'miller',
     age: 40,
-    visits: 40,
+    visits: 400,
     status: 'Single',
     progress: 80,
   },
@@ -125,7 +130,7 @@ export const data: MockData[] = [
     firstName: 'bob',
     lastName: 'johnson',
     age: 29,
-    visits: 33,
+    visits: 330,
     status: 'In Relationship',
     progress: 40,
   },
@@ -141,7 +146,7 @@ export const data: MockData[] = [
     firstName: 'dave',
     lastName: 'brown',
     age: 22,
-    visits: 14,
+    visits: 140,
     status: 'Single',
     progress: 91,
   },
@@ -165,20 +170,20 @@ export const data: MockData[] = [
     firstName: 'grace',
     lastName: 'martinez',
     age: 44,
-    visits: 19,
+    visits: 1,
     status: 'Complicated',
-    progress: 12,
+    progress: 12.5,
   },
 ];
 
-export const advancedData: AdvancedMockData[] = [
+export const advancedData: AdvancedTableMockData[] = [
   {
     firstName: 'tanner',
     lastName: 'linsley',
     age: 24,
     visits: 100,
     status: 'In Relationship',
-    progress: 50,
+    progress: 50.45,
     hobbies: ['climbing', 'reading'],
     email: 'tanner.linsley@example.com',
     phoneNumber: '+1-514-555-0001',
@@ -419,7 +424,7 @@ export const advancedData: AdvancedMockData[] = [
   },
   {
     firstName: 'irene',
-    lastName: 'thomas',
+    lastName: 'tremblay',
     age: 35,
     visits: 88,
     status: 'In Relationship',
@@ -441,7 +446,7 @@ export const advancedData: AdvancedMockData[] = [
   },
   {
     firstName: 'jack',
-    lastName: 'jackson',
+    lastName: 'tremblay',
     age: 28,
     visits: 51,
     status: 'Complicated',
@@ -508,7 +513,7 @@ export const advancedData: AdvancedMockData[] = [
   },
   {
     firstName: 'mia',
-    lastName: 'martin',
+    lastName: 'tremblay',
     age: 30,
     visits: 27,
     status: 'Complicated',
@@ -552,7 +557,7 @@ export const advancedData: AdvancedMockData[] = [
   },
   {
     firstName: 'olivia',
-    lastName: 'walker',
+    lastName: 'tremblay',
     age: 27,
     visits: 58,
     status: 'In Relationship',
@@ -665,7 +670,7 @@ export const advancedData: AdvancedMockData[] = [
     firstName: 'tyler',
     lastName: 'wright',
     age: 23,
-    visits: 15,
+    visits: 15.1,
     status: 'Complicated',
     progress: 19,
     hobbies: ['music', 'movies'],
@@ -756,7 +761,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 30,
     visits: 121,
     status: 'Single',
-    progress: 95,
+    progress: 95.12,
     hobbies: ['cycling', 'running', 'music'],
     email: 'xavier.adams@example.com',
     phoneNumber: '+1-514-555-0027',
@@ -800,7 +805,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 43,
     visits: 22,
     status: 'Complicated',
-    progress: 29,
+    progress: 29.98,
     hobbies: ['reading', 'woodworking'],
     email: 'zach.carter@example.com',
     phoneNumber: '+1-514-555-0029',
@@ -866,7 +871,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 39,
     visits: 54,
     status: 'Complicated',
-    progress: 47,
+    progress: 47.12,
     hobbies: ['yoga', 'reading', 'gardening'],
     email: 'paula.turner@example.com',
     phoneNumber: '+1-514-555-0032',
@@ -977,7 +982,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 37,
     visits: 44,
     status: 'In Relationship',
-    progress: 46,
+    progress: 46.24,
     hobbies: ['hiking', 'cycling'],
     email: 'ulrich.fischer@example.com',
     phoneNumber: '+1-514-555-0037',
@@ -999,7 +1004,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 24,
     visits: 59,
     status: 'Single',
-    progress: 90,
+    progress: 90.0,
     hobbies: ['coding', 'reading', 'travel'],
     email: 'valerie.dubois@example.com',
     phoneNumber: '+1-514-555-0038',
@@ -1021,7 +1026,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 31,
     visits: 18,
     status: 'Complicated',
-    progress: 33,
+    progress: 33.83,
     hobbies: ['movies', 'cooking'],
     email: 'will.rodriguez@example.com',
     phoneNumber: '+1-514-555-0039',
@@ -1043,7 +1048,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 42,
     visits: 71,
     status: 'In Relationship',
-    progress: 49,
+    progress: 49.23,
     hobbies: ['yoga', 'travel', 'music'],
     email: 'ximena.santos@example.com',
     phoneNumber: '+1-514-555-0040',
@@ -1065,7 +1070,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 36,
     visits: 62,
     status: 'Single',
-    progress: 58,
+    progress: 58.99,
     hobbies: ['cycling', 'photography'],
     email: 'henry.wilson@example.com',
     phoneNumber: '+1-514-555-0101',
@@ -1087,7 +1092,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 28,
     visits: 41,
     status: 'In Relationship',
-    progress: 72,
+    progress: 72.1,
     hobbies: ['yoga', 'cooking'],
     email: 'irene.clark@example.com',
     phoneNumber: '+1-438-555-0102',
@@ -1109,7 +1114,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 47,
     visits: 88,
     status: 'Married',
-    progress: 64,
+    progress: 64.25,
     hobbies: ['woodworking', 'fishing'],
     email: 'jack.thompson@example.com',
     phoneNumber: '+1-514-555-0103',
@@ -1131,7 +1136,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 34,
     visits: 55,
     status: 'Single',
-    progress: 47,
+    progress: 47.2,
     hobbies: ['painting', 'travel'],
     email: 'karen.lopez@example.com',
     phoneNumber: '+1-438-555-0104',
@@ -1153,7 +1158,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 26,
     visits: 23,
     status: 'Single',
-    progress: 91,
+    progress: 91.0,
     hobbies: ['gaming', 'streaming'],
     email: 'liam.anderson@example.com',
     phoneNumber: '+1-514-555-0105',
@@ -1175,7 +1180,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 39,
     visits: 71,
     status: 'In Relationship',
-    progress: 83,
+    progress: 83.12,
     hobbies: ['running', 'nutrition'],
     email: 'mia.nguyen@example.com',
     phoneNumber: '+1-438-555-0106',
@@ -1197,7 +1202,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 42,
     visits: 36,
     status: 'Married',
-    progress: 29,
+    progress: 29.9,
     hobbies: ['gardening', 'DIY'],
     email: 'nathan.hall@example.com',
     phoneNumber: '+1-514-555-0107',
@@ -1220,7 +1225,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 31,
     visits: 94,
     status: 'Single',
-    progress: 88,
+    progress: 88.0,
     hobbies: ['blogging', 'marketing'],
     email: 'olivia.young@example.com',
     phoneNumber: '+1-438-555-0108',
@@ -1242,7 +1247,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 54,
     visits: 11,
     status: 'Married',
-    progress: 22,
+    progress: 22.75,
     hobbies: ['history', 'chess'],
     email: 'paul.king@example.com',
     phoneNumber: '+1-514-555-0109',
@@ -1264,7 +1269,7 @@ export const advancedData: AdvancedMockData[] = [
     age: 23,
     visits: 67,
     status: 'Single',
-    progress: 95,
+    progress: 95.0,
     hobbies: ['music', 'sound design'],
     email: 'quinn.scott@example.com',
     phoneNumber: '+1-438-555-0110',
@@ -1281,3 +1286,45 @@ export const advancedData: AdvancedMockData[] = [
     tags: ['creative', 'new'],
   },
 ];
+
+/**
+ * Helper
+ */
+export function generateMultiSelectData(key: string) {
+  const response = advancedData.map(data => {
+    const count =
+      advancedData.filter(d => d[key as keyof AdvancedTableMockData] === data[key as keyof AdvancedTableMockData])
+        .length ?? 0;
+    return {
+      key: data[key as keyof AdvancedTableMockData],
+      count,
+    };
+  });
+
+  return uniqBy(response, 'key');
+}
+
+export function generateBooleanData(key: string) {
+  return [
+    {
+      key: 'true',
+      count: advancedData.filter(d => d[key as keyof AdvancedTableMockData] === true).length ?? 0,
+    },
+    {
+      key: 'false',
+      count: advancedData.filter(d => d[key as keyof AdvancedTableMockData] === false).length ?? 0,
+    },
+  ];
+}
+
+export function generateSortedAdvancedData(key: string, type: string) {
+  const sorted = advancedData.sort(
+    (a, b) => a[key as keyof AdvancedTableMockData] - b[key as keyof AdvancedTableMockData],
+  );
+
+  return {
+    max: sorted[sorted.length - 1][key as keyof AdvancedTableMockData],
+    min: sorted[0][key as keyof AdvancedTableMockData],
+    type,
+  };
+}

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Button } from '@/components/base/shadcn/button';
 import { Spinner } from '@/components/base/shadcn/spinner';

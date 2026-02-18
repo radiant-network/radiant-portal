@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import PageHeader from '@/components/base/page/page-header';
 import { Users } from 'lucide-react';
 

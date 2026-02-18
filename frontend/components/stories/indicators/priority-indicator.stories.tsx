@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import {
   Pagination,

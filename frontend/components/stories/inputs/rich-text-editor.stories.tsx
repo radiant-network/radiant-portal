@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
-import { action } from '@storybook/addon-actions';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
+import { action } from 'storybook/actions';
 import { useI18n } from '@/components/hooks/i18n';
 
 import RichTextEditor from '@/components/base/data-entry/rich-text-editor/rich-text-editor';

@@ -1,13 +1,12 @@
-import { createContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { CaseEntity, CaseSequencingExperiment } from '@/api/api';
 
 import SequencingExperimentVariantFilters from './filters/sequencing-experiment-variant-filters';
 import CNVTab from './occurrence/cnv-tab';
+import { SeqIDContext } from './occurrence/hooks/use-seq-id';
 import SNVTab from './occurrence/snv-tab';
-
-export const SeqIDContext = createContext<number>(-1);
 
 export enum VariantInterface {
   SNV = 'snv',

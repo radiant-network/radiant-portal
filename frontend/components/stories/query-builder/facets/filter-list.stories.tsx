@@ -1,5 +1,5 @@
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { X } from 'lucide-react';
 import { delay, http, HttpResponse } from 'msw';
 
@@ -10,11 +10,11 @@ import { ApplicationId, ConfigProvider, FilterTypes, PortalConfig } from '@/comp
 import { RangeOperators } from '@/components/cores/sqon';
 
 import {
-  httpOccurrenceApiResponse,
-  httpStatisticsApiResponse,
+  httpOccurrenceAggregateApiResponse,
+  httpOccurrenceAggregateStatisticsApiResponse,
   OccurenceHandler,
-  occurrenceApi,
-  statisticApi,
+  occurrenceAggregateApi,
+  occurrenceAggregateStatisticApi,
 } from '../../api/api-occurrence';
 
 const filterListConfig: PortalConfig = {
@@ -91,7 +91,7 @@ const filterListConfig: PortalConfig = {
             },
           },
           {
-            key: 'toggle filter',
+            key: 'boolean',
             translation_key: 'toggle filter',
             type: FilterTypes.BOOLEAN,
           },
@@ -206,8 +206,8 @@ export const Default: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post<OccurenceHandler>(occurrenceApi, httpOccurrenceApiResponse),
-        http.post<OccurenceHandler>(statisticApi, httpStatisticsApiResponse),
+        http.post<OccurenceHandler>(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post<OccurenceHandler>(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
       ],
     },
   },
@@ -217,7 +217,7 @@ export const Error: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post(occurrenceApi, async () => {
+        http.post(occurrenceAggregateApi, async () => {
           await delay(800);
           return new HttpResponse(null, {
             status: 403,
