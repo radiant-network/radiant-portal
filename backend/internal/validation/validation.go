@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -118,7 +119,7 @@ func (r *BaseValidationRecord) ValidateStringField(value, fieldName, path, error
 		return
 	}
 
-	prefix := FormatInvalidField(resourceType, fieldName, "", resourceIDs)
+	prefix := strings.TrimSuffix(FormatInvalidField(resourceType, fieldName, "", resourceIDs), " .")
 	r.ValidateTextLength(path, value, errorCode, prefix, maxLength)
 
 	if re != nil {

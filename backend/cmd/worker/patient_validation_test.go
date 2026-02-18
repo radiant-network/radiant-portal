@@ -41,7 +41,7 @@ func Test_SubmitterPatientId_Special_Characters(t *testing.T) {
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateSubmitterPatientId()
 	assert.Len(t, patientValidationRecord.Errors, 1)
-	assert.Equal(t, fmt.Sprintf("Invalid field submitter_patient_id for patient (CHUSJ / %s). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$.", orgPatientId), patientValidationRecord.Errors[0].Message)
+	assert.Equal(t, fmt.Sprintf("Invalid field submitter_patient_id for patient (CHUSJ / %s). Reason: does not match the regular expression `^[a-zA-Z0-9\\- ._'À-ÿ]*$`.", orgPatientId), patientValidationRecord.Errors[0].Message)
 	assert.Equal(t, "patient[0].submitter_patient_id", patientValidationRecord.Errors[0].Path)
 }
 

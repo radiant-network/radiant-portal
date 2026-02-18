@@ -49,78 +49,45 @@ func (r *PatientValidationRecord) GetResourceType() string {
 	return types.PatientBatchType
 }
 
+func (r *PatientValidationRecord) getResourceIds() []string {
+	return []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
+}
+
 func (r *PatientValidationRecord) validateSubmitterPatientId() {
-	resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
 	path := validation.FormatPath(r, "submitter_patient_id")
-	if len(r.Patient.SubmitterPatientId) > TextMaxLength {
-		message := validation.FormatFieldTooLong(r.GetResourceType(), "submitter_patient_id", TextMaxLength, resIds)
-		r.AddErrors(message, PatientInvalidValueCode, path)
-	}
-	if !ExternalIdRegexpCompiled.MatchString(r.Patient.SubmitterPatientId.String()) {
-		message := validation.FormatFieldRegexpMatch(r.GetResourceType(), "submitter_patient_id", ExternalIdRegexp, resIds)
-		r.AddErrors(message, PatientInvalidValueCode, path)
-	}
+	r.ValidateStringField(r.Patient.SubmitterPatientId.String(), "submitter_patient_id", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getResourceIds(), true)
 }
 
 func (r *PatientValidationRecord) validateSubmitterPatientIdType() {
-	resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
 	path := validation.FormatPath(r, "submitter_patient_id_type")
-	if len(r.Patient.SubmitterPatientIdType) > TextMaxLength {
-		message := validation.FormatFieldTooLong(r.GetResourceType(), "submitter_patient_id_type", TextMaxLength, resIds)
-		r.AddErrors(message, PatientInvalidValueCode, path)
-	}
-	if !ExternalIdRegexpCompiled.MatchString(r.Patient.SubmitterPatientIdType.String()) {
-		message := validation.FormatFieldRegexpMatch(r.GetResourceType(), "submitter_patient_id_type", ExternalIdRegexp, resIds)
-		r.AddErrors(message, PatientInvalidValueCode, path)
-	}
+	r.ValidateStringField(r.Patient.SubmitterPatientIdType.String(), "submitter_patient_id_type", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getResourceIds(), true)
 }
 
 func (r *PatientValidationRecord) validateLastName() {
 	if r.Patient.LastName == "" {
 		return
 	}
-	resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
 	path := validation.FormatPath(r, "last_name")
-	if len(r.Patient.LastName) > TextMaxLength {
-		message := validation.FormatFieldTooLong(r.GetResourceType(), "last_name", TextMaxLength, resIds)
-		r.AddErrors(message, PatientInvalidValueCode, path)
-	}
-	if !NameRegExpCompiled.MatchString(r.Patient.LastName.String()) {
-		message := validation.FormatFieldRegexpMatch(r.GetResourceType(), "last_name", NameRegExp, resIds)
-		r.AddErrors(message, PatientInvalidValueCode, path)
-	}
+	r.ValidateStringField(r.Patient.LastName.String(), "last_name", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, NameRegExpCompiled, r.getResourceIds(), false)
+
 }
 
 func (r *PatientValidationRecord) validateFirstName() {
 	if r.Patient.FirstName == "" {
 		return
 	}
-	resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
 	path := validation.FormatPath(r, "first_name")
-	if len(r.Patient.FirstName) > TextMaxLength {
-		message := validation.FormatFieldTooLong(r.GetResourceType(), "first_name", TextMaxLength, resIds)
-		r.AddErrors(message, PatientInvalidValueCode, path)
-	}
-	if !NameRegExpCompiled.MatchString(r.Patient.FirstName.String()) {
-		message := validation.FormatFieldRegexpMatch(r.GetResourceType(), "first_name", NameRegExp, resIds)
-		r.AddErrors(message, PatientInvalidValueCode, path)
-	}
+	r.ValidateStringField(r.Patient.FirstName.String(), "first_name", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, NameRegExpCompiled, r.getResourceIds(), false)
+
 }
 
 func (r *PatientValidationRecord) validateJhn() {
 	if r.Patient.Jhn == "" {
 		return
 	}
-	resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
 	path := validation.FormatPath(r, "jhn")
-	if len(r.Patient.Jhn) > TextMaxLength {
-		message := validation.FormatFieldTooLong(r.GetResourceType(), "jhn", TextMaxLength, resIds)
-		r.AddErrors(message, PatientInvalidValueCode, path)
-	}
-	if !ExternalIdRegexpCompiled.MatchString(r.Patient.Jhn.String()) {
-		message := validation.FormatFieldRegexpMatch(r.GetResourceType(), "jhn", ExternalIdRegexp, resIds)
-		r.AddErrors(message, PatientInvalidValueCode, path)
-	}
+	r.ValidateStringField(r.Patient.Jhn.String(), "jhn", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getResourceIds(), false)
+
 }
 
 func (r *PatientValidationRecord) validateOrganization(organization *types.Organization) {
