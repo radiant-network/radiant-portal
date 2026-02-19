@@ -109,3 +109,11 @@ var PatientOrganizationNameField = Field{
 	CanBeSelected: true,
 	Table:         ManagingOrganizationTable,
 }
+
+var PatientSexCodeField = Field{
+	Name:          "sex_code",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         PatientTable,
+}

@@ -187,7 +187,7 @@ var VariantTable = Table{
 }
 
 var VariantInterpretedCasesFields = append(CasesFields, GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, ConditionIdField, ConditionNameField, ConditionTermField, AggregatedPhenotypeTermField)
-var VariantUninterpretedCasesFields = append(CasesFields, ConditionTermField, AggregatedPhenotypeTermField, GermlineSNVZygosityField, GermlineSNVTransmissionModeField, GermlineSNVFilterField, GermlineSNVFilterIsPassField)
+var VariantUninterpretedCasesFields = append(CasesFields, ConditionTermField, AggregatedPhenotypeTermField, GermlineSNVZygosityField, GermlineSNVTransmissionModeField, GermlineSNVFilterField, GermlineSNVFilterIsPassField, PatientSexCodeField)
 var VariantInterpretedCasesDefaultSort = []SortField{{Field: GermlineInterpretationUpdatedOnField, Order: "desc"}}
 
 var VariantUninterpretedCasesDefaultFields = []Field{

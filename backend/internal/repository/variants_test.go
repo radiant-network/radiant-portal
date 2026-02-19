@@ -222,16 +222,15 @@ func Test_GetVariantUninterpretedCases_WithCriteria_NoPagination_DefaultSort(t *
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
 		criteria := []types.SearchCriterion{
-			{FieldName: types.CaseStatusCodeField.Name, Value: []interface{}{"incomplete"}},
+			{FieldName: types.PatientSexCodeField.Name, Value: []interface{}{"female"}},
 			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"disorder"}, Operator: "contains"},
 		}
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(2), *count)
-		assert.Equal(t, 2, len(*uninterpretedCases))
-		assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
-		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
+		assert.Equal(t, int64(1), *count)
+		assert.Equal(t, 1, len(*uninterpretedCases))
+		assert.Equal(t, 4, (*uninterpretedCases)[0].CaseId)
 	})
 }
 
@@ -336,6 +335,23 @@ func Test_GetVariantUninterpretedCases_WithCaseAnalysisCriteria_NoPagination_Def
 		assert.Equal(t, int64(1), *count)
 		assert.Equal(t, 1, len(*uninterpretedCases))
 		assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
+	})
+}
+
+func Test_GetVariantUninterpretedCases_WithPatientSexCodeCriteria_NoPagination_DefaultSort(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		criteria := []types.SearchCriterion{
+			{FieldName: types.PatientSexCodeField.Name, Value: []interface{}{"female"}, Operator: "in"},
+		}
+		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
+		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(3), *count)
+		assert.Equal(t, 3, len(*uninterpretedCases))
+		assert.Equal(t, 4, (*uninterpretedCases)[0].CaseId)
+		assert.Equal(t, 7, (*uninterpretedCases)[1].CaseId)
+		assert.Equal(t, 7, (*uninterpretedCases)[2].CaseId)
 	})
 }
 
