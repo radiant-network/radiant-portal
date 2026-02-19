@@ -4998,6 +4998,12 @@ export interface VariantUninterpretedCase {
     'exomiser_acmg_evidence'?: Array<string>;
     /**
      * 
+     * @type {boolean}
+     * @memberof VariantUninterpretedCase
+     */
+    'filter_is_pass'?: boolean;
+    /**
+     * 
      * @type {Array<Term>}
      * @memberof VariantUninterpretedCase
      */

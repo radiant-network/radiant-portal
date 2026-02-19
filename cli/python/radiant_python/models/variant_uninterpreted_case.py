@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.term import Term
 from typing import Optional, Set
@@ -36,6 +36,7 @@ class VariantUninterpretedCase(BaseModel):
     diagnosis_lab_name: Optional[StrictStr] = None
     exomiser_acmg_classification: Optional[StrictStr] = None
     exomiser_acmg_evidence: Optional[List[StrictStr]] = None
+    filter_is_pass: Optional[StrictBool] = None
     observed_phenotypes: Optional[List[Term]] = None
     patient_id: StrictInt
     primary_condition_id: Optional[StrictStr] = None
@@ -46,7 +47,7 @@ class VariantUninterpretedCase(BaseModel):
     submitter_sample_id: Optional[StrictStr] = None
     updated_on: StrictStr
     zygosity: StrictStr
-    __properties: ClassVar[List[str]] = ["affected_status", "analysis_catalog_code", "analysis_catalog_name", "case_id", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "exomiser_acmg_classification", "exomiser_acmg_evidence", "observed_phenotypes", "patient_id", "primary_condition_id", "primary_condition_name", "relationship_to_proband", "seq_id", "status_code", "submitter_sample_id", "updated_on", "zygosity"]
+    __properties: ClassVar[List[str]] = ["affected_status", "analysis_catalog_code", "analysis_catalog_name", "case_id", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "exomiser_acmg_classification", "exomiser_acmg_evidence", "filter_is_pass", "observed_phenotypes", "patient_id", "primary_condition_id", "primary_condition_name", "relationship_to_proband", "seq_id", "status_code", "submitter_sample_id", "updated_on", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -115,6 +116,7 @@ class VariantUninterpretedCase(BaseModel):
             "diagnosis_lab_name": obj.get("diagnosis_lab_name"),
             "exomiser_acmg_classification": obj.get("exomiser_acmg_classification"),
             "exomiser_acmg_evidence": obj.get("exomiser_acmg_evidence"),
+            "filter_is_pass": obj.get("filter_is_pass"),
             "observed_phenotypes": [Term.from_dict(_item) for _item in obj["observed_phenotypes"]] if obj.get("observed_phenotypes") is not None else None,
             "patient_id": obj.get("patient_id"),
             "primary_condition_id": obj.get("primary_condition_id"),

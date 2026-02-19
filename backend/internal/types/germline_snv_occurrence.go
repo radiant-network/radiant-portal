@@ -117,6 +117,13 @@ var GermlineSNVFilterField = Field{
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
+var GermlineSNVFilterIsPassField = Field{
+	Name:          "filter = 'PASS'",
+	Alias:         "filter_is_pass",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	Table:         GermlineSNVOccurrenceTable,
+}
 var GermlineSNVSeqIdField = Field{
 	Name:          "seq_id",
 	CanBeSelected: true,

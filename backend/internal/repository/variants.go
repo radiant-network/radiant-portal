@@ -205,6 +205,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	tx = utils.JoinCaseWithDiagnosisLab(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
 	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
+	tx = utils.JoinFamilyWithPatient(tx)
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
 	tx = utils.AntiJoinCaseHasSeqExpWithGermlineInterpretationForLocus(tx, locusIdString)
 	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = spl.patient_id", txAggPhenotypes)

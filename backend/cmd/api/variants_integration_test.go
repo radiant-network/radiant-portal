@@ -169,7 +169,8 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 				"updated_on":"2021-09-12T13:08:00Z",
 				"zygosity":"HOM",
 				"exomiser_acmg_classification":"PATHOGENIC",
-				"exomiser_acmg_evidence":["PS1", "PVS2"]
+				"exomiser_acmg_evidence":["PS1", "PVS2"],
+				"filter_is_pass":true
 			}
 		],
 		"count": 1
@@ -222,7 +223,7 @@ func assertGetVariantCasesCount(t *testing.T, data string, locusId int, expected
 }
 
 func Test_GetVariantCasesCount(t *testing.T) {
-	expected := `{"count_interpreted":3, "count_uninterpreted":4}`
+	expected := `{"count_interpreted":3, "count_uninterpreted":5}`
 	assertGetVariantCasesCount(t, "simple", 1000, expected)
 }
 

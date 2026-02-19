@@ -444,6 +444,7 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		"start":1111, 
 		"symbol":"BRAF", 
 		"transcript_id": "T001",
+		"transmission": "autosomal_dominant",
 		"vep_impact":"impact1", 
 		"zygosity":"HET"
 	}`

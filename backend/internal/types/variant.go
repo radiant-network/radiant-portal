@@ -133,6 +133,7 @@ type VariantUninterpretedCase = struct {
 	Phenotypes                 JsonArray[Term]   `json:"observed_phenotypes"`
 	ExomiserACMGClassification string            `json:"exomiser_acmg_classification,omitempty"`
 	ExomiserACMGEvidence       JsonArray[string] `json:"exomiser_acmg_evidence,omitempty"`
+	FilterIsPass               *bool             `json:"filter_is_pass,omitempty"`
 } // @name VariantUninterpretedCase
 
 type VariantExpandedInterpretedCase = struct {
@@ -186,7 +187,7 @@ var VariantTable = Table{
 }
 
 var VariantInterpretedCasesFields = append(CasesFields, GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, ConditionIdField, ConditionNameField, ConditionTermField, AggregatedPhenotypeTermField)
-var VariantUninterpretedCasesFields = append(CasesFields, ConditionTermField, AggregatedPhenotypeTermField)
+var VariantUninterpretedCasesFields = append(CasesFields, ConditionTermField, AggregatedPhenotypeTermField, GermlineSNVZygosityField, GermlineSNVTransmissionModeField, GermlineSNVFilterField, GermlineSNVFilterIsPassField, PatientSexCodeField)
 var VariantInterpretedCasesDefaultSort = []SortField{{Field: GermlineInterpretationUpdatedOnField, Order: "desc"}}
 
 var VariantUninterpretedCasesDefaultFields = []Field{
@@ -197,6 +198,9 @@ var VariantUninterpretedCasesDefaultFields = []Field{
 	SampleSubmitterSampleIdField,
 	FamilyAffectedStatusCodeField,
 	GermlineSNVZygosityField,
+	GermlineSNVTransmissionModeField,
+	GermlineSNVFilterField,
+	GermlineSNVFilterIsPassField,
 	CaseDiagnosisLabCodeField,
 	CaseDiagnosisLabNameField,
 	AnalysisCatalogCodeField,
@@ -221,7 +225,7 @@ var VariantInterpretedCasesQueryConfig = QueryConfig{
 var VariantUninterpretedCasesQueryConfig = QueryConfig{
 	AllFields:     VariantUninterpretedCasesFields,
 	DefaultFields: VariantUninterpretedCasesDefaultFields,
-	DefaultSort:   CasesDefaultSort,
+	DefaultSort:   append(CasesDefaultSort, SortField{Field: CaseIdField, Order: "asc"}, SortField{Field: SequencingExperimentIdField, Order: "desc"}),
 	IdField:       CaseIdField,
 }
 
