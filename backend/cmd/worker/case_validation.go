@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
+	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/internal/validation"
 	"gorm.io/gorm"
 )
 
@@ -139,8 +139,8 @@ func NewStorageContext(db *gorm.DB) *StorageContext {
 }
 
 type CaseValidationRecord struct {
-	validation.BaseValidationRecord
-	Context                *validation.BatchValidationContext
+	batchval.BaseValidationRecord
+	Context                *batchval.BatchValidationContext
 	Case                   types.CaseBatch
 	CaseID                 *int
 	ProjectID              *int
@@ -173,9 +173,9 @@ type CaseValidationRecord struct {
 	TaskContexts          map[int][]*types.TaskContext
 }
 
-func NewCaseValidationRecord(ctx *validation.BatchValidationContext, c types.CaseBatch, index int) *CaseValidationRecord {
+func NewCaseValidationRecord(ctx *batchval.BatchValidationContext, c types.CaseBatch, index int) *CaseValidationRecord {
 	return &CaseValidationRecord{
-		BaseValidationRecord: validation.BaseValidationRecord{
+		BaseValidationRecord: batchval.BaseValidationRecord{
 			Index: index,
 		},
 		Case:                  c,
@@ -189,7 +189,7 @@ func NewCaseValidationRecord(ctx *validation.BatchValidationContext, c types.Cas
 	}
 }
 
-func (r *CaseValidationRecord) GetBase() *validation.BaseValidationRecord {
+func (r *CaseValidationRecord) GetBase() *batchval.BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
@@ -892,29 +892,29 @@ func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string,
 
 func (cr *CaseValidationRecord) validateCodes() {
 	if !slices.Contains(cr.StatusCodes, cr.Case.StatusCode) {
-		path := validation.FormatPath(cr, "")
+		path := batchval.FormatPath(cr, "")
 		message := fmt.Sprintf("%s status code %q is not a valid status code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("status_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.StatusCode, strings.Join(cr.StatusCodes, ", "))
 		cr.AddErrors(message, CaseInvalidField, path)
 	}
 	if cr.Case.ResolutionStatusCode != "" && !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
-		path := validation.FormatPath(cr, "")
+		path := batchval.FormatPath(cr, "")
 		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("resolution_status_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.ResolutionStatusCode, strings.Join(cr.ResolutionStatusCodes, ", "))
 		cr.AddErrors(message, CaseInvalidField, path)
 	}
 	if cr.Case.PriorityCode != "" && !slices.Contains(cr.PriorityCodes, cr.Case.PriorityCode) {
-		path := validation.FormatPath(cr, "")
+		path := batchval.FormatPath(cr, "")
 		message := fmt.Sprintf("%s priority code %q is not a valid priority code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("priority_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.PriorityCode, strings.Join(cr.PriorityCodes, ", "))
 		cr.AddErrors(message, CaseInvalidField, path)
 	}
 	if !slices.Contains(cr.CategoryCodes, cr.Case.CategoryCode) {
-		path := validation.FormatPath(cr, "")
+		path := batchval.FormatPath(cr, "")
 		message := fmt.Sprintf("%s category code %q is not a valid category code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("category_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.CategoryCode, strings.Join(cr.CategoryCodes, ", "))
 		cr.AddErrors(message, CaseInvalidField, path)
 	}
 }
 
 func (cr *CaseValidationRecord) validateCase() error {
-	path := validation.FormatPath(cr, "")
+	path := batchval.FormatPath(cr, "")
 
 	// Validate case uniqueness in DB
 	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
@@ -1248,7 +1248,7 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 
 			cr.validateDocumentCodes(doc, tid, did)
 			if doc.Size != nil && *doc.Size < 0 {
-				msg := validation.FormatInvalidField(cr.GetResourceType(), "size", "size is invalid, must be non-negative", []string{})
+				msg := batchval.FormatInvalidField(cr.GetResourceType(), "size", "size is invalid, must be non-negative", []string{})
 				cr.AddErrors(msg, DocumentInvalidField, path)
 			}
 
@@ -1262,7 +1262,7 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 }
 
 func validateCaseRecord(
-	ctx *validation.BatchValidationContext,
+	ctx *batchval.BatchValidationContext,
 	c types.CaseBatch,
 	index int,
 ) (*CaseValidationRecord, error) {
@@ -1308,18 +1308,18 @@ func validateCaseRecord(
 	return cr, nil
 }
 
-func processCaseBatch(ctx *validation.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+func processCaseBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
 	payload := []byte(batch.Payload)
 	var caseBatches []types.CaseBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &caseBatches); unexpectedErr != nil {
-		validation.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), ctx.BatchRepo)
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
 	records, unexpectedErr := validateCaseBatch(ctx, caseBatches)
 	if unexpectedErr != nil {
-		validation.ProcessUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), ctx.BatchRepo)
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
@@ -1327,7 +1327,7 @@ func processCaseBatch(ctx *validation.BatchValidationContext, batch *types.Batch
 
 	err := persistBatchAndCaseRecords(db, batch, records)
 	if err != nil {
-		validation.ProcessUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), ctx.BatchRepo)
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), ctx.BatchRepo)
 		return
 	}
 }
@@ -1336,7 +1336,7 @@ func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*Case
 	return db.Transaction(func(tx *gorm.DB) error {
 		batchRepo := repository.NewBatchRepository(tx)
 		txCtx := NewStorageContext(tx)
-		rowsUpdated, unexpectedErrUpdate := validation.UpdateBatch(batch, records, batchRepo)
+		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(batch, records, batchRepo)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
 		}
@@ -1640,7 +1640,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 	return nil
 }
 
-func validateCaseBatch(ctx *validation.BatchValidationContext, cases []types.CaseBatch) ([]*CaseValidationRecord, error) {
+func validateCaseBatch(ctx *batchval.BatchValidationContext, cases []types.CaseBatch) ([]*CaseValidationRecord, error) {
 	var records []*CaseValidationRecord
 	visited := map[CaseKey]struct{}{}
 
@@ -1656,7 +1656,7 @@ func validateCaseBatch(ctx *validation.BatchValidationContext, cases []types.Cas
 		}
 
 		if c.ProjectCode != "" && c.SubmitterCaseId != "" {
-			validation.ValidateUniquenessInBatch(record, key, visited, CaseIdenticalInBatch, []string{c.ProjectCode, c.SubmitterCaseId})
+			batchval.ValidateUniquenessInBatch(record, key, visited, CaseIdenticalInBatch, []string{c.ProjectCode, c.SubmitterCaseId})
 		}
 		records = append(records, record)
 	}

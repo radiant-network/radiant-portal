@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/golang/glog"
+	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/internal/validation"
 	"gorm.io/gorm"
 )
 
@@ -50,14 +50,14 @@ type SequencingExperimentKey struct {
 }
 
 type SequencingExperimentValidationRecord struct {
-	validation.BaseValidationRecord
+	batchval.BaseValidationRecord
 	SequencingExperiment    types.SequencingExperimentBatch
 	SubmitterOrganizationID *int
 	SampleID                *int
 	SequencingLabID         *int
 }
 
-func (r *SequencingExperimentValidationRecord) GetBase() *validation.BaseValidationRecord {
+func (r *SequencingExperimentValidationRecord) GetBase() *batchval.BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
@@ -116,7 +116,7 @@ func (r *SequencingExperimentValidationRecord) validateExperimentalStrategyCodeF
 		return fmt.Errorf("error fetching experimental strategy codes: %w", err)
 	}
 	if !slices.Contains(codes, r.SequencingExperiment.ExperimentalStrategyCode) {
-		r.AddErrors(validation.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
+		r.AddErrors(batchval.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
@@ -130,7 +130,7 @@ func (r *SequencingExperimentValidationRecord) validateSequencingReadTechnologyC
 		return fmt.Errorf("error fetching sequencing read technology codes: %w", err)
 	}
 	if !slices.Contains(codes, r.SequencingExperiment.SequencingReadTechnologyCode) {
-		r.AddErrors(validation.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
+		r.AddErrors(batchval.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
@@ -157,7 +157,7 @@ func (r *SequencingExperimentValidationRecord) validateRunDateField() {
 	now := time.Now()
 
 	if time.Time(*r.SequencingExperiment.RunDate).After(now) {
-		r.AddErrors(validation.FormatInvalidField(r.GetResourceType(), fieldName, "must be a past date", resIds), InvalidFieldValueCode, r.getPath(fieldName))
+		r.AddErrors(batchval.FormatInvalidField(r.GetResourceType(), fieldName, "must be a past date", resIds), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 }
 
@@ -175,7 +175,7 @@ func (r *SequencingExperimentValidationRecord) validateStatusCodeField() error {
 	}
 
 	if !slices.Contains(codes, r.SequencingExperiment.StatusCode) {
-		r.AddErrors(validation.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
+		r.AddErrors(batchval.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
@@ -200,7 +200,7 @@ func (r *SequencingExperimentValidationRecord) validatePlatformCodeField() error
 		return fmt.Errorf("error fetching platform codes: %w", err)
 	}
 	if !slices.Contains(codes, r.SequencingExperiment.PlatformCode) {
-		r.AddErrors(validation.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
+		r.AddErrors(batchval.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getResId()), InvalidFieldValueCode, r.getPath(fieldName))
 	}
 	return nil
 }
@@ -294,18 +294,18 @@ func verifyIsDifferentField[T comparable](left T, right T, r *SequencingExperime
 	return true
 }
 
-func processSequencingExperimentBatch(ctx *validation.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+func processSequencingExperimentBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
 	payload := []byte(batch.Payload)
 	var experimentsBatch []types.SequencingExperimentBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &experimentsBatch); unexpectedErr != nil {
-		validation.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), ctx.BatchRepo)
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
 	records, unexpectedErr := validateSequencingExperimentBatch(ctx, experimentsBatch)
 	if unexpectedErr != nil {
-		validation.ProcessUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), ctx.BatchRepo)
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
@@ -313,7 +313,7 @@ func processSequencingExperimentBatch(ctx *validation.BatchValidationContext, ba
 
 	err := persistBatchAndSequencingExperimentRecords(db, batch, records)
 	if err != nil {
-		validation.ProcessUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), ctx.BatchRepo)
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), ctx.BatchRepo)
 		return
 	}
 }
@@ -322,7 +322,7 @@ func persistBatchAndSequencingExperimentRecords(db *gorm.DB, batch *types.Batch,
 	return db.Transaction(func(tx *gorm.DB) error {
 		txRepoSeqExp := repository.NewSequencingExperimentRepository(tx)
 		txRepoBatch := repository.NewBatchRepository(tx)
-		rowsUpdated, unexpectedErrUpdate := validation.UpdateBatch(batch, records, txRepoBatch)
+		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(batch, records, txRepoBatch)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
 		}
@@ -377,7 +377,7 @@ func insertSequencingExperimentRecords(records []*SequencingExperimentValidation
 	return nil
 }
 
-func validateSequencingExperimentBatch(ctx *validation.BatchValidationContext, seqExps []types.SequencingExperimentBatch) ([]*SequencingExperimentValidationRecord, error) {
+func validateSequencingExperimentBatch(ctx *batchval.BatchValidationContext, seqExps []types.SequencingExperimentBatch) ([]*SequencingExperimentValidationRecord, error) {
 	var records []*SequencingExperimentValidationRecord
 	visited := map[SequencingExperimentKey]struct{}{}
 
@@ -391,15 +391,15 @@ func validateSequencingExperimentBatch(ctx *validation.BatchValidationContext, s
 		if err != nil {
 			return nil, fmt.Errorf("error during sequencing experiment validation: %v", err)
 		}
-		validation.ValidateUniquenessInBatch(record, key, visited, IdenticalSequencingExperimentInBatchCode, []string{seqExp.SampleOrganizationCode, seqExp.SubmitterSampleId.String(), seqExp.Aliquot.String()})
+		batchval.ValidateUniquenessInBatch(record, key, visited, IdenticalSequencingExperimentInBatchCode, []string{seqExp.SampleOrganizationCode, seqExp.SubmitterSampleId.String(), seqExp.Aliquot.String()})
 		records = append(records, record)
 	}
 	return records, nil
 }
 
-func validateSequencingExperimentRecord(ctx *validation.BatchValidationContext, seqExp types.SequencingExperimentBatch, index int) (*SequencingExperimentValidationRecord, error) {
+func validateSequencingExperimentRecord(ctx *batchval.BatchValidationContext, seqExp types.SequencingExperimentBatch, index int) (*SequencingExperimentValidationRecord, error) {
 	record := SequencingExperimentValidationRecord{
-		BaseValidationRecord: validation.BaseValidationRecord{
+		BaseValidationRecord: batchval.BaseValidationRecord{
 			Context: ctx,
 			Index:   index,
 		},

@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/internal/validation"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -28,7 +28,7 @@ func insertPayloadAndProcessBatch(db *gorm.DB, payload string, status types.Batc
 	if initErr != nil {
 		panic(fmt.Sprintf("failed to insert payload into table %v", initErr))
 	}
-	ctx, _ := validation.NewBatchValidationContext(db)
+	ctx, _ := batchval.NewBatchValidationContext(db)
 	processBatch(db, ctx)
 	return id
 }
@@ -71,7 +71,7 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -123,7 +123,7 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -169,7 +169,7 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -281,7 +281,7 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -331,7 +331,7 @@ func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -379,7 +379,7 @@ func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -432,7 +432,7 @@ func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -475,7 +475,7 @@ func Test_ProcessBatch_Sample_Existing_Different_Field_Warning(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -513,7 +513,7 @@ func Test_ProcessBatch_Sample_Patient_Not_Exist(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -549,7 +549,7 @@ func Test_ProcessBatch_Sample_Organization_Not_Exist(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -595,7 +595,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -648,7 +648,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -701,7 +701,7 @@ func Test_ProcessBatch_Sample_Unknown_Parent_Sample(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -745,7 +745,7 @@ func Test_ProcessBatch_Sample_Invalid_Patient_For_Parent_Sample(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -790,7 +790,7 @@ func Test_ProcessBatch_Sample_Duplicate_In_Batch(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -827,7 +827,7 @@ func Test_ProcessBatch_Sample_Field_Too_Long(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -925,7 +925,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}
@@ -977,7 +977,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 
 		// Make sure DB is clean before running the import
 		var count int64
@@ -1060,7 +1060,7 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
@@ -1132,7 +1132,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
@@ -1226,7 +1226,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
@@ -1284,7 +1284,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors_InvalidOrgs(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
@@ -1356,7 +1356,7 @@ func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
 		}
 		assert.Equal(t, int64(0), count)
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 		if err := db.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
 			t.Fatal("failed to count sequencing_experiment:", err)
@@ -1471,7 +1471,7 @@ func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		context, _ := validation.NewBatchValidationContext(db)
+		context, _ := batchval.NewBatchValidationContext(db)
 		processBatch(db, context)
 
 		resultBatch := repository.Batch{}

@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"github.com/golang/glog"
+	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
-	"github.com/radiant-network/radiant-api/internal/validation"
 	"gorm.io/gorm"
 )
 
-var supportedProcessors = map[string]func(*validation.BatchValidationContext, *types.Batch, *gorm.DB){
+var supportedProcessors = map[string]func(*batchval.BatchValidationContext, *types.Batch, *gorm.DB){
 	types.PatientBatchType:              processPatientBatch,
 	types.SampleBatchType:               processSampleBatch,
 	types.SequencingExperimentBatchType: processSequencingExperimentBatch,
@@ -37,7 +37,7 @@ func main() {
 		glog.Fatalf("Failed to initialize postgres database: %v", initDbErr)
 	}
 
-	context, err := validation.NewBatchValidationContext(dbPostgres)
+	context, err := batchval.NewBatchValidationContext(dbPostgres)
 	if err != nil {
 		glog.Fatalf("Failed to initialize batch validation context: %v", err)
 	}
@@ -50,7 +50,7 @@ func main() {
 	}
 }
 
-func processBatch(db *gorm.DB, ctx *validation.BatchValidationContext) {
+func processBatch(db *gorm.DB, ctx *batchval.BatchValidationContext) {
 	nextBatch, err := ctx.BatchRepo.ClaimNextBatch()
 	if err != nil {
 		glog.Errorf("Error claiming next batch: %v", err)
@@ -64,7 +64,7 @@ func processBatch(db *gorm.DB, ctx *validation.BatchValidationContext) {
 	processFn, ok := supportedProcessors[nextBatch.BatchType]
 	if !ok {
 		err = fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
-		validation.ProcessUnexpectedError(nextBatch, err, ctx.BatchRepo)
+		batchval.ProcessUnexpectedError(nextBatch, err, ctx.BatchRepo)
 		return
 	}
 

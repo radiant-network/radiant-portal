@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/internal/validation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -108,7 +108,7 @@ func (m *mockValueSetsDAO) GetCodes(vsType repository.ValueSetType) ([]string, e
 
 func newBaseRecord() *SequencingExperimentValidationRecord {
 	return &SequencingExperimentValidationRecord{
-		BaseValidationRecord: validation.BaseValidationRecord{Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{},
 	}
 }
@@ -117,7 +117,7 @@ func newBaseRecord() *SequencingExperimentValidationRecord {
 
 func Test_VerifyIdentical_DifferentField_AddsWarning(t *testing.T) {
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: validation.BaseValidationRecord{Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
 	}
 	verifyIsDifferentField(1, 2, r, "key", "mock_field")
 	assert.Len(t, r.Warnings, 1)
@@ -128,7 +128,7 @@ func Test_VerifyIdentical_DifferentField_AddsWarning(t *testing.T) {
 
 func Test_VerifyIdentical_AddsInfo(t *testing.T) {
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: validation.BaseValidationRecord{Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
 	}
 	verifyIsDifferentField("same", "same", r, "key", "field")
 	assert.Empty(t, r.Warnings)
@@ -136,7 +136,7 @@ func Test_VerifyIdentical_AddsInfo(t *testing.T) {
 
 func Test_ValidateExperimentalStrategyCodeField_Allowed(t *testing.T) {
 	r := newBaseRecord()
-	r.Context = &validation.BatchValidationContext{
+	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
 
@@ -148,7 +148,7 @@ func Test_ValidateExperimentalStrategyCodeField_Allowed(t *testing.T) {
 
 func Test_ValidateExperimentalStrategyCodeField_NotAllowed(t *testing.T) {
 	r := newBaseRecord()
-	r.Context = &validation.BatchValidationContext{
+	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
@@ -165,7 +165,7 @@ func Test_ValidateExperimentalStrategyCodeField_NotAllowed(t *testing.T) {
 
 func Test_ValidateSequencingReadTechnologyCodeField_Allowed(t *testing.T) {
 	r := newBaseRecord()
-	r.Context = &validation.BatchValidationContext{
+	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
 	r.SequencingExperiment.SequencingReadTechnologyCode = "short_read"
@@ -176,7 +176,7 @@ func Test_ValidateSequencingReadTechnologyCodeField_Allowed(t *testing.T) {
 
 func Test_ValidateSequencingReadTechnologyCodeField_NotAllowed(t *testing.T) {
 	r := newBaseRecord()
-	r.Context = &validation.BatchValidationContext{
+	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
@@ -193,7 +193,7 @@ func Test_ValidateSequencingReadTechnologyCodeField_NotAllowed(t *testing.T) {
 
 func Test_ValidateStatusCodeField_Allowed(t *testing.T) {
 	r := newBaseRecord()
-	r.Context = &validation.BatchValidationContext{
+	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
 	r.SequencingExperiment.StatusCode = "in_progress"
@@ -204,7 +204,7 @@ func Test_ValidateStatusCodeField_Allowed(t *testing.T) {
 
 func Test_ValidateStatusCodeField_NotAllowed(t *testing.T) {
 	r := newBaseRecord()
-	r.Context = &validation.BatchValidationContext{
+	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
@@ -221,7 +221,7 @@ func Test_ValidateStatusCodeField_NotAllowed(t *testing.T) {
 
 func Test_ValidatePlatformCodeField_Allowed(t *testing.T) {
 	r := newBaseRecord()
-	r.Context = &validation.BatchValidationContext{
+	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
 	r.SequencingExperiment.PlatformCode = "illumina"
@@ -232,7 +232,7 @@ func Test_ValidatePlatformCodeField_Allowed(t *testing.T) {
 
 func Test_ValidatePlatformCodeField_NotAllowed(t *testing.T) {
 	r := newBaseRecord()
-	r.Context = &validation.BatchValidationContext{
+	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
@@ -296,7 +296,7 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 	sampleDAO := &mockSampleDAO{}
 	sampleDAO.On("GetSampleById", 10).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationId: 70}, nil)
 
-	r.Context = &validation.BatchValidationContext{
+	r.Context = &batchval.BatchValidationContext{
 		SeqExpRepo: seqDAO,
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
@@ -371,7 +371,7 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 	sampleDAO := &mockSampleDAO{}
 	sampleDAO.On("GetSampleById", 1).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationId: 70}, nil)
 
-	r.Context = &validation.BatchValidationContext{
+	r.Context = &batchval.BatchValidationContext{
 		SeqExpRepo: seqDAO,
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
@@ -442,7 +442,7 @@ func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
 	seqDAO.On("GetSequencingExperimentByAliquotAndSubmitterSample", "A1", "S1", "ORG").
 		Return([]types.SequencingExperiment{}, nil)
 
-	mockContext := &validation.BatchValidationContext{
+	mockContext := &batchval.BatchValidationContext{
 		OrgRepo:       orgDAO,
 		SampleRepo:    sampleDAO,
 		SeqExpRepo:    seqDAO,
@@ -489,7 +489,7 @@ func Test_ValidateSequencingExperimentBatch_DuplicateInBatch_AddsError(t *testin
 	seqDAO.On("GetSequencingExperimentByAliquot", "A1").
 		Return([]types.SequencingExperiment{}, nil).Twice()
 
-	mockContext := &validation.BatchValidationContext{
+	mockContext := &batchval.BatchValidationContext{
 		OrgRepo:       orgDAO,
 		SampleRepo:    sampleDAO,
 		SeqExpRepo:    seqDAO,
@@ -511,14 +511,14 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 	orgDAO := &mockOrgDAO{}
 	sampleDAO := &mockSampleDAO{}
 
-	mockContext := &validation.BatchValidationContext{
+	mockContext := &batchval.BatchValidationContext{
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: validation.BaseValidationRecord{Context: mockContext, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -556,14 +556,14 @@ func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
 	orgDAO := &mockOrgDAO{}
 	sampleDAO := &mockSampleDAO{}
 
-	mockContext := &validation.BatchValidationContext{
+	mockContext := &batchval.BatchValidationContext{
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: validation.BaseValidationRecord{Context: mockContext, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -593,14 +593,14 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 	orgDAO := &mockOrgDAO{}
 	sampleDAO := &mockSampleDAO{}
 
-	mockContext := &validation.BatchValidationContext{
+	mockContext := &batchval.BatchValidationContext{
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: validation.BaseValidationRecord{Context: mockContext, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -652,7 +652,7 @@ func Test_PreFetchValidationInfo_SampleLookupError_Propagates(t *testing.T) {
 		On("GetSampleBySubmitterSampleId", 1, "S1").
 		Return((*types.Sample)(nil), assert.AnError)
 
-	r.Context = &validation.BatchValidationContext{
+	r.Context = &batchval.BatchValidationContext{
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}

@@ -1,4 +1,4 @@
-package validation
+package batchval
 
 import (
 	"errors"
@@ -43,6 +43,54 @@ func Test_Process_Unexpected_Errors(t *testing.T) {
 			assert.Equal(t, resultBatch.Report.Errors[0].Message, "some unexpected error")
 		}
 
+	})
+}
+
+type mockValidationRecord struct {
+	base         *BaseValidationRecord
+	resourceType string
+}
+
+func (m *mockValidationRecord) GetBase() *BaseValidationRecord {
+	return m.base
+}
+
+func (m *mockValidationRecord) GetResourceType() string {
+	return m.resourceType
+}
+
+func Test_ValidateUniquenessInBatch(t *testing.T) {
+	duplicateCode := "DUP-001"
+	resourceType := "patient"
+
+	t.Run("first occurrence should not add error", func(t *testing.T) {
+		record := &mockValidationRecord{
+			base:         &BaseValidationRecord{Index: 0},
+			resourceType: resourceType,
+		}
+		seen := make(map[string]struct{})
+		ids := []string{"ORG001", "PAT001"}
+
+		ValidateUniquenessInBatch(record, "key1", seen, duplicateCode, ids)
+
+		assert.Empty(t, record.base.Errors)
+		assert.Contains(t, seen, "key1")
+	})
+
+	t.Run("second occurrence should add error", func(t *testing.T) {
+		record := &mockValidationRecord{
+			base:         &BaseValidationRecord{Index: 1},
+			resourceType: resourceType,
+		}
+		seen := map[string]struct{}{"key1": {}}
+		ids := []string{"ORG001", "PAT001"}
+
+		ValidateUniquenessInBatch(record, "key1", seen, duplicateCode, ids)
+
+		assert.Len(t, record.base.Errors, 1)
+		assert.Equal(t, duplicateCode, record.base.Errors[0].Code)
+		assert.Equal(t, "patient[1]", record.base.Errors[0].Path)
+		assert.Contains(t, record.base.Errors[0].Message, "Patient (ORG001 / PAT001) appears multiple times in the batch.")
 	})
 }
 

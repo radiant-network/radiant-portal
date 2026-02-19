@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/internal/validation"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -390,8 +390,8 @@ func Test_ValidateLifeStatusCode_Valid(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "alive"}
 		rec := PatientValidationRecord{
-			BaseValidationRecord: validation.BaseValidationRecord{
-				Context: &validation.BatchValidationContext{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &batchval.BatchValidationContext{
 					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
 				},
 			},
@@ -407,8 +407,8 @@ func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "unalive"}
 		rec := PatientValidationRecord{
-			BaseValidationRecord: validation.BaseValidationRecord{
-				Context: &validation.BatchValidationContext{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &batchval.BatchValidationContext{
 					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
 				},
 			},
@@ -432,8 +432,8 @@ func Test_ValidateLifeStatusCode_Missing(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: ""}
 		rec := PatientValidationRecord{
-			BaseValidationRecord: validation.BaseValidationRecord{
-				Context: &validation.BatchValidationContext{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &batchval.BatchValidationContext{
 					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
 				},
 			},
