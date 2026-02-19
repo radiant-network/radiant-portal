@@ -319,7 +319,7 @@ func Test_VerifyStringField_RequiredMissing(t *testing.T) {
 	r.ValidateStringField("", "foobar", "type[0].foobar", "ERROR-001", "resourceType", 100, nil, []string{"res1", "res2"}, true)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "ERROR-001", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field foobar for resourceType (res1 / res2). Reason: field is missing.", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field foobar for resourceType (res1 / res2). Reason: field is empty.", r.Errors[0].Message)
 	assert.Equal(t, "type[0].foobar", r.Errors[0].Path)
 }
 
@@ -342,6 +342,6 @@ func Test_VerifyStringField_RegexpMismatch(t *testing.T) {
 	r.ValidateStringField("abc", "foobar", "type[0].field", "ERROR-001", "resourceType", 5, re, []string{"res1", "res2"}, true)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "ERROR-001", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field foobar for resourceType (res1 / res2). Reason: does not match the regular expression ^[A-Z]+$.", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field foobar for resourceType (res1 / res2). Reason: does not match the regular expression `^[A-Z]+$`.", r.Errors[0].Message)
 	assert.Equal(t, "type[0].field", r.Errors[0].Path)
 }

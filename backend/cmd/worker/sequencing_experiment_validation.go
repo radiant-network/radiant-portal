@@ -193,7 +193,7 @@ func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error
 
 func (r *SequencingExperimentValidationRecord) validatePlatformCodeField() error {
 	fieldName := "platform_code"
-	r.ValidateStringField(r.SequencingExperiment.PlatformCode, fieldName, r.getPath(fieldName), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getResId(), true)
+	r.ValidateStringField(r.SequencingExperiment.PlatformCode, fieldName, r.getPath(fieldName), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, TextRegExpCompiled, r.getResId(), true)
 
 	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetPlatform)
 	if err != nil {

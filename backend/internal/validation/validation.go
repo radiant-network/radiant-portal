@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -98,32 +97,33 @@ func (r *BaseValidationRecord) FormatCasesInvalidFieldMessage(fieldName, fieldRe
 	)
 }
 
-func (r *BaseValidationRecord) ValidateRegexPattern(path, value, code, prefixMessage string, regExp *regexp.Regexp) {
+func (r *BaseValidationRecord) ValidateRegexPattern(resourceType, path, fieldName, value, code string, regExp *regexp.Regexp, resourceIds []string) {
 	if regExp != nil && !regExp.MatchString(value) {
-		r.AddErrors(fmt.Sprintf("%s does not match the regular expression `%s`.", prefixMessage, regExp.String()), code, path)
+		message := FormatInvalidField(resourceType, fieldName, fmt.Sprintf("does not match the regular expression `%s`", regExp.String()), resourceIds)
+		r.AddErrors(message, code, path)
 	}
 }
 
-func (r *BaseValidationRecord) ValidateTextLength(path, value, code, prefixMessage string, maxLength int) {
+func (r *BaseValidationRecord) ValidateTextLength(resourceType, path, fieldName, value, code string, maxLength int, resourceIds []string) {
 	if len(value) > maxLength {
-		r.AddErrors(fmt.Sprintf("%s field is too long, maximum length allowed is %d.", prefixMessage, maxLength), code, path)
+		message := FormatInvalidField(resourceType, fieldName, fmt.Sprintf("field is too long, maximum length allowed is %d", maxLength), resourceIds)
+		r.AddErrors(message, code, path)
 	}
 }
 
 func (r *BaseValidationRecord) ValidateStringField(value, fieldName, path, errorCode, resourceType string, maxLength int, re *regexp.Regexp, resourceIDs []string, isRequired bool) {
 	if value == "" {
 		if isRequired {
-			msg := FormatInvalidField(resourceType, fieldName, "field is missing", resourceIDs)
+			msg := FormatInvalidField(resourceType, fieldName, "field is empty", resourceIDs)
 			r.AddErrors(msg, errorCode, path)
 		}
 		return
 	}
 
-	prefix := strings.TrimSuffix(FormatInvalidField(resourceType, fieldName, "", resourceIDs), " .")
-	r.ValidateTextLength(path, value, errorCode, prefix, maxLength)
+	r.ValidateTextLength(resourceType, path, fieldName, value, errorCode, maxLength, resourceIDs)
 
 	if re != nil {
-		r.ValidateRegexPattern(path, value, errorCode, prefix, re)
+		r.ValidateRegexPattern(resourceType, path, fieldName, value, errorCode, re, resourceIDs)
 	}
 }
 
@@ -141,11 +141,6 @@ func ValidateUniquenessInBatch[K comparable](
 	} else {
 		seenBatchMap[key] = struct{}{}
 	}
-}
-
-func FormatFieldRegexpMatch(resourceType string, fieldName string, regExpStr string, resourceIds []string) string {
-	reason := fmt.Sprintf("does not match the regular expression %s", regExpStr)
-	return FormatInvalidField(resourceType, fieldName, reason, resourceIds)
 }
 
 func UpdateBatch[T interface{ GetBase() *BaseValidationRecord }](batch *types.Batch, records []T, r *repository.BatchRepository) (int64, error) {

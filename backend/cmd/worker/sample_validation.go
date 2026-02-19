@@ -50,9 +50,8 @@ func (r *SampleValidationRecord) GetResourceType() string {
 	return types.SampleBatchType
 }
 
-func (r *SampleValidationRecord) formatFieldRegexpMatch(fieldName string, regexp string) string {
-	reason := fmt.Sprintf("does not match the regular expression %s", regexp)
-	return validation.FormatInvalidField(r.GetResourceType(), fieldName, reason, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+func (r *SampleValidationRecord) getResourceIds() []string {
+	return []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()}
 }
 
 func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValue string) {
@@ -61,7 +60,7 @@ func (r *SampleValidationRecord) validateFieldLength(fieldName string, fieldValu
 	}
 	if len(fieldValue) > TextMaxLength {
 		path := validation.FormatPath(r, fieldName)
-		message := validation.FormatFieldTooLong(r.GetResourceType(), fieldName, TextMaxLength, []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+		message := validation.FormatFieldTooLong(r.GetResourceType(), fieldName, TextMaxLength, r.getResourceIds())
 		r.AddErrors(message, SampleInvalidValueCode, path)
 	}
 }
@@ -283,32 +282,24 @@ func reorderSampleRecords(records []*SampleValidationRecord) {
 	copy(records, sorted)
 }
 
-func (r *SampleValidationRecord) validateFieldWithRegexp(fieldName string, fieldValue string, regexpCompiled *regexp.Regexp, regexpStr string, required bool) {
-	if !required && fieldValue == "" {
-		return
-	}
-	r.validateFieldLength(fieldName, fieldValue)
-	if !regexpCompiled.MatchString(fieldValue) {
-		message := r.formatFieldRegexpMatch(fieldName, regexpStr)
-		path := validation.FormatPath(r, fieldName)
-		r.AddErrors(message, SampleInvalidValueCode, path)
-	}
-}
-
 func (r *SampleValidationRecord) validateSubmitterPatientId() {
-	r.validateFieldWithRegexp("submitter_patient_id", r.Sample.SubmitterPatientId.String(), ExternalIdRegexpCompiled, ExternalIdRegexp, true)
+	path := validation.FormatPath(r, "submitter_patient_id")
+	r.ValidateStringField(r.Sample.SubmitterPatientId.String(), "submitter_patient_id", path, SampleInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getResourceIds(), true)
 }
 
 func (r *SampleValidationRecord) validateSubmitterSampleId() {
-	r.validateFieldWithRegexp("submitter_sample_id", r.Sample.SubmitterSampleId.String(), ExternalIdRegexpCompiled, ExternalIdRegexp, true)
+	path := validation.FormatPath(r, "submitter_sample_id")
+	r.ValidateStringField(r.Sample.SubmitterSampleId.String(), "submitter_sample_id", path, SampleInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getResourceIds(), true)
 }
 
 func (r *SampleValidationRecord) validateSubmitterParentSampleId() {
-	r.validateFieldWithRegexp("submitter_parent_sample_id", r.Sample.SubmitterParentSampleId.String(), ExternalIdRegexpCompiled, ExternalIdRegexp, false)
+	path := validation.FormatPath(r, "submitter_parent_sample_id")
+	r.ValidateStringField(r.Sample.SubmitterParentSampleId.String(), "submitter_parent_sample_id", path, SampleInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getResourceIds(), false)
 }
 
 func (r *SampleValidationRecord) validateTissueSite() {
-	r.validateFieldWithRegexp("tissue_site", r.Sample.TissueSite.String(), TissueSiteRegExpCompiled, TissueSiteRegExp, false)
+	path := validation.FormatPath(r, "tissue_site")
+	r.ValidateStringField(r.Sample.TissueSite.String(), "tissue_site", path, SampleInvalidValueCode, r.GetResourceType(), TextMaxLength, TissueSiteRegExpCompiled, r.getResourceIds(), false)
 }
 
 func (r *SampleValidationRecord) validateTypeCode() error {
@@ -319,7 +310,7 @@ func (r *SampleValidationRecord) validateTypeCode() error {
 	if !slices.Contains(allowedTypeCodes, r.Sample.TypeCode) {
 		fieldName := "type_code"
 		path := validation.FormatPath(r, fieldName)
-		message := validation.FormatInvalidField(r.GetResourceType(), fieldName, fmt.Sprintf("must be one of: %s", strings.Join(allowedTypeCodes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+		message := validation.FormatInvalidField(r.GetResourceType(), fieldName, fmt.Sprintf("must be one of: %s", strings.Join(allowedTypeCodes, ", ")), r.getResourceIds())
 		r.AddErrors(message, SampleInvalidValueCode, path)
 	}
 	return nil
@@ -333,7 +324,7 @@ func (r *SampleValidationRecord) validateHistologyCode() error {
 	if !slices.Contains(codes, r.Sample.HistologyCode) {
 		fieldName := "histology_code"
 		path := validation.FormatPath(r, fieldName)
-		message := validation.FormatInvalidField(r.GetResourceType(), fieldName, fmt.Sprintf("value %q must be one of: [%s]", r.Sample.HistologyCode, strings.Join(codes, ", ")), []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()})
+		message := validation.FormatInvalidField(r.GetResourceType(), fieldName, fmt.Sprintf("value %q must be one of: [%s]", r.Sample.HistologyCode, strings.Join(codes, ", ")), r.getResourceIds())
 		r.AddErrors(message, SampleInvalidValueCode, path)
 	}
 	return nil

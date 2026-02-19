@@ -225,7 +225,7 @@ func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "PATIENT-004",
-				Message: "Invalid field submitter_patient_id for patient (ORG001 / 123456789!@#$%?&*()_+). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$.",
+				Message: "Invalid field submitter_patient_id for patient (ORG001 / 123456789!@#$%?&*()_+). Reason: does not match the regular expression `^[a-zA-Z0-9\\- ._'À-ÿ]*$`.",
 				Path:    "patient[1].submitter_patient_id",
 			},
 			{
@@ -1410,7 +1410,7 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "SEQ-002",
-				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: does not match the regular expression ^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$.",
+				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
 				Path:    "sequencing_experiment[1].platform_code",
 			},
 			{
