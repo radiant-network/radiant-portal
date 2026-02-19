@@ -705,12 +705,12 @@ func Test_ProcessBatch_Case_Inner_Codes_PatientsAndObservations(t *testing.T) {
 			},
 			{
 				Code:    "OBS-001",
-				Message: "Invalid field system for case 0 - patient 1 - observations_categorical 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Message: "Invalid field onset_code for case 0 - patient 1 - observations_categorical 0. Reason: onset code \"infantilee\" is not a valid onset code.",
 				Path:    "case[0].patients[1].observations_categorical[0]",
 			},
 			{
 				Code:    "OBS-001",
-				Message: "Invalid field onset_code for case 0 - patient 1 - observations_categorical 0. Reason: onset code \"infantilee\" is not a valid onset code.",
+				Message: "Invalid field system for case 0 - patient 1 - observations_categorical 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
 				Path:    "case[0].patients[1].observations_categorical[0]",
 			},
 		}
@@ -752,7 +752,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field aliquots for case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Message: "Invalid field aliquots for case 0 - task 0. Reason: field is empty.",
 				Path:    "case[0].tasks[0].aliquots",
 			},
 			{

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -40,7 +41,7 @@ func Test_SubmitterPatientId_Special_Characters(t *testing.T) {
 	patientValidationRecord := PatientValidationRecord{Patient: patient}
 	patientValidationRecord.validateSubmitterPatientId()
 	assert.Len(t, patientValidationRecord.Errors, 1)
-	assert.Equal(t, fmt.Sprintf("Invalid field submitter_patient_id for patient (CHUSJ / %s). Reason: does not match the regular expression ^[a-zA-Z0-9\\- ._'À-ÿ]*$.", orgPatientId), patientValidationRecord.Errors[0].Message)
+	assert.Equal(t, fmt.Sprintf("Invalid field submitter_patient_id for patient (CHUSJ / %s). Reason: does not match the regular expression `^[a-zA-Z0-9\\- ._'À-ÿ]*$`.", orgPatientId), patientValidationRecord.Errors[0].Message)
 	assert.Equal(t, "patient[0].submitter_patient_id", patientValidationRecord.Errors[0].Path)
 }
 
@@ -389,8 +390,8 @@ func Test_ValidateLifeStatusCode_Valid(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "alive"}
 		rec := PatientValidationRecord{
-			BaseValidationRecord: BaseValidationRecord{
-				Context: &BatchValidationContext{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &batchval.BatchValidationContext{
 					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
 				},
 			},
@@ -406,8 +407,8 @@ func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "unalive"}
 		rec := PatientValidationRecord{
-			BaseValidationRecord: BaseValidationRecord{
-				Context: &BatchValidationContext{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &batchval.BatchValidationContext{
 					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
 				},
 			},
@@ -431,8 +432,8 @@ func Test_ValidateLifeStatusCode_Missing(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
 		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: ""}
 		rec := PatientValidationRecord{
-			BaseValidationRecord: BaseValidationRecord{
-				Context: &BatchValidationContext{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &batchval.BatchValidationContext{
 					ValueSetsRepo: repository.NewValueSetsRepository(postgres),
 				},
 			},
