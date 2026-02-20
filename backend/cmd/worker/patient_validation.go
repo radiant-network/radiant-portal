@@ -49,26 +49,30 @@ func (r *PatientValidationRecord) GetResourceType() string {
 	return types.PatientBatchType
 }
 
-func (r *PatientValidationRecord) getResourceIds() []string {
+func (r *PatientValidationRecord) getUniqueIds() []string {
 	return []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
 }
 
+func (r *PatientValidationRecord) getFormattedPath(fieldName string) string {
+	return batchval.FormatPath(r, fieldName)
+}
+
 func (r *PatientValidationRecord) validateSubmitterPatientId() {
-	path := batchval.FormatPath(r, "submitter_patient_id")
-	r.ValidateStringField(r.Patient.SubmitterPatientId.String(), "submitter_patient_id", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getResourceIds(), true)
+	path := r.getFormattedPath("submitter_patient_id")
+	r.ValidateStringField(r.Patient.SubmitterPatientId.String(), "submitter_patient_id", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getUniqueIds(), true)
 }
 
 func (r *PatientValidationRecord) validateSubmitterPatientIdType() {
-	path := batchval.FormatPath(r, "submitter_patient_id_type")
-	r.ValidateStringField(r.Patient.SubmitterPatientIdType.String(), "submitter_patient_id_type", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getResourceIds(), true)
+	path := r.getFormattedPath("submitter_patient_id_type")
+	r.ValidateStringField(r.Patient.SubmitterPatientIdType.String(), "submitter_patient_id_type", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getUniqueIds(), true)
 }
 
 func (r *PatientValidationRecord) validateLastName() {
 	if r.Patient.LastName == "" {
 		return
 	}
-	path := batchval.FormatPath(r, "last_name")
-	r.ValidateStringField(r.Patient.LastName.String(), "last_name", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, NameRegExpCompiled, r.getResourceIds(), false)
+	path := r.getFormattedPath("last_name")
+	r.ValidateStringField(r.Patient.LastName.String(), "last_name", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, NameRegExpCompiled, r.getUniqueIds(), false)
 
 }
 
@@ -76,8 +80,8 @@ func (r *PatientValidationRecord) validateFirstName() {
 	if r.Patient.FirstName == "" {
 		return
 	}
-	path := batchval.FormatPath(r, "first_name")
-	r.ValidateStringField(r.Patient.FirstName.String(), "first_name", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, NameRegExpCompiled, r.getResourceIds(), false)
+	path := r.getFormattedPath("first_name")
+	r.ValidateStringField(r.Patient.FirstName.String(), "first_name", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, NameRegExpCompiled, r.getUniqueIds(), false)
 
 }
 
@@ -85,13 +89,13 @@ func (r *PatientValidationRecord) validateJhn() {
 	if r.Patient.Jhn == "" {
 		return
 	}
-	path := batchval.FormatPath(r, "jhn")
-	r.ValidateStringField(r.Patient.Jhn.String(), "jhn", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getResourceIds(), false)
+	path := r.getFormattedPath("jhn")
+	r.ValidateStringField(r.Patient.Jhn.String(), "jhn", path, PatientInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getUniqueIds(), false)
 
 }
 
 func (r *PatientValidationRecord) validateOrganization(organization *types.Organization) {
-	path := batchval.FormatPath(r, "patient_organization_code")
+	path := r.getFormattedPath("patient_organization_code")
 	if organization == nil {
 		message := fmt.Sprintf("Organization %s for patient %s does not exist.", r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
 		r.AddErrors(message, PatientOrganizationNotExistCode, path)
@@ -112,7 +116,7 @@ func (r *PatientValidationRecord) validateDateOfBirth() {
 	if r.Patient.DateOfBirth == nil {
 		resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
 		message := batchval.FormatInvalidField(r.GetResourceType(), "date_of_birth", "missing value, date of birth is required", resIds)
-		r.AddErrors(message, PatientInvalidValueCode, batchval.FormatPath(r, "date_of_birth"))
+		r.AddErrors(message, PatientInvalidValueCode, r.getFormattedPath("date_of_birth"))
 	}
 }
 
@@ -136,7 +140,7 @@ func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types
 	if !anyDifference {
 		message := fmt.Sprintf("Patient (%s / %s) already exists, skipped.",
 			r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
-		r.AddInfos(message, PatientAlreadyExistCode, batchval.FormatPath(r, ""))
+		r.AddInfos(message, PatientAlreadyExistCode, r.getFormattedPath(""))
 	}
 }
 
@@ -145,11 +149,7 @@ func (r *PatientValidationRecord) validateLifeStatusCode() error {
 	if err != nil {
 		return fmt.Errorf("error getting life status codes: %v", err)
 	}
-	if r.Patient.LifeStatusCode == "" || !slices.Contains(codes, r.Patient.LifeStatusCode) {
-		resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
-		message := batchval.FormatInvalidField(r.GetResourceType(), "life_status_code", fmt.Sprintf("value %q must be one of the allowed codes: [%s]", r.Patient.LifeStatusCode, strings.Join(codes, ", ")), resIds)
-		r.AddErrors(message, PatientInvalidValueCode, batchval.FormatPath(r, "life_status_code"))
-	}
+	r.ValidateCode(r.GetResourceType(), r.getFormattedPath("life_status_code"), "life_status_code", PatientInvalidValueCode, r.Patient.LifeStatusCode, codes, r.getUniqueIds(), true)
 	return nil
 }
 
@@ -158,11 +158,7 @@ func (r *PatientValidationRecord) validateSexCode() error {
 	if err != nil {
 		return err
 	}
-	if r.Patient.SexCode == "" || !slices.Contains(codes, r.Patient.SexCode) {
-		resIds := []string{r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId.String()}
-		message := batchval.FormatInvalidField(r.GetResourceType(), "sex_code", fmt.Sprintf("value %q must be one of the allowed codes: [%s]", r.Patient.SexCode, strings.Join(codes, ", ")), resIds)
-		r.AddErrors(message, PatientInvalidValueCode, batchval.FormatPath(r, "sex_code"))
-	}
+	r.ValidateCode(r.GetResourceType(), r.getFormattedPath("sex_code"), "sex_code", PatientInvalidValueCode, r.Patient.SexCode, codes, r.getUniqueIds(), true)
 	return nil
 }
 
@@ -173,7 +169,7 @@ func validateIsDifferentExistingPatientField[T comparable](
 	recordValue T,
 ) bool {
 	if existingPatientValue != recordValue {
-		path := batchval.FormatPath(r, fieldName)
+		path := r.getFormattedPath(fieldName)
 		message := fmt.Sprintf("A patient with same ids (%s / %s) has been found but with a different %s (%v <> %v).",
 			r.Patient.PatientOrganizationCode,
 			r.Patient.SubmitterPatientId,

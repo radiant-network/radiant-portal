@@ -94,18 +94,6 @@ func (m *MockValueSetRepository) GetCodes(vsType repository.ValueSetType) ([]str
 	}
 }
 
-func Test_SampleField_Too_Long(t *testing.T) {
-	longString := randomString(120, letters)
-	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TissueSite: types.TrimmedString(longString)}
-	rec := SampleValidationRecord{Sample: sample}
-	rec.validateFieldLength("tissue_site", rec.Sample.TissueSite.String())
-
-	assert.Len(t, rec.Errors, 1)
-	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
-	assert.Contains(t, rec.Errors[0].Message, "field is too long")
-	assert.Equal(t, "sample[0].tissue_site", rec.Errors[0].Path)
-}
-
 func Test_ValidateSubmitterPatientId_Valid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", SubmitterPatientId: "PAT-123"}
 	rec := SampleValidationRecord{Sample: sample}
@@ -213,7 +201,7 @@ func Test_ValidateTypeCode_Invalid(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
-	assert.Contains(t, rec.Errors[0].Message, "must be one of: blood, dna")
+	assert.Equal(t, rec.Errors[0].Message, "Invalid field type_code for sample (CHUSJ / S1). Reason: \"invalid_type\" is not a valid type code. Valid values [blood, dna].")
 }
 
 func Test_ValidateHistologyTypeCode_Valid(t *testing.T) {
@@ -236,7 +224,7 @@ func Test_ValidateHistologyTypeCode_Invalid(t *testing.T) {
 	err := rec.validateHistologyCode()
 	expected := types.BatchMessage{
 		Code:    SampleInvalidValueCode,
-		Message: "Invalid field histology_code for sample (CHUSJ / S1). Reason: value \"invalid_histology\" must be one of: [tumoral, normal].",
+		Message: "Invalid field histology_code for sample (CHUSJ / S1). Reason: \"invalid_histology\" is not a valid histology code. Valid values [tumoral, normal].",
 		Path:    "sample[0].histology_code",
 	}
 	assert.NoError(t, err)

@@ -15,14 +15,23 @@ func FormatPath(r ValidationRecord, fieldName string) string {
 func FormatIds(resourceIds []string) string {
 	formatResourceIds := ""
 	if len(resourceIds) > 0 {
-		formatResourceIds = fmt.Sprintf("(%s)", strings.Join(resourceIds, " / "))
+		if len(resourceIds) > 1 {
+			formatResourceIds = fmt.Sprintf("(%s)", strings.Join(resourceIds, " / "))
+		} else {
+			formatResourceIds = fmt.Sprintf("%s", resourceIds[0])
+		}
 	}
 	return formatResourceIds
 }
 
 func FormatInvalidField(resourceType string, fieldName string, reason string, ids []string) string {
 	formatResourceIds := FormatIds(ids)
-	invalidFieldMessage := strings.TrimSpace(fmt.Sprintf("Invalid field %s for %s %s", fieldName, resourceType, formatResourceIds))
+	var invalidFieldMessage string
+	if resourceType != "" {
+		invalidFieldMessage = strings.TrimSpace(fmt.Sprintf("Invalid field %s for %s %s", fieldName, resourceType, formatResourceIds))
+	} else {
+		invalidFieldMessage = strings.TrimSpace(fmt.Sprintf("Invalid field %s for %s", fieldName, formatResourceIds))
+	}
 	reasonMessage := fmt.Sprintf("Reason: %s", reason)
 	message := strings.TrimSpace(fmt.Sprintf("%s. %s.", invalidFieldMessage, reasonMessage))
 	return message

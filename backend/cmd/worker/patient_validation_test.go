@@ -418,7 +418,7 @@ func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
 
 		expected := types.BatchMessage{
 			Code:    "PATIENT-004",
-			Message: "Invalid field life_status_code for patient (CHUSJ / id1). Reason: value \"unalive\" must be one of the allowed codes: [alive, deceased, unknown].",
+			Message: "Invalid field life_status_code for patient (CHUSJ / id1). Reason: \"unalive\" is not a valid life status code. Valid values [alive, deceased, unknown].",
 			Path:    "patient[0].life_status_code",
 		}
 
@@ -442,7 +442,7 @@ func Test_ValidateLifeStatusCode_Missing(t *testing.T) {
 		err := rec.validateLifeStatusCode()
 		expected := types.BatchMessage{
 			Code:    "PATIENT-004",
-			Message: "Invalid field life_status_code for patient (CHUSJ / id1). Reason: value \"\" must be one of the allowed codes: [alive, deceased, unknown].",
+			Message: "Invalid field life_status_code for patient (CHUSJ / id1). Reason: \"\" is not a valid life status code. Valid values [alive, deceased, unknown].",
 			Path:    "patient[0].life_status_code",
 		}
 

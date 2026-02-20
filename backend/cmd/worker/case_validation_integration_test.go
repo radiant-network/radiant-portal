@@ -609,23 +609,23 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field status_code for case 1. Reason: status code \"not_in_progress\" is not a valid status code. Valid values [completed, draft, incomplete, in_progress, revoke, submitted, unknown].",
-				Path:    "case[1]",
+				Message: "Invalid field status_code for case 1. Reason: \"not_in_progress\" is not a valid status code. Valid values [completed, draft, incomplete, in_progress, revoke, submitted, unknown].",
+				Path:    "case[1].status_code",
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field resolution_status_code for case 1. Reason: resolution status code \"unresolved\" is not a valid resolution status code. Valid values [inconclusive, solved, unsolved].",
-				Path:    "case[1]",
+				Message: "Invalid field resolution_status_code for case 1. Reason: \"unresolved\" is not a valid resolution status code. Valid values [inconclusive, solved, unsolved].",
+				Path:    "case[1].resolution_status_code",
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field priority_code for case 1. Reason: priority code \"not-routine\" is not a valid priority code. Valid values [asap, routine, stat, urgent].",
-				Path:    "case[1]",
+				Message: "Invalid field priority_code for case 1. Reason: \"not-routine\" is not a valid priority code. Valid values [asap, routine, stat, urgent].",
+				Path:    "case[1].priority_code",
 			},
 			{
 				Code:    "CASE-002",
-				Message: "Invalid field category_code for case 1. Reason: category code \"not-postnatal\" is not a valid category code. Valid values [postnatal, prenatal].",
-				Path:    "case[1]",
+				Message: "Invalid field category_code for case 1. Reason: \"not-postnatal\" is not a valid category code. Valid values [postnatal, prenatal].",
+				Path:    "case[1].category_code",
 			},
 			{
 				Code:    "CASE-002",
@@ -686,7 +686,7 @@ func Test_ProcessBatch_Case_Inner_Codes_PatientsAndObservations(t *testing.T) {
 			{
 				Code:    "PATIENT-004",
 				Message: "Invalid field submitter_patient_id for case 0 - patient 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[0].patients[1]",
+				Path:    "case[0].patients[1].submitter_patient_id",
 			},
 			{
 				Code:    "PATIENT-006",
@@ -695,23 +695,23 @@ func Test_ProcessBatch_Case_Inner_Codes_PatientsAndObservations(t *testing.T) {
 			},
 			{
 				Code:    "PATIENT-004",
-				Message: "Invalid field affected_status_code for case 0 - patient 1. Reason: affected status code \"super-affected\" must be in [affected, non_affected, unknown].",
-				Path:    "case[0].patients[1]",
+				Message: "Invalid field affected_status_code for case 0 - patient 1. Reason: \"super-affected\" is not a valid affected status code. Valid values [affected, non_affected, unknown].",
+				Path:    "case[0].patients[1].affected_status_code",
 			},
 			{
 				Code:    "PATIENT-004",
-				Message: "Invalid field relation_to_proband_code for case 0 - patient 1. Reason: relationship to proband code \"not-proband\" must be in [brother, father, mother, proband, sibling, sister].",
-				Path:    "case[0].patients[1]",
+				Message: "Invalid field relation_to_proband_code for case 0 - patient 1. Reason: \"not-proband\" is not a valid relation to proband code. Valid values [brother, father, mother, proband, sibling, sister].",
+				Path:    "case[0].patients[1].relation_to_proband_code",
 			},
 			{
 				Code:    "OBS-001",
-				Message: "Invalid field onset_code for case 0 - patient 1 - observations_categorical 0. Reason: onset code \"infantilee\" is not a valid onset code.",
-				Path:    "case[0].patients[1].observations_categorical[0]",
+				Message: "Invalid field onset_code for case 0 - patient 1 - observations_categorical 0. Reason: \"infantilee\" is not a valid onset code. Valid values [antenatal, childhood, congenital, infantile, juvenile, middle_age, neonatal, senior, unknown, young_adult].",
+				Path:    "case[0].patients[1].observations_categorical[0].onset_code",
 			},
 			{
 				Code:    "OBS-001",
 				Message: "Invalid field system for case 0 - patient 1 - observations_categorical 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
-				Path:    "case[0].patients[1].observations_categorical[0]",
+				Path:    "case[0].patients[1].observations_categorical[0].system",
 			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)

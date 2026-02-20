@@ -23,7 +23,7 @@ func Test_FormatIds(t *testing.T) {
 	assert.Equal(t, "", result)
 
 	result = FormatIds([]string{"ORG1"})
-	assert.Equal(t, "(ORG1)", result)
+	assert.Equal(t, "ORG1", result)
 
 	result = FormatIds([]string{"ORG1", "P123"})
 	assert.Equal(t, "(ORG1 / P123)", result)
