@@ -10,6 +10,8 @@ import { IValueFacet } from '@/components/base/query-builder-v3/type';
 import { useI18n } from '@/components/hooks/i18n';
 
 const MAX_VALUES = 3;
+const UNION_OPERATOR = ',';
+const ALL_OPERATOR = '&';
 
 export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canExpand'> & {
   valueFacet: IValueFacet;
@@ -20,11 +22,11 @@ export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canEx
  * - Display the first 3 selected values
  * - Clicking on [>] or [ < ] change the expand state
  *
- * e.g.
- * In the UI, QueryPillValues manage [ [1,2, 3 >] ]
- * | ┌──────────────────────────────────────────┐ |
- * | | Loremp Ipsum = [1,2, 3 >][X]      | 389K | |
- * | └──────────────────────────────────────────┘ |
+ *                         ┌──────────┐
+ * ┌───────┌──────────────────────────────────────────┐─────────────────┐
+ * | [] Q1 | Loremp Ipsum = [1,2, 3 >] [X]     | 389K | [copy] [trash]  |
+ * └───────└──────────────────────────────────────────┘─────────────────┘
+ *                         └──────────┘
  *
  */
 function QueryPillValues({ valueFacet, ...props }: QueryPillValuesProps) {
@@ -49,7 +51,9 @@ function QueryPillValues({ valueFacet, ...props }: QueryPillValuesProps) {
                 defaultValue: lazyTranslate(val),
               })}
             </span>
-            {values.length - 1 > index && <span className="px-1">{valueFacet.op === SqonOpEnum.All ? '&' : ','}</span>}
+            {values.length - 1 > index && (
+              <span className="px-1">{valueFacet.op === SqonOpEnum.All ? ALL_OPERATOR : UNION_OPERATOR}</span>
+            )}
           </div>
         ))
       )}

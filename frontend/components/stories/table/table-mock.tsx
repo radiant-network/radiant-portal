@@ -1291,15 +1291,23 @@ export const advancedData: AdvancedTableMockData[] = [
  * Helper
  */
 export function generateMultiSelectData(key: string) {
-  const response = advancedData.map(data => {
-    const count =
-      advancedData.filter(d => d[key as keyof AdvancedTableMockData] === data[key as keyof AdvancedTableMockData])
-        .length ?? 0;
-    return {
-      key: data[key as keyof AdvancedTableMockData],
-      count,
-    };
-  });
+  const response = advancedData
+    .map(data => {
+      const count =
+        advancedData.filter(d => d[key as keyof AdvancedTableMockData] === data[key as keyof AdvancedTableMockData])
+          .length ?? 0;
+      const value = data[key as keyof AdvancedTableMockData];
+      if (!value) {
+        return undefined;
+      }
+      const label = (value as string)[0].toUpperCase() + (value as string).substr(1).toLowerCase();
+      return {
+        key: value.toString().toLowerCase(),
+        label,
+        count,
+      };
+    })
+    .filter(d => d !== undefined);
 
   return uniqBy(response, 'key');
 }
@@ -1319,6 +1327,7 @@ export function generateBooleanData(key: string) {
 
 export function generateSortedAdvancedData(key: string, type: string) {
   const sorted = advancedData.sort(
+    // @ts-ignore
     (a, b) => a[key as keyof AdvancedTableMockData] - b[key as keyof AdvancedTableMockData],
   );
 

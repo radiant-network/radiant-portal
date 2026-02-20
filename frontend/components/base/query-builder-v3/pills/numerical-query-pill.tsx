@@ -1,5 +1,4 @@
-type NumericalQueryPillProps = {};
-function NumericalQueryPill({ }: NumericalQueryPillProps) {
-  return <div></div>;
+function NumericalQueryPill() {
+  return <div>numerical</div>;
 }
 export default NumericalQueryPill;

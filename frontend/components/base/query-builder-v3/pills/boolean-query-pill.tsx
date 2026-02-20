@@ -1,5 +1,4 @@
-type BooleanQueryPillProps = {};
-function BooleanQueryPill({ }: BooleanQueryPillProps) {
-  return <div></div>;
+function BooleanQueryPill() {
+  return <div>BooleanQueryPill</div>;
 }
 export default BooleanQueryPill;

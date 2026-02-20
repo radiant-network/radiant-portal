@@ -7,7 +7,16 @@ type LabelOperatorQueryPillProps = {
   operator: ReactNode;
 };
 
-// @TODO: Change dictionary key from filters to facet
+/**
+ * Label for a pill
+ * @TODO: Change dictionary key from filters to facet
+ *
+ *          ┌────────────┐                   ┌─────┐
+ * ┌───────┌───────────────────────────────────────────────────────────┐─────────────────┐
+ * | [] Q1 | Loremp Ipsum = [1,2, 3 >][X] and Ipsum < 60[x]     | 389K | [copy] [trash]  |
+ * └───────└───────────────────────────────────────────────────────────┘─────────────────┘
+ *          └────────────┘                   └─────┘
+ */
 function LabelOperator({ field, operator }: LabelOperatorQueryPillProps) {
   const { t, lazyTranslate } = useI18n();
   return (

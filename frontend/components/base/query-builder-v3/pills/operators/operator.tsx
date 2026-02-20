@@ -15,6 +15,16 @@ export type OperatorQueryPillProps = {
 
 /**
  * Return to corresponding operator for the sqon
+ *
+/**
+ * Label for a pill
+ * @TODO: Change dictionary key from filters to facet
+ *
+ *                       ┌─┐                       ┌─┐
+ * ┌───────┌───────────────────────────────────────────────────────────┐─────────────────┐
+ * | [] Q1 | Loremp Ipsum = [1,2, 3 >][X] and Ipsum < 60[x]     | 389K | [copy] [trash]  |
+ * └───────└───────────────────────────────────────────────────────────┘─────────────────┘
+ *                       └─┘                       └─┘
  */
 function Operator({ type, size, className }: OperatorQueryPillProps) {
   switch (type) {

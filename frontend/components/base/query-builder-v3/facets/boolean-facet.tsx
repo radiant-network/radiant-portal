@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/base/shadcn/radio-group
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { QBActionFlag, useQBDispatch } from '../hooks/use-query-builder';
+import { QBActionType, useQBDispatch } from '../hooks/use-query-builder';
 import { IValueFacet } from '../type';
 
 import { useFacetConfig } from './hooks/use-facet-config';
@@ -65,7 +65,7 @@ export function BooleanFacet({ data, field }: BooleanFacetProps) {
       setSelectedItem(item.key || null);
 
       dispatch({
-        type: QBActionFlag.ADD_IVALUEFACET,
+        type: QBActionType.ADD_MULTISELECT_VALUE,
         payload: {
           field: field.key,
           value: [...item.key],

@@ -2,41 +2,22 @@ import { useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
-import { Count, CountBodyWithSqon, SortBody, Sqon, SqonContent, SqonOpEnum } from '@/api/api';
+import { Count, SortBody, SqonContent, SqonOpEnum } from '@/api/api';
 
 import DataTable, { TableProps } from '../data-table/data-table';
 import { Card, CardContent } from '../shadcn/card';
 
-import { useQBActiveQuery } from './hooks/use-query-builder';
+import { useQBActiveQuery, useQBContext } from './hooks/use-query-builder';
 
-// @TODO: Should be on api side just like CountBodyWithSqon
-export interface IListInput {
-  listBody: {
-    additional_fields?: string[];
-    limit: number;
-    page_index: number;
-    sort: SortBody[];
-    sqon: Sqon;
-  };
-}
-
-export interface ICountInput {
-  countBody: CountBodyWithSqon;
-}
-
-type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'> & {
-  fetcher: {
-    list: (params: IListInput) => Promise<T[]>;
-    count: (params: ICountInput) => Promise<Count>;
-  };
-};
+type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'>;
 
 /**
  * Wrapper for data-table
  * Used to access QBContext and create list and count query
  */
-function QueryBuilderDataTable<T>({ fetcher, ...props }: QueryBuilderDataTableProps<T>) {
+function QueryBuilderDataTable<T>({ ...props }: QueryBuilderDataTableProps<T>) {
   const activeQuery = useQBActiveQuery();
+  const { fetcher } = useQBContext();
 
   const [additionalFields, setAdditionalFields] = useState<string[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -47,7 +28,7 @@ function QueryBuilderDataTable<T>({ fetcher, ...props }: QueryBuilderDataTablePr
   const [sorting, setSorting] = useState<SortBody[]>([]);
 
   const fetchList = useSWR<any[]>(
-    `${props.id}-list`,
+    `${JSON.stringify(activeQuery)}-list`,
     () =>
       fetcher.list({
         listBody: {
@@ -69,7 +50,7 @@ function QueryBuilderDataTable<T>({ fetcher, ...props }: QueryBuilderDataTablePr
   );
 
   const fetchTotal = useSWR<Count>(
-    `${props.id}-count`,
+    `${JSON.stringify(activeQuery)}-count`,
     () =>
       fetcher.count({
         countBody: {
@@ -85,6 +66,7 @@ function QueryBuilderDataTable<T>({ fetcher, ...props }: QueryBuilderDataTablePr
       shouldRetryOnError: false,
     },
   );
+
   return (
     <Card>
       <CardContent>

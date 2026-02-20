@@ -7,15 +7,15 @@ type QueryPillContainerProps = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 /**
- * Simple wrapper that add the blue background to highlight the query pill.
- * Add the X button to remove query-pill
+ * Simple wrapper that:
+ * - Add the blue background to highlight the query pill if it has been selected by the user
+ * - Add the X button to remove query-pill
  *
- * e.g.
- * In the UI, QueryPillContainer manage [ [....][X] ]
- * | ┌──────────────────────────────────────────┐ |
- * | | Loremp Ipsum = [1,2, 3 >][X]      | 389K | |
- * | └──────────────────────────────────────────┘ |
- *
+ *          ┌────────────────────────────┐
+ * ┌───────┌──────────────────────────────────────────┐─────────────────┐
+ * | [] Q1 | Loremp Ipsum = [1,2, 3 >][X]      | 389K | [copy] [trash]  |
+ * └───────└──────────────────────────────────────────┘─────────────────┘
+ *          └────────────────────────────┘
  */
 function QueryPillContainer({ children, onRemovePill }: QueryPillContainerProps) {
   return (

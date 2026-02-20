@@ -1,5 +1,4 @@
-// import { SqonOpEnum } from "@/api/api";
-
+// @TODO: Every type name should be re-validated to ensure their name are explicites and comprehensibles
 import { SqonOpEnum } from '@/api/api';
 
 export const RangeOperators = {
@@ -12,11 +11,12 @@ export const RangeOperators = {
 } as const;
 export type RangeOperators = (typeof RangeOperators)[keyof typeof RangeOperators];
 
+// @TODO: 'some-not-in' doesn't exist in api
 export const TermOperators = {
   In: SqonOpEnum.In,
   NotIn: SqonOpEnum.NotIn,
   All: SqonOpEnum.All,
-  SomeNotIn: 'some-not-in', // Adding your new value
+  SomeNotIn: 'some-not-in',
 } as const;
 export type TermOperators = (typeof TermOperators)[keyof typeof TermOperators];
 
@@ -27,8 +27,9 @@ export const BooleanOperators = {
 } as const;
 export type BooleanOperators = (typeof BooleanOperators)[keyof typeof BooleanOperators];
 
+// @TODO: This doesn't exist in SqonOpEnum
 export const FacetOperators = {
-  Filter: 'filter', // This doesn't exist in SqonOpEnum
+  Filter: 'filter',
 } as const;
 export type FacetOperators = (typeof FacetOperators)[keyof typeof FacetOperators];
 
@@ -90,41 +91,4 @@ export interface ISyntheticSqon {
   content: TSyntheticSqonContent;
   id: string;
   title?: string;
-}
-
-/**
- * Strategy to use to merge the values of the field.
- */
-export enum MERGE_VALUES_STRATEGIES {
-  /**
-   * Defaults to `OVERRIDE_VALUES`
-   */
-  DEFAULT = 'OVERRIDE_VALUES',
-  /**
-   * Replaces existing values with provided ones
-   */
-  OVERRIDE_VALUES = 'OVERRIDE_VALUES',
-  /**
-   * Append provided values to existing ones
-   */
-  APPEND_VALUES = 'APPEND_VALUES',
-}
-
-/**
- * Strategy to use to merge the operator of the field.
- */
-export enum MERGE_OPERATOR_STRATEGIES {
-  /**
-   * Defaults to `OVERRIDE_OPERATOR`
-   */
-  DEFAULT = 'OVERRIDE_OPERATOR',
-  /**
-   * Replaces existing operator with provided one
-   */
-  OVERRIDE_OPERATOR = 'OVERRIDE_OPERATOR',
-  /**
-   * Keep the current operator.
-   * The one provided will be used if the field is not found.
-   */
-  KEEP_OPERATOR = 'KEEP_OPERATOR',
 }

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 const Popover = PopoverPrimitive.Root;
 
 const PopoverTrigger = PopoverPrimitive.Trigger;
+const PopoverClose = PopoverPrimitive.PopoverClose;
 
 function PopoverContent({
   className,
@@ -29,4 +30,4 @@ function PopoverContent({
 }
 PopoverContent.displayName = PopoverPrimitive.Content.displayName;
 
-export { Popover, PopoverTrigger, PopoverContent };
+export { Popover, PopoverTrigger, PopoverContent, PopoverClose };
