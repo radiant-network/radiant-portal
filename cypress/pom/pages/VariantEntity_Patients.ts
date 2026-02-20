@@ -164,7 +164,7 @@ const tableColumns = {
     {
       id: 'aff_status',
       name: 'Aff. Status',
-      apiField: 'affected_status_name',
+      apiField: 'affected_status',
       isVisibleByDefault: true,
       pinByDefault: null,
       isSortable: false,
