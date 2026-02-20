@@ -117,3 +117,10 @@ var PatientSexCodeField = Field{
 	CanBeSorted:   true,
 	Table:         PatientTable,
 }
+
+var PatientSexNameField = Field{
+	Name:          "name_en",
+	Alias:         "sex_name",
+	CanBeSelected: true,
+	Table:         SexTable,
+}

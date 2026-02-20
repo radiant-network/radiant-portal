@@ -399,6 +399,7 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 	expected := `{
 		"aa_change":"p.Arg19His", 
 		"ad_alt":5, 
+		"ad_total":5, 
 		"cadd_phred":0.1, 
 		"cadd_score":0.1, 
 		"chromosome":"1", 
@@ -436,6 +437,7 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		"polyphen2_hvar_pred": "D",
 		"polyphen2_hvar_score":0.991,
 		"pn_wgs_affected":3, 
+		"qd":0.1, 
 		"revel_score":0.1, 
 		"sift_pred":"T", 
 		"sift_score":0.1, 

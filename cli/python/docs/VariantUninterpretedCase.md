@@ -5,24 +5,27 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**affected_status** | **str** |  | [optional] 
+**ad_alt** | **int** |  | [optional] 
+**ad_ratio** | **float** |  | [optional] 
+**ad_total** | **int** |  | [optional] 
+**affected_status_name** | **str** |  | 
 **analysis_catalog_code** | **str** |  | [optional] 
 **analysis_catalog_name** | **str** |  | [optional] 
 **case_id** | **int** |  | 
-**created_on** | **str** |  | 
-**diagnosis_lab_code** | **str** |  | [optional] 
-**diagnosis_lab_name** | **str** |  | [optional] 
-**exomiser_acmg_classification** | **str** |  | [optional] 
-**exomiser_acmg_evidence** | **List[str]** |  | [optional] 
-**filter_is_pass** | **bool** |  | [optional] 
-**observed_phenotypes** | [**List[Term]**](Term.md) |  | [optional] 
-**patient_id** | **int** |  | 
+**diagnosis_lab_code** | **str** |  | 
+**diagnosis_lab_name** | **str** |  | 
+**filter_is_pass** | **bool** |  | 
+**genotype_quality** | **int** |  | [optional] 
+**info_qd** | **float** |  | [optional] 
+**observed_phenotypes** | [**List[Term]**](Term.md) |  | 
+**patient_id** | **int** |  | [optional] 
 **primary_condition_id** | **str** |  | [optional] 
 **primary_condition_name** | **str** |  | [optional] 
 **relationship_to_proband** | **str** |  | [optional] 
 **seq_id** | **int** |  | 
-**status_code** | **str** |  | 
-**submitter_sample_id** | **str** |  | [optional] 
+**sex_name** | **str** |  | [optional] 
+**submitter_sample_id** | **str** |  | 
+**transmission_mode** | **str** |  | 
 **updated_on** | **str** |  | 
 **zygosity** | **str** |  | 
 

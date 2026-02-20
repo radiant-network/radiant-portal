@@ -146,31 +146,39 @@ func assertGetVariantUninterpretedCases(t *testing.T, data string, locusId int, 
 
 func Test_GetVariantUninterpretedCases(t *testing.T) {
 	body := `{
-			"search_criteria":[{"field": "status_code", "value": ["in_progress"]}]
+			"additional_fields": ["primary_condition_id", "primary_condition_name", "analysis_catalog_code", "analysis_catalog_name",
+				"info_qd", "genotype_quality", "ad_alt", "ad_total", "ad_ratio", "patient_id", "sex_name"],
+			"search_criteria":[{"field": "transmission_mode", "value": ["autosomal_dominant"]}]
 		}`
 	expected := `{
 		"list": [
 			{
-				"affected_status":"non_affected", 
+				"ad_alt":5, 
+				"ad_ratio":0.5, 
+				"ad_total":10, 
+				"affected_status_name":"Affected", 
 				"analysis_catalog_code":"WGA", 
 				"analysis_catalog_name":"Whole Genome Analysis", 
-				"case_id":5, 
-				"created_on":"2021-09-12T13:08:00Z", 
-				"observed_phenotypes":[],
-				"patient_id":14, 
+				"case_id":4, 
 				"diagnosis_lab_code":"CQGC", 
 				"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
+				"filter_is_pass":true, 
+				"genotype_quality":100, 
+				"info_qd":0.4, 
+				"observed_phenotypes":[
+					{"id":"HP:0100622", "name":"Maternal seizure"},
+					{"id":"HP:0001562", "name":"Oligohydramnios"}
+				], 
+				"patient_id":10, 
 				"primary_condition_id":"MONDO:0700092", 
 				"primary_condition_name":"neurodevelopmental disorder", 
-				"relationship_to_proband":"father",
-				"seq_id":15,
-				"status_code":"in_progress", 
-				"submitter_sample_id":"S13238",
-				"updated_on":"2021-09-12T13:08:00Z",
-				"zygosity":"HOM",
-				"exomiser_acmg_classification":"PATHOGENIC",
-				"exomiser_acmg_evidence":["PS1", "PVS2"],
-				"filter_is_pass":true
+				"relationship_to_proband":"proband", 
+				"seq_id":10, 
+				"sex_name":"Female", 
+				"submitter_sample_id":"S13233", 
+				"transmission_mode":"autosomal_dominant", 
+				"updated_on":"2021-09-12T13:08:00Z", 
+				"zygosity":"HOM"
 			}
 		],
 		"count": 1
