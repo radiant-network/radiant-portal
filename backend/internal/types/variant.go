@@ -115,11 +115,11 @@ type VariantInterpretedCase = struct {
 type VariantUninterpretedCase = struct {
 	CaseId                    int             `json:"case_id" validate:"required"`
 	SeqId                     int             `json:"seq_id" validate:"required"`
-	PatientId                 int             `json:"patient_id,omitempty"`
+	PatientId                 int             `json:"patient_id" validate:"required"`
 	UpdatedOn                 time.Time       `json:"updated_on" validate:"required"`
 	SubmitterSampleId         string          `json:"submitter_sample_id" validate:"required"`
 	RelationshipToProbandCode string          `json:"relationship_to_proband,omitempty"`
-	AffectedStatusName        string          `json:"affected_status_name" validate:"required"`
+	AffectedStatusCode        string          `json:"affected_status" validate:"required"`
 	PrimaryConditionId        string          `json:"primary_condition_id,omitempty"`
 	PrimaryConditionName      string          `json:"primary_condition_name,omitempty"`
 	Zygosity                  string          `json:"zygosity" validate:"required"`
@@ -197,7 +197,7 @@ var VariantUninterpretedCasesDefaultFields = []Field{
 	FamilyRelationshipToProbandCodeField,
 	SequencingExperimentIdField,
 	SampleSubmitterSampleIdField,
-	FamilyAffectedStatusNameField,
+	FamilyAffectedStatusCodeField,
 	AggregatedPhenotypeUnparsedField,
 	GermlineSNVFilterIsPassField,
 	GermlineSNVZygosityField,
@@ -205,6 +205,7 @@ var VariantUninterpretedCasesDefaultFields = []Field{
 	CaseDiagnosisLabCodeField,
 	CaseDiagnosisLabNameField,
 	CaseUpdatedOnField,
+	SamplePatientIdField,
 }
 
 var VariantUninterpretedCasesFields = append(VariantUninterpretedCasesDefaultFields,
@@ -218,7 +219,6 @@ var VariantUninterpretedCasesFields = append(VariantUninterpretedCasesDefaultFie
 	GermlineSNVAdAltField,
 	GermlineSNVAdTotalField,
 	GermlineSNVAdRatioField,
-	SamplePatientIdField,
 	PatientSexCodeField,
 	PatientSexNameField,
 )

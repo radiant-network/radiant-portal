@@ -30,7 +30,7 @@ class VariantUninterpretedCase(BaseModel):
     ad_alt: Optional[StrictInt] = None
     ad_ratio: Optional[Union[StrictFloat, StrictInt]] = None
     ad_total: Optional[StrictInt] = None
-    affected_status_name: StrictStr
+    affected_status: StrictStr
     analysis_catalog_code: Optional[StrictStr] = None
     analysis_catalog_name: Optional[StrictStr] = None
     case_id: StrictInt
@@ -40,7 +40,7 @@ class VariantUninterpretedCase(BaseModel):
     genotype_quality: Optional[StrictInt] = None
     info_qd: Optional[Union[StrictFloat, StrictInt]] = None
     observed_phenotypes: List[Term]
-    patient_id: Optional[StrictInt] = None
+    patient_id: StrictInt
     primary_condition_id: Optional[StrictStr] = None
     primary_condition_name: Optional[StrictStr] = None
     relationship_to_proband: Optional[StrictStr] = None
@@ -50,7 +50,7 @@ class VariantUninterpretedCase(BaseModel):
     transmission_mode: StrictStr
     updated_on: StrictStr
     zygosity: StrictStr
-    __properties: ClassVar[List[str]] = ["ad_alt", "ad_ratio", "ad_total", "affected_status_name", "analysis_catalog_code", "analysis_catalog_name", "case_id", "diagnosis_lab_code", "diagnosis_lab_name", "filter_is_pass", "genotype_quality", "info_qd", "observed_phenotypes", "patient_id", "primary_condition_id", "primary_condition_name", "relationship_to_proband", "seq_id", "sex_name", "submitter_sample_id", "transmission_mode", "updated_on", "zygosity"]
+    __properties: ClassVar[List[str]] = ["ad_alt", "ad_ratio", "ad_total", "affected_status", "analysis_catalog_code", "analysis_catalog_name", "case_id", "diagnosis_lab_code", "diagnosis_lab_name", "filter_is_pass", "genotype_quality", "info_qd", "observed_phenotypes", "patient_id", "primary_condition_id", "primary_condition_name", "relationship_to_proband", "seq_id", "sex_name", "submitter_sample_id", "transmission_mode", "updated_on", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -113,7 +113,7 @@ class VariantUninterpretedCase(BaseModel):
             "ad_alt": obj.get("ad_alt"),
             "ad_ratio": obj.get("ad_ratio"),
             "ad_total": obj.get("ad_total"),
-            "affected_status_name": obj.get("affected_status_name"),
+            "affected_status": obj.get("affected_status"),
             "analysis_catalog_code": obj.get("analysis_catalog_code"),
             "analysis_catalog_name": obj.get("analysis_catalog_name"),
             "case_id": obj.get("case_id"),

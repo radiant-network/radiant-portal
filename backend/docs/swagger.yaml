@@ -2389,7 +2389,7 @@ components:
           type: number
         ad_total:
           type: integer
-        affected_status_name:
+        affected_status:
           type: string
         analysis_catalog_code:
           type: string
@@ -2433,12 +2433,13 @@ components:
         zygosity:
           type: string
       required:
-      - affected_status_name
+      - affected_status
       - case_id
       - diagnosis_lab_code
       - diagnosis_lab_name
       - filter_is_pass
       - observed_phenotypes
+      - patient_id
       - seq_id
       - submitter_sample_id
       - transmission_mode

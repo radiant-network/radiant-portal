@@ -4965,7 +4965,7 @@ export interface VariantUninterpretedCase {
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
-    'affected_status_name': string;
+    'affected_status': string;
     /**
      * 
      * @type {string}
@@ -5025,7 +5025,7 @@ export interface VariantUninterpretedCase {
      * @type {number}
      * @memberof VariantUninterpretedCase
      */
-    'patient_id'?: number;
+    'patient_id': number;
     /**
      * 
      * @type {string}

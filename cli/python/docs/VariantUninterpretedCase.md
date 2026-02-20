@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **ad_alt** | **int** |  | [optional] 
 **ad_ratio** | **float** |  | [optional] 
 **ad_total** | **int** |  | [optional] 
-**affected_status_name** | **str** |  | 
+**affected_status** | **str** |  | 
 **analysis_catalog_code** | **str** |  | [optional] 
 **analysis_catalog_name** | **str** |  | [optional] 
 **case_id** | **int** |  | 
@@ -18,7 +18,7 @@ Name | Type | Description | Notes
 **genotype_quality** | **int** |  | [optional] 
 **info_qd** | **float** |  | [optional] 
 **observed_phenotypes** | [**List[Term]**](Term.md) |  | 
-**patient_id** | **int** |  | [optional] 
+**patient_id** | **int** |  | 
 **primary_condition_id** | **str** |  | [optional] 
 **primary_condition_name** | **str** |  | [optional] 
 **relationship_to_proband** | **str** |  | [optional] 

@@ -32,13 +32,6 @@ var FamilyAffectedStatusCodeField = Field{
 	Table:         FamilyTable,
 }
 
-var FamilyAffectedStatusNameField = Field{
-	Name:          "name_en",
-	Alias:         "affected_status_name",
-	CanBeSelected: true,
-	Table:         AffectedStatusTable,
-}
-
 func (Family) TableName() string {
 	return FamilyTable.Name
 }

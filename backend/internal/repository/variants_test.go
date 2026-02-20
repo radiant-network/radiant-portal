@@ -163,7 +163,7 @@ func Test_GetVariantUninterpretedCases_DefaultFields(t *testing.T) {
 		assert.Equal(t, "proband", case4.RelationshipToProbandCode)
 		assert.Equal(t, 10, case4.SeqId)
 		assert.Equal(t, "S13233", case4.SubmitterSampleId)
-		assert.Equal(t, "Affected", case4.AffectedStatusName)
+		assert.Equal(t, "affected", case4.AffectedStatusCode)
 		assert.Equal(t, 2, len(case4.Phenotypes))
 		assert.Equal(t, true, *(case4.FilterIsPass))
 		assert.Equal(t, "HOM", case4.Zygosity)
@@ -171,6 +171,7 @@ func Test_GetVariantUninterpretedCases_DefaultFields(t *testing.T) {
 		assert.Equal(t, "CQGC", case4.DiagnosisLabCode)
 		assert.Equal(t, "Quebec Clinical Genomic Center", case4.DiagnosisLabName)
 		assert.Equal(t, "2021-09-12 13:08:00 +0000 UTC", case4.UpdatedOn.String())
+		assert.Equal(t, 10, case4.PatientId)
 	})
 }
 
@@ -179,7 +180,7 @@ func Test_GetVariantUninterpretedCases_AdditionalFields(t *testing.T) {
 		repo := NewVariantsRepository(db)
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{
 			"primary_condition_id", "primary_condition_name", "analysis_catalog_code", "analysis_catalog_name",
-			"info_qd", "genotype_quality", "ad_alt", "ad_total", "ad_ratio", "patient_id", "sex_name",
+			"info_qd", "genotype_quality", "ad_alt", "ad_total", "ad_ratio", "sex_name",
 		}, []types.SearchCriterion{}, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
@@ -198,7 +199,6 @@ func Test_GetVariantUninterpretedCases_AdditionalFields(t *testing.T) {
 		assert.Equal(t, 5, case4.AdAlt)
 		assert.Equal(t, 10, case4.AdTotal)
 		assert.Equal(t, float32(0.5), case4.AdRatio)
-		assert.Equal(t, 10, case4.PatientId)
 		assert.Equal(t, "Female", case4.SexName)
 	})
 }
