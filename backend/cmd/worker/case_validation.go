@@ -648,7 +648,7 @@ func (cr *CaseValidationRecord) validateObservationsText(patientIndex int) error
 		res := fmt.Sprintf("case %d - patient %d - observations_text %d", cr.Index, patientIndex, obsIndex)
 
 		path := cr.formatPatientsFieldPath(&patientIndex, "observations_text", &obsIndex)
-		cr.ValidateCode(res, path, "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{res}, true)
+		cr.ValidateCode(res, path+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
 		cr.validateObsTextValue(patientIndex, obsIndex)
 	}
 	return nil
