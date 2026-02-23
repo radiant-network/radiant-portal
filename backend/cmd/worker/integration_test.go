@@ -868,7 +868,7 @@ func Test_ProcessBatch_Sample_All_Codes(t *testing.T) {
 			},
 			{
 				Code:    "SAMPLE-006",
-				Message: "Invalid field type_code for sample (CCMG / ABCD1). Reason: must be one of: blood, dna, not_reported, rna, saliva, solid_tissue.",
+				Message: "Invalid field type_code for sample (CCMG / ABCD1). Reason: \"dna!\" is not a valid type code. Valid values [blood, dna, not_reported, rna, saliva, solid_tissue].",
 				Path:    "sample[2].type_code",
 			},
 			{
@@ -1415,7 +1415,7 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 			},
 			{
 				Code:    "SEQ-002",
-				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: value not allowed.",
+				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: \"!@#$%^&\" is not a valid platform code. Valid values [illumina, nanopore, pacbio].",
 				Path:    "sequencing_experiment[1].platform_code",
 			},
 			{

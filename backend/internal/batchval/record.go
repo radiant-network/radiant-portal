@@ -3,6 +3,8 @@ package batchval
 import (
 	"fmt"
 	"regexp"
+	"slices"
+	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 )
@@ -79,5 +81,17 @@ func (r *BaseValidationRecord) ValidateStringField(value, fieldName, path, error
 
 	if re != nil {
 		r.ValidateRegexPattern(resourceType, path, fieldName, value, errorCode, re, resourceIDs)
+	}
+}
+
+func (r *BaseValidationRecord) ValidateCode(resourceType, path, fieldName, errorCode, value string, validCodes, resourceIds []string, required bool) {
+	if value == "" && !required {
+		return
+	}
+	if !slices.Contains(validCodes, value) {
+		label := strings.ReplaceAll(fieldName, "_", " ") // Converts "status_code" to "status code"
+		reason := fmt.Sprintf("%q is not a valid %s. Valid values [%s]", value, label, strings.Join(validCodes, ", "))
+		message := FormatInvalidField(resourceType, fieldName, reason, resourceIds)
+		r.AddErrors(message, errorCode, path)
 	}
 }

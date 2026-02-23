@@ -590,15 +590,6 @@ func (cr *CaseValidationRecord) formatSeqExpFieldPath(seqExpIndex *int) string {
 	return cr.formatFieldPath("sequencing_experiments", seqExpIndex, "", nil)
 }
 
-func (cr *CaseValidationRecord) validateCodeField(code, fieldName, path, codeType string, patientIndex int, validCodes []string, observationType string, obsIndex int) {
-	if !slices.Contains(validCodes, code) {
-		var message string
-		message = cr.formatObservationInvalidFieldMessage(fieldName, patientIndex, observationType, obsIndex)
-		msg := fmt.Sprintf("%s %s %q is not a valid %s.", message, codeType, code, codeType)
-		cr.AddErrors(msg, ObservationInvalidField, path) // OBS-001
-	}
-}
-
 // Family History validation
 
 func (cr *CaseValidationRecord) validateFamilyMemberCode(patientIndex int, fhIndex int) {
@@ -625,44 +616,23 @@ func (cr *CaseValidationRecord) validateFamilyHistory(patientIndex int) {
 
 // Observations Categorical validation
 
-func (cr *CaseValidationRecord) validateObsCategoricalCode(patientIndex int, obsIndex int) {
-	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
-	fieldName := "code"
-	path := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
-	cr.validateCodeField(obs.Code, fieldName, path, "observation code", patientIndex, cr.ObservationCodes, "observations_categorical", obsIndex)
-}
-
-func (cr *CaseValidationRecord) validateOnsetCode(patientIndex int, obsIndex int) {
-	obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
-	fieldName := "onset_code"
-	path := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
-	cr.validateCodeField(obs.OnsetCode, fieldName, path, "onset code", patientIndex, cr.OnsetCodes, "observations_categorical", obsIndex)
-}
-
 func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int) error {
 	for obsIndex := range cr.Case.Patients[patientIndex].ObservationsCategorical {
-		path := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
+		obsPath := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
 		obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
 		res := fmt.Sprintf("case %d - patient %d - observations_categorical %d", cr.Index, patientIndex, obsIndex)
 
-		cr.validateObsCategoricalCode(patientIndex, obsIndex)
-		cr.validateOnsetCode(patientIndex, obsIndex)
+		cr.ValidateCode(res, obsPath+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
+		cr.ValidateCode(res, obsPath+".onset_code", "onset_code", ObservationInvalidField, obs.OnsetCode, cr.OnsetCodes, []string{}, true)
 
-		cr.ValidateStringField(obs.System, "system", path, ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
-		cr.ValidateStringField(obs.Value, "value", path, ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
-		cr.ValidateStringField(obs.Note, "note", path, ObservationInvalidField, res, NoteMaxLength, TextRegExpCompiled, []string{}, false)
+		cr.ValidateStringField(obs.System, "system", obsPath+".system", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
+		cr.ValidateStringField(obs.Value, "value", obsPath+".value", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
+		cr.ValidateStringField(obs.Note, "note", obsPath+".note", ObservationInvalidField, res, NoteMaxLength, TextRegExpCompiled, []string{}, false)
 	}
 	return nil
 }
 
 // Observations Text validation
-
-func (cr *CaseValidationRecord) validateObsTextCode(patientIndex int, obsIndex int) {
-	obs := cr.Case.Patients[patientIndex].ObservationsText[obsIndex]
-	fieldName := "code"
-	path := cr.formatPatientsFieldPath(&patientIndex, "observations_text", &obsIndex)
-	cr.validateCodeField(obs.Code, fieldName, path, "observation code", patientIndex, cr.ObservationCodes, "observations_text", obsIndex)
-}
 
 func (cr *CaseValidationRecord) validateObsTextValue(patientIndex int, obsIndex int) {
 	obs := cr.Case.Patients[patientIndex].ObservationsText[obsIndex]
@@ -674,7 +644,11 @@ func (cr *CaseValidationRecord) validateObsTextValue(patientIndex int, obsIndex 
 
 func (cr *CaseValidationRecord) validateObservationsText(patientIndex int) error {
 	for obsIndex := range cr.Case.Patients[patientIndex].ObservationsText {
-		cr.validateObsTextCode(patientIndex, obsIndex)
+		obs := cr.Case.Patients[patientIndex].ObservationsText[obsIndex]
+		res := fmt.Sprintf("case %d - patient %d - observations_text %d", cr.Index, patientIndex, obsIndex)
+
+		path := cr.formatPatientsFieldPath(&patientIndex, "observations_text", &obsIndex)
+		cr.ValidateCode(res, path+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
 		cr.validateObsTextValue(patientIndex, obsIndex)
 	}
 	return nil
@@ -715,26 +689,13 @@ func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int
 	visited[patientKey] = struct{}{}
 }
 
-func (cr *CaseValidationRecord) validateAffectedStatusCode(patientIndex int) {
-	a := cr.Case.Patients[patientIndex].AffectedStatusCode
-	if !slices.Contains(cr.PatientAffectedStatusCodes, a) {
-		fieldName := "affected_status_code"
-		path := cr.formatPatientsFieldPath(&patientIndex, "", nil)
-		message := cr.formatPatientsInvalidFieldMessage(fieldName, patientIndex)
-		msg := fmt.Sprintf("%s affected status code %q must be in [%s].", message, a, strings.Join(cr.PatientAffectedStatusCodes, ", "))
-		cr.AddErrors(msg, PatientInvalidField, path)
-	}
+func (cr *CaseValidationRecord) validateAffectedStatusCode(path string, resourceIds []string, patientIndex int) {
+	cr.ValidateCode("", path, "affected_status_code", PatientInvalidField, cr.Case.Patients[patientIndex].AffectedStatusCode, cr.PatientAffectedStatusCodes, resourceIds, true)
 }
 
-func (cr *CaseValidationRecord) validateRelationshipToProbandCode(patientIndex int) {
-	r := cr.Case.Patients[patientIndex].RelationToProbandCode
-	if !slices.Contains(cr.PatientRelationshipToProbandCodes, r) {
-		fieldName := "relation_to_proband_code"
-		path := cr.formatPatientsFieldPath(&patientIndex, "", nil)
-		message := cr.formatPatientsInvalidFieldMessage(fieldName, patientIndex)
-		msg := fmt.Sprintf("%s relationship to proband code %q must be in [%s].", message, r, strings.Join(cr.PatientRelationshipToProbandCodes, ", "))
-		cr.AddErrors(msg, PatientInvalidField, path)
-	}
+func (cr *CaseValidationRecord) validateRelationshipToProbandCode(path string, resourceIds []string, patientIndex int) {
+	cr.ValidateCode("", path, "relation_to_proband_code", PatientInvalidField, cr.Case.Patients[patientIndex].RelationToProbandCode, cr.PatientRelationshipToProbandCodes, resourceIds, true)
+
 }
 
 func (cr *CaseValidationRecord) validateCasePatients() error {
@@ -743,9 +704,9 @@ func (cr *CaseValidationRecord) validateCasePatients() error {
 
 	for patientIndex := range cr.Case.Patients {
 
-		path := cr.formatPatientsFieldPath(&patientIndex, "", nil)
+		patientPath := cr.formatPatientsFieldPath(&patientIndex, "", nil)
 		res := fmt.Sprintf("case %d - patient %d", cr.Index, patientIndex)
-		cr.ValidateStringField(cr.Case.Patients[patientIndex].SubmitterPatientId, "submitter_patient_id", path, PatientInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
+		cr.ValidateStringField(cr.Case.Patients[patientIndex].SubmitterPatientId, "submitter_patient_id", patientPath+".submitter_patient_id", PatientInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
 
 		// Validate uniqueness of patients in case
 		cr.validatePatientUniquenessInCase(patientIndex, visitedPatients)
@@ -756,9 +717,8 @@ func (cr *CaseValidationRecord) validateCasePatients() error {
 		if cr.Case.Patients[patientIndex].RelationToProbandCode == "proband" {
 			nbProband++
 		}
-
-		cr.validateAffectedStatusCode(patientIndex)
-		cr.validateRelationshipToProbandCode(patientIndex)
+		cr.validateAffectedStatusCode(patientPath+".affected_status_code", []string{res}, patientIndex)
+		cr.validateRelationshipToProbandCode(patientPath+".relation_to_proband_code", []string{res}, patientIndex)
 
 		// Validate family history
 		cr.validateFamilyHistory(patientIndex)
@@ -891,29 +851,16 @@ func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string,
 }
 
 func (cr *CaseValidationRecord) validateCodes() {
-	if !slices.Contains(cr.StatusCodes, cr.Case.StatusCode) {
-		path := batchval.FormatPath(cr, "")
-		message := fmt.Sprintf("%s status code %q is not a valid status code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("status_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.StatusCode, strings.Join(cr.StatusCodes, ", "))
-		cr.AddErrors(message, CaseInvalidField, path)
-	}
-	if cr.Case.ResolutionStatusCode != "" && !slices.Contains(cr.ResolutionStatusCodes, cr.Case.ResolutionStatusCode) {
-		path := batchval.FormatPath(cr, "")
-		message := fmt.Sprintf("%s resolution status code %q is not a valid resolution status code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("resolution_status_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.ResolutionStatusCode, strings.Join(cr.ResolutionStatusCodes, ", "))
-		cr.AddErrors(message, CaseInvalidField, path)
-	}
-	if cr.Case.PriorityCode != "" && !slices.Contains(cr.PriorityCodes, cr.Case.PriorityCode) {
-		path := batchval.FormatPath(cr, "")
-		message := fmt.Sprintf("%s priority code %q is not a valid priority code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("priority_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.PriorityCode, strings.Join(cr.PriorityCodes, ", "))
-		cr.AddErrors(message, CaseInvalidField, path)
-	}
-	if !slices.Contains(cr.CategoryCodes, cr.Case.CategoryCode) {
-		path := batchval.FormatPath(cr, "")
-		message := fmt.Sprintf("%s category code %q is not a valid category code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("category_code", fmt.Sprintf("case %d", cr.Index)), cr.Case.CategoryCode, strings.Join(cr.CategoryCodes, ", "))
-		cr.AddErrors(message, CaseInvalidField, path)
-	}
+	resIds := []string{fmt.Sprintf("%d", cr.Index)}
+	path := cr.formatFieldPath("", nil, "", nil)
+	cr.ValidateCode(cr.GetResourceType(), path+".status_code", "status_code", CaseInvalidField, cr.Case.StatusCode, cr.StatusCodes, resIds, true)
+	cr.ValidateCode(cr.GetResourceType(), path+".resolution_status_code", "resolution_status_code", CaseInvalidField, cr.Case.ResolutionStatusCode, cr.ResolutionStatusCodes, resIds, false)
+	cr.ValidateCode(cr.GetResourceType(), path+".priority_code", "priority_code", CaseInvalidField, cr.Case.PriorityCode, cr.PriorityCodes, resIds, false)
+	cr.ValidateCode(cr.GetResourceType(), path+".category_code", "category_code", CaseInvalidField, cr.Case.CategoryCode, cr.CategoryCodes, resIds, false)
 }
 
 func (cr *CaseValidationRecord) validateCase() error {
+
 	path := batchval.FormatPath(cr, "")
 
 	// Validate case uniqueness in DB

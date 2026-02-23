@@ -139,6 +139,7 @@ func Test_ValidateExperimentalStrategyCodeField_Allowed(t *testing.T) {
 	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
+	r.ExperimentalStrategyCodes = []string{"wgs", "wxs"}
 
 	r.SequencingExperiment.ExperimentalStrategyCode = "wgs"
 	err := r.validateExperimentalStrategyCodeField()
@@ -151,6 +152,7 @@ func Test_ValidateExperimentalStrategyCodeField_NotAllowed(t *testing.T) {
 	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
+	r.ExperimentalStrategyCodes = []string{"wgs", "wxs", "rna_seq"}
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
 	r.SequencingExperiment.SubmitterSampleId = "S1"
 	r.SequencingExperiment.Aliquot = "A1"
@@ -159,7 +161,7 @@ func Test_ValidateExperimentalStrategyCodeField_NotAllowed(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field experimental_strategy_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field experimental_strategy_code for sequencing_experiment (ORG / S1 / A1). Reason: \"foobar\" is not a valid experimental strategy code. Valid values [wgs, wxs, rna_seq].", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].experimental_strategy_code", r.Errors[0].Path)
 }
 
@@ -168,6 +170,7 @@ func Test_ValidateSequencingReadTechnologyCodeField_Allowed(t *testing.T) {
 	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
+	r.SequencingReadTechnologyCodes = []string{"short_read", "long_read"}
 	r.SequencingExperiment.SequencingReadTechnologyCode = "short_read"
 	err := r.validateSequencingReadTechnologyCodeField()
 	assert.NoError(t, err)
@@ -179,6 +182,7 @@ func Test_ValidateSequencingReadTechnologyCodeField_NotAllowed(t *testing.T) {
 	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
+	r.SequencingReadTechnologyCodes = []string{"short_read", "long_read"}
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
 	r.SequencingExperiment.SubmitterSampleId = "S1"
 	r.SequencingExperiment.Aliquot = "A1"
@@ -187,7 +191,7 @@ func Test_ValidateSequencingReadTechnologyCodeField_NotAllowed(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field sequencing_read_technology_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field sequencing_read_technology_code for sequencing_experiment (ORG / S1 / A1). Reason: \"mini_read\" is not a valid sequencing read technology code. Valid values [short_read, long_read].", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].sequencing_read_technology_code", r.Errors[0].Path)
 }
 
@@ -196,6 +200,7 @@ func Test_ValidateStatusCodeField_Allowed(t *testing.T) {
 	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
+	r.StatusCodes = []string{"draft", "in_progress", "completed"}
 	r.SequencingExperiment.StatusCode = "in_progress"
 	err := r.validateStatusCodeField()
 	assert.NoError(t, err)
@@ -207,6 +212,7 @@ func Test_ValidateStatusCodeField_NotAllowed(t *testing.T) {
 	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
+	r.StatusCodes = []string{"draft", "in_progress", "completed"}
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
 	r.SequencingExperiment.SubmitterSampleId = "S1"
 	r.SequencingExperiment.Aliquot = "A1"
@@ -215,7 +221,7 @@ func Test_ValidateStatusCodeField_NotAllowed(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field status_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field status_code for sequencing_experiment (ORG / S1 / A1). Reason: \"invalid\" is not a valid status code. Valid values [draft, in_progress, completed].", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].status_code", r.Errors[0].Path)
 }
 
@@ -224,6 +230,7 @@ func Test_ValidatePlatformCodeField_Allowed(t *testing.T) {
 	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
+	r.PlatformCodes = []string{"illumina", "pacbio", "nanopore"}
 	r.SequencingExperiment.PlatformCode = "illumina"
 	err := r.validatePlatformCodeField()
 	assert.NoError(t, err)
@@ -235,6 +242,7 @@ func Test_ValidatePlatformCodeField_NotAllowed(t *testing.T) {
 	r.Context = &batchval.BatchValidationContext{
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
+	r.PlatformCodes = []string{"illumina", "pacbio", "nanopore"}
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
 	r.SequencingExperiment.SubmitterSampleId = "S1"
 	r.SequencingExperiment.Aliquot = "A1"
@@ -243,7 +251,7 @@ func Test_ValidatePlatformCodeField_NotAllowed(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, r.Errors, 1)
 	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
-	assert.Equal(t, "Invalid field platform_code for sequencing_experiment (ORG / S1 / A1). Reason: value not allowed.", r.Errors[0].Message)
+	assert.Equal(t, "Invalid field platform_code for sequencing_experiment (ORG / S1 / A1). Reason: \"not-illumina\" is not a valid platform code. Valid values [illumina, pacbio, nanopore].", r.Errors[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].platform_code", r.Errors[0].Path)
 }
 
@@ -510,10 +518,12 @@ func Test_ValidateSequencingExperimentBatch_DuplicateInBatch_AddsError(t *testin
 func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 	orgDAO := &mockOrgDAO{}
 	sampleDAO := &mockSampleDAO{}
+	valueSetDAO := &mockValueSetsDAO{}
 
 	mockContext := &batchval.BatchValidationContext{
-		OrgRepo:    orgDAO,
-		SampleRepo: sampleDAO,
+		OrgRepo:       orgDAO,
+		SampleRepo:    sampleDAO,
+		ValueSetsRepo: valueSetDAO,
 	}
 
 	// Input batch record
@@ -555,10 +565,12 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
 	orgDAO := &mockOrgDAO{}
 	sampleDAO := &mockSampleDAO{}
+	valueSetDAO := &mockValueSetsDAO{}
 
 	mockContext := &batchval.BatchValidationContext{
-		OrgRepo:    orgDAO,
-		SampleRepo: sampleDAO,
+		OrgRepo:       orgDAO,
+		SampleRepo:    sampleDAO,
+		ValueSetsRepo: valueSetDAO,
 	}
 
 	// Input batch record
@@ -592,10 +604,12 @@ func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
 func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 	orgDAO := &mockOrgDAO{}
 	sampleDAO := &mockSampleDAO{}
+	valueSetDAO := &mockValueSetsDAO{}
 
 	mockContext := &batchval.BatchValidationContext{
-		OrgRepo:    orgDAO,
-		SampleRepo: sampleDAO,
+		OrgRepo:       orgDAO,
+		SampleRepo:    sampleDAO,
+		ValueSetsRepo: valueSetDAO,
 	}
 
 	// Input batch record

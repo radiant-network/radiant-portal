@@ -1514,9 +1514,9 @@ func Test_validateStatusCode_Invalid(t *testing.T) {
 
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code for case 0")
-	assert.Contains(t, cr.Errors[0].Message, "status code \"unknown_status\" is not a valid status code")
+	assert.Contains(t, cr.Errors[0].Message, "\"unknown_status\" is not a valid status code")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].status_code", cr.Errors[0].Path)
 }
 
 func Test_validateResolutionStatusCode_Invalid(t *testing.T) {
@@ -1539,9 +1539,9 @@ func Test_validateResolutionStatusCode_Invalid(t *testing.T) {
 
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field resolution_status_code for case 0")
-	assert.Contains(t, cr.Errors[0].Message, "resolution status code \"nan\" is not a valid resolution status code")
+	assert.Contains(t, cr.Errors[0].Message, "\"nan\" is not a valid resolution status code")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].resolution_status_code", cr.Errors[0].Path)
 }
 
 // -----------------------------------------------------------------------------
@@ -1799,7 +1799,7 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 	assert.Len(t, cr.Errors, 1)
 	assert.Contains(t, cr.Errors[0].Message, "Invalid field status_code")
 	assert.Equal(t, CaseInvalidField, cr.Errors[0].Code)
-	assert.Equal(t, "case[0]", cr.Errors[0].Path)
+	assert.Equal(t, "case[0].status_code", cr.Errors[0].Path)
 }
 
 func Test_validateCase_InvalidFieldFormat(t *testing.T) {
@@ -2393,132 +2393,6 @@ func Test_validateFamilyHistory_WithErrors(t *testing.T) {
 	assert.Len(t, record.Errors, 4)
 }
 
-func Test_validateObsCategoricalCode_Valid(t *testing.T) {
-	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		ObservationCodes:     []string{"phenotype", "condition", "note"},
-		Case: types.CaseBatch{
-			ProjectCode:     "PROJ-1",
-			SubmitterCaseId: "CASE-1",
-			Patients: []*types.CasePatientBatch{
-				{
-					PatientOrganizationCode: "CHUSJ",
-					SubmitterPatientId:      "PAT-1",
-					ObservationsCategorical: []*types.ObservationCategoricalBatch{
-						{
-							Code:               "phenotype",
-							System:             "HPO",
-							Value:              "HP:0001263",
-							OnsetCode:          "unknown",
-							InterpretationCode: "positive",
-							Note:               "Test note",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	record.validateObsCategoricalCode(0, 0)
-	assert.Empty(t, record.Errors)
-}
-
-func Test_validateObsCategoricalCode_Invalid(t *testing.T) {
-	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		ObservationCodes:     []string{"phenotype", "condition", "note"},
-		Case: types.CaseBatch{
-			ProjectCode:     "PROJ-1",
-			SubmitterCaseId: "CASE-1",
-			Patients: []*types.CasePatientBatch{
-				{
-					PatientOrganizationCode: "CHUSJ",
-					SubmitterPatientId:      "PAT-1",
-					ObservationsCategorical: []*types.ObservationCategoricalBatch{
-						{
-							Code:               "invalid_code",
-							System:             "HPO",
-							Value:              "HP:0001263",
-							OnsetCode:          "unknown",
-							InterpretationCode: "positive",
-							Note:               "Test note",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	record.validateObsCategoricalCode(0, 0)
-	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, "is not a valid observation code")
-	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
-}
-
-func Test_validateOnsetCode_Valid(t *testing.T) {
-	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		OnsetCodes:           []string{"childhood"},
-		Case: types.CaseBatch{
-			ProjectCode:     "PROJ-1",
-			SubmitterCaseId: "CASE-1",
-			Patients: []*types.CasePatientBatch{
-				{
-					PatientOrganizationCode: "CHUSJ",
-					SubmitterPatientId:      "PAT-1",
-					ObservationsCategorical: []*types.ObservationCategoricalBatch{
-						{
-							Code:               "phenotype",
-							System:             "HPO",
-							Value:              "HP:0001263",
-							OnsetCode:          "childhood",
-							InterpretationCode: "positive",
-							Note:               "Test note",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	record.validateOnsetCode(0, 0)
-	assert.Empty(t, record.Errors)
-}
-
-func Test_validateOnsetCode_Invalid(t *testing.T) {
-	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		OnsetCodes:           []string{"childhood"},
-		Case: types.CaseBatch{
-			ProjectCode:     "PROJ-1",
-			SubmitterCaseId: "CASE-1",
-			Patients: []*types.CasePatientBatch{
-				{
-					PatientOrganizationCode: "CHUSJ",
-					SubmitterPatientId:      "PAT-1",
-					ObservationsCategorical: []*types.ObservationCategoricalBatch{
-						{
-							Code:               "phenotype",
-							System:             "HPO",
-							Value:              "HP:0001263",
-							OnsetCode:          "invalid_onset",
-							InterpretationCode: "positive",
-							Note:               "Test note",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	record.validateOnsetCode(0, 0)
-	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, "is not a valid onset code")
-	assert.Equal(t, "case[0].patients[0].observations_categorical[0]", record.Errors[0].Path)
-}
-
 func Test_validateObservationsCategorical_Valid(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
@@ -2608,61 +2482,6 @@ func Test_validateObservationsCategorical_NoObservations(t *testing.T) {
 	err := record.validateObservationsCategorical(0)
 	assert.NoError(t, err)
 	assert.Empty(t, record.Errors)
-}
-
-func Test_validateObsTextCode_Valid(t *testing.T) {
-	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		ObservationCodes:     []string{"note", "phenotype", "condition"},
-		Case: types.CaseBatch{
-			ProjectCode:     "PROJ-1",
-			SubmitterCaseId: "CASE-1",
-			Patients: []*types.CasePatientBatch{
-				{
-					PatientOrganizationCode: "CHUSJ",
-					SubmitterPatientId:      "PAT-1",
-					ObservationsText: []*types.ObservationTextBatch{
-						{
-							Code:  "note",
-							Value: "Free text clinical note",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	record.validateObsTextCode(0, 0)
-	assert.Empty(t, record.Errors)
-}
-
-func Test_validateObsTextCode_Invalid(t *testing.T) {
-	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		ObservationCodes:     []string{"note", "phenotype", "condition"},
-		Case: types.CaseBatch{
-			ProjectCode:     "PROJ-1",
-			SubmitterCaseId: "CASE-1",
-			Patients: []*types.CasePatientBatch{
-				{
-					PatientOrganizationCode: "CHUSJ",
-					SubmitterPatientId:      "PAT-1",
-					ObservationsText: []*types.ObservationTextBatch{
-						{
-							Code:  "invalid_code",
-							Value: "Free text clinical note",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	record.validateObsTextCode(0, 0)
-	assert.Len(t, record.Errors, 1)
-	assert.Equal(t, ObservationInvalidField, record.Errors[0].Code)
-	assert.Contains(t, record.Errors[0].Message, "is not a valid observation code")
-	assert.Equal(t, "case[0].patients[0].observations_text[0]", record.Errors[0].Path)
 }
 
 func Test_validateObsTextValue_Valid(t *testing.T) {
