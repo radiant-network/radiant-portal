@@ -11,6 +11,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -84,6 +85,7 @@ const (
 	DocumentSizeMismatch                     = "DOCUMENT-006"
 	DocumentHashMismatch                     = "DOCUMENT-007"
 	DocumentDuplicateInBatch                 = "DOCUMENT-008"
+	DocumentNameInconsistency                = "DOCUMENT-009"
 )
 
 const RelationshipProbandCode = "proband"
@@ -1135,6 +1137,15 @@ func (cr *CaseValidationRecord) validateDocumentMetadata(doc *types.OutputDocume
 				docIndex,
 			), DocumentNotFoundAtURL, path)
 		return nil
+	}
+
+	docNameFromUrl, err := utils.ExtractFileName(doc.Url)
+	if err != nil {
+		return err
+	}
+	if *docNameFromUrl != doc.Name {
+		msg := fmt.Sprintf("Document name %s is not consistent with URL %s for case %d - task %d - output document %d.", doc.Name, doc.Url, cr.Index, taskIndex, docIndex)
+		cr.AddErrors(msg, DocumentNameInconsistency, path)
 	}
 
 	if doc.Size == nil || metadata.Size != *doc.Size {

@@ -39,6 +39,25 @@ func Test_extractS3BucketAndKey_Not_S3_URL(t *testing.T) {
 	assert.Nil(t, s3loc)
 }
 
+func Test_extractFileName_Valid(t *testing.T) {
+	filename, err := utils.ExtractFileName("s3://test/foo/bar.txt")
+	assert.Nil(t, err)
+	assert.NotNil(t, filename)
+	assert.Equal(t, "bar.txt", *filename)
+}
+
+func Test_extractFileName_Invalid_URL(t *testing.T) {
+	filename, err := utils.ExtractFileName("//test/foo/bar.txt")
+	assert.NotNil(t, err)
+	assert.Nil(t, filename)
+}
+
+func Test_extractFileName_Not_S3_URL(t *testing.T) {
+	filename, err := utils.ExtractFileName("http://test/foo/bar.txt")
+	assert.NotNil(t, err)
+	assert.Nil(t, filename)
+}
+
 func Test_GetMetadata_OK(t *testing.T) {
 	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
 		t.Setenv("AWS_ENDPOINT_URL", endpoint)

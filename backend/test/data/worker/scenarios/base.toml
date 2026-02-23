@@ -90,6 +90,6 @@ ordering_organization_code = "CHUSJ"
     data_type_code = "alignment"
     format_code = "cram"
     hash = "d57f21e6a273781dbf8b7657940f3b03"
-    name = "NA12891.recal.cram"
+    name = "CASE-12345.recal.crai"
     size = 11
     url = "s3://test-bucket/CASE-12345.recal.crai"

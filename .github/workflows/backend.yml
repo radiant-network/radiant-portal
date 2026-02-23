@@ -46,4 +46,4 @@ jobs:
         if: steps.filter.outputs.backend == 'true'
         run: go test ./...
         working-directory: ./backend
-        timeout-minutes: 15
+        timeout-minutes: 20
