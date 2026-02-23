@@ -78,6 +78,9 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
               onSearch={value => {
                 if (value.length >= minSearchLength) {
                   debouncedSearch(value);
+                } else {
+                  setOptions([]);
+                  setSearchValue('');
                 }
               }}
               options={options}

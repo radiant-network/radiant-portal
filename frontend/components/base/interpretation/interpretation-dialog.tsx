@@ -178,15 +178,15 @@ function InterpretationDialog({
         variant="stickyBoth"
         className="overflow-hidden"
       >
+        <DialogHeader>
+          <DialogTitle>{t('variant.interpretation_form.title')}</DialogTitle>
+        </DialogHeader>
         {fetchInterpretation.isLoading || fetchOccurrenceExpand?.isLoading ? (
           <DialogBody className="flex items-center justify-center">
             <Spinner size={32} />
           </DialogBody>
         ) : (
-          <div>
-            <DialogHeader>
-              <DialogTitle>{t('variant.interpretation_form.title')}</DialogTitle>
-            </DialogHeader>
+          <>
             <DialogBody className="overflow-scroll space-y-6">
               <InterpretationLastUpdatedBanner interpretation={fetchInterpretation.data} />
               <InterpretationVariantHeader
@@ -261,7 +261,7 @@ function InterpretationDialog({
                 {t('variant.interpretation_form.ok_text')}
               </Button>
             </DialogFooter>
-          </div>
+          </>
         )}
       </DialogContent>
     </Dialog>
