@@ -2383,6 +2383,12 @@ components:
       type: object
     VariantUninterpretedCase:
       properties:
+        ad_alt:
+          type: integer
+        ad_ratio:
+          type: number
+        ad_total:
+          type: integer
         affected_status:
           type: string
         analysis_catalog_code:
@@ -2391,21 +2397,16 @@ components:
           type: string
         case_id:
           type: integer
-        created_on:
-          type: string
         diagnosis_lab_code:
           type: string
         diagnosis_lab_name:
           type: string
-        exomiser_acmg_classification:
-          type: string
-        exomiser_acmg_evidence:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
         filter_is_pass:
           type: boolean
+        genotype_quality:
+          type: integer
+        info_qd:
+          type: number
         observed_phenotypes:
           items:
             $ref: '#/components/schemas/Term'
@@ -2421,20 +2422,27 @@ components:
           type: string
         seq_id:
           type: integer
-        status_code:
+        sex_name:
           type: string
         submitter_sample_id:
+          type: string
+        transmission_mode:
           type: string
         updated_on:
           type: string
         zygosity:
           type: string
       required:
+      - affected_status
       - case_id
-      - created_on
+      - diagnosis_lab_code
+      - diagnosis_lab_name
+      - filter_is_pass
+      - observed_phenotypes
       - patient_id
       - seq_id
-      - status_code
+      - submitter_sample_id
+      - transmission_mode
       - updated_on
       - zygosity
       type: object

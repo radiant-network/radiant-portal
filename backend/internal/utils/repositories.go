@@ -235,3 +235,7 @@ func JoinGermlineInterpretationWithVariant(tx *gorm.DB) *gorm.DB {
 func AntiJoinCaseHasSeqExpWithGermlineInterpretationForLocus(tx *gorm.DB, locusIdString string) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT ANTI JOIN %s %s ON %s.locus_id = ? AND %s.sequencing_id = %s.sequencing_experiment_id AND %s.case_id = %s.case_id", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias, types.InterpretationGermlineTable.Alias, types.InterpretationGermlineTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.InterpretationGermlineTable.Alias, types.CaseHasSequencingExperimentTable.Alias), locusIdString)
 }
+
+func JoinPatientWithSex(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.code = %s.sex_code", types.SexTable.FederationName, types.SexTable.Alias, types.SexTable.Alias, types.PatientTable.Alias))
+}

@@ -1,9 +1,9 @@
-part	seq_id	task_id	locus_id	gq	filter	zygosity	ad_ratio	exomiser_gene_combined_score	exomiser_acmg_evidence	exomiser_acmg_classification	ad_alt	transmission_mode
-1	1	1	1000	100	PASS	HET	1.0	0.7	["PS1","PVS2"]	UNCERTAIN_SIGNIFICANCE	5	autosomal_dominant
-1	2	1	1000	100	PASS	HET	1.0	0.7	["PS1","PVS2"]	LIKELY_BENIGN	5	autosomal_dominant_de_novo
-2	7	7	1000	100	PASS	HET	1.0	0.7	["PS1","PVS2"]	PATHOGENIC	5	autosomal_recessive
-2	10	10	1000	100	PASS	HOM	0.5	0.7	["PS1","PVS2"]	BENIGN	5	autosomal_dominant
-3	15	22	1000	100	PASS	HOM	0.75	0.7	["PS1","PVS2"]	PATHOGENIC	5	autosomal_dominant_de_novo
-4	19	19	1000	100	PASS	HET	1.0	0.7	["PS1","PVS2"]	UNCERTAIN_SIGNIFICANCE	5	autosomal_recessive
-4	20	19	1000	100	VQSRTrancheSNP99.95to100.00	HET	1.0	0.7	["PS1","PVS2"]	UNCERTAIN_SIGNIFICANCE	5	autosomal_recessive
-4	46	55	2000	100	PASS	HOM	1.0	0.7	"[""PS1"",""PVS2""]"	PATHOGENIC	5	autosomal_dominant
+part	seq_id	task_id	locus_id	gq	filter	zygosity	ad_ratio	exomiser_gene_combined_score	exomiser_acmg_evidence	exomiser_acmg_classification	ad_alt	transmission_mode	ad_total	info_qd
+1	1	1	1000	100	PASS	HET	1.0	0.7	["PS1","PVS2"]	UNCERTAIN_SIGNIFICANCE	5	autosomal_dominant	5	0.1
+1	2	1	1000	100	PASS	HET	1.0	0.7	["PS1","PVS2"]	LIKELY_BENIGN	5	autosomal_dominant_de_novo	5	0.2
+2	7	7	1000	100	PASS	HET	1.0	0.7	["PS1","PVS2"]	PATHOGENIC	5	autosomal_recessive	5	0.3
+2	10	10	1000	100	PASS	HOM	0.5	0.7	["PS1","PVS2"]	BENIGN	5	autosomal_dominant	10	0.4
+3	15	22	1000	100	PASS	HOM	0.75	0.7	["PS1","PVS2"]	PATHOGENIC	5	autosomal_dominant_de_novo	7	0.5
+4	19	19	1000	100	PASS	HET	1.0	0.7	["PS1","PVS2"]	UNCERTAIN_SIGNIFICANCE	5	autosomal_recessive	5	0.6
+4	20	19	1000	100	VQSRTrancheSNP99.95to100.00	HET	1.0	0.7	["PS1","PVS2"]	UNCERTAIN_SIGNIFICANCE	5	autosomal_recessive	5	0.7
+4	46	55	2000	100	PASS	HOM	1.0	0.7	"[""PS1"",""PVS2""]"	PATHOGENIC	5	autosomal_dominant	5	0.8
