@@ -345,3 +345,47 @@ func Test_VerifyStringField_RegexpMismatch(t *testing.T) {
 	assert.Equal(t, "Invalid field foobar for resourceType (res1 / res2). Reason: does not match the regular expression `^[A-Z]+$`.", r.Errors[0].Message)
 	assert.Equal(t, "type[0].field", r.Errors[0].Path)
 }
+
+func Test_ValidateCode_Valid(t *testing.T) {
+	r := &BaseValidationRecord{}
+	validCodes := []string{"code1", "code2"}
+	r.ValidateCode("resource", "path.to.field", "status_code", "ERR001", "code1", validCodes, []string{"ID1"}, true)
+	assert.Empty(t, r.Errors)
+}
+
+func Test_ValidateCode_Invalid(t *testing.T) {
+	r := &BaseValidationRecord{}
+	validCodes := []string{"code1", "code2"}
+	r.ValidateCode("resource", "path.to.field", "status_code", "ERR001", "invalid", validCodes, []string{"ID1"}, true)
+	assert.Len(t, r.Errors, 1)
+	assert.Equal(t, "ERR001", r.Errors[0].Code)
+	assert.Equal(t, "path.to.field", r.Errors[0].Path)
+	assert.Equal(t, "Invalid field status_code for resource ID1. Reason: \"invalid\" is not a valid status code. Valid values [code1, code2].", r.Errors[0].Message)
+}
+
+func Test_ValidateCode_EmptyNotRequired(t *testing.T) {
+	r := &BaseValidationRecord{}
+	validCodes := []string{"code1", "code2"}
+	r.ValidateCode("resource", "path.to.field", "status_code", "ERR001", "", validCodes, []string{"ID1"}, false)
+	assert.Empty(t, r.Errors)
+}
+
+func Test_ValidateCode_EmptyRequired(t *testing.T) {
+	r := &BaseValidationRecord{}
+	validCodes := []string{"code1", "code2"}
+	r.ValidateCode("resource", "path.to.field", "status_code", "ERR001", "", validCodes, []string{"ID1"}, true)
+	assert.Len(t, r.Errors, 1)
+	assert.Equal(t, "ERR001", r.Errors[0].Code)
+	assert.Equal(t, "path.to.field", r.Errors[0].Path)
+	assert.Equal(t, "Invalid field status_code for resource ID1. Reason: \"\" is not a valid status code. Valid values [code1, code2].", r.Errors[0].Message)
+}
+
+func Test_ValidateCode_LabelFormatting(t *testing.T) {
+	r := &BaseValidationRecord{}
+	validCodes := []string{"A"}
+	r.ValidateCode("resource", "path.to.field", "very_long_field_name", "ERR001", "B", validCodes, []string{"ID"}, true)
+	assert.Len(t, r.Errors, 1)
+	assert.Equal(t, "ERR001", r.Errors[0].Code)
+	assert.Equal(t, "path.to.field", r.Errors[0].Path)
+	assert.Equal(t, r.Errors[0].Message, "Invalid field very_long_field_name for resource ID. Reason: \"B\" is not a valid very long field name. Valid values [A].")
+}
