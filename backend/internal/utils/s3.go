@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"path"
 	"strings"
 	"time"
 
@@ -73,6 +74,21 @@ func ExtractS3BucketAndKey(s3URL string) (*S3Location, error) {
 	key := strings.TrimPrefix(parsed.Path, "/")
 
 	return &S3Location{bucket, key}, nil
+}
+
+func ExtractFileName(s3URL string) (*string, error) {
+	parsed, err := url.Parse(s3URL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid URL: %w", err)
+	}
+
+	if parsed.Scheme != "s3" {
+		return nil, fmt.Errorf("URL is not an S3 URL")
+	}
+
+	name := path.Base(parsed.Path)
+
+	return &name, nil
 }
 
 func (ps *S3PreSigner) GeneratePreSignedURL(url string) (*PreSignedURL, error) {

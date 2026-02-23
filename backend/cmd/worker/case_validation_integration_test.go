@@ -26,6 +26,7 @@ func createBaseCasePayload(submitterCaseId string) []*types.CaseBatch {
 	cases := scenario.Cases
 	cases[0].SubmitterCaseId = submitterCaseId
 	cases[0].Tasks[0].OutputDocuments[0].Url = fmt.Sprintf("s3://test-bucket/%s.recal.crai", submitterCaseId)
+	cases[0].Tasks[0].OutputDocuments[0].Name = fmt.Sprintf("%s.recal.crai", submitterCaseId)
 	return cases
 }
 
@@ -161,7 +162,7 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 		db.Table("document").Where("id = ?", thd[0].DocumentID).First(&doc)
 		assert.NotNil(t, doc)
 
-		assert.Equal(t, "NA12891.recal.cram", doc.Name)
+		assert.Equal(t, "Not_Dry_Run.recal.crai", doc.Name)
 		assert.Equal(t, int64(11), doc.Size)
 		assert.Equal(t, "d57f21e6a273781dbf8b7657940f3b03", doc.Hash)
 		assert.Equal(t, "s3://test-bucket/Not_Dry_Run.recal.crai", doc.Url)
@@ -177,12 +178,14 @@ func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
 		payload[0].SubmitterCaseId = ""
 		payload[0].OrderingPhysician = "Not_Dry_Run_No_SubmitterCaseId"
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_No_SubmitterCaseId_1.recal.crai"
+		payload[0].Tasks[0].OutputDocuments[0].Name = "Not_Dry_Run_No_SubmitterCaseId_1.recal.crai"
 
 		payload = append(payload, payload[0])
 
 		payload[1].SubmitterCaseId = ""
 		payload[1].OrderingPhysician = "Not Dry Run No SubmitterCaseId"
 		payload[1].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_No_SubmitterCaseId_2.recal.crai"
+		payload[1].Tasks[0].OutputDocuments[0].Name = "Not_Dry_Run_No_SubmitterCaseId_2.recal.crai"
 
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
@@ -206,11 +209,13 @@ func Test_ProcessBatch_Case_Not_Dry_Run_SubmitterCaseId_Collision(t *testing.T) 
 		payload := createBaseCasePayload("")
 		payload[0].SubmitterCaseId = "SUBMITTER_CASE_ID_COLLISION"
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
+		payload[0].Tasks[0].OutputDocuments[0].Name = "Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
 
 		payload = append(payload, payload[0])
 
 		payload[1].SubmitterCaseId = "SUBMITTER_CASE_ID_COLLISION"
 		payload[1].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
+		payload[1].Tasks[0].OutputDocuments[0].Name = "Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
 
 		createDocumentsForBatch(context, client, payload)
 		payloadBytes, _ := json.Marshal(payload)
@@ -259,7 +264,7 @@ func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
 			case "task":
 				msg = "error processing case batch records: error during case insertion failed to persist tasks for case 0: failed to persist task for case 0: ERROR: duplicate key value violates unique constraint \"task_pkey\" (SQLSTATE 23505)"
 			case "document":
-				msg = "error processing case batch records: error during case insertion failed to persist tasks for case 0: failed to persist document \"NA12891.recal.cram\" for case 0: ERROR: duplicate key value violates unique constraint \"document_pkey\" (SQLSTATE 23505)"
+				msg = "error processing case batch records: error during case insertion failed to persist tasks for case 0: failed to persist document \"Persist_Failure_ID_Collision_document.recal.crai\" for case 0: ERROR: duplicate key value violates unique constraint \"document_pkey\" (SQLSTATE 23505)"
 			default:
 				t.Fatalf("unexpected table name: %s", tableName)
 			}
@@ -417,6 +422,7 @@ func Test_ProcessBatch_Case_validateDocument_IdenticalDocumentAlreadyExists(t *t
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload("validateDocument_IdenticalDocumentAlreadyExists_1")
 		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/validateDocument_IdenticalDocumentAlreadyExists.recal.crai"
+		payload[0].Tasks[0].OutputDocuments[0].Name = "validateDocument_IdenticalDocumentAlreadyExists.recal.crai"
 		createDocumentsForBatch(context, client, payload)
 
 		payloadBytes, _ := json.Marshal(payload)
@@ -456,6 +462,11 @@ func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
 			{
 				Code:    "DOCUMENT-001",
 				Message: "Invalid field name for case 0 - task 0 - output document 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-009",
+				Message: "Document name !@#$%^&*()_+ is not consistent with URL s3://test-bucket/validateDocument_Error_DocumentField.recal.crai for case 0 - task 0 - output document 0.",
 				Path:    "case[0].tasks[0].output_documents[0]",
 			},
 		}
@@ -506,7 +517,7 @@ func Test_ProcessBatch_Case_validateDocument_Warning_PartiallyDifferentDocumentE
 		warnings := []types.BatchMessage{
 			{
 				Code:    "DOCUMENT-004",
-				Message: "A document with same url s3://test-bucket/validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai has been found but with a different name (NA12891.recal.cram <> Something Else).",
+				Message: "A document with same url s3://test-bucket/validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai has been found but with a different name (validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai <> Something Else).",
 				Path:    "case[0].tasks[0].output_documents[0]",
 			},
 		}
@@ -868,6 +879,11 @@ func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
 			{
 				Code:    "DOCUMENT-001",
 				Message: "Invalid field data_category_code for case 0. Reason: data category code \"genomic!@#$%\" is not a valid data category code. Valid values [clinical, genomic].",
+				Path:    "case[0].tasks[0].output_documents[1]",
+			},
+			{
+				Code:    "DOCUMENT-009",
+				Message: "Document name wrong_name.recal.crai is not consistent with URL s3://test-bucket/existing_document.recal.crai for case 0 - task 0 - output document 1.",
 				Path:    "case[0].tasks[0].output_documents[1]",
 			},
 			{

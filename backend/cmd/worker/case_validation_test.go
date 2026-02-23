@@ -4182,6 +4182,53 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 	})
 }
 
+func Test_validateFileMetadata_NameMismatch(t *testing.T) {
+	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
+		t.Setenv("AWS_ENDPOINT_URL", endpoint)
+		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
+		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
+		t.Setenv("AWS_USE_SSL", "false")
+
+		bucketName := "foo"
+		objectName := "bar.txt"
+		content := []byte("hello world") // Size: 11 bytes
+
+		_ = client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		_, _ = client.PutObject(ctx, bucketName, objectName, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+
+		s3fs, _ := utils.NewS3Store()
+		mockContext := batchval.BatchValidationContext{
+			S3FS: s3fs,
+		}
+		record := CaseValidationRecord{
+			BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
+			Context:              &mockContext,
+		}
+
+		size := int64(11)
+		doc := types.OutputDocumentBatch{
+			Name:             "another_name.txt",
+			DataCategoryCode: "foobar",
+			DataTypeCode:     "foo",
+			FormatCode:       "bar",
+			Size:             &size,
+			Url:              "s3://foo/bar.txt",
+			Hash:             "5eb63bbbe01eeed093cb22bb8f5acdc3",
+		}
+
+		err := record.validateDocumentMetadata(&doc, "foo[0].bar", 0, 1)
+		assert.NoError(t, err)
+		assert.Len(t, record.Infos, 0)
+		assert.Len(t, record.Warnings, 0)
+		assert.Len(t, record.Errors, 1)
+		assert.Equal(t, record.Errors[0], types.BatchMessage{
+			Code:    "DOCUMENT-009",
+			Message: "Document name another_name.txt is not consistent with URL s3://foo/bar.txt for case 0 - task 0 - output document 1.",
+			Path:    "foo[0].bar",
+		})
+	})
+}
+
 func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 	testutils.SequentialTestWithMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string) {
 		t.Setenv("AWS_ENDPOINT_URL", endpoint)
@@ -4207,7 +4254,7 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 
 		size := int64(12)
 		doc := types.OutputDocumentBatch{
-			Name:             "Foo Bar",
+			Name:             "bar.txt",
 			DataCategoryCode: "foobar",
 			DataTypeCode:     "foo",
 			FormatCode:       "bar",
@@ -4254,7 +4301,7 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 
 		size := int64(11)
 		doc := types.OutputDocumentBatch{
-			Name:             "Foo Bar",
+			Name:             "bar.txt",
 			DataCategoryCode: "foobar",
 			DataTypeCode:     "foo",
 			FormatCode:       "bar",
@@ -4301,7 +4348,7 @@ func Test_validateFileMetadata_OptionalHash(t *testing.T) {
 
 		size := int64(11)
 		doc := types.OutputDocumentBatch{
-			Name:             "Foo Bar",
+			Name:             "bar.txt",
 			DataCategoryCode: "foobar",
 			DataTypeCode:     "foo",
 			FormatCode:       "bar",
