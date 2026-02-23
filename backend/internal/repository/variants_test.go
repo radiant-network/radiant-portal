@@ -147,6 +147,62 @@ func Test_GetVariantExpandedInterpretedCase_OtherMember(t *testing.T) {
 		assert.Equal(t, "BRAF", (*expanded).GeneSymbol)
 	})
 }
+
+func Test_GetVariantUninterpretedCases_DefaultFields(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, nil, nil)
+		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(5), *count)
+		assert.Equal(t, 5, len(*uninterpretedCases))
+		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
+
+		case4 := (*uninterpretedCases)[1]
+
+		assert.Equal(t, "proband", case4.RelationshipToProbandCode)
+		assert.Equal(t, 10, case4.SeqId)
+		assert.Equal(t, "S13233", case4.SubmitterSampleId)
+		assert.Equal(t, "affected", case4.AffectedStatusCode)
+		assert.Equal(t, 2, len(case4.Phenotypes))
+		assert.Equal(t, true, *(case4.FilterIsPass))
+		assert.Equal(t, "HOM", case4.Zygosity)
+		assert.Equal(t, "autosomal_dominant", case4.TransmissionMode)
+		assert.Equal(t, "CQGC", case4.DiagnosisLabCode)
+		assert.Equal(t, "Quebec Clinical Genomic Center", case4.DiagnosisLabName)
+		assert.Equal(t, "2021-09-12 13:08:00 +0000 UTC", case4.UpdatedOn.String())
+		assert.Equal(t, 10, case4.PatientId)
+	})
+}
+
+func Test_GetVariantUninterpretedCases_AdditionalFields(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewVariantsRepository(db)
+		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{
+			"primary_condition_id", "primary_condition_name", "analysis_catalog_code", "analysis_catalog_name",
+			"info_qd", "genotype_quality", "ad_alt", "ad_total", "ad_ratio", "sex_name",
+		}, []types.SearchCriterion{}, nil, nil)
+		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(5), *count)
+		assert.Equal(t, 5, len(*uninterpretedCases))
+		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
+
+		case4 := (*uninterpretedCases)[1]
+
+		assert.Equal(t, "MONDO:0700092", case4.PrimaryConditionId)
+		assert.Equal(t, "neurodevelopmental disorder", case4.PrimaryConditionName)
+		assert.Equal(t, "WGA", case4.AnalysisCatalogCode)
+		assert.Equal(t, "Whole Genome Analysis", case4.AnalysisCatalogName)
+		assert.Equal(t, float32(0.4), case4.InfoQd)
+		assert.Equal(t, 100, case4.GenotypeQuality)
+		assert.Equal(t, 5, case4.AdAlt)
+		assert.Equal(t, 10, case4.AdTotal)
+		assert.Equal(t, float32(0.5), case4.AdRatio)
+		assert.Equal(t, "Female", case4.SexName)
+	})
+}
+
 func Test_GetVariantUninterpretedCases_NoCriteria_NoPagination_DefaultSorted(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
@@ -207,14 +263,14 @@ func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_CustomSort(t *t
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
 		pagination := types.Pagination{Limit: 2}
-		sort := types.SortBody{Field: types.CaseStatusCodeField.Name, Order: "asc"}
+		sort := types.SortBody{Field: types.FamilyRelationshipToProbandCodeField.Name, Order: "asc"}
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, []types.SearchCriterion{}, &pagination, []types.SortBody{sort})
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(5), *count)
 		assert.Equal(t, 2, len(*uninterpretedCases))
 		assert.Equal(t, 5, (*uninterpretedCases)[0].CaseId)
-		assert.Equal(t, 3, (*uninterpretedCases)[1].CaseId)
+		assert.Equal(t, 7, (*uninterpretedCases)[1].CaseId)
 	})
 }
 
@@ -223,14 +279,15 @@ func Test_GetVariantUninterpretedCases_WithCriteria_NoPagination_DefaultSort(t *
 		repo := NewVariantsRepository(db)
 		criteria := []types.SearchCriterion{
 			{FieldName: types.PatientSexCodeField.Name, Value: []interface{}{"female"}},
-			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"disorder"}, Operator: "contains"},
+			{FieldName: types.AggregatedPhenotypeTermField.Alias, Value: []interface{}{"seizure"}, Operator: "contains"},
 		}
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(1), *count)
-		assert.Equal(t, 1, len(*uninterpretedCases))
+		assert.Equal(t, int64(2), *count)
+		assert.Equal(t, 2, len(*uninterpretedCases))
 		assert.Equal(t, 4, (*uninterpretedCases)[0].CaseId)
+		assert.Equal(t, 7, (*uninterpretedCases)[1].CaseId)
 	})
 }
 
@@ -355,29 +412,11 @@ func Test_GetVariantUninterpretedCases_WithPatientSexCodeCriteria_NoPagination_D
 	})
 }
 
-func Test_GetVariantUninterpretedCases_WithExomiserACMGClassification_NoPagination_DefaultSort(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "exomiser", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(db)
-		criteria := []types.SearchCriterion{
-			{FieldName: types.AggregatedPhenotypeTermField.Alias, Value: []interface{}{"seizure"}, Operator: "contains"},
-		}
-		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
-		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
-		assert.NoError(t, err)
-		assert.Equal(t, int64(3), *count)
-		assert.Equal(t, 3, len(*uninterpretedCases))
-		for _, caseItem := range *uninterpretedCases {
-			assert.Equal(t, "Pathogenic", caseItem.ExomiserACMGClassification)
-			assert.Equal(t, types.JsonArray[string]{"PS1", "PVS2"}, caseItem.ExomiserACMGEvidence)
-		}
-	})
-}
-
 func Test_GetVariantUninterpretedCases_NoResult(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
 		criteria := []types.SearchCriterion{
-			{FieldName: types.ConditionTermField.Alias, Value: []interface{}{"not found"}, Operator: "contains"},
+			{FieldName: types.AggregatedPhenotypeTermField.Alias, Value: []interface{}{"not found"}, Operator: "contains"},
 		}
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(2000, query)

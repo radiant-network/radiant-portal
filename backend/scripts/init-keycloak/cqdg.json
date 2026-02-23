@@ -26,7 +26,7 @@
   "oauth2DeviceCodeLifespan": 600,
   "oauth2DevicePollingInterval": 5,
   "enabled": true,
-  "sslRequired": "external",
+  "sslRequired": "none",
   "registrationAllowed": true,
   "registrationEmailAsUsername": false,
   "rememberMe": false,
@@ -67,6 +67,9 @@
             "uma_authorization"
           ],
           "client": {
+            "radiant": [
+              "radiant"
+            ],
             "account": [
               "manage-account",
               "view-profile"
@@ -343,6 +346,15 @@
           "clientRole": true,
           "containerId": "81635516-20ff-43f1-aba0-6dda1994350f",
           "attributes": {}
+        },
+        {
+          "id": "44969021-2b1e-4d50-b288-1a0b18975110",
+          "name": "radiant",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "81635516-20ff-43f1-aba0-6dda1994350f",
+          "attributes": {}
         }
       ],
       "UDN": [
@@ -565,6 +577,7 @@
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
         "standard.token.exchange.enabled": "false",
+        "post.logout.redirect.uris": "+",
         "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false"
       },
@@ -620,6 +633,7 @@
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
         "standard.token.exchange.enabled": "false",
+        "post.logout.redirect.uris": "+",
         "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false"
       },
@@ -1762,14 +1776,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
+            "oidc-usermodel-attribute-mapper",
+            "saml-user-property-mapper",
+            "saml-role-list-mapper",
             "oidc-usermodel-property-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
+            "saml-user-attribute-mapper",
             "oidc-full-name-mapper",
             "oidc-address-mapper",
-            "saml-role-list-mapper",
-            "oidc-usermodel-attribute-mapper",
-            "saml-user-attribute-mapper",
-            "saml-user-property-mapper"
+            "oidc-sha256-pairwise-sub-mapper"
           ]
         }
       },
@@ -1826,12 +1840,12 @@
           "allowed-protocol-mapper-types": [
             "oidc-address-mapper",
             "saml-user-property-mapper",
-            "saml-user-attribute-mapper",
             "oidc-full-name-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
+            "saml-role-list-mapper",
             "oidc-usermodel-property-mapper",
-            "oidc-usermodel-attribute-mapper",
-            "saml-role-list-mapper"
+            "oidc-sha256-pairwise-sub-mapper",
+            "saml-user-attribute-mapper",
+            "oidc-usermodel-attribute-mapper"
           ]
         }
       }
@@ -2643,7 +2657,7 @@
     "cibaInterval": "5",
     "realmReusableOtpCode": "false"
   },
-  "keycloakVersion": "26.3.2",
+  "keycloakVersion": "26.4.5",
   "userManagedAccessAllowed": false,
   "organizationsEnabled": false,
   "verifiableCredentialsEnabled": false,

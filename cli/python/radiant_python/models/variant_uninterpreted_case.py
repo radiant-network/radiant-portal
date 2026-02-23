@@ -17,8 +17,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from radiant_python.models.term import Term
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,27 +27,30 @@ class VariantUninterpretedCase(BaseModel):
     """
     VariantUninterpretedCase
     """ # noqa: E501
-    affected_status: Optional[StrictStr] = None
+    ad_alt: Optional[StrictInt] = None
+    ad_ratio: Optional[Union[StrictFloat, StrictInt]] = None
+    ad_total: Optional[StrictInt] = None
+    affected_status: StrictStr
     analysis_catalog_code: Optional[StrictStr] = None
     analysis_catalog_name: Optional[StrictStr] = None
     case_id: StrictInt
-    created_on: StrictStr
-    diagnosis_lab_code: Optional[StrictStr] = None
-    diagnosis_lab_name: Optional[StrictStr] = None
-    exomiser_acmg_classification: Optional[StrictStr] = None
-    exomiser_acmg_evidence: Optional[List[StrictStr]] = None
-    filter_is_pass: Optional[StrictBool] = None
-    observed_phenotypes: Optional[List[Term]] = None
+    diagnosis_lab_code: StrictStr
+    diagnosis_lab_name: StrictStr
+    filter_is_pass: StrictBool
+    genotype_quality: Optional[StrictInt] = None
+    info_qd: Optional[Union[StrictFloat, StrictInt]] = None
+    observed_phenotypes: List[Term]
     patient_id: StrictInt
     primary_condition_id: Optional[StrictStr] = None
     primary_condition_name: Optional[StrictStr] = None
     relationship_to_proband: Optional[StrictStr] = None
     seq_id: StrictInt
-    status_code: StrictStr
-    submitter_sample_id: Optional[StrictStr] = None
+    sex_name: Optional[StrictStr] = None
+    submitter_sample_id: StrictStr
+    transmission_mode: StrictStr
     updated_on: StrictStr
     zygosity: StrictStr
-    __properties: ClassVar[List[str]] = ["affected_status", "analysis_catalog_code", "analysis_catalog_name", "case_id", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "exomiser_acmg_classification", "exomiser_acmg_evidence", "filter_is_pass", "observed_phenotypes", "patient_id", "primary_condition_id", "primary_condition_name", "relationship_to_proband", "seq_id", "status_code", "submitter_sample_id", "updated_on", "zygosity"]
+    __properties: ClassVar[List[str]] = ["ad_alt", "ad_ratio", "ad_total", "affected_status", "analysis_catalog_code", "analysis_catalog_name", "case_id", "diagnosis_lab_code", "diagnosis_lab_name", "filter_is_pass", "genotype_quality", "info_qd", "observed_phenotypes", "patient_id", "primary_condition_id", "primary_condition_name", "relationship_to_proband", "seq_id", "sex_name", "submitter_sample_id", "transmission_mode", "updated_on", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -107,24 +110,27 @@ class VariantUninterpretedCase(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "ad_alt": obj.get("ad_alt"),
+            "ad_ratio": obj.get("ad_ratio"),
+            "ad_total": obj.get("ad_total"),
             "affected_status": obj.get("affected_status"),
             "analysis_catalog_code": obj.get("analysis_catalog_code"),
             "analysis_catalog_name": obj.get("analysis_catalog_name"),
             "case_id": obj.get("case_id"),
-            "created_on": obj.get("created_on"),
             "diagnosis_lab_code": obj.get("diagnosis_lab_code"),
             "diagnosis_lab_name": obj.get("diagnosis_lab_name"),
-            "exomiser_acmg_classification": obj.get("exomiser_acmg_classification"),
-            "exomiser_acmg_evidence": obj.get("exomiser_acmg_evidence"),
             "filter_is_pass": obj.get("filter_is_pass"),
+            "genotype_quality": obj.get("genotype_quality"),
+            "info_qd": obj.get("info_qd"),
             "observed_phenotypes": [Term.from_dict(_item) for _item in obj["observed_phenotypes"]] if obj.get("observed_phenotypes") is not None else None,
             "patient_id": obj.get("patient_id"),
             "primary_condition_id": obj.get("primary_condition_id"),
             "primary_condition_name": obj.get("primary_condition_name"),
             "relationship_to_proband": obj.get("relationship_to_proband"),
             "seq_id": obj.get("seq_id"),
-            "status_code": obj.get("status_code"),
+            "sex_name": obj.get("sex_name"),
             "submitter_sample_id": obj.get("submitter_sample_id"),
+            "transmission_mode": obj.get("transmission_mode"),
             "updated_on": obj.get("updated_on"),
             "zygosity": obj.get("zygosity")
         })

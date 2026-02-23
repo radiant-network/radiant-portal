@@ -113,27 +113,30 @@ type VariantInterpretedCase = struct {
 } // @name VariantInterpretedCase
 
 type VariantUninterpretedCase = struct {
-	CaseId                     int               `json:"case_id" validate:"required"`
-	SeqId                      int               `json:"seq_id" validate:"required"`
-	PatientId                  int               `json:"patient_id" validate:"required"`
-	CreatedOn                  time.Time         `json:"created_on" validate:"required"`
-	UpdatedOn                  time.Time         `json:"updated_on" validate:"required"`
-	SubmitterSampleId          string            `json:"submitter_sample_id,omitempty"`
-	RelationshipToProbandCode  string            `json:"relationship_to_proband,omitempty"`
-	AffectedStatusCode         string            `json:"affected_status,omitempty"`
-	PrimaryConditionId         string            `json:"primary_condition_id,omitempty"`
-	PrimaryConditionName       string            `json:"primary_condition_name,omitempty"`
-	Zygosity                   string            `json:"zygosity" validate:"required"`
-	DiagnosisLabCode           string            `json:"diagnosis_lab_code,omitempty"`
-	DiagnosisLabName           string            `json:"diagnosis_lab_name,omitempty"`
-	AnalysisCatalogCode        string            `json:"analysis_catalog_code,omitempty"`
-	AnalysisCatalogName        string            `json:"analysis_catalog_name,omitempty"`
-	StatusCode                 string            `json:"status_code" validate:"required"`
-	PhenotypesUnparsed         string            `json:"-"`
-	Phenotypes                 JsonArray[Term]   `json:"observed_phenotypes"`
-	ExomiserACMGClassification string            `json:"exomiser_acmg_classification,omitempty"`
-	ExomiserACMGEvidence       JsonArray[string] `json:"exomiser_acmg_evidence,omitempty"`
-	FilterIsPass               *bool             `json:"filter_is_pass,omitempty"`
+	CaseId                    int             `json:"case_id" validate:"required"`
+	SeqId                     int             `json:"seq_id" validate:"required"`
+	PatientId                 int             `json:"patient_id" validate:"required"`
+	UpdatedOn                 time.Time       `json:"updated_on" validate:"required"`
+	SubmitterSampleId         string          `json:"submitter_sample_id" validate:"required"`
+	RelationshipToProbandCode string          `json:"relationship_to_proband,omitempty"`
+	AffectedStatusCode        string          `json:"affected_status" validate:"required"`
+	PrimaryConditionId        string          `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName      string          `json:"primary_condition_name,omitempty"`
+	Zygosity                  string          `json:"zygosity" validate:"required"`
+	DiagnosisLabCode          string          `json:"diagnosis_lab_code" validate:"required"`
+	DiagnosisLabName          string          `json:"diagnosis_lab_name" validate:"required"`
+	AnalysisCatalogCode       string          `json:"analysis_catalog_code,omitempty"`
+	AnalysisCatalogName       string          `json:"analysis_catalog_name,omitempty"`
+	PhenotypesUnparsed        string          `json:"-"`
+	Phenotypes                JsonArray[Term] `json:"observed_phenotypes" validate:"required"`
+	FilterIsPass              *bool           `json:"filter_is_pass" validate:"required"`
+	TransmissionMode          string          `json:"transmission_mode" validate:"required"`
+	InfoQd                    float32         `json:"info_qd,omitempty"`
+	GenotypeQuality           int             `json:"genotype_quality,omitempty"`
+	AdAlt                     int             `json:"ad_alt,omitempty"`
+	AdTotal                   int             `json:"ad_total,omitempty"`
+	AdRatio                   float32         `json:"ad_ratio,omitempty"`
+	SexName                   string          `json:"sex_name,omitempty"`
 } // @name VariantUninterpretedCase
 
 type VariantExpandedInterpretedCase = struct {
@@ -187,33 +190,38 @@ var VariantTable = Table{
 }
 
 var VariantInterpretedCasesFields = append(CasesFields, GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, ConditionIdField, ConditionNameField, ConditionTermField, AggregatedPhenotypeTermField)
-var VariantUninterpretedCasesFields = append(CasesFields, ConditionTermField, AggregatedPhenotypeTermField, GermlineSNVZygosityField, GermlineSNVTransmissionModeField, GermlineSNVFilterField, GermlineSNVFilterIsPassField, PatientSexCodeField)
 var VariantInterpretedCasesDefaultSort = []SortField{{Field: GermlineInterpretationUpdatedOnField, Order: "desc"}}
 
 var VariantUninterpretedCasesDefaultFields = []Field{
 	CaseIdField,
 	FamilyRelationshipToProbandCodeField,
 	SequencingExperimentIdField,
-	SamplePatientIdField,
 	SampleSubmitterSampleIdField,
 	FamilyAffectedStatusCodeField,
+	AggregatedPhenotypeUnparsedField,
+	GermlineSNVFilterIsPassField,
 	GermlineSNVZygosityField,
 	GermlineSNVTransmissionModeField,
-	GermlineSNVFilterField,
-	GermlineSNVFilterIsPassField,
 	CaseDiagnosisLabCodeField,
 	CaseDiagnosisLabNameField,
-	AnalysisCatalogCodeField,
-	AnalysisCatalogNameField,
-	CaseStatusCodeField,
-	CaseCreatedOnField,
 	CaseUpdatedOnField,
-	GermlineSNVExomiserAcmgClassificationField,
-	GermlineSNVExomiserAcmgEvidenceField,
-	AggregatedPhenotypeUnparsedField,
+	SamplePatientIdField,
+}
+
+var VariantUninterpretedCasesFields = append(VariantUninterpretedCasesDefaultFields,
+	AggregatedPhenotypeTermField,
 	CasePrimaryConditionIdField,
 	CasePrimaryConditionNameField,
-}
+	AnalysisCatalogCodeField,
+	AnalysisCatalogNameField,
+	GermlineSNVInfoQdField,
+	GermlineSNVGenotypeQualityField,
+	GermlineSNVAdAltField,
+	GermlineSNVAdTotalField,
+	GermlineSNVAdRatioField,
+	PatientSexCodeField,
+	PatientSexNameField,
+)
 
 var VariantInterpretedCasesQueryConfig = QueryConfig{
 	AllFields:     VariantInterpretedCasesFields,
