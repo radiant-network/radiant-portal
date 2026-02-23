@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"slices"
 	"time"
 
 	"github.com/golang/glog"
@@ -21,18 +20,6 @@ const (
 var (
 	AlphanumericIdentifierRegExpCompiled = regexp.MustCompile(AlphanumericIdentifierRegExp)
 )
-
-var EMPTY = struct{}{}
-
-var AllowedStatusCode = map[string]struct{}{
-	"unknown":     EMPTY,
-	"draft":       EMPTY,
-	"revoke":      EMPTY,
-	"completed":   EMPTY,
-	"incomplete":  EMPTY,
-	"submitted":   EMPTY,
-	"in_progress": EMPTY,
-}
 
 const (
 	IdenticalSequencingExperimentInDBCode    = "SEQ-001"
@@ -55,6 +42,11 @@ type SequencingExperimentValidationRecord struct {
 	SubmitterOrganizationID *int
 	SampleID                *int
 	SequencingLabID         *int
+
+	PlatformCodes                 []string
+	ExperimentalStrategyCodes     []string
+	SequencingReadTechnologyCodes []string
+	StatusCodes                   []string
 }
 
 func (r *SequencingExperimentValidationRecord) GetBase() *batchval.BaseValidationRecord {
@@ -100,6 +92,38 @@ func (r *SequencingExperimentValidationRecord) preFetchValidationInfo() error {
 	if sequencingLab != nil {
 		r.SequencingLabID = &sequencingLab.ID
 	}
+
+	platformCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetPlatform)
+	if err != nil {
+		return fmt.Errorf("error fetching platform codes: %w", err)
+	}
+	if platformCodes != nil {
+		r.PlatformCodes = platformCodes
+	}
+
+	experimentalStrategyCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetExperimentalStrategy)
+	if err != nil {
+		return fmt.Errorf("error fetching experimental strategy codes: %w", err)
+	}
+	if experimentalStrategyCodes != nil {
+		r.ExperimentalStrategyCodes = experimentalStrategyCodes
+	}
+
+	sequencingReadTechnologyCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetSequencingReadTechnology)
+	if err != nil {
+		return fmt.Errorf("error fetching sequencing read technology codes: %w", err)
+	}
+	if sequencingReadTechnologyCodes != nil {
+		r.SequencingReadTechnologyCodes = sequencingReadTechnologyCodes
+	}
+
+	statusCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetStatus)
+	if err != nil {
+		return fmt.Errorf("error fetching status codes: %w", err)
+	}
+	if statusCodes != nil {
+		r.StatusCodes = statusCodes
+	}
 	return nil
 }
 
@@ -110,25 +134,14 @@ func (r *SequencingExperimentValidationRecord) validateAliquotField() {
 func (r *SequencingExperimentValidationRecord) validateExperimentalStrategyCodeField() error {
 	fieldName := "experimental_strategy_code"
 	r.ValidateStringField(r.SequencingExperiment.ExperimentalStrategyCode, fieldName, r.getPath(fieldName), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getUniqueIds(), true)
-
-	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetExperimentalStrategy)
-	if err != nil {
-		return fmt.Errorf("error fetching experimental strategy codes: %w", err)
-	}
-	r.ValidateCode(r.GetResourceType(), batchval.FormatPath(r, fieldName), fieldName, InvalidFieldValueCode, r.SequencingExperiment.ExperimentalStrategyCode, codes, r.getUniqueIds(), true)
+	r.ValidateCode(r.GetResourceType(), batchval.FormatPath(r, fieldName), fieldName, InvalidFieldValueCode, r.SequencingExperiment.ExperimentalStrategyCode, r.ExperimentalStrategyCodes, r.getUniqueIds(), true)
 	return nil
 }
 
 func (r *SequencingExperimentValidationRecord) validateSequencingReadTechnologyCodeField() error {
 	fieldName := "sequencing_read_technology_code"
 	r.ValidateStringField(r.SequencingExperiment.SequencingReadTechnologyCode, fieldName, r.getPath(fieldName), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getUniqueIds(), true)
-
-	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetSequencingReadTechnology)
-	if err != nil {
-		return fmt.Errorf("error fetching sequencing read technology codes: %w", err)
-	}
-	r.ValidateCode(r.GetResourceType(), batchval.FormatPath(r, fieldName), fieldName, InvalidFieldValueCode, r.SequencingExperiment.SequencingReadTechnologyCode, codes, r.getUniqueIds(), true)
-
+	r.ValidateCode(r.GetResourceType(), r.getPath(fieldName), fieldName, InvalidFieldValueCode, r.SequencingExperiment.SequencingReadTechnologyCode, r.SequencingReadTechnologyCodes, r.getUniqueIds(), true)
 	return nil
 }
 
@@ -165,12 +178,7 @@ func (r *SequencingExperimentValidationRecord) validateRunNameField() {
 func (r *SequencingExperimentValidationRecord) validateStatusCodeField() error {
 	fieldName := "status_code"
 	r.ValidateStringField(r.SequencingExperiment.StatusCode, fieldName, r.getPath(fieldName), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getUniqueIds(), true)
-
-	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetStatus)
-	if err != nil {
-		return fmt.Errorf("error fetching status codes: %w", err)
-	}
-	r.ValidateCode(r.GetResourceType(), batchval.FormatPath(r, fieldName), fieldName, InvalidFieldValueCode, r.SequencingExperiment.StatusCode, codes, r.getUniqueIds(), true)
+	r.ValidateCode(r.GetResourceType(), r.getPath(fieldName), fieldName, InvalidFieldValueCode, r.SequencingExperiment.StatusCode, r.StatusCodes, r.getUniqueIds(), true)
 	return nil
 }
 
@@ -188,14 +196,7 @@ func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error
 func (r *SequencingExperimentValidationRecord) validatePlatformCodeField() error {
 	fieldName := "platform_code"
 	r.ValidateStringField(r.SequencingExperiment.PlatformCode, fieldName, r.getPath(fieldName), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, TextRegExpCompiled, r.getUniqueIds(), true)
-
-	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetPlatform)
-	if err != nil {
-		return fmt.Errorf("error fetching platform codes: %w", err)
-	}
-	if !slices.Contains(codes, r.SequencingExperiment.PlatformCode) {
-		r.AddErrors(batchval.FormatInvalidField(r.GetResourceType(), fieldName, "value not allowed", r.getUniqueIds()), InvalidFieldValueCode, r.getPath(fieldName))
-	}
+	r.ValidateCode(r.GetResourceType(), r.getPath("platform_code"), fieldName, InvalidFieldValueCode, r.SequencingExperiment.PlatformCode, r.PlatformCodes, r.getUniqueIds(), true)
 	return nil
 }
 

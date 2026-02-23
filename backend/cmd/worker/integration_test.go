@@ -1415,7 +1415,7 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 			},
 			{
 				Code:    "SEQ-002",
-				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: value not allowed.",
+				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: \"!@#$%^&\" is not a valid platform code. Valid values [illumina, nanopore, pacbio].",
 				Path:    "sequencing_experiment[1].platform_code",
 			},
 			{
