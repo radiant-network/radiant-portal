@@ -135,7 +135,7 @@ export const AutoComplete = <T extends Option>({
     option[optionFilterProp].toLowerCase().trim().includes(inputValueSearch.toLowerCase().trim()),
   );
 
-  const hasSearchStarted = inputValueSearch.length > minSearchLength;
+  const hasSearchStarted = debouncedSearchTerm.length >= minSearchLength;
 
   const getEmptyStateIndicator = () => {
     if (hasSearchStarted) {
