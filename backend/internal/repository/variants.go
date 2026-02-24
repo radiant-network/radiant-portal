@@ -18,7 +18,6 @@ type VariantOverview = types.VariantOverview
 type VariantConsequence = types.VariantConsequence
 type VariantInterpretedCase = types.VariantInterpretedCase
 type VariantUninterpretedCase = types.VariantUninterpretedCase
-type VariantExpandedInterpretedCase = types.VariantExpandedInterpretedCase
 type VariantCasesFilters = types.VariantCasesFilters
 type VariantCasesCount = types.VariantCasesCount
 type VariantExternalFrequencies = types.VariantExternalFrequencies
@@ -34,7 +33,6 @@ type VariantsDAO interface {
 	GetVariantConsequences(locusId int) (*[]VariantConsequence, error)
 	GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, *int64, error)
 	GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, *int64, error)
-	GetVariantExpandedInterpretedCase(locusId int, caseId int, seqId int, transcriptId string) (*VariantExpandedInterpretedCase, error)
 	GetVariantCasesCount(locusId int) (*VariantCasesCount, error)
 	GetVariantCasesFilters() (*VariantCasesFilters, error)
 	GetVariantExternalFrequencies(locusId int) (*VariantExternalFrequencies, error)
@@ -247,37 +245,6 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	}
 
 	return &variantUninterpretedCases, &count, nil
-}
-
-func (r *VariantsRepository) GetVariantExpandedInterpretedCase(locusId int, caseId int, seqId int, transcriptId string) (*VariantExpandedInterpretedCase, error) {
-	locusIdAsString := fmt.Sprintf("%d", locusId)
-	caseIdAsString := fmt.Sprintf("%d", caseId)
-	seqIdAsString := fmt.Sprintf("%d", seqId)
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias))
-	tx = utils.JoinGermlineInterpretationWithSnvOccurrence(tx)
-	tx = utils.JoinGermlineInterpretationWithVariant(tx)
-	tx = utils.JoinGermlineSNVOccurrenceWithSeqExp(tx)
-	tx = utils.JoinSeqExpWithSample(tx)
-	tx = utils.JoinGermlineSNVOccurrenceWithCaseHasSeqExp(tx)
-	tx = utils.JoinCaseHasSeqExpWithCase(tx)
-	tx = utils.JoinCaseWithProband(tx, nil)
-	tx = tx.Where("ig.locus_id = ? AND ig.case_id = ? AND ig.sequencing_id = ? AND ig.transcript_id = ?", locusIdAsString, caseIdAsString, seqIdAsString, transcriptId)
-	tx = tx.Select("spl.patient_id as patient_id, ig.updated_by_name as interpreter_name, ig.interpretation as interpretation, v.symbol as gene_symbol, ig.classification_criterias as classification_criterias_string, ig.transmission_modes as inheritances_string, ig.pubmed as pubmed_ids_string, pro.sex_code as patient_sex_code")
-
-	var variantExpandedInterpretedCase VariantExpandedInterpretedCase
-	if err := tx.Find(&variantExpandedInterpretedCase).Error; err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("error while fetching variant expanded interpreted cases: %w", err)
-		} else {
-			return nil, nil
-		}
-	}
-
-	variantExpandedInterpretedCase.ClassificationCriterias = utils.SplitRemoveEmptyString(variantExpandedInterpretedCase.ClassificationCriteriasString, ",")
-	variantExpandedInterpretedCase.Inheritances = utils.SplitRemoveEmptyString(variantExpandedInterpretedCase.InheritancesString, ",")
-	variantExpandedInterpretedCase.PubmedIDs = utils.SplitRemoveEmptyString(variantExpandedInterpretedCase.PubmedIDsString, ",")
-
-	return &variantExpandedInterpretedCase, nil
 }
 
 func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCount, error) {

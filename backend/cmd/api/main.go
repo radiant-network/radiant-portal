@@ -168,7 +168,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	variantsGermlineGroup.GET("/:locus_id/consequences", server.GetGermlineVariantConsequences(repoVariants))
 	variantsGermlineGroup.POST("/:locus_id/cases/interpreted", server.GetGermlineVariantInterpretedCases(repoVariants))
 	variantsGermlineGroup.POST("/:locus_id/cases/uninterpreted", server.GetGermlineVariantUninterpretedCases(repoVariants))
-	variantsGermlineGroup.GET("/:locus_id/cases/interpreted/:case_id/:seq_id/:transcript_id", server.GetExpandedGermlineVariantInterpretedCase(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/cases/count", server.GetGermlineVariantCasesCount(repoVariants))
 	variantsGermlineGroup.GET("/cases/filters", server.GetGermlineVariantCasesFilters(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/conditions/:panel_type", server.GetGermlineVariantConditions(repoGenePanels))

@@ -20,7 +20,7 @@ The following variables must be configured:
 
 | Variable                     | Description                | Example                 |
 | ---------------------------- | -------------------------- | ----------------------- |
-| `radiant-api-url"`           | API base URL               | `http://localhost:8090` |
+| `radiant-api-url`            | API base URL               | `http://localhost:8090` |
 | `keycloak-url`               | Keycloak base URL          | `http://localhost:8080` |
 | `client-secret`              | Radiant client secret      | `xxxxxx`                |
 | `username`                   | Your username              | `xxxxxx`                |

@@ -123,31 +123,6 @@ func Test_GetVariantInterpretedCases_NoResult(t *testing.T) {
 	})
 }
 
-func Test_GetVariantExpandedInterpretedCase_Proband(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(db)
-		expanded, err := repo.GetVariantExpandedInterpretedCase(1000, 1, 1, "T002")
-		assert.NoError(t, err)
-		assert.Equal(t, 3, (*expanded).PatientID)
-		assert.Equal(t, types.JsonArray[string]{"PM1", "PM2"}, (*expanded).ClassificationCriterias)
-		assert.Equal(t, types.JsonArray[string]{"autosomal_dominant_de_novo"}, (*expanded).Inheritances)
-		assert.Equal(t, types.JsonArray[string]{}, (*expanded).PubmedIDs)
-		assert.Equal(t, "BRAF", (*expanded).GeneSymbol)
-	})
-}
-func Test_GetVariantExpandedInterpretedCase_OtherMember(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewVariantsRepository(db)
-		expanded, err := repo.GetVariantExpandedInterpretedCase(1000, 1, 2, "T001")
-		assert.NoError(t, err)
-		assert.Equal(t, 1, (*expanded).PatientID)
-		assert.Equal(t, types.JsonArray[string]{"PS1", "PM1", "PP2"}, (*expanded).ClassificationCriterias)
-		assert.Equal(t, types.JsonArray[string]{"autosomal_dominant_de_novo", "x_linked_dominant_de_novo"}, (*expanded).Inheritances)
-		assert.Equal(t, types.JsonArray[string]{}, (*expanded).PubmedIDs)
-		assert.Equal(t, "BRAF", (*expanded).GeneSymbol)
-	})
-}
-
 func Test_GetVariantUninterpretedCases_DefaultFields(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)

@@ -230,52 +230,6 @@ func GetGermlineVariantUninterpretedCases(repo repository.VariantsDAO) gin.Handl
 	}
 }
 
-// GetExpandedGermlineVariantInterpretedCase handles retrieving expanded interpreted case for a given locus, sequencing and transcript
-// @Summary Get expanded germline interpreted case for a given locus, sequencing and transcript
-// @Id getExpandedGermlineVariantInterpretedCase
-// @Description Retrieve germline expanded interpreted case for a given locus, sequencing and transcript
-// @Tags variant
-// @Security bearerauth
-// @Param locus_id path string true "Locus ID"
-// @Param case_id path string true "Case ID"
-// @Param seq_id path string true "Seq ID"
-// @Param transcript_id path string true "Transcript ID"
-// @Produce json
-// @Success 200 {object} types.VariantExpandedInterpretedCase
-// @Failure 404 {object} types.ApiError
-// @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/cases/interpreted/{case_id}/{seq_id}/{transcript_id} [get]
-func GetExpandedGermlineVariantInterpretedCase(repo repository.VariantsDAO) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		caseId, errCase := strconv.Atoi(c.Param("case_id"))
-		if errCase != nil {
-			HandleNotFoundError(c, "case_id")
-			return
-		}
-		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
-		if errSeq != nil {
-			HandleNotFoundError(c, "seq_id")
-			return
-		}
-		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
-		if errLocus != nil {
-			HandleNotFoundError(c, "locus_id")
-			return
-		}
-		transcriptId := c.Param("transcript_id")
-		cases, err := repo.GetVariantExpandedInterpretedCase(locusId, caseId, seqId, transcriptId)
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		if cases == nil {
-			HandleNotFoundError(c, "variant expanded interpreted case")
-			return
-		}
-		c.JSON(http.StatusOK, cases)
-	}
-}
-
 // GetGermlineVariantCasesCount handles retrieving cases count for a given locus id
 // @Summary Get germline cases count for a given locus
 // @Id getGermlineVariantCasesCount

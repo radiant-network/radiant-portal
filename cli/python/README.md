@@ -148,7 +148,6 @@ Class | Method | HTTP request | Description
 *UserPreferencesApi* | [**get_user_preferences**](docs/UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences/{key} | Get user preferences
 *UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences/{key} | Create or update user preference
 *UserSetsApi* | [**get_user_set**](docs/UserSetsApi.md#get_user_set) | **GET** /users/sets/{user_set_id} | Get user set by id
-*VariantApi* | [**get_expanded_germline_variant_interpreted_case**](docs/VariantApi.md#get_expanded_germline_variant_interpreted_case) | **GET** /variants/germline/{locus_id}/cases/interpreted/{case_id}/{seq_id}/{transcript_id} | Get expanded germline interpreted case for a given locus, sequencing and transcript
 *VariantApi* | [**get_germline_variant_cases_count**](docs/VariantApi.md#get_germline_variant_cases_count) | **GET** /variants/germline/{locus_id}/cases/count | Get germline cases count for a given locus
 *VariantApi* | [**get_germline_variant_cases_filters**](docs/VariantApi.md#get_germline_variant_cases_filters) | **GET** /variants/germline/cases/filters | Get cases filters for germline variant entity
 *VariantApi* | [**get_germline_variant_conditions**](docs/VariantApi.md#get_germline_variant_conditions) | **GET** /variants/germline/{locus_id}/conditions/{panel_type} | Get conditions for germline variant entity for a specific gene panel
@@ -250,7 +249,6 @@ Class | Method | HTTP request | Description
  - [VariantCasesCount](docs/VariantCasesCount.md)
  - [VariantCasesFilters](docs/VariantCasesFilters.md)
  - [VariantConsequence](docs/VariantConsequence.md)
- - [VariantExpandedInterpretedCase](docs/VariantExpandedInterpretedCase.md)
  - [VariantExternalFrequencies](docs/VariantExternalFrequencies.md)
  - [VariantHeader](docs/VariantHeader.md)
  - [VariantInternalFrequencies](docs/VariantInternalFrequencies.md)

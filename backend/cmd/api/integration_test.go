@@ -64,7 +64,6 @@ func Test_SecureRoutes(t *testing.T) {
 			"variants/germline/1/header",
 			"variants/germline/1/overview",
 			"variants/germline/1/consequences",
-			"variants/germline/1/cases/interpreted/1/1/1",
 			"variants/germline/1/cases/count",
 			"variants/germline/cases/filters",
 			"variants/germline/1/conditions/omim",
