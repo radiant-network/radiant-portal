@@ -122,17 +122,6 @@ func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]
 	}, &count, nil
 }
 
-func (m *MockRepository) GetVariantExpandedInterpretedCase(int, int, int, string) (*types.VariantExpandedInterpretedCase, error) {
-	return &types.VariantExpandedInterpretedCase{
-		PatientID:               3,
-		GeneSymbol:              "BRAF",
-		ClassificationCriterias: types.JsonArray[string]{"PM1", "PM2"},
-		Inheritances:            types.JsonArray[string]{"autosomal_dominant_de_novo"},
-		PatientSexCode:          "male",
-		PubmedIDs:               types.JsonArray[string]{},
-	}, nil
-}
-
 func (m *MockRepository) GetVariantCasesCount(int) (*types.VariantCasesCount, error) {
 	return &types.VariantCasesCount{
 		CountInterpreted:   int64(1),
@@ -504,28 +493,6 @@ func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 			}
 		],
 		"count": 3
-	}`, w.Body.String())
-}
-
-func Test_GetExpandedGermlineVariantInterpretedCaseHandler(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.GET("/variants/germline/:locus_id/cases/interpreted/:case_id/:seq_id/:transcript_id", GetExpandedGermlineVariantInterpretedCase(repo))
-
-	req, _ := http.NewRequest("GET", "/variants/germline/1000/cases/interpreted/1/1/T002", bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{
-		"classification_criterias":["PM1","PM2"],
-		"gene_symbol":"BRAF",
-		"inheritances":["autosomal_dominant_de_novo"],
-		"interpretation":"",
-		"interpreter_name":"", 
-		"patient_id":3, 
-		"patient_sex_code":"male", 
-		"pubmed_ids":[]
 	}`, w.Body.String())
 }
 

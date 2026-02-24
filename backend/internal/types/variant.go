@@ -139,20 +139,6 @@ type VariantUninterpretedCase = struct {
 	SexName                   string          `json:"sex_name,omitempty"`
 } // @name VariantUninterpretedCase
 
-type VariantExpandedInterpretedCase = struct {
-	PatientID                     int               `json:"patient_id" validate:"required"`
-	InterpreterName               string            `json:"interpreter_name" validate:"required"`
-	Interpretation                string            `json:"interpretation" validate:"required"`
-	GeneSymbol                    string            `json:"gene_symbol" validate:"required"`
-	ClassificationCriteriasString string            `json:"-"`
-	ClassificationCriterias       JsonArray[string] `json:"classification_criterias" validate:"required"`
-	InheritancesString            string            `json:"-"`
-	Inheritances                  JsonArray[string] `json:"inheritances" validate:"required"`
-	PatientSexCode                string            `json:"patient_sex_code" validate:"required"`
-	PubmedIDsString               string            `json:"-"`
-	PubmedIDs                     JsonArray[string] `json:"pubmed_ids" validate:"required"`
-} // @name VariantExpandedInterpretedCase
-
 type VariantCasesFilters = struct {
 	Classification  []Aggregation `json:"classification" validate:"required"`
 	AnalysisCatalog []Aggregation `json:"analysis_catalog_code" validate:"required"`

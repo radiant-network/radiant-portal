@@ -4450,61 +4450,6 @@ export interface VariantConsequence {
 /**
  * 
  * @export
- * @interface VariantExpandedInterpretedCase
- */
-export interface VariantExpandedInterpretedCase {
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof VariantExpandedInterpretedCase
-     */
-    'classification_criterias': Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof VariantExpandedInterpretedCase
-     */
-    'gene_symbol': string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof VariantExpandedInterpretedCase
-     */
-    'inheritances': Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof VariantExpandedInterpretedCase
-     */
-    'interpretation': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof VariantExpandedInterpretedCase
-     */
-    'interpreter_name': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof VariantExpandedInterpretedCase
-     */
-    'patient_id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof VariantExpandedInterpretedCase
-     */
-    'patient_sex_code': string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof VariantExpandedInterpretedCase
-     */
-    'pubmed_ids': Array<string>;
-}
-/**
- * 
- * @export
  * @interface VariantExternalFrequencies
  */
 export interface VariantExternalFrequencies {
@@ -10100,56 +10045,6 @@ export class UserSetsApi extends BaseAPI {
 export const VariantApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Retrieve germline expanded interpreted case for a given locus, sequencing and transcript
-         * @summary Get expanded germline interpreted case for a given locus, sequencing and transcript
-         * @param {string} locusId Locus ID
-         * @param {string} caseId Case ID
-         * @param {string} seqId Seq ID
-         * @param {string} transcriptId Transcript ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getExpandedGermlineVariantInterpretedCase: async (locusId: string, caseId: string, seqId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'locusId' is not null or undefined
-            assertParamExists('getExpandedGermlineVariantInterpretedCase', 'locusId', locusId)
-            // verify required parameter 'caseId' is not null or undefined
-            assertParamExists('getExpandedGermlineVariantInterpretedCase', 'caseId', caseId)
-            // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('getExpandedGermlineVariantInterpretedCase', 'seqId', seqId)
-            // verify required parameter 'transcriptId' is not null or undefined
-            assertParamExists('getExpandedGermlineVariantInterpretedCase', 'transcriptId', transcriptId)
-            const localVarPath = `/variants/germline/{locus_id}/cases/interpreted/{case_id}/{seq_id}/{transcript_id}`
-                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
-                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
-                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
-                .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Retrieve cases count for a given locus id
          * @summary Get germline cases count for a given locus
          * @param {string} locusId Locus ID
@@ -10640,22 +10535,6 @@ export const VariantApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = VariantApiAxiosParamCreator(configuration)
     return {
         /**
-         * Retrieve germline expanded interpreted case for a given locus, sequencing and transcript
-         * @summary Get expanded germline interpreted case for a given locus, sequencing and transcript
-         * @param {string} locusId Locus ID
-         * @param {string} caseId Case ID
-         * @param {string} seqId Seq ID
-         * @param {string} transcriptId Transcript ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getExpandedGermlineVariantInterpretedCase(locusId: string, caseId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantExpandedInterpretedCase>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedGermlineVariantInterpretedCase(locusId, caseId, seqId, transcriptId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['VariantApi.getExpandedGermlineVariantInterpretedCase']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * Retrieve cases count for a given locus id
          * @summary Get germline cases count for a given locus
          * @param {string} locusId Locus ID
@@ -10826,19 +10705,6 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = VariantApiFp(configuration)
     return {
         /**
-         * Retrieve germline expanded interpreted case for a given locus, sequencing and transcript
-         * @summary Get expanded germline interpreted case for a given locus, sequencing and transcript
-         * @param {string} locusId Locus ID
-         * @param {string} caseId Case ID
-         * @param {string} seqId Seq ID
-         * @param {string} transcriptId Transcript ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getExpandedGermlineVariantInterpretedCase(locusId: string, caseId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantExpandedInterpretedCase> {
-            return localVarFp.getExpandedGermlineVariantInterpretedCase(locusId, caseId, seqId, transcriptId, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Retrieve cases count for a given locus id
          * @summary Get germline cases count for a given locus
          * @param {string} locusId Locus ID
@@ -10972,21 +10838,6 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class VariantApi extends BaseAPI {
-    /**
-     * Retrieve germline expanded interpreted case for a given locus, sequencing and transcript
-     * @summary Get expanded germline interpreted case for a given locus, sequencing and transcript
-     * @param {string} locusId Locus ID
-     * @param {string} caseId Case ID
-     * @param {string} seqId Seq ID
-     * @param {string} transcriptId Transcript ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof VariantApi
-     */
-    public getExpandedGermlineVariantInterpretedCase(locusId: string, caseId: string, seqId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getExpandedGermlineVariantInterpretedCase(locusId, caseId, seqId, transcriptId, options).then((request) => request(this.axios, this.basePath));
-    }
-
     /**
      * Retrieve cases count for a given locus id
      * @summary Get germline cases count for a given locus

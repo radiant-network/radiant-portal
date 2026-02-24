@@ -2136,43 +2136,6 @@ components:
           type: array
           uniqueItems: false
       type: object
-    VariantExpandedInterpretedCase:
-      properties:
-        classification_criterias:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        gene_symbol:
-          type: string
-        inheritances:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        interpretation:
-          type: string
-        interpreter_name:
-          type: string
-        patient_id:
-          type: integer
-        patient_sex_code:
-          type: string
-        pubmed_ids:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-      required:
-      - classification_criterias
-      - gene_symbol
-      - inheritances
-      - interpretation
-      - interpreter_name
-      - patient_id
-      - patient_sex_code
-      - pubmed_ids
-      type: object
     VariantExternalFrequencies:
       properties:
         external_frequencies:
@@ -4870,61 +4833,6 @@ paths:
       security:
       - bearerauth: []
       summary: Get list of interpreted Cases for a germline variant
-      tags:
-      - variant
-  /variants/germline/{locus_id}/cases/interpreted/{case_id}/{seq_id}/{transcript_id}:
-    get:
-      description: Retrieve germline expanded interpreted case for a given locus,
-        sequencing and transcript
-      operationId: getExpandedGermlineVariantInterpretedCase
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      - description: Case ID
-        in: path
-        name: case_id
-        required: true
-        schema:
-          type: string
-      - description: Seq ID
-        in: path
-        name: seq_id
-        required: true
-        schema:
-          type: string
-      - description: Transcript ID
-        in: path
-        name: transcript_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VariantExpandedInterpretedCase'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get expanded germline interpreted case for a given locus, sequencing
-        and transcript
       tags:
       - variant
   /variants/germline/{locus_id}/cases/uninterpreted:

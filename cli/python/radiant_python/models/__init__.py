@@ -99,7 +99,6 @@ from radiant_python.models.utils_pre_signed_url import UtilsPreSignedURL
 from radiant_python.models.variant_cases_count import VariantCasesCount
 from radiant_python.models.variant_cases_filters import VariantCasesFilters
 from radiant_python.models.variant_consequence import VariantConsequence
-from radiant_python.models.variant_expanded_interpreted_case import VariantExpandedInterpretedCase
 from radiant_python.models.variant_external_frequencies import VariantExternalFrequencies
 from radiant_python.models.variant_header import VariantHeader
 from radiant_python.models.variant_internal_frequencies import VariantInternalFrequencies

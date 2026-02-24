@@ -102,7 +102,6 @@ docs/VariantApi.md
 docs/VariantCasesCount.md
 docs/VariantCasesFilters.md
 docs/VariantConsequence.md
-docs/VariantExpandedInterpretedCase.md
 docs/VariantExternalFrequencies.md
 docs/VariantHeader.md
 docs/VariantInternalFrequencies.md
@@ -221,7 +220,6 @@ radiant_python/models/utils_pre_signed_url.py
 radiant_python/models/variant_cases_count.py
 radiant_python/models/variant_cases_filters.py
 radiant_python/models/variant_consequence.py
-radiant_python/models/variant_expanded_interpreted_case.py
 radiant_python/models/variant_external_frequencies.py
 radiant_python/models/variant_header.py
 radiant_python/models/variant_internal_frequencies.py
