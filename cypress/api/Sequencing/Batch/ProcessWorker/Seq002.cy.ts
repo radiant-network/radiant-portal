@@ -69,7 +69,7 @@ describe('Sequencing - Batch - Process worker - Seq002', () => {
   });
 
   it('Validate report sequencing_experiment[0] platform_code 3', () => {
-    cy.validateReport(response, 'error', 'SEQ-002', apiMessages.ProcessWorkerErrorValueNotAllowed('sequencing_experiment', 'platform_code', 'CQGC', 'S13224', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sequencing_experiment[0].platform_code');
+    cy.validateReport(response, 'error', 'SEQ-002', apiMessages.ProcessWorkerErrorOneOfPlatform('sequencing_experiment', 'platform_code', 'CQGC', 'S13224', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sequencing_experiment[0].platform_code');
   });
 
   it('Validate report sequencing_experiment[0] run_date', () => {
