@@ -1,0 +1,2458 @@
+{
+  "info": {
+    "_postman_id": "102415ee-9728-475c-8785-b5ac50294917",
+    "name": "RADIANT-API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "16168037"
+  },
+  "item": [
+    {
+      "name": "Germline SNV Occurrences",
+      "item": [
+        {
+          "name": "Count",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/count",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "germline",
+                "snv",
+                "1",
+                "1",
+                "count"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"additional_fields\": [\n    ],\n    \"limit\": 10,\n    \"page_index\": 0    \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/list",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "germline",
+                "snv",
+                "1",
+                "1",
+                "list"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aggregate",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"field\":\"filter\",\n    \"limit\": 10,\n    \"sqon\": {\n        \"op\": \"and\",\n        \"content\": [\n            {\n                \"op\": \"in\",\n                \"content\":{\n\t\t\t\t\t\"field\": \"zygosity\",\n\t\t\t\t\t\"value\": [\"HET\"]\n\t\t\t\t}\n            }\n        ]\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/aggregate",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "germline",
+                "snv",
+                "1",
+                "1",
+                "aggregate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Statistics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"field\":\"genotype_quality\",\n    \"sqon\": {\n        \"op\": \"and\",\n        \"content\": [\n            {\n                \"op\": \"in\",\n                \"content\":{\n\t\t\t\t\t\"field\": \"zygosity\",\n\t\t\t\t\t\"value\": [\"HET\"]\n\t\t\t\t}\n            }\n        ]\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/statistics",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "germline",
+                "snv",
+                "1",
+                "1",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Expended",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/-8318226658347712512/expanded",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "germline",
+                "snv",
+                "1",
+                "1",
+                "-8318226658347712512",
+                "expanded"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Germline CNV Occurrences",
+      "item": [
+        {
+          "name": "Count",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/count",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "germline",
+                "cnv",
+                "1",
+                "1",
+                "count"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"additional_fields\": [\n    ],\n    \"limit\": 10,\n    \"page_index\": 0    \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/list",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "germline",
+                "cnv",
+                "1",
+                "1",
+                "list"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aggregate",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"field\":\"type\",\n    \"limit\": 10,\n    \"sqon\": {\n        \"op\": \"and\",\n        \"content\": [\n            {\n                \"op\": \"in\",\n                \"content\":{\n\t\t\t\t\t\"field\": \"filter\",\n\t\t\t\t\t\"value\": [\"PASS\"]\n\t\t\t\t}\n            }\n        ]\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/aggregate",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "germline",
+                "cnv",
+                "1",
+                "1",
+                "aggregate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Statistics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"field\":\"length\",\n    \"sqon\": {\n        \"op\": \"and\",\n        \"content\": [\n            {\n                \"op\": \"in\",\n                \"content\":{\n\t\t\t\t\t\"field\": \"filter\",\n\t\t\t\t\t\"value\": [\"PASS\"]\n\t\t\t\t}\n            }\n        ]\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/statistics",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "germline",
+                "cnv",
+                "1",
+                "1",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Genes Overlap",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/2916096452801350323/genes_overlap",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "germline",
+                "cnv",
+                "1",
+                "1",
+                "2916096452801350323",
+                "genes_overlap"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Germline Variants",
+      "item": [
+        {
+          "name": "Header",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8935137337952698368/header",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8935137337952698368",
+                "header"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Overview",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-6306227490935275520/overview",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-6306227490935275520",
+                "overview"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "External Frequencies",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8935137337952698368/external_frequencies",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8935137337952698368",
+                "external_frequencies"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Internal Frequencies - Global",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8934226361296355323/internal_frequencies/global",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8934226361296355323",
+                "internal_frequencies",
+                "global"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Internal Frequencies - Split by Primary Condition",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8934226361296355323/internal_frequencies?split=primary_condition",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8934226361296355323",
+                "internal_frequencies"
+              ],
+              "query": [
+                {
+                  "key": "split",
+                  "value": "primary_condition"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Internal Frequencies - Split by Project",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8934226361296355323/internal_frequencies?split=project",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8934226361296355323",
+                "internal_frequencies"
+              ],
+              "query": [
+                {
+                  "key": "split",
+                  "value": "project"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Internal Frequencies - Split by Analysis",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8934226361296355323/internal_frequencies?split=analysis",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8934226361296355323",
+                "internal_frequencies"
+              ],
+              "query": [
+                {
+                  "key": "split",
+                  "value": "analysis"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Conditions - Clinvar",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8933292769288388608/conditions/clinvar",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8933292769288388608",
+                "conditions",
+                "clinvar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Conditions - OMIM",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8933292769288388608/conditions/omim",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8933292769288388608",
+                "conditions",
+                "omim"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Conditions - Orphanet",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8933292769288388608/conditions/orphanet",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8933292769288388608",
+                "conditions",
+                "orphanet"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Conditions - HPO",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8933292769288388608/conditions/hpo",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8933292769288388608",
+                "conditions",
+                "hpo"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consequences",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-6306227490935275520/consequences",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-6306227490935275520",
+                "consequences"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cases - Count",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8318226658347712512/cases/count",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8318226658347712512",
+                "cases",
+                "count"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cases - Filters",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/cases/filters",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "cases",
+                "filters"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cases - Interpreted",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"search_criteria\": [\n        {\n            \"field\": \"classification\",\n            \"value\": [\n                \"LA26332-9\",\n                \"LA6668-3\"\n            ]\n        }\n    ],\n    \"sort\": [\n        {\n            \"field\": \"updated_on\",\n            \"order\": \"desc\"\n        }\n    ],\n    \"limit\": 10,\n    \"offset\": 0,\n    \"page_index\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-8318226658347712512/cases/interpreted",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-8318226658347712512",
+                "cases",
+                "interpreted"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cases - Uninterpreted",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"limit\": 10,\n    \"additional_fields\": [\n        \"primary_condition_id\",\n        \"primary_condition_name\",\n        \"analysis_catalog_code\",\n        \"analysis_catalog_name\",\n        \"info_qd\",\n        \"genotype_quality\",\n        \"ad_alt\",\n        \"ad_total\",\n        \"ad_ratio\",\n        \"sex_name\"\n    ],\n    \"sort\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/variants/germline/-6314224666588217344/cases/uninterpreted",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "variants",
+                "germline",
+                "-6314224666588217344",
+                "cases",
+                "uninterpreted"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cases",
+      "item": [
+        {
+          "name": "Filters",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"search_criteria\": [\n        { \"field\": \"project_code\", \"value\": [\"N1\"]}\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/cases/filters",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "cases",
+                "filters"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Autocomplete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/cases/autocomplete?prefix=MRN&limit=5",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "cases",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "MRN"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"additional_fields\": [\n        \"case_type\"\n    ],\n    \"search_criteria\": [\n        {\n            \"field\": \"priority_code\",\n            \"value\": [\n                \"routine\",\n                \"urgent\"\n            ]\n        }\n    ],\n    \"limit\": 20,\n    \"page_index\": 0,\n    \"sort\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/cases/search",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "cases",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Entity",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/cases/1",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "cases",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Documents - Filters",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"search_criteria\": [\n        { \"field\": \"data_type_code\", \"value\": [\"snv\"]}\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/cases/1/documents/filters",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "cases",
+                "1",
+                "documents",
+                "filters"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Documents - Search",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"additional_fields\": [\"hash\"],\n    \"limit\": 5,\n    \"page_index\": 0,\n    \"sort\": [\n        {\n            \"field\": \"name\",\n            \"order\": \"desc\"\n        }\n    ],\n    \"search_criteria\": [\n        {\"field\": \"relationship_to_proband_code\", \"value\": [\"mother\"]}\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/cases/1/documents/search",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "cases",
+                "1",
+                "documents",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sequencing",
+      "item": [
+        {
+          "name": "Entity",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/sequencing/1",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "sequencing",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Details",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/sequencing/1/details",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "sequencing",
+                "1",
+                "details"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "Autocomplete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/documents/autocomplete?prefix=1&limit=5",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "documents",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download URL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/documents/1027/download_url",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "documents",
+                "1027",
+                "download_url"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Filters",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"search_criteria\": [\n        { \"field\": \"project_code\", \"value\": [\"N1\"]}\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/documents/filters",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "documents",
+                "filters"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"additional_fields\": [\"hash\"],\n    \"limit\": 5,\n    \"page_index\": 0,\n    \"sort\": [\n        {\n            \"field\": \"name\",\n            \"order\": \"desc\"\n        }\n    ],\n    \"search_criteria\": [\n        {\"field\": \"case_id\", \"value\": [\"1\"]}\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/documents/search",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "documents",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Saved Filters",
+      "item": [
+        {
+          "name": "Get all",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"search_criteria\": [\n        { \"field\": \"project_code\", \"value\": [\"N1\"]}\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/users/saved_filters",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "users",
+                "saved_filters"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get by ID",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"search_criteria\": [\n        { \"field\": \"project_code\", \"value\": [\"N1\"]}\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/users/saved_filters/395b31b8-5f16-4934-a0c5-9d8a16aec6cb",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "users",
+                "saved_filters",
+                "395b31b8-5f16-4934-a0c5-9d8a16aec6cb"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get by type",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"search_criteria\": [\n        { \"field\": \"project_code\", \"value\": [\"N1\"]}\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/users/saved_filters?type=germline_snv_occurrence",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "users",
+                "saved_filters"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "germline_snv_occurrence"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"new empty saved filter 1\",\n    \"type\": \"germline_snv_occurrence\",\n    \"queries\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/users/saved_filters",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "users",
+                "saved_filters"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"favorite\": false,\n    \"name\": \"new empty saved filter 1.5\",\n    \"queries\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/users/saved_filters/395b31b8-5f16-4934-a0c5-9d8a16aec6cb",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "users",
+                "saved_filters",
+                "395b31b8-5f16-4934-a0c5-9d8a16aec6cb"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/users/saved_filters/395b31b8-5f16-4934-a0c5-9d8a16aec6cb",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "users",
+                "saved_filters",
+                "395b31b8-5f16-4934-a0c5-9d8a16aec6cb"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Genes",
+      "item": [
+        {
+          "name": "Autocomplete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/genes/autocomplete?prefix=BRC",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "genes",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "BRC"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"inputs\": [\"ENSG00000000003\", \"TNMD\", \"ensg00000157764\", \"ensa\", \"ENSG000000011671111\", \"BAD_SYMBOL\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/genes/search",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "genes",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Preferences",
+      "item": [
+        {
+          "name": "Get by key",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/users/preferences/data-table-case-exploration",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "users",
+                "preferences",
+                "data-table-case-exploration"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Post by key",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": {\n        \"columnOrder\": [\n            \"case_id\",\n            \"proband_id\",\n            \"submitter_proband_id\",\n            \"proband_first_name\",\n            \"proband_last_name\",\n            \"proband_life_status_code\",\n            \"case_category_code\",\n            \"proband_jhn\",\n            \"priority_code\",\n            \"status_code\",\n            \"resolution_status_code\",\n            \"case_type\",\n            \"analysis_catalog_code\",\n            \"primary_condition\",\n            \"panel_code\",\n            \"ordering_organization_code\",\n            \"project_code\",\n            \"created_on\",\n            \"updated_on\",\n            \"prescriber\",\n            \"diagnostic_lab\",\n            \"managing_organization\",\n            \"actions\"\n        ],\n        \"columnPinning\": {\n            \"left\": [],\n            \"right\": [\n                \"actions\"\n            ]\n        },\n        \"columnSizing\": {},\n        \"columnVisibility\": {\n            \"actions\": true,\n            \"analysis_catalog_code\": true,\n            \"case_category_code\": false,\n            \"case_id\": true,\n            \"case_type\": true,\n            \"created_on\": true,\n            \"diagnostic_lab\": false,\n            \"managing_organization\": false,\n            \"ordering_organization_code\": true,\n            \"panel_code\": false,\n            \"prescriber\": false,\n            \"primary_condition\": false,\n            \"priority_code\": true,\n            \"proband_first_name\": false,\n            \"proband_id\": false,\n            \"proband_jhn\": false,\n            \"proband_last_name\": false,\n            \"proband_life_status_code\": false,\n            \"project_code\": false,\n            \"resolution_status_code\": false,\n            \"status_code\": true,\n            \"submitter_proband_id\": true,\n            \"updated_on\": true\n        }\n    },\n    \"key\": \"data-table-case-exploration\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/users/preferences/data-table-case-exploration",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "users",
+                "preferences",
+                "data-table-case-exploration"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Mondo",
+      "item": [
+        {
+          "name": "Autocomplete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/mondo/autocomplete?prefix=mondo",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "mondo",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "mondo"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "HPO",
+      "item": [
+        {
+          "name": "Autocomplete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/hpo/autocomplete?prefix=blood&limit=10",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "hpo",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "blood"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "IGV",
+      "item": [
+        {
+          "name": "Get By Case ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/igv/1",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "igv",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Batch",
+      "item": [
+        {
+          "name": "GET By ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/batches/{{batch-id}}",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "batches",
+                "{{batch-id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Cases",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseJson = pm.response.json();",
+                  "var batchId = responseJson.id;",
+                  "pm.environment.set(\"batch-id\", batchId)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"cases\": [\n         {\n            \"analysis_code\": \"WGA\",\n            \"category_code\": \"postnatal\",\n            \"diagnostic_lab_code\": \"LDM-CHUSJ\",\n            \"note\": \"New case to test internal frequencies - Solo\",\n            \"ordering_organization_code\": \"CHUSJ\",\n            \"ordering_physician\": \"Gérard Proviste\",\n            \"patients\": [\n                {\n                    \"affected_status_code\": \"affected\",\n                    \"family_history\": [],\n                    \"observations_categorical\": [\n                        {\n                            \"code\": \"phenotype\",\n                            \"system\": \"HPO\",\n                            \"value\": \"HP:0100013\",\n                            \"onset_code\": \"childhood\",\n                            \"interpretation_code\": \"positive\"\n                        },\n                        {\n                            \"code\": \"phenotype\",\n                            \"system\": \"HPO\",\n                            \"value\": \"HP:0030688\",\n                            \"onset_code\": \"juvenile\",\n                            \"interpretation_code\": \"positive\"\n                        },\n                        {\n                            \"code\": \"phenotype\",\n                            \"system\": \"HPO\",\n                            \"value\": \"HP:0009725\",\n                            \"onset_code\": \"childhood\",\n                            \"interpretation_code\": \"positive\"\n                        },\n                        {\n                            \"code\": \"phenotype\",\n                            \"system\": \"HPO\",\n                            \"value\": \"HP:0000134\",\n                            \"onset_code\": \"juvenile\",\n                            \"interpretation_code\": \"negative\"\n                        }\n                    ],\n                    \"observations_text\": [\n                        {\n                            \"code\": \"ancestry\",\n                            \"value\": \"White\"\n                        }\n                    ],\n                    \"patient_organization_code\": \"CHUSJ\",\n                    \"relation_to_proband_code\": \"proband\",\n                    \"submitter_patient_id\": \"MRN-268593\"\n                }\n            ],\n            \"primary_condition_code_system\": \"MONDO\",\n            \"primary_condition_value\": \"MONDO:0007254\",\n            \"priority_code\": \"routine\",\n            \"project_code\": \"N1\",\n            \"resolution_status_code\": \"unsolved\",\n            \"sequencing_experiments\": [\n                {\n                    \"aliquot\": \"HG03476\",\n                    \"sample_organization_code\": \"CQGC\",\n                    \"submitter_sample_id\": \"HG03476\"\n                }\n            ],\n            \"submitter_case_id\": \"N1_MRN-268593_MONDO_0007254_3\",\n            \"status_code\": \"in_progress\",\n            \"tasks\": [\n                {\n                    \"type_code\": \"alignment_germline_variant_calling\",\n                    \"aliquots\": [\"HG03476\"],\n                    \"output_documents\": [\n                        {\n                            \"data_category_code\": \"genomic\",\n                            \"data_type_code\": \"snv\",\n                            \"format_code\": \"gvcf\",\n                            \"name\": \"oops.gvcf.gz\",\n                            \"size\": 4585061886,\n                            \"url\": \"s3://cqdg-qa-file-import/radiant/data/1000g_dragen4.2.7/pedigree.ped\"\n                        }\n                    ],\n                    \"pipeline_name\": \"Dragen\",\n                    \"pipeline_version\": \"4.2.7\",\n                    \"genome_build\": \"GRch38\"\n                }\n            ],\n            \"type\": \"germline\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/cases/batch?dry_run=true",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "cases",
+                "batch"
+              ],
+              "query": [
+                {
+                  "key": "dry_run",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Sequencing",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseJson = pm.response.json();",
+                  "var batchId = responseJson.id;",
+                  "pm.environment.set(\"batch-id\", batchId)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n      \"sequencing_experiments\": [\n        {\n          \"aliquot\": \"NA12878_NA12878\",\n          \"sample_organization_code\": \"CQGC\",\n          \"submitter_sample_id\": \"S13224\",\n          \"experimental_strategy_code\": \"wgs\",\n          \"sequencing_read_technology_code\": \"short_read\",\n          \"platform_code\": \"pacbio\",\n          \"sequencing_lab_code\": \"CQGC\",\n          \"capture_kit\": \"Cypress\",\n          \"run_alias\": \"Cypress\",\n          \"run_date\": \"2025-01-01T00:00:00Z\",\n          \"run_name\": \"Cypress\",\n          \"status_code\": \"completed\"\n        }\n      ]\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/sequencing/batch?dry_run=true",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "sequencing",
+                "batch"
+              ],
+              "query": [
+                {
+                  "key": "dry_run",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Patients",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseJson = pm.response.json();",
+                  "var batchId = responseJson.id;",
+                  "pm.environment.set(\"batch-id\", batchId)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"patients\": [\n        {\n            \"submitter_patient_id\": \"MRN-593847\",\n            \"submitter_patient_id_type\": \"MRN\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"life_status_code\": \"alive\",\n            \"first_name\": \"Olivier\",\n            \"last_name\": \"Paquette\",\n            \"sex_code\": \"male\",\n            \"date_of_birth\": \"2016-02-11\",\n            \"jhn\": \"PAQO16021147\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-184209\",\n            \"submitter_patient_id_type\": \"MRN\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"life_status_code\": \"alive\",\n            \"first_name\": \"Malik\",\n            \"last_name\": \"Diallo\",\n            \"sex_code\": \"male\",\n            \"date_of_birth\": \"2015-10-03\",\n            \"jhn\": \"DIAM15100382\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-760351\",\n            \"submitter_patient_id_type\": \"MRN\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"life_status_code\": \"alive\",\n            \"first_name\": \"Émile\",\n            \"last_name\": \"Côté\",\n            \"sex_code\": \"male\",\n            \"date_of_birth\": \"2017-04-27\",\n            \"jhn\": \"COTE17042735\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-421786\",\n            \"submitter_patient_id_type\": \"MRN\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"life_status_code\": \"alive\",\n            \"first_name\": \"Sofia\",\n            \"last_name\": \"Nguyen\",\n            \"sex_code\": \"female\",\n            \"date_of_birth\": \"2016-08-19\",\n            \"jhn\": \"NGUS16081991\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-935024\",\n            \"submitter_patient_id_type\": \"MRN\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"life_status_code\": \"alive\",\n            \"first_name\": \"Amélia\",\n            \"last_name\": \"Bélanger\",\n            \"sex_code\": \"female\",\n            \"date_of_birth\": \"2015-12-14\",\n            \"jhn\": \"BELA15121463\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-268593\",\n            \"submitter_patient_id_type\": \"MRN\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"life_status_code\": \"alive\",\n            \"first_name\": \"Inès\",\n            \"last_name\": \"Haddad\",\n            \"sex_code\": \"female\",\n            \"date_of_birth\": \"2017-01-22\",\n            \"jhn\": \"HADI17012258\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-847295\",\n            \"submitter_patient_id_type\": \"MRN\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"life_status_code\": \"alive\",\n            \"first_name\": \"Alexandre\",\n            \"last_name\": \"Girard\",\n            \"sex_code\": \"male\",\n            \"date_of_birth\": \"1988-05-17\",\n            \"jhn\": \"GIRA88051742\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-392618\",\n            \"submitter_patient_id_type\": \"MRN\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"life_status_code\": \"alive\",\n            \"first_name\": \"Samuel\",\n            \"last_name\": \"Desrosiers\",\n            \"sex_code\": \"male\",\n            \"date_of_birth\": \"1991-09-03\",\n            \"jhn\": \"DESS91090377\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-605173\",\n            \"submitter_patient_id_type\": \"MRN\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"life_status_code\": \"alive\",\n            \"first_name\": \"Camille\",\n            \"last_name\": \"Fournier\",\n            \"sex_code\": \"female\",\n            \"date_of_birth\": \"1989-11-28\",\n            \"jhn\": \"FOUR89112864\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-178904\",\n            \"submitter_patient_id_type\": \"MRN\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"life_status_code\": \"alive\",\n            \"first_name\": \"Valérie\",\n            \"last_name\": \"Martel\",\n            \"sex_code\": \"female\",\n            \"date_of_birth\": \"1993-02-14\",\n            \"jhn\": \"MARV93021485\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/patients/batch?dry_run=false",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "patients",
+                "batch"
+              ],
+              "query": [
+                {
+                  "key": "dry_run",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Samples",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseJson = pm.response.json();",
+                  "var batchId = responseJson.id;",
+                  "pm.environment.set(\"batch-id\", batchId)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"samples\": [\n        {\n            \"submitter_patient_id\": \"MRN-593847\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"blood\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"B.18515.1\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-593847\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"dna\",\n            \"submitter_parent_sample_id\": \"B.18515.1\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"NA18515\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-184209\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"blood\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"B.02356.1\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-184209\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"dna\",\n            \"submitter_parent_sample_id\": \"B.02356.1\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"HG02356\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-760351\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"blood\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"B.03469.1\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-760351\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"dna\",\n            \"submitter_parent_sample_id\": \"B.03469.1\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"HG03469\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-421786\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"blood\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"B.00408.1\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-421786\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"dna\",\n            \"submitter_parent_sample_id\": \"B.00408.1\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"HG00408\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-935024\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"blood\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"B.02348.1\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-935024\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"dna\",\n            \"submitter_parent_sample_id\": \"B.02348.1\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"HG02348\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-268593\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"blood\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"B.03476.1\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-268593\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"dna\",\n            \"submitter_parent_sample_id\": \"B.03476.1\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"HG03476\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-847295\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"blood\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"B.00406.1\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-847295\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"dna\",\n            \"submitter_parent_sample_id\": \"B.00406.1\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"HG00406\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-392618\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"blood\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"B.18516.1\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-392618\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"dna\",\n            \"submitter_parent_sample_id\": \"B.18516.1\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"NA18516\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-605173\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"blood\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"B.00407.1\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-605173\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"dna\",\n            \"submitter_parent_sample_id\": \"B.00407.1\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"HG00407\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-178904\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"blood\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"B.18517.1\",\n            \"sample_organization_code\": \"CQGC\"\n        },\n        {\n            \"submitter_patient_id\": \"MRN-178904\",\n            \"patient_organization_code\": \"CHUSJ\",\n            \"type_code\": \"dna\",\n            \"submitter_parent_sample_id\": \"B.18517.1\",\n            \"histology_code\": \"normal\",\n            \"submitter_sample_id\": \"NA18517\",\n            \"sample_organization_code\": \"CQGC\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/samples/batch?dry_run=false",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "samples",
+                "batch"
+              ],
+              "query": [
+                {
+                  "key": "dry_run",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Germline Interpretations",
+      "item": [
+        {
+          "name": "Get V2",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/interpretations/v2/germline/1/1/-8318226658347712512/ENST00000295910",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "interpretations",
+                "v2",
+                "germline",
+                "1",
+                "1",
+                "-8318226658347712512",
+                "ENST00000295910"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Post V2",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"classification\": \"LA6668-3\",\n    \"classification_criterias\": [\n        \"PS1\"\n    ],\n    \"condition\": \"MONDO:0008688\",\n    \"transmission_modes\": [\n        \"x_linked_recessive_de_novo\"\n    ],\n    \"interpretation\": \"<p>this is a test 2</p>\",\n    \"pubmed\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/interpretations/v2/germline/1/1/-8027673761685700608/ENST00000691494",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "interpretations",
+                "v2",
+                "germline",
+                "1",
+                "1",
+                "-8027673761685700608",
+                "ENST00000691494"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Somatic Interpretations",
+      "item": [
+        {
+          "name": "Get V2",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/interpretations/v2/somatic/1/1/-8318226658347712512/ENST00000295910",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "interpretations",
+                "v2",
+                "somatic",
+                "1",
+                "1",
+                "-8318226658347712512",
+                "ENST00000295910"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Post V2",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"classification\": \"LA6668-3\",\n    \"classification_criterias\": [\n        \"PS1\"\n    ],\n    \"condition\": \"MONDO:0008688\",\n    \"transmission_modes\": [\n        \"x_linked_recessive_de_novo\"\n    ],\n    \"interpretation\": \"<p>this is a test 2</p>\",\n    \"pubmed\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/interpretations/v2/somatic/1/1/-8027673761685700608/ENST00000691494",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "interpretations",
+                "v2",
+                "somatic",
+                "1",
+                "1",
+                "-8027673761685700608",
+                "ENST00000691494"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pubmed",
+      "item": [
+        {
+          "name": "Citation",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/interpretations/pubmed/36069183",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "interpretations",
+                "pubmed",
+                "36069183"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "GET status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{radiant-api-url}}/status",
+          "host": [
+            "{{radiant-api-url}}"
+          ],
+          "path": [
+            "status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const responseJson = pm.response.json();",
+              "var accessToken = responseJson.access_token;",
+              "pm.environment.set(\"token\", accessToken)"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "{{username}}",
+              "type": "text"
+            },
+            {
+              "key": "password",
+              "value": "{{password}}",
+              "type": "text"
+            },
+            {
+              "key": "grant_type",
+              "value": "password",
+              "type": "text"
+            },
+            {
+              "key": "client_id",
+              "value": "radiant",
+              "type": "text"
+            },
+            {
+              "key": "client_secret",
+              "value": "{{client-secret}}",
+              "type": "text",
+              "uuid": "b56be0b0-01bc-4720-bd1e-fd83b4bcc162"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{keycloak-url}}/realms/CQDG/protocol/openid-connect/token",
+          "host": [
+            "{{keycloak-url}}"
+          ],
+          "path": [
+            "realms",
+            "CQDG",
+            "protocol",
+            "openid-connect",
+            "token"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET token data manager",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const responseJson = pm.response.json();",
+              "var accessToken = responseJson.access_token;",
+              "pm.environment.set(\"token\", accessToken)"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "client_credentials",
+              "type": "text"
+            },
+            {
+              "key": "client_id",
+              "value": "{{data-manager-client-id}}",
+              "type": "text"
+            },
+            {
+              "key": "client_secret",
+              "value": "{{data-manager-client-secret}}",
+              "type": "text",
+              "uuid": "b56be0b0-01bc-4720-bd1e-fd83b4bcc162"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{keycloak-url}}/realms/CQDG/protocol/openid-connect/token",
+          "host": [
+            "{{keycloak-url}}"
+          ],
+          "path": [
+            "realms",
+            "CQDG",
+            "protocol",
+            "openid-connect",
+            "token"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
