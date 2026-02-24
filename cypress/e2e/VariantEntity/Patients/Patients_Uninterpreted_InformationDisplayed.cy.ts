@@ -50,7 +50,7 @@ describe('VariantEntity - Patients - Uninterpreted - Information displayed', () 
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('diag_lab', data.variantGermline.uninterpreted);
   });
 
-  it('Analysis', () => {
+  it('Analysis [SJRA-1205]', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('analysis', data.variantGermline.uninterpreted);
   });
@@ -60,7 +60,7 @@ describe('VariantEntity - Patients - Uninterpreted - Information displayed', () 
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('date', data.variantGermline.uninterpreted);
   });
 
-  it('Status', () => {
+  it('Status [SJRA-1205]', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('status', data.variantGermline.uninterpreted);
   });

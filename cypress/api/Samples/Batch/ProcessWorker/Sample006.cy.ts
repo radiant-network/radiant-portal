@@ -60,6 +60,6 @@ describe('Samples - Batch - Process worker - Sample006', () => {
   });
 
   it('Validate report sample[0] type_code', () => {
-    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorOneOfTypeCode('sample', 'type_code', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sample[0].type_code');
+    cy.validateReport(response, 'error', 'SAMPLE-006', apiMessages.ProcessWorkerErrorOneOfTypeCode('sample', 'type_code', 'CQGC', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!', 'Cypress'), 'sample[0].type_code');
   });
 });
