@@ -1673,7 +1673,9 @@
           "search_hpo_placeholder": "Filter HPO phenotype",
           "test": "Analysis"
         },
-        "seq_id_abrv": "Seq."
+        "seq_id_abrv": "Seq.",
+        "view_case": "View Case",
+        "view_variants": "View Variants"
       }
     }
   },

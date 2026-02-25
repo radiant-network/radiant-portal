@@ -18,6 +18,7 @@ import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-he
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 import { Badge } from '@/components/base/shadcn/badge';
 
+import UninterpretedCaseActionsCell from './cells/uninterpreted-case-actions-cell';
 import UninterpretedCasePreviewCell from './cells/uninterpreted-case-preview-cell';
 
 const columnHelper = createColumnHelper<VariantUninterpretedCase>();
@@ -285,6 +286,15 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       enableSorting: false,
     }),
+    // Actions Buttons
+    {
+      id: 'actions',
+      cell: UninterpretedCaseActionsCell,
+      size: 44,
+      maxSize: 44,
+      enableResizing: false,
+      enablePinning: true,
+    },
   ] as TableColumnDef<VariantUninterpretedCase, any>[]; // todo replace with correct type when api is updated
 }
 
@@ -391,6 +401,12 @@ const uninterpretedCasesDefaultSettings = createColumnSettings([
     visible: false,
     label: 'variant_entity.cases.other_table.headers.sex',
     additionalFields: ['sex_name'],
+  },
+  {
+    id: 'actions',
+    visible: true,
+    fixed: true,
+    pinningPosition: 'right',
   },
 ]);
 

@@ -1677,7 +1677,9 @@
           "search_hpo_placeholder": "Filtrer les phénotypes HPO",
           "test": "Analyse"
         },
-        "seq_id_abrv": "Séq."
+        "seq_id_abrv": "Séq.",
+        "view_case": "Voir cas",
+        "view_variants": "Voir variants"
       }
     }
   },
