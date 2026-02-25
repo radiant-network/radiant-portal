@@ -399,3 +399,125 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 	assert.Len(t, s5.Errors, 1)
 	assert.Equal(t, SampleUnknownParentSubmitterSampleIdCode, s5.Errors[0].Code)
 }
+
+func Test_reorderSampleRecords_Duplicates(t *testing.T) {
+	r1 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}
+	r2 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}}
+	r3 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Duplicate S2
+
+	// Input in reverse order to force reordering
+	records := []*SampleValidationRecord{r2, r3, r1}
+
+	sorted := reorderSampleRecords(records)
+	assert.Len(t, sorted, 3, "Should have 3 records after reordering")
+
+	// Check for duplicates in the result slice
+	recordCounts := make(map[*SampleValidationRecord]int)
+	for _, r := range sorted {
+		recordCounts[r]++
+	}
+
+	assert.Equal(t, 1, recordCounts[r1], "r1 should appear exactly once")
+	assert.Equal(t, 1, recordCounts[r2], "r2 should appear once")
+	assert.Equal(t, 1, recordCounts[r3], "r3 should appear once")
+
+	// Check order: r1 should be before r2 and r3
+	var r1Idx, r2Idx, r3Idx int
+	for i, r := range sorted {
+		if r == r1 {
+			r1Idx = i
+		}
+		if r == r2 {
+			r2Idx = i
+		}
+		if r == r3 {
+			r3Idx = i
+		}
+	}
+	assert.Less(t, r1Idx, r2Idx, "Parent r1 should be before child r2")
+	assert.Less(t, r1Idx, r3Idx, "Parent r1 should be before child r3")
+}
+
+func Test_reorderSampleRecords_DeepHierarchy(t *testing.T) {
+	r1 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}                                // Grandparent
+	r2 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Parent
+	r3 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S3", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}} // Child
+
+	// Order: Child, Parent, Grandparent
+	records := []*SampleValidationRecord{r3, r2, r1}
+
+	sorted := reorderSampleRecords(records)
+	assert.Len(t, sorted, 3)
+
+	var r1Idx, r2Idx, r3Idx int
+	for i, r := range sorted {
+		if r == r1 {
+			r1Idx = i
+		}
+		if r == r2 {
+			r2Idx = i
+		}
+		if r == r3 {
+			r3Idx = i
+		}
+	}
+	assert.Less(t, r1Idx, r2Idx, "Grandparent S1 should be before parent S2")
+	assert.Less(t, r2Idx, r3Idx, "Parent S2 should be before child S3")
+}
+
+func Test_reorderSampleRecords_DeepHierarchy_With_Duplicates(t *testing.T) {
+	r1 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}                                // Grandparent
+	r2 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1"}}                                // Grandparent
+	r3 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Parent
+	r4 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}} // Parent
+	r5 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S3", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}} // Child
+	r6 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S3", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}} // Child
+
+	// Order: Child, Parent, Grandparent
+	records := []*SampleValidationRecord{r6, r5, r4, r3, r2, r1}
+
+	sorted := reorderSampleRecords(records)
+	assert.Len(t, sorted, 6)
+
+	var r1Idx, r2Idx, r3Idx, r4Idx, r5Idx, r6Idx int
+	for i, r := range sorted {
+		if r == r1 {
+			r1Idx = i
+		}
+		if r == r2 {
+			r2Idx = i
+		}
+		if r == r3 {
+			r3Idx = i
+		}
+		if r == r4 {
+			r4Idx = i
+		}
+		if r == r5 {
+			r5Idx = i
+		}
+		if r == r6 {
+			r6Idx = i
+		}
+	}
+	assert.Less(t, r1Idx, r3Idx, "Grandparent S1 should be before parent S2")
+	assert.Less(t, r1Idx, r4Idx, "Grandparent S1 should be before duplicate parent S2")
+	assert.Less(t, r2Idx, r3Idx, "Grandparent duplicate S1 should also be before parent S2")
+	assert.Less(t, r2Idx, r4Idx, "Grandparent duplicate S1 should also be before parent duplicate S2")
+	assert.Less(t, r3Idx, r5Idx, "Parent S2 should be before child S3")
+	assert.Less(t, r4Idx, r5Idx, "Parent duplicate S2 should be before child S3")
+	assert.Less(t, r3Idx, r6Idx, "Parent S2 should be before child S3")
+	assert.Less(t, r4Idx, r6Idx, "Parent duplicate S2 should be before child duplicate S3")
+}
+
+func Test_reorderSampleRecords_Cycle(t *testing.T) {
+	// S1 -> S2 -> S1 (Cycle)
+	r1 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S1", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S2"}}
+	r2 := &SampleValidationRecord{Sample: types.SampleBatch{SubmitterSampleId: "S2", SampleOrganizationCode: "ORG1", SubmitterParentSampleId: "S1"}}
+
+	records := []*SampleValidationRecord{r1, r2}
+
+	// This should not hang/infinite loop
+	sorted := reorderSampleRecords(records)
+	assert.Len(t, sorted, 2)
+}

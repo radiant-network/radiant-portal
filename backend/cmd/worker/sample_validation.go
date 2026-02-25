@@ -233,44 +233,44 @@ func samplesMap(samples []types.SampleBatch) map[SampleKey]*types.SampleBatch {
 	return samplesMap
 }
 
-func reorderSampleRecords(records []*SampleValidationRecord) {
-	keyToRecord := make(map[SampleKey]*SampleValidationRecord, len(records))
+func getSampleKey(orgCode, sampleId string) SampleKey {
+	return SampleKey{
+		OrganizationCode:  orgCode,
+		SubmitterSampleId: sampleId,
+	}
+}
+
+func reorderSampleRecords(records []*SampleValidationRecord) []*SampleValidationRecord {
+	byKey := make(map[SampleKey][]*SampleValidationRecord)
 	for _, r := range records {
-		key := SampleKey{
-			OrganizationCode:  r.Sample.SampleOrganizationCode,
-			SubmitterSampleId: r.Sample.SubmitterSampleId.String(),
-		}
-		keyToRecord[key] = r
+		key := getSampleKey(r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String())
+		byKey[key] = append(byKey[key], r)
 	}
 
-	visited := make(map[SampleKey]bool, len(records))
-	var sorted []*SampleValidationRecord
-	var visit func(*SampleValidationRecord)
-	visit = func(r *SampleValidationRecord) {
-		id := SampleKey{
-			OrganizationCode:  r.Sample.SampleOrganizationCode,
-			SubmitterSampleId: r.Sample.SubmitterSampleId.String(),
-		}
-		if visited[id] {
+	reordered := make([]*SampleValidationRecord, 0, len(records))
+	visited := make(map[*SampleValidationRecord]bool)
+
+	var reorder func(r *SampleValidationRecord)
+	reorder = func(r *SampleValidationRecord) {
+		if visited[r] {
 			return
 		}
-		visited[id] = true
-		if r.Sample.SubmitterParentSampleId != "" {
-			parentID := SampleKey{
-				OrganizationCode:  r.Sample.SampleOrganizationCode,
-				SubmitterSampleId: r.Sample.SubmitterParentSampleId.String(),
-			}
-			if parent, ok := keyToRecord[parentID]; ok {
-				visit(parent)
+		visited[r] = true
+
+		if parentID := r.Sample.SubmitterParentSampleId.String(); parentID != "" {
+			parentKey := getSampleKey(r.Sample.SampleOrganizationCode, parentID)
+			for _, parent := range byKey[parentKey] {
+				reorder(parent)
 			}
 		}
-		sorted = append(sorted, r)
+		reordered = append(reordered, r)
 	}
 
 	for _, r := range records {
-		visit(r)
+		reorder(r)
 	}
-	copy(records, sorted)
+
+	return reordered
 }
 
 func (r *SampleValidationRecord) validateSubmitterPatientId() {
@@ -397,6 +397,6 @@ func validateSamplesBatch(ctx *batchval.BatchValidationContext, samples []types.
 		records = append(records, record)
 	}
 
-	reorderSampleRecords(records)
-	return records, nil
+	reordered := reorderSampleRecords(records)
+	return reordered, nil
 }
