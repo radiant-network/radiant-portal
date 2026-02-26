@@ -1,0 +1,18 @@
+import{j as t,c as v,r as l}from"./iframe-DTNMgtJ9.js";import{B as x}from"./button-BiWZa9fG.js";import{c as h}from"./index-Dhrm-lFu.js";import"./separator-BbDgtkUj.js";import{C as b,A as o}from"./applications-config-CUtxw-Zq.js";import{b as y}from"./utils-DT0TDhH2.js";import{B}from"./chunk-EPOLDU6W-CztNFCtC.js";import"./preload-helper-Dp1pzeXC.js";import"./index-DmW2l3rw.js";import"./action-button-C48Q3ZbN.js";import"./dropdown-menu-rE6kSISp.js";import"./index-q85xT6Ym.js";import"./circle-DVbZsvoH.js";import"./check-DWPdEd59.js";import"./i18n-_VeiNF7Q.js";const _=h("flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*]:focus-visible:relative [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-md has-[>[data-slot=button-group]]:gap-2",{variants:{orientation:{horizontal:"[&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0 [&>*:not(:last-child)]:rounded-r-none",vertical:"flex-col [&>*:not(:first-child)]:rounded-t-none [&>*:not(:first-child)]:border-t-0 [&>*:not(:last-child)]:rounded-b-none"},size:{xxs:{base:"h-6 p-2 gap-[4px] text-xs [&_svg]:size-3"},xs:{base:"h-7 px-2.5 py-2 gap-[6px] text-xs [&_svg]:size-3"},sm:{base:"h-8 px-3 py-2"},default:{base:"h-9 px-4 py-2"},lg:{base:"h-10 px-8 py-2"}}},defaultVariants:{orientation:"horizontal"}});function m({className:e,orientation:a,...s}){return t.jsx("div",{role:"group","data-slot":"button-group","data-orientation":a,className:v(_({orientation:a}),e),...s})}m.__docgenInfo={description:"",methods:[],displayName:"ButtonGroup"};function u({onValueChange:e,defaultValue:a,items:s,size:g}){const[i,f]=l.useState(a);return l.useEffect(()=>{e(i)},[i]),t.jsx(m,{children:s.map(r=>t.jsx(x,{onClick:()=>f(r.value),size:g,variant:i===r.value?"default":"outline",children:r.label},r.value))})}u.__docgenInfo={description:"",methods:[],displayName:"ToggleButtonGroup",props:{onValueChange:{required:!0,tsType:{name:"signature",type:"function",raw:"(value: any) => void",signature:{arguments:[{type:{name:"any"},name:"value"}],return:{name:"void"}}},description:""},defaultValue:{required:!0,tsType:{name:"string"},description:""},items:{required:!0,tsType:{name:"Array",elements:[{name:"signature",type:"object",raw:`{
+  label: string;
+  value: string;
+}`,signature:{properties:[{key:"label",value:{name:"string",required:!0}},{key:"value",value:{name:"string",required:!0}}]}}],raw:"ItemType[]"},description:""}}};const j={variant_entity:{app_id:o.variant_entity},snv_occurrence:{app_id:o.snv_occurrence,aggregations:[]},cnv_occurrence:{app_id:o.cnv_occurrence,aggregations:[]},admin:{admin_code:"admin",app_id:o.admin},portal:{name:"",navigation:{}}},O={title:"Buttons/ToggleButtonGroup",component:u,args:{},decorators:[e=>t.jsx(B,{children:t.jsx(b,{config:j,children:t.jsx(e,{})})})]},n={args:{defaultValue:"Button 1",onValueChange:e=>{}},render:e=>t.jsx("div",{className:"flex flex-col gap-2",children:y.map(a=>t.jsx(u,{size:a,...e,items:[{label:"Button 1",value:"Button 1"},{label:"Button 2",value:"Button 2"}]},a))})};var p,d,c;n.parameters={...n.parameters,docs:{...(p=n.parameters)==null?void 0:p.docs,source:{originalSource:`{
+  args: {
+    defaultValue: 'Button 1',
+    onValueChange: (_value: String) => {}
+  },
+  render: args => <div className="flex flex-col gap-2">
+      {buttonSizes.map(size => <ToggleButtonGroup key={size} size={size} {...args} items={[{
+      label: 'Button 1',
+      value: 'Button 1'
+    }, {
+      label: 'Button 2',
+      value: 'Button 2'
+    }]} />)}
+    </div>
+}`,...(c=(d=n.parameters)==null?void 0:d.docs)==null?void 0:c.source}}};const P=["Default"];export{n as Default,P as __namedExportsOrder,O as default};
