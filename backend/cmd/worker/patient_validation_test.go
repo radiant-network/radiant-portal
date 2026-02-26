@@ -397,6 +397,7 @@ func Test_ValidateLifeStatusCode_Valid(t *testing.T) {
 			},
 			Patient: patient,
 		}
+		rec.Cache = batchval.NewValidationCache(rec.Context)
 		err := rec.validateLifeStatusCode()
 		assert.NoError(t, err)
 		assert.Nil(t, rec.Errors)
@@ -414,6 +415,7 @@ func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
 			},
 			Patient: patient,
 		}
+		rec.Cache = batchval.NewValidationCache(rec.Context)
 		err := rec.validateLifeStatusCode()
 
 		expected := types.BatchMessage{
@@ -439,6 +441,7 @@ func Test_ValidateLifeStatusCode_Missing(t *testing.T) {
 			},
 			Patient: patient,
 		}
+		rec.Cache = batchval.NewValidationCache(rec.Context)
 		err := rec.validateLifeStatusCode()
 		expected := types.BatchMessage{
 			Code:    "PATIENT-004",

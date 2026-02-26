@@ -35,8 +35,14 @@ type PatientKey struct {
 	SubmitterPatientId string
 }
 
+type PatientCache interface {
+	GetValueSetCodes(valueSetType repository.ValueSetType) ([]string, error)
+}
+
 type PatientValidationRecord struct {
 	batchval.BaseValidationRecord
+	Cache PatientCache
+
 	Patient        types.PatientBatch
 	OrganizationId int
 }
@@ -145,7 +151,7 @@ func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types
 }
 
 func (r *PatientValidationRecord) validateLifeStatusCode() error {
-	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetLifeStatus)
+	codes, err := r.Cache.GetValueSetCodes(repository.ValueSetLifeStatus)
 	if err != nil {
 		return fmt.Errorf("error getting life status codes: %v", err)
 	}
@@ -154,7 +160,7 @@ func (r *PatientValidationRecord) validateLifeStatusCode() error {
 }
 
 func (r *PatientValidationRecord) validateSexCode() error {
-	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetSex)
+	codes, err := r.Cache.GetValueSetCodes(repository.ValueSetSex)
 	if err != nil {
 		return err
 	}
@@ -273,6 +279,7 @@ func validatePatientRecord(ctx *batchval.BatchValidationContext, patient types.P
 			Context: ctx,
 			Index:   index,
 		},
+		Cache:   batchval.NewValidationCache(ctx),
 		Patient: patient,
 	}
 	record.validateSubmitterPatientId()
