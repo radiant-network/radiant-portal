@@ -36,8 +36,19 @@ type SequencingExperimentKey struct {
 	Aliquot                string
 }
 
+type SequencingExperimentCache interface {
+	GetOrganizationByCode(code string) (*types.Organization, error)
+	GetOrganizationById(id int) (*types.Organization, error)
+	GetSampleById(id int) (*types.Sample, error)
+	GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*types.Sample, error)
+	GetSequencingExperimentByAliquot(aliquot string) ([]*types.SequencingExperiment, error)
+	GetValueSetCodes(valueSetType repository.ValueSetType) ([]string, error)
+}
+
 type SequencingExperimentValidationRecord struct {
 	batchval.BaseValidationRecord
+	Cache SequencingExperimentCache
+
 	SequencingExperiment    types.SequencingExperimentBatch
 	SubmitterOrganizationID *int
 	SampleID                *int
@@ -70,60 +81,53 @@ func (r *SequencingExperimentValidationRecord) getUniqueIds() []string {
 }
 
 func (r *SequencingExperimentValidationRecord) preFetchValidationInfo() error {
-	soc, err := r.Context.OrgRepo.GetOrganizationByCode(r.SequencingExperiment.SampleOrganizationCode)
+	soc, err := r.Cache.GetOrganizationByCode(r.SequencingExperiment.SampleOrganizationCode)
 	if err != nil {
-		return err
+		return fmt.Errorf("error fetching sample organization: %w", err)
 	}
 	if soc != nil {
 		r.SubmitterOrganizationID = &soc.ID
-		sample, err := r.Context.SampleRepo.GetSampleBySubmitterSampleId(*r.SubmitterOrganizationID, r.SequencingExperiment.SubmitterSampleId.String())
+		sample, err := r.Cache.GetSampleBySubmitterSampleId(*r.SubmitterOrganizationID, r.SequencingExperiment.SubmitterSampleId.String())
 		if err != nil {
-			return err
+			return fmt.Errorf("error fetching sample: %w", err)
 		}
 		if sample != nil {
 			r.SampleID = &sample.ID
 		}
 	}
 
-	sequencingLab, err := r.Context.OrgRepo.GetOrganizationByCode(r.SequencingExperiment.SequencingLabCode)
+	sequencingLab, err := r.Cache.GetOrganizationByCode(r.SequencingExperiment.SequencingLabCode)
 	if err != nil {
-		return err
+		return fmt.Errorf("error fetching sequencing lab: %w", err)
 	}
 	if sequencingLab != nil {
 		r.SequencingLabID = &sequencingLab.ID
 	}
 
-	platformCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetPlatform)
+	platformCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetPlatform)
 	if err != nil {
 		return fmt.Errorf("error fetching platform codes: %w", err)
 	}
-	if platformCodes != nil {
-		r.PlatformCodes = platformCodes
-	}
+	r.PlatformCodes = platformCodes
 
-	experimentalStrategyCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetExperimentalStrategy)
+	experimentalStrategyCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetExperimentalStrategy)
 	if err != nil {
 		return fmt.Errorf("error fetching experimental strategy codes: %w", err)
 	}
-	if experimentalStrategyCodes != nil {
-		r.ExperimentalStrategyCodes = experimentalStrategyCodes
-	}
+	r.ExperimentalStrategyCodes = experimentalStrategyCodes
 
-	sequencingReadTechnologyCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetSequencingReadTechnology)
+	sequencingReadTechnologyCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetSequencingReadTechnology)
 	if err != nil {
 		return fmt.Errorf("error fetching sequencing read technology codes: %w", err)
 	}
-	if sequencingReadTechnologyCodes != nil {
-		r.SequencingReadTechnologyCodes = sequencingReadTechnologyCodes
-	}
+	r.SequencingReadTechnologyCodes = sequencingReadTechnologyCodes
 
-	statusCodes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetStatus)
+	statusCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetStatus)
 	if err != nil {
 		return fmt.Errorf("error fetching status codes: %w", err)
 	}
-	if statusCodes != nil {
-		r.StatusCodes = statusCodes
-	}
+	r.StatusCodes = statusCodes
+
 	return nil
 }
 
@@ -205,21 +209,22 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 		return nil
 	}
 
-	seqExps, err := r.Context.SeqExpRepo.GetSequencingExperimentByAliquot(r.SequencingExperiment.Aliquot.String())
+	seqExps, err := r.Cache.GetSequencingExperimentByAliquot(r.SequencingExperiment.Aliquot.String())
 	if err != nil {
-		return err
+		return fmt.Errorf("error fetching sequencing experiments by aliquot: %w", err)
 	}
+
 	key := fmt.Sprintf("%s / %s / %s", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String(), r.SequencingExperiment.Aliquot.String())
 	for _, s := range seqExps {
 
-		sample, err := r.Context.SampleRepo.GetSampleById(s.SampleID)
+		sample, err := r.Cache.GetSampleById(s.SampleID)
 		if err != nil {
-			return fmt.Errorf("error fetching sample by id %d: %w", s.SampleID, err)
+			return fmt.Errorf("error fetching sample by id: %w", err)
 		}
 
-		sampleOrg, err := r.Context.OrgRepo.GetOrganizationById(sample.OrganizationId)
+		sampleOrg, err := r.Cache.GetOrganizationById(sample.OrganizationId)
 		if err != nil {
-			return fmt.Errorf("error fetching organization by id %d: %w", sample.OrganizationId, err)
+			return fmt.Errorf("error fetching sample organization by id: %w", err)
 		}
 
 		if s.SequencingLabID == *r.SequencingLabID {
@@ -393,11 +398,13 @@ func validateSequencingExperimentBatch(ctx *batchval.BatchValidationContext, seq
 }
 
 func validateSequencingExperimentRecord(ctx *batchval.BatchValidationContext, seqExp types.SequencingExperimentBatch, index int) (*SequencingExperimentValidationRecord, error) {
+
 	record := SequencingExperimentValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
 			Context: ctx,
 			Index:   index,
 		},
+		Cache:                batchval.NewValidationCache(ctx),
 		SequencingExperiment: seqExp,
 	}
 

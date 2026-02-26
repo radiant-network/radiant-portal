@@ -309,6 +309,7 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}
+	r.Cache = batchval.NewValidationCache(r.Context)
 
 	err := r.validateExistingAliquotForSequencingLabCode()
 	assert.NoError(t, err)
@@ -384,6 +385,7 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}
+	r.Cache = batchval.NewValidationCache(r.Context)
 
 	err := r.validateExistingAliquotForSequencingLabCode()
 
@@ -534,6 +536,7 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 			SubmitterSampleId:      "S1",
 			SequencingLabCode:      "LAB1",
 		},
+		Cache: batchval.NewValidationCache(mockContext),
 	}
 
 	// Mocked orgs and sample
@@ -581,6 +584,7 @@ func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
 			SubmitterSampleId:      "S1",
 			SequencingLabCode:      "LAB1",
 		},
+		Cache: batchval.NewValidationCache(mockContext),
 	}
 
 	// Mocked orgs and sample
@@ -620,6 +624,7 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 			SubmitterSampleId:      "S1",
 			SequencingLabCode:      "LAB1",
 		},
+		Cache: batchval.NewValidationCache(mockContext),
 	}
 
 	// Mocked orgs and sample
@@ -670,9 +675,9 @@ func Test_PreFetchValidationInfo_SampleLookupError_Propagates(t *testing.T) {
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}
+	r.Cache = batchval.NewValidationCache(r.Context)
 
 	err := r.preFetchValidationInfo()
-
 	assert.Error(t, err)
-	assert.Same(t, assert.AnError, err)
+	assert.ErrorContains(t, err, "error fetching sample: assert.AnError general error for testing")
 }
