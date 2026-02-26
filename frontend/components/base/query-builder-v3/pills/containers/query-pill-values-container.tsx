@@ -7,14 +7,13 @@ export type QueryPillValuesContainerProps = React.HTMLAttributes<HTMLDivElement>
 };
 
 /**
- * Wrapper for QueryPillValues. Highlight with a white background
+ * Visual container for QueryPillValues. Highlight with a white background
  *
- * e.g.
- * Wrap [ [1,2, 3 >][X] ]
- * | ┌──────────────────────────────────────────┐ |
- * | | Loremp Ipsum = [1,2, 3 >][X]      | 389K | |
- * | └──────────────────────────────────────────┘ |
- *
+ *                         ┌─────────────┐
+ * ┌───────┌──────────────────────────────────────────┐─────────────────┐
+ * | [] Q1 | Loremp Ipsum = [1,2, 3 >][X]      | 389K | [copy] [trash]  |
+ * └───────└──────────────────────────────────────────┘─────────────────┘
+ *                         └─────────────┘
  */
 function QueryPillValuesContainer({
   canExpand,

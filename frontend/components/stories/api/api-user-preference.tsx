@@ -1,6 +1,8 @@
 import { HttpResponse } from 'msw';
 
-export const userPreferenceApi = 'api/users/preferences/:key';
+import { BASE_URL } from './constant';
+
+export const userPreferenceApi = `${BASE_URL}api/users/preferences/:key`;
 
 export async function httpUserPreferenceApiResponse({ params }: any) {
   const key = params.key;
@@ -22,21 +24,21 @@ export async function httpUserPreferenceApiResponse({ params }: any) {
           {
             content: {
               field: 'firstName',
-              value: ['Henry', 'Jack', 'Irene', 'Liam', 'Olivia', 'Tanner'],
+              value: ['henry', 'jack', 'irene', 'liam', 'olivia', 'tanner'],
             },
             op: 'in',
           },
           {
             content: {
               field: 'lastName',
-              value: ['Tremblay', 'Anderson', 'Young'],
+              value: ['tremblay', 'anderson', 'young'],
             },
             op: 'in',
           },
           {
             content: {
               field: 'status',
-              value: ['Single'],
+              value: ['single'],
             },
             op: 'in',
           },

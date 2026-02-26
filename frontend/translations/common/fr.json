@@ -142,6 +142,7 @@
       "exomiser": "Rapport Exomiser"
     },
     "query_bar": {
+      "selector": "Q{{index}}",
       "empty": "Utilisez les outils de recherche et les facettes à gauche pour construire une requête",
       "delete_popover": {
         "title": "Supprimer cette requête ?",

@@ -1,8 +1,10 @@
 import { HttpResponse } from 'msw';
 
-export const caseFiltersApi = 'api/cases/filters';
-export const caseSearchApi = 'api/cases/search';
-export const caseAutocomplete = 'api/cases/autocomplete';
+import { BASE_URL } from './constant';
+
+export const caseFiltersApi = `${BASE_URL}api/cases/filters`;
+export const caseSearchApi = `${BASE_URL}api/cases/search`;
+export const caseAutocomplete = `${BASE_URL}api/cases/autocomplete`;
 
 export async function httpCaseSearchApiResponse() {
   return HttpResponse.json({

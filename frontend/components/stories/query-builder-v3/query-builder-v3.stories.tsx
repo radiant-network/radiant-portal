@@ -6,11 +6,9 @@ import { delay, http, HttpResponse } from 'msw';
 import { mocked } from 'storybook/test';
 
 import { TableColumnDef } from '@/components/base/data-table/data-table';
+import { ICountInput, IListInput } from '@/components/base/query-builder-v3/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder-v3/query-builder';
-import QueryBuilderDataTable, {
-  ICountInput,
-  IListInput,
-} from '@/components/base/query-builder-v3/query-builder-data-table';
+import QueryBuilderDataTable from '@/components/base/query-builder-v3/query-builder-data-table';
 import { ApplicationId, ConfigProvider, FilterTypes, PortalConfig } from '@/components/cores/applications-config';
 import { RangeOperators } from '@/components/cores/sqon';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
@@ -264,7 +262,14 @@ const meta = {
     mocked(useCaseIdFromParam).mockReturnValue(1);
     mocked(useSeqIdFromSearchParam).mockReturnValue(1);
   },
-  args: {},
+  args: {
+    fetcher: {
+      list: async (params: IListInput) =>
+        axios.post(mockListApi, { listBody: params.listBody }).then(response => response.data),
+      count: async (params: ICountInput) =>
+        axios.post(mockCountApi, { countBody: params.countBody }).then(response => response.data),
+    },
+  },
   decorators: [
     Story => (
       <MemoryRouter initialEntries={['/case/1?seq_id=1']}>
@@ -312,15 +317,9 @@ export const Loading: Story = {
   render: args => (
     <>
       <div className="bold font-mono text-red">Do a hard refresh to reset loading state</div>
-      <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen}>
+      <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
         <QueryBuilderDataTable
           id="storybook-query-builder"
-          fetcher={{
-            list: async (params: IListInput) =>
-              axios.post(mockListApi, { listBody: params.listBody }).then(response => response.data),
-            count: async (params: ICountInput) =>
-              axios.post(mockCountApi, { countBody: params.countBody }).then(response => response.data),
-          }}
           columns={
             [
               ...mockColumns,
@@ -354,15 +353,9 @@ export const Default: Story = {
     defaultSidebarOpen: true,
   },
   render: args => (
-    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen}>
+    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
       <QueryBuilderDataTable
         id="storybook-query-builder"
-        fetcher={{
-          list: async (params: IListInput) =>
-            axios.post(mockListApi, { listBody: params.listBody }).then(response => response.data),
-          count: async (params: ICountInput) =>
-            axios.post(mockCountApi, { countBody: params.countBody }).then(response => response.data),
-        }}
         columns={
           [
             ...mockColumns,
@@ -395,15 +388,9 @@ export const Multiselect: Story = {
     defaultSidebarOpen: true,
   },
   render: args => (
-    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen}>
+    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
       <QueryBuilderDataTable
         id="storybook-query-builder"
-        fetcher={{
-          list: async (params: IListInput) =>
-            axios.post(mockListApi, { listBody: params.listBody }).then(response => response.data),
-          count: async (params: ICountInput) =>
-            axios.post(mockCountApi, { countBody: params.countBody }).then(response => response.data),
-        }}
         columns={
           [
             ...mockColumns,

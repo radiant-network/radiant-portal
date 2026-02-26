@@ -1,8 +1,8 @@
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 
 import { FacetComponent } from '@/components/base/query-builder-v3/facets/facet-container';
-import { QBContext } from '@/components/base/query-builder-v3/hooks/use-query-builder';
-import { getAggregationsByIValueFacet } from '@/components/base/query-builder-v3/libs/facet-libs';
+import { QBActionType, QBContext, useQBDispatch } from '@/components/base/query-builder-v3/hooks/use-query-builder';
+import { getMultiselectAggregation } from '@/components/base/query-builder-v3/libs/aggregations';
 import QueryPillContainer from '@/components/base/query-builder-v3/pills/containers/query-pill-container';
 import LabelOperator from '@/components/base/query-builder-v3/pills/operators/label-operator';
 import Operator from '@/components/base/query-builder-v3/pills/operators/operator';
@@ -13,10 +13,25 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/shadc
 type MultiSelectPillProps = {
   content: IValueFacet;
 };
+
+/**
+ *          ┌────────────────────────┐
+ * ┌───────┌──────────────────────────────────────────┐─────────────────┐
+ * | [] Q1 | Loremp Ipsum = [1,2, 3 >] [X]     | 389K | [copy] [trash]  |
+ * └───────└──────────────────────────────────────────┘─────────────────┘
+ *          └────────────────────────┘
+ */
 function MultiSelectQueryPill({ content }: MultiSelectPillProps) {
   const { aggregations } = useContext(QBContext);
-  const onRemovePill = () => {};
-  const aggregation = getAggregationsByIValueFacet(aggregations, content);
+  const aggregation = getMultiselectAggregation(aggregations, content);
+  const dispatch = useQBDispatch();
+
+  const onRemovePill = useCallback(() => {
+    dispatch({
+      type: QBActionType.REMOVE_MULTISELECT_PILL,
+      payload: content,
+    });
+  }, [content]);
 
   return (
     <QueryPillContainer onRemovePill={onRemovePill}>

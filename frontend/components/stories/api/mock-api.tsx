@@ -4,24 +4,95 @@ import { SqonContent, SqonOpEnum } from '@/api/api';
 
 import { advancedData, AdvancedTableMockData } from '../table/table-mock';
 
-export const mockAggregateApi = 'api/mock/aggregate';
-export const mockAggregateStatisticApi = 'api/mock/statistics';
-export const mockListApi = 'api/mock/list';
-export const mockCountApi = 'api/mock/count';
+import { BASE_URL } from './constant';
+
+export const mockAggregateApi = `${BASE_URL}api/mock/aggregate`;
+export const mockAggregateStatisticApi = `${BASE_URL}api/mock/statistics`;
+export const mockListApi = `${BASE_URL}api/mock/list`;
+export const mockCountApi = `${BASE_URL}api/mock/count`;
+
+/**
+ * Read a sqon to query AdvancedTableMockData and simulate a response
+ */
+function querySqon(data: AdvancedTableMockData, sqon: any): boolean {
+  const { op } = sqon;
+
+  const field = sqon.content.field;
+  const values = sqon.content.value;
+  const target = data[field as keyof AdvancedTableMockData]?.toString().toLowerCase();
+
+  switch (op) {
+    case SqonOpEnum.In: {
+      return values.includes(target);
+    }
+    case SqonOpEnum.And: {
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      return true;
+    }
+
+    case SqonOpEnum.Or: {
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      return true;
+    }
+
+    case SqonOpEnum.Not: {
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      return true;
+    }
+
+    case SqonOpEnum.Between: {
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      return true;
+    }
+
+    case SqonOpEnum.GreaterThan: {
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      return true;
+    }
+
+    case SqonOpEnum.LessThan: {
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      return true;
+    }
+
+    case SqonOpEnum.GreaterThanOrEqualTo: {
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      return true;
+    }
+
+    case SqonOpEnum.LessThanOrEqualTo: {
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      return true;
+    }
+
+    case SqonOpEnum.NotIn: {
+      return !values.includes(target);
+    }
+
+    case SqonOpEnum.All: {
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      return true;
+    }
+  }
+  return false;
+}
 
 function filterMockData(sqon: { content: SqonContent; op: SqonOpEnum }) {
   return advancedData.filter((data: AdvancedTableMockData) => {
-    let matched = false;
-    // @ts-ignore
-    sqon.content.forEach(content => {
-      // IValueFacet
-      const field = content.content.field;
-      const values = content.content.value;
-      if (values.includes(data[field as keyof AdvancedTableMockData])) {
-        matched = true;
+    switch (sqon.op) {
+      // OR
+      case SqonOpEnum.Or: {
+        // @ts-ignore
+        const result = sqon.content.map((content: any) => querySqon(data, content));
+        return result.includes(true);
       }
-    });
-    return matched;
+      // AND
+      default: {
+        // @ts-ignore
+        const result = sqon.content.map((content: any) => querySqon(data, content));
+        return result.every((r: boolean) => r === true);
+      }
+    }
   });
 }
 

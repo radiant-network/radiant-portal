@@ -142,6 +142,7 @@
       "exomiser": "Exomiser Report"
     },
     "query_bar": {
+      "selector": "Q{{index}}",
       "empty": "Use the search tools & facets on the left to build a query",
       "delete_popover": {
         "title": "Delete this query?",

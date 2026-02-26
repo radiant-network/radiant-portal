@@ -11,7 +11,7 @@ import { queryBuilderRemote } from '@/components/cores/query-builder/query-build
 import { useI18n } from '@/components/hooks/i18n';
 import { genesApi } from '@/utils/api';
 
-import { IValueFacet, MERGE_VALUES_STRATEGIES, TSqonContentValue } from '../type';
+import { IValueFacet, TSqonContentValue } from '../type';
 
 import { useFacetConfig } from './hooks/use-facet-config';
 
@@ -142,11 +142,7 @@ export function SearchFacet({ search }: SearchFilterProps) {
 
   const handleChange = (newValues: string[]) => {
     setSelectedValues(newValues);
-    queryBuilderRemote.updateActiveQueryField(appId, {
-      field: fieldKey,
-      value: newValues,
-      merge_strategy: MERGE_VALUES_STRATEGIES.OVERRIDE_VALUES,
-    });
+    // @TODO: add dispatch to add to query-builder
   };
 
   return (

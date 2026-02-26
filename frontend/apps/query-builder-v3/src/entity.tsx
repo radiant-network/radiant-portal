@@ -1,10 +1,8 @@
 import { useState } from 'react';
 
+import { ICountInput, IListInput } from '@/components/base/query-builder-v3/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder-v3/query-builder';
-import QueryBuilderDataTable, {
-  ICountInput,
-  IListInput,
-} from '@/components/base/query-builder-v3/query-builder-data-table';
+import QueryBuilderDataTable from '@/components/base/query-builder-v3/query-builder-data-table';
 import { useConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 import { occurrencesApi } from '@/utils/api';
@@ -20,7 +18,15 @@ function QueryBuilderV3() {
   const appId = config.snv_occurrence.app_id;
 
   return (
-    <QueryBuilder appId={config.snv_occurrence.app_id}>
+    <QueryBuilder
+      appId={config.snv_occurrence.app_id}
+      fetcher={{
+        list: async (params: IListInput) =>
+          occurrencesApi.listGermlineSNVOccurrences(caseId, seqId, params.listBody).then(response => response.data),
+        count: async (params: ICountInput) =>
+          occurrencesApi.countGermlineSNVOccurrences(caseId, seqId, params.countBody).then(response => response.data),
+      }}
+    >
       <QueryBuilderDataTable
         id={appId}
         columns={getSNVOccurrenceColumns(t)}
@@ -29,12 +35,6 @@ function QueryBuilderV3() {
         enableFullscreen
         rowSelection={rowSelection}
         onRowSelectionChange={setRowSelection}
-        fetcher={{
-          list: async (params: IListInput) =>
-            occurrencesApi.listGermlineSNVOccurrences(caseId, seqId, params.listBody).then(response => response.data),
-          count: async (params: ICountInput) =>
-            occurrencesApi.countGermlineSNVOccurrences(caseId, seqId, params.countBody).then(response => response.data),
-        }}
       />
     </QueryBuilder>
   );

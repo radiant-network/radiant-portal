@@ -44,7 +44,7 @@
  *
  */
 
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { TFunction } from 'i18next';
 
 import { type Statistics } from '@/api/api';
@@ -55,7 +55,6 @@ import GreaterThanOrEqualOperatorIcon from '@/components/base/icons/greater-than
 import LessThanOperatorIcon from '@/components/base/icons/less-than-operator-icon';
 import LessThanOrEqualOperatorIcon from '@/components/base/icons/less-than-or-equal-operator-icon';
 import { useFacetConfig } from '@/components/base/query-builder-v3/facets/hooks/use-facet-config';
-import { AggregateContext } from '@/components/base/query-filters/use-aggregation-builder';
 import { Button } from '@/components/base/shadcn/button';
 import { CardContent, CardFooter } from '@/components/base/shadcn/card';
 import { Checkbox } from '@/components/base/shadcn/checkbox';
@@ -69,7 +68,7 @@ import { type Aggregation as AggregationConfig } from '@/components/cores/applic
 import { DEFAULT_EMPTY_QUERY, queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
 import i18n, { useI18n } from '@/components/hooks/i18n';
 
-import { QBActionFlag, useQBContext, useQBDispatch } from '../hooks/use-query-builder';
+import { QBActionType, useQBContext, useQBDispatch } from '../hooks/use-query-builder';
 import { ISqonGroupFacet, IValueFacet, RangeOperators, TSqonContentValue } from '../type';
 
 const API_DEFAULT_TYPE = 'integer';
@@ -310,7 +309,7 @@ export function NumericalFacet({ field }: IProps) {
     if (hasNoData) {
       // @TODO: change action-flag type
       dispatch({
-        type: QBActionFlag.ADD_IVALUEFACET,
+        type: QBActionType.ADD_MULTISELECT_VALUE,
         payload: {
           field: fieldKey,
           value: ['__missing__'],
@@ -329,7 +328,7 @@ export function NumericalFacet({ field }: IProps) {
     // Update the main field with numeric values
     // @TODO: change action-flag type
     dispatch({
-      type: QBActionFlag.ADD_IVALUEFACET,
+      type: QBActionType.ADD_MULTISELECT_VALUE,
       payload: {
         field: fieldKey,
         value: values,
@@ -341,7 +340,7 @@ export function NumericalFacet({ field }: IProps) {
     if (selectedUnit) {
       // @TODO: change action-flag type
       dispatch({
-        type: QBActionFlag.ADD_IVALUEFACET,
+        type: QBActionType.ADD_MULTISELECT_VALUE,
         payload: {
           field: `${fieldKey}_unit`,
           value: [selectedUnit],

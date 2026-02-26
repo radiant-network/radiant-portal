@@ -5,7 +5,7 @@ import { UserPreference } from '@/api/api';
 import { ApplicationId } from '@/components/cores/applications-config';
 import { userPreferenceApi } from '@/utils/api';
 
-import { DEFAULT_QBCONTEXT } from './use-query-builder';
+import { getDefaultQBContext } from './use-query-builder';
 
 type FetchUserPreferenceInput = {
   key: string;
@@ -53,9 +53,9 @@ export function useQueryBuilderGetPreferenceEffect({ appId, setPreference }: use
 
   useEffect(() => {
     if (qbUserPreference.data) {
-      setPreference(qbUserPreference.data);
+      setPreference({ ...qbUserPreference.data, history: getDefaultQBContext().history });
     } else if (qbUserPreference.error) {
-      setPreference(DEFAULT_QBCONTEXT);
+      setPreference(getDefaultQBContext());
     }
   }, [qbUserPreference.isLoading]);
 }
