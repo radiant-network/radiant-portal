@@ -114,8 +114,8 @@ func Test_PhenotypeUnparsedToJsonArrayOfTerms(t *testing.T) {
 	phenotypes := PhenotypeUnparsedToJsonArrayOfTerms(input)
 
 	assert.Equal(t, 2, len(phenotypes))
-	assert.Equal(t, "HP:0100622", phenotypes[0].ID)
-	assert.Equal(t, "Maternal seizure", phenotypes[0].Name)
-	assert.Equal(t, "HP:0001562", phenotypes[1].ID)
-	assert.Equal(t, "Oligohydramnios", phenotypes[1].Name)
+	assert.Equal(t, "HP:0001562", phenotypes[0].ID)
+	assert.Equal(t, "Oligohydramnios", phenotypes[0].Name)
+	assert.Equal(t, "HP:0100622", phenotypes[1].ID)
+	assert.Equal(t, "Maternal seizure", phenotypes[1].Name)
 }

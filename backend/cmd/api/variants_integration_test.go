@@ -166,8 +166,8 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 				"genotype_quality":100, 
 				"info_qd":0.4, 
 				"observed_phenotypes":[
-					{"id":"HP:0100622", "name":"Maternal seizure"},
-					{"id":"HP:0001562", "name":"Oligohydramnios"}
+					{"id":"HP:0001562", "name":"Oligohydramnios"},
+					{"id":"HP:0100622", "name":"Maternal seizure"}
 				], 
 				"patient_id":10, 
 				"primary_condition_id":"MONDO:0700092", 
