@@ -16,7 +16,7 @@ sb.mock(import('../../utils/helper.ts'), { spy: true });
 
 let options = {};
 if (location.hostname === 'radiant-network.github.io') {
-  console.log('Configure MSW service worker for radiant-network.github.io');
+  console.log(`Configure MSW service worker for radiant-network.github.io`);
   options = {
     serviceWorker: {
       url: './mockServiceWorker.js',
