@@ -1,8 +1,6 @@
 import { HttpResponse } from 'msw';
 
-import { BASE_URL } from './constant';
-
-export const userPreferenceApi = `${BASE_URL}api/users/preferences/:key`;
+export const userPreferenceApi = `api/users/preferences/:key`;
 
 export async function httpUserPreferenceApiResponse({ params }: any) {
   const key = params.key;

@@ -4,12 +4,10 @@ import { SqonContent, SqonOpEnum } from '@/api/api';
 
 import { advancedData, AdvancedTableMockData } from '../table/table-mock';
 
-import { BASE_URL } from './constant';
-
-export const mockAggregateApi = `${BASE_URL}api/mock/aggregate`;
-export const mockAggregateStatisticApi = `${BASE_URL}api/mock/statistics`;
-export const mockListApi = `${BASE_URL}api/mock/list`;
-export const mockCountApi = `${BASE_URL}api/mock/count`;
+export const mockAggregateApi = `api/mock/aggregate`;
+export const mockAggregateStatisticApi = `api/mock/statistics`;
+export const mockListApi = `api/mock/list`;
+export const mockCountApi = `api/mock/count`;
 
 /**
  * Read a sqon to query AdvancedTableMockData and simulate a response

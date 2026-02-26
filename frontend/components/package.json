@@ -20,7 +20,6 @@
     "@storybook/addon-vitest": "^10.2.10",
     "@storybook/react": "^10.2.10",
     "@storybook/react-vite": "^10.2.10",
-    "@storybook/test": "^8.6.15",
     "@tailwindcss/vite": "^4.1.8",
     "@types/i18next": "^13.0.0",
     "@types/lodash": "^4.17.14",
@@ -96,7 +95,7 @@
   },
   "msw": {
     "workerDirectory": [
-      "stories/public"
+      "../../docs/public"
     ]
   }
 }

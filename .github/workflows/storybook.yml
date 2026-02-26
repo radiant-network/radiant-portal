@@ -32,9 +32,9 @@ jobs:
           cd frontend
           npm install
           cd components
-          npx msw init
+          npx msw init ../../docs/public
           npm run build:storybook:radiant
-          cp stories/public/mockServiceWorker.js storybook-static/
+          cp ../../docs/public/mockServiceWorker.js storybook-static/
 
       - name: Deploy 🚀
         if: steps.filter.outputs.frontend == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
