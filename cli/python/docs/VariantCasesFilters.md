@@ -8,6 +8,9 @@ Name | Type | Description | Notes
 **analysis_catalog_code** | [**List[Aggregation]**](Aggregation.md) |  | 
 **classification** | [**List[Aggregation]**](Aggregation.md) |  | 
 **diagnosis_lab_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**sex_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**transmission_mode** | [**List[Aggregation]**](Aggregation.md) |  | 
+**zygosity** | [**List[Aggregation]**](Aggregation.md) |  | 
 
 ## Example
 

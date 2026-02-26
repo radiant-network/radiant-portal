@@ -140,9 +140,12 @@ type VariantUninterpretedCase = struct {
 } // @name VariantUninterpretedCase
 
 type VariantCasesFilters = struct {
-	Classification  []Aggregation `json:"classification" validate:"required"`
-	AnalysisCatalog []Aggregation `json:"analysis_catalog_code" validate:"required"`
-	DiagnosisLab    []Aggregation `json:"diagnosis_lab_code" validate:"required"`
+	Classification   []Aggregation `json:"classification" validate:"required"`
+	AnalysisCatalog  []Aggregation `json:"analysis_catalog_code" validate:"required"`
+	DiagnosisLab     []Aggregation `json:"diagnosis_lab_code" validate:"required"`
+	Sex              []Aggregation `json:"sex_code" validate:"required"`
+	Zygosity         []Aggregation `json:"zygosity" validate:"required"`
+	TransmissionMode []Aggregation `json:"transmission_mode" validate:"required"`
 } // @name VariantCasesFilters
 
 type VariantCasesCount struct {

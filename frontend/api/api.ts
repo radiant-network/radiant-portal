@@ -4391,6 +4391,24 @@ export interface VariantCasesFilters {
      * @memberof VariantCasesFilters
      */
     'diagnosis_lab_code': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof VariantCasesFilters
+     */
+    'sex_code': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof VariantCasesFilters
+     */
+    'transmission_mode': Array<Aggregation>;
+    /**
+     * 
+     * @type {Array<Aggregation>}
+     * @memberof VariantCasesFilters
+     */
+    'zygosity': Array<Aggregation>;
 }
 /**
  * 

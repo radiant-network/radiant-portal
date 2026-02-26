@@ -311,6 +311,8 @@ func (r *CasesRepository) retrieveCaseSequencingExperiments(caseId int) (*[]Case
 	if err := txSeqExp.Find(&sequencingExperiments).Error; err != nil {
 		return nil, fmt.Errorf("error fetching sequencing experiments: %w", err)
 	}
+
+	println("Count of sequencing experiments:", len(sequencingExperiments))
 	return &sequencingExperiments, nil
 }
 

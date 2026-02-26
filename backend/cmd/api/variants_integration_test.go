@@ -239,6 +239,31 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 		"diagnosis_lab_code":[
 			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
 			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}			
+		],
+		"sex_code": [
+			{"count": 0, "key":"female", "label":"Female"},
+			{"count": 0, "key":"male", "label":"Male"},
+			{"count": 0, "key":"unknown", "label":"Unknown"}
+		],
+		"zygosity": [
+			{"count": 0, "key":"HOM"},
+			{"count": 0, "key":"HET"},
+			{"count": 0, "key":"HEM"},
+			{"count": 0, "key":"UNK"}
+		],
+		"transmission_mode": [
+			{"count": 0, "key":"autosomal_dominant_de_novo"},
+			{"count": 0, "key":"autosomal_dominant"},
+			{"count": 0, "key":"autosomal_recessive"},
+			{"count": 0, "key":"x_linked_dominant_de_novo"},
+			{"count": 0, "key":"x_linked_recessive_de_novo"},
+			{"count": 0, "key":"x_linked_dominant"},
+			{"count": 0, "key":"x_linked_recessive"},
+			{"count": 0, "key":"non_carrier_proband"},
+			{"count": 0, "key":"unknown_parents_genotype"},
+			{"count": 0, "key":"unknown_father_genotype"},
+			{"count": 0, "key":"unknown_mother_genotype"},
+			{"count": 0, "key":"unknown_proband_genotype"}
 		]
 	}`
 	assertGetVariantCasesFilters(t, "simple", expected)
