@@ -2,11 +2,9 @@ import { HttpResponse } from 'msw';
 
 import { generateBooleanData, generateMultiSelectData, generateSortedAdvancedData } from '../table/table-mock';
 
-import { BASE_URL } from './constant';
-
-export const occurrenceListApi = `${BASE_URL}api/occurrences/germline/:type/:case_id/:seq_id/list`;
-export const occurrenceAggregateApi = `${BASE_URL}api/occurrences/germline/:type/:case_id/:seq_id/aggregate`;
-export const occurrenceAggregateStatisticApi = `${BASE_URL}api/occurrences/germline/:type/:case_id/:seq_id/statistics`;
+export const occurrenceListApi = `api/occurrences/germline/:type/:case_id/:seq_id/list`;
+export const occurrenceAggregateApi = `api/occurrences/germline/:type/:case_id/:seq_id/aggregate`;
+export const occurrenceAggregateStatisticApi = `api/occurrences/germline/:type/:case_id/:seq_id/statistics`;
 
 export type OccurenceHandler = {
   case_id: string;
