@@ -15,7 +15,9 @@ type ValidationRecord interface {
 }
 
 type BaseValidationRecord struct {
-	Context  *BatchValidationContext
+	Context *BatchValidationContext
+	Cache   *BatchValidationCache
+
 	Index    int
 	Skipped  bool
 	Errors   []types.BatchMessage

@@ -7,7 +7,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-type ValidationCache struct {
+type BatchValidationCache struct {
 	Context *BatchValidationContext
 
 	// Value Sets (Static Lookups)
@@ -25,8 +25,8 @@ type ValidationCache struct {
 	TaskTypes map[string]*types.TaskType // Key: code
 }
 
-func NewValidationCache(context *BatchValidationContext) *ValidationCache {
-	return &ValidationCache{
+func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCache {
+	return &BatchValidationCache{
 		Context:           context,
 		ValueSets:         make(map[repository.ValueSetType][]string),
 		Organizations:     make(map[string]*types.Organization),
@@ -39,7 +39,7 @@ func NewValidationCache(context *BatchValidationContext) *ValidationCache {
 	}
 }
 
-func (c *ValidationCache) GetOrganizationByCode(code string) (*types.Organization, error) {
+func (c *BatchValidationCache) GetOrganizationByCode(code string) (*types.Organization, error) {
 	if org, ok := c.Organizations[code]; ok {
 		return org, nil
 	}
@@ -57,7 +57,7 @@ func (c *ValidationCache) GetOrganizationByCode(code string) (*types.Organizatio
 	return org, nil
 }
 
-func (c *ValidationCache) GetOrganizationById(id int) (*types.Organization, error) {
+func (c *BatchValidationCache) GetOrganizationById(id int) (*types.Organization, error) {
 	if org, ok := c.OrganizationsById[id]; ok {
 		return org, nil
 	}
@@ -75,7 +75,7 @@ func (c *ValidationCache) GetOrganizationById(id int) (*types.Organization, erro
 	return org, nil
 }
 
-func (c *ValidationCache) GetSampleById(id int) (*types.Sample, error) {
+func (c *BatchValidationCache) GetSampleById(id int) (*types.Sample, error) {
 	if sample, ok := c.Samples[id]; ok {
 		return sample, nil
 	}
@@ -92,7 +92,7 @@ func (c *ValidationCache) GetSampleById(id int) (*types.Sample, error) {
 	return sample, nil
 }
 
-func (c *ValidationCache) GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*types.Sample, error) {
+func (c *BatchValidationCache) GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*types.Sample, error) {
 	for _, sample := range c.Samples {
 		if sample.OrganizationId == organizationId && sample.SubmitterSampleId == submitterSampleId {
 			return sample, nil
@@ -111,7 +111,7 @@ func (c *ValidationCache) GetSampleBySubmitterSampleId(organizationId int, submi
 	return sample, nil
 }
 
-func (c *ValidationCache) GetSequencingExperimentByAliquot(aliquot string) ([]*types.SequencingExperiment, error) {
+func (c *BatchValidationCache) GetSequencingExperimentByAliquot(aliquot string) ([]*types.SequencingExperiment, error) {
 	if exps, ok := c.SeqExps[aliquot]; ok {
 		return exps, nil
 	}
@@ -130,7 +130,7 @@ func (c *ValidationCache) GetSequencingExperimentByAliquot(aliquot string) ([]*t
 	return result, nil
 }
 
-func (c *ValidationCache) GetValueSetCodes(valueSetType repository.ValueSetType) ([]string, error) {
+func (c *BatchValidationCache) GetValueSetCodes(valueSetType repository.ValueSetType) ([]string, error) {
 	if codes, ok := c.ValueSets[valueSetType]; ok {
 		return codes, nil
 	}

@@ -36,18 +36,8 @@ type SequencingExperimentKey struct {
 	Aliquot                string
 }
 
-type SequencingExperimentCache interface {
-	GetOrganizationByCode(code string) (*types.Organization, error)
-	GetOrganizationById(id int) (*types.Organization, error)
-	GetSampleById(id int) (*types.Sample, error)
-	GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*types.Sample, error)
-	GetSequencingExperimentByAliquot(aliquot string) ([]*types.SequencingExperiment, error)
-	GetValueSetCodes(valueSetType repository.ValueSetType) ([]string, error)
-}
-
 type SequencingExperimentValidationRecord struct {
 	batchval.BaseValidationRecord
-	Cache SequencingExperimentCache
 
 	SequencingExperiment    types.SequencingExperimentBatch
 	SubmitterOrganizationID *int
@@ -380,6 +370,7 @@ func insertSequencingExperimentRecords(records []*SequencingExperimentValidation
 func validateSequencingExperimentBatch(ctx *batchval.BatchValidationContext, seqExps []types.SequencingExperimentBatch) ([]*SequencingExperimentValidationRecord, error) {
 	var records []*SequencingExperimentValidationRecord
 	visited := map[SequencingExperimentKey]struct{}{}
+	cache := batchval.NewBatchValidationCache(ctx)
 
 	for index, seqExp := range seqExps {
 		key := SequencingExperimentKey{
@@ -387,7 +378,7 @@ func validateSequencingExperimentBatch(ctx *batchval.BatchValidationContext, seq
 			SubmitterSampleId:      seqExp.SubmitterSampleId.String(),
 			Aliquot:                seqExp.Aliquot.String(),
 		}
-		record, err := validateSequencingExperimentRecord(ctx, seqExp, index)
+		record, err := validateSequencingExperimentRecord(ctx, cache, seqExp, index)
 		if err != nil {
 			return nil, fmt.Errorf("error during sequencing experiment validation: %v", err)
 		}
@@ -397,14 +388,14 @@ func validateSequencingExperimentBatch(ctx *batchval.BatchValidationContext, seq
 	return records, nil
 }
 
-func validateSequencingExperimentRecord(ctx *batchval.BatchValidationContext, seqExp types.SequencingExperimentBatch, index int) (*SequencingExperimentValidationRecord, error) {
+func validateSequencingExperimentRecord(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, seqExp types.SequencingExperimentBatch, index int) (*SequencingExperimentValidationRecord, error) {
 
 	record := SequencingExperimentValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
 			Context: ctx,
+			Cache:   cache,
 			Index:   index,
 		},
-		Cache:                batchval.NewValidationCache(ctx),
 		SequencingExperiment: seqExp,
 	}
 

@@ -309,7 +309,7 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}
-	r.Cache = batchval.NewValidationCache(r.Context)
+	r.Cache = batchval.NewBatchValidationCache(r.Context)
 
 	err := r.validateExistingAliquotForSequencingLabCode()
 	assert.NoError(t, err)
@@ -385,7 +385,7 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}
-	r.Cache = batchval.NewValidationCache(r.Context)
+	r.Cache = batchval.NewBatchValidationCache(r.Context)
 
 	err := r.validateExistingAliquotForSequencingLabCode()
 
@@ -458,8 +458,9 @@ func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
 		SeqExpRepo:    seqDAO,
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
+	cache := batchval.NewBatchValidationCache(mockContext)
 
-	record, err := validateSequencingExperimentRecord(mockContext, seq, 0)
+	record, err := validateSequencingExperimentRecord(mockContext, cache, seq, 0)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 0, record.Index)
@@ -527,16 +528,16 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 		SampleRepo:    sampleDAO,
 		ValueSetsRepo: valueSetDAO,
 	}
+	cache := batchval.NewBatchValidationCache(mockContext)
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
 			SequencingLabCode:      "LAB1",
 		},
-		Cache: batchval.NewValidationCache(mockContext),
 	}
 
 	// Mocked orgs and sample
@@ -575,16 +576,16 @@ func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
 		SampleRepo:    sampleDAO,
 		ValueSetsRepo: valueSetDAO,
 	}
+	cache := batchval.NewBatchValidationCache(mockContext)
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
 			SequencingLabCode:      "LAB1",
 		},
-		Cache: batchval.NewValidationCache(mockContext),
 	}
 
 	// Mocked orgs and sample
@@ -615,16 +616,16 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 		SampleRepo:    sampleDAO,
 		ValueSetsRepo: valueSetDAO,
 	}
+	cache := batchval.NewBatchValidationCache(mockContext)
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
 			SequencingLabCode:      "LAB1",
 		},
-		Cache: batchval.NewValidationCache(mockContext),
 	}
 
 	// Mocked orgs and sample
@@ -675,7 +676,7 @@ func Test_PreFetchValidationInfo_SampleLookupError_Propagates(t *testing.T) {
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}
-	r.Cache = batchval.NewValidationCache(r.Context)
+	r.Cache = batchval.NewBatchValidationCache(r.Context)
 
 	err := r.preFetchValidationInfo()
 	assert.Error(t, err)

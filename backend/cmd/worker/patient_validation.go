@@ -35,14 +35,8 @@ type PatientKey struct {
 	SubmitterPatientId string
 }
 
-type PatientCache interface {
-	GetValueSetCodes(valueSetType repository.ValueSetType) ([]string, error)
-}
-
 type PatientValidationRecord struct {
 	batchval.BaseValidationRecord
-	Cache PatientCache
-
 	Patient        types.PatientBatch
 	OrganizationId int
 }
@@ -262,9 +256,10 @@ func insertPatientRecords(records []*PatientValidationRecord, repo repository.Pa
 
 func validatePatientsBatch(ctx *batchval.BatchValidationContext, patients []types.PatientBatch) ([]*PatientValidationRecord, error) {
 	var records []*PatientValidationRecord
+	cache := batchval.NewBatchValidationCache(ctx)
 	seenPatients := map[PatientKey]struct{}{}
 	for index, patient := range patients {
-		record, err := validatePatientRecord(ctx, patient, index, seenPatients)
+		record, err := validatePatientRecord(ctx, cache, patient, index, seenPatients)
 		if err != nil {
 			return nil, fmt.Errorf("error during patient validation: %v", err)
 		}
@@ -273,13 +268,13 @@ func validatePatientsBatch(ctx *batchval.BatchValidationContext, patients []type
 	return records, nil
 }
 
-func validatePatientRecord(ctx *batchval.BatchValidationContext, patient types.PatientBatch, index int, seenPatients map[PatientKey]struct{}) (*PatientValidationRecord, error) {
+func validatePatientRecord(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patient types.PatientBatch, index int, seenPatients map[PatientKey]struct{}) (*PatientValidationRecord, error) {
 	record := &PatientValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
 			Context: ctx,
+			Cache:   cache,
 			Index:   index,
 		},
-		Cache:   batchval.NewValidationCache(ctx),
 		Patient: patient,
 	}
 	record.validateSubmitterPatientId()

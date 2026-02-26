@@ -136,13 +136,14 @@ func validateIsDifferentExistingSampleField[T comparable](
 func processSampleBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
 	payload := []byte(batch.Payload)
 	var samplesbatch []types.SampleBatch
+	cache := batchval.NewBatchValidationCache(ctx)
 
 	if unexpectedErr := json.Unmarshal(payload, &samplesbatch); unexpectedErr != nil {
 		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling sample batch: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
-	records, unexpectedErr := validateSamplesBatch(ctx, samplesbatch)
+	records, unexpectedErr := validateSamplesBatch(ctx, cache, samplesbatch)
 	if unexpectedErr != nil {
 		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error sample batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
@@ -311,7 +312,7 @@ func (r *SampleValidationRecord) validateHistologyCode() error {
 	return nil
 }
 
-func validateSamplesBatch(ctx *batchval.BatchValidationContext, samples []types.SampleBatch) ([]*SampleValidationRecord, error) {
+func validateSamplesBatch(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, samples []types.SampleBatch) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
 	samplesMap := samplesMap(samples)
 	seenSamples := make(map[SampleKey]struct{})
@@ -320,6 +321,7 @@ func validateSamplesBatch(ctx *batchval.BatchValidationContext, samples []types.
 		record := &SampleValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
 				Context: ctx,
+				Cache:   cache,
 				Index:   index,
 			},
 			Sample: sample,
