@@ -312,7 +312,6 @@ func (r *CasesRepository) retrieveCaseSequencingExperiments(caseId int) (*[]Case
 		return nil, fmt.Errorf("error fetching sequencing experiments: %w", err)
 	}
 
-	println("Count of sequencing experiments:", len(sequencingExperiments))
 	return &sequencingExperiments, nil
 }
 
