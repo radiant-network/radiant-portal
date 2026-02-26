@@ -278,6 +278,7 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCou
 func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, error) {
 	var analysisCatalog []Aggregation
 	var diagnosisLab []Aggregation
+	var sex []Aggregation
 
 	txAnalysisCatalog := r.db.Table(fmt.Sprintf("%s %s", types.AnalysisCatalogTable.FederationName, types.AnalysisCatalogTable.Alias))
 	txAnalysisCatalog = txAnalysisCatalog.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.AnalysisCatalogTable.Alias, types.AnalysisCatalogTable.Alias))
@@ -294,10 +295,42 @@ func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, err
 		return nil, fmt.Errorf("error fetching diagnosis lab: %w", err)
 	}
 
+	txSex := r.db.Table(fmt.Sprintf("%s %s", types.SexTable.FederationName, types.SexTable.Alias))
+	txSex = txSex.Select(fmt.Sprintf("%s.code as bucket, %s.name_en as label", types.SexTable.Alias, types.SexTable.Alias))
+	txSex = txSex.Order("bucket asc")
+	if err := txSex.Find(&sex).Error; err != nil {
+		return nil, fmt.Errorf("error fetching sex: %w", err)
+	}
+
+	zygosity := []Aggregation{
+		{Bucket: "HOM"},
+		{Bucket: "HET"},
+		{Bucket: "HEM"},
+		{Bucket: "UNK"},
+	}
+
+	transmissionMode := []Aggregation{
+		{Bucket: "autosomal_dominant_de_novo"},
+		{Bucket: "autosomal_dominant"},
+		{Bucket: "autosomal_recessive"},
+		{Bucket: "x_linked_dominant_de_novo"},
+		{Bucket: "x_linked_recessive_de_novo"},
+		{Bucket: "x_linked_dominant"},
+		{Bucket: "x_linked_recessive"},
+		{Bucket: "non_carrier_proband"},
+		{Bucket: "unknown_parents_genotype"},
+		{Bucket: "unknown_father_genotype"},
+		{Bucket: "unknown_mother_genotype"},
+		{Bucket: "unknown_proband_genotype"},
+	}
+
 	return &VariantCasesFilters{
-		Classification:  types.MapToAggregationArray(),
-		AnalysisCatalog: analysisCatalog,
-		DiagnosisLab:    diagnosisLab,
+		Classification:   types.MapToAggregationArray(),
+		AnalysisCatalog:  analysisCatalog,
+		DiagnosisLab:     diagnosisLab,
+		Sex:              sex,
+		Zygosity:         zygosity,
+		TransmissionMode: transmissionMode,
 	}, nil
 }
 

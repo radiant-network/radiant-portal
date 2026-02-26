@@ -30,7 +30,10 @@ class VariantCasesFilters(BaseModel):
     analysis_catalog_code: List[Aggregation]
     classification: List[Aggregation]
     diagnosis_lab_code: List[Aggregation]
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "classification", "diagnosis_lab_code"]
+    sex_code: List[Aggregation]
+    transmission_mode: List[Aggregation]
+    zygosity: List[Aggregation]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "classification", "diagnosis_lab_code", "sex_code", "transmission_mode", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -92,6 +95,27 @@ class VariantCasesFilters(BaseModel):
                 if _item_diagnosis_lab_code:
                     _items.append(_item_diagnosis_lab_code.to_dict())
             _dict['diagnosis_lab_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in sex_code (list)
+        _items = []
+        if self.sex_code:
+            for _item_sex_code in self.sex_code:
+                if _item_sex_code:
+                    _items.append(_item_sex_code.to_dict())
+            _dict['sex_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in transmission_mode (list)
+        _items = []
+        if self.transmission_mode:
+            for _item_transmission_mode in self.transmission_mode:
+                if _item_transmission_mode:
+                    _items.append(_item_transmission_mode.to_dict())
+            _dict['transmission_mode'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in zygosity (list)
+        _items = []
+        if self.zygosity:
+            for _item_zygosity in self.zygosity:
+                if _item_zygosity:
+                    _items.append(_item_zygosity.to_dict())
+            _dict['zygosity'] = _items
         return _dict
 
     @classmethod
@@ -106,7 +130,10 @@ class VariantCasesFilters(BaseModel):
         _obj = cls.model_validate({
             "analysis_catalog_code": [Aggregation.from_dict(_item) for _item in obj["analysis_catalog_code"]] if obj.get("analysis_catalog_code") is not None else None,
             "classification": [Aggregation.from_dict(_item) for _item in obj["classification"]] if obj.get("classification") is not None else None,
-            "diagnosis_lab_code": [Aggregation.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None
+            "diagnosis_lab_code": [Aggregation.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None,
+            "sex_code": [Aggregation.from_dict(_item) for _item in obj["sex_code"]] if obj.get("sex_code") is not None else None,
+            "transmission_mode": [Aggregation.from_dict(_item) for _item in obj["transmission_mode"]] if obj.get("transmission_mode") is not None else None,
+            "zygosity": [Aggregation.from_dict(_item) for _item in obj["zygosity"]] if obj.get("zygosity") is not None else None
         })
         return _obj
 

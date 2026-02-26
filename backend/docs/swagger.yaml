@@ -2106,10 +2106,28 @@ components:
             $ref: '#/components/schemas/Aggregation'
           type: array
           uniqueItems: false
+        sex_code:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        transmission_mode:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
+        zygosity:
+          items:
+            $ref: '#/components/schemas/Aggregation'
+          type: array
+          uniqueItems: false
       required:
       - analysis_catalog_code
       - classification
       - diagnosis_lab_code
+      - sex_code
+      - transmission_mode
+      - zygosity
       type: object
     VariantConsequence:
       properties:
