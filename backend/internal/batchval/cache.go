@@ -48,9 +48,6 @@ type BatchValidationCache struct {
 	TaskHasDocuments               map[int][]*types.TaskHasDocument                        // Key: document ID
 	AnalysisCatalogIDs             map[string]*types.AnalysisCatalog                       // Key: code
 	Cases                          map[CaseKey]*types.Case                                 // Key: project_id + submitter_case_id
-
-	// Task Metadata
-	TaskTypes map[string]*types.TaskType // Key: code
 }
 
 func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCache {
@@ -65,7 +62,6 @@ func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCa
 		SamplesByKey:                   make(map[SampleKey]*types.Sample),
 		SequencingExperimentsByAliquot: make(map[string][]types.SequencingExperiment),
 		SequencingExperimentsByKey:     make(map[SequencingExperimentKey]*types.SequencingExperiment),
-		TaskTypes:                      make(map[string]*types.TaskType),
 		TaskContext:                    make(map[int][]*types.TaskContext),
 		Documents:                      make(map[string]*types.Document),
 		TaskHasDocuments:               make(map[int][]*types.TaskHasDocument),
@@ -315,7 +311,7 @@ func (c *BatchValidationCache) GetValueSetCodes(valueSetType repository.ValueSet
 
 	codes, err := c.Context.ValueSetsRepo.GetCodes(valueSetType)
 	if err != nil {
-		return nil, fmt.Errorf("error retrieving codes for %s: %w", valueSetType, err)
+		return nil, fmt.Errorf("batch validation cache GetValueSetCodes: %w", err)
 	}
 
 	c.ValueSets[valueSetType] = codes

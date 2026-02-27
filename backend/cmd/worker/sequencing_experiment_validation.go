@@ -203,12 +203,15 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 
 		sample, err := r.Cache.GetSampleById(s.SampleID)
 		if err != nil {
-			return fmt.Errorf("error fetching sample by id: %w", err)
+			return fmt.Errorf("error fetching sample by id %d: %w", s.SampleID, err)
+		}
+		if sample == nil {
+			continue
 		}
 
 		sampleOrg, err := r.Cache.GetOrganizationById(sample.OrganizationId)
 		if err != nil {
-			return fmt.Errorf("error fetching sample organization by id: %w", err)
+			return fmt.Errorf("error fetching sample organization by id %d: %w", sample.OrganizationId, err)
 		}
 
 		if s.SequencingLabID == *r.SequencingLabID {
