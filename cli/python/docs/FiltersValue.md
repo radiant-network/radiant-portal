@@ -1,31 +1,30 @@
-# Aggregation
+# FiltersValue
 
-Aggregation represents an aggregation result
+FiltersValue represents an item in filters
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**count** | **int** | Count in the bucket | 
 **key** | **str** | Bucket key | 
 **label** | **str** | Label corresponding to the key | [optional] 
 
 ## Example
 
 ```python
-from radiant_python.models.aggregation import Aggregation
+from radiant_python.models.filters_value import FiltersValue
 
 # TODO update the JSON string below
 json = "{}"
-# create an instance of Aggregation from a JSON string
-aggregation_instance = Aggregation.from_json(json)
+# create an instance of FiltersValue from a JSON string
+filters_value_instance = FiltersValue.from_json(json)
 # print the JSON string representation of the object
-print(Aggregation.to_json())
+print(FiltersValue.to_json())
 
 # convert the object into a dict
-aggregation_dict = aggregation_instance.to_dict()
-# create an instance of Aggregation from a dict
-aggregation_from_dict = Aggregation.from_dict(aggregation_dict)
+filters_value_dict = filters_value_instance.to_dict()
+# create an instance of FiltersValue from a dict
+filters_value_from_dict = FiltersValue.from_dict(filters_value_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -184,13 +184,13 @@ func Test_DocumentIdsAutoComplete(t *testing.T) {
 	assertDocumentIdsAutoComplete(t, "simple", "1", 5, expected)
 }
 
-func assertGetDocumentsFilters(t *testing.T, data string, body string, expected string) {
+func assertGetDocumentsFilters(t *testing.T, data string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
-		router.POST("/documents/filters", server.DocumentsFiltersHandler(repo))
+		router.GET("/documents/filters", server.DocumentsFiltersHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/documents/filters", bytes.NewBuffer([]byte(body)))
+		req, _ := http.NewRequest("GET", "/documents/filters", bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -200,59 +200,56 @@ func assertGetDocumentsFilters(t *testing.T, data string, body string, expected 
 }
 
 func Test_GetDocumentsFilters(t *testing.T) {
-	body := `{
-			"search_criteria":[{"field": "format_code", "value": ["vcf"]}]
-		}`
 	expected := `{
 		"data_type_code":[
-			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
-			{"count":0, "key":"cnvvis", "label":"CNV Visualization"}, 
-			{"count":0, "key":"covgene", "label":"Coverage by Gene Report"}, 
-			{"count":0, "key":"exomiser", "label":"Exomiser Report"}, 
-			{"count":0, "key":"exp", "label":"Expression PNG"}, 
-			{"count":0, "key":"gcnv", "label":"Germline CNV"}, 
-			{"count":0, "key":"gsv", "label":"Germline SV"}, 
-			{"count":0, "key":"igv", "label":"IGV Track"}, 
-			{"count":0, "key":"qcrun", "label":"Sequencing Run QC Report"}, 
-			{"count":0, "key":"scnv", "label":"Somatic CNV"}, 
-			{"count":0, "key":"snv", "label":"Germline SNV"}, 
-			{"count":0, "key":"somfu", "label":"Somatic Fusion Dragen VCF"}, 
-			{"count":0, "key":"ssnv", "label":"Somatic SNV"}, 
-			{"count":0, "key":"ssup", "label":"Sequencing Data Supplement"}, 
-			{"count":0, "key":"ssv", "label":"Somatic SV"}
+			{"key":"alignment", "label":"Aligned Reads"}, 
+			{"key":"cnvvis", "label":"CNV Visualization"}, 
+			{"key":"covgene", "label":"Coverage by Gene Report"}, 
+			{"key":"exomiser", "label":"Exomiser Report"}, 
+			{"key":"exp", "label":"Expression PNG"}, 
+			{"key":"gcnv", "label":"Germline CNV"}, 
+			{"key":"gsv", "label":"Germline SV"}, 
+			{"key":"igv", "label":"IGV Track"}, 
+			{"key":"qcrun", "label":"Sequencing Run QC Report"}, 
+			{"key":"scnv", "label":"Somatic CNV"}, 
+			{"key":"snv", "label":"Germline SNV"}, 
+			{"key":"somfu", "label":"Somatic Fusion Dragen VCF"}, 
+			{"key":"ssnv", "label":"Somatic SNV"}, 
+			{"key":"ssup", "label":"Sequencing Data Supplement"}, 
+			{"key":"ssv", "label":"Somatic SV"}
 		], 
 		"format_code":[
-			{"count":0, "key":"bed", "label":"BED File"}, 
-			{"count":0, "key":"bw", "label":"BW File"}, 
-			{"count":0, "key":"cram", "label":"CRAM File"}, 
-			{"count":0, "key":"csv", "label":"CSV File"}, 
-			{"count":0, "key":"gvcf", "label":"gVCF File"}, 
-			{"count":0, "key":"html", "label":"HTML File"}, 
-			{"count":0, "key":"json", "label":"JSON File"}, 
-			{"count":0, "key":"pdf", "label":"PDF File"}, 
-			{"count":0, "key":"png", "label":"PNG File"}, 
-			{"count":0, "key":"tgz", "label":"TGZ Archive File"}, 
-			{"count":0, "key":"tsv", "label":"TSV File"}, 
-			{"count":0, "key":"txt", "label":"Text File"},
-			{"count":0, "key":"vcf", "label":"VCF File"}
+			{"key":"bed", "label":"BED File"}, 
+			{"key":"bw", "label":"BW File"}, 
+			{"key":"cram", "label":"CRAM File"}, 
+			{"key":"csv", "label":"CSV File"}, 
+			{"key":"gvcf", "label":"gVCF File"}, 
+			{"key":"html", "label":"HTML File"}, 
+			{"key":"json", "label":"JSON File"}, 
+			{"key":"pdf", "label":"PDF File"}, 
+			{"key":"png", "label":"PNG File"}, 
+			{"key":"tgz", "label":"TGZ Archive File"}, 
+			{"key":"tsv", "label":"TSV File"}, 
+			{"key":"txt", "label":"Text File"},
+			{"key":"vcf", "label":"VCF File"}
 		], 
 		"diagnosis_lab_code":[
-			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}, 
-			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}
+			{"key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"}, 
+			{"key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}
 		], 
 		"project_code":[
-			{"count":0, "key":"N1", "label":"NeuroDev Phase I"}, 
-			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}
+			{"key":"N1", "label":"NeuroDev Phase I"}, 
+			{"key":"N2", "label":"NeuroDev Phase II"}
 		], 
 		"relationship_to_proband_code":[
-			{"count":0, "key":"brother", "label":"Brother"}, 
-			{"count":0, "key":"father", "label":"Father"}, 
-			{"count":0, "key":"mother", "label":"Mother"}, 
-			{"count":0, "key":"proband", "label":"Proband"}, 
-			{"count":0, "key":"sibling", "label":"Sibling"},
-			{"count":0, "key":"sister", "label":"Sister"}
+			{"key":"brother", "label":"Brother"}, 
+			{"key":"father", "label":"Father"}, 
+			{"key":"mother", "label":"Mother"}, 
+			{"key":"proband", "label":"Proband"}, 
+			{"key":"sibling", "label":"Sibling"},
+			{"key":"sister", "label":"Sister"}
 		]}`
-	assertGetDocumentsFilters(t, "simple", body, expected)
+	assertGetDocumentsFilters(t, "simple", expected)
 }
 
 func Test_GetDocumentsDownloadUrl(t *testing.T) {

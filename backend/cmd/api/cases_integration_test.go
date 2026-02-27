@@ -88,13 +88,13 @@ func Test_CaseIdsAutoComplete(t *testing.T) {
 	assertCaseIdsAutoComplete(t, "simple", "1", 5, expected)
 }
 
-func assertGetCasesFilters(t *testing.T, data string, body string, expected string) {
+func assertGetCasesFilters(t *testing.T, data string, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
 		router := gin.Default()
-		router.POST("/cases/filters", server.CasesFiltersHandler(repo))
+		router.GET("/cases/filters", server.CasesFiltersHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/cases/filters", bytes.NewBuffer([]byte(body)))
+		req, _ := http.NewRequest("GET", "/cases/filters", bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -104,60 +104,57 @@ func assertGetCasesFilters(t *testing.T, data string, body string, expected stri
 }
 
 func Test_GetCasesFilters(t *testing.T) {
-	body := `{
-			"search_criteria":[{"field": "status_code", "value": ["draft"]}]
-		}`
 	expected := `{
 		"analysis_catalog_code":[
-			{"count":0, "key":"HYPM", "label":"Malignant Hyperthermia"},
-			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"},
-			{"count":0, "key":"MYOC", "label":"Congenital Myopathies"},
-			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}], 
+			{"key":"HYPM", "label":"Malignant Hyperthermia"},
+			{"key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"},
+			{"key":"MYOC", "label":"Congenital Myopathies"},
+			{"key":"WGA", "label":"Whole Genome Analysis"}], 
 		"diagnosis_lab_code":[
-			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
-			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}],
+			{"key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
+			{"key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}],
 		"priority_code":[
-			{"count":0, "key":"asap", "label":"Asap"},
-			{"count":0, "key":"routine", "label":"Routine"},
-			{"count":0, "key":"stat", "label":"Stat"},
-			{"count":0, "key":"urgent", "label":"Urgent"}], 
+			{"key":"asap", "label":"Asap"},
+			{"key":"routine", "label":"Routine"},
+			{"key":"stat", "label":"Stat"},
+			{"key":"urgent", "label":"Urgent"}], 
 		"project_code":[
-			{"count":0, "key":"N1", "label":"NeuroDev Phase I"}, 
-			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}], 
+			{"key":"N1", "label":"NeuroDev Phase I"}, 
+			{"key":"N2", "label":"NeuroDev Phase II"}], 
 		"ordering_organization_code":[
-			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
-			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"},
-			{"count":0, "key":"CQGC", "label":"Quebec Clinical Genomic Center"},
-			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
-			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 
-			{"count":0, "key":"UCSF", "label":"University of California San-Francisco"}], 
+			{"key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
+			{"key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"},
+			{"key":"CQGC", "label":"Quebec Clinical Genomic Center"},
+			{"key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
+			{"key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 
+			{"key":"UCSF", "label":"University of California San-Francisco"}], 
 		"status_code":[
-			{"count":0, "key":"completed", "label":"Completed"},
-			{"count":0, "key":"draft", "label":"Draft"}, 
-			{"count":0, "key":"in_progress", "label":"In Progress"}, 
-			{"count":0, "key":"incomplete", "label":"Incomplete"}, 
-			{"count":0, "key":"revoke", "label":"Revoke"},
-			{"count":0, "key":"submitted", "label":"Submitted"},
-			{"count":0, "key":"unknown", "label":"Unknown"}],
+			{"key":"completed", "label":"Completed"},
+			{"key":"draft", "label":"Draft"}, 
+			{"key":"in_progress", "label":"In Progress"}, 
+			{"key":"incomplete", "label":"Incomplete"}, 
+			{"key":"revoke", "label":"Revoke"},
+			{"key":"submitted", "label":"Submitted"},
+			{"key":"unknown", "label":"Unknown"}],
 		"resolution_status_code":[
-			{"count":0, "key":"inconclusive", "label":"Inconclusive"},
-			{"count":0, "key":"solved", "label":"Solved"},
-			{"count":0, "key":"unsolved", "label":"Unsolved"}],
+			{"key":"inconclusive", "label":"Inconclusive"},
+			{"key":"solved", "label":"Solved"},
+			{"key":"unsolved", "label":"Unsolved"}],
 		"life_status_code":[
-			{"count":0, "key":"alive", "label":"Alive"},
-			{"count":0, "key":"deceased", "label":"Deceased"},
-			{"count":0, "key":"unknown", "label":"Unknown"}],
+			{"key":"alive", "label":"Alive"},
+			{"key":"deceased", "label":"Deceased"},
+			{"key":"unknown", "label":"Unknown"}],
 		"case_category_code":[
-			{"count":0, "key":"postnatal", "label":"Postnatal"},
-			{"count":0, "key":"prenatal", "label":"Prenatal"}],
+			{"key":"postnatal", "label":"Postnatal"},
+			{"key":"prenatal", "label":"Prenatal"}],
 		"panel_code":[
-			{"count":0, "key":"EPILEP", "label":"Epilepsy"},
-			{"count":0, "key":"HEART", "label":"Heart diseases"}],
+			{"key":"EPILEP", "label":"Epilepsy"},
+			{"key":"HEART", "label":"Heart diseases"}],
 		"case_type_code":[
-			{"count":0, "key":"germline", "label":"Germline"},
-			{"count":0, "key":"somatic", "label":"Somatic"}]
+			{"key":"germline", "label":"Germline"},
+			{"key":"somatic", "label":"Somatic"}]
 		}`
-	assertGetCasesFilters(t, "simple", body, expected)
+	assertGetCasesFilters(t, "simple", expected)
 }
 
 func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected string) {
@@ -320,13 +317,13 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 	assertCaseEntityDocumentsSearchHandler(t, "simple", 21, body, expected)
 }
 
-func assertCaseEntityDocumentsFiltersHandler(t *testing.T, data string, caseId int, body string, expected string) {
+func assertCaseEntityDocumentsFiltersHandler(t *testing.T, data string, caseId int, expected string) {
 	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
-		router.POST("/cases/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repo))
+		router.GET("/cases/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repo))
 
-		req, _ := http.NewRequest("POST", fmt.Sprintf("/cases/%d/documents/filters", caseId), bytes.NewBuffer([]byte(body)))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/cases/%d/documents/filters", caseId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -336,49 +333,46 @@ func assertCaseEntityDocumentsFiltersHandler(t *testing.T, data string, caseId i
 }
 
 func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
-	body := `{
-			"search_criteria":[{"field": "format_code", "value": ["vcf"]}]
-		}`
 	expected := `{
 		"data_type_code":[
-			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
-			{"count":0, "key":"cnvvis", "label":"CNV Visualization"}, 
-			{"count":0, "key":"covgene", "label":"Coverage by Gene Report"}, 
-			{"count":0, "key":"exomiser", "label":"Exomiser Report"}, 
-			{"count":0, "key":"exp", "label":"Expression PNG"}, 
-			{"count":0, "key":"gcnv", "label":"Germline CNV"}, 
-			{"count":0, "key":"gsv", "label":"Germline SV"}, 
-			{"count":0, "key":"igv", "label":"IGV Track"}, 
-			{"count":0, "key":"qcrun", "label":"Sequencing Run QC Report"}, 
-			{"count":0, "key":"scnv", "label":"Somatic CNV"}, 
-			{"count":0, "key":"snv", "label":"Germline SNV"}, 
-			{"count":0, "key":"somfu", "label":"Somatic Fusion Dragen VCF"}, 
-			{"count":0, "key":"ssnv", "label":"Somatic SNV"}, 
-			{"count":0, "key":"ssup", "label":"Sequencing Data Supplement"}, 
-			{"count":0, "key":"ssv", "label":"Somatic SV"}
+			{"key":"alignment", "label":"Aligned Reads"}, 
+			{"key":"cnvvis", "label":"CNV Visualization"}, 
+			{"key":"covgene", "label":"Coverage by Gene Report"}, 
+			{"key":"exomiser", "label":"Exomiser Report"}, 
+			{"key":"exp", "label":"Expression PNG"}, 
+			{"key":"gcnv", "label":"Germline CNV"}, 
+			{"key":"gsv", "label":"Germline SV"}, 
+			{"key":"igv", "label":"IGV Track"}, 
+			{"key":"qcrun", "label":"Sequencing Run QC Report"}, 
+			{"key":"scnv", "label":"Somatic CNV"}, 
+			{"key":"snv", "label":"Germline SNV"}, 
+			{"key":"somfu", "label":"Somatic Fusion Dragen VCF"}, 
+			{"key":"ssnv", "label":"Somatic SNV"}, 
+			{"key":"ssup", "label":"Sequencing Data Supplement"}, 
+			{"key":"ssv", "label":"Somatic SV"}
 		], 
 		"format_code":[
-			{"count":0, "key":"bed", "label":"BED File"}, 
-			{"count":0, "key":"bw", "label":"BW File"}, 
-			{"count":0, "key":"cram", "label":"CRAM File"}, 
-			{"count":0, "key":"csv", "label":"CSV File"}, 
-			{"count":0, "key":"gvcf", "label":"gVCF File"}, 
-			{"count":0, "key":"html", "label":"HTML File"}, 
-			{"count":0, "key":"json", "label":"JSON File"}, 
-			{"count":0, "key":"pdf", "label":"PDF File"}, 
-			{"count":0, "key":"png", "label":"PNG File"}, 
-			{"count":0, "key":"tgz", "label":"TGZ Archive File"}, 
-			{"count":0, "key":"tsv", "label":"TSV File"}, 
-			{"count":0, "key":"txt", "label":"Text File"},
-			{"count":0, "key":"vcf", "label":"VCF File"} 
+			{"key":"bed", "label":"BED File"}, 
+			{"key":"bw", "label":"BW File"}, 
+			{"key":"cram", "label":"CRAM File"}, 
+			{"key":"csv", "label":"CSV File"}, 
+			{"key":"gvcf", "label":"gVCF File"}, 
+			{"key":"html", "label":"HTML File"}, 
+			{"key":"json", "label":"JSON File"}, 
+			{"key":"pdf", "label":"PDF File"}, 
+			{"key":"png", "label":"PNG File"}, 
+			{"key":"tgz", "label":"TGZ Archive File"}, 
+			{"key":"tsv", "label":"TSV File"}, 
+			{"key":"txt", "label":"Text File"},
+			{"key":"vcf", "label":"VCF File"} 
 		], 
 		"relationship_to_proband_code":[
-			{"count":0, "key":"brother", "label":"Brother"}, 
-			{"count":0, "key":"father", "label":"Father"}, 
-			{"count":0, "key":"mother", "label":"Mother"},
-			{"count":0, "key":"proband", "label":"Proband"}, 
-			{"count":0, "key":"sibling", "label":"Sibling"}, 
-			{"count":0, "key":"sister", "label":"Sister"}
+			{"key":"brother", "label":"Brother"}, 
+			{"key":"father", "label":"Father"}, 
+			{"key":"mother", "label":"Mother"},
+			{"key":"proband", "label":"Proband"}, 
+			{"key":"sibling", "label":"Sibling"}, 
+			{"key":"sister", "label":"Sister"}
 		]}`
-	assertCaseEntityDocumentsFiltersHandler(t, "simple", 21, body, expected)
+	assertCaseEntityDocumentsFiltersHandler(t, "simple", 21, expected)
 }

@@ -17,19 +17,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class Aggregation(BaseModel):
+class FiltersValue(BaseModel):
     """
-    Aggregation represents an aggregation result
+    FiltersValue represents an item in filters
     """ # noqa: E501
-    count: StrictInt = Field(description="Count in the bucket")
     key: StrictStr = Field(description="Bucket key")
     label: Optional[StrictStr] = Field(default=None, description="Label corresponding to the key")
-    __properties: ClassVar[List[str]] = ["count", "key", "label"]
+    __properties: ClassVar[List[str]] = ["key", "label"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +48,7 @@ class Aggregation(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of Aggregation from a JSON string"""
+        """Create an instance of FiltersValue from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,7 +73,7 @@ class Aggregation(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of Aggregation from a dict"""
+        """Create an instance of FiltersValue from a dict"""
         if obj is None:
             return None
 
@@ -82,7 +81,6 @@ class Aggregation(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "count": obj.get("count"),
             "key": obj.get("key"),
             "label": obj.get("label")
         })

@@ -5,7 +5,7 @@ All URIs are relative to *http://localhost*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**autocomplete_documents**](DocumentsApi.md#autocomplete_documents) | **GET** /documents/autocomplete | Get AutocompleteResult list of matching prefix
-[**documents_filters**](DocumentsApi.md#documents_filters) | **POST** /documents/filters | Get DocumentFilters documents filters
+[**documents_filters**](DocumentsApi.md#documents_filters) | **GET** /documents/filters | Get DocumentFilters documents filters
 [**get_document_download_url**](DocumentsApi.md#get_document_download_url) | **GET** /documents/{document_id}/download_url | Get pre-signed S3 download URL for a document
 [**search_documents**](DocumentsApi.md#search_documents) | **POST** /documents/search | Search documents
 
@@ -92,7 +92,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **documents_filters**
-> DocumentFilters documents_filters(filters_body_with_criteria)
+> DocumentFilters documents_filters()
 
 Get DocumentFilters documents filters
 
@@ -105,7 +105,6 @@ Retrieve DocumentFilters documents filters
 ```python
 import radiant_python
 from radiant_python.models.document_filters import DocumentFilters
-from radiant_python.models.filters_body_with_criteria import FiltersBodyWithCriteria
 from radiant_python.rest import ApiException
 from pprint import pprint
 
@@ -129,11 +128,10 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.DocumentsApi(api_client)
-    filters_body_with_criteria = radiant_python.FiltersBodyWithCriteria() # FiltersBodyWithCriteria | Filters Body
 
     try:
         # Get DocumentFilters documents filters
-        api_response = api_instance.documents_filters(filters_body_with_criteria)
+        api_response = api_instance.documents_filters()
         print("The response of DocumentsApi->documents_filters:\n")
         pprint(api_response)
     except Exception as e:
@@ -144,10 +142,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **filters_body_with_criteria** | [**FiltersBodyWithCriteria**](FiltersBodyWithCriteria.md)| Filters Body | 
+This endpoint does not need any parameter.
 
 ### Return type
 
@@ -159,7 +154,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 ### HTTP response details

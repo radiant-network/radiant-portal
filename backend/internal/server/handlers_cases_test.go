@@ -54,55 +54,55 @@ func (m *MockRepository) SearchById(prefix string, limit int) (*[]types.Autocomp
 	return &result, nil
 }
 
-func (m *MockRepository) GetCasesFilters(query types.AggQuery) (*types.CaseFilters, error) {
+func (m *MockRepository) GetCasesFilters() (*types.CaseFilters, error) {
 	var result = types.CaseFilters{
-		Status: []types.Aggregation{
-			{Bucket: "draft", Label: "Draft"},
-			{Bucket: "in_progress", Label: "In Progress"},
-			{Bucket: "revoke", Label: "Revoke"},
+		Status: []types.FiltersValue{
+			{Key: "draft", Label: "Draft"},
+			{Key: "in_progress", Label: "In Progress"},
+			{Key: "revoke", Label: "Revoke"},
 		},
-		Priority: []types.Aggregation{
-			{Bucket: "routine", Label: "Routine"},
-			{Bucket: "asap", Label: "Asap"},
-			{Bucket: "stat", Label: "Stat"},
+		Priority: []types.FiltersValue{
+			{Key: "routine", Label: "Routine"},
+			{Key: "asap", Label: "Asap"},
+			{Key: "stat", Label: "Stat"},
 		},
-		AnalysisCatalog: []types.Aggregation{
-			{Bucket: "WGA", Label: "Whole Genome Analysis"},
-			{Bucket: "IDGD", Label: "Intellectual Deficiency and Global Developmental Delay"},
+		AnalysisCatalog: []types.FiltersValue{
+			{Key: "WGA", Label: "Whole Genome Analysis"},
+			{Key: "IDGD", Label: "Intellectual Deficiency and Global Developmental Delay"},
 		},
-		Project: []types.Aggregation{
-			{Bucket: "N1", Label: "NeuroDev Phase I"},
-			{Bucket: "N2", Label: "NeuroDev Phase II"},
+		Project: []types.FiltersValue{
+			{Key: "N1", Label: "NeuroDev Phase I"},
+			{Key: "N2", Label: "NeuroDev Phase II"},
 		},
-		DiagnosisLab: []types.Aggregation{
-			{Bucket: "CHOP", Label: "Children Hospital of Philadelphia"},
-			{Bucket: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
+		DiagnosisLab: []types.FiltersValue{
+			{Key: "CHOP", Label: "Children Hospital of Philadelphia"},
+			{Key: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
 		},
-		OrderingOrganization: []types.Aggregation{
-			{Bucket: "CHOP", Label: "Children Hospital of Philadelphia"},
-			{Bucket: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
+		OrderingOrganization: []types.FiltersValue{
+			{Key: "CHOP", Label: "Children Hospital of Philadelphia"},
+			{Key: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
 		},
-		Panel: []types.Aggregation{
-			{Bucket: "EPILEP", Label: "Epilepsy"},
-			{Bucket: "HEART", Label: "Heart diseases"},
+		Panel: []types.FiltersValue{
+			{Key: "EPILEP", Label: "Epilepsy"},
+			{Key: "HEART", Label: "Heart diseases"},
 		},
-		LifeStatus: []types.Aggregation{
-			{Bucket: "alive", Label: "Alive"},
-			{Bucket: "deceased", Label: "Deceased"},
-			{Bucket: "unknown", Label: "Unknown"},
+		LifeStatus: []types.FiltersValue{
+			{Key: "alive", Label: "Alive"},
+			{Key: "deceased", Label: "Deceased"},
+			{Key: "unknown", Label: "Unknown"},
 		},
-		ResolutionStatus: []types.Aggregation{
-			{Bucket: "inconclusive", Label: "Inconclusive"},
-			{Bucket: "solved", Label: "Solved"},
-			{Bucket: "unsolved", Label: "Unsolved"},
+		ResolutionStatus: []types.FiltersValue{
+			{Key: "inconclusive", Label: "Inconclusive"},
+			{Key: "solved", Label: "Solved"},
+			{Key: "unsolved", Label: "Unsolved"},
 		},
-		CaseCategory: []types.Aggregation{
-			{Bucket: "prenatal", Label: "Prenatal"},
-			{Bucket: "postnatal", Label: "Postnatal"},
+		CaseCategory: []types.FiltersValue{
+			{Key: "prenatal", Label: "Prenatal"},
+			{Key: "postnatal", Label: "Postnatal"},
 		},
-		CaseType: []types.Aggregation{
-			{Bucket: "germline", Label: "Germline"},
-			{Bucket: "somatic", Label: "Somatic"},
+		CaseType: []types.FiltersValue{
+			{Key: "germline", Label: "Germline"},
+			{Key: "somatic", Label: "Somatic"},
 		},
 	}
 	return &result, nil
@@ -214,51 +214,51 @@ func Test_CasesAutocompleteHandler(t *testing.T) {
 func Test_CasesFiltersHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/cases/filters", CasesFiltersHandler(repo))
+	router.GET("/cases/filters", CasesFiltersHandler(repo))
 
-	req, _ := http.NewRequest("POST", "/cases/filters", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/cases/filters", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"analysis_catalog_code":[
-			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}, 
-			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"}
+			{"key":"WGA", "label":"Whole Genome Analysis"}, 
+			{"key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"}
 		], "diagnosis_lab_code":[
-			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
-			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+			{"key":"CHOP", "label":"Children Hospital of Philadelphia"},
+			{"key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], "priority_code":[
-			{"count":0, "key":"routine", "label":"Routine"},
-			{"count":0, "key":"asap", "label":"Asap"},
-			{"count":0, "key":"stat", "label":"Stat"}
+			{"key":"routine", "label":"Routine"},
+			{"key":"asap", "label":"Asap"},
+			{"key":"stat", "label":"Stat"}
 		], "project_code":[
-			{"count":0, "key":"N1", "label":"NeuroDev Phase I"},
-			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}
+			{"key":"N1", "label":"NeuroDev Phase I"},
+			{"key":"N2", "label":"NeuroDev Phase II"}
 		], "ordering_organization_code":[
-			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
-			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+			{"key":"CHOP", "label":"Children Hospital of Philadelphia"},
+			{"key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], "status_code":[
-			{"count":0, "key":"draft", "label":"Draft"},
-			{"count":0, "key":"in_progress", "label":"In Progress"},
-			{"count":0, "key":"revoke", "label":"Revoke"}
+			{"key":"draft", "label":"Draft"},
+			{"key":"in_progress", "label":"In Progress"},
+			{"key":"revoke", "label":"Revoke"}
 		], "resolution_status_code":[
-			{"count":0, "key":"inconclusive", "label":"Inconclusive"},
-			{"count":0, "key":"solved", "label":"Solved"},
-			{"count":0, "key":"unsolved", "label":"Unsolved"}
+			{"key":"inconclusive", "label":"Inconclusive"},
+			{"key":"solved", "label":"Solved"},
+			{"key":"unsolved", "label":"Unsolved"}
 		], "life_status_code":[
-			{"count":0, "key":"alive", "label":"Alive"},
-			{"count":0, "key":"deceased", "label":"Deceased"},
-			{"count":0, "key":"unknown", "label":"Unknown"}
+			{"key":"alive", "label":"Alive"},
+			{"key":"deceased", "label":"Deceased"},
+			{"key":"unknown", "label":"Unknown"}
 		], "case_category_code":[
-			{"count":0, "key":"prenatal", "label":"Prenatal"},
-			{"count":0, "key":"postnatal", "label":"Postnatal"}
+			{"key":"prenatal", "label":"Prenatal"},
+			{"key":"postnatal", "label":"Postnatal"}
 		], "panel_code":[
-			{"count":0, "key":"EPILEP", "label":"Epilepsy"},
-			{"count":0, "key":"HEART", "label":"Heart diseases"}
+			{"key":"EPILEP", "label":"Epilepsy"},
+			{"key":"HEART", "label":"Heart diseases"}
 		], "case_type_code":[
-			{"count":0, "key":"germline", "label":"Germline"},
-			{"count":0, "key":"somatic", "label":"Somatic"}
+			{"key":"germline", "label":"Germline"},
+			{"key":"somatic", "label":"Somatic"}
 		]
 	}`, w.Body.String())
 }
@@ -388,34 +388,34 @@ func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
 func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/cases/:case_id/documents/filters", CaseEntityDocumentsFiltersHandler(repo))
+	router.GET("/cases/:case_id/documents/filters", CaseEntityDocumentsFiltersHandler(repo))
 
-	req, _ := http.NewRequest("POST", "/cases/1/documents/filters", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/cases/1/documents/filters", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"data_type_code":[
-			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
-			{"count":0, "key":"snv", "label":"Germline SNV"}, 
-			{"count":0, "key":"ssnv", "label":"Somatic SNV"}
+			{"key":"alignment", "label":"Aligned Reads"}, 
+			{"key":"snv", "label":"Germline SNV"}, 
+			{"key":"ssnv", "label":"Somatic SNV"}
 		], 
 		"format_code":[
-			{"count":0, "key":"cram", "label":"CRAM File"}, 
-			{"count":0, "key":"vcf", "label":"VCF File"}
+			{"key":"cram", "label":"CRAM File"}, 
+			{"key":"vcf", "label":"VCF File"}
 		], 
 		"diagnosis_lab_code":[
-			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
-			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+			{"key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
+			{"key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], 
 		"project_code":[
-			{"count":0, "key":"N1", "label":"NeuroDev Phase I"}, 
-			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}
+			{"key":"N1", "label":"NeuroDev Phase I"}, 
+			{"key":"N2", "label":"NeuroDev Phase II"}
 		], 
 		"relationship_to_proband_code":[
-			{"count":0, "key":"proband", "label":"Proband"}, 
-			{"count":0, "key":"father", "label":"Father"}, 
-			{"count":0, "key":"mother", "label":"Mother"}
+			{"key":"proband", "label":"Proband"}, 
+			{"key":"father", "label":"Father"}, 
+			{"key":"mother", "label":"Mother"}
 		]}`, w.Body.String())
 }
