@@ -626,18 +626,21 @@
           "het": "Heterozygote",
           "wt": "Wild Type",
           "hom": "Homozygote",
+          "hem": "Hemizygous",
           "unk": "Unknown"
         },
         "mother_zygosity": {
           "het": "Heterozygote",
           "wt": "Wild Type",
           "hom": "Homozygote",
+          "hem": "Hemizygous",
           "unk": "Unknown"
         },
         "zygosity": {
           "het": "Heterozygote",
           "wt": "Wild Type",
           "hom": "Homozygote",
+          "hem": "Hemizygous",
           "unk": "Unknown"
         }
       },
@@ -1668,10 +1671,16 @@
           "zygosity_tooltip": "Zygosity"
         },
         "filters": {
-          "institution": "Diagnostic Lab",
-          "search_hpo": "Phenotype",
+          "analysis_catalog_code": "Analysis",
+          "diagnosis_lab_code": "Diagnostic Lab",
+          "filter_fail": "Fail",
+          "filter_is_pass": "Filter",
+          "filter_pass": "Pass",
+          "search_hpo": "Search by phenotype",
           "search_hpo_placeholder": "Filter HPO phenotype",
-          "test": "Analysis"
+          "sex_code": "Sex",
+          "transmission_mode": "Transmission",
+          "zygosity": "Zygosity"
         },
         "seq_id_abrv": "Seq.",
         "view_case": "View Case",

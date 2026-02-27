@@ -16,7 +16,7 @@ import SliderUninterpretedCaseSheet from '@/entity/cases/slider/slider-uninterpr
 import { useSliderCasePatientIdNavigation } from '@/entity/cases/slider/use-slider-case-navigation';
 import { variantsApi } from '@/utils/api';
 
-import UninterpretedCasesFilters, { UninterpretedCasesFiltersState } from './table/uninterpreted-cases-filters';
+import UninterpretedCasesTableFilters from './table/uninterpreted-cases-table-filters';
 import {
   getUninterpretedCasesColumns,
   uninterpretedCasesDefaultSettings,
@@ -46,41 +46,13 @@ function UninterpretedCasesTable() {
   });
   const [additionalFields, setAdditionalFields] = useState<string[]>([]);
 
-  const [initialFilters, setInitialFilters] = useState<UninterpretedCasesFiltersState>({
-    phenotype: '',
-    institution: [],
-    test: [],
-  });
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
 
-  const searchCriteria: SearchCriterion[] = useMemo(() => {
-    const criteria: SearchCriterion[] = [];
-
-    if (initialFilters.phenotype) {
-      criteria.push({
-        field: 'phenotypes_term',
-        value: [initialFilters.phenotype],
-        operator: 'contains',
-      });
-    }
-
-    if (initialFilters.institution && initialFilters.institution.length > 0) {
-      criteria.push({
-        field: 'diagnosis_lab_code',
-        value: [...initialFilters.institution],
-      });
-    }
-
-    if (initialFilters.test && initialFilters.test.length > 0) {
-      criteria.push({
-        field: 'analysis_catalog_code',
-        value: [...initialFilters.test],
-      });
-    }
-
-    return criteria;
-  }, [initialFilters.phenotype, initialFilters.institution, initialFilters.test]);
-
-  const { data, isLoading } = useSWR<VariantUninterpretedCasesSearchResponse, ApiError, UninterpretedCasesSearchInput>(
+  const { data, isLoading, isValidating } = useSWR<
+    VariantUninterpretedCasesSearchResponse,
+    ApiError,
+    UninterpretedCasesSearchInput
+  >(
     {
       key: 'uninterpreted-cases',
       locusId: params.locusId!,
@@ -114,7 +86,9 @@ function UninterpretedCasesTable() {
       <DataTable
         id="uninterpreted-cases"
         columns={getUninterpretedCasesColumns(t)}
-        TableFilters={<UninterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />}
+        TableFilters={
+          <UninterpretedCasesTableFilters loading={isLoading && !isValidating} setSearchCriteria={setSearchCriteria} />
+        }
         data={casesData}
         defaultColumnSettings={uninterpretedCasesDefaultSettings}
         loadingStates={{
