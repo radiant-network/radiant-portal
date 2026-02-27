@@ -17,12 +17,12 @@ var Classifications = []Classification{
 	{Code: "LA6675-8", Label: "benign"},
 }
 
-func MapToAggregationArray() []Aggregation {
-	var aggregations = make([]Aggregation, len(Classifications))
+func MapToFiltersValueArray() []FiltersValue {
+	var filtersValues = make([]FiltersValue, len(Classifications))
 	for i, c := range Classifications {
-		aggregations[i] = Aggregation{Bucket: c.Code, Label: c.Label}
+		filtersValues[i] = FiltersValue{Key: c.Code, Label: c.Label}
 	}
-	return aggregations
+	return filtersValues
 }
 
 func GetLabelFromCode(code string) (string, error) {

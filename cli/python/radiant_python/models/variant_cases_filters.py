@@ -19,7 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
-from radiant_python.models.aggregation import Aggregation
+from radiant_python.models.filters_value import FiltersValue
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,12 +27,12 @@ class VariantCasesFilters(BaseModel):
     """
     VariantCasesFilters
     """ # noqa: E501
-    analysis_catalog_code: List[Aggregation]
-    classification: List[Aggregation]
-    diagnosis_lab_code: List[Aggregation]
-    sex_code: List[Aggregation]
-    transmission_mode: List[Aggregation]
-    zygosity: List[Aggregation]
+    analysis_catalog_code: List[FiltersValue]
+    classification: List[FiltersValue]
+    diagnosis_lab_code: List[FiltersValue]
+    sex_code: List[FiltersValue]
+    transmission_mode: List[FiltersValue]
+    zygosity: List[FiltersValue]
     __properties: ClassVar[List[str]] = ["analysis_catalog_code", "classification", "diagnosis_lab_code", "sex_code", "transmission_mode", "zygosity"]
 
     model_config = ConfigDict(
@@ -128,12 +128,12 @@ class VariantCasesFilters(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "analysis_catalog_code": [Aggregation.from_dict(_item) for _item in obj["analysis_catalog_code"]] if obj.get("analysis_catalog_code") is not None else None,
-            "classification": [Aggregation.from_dict(_item) for _item in obj["classification"]] if obj.get("classification") is not None else None,
-            "diagnosis_lab_code": [Aggregation.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None,
-            "sex_code": [Aggregation.from_dict(_item) for _item in obj["sex_code"]] if obj.get("sex_code") is not None else None,
-            "transmission_mode": [Aggregation.from_dict(_item) for _item in obj["transmission_mode"]] if obj.get("transmission_mode") is not None else None,
-            "zygosity": [Aggregation.from_dict(_item) for _item in obj["zygosity"]] if obj.get("zygosity") is not None else None
+            "analysis_catalog_code": [FiltersValue.from_dict(_item) for _item in obj["analysis_catalog_code"]] if obj.get("analysis_catalog_code") is not None else None,
+            "classification": [FiltersValue.from_dict(_item) for _item in obj["classification"]] if obj.get("classification") is not None else None,
+            "diagnosis_lab_code": [FiltersValue.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None,
+            "sex_code": [FiltersValue.from_dict(_item) for _item in obj["sex_code"]] if obj.get("sex_code") is not None else None,
+            "transmission_mode": [FiltersValue.from_dict(_item) for _item in obj["transmission_mode"]] if obj.get("transmission_mode") is not None else None,
+            "zygosity": [FiltersValue.from_dict(_item) for _item in obj["zygosity"]] if obj.get("zygosity") is not None else None
         })
         return _obj
 

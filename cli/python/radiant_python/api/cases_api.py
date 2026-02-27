@@ -27,7 +27,6 @@ from radiant_python.models.create_batch_response import CreateBatchResponse
 from radiant_python.models.create_case_batch_body import CreateCaseBatchBody
 from radiant_python.models.document_filters import DocumentFilters
 from radiant_python.models.documents_search_response import DocumentsSearchResponse
-from radiant_python.models.filters_body_with_criteria import FiltersBodyWithCriteria
 from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
 
 from radiant_python.api_client import ApiClient, RequestSerialized
@@ -602,7 +601,6 @@ class CasesApi:
     def case_entity_documents_filters(
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
-        filters_body_with_criteria: Annotated[FiltersBodyWithCriteria, Field(description="Filters Body")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -622,8 +620,6 @@ class CasesApi:
 
         :param case_id: Case ID (required)
         :type case_id: int
-        :param filters_body_with_criteria: Filters Body (required)
-        :type filters_body_with_criteria: FiltersBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -648,7 +644,6 @@ class CasesApi:
 
         _param = self._case_entity_documents_filters_serialize(
             case_id=case_id,
-            filters_body_with_criteria=filters_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -674,7 +669,6 @@ class CasesApi:
     def case_entity_documents_filters_with_http_info(
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
-        filters_body_with_criteria: Annotated[FiltersBodyWithCriteria, Field(description="Filters Body")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -694,8 +688,6 @@ class CasesApi:
 
         :param case_id: Case ID (required)
         :type case_id: int
-        :param filters_body_with_criteria: Filters Body (required)
-        :type filters_body_with_criteria: FiltersBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -720,7 +712,6 @@ class CasesApi:
 
         _param = self._case_entity_documents_filters_serialize(
             case_id=case_id,
-            filters_body_with_criteria=filters_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -746,7 +737,6 @@ class CasesApi:
     def case_entity_documents_filters_without_preload_content(
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
-        filters_body_with_criteria: Annotated[FiltersBodyWithCriteria, Field(description="Filters Body")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -766,8 +756,6 @@ class CasesApi:
 
         :param case_id: Case ID (required)
         :type case_id: int
-        :param filters_body_with_criteria: Filters Body (required)
-        :type filters_body_with_criteria: FiltersBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -792,7 +780,6 @@ class CasesApi:
 
         _param = self._case_entity_documents_filters_serialize(
             case_id=case_id,
-            filters_body_with_criteria=filters_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -813,7 +800,6 @@ class CasesApi:
     def _case_entity_documents_filters_serialize(
         self,
         case_id,
-        filters_body_with_criteria,
         _request_auth,
         _content_type,
         _headers,
@@ -841,8 +827,6 @@ class CasesApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if filters_body_with_criteria is not None:
-            _body_params = filters_body_with_criteria
 
 
         # set the HTTP header `Accept`
@@ -853,19 +837,6 @@ class CasesApi:
                 ]
             )
 
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params['Content-Type'] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
         _auth_settings: List[str] = [
@@ -873,7 +844,7 @@ class CasesApi:
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
+            method='GET',
             resource_path='/cases/{case_id}/documents/filters',
             path_params=_path_params,
             query_params=_query_params,
@@ -1188,7 +1159,6 @@ class CasesApi:
     @validate_call
     def cases_filters(
         self,
-        filters_body_with_criteria: Annotated[FiltersBodyWithCriteria, Field(description="Filters Body")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1206,8 +1176,6 @@ class CasesApi:
 
         Retrieve CaseFilters cases filters
 
-        :param filters_body_with_criteria: Filters Body (required)
-        :type filters_body_with_criteria: FiltersBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1231,7 +1199,6 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._cases_filters_serialize(
-            filters_body_with_criteria=filters_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1256,7 +1223,6 @@ class CasesApi:
     @validate_call
     def cases_filters_with_http_info(
         self,
-        filters_body_with_criteria: Annotated[FiltersBodyWithCriteria, Field(description="Filters Body")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1274,8 +1240,6 @@ class CasesApi:
 
         Retrieve CaseFilters cases filters
 
-        :param filters_body_with_criteria: Filters Body (required)
-        :type filters_body_with_criteria: FiltersBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1299,7 +1263,6 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._cases_filters_serialize(
-            filters_body_with_criteria=filters_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1324,7 +1287,6 @@ class CasesApi:
     @validate_call
     def cases_filters_without_preload_content(
         self,
-        filters_body_with_criteria: Annotated[FiltersBodyWithCriteria, Field(description="Filters Body")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1342,8 +1304,6 @@ class CasesApi:
 
         Retrieve CaseFilters cases filters
 
-        :param filters_body_with_criteria: Filters Body (required)
-        :type filters_body_with_criteria: FiltersBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1367,7 +1327,6 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._cases_filters_serialize(
-            filters_body_with_criteria=filters_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1387,7 +1346,6 @@ class CasesApi:
 
     def _cases_filters_serialize(
         self,
-        filters_body_with_criteria,
         _request_auth,
         _content_type,
         _headers,
@@ -1413,8 +1371,6 @@ class CasesApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if filters_body_with_criteria is not None:
-            _body_params = filters_body_with_criteria
 
 
         # set the HTTP header `Accept`
@@ -1425,19 +1381,6 @@ class CasesApi:
                 ]
             )
 
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params['Content-Type'] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
         _auth_settings: List[str] = [
@@ -1445,7 +1388,7 @@ class CasesApi:
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
+            method='GET',
             resource_path='/cases/filters',
             path_params=_path_params,
             query_params=_query_params,

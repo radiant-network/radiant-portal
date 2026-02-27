@@ -148,9 +148,9 @@ func (Document) TableName() string {
 }
 
 type DocumentFilters struct {
-	Project               []Aggregation `json:"project_code,omitempty"`
-	DiagnosisLab          []Aggregation `json:"diagnosis_lab_code,omitempty"`
-	RelationshipToProband []Aggregation `json:"relationship_to_proband_code" validate:"required"`
-	Format                []Aggregation `json:"format_code" validate:"required"`
-	DataType              []Aggregation `json:"data_type_code" validate:"required"`
+	Project               []FiltersValue `json:"project_code,omitempty"`
+	DiagnosisLab          []FiltersValue `json:"diagnosis_lab_code,omitempty"`
+	RelationshipToProband []FiltersValue `json:"relationship_to_proband_code" validate:"required"`
+	Format                []FiltersValue `json:"format_code" validate:"required"`
+	DataType              []FiltersValue `json:"data_type_code" validate:"required"`
 }

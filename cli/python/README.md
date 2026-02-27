@@ -98,13 +98,13 @@ Class | Method | HTTP request | Description
 *BatchesApi* | [**get_batch**](docs/BatchesApi.md#get_batch) | **GET** /batches/{batchId} | Retrieve a batch by ID
 *CasesApi* | [**autocomplete_cases**](docs/CasesApi.md#autocomplete_cases) | **GET** /cases/autocomplete | Get AutocompleteResult list of matching prefix
 *CasesApi* | [**case_entity**](docs/CasesApi.md#case_entity) | **GET** /cases/{case_id} | Get CaseEntity case entity
-*CasesApi* | [**case_entity_documents_filters**](docs/CasesApi.md#case_entity_documents_filters) | **POST** /cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
+*CasesApi* | [**case_entity_documents_filters**](docs/CasesApi.md#case_entity_documents_filters) | **GET** /cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
 *CasesApi* | [**case_entity_documents_search**](docs/CasesApi.md#case_entity_documents_search) | **POST** /cases/{case_id}/documents/search | Search DocumentResult list for a case entity
-*CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **POST** /cases/filters | Get CaseFilters cases filters
+*CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **GET** /cases/filters | Get CaseFilters cases filters
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /cases/batch | Create a new case batch
 *CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /cases/search | Search cases
 *DocumentsApi* | [**autocomplete_documents**](docs/DocumentsApi.md#autocomplete_documents) | **GET** /documents/autocomplete | Get AutocompleteResult list of matching prefix
-*DocumentsApi* | [**documents_filters**](docs/DocumentsApi.md#documents_filters) | **POST** /documents/filters | Get DocumentFilters documents filters
+*DocumentsApi* | [**documents_filters**](docs/DocumentsApi.md#documents_filters) | **GET** /documents/filters | Get DocumentFilters documents filters
 *DocumentsApi* | [**get_document_download_url**](docs/DocumentsApi.md#get_document_download_url) | **GET** /documents/{document_id}/download_url | Get pre-signed S3 download URL for a document
 *DocumentsApi* | [**search_documents**](docs/DocumentsApi.md#search_documents) | **POST** /documents/search | Search documents
 *GenesApi* | [**gene_auto_complete**](docs/GenesApi.md#gene_auto_complete) | **GET** /genes/autocomplete | Get AutoCompleteGene list of matching input string with highlighted
@@ -200,7 +200,7 @@ Class | Method | HTTP request | Description
  - [ExternalFrequencies](docs/ExternalFrequencies.md)
  - [Facet](docs/Facet.md)
  - [FamilyHistoryBatch](docs/FamilyHistoryBatch.md)
- - [FiltersBodyWithCriteria](docs/FiltersBodyWithCriteria.md)
+ - [FiltersValue](docs/FiltersValue.md)
  - [GenePanelCondition](docs/GenePanelCondition.md)
  - [GenePanelConditions](docs/GenePanelConditions.md)
  - [GeneResult](docs/GeneResult.md)

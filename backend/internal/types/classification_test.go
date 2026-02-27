@@ -1,23 +1,24 @@
 package types
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_MapToAggregationArray(t *testing.T) {
-	var agg = MapToAggregationArray()
+	var agg = MapToFiltersValueArray()
 
 	assert.Len(t, agg, 5)
-	assert.Equal(t, "LA6668-3", agg[0].Bucket)
+	assert.Equal(t, "LA6668-3", agg[0].Key)
 	assert.Equal(t, "pathogenic", agg[0].Label)
-	assert.Equal(t, "LA26332-9", agg[1].Bucket)
+	assert.Equal(t, "LA26332-9", agg[1].Key)
 	assert.Equal(t, "likelyPathogenic", agg[1].Label)
-	assert.Equal(t, "LA26333-7", agg[2].Bucket)
+	assert.Equal(t, "LA26333-7", agg[2].Key)
 	assert.Equal(t, "vus", agg[2].Label)
-	assert.Equal(t, "LA26334-5", agg[3].Bucket)
+	assert.Equal(t, "LA26334-5", agg[3].Key)
 	assert.Equal(t, "likelyBenign", agg[3].Label)
-	assert.Equal(t, "LA6675-8", agg[4].Bucket)
+	assert.Equal(t, "LA6675-8", agg[4].Key)
 	assert.Equal(t, "benign", agg[4].Label)
 }
 

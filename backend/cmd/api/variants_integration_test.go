@@ -224,46 +224,46 @@ func assertGetVariantCasesFilters(t *testing.T, data string, expected string) {
 func Test_GetVariantCasesFilters(t *testing.T) {
 	expected := `{
 		"analysis_catalog_code":[
-			{"count":0, "key":"HYPM", "label":"Malignant Hyperthermia"},
-			{"count":0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"},
-			{"count":0, "key":"MYOC", "label":"Congenital Myopathies"},
-			{"count":0, "key":"WGA", "label":"Whole Genome Analysis"}
+			{"key":"HYPM", "label":"Malignant Hyperthermia"},
+			{"key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"},
+			{"key":"MYOC", "label":"Congenital Myopathies"},
+			{"key":"WGA", "label":"Whole Genome Analysis"}
 		], 
 		"classification": [
-			{"count": 0, "key":"LA6668-3", "label":"pathogenic"}, 
-			{"count": 0, "key":"LA26332-9", "label":"likelyPathogenic"}, 
-			{"count": 0, "key":"LA26333-7", "label":"vus"}, 
-			{"count": 0, "key":"LA26334-5", "label":"likelyBenign"}, 
-			{"count": 0, "key":"LA6675-8", "label":"benign"} 
+			{"key":"LA6668-3", "label":"pathogenic"}, 
+			{"key":"LA26332-9", "label":"likelyPathogenic"}, 
+			{"key":"LA26333-7", "label":"vus"}, 
+			{"key":"LA26334-5", "label":"likelyBenign"}, 
+			{"key":"LA6675-8", "label":"benign"} 
 		],
 		"diagnosis_lab_code":[
-			{"count":0, "key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
-			{"count":0, "key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}			
+			{"key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
+			{"key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}			
 		],
 		"sex_code": [
-			{"count": 0, "key":"female", "label":"Female"},
-			{"count": 0, "key":"male", "label":"Male"},
-			{"count": 0, "key":"unknown", "label":"Unknown"}
+			{"key":"female", "label":"Female"},
+			{"key":"male", "label":"Male"},
+			{"key":"unknown", "label":"Unknown"}
 		],
 		"zygosity": [
-			{"count": 0, "key":"HOM"},
-			{"count": 0, "key":"HET"},
-			{"count": 0, "key":"HEM"},
-			{"count": 0, "key":"UNK"}
+			{"key":"HOM"},
+			{"key":"HET"},
+			{"key":"HEM"},
+			{"key":"UNK"}
 		],
 		"transmission_mode": [
-			{"count": 0, "key":"autosomal_dominant_de_novo"},
-			{"count": 0, "key":"autosomal_dominant"},
-			{"count": 0, "key":"autosomal_recessive"},
-			{"count": 0, "key":"x_linked_dominant_de_novo"},
-			{"count": 0, "key":"x_linked_recessive_de_novo"},
-			{"count": 0, "key":"x_linked_dominant"},
-			{"count": 0, "key":"x_linked_recessive"},
-			{"count": 0, "key":"non_carrier_proband"},
-			{"count": 0, "key":"unknown_parents_genotype"},
-			{"count": 0, "key":"unknown_father_genotype"},
-			{"count": 0, "key":"unknown_mother_genotype"},
-			{"count": 0, "key":"unknown_proband_genotype"}
+			{"key":"autosomal_dominant_de_novo"},
+			{"key":"autosomal_dominant"},
+			{"key":"autosomal_recessive"},
+			{"key":"x_linked_dominant_de_novo"},
+			{"key":"x_linked_recessive_de_novo"},
+			{"key":"x_linked_dominant"},
+			{"key":"x_linked_recessive"},
+			{"key":"non_carrier_proband"},
+			{"key":"unknown_parents_genotype"},
+			{"key":"unknown_father_genotype"},
+			{"key":"unknown_mother_genotype"},
+			{"key":"unknown_proband_genotype"}
 		]
 	}`
 	assertGetVariantCasesFilters(t, "simple", expected)

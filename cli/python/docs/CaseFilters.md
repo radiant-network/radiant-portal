@@ -5,17 +5,17 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**analysis_catalog_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**case_category_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**case_type_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**diagnosis_lab_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**life_status_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**ordering_organization_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**panel_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**priority_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**project_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**resolution_status_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**status_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**analysis_catalog_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**case_category_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**case_type_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**diagnosis_lab_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**life_status_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**ordering_organization_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**panel_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**priority_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**project_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**resolution_status_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**status_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 
 ## Example
 

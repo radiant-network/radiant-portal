@@ -5,11 +5,11 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**data_type_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**diagnosis_lab_code** | [**List[Aggregation]**](Aggregation.md) |  | [optional] 
-**format_code** | [**List[Aggregation]**](Aggregation.md) |  | 
-**project_code** | [**List[Aggregation]**](Aggregation.md) |  | [optional] 
-**relationship_to_proband_code** | [**List[Aggregation]**](Aggregation.md) |  | 
+**data_type_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**diagnosis_lab_code** | [**List[FiltersValue]**](FiltersValue.md) |  | [optional] 
+**format_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**project_code** | [**List[FiltersValue]**](FiltersValue.md) |  | [optional] 
+**relationship_to_proband_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 
 ## Example
 

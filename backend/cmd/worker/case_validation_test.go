@@ -110,7 +110,7 @@ func (m *CaseValidationMockRepo) GetCaseBySubmitterCaseIdAndProjectId(submitterC
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetCasesFilters(userQuery types.AggQuery) (*repository.CaseFilters, error) {
+func (m *CaseValidationMockRepo) GetCasesFilters() (*repository.CaseFilters, error) {
 	return nil, nil
 }
 

@@ -145,11 +145,11 @@ func (r *DocumentsRepository) SearchById(prefix string, limit int) (*[]Autocompl
 
 func (r *DocumentsRepository) GetDocumentsFilters(withProjectAndLab bool) (*DocumentFilters, error) {
 
-	var project []Aggregation
-	var diagnosisLab []Aggregation
-	var relationship []Aggregation
-	var format []Aggregation
-	var dataType []Aggregation
+	var project []types.FiltersValue
+	var diagnosisLab []types.FiltersValue
+	var relationship []types.FiltersValue
+	var format []types.FiltersValue
+	var dataType []types.FiltersValue
 	var err error
 
 	if withProjectAndLab {

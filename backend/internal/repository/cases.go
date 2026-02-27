@@ -30,7 +30,7 @@ type CasesRepository struct {
 type CasesDAO interface {
 	SearchCases(userQuery types.ListQuery) (*[]CaseResult, *int64, error)
 	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
-	GetCasesFilters(userQuery types.AggQuery) (*CaseFilters, error)
+	GetCasesFilters() (*CaseFilters, error)
 	GetCaseEntity(caseId int) (*CaseEntity, error)
 	CreateCase(*Case) error
 	CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error
@@ -140,7 +140,7 @@ func (r *CasesRepository) SearchById(prefix string, limit int) (*[]AutocompleteR
 	return &autocompleteResult, nil
 }
 
-func (r *CasesRepository) GetCasesFilters(query types.AggQuery) (*CaseFilters, error) {
+func (r *CasesRepository) GetCasesFilters() (*CaseFilters, error) {
 	status, err := utils.GetFilter(r.db, types.StatusTable, "name_en", nil)
 	if err != nil {
 		return nil, err

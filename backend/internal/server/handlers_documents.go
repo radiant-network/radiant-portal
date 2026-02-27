@@ -86,24 +86,12 @@ func DocumentsAutocompleteHandler(repo repository.DocumentsDAO) gin.HandlerFunc 
 // @Description Retrieve types.DocumentFilters documents filters
 // @Tags documents
 // @Security bearerauth
-// @Param			message	body		types.FiltersBodyWithCriteria	true	"Filters Body"
-// @Accept json
 // @Produce json
 // @Success 200 {object} types.DocumentFilters
 // @Failure 500 {object} types.ApiError
-// @Router /documents/filters [post]
+// @Router /documents/filters [get]
 func DocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var (
-			body types.FiltersBodyWithCriteria
-		)
-
-		// Bind JSON to the struct
-		if err := c.ShouldBindJSON(&body); err != nil {
-			// Return a 400 Bad Request if validation fails
-			HandleValidationError(c, err)
-			return
-		}
 		filters, err := repo.GetDocumentsFilters(true)
 		if err != nil {
 			HandleError(c, err)

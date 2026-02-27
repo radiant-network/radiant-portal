@@ -385,15 +385,15 @@ var CaseResolutionStatusCodeField = Field{
 }
 
 type CaseFilters struct {
-	Status               []Aggregation `json:"status_code" validate:"required"`
-	Priority             []Aggregation `json:"priority_code" validate:"required"`
-	AnalysisCatalog      []Aggregation `json:"analysis_catalog_code" validate:"required"`
-	Project              []Aggregation `json:"project_code" validate:"required"`
-	DiagnosisLab         []Aggregation `json:"diagnosis_lab_code" validate:"required"`
-	OrderingOrganization []Aggregation `json:"ordering_organization_code" validate:"required"`
-	ResolutionStatus     []Aggregation `json:"resolution_status_code" validate:"required"`
-	Panel                []Aggregation `json:"panel_code" validate:"required"`
-	LifeStatus           []Aggregation `json:"life_status_code" validate:"required"`
-	CaseCategory         []Aggregation `json:"case_category_code" validate:"required"`
-	CaseType             []Aggregation `json:"case_type_code" validate:"required"`
+	Status               []FiltersValue `json:"status_code" validate:"required"`
+	Priority             []FiltersValue `json:"priority_code" validate:"required"`
+	AnalysisCatalog      []FiltersValue `json:"analysis_catalog_code" validate:"required"`
+	Project              []FiltersValue `json:"project_code" validate:"required"`
+	DiagnosisLab         []FiltersValue `json:"diagnosis_lab_code" validate:"required"`
+	OrderingOrganization []FiltersValue `json:"ordering_organization_code" validate:"required"`
+	ResolutionStatus     []FiltersValue `json:"resolution_status_code" validate:"required"`
+	Panel                []FiltersValue `json:"panel_code" validate:"required"`
+	LifeStatus           []FiltersValue `json:"life_status_code" validate:"required"`
+	CaseCategory         []FiltersValue `json:"case_category_code" validate:"required"`
+	CaseType             []FiltersValue `json:"case_type_code" validate:"required"`
 }

@@ -138,18 +138,17 @@ type ListBodyWithCriteria struct {
 	Sort             []SortBody        `json:"sort"`
 }
 
-type CountBodyWithCriteria struct {
-	SearchCriteria []SearchCriterion `json:"search_criteria"`
-} // @Name CountBodyWithCriteria
-
-type FiltersBodyWithCriteria struct {
-	SearchCriteria []SearchCriterion `json:"search_criteria"`
-} // @Name FiltersBodyWithCriteria
-
 type SearchResponse[T any] struct {
 	List  JsonArray[T] `json:"list" validate:"required"`
 	Count int64        `json:"count" validate:"required"`
 } // @Name SearchResponse
+
+// FiltersValue represents an item in filters
+// @Description FiltersValue represents an item in filters
+type FiltersValue struct {
+	Key   string `json:"key" validate:"required"` // Bucket key
+	Label string `json:"label,omitempty"`         // Label corresponding to the key
+} // @Name FiltersValue
 
 type VariantInterpretedCasesSearchResponse = SearchResponse[VariantInterpretedCase]
 type VariantUninterpretedCasesSearchResponse = SearchResponse[VariantUninterpretedCase]

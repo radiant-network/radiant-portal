@@ -34,13 +34,13 @@ export interface Aggregation {
      * @type {number}
      * @memberof Aggregation
      */
-    'count'?: number;
+    'count': number;
     /**
      * Bucket key
      * @type {string}
      * @memberof Aggregation
      */
-    'key'?: string;
+    'key': string;
     /**
      * Label corresponding to the key
      * @type {string}
@@ -585,70 +585,70 @@ export interface CaseEntity {
 export interface CaseFilters {
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'analysis_catalog_code': Array<Aggregation>;
+    'analysis_catalog_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'case_category_code': Array<Aggregation>;
+    'case_category_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'case_type_code': Array<Aggregation>;
+    'case_type_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'diagnosis_lab_code': Array<Aggregation>;
+    'diagnosis_lab_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'life_status_code': Array<Aggregation>;
+    'life_status_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'ordering_organization_code': Array<Aggregation>;
+    'ordering_organization_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'panel_code': Array<Aggregation>;
+    'panel_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'priority_code': Array<Aggregation>;
+    'priority_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'project_code': Array<Aggregation>;
+    'project_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'resolution_status_code': Array<Aggregation>;
+    'resolution_status_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
-    'status_code': Array<Aggregation>;
+    'status_code': Array<FiltersValue>;
 }
 /**
  * 
@@ -1413,34 +1413,34 @@ export interface CreateSequencingExperimentBatchBody {
 export interface DocumentFilters {
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof DocumentFilters
      */
-    'data_type_code': Array<Aggregation>;
+    'data_type_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof DocumentFilters
      */
-    'diagnosis_lab_code'?: Array<Aggregation>;
+    'diagnosis_lab_code'?: Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof DocumentFilters
      */
-    'format_code': Array<Aggregation>;
+    'format_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof DocumentFilters
      */
-    'project_code'?: Array<Aggregation>;
+    'project_code'?: Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof DocumentFilters
      */
-    'relationship_to_proband_code': Array<Aggregation>;
+    'relationship_to_proband_code': Array<FiltersValue>;
 }
 /**
  * 
@@ -2021,17 +2021,23 @@ export interface FamilyHistoryBatch {
     'family_member_code': string;
 }
 /**
- * 
+ * FiltersValue represents an item in filters
  * @export
- * @interface FiltersBodyWithCriteria
+ * @interface FiltersValue
  */
-export interface FiltersBodyWithCriteria {
+export interface FiltersValue {
     /**
-     * 
-     * @type {Array<SearchCriterion>}
-     * @memberof FiltersBodyWithCriteria
+     * Bucket key
+     * @type {string}
+     * @memberof FiltersValue
      */
-    'search_criteria'?: Array<SearchCriterion>;
+    'key': string;
+    /**
+     * Label corresponding to the key
+     * @type {string}
+     * @memberof FiltersValue
+     */
+    'label'?: string;
 }
 /**
  * 
@@ -4375,40 +4381,40 @@ export interface VariantCasesCount {
 export interface VariantCasesFilters {
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof VariantCasesFilters
      */
-    'analysis_catalog_code': Array<Aggregation>;
+    'analysis_catalog_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof VariantCasesFilters
      */
-    'classification': Array<Aggregation>;
+    'classification': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof VariantCasesFilters
      */
-    'diagnosis_lab_code': Array<Aggregation>;
+    'diagnosis_lab_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof VariantCasesFilters
      */
-    'sex_code': Array<Aggregation>;
+    'sex_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof VariantCasesFilters
      */
-    'transmission_mode': Array<Aggregation>;
+    'transmission_mode': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<Aggregation>}
+     * @type {Array<FiltersValue>}
      * @memberof VariantCasesFilters
      */
-    'zygosity': Array<Aggregation>;
+    'zygosity': Array<FiltersValue>;
 }
 /**
  * 
@@ -5293,15 +5299,12 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
          * Retrieve DocumentFilters documents filters for a specific case
          * @summary Get DocumentFilters documents filters for a specific case
          * @param {number} caseId Case ID
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntityDocumentsFilters: async (caseId: number, filtersBodyWithCriteria: FiltersBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        caseEntityDocumentsFilters: async (caseId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('caseEntityDocumentsFilters', 'caseId', caseId)
-            // verify required parameter 'filtersBodyWithCriteria' is not null or undefined
-            assertParamExists('caseEntityDocumentsFilters', 'filtersBodyWithCriteria', filtersBodyWithCriteria)
             const localVarPath = `/cases/{case_id}/documents/filters`
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -5311,7 +5314,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5321,12 +5324,9 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
 
 
     
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(filtersBodyWithCriteria, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5380,13 +5380,10 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        casesFilters: async (filtersBodyWithCriteria: FiltersBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'filtersBodyWithCriteria' is not null or undefined
-            assertParamExists('casesFilters', 'filtersBodyWithCriteria', filtersBodyWithCriteria)
+        casesFilters: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/cases/filters`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -5395,7 +5392,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5405,12 +5402,9 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
 
 
     
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(filtersBodyWithCriteria, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5543,12 +5537,11 @@ export const CasesApiFp = function(configuration?: Configuration) {
          * Retrieve DocumentFilters documents filters for a specific case
          * @summary Get DocumentFilters documents filters for a specific case
          * @param {number} caseId Case ID
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async caseEntityDocumentsFilters(caseId: number, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentFilters>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntityDocumentsFilters(caseId, filtersBodyWithCriteria, options);
+        async caseEntityDocumentsFilters(caseId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentFilters>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntityDocumentsFilters(caseId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.caseEntityDocumentsFilters']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5570,12 +5563,11 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async casesFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseFilters>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.casesFilters(filtersBodyWithCriteria, options);
+        async casesFilters(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseFilters>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.casesFilters(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.casesFilters']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5642,12 +5634,11 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          * Retrieve DocumentFilters documents filters for a specific case
          * @summary Get DocumentFilters documents filters for a specific case
          * @param {number} caseId Case ID
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntityDocumentsFilters(caseId: number, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentFilters> {
-            return localVarFp.caseEntityDocumentsFilters(caseId, filtersBodyWithCriteria, options).then((request) => request(axios, basePath));
+        caseEntityDocumentsFilters(caseId: number, options?: RawAxiosRequestConfig): AxiosPromise<DocumentFilters> {
+            return localVarFp.caseEntityDocumentsFilters(caseId, options).then((request) => request(axios, basePath));
         },
         /**
          * Search for DocumentResult list for a case entity
@@ -5663,12 +5654,11 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
         /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        casesFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<CaseFilters> {
-            return localVarFp.casesFilters(filtersBodyWithCriteria, options).then((request) => request(axios, basePath));
+        casesFilters(options?: RawAxiosRequestConfig): AxiosPromise<CaseFilters> {
+            return localVarFp.casesFilters(options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new case batch
@@ -5730,13 +5720,12 @@ export class CasesApi extends BaseAPI {
      * Retrieve DocumentFilters documents filters for a specific case
      * @summary Get DocumentFilters documents filters for a specific case
      * @param {number} caseId Case ID
-     * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public caseEntityDocumentsFilters(caseId: number, filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).caseEntityDocumentsFilters(caseId, filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    public caseEntityDocumentsFilters(caseId: number, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).caseEntityDocumentsFilters(caseId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5755,13 +5744,12 @@ export class CasesApi extends BaseAPI {
     /**
      * Retrieve CaseFilters cases filters
      * @summary Get CaseFilters cases filters
-     * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public casesFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).casesFilters(filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    public casesFilters(options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).casesFilters(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5847,13 +5835,10 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
         /**
          * Retrieve DocumentFilters documents filters
          * @summary Get DocumentFilters documents filters
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        documentsFilters: async (filtersBodyWithCriteria: FiltersBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'filtersBodyWithCriteria' is not null or undefined
-            assertParamExists('documentsFilters', 'filtersBodyWithCriteria', filtersBodyWithCriteria)
+        documentsFilters: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/documents/filters`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -5862,7 +5847,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
                 baseOptions = configuration.baseOptions;
             }
 
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -5872,12 +5857,9 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
 
 
     
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(filtersBodyWithCriteria, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5989,12 +5971,11 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve DocumentFilters documents filters
          * @summary Get DocumentFilters documents filters
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async documentsFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentFilters>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.documentsFilters(filtersBodyWithCriteria, options);
+        async documentsFilters(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentFilters>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.documentsFilters(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DocumentsApi.documentsFilters']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6049,12 +6030,11 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
         /**
          * Retrieve DocumentFilters documents filters
          * @summary Get DocumentFilters documents filters
-         * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        documentsFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentFilters> {
-            return localVarFp.documentsFilters(filtersBodyWithCriteria, options).then((request) => request(axios, basePath));
+        documentsFilters(options?: RawAxiosRequestConfig): AxiosPromise<DocumentFilters> {
+            return localVarFp.documentsFilters(options).then((request) => request(axios, basePath));
         },
         /**
          * Generate a pre-signed S3 download URL for a document
@@ -6102,13 +6082,12 @@ export class DocumentsApi extends BaseAPI {
     /**
      * Retrieve DocumentFilters documents filters
      * @summary Get DocumentFilters documents filters
-     * @param {FiltersBodyWithCriteria} filtersBodyWithCriteria Filters Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApi
      */
-    public documentsFilters(filtersBodyWithCriteria: FiltersBodyWithCriteria, options?: RawAxiosRequestConfig) {
-        return DocumentsApiFp(this.configuration).documentsFilters(filtersBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    public documentsFilters(options?: RawAxiosRequestConfig) {
+        return DocumentsApiFp(this.configuration).documentsFilters(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

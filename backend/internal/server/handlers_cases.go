@@ -85,30 +85,13 @@ func CasesAutocompleteHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Description Retrieve types.CaseFilters cases filters
 // @Tags cases
 // @Security bearerauth
-// @Param			message	body		types.FiltersBodyWithCriteria	true	"Filters Body"
-// @Accept json
 // @Produce json
 // @Success 200 {object} types.CaseFilters
 // @Failure 500 {object} types.ApiError
-// @Router /cases/filters [post]
+// @Router /cases/filters [get]
 func CasesFiltersHandler(repo repository.CasesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var (
-			body types.FiltersBodyWithCriteria
-		)
-
-		// Bind JSON to the struct
-		if err := c.ShouldBindJSON(&body); err != nil {
-			// Return a 400 Bad Request if validation fails
-			HandleValidationError(c, err)
-			return
-		}
-		query, err := types.NewAggregationQueryFromCriteria(body.SearchCriteria, types.CasesFields)
-		if err != nil {
-			HandleValidationError(c, err)
-			return
-		}
-		filters, err := repo.GetCasesFilters(query)
+		filters, err := repo.GetCasesFilters()
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -205,24 +188,12 @@ func CaseEntityDocumentsSearchHandler(repo repository.DocumentsDAO) gin.HandlerF
 // @Tags cases
 // @Security bearerauth
 // @Param case_id path int true "Case ID"
-// @Param			message	body		types.FiltersBodyWithCriteria	true	"Filters Body"
-// @Accept json
 // @Produce json
 // @Success 200 {object} types.DocumentFilters
 // @Failure 500 {object} types.ApiError
-// @Router /cases/{case_id}/documents/filters [post]
+// @Router /cases/{case_id}/documents/filters [get]
 func CaseEntityDocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var (
-			body types.FiltersBodyWithCriteria
-		)
-
-		// Bind JSON to the struct
-		if err := c.ShouldBindJSON(&body); err != nil {
-			// Return a 400 Bad Request if validation fails
-			HandleValidationError(c, err)
-			return
-		}
 		filters, err := repo.GetDocumentsFilters(false)
 		if err != nil {
 			HandleError(c, err)

@@ -131,45 +131,45 @@ func (m *MockRepository) GetVariantCasesCount(int) (*types.VariantCasesCount, er
 
 func (m *MockRepository) GetVariantCasesFilters() (*types.VariantCasesFilters, error) {
 	return &types.VariantCasesFilters{
-		Classification: []types.Aggregation{
-			{Bucket: "LA6668-3", Label: "pathogenic"},
-			{Bucket: "LA26332-9", Label: "likelyPathogenic"},
-			{Bucket: "LA26333-7", Label: "vus"},
-			{Bucket: "LA26334-5", Label: "likelyBenign"},
-			{Bucket: "LA6675-8", Label: "benign"},
+		Classification: []types.FiltersValue{
+			{Key: "LA6668-3", Label: "pathogenic"},
+			{Key: "LA26332-9", Label: "likelyPathogenic"},
+			{Key: "LA26333-7", Label: "vus"},
+			{Key: "LA26334-5", Label: "likelyBenign"},
+			{Key: "LA6675-8", Label: "benign"},
 		},
-		AnalysisCatalog: []types.Aggregation{
-			{Bucket: "WGA", Label: "Whole Genome Analysis"},
-			{Bucket: "IDGD", Label: "Intellectual Deficiency and Global Developmental Delay"},
+		AnalysisCatalog: []types.FiltersValue{
+			{Key: "WGA", Label: "Whole Genome Analysis"},
+			{Key: "IDGD", Label: "Intellectual Deficiency and Global Developmental Delay"},
 		},
-		DiagnosisLab: []types.Aggregation{
-			{Bucket: "CHOP", Label: "Children Hospital of Philadelphia"},
-			{Bucket: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
+		DiagnosisLab: []types.FiltersValue{
+			{Key: "CHOP", Label: "Children Hospital of Philadelphia"},
+			{Key: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
 		},
-		Sex: []types.Aggregation{
-			{Bucket: "female", Label: "Female"},
-			{Bucket: "male", Label: "Male"},
-			{Bucket: "unknown", Label: "Unknown"},
+		Sex: []types.FiltersValue{
+			{Key: "female", Label: "Female"},
+			{Key: "male", Label: "Male"},
+			{Key: "unknown", Label: "Unknown"},
 		},
-		Zygosity: []types.Aggregation{
-			{Bucket: "HOM"},
-			{Bucket: "HET"},
-			{Bucket: "HEM"},
-			{Bucket: "UNK"},
+		Zygosity: []types.FiltersValue{
+			{Key: "HOM"},
+			{Key: "HET"},
+			{Key: "HEM"},
+			{Key: "UNK"},
 		},
-		TransmissionMode: []types.Aggregation{
-			{Bucket: "autosomal_dominant_de_novo"},
-			{Bucket: "autosomal_dominant"},
-			{Bucket: "autosomal_recessive"},
-			{Bucket: "x_linked_dominant_de_novo"},
-			{Bucket: "x_linked_recessive_de_novo"},
-			{Bucket: "x_linked_dominant"},
-			{Bucket: "x_linked_recessive"},
-			{Bucket: "non_carrier_proband"},
-			{Bucket: "unknown_parents_genotype"},
-			{Bucket: "unknown_father_genotype"},
-			{Bucket: "unknown_mother_genotype"},
-			{Bucket: "unknown_proband_genotype"},
+		TransmissionMode: []types.FiltersValue{
+			{Key: "autosomal_dominant_de_novo"},
+			{Key: "autosomal_dominant"},
+			{Key: "autosomal_recessive"},
+			{Key: "x_linked_dominant_de_novo"},
+			{Key: "x_linked_recessive_de_novo"},
+			{Key: "x_linked_dominant"},
+			{Key: "x_linked_recessive"},
+			{Key: "non_carrier_proband"},
+			{Key: "unknown_parents_genotype"},
+			{Key: "unknown_father_genotype"},
+			{Key: "unknown_mother_genotype"},
+			{Key: "unknown_proband_genotype"},
 		},
 	}, nil
 }
@@ -603,44 +603,44 @@ func Test_GetGermlineVariantCasesFiltersHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"analysis_catalog_code":[
-			{"count": 0, "key":"WGA", "label":"Whole Genome Analysis"}, 
-			{"count": 0, "key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"}
+			{"key":"WGA", "label":"Whole Genome Analysis"}, 
+			{"key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"}
 		],
 		"classification": [
-			{"count": 0, "key":"LA6668-3", "label":"pathogenic"}, 
-			{"count": 0, "key":"LA26332-9", "label":"likelyPathogenic"}, 
-			{"count": 0, "key":"LA26333-7", "label":"vus"}, 
-			{"count": 0, "key":"LA26334-5", "label":"likelyBenign"}, 
-			{"count": 0, "key":"LA6675-8", "label":"benign"} 
+			{"key":"LA6668-3", "label":"pathogenic"}, 
+			{"key":"LA26332-9", "label":"likelyPathogenic"}, 
+			{"key":"LA26333-7", "label":"vus"}, 
+			{"key":"LA26334-5", "label":"likelyBenign"}, 
+			{"key":"LA6675-8", "label":"benign"} 
 		],
 		"diagnosis_lab_code":[
-			{"count": 0, "key":"CHOP", "label":"Children Hospital of Philadelphia"},
-			{"count": 0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+			{"key":"CHOP", "label":"Children Hospital of Philadelphia"},
+			{"key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		],
 		"sex_code": [
-			{"count": 0, "key":"female", "label":"Female"},
-			{"count": 0, "key":"male", "label":"Male"},
-			{"count": 0, "key":"unknown", "label":"Unknown"}
+			{"key":"female", "label":"Female"},
+			{"key":"male", "label":"Male"},
+			{"key":"unknown", "label":"Unknown"}
 		],
 		"zygosity": [
-			{"count": 0, "key":"HOM"},
-			{"count": 0, "key":"HET"},
-			{"count": 0, "key":"HEM"},
-			{"count": 0, "key":"UNK"}
+			{"key":"HOM"},
+			{"key":"HET"},
+			{"key":"HEM"},
+			{"key":"UNK"}
 		],
 		"transmission_mode": [
-			{"count": 0, "key":"autosomal_dominant_de_novo"},
-			{"count": 0, "key":"autosomal_dominant"},
-			{"count": 0, "key":"autosomal_recessive"},
-			{"count": 0, "key":"x_linked_dominant_de_novo"},
-			{"count": 0, "key":"x_linked_recessive_de_novo"},
-			{"count": 0, "key":"x_linked_dominant"},
-			{"count": 0, "key":"x_linked_recessive"},
-			{"count": 0, "key":"non_carrier_proband"},
-			{"count": 0, "key":"unknown_parents_genotype"},
-			{"count": 0, "key":"unknown_father_genotype"},
-			{"count": 0, "key":"unknown_mother_genotype"},
-			{"count": 0, "key":"unknown_proband_genotype"}
+			{"key":"autosomal_dominant_de_novo"},
+			{"key":"autosomal_dominant"},
+			{"key":"autosomal_recessive"},
+			{"key":"x_linked_dominant_de_novo"},
+			{"key":"x_linked_recessive_de_novo"},
+			{"key":"x_linked_dominant"},
+			{"key":"x_linked_recessive"},
+			{"key":"non_carrier_proband"},
+			{"key":"unknown_parents_genotype"},
+			{"key":"unknown_father_genotype"},
+			{"key":"unknown_mother_genotype"},
+			{"key":"unknown_proband_genotype"}
 		]
 	}`, w.Body.String())
 }

@@ -47,6 +47,7 @@ func Test_SecureRoutes(t *testing.T) {
 		for _, route := range []string{
 			"sequencing/1/details",
 			"cases/1",
+			"cases/filters",
 			"cases/autocomplete",
 			"genes/autocomplete",
 			"hpo/autocomplete",
@@ -79,7 +80,6 @@ func Test_SecureRoutes(t *testing.T) {
 		// POST requests
 		for _, route := range []string{
 			"cases/search",
-			"cases/filters",
 			"genes/search",
 			"interpretations/germline/1/1/1",
 			"interpretations/somatic/1/1/1",
@@ -132,6 +132,7 @@ func Test_OpenFGA_Authorization(t *testing.T) {
 			}{
 				{"sequencing/1/details", 200},
 				{"cases/1", 200},
+				{"cases/filters", 200},
 				{"genes/autocomplete", 200},
 				{"hpo/autocomplete", 200},
 				{"igv/999", 404},
@@ -163,7 +164,6 @@ func Test_OpenFGA_Authorization(t *testing.T) {
 				code  int
 			}{
 				{"cases/search", 400},
-				{"cases/filters", 400},
 				{"interpretations/germline/1/1000/T001", 400},
 				{"occurrences/germline/snv/1/1/count", 400},
 				{"variants/germline/1000/cases/interpreted", 400},

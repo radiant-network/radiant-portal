@@ -6,9 +6,9 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**autocomplete_cases**](CasesApi.md#autocomplete_cases) | **GET** /cases/autocomplete | Get AutocompleteResult list of matching prefix
 [**case_entity**](CasesApi.md#case_entity) | **GET** /cases/{case_id} | Get CaseEntity case entity
-[**case_entity_documents_filters**](CasesApi.md#case_entity_documents_filters) | **POST** /cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
+[**case_entity_documents_filters**](CasesApi.md#case_entity_documents_filters) | **GET** /cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
 [**case_entity_documents_search**](CasesApi.md#case_entity_documents_search) | **POST** /cases/{case_id}/documents/search | Search DocumentResult list for a case entity
-[**cases_filters**](CasesApi.md#cases_filters) | **POST** /cases/filters | Get CaseFilters cases filters
+[**cases_filters**](CasesApi.md#cases_filters) | **GET** /cases/filters | Get CaseFilters cases filters
 [**post_case_batch**](CasesApi.md#post_case_batch) | **POST** /cases/batch | Create a new case batch
 [**search_cases**](CasesApi.md#search_cases) | **POST** /cases/search | Search cases
 
@@ -175,7 +175,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **case_entity_documents_filters**
-> DocumentFilters case_entity_documents_filters(case_id, filters_body_with_criteria)
+> DocumentFilters case_entity_documents_filters(case_id)
 
 Get DocumentFilters documents filters for a specific case
 
@@ -188,7 +188,6 @@ Retrieve DocumentFilters documents filters for a specific case
 ```python
 import radiant_python
 from radiant_python.models.document_filters import DocumentFilters
-from radiant_python.models.filters_body_with_criteria import FiltersBodyWithCriteria
 from radiant_python.rest import ApiException
 from pprint import pprint
 
@@ -213,11 +212,10 @@ with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
     case_id = 56 # int | Case ID
-    filters_body_with_criteria = radiant_python.FiltersBodyWithCriteria() # FiltersBodyWithCriteria | Filters Body
 
     try:
         # Get DocumentFilters documents filters for a specific case
-        api_response = api_instance.case_entity_documents_filters(case_id, filters_body_with_criteria)
+        api_response = api_instance.case_entity_documents_filters(case_id)
         print("The response of CasesApi->case_entity_documents_filters:\n")
         pprint(api_response)
     except Exception as e:
@@ -232,7 +230,6 @@ with radiant_python.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
- **filters_body_with_criteria** | [**FiltersBodyWithCriteria**](FiltersBodyWithCriteria.md)| Filters Body | 
 
 ### Return type
 
@@ -244,7 +241,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 ### HTTP response details
@@ -340,7 +337,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **cases_filters**
-> CaseFilters cases_filters(filters_body_with_criteria)
+> CaseFilters cases_filters()
 
 Get CaseFilters cases filters
 
@@ -353,7 +350,6 @@ Retrieve CaseFilters cases filters
 ```python
 import radiant_python
 from radiant_python.models.case_filters import CaseFilters
-from radiant_python.models.filters_body_with_criteria import FiltersBodyWithCriteria
 from radiant_python.rest import ApiException
 from pprint import pprint
 
@@ -377,11 +373,10 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
-    filters_body_with_criteria = radiant_python.FiltersBodyWithCriteria() # FiltersBodyWithCriteria | Filters Body
 
     try:
         # Get CaseFilters cases filters
-        api_response = api_instance.cases_filters(filters_body_with_criteria)
+        api_response = api_instance.cases_filters()
         print("The response of CasesApi->cases_filters:\n")
         pprint(api_response)
     except Exception as e:
@@ -392,10 +387,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **filters_body_with_criteria** | [**FiltersBodyWithCriteria**](FiltersBodyWithCriteria.md)| Filters Body | 
+This endpoint does not need any parameter.
 
 ### Return type
 
@@ -407,7 +399,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 ### HTTP response details
