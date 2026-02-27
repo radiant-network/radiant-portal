@@ -19,7 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
-from radiant_python.models.aggregation import Aggregation
+from radiant_python.models.filters_value import FiltersValue
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,17 +27,17 @@ class CaseFilters(BaseModel):
     """
     CaseFilters
     """ # noqa: E501
-    analysis_catalog_code: List[Aggregation]
-    case_category_code: List[Aggregation]
-    case_type_code: List[Aggregation]
-    diagnosis_lab_code: List[Aggregation]
-    life_status_code: List[Aggregation]
-    ordering_organization_code: List[Aggregation]
-    panel_code: List[Aggregation]
-    priority_code: List[Aggregation]
-    project_code: List[Aggregation]
-    resolution_status_code: List[Aggregation]
-    status_code: List[Aggregation]
+    analysis_catalog_code: List[FiltersValue]
+    case_category_code: List[FiltersValue]
+    case_type_code: List[FiltersValue]
+    diagnosis_lab_code: List[FiltersValue]
+    life_status_code: List[FiltersValue]
+    ordering_organization_code: List[FiltersValue]
+    panel_code: List[FiltersValue]
+    priority_code: List[FiltersValue]
+    project_code: List[FiltersValue]
+    resolution_status_code: List[FiltersValue]
+    status_code: List[FiltersValue]
     __properties: ClassVar[List[str]] = ["analysis_catalog_code", "case_category_code", "case_type_code", "diagnosis_lab_code", "life_status_code", "ordering_organization_code", "panel_code", "priority_code", "project_code", "resolution_status_code", "status_code"]
 
     model_config = ConfigDict(
@@ -168,17 +168,17 @@ class CaseFilters(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "analysis_catalog_code": [Aggregation.from_dict(_item) for _item in obj["analysis_catalog_code"]] if obj.get("analysis_catalog_code") is not None else None,
-            "case_category_code": [Aggregation.from_dict(_item) for _item in obj["case_category_code"]] if obj.get("case_category_code") is not None else None,
-            "case_type_code": [Aggregation.from_dict(_item) for _item in obj["case_type_code"]] if obj.get("case_type_code") is not None else None,
-            "diagnosis_lab_code": [Aggregation.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None,
-            "life_status_code": [Aggregation.from_dict(_item) for _item in obj["life_status_code"]] if obj.get("life_status_code") is not None else None,
-            "ordering_organization_code": [Aggregation.from_dict(_item) for _item in obj["ordering_organization_code"]] if obj.get("ordering_organization_code") is not None else None,
-            "panel_code": [Aggregation.from_dict(_item) for _item in obj["panel_code"]] if obj.get("panel_code") is not None else None,
-            "priority_code": [Aggregation.from_dict(_item) for _item in obj["priority_code"]] if obj.get("priority_code") is not None else None,
-            "project_code": [Aggregation.from_dict(_item) for _item in obj["project_code"]] if obj.get("project_code") is not None else None,
-            "resolution_status_code": [Aggregation.from_dict(_item) for _item in obj["resolution_status_code"]] if obj.get("resolution_status_code") is not None else None,
-            "status_code": [Aggregation.from_dict(_item) for _item in obj["status_code"]] if obj.get("status_code") is not None else None
+            "analysis_catalog_code": [FiltersValue.from_dict(_item) for _item in obj["analysis_catalog_code"]] if obj.get("analysis_catalog_code") is not None else None,
+            "case_category_code": [FiltersValue.from_dict(_item) for _item in obj["case_category_code"]] if obj.get("case_category_code") is not None else None,
+            "case_type_code": [FiltersValue.from_dict(_item) for _item in obj["case_type_code"]] if obj.get("case_type_code") is not None else None,
+            "diagnosis_lab_code": [FiltersValue.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None,
+            "life_status_code": [FiltersValue.from_dict(_item) for _item in obj["life_status_code"]] if obj.get("life_status_code") is not None else None,
+            "ordering_organization_code": [FiltersValue.from_dict(_item) for _item in obj["ordering_organization_code"]] if obj.get("ordering_organization_code") is not None else None,
+            "panel_code": [FiltersValue.from_dict(_item) for _item in obj["panel_code"]] if obj.get("panel_code") is not None else None,
+            "priority_code": [FiltersValue.from_dict(_item) for _item in obj["priority_code"]] if obj.get("priority_code") is not None else None,
+            "project_code": [FiltersValue.from_dict(_item) for _item in obj["project_code"]] if obj.get("project_code") is not None else None,
+            "resolution_status_code": [FiltersValue.from_dict(_item) for _item in obj["resolution_status_code"]] if obj.get("resolution_status_code") is not None else None,
+            "status_code": [FiltersValue.from_dict(_item) for _item in obj["status_code"]] if obj.get("status_code") is not None else None
         })
         return _obj
 

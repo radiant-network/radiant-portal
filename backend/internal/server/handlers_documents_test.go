@@ -40,27 +40,27 @@ func (m *MockRepository) SearchDocuments(userQuery types.ListQuery) (*[]types.Do
 
 func (m *MockRepository) GetDocumentsFilters(withLabAndProject bool) (*types.DocumentFilters, error) {
 	var result = types.DocumentFilters{
-		Project: []types.Aggregation{
-			{Bucket: "N1", Label: "NeuroDev Phase I"},
-			{Bucket: "N2", Label: "NeuroDev Phase II"},
+		Project: []types.FiltersValue{
+			{Key: "N1", Label: "NeuroDev Phase I"},
+			{Key: "N2", Label: "NeuroDev Phase II"},
 		},
-		DiagnosisLab: []types.Aggregation{
-			{Bucket: "CHOP", Label: "Children Hospital of Philadelphia"},
-			{Bucket: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
+		DiagnosisLab: []types.FiltersValue{
+			{Key: "CHOP", Label: "Children Hospital of Philadelphia"},
+			{Key: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
 		},
-		RelationshipToProband: []types.Aggregation{
-			{Bucket: "proband", Label: "Proband"},
-			{Bucket: "father", Label: "Father"},
-			{Bucket: "mother", Label: "Mother"},
+		RelationshipToProband: []types.FiltersValue{
+			{Key: "proband", Label: "Proband"},
+			{Key: "father", Label: "Father"},
+			{Key: "mother", Label: "Mother"},
 		},
-		Format: []types.Aggregation{
-			{Bucket: "cram", Label: "CRAM File"},
-			{Bucket: "vcf", Label: "VCF File"},
+		Format: []types.FiltersValue{
+			{Key: "cram", Label: "CRAM File"},
+			{Key: "vcf", Label: "VCF File"},
 		},
-		DataType: []types.Aggregation{
-			{Bucket: "alignment", Label: "Aligned Reads"},
-			{Bucket: "snv", Label: "Germline SNV"},
-			{Bucket: "ssnv", Label: "Somatic SNV"},
+		DataType: []types.FiltersValue{
+			{Key: "alignment", Label: "Aligned Reads"},
+			{Key: "snv", Label: "Germline SNV"},
+			{Key: "ssnv", Label: "Somatic SNV"},
 		},
 	}
 	return &result, nil
@@ -138,35 +138,35 @@ func Test_DocumentsAutocompleteHandler(t *testing.T) {
 func Test_DocumentsFiltersHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/documents/filters", DocumentsFiltersHandler(repo))
+	router.GET("/documents/filters", DocumentsFiltersHandler(repo))
 
-	req, _ := http.NewRequest("POST", "/documents/filters", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/documents/filters", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"data_type_code":[
-			{"count":0, "key":"alignment", "label":"Aligned Reads"}, 
-			{"count":0, "key":"snv", "label":"Germline SNV"}, 
-			{"count":0, "key":"ssnv", "label":"Somatic SNV"}
+			{"key":"alignment", "label":"Aligned Reads"}, 
+			{"key":"snv", "label":"Germline SNV"}, 
+			{"key":"ssnv", "label":"Somatic SNV"}
 		], 
 		"format_code":[
-			{"count":0, "key":"cram", "label":"CRAM File"}, 
-			{"count":0, "key":"vcf", "label":"VCF File"}
+			{"key":"cram", "label":"CRAM File"}, 
+			{"key":"vcf", "label":"VCF File"}
 		], 
 		"diagnosis_lab_code":[
-			{"count":0, "key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
-			{"count":0, "key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+			{"key":"CHOP", "label":"Children Hospital of Philadelphia"}, 
+			{"key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
 		], 
 		"project_code":[
-			{"count":0, "key":"N1", "label":"NeuroDev Phase I"}, 
-			{"count":0, "key":"N2", "label":"NeuroDev Phase II"}
+			{"key":"N1", "label":"NeuroDev Phase I"}, 
+			{"key":"N2", "label":"NeuroDev Phase II"}
 		], 
 		"relationship_to_proband_code":[
-			{"count":0, "key":"proband", "label":"Proband"}, 
-			{"count":0, "key":"father", "label":"Father"}, 
-			{"count":0, "key":"mother", "label":"Mother"}
+			{"key":"proband", "label":"Proband"}, 
+			{"key":"father", "label":"Father"}, 
+			{"key":"mother", "label":"Mother"}
 		]}`, w.Body.String())
 }
 

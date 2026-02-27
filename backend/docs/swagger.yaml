@@ -12,6 +12,9 @@ components:
         label:
           description: Label corresponding to the key
           type: string
+      required:
+      - count
+      - key
       type: object
     AggregationBodyWithSqon:
       properties:
@@ -278,57 +281,57 @@ components:
       properties:
         analysis_catalog_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         case_category_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         case_type_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         diagnosis_lab_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         life_status_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         ordering_organization_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         panel_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         priority_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         project_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         resolution_status_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         status_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
       required:
@@ -750,27 +753,27 @@ components:
       properties:
         data_type_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         diagnosis_lab_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         format_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         project_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         relationship_to_proband_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
       required:
@@ -1030,13 +1033,17 @@ components:
       - condition
       - family_member_code
       type: object
-    FiltersBodyWithCriteria:
+    FiltersValue:
+      description: FiltersValue represents an item in filters
       properties:
-        search_criteria:
-          items:
-            $ref: '#/components/schemas/SearchCriterion'
-          type: array
-          uniqueItems: false
+        key:
+          description: Bucket key
+          type: string
+        label:
+          description: Label corresponding to the key
+          type: string
+      required:
+      - key
       type: object
     GenePanelCondition:
       properties:
@@ -2093,32 +2100,32 @@ components:
       properties:
         analysis_catalog_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         classification:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         diagnosis_lab_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         sex_code:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         transmission_mode:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
         zygosity:
           items:
-            $ref: '#/components/schemas/Aggregation'
+            $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
       required:
@@ -2565,7 +2572,7 @@ paths:
       tags:
       - cases
   /cases/{case_id}/documents/filters:
-    post:
+    get:
       description: Retrieve DocumentFilters documents filters for a specific
         case
       operationId: caseEntityDocumentsFilters
@@ -2576,13 +2583,6 @@ paths:
         required: true
         schema:
           type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FiltersBodyWithCriteria'
-        description: Filters Body
-        required: true
       responses:
         "200":
           content:
@@ -2728,16 +2728,9 @@ paths:
       tags:
       - cases
   /cases/filters:
-    post:
+    get:
       description: Retrieve CaseFilters cases filters
       operationId: casesFilters
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FiltersBodyWithCriteria'
-        description: Filters Body
-        required: true
       responses:
         "200":
           content:
@@ -2863,16 +2856,9 @@ paths:
       tags:
       - documents
   /documents/filters:
-    post:
+    get:
       description: Retrieve DocumentFilters documents filters
       operationId: documentsFilters
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FiltersBodyWithCriteria'
-        description: Filters Body
-        required: true
       responses:
         "200":
           content:

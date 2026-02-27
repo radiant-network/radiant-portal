@@ -19,7 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List, Optional
-from radiant_python.models.aggregation import Aggregation
+from radiant_python.models.filters_value import FiltersValue
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,11 +27,11 @@ class DocumentFilters(BaseModel):
     """
     DocumentFilters
     """ # noqa: E501
-    data_type_code: List[Aggregation]
-    diagnosis_lab_code: Optional[List[Aggregation]] = None
-    format_code: List[Aggregation]
-    project_code: Optional[List[Aggregation]] = None
-    relationship_to_proband_code: List[Aggregation]
+    data_type_code: List[FiltersValue]
+    diagnosis_lab_code: Optional[List[FiltersValue]] = None
+    format_code: List[FiltersValue]
+    project_code: Optional[List[FiltersValue]] = None
+    relationship_to_proband_code: List[FiltersValue]
     __properties: ClassVar[List[str]] = ["data_type_code", "diagnosis_lab_code", "format_code", "project_code", "relationship_to_proband_code"]
 
     model_config = ConfigDict(
@@ -120,11 +120,11 @@ class DocumentFilters(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "data_type_code": [Aggregation.from_dict(_item) for _item in obj["data_type_code"]] if obj.get("data_type_code") is not None else None,
-            "diagnosis_lab_code": [Aggregation.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None,
-            "format_code": [Aggregation.from_dict(_item) for _item in obj["format_code"]] if obj.get("format_code") is not None else None,
-            "project_code": [Aggregation.from_dict(_item) for _item in obj["project_code"]] if obj.get("project_code") is not None else None,
-            "relationship_to_proband_code": [Aggregation.from_dict(_item) for _item in obj["relationship_to_proband_code"]] if obj.get("relationship_to_proband_code") is not None else None
+            "data_type_code": [FiltersValue.from_dict(_item) for _item in obj["data_type_code"]] if obj.get("data_type_code") is not None else None,
+            "diagnosis_lab_code": [FiltersValue.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None,
+            "format_code": [FiltersValue.from_dict(_item) for _item in obj["format_code"]] if obj.get("format_code") is not None else None,
+            "project_code": [FiltersValue.from_dict(_item) for _item in obj["project_code"]] if obj.get("project_code") is not None else None,
+            "relationship_to_proband_code": [FiltersValue.from_dict(_item) for _item in obj["relationship_to_proband_code"]] if obj.get("relationship_to_proband_code") is not None else None
         })
         return _obj
 

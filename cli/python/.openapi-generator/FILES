@@ -39,7 +39,7 @@ docs/ExpandedGermlineSNVOccurrence.md
 docs/ExternalFrequencies.md
 docs/Facet.md
 docs/FamilyHistoryBatch.md
-docs/FiltersBodyWithCriteria.md
+docs/FiltersValue.md
 docs/GenePanelCondition.md
 docs/GenePanelConditions.md
 docs/GeneResult.md
@@ -171,7 +171,7 @@ radiant_python/models/expanded_germline_snv_occurrence.py
 radiant_python/models/external_frequencies.py
 radiant_python/models/facet.py
 radiant_python/models/family_history_batch.py
-radiant_python/models/filters_body_with_criteria.py
+radiant_python/models/filters_value.py
 radiant_python/models/gene_panel_condition.py
 radiant_python/models/gene_panel_conditions.py
 radiant_python/models/gene_result.py
@@ -232,3 +232,4 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
+test/test_filters_value.py

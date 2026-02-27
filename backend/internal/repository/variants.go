@@ -276,56 +276,46 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCou
 }
 
 func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, error) {
-	var analysisCatalog []Aggregation
-	var diagnosisLab []Aggregation
-	var sex []Aggregation
-
-	txAnalysisCatalog := r.db.Table(fmt.Sprintf("%s %s", types.AnalysisCatalogTable.FederationName, types.AnalysisCatalogTable.Alias))
-	txAnalysisCatalog = txAnalysisCatalog.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.AnalysisCatalogTable.Alias, types.AnalysisCatalogTable.Alias))
-	txAnalysisCatalog = txAnalysisCatalog.Order("bucket asc")
-	if err := txAnalysisCatalog.Find(&analysisCatalog).Error; err != nil {
-		return nil, fmt.Errorf("error fetching analysis catalog: %w", err)
+	analysisCatalog, err := utils.GetFilter(r.db, types.AnalysisCatalogTable, "name", nil)
+	if err != nil {
+		return nil, err
 	}
 
-	txDiagnosisLab := r.db.Table(fmt.Sprintf("%s %s", types.OrganizationTable.FederationName, types.OrganizationTable.Alias))
-	txDiagnosisLab = txDiagnosisLab.Select(fmt.Sprintf("%s.code as bucket, %s.name as label", types.OrganizationTable.Alias, types.OrganizationTable.Alias))
-	txDiagnosisLab = txDiagnosisLab.Where(fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.OrganizationTable.Alias))
-	txDiagnosisLab = txDiagnosisLab.Order("bucket asc")
-	if err := txDiagnosisLab.Find(&diagnosisLab).Error; err != nil {
-		return nil, fmt.Errorf("error fetching diagnosis lab: %w", err)
+	isDiagnosisLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.SequencingLabTable.Alias)
+	diagnosisLab, err := utils.GetFilter(r.db, types.SequencingLabTable, "name", &isDiagnosisLabCondition)
+	if err != nil {
+		return nil, err
 	}
 
-	txSex := r.db.Table(fmt.Sprintf("%s %s", types.SexTable.FederationName, types.SexTable.Alias))
-	txSex = txSex.Select(fmt.Sprintf("%s.code as bucket, %s.name_en as label", types.SexTable.Alias, types.SexTable.Alias))
-	txSex = txSex.Order("bucket asc")
-	if err := txSex.Find(&sex).Error; err != nil {
-		return nil, fmt.Errorf("error fetching sex: %w", err)
+	sex, err := utils.GetFilter(r.db, types.SexTable, "name_en", nil)
+	if err != nil {
+		return nil, err
 	}
 
-	zygosity := []Aggregation{
-		{Bucket: "HOM"},
-		{Bucket: "HET"},
-		{Bucket: "HEM"},
-		{Bucket: "UNK"},
+	zygosity := []types.FiltersValue{
+		{Key: "HOM"},
+		{Key: "HET"},
+		{Key: "HEM"},
+		{Key: "UNK"},
 	}
 
-	transmissionMode := []Aggregation{
-		{Bucket: "autosomal_dominant_de_novo"},
-		{Bucket: "autosomal_dominant"},
-		{Bucket: "autosomal_recessive"},
-		{Bucket: "x_linked_dominant_de_novo"},
-		{Bucket: "x_linked_recessive_de_novo"},
-		{Bucket: "x_linked_dominant"},
-		{Bucket: "x_linked_recessive"},
-		{Bucket: "non_carrier_proband"},
-		{Bucket: "unknown_parents_genotype"},
-		{Bucket: "unknown_father_genotype"},
-		{Bucket: "unknown_mother_genotype"},
-		{Bucket: "unknown_proband_genotype"},
+	transmissionMode := []types.FiltersValue{
+		{Key: "autosomal_dominant_de_novo"},
+		{Key: "autosomal_dominant"},
+		{Key: "autosomal_recessive"},
+		{Key: "x_linked_dominant_de_novo"},
+		{Key: "x_linked_recessive_de_novo"},
+		{Key: "x_linked_dominant"},
+		{Key: "x_linked_recessive"},
+		{Key: "non_carrier_proband"},
+		{Key: "unknown_parents_genotype"},
+		{Key: "unknown_father_genotype"},
+		{Key: "unknown_mother_genotype"},
+		{Key: "unknown_proband_genotype"},
 	}
 
 	return &VariantCasesFilters{
-		Classification:   types.MapToAggregationArray(),
+		Classification:   types.MapToFiltersValueArray(),
 		AnalysisCatalog:  analysisCatalog,
 		DiagnosisLab:     diagnosisLab,
 		Sex:              sex,

@@ -82,11 +82,11 @@ func GetSequencingPart(seqId int, db *gorm.DB) (int, error) {
 	return part, nil
 }
 
-func GetFilter(db *gorm.DB, filterTable types.Table, filterLabelColumn string, filterCondition *string) ([]types.Aggregation, error) {
-	var filter []types.Aggregation
+func GetFilter(db *gorm.DB, filterTable types.Table, filterLabelColumn string, filterCondition *string) ([]types.FiltersValue, error) {
+	var filter []types.FiltersValue
 	tx := db.Table(fmt.Sprintf("%s %s", filterTable.FederationName, filterTable.Alias))
-	tx = tx.Select(fmt.Sprintf("%s.code as bucket, %s.%s as label", filterTable.Alias, filterTable.Alias, filterLabelColumn))
-	tx = tx.Order("bucket asc")
+	tx = tx.Select(fmt.Sprintf("%s.code as `key`, %s.%s as label", filterTable.Alias, filterTable.Alias, filterLabelColumn))
+	tx = tx.Order("`key` asc")
 	if filterCondition != nil {
 		tx = tx.Where(*filterCondition)
 	}

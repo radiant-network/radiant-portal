@@ -92,10 +92,10 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup := privateRoutes.Group("/cases")
 	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))
 	casesGroup.GET("/autocomplete", server.CasesAutocompleteHandler(repoCases))
-	casesGroup.POST("/filters", server.CasesFiltersHandler(repoCases))
+	casesGroup.GET("/filters", server.CasesFiltersHandler(repoCases))
 	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases))
 	casesGroup.POST("/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repoDocuments))
-	casesGroup.POST("/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repoDocuments))
+	casesGroup.GET("/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repoDocuments))
 
 	geneGroup := privateRoutes.Group("/genes")
 	geneGroup.GET("/autocomplete", server.GetGeneAutoCompleteHandler(repoGenes))
@@ -179,7 +179,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup := privateRoutes.Group("/documents")
 	documentsGroup.POST("/search", server.SearchDocumentsHandler(repoDocuments))
 	documentsGroup.GET("/autocomplete", server.DocumentsAutocompleteHandler(repoDocuments))
-	documentsGroup.POST("/filters", server.DocumentsFiltersHandler(repoDocuments))
+	documentsGroup.GET("/filters", server.DocumentsFiltersHandler(repoDocuments))
 	documentsGroup.GET("/:document_id/download_url", server.GetDocumentsDownloadUrlHandler(repoDocuments, s3Presigner))
 
 	dataManagerResourceName := os.Getenv("KEYCLOAK_CLIENT")

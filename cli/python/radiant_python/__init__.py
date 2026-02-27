@@ -83,7 +83,7 @@ from radiant_python.models.expanded_germline_snv_occurrence import ExpandedGerml
 from radiant_python.models.external_frequencies import ExternalFrequencies
 from radiant_python.models.facet import Facet
 from radiant_python.models.family_history_batch import FamilyHistoryBatch
-from radiant_python.models.filters_body_with_criteria import FiltersBodyWithCriteria
+from radiant_python.models.filters_value import FiltersValue
 from radiant_python.models.gene_panel_condition import GenePanelCondition
 from radiant_python.models.gene_panel_conditions import GenePanelConditions
 from radiant_python.models.gene_result import GeneResult
