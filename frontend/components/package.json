@@ -95,7 +95,7 @@
   },
   "msw": {
     "workerDirectory": [
-      "../../docs/public"
+      "stories/public"
     ]
   }
 }
