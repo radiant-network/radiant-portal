@@ -304,7 +304,7 @@ func (r *CasesRepository) retrieveCaseSequencingExperiments(caseId int) (*[]Case
 	txSeqExp = utils.JoinCaseHasSeqExpWithSequencingExperiment(txSeqExp)
 	txSeqExp = utils.JoinSeqExpWithSample(txSeqExp)
 	txSeqExp = utils.JoinSampleAndCaseHasSeqExpWithFamily(txSeqExp)
-	txSeqExp = txSeqExp.Joins("LEFT JOIN staging_sequencing_experiment se on s.id = se.seq_id and se.ingested_at is not null and se.task_type = 'radiant_germline_annotation'")
+	txSeqExp = txSeqExp.Joins("LEFT JOIN staging_sequencing_experiment se on s.id = se.seq_id and se.ingested_at is not null and se.task_type = 'radiant_germline_annotation' and se.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
 	txSeqExp = txSeqExp.Where("chseq.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc, relationship_to_proband desc")
