@@ -1,9 +1,24 @@
-import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
-type FeatureDefinition = {
-  defaultValue: boolean | string;
-  options?: { value: string; label: string }[];
+type FeatureBooleanDefinition = {
+  type: 'boolean';
+  defaultValue: boolean;
+  label: string;
+  description?: string;
+};
+
+type FeatureSelectDefinition = {
+  type: 'select';
+  defaultValue: string;
+  options: { value: string; label: string }[];
+  label: string;
+  description?: string;
+};
+
+type FeatureLinkDefinition = {
+  type: 'link';
+  link: string;
   label: string;
   description?: string;
 };
@@ -13,7 +28,7 @@ type BetaFeatures = {
 };
 
 type FeatureDefinitions = {
-  [key: string]: FeatureDefinition;
+  [key: string]: FeatureBooleanDefinition | FeatureSelectDefinition | FeatureLinkDefinition;
 };
 
 type BetaFeatureContextType = {
@@ -24,6 +39,7 @@ type BetaFeatureContextType = {
 
 const defaultFeatureDefinitions: FeatureDefinitions = {
   orientation: {
+    type: 'select',
     defaultValue: 'top',
     options: [
       { value: 'top', label: 'Top (Default)' },
@@ -34,6 +50,12 @@ const defaultFeatureDefinitions: FeatureDefinitions = {
     description: 'Change the position of the main navigation menu',
   },
   // Add more feature definitions here
+  query_builder: {
+    type: 'link',
+    link: '/query-builder-v3/1?seq_id=1',
+    label: 'Query Builder V3',
+    description: 'Preview of the new Query Builder',
+  },
 };
 
 const BetaFeatureContext = createContext<BetaFeatureContextType | undefined>(undefined);

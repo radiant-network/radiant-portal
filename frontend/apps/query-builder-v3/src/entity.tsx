@@ -6,12 +6,13 @@ import QueryBuilderDataTable from '@/components/base/query-builder-v3/query-buil
 import { useConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 import { occurrencesApi } from '@/utils/api';
+import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table-settings';
 
 function QueryBuilderV3() {
-  const seqId = 1;
-  const caseId = 1;
+  const seqId = useSeqIdFromSearchParam();
+  const caseId = useCaseIdFromParam();
   const { t } = useI18n();
   const config = useConfig();
   const [rowSelection, setRowSelection] = useState({});

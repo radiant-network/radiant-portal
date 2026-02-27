@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { Fragment, useCallback } from 'react';
 import { CopyIcon, TrashIcon } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -109,7 +109,7 @@ function QueryBar({ sqon, active }: QueryBarProps) {
       <div className={cn('flex flex-1 justify-between py-3 px-3 border', backgroundColor)}>
         <div className="flex flex-1 flex-wrap max-h-[30vh]">
           {sqon.content.map((content, index) => (
-            <>{factory(content, index < sqon.content.length - 1)}</>
+            <Fragment key={index}>{factory(content, index < sqon.content.length - 1)}</Fragment>
           ))}
         </div>
 
