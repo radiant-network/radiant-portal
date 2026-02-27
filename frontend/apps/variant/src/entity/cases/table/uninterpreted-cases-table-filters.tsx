@@ -68,16 +68,16 @@ function UninterpretedCasesTableFilters({
     if (!value) {
       searchCriteria = searchCriteria.filter(criterion => criterion.field !== 'phenotypes_term');
       setSearchCriteria([...searchCriteria]);
-    } else {
-      setSearchCriteria([
-        ...searchCriteria,
-        {
-          field: 'phenotypes_term',
-          value: [value],
-          operator: 'contains',
-        },
-      ]);
+      return;
     }
+    setSearchCriteria([
+      ...searchCriteria,
+      {
+        field: 'phenotypes_term',
+        value: [value],
+        operator: 'contains',
+      },
+    ]);
   };
 
   const filterButtons = useMemo(() => {
