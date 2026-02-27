@@ -14,7 +14,10 @@ import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { variantsApi } from '@/utils/api';
 
+import PhenotypeCasesFilter from './filters/phenotype-cases-filter';
+
 interface UninterpretedCasesTableFiltersProps {
+  searchCriteria: SearchCriterion[];
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
   loading?: boolean;
 }
@@ -42,19 +45,40 @@ async function fetchFilters() {
   return response.data;
 }
 
-function UninterpretedCasesTableFilters({ setSearchCriteria, loading }: UninterpretedCasesTableFiltersProps) {
+function UninterpretedCasesTableFilters({
+  searchCriteria,
+  setSearchCriteria,
+  loading,
+}: UninterpretedCasesTableFiltersProps) {
   const { t } = useI18n();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('uninterpreted-cases-filters', {
     ...FILTER_DEFAULTS,
   });
+
   const { data: apiFilters } = useSWR<VariantCasesFilters>('uninterpreted-cases-filters', fetchFilters, {
     revalidateOnFocus: false,
     revalidateOnMount: true,
     revalidateIfStale: false,
     revalidateOnReconnect: false,
   });
+
+  const handleHpoChange = (value: string) => {
+    if (!value) {
+      searchCriteria = searchCriteria.filter(criterion => criterion.field !== 'phenotypes_term');
+      setSearchCriteria([...searchCriteria]);
+    } else {
+      setSearchCriteria([
+        ...searchCriteria,
+        {
+          field: 'phenotypes_term',
+          value: [value],
+          operator: 'contains',
+        },
+      ]);
+    }
+  };
 
   const filterButtons = useMemo(() => {
     if (!apiFilters) return [];
@@ -115,24 +139,22 @@ function UninterpretedCasesTableFilters({ setSearchCriteria, loading }: Uninterp
   }, [apiFilters, filters, openFilters, t]);
 
   return (
-    <DataTableFilters
-      // filterSearch={{
-      //   minSearchLength: 1,
-      //   placeholder: t('variant_entity.cases.other_table.filters.search_hpo_placeholder'),
-      //   api: (prefix: string) => variantsApi.autocompletePhenotype(prefix, '10'),
-      // }}
-      filterButtons={filterButtons}
-      changedFilterButtons={changedFilterButtons}
-      setChangedFilterButtons={setChangedFilterButtons}
-      filters={filters}
-      setFilters={setFilters}
-      openFilters={openFilters}
-      setOpenFilters={setOpenFilters}
-      loading={loading}
-      setSearchCriteria={setSearchCriteria}
-      criterias={CRITERIAS}
-      defaultFilters={FILTER_DEFAULTS}
-    />
+    <div className="flex items-end gap-2 w-full mt-6">
+      <PhenotypeCasesFilter onChange={value => handleHpoChange(value)} />
+      <DataTableFilters
+        filterButtons={filterButtons}
+        changedFilterButtons={changedFilterButtons}
+        setChangedFilterButtons={setChangedFilterButtons}
+        filters={filters}
+        setFilters={setFilters}
+        openFilters={openFilters}
+        setOpenFilters={setOpenFilters}
+        loading={loading}
+        setSearchCriteria={setSearchCriteria}
+        criterias={CRITERIAS}
+        defaultFilters={FILTER_DEFAULTS}
+      />
+    </div>
   );
 }
 

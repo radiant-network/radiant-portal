@@ -87,7 +87,11 @@ function UninterpretedCasesTable() {
         id="uninterpreted-cases"
         columns={getUninterpretedCasesColumns(t)}
         TableFilters={
-          <UninterpretedCasesTableFilters loading={isLoading && !isValidating} setSearchCriteria={setSearchCriteria} />
+          <UninterpretedCasesTableFilters
+            loading={isLoading && !isValidating}
+            searchCriteria={searchCriteria}
+            setSearchCriteria={setSearchCriteria}
+          />
         }
         data={casesData}
         defaultColumnSettings={uninterpretedCasesDefaultSettings}
