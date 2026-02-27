@@ -31,6 +31,8 @@ export async function httpOccurrenceAggregateApiResponse({ request }: any) {
 
   if (body.field.includes('isActive')) {
     return HttpResponse.json(generateBooleanData('isActive'));
+  } else if (body.field.includes('newsletterSubscribed')) {
+    return HttpResponse.json(generateBooleanData('newsletterSubscribed'));
   }
 
   let multiSelectResponse: any[] = [];

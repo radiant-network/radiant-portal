@@ -219,12 +219,15 @@ function getRangeOperatorLabels(t: TFunction<string, undefined>): Record<RangeOp
   };
 }
 
-interface IProps {
+type NumericalFacetProps = {
   field: AggregationConfig;
-}
+};
 
+/**
+ * @TODO: https://d3b.atlassian.net/browse/SJRA-1241 update aggregate empty check when task is done
+ */
 // eslint-disable-next-line complexity
-export function NumericalFacet({ field }: IProps) {
+export function NumericalFacet({ field }: NumericalFacetProps) {
   const { t } = useI18n();
   const dispatch = useQBDispatch();
   const { aggregations } = useQBContext();
@@ -309,7 +312,7 @@ export function NumericalFacet({ field }: IProps) {
     if (hasNoData) {
       // @TODO: change action-flag type
       dispatch({
-        type: QBActionType.ADD_MULTISELECT_VALUE,
+        type: QBActionType.ADD_OR_UPDATE_FACET_PILL,
         payload: {
           field: fieldKey,
           value: ['__missing__'],
@@ -328,7 +331,7 @@ export function NumericalFacet({ field }: IProps) {
     // Update the main field with numeric values
     // @TODO: change action-flag type
     dispatch({
-      type: QBActionType.ADD_MULTISELECT_VALUE,
+      type: QBActionType.ADD_OR_UPDATE_FACET_PILL,
       payload: {
         field: fieldKey,
         value: values,
@@ -340,7 +343,7 @@ export function NumericalFacet({ field }: IProps) {
     if (selectedUnit) {
       // @TODO: change action-flag type
       dispatch({
-        type: QBActionType.ADD_MULTISELECT_VALUE,
+        type: QBActionType.ADD_OR_UPDATE_FACET_PILL,
         payload: {
           field: `${fieldKey}_unit`,
           value: [selectedUnit],

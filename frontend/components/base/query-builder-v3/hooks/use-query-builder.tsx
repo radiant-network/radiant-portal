@@ -10,8 +10,8 @@ import { BooleanOperators, ISyntheticSqon, IValueContent, IValueFacet, TFacetVal
 export enum QBActionType {
   REMOVE_QUERY = 'remove-query',
   SET_ACTIVE_QUERY = 'set-active-query',
-  ADD_MULTISELECT_VALUE = 'update-active-query',
-  REMOVE_MULTISELECT_PILL = 'remove-multiselect-pill',
+  ADD_OR_UPDATE_FACET_PILL = 'add-or-update-facet-pill',
+  REMOVE_FACET_PILL = 'remove-facet-pill',
   CHANGE_COMBINER_OPERATOR = 'change-combiner-operator',
 }
 
@@ -105,14 +105,13 @@ type SetActiveQueryAction = {
   payload: string;
 };
 type AddMultiselectAction = {
-  type: QBActionType.ADD_MULTISELECT_VALUE;
+  type: QBActionType.ADD_OR_UPDATE_FACET_PILL;
   payload: IValueFacet;
 };
 type RemoveMultiselectAction = {
-  type: QBActionType.REMOVE_MULTISELECT_PILL;
+  type: QBActionType.REMOVE_FACET_PILL;
   payload: IValueFacet;
 };
-
 type RemoveQueryAction = {
   type: QBActionType.REMOVE_QUERY;
 };
@@ -166,9 +165,9 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       };
     }
     /**
-     * Add or update a query with a IValueFacet (MultiSelect)
+     * Add or update a multi-select pill to the active query
      */
-    case QBActionType.ADD_MULTISELECT_VALUE: {
+    case QBActionType.ADD_OR_UPDATE_FACET_PILL: {
       const { activeQueryId } = context;
       const { sqons } = context;
       const index = sqons.findIndex(sqon => sqon.id === activeQueryId);
@@ -207,9 +206,9 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       return { ...context, sqons: [...sqons], history: { uuid: v4(), type: PillUserAction.UPDATE, target: field } };
     }
     /**
-     * Remove multiselect value from active query
+     * Remove multiselect-pill from active query
      */
-    case QBActionType.REMOVE_MULTISELECT_PILL: {
+    case QBActionType.REMOVE_FACET_PILL: {
       const { activeQueryId } = context;
       const { sqons } = context;
       const index = sqons.findIndex(sqon => sqon.id === activeQueryId);
@@ -305,8 +304,9 @@ export function useQBHistory() {
   const { history } = useQBContext();
   return history;
 }
+
 /**
- * Return the TFacetValue of IValueFacet for a specific field
+ * Return usable value for multi-select field (facet or pill)
  */
 export function useQBMultiselectValue(field: string): TFacetValue {
   const activeQuery = useQBActiveQuery();
@@ -326,4 +326,28 @@ export function useQBMultiselectValue(field: string): TFacetValue {
   }
 
   return [];
+}
+
+/**
+ * Return usable value for boolean field (facet or pill)
+ */
+export function useQBBooleanValue(field: string): string | null {
+  const activeQuery = useQBActiveQuery();
+  if (activeQuery.content.length === 0) return null;
+
+  const index = activeQuery.content.findIndex(
+    (value: any) =>
+      typeof value === 'object' &&
+      value !== null &&
+      'content' in value &&
+      'field' in (value.content as IValueFacet) &&
+      (value.content as IValueContent).field === field,
+  );
+
+  if (activeQuery.content[index]) {
+    const result = (activeQuery.content[index] as IValueFacet).content.value;
+    return (result as string[])[0];
+  }
+
+  return null;
 }

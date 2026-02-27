@@ -19,7 +19,7 @@ import {
   occurrenceAggregateApi,
   occurrenceAggregateStatisticApi,
 } from '../api/api-occurrence';
-import { httpUserPreferenceApiResponse, userPreferenceApi } from '../api/api-user-preference';
+import { userPreferenceApi } from '../api/api-user-preference';
 import { httpMockCountApiResponse, httpMockListApiResponse, mockCountApi, mockListApi } from '../api/mock-api';
 import { mockColumnHelper, mockColumns, TableMockData } from '../table/table-mock';
 
@@ -128,8 +128,8 @@ const facetListConfig: PortalConfig = {
             },
           },
           {
-            key: 'isActive',
-            translation_key: 'isActive (boolean)',
+            key: 'newsletterSubscribed',
+            translation_key: 'newsletterSubscribed (boolean)',
             type: FilterTypes.BOOLEAN,
           },
         ],
@@ -343,7 +343,7 @@ export const Default: Story = {
         http.post(mockCountApi, httpMockCountApiResponse),
         http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
         http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
-        http.get(userPreferenceApi, httpUserPreferenceApiResponse),
+        http.get(userPreferenceApi, () => new HttpResponse(null, { status: 404 })),
       ],
     },
   },
@@ -378,7 +378,106 @@ export const Multiselect: Story = {
         http.post(mockCountApi, httpMockCountApiResponse),
         http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
         http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
-        http.get(userPreferenceApi, httpUserPreferenceApiResponse),
+        http.get(userPreferenceApi, ({ params }: any) => {
+          const key = params.key;
+          if (key === 'data-table-storybook-query-builder') {
+            return new HttpResponse(null, { status: 404 });
+          }
+          return HttpResponse.json({
+            activeQueryId: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+            sqons: [
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+                content: [
+                  {
+                    content: {
+                      field: 'firstName',
+                      value: ['henry', 'jack', 'irene', 'liam', 'olivia', 'tanner'],
+                    },
+                    op: 'in',
+                  },
+                  {
+                    content: {
+                      field: 'lastName',
+                      value: ['tremblay', 'anderson', 'young'],
+                    },
+                    op: 'in',
+                  },
+                  {
+                    content: {
+                      field: 'status',
+                      value: ['single'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+            savedFilters: [],
+            selectedQueryIndexes: [0],
+          });
+        }),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.snv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
+      <QueryBuilderDataTable
+        id="storybook-query-builder"
+        columns={
+          [
+            ...mockColumns,
+            mockColumnHelper.accessor('isActive', {
+              header: 'Active',
+            }),
+          ] as TableColumnDef<TableMockData, any>[]
+        }
+        defaultColumnSettings={[]}
+      />
+    </QueryBuilder>
+  ),
+};
+
+export const Boolean: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get(userPreferenceApi, ({ params }: any) => {
+          const key = params.key;
+          if (key === 'data-table-storybook-query-builder') {
+            return new HttpResponse(null, { status: 404 });
+          }
+          return HttpResponse.json({
+            activeQueryId: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+            sqons: [
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+                content: [
+                  {
+                    content: {
+                      field: 'isActive',
+                      value: ['true'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+            savedFilters: [],
+            selectedQueryIndexes: [0],
+          });
+        }),
       ],
     },
   },

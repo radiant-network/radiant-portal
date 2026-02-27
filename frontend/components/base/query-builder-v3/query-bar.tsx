@@ -15,6 +15,8 @@ import { cn } from '@/components/lib/utils';
 import { Button } from '../shadcn/button';
 
 import { QBActionType, useQBContext, useQBDispatch } from './hooks/use-query-builder';
+import { isBoolean } from './libs/sqon';
+import BooleanQueryPill from './pills/boolean-query-pill';
 import MultiSelectQueryPill from './pills/multiselect-query-pill';
 import CombinerOperator from './pills/operators/combiner-operator';
 import { ISyntheticSqon, IValueFacet } from './type';
@@ -31,10 +33,19 @@ type QueryBarProps = {
  * Simple factory design pattern to create the correct query-pill
  */
 function factory(content: TSyntheticSqonContentValue, displayCombiner: boolean) {
+  if (isBoolean(content as IValueFacet)) {
+    return (
+      <>
+        <BooleanQueryPill content={content as IValueFacet} />
+        {displayCombiner && <CombinerOperator />}
+      </>
+    );
+  }
+
   return (
-    <div className="flex mt-1">
+    <>
       <MultiSelectQueryPill content={content as IValueFacet} /> {displayCombiner && <CombinerOperator />}
-    </div>
+    </>
   );
 }
 
@@ -109,7 +120,9 @@ function QueryBar({ sqon, active }: QueryBarProps) {
       <div className={cn('flex flex-1 justify-between py-3 px-3 border', backgroundColor)}>
         <div className="flex flex-1 flex-wrap max-h-[30vh]">
           {sqon.content.map((content, index) => (
-            <Fragment key={index}>{factory(content, index < sqon.content.length - 1)}</Fragment>
+            <div key={index} className="flex mt-1">
+              {factory(content, index < sqon.content.length - 1)}
+            </div>
           ))}
         </div>
 

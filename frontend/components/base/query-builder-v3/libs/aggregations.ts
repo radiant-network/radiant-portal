@@ -1,4 +1,3 @@
-import { IValueFacet } from '@/components/base/query-builder-v3/type';
 import { Aggregation, AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 
 /**
@@ -21,15 +20,14 @@ export function getVisibleAggregations(aggregationGroups: AggregationConfig) {
 /**
  * Read aggregations config to return the associated aggregation
  */
-export function getMultiselectAggregation(aggregations: AggregationConfig, content: IValueFacet): Aggregation {
-  const target = content.content.field;
+export function getAggregationByField(aggregations: AggregationConfig, field: string): Aggregation {
   let result;
   for (const key in aggregations) {
-    result = aggregations[key].items.find(item => item.key === target);
+    result = aggregations[key].items.find(item => item.key === field);
     if (result) return result;
   }
 
-  console.error(`${target} doesn't exist in aggregations`, aggregations);
+  console.error(`${field} doesn't exist in aggregations`, aggregations);
   return {
     type: FilterTypes.MULTIPLE,
     key: 'error',
