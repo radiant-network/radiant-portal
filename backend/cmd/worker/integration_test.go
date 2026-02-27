@@ -1453,6 +1453,44 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 	})
 }
 
+func Test_ProcessBatch_Using_Cache(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewValueSetsRepository(db)
+		ctx := batchval.BatchValidationContext{
+			ValueSetsRepo: repo,
+		}
+		cache := batchval.NewBatchValidationCache(&ctx)
+		expected := []string{"completed", "draft", "incomplete", "in_progress", "revoke", "submitted", "unknown"}
+
+		vc, err := cache.GetValueSetCodes(repository.ValueSetStatus)
+		assert.NoError(t, err)
+		assert.Equal(t, expected, vc)
+
+		// Insert a value into the value set
+		if err := db.Exec(`
+			INSERT INTO status (code, name_en) VALUES ('foo', 'bar');
+		`).Error; err != nil {
+			t.Fatal("failed to insert status code:", err)
+		}
+
+		codes, err := repo.GetCodes(repository.ValueSetStatus)
+		assert.NoError(t, err)
+		assert.Contains(t, codes, "foo") // Make sure the new code is in the DB
+
+		// We should not get the new value, since we use the cache
+		vc, err = cache.GetValueSetCodes(repository.ValueSetStatus)
+		assert.NoError(t, err)
+		assert.Equal(t, expected, vc)
+
+		// Cleanup
+		if err := db.Exec(`
+			DELETE FROM status WHERE code = 'foo';
+		`).Error; err != nil {
+			t.Fatal("failed to delete status code:", err)
+		}
+	})
+}
+
 func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
