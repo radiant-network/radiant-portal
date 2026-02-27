@@ -22,10 +22,10 @@ import { thousandNumberFormat } from '@/components/lib/number-format';
 import { QBActionType, useQBDispatch, useQBHistory, useQBMultiselectValue } from '../hooks/use-query-builder';
 import { TermOperators } from '../type';
 
-interface IProps {
+type MultiFacetProps = {
   field: AggregationConfig;
   maxVisibleItems?: number;
-}
+};
 
 /**
  * Wait for api Aggregation to be updated to extend aggregation and make label defined
@@ -53,6 +53,9 @@ export function getAggregatesWithLabel(
   }));
 }
 
+/**
+ * Handle search through aggregates
+ */
 function searchOptions(search: string, aggregates: MultiSelectAggregation[]) {
   const terms = search.toLowerCase().split(/\s+/).filter(Boolean);
   return aggregates.filter(option => {
@@ -72,6 +75,9 @@ function searchOptions(search: string, aggregates: MultiSelectAggregation[]) {
   });
 }
 
+/**
+ * Compute visible items count
+ */
 function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
   return maxVisibleItems < itemLength ? maxVisibleItems : itemLength;
 }
@@ -94,7 +100,12 @@ function sortAggregates(qbValues: string[]) {
   };
 }
 
-export function MultiSelectFacet({ field, maxVisibleItems = 5 }: IProps) {
+/**
+ * Multi select facet
+ * - Allow to select multi string value
+ * @TODO: https://d3b.atlassian.net/browse/SJRA-1241 update aggregate empty check when task is done
+ */
+export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps) {
   const { t, sanitize, lazyTranslate } = useI18n();
   const { appId, builderFetcher } = useFacetConfig();
   const dispatch = useQBDispatch();
@@ -190,7 +201,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: IProps) {
   const applyWithOperator = useCallback(
     (operator: TermOperators) => {
       dispatch({
-        type: QBActionType.ADD_MULTISELECT_VALUE,
+        type: QBActionType.ADD_OR_UPDATE_FACET_PILL,
         payload: {
           content: {
             field: field.key,

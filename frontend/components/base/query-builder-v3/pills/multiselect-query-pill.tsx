@@ -1,8 +1,8 @@
-import { useCallback, useContext } from 'react';
+import { useCallback } from 'react';
 
 import { FacetComponent } from '@/components/base/query-builder-v3/facets/facet-container';
-import { QBActionType, QBContext, useQBDispatch } from '@/components/base/query-builder-v3/hooks/use-query-builder';
-import { getMultiselectAggregation } from '@/components/base/query-builder-v3/libs/aggregations';
+import { QBActionType, useQBContext, useQBDispatch } from '@/components/base/query-builder-v3/hooks/use-query-builder';
+import { getAggregationByField } from '@/components/base/query-builder-v3/libs/aggregations';
 import QueryPillContainer from '@/components/base/query-builder-v3/pills/containers/query-pill-container';
 import LabelOperator from '@/components/base/query-builder-v3/pills/operators/label-operator';
 import Operator from '@/components/base/query-builder-v3/pills/operators/operator';
@@ -22,13 +22,13 @@ type MultiSelectPillProps = {
  *          └────────────────────────┘
  */
 function MultiSelectQueryPill({ content }: MultiSelectPillProps) {
-  const { aggregations } = useContext(QBContext);
-  const aggregation = getMultiselectAggregation(aggregations, content);
+  const { aggregations } = useQBContext();
+  const aggregation = getAggregationByField(aggregations, content.content.field);
   const dispatch = useQBDispatch();
 
   const onRemovePill = useCallback(() => {
     dispatch({
-      type: QBActionType.REMOVE_MULTISELECT_PILL,
+      type: QBActionType.REMOVE_FACET_PILL,
       payload: content,
     });
   }, [content]);

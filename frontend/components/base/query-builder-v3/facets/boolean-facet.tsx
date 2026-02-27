@@ -1,85 +1,90 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { Aggregation } from '@/api/api';
+import { Aggregation, SqonOpEnum } from '@/api/api';
 import { Button } from '@/components/base/shadcn/button';
 import { Label } from '@/components/base/shadcn/label';
 import { RadioGroup, RadioGroupItem } from '@/components/base/shadcn/radio-group';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { QBActionType, useQBDispatch } from '../hooks/use-query-builder';
-import { IValueFacet } from '../type';
+import { QBActionType, useQBBooleanValue, useQBDispatch, useQBHistory } from '../hooks/use-query-builder';
 
 import { useFacetConfig } from './hooks/use-facet-config';
 
 type BooleanFacetProps = {
-  data?: Aggregation[];
   field: AggregationConfig;
 };
 
-export function BooleanFacet({ data, field }: BooleanFacetProps) {
+/**
+ * @TODO: https://d3b.atlassian.net/browse/SJRA-1241 update aggregate empty check when task is done
+ */
+export function BooleanFacet({ field }: BooleanFacetProps) {
   const { t } = useI18n();
   const { builderFetcher } = useFacetConfig();
   const dispatch = useQBDispatch();
+  const history = useQBHistory();
 
-  // Use the aggregation builder hook to fetch data automatically
-  const { data: aggregationData } = builderFetcher({
+  const { data: apiAggregates } = builderFetcher({
     field: field.key,
-    size: 30,
   });
 
-  // Use data from props or from the aggregation builder
-  const [items, setItems] = useState<Aggregation[]>(data || aggregationData || []);
-  // items that are include in the search
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const defaultItem = useQBBooleanValue(field.key);
+  const [items, setItems] = useState<Aggregation[]>(apiAggregates ?? []);
+  const [selectedItem, setSelectedItem] = useState<string | null>(defaultItem);
 
-  useEffect(() => {
-    // Update items when data changes (either from props or aggregation builder)
-    setItems(data || aggregationData || []);
-  }, [data, aggregationData]);
-
-  useEffect(() => {
-    // if page reload and there is item selected in the querybuilder
-    // @TODO: to implement with new hooks
-    const prevSelectedItems: IValueFacet | undefined = undefined;
-    // const prevSelectedItems: IValueFacet | undefined = queryBuilderRemote
-    //   .getActiveQuery(appId)
-    //   // @ts-ignore
-    //   .content.find((x: IValueFacet) => x.content.field === field.key);
-    if (prevSelectedItems) {
-      const items = prevSelectedItems.content.value;
-      if (items.length >= 1) {
-        setSelectedItem(items[0] as string);
-      }
-    } else {
-      setSelectedItem(null);
-    }
-  }, [field.key]);
-
-  // Memoize these functions with useCallback
-  const onSelect = useCallback(
+  const handlSelect = useCallback(
     (item: Aggregation) => {
       if (item.key === selectedItem) return;
       if (item.key === undefined) return;
 
-      setSelectedItem(item.key || null);
+      setSelectedItem(item.key ?? null);
 
       dispatch({
-        type: QBActionType.ADD_MULTISELECT_VALUE,
+        type: QBActionType.ADD_OR_UPDATE_FACET_PILL,
         payload: {
-          field: field.key,
-          value: [...item.key],
+          content: {
+            field: field.key,
+            value: [item.key],
+          },
+          op: SqonOpEnum.In,
         },
       });
     },
     [selectedItem],
   );
 
-  const isSelected = useCallback((item: Aggregation) => selectedItem === item.key, [selectedItem]);
+  const handleChecked = useCallback((item: Aggregation) => selectedItem === item.key, [selectedItem]);
 
-  const clear = useCallback(() => {
+  const handleClear = useCallback(() => {
+    dispatch({
+      type: QBActionType.REMOVE_FACET_PILL,
+      payload: {
+        content: {
+          field: field.key,
+          value: [selectedItem],
+        },
+        op: SqonOpEnum.In,
+      },
+    });
     setSelectedItem(null);
   }, [selectedItem]);
+
+  useEffect(() => {
+    if (apiAggregates) {
+      setItems(apiAggregates);
+    }
+  }, [apiAggregates]);
+
+  /**
+   * Update only when field has been changed from a remote component
+   */
+  useEffect(() => {
+    if (history.target == field.key) {
+      if (defaultItem !== selectedItem) {
+        setSelectedItem(defaultItem);
+      }
+    }
+  }, [history.uuid]);
 
   return (
     <div className="p-2 w-full max-w-md">
@@ -91,9 +96,9 @@ export function BooleanFacet({ data, field }: BooleanFacetProps) {
                 <RadioGroupItem
                   value={item.key || ''}
                   id={item.key}
-                  checked={isSelected(item)}
+                  checked={handleChecked(item)}
                   onClick={() => {
-                    onSelect(item);
+                    handlSelect(item);
                   }}
                 />
                 <Label htmlFor={item.key}>{item.key}</Label>
@@ -108,7 +113,7 @@ export function BooleanFacet({ data, field }: BooleanFacetProps) {
         <>
           <hr className="my-4 border-border" />
           <div className="flex align-right justify-end items-center space-x-2">
-            <Button onClick={clear} size="xs">
+            <Button onClick={handleClear} size="xs">
               {t('common.filters.buttons.clear')}
             </Button>
           </div>
