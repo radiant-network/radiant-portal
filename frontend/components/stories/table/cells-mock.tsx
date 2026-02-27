@@ -922,7 +922,7 @@ export const applicationFirstSetCellColumns = [
       <UninterpretedCasePreviewCell
         caseId={info.getValue() ?? 1}
         patientId={info.row.original.patient_id ?? 1}
-        relationshipToProband={info.row.original.relationship_to_proband}
+        seqId={info.row.original.seq_id ? +info.row.original.seq_id : 1}
       />
     ),
     header: () => (

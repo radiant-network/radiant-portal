@@ -3,14 +3,20 @@ import { useParams, useSearchParams } from 'react-router';
 import { PaginationState } from '@tanstack/table-core';
 import useSWR from 'swr';
 
-import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantUninterpretedCasesSearchResponse } from '@/api/api';
+import {
+  ApiError,
+  ListBodyWithCriteria,
+  SearchCriterion,
+  SortBody,
+  VariantUninterpretedCasesSearchResponse,
+} from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import SliderUninterpretedCaseSheet from '@/entity/cases/slider/slider-uninterpreted-case-sheet';
 import { useSliderCasePatientIdNavigation } from '@/entity/cases/slider/use-slider-case-navigation';
 import { variantsApi } from '@/utils/api';
 
-import UninterpretedCasesFilters, { UninterpretedCasesFiltersState } from './table/uninterpreted-cases-filters';
+import UninterpretedCasesTableFilters from './table/uninterpreted-cases-table-filters';
 import {
   getUninterpretedCasesColumns,
   uninterpretedCasesDefaultSettings,
@@ -20,11 +26,11 @@ import { SELECTED_UNINTERPRETED_CASE_PARAM } from './constants';
 type UninterpretedCasesSearchInput = {
   key: string;
   locusId: string;
-  criteria: ListBodyWithCriteria;
+  listBodyWithCriteria: ListBodyWithCriteria;
 };
 
 async function fetchUninterpretedCases(input: UninterpretedCasesSearchInput) {
-  const response = await variantsApi.getGermlineVariantUninterpretedCases(input.locusId, input.criteria);
+  const response = await variantsApi.getGermlineVariantUninterpretedCases(input.locusId, input.listBodyWithCriteria);
   return response.data;
 }
 
@@ -33,66 +39,34 @@ function UninterpretedCasesTable() {
   const params = useParams<{ locusId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [rowSelection, setRowSelection] = useState({});
+  const [sorting, setSorting] = useState<SortBody[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 25,
   });
+  const [additionalFields, setAdditionalFields] = useState<string[]>([]);
 
-  const [initialFilters, setInitialFilters] = useState<UninterpretedCasesFiltersState>({
-    phenotype: '',
-    institution: [],
-    test: [],
-  });
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
 
-  const searchCriteria: SearchCriterion[] = useMemo(() => {
-    const criteria: SearchCriterion[] = [];
-
-    if (initialFilters.phenotype) {
-      criteria.push({
-        field: 'phenotypes_term',
-        value: [initialFilters.phenotype],
-        operator: 'contains',
-      });
-    }
-
-    if (initialFilters.institution && initialFilters.institution.length > 0) {
-      criteria.push({
-        field: 'diagnosis_lab_code',
-        value: [...initialFilters.institution],
-      });
-    }
-
-    if (initialFilters.test && initialFilters.test.length > 0) {
-      criteria.push({
-        field: 'analysis_catalog_code',
-        value: [...initialFilters.test],
-      });
-    }
-
-    return criteria;
-  }, [initialFilters.phenotype, initialFilters.institution, initialFilters.test]);
-
-  const { data, isLoading } = useSWR<VariantUninterpretedCasesSearchResponse, ApiError, UninterpretedCasesSearchInput>(
+  const { data, isLoading, isValidating } = useSWR<
+    VariantUninterpretedCasesSearchResponse,
+    ApiError,
+    UninterpretedCasesSearchInput
+  >(
     {
       key: 'uninterpreted-cases',
       locusId: params.locusId!,
-      criteria: {
+      listBodyWithCriteria: {
+        additional_fields: additionalFields,
         search_criteria: searchCriteria,
-        sort: [
-          {
-            field: 'updated_on',
-            order: 'desc',
-          },
-        ],
         limit: pagination.pageSize,
-        offset: pagination.pageIndex * pagination.pageSize,
         page_index: pagination.pageIndex,
+        sort: sorting,
       },
     },
     fetchUninterpretedCases,
     {
       revalidateOnFocus: false,
-      shouldRetryOnError: false,
     },
   );
 
@@ -112,21 +86,30 @@ function UninterpretedCasesTable() {
       <DataTable
         id="uninterpreted-cases"
         columns={getUninterpretedCasesColumns(t)}
-        TableFilters={<UninterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />}
+        TableFilters={
+          <UninterpretedCasesTableFilters
+            loading={isLoading && !isValidating}
+            searchCriteria={searchCriteria}
+            setSearchCriteria={setSearchCriteria}
+          />
+        }
         data={casesData}
         defaultColumnSettings={uninterpretedCasesDefaultSettings}
         loadingStates={{
           total: isLoading,
           list: isLoading,
         }}
-        total={data?.count || 0}
         pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
+        total={data?.count || 0}
+        enableColumnOrdering
+        enableFullscreen
         tableIndexResultPosition="bottom"
+        serverOptions={{
+          setAdditionalFields,
+          onSortingChange: setSorting,
+        }}
         rowSelection={rowSelection}
         onRowSelectionChange={setRowSelection}
-        serverOptions={{
-          onSortingChange: () => [],
-        }}
       />
       <SliderUninterpretedCaseSheet
         open={!!selectedCase}

@@ -128,6 +128,8 @@ export default function App() {
               <TabsContent value={VariantEntityTabs.Transcripts} className="p-0 sm:py-3">
                 <TranscriptsTab />
               </TabsContent>
+            </div>
+            <div className="mx-auto w-full">
               <TabsContent value={VariantEntityTabs.Cases} className="p-0 sm:py-3">
                 <CasesTab />
               </TabsContent>
