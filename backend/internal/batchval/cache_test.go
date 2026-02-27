@@ -130,7 +130,7 @@ func TestBatchValidationCache_GetOrganizationByCode(t *testing.T) {
 	result, err := cache.GetOrganizationByCode("ORG1")
 	assert.NoError(t, err)
 	assert.Equal(t, org, result)
-	assert.Equal(t, org, cache.Organizations["ORG1"])
+	assert.Equal(t, org, cache.OrganizationsByCode["ORG1"])
 	assert.Equal(t, org, cache.OrganizationsById[1])
 
 	// Test cache hit (Repo should not be called again)
@@ -158,7 +158,7 @@ func TestBatchValidationCache_GetOrganizationById(t *testing.T) {
 	result, err := cache.GetOrganizationById(1)
 	assert.NoError(t, err)
 	assert.Equal(t, org, result)
-	assert.Equal(t, org, cache.Organizations["ORG1"])
+	assert.Equal(t, org, cache.OrganizationsByCode["ORG1"])
 	assert.Equal(t, org, cache.OrganizationsById[1])
 
 	// Test cache hit
@@ -477,14 +477,19 @@ func TestBatchValidationCache_GetTaskHasDocumentByDocumentId(t *testing.T) {
 
 func TestBatchValidationCache_GetSampleBySubmitterSampleId(t *testing.T) {
 	mockRepo := &mockSampleRepo{}
-	ctx := &BatchValidationContext{SampleRepo: mockRepo}
+	orgRepo := &mockOrgRepo{}
+	ctx := &BatchValidationContext{SampleRepo: mockRepo, OrgRepo: orgRepo}
 	cache := NewBatchValidationCache(ctx)
 
 	sample := &types.Sample{ID: 10, OrganizationId: 1, SubmitterSampleId: "S1"}
 
 	// Test cache miss
-	mockRepo.GetBySubmitterSampleIdFunc = func(orgID int, id string) (*types.Sample, error) {
-		assert.Equal(t, 1, orgID)
+	orgRepo.GetByIdFunc = func(id int) (*types.Organization, error) {
+		assert.Equal(t, 1, id)
+		return &types.Organization{ID: 1, Code: "ORG1"}, nil
+	}
+	mockRepo.GetSampleByOrgCodeAndSubmitterSampleIdFunc = func(orgCode string, id string) (*types.Sample, error) {
+		assert.Equal(t, "ORG1", orgCode)
 		assert.Equal(t, "S1", id)
 		return sample, nil
 	}

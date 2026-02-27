@@ -748,7 +748,7 @@ func (cr *CaseValidationRecord) validateCasePatients() error {
 
 func (cr *CaseValidationRecord) validateSeqExpExists(seqExpIndex int) (error, bool) {
 	se := cr.Case.SequencingExperiments[seqExpIndex]
-	seqExp, err := cr.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode) // TODO use cache from context
+	seqExp, err := cr.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
 	if err != nil {
 		return fmt.Errorf("error getting existing sequencing experiment: %v", err), false
 	}

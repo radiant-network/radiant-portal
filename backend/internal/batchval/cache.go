@@ -35,7 +35,7 @@ type BatchValidationCache struct {
 	ValueSets map[repository.ValueSetType][]string
 
 	// Referenced Entities (Indexed by their natural keys)
-	Organizations                  map[string]*types.Organization                          // Key: code
+	OrganizationsByCode            map[string]*types.Organization                          // Key: code
 	OrganizationsById              map[int]*types.Organization                             // Key: ID
 	Projects                       map[string]*types.Project                               // Key: code
 	Patients                       map[PatientKey]*types.Patient                           // Key: org_code + submitter_id
@@ -57,7 +57,7 @@ func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCa
 	return &BatchValidationCache{
 		Context:                        context,
 		ValueSets:                      make(map[repository.ValueSetType][]string),
-		Organizations:                  make(map[string]*types.Organization),
+		OrganizationsByCode:            make(map[string]*types.Organization),
 		OrganizationsById:              make(map[int]*types.Organization),
 		Projects:                       make(map[string]*types.Project),
 		Patients:                       make(map[PatientKey]*types.Patient),
@@ -72,6 +72,12 @@ func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCa
 		AnalysisCatalogIDs:             make(map[string]*types.AnalysisCatalog),
 		Cases:                          make(map[CaseKey]*types.Case),
 	}
+}
+
+func getCopy[T any](input []T) []T {
+	out := make([]T, len(input))
+	copy(out, input)
+	return out
 }
 
 func (c *BatchValidationCache) GetCaseAnalysisCatalogByCode(code string) (*types.AnalysisCatalog, error) {
@@ -124,7 +130,7 @@ func (c *BatchValidationCache) GetDocumentByUrl(url string) (*types.Document, er
 }
 
 func (c *BatchValidationCache) GetOrganizationByCode(code string) (*types.Organization, error) {
-	if org, ok := c.Organizations[code]; ok {
+	if org, ok := c.OrganizationsByCode[code]; ok {
 		return org, nil
 	}
 
@@ -134,7 +140,7 @@ func (c *BatchValidationCache) GetOrganizationByCode(code string) (*types.Organi
 	}
 
 	if org != nil {
-		c.Organizations[code] = org
+		c.OrganizationsByCode[code] = org
 		c.OrganizationsById[org.ID] = org
 	}
 
@@ -152,7 +158,7 @@ func (c *BatchValidationCache) GetOrganizationById(id int) (*types.Organization,
 	}
 
 	if org != nil {
-		c.Organizations[org.Code] = org
+		c.OrganizationsByCode[org.Code] = org
 		c.OrganizationsById[id] = org
 	}
 
@@ -231,26 +237,20 @@ func (c *BatchValidationCache) GetSampleByOrgCodeAndSubmitterSampleId(orgCode st
 }
 
 func (c *BatchValidationCache) GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*types.Sample, error) {
-	for _, sample := range c.SamplesById {
-		if sample.OrganizationId == organizationId && sample.SubmitterSampleId == submitterSampleId {
-			return sample, nil
-		}
-	}
-	sample, err := c.Context.SampleRepo.GetSampleBySubmitterSampleId(organizationId, submitterSampleId)
+	org, err := c.GetOrganizationById(organizationId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error retrieving organization for ID %d: %w", organizationId, err)
+	}
+	if org == nil {
+		return nil, fmt.Errorf("no organization found for ID %d", organizationId)
 	}
 
-	if sample != nil {
-		c.SamplesById[sample.ID] = sample
-	}
-
-	return sample, nil
+	return c.GetSampleByOrgCodeAndSubmitterSampleId(org.Code, submitterSampleId)
 }
 
 func (c *BatchValidationCache) GetSequencingExperimentByAliquot(aliquot string) ([]types.SequencingExperiment, error) {
 	if seqExps, ok := c.SequencingExperimentsByAliquot[aliquot]; ok {
-		return seqExps, nil
+		return getCopy(seqExps), nil
 	}
 
 	seqExps, err := c.Context.SeqExpRepo.GetSequencingExperimentByAliquot(aliquot)
@@ -259,7 +259,7 @@ func (c *BatchValidationCache) GetSequencingExperimentByAliquot(aliquot string) 
 	}
 
 	c.SequencingExperimentsByAliquot[aliquot] = seqExps
-	return seqExps, nil
+	return getCopy(seqExps), nil
 }
 
 func (c *BatchValidationCache) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error) {
@@ -282,7 +282,7 @@ func (c *BatchValidationCache) GetSequencingExperimentByAliquotAndSubmitterSampl
 
 func (c *BatchValidationCache) GetTaskContextBySequencingExperimentId(seqExpId int) ([]*types.TaskContext, error) {
 	if tc, ok := c.TaskContext[seqExpId]; ok {
-		return tc, nil
+		return getCopy(tc), nil
 	}
 
 	tc, err := c.Context.TaskRepo.GetTaskContextBySequencingExperimentId(seqExpId)
@@ -291,12 +291,12 @@ func (c *BatchValidationCache) GetTaskContextBySequencingExperimentId(seqExpId i
 	}
 
 	c.TaskContext[seqExpId] = tc
-	return tc, nil
+	return getCopy(tc), nil
 }
 
 func (c *BatchValidationCache) GetTaskHasDocumentByDocumentId(documentId int) ([]*types.TaskHasDocument, error) {
 	if thd, ok := c.TaskHasDocuments[documentId]; ok {
-		return thd, nil
+		return getCopy(thd), nil
 	}
 
 	thd, err := c.Context.TaskRepo.GetTaskHasDocumentByDocumentId(documentId)
@@ -305,12 +305,12 @@ func (c *BatchValidationCache) GetTaskHasDocumentByDocumentId(documentId int) ([
 	}
 
 	c.TaskHasDocuments[documentId] = thd
-	return thd, nil
+	return getCopy(thd), nil
 }
 
 func (c *BatchValidationCache) GetValueSetCodes(valueSetType repository.ValueSetType) ([]string, error) {
 	if codes, ok := c.ValueSets[valueSetType]; ok {
-		return codes, nil
+		return getCopy(codes), nil
 	}
 
 	codes, err := c.Context.ValueSetsRepo.GetCodes(valueSetType)
@@ -319,5 +319,5 @@ func (c *BatchValidationCache) GetValueSetCodes(valueSetType repository.ValueSet
 	}
 
 	c.ValueSets[valueSetType] = codes
-	return codes, nil
+	return getCopy(codes), nil
 }
