@@ -30,12 +30,6 @@ const (
 	IdenticalSequencingExperimentInBatchCode = "SEQ-006"
 )
 
-type SequencingExperimentKey struct {
-	SampleOrganizationCode string
-	SubmitterSampleId      string
-	Aliquot                string
-}
-
 type SequencingExperimentValidationRecord struct {
 	batchval.BaseValidationRecord
 
@@ -369,11 +363,11 @@ func insertSequencingExperimentRecords(records []*SequencingExperimentValidation
 
 func validateSequencingExperimentBatch(ctx *batchval.BatchValidationContext, seqExps []types.SequencingExperimentBatch) ([]*SequencingExperimentValidationRecord, error) {
 	var records []*SequencingExperimentValidationRecord
-	visited := map[SequencingExperimentKey]struct{}{}
+	visited := map[batchval.SequencingExperimentKey]struct{}{}
 	cache := batchval.NewBatchValidationCache(ctx)
 
 	for index, seqExp := range seqExps {
-		key := SequencingExperimentKey{
+		key := batchval.SequencingExperimentKey{
 			SampleOrganizationCode: seqExp.SampleOrganizationCode,
 			SubmitterSampleId:      seqExp.SubmitterSampleId.String(),
 			Aliquot:                seqExp.Aliquot.String(),

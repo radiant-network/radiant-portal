@@ -30,11 +30,6 @@ const (
 	PatientDuplicateInBatchCode              = "PATIENT-006"
 )
 
-type PatientKey struct {
-	OrganizationCode   string
-	SubmitterPatientId string
-}
-
 type PatientValidationRecord struct {
 	batchval.BaseValidationRecord
 	Patient        types.PatientBatch
@@ -257,7 +252,7 @@ func insertPatientRecords(records []*PatientValidationRecord, repo repository.Pa
 func validatePatientsBatch(ctx *batchval.BatchValidationContext, patients []types.PatientBatch) ([]*PatientValidationRecord, error) {
 	var records []*PatientValidationRecord
 	cache := batchval.NewBatchValidationCache(ctx)
-	seenPatients := map[PatientKey]struct{}{}
+	seenPatients := map[batchval.PatientKey]struct{}{}
 	for index, patient := range patients {
 		record, err := validatePatientRecord(ctx, cache, patient, index, seenPatients)
 		if err != nil {
@@ -268,7 +263,7 @@ func validatePatientsBatch(ctx *batchval.BatchValidationContext, patients []type
 	return records, nil
 }
 
-func validatePatientRecord(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patient types.PatientBatch, index int, seenPatients map[PatientKey]struct{}) (*PatientValidationRecord, error) {
+func validatePatientRecord(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patient types.PatientBatch, index int, seenPatients map[batchval.PatientKey]struct{}) (*PatientValidationRecord, error) {
 	record := &PatientValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
 			Context: ctx,
@@ -292,7 +287,7 @@ func validatePatientRecord(ctx *batchval.BatchValidationContext, cache *batchval
 	}
 
 	batchval.ValidateUniquenessInBatch(record,
-		PatientKey{
+		batchval.PatientKey{
 			OrganizationCode:   patient.PatientOrganizationCode,
 			SubmitterPatientId: patient.SubmitterPatientId.String(),
 		},
