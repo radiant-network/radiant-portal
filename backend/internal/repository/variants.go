@@ -455,7 +455,7 @@ func (r *VariantsRepository) GetVariantInternalFrequenciesSplitBy(locusId int, s
 				FROM radiant_jdbc.public.cases c
 				%s
 				LEFT JOIN radiant_jdbc.public.case_has_sequencing_experiment chse ON chse.case_id = c.id
-				JOIN staging_sequencing_experiment seq ON seq.seq_id = chse.sequencing_experiment_id AND seq.experimental_strategy = 'wgs'
+				JOIN staging_sequencing_experiment seq ON seq.seq_id = chse.sequencing_experiment_id AND seq.case_id = chse.case_id AND seq.experimental_strategy = 'wgs'
 				LEFT JOIN germline__snv__occurrence o ON o.seq_id = seq.seq_id AND o.locus_id = ? AND o.gq >= 20 AND o.filter = 'PASS' AND o.ad_alt > 3
 			),
 			result AS (
