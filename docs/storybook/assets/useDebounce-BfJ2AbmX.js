@@ -1,0 +1,1 @@
+import{r as n}from"./iframe-QXLGoJMs.js";function c(e,t){const[r,u]=n.useState(e);return n.useEffect(()=>{const o=setTimeout(()=>u(e),t||500);return()=>{clearTimeout(o)}},[e,t]),r}function i(e,t){let r;return(...u)=>(clearTimeout(r),new Promise(o=>{r=setTimeout(()=>{o(e(...u))},t)}))}export{i as d,c as u};
