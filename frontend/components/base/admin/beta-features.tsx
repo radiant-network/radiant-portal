@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
 
 import { Button } from '@/components/base/shadcn/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
@@ -23,13 +24,13 @@ function BetaFeatures() {
   const renderFeature = (key: string, definition: (typeof featureDefinitions)[string]) => {
     const value = features[key];
 
-    if (definition.options) {
+    if (definition.type === 'select') {
       return (
         <div key={key} className="mb-4">
           <label className="block mb-2">{definition.label}</label>
           {definition.description && <p className="text-sm text-gray-500 mb-2">{definition.description}</p>}
           <Select value={value as string} onValueChange={newValue => setFeature(key, newValue)}>
-            <SelectTrigger className="w-[240px]">
+            <SelectTrigger className="w-60">
               <SelectValue placeholder={`Select ${definition.label}`} />
             </SelectTrigger>
             <SelectContent>
@@ -40,6 +41,19 @@ function BetaFeatures() {
               ))}
             </SelectContent>
           </Select>
+        </div>
+      );
+    } else if (definition.type === 'link') {
+      return (
+        <div key={key} className="mb-4">
+          <div className="flex items-center space-x-2">
+            <div>
+              <Link className="block" to={definition.link}>
+                <Button>{definition.label}</Button>
+              </Link>
+              {definition.description && <p className="text-sm text-gray-500">{definition.description}</p>}
+            </div>
+          </div>
         </div>
       );
     } else {
