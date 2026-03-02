@@ -1,4 +1,5 @@
-import { SquarePen } from 'lucide-react';
+import { useState } from 'react';
+import { MessageSquare, SquarePen } from 'lucide-react';
 
 import { CaseSequencingExperiment, GermlineSNVOccurrence } from '@/api/api';
 import InterpretationDialog from '@/components/base/interpretation/interpretation-dialog';
@@ -13,6 +14,8 @@ import SliderPatientRow from '@/components/base/slider/slider-patient-row';
 import SliderSheet from '@/components/base/slider/slider-sheet';
 import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
 import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
+import { useVariantComments } from '@/components/base/variant-comments/use-variant-comments';
+import VariantCommentsSheet from '@/components/base/variant-comments/variant-comments-sheet';
 import { useI18n } from '@/components/hooks/i18n';
 import { useCaseIdFromParam } from '@/utils/helper';
 
@@ -82,6 +85,8 @@ function OccurrenceSheetContent({
   const { t } = useI18n();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdContext();
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const { comments, addComment, updateComment, deleteComment, currentUser } = useVariantComments();
   const { patient, caseSequencing, expandResult, isLoading } = useOccurrenceAndCase(
     caseId,
     occurrence.seq_id,
@@ -107,21 +112,36 @@ function OccurrenceSheetContent({
         locusId={occurrence.locus_id}
         hgvsg={occurrence.hgvsg}
         actions={
-          !occurrence.has_interpretation && (
-            <InterpretationDialog
-              locusId={occurrence.locus_id}
-              transcriptId={occurrence.transcript_id}
-              seqId={seqId}
-              handleSaveCallback={onInterpretationSaved}
-              renderTrigger={handleOpen => (
-                <Button size="sm" onClick={handleOpen}>
-                  <SquarePen />
-                  {t('preview_sheet.actions.interpretation')}
-                </Button>
-              )}
-            />
-          )
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setCommentsOpen(true)}>
+              <MessageSquare className="h-4 w-4" />
+              {t('variant_comments.button')}
+            </Button>
+            {!occurrence.has_interpretation && (
+              <InterpretationDialog
+                locusId={occurrence.locus_id}
+                transcriptId={occurrence.transcript_id}
+                seqId={seqId}
+                handleSaveCallback={onInterpretationSaved}
+                renderTrigger={handleOpen => (
+                  <Button size="sm" onClick={handleOpen}>
+                    <SquarePen />
+                    {t('preview_sheet.actions.interpretation')}
+                  </Button>
+                )}
+              />
+            )}
+          </div>
         }
+      />
+      <VariantCommentsSheet
+        open={commentsOpen}
+        onOpenChange={setCommentsOpen}
+        comments={comments}
+        currentUserId={currentUser.id}
+        onAdd={addComment}
+        onUpdate={updateComment}
+        onDelete={deleteComment}
       />
       {occurrence.has_interpretation && (
         <SliderInterpretationDetailsCard
