@@ -315,6 +315,7 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 		SampleRepo:    mockSampleRepo,
 		ValueSetsRepo: &MockValueSetRepository{},
 	}
+	cache := batchval.NewBatchValidationCache(mockContext)
 
 	samples := []types.SampleBatch{
 		{SubmitterSampleId: "S1", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", HistologyCode: "normal"},                                           // 1. Valid new sample
@@ -326,7 +327,7 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 		{SubmitterSampleId: "P-BATCH2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", HistologyCode: "normal"},                                     // 7. The grandparent for S3
 	}
 
-	records, err := validateSamplesBatch(mockContext, samples)
+	records, err := validateSamplesBatch(mockContext, cache, samples)
 	assert.NoError(t, err)
 	assert.Len(t, records, 7) // Updated from 6 to 7 to include P-BATCH2
 
