@@ -11,9 +11,13 @@ import (
 
 type MockOrganizationRepository struct {
 	GetOrganizationByCodeFunc func(code string) (*types.Organization, error)
+	GetOrganizationByIdFunc   func(id int) (*types.Organization, error)
 }
 
 func (m *MockOrganizationRepository) GetOrganizationById(id int) (*types.Organization, error) {
+	if m.GetOrganizationByIdFunc != nil {
+		return m.GetOrganizationByIdFunc(id)
+	}
 	return nil, nil
 }
 
@@ -42,9 +46,10 @@ func (m *MockPatientsRepository) GetPatientBySubmitterPatientId(organizationId i
 func (m *MockPatientsRepository) CreatePatient(newPatient *types.Patient) error { return nil }
 
 type MockSamplesRepository struct {
-	GetSampleBySubmitterSampleIdFunc func(organizationId int, submitterSampleId string) (*types.Sample, error)
-	CreateSampleFunc                 func(newSample *types.Sample) (*types.Sample, error)
-	GetTypeCodesFunc                 func() ([]string, error)
+	GetSampleBySubmitterSampleIdFunc           func(organizationId int, submitterSampleId string) (*types.Sample, error)
+	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(organizationCode string, submitterSampleId string) (*types.Sample, error)
+	CreateSampleFunc                           func(newSample *types.Sample) (*types.Sample, error)
+	GetTypeCodesFunc                           func() ([]string, error)
 }
 
 func (m *MockSamplesRepository) GetSampleById(id int) (*types.Sample, error) {
@@ -59,6 +64,9 @@ func (m *MockSamplesRepository) GetSampleBySubmitterSampleId(organizationId int,
 }
 
 func (m *MockSamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+	if m.GetSampleByOrgCodeAndSubmitterSampleIdFunc != nil {
+		return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(organizationCode, submitterSampleId)
+	}
 	return nil, nil
 }
 
@@ -177,8 +185,9 @@ func Test_ValidateTypeCode_Valid(t *testing.T) {
 			return []string{"blood", "dna"}, nil
 		},
 	}
+	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: mockValueSetRepo}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: &batchval.BatchValidationContext{ValueSetsRepo: mockValueSetRepo}},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
 	err := rec.validateTypeCode()
@@ -193,8 +202,9 @@ func Test_ValidateTypeCode_Invalid(t *testing.T) {
 			return []string{"blood", "dna"}, nil
 		},
 	}
+	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: mockValueSetRepo}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: &batchval.BatchValidationContext{ValueSetsRepo: mockValueSetRepo}},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
 	err := rec.validateTypeCode()
@@ -206,8 +216,9 @@ func Test_ValidateTypeCode_Invalid(t *testing.T) {
 
 func Test_ValidateHistologyTypeCode_Valid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood", HistologyCode: "normal"}
+	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: &batchval.BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
 	err := rec.validateHistologyCode()
@@ -217,8 +228,9 @@ func Test_ValidateHistologyTypeCode_Valid(t *testing.T) {
 
 func Test_ValidateHistologyTypeCode_Invalid(t *testing.T) {
 	sample := types.SampleBatch{SampleOrganizationCode: "CHUSJ", SubmitterSampleId: "S1", TypeCode: "blood", HistologyCode: "invalid_histology"}
+	mockContext := &batchval.BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}
 	rec := SampleValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: &batchval.BatchValidationContext{ValueSetsRepo: &MockValueSetRepository{}}},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
 	err := rec.validateHistologyCode()
@@ -287,6 +299,12 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 			}
 			return nil, nil
 		},
+		GetOrganizationByIdFunc: func(id int) (*types.Organization, error) {
+			if id == org.ID {
+				return org, nil
+			}
+			return nil, nil
+		},
 	}
 	mockPatientRepo := &MockPatientsRepository{
 		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string) (*types.Patient, error) {
@@ -299,6 +317,17 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 	mockSampleRepo := &MockSamplesRepository{
 		GetSampleBySubmitterSampleIdFunc: func(orgId int, sampleId string) (*types.Sample, error) {
 			if orgId == org.ID {
+				switch sampleId {
+				case "S2":
+					return existingSampleInDb, nil
+				case "P-DB":
+					return parentInDb, nil
+				}
+			}
+			return nil, nil
+		},
+		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(orgCode, sampleId string) (*types.Sample, error) {
+			if orgCode == "CHUSJ" {
 				switch sampleId {
 				case "S2":
 					return existingSampleInDb, nil

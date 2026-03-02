@@ -46,7 +46,7 @@ type BatchValidationCache struct {
 	TaskContext                    map[int][]*types.TaskContext                            // Key: sequencing experiment ID
 	Documents                      map[string]*types.Document                              // Key: URL
 	TaskHasDocuments               map[int][]*types.TaskHasDocument                        // Key: document ID
-	AnalysisCatalogIDs             map[string]*types.AnalysisCatalog                       // Key: code
+	AnalysisCatalogs               map[string]*types.AnalysisCatalog                       // Key: code
 	Cases                          map[CaseKey]*types.Case                                 // Key: project_id + submitter_case_id
 }
 
@@ -65,7 +65,7 @@ func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCa
 		TaskContext:                    make(map[int][]*types.TaskContext),
 		Documents:                      make(map[string]*types.Document),
 		TaskHasDocuments:               make(map[int][]*types.TaskHasDocument),
-		AnalysisCatalogIDs:             make(map[string]*types.AnalysisCatalog),
+		AnalysisCatalogs:               make(map[string]*types.AnalysisCatalog),
 		Cases:                          make(map[CaseKey]*types.Case),
 	}
 }
@@ -77,7 +77,7 @@ func getCopy[T any](input []T) []T {
 }
 
 func (c *BatchValidationCache) GetCaseAnalysisCatalogByCode(code string) (*types.AnalysisCatalog, error) {
-	if ac, ok := c.AnalysisCatalogIDs[code]; ok {
+	if ac, ok := c.AnalysisCatalogs[code]; ok {
 		return ac, nil
 	}
 
@@ -86,7 +86,7 @@ func (c *BatchValidationCache) GetCaseAnalysisCatalogByCode(code string) (*types
 		return nil, err
 	}
 
-	c.AnalysisCatalogIDs[code] = ac
+	c.AnalysisCatalogs[code] = ac
 	return ac, nil
 }
 

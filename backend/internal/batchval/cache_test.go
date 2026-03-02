@@ -350,7 +350,7 @@ func TestBatchValidationCache_GetCaseAnalysisCatalogByCode(t *testing.T) {
 	result, err := cache.GetCaseAnalysisCatalogByCode("WGS")
 	assert.NoError(t, err)
 	assert.Equal(t, ac, result)
-	assert.Equal(t, ac, cache.AnalysisCatalogIDs["WGS"])
+	assert.Equal(t, ac, cache.AnalysisCatalogs["WGS"])
 
 	// Test cache hit
 	mockRepo.GetAnalysisCatalogFunc = func(code string) (*types.AnalysisCatalog, error) {
