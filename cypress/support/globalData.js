@@ -184,19 +184,19 @@ const globalData = {
           field: 'pf_wgs',
           value: '0.5',
           op: '<',
-          count: 2073057,
+          count: 2180139,
         },
         {
           field: 'pf_wgs_affected',
           value: '0.5',
           op: '<',
-          count: 2006606,
+          count: 2298376,
         },
         {
           field: 'pf_wgs_not_affected',
           value: '0.5',
           op: '<',
-          count: 1866517,
+          count: 2473724,
         },
         {
           field: 'gnomad_v3_af',

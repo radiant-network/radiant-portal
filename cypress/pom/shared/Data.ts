@@ -100,7 +100,7 @@ export const data = {
     exomiser: '0.438',
     acmg_exomiser: ['LB'],
     gnomad: '1.66e-3',
-    freq: '1.43e-1',
+    freq: '8.33e-2',
     gq: '99.00',
     zyg: '0/1',
     ad_ratio: '0.46',
