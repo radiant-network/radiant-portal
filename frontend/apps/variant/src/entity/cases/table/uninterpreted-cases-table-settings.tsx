@@ -16,7 +16,6 @@ import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cel
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
-import { Badge } from '@/components/base/shadcn/badge';
 
 import UninterpretedCaseActionsCell from './cells/uninterpreted-case-actions-cell';
 import UninterpretedCasePreviewCell from './cells/uninterpreted-case-preview-cell';
@@ -276,9 +275,9 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.sex_name, {
       id: 'sex_name',
       cell: info => (
-        <Badge variant="secondary" className="self-start">
-          {t(`common.sex.${info.getValue().toLowerCase()}`)}
-        </Badge>
+        <BadgeCell variant="secondary" className="self-start">
+          {t(`common.sex.${info.getValue() ? info.getValue().toLowerCase() : ''}`)}
+        </BadgeCell>
       ),
       header: t('variant_entity.cases.other_table.headers.sex'),
       minSize: 80,
