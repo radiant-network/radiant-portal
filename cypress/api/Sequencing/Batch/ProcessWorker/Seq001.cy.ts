@@ -16,11 +16,10 @@ describe('Sequencing - Batch - Process worker - Seq001', () => {
           "experimental_strategy_code": "wgs",
           "sequencing_read_technology_code": "short_read",
           "platform_code": "illumina",
-          "sequencing_lab_code": "CHUSJ",
-          "capture_kit": "Cypress",
-          "run_alias": "Cypress",
-          "run_date": "2025-01-01T00:00:00Z",
-          "run_name": "Cypress",
+          "sequencing_lab_code": "CQGC",
+          "run_alias": "A00516_0169",
+          "run_date": "2021-08-17T00:00:00Z",
+          "run_name": "1617",
           "status_code": "completed"
         }
       ]
@@ -44,15 +43,15 @@ describe('Sequencing - Batch - Process worker - Seq001', () => {
     expect(response.status).to.eq(200);
   });
 
-  it('Validate summary [SJRA-1133]', () => {
+  it('Validate summary', () => {
     cy.validateSummary(response, 0 /*created*/, 0 /*updated*/, 1 /*skipped*/, 0 /*errors*/);
   });
 
-  it('Validate report info count [SJRA-1133]', () => {
+  it('Validate report info count', () => {
     expect(Object.keys(response.body.report.info)).to.have.lengthOf(1);
   });
 
-  it('Validate report sequencing_experiment[0] [SJRA-1133]', () => {
+  it('Validate report sequencing_experiment[0]', () => {
     cy.validateReport(response, 'info', 'SEQ-001', apiMessages.ProcessWorkerError001('Sequencing', 'CQGC', 'S13224', 'NA12878_NA12878'), 'sequencing_experiment[0]');
   });
 });

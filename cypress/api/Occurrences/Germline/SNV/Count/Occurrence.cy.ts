@@ -22,7 +22,19 @@ describe('Occurrences - Germline - SNV - Count - Occurrence', () => {
   }
 
   sectionData.facets.forEach(facet => {
-    const facetName = facet.name instanceof RegExp ? facet.name.source.replace(/^\^|\$$/g, '') : facet.name;
+    let facetName = facet.name instanceof RegExp ? facet.name.source.replace(/^\^|\$$/g, '') : facet.name;
+
+    // Tag failed tests
+    switch (facetName) {
+      case 'Father’s Zygosity':
+      case 'Mother’s Zygosity':
+      case 'Parental Origin':
+      case 'Transmission':
+        facetName = `${facetName} [SJRA-1246]`;
+        break;
+      default:
+        break;
+    }
 
     it(`${facetName}`, () => {
       const facetData = globalData.Count.snv[sectionData.section].find((f: { field: string }) => f.field === facet.apiField);

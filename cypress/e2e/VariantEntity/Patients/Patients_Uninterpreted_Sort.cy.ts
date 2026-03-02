@@ -3,7 +3,7 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 
-describe('VariantEntity - Patients - Uninterpreted - Sort', () => {
+describe('VariantEntity - Patients - Uninterpreted - Sort [SJRA-1250]', () => {
   const setupTest = () => {
     cy.login();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
