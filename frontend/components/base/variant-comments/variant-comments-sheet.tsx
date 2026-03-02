@@ -37,7 +37,6 @@ function VariantCommentsSheet({
           <SheetTitle>{t('variant_comments.title')}</SheetTitle>
           <SheetDescription className="sr-only">{t('variant_comments.title')}</SheetDescription>
         </SheetHeader>
-        <Separator />
 
         <div className="px-6 py-4">
           <CommentEditor onSubmit={onAdd} />
