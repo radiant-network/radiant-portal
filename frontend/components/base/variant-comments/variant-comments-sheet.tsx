@@ -42,7 +42,6 @@ function VariantCommentsSheet({
         <div className="px-6 py-4">
           <CommentEditor onSubmit={onAdd} />
         </div>
-        <Separator />
 
         <TooltipProvider>
           <div className="flex-1 overflow-y-auto">
@@ -55,7 +54,7 @@ function VariantCommentsSheet({
                 </div>
               </div>
             ) : (
-              <div className="divide-y">
+              <div>
                 {comments.map(comment => (
                   <CommentItem
                     key={comment.id}

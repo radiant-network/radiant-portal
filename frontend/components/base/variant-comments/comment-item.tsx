@@ -67,13 +67,13 @@ function CommentItem({ comment, isOwner, onUpdate, onDelete }: CommentItemProps)
 
   return (
     <div className="flex gap-3 px-4 py-3">
-      <div className="shrink-0 pt-0.5">
+      <div className="shrink-0">
         <SingleAvatar user={comment.author} size="md" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground truncate">{comment.author.name}</span>
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
+          <span className="text-sm font-semibold text-foreground truncate">{comment.author.name}</span>
+          <span className="text-sm font-normal text-muted-foreground whitespace-nowrap">
             {formattedDate}
             {isEdited && (
               <Tooltip>
