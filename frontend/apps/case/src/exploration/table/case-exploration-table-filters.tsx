@@ -15,10 +15,6 @@ import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { caseApi } from '@/utils/api';
 
-type CaseFiltersInput = {
-  search_criteria: Array<SearchCriterion>;
-};
-
 type FiltersGroupFormProps = {
   loading?: boolean;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
@@ -52,8 +48,8 @@ export const FILTER_DEFAULTS = {
   case_category_code: [],
 };
 
-async function fetchFilters(searchCriteria: CaseFiltersInput) {
-  const response = await caseApi.casesFilters(searchCriteria);
+async function fetchFilters() {
+  const response = await caseApi.casesFilters();
   return response.data;
 }
 
@@ -65,7 +61,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
   });
   const { t } = useI18n();
 
-  const { data: apiFilters } = useSWR<CaseFilters>('case-filters', () => fetchFilters({ search_criteria: [] }), {
+  const { data: apiFilters } = useSWR<CaseFilters>('case-filters', () => fetchFilters(), {
     revalidateOnFocus: false,
     revalidateOnMount: true,
     revalidateIfStale: false,
