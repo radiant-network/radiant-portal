@@ -1,4 +1,4 @@
-import { Aggregation } from '@/api/api';
+import { FiltersValue } from '@/api/api';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 
@@ -7,7 +7,7 @@ import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indi
  */
 const PRIORITY_ORDER = ['routine', 'urgent', 'asap', 'stat'];
 
-export default function filterItemPriority(options: Aggregation[]): IFilterButtonItem[] {
+export default function filterItemPriority(options: FiltersValue[]): IFilterButtonItem[] {
   // Sort options according to the desired order
   const sortedOptions = options.sort((a, b) => {
     const aIndex = PRIORITY_ORDER.indexOf(a.key?.toLowerCase() || '');

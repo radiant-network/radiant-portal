@@ -19,10 +19,6 @@ type FilesTableFilters = {
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
 };
 
-type DocumentFiltersInput = {
-  search_criteria: Array<SearchCriterion>;
-};
-
 export const FILTER_DEFAULTS = {
   format_code: [],
   data_type_code: [],
@@ -35,8 +31,8 @@ const CRITERIAS = {
   relationship_to_proband_code: { key: 'relationship_to_proband_code', weight: 3, visible: true },
 };
 
-async function fetchFilters(caseId: number, searchCriteria: DocumentFiltersInput) {
-  const response = await caseApi.caseEntityDocumentsFilters(caseId, searchCriteria);
+async function fetchFilters(caseId: number) {
+  const response = await caseApi.caseEntityDocumentsFilters(caseId);
   return response.data;
 }
 
@@ -47,16 +43,12 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-files-filters', {
     ...FILTER_DEFAULTS,
   });
-  const { data: apiFilters } = useSWR<DocumentFilters>(
-    'document-filters',
-    () => fetchFilters(caseId, { search_criteria: [] }),
-    {
-      revalidateOnFocus: false,
-      revalidateOnMount: true,
-      revalidateIfStale: false,
-      revalidateOnReconnect: false,
-    },
-  );
+  const { data: apiFilters } = useSWR<DocumentFilters>('document-filters', () => fetchFilters(caseId), {
+    revalidateOnFocus: false,
+    revalidateOnMount: true,
+    revalidateIfStale: false,
+    revalidateOnReconnect: false,
+  });
 
   // Mesmoize filter buttons to prevent unnecessary re-renders
   const filterButtons = useMemo(() => {

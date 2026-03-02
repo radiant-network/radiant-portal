@@ -19,9 +19,6 @@ type FilesTableFilters = {
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
 };
 
-type DocumentFiltersInput = {
-  search_criteria: Array<SearchCriterion>;
-};
 const FILTER_DEFAULTS = {
   data_type_code: [],
   format_code: [],
@@ -38,8 +35,8 @@ const CRITERIAS = {
   data_type_code: { key: 'data_type_code', weight: 5, visible: true },
 };
 
-async function fetchFilters(searchCriteria: DocumentFiltersInput) {
-  const response = await documentApi.documentsFilters(searchCriteria);
+async function fetchFilters() {
+  const response = await documentApi.documentsFilters();
   return response.data;
 }
 
@@ -50,16 +47,12 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('files-filters', {
     ...FILTER_DEFAULTS,
   });
-  const { data: apiFilters } = useSWR<DocumentFilters>(
-    'document-filters',
-    () => fetchFilters({ search_criteria: [] }),
-    {
-      revalidateOnFocus: false,
-      revalidateOnMount: true,
-      revalidateIfStale: false,
-      revalidateOnReconnect: false,
-    },
-  );
+  const { data: apiFilters } = useSWR<DocumentFilters>('document-filters', () => fetchFilters(), {
+    revalidateOnFocus: false,
+    revalidateOnMount: true,
+    revalidateIfStale: false,
+    revalidateOnReconnect: false,
+  });
 
   // Mesmoize filter buttons to prevent unnecessary re-renders
   const filterButtons = useMemo(() => {

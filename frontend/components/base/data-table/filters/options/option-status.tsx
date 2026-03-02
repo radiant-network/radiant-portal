@@ -1,6 +1,6 @@
 import { Check, CircleDashed, FileQuestion, Hourglass, OctagonX, Pen, RefreshCcw } from 'lucide-react';
 
-import { Aggregation } from '@/api/api';
+import { FiltersValue } from '@/api/api';
 import { IFilterButtonItem } from '@/components/base/buttons/filter-button';
 
 /**
@@ -20,7 +20,7 @@ function getItemStatusIcon(statusKey: string) {
   return iconMap[statusKey.toLowerCase()] || FileQuestion;
 }
 
-export default function getItemStatus(options: Aggregation[], t: any): IFilterButtonItem[] {
+export default function getItemStatus(options: FiltersValue[], t: any): IFilterButtonItem[] {
   return options.map(option => ({
     ...option,
     label: t(`${itemStatusTranslationKeyPrefix}.${option.key}`, option.label || ''),
