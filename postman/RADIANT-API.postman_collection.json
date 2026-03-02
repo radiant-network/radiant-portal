@@ -955,17 +955,8 @@
                 }
               ]
             },
-            "method": "POST",
+            "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"search_criteria\": [\n        { \"field\": \"project_code\", \"value\": [\"N1\"]}\n    ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
             "url": {
               "raw": "{{radiant-api-url}}/cases/filters",
               "host": [
@@ -1095,17 +1086,8 @@
                 }
               ]
             },
-            "method": "POST",
+            "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"search_criteria\": [\n        { \"field\": \"data_type_code\", \"value\": [\"snv\"]}\n    ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
             "url": {
               "raw": "{{radiant-api-url}}/cases/1/documents/filters",
               "host": [
@@ -1307,17 +1289,8 @@
                 }
               ]
             },
-            "method": "POST",
+            "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"search_criteria\": [\n        { \"field\": \"project_code\", \"value\": [\"N1\"]}\n    ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
             "url": {
               "raw": "{{radiant-api-url}}/documents/filters",
               "host": [
