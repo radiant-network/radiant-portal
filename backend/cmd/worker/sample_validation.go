@@ -136,13 +136,14 @@ func validateIsDifferentExistingSampleField[T comparable](
 func processSampleBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
 	payload := []byte(batch.Payload)
 	var samplesbatch []types.SampleBatch
+	cache := batchval.NewBatchValidationCache(ctx)
 
 	if unexpectedErr := json.Unmarshal(payload, &samplesbatch); unexpectedErr != nil {
 		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling sample batch: %v", unexpectedErr), ctx.BatchRepo)
 		return
 	}
 
-	records, unexpectedErr := validateSamplesBatch(ctx, samplesbatch)
+	records, unexpectedErr := validateSamplesBatch(ctx, cache, samplesbatch)
 	if unexpectedErr != nil {
 		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error sample batch validation: %v", unexpectedErr), ctx.BatchRepo)
 		return
@@ -294,7 +295,7 @@ func (r *SampleValidationRecord) validateTissueSite() {
 }
 
 func (r *SampleValidationRecord) validateTypeCode() error {
-	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetSampleType)
+	codes, err := r.Cache.GetValueSetCodes(repository.ValueSetSampleType)
 	if err != nil {
 		return fmt.Errorf("error retrieving sample type codes: %v", err)
 	}
@@ -303,7 +304,7 @@ func (r *SampleValidationRecord) validateTypeCode() error {
 }
 
 func (r *SampleValidationRecord) validateHistologyCode() error {
-	codes, err := r.Context.ValueSetsRepo.GetCodes(repository.ValueSetHistologyType)
+	codes, err := r.Cache.GetValueSetCodes(repository.ValueSetHistologyType)
 	if err != nil {
 		return fmt.Errorf("error retrieving sample histology codes: %v", err)
 	}
@@ -311,7 +312,7 @@ func (r *SampleValidationRecord) validateHistologyCode() error {
 	return nil
 }
 
-func validateSamplesBatch(ctx *batchval.BatchValidationContext, samples []types.SampleBatch) ([]*SampleValidationRecord, error) {
+func validateSamplesBatch(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, samples []types.SampleBatch) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
 	samplesMap := samplesMap(samples)
 	seenSamples := make(map[SampleKey]struct{})
@@ -320,6 +321,7 @@ func validateSamplesBatch(ctx *batchval.BatchValidationContext, samples []types.
 		record := &SampleValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
 				Context: ctx,
+				Cache:   cache,
 				Index:   index,
 			},
 			Sample: sample,
@@ -351,14 +353,14 @@ func validateSamplesBatch(ctx *batchval.BatchValidationContext, samples []types.
 		)
 
 		// 3. Validate patient
-		patient, patientErr := ctx.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(sample.PatientOrganizationCode, sample.SubmitterPatientId.String())
+		patient, patientErr := cache.GetPatientByOrgCodeAndSubmitterPatientId(sample.PatientOrganizationCode, sample.SubmitterPatientId.String())
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		}
 		record.validatePatient(patient)
 
 		// 4. Validate organization
-		organization, orgErr := ctx.OrgRepo.GetOrganizationByCode(sample.SampleOrganizationCode)
+		organization, orgErr := cache.GetOrganizationByCode(sample.SampleOrganizationCode)
 		if orgErr != nil {
 			return nil, fmt.Errorf("error getting existing sample organization: %v", orgErr)
 		}
@@ -366,7 +368,7 @@ func validateSamplesBatch(ctx *batchval.BatchValidationContext, samples []types.
 
 		// 5. Validate if sample exists in DB
 		if organization != nil {
-			existingSample, sampleErr := ctx.SampleRepo.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterSampleId.String())
+			existingSample, sampleErr := cache.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterSampleId.String())
 			if sampleErr != nil {
 				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
 			}
@@ -375,7 +377,7 @@ func validateSamplesBatch(ctx *batchval.BatchValidationContext, samples []types.
 
 			// 7. Validate parent sample in DB if provided
 			if sample.SubmitterParentSampleId != "" {
-				existingParentSample, parentSampleErr := ctx.SampleRepo.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterParentSampleId.String())
+				existingParentSample, parentSampleErr := cache.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterParentSampleId.String())
 				if parentSampleErr != nil {
 					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
 				}

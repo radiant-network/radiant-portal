@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -56,7 +57,11 @@ func (m *mockSampleDAO) GetSampleBySubmitterSampleId(orgID int, submitterID stri
 }
 
 func (m *mockSampleDAO) GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*types.Sample, error) {
-	return nil, nil
+	args := m.Called(organizationCode, submitterSampleId)
+	if s, ok := args.Get(0).(*types.Sample); ok {
+		return s, args.Error(1)
+	}
+	return nil, args.Error(1)
 }
 
 type mockSeqExpDAO struct{ mock.Mock }
@@ -309,6 +314,7 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}
+	r.Cache = batchval.NewBatchValidationCache(r.Context)
 
 	err := r.validateExistingAliquotForSequencingLabCode()
 	assert.NoError(t, err)
@@ -384,6 +390,7 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 		OrgRepo:    orgDAO,
 		SampleRepo: sampleDAO,
 	}
+	r.Cache = batchval.NewBatchValidationCache(r.Context)
 
 	err := r.validateExistingAliquotForSequencingLabCode()
 
@@ -436,12 +443,16 @@ func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
 	}
 
 	orgDAO.On("GetOrganizationByCode", "LAB1").
-		Return(&types.Organization{ID: 2}, nil)
+		Return(&types.Organization{ID: 2, Code: "LAB1"}, nil)
 	orgDAO.On("GetOrganizationByCode", "ORG").
-		Return(&types.Organization{ID: 1}, nil)
+		Return(&types.Organization{ID: 1, Code: "ORG"}, nil)
+	orgDAO.On("GetOrganizationById", 1).
+		Return(&types.Organization{Code: "ORG", ID: 1}, nil)
 
 	sampleDAO.On("GetSampleBySubmitterSampleId", 1, "S1").
-		Return(&types.Sample{ID: 10}, nil)
+		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
 
 	seqDAO.On("GetSequencingExperimentBySampleID", 10).
 		Return([]types.SequencingExperiment{}, nil)
@@ -456,8 +467,9 @@ func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
 		SeqExpRepo:    seqDAO,
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
+	cache := batchval.NewBatchValidationCache(mockContext)
 
-	record, err := validateSequencingExperimentRecord(mockContext, seq, 0)
+	record, err := validateSequencingExperimentRecord(mockContext, cache, seq, 0)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 0, record.Index)
@@ -485,12 +497,16 @@ func Test_ValidateSequencingExperimentBatch_DuplicateInBatch_AddsError(t *testin
 	seq2 := seq1
 
 	orgDAO.On("GetOrganizationByCode", "LAB1").
-		Return(&types.Organization{ID: 2}, nil).Twice()
+		Return(&types.Organization{ID: 2, Code: "LAB1"}, nil).Twice()
 	orgDAO.On("GetOrganizationByCode", "ORG").
-		Return(&types.Organization{ID: 1}, nil).Twice()
+		Return(&types.Organization{ID: 1, Code: "ORG"}, nil).Twice()
+	orgDAO.On("GetOrganizationById", 1).
+		Return(&types.Organization{Code: "ORG", ID: 1}, nil)
 
 	sampleDAO.On("GetSampleBySubmitterSampleId", 1, "S1").
 		Return(&types.Sample{ID: 10}, nil).Twice()
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
 
 	seqDAO.On("GetSequencingExperimentBySampleID", 10).
 		Return([]types.SequencingExperiment{}, nil).Twice()
@@ -525,10 +541,11 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 		SampleRepo:    sampleDAO,
 		ValueSetsRepo: valueSetDAO,
 	}
+	cache := batchval.NewBatchValidationCache(mockContext)
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -539,14 +556,13 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 	// Mocked orgs and sample
 	orgDAO.
 		On("GetOrganizationByCode", "ORG").
-		Return(&types.Organization{ID: 1}, nil)
+		Return(&types.Organization{ID: 1, Code: "ORG"}, nil)
 	orgDAO.
 		On("GetOrganizationByCode", "LAB1").
-		Return(&types.Organization{ID: 2}, nil)
+		Return(&types.Organization{ID: 2, Code: "LAB1"}, nil)
 
-	sampleDAO.
-		On("GetSampleBySubmitterSampleId", 1, "S1").
-		Return(&types.Sample{ID: 10}, nil)
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
 
 	err := r.preFetchValidationInfo()
 
@@ -572,10 +588,11 @@ func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
 		SampleRepo:    sampleDAO,
 		ValueSetsRepo: valueSetDAO,
 	}
+	cache := batchval.NewBatchValidationCache(mockContext)
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -611,10 +628,11 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 		SampleRepo:    sampleDAO,
 		ValueSetsRepo: valueSetDAO,
 	}
+	cache := batchval.NewBatchValidationCache(mockContext)
 
 	// Input batch record
 	r := &SequencingExperimentValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Index: 0},
+		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache, Index: 0},
 		SequencingExperiment: types.SequencingExperimentBatch{
 			SampleOrganizationCode: "ORG",
 			SubmitterSampleId:      "S1",
@@ -625,14 +643,13 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 	// Mocked orgs and sample
 	orgDAO.
 		On("GetOrganizationByCode", "ORG").
-		Return(&types.Organization{ID: 1}, nil)
+		Return(&types.Organization{ID: 1, Code: "ORG"}, nil)
 	orgDAO.
 		On("GetOrganizationByCode", "LAB1").
 		Return(nil, nil)
 
-	sampleDAO.
-		On("GetSampleBySubmitterSampleId", 1, "S1").
-		Return(&types.Sample{ID: 10}, nil)
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
 
 	err := r.preFetchValidationInfo()
 
@@ -650,6 +667,7 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 func Test_PreFetchValidationInfo_SampleLookupError_Propagates(t *testing.T) {
 	orgDAO := &mockOrgDAO{}
 	sampleDAO := &mockSampleDAO{}
+	valueSetDAO := &mockValueSetsDAO{}
 
 	r := &SequencingExperimentValidationRecord{
 		SequencingExperiment: types.SequencingExperimentBatch{
@@ -660,19 +678,22 @@ func Test_PreFetchValidationInfo_SampleLookupError_Propagates(t *testing.T) {
 	}
 
 	orgDAO.
+		On("GetOrganizationByCode", "LAB1").
+		Return(&types.Organization{ID: 1, Code: "LAB1"}, nil)
+	orgDAO.
 		On("GetOrganizationByCode", "ORG").
-		Return(&types.Organization{ID: 1}, nil)
-	sampleDAO.
-		On("GetSampleBySubmitterSampleId", 1, "S1").
-		Return((*types.Sample)(nil), assert.AnError)
+		Return(&types.Organization{ID: 2, Code: "ORG"}, nil)
+	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
+		Return(nil, errors.New("sample not found"))
 
 	r.Context = &batchval.BatchValidationContext{
-		OrgRepo:    orgDAO,
-		SampleRepo: sampleDAO,
+		OrgRepo:       orgDAO,
+		SampleRepo:    sampleDAO,
+		ValueSetsRepo: valueSetDAO,
 	}
+	r.Cache = batchval.NewBatchValidationCache(r.Context)
 
 	err := r.preFetchValidationInfo()
-
 	assert.Error(t, err)
-	assert.Same(t, assert.AnError, err)
+	assert.ErrorContains(t, err, "error fetching sample: sample not found")
 }

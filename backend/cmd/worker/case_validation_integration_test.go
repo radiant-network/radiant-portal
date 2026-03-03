@@ -319,7 +319,7 @@ func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T)
 		errors := []types.BatchMessage{
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, family_variant_calling, somatic_variant_calling, tumor_only_variant_calling, radiant_germline_annotation, exomiser, rnaseq_analysis].",
+				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, exomiser, family_variant_calling, radiant_germline_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
 				Path:    "case[0].tasks[0].type_code",
 			},
 		}
@@ -768,7 +768,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 			},
 			{
 				Code:    "TASK-001",
-				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, family_variant_calling, somatic_variant_calling, tumor_only_variant_calling, radiant_germline_annotation, exomiser, rnaseq_analysis].",
+				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, exomiser, family_variant_calling, radiant_germline_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
 				Path:    "case[0].tasks[0].type_code",
 			},
 			{

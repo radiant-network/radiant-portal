@@ -26,16 +26,7 @@ type CaseValidationMockRepo struct {
 }
 
 func (m *CaseValidationMockRepo) GetTaskTypeCodes() ([]types.TaskType, error) {
-	return []types.TaskType{
-		{types.ValueSet{Code: "alignment", NameEn: "Genome Alignment"}},
-		{types.ValueSet{Code: "alignment_germline_variant_calling", NameEn: "Genome Alignment and Germline Variant calling"}},
-		{types.ValueSet{Code: "family_variant_calling", NameEn: "Family Joint Genotyping"}},
-		{types.ValueSet{Code: "somatic_variant_calling", NameEn: "Somatic Variant Calling by Tumor-Normal Paired Samples"}},
-		{types.ValueSet{Code: "tumor_only_variant_calling", NameEn: "Somatic Variant Calling by Tumor-Only Sample"}},
-		{types.ValueSet{Code: "radiant_germline_annotation", NameEn: "RADIANT Germline Annotation"}},
-		{types.ValueSet{Code: "exomiser", NameEn: "Exomiser"}},
-		{types.ValueSet{Code: "rnaseq_analysis", NameEn: "RNAseq Analysis of Transcriptome Profiling and Gene Fusion Calling"}},
-	}, nil
+	return nil, nil
 }
 
 func (m *CaseValidationMockRepo) GetTaskContextBySequencingExperimentId(seqExpId int) ([]*repository.TaskContext, error) {
@@ -228,6 +219,14 @@ func (m *CaseValidationMockRepo) GetOrganizationById(id int) (*types.Organizatio
 	return nil, nil
 }
 
+func (m *CaseValidationMockRepo) GetCodes(setType repository.ValueSetType) ([]string, error) {
+	switch setType {
+	case repository.ValueSetTaskType:
+		return []string{"alignment", "alignment_germline_variant_calling", "family_variant_calling", "somatic_variant_calling", "tumor_only_variant_calling", "radiant_germline_annotation", "exomiser", "rnaseq_analysis"}, nil
+	}
+	return nil, nil
+}
+
 // -----------------------------------------------------------------------------
 // Section: Helper Methods Tests
 // -----------------------------------------------------------------------------
@@ -358,9 +357,9 @@ func Test_getProbandFromPatients_OK(t *testing.T) {
 				{RelationToProbandCode: "proband", PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-3"},
 			},
 		},
-		Patients: make(map[PatientKey]*types.Patient),
+		Patients: make(map[batchval.PatientKey]*types.Patient),
 	}
-	key := PatientKey{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-3"}
+	key := batchval.PatientKey{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-3"}
 	record.Patients[key] = &types.Patient{ID: 1}
 	proband, err := record.getProbandFromPatients()
 	assert.NoError(t, err)
@@ -372,7 +371,7 @@ func Test_getProbandFromPatients_Empty(t *testing.T) {
 		Case: types.CaseBatch{
 			Patients: []*types.CasePatientBatch{},
 		},
-		Patients: make(map[PatientKey]*types.Patient),
+		Patients: make(map[batchval.PatientKey]*types.Patient),
 	}
 	proband, err := record.getProbandFromPatients()
 	assert.NoError(t, err)
@@ -389,7 +388,7 @@ func Test_getProbandFromPatients_Error(t *testing.T) {
 				{RelationToProbandCode: "proband", PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-3"},
 			},
 		},
-		Patients: make(map[PatientKey]*types.Patient),
+		Patients: make(map[batchval.PatientKey]*types.Patient),
 	}
 	proband, err := record.getProbandFromPatients()
 	assert.Error(t, err)
@@ -597,8 +596,8 @@ func Test_fetchStatusCodes_OK(t *testing.T) {
 	mockContext := &batchval.BatchValidationContext{
 		ValueSetsRepo: &CodesMockRepo{},
 	}
-
-	record := CaseValidationRecord{Context: mockContext}
+	cache := batchval.NewBatchValidationCache(mockContext)
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
 	err := record.fetchStatusCodes()
 	assert.NoError(t, err)
@@ -615,8 +614,8 @@ func Test_fetchStatusCodes_Error(t *testing.T) {
 	mockContext := &batchval.BatchValidationContext{
 		ValueSetsRepo: mockRepo,
 	}
-
-	record := CaseValidationRecord{Context: mockContext}
+	cache := batchval.NewBatchValidationCache(mockContext)
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
 	err := record.fetchStatusCodes()
 	assert.Error(t, err)
@@ -629,8 +628,8 @@ func Test_fetchObservationCodes_OK(t *testing.T) {
 	mockContext := &batchval.BatchValidationContext{
 		ValueSetsRepo: &CodesMockRepo{},
 	}
-
-	record := CaseValidationRecord{Context: mockContext}
+	cache := batchval.NewBatchValidationCache(mockContext)
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
 	err := record.fetchObservationCodes()
 	assert.NoError(t, err)
@@ -647,8 +646,8 @@ func Test_fetchObservationCodes_Error(t *testing.T) {
 	mockContext := &batchval.BatchValidationContext{
 		ValueSetsRepo: mockRepo,
 	}
-
-	record := CaseValidationRecord{Context: mockContext}
+	cache := batchval.NewBatchValidationCache(mockContext)
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
 	err := record.fetchObservationCodes()
 	assert.Error(t, err)
@@ -662,8 +661,8 @@ func Test_fetchOnsetCodes_OK(t *testing.T) {
 	mockContext := &batchval.BatchValidationContext{
 		ValueSetsRepo: mockRepo,
 	}
-
-	record := CaseValidationRecord{Context: mockContext}
+	cache := batchval.NewBatchValidationCache(mockContext)
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
 	err := record.fetchOnsetCodes()
 	assert.NoError(t, err)
@@ -680,23 +679,26 @@ func Test_fetchOnsetCodes_Error(t *testing.T) {
 	mockContext := &batchval.BatchValidationContext{
 		ValueSetsRepo: mockRepo,
 	}
-
-	record := CaseValidationRecord{Context: mockContext}
+	cache := batchval.NewBatchValidationCache(mockContext)
+	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
 	err := record.fetchOnsetCodes()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "error retrieving onset codes")
-	assert.Contains(t, err.Error(), "database connection failed")
+	assert.ErrorContains(t, err, "error retrieving onset codes")
+	assert.ErrorContains(t, err, "database connection failed")
 	assert.Nil(t, record.OnsetCodes)
 }
 
 func Test_fetchCodeInfos_OK(t *testing.T) {
 	record := CaseValidationRecord{
-		Context: &batchval.BatchValidationContext{
-			ValueSetsRepo: &CodesMockRepo{},
-			TaskRepo:      &CaseValidationMockRepo{},
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &batchval.BatchValidationContext{
+				ValueSetsRepo: &CodesMockRepo{},
+				TaskRepo:      &CaseValidationMockRepo{},
+			},
 		},
 	}
+	record.Cache = batchval.NewBatchValidationCache(record.Context)
 
 	err := record.fetchCodeInfos()
 	assert.NoError(t, err)
@@ -716,15 +718,18 @@ func Test_fetchCodeInfos_StatusCodesError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &batchval.BatchValidationContext{
-			ValueSetsRepo: mockRepo,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &batchval.BatchValidationContext{
+				ValueSetsRepo: mockRepo,
+			},
 		},
 	}
+	record.Cache = batchval.NewBatchValidationCache(record.Context)
 
 	err := record.fetchCodeInfos()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to retrieve status codes")
-	assert.Contains(t, err.Error(), "database connection failed")
+	assert.ErrorContains(t, err, "failed to retrieve status codes")
+	assert.ErrorContains(t, err, "database connection failed")
 }
 
 func Test_fetchCodeInfos_ObservationCodesError(t *testing.T) {
@@ -735,15 +740,18 @@ func Test_fetchCodeInfos_ObservationCodesError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &batchval.BatchValidationContext{
-			ValueSetsRepo: mockRepo,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &batchval.BatchValidationContext{
+				ValueSetsRepo: mockRepo,
+			},
 		},
 	}
+	record.Cache = batchval.NewBatchValidationCache(record.Context)
 
 	err := record.fetchObservationCodes()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "error retrieving observation codes")
-	assert.Contains(t, err.Error(), "database connection failed")
+	assert.ErrorContains(t, err, "error retrieving observation codes")
+	assert.ErrorContains(t, err, "database connection failed")
 }
 
 func Test_fetchCodeInfos_OnsetCodesError(t *testing.T) {
@@ -754,25 +762,27 @@ func Test_fetchCodeInfos_OnsetCodesError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &batchval.BatchValidationContext{
-			ValueSetsRepo: mockRepo,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &batchval.BatchValidationContext{
+				ValueSetsRepo: mockRepo,
+			},
 		},
 	}
+	record.Cache = batchval.NewBatchValidationCache(record.Context)
 
 	err := record.fetchOnsetCodes()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "error retrieving onset codes")
-	assert.Contains(t, err.Error(), "database connection failed")
+	assert.ErrorContains(t, err, "error retrieving onset codes")
+	assert.ErrorContains(t, err, "database connection failed")
 }
 
 func Test_fetchTaskTypeCodes_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockContext := batchval.BatchValidationContext{
-		TaskRepo: &mockRepo,
+		ValueSetsRepo: &mockRepo,
 	}
-	mockRecord := CaseValidationRecord{
-		Context: &mockContext,
-	}
+	cache := batchval.NewBatchValidationCache(&mockContext)
+	mockRecord := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: &mockContext, Cache: cache}}
 
 	err := mockRecord.fetchTaskTypeCodes()
 	assert.NoError(t, err)
@@ -795,7 +805,10 @@ func Test_fetchProject_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Case: types.CaseBatch{
 			ProjectCode: "PROJ-1",
 		},
@@ -814,7 +827,10 @@ func Test_fetchProject_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Case: types.CaseBatch{
 			ProjectCode: "PROJ-2",
 		},
@@ -832,7 +848,10 @@ func Test_fetchProject_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Case: types.CaseBatch{
 			ProjectCode: "PROJ-ERROR",
 		},
@@ -850,7 +869,10 @@ func Test_fetchAnalysisCatalog_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Case: types.CaseBatch{
 			AnalysisCode: "WGA",
 		},
@@ -869,7 +891,10 @@ func Test_fetchAnalysisCatalog_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Case: types.CaseBatch{
 			AnalysisCode: "WPGA",
 		},
@@ -887,7 +912,10 @@ func Test_fetchAnalysisCatalog_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Case: types.CaseBatch{
 			AnalysisCode: "WGA-ERROR",
 		},
@@ -905,7 +933,10 @@ func Test_fetchOrganizations_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Case: types.CaseBatch{
 			OrderingOrganizationCode: "LAB-1",
 			DiagnosticLabCode:        "LAB-2",
@@ -927,7 +958,10 @@ func Test_fetchOrganizations_NotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Case: types.CaseBatch{
 			OrderingOrganizationCode: "LAB-1",
 			DiagnosticLabCode:        "LAB-3",
@@ -948,7 +982,10 @@ func Test_fetchOrganizations_Error(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Case: types.CaseBatch{
 			OrderingOrganizationCode: "LAB-ERROR",
 			DiagnosticLabCode:        "LAB-2",
@@ -961,7 +998,10 @@ func Test_fetchOrganizations_Error(t *testing.T) {
 	assert.Nil(t, record.DiagnosisLabID)
 
 	record = CaseValidationRecord{
-		Context: &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Case: types.CaseBatch{
 			OrderingOrganizationCode: "LAB-1",
 			DiagnosticLabCode:        "LAB-ERROR",
@@ -982,8 +1022,11 @@ func Test_fetchPatients_PartialOK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context:  &mockContext,
-		Patients: make(map[PatientKey]*types.Patient),
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
+		Patients: make(map[batchval.PatientKey]*types.Patient),
 		Case: types.CaseBatch{
 			Patients: []*types.CasePatientBatch{
 				{PatientOrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"},
@@ -997,7 +1040,7 @@ func Test_fetchPatients_PartialOK(t *testing.T) {
 
 	assert.Len(t, record.Patients, 1)
 
-	validKey := PatientKey{"LAB-1", "PAT-1"}
+	validKey := batchval.PatientKey{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"}
 	assert.Contains(t, record.Patients, validKey)
 	assert.Equal(t, 100, record.Patients[validKey].ID)
 }
@@ -1011,10 +1054,13 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context:               &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Documents:             make(map[string]*types.Document),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
-		Patients:              make(map[PatientKey]*types.Patient),
+		Patients:              make(map[batchval.PatientKey]*types.Patient),
 		DocumentsInTasks:      make(map[string][]*DocumentRelation),
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-TASK-TEST",
@@ -1047,10 +1093,13 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context:               &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Documents:             make(map[string]*types.Document),
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
-		Patients:              make(map[PatientKey]*types.Patient),
+		Patients:              make(map[batchval.PatientKey]*types.Patient),
 		DocumentsInTasks:      make(map[string][]*DocumentRelation),
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-FAIL",
@@ -1067,7 +1116,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 
 	err := record.fetchFromTasks()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to get document by url")
+	assert.ErrorContains(t, err, "failed to get document by url")
 }
 
 func Test_fetchFromTasks_SeqExpError(t *testing.T) {
@@ -1079,7 +1128,10 @@ func Test_fetchFromTasks_SeqExpError(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		Context: &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+		},
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-FAIL",
 			Tasks: []*types.CaseTaskBatch{
@@ -1092,7 +1144,7 @@ func Test_fetchFromTasks_SeqExpError(t *testing.T) {
 
 	err := record.fetchFromTasks()
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to get sequencing experiment by aliquot")
+	assert.ErrorContains(t, err, "failed to get sequencing experiment by aliquot")
 }
 
 func Test_fetchValidationInfos_OK(t *testing.T) {
@@ -1123,7 +1175,8 @@ func Test_fetchValidationInfos_OK(t *testing.T) {
 			SubmitterPatientId:      "PAT-1",
 		},
 	}
-	record := NewCaseValidationRecord(&mockContext, caseBatch, 0)
+	cache := batchval.NewBatchValidationCache(&mockContext)
+	record := NewCaseValidationRecord(&mockContext, cache, caseBatch, 0)
 	err := record.fetchValidationInfos()
 	assert.NoError(t, err)
 	assert.Equal(t, 42, *record.ProjectID)
@@ -1134,7 +1187,7 @@ func Test_fetchValidationInfos_OK(t *testing.T) {
 	assert.Len(t, record.SequencingExperiments, 1)
 	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[200].Aliquot)
 	assert.Len(t, record.Patients, 1)
-	validKey := PatientKey{"LAB-1", "PAT-1"}
+	validKey := batchval.PatientKey{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"}
 	assert.Contains(t, record.Patients, validKey)
 	assert.Equal(t, 100, record.Patients[validKey].ID)
 }
@@ -1144,9 +1197,10 @@ func Test_fetchValidationInfos_Error(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{
 		ProjectRepo: &mockRepo,
 	}
+	cache := batchval.NewBatchValidationCache(&mockContext)
 	caseBatch := types.CaseBatch{}
 	caseBatch.ProjectCode = "PROJ-ERROR"
-	record := NewCaseValidationRecord(&mockContext, caseBatch, 0)
+	record := NewCaseValidationRecord(&mockContext, cache, caseBatch, 0)
 	err := record.fetchValidationInfos()
 	assert.Error(t, err)
 	assert.Nil(t, record.ProjectID)
@@ -1212,7 +1266,8 @@ func Test_fetchSequencingExperimentsInTask_OK(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{
 		SeqExpRepo: &mockRepo,
 	}
-	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+	cache := batchval.NewBatchValidationCache(&mockContext)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
 		Aliquots: []string{"ALIQUOT-1"},
@@ -1229,7 +1284,8 @@ func Test_fetchSequencingExperimentsInTask_NotFound(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{
 		SeqExpRepo: &mockRepo,
 	}
-	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+	cache := batchval.NewBatchValidationCache(&mockContext)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
 		Aliquots: []string{"ALIQUOT-999"},
@@ -1244,7 +1300,8 @@ func Test_fetchSequencingExperimentsInTask_Error(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{
 		SeqExpRepo: &mockRepo,
 	}
-	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+	cache := batchval.NewBatchValidationCache(&mockContext)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
 		Aliquots: []string{"ALIQUOT-ERROR"},
@@ -1260,7 +1317,8 @@ func Test_fetchInputDocumentsFromTask_OK(t *testing.T) {
 		DocRepo:  &mockRepo,
 		TaskRepo: &mockRepo,
 	}
-	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+	cache := batchval.NewBatchValidationCache(&mockContext)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
 		InputDocuments: []*types.InputDocumentBatch{{
@@ -1278,7 +1336,8 @@ func Test_fetchInputDocumentsFromTask_NotFound(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{
 		DocRepo: &mockRepo,
 	}
-	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+	cache := batchval.NewBatchValidationCache(&mockContext)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
 		InputDocuments: []*types.InputDocumentBatch{{
@@ -1295,7 +1354,8 @@ func Test_fetchInputDocumentsFromTask_Error(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{
 		DocRepo: &mockRepo,
 	}
-	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+	cache := batchval.NewBatchValidationCache(&mockContext)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
 		InputDocuments: []*types.InputDocumentBatch{{
@@ -1313,7 +1373,8 @@ func Test_fetchOutputDocumentsFromTask_OK(t *testing.T) {
 		DocRepo:  &mockRepo,
 		TaskRepo: &mockRepo,
 	}
-	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+	cache := batchval.NewBatchValidationCache(&mockContext)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
 		OutputDocuments: []*types.OutputDocumentBatch{{
@@ -1336,7 +1397,8 @@ func Test_fetchOutputDocumentsFromTask_NotFound(t *testing.T) {
 		DocRepo:  &mockRepo,
 		TaskRepo: &mockRepo,
 	}
-	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+	cache := batchval.NewBatchValidationCache(&mockContext)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
 		OutputDocuments: []*types.OutputDocumentBatch{{
@@ -1355,7 +1417,8 @@ func Test_fetchOutputDocumentsFromTask_Error(t *testing.T) {
 		DocRepo:  &mockRepo,
 		TaskRepo: &mockRepo,
 	}
-	record := NewCaseValidationRecord(&mockContext, types.CaseBatch{}, 0)
+	cache := batchval.NewBatchValidationCache(&mockContext)
+	record := NewCaseValidationRecord(&mockContext, cache, types.CaseBatch{}, 0)
 
 	task := types.CaseTaskBatch{
 		OutputDocuments: []*types.OutputDocumentBatch{{
@@ -1559,8 +1622,11 @@ func Test_validateCase_Valid(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord:   batchval.BaseValidationRecord{Index: 0},
-		Context:                ctx,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: ctx,
+			Cache:   batchval.NewBatchValidationCache(ctx),
+			Index:   0,
+		},
 		ProjectID:              &projectID,
 		DiagnosisLabID:         &diagnosisLabID,
 		AnalysisCatalogID:      &analysisID,
@@ -1603,8 +1669,11 @@ func Test_validateCase_MissingProject(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord:   batchval.BaseValidationRecord{Index: 0},
-		Context:                ctx,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: ctx,
+			Cache:   batchval.NewBatchValidationCache(ctx),
+			Index:   0,
+		},
 		ProjectID:              nil,
 		DiagnosisLabID:         &diagnosisLabID,
 		AnalysisCatalogID:      &analysisID,
@@ -1646,8 +1715,11 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord:   batchval.BaseValidationRecord{Index: 0},
-		Context:                ctx,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: ctx,
+			Cache:   batchval.NewBatchValidationCache(ctx),
+			Index:   0,
+		},
 		ProjectID:              &projectID,
 		DiagnosisLabID:         nil,
 		AnalysisCatalogID:      &analysisID,
@@ -1688,8 +1760,11 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord:   batchval.BaseValidationRecord{Index: 0},
-		Context:                ctx,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: ctx,
+			Cache:   batchval.NewBatchValidationCache(ctx),
+			Index:   0,
+		},
 		ProjectID:              &projectID,
 		DiagnosisLabID:         &diagnosisLabID,
 		AnalysisCatalogID:      nil,
@@ -1729,8 +1804,11 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord:   batchval.BaseValidationRecord{Index: 0},
-		Context:                ctx,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: ctx,
+			Cache:   batchval.NewBatchValidationCache(ctx),
+			Index:   0,
+		},
 		ProjectID:              &projectID,
 		DiagnosisLabID:         &diagnosisLabID,
 		AnalysisCatalogID:      &analysisID,
@@ -1772,8 +1850,11 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord:   batchval.BaseValidationRecord{Index: 0},
-		Context:                ctx,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: ctx,
+			Cache:   batchval.NewBatchValidationCache(ctx),
+			Index:   0,
+		},
 		ProjectID:              &projectID,
 		DiagnosisLabID:         &diagnosisLabID,
 		AnalysisCatalogID:      &analysisID,
@@ -1813,8 +1894,11 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord:   batchval.BaseValidationRecord{Index: 0},
-		Context:                ctx,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: ctx,
+			Cache:   batchval.NewBatchValidationCache(ctx),
+			Index:   0,
+		},
 		ProjectID:              &projectID,
 		DiagnosisLabID:         &diagnosisLabID,
 		AnalysisCatalogID:      &analysisID,
@@ -1863,8 +1947,11 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord:   batchval.BaseValidationRecord{Index: 0},
-		Context:                ctx,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: ctx,
+			Cache:   batchval.NewBatchValidationCache(ctx),
+			Index:   0,
+		},
 		ProjectID:              &projectID,
 		DiagnosisLabID:         &diagnosisLabID,
 		AnalysisCatalogID:      &analysisID,
@@ -1897,8 +1984,11 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord:   batchval.BaseValidationRecord{Index: 0},
-		Context:                ctx,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: ctx,
+			Cache:   batchval.NewBatchValidationCache(ctx),
+			Index:   0,
+		},
 		ProjectID:              &projectID,
 		DiagnosisLabID:         nil,
 		AnalysisCatalogID:      &analysisID,
@@ -1943,8 +2033,11 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 	ctx.CasesRepo = mockRepo
 
 	cr := &CaseValidationRecord{
-		BaseValidationRecord:   batchval.BaseValidationRecord{Index: 0},
-		Context:                ctx,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: ctx,
+			Cache:   batchval.NewBatchValidationCache(ctx),
+			Index:   0,
+		},
 		ProjectID:              &projectID,
 		DiagnosisLabID:         &diagnosisLabID,
 		AnalysisCatalogID:      &analysisID,
@@ -2660,7 +2753,7 @@ func Test_validatePatient_PatientExists(t *testing.T) {
 				},
 			},
 		},
-		Patients: map[PatientKey]*types.Patient{
+		Patients: map[batchval.PatientKey]*types.Patient{
 			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
@@ -2712,7 +2805,7 @@ func Test_validatePatient_MultiplePatients(t *testing.T) {
 				},
 			},
 		},
-		Patients: map[PatientKey]*types.Patient{
+		Patients: map[batchval.PatientKey]*types.Patient{
 			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
@@ -2742,8 +2835,11 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: mockContext,
+			Cache:   batchval.NewBatchValidationCache(mockContext),
+			Index:   0,
+		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2756,7 +2852,7 @@ func Test_validateCasePatients_NoProband(t *testing.T) {
 				},
 			},
 		},
-		Patients: map[PatientKey]*types.Patient{
+		Patients: map[batchval.PatientKey]*types.Patient{
 			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
@@ -2780,8 +2876,11 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: mockContext,
+			Cache:   batchval.NewBatchValidationCache(mockContext),
+			Index:   0,
+		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2800,7 +2899,7 @@ func Test_validateCasePatients_MultipleProbands(t *testing.T) {
 				},
 			},
 		},
-		Patients: map[PatientKey]*types.Patient{
+		Patients: map[batchval.PatientKey]*types.Patient{
 			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
@@ -2828,8 +2927,11 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: mockContext,
+			Cache:   batchval.NewBatchValidationCache(mockContext),
+			Index:   0,
+		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2848,7 +2950,7 @@ func Test_validateCasePatients_DuplicatePatient(t *testing.T) {
 				},
 			},
 		},
-		Patients: map[PatientKey]*types.Patient{
+		Patients: map[batchval.PatientKey]*types.Patient{
 			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
@@ -2924,7 +3026,7 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 			SubmitterCaseId: "CASE-1",
 			Patients:        patientsBatch,
 		},
-		Patients: map[PatientKey]*types.Patient{
+		Patients: map[batchval.PatientKey]*types.Patient{
 			{OrganizationCode: "CHUSJ", SubmitterPatientId: "PAT-1"}: {
 				ID:                 1,
 				SubmitterPatientId: "PAT-1",
@@ -2949,8 +3051,11 @@ func Test_validateCasePatients_WithErrors(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: mockContext,
+			Cache:   batchval.NewBatchValidationCache(mockContext),
+			Index:   0,
+		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -3016,8 +3121,11 @@ func Test_validateSeqExp_SeqExpExists(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: mockContext,
+			Cache:   batchval.NewBatchValidationCache(mockContext),
+			Index:   0,
+		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -3043,8 +3151,11 @@ func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: mockContext,
+			Cache:   batchval.NewBatchValidationCache(mockContext),
+			Index:   0,
+		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -3082,11 +3193,14 @@ func Test_validateSeqExpSample_Valid(t *testing.T) {
 			return nil, nil
 		},
 	}
-
+	mockContext := &batchval.BatchValidationContext{
+		SampleRepo: samplesMockRepo,
+	}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context: &batchval.BatchValidationContext{
-			SampleRepo: samplesMockRepo,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: mockContext,
+			Cache:   batchval.NewBatchValidationCache(mockContext),
+			Index:   0,
 		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -3116,11 +3230,14 @@ func Test_validateSeqExpSample_SampleNotFound(t *testing.T) {
 			return nil, nil
 		},
 	}
-
+	mockContext := &batchval.BatchValidationContext{
+		SampleRepo: samplesMockRepo,
+	}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context: &batchval.BatchValidationContext{
-			SampleRepo: samplesMockRepo,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: mockContext,
+			Cache:   batchval.NewBatchValidationCache(mockContext),
+			Index:   0,
 		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
@@ -3146,8 +3263,11 @@ func Test_validateCaseSequencingExperiments_NoSeqExps(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
 		Case: types.CaseBatch{
 			ProjectCode:           "PROJ-1",
 			SubmitterCaseId:       "CASE-1",
@@ -3167,8 +3287,11 @@ func Test_validateCaseSequencingExperiments_MultipleSeqExps(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -3210,8 +3333,11 @@ func Test_validateCaseSequencingExperiments_WithErrors(t *testing.T) {
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -3233,7 +3359,7 @@ func Test_validateCaseSequencingExperiments_WithErrors(t *testing.T) {
 				},
 			},
 		},
-		Patients: map[PatientKey]*types.Patient{
+		Patients: map[batchval.PatientKey]*types.Patient{
 			{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"}: {
 				ID:                 100,
 				SubmitterPatientId: "PAT-1",
@@ -3269,7 +3395,7 @@ func Test_validateSeqExpPatientInCase_Valid(t *testing.T) {
 				},
 			},
 		},
-		Patients: map[PatientKey]*types.Patient{
+		Patients: map[batchval.PatientKey]*types.Patient{
 			{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"}: {
 				ID:                 100,
 				SubmitterPatientId: "PAT-1",
@@ -3452,8 +3578,11 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 	}
 
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
 		Case: types.CaseBatch{
 			Type:            "germline",
 			ProjectCode:     "PROJ-1",
@@ -3471,7 +3600,7 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 				},
 			},
 		},
-		Patients: map[PatientKey]*types.Patient{
+		Patients: map[batchval.PatientKey]*types.Patient{
 			{OrganizationCode: "LAB-1", SubmitterPatientId: "PAT-1"}: {
 				ID:                 100,
 				SubmitterPatientId: "PAT-1",
@@ -3888,8 +4017,11 @@ func Test_validateTaskDocumentOutputInBatch_OK(t *testing.T) {
 func Test_validateExistingDocument_IdenticalMatch(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
 	}
 
 	size := int64(42)
@@ -3927,8 +4059,11 @@ func Test_validateExistingDocument_IdenticalMatch(t *testing.T) {
 func Test_validateExistingDocument_PartialMatch(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
 	}
 
 	size := int64(42)
@@ -3966,8 +4101,11 @@ func Test_validateExistingDocument_PartialMatch(t *testing.T) {
 func Test_validateDocumentTextField_OK(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
 	}
 	fieldValue := "test value"
 	fieldName := "test_field"
@@ -3986,8 +4124,11 @@ func Test_validateDocumentTextField_OK(t *testing.T) {
 func Test_validateDocumentTextField_RegexError(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
 	}
 	fieldValue := "test value %$#%"
 	fieldName := "test_field"
@@ -4011,8 +4152,11 @@ func Test_validateDocumentTextField_RegexError(t *testing.T) {
 func Test_validateDocumentTextField_LengthError(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
 	}
 	fieldValue := strings.Repeat("A", 300)
 	fieldName := "test_field"
@@ -4036,8 +4180,11 @@ func Test_validateDocumentTextField_LengthError(t *testing.T) {
 func Test_validateDocumentIsOutputOfAnotherTask_DocumentFound(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
 		DocumentsInTasks: map[string][]*DocumentRelation{
 			"s3://foo/bar": {{
 				TaskID: 1,
@@ -4071,8 +4218,11 @@ func Test_validateDocumentIsOutputOfAnotherTask_DocumentFound(t *testing.T) {
 func Test_validateDocumentIsOutputOfAnotherTask_DocumentNotFound(t *testing.T) {
 	mockContext := batchval.BatchValidationContext{}
 	record := CaseValidationRecord{
-		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-		Context:              &mockContext,
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: &mockContext,
+			Cache:   batchval.NewBatchValidationCache(&mockContext),
+			Index:   0,
+		},
 		DocumentsInTasks: map[string][]*DocumentRelation{
 			"s3://foo/bar": {{
 				TaskID: 1,
@@ -4113,8 +4263,11 @@ func Test_validateFileMetadata_OK(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-			Context:              &mockContext,
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &mockContext,
+				Cache:   batchval.NewBatchValidationCache(&mockContext),
+				Index:   0,
+			},
 		}
 
 		doc := types.Document{
@@ -4154,8 +4307,11 @@ func Test_validateFileMetadata_DocumentNotFound(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-			Context:              &mockContext,
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &mockContext,
+				Cache:   batchval.NewBatchValidationCache(&mockContext),
+				Index:   0,
+			},
 		}
 
 		size := int64(11)
@@ -4201,8 +4357,11 @@ func Test_validateFileMetadata_NameMismatch(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-			Context:              &mockContext,
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &mockContext,
+				Cache:   batchval.NewBatchValidationCache(&mockContext),
+				Index:   0,
+			},
 		}
 
 		size := int64(11)
@@ -4248,8 +4407,11 @@ func Test_validateFileMetadata_SizeMismatch(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-			Context:              &mockContext,
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &mockContext,
+				Cache:   batchval.NewBatchValidationCache(&mockContext),
+				Index:   0,
+			},
 		}
 
 		size := int64(12)
@@ -4295,8 +4457,11 @@ func Test_validateFileMetadata_HashMismatch(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-			Context:              &mockContext,
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &mockContext,
+				Cache:   batchval.NewBatchValidationCache(&mockContext),
+				Index:   0,
+			},
 		}
 
 		size := int64(11)
@@ -4342,8 +4507,11 @@ func Test_validateFileMetadata_OptionalHash(t *testing.T) {
 			S3FS: s3fs,
 		}
 		record := CaseValidationRecord{
-			BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
-			Context:              &mockContext,
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &mockContext,
+				Cache:   batchval.NewBatchValidationCache(&mockContext),
+				Index:   0,
+			},
 		}
 
 		size := int64(11)
