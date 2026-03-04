@@ -2410,7 +2410,7 @@ components:
           type: string
         seq_id:
           type: integer
-        sex_name:
+        sex_code:
           type: string
         submitter_sample_id:
           type: string

@@ -23,7 +23,7 @@ Name | Type | Description | Notes
 **primary_condition_name** | **str** |  | [optional] 
 **relationship_to_proband** | **str** |  | [optional] 
 **seq_id** | **int** |  | 
-**sex_name** | **str** |  | [optional] 
+**sex_code** | **str** |  | [optional] 
 **submitter_sample_id** | **str** |  | 
 **transmission_mode** | **str** |  | 
 **updated_on** | **str** |  | 
