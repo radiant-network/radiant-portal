@@ -854,6 +854,7 @@
       "chromosome": "Chr",
       "chromosome_tooltip": "Chromosome",
       "clinical_interpretation": "Clinical Interpretation",
+      "comments": "Comments",
       "clingen": "ClinGen",
       "clinvar": "ClinVar",
       "cn": "CN",
@@ -926,6 +927,12 @@
       "AL": "Acceptor Loss",
       "DG": "Donor Gain",
       "DL": "Donor Loss"
+    },
+    "comments": {
+      "tooltip": {
+        "add": "Add a comment",
+        "view": "View comments"
+      }
     },
     "interpretation": {
       "tooltip": {

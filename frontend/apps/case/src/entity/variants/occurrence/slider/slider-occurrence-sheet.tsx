@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { MessageSquare, SquarePen } from 'lucide-react';
 
 import { CaseSequencingExperiment, GermlineSNVOccurrence } from '@/api/api';
@@ -18,6 +19,7 @@ import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-de
 import { useVariantComments } from '@/components/base/variant-comments/use-variant-comments';
 import VariantCommentsSheet from '@/components/base/variant-comments/variant-comments-sheet';
 import { useI18n } from '@/components/hooks/i18n';
+import { OPEN_COMMENTS_PARAM } from '@/entity/variants/constants';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { useSeqIdContext } from '../hooks/use-seq-id';
@@ -87,6 +89,18 @@ function OccurrenceSheetContent({
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdContext();
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get(OPEN_COMMENTS_PARAM)) {
+      setCommentsOpen(true);
+      setSearchParams(prev => {
+        prev.delete(OPEN_COMMENTS_PARAM);
+        return prev;
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [occurrence.locus_id]);
   const { comments, addComment, updateComment, deleteComment, currentUser } = useVariantComments();
   const { patient, caseSequencing, expandResult, isLoading } = useOccurrenceAndCase(
     caseId,
@@ -117,9 +131,7 @@ function OccurrenceSheetContent({
             <Button variant="outline" size="sm" onClick={() => setCommentsOpen(true)}>
               <MessageSquare className="h-4 w-4" />
               {t('variant_comments.button')}
-              {comments.length > 0 && (
-                <Badge className="rounded-full min-w-5 justify-center">{comments.length}</Badge>
-              )}
+              {comments.length > 0 && <Badge className="rounded-full min-w-5 justify-center">{comments.length}</Badge>}
             </Button>
             {!occurrence.has_interpretation && (
               <InterpretationDialog

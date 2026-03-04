@@ -80,6 +80,47 @@ function getUserPreferenceKey(id: string) {
 }
 
 /**
+ * Merge a saved column pinning state with the default settings, adding any new
+ * columns (absent from saved pinning) to their correct pin side.
+ */
+function mergeColumnPinning(savedPinning: ColumnPinningState, defaultSettings: ColumnSettings[]): ColumnPinningState {
+  const result = {
+    left: [...(savedPinning.left ?? [])],
+    right: [...(savedPinning.right ?? [])],
+  };
+  defaultSettings.forEach(setting => {
+    if (!setting.pinningPosition) return;
+    const alreadyPinned = result.left.includes(setting.id) || result.right.includes(setting.id);
+    if (alreadyPinned) return;
+    if (setting.pinningPosition === 'left') result.left.push(setting.id);
+    else if (setting.pinningPosition === 'right') result.right.push(setting.id);
+  });
+  return result;
+}
+
+/**
+ * Merge a saved column order with the default settings, inserting any new
+ * columns (absent from the saved order) at their correct default position.
+ */
+function mergeColumnOrder(savedOrder: string[], defaultSettings: ColumnSettings[]): string[] {
+  const defaultOrder = [...defaultSettings].sort((a, b) => a.index - b.index).map(s => s.id);
+  const newColumns = defaultOrder.filter(id => !savedOrder.includes(id));
+  if (newColumns.length === 0) return savedOrder;
+
+  const merged = [...savedOrder];
+  newColumns.forEach(newId => {
+    const defaultPos = defaultOrder.indexOf(newId);
+    const predecessor = defaultOrder
+      .slice(0, defaultPos)
+      .reverse()
+      .find(id => merged.includes(id));
+    const insertAt = predecessor !== undefined ? merged.indexOf(predecessor) + 1 : 0;
+    merged.splice(insertAt, 0, newId);
+  });
+  return merged;
+}
+
+/**
  * Load user preference
  * Will return an 404 if the config has never been set before
  * In that case, the data table falls back to its default configuration.
@@ -110,8 +151,8 @@ export function useTableGetPreferenceEffect({
     }
     if (tableUserPreference.data) {
       const tablePreference = tableUserPreference.data.content as TableObserverProps;
-      setColumnOrder(tablePreference.columnOrder);
-      setColumnPinning(tablePreference.columnPinning);
+      setColumnOrder(mergeColumnOrder(tablePreference.columnOrder, defaultColumnSettings));
+      setColumnPinning(mergeColumnPinning(tablePreference.columnPinning, defaultColumnSettings));
       setColumnSizing(tablePreference.columnSizing);
       setColumnVisibility(tablePreference.columnVisibility);
       setAdditionalFields?.(

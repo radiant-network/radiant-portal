@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList, MessageSquare } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
@@ -19,6 +19,7 @@ import { createColumnSettings, TableColumnDef } from '@/components/base/data-tab
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
 
+import CommentCell from './cells/comment-cell';
 import HgvsgCell from './cells/hgvsg-cell';
 import InterpretationCell from './cells/interpretation-cell';
 import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
@@ -44,6 +45,22 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
         <div className="flex justify-center">
           <TooltipHeader tooltip={t('variant.headers.clinical_interpretation')} iconOnly>
             <ClipboardList size={16} />
+          </TooltipHeader>
+        </div>
+      ),
+      size: 48,
+      enablePinning: false,
+      enableResizing: false,
+      enableSorting: false,
+    }),
+    // Comments
+    columnHelper.accessor(row => row, {
+      id: 'comments',
+      cell: info => <CommentCell occurrence={info.getValue()} />,
+      header: () => (
+        <div className="flex justify-center">
+          <TooltipHeader tooltip={t('variant.headers.comments')} iconOnly>
+            <MessageSquare size={16} />
           </TooltipHeader>
         </div>
       ),
@@ -274,6 +291,13 @@ const defaultSNVSettings = createColumnSettings([
     pinningPosition: 'left',
     label: 'variant.headers.clinical_interpretation',
     additionalFields: ['transcript_id', 'has_interpretation'],
+  },
+  {
+    id: 'comments',
+    visible: true,
+    fixed: true,
+    pinningPosition: 'left',
+    label: 'variant.headers.comments',
   },
   {
     id: 'hgvsg',
