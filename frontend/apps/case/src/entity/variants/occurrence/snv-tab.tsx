@@ -145,7 +145,11 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
     },
   );
 
-  const occurrencesData = useMemo(() => fetchOccurrencesList.data ?? [], [fetchOccurrencesList.data]);
+  // TODO: remove mock — injects has_comments until the API field is available
+  const occurrencesData = useMemo(
+    () => (fetchOccurrencesList.data ?? []).map((o, i) => ({ ...o, has_comments: i % 2 === 0 })),
+    [fetchOccurrencesList.data],
+  );
 
   const {
     selectedOccurrence,
@@ -329,7 +333,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
                 <DataTable
                   id={appId}
                   columns={getSNVOccurrenceColumns(t, onInterpretationSaved)}
-                  data={fetchOccurrencesList.data ?? []}
+                  data={occurrencesData}
                   defaultColumnSettings={defaultSNVSettings}
                   loadingStates={{
                     total: fetchOccurrencesCount.isLoading,

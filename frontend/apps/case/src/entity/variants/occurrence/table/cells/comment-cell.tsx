@@ -28,11 +28,14 @@ function CommentCell({ occurrence }: CommentCellProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button className="size-6" iconOnly variant="ghost" onClick={handleClick}>
+        <Button className="relative size-6" iconOnly variant="ghost" onClick={handleClick}>
           <MessageSquare
-            className={hasComments ? 'text-primary fill-primary/30' : 'text-muted-foreground/40'}
+            className={hasComments ? 'text-primary fill-primary/20' : 'text-muted-foreground/40'}
             size={16}
           />
+          {hasComments && (
+            <span className="absolute top-0.5 right-0.5 size-1.5 rounded-full bg-primary pointer-events-none" />
+          )}
         </Button>
       </TooltipTrigger>
       <TooltipContent>
