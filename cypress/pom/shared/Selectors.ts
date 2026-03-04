@@ -61,7 +61,7 @@ export const CommonSelectors = {
   resetButton: 'button:contains("Reset")',
   saveIcon: '[class*="lucide-save"]',
   searchInput: '[data-cy="table-filters-search-input"]',
-  settingsCheckbox: (value: string) => `[class*="items"]:contains("${value}") [role="checkbox"]`,
+  settingsCheckbox: (value: string) => `[class*="radix-dropdown-menu-content"] [class*="items"]:contains("${value}") [role="checkbox"]`,
   settingsIcon: '[class*="lucide-settings"]',
   settingsPopper: '[class*="radix-dropdown-menu-content"]',
   sidebarSection: (section: string) => `[data-sidebar="menu-item"]:contains("${section}") svg`,

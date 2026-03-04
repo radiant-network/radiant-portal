@@ -3,7 +3,7 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 
-describe('VariantEntity - Patients - Uninterpreted - Information displayed [SJRA-1250]', () => {
+describe('VariantEntity - Patients - Uninterpreted - Information displayed', () => {
   const setupTest = () => {
     cy.login();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
@@ -30,7 +30,7 @@ describe('VariantEntity - Patients - Uninterpreted - Information displayed [SJRA
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('sample', data.variantGermline.uninterpreted);
   });
 
-  it('Aff. Status', () => {
+  it('Aff. Status [SJRA-1205]', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('aff_status', data.variantGermline.uninterpreted);
   });
