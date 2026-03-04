@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import createUUID from './createUUID';
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { oneMinute } from 'pom/shared/Utils';
+import { getSettingsCheckbox, oneMinute } from 'pom/shared/Utils';
 import 'cypress-real-events';
 import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
 
@@ -34,7 +34,7 @@ Cypress.Commands.add('handleColumnNotFound', (column: string) => {
  */
 Cypress.Commands.add('hideColumn', (column: string) => {
   cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
-  cy.get(`${CommonSelectors.settingsPopper} ${CommonSelectors.settingsCheckbox(column)}`).click({ force: true });
+  getSettingsCheckbox(column).click({ force: true });
   cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
   cy.get(CommonSelectors.settingsPopper).should('not.exist');
 });
@@ -231,9 +231,9 @@ Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, 
  * Shows a column in the table by checking it in the column selector.
  * @param column The column name to show.
  */
-Cypress.Commands.add('showColumn', (column: string) => {
+Cypress.Commands.add('showColumn', (column: string|RegExp) => {
   cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
-  cy.get(CommonSelectors.settingsPopper).find(CommonSelectors.settingsCheckbox(column)).click({ force: true });
+  getSettingsCheckbox(column).click({ force: true });
   cy.get(CommonSelectors.logo).clickAndWait({ force: true }); // Close the popper
   cy.get(CommonSelectors.settingsPopper).should('not.exist');
   cy.waitWhileLoad(oneMinute);

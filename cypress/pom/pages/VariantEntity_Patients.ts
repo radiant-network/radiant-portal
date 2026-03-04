@@ -123,42 +123,20 @@ const tableColumns = {
       apiField: 'case_id',
       isVisibleByDefault: true,
       pinByDefault: null,
-      isSortable: false,
+      isSortable: true,
       isPinnable: true,
       position: 0,
-      tooltip: null,
+      tooltip: 'Case and sequencing IDs',
     },
     {
-      id: 'sequencing',
-      name: 'Sequencing',
-      apiField: 'seq_id',
+      id: 'relationship',
+      name: 'Relationship',
+      apiField: 'relationship_to_proband',
       isVisibleByDefault: true,
       pinByDefault: null,
-      isSortable: false,
+      isSortable: true,
       isPinnable: true,
       position: 1,
-      tooltip: null,
-    },
-    {
-      id: 'patient',
-      name: 'Patient',
-      apiField: 'patient_id',
-      isVisibleByDefault: true,
-      pinByDefault: null,
-      isSortable: false,
-      isPinnable: true,
-      position: 2,
-      tooltip: null,
-    },
-    {
-      id: 'sample',
-      name: 'Sample',
-      apiField: 'submitter_sample_id',
-      isVisibleByDefault: true,
-      pinByDefault: null,
-      isSortable: false,
-      isPinnable: true,
-      position: 3,
       tooltip: null,
     },
     {
@@ -169,18 +147,29 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: false,
       isPinnable: true,
-      position: 4,
+      position: 2,
       tooltip: 'Affected status',
     },
     {
       id: 'hpo',
       name: 'Phenotype (HPO)',
-      apiField: '',
+      apiField: 'observed_phenotypes',
       isVisibleByDefault: true,
       pinByDefault: null,
       isSortable: false,
       isPinnable: true,
-      position: 5,
+      position: 3,
+      tooltip: null,
+    },
+    {
+      id: 'filter',
+      name: 'Filter',
+      apiField: 'filter_is_pass',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: true,
+      position: 4,
       tooltip: null,
     },
     {
@@ -191,12 +180,23 @@ const tableColumns = {
       pinByDefault: null,
       isSortable: false,
       isPinnable: true,
+      position: 5,
+      tooltip: null,
+    },
+    {
+      id: 'transmission',
+      name: 'Transmission',
+      apiField: 'transmission_mode',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: true,
       position: 6,
       tooltip: null,
     },
     {
       id: 'diag_lab',
-      name: 'Diagnostic Lab',
+      name: 'Diag. Lab',
       apiField: 'diagnosis_lab_code',
       isVisibleByDefault: true,
       pinByDefault: null,
@@ -206,9 +206,9 @@ const tableColumns = {
       tooltip: 'Molecular diagnostic laboratory',
     },
     {
-      id: 'analysis',
-      name: 'Analysis',
-      apiField: 'analysis_catalog_code',
+      id: 'sample',
+      name: 'Sample',
+      apiField: 'submitter_sample_id',
       isVisibleByDefault: true,
       pinByDefault: null,
       isSortable: false,
@@ -217,26 +217,125 @@ const tableColumns = {
       tooltip: null,
     },
     {
-      id: 'status',
-      name: 'Status',
-      apiField: 'status_code',
+      id: 'date',
+      name: 'Date',
+      apiField: 'updated_on',
       isVisibleByDefault: true,
       pinByDefault: null,
       isSortable: true,
       isPinnable: true,
       position: 9,
+      tooltip: 'Date of last case modification (yyyy-mm-dd)',
+    },
+    {
+      id: 'prim_cond',
+      name: 'Primary Condition',
+      apiField: 'primary_condition_id',
+      isVisibleByDefault: false,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: true,
+      position: 10,
       tooltip: null,
     },
     {
-      id: 'date',
-      name: 'Date',
-      apiField: 'created_on',
-      isVisibleByDefault: true,
+      id: 'analysis',
+      name: 'Analysis',
+      apiField: 'analysis_catalog_code',
+      isVisibleByDefault: false,
       pinByDefault: null,
-      isSortable: true,
+      isSortable: false,
       isPinnable: true,
-      position: 10,
-      tooltip: 'Date received',
+      position: 11,
+      tooltip: null,
+    },
+    {
+      id: 'qd',
+      name: 'QD',
+      apiField: 'info_qd',
+      isVisibleByDefault: false,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: true,
+      position: 12,
+      tooltip: 'Quality Depth',
+    },
+    {
+      id: 'gq',
+      name: 'GQ',
+      apiField: 'genotype_quality',
+      isVisibleByDefault: false,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: true,
+      position: 13,
+      tooltip: 'Genotype Quality',
+    },
+    {
+      id: 'ad_alt',
+      name: 'ALT',
+      apiField: 'ad_alt',
+      isVisibleByDefault: false,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: true,
+      position: 14,
+      tooltip: 'Allele Depth ALT',
+    },
+    {
+      id: 'ad_total',
+      name: 'ALT + REF',
+      apiField: 'ad_total',
+      isVisibleByDefault: false,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: true,
+      position: 15,
+      tooltip: 'Total Depth ALT + REF',
+    },
+    {
+      id: 'ad_ratio',
+      name: 'ALT / (ALT + REF)',
+      apiField: 'ad_ratio',
+      isVisibleByDefault: false,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: true,
+      position: 16,
+      tooltip: 'Allelic Ratio ALT/(ALT+REF)',
+    },
+    {
+      id: 'patient',
+      name: 'Patient',
+      apiField: 'patient_id',
+      isVisibleByDefault: false,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: true,
+      position: 17,
+      tooltip: null,
+    },
+    {
+      id: 'sex',
+      name: 'Sex',
+      apiField: 'sex_name',
+      isVisibleByDefault: false,
+      pinByDefault: null,
+      isSortable: false,
+      isPinnable: true,
+      position: 18,
+      tooltip: null,
+    },
+    {
+      id: 'actions',
+      name: '',
+      apiField: 'actions',
+      isVisibleByDefault: true,
+      pinByDefault: 'right',
+      isSortable: false,
+      isPinnable: true,
+      position: 19,
+      tooltip: null,
     },
   ],
 };
@@ -269,6 +368,16 @@ const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
         cy.pinColumn(position, tableId);
       })
     );
+  },
+  /**
+   * Shows all columns in the table.
+   */
+  showAllColumns() {
+    columns.forEach((column) => {
+      if (!column.isVisibleByDefault) {
+        cy.showColumn(stringToRegExp(column.name, true /*exact*/));
+      }
+    });
   },
   /**
    * Sorts a column, optionally using an intercept.
@@ -334,7 +443,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates the default pin state of each column.
    */
-  shouldMatchDefaultPinnedColumns() {
+  shouldMatchDefaultPinnedColumns(showColumnsAction: () => void) {
+    showColumnsAction();
     columns.forEach(column => {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
@@ -352,7 +462,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates that all columns are displayed in the correct order in the table.
    */
-  shouldShowAllColumns() {
+  shouldShowAllColumns(showColumnsAction: () => void) {
+    showColumnsAction();
     columns.forEach(column => {
       if (column.name.startsWith('[')) {
         cy.get(CommonSelectors.tableHeadCell(tableId)).eq(column.position).find(column.name).should('exist');
@@ -366,7 +477,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    * @param columnID The ID of the column to validate.
    * @param data The data object containing the expected values.
    */
-  shouldShowColumnContent(columnID: string, data: any, sortAction: () => void) {
+  shouldShowColumnContent(columnID: string, data: any) {
     getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
       if (position !== -1) {
         if (customColumnContent) {
@@ -383,7 +494,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates the tooltips on columns.
    */
-  shouldShowColumnTooltips() {
+  shouldShowColumnTooltips(showColumnsAction: () => void) {
+    showColumnsAction();
     columns.forEach(column => {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
@@ -399,7 +511,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates that pinnable columns are correctly marked as pinnable.
    */
-  shouldShowPinnableColumns() {
+  shouldShowPinnableColumns(showColumnsAction: () => void) {
+    showColumnsAction();
     columns.forEach(column => {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
@@ -426,7 +539,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates that sortable columns are correctly marked as sortable.
    */
-  shouldShowSortableColumns() {
+  shouldShowSortableColumns(showColumnsAction: () => void) {
+    showColumnsAction();
     columns.forEach(column => {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
@@ -578,8 +692,20 @@ export const VariantEntity_Patients = {
       const baseValidations = generateTableValidationsFunctions(selectors.interpreted.tableId, tableColumns.interpreted, interpretedColumnContentHandler);
       return {
         ...baseValidations,
-        shouldShowColumnContent(columnID: string, data: any) {
-          baseValidations.shouldShowColumnContent(columnID, data, () => actions.sortColumn('date'));
+        shouldMatchDefaultPinnedColumns() {
+          baseValidations.shouldMatchDefaultPinnedColumns(() => actions.showAllColumns());
+        },
+        shouldShowAllColumns() {
+          baseValidations.shouldShowAllColumns(() => actions.showAllColumns());
+        },
+        shouldShowColumnTooltips() {
+          baseValidations.shouldShowColumnTooltips(() => actions.showAllColumns());
+        },
+        shouldShowPinnableColumns() {
+          baseValidations.shouldShowPinnableColumns(() => actions.showAllColumns());
+        },
+        shouldShowSortableColumns() {
+          baseValidations.shouldShowSortableColumns(() => actions.showAllColumns());
         },
         shouldSortColumn(columnID: string, hasUniqueValues: boolean) {
           baseValidations.shouldSortColumn(columnID, hasUniqueValues, () => actions.sortColumn(columnID));
@@ -605,8 +731,20 @@ export const VariantEntity_Patients = {
       const baseValidations = generateTableValidationsFunctions(selectors.uninterpreted.tableId, tableColumns.uninterpreted, uninterpretedColumnContentHandler);
       return {
         ...baseValidations,
-        shouldShowColumnContent(columnID: string, data: any) {
-          baseValidations.shouldShowColumnContent(columnID, data, () => actions.sortColumn('date'));
+        shouldMatchDefaultPinnedColumns() {
+          baseValidations.shouldMatchDefaultPinnedColumns(() => actions.showAllColumns());
+        },
+        shouldShowAllColumns() {
+          baseValidations.shouldShowAllColumns(() => actions.showAllColumns());
+        },
+        shouldShowColumnTooltips() {
+          baseValidations.shouldShowColumnTooltips(() => actions.showAllColumns());
+        },
+        shouldShowPinnableColumns() {
+          baseValidations.shouldShowPinnableColumns(() => actions.showAllColumns());
+        },
+        shouldShowSortableColumns() {
+          baseValidations.shouldShowSortableColumns(() => actions.showAllColumns());
         },
         shouldSortColumn(columnID: string, hasUniqueValues: boolean) {
           baseValidations.shouldSortColumn(columnID, hasUniqueValues, () => actions.sortColumn(columnID));

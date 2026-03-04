@@ -28,7 +28,7 @@ declare namespace Cypress {
     shouldBePinned(position: 'left' | 'right' | null): Chainable<JQuery<HTMLElement>>;
     shouldBeSortable(isSortable: boolean): Chainable<Element>;
     shouldHaveTooltip(column: any): cy & CyEventEmitter;
-    showColumn(column: string): cy & CyEventEmitter;
+    showColumn(column: string|RegExp): cy & CyEventEmitter;
     sortTableAndIntercept(position: number, routeMatcher: string, nbCalls: number, tableId: string = ''): cy & CyEventEmitter;
     sortTableAndWait(position: number, tableId: string = ''): cy & CyEventEmitter;
     unpinColumn(position: number, tableId: string = ''): cy & CyEventEmitter;

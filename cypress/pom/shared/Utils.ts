@@ -96,6 +96,21 @@ export const getPriorityColor = (priority: string) => {
 };
 
 /**
+ * Returns a settings checkbox by matching its label with a string or RegExp.
+ * @param value Text or RegExp to match in the label.
+ * @returns Cypress chainable for the matching checkbox(es).
+ */
+export function getSettingsCheckbox(value: string | RegExp) {
+  if (typeof value === 'string') {
+    return cy.get(CommonSelectors.settingsCheckbox(value));
+  }
+  return cy.get(CommonSelectors.settingsCheckbox('')).filter((_, el) => {
+    const text = el.closest('[class*="items"]')?.textContent || '';
+    return value.test(text);
+  });
+}
+
+/**
  * Gets the color associated with a status.
  * @param priority The status (e.g., 'Completed', 'In Progress', etc.).
  * @returns The color string.

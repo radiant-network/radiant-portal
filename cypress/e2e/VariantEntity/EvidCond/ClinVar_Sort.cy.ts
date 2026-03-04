@@ -23,6 +23,7 @@ describe('VariantEntity - EvidCond - ClinVar - Sort', () => {
     setupTest();
     VariantEntity_EvidCond.clinvarCard.actions.sortColumn('classification');
     VariantEntity_EvidCond.clinvarCard.actions.sortColumn('condition');
-    VariantEntity_EvidCond.clinvarCard.validations.shouldHaveFirstRowValue('Urofacial syndrome type 1', 'condition');
+    VariantEntity_EvidCond.clinvarCard.actions.sortColumn('condition');
+    VariantEntity_EvidCond.clinvarCard.validations.shouldHaveFirstRowValue('HPSE2-Related Disorder', 'condition');
   });
 });

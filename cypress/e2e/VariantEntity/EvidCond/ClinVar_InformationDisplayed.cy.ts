@@ -7,6 +7,8 @@ describe('VariantEntity - EvidCond - ClinVar - Information displayed', () => {
   const setupTest = () => {
     cy.login();
     cy.visitVariantEvidCondPage(data.variantGermline.locus_id);
+    VariantEntity_EvidCond.clinvarCard.actions.sortColumn('condition');
+    VariantEntity_EvidCond.clinvarCard.actions.sortColumn('condition');
   };
 
   it('Evaluated', () => {

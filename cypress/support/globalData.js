@@ -98,7 +98,7 @@ const globalData = {
           field: 'clinvar',
           value: 'Benign',
           op: 'in',
-          count: 41344,
+          count: 41346,
         },
         {
           field: 'vep_impact',
@@ -184,19 +184,19 @@ const globalData = {
           field: 'pf_wgs',
           value: '0.5',
           op: '<',
-          count: 2180139,
+          count: 2073057,
         },
         {
           field: 'pf_wgs_affected',
           value: '0.5',
           op: '<',
-          count: 2298376,
+          count: 2006606,
         },
         {
           field: 'pf_wgs_not_affected',
           value: '0.5',
           op: '<',
-          count: 2473724,
+          count: 1866517,
         },
         {
           field: 'gnomad_v3_af',
