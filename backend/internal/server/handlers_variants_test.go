@@ -117,7 +117,7 @@ func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]
 			AdTotal:         10,
 			AdRatio:         float32(0.5),
 			PatientId:       10,
-			SexName:         "Female",
+			SexCode:         "female",
 		},
 	}, &count, nil
 }
@@ -567,7 +567,7 @@ func Test_GetGermlineVariantUninterpretedCasesHandler(t *testing.T) {
 				"primary_condition_name":"neurodevelopmental disorder", 
 				"relationship_to_proband":"proband", 
 				"seq_id":10, 
-				"sex_name":"Female", 
+				"sex_code":"female", 
 				"submitter_sample_id":"S13233", 
 				"transmission_mode":"autosomal_dominant", 
 				"updated_on":"2021-09-12T12:08:00Z", 

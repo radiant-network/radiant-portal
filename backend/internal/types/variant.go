@@ -136,7 +136,7 @@ type VariantUninterpretedCase = struct {
 	AdAlt                     int             `json:"ad_alt,omitempty"`
 	AdTotal                   int             `json:"ad_total,omitempty"`
 	AdRatio                   float32         `json:"ad_ratio,omitempty"`
-	SexName                   string          `json:"sex_name,omitempty"`
+	SexCode                   string          `json:"sex_code,omitempty"`
 } // @name VariantUninterpretedCase
 
 type VariantCasesFilters = struct {
@@ -209,7 +209,6 @@ var VariantUninterpretedCasesFields = append(VariantUninterpretedCasesDefaultFie
 	GermlineSNVAdTotalField,
 	GermlineSNVAdRatioField,
 	PatientSexCodeField,
-	PatientSexNameField,
 )
 
 var VariantInterpretedCasesQueryConfig = QueryConfig{

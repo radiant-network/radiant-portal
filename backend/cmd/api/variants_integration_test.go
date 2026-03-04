@@ -147,7 +147,7 @@ func assertGetVariantUninterpretedCases(t *testing.T, data string, locusId int, 
 func Test_GetVariantUninterpretedCases(t *testing.T) {
 	body := `{
 			"additional_fields": ["primary_condition_id", "primary_condition_name", "analysis_catalog_code", "analysis_catalog_name",
-				"info_qd", "genotype_quality", "ad_alt", "ad_total", "ad_ratio", "sex_name"],
+				"info_qd", "genotype_quality", "ad_alt", "ad_total", "ad_ratio", "sex_code"],
 			"search_criteria":[{"field": "transmission_mode", "value": ["autosomal_dominant"]}]
 		}`
 	expected := `{
@@ -174,7 +174,7 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 				"primary_condition_name":"neurodevelopmental disorder", 
 				"relationship_to_proband":"proband", 
 				"seq_id":10, 
-				"sex_name":"Female", 
+				"sex_code":"female", 
 				"submitter_sample_id":"S13233", 
 				"transmission_mode":"autosomal_dominant", 
 				"updated_on":"2021-09-12T13:08:00Z", 
