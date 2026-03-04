@@ -914,7 +914,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"limit\": 10,\n    \"additional_fields\": [\n        \"primary_condition_id\",\n        \"primary_condition_name\",\n        \"analysis_catalog_code\",\n        \"analysis_catalog_name\",\n        \"info_qd\",\n        \"genotype_quality\",\n        \"ad_alt\",\n        \"ad_total\",\n        \"ad_ratio\",\n        \"sex_name\"\n    ],\n    \"sort\": []\n}",
+              "raw": "{\n    \"limit\": 10,\n    \"additional_fields\": [\n        \"primary_condition_id\",\n        \"primary_condition_name\",\n        \"analysis_catalog_code\",\n        \"analysis_catalog_name\",\n        \"info_qd\",\n        \"genotype_quality\",\n        \"ad_alt\",\n        \"ad_total\",\n        \"ad_ratio\",\n        \"sex_code\"\n    ],\n    \"sort\": []\n}",
               "options": {
                 "raw": {
                   "language": "json"
