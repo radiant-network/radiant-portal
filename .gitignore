@@ -62,3 +62,7 @@ openapitools.json
 
 .nvmrc
 node_modules
+
+# Local dev
+dev.sh
+memory/
