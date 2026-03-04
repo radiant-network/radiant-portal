@@ -4,7 +4,12 @@ import { filtersWithTooltip } from '@/apps/case/src/entity/variants/filters/util
 import { BooleanFacet } from '@/components/base/query-builder-v3/facets/boolean-facet';
 import { MultiSelectFacet } from '@/components/base/query-builder-v3/facets/multiselect-facet';
 import { NumericalFacet } from '@/components/base/query-builder-v3/facets/numerical-facet';
-import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
+import {
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+  useAccordionContext,
+} from '@/components/base/shadcn/accordion';
 import { Card, CardHeader } from '@/components/base/shadcn/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { type Aggregation as AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
@@ -23,6 +28,7 @@ interface AccordionContainerProps extends FacetContainerProps {
 
 export function AccordionContainer({ field, children }: AccordionContainerProps) {
   const { t } = useI18n();
+  const { history } = useAccordionContext();
 
   const label = t(`common.filters.labels.${field.translation_key}`, { defaultValue: field.key });
   let tooltipContent: string | null = null;
@@ -58,7 +64,9 @@ export function AccordionContainer({ field, children }: AccordionContainerProps)
             )}
           </AccordionTrigger>
         </CardHeader>
-        <AccordionContent className="pb-0">{children}</AccordionContent>
+        <AccordionContent className="pb-0" forceMount={history.includes(field.key) ? true : undefined}>
+          {children}
+        </AccordionContent>
       </AccordionItem>
     </Card>
   );

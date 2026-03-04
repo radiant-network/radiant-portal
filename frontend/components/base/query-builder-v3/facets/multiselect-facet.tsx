@@ -22,6 +22,8 @@ import { thousandNumberFormat } from '@/components/lib/number-format';
 import { QBActionType, useQBDispatch, useQBHistory, useQBMultiselectValue } from '../hooks/use-query-builder';
 import { TermOperators } from '../type';
 
+import { getFacetSessionDictionary, setFacetSessionDictionary } from './libs/facet-storage';
+
 type MultiFacetProps = {
   field: AggregationConfig;
   maxVisibleItems?: number;
@@ -110,14 +112,17 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
   const { appId, builderFetcher } = useFacetConfig();
   const dispatch = useQBDispatch();
 
-  const [withDictionaryToggle, setWithDictionaryToggle] = useState<boolean>(false);
+  const [isDictionaryEnabled, setIsDictionaryEnabled] = useState<boolean>(
+    getFacetSessionDictionary({ appId, field: field.key }),
+  );
   const { data: apiAggregates, isLoading } = builderFetcher({
     field: field.key,
-    withDictionary: withDictionaryToggle,
+    withDictionary: isDictionaryEnabled,
   });
 
   const history = useQBHistory();
   const defaultItems = useQBMultiselectValue(field.key) as string[];
+
   const aggregates = useMemo(() => {
     const multiAggregates = (apiAggregates ?? []).map((aggregate: Aggregation) => ({
       ...aggregate,
@@ -127,6 +132,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
     })) as MultiSelectAggregation[];
     return multiAggregates.sort(sortAggregates(defaultItems));
   }, [apiAggregates, defaultItems]);
+
   const [items, setItems] = useState<MultiSelectAggregation[]>(aggregates);
   const [selectedItems, setSelectedItems] = useState<string[]>(defaultItems);
   const [visibleItemsCount, setVisibleItemsCount] = useState(
@@ -156,6 +162,15 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
     [maxVisibleItems, apiAggregates],
   );
 
+  /**
+   * Save dictionary state in session
+   */
+  const handleOnDictionaryChecked = useCallback(() => {
+    const value: boolean = !isDictionaryEnabled;
+    setIsDictionaryEnabled(value);
+    setFacetSessionDictionary({ appId, field: field.key, isDictionaryEnabled: value });
+  }, [isDictionaryEnabled]);
+
   const showMore = useCallback(() => {
     setVisibleItemsCount(items.length);
   }, [items]);
@@ -171,7 +186,6 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
     setSelectedItems(items.map(f => f.key!));
   }, [items, selectedItems]);
 
-  // Helper function to clear all selections and clean sessionStorage
   const clearAllSelections = useCallback(() => {
     setSelectedItems([]); // Uncheck ALL values (including those from query builder)
   }, [field.key]);
@@ -241,6 +255,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
    */
   useEffect(() => {
     if (history.target == field.key) {
+      setItems(aggregates);
       if (!isEqual(defaultItems, selectedItems)) {
         setSelectedItems(defaultItems);
       }
@@ -277,9 +292,9 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
               </Label>
               <Switch
                 id="with-dictionary-switch"
-                checked={withDictionaryToggle}
+                checked={isDictionaryEnabled}
                 size="xs"
-                onCheckedChange={() => setWithDictionaryToggle(!withDictionaryToggle)}
+                onCheckedChange={handleOnDictionaryChecked}
               />
             </>
           )}
