@@ -5024,7 +5024,7 @@ export interface VariantUninterpretedCase {
      * @type {string}
      * @memberof VariantUninterpretedCase
      */
-    'sex_name'?: string;
+    'sex_code'?: string;
     /**
      * 
      * @type {string}

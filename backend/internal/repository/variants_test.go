@@ -155,7 +155,7 @@ func Test_GetVariantUninterpretedCases_AdditionalFields(t *testing.T) {
 		repo := NewVariantsRepository(db)
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{
 			"primary_condition_id", "primary_condition_name", "analysis_catalog_code", "analysis_catalog_name",
-			"info_qd", "genotype_quality", "ad_alt", "ad_total", "ad_ratio", "sex_name",
+			"info_qd", "genotype_quality", "ad_alt", "ad_total", "ad_ratio", "sex_code",
 		}, []types.SearchCriterion{}, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
@@ -174,7 +174,7 @@ func Test_GetVariantUninterpretedCases_AdditionalFields(t *testing.T) {
 		assert.Equal(t, 5, case4.AdAlt)
 		assert.Equal(t, 10, case4.AdTotal)
 		assert.Equal(t, float32(0.5), case4.AdRatio)
-		assert.Equal(t, "Female", case4.SexName)
+		assert.Equal(t, "female", case4.SexCode)
 	})
 }
 

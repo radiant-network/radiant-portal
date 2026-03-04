@@ -45,12 +45,12 @@ class VariantUninterpretedCase(BaseModel):
     primary_condition_name: Optional[StrictStr] = None
     relationship_to_proband: Optional[StrictStr] = None
     seq_id: StrictInt
-    sex_name: Optional[StrictStr] = None
+    sex_code: Optional[StrictStr] = None
     submitter_sample_id: StrictStr
     transmission_mode: StrictStr
     updated_on: StrictStr
     zygosity: StrictStr
-    __properties: ClassVar[List[str]] = ["ad_alt", "ad_ratio", "ad_total", "affected_status", "analysis_catalog_code", "analysis_catalog_name", "case_id", "diagnosis_lab_code", "diagnosis_lab_name", "filter_is_pass", "genotype_quality", "info_qd", "observed_phenotypes", "patient_id", "primary_condition_id", "primary_condition_name", "relationship_to_proband", "seq_id", "sex_name", "submitter_sample_id", "transmission_mode", "updated_on", "zygosity"]
+    __properties: ClassVar[List[str]] = ["ad_alt", "ad_ratio", "ad_total", "affected_status", "analysis_catalog_code", "analysis_catalog_name", "case_id", "diagnosis_lab_code", "diagnosis_lab_name", "filter_is_pass", "genotype_quality", "info_qd", "observed_phenotypes", "patient_id", "primary_condition_id", "primary_condition_name", "relationship_to_proband", "seq_id", "sex_code", "submitter_sample_id", "transmission_mode", "updated_on", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -128,7 +128,7 @@ class VariantUninterpretedCase(BaseModel):
             "primary_condition_name": obj.get("primary_condition_name"),
             "relationship_to_proband": obj.get("relationship_to_proband"),
             "seq_id": obj.get("seq_id"),
-            "sex_name": obj.get("sex_name"),
+            "sex_code": obj.get("sex_code"),
             "submitter_sample_id": obj.get("submitter_sample_id"),
             "transmission_mode": obj.get("transmission_mode"),
             "updated_on": obj.get("updated_on"),
