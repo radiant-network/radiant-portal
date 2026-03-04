@@ -272,11 +272,11 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
       enableSorting: false,
     }),
     // Sex
-    columnHelper.accessor(row => row.sex_name, {
-      id: 'sex_name',
+    columnHelper.accessor(row => row.sex_code, {
+      id: 'sex_code',
       cell: info => (
         <BadgeCell variant="secondary" className="self-start">
-          {t(`common.sex.${info.getValue() ? info.getValue().toLowerCase() : ''}`)}
+          {t(`common.sex.${info.getValue()}`)}
         </BadgeCell>
       ),
       header: t('variant_entity.cases.other_table.headers.sex'),
@@ -396,10 +396,10 @@ const uninterpretedCasesDefaultSettings = createColumnSettings([
     label: 'variant_entity.cases.other_table.headers.patient_id',
   },
   {
-    id: 'sex_name',
+    id: 'sex_code',
     visible: false,
     label: 'variant_entity.cases.other_table.headers.sex',
-    additionalFields: ['sex_name'],
+    additionalFields: ['sex_code'],
   },
   {
     id: 'actions',
