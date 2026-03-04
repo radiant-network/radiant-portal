@@ -1,6 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
-import { ClipboardList, MessageSquare } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
@@ -37,34 +36,17 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
     //   enablePinning: false,
     //   enableResizing: false,
     // },
-    // lightning icon
+    // Row actions (interpretation + comments)
     columnHelper.accessor(row => row, {
-      id: 'clinical_interpretation',
-      cell: info => <InterpretationCell occurrence={info.getValue()} />,
-      header: () => (
-        <div className="flex justify-center">
-          <TooltipHeader tooltip={t('variant.headers.clinical_interpretation')} iconOnly>
-            <ClipboardList size={16} />
-          </TooltipHeader>
+      id: 'row_actions',
+      cell: info => (
+        <div className="flex items-center gap-1">
+          <InterpretationCell occurrence={info.getValue()} />
+          <CommentCell occurrence={info.getValue()} />
         </div>
       ),
-      size: 48,
-      enablePinning: false,
-      enableResizing: false,
-      enableSorting: false,
-    }),
-    // Comments
-    columnHelper.accessor(row => row, {
-      id: 'comments',
-      cell: info => <CommentCell occurrence={info.getValue()} />,
-      header: () => (
-        <div className="flex justify-center">
-          <TooltipHeader tooltip={t('variant.headers.comments')} iconOnly>
-            <MessageSquare size={16} />
-          </TooltipHeader>
-        </div>
-      ),
-      size: 48,
+      header: () => null,
+      size: 68,
       enablePinning: false,
       enableResizing: false,
       enableSorting: false,
@@ -285,19 +267,11 @@ const defaultSNVSettings = createColumnSettings([
   //   pinningPosition: 'left',
   // },
   {
-    id: 'clinical_interpretation',
+    id: 'row_actions',
     visible: true,
     fixed: true,
     pinningPosition: 'left',
-    label: 'variant.headers.clinical_interpretation',
     additionalFields: ['transcript_id', 'has_interpretation'],
-  },
-  {
-    id: 'comments',
-    visible: true,
-    fixed: true,
-    pinningPosition: 'left',
-    label: 'variant.headers.comments',
   },
   {
     id: 'hgvsg',
