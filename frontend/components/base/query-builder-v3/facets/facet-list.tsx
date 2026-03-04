@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 
 import UploadIdModal from '@/components/base/modals/upload-id-modal';
 import { FacetContainer } from '@/components/base/query-builder-v3/facets/facet-container';
-import { useGlobalStorageKey } from '@/components/base/query-builder-v3/facets/hooks/use-facet-config';
 import { SearchFacet } from '@/components/base/query-builder-v3/facets/search-facet';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
@@ -20,16 +19,8 @@ interface FacetListProps {
 export function FacetList({ groupKey, aggregations }: FacetListProps) {
   const { t } = useI18n();
   const [toggleExpandAll, setToggleExpandAll] = useState<boolean>(false);
-  const [expandedFilters, setExpandedFilters] = useState<string[]>([]);
+  const [expandedFacets, setExpandedFacets] = useState<string[]>([]);
   const [prevGroupKey, setPrevGroupKey] = useState<string | null | undefined>(groupKey);
-
-  // Unique key for all temporary selections
-  const globalStorageKey = useGlobalStorageKey();
-
-  // Simple function to clean all temporary selections
-  const clearUnappliedFilters = () => {
-    sessionStorage.removeItem(globalStorageKey);
-  };
 
   // If groupKey is provided, use that group's aggregations, otherwise get all aggregations from all groups
   const allFields = groupKey
@@ -43,20 +34,11 @@ export function FacetList({ groupKey, aggregations }: FacetListProps) {
 
   useEffect(() => {
     setToggleExpandAll(false);
-    setExpandedFilters([]);
+    setExpandedFacets([]);
   }, [groupKey]);
 
   // Detect sidebar closure (groupKey → null) OR content change (groupKey1 → groupKey2)
   useEffect(() => {
-    // Closure: groupKey goes from a value to null
-    if (prevGroupKey && prevGroupKey !== null && groupKey === null) {
-      clearUnappliedFilters();
-    }
-    // Change: groupKey goes from one value to another value
-    else if (prevGroupKey && prevGroupKey !== null && groupKey && groupKey !== null && prevGroupKey !== groupKey) {
-      clearUnappliedFilters();
-    }
-
     setPrevGroupKey(groupKey);
   }, [groupKey, prevGroupKey]);
 
@@ -79,9 +61,9 @@ export function FacetList({ groupKey, aggregations }: FacetListProps) {
             setToggleExpandAll(newToggleExpandAll);
 
             if (newToggleExpandAll) {
-              setExpandedFilters(fields.map(field => field.key));
+              setExpandedFacets(fields.map(field => field.key));
             } else {
-              setExpandedFilters([]);
+              setExpandedFacets([]);
             }
           }}
         >
@@ -91,11 +73,11 @@ export function FacetList({ groupKey, aggregations }: FacetListProps) {
       <Accordion
         className="flex flex-col gap-1"
         type="multiple"
-        value={expandedFilters}
-        onValueChange={value => setExpandedFilters(value)}
+        value={expandedFacets}
+        onValueChange={value => setExpandedFacets(value)}
       >
         {fields.map((field, index) => (
-          <FacetContainer key={`${field.key}-${index}`} isOpen={expandedFilters.includes(field.key)} field={field} />
+          <FacetContainer key={`${field.key}-${index}`} isOpen={expandedFacets.includes(field.key)} field={field} />
         ))}
       </Accordion>
     </div>
