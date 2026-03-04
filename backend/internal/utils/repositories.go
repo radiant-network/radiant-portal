@@ -156,10 +156,6 @@ func JoinSampleAndCaseHasSeqExpWithFamily(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.case_id", types.FamilyTable.FederationName, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.CaseHasSequencingExperimentTable.Alias))
 }
 
-func JoinSampleAndTaskContextWithFamily(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.case_id", types.FamilyTable.FederationName, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.TaskContextTable.Alias))
-}
-
 func JoinSampleAndCaseWithFamily(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.family_member_id=%s.patient_id AND %s.case_id = %s.id", types.FamilyTable.FederationName, types.FamilyTable.Alias, types.FamilyTable.Alias, types.SampleTable.Alias, types.FamilyTable.Alias, types.CaseTable.Alias))
 }
@@ -228,14 +224,6 @@ func JoinCaseHasSeqExpWithGermlineSnvOccurrence(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.sequencing_experiment_id = %s.seq_id", types.GermlineSNVOccurrenceTable.Name, types.GermlineSNVOccurrenceTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
 }
 
-func JoinGermlineInterpretationWithVariant(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.locus_id = %s.locus_id", types.VariantTable.Name, types.VariantTable.Alias, types.VariantTable.Alias, types.InterpretationGermlineTable.Alias))
-}
-
 func AntiJoinCaseHasSeqExpWithGermlineInterpretationForLocus(tx *gorm.DB, locusIdString string) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT ANTI JOIN %s %s ON %s.locus_id = ? AND %s.sequencing_id = %s.sequencing_experiment_id AND %s.case_id = %s.case_id", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias, types.InterpretationGermlineTable.Alias, types.InterpretationGermlineTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.InterpretationGermlineTable.Alias, types.CaseHasSequencingExperimentTable.Alias), locusIdString)
-}
-
-func JoinPatientWithSex(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.code = %s.sex_code", types.SexTable.FederationName, types.SexTable.Alias, types.SexTable.Alias, types.PatientTable.Alias))
 }
