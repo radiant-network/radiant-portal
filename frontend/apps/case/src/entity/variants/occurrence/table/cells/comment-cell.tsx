@@ -1,47 +1,24 @@
-import { useSearchParams } from 'react-router';
-import { MessageSquare } from 'lucide-react';
-
 import { GermlineSNVOccurrence } from '@/api/api';
-import { Button } from '@/components/base/shadcn/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
-import { useI18n } from '@/components/hooks/i18n';
-import { OPEN_COMMENTS_PARAM, SELECTED_VARIANT_PARAM } from '@/entity/variants/constants';
+import { useVariantComments } from '@/components/base/variant-comments/use-variant-comments';
+import VariantCommentsPopover from '@/components/base/variant-comments/variant-comments-popover';
 
 type CommentCellProps = {
   occurrence: GermlineSNVOccurrence;
 };
 
 function CommentCell({ occurrence }: CommentCellProps) {
-  const { t } = useI18n();
-  const [_, setSearchParams] = useSearchParams();
-
   const hasComments = (occurrence as any).has_comments === true;
-
-  const handleClick = () => {
-    setSearchParams(prev => {
-      prev.set(SELECTED_VARIANT_PARAM, occurrence.locus_id);
-      prev.set(OPEN_COMMENTS_PARAM, '1');
-      return prev;
-    });
-  };
+  const { comments, addComment, updateComment, deleteComment, currentUser } = useVariantComments();
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button className="relative size-6" iconOnly variant="ghost" onClick={handleClick}>
-          <MessageSquare
-            className={hasComments ? 'text-primary fill-primary/20' : 'text-muted-foreground/40'}
-            size={16}
-          />
-          {hasComments && (
-            <span className="absolute top-0.5 right-0.5 size-1.5 rounded-full bg-primary pointer-events-none" />
-          )}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        {hasComments ? t('variant.comments.tooltip.view') : t('variant.comments.tooltip.add')}
-      </TooltipContent>
-    </Tooltip>
+    <VariantCommentsPopover
+      hasComments={hasComments}
+      comments={comments}
+      currentUserId={currentUser.id}
+      onAdd={addComment}
+      onUpdate={updateComment}
+      onDelete={deleteComment}
+    />
   );
 }
 
