@@ -4,7 +4,6 @@ import { MessageSquare, SquarePen } from 'lucide-react';
 
 import { CaseSequencingExperiment, GermlineSNVOccurrence } from '@/api/api';
 import InterpretationDialog from '@/components/base/interpretation/interpretation-dialog';
-import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
 import { useOccurrenceAndCase } from '@/components/base/slider/hooks/use-slider-occurrence-and-case';
@@ -130,8 +129,7 @@ function OccurrenceSheetContent({
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setCommentsOpen(true)}>
               <MessageSquare className="h-4 w-4" />
-              {t('variant_comments.button')}
-              {comments.length > 0 && <Badge className="rounded-full min-w-5 justify-center">{comments.length}</Badge>}
+              {comments.length > 0 && comments.length}
             </Button>
             {!occurrence.has_interpretation && (
               <InterpretationDialog
