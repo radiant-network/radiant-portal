@@ -22,7 +22,6 @@ _build/
 .idea/
 .vscode/
 *.iml
-.cursor/
 
 # Dependency directories
 vendor/
@@ -63,7 +62,9 @@ openapitools.json
 .nvmrc
 node_modules
 
-# Local dev
+# Designer local dev files
 dev.sh
 memory/
 CLAUDE.md
+design/comments-feature.md
+.cursor/
