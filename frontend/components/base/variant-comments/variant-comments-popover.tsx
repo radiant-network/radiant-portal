@@ -7,7 +7,6 @@ import { useI18n } from '@/components/hooks/i18n';
 
 import CommentEditor from './comment-editor';
 import CommentItem from './comment-item';
-import CommentsEmptyIllustration from './comments-empty-illustration';
 import { VariantComment } from './variant-comment.types';
 
 type VariantCommentsPopoverProps = {
@@ -28,7 +27,6 @@ function VariantCommentsPopover({
   onDelete,
 }: VariantCommentsPopoverProps) {
   const { t } = useI18n();
-  const isEmpty = comments.length === 0;
 
   return (
     <Popover>
@@ -69,27 +67,15 @@ function VariantCommentsPopover({
 
         <TooltipProvider>
           <div className="flex-1 overflow-y-auto">
-            {isEmpty ? (
-              <div className="flex flex-col items-center justify-center gap-4 py-10 px-4">
-                <CommentsEmptyIllustration />
-                <div className="text-center space-y-1">
-                  <p className="text-sm font-medium text-foreground">{t('variant_comments.empty_title')}</p>
-                  <p className="text-sm text-muted-foreground">{t('variant_comments.empty_description')}</p>
-                </div>
-              </div>
-            ) : (
-              <div>
-                {comments.map(comment => (
-                  <CommentItem
-                    key={comment.id}
-                    comment={comment}
-                    isOwner={comment.author.id === currentUserId}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                  />
-                ))}
-              </div>
-            )}
+            {comments.map(comment => (
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                isOwner={comment.author.id === currentUserId}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
+              />
+            ))}
           </div>
         </TooltipProvider>
       </PopoverContent>

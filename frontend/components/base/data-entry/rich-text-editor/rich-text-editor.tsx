@@ -14,11 +14,13 @@ export type RichTextEditorProps = Omit<EditorContentProps, 'ref' | 'editor' | 'o
   wrapperClassName?: string;
   onChange?: (value: string) => void;
   onBlur?: () => void;
+  autofocus?: boolean;
 };
 
-const RichTextEditor = ({ value, className, wrapperClassName, onChange, onBlur, ...props }: RichTextEditorProps) => {
+const RichTextEditor = ({ value, className, wrapperClassName, onChange, onBlur, autofocus, ...props }: RichTextEditorProps) => {
   const editor = useEditor(
     {
+      autofocus: autofocus ? 'end' : false,
       editorProps: {
         attributes: {
           class: cn(
