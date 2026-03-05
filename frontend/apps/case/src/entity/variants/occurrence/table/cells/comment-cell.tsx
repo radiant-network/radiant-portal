@@ -6,13 +6,11 @@ type CommentCellProps = {
   occurrence: GermlineSNVOccurrence;
 };
 
-function CommentCell({ occurrence }: CommentCellProps) {
-  const hasComments = (occurrence as any).has_comments === true;
+function CommentCell({ occurrence: _occurrence }: CommentCellProps) {
   const { comments, addComment, updateComment, deleteComment, currentUser } = useVariantComments();
 
   return (
     <VariantCommentsPopover
-      hasComments={hasComments}
       comments={comments}
       currentUserId={currentUser.id}
       onAdd={addComment}

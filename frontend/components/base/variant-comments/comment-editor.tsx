@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import RichTextEditor from '@/components/base/data-entry/rich-text-editor/rich-text-editor';
 import { Button } from '@/components/base/shadcn/button';
@@ -20,13 +20,13 @@ type CommentEditorProps = {
 function CommentEditor({ initialValue = '', onSubmit, onCancel, submitLabel }: CommentEditorProps) {
   const { t } = useI18n();
   const [value, setValue] = useState(initialValue);
-  const isEmpty = stripHtml(value).length === 0;
+  const isEmpty = useMemo(() => stripHtml(value).length === 0, [value]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
     if (isEmpty) return;
     onSubmit(value);
     setValue('');
-  }, [isEmpty, onSubmit, value]);
+  };
 
   return (
     <div className="space-y-2">

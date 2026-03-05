@@ -10,7 +10,6 @@ import CommentItem from './comment-item';
 import { VariantComment } from './variant-comment.types';
 
 type VariantCommentsPopoverProps = {
-  hasComments: boolean;
   comments: VariantComment[];
   currentUserId: string;
   onAdd: (body: string) => void;
@@ -19,13 +18,13 @@ type VariantCommentsPopoverProps = {
 };
 
 function VariantCommentsPopover({
-  hasComments,
   comments,
   currentUserId,
   onAdd,
   onUpdate,
   onDelete,
 }: VariantCommentsPopoverProps) {
+  const hasComments = comments.length > 0;
   const { t } = useI18n();
 
   return (

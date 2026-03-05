@@ -19,7 +19,6 @@ export const WithComments: Story = {
 
     return (
       <VariantCommentsPopover
-        hasComments={comments.length > 0}
         comments={comments}
         currentUserId={currentUser.id}
         onAdd={addComment}
@@ -37,7 +36,6 @@ export const EmptyState: Story = {
 
     return (
       <VariantCommentsPopover
-        hasComments={false}
         comments={comments}
         currentUserId={currentUser.id}
         onAdd={addComment}
