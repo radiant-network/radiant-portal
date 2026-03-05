@@ -1729,7 +1729,7 @@
     "title": "Variant Comments",
     "button": "Comments",
     "empty_title": "No comments yet",
-    "empty_description": "Be the first to share thoughts on this variant.",
+    "empty_description": "Use comments to add notes about your case analysis and document decisions. Comments are visible to all users with access to this case.",
     "editor_placeholder": "Add your comment",
     "submit": "Submit",
     "save": "Save",
