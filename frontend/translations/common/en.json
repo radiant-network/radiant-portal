@@ -1677,7 +1677,7 @@
           "filter_is_pass": "Filter",
           "filter_pass": "Pass",
           "search_hpo": "Search by phenotype",
-          "search_hpo_placeholder": "Filter HPO phenotype",
+          "search_hpo_placeholder": "Filter by HPO phenotype",
           "sex_code": "Sex",
           "transmission_mode": "Transmission",
           "zygosity": "Zygosity"
