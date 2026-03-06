@@ -22,6 +22,7 @@ type BatchDAO interface {
 	UpdateBatch(batch Batch) (int64, error)
 	GetBatchByID(batchId string) (*Batch, error)
 	ClaimNextBatch() (*Batch, error)
+	UpdateStuckBatch() (int64, error)
 }
 
 func NewBatchRepository(db *gorm.DB) *BatchRepository {
@@ -104,4 +105,16 @@ func (r *BatchRepository) ClaimNextBatch() (*Batch, error) {
 		return nil, nil // no available job
 	}
 	return &batch, nil
+}
+
+func (r *BatchRepository) UpdateStuckBatch() (int64, error) {
+	result := r.db.Table(types.BatchTable.Name)
+	result = result.Where("status = ?", types.BatchStatusRunning)
+	result = result.Where("started_on < ?", time.Now().Add(-24*time.Hour).Format("2006-01-02"))
+	result = result.Update("status", types.BatchStatusError)
+
+	if result.Error != nil {
+		return 0, fmt.Errorf("error updating batch: %w", result.Error)
+	}
+	return result.RowsAffected, nil
 }

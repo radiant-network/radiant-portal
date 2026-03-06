@@ -145,3 +145,33 @@ func Test_UpdateBatch(t *testing.T) {
 
 	})
 }
+
+func Test_UpdateStuckBatch(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewBatchRepository(db)
+
+		timeMoreThan24hAgo := time.Now().Add(-48 * time.Hour).Format("2006-01-02")
+		timeLessThan24hAgo := time.Now().Add(-22 * time.Hour).Format("2006-01-02")
+
+		var ids []string
+		initErr := db.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on)
+    		VALUES ('{}', ?, 'patient', true, 'user999', '2025-10-09', ?),
+				('{}', ?, 'sample', false, 'user999', '2025-10-09', ?),
+				('{}', ?, 'case', true, 'user999', '2025-10-09', ?)
+    		RETURNING id;
+		`, types.BatchStatusRunning, timeMoreThan24hAgo,
+			types.BatchStatusPending, timeMoreThan24hAgo,
+			types.BatchStatusRunning, timeLessThan24hAgo).Scan(&ids).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		rowsUpdated, err := repo.UpdateStuckBatch()
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), rowsUpdated)
+		resultBatch := Batch{}
+		db.Table("batch").Where("id = ?", ids[0]).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+	})
+}

@@ -12,9 +12,10 @@ import (
 )
 
 type MockBatchRepository struct {
-	CreateBatchFunc    func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error)
-	GetBatchByIDFunc   func(batchId string) (*types.Batch, error)
-	ClaimNextBatchFunc func() (*types.Batch, error)
+	CreateBatchFunc      func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error)
+	GetBatchByIDFunc     func(batchId string) (*types.Batch, error)
+	ClaimNextBatchFunc   func() (*types.Batch, error)
+	UpdateStuckBatchFunc func() (int64, error)
 }
 
 func (m *MockBatchRepository) CreateBatch(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
@@ -40,6 +41,13 @@ func (m *MockBatchRepository) ClaimNextBatch() (*types.Batch, error) {
 		return m.ClaimNextBatchFunc()
 	}
 	return nil, errors.New("ClaimNextBatchFunc not implemented")
+}
+
+func (m *MockBatchRepository) UpdateStuckBatch() (int64, error) {
+	if m.UpdateStuckBatchFunc != nil {
+		return m.UpdateStuckBatch()
+	}
+	return 0, errors.New("UpdateStuckBatch not implemented")
 }
 
 func Test_GetBatchHandler_Success(t *testing.T) {
