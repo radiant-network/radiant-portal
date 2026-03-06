@@ -63,6 +63,7 @@ const facetListConfig: PortalConfig = {
               defaultOperator: RangeOperators.LessThan,
               defaultMin: 0,
               defaultMax: 100,
+              noDataInputOption: true,
             },
           },
           {
@@ -92,44 +93,6 @@ const facetListConfig: PortalConfig = {
           {
             key: 'isActive',
             translation_key: 'isActive (boolean)',
-            type: FilterTypes.BOOLEAN,
-          },
-        ],
-      },
-      gene: {
-        items: [
-          {
-            key: 'lastName',
-            translation_key: 'multiple (with dictionary)',
-            type: FilterTypes.MULTIPLE,
-          },
-          {
-            key: 'progress',
-            translation_key: 'numerical (decimal)',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.LessThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'age',
-            translation_key: 'Age (integer)',
-            type: FilterTypes.NUMERICAL,
-            defaults: {
-              min: 0,
-              max: 100,
-              defaultOperator: RangeOperators.LessThan,
-              defaultMin: 0,
-              defaultMax: 100,
-            },
-          },
-          {
-            key: 'newsletterSubscribed',
-            translation_key: 'newsletterSubscribed (boolean)',
             type: FilterTypes.BOOLEAN,
           },
         ],
@@ -469,6 +432,73 @@ export const Boolean: Story = {
                       value: ['true'],
                     },
                     op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+            savedFilters: [],
+            selectedQueryIndexes: [0],
+          });
+        }),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.snv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
+      <QueryBuilderDataTable
+        id="storybook-query-builder"
+        columns={
+          [
+            ...mockColumns,
+            mockColumnHelper.accessor('isActive', {
+              header: 'Active',
+            }),
+          ] as TableColumnDef<TableMockData, any>[]
+        }
+        defaultColumnSettings={[]}
+      />
+    </QueryBuilder>
+  ),
+};
+
+export const Numerical: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get(userPreferenceApi, ({ params }: any) => {
+          const key = params.key;
+          if (key === 'data-table-storybook-query-builder') {
+            return new HttpResponse(null, { status: 404 });
+          }
+          return HttpResponse.json({
+            activeQueryId: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+            sqons: [
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+                content: [
+                  {
+                    content: {
+                      field: 'progress',
+                      value: ['50'],
+                    },
+                    op: '<',
+                  },
+                  {
+                    content: {
+                      field: 'visits',
+                      value: ['1', '100'],
+                    },
+                    op: 'between',
                   },
                 ],
                 op: 'and',

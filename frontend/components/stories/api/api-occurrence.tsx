@@ -110,15 +110,21 @@ export async function httpOccurrenceAggregateStatisticsApiResponse({ request }: 
   }
 
   if (body.field.includes('age')) {
-    return HttpResponse.json(generateSortedAdvancedData('age', 'integer'));
+    const result = generateSortedAdvancedData('age', 'integer');
+    console.warn(`OcurrenceApi:Age (${result.type}) ${result.min}-${result.max}`);
+    return HttpResponse.json(result);
   }
 
   if (body.field.includes('visits')) {
-    return HttpResponse.json(generateSortedAdvancedData('visits', 'integer'));
+    const result = generateSortedAdvancedData('visits', 'integer');
+    console.warn(`OcurrenceApi:Visits (${result.type}) ${result.min}-${result.max}`);
+    return HttpResponse.json(result);
   }
 
   if (body.field.includes('progress')) {
-    return HttpResponse.json(generateSortedAdvancedData('progress', 'decimal'));
+    const result = generateSortedAdvancedData('progress', 'decimal');
+    console.warn(`OcurrenceApi:Progress (${result.type}) ${result.min}-${result.max}`);
+    return HttpResponse.json(result);
   }
 
   return HttpResponse.json({

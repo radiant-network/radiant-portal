@@ -49,8 +49,8 @@ export function isEqualToField(sqon: TSyntheticSqonContentValue, field: string) 
 export function createEmptyQuery() {
   return {
     content: [],
-    id: v4(),
     op: BooleanOperators.And,
+    id: v4(),
   };
 }
 

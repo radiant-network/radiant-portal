@@ -1,3 +1,4 @@
+// @ts-ignore
 import { HttpResponse } from 'msw';
 
 import { SqonContent, SqonOpEnum } from '@/api/api';
@@ -24,51 +25,43 @@ function querySqon(data: AdvancedTableMockData, sqon: any): boolean {
       return values.includes(target);
     }
     case SqonOpEnum.And: {
-      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded; ${field} ${target} ${op} ${values}`);
       return true;
     }
-
     case SqonOpEnum.Or: {
-      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded; ${field} ${target} ${op} ${values}`);
       return true;
     }
-
     case SqonOpEnum.Not: {
-      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded; ${field} ${target} ${op} ${values}`);
       return true;
     }
-
     case SqonOpEnum.Between: {
-      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
-      return true;
+      if (!target) return false;
+      return parseFloat(target) > parseFloat(values[0]) && parseFloat(target) < parseFloat(values[1]);
     }
-
     case SqonOpEnum.GreaterThan: {
-      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
-      return true;
+      if (!target) return false;
+      return parseFloat(target) > parseFloat(values[0]);
     }
-
     case SqonOpEnum.LessThan: {
-      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
-      return true;
+      if (!target) return false;
+      return parseFloat(target) < parseFloat(values[0]);
     }
-
     case SqonOpEnum.GreaterThanOrEqualTo: {
-      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
-      return true;
+      if (!target) return false;
+      return parseFloat(target) >= parseFloat(values[0]);
     }
-
     case SqonOpEnum.LessThanOrEqualTo: {
-      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
-      return true;
+      if (!target) return false;
+      return parseFloat(target) <= parseFloat(values[0]);
     }
-
     case SqonOpEnum.NotIn: {
       return !values.includes(target);
     }
 
     case SqonOpEnum.All: {
-      console.warn(`mock-api:filtercontent ${op} operator has not been coded`);
+      console.warn(`mock-api:filtercontent ${op} operator has not been coded; ${field} ${target} ${op} ${values}`);
       return true;
     }
   }

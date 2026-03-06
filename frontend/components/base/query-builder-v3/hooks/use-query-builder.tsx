@@ -2,10 +2,15 @@ import { createContext, Dispatch, useContext, useReducer } from 'react';
 import { v4 } from 'uuid';
 
 import { Count, CountBodyWithSqon, SortBody, Sqon, SqonContent, SqonOpEnum } from '@/api/api';
-import { AggregationConfig } from '@/components/cores/applications-config';
+import { AggregationConfig, IFilterRangeConfig } from '@/components/cores/applications-config';
 
 import { createEmptyQuery, isEqualToField } from '../libs/sqon';
 import { BooleanOperators, ISyntheticSqon, IValueContent, IValueFacet, TFacetValue } from '../type';
+
+export const DEFAULT_EMPTY_QUERY = {
+  content: [],
+  op: 'and',
+};
 
 export enum QBActionType {
   REMOVE_QUERY = 'remove-query',
@@ -280,16 +285,35 @@ export function useQBDispatch() {
 /**
  * Retrieve active query
  */
-export function useQBActiveQuery() {
+export function useQBActiveQuery(): ISyntheticSqon {
   const { activeQueryId, sqons } = useQBContext();
   return sqons.find(sqon => sqon.id === activeQueryId) ?? createEmptyQuery();
+}
+
+/**
+ * Retrieve aggregations
+ */
+export function useQBAggregations(): AggregationConfig {
+  const { aggregations } = useQBContext();
+  return aggregations;
+}
+
+/**
+ * Find and return the AggregationConfig
+ */
+export function useQBAggregationsNumericalConfig(field: string): IFilterRangeConfig {
+  const aggregations = useQBAggregations();
+  const config = Object.values(aggregations)
+    .flatMap(f => f.items)
+    .find(agg => agg.key === field)?.defaults as IFilterRangeConfig;
+  return config;
 }
 
 /**
  * Return active query sqon
  * The format is converted to be use by the api
  */
-export function useQBActiveSqon() {
+export function useQBActiveSqon(): { content: SqonContent; op: SqonOpEnum } {
   const activeQuery = useQBActiveQuery();
   return {
     content: activeQuery.content as SqonContent,
@@ -300,7 +324,7 @@ export function useQBActiveSqon() {
 /**
  * Return last user action on field
  */
-export function useQBHistory() {
+export function useQBHistory(): IHistory {
   const { history } = useQBContext();
   return history;
 }
@@ -350,4 +374,27 @@ export function useQBBooleanValue(field: string): string | null {
   }
 
   return null;
+}
+
+/**
+ * Return usable value for numerical field (facet or pill)
+ */
+export function useQBNumericalSqon(field: string): IValueFacet | undefined {
+  const activeQuery = useQBActiveQuery();
+  if (activeQuery.content.length === 0) return undefined;
+
+  const index = activeQuery.content.findIndex(
+    (value: any) =>
+      typeof value === 'object' &&
+      value !== null &&
+      'content' in value &&
+      'field' in (value.content as IValueFacet) &&
+      (value.content as IValueContent).field === field,
+  );
+
+  if (activeQuery.content[index]) {
+    return activeQuery.content[index] as IValueFacet;
+  }
+
+  return undefined;
 }
