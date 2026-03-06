@@ -386,7 +386,7 @@
     "filters": {
       "labels": {
         "[fieldKey]": "Champ : {{fieldKey}}",
-        "actual_interval": "Intervalle actuel",
+        "actual_interval": "Intervalle actuel {{min}}-{{max}}",
         "ad_alt": "Profondeur allélique ALT",
         "ad_ratio": "Ratio allélique ALT",
         "ad_total": "Profondeur totale ALT + REF",

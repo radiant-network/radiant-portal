@@ -385,7 +385,7 @@
     "filters": {
       "labels": {
         "[fieldKey]": "Field: {{fieldKey}}",
-        "actual_interval": "Actual interval",
+        "actual_interval": "Actual interval {{min}}-{{max}}",
         "ad_alt": "ALT Allele Depth",
         "ad_ratio": "Allelic Ratio ALT",
         "ad_total": "Total Depth ALT + REF",

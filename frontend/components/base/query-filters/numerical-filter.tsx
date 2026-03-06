@@ -99,6 +99,7 @@ import {
 } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
 import { i18n } from '@/components/hooks/i18n';
+import { thousandNumberFormat } from '@/components/lib/number-format';
 import { occurrencesApi } from '@/utils/api';
 
 import { useFilterConfig } from './filter-list';
@@ -493,14 +494,22 @@ export function NumericalFilter({ field }: IProps) {
             {hasInterval && (
               <div id={`${fieldKey}_interval`}>
                 <TextMuted size="xs">
-                  {t('common.filters.labels.actual_interval')} :{' '}
-                  {statistics?.min !== undefined
-                    ? Number(statistics.min.toFixed(decimal)).toLocaleString(i18n.language)
-                    : ''}{' '}
-                  -{' '}
-                  {statistics?.max !== undefined
-                    ? Number(statistics.max.toFixed(decimal)).toLocaleString(i18n.language)
-                    : ''}
+                  {t('common.filters.labels.actual_interval', {
+                    min:
+                      statistics?.min !== undefined
+                        ? thousandNumberFormat(statistics.min, {
+                            minimumFractionDigits: decimal,
+                            maximumFractionDigits: decimal,
+                          })
+                        : undefined,
+                    max:
+                      statistics?.max !== undefined
+                        ? thousandNumberFormat(statistics.max, {
+                            minimumFractionDigits: decimal,
+                            maximumFractionDigits: decimal,
+                          })
+                        : undefined,
+                  })}
                 </TextMuted>
               </div>
             )}

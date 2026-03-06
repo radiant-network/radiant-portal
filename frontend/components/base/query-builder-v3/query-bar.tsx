@@ -15,9 +15,10 @@ import { cn } from '@/components/lib/utils';
 import { Button } from '../shadcn/button';
 
 import { QBActionType, useQBContext, useQBDispatch } from './hooks/use-query-builder';
-import { isBoolean } from './libs/sqon';
+import { isBoolean, isRange } from './libs/sqon';
 import BooleanQueryPill from './pills/boolean-query-pill';
 import MultiSelectQueryPill from './pills/multiselect-query-pill';
+import NumericalQueryPill from './pills/numerical-query-pill';
 import CombinerOperator from './pills/operators/combiner-operator';
 import { ISyntheticSqon, IValueFacet } from './type';
 
@@ -32,21 +33,16 @@ type QueryBarProps = {
 /**
  * Simple factory design pattern to create the correct query-pill
  */
-function factory(content: TSyntheticSqonContentValue, displayCombiner: boolean) {
-  if (isBoolean(content as IValueFacet)) {
-    return (
-      <>
-        <BooleanQueryPill content={content as IValueFacet} />
-        {displayCombiner && <CombinerOperator />}
-      </>
-    );
+function factory(content: TSyntheticSqonContentValue) {
+  if (isRange(content as IValueFacet)) {
+    return <NumericalQueryPill content={content as IValueFacet} />;
   }
 
-  return (
-    <>
-      <MultiSelectQueryPill content={content as IValueFacet} /> {displayCombiner && <CombinerOperator />}
-    </>
-  );
+  if (isBoolean(content as IValueFacet)) {
+    return <BooleanQueryPill content={content as IValueFacet} />;
+  }
+
+  return <MultiSelectQueryPill content={content as IValueFacet} />;
 }
 
 /**
@@ -121,7 +117,8 @@ function QueryBar({ sqon, active }: QueryBarProps) {
         <div className="flex flex-1 flex-wrap max-h-[30vh]">
           {sqon.content.map((content, index) => (
             <div key={index} className="flex mt-1">
-              {factory(content, index < sqon.content.length - 1)}
+              {factory(content)}
+              {index < sqon.content.length - 1 && <CombinerOperator />}
             </div>
           ))}
         </div>
