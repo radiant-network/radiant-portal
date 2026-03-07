@@ -40,6 +40,9 @@ class VariantOverview(BaseModel):
     exon_total: Optional[StrictInt] = None
     fathmm_pred: Optional[StrictStr] = None
     fathmm_score: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pc_wgs: Optional[StrictInt] = None
+    germline_pf_wgs: Union[StrictFloat, StrictInt]
+    germline_pn_wgs: Optional[StrictInt] = None
     gnomad_loeuf: Optional[Union[StrictFloat, StrictInt]] = None
     gnomad_pli: Optional[Union[StrictFloat, StrictInt]] = None
     gnomad_v3_af: Union[StrictFloat, StrictInt]
@@ -51,11 +54,8 @@ class VariantOverview(BaseModel):
     lrt_pred: Optional[StrictStr] = None
     lrt_score: Optional[Union[StrictFloat, StrictInt]] = None
     omim_conditions: Optional[List[OmimGenePanel]] = None
-    pc_wgs: Optional[StrictInt] = None
-    pf_wgs: Union[StrictFloat, StrictInt]
     phylo_p17way_primate: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="phyloP17way_primate")
     picked_consequences: List[StrictStr]
-    pn_wgs: Optional[StrictInt] = None
     polyphen2_hvar_pred: Optional[StrictStr] = None
     polyphen2_hvar_score: Optional[Union[StrictFloat, StrictInt]] = None
     revel_score: Optional[Union[StrictFloat, StrictInt]] = None
@@ -67,7 +67,7 @@ class VariantOverview(BaseModel):
     symbol: Optional[StrictStr] = None
     transcript_id: Optional[StrictStr] = None
     vep_impact: Optional[VepImpact] = None
-    __properties: ClassVar[List[str]] = ["aa_change", "cadd_phred", "cadd_score", "clinvar", "clinvar_name", "dann_score", "dna_change", "exomiser_acmg_classification_counts", "exon_rank", "exon_total", "fathmm_pred", "fathmm_score", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "lrt_pred", "lrt_score", "omim_conditions", "pc_wgs", "pf_wgs", "phyloP17way_primate", "picked_consequences", "pn_wgs", "polyphen2_hvar_pred", "polyphen2_hvar_score", "revel_score", "rsnumber", "sift_pred", "sift_score", "spliceai_ds", "spliceai_type", "symbol", "transcript_id", "vep_impact"]
+    __properties: ClassVar[List[str]] = ["aa_change", "cadd_phred", "cadd_score", "clinvar", "clinvar_name", "dann_score", "dna_change", "exomiser_acmg_classification_counts", "exon_rank", "exon_total", "fathmm_pred", "fathmm_score", "germline_pc_wgs", "germline_pf_wgs", "germline_pn_wgs", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "lrt_pred", "lrt_score", "omim_conditions", "phyloP17way_primate", "picked_consequences", "polyphen2_hvar_pred", "polyphen2_hvar_score", "revel_score", "rsnumber", "sift_pred", "sift_score", "spliceai_ds", "spliceai_type", "symbol", "transcript_id", "vep_impact"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -139,6 +139,9 @@ class VariantOverview(BaseModel):
             "exon_total": obj.get("exon_total"),
             "fathmm_pred": obj.get("fathmm_pred"),
             "fathmm_score": obj.get("fathmm_score"),
+            "germline_pc_wgs": obj.get("germline_pc_wgs"),
+            "germline_pf_wgs": obj.get("germline_pf_wgs"),
+            "germline_pn_wgs": obj.get("germline_pn_wgs"),
             "gnomad_loeuf": obj.get("gnomad_loeuf"),
             "gnomad_pli": obj.get("gnomad_pli"),
             "gnomad_v3_af": obj.get("gnomad_v3_af"),
@@ -150,11 +153,8 @@ class VariantOverview(BaseModel):
             "lrt_pred": obj.get("lrt_pred"),
             "lrt_score": obj.get("lrt_score"),
             "omim_conditions": [OmimGenePanel.from_dict(_item) for _item in obj["omim_conditions"]] if obj.get("omim_conditions") is not None else None,
-            "pc_wgs": obj.get("pc_wgs"),
-            "pf_wgs": obj.get("pf_wgs"),
             "phyloP17way_primate": obj.get("phyloP17way_primate"),
             "picked_consequences": obj.get("picked_consequences"),
-            "pn_wgs": obj.get("pn_wgs"),
             "polyphen2_hvar_pred": obj.get("polyphen2_hvar_pred"),
             "polyphen2_hvar_score": obj.get("polyphen2_hvar_score"),
             "revel_score": obj.get("revel_score"),

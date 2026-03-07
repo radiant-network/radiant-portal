@@ -51,6 +51,13 @@ class ExpandedGermlineSNVOccurrence(BaseModel):
     fathmm_score: Optional[Union[StrictFloat, StrictInt]] = None
     filter: Optional[StrictStr] = None
     genotype_quality: StrictInt
+    germline_pc_wgs_affected: Optional[StrictInt] = None
+    germline_pc_wgs_not_affected: Optional[StrictInt] = None
+    germline_pf_wgs: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wgs_affected: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pf_wgs_not_affected: Optional[Union[StrictFloat, StrictInt]] = None
+    germline_pn_wgs_affected: Optional[StrictInt] = None
+    germline_pn_wgs_not_affected: Optional[StrictInt] = None
     gnomad_loeuf: Optional[Union[StrictFloat, StrictInt]] = None
     gnomad_pli: Optional[Union[StrictFloat, StrictInt]] = None
     gnomad_v3_af: Union[StrictFloat, StrictInt]
@@ -67,14 +74,7 @@ class ExpandedGermlineSNVOccurrence(BaseModel):
     mother_calls: Optional[List[StrictInt]] = None
     omim_conditions: Optional[List[OmimGenePanel]] = None
     parental_origin: Optional[StrictStr] = None
-    pc_wgs_affected: Optional[StrictInt] = None
-    pc_wgs_not_affected: Optional[StrictInt] = None
-    pf_wgs: Optional[Union[StrictFloat, StrictInt]] = None
-    pf_wgs_affected: Optional[Union[StrictFloat, StrictInt]] = None
-    pf_wgs_not_affected: Optional[Union[StrictFloat, StrictInt]] = None
     picked_consequences: List[StrictStr]
-    pn_wgs_affected: Optional[StrictInt] = None
-    pn_wgs_not_affected: Optional[StrictInt] = None
     polyphen2_hvar_pred: Optional[StrictStr] = None
     polyphen2_hvar_score: Optional[Union[StrictFloat, StrictInt]] = None
     qd: Optional[Union[StrictFloat, StrictInt]] = None
@@ -90,7 +90,7 @@ class ExpandedGermlineSNVOccurrence(BaseModel):
     transmission: Optional[StrictStr] = None
     vep_impact: Optional[VepImpact] = None
     zygosity: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_alt", "ad_total", "af", "cadd_phred", "cadd_score", "chromosome", "clinvar", "dann_score", "dna_change", "end", "ensembl_gene_id", "exomiser_acmg_classification", "exomiser_acmg_classification_counts", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exon_rank", "exon_total", "father_calls", "fathmm_pred", "fathmm_score", "filter", "genotype_quality", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "hgvsg", "interpretation_classification", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "lrt_pred", "lrt_score", "mother_calls", "omim_conditions", "parental_origin", "pc_wgs_affected", "pc_wgs_not_affected", "pf_wgs", "pf_wgs_affected", "pf_wgs_not_affected", "picked_consequences", "pn_wgs_affected", "pn_wgs_not_affected", "polyphen2_hvar_pred", "polyphen2_hvar_score", "qd", "revel_score", "rsnumber", "sift_pred", "sift_score", "spliceai_ds", "spliceai_type", "start", "symbol", "transcript_id", "transmission", "vep_impact", "zygosity"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_alt", "ad_total", "af", "cadd_phred", "cadd_score", "chromosome", "clinvar", "dann_score", "dna_change", "end", "ensembl_gene_id", "exomiser_acmg_classification", "exomiser_acmg_classification_counts", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exon_rank", "exon_total", "father_calls", "fathmm_pred", "fathmm_score", "filter", "genotype_quality", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "gnomad_loeuf", "gnomad_pli", "gnomad_v3_af", "hgvsg", "interpretation_classification", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "lrt_pred", "lrt_score", "mother_calls", "omim_conditions", "parental_origin", "picked_consequences", "polyphen2_hvar_pred", "polyphen2_hvar_score", "qd", "revel_score", "rsnumber", "sift_pred", "sift_score", "spliceai_ds", "spliceai_type", "start", "symbol", "transcript_id", "transmission", "vep_impact", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -173,6 +173,13 @@ class ExpandedGermlineSNVOccurrence(BaseModel):
             "fathmm_score": obj.get("fathmm_score"),
             "filter": obj.get("filter"),
             "genotype_quality": obj.get("genotype_quality"),
+            "germline_pc_wgs_affected": obj.get("germline_pc_wgs_affected"),
+            "germline_pc_wgs_not_affected": obj.get("germline_pc_wgs_not_affected"),
+            "germline_pf_wgs": obj.get("germline_pf_wgs"),
+            "germline_pf_wgs_affected": obj.get("germline_pf_wgs_affected"),
+            "germline_pf_wgs_not_affected": obj.get("germline_pf_wgs_not_affected"),
+            "germline_pn_wgs_affected": obj.get("germline_pn_wgs_affected"),
+            "germline_pn_wgs_not_affected": obj.get("germline_pn_wgs_not_affected"),
             "gnomad_loeuf": obj.get("gnomad_loeuf"),
             "gnomad_pli": obj.get("gnomad_pli"),
             "gnomad_v3_af": obj.get("gnomad_v3_af"),
@@ -189,14 +196,7 @@ class ExpandedGermlineSNVOccurrence(BaseModel):
             "mother_calls": obj.get("mother_calls"),
             "omim_conditions": [OmimGenePanel.from_dict(_item) for _item in obj["omim_conditions"]] if obj.get("omim_conditions") is not None else None,
             "parental_origin": obj.get("parental_origin"),
-            "pc_wgs_affected": obj.get("pc_wgs_affected"),
-            "pc_wgs_not_affected": obj.get("pc_wgs_not_affected"),
-            "pf_wgs": obj.get("pf_wgs"),
-            "pf_wgs_affected": obj.get("pf_wgs_affected"),
-            "pf_wgs_not_affected": obj.get("pf_wgs_not_affected"),
             "picked_consequences": obj.get("picked_consequences"),
-            "pn_wgs_affected": obj.get("pn_wgs_affected"),
-            "pn_wgs_not_affected": obj.get("pn_wgs_not_affected"),
             "polyphen2_hvar_pred": obj.get("polyphen2_hvar_pred"),
             "polyphen2_hvar_score": obj.get("polyphen2_hvar_score"),
             "qd": obj.get("qd"),

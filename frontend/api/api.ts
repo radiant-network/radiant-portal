@@ -1713,6 +1713,48 @@ export interface ExpandedGermlineSNVOccurrence {
      * @type {number}
      * @memberof ExpandedGermlineSNVOccurrence
      */
+    'germline_pc_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pc_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pf_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pf_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pf_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pn_wgs_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'germline_pn_wgs_not_affected'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
     'gnomad_loeuf'?: number;
     /**
      * 
@@ -1806,52 +1848,10 @@ export interface ExpandedGermlineSNVOccurrence {
     'parental_origin'?: string;
     /**
      * 
-     * @type {number}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'pc_wgs_affected'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'pc_wgs_not_affected'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'pf_wgs'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'pf_wgs_affected'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'pf_wgs_not_affected'?: number;
-    /**
-     * 
      * @type {Array<string>}
      * @memberof ExpandedGermlineSNVOccurrence
      */
     'picked_consequences': Array<string>;
-    /**
-     * 
-     * @type {number}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'pn_wgs_affected'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'pn_wgs_not_affected'?: number;
     /**
      * 
      * @type {string}
@@ -2379,6 +2379,24 @@ export interface GermlineSNVOccurrence {
      * @type {number}
      * @memberof GermlineSNVOccurrence
      */
+    'germline_pc_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pf_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'germline_pn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
     'gnomad_v3_af': number;
     /**
      * 
@@ -2436,28 +2454,10 @@ export interface GermlineSNVOccurrence {
     'omim_inheritance_code'?: Array<string>;
     /**
      * 
-     * @type {number}
-     * @memberof GermlineSNVOccurrence
-     */
-    'pc_wgs'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof GermlineSNVOccurrence
-     */
-    'pf_wgs': number;
-    /**
-     * 
      * @type {Array<string>}
      * @memberof GermlineSNVOccurrence
      */
     'picked_consequences': Array<string>;
-    /**
-     * 
-     * @type {number}
-     * @memberof GermlineSNVOccurrence
-     */
-    'pn_wgs'?: number;
     /**
      * 
      * @type {string}
@@ -4745,6 +4745,24 @@ export interface VariantOverview {
      * @type {number}
      * @memberof VariantOverview
      */
+    'germline_pc_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'germline_pf_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
+    'germline_pn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof VariantOverview
+     */
     'gnomad_loeuf'?: number;
     /**
      * 
@@ -4811,18 +4829,6 @@ export interface VariantOverview {
      * @type {number}
      * @memberof VariantOverview
      */
-    'pc_wgs'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof VariantOverview
-     */
-    'pf_wgs': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof VariantOverview
-     */
     'phyloP17way_primate'?: number;
     /**
      * 
@@ -4830,12 +4836,6 @@ export interface VariantOverview {
      * @memberof VariantOverview
      */
     'picked_consequences': Array<string>;
-    /**
-     * 
-     * @type {number}
-     * @memberof VariantOverview
-     */
-    'pn_wgs'?: number;
     /**
      * 
      * @type {string}
