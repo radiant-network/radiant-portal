@@ -45,7 +45,7 @@ func addImplicitOccurrencesFilters(seqId int, r *GermlineSNVOccurrencesRepositor
 	return tx
 }
 func joinWithVariants(tx *gorm.DB) *gorm.DB {
-	return tx.Joins("JOIN germline__snv__variant v ON v.locus_id=o.locus_id")
+	return tx.Joins("JOIN snv__variant v ON v.locus_id=o.locus_id")
 }
 
 func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, userQuery types.ListQuery) ([]GermlineSNVOccurrence, error) {
@@ -64,13 +64,13 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 	utils.AddLimitAndSort(tx, userQuery)
 	// we build a TOP-N query like :
 	// SELECT o.locus_id, o.quality, o.ad_ratio, ...., v.variant_class, v.hgvsg..., i.locus_id IS NOT NULL AS has_interpretation
-	// FROM (germline__snv__occurrence o, germline__snv__variant v)
+	// FROM (germline__snv__occurrence o, snv__variant v)
 	// 		LEFT JOIN (SELECT DISTINCT locus_id, sequencing_id FROM radiant_jdbc.public.interpretation_germline) i ON i.locus_id = o.locus_id AND i.sequencing_id = ?
 	// WHERE o.locus_id in (
 	//	SELECT o.locus_id FROM germline__snv__occurrence JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
 	// ) AND o.seq_id=? AND o.part=? AND v.locus_id=o.locus_id ORDER BY ad_ratio DESC
 	tx = tx.Select("o.locus_id")
-	tx = r.db.Table("(germline__snv__occurrence o, germline__snv__variant v)").
+	tx = r.db.Table("(germline__snv__occurrence o, snv__variant v)").
 		Joins("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM radiant_jdbc.public.interpretation_germline) i ON i.locus_id = o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
 		Select(columns).
 		Where("o.seq_id = ? and part=? and v.locus_id = o.locus_id and o.locus_id in (?)", seqId, part, tx)
@@ -124,7 +124,7 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *GermlineSNVOcc
 				selectedPanelsField := userQuery.GetFieldsFromTables(types.GenePanelsTables...)
 				selectedPanelsTables := utils.GetDistinctTablesFromFields(selectedPanelsField)
 
-				consequenceFilterTable := r.db.Table("germline__snv__consequence_filter_partitioned cf").Where("part = ?", part)
+				consequenceFilterTable := r.db.Table("snv__consequence_filter_partitioned cf").Where("part = ?", part)
 
 				// overrideTableAliases will be used to override the table aliases when generating the filter. The sub-query will contain the columns with their aliases.
 				// For instance panel column from omim_gene_panel will be aliased as omim_gene_panel in the subquery.
@@ -151,7 +151,7 @@ func prepareListOrCountQuery(seqId int, userQuery types.Query, r *GermlineSNVOcc
 
 			} else {
 				filters, params := userQuery.Filters().ToSQL(nil)
-				joinClause := "LEFT SEMI JOIN germline__snv__consequence_filter_partitioned cf ON cf.locus_id=o.locus_id AND cf.part = o.part and (?)"
+				joinClause := "LEFT SEMI JOIN snv__consequence_filter_partitioned cf ON cf.locus_id=o.locus_id AND cf.part = o.part and (?)"
 				tx = tx.Joins(joinClause, gorm.Expr(filters, params...))
 			}
 
@@ -184,7 +184,7 @@ func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *GermlineSN
 	if userQuery != nil {
 		tx = joinWithVariants(tx)
 		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...) {
-			joinClause := "LEFT JOIN germline__snv__consequence_filter_partitioned cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
+			joinClause := "LEFT JOIN snv__consequence_filter_partitioned cf ON cf.locus_id=o.locus_id AND cf.part = o.part"
 			tx = tx.Joins(joinClause)
 			selectedPanelsTables := utils.GetDistinctTablesFromFields(userQuery.GetFieldsFromTables(types.GenePanelsTables...))
 			for _, panelsTable := range selectedPanelsTables {
@@ -258,18 +258,18 @@ func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId
 
 func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(caseId int, seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error) {
 	tx := r.db.Table("germline__snv__occurrence o")
-	tx = tx.Joins("JOIN germline__snv__consequence c ON o.locus_id=c.locus_id AND o.seq_id = ? AND o.locus_id = ? AND c.is_picked = true", seqId, locusId)
-	tx = tx.Joins("JOIN germline__snv__variant v ON o.locus_id=v.locus_id")
+	tx = tx.Joins("JOIN snv__consequence c ON o.locus_id=c.locus_id AND o.seq_id = ? AND o.locus_id = ? AND c.is_picked = true", seqId, locusId)
+	tx = tx.Joins("JOIN snv__variant v ON o.locus_id=v.locus_id")
 	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id=o.locus_id AND i.sequencing_id = o.seq_id AND i.transcript_id = v.transcript_id AND i.case_id = ?", fmt.Sprintf("%d", caseId))
 	tx = tx.Joins("LEFT JOIN ensembl_gene g ON g.name=v.symbol")
 	tx = tx.Select("c.locus_id, v.hgvsg, v.locus, v.chromosome, v.start, v.end, v.symbol, v.transcript_id, v.is_canonical, " +
 		"v.is_mane_select, v.is_mane_plus, c.exon_rank, c.exon_total, v.dna_change, v.vep_impact, v.consequences, " +
 		"v.aa_change, v.rsnumber, v.clinvar_interpretation, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_type, c.spliceai_ds, " +
-		"v.pf_wgs, v.gnomad_v3_af, c.sift_pred, c.sift_score, c.revel_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, " +
+		"v.germline_pf_wgs, v.gnomad_v3_af, c.sift_pred, c.sift_score, c.revel_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, " +
 		"c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, o.zygosity, o.transmission_mode, o.parental_origin, " +
 		"o.father_calls, o.mother_calls, o.info_qd, o.ad_alt, o.ad_total, o.filter, o.gq," +
-		"o.exomiser_gene_combined_score, o.exomiser_acmg_evidence, o.exomiser_acmg_classification, v.pc_wgs_affected, v.pn_wgs_affected, v.pf_wgs_affected, " +
-		"v.pc_wgs_not_affected, v.pn_wgs_not_affected, v.pf_wgs_not_affected, i.classification as interpretation_classification_code, g.gene_id as ensembl_gene_id")
+		"o.exomiser_gene_combined_score, o.exomiser_acmg_evidence, o.exomiser_acmg_classification, v.germline_pc_wgs_affected, v.germline_pn_wgs_affected, v.germline_pf_wgs_affected, " +
+		"v.germline_pc_wgs_not_affected, v.germline_pn_wgs_not_affected, v.germline_pf_wgs_not_affected, i.classification as interpretation_classification_code, g.gene_id as ensembl_gene_id")
 
 	var expandedOccurrence ExpandedGermlineSNVOccurrence
 	if err := tx.First(&expandedOccurrence).Error; err != nil {

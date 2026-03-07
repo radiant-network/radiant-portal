@@ -38,6 +38,9 @@ class GermlineSNVOccurrence(BaseModel):
     exomiser_variant_score: Union[StrictFloat, StrictInt]
     filter: Optional[StrictStr] = None
     genotype_quality: StrictInt
+    germline_pc_wgs: Optional[StrictInt] = None
+    germline_pf_wgs: Union[StrictFloat, StrictInt]
+    germline_pn_wgs: Optional[StrictInt] = None
     gnomad_v3_af: Union[StrictFloat, StrictInt]
     has_interpretation: StrictBool
     hgvsg: StrictStr
@@ -48,10 +51,7 @@ class GermlineSNVOccurrence(BaseModel):
     locus_id: StrictStr
     max_impact_score: StrictInt
     omim_inheritance_code: Optional[List[StrictStr]] = None
-    pc_wgs: Optional[StrictInt] = None
-    pf_wgs: Union[StrictFloat, StrictInt]
     picked_consequences: List[StrictStr]
-    pn_wgs: Optional[StrictInt] = None
     rsnumber: Optional[StrictStr] = None
     seq_id: StrictInt
     start: StrictInt
@@ -61,7 +61,7 @@ class GermlineSNVOccurrence(BaseModel):
     variant_class: StrictStr
     vep_impact: Optional[VepImpact] = None
     zygosity: StrictStr
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "genotype_quality", "gnomad_v3_af", "has_interpretation", "hgvsg", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "pc_wgs", "pf_wgs", "picked_consequences", "pn_wgs", "rsnumber", "seq_id", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "genotype_quality", "germline_pc_wgs", "germline_pf_wgs", "germline_pn_wgs", "gnomad_v3_af", "has_interpretation", "hgvsg", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -125,6 +125,9 @@ class GermlineSNVOccurrence(BaseModel):
             "exomiser_variant_score": obj.get("exomiser_variant_score"),
             "filter": obj.get("filter"),
             "genotype_quality": obj.get("genotype_quality"),
+            "germline_pc_wgs": obj.get("germline_pc_wgs"),
+            "germline_pf_wgs": obj.get("germline_pf_wgs"),
+            "germline_pn_wgs": obj.get("germline_pn_wgs"),
             "gnomad_v3_af": obj.get("gnomad_v3_af"),
             "has_interpretation": obj.get("has_interpretation"),
             "hgvsg": obj.get("hgvsg"),
@@ -135,10 +138,7 @@ class GermlineSNVOccurrence(BaseModel):
             "locus_id": obj.get("locus_id"),
             "max_impact_score": obj.get("max_impact_score"),
             "omim_inheritance_code": obj.get("omim_inheritance_code"),
-            "pc_wgs": obj.get("pc_wgs"),
-            "pf_wgs": obj.get("pf_wgs"),
             "picked_consequences": obj.get("picked_consequences"),
-            "pn_wgs": obj.get("pn_wgs"),
             "rsnumber": obj.get("rsnumber"),
             "seq_id": obj.get("seq_id"),
             "start": obj.get("start"),

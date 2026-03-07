@@ -12,9 +12,9 @@ type GermlineSNVOccurrence struct {
 	GenotypeQuality            int32             `json:"genotype_quality" validate:"required"`
 	Filter                     string            `json:"filter,omitempty"`
 	Zygosity                   string            `json:"zygosity" validate:"required"`
-	PfWgs                      float64           `json:"pf_wgs" validate:"required"`
-	PcWgs                      int               `json:"pc_wgs,omitempty"`
-	PnWgs                      int               `json:"pn_wgs,omitempty"`
+	GermlinePfWgs              float64           `json:"germline_pf_wgs" validate:"required"`
+	GermlinePcWgs              int               `json:"germline_pc_wgs,omitempty"`
+	GermlinePnWgs              int               `json:"germline_pn_wgs,omitempty"`
 	GnomadV3Af                 float64           `json:"gnomad_v3_af" validate:"required"`
 	Hgvsg                      string            `json:"hgvsg" validate:"required"`
 	OmimInheritanceCode        JsonArray[string] `gorm:"type:json" json:"omim_inheritance_code,omitempty"`
@@ -64,13 +64,13 @@ type ExpandedGermlineSNVOccurrence = struct {
 	SpliceaiType                       JsonArray[string]        `gorm:"type:json" json:"spliceai_type,omitempty"`
 	SpliceaiDs                         float32                  `json:"spliceai_ds,omitempty"`
 	Af                                 float64                  `json:"af,omitempty"` // TODO
-	PfWgs                              float64                  `json:"pf_wgs,omitempty"`
-	PcWgsAffected                      int                      `json:"pc_wgs_affected,omitempty"`
-	PnWgsAffected                      int                      `json:"pn_wgs_affected,omitempty"`
-	PfWgsAffected                      float64                  `json:"pf_wgs_affected,omitempty"`
-	PcWgsNotAffected                   int                      `json:"pc_wgs_not_affected,omitempty"`
-	PnWgsNotAffected                   int                      `json:"pn_wgs_not_affected,omitempty"`
-	PfWgsNotAffected                   float64                  `json:"pf_wgs_not_affected,omitempty"`
+	GermlinePfWgs                      float64                  `json:"germline_pf_wgs,omitempty"`
+	GermlinePcWgsAffected              int                      `json:"germline_pc_wgs_affected,omitempty"`
+	GermlinePnWgsAffected              int                      `json:"germline_pn_wgs_affected,omitempty"`
+	GermlinePfWgsAffected              float64                  `json:"germline_pf_wgs_affected,omitempty"`
+	GermlinePcWgsNotAffected           int                      `json:"germline_pc_wgs_not_affected,omitempty"`
+	GermlinePnWgsNotAffected           int                      `json:"germline_pn_wgs_not_affected,omitempty"`
+	GermlinePfWgsNotAffected           float64                  `json:"germline_pf_wgs_not_affected,omitempty"`
 	GnomadV3Af                         float64                  `json:"gnomad_v3_af" validate:"required"`
 	SiftPred                           string                   `json:"sift_pred,omitempty"`
 	SiftScore                          float32                  `json:"sift_score,omitempty"`
@@ -289,11 +289,11 @@ var GermlineSNVOccurrencesFields = []Field{
 	GermlineSNVInfoQdField,
 
 	// Frequencies
-	PfWgsField,
-	PnWgsField,
-	PcWgsField,
-	PfWgsAffectedField,
-	PfWgsNotAffectedField,
+	GermlinePfWgsField,
+	GermlinePnWgsField,
+	GermlinePcWgsField,
+	GermlinePfWgsAffectedField,
+	GermlinePfWgsNotAffectedField,
 	GnomadV3AfField,
 	TopmedAfField,
 	ThousandGenomesAfField,
@@ -343,7 +343,7 @@ var GermlineSNVOccurrencesDefaultFields = []Field{
 	HgvsgField,
 	VariantClassField,
 	GnomadV3AfField,
-	PfWgsField,
+	GermlinePfWgsField,
 	GermlineSNVGenotypeQualityField,
 	GermlineSNVZygosityField,
 	GermlineSNVAdRatioField,

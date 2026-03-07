@@ -2,45 +2,6 @@ package types
 
 import "time"
 
-/*
-+----------------------+-------------------+----+-----+-------+-----+
-|Field                 |Type               |Null|Key  |Default|Extra|
-+----------------------+-------------------+----+-----+-------+-----+
-|locus_id              |bigint             |NO  |true |null   |     |
-|pf_wgs                |double             |YES |false|null   |     |
-|gnomad_v3_af          |double             |YES |false|null   |     |
-|topmed_af             |double             |YES |false|null   |     |
-|tg_af                 |double             |YES |false|null   |     |
-|pc_wgs                |int                |YES |false|null   |     |
-|pn_wgs                |int                |YES |false|null   |     |
-|chromosome            |char(2)            |YES |false|null   |     |
-|start                 |bigint             |YES |false|null   |     |
-|clinvar_name          |varchar(2000)      |YES |false|null   |     |
-|variant_class         |varchar(50)        |YES |false|null   |     |
-|clinvar_interpretation|array<varchar(100)>|YES |false|null   |     |
-|symbol                |varchar(20)        |YES |false|null   |     |
-|impact_score          |tinyint            |YES |false|null   |     |
-|consequences          |array<varchar(50)> |YES |false|null   |     |
-|vep_impact            |varchar(20)        |YES |false|null   |     |
-|is_mane_select        |boolean            |YES |false|null   |     |
-|is_mane_plus          |boolean            |YES |false|null   |     |
-|is_canonical          |boolean            |YES |false|null   |     |
-|rsnumber              |array<varchar(15)> |YES |false|null   |     |
-|reference             |varchar(2000)      |YES |false|null   |     |
-|alternate             |varchar(2000)      |YES |false|null   |     |
-|mane_select           |varchar(200)       |YES |false|null   |     |
-|hgvsg                 |varchar(2000)      |YES |false|null   |     |
-|hgvsc                 |varchar(2000)      |YES |false|null   |     |
-|hgvsp                 |varchar(2000)      |YES |false|null   |     |
-|locus                 |varchar(2000)      |YES |false|null   |     |
-|dna_change            |varchar(2000)      |YES |false|null   |     |
-|aa_change             |varchar(2000)      |YES |false|null   |     |
-|transcript_id         |varchar(100)       |YES |false|null   |     |
-|omim_inheritance_code |array<varchar(5)>  |YES |false|null   |     |
-+----------------------+-------------------+----+-----+-------+-----+
-
-*/
-
 type VariantHeader = struct {
 	Hgvsg           string            `json:"hgvsg" validate:"required"`
 	AssemblyVersion string            `json:"assembly_version,omitempty"`
@@ -51,9 +12,9 @@ type VariantOverview = struct {
 	Symbol                             string                   `json:"symbol,omitempty"`
 	Consequences                       JsonArray[string]        `gorm:"type:json" json:"picked_consequences" validate:"required"`
 	ClinvarInterpretation              JsonArray[string]        `gorm:"type:json" json:"clinvar,omitempty"`
-	PcWgs                              int                      `json:"pc_wgs,omitempty"`
-	PnWgs                              int                      `json:"pn_wgs,omitempty"`
-	PfWgs                              float64                  `json:"pf_wgs" validate:"required"`
+	GermlinePcWgs                      int                      `json:"germline_pc_wgs,omitempty"`
+	GermlinePnWgs                      int                      `json:"germline_pn_wgs,omitempty"`
+	GermlinePfWgs                      float64                  `json:"germline_pf_wgs" validate:"required"`
 	GnomadV3Af                         float64                  `json:"gnomad_v3_af" validate:"required"`
 	IsCanonical                        bool                     `json:"is_canonical" validate:"required"`
 	IsManeSelect                       bool                     `json:"is_mane_select" validate:"required"`
@@ -174,7 +135,7 @@ type VariantInternalFrequencies struct {
 }
 
 var VariantTable = Table{
-	Name:  "germline__snv__variant",
+	Name:  "snv__variant",
 	Alias: "v",
 }
 
@@ -244,40 +205,40 @@ var StartField = Field{
 	Table:           VariantTable,
 }
 
-var PfWgsField = Field{
-	Name:          "pf_wgs",
+var GermlinePfWgsField = Field{
+	Name:          "germline_pf_wgs",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          DecimalType,
 	Table:         VariantTable,
 }
-var PcWgsField = Field{
-	Name:          "pc_wgs",
+var GermlinePcWgsField = Field{
+	Name:          "germline_pc_wgs",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          IntegerType,
 	Table:         VariantTable,
 }
-var PnWgsField = Field{
-	Name:          "pn_wgs",
+var GermlinePnWgsField = Field{
+	Name:          "germline_pn_wgs",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          IntegerType,
 	Table:         VariantTable,
 }
-var PfWgsAffectedField = Field{
-	Name:          "pf_wgs_affected",
+var GermlinePfWgsAffectedField = Field{
+	Name:          "germline_pf_wgs_affected",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          DecimalType,
 	Table:         VariantTable,
 }
-var PfWgsNotAffectedField = Field{
-	Name:          "pf_wgs_not_affected",
+var GermlinePfWgsNotAffectedField = Field{
+	Name:          "germline_pf_wgs_not_affected",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,

@@ -28,6 +28,13 @@ Name | Type | Description | Notes
 **fathmm_score** | **float** |  | [optional] 
 **filter** | **str** |  | [optional] 
 **genotype_quality** | **int** |  | 
+**germline_pc_wgs_affected** | **int** |  | [optional] 
+**germline_pc_wgs_not_affected** | **int** |  | [optional] 
+**germline_pf_wgs** | **float** |  | [optional] 
+**germline_pf_wgs_affected** | **float** |  | [optional] 
+**germline_pf_wgs_not_affected** | **float** |  | [optional] 
+**germline_pn_wgs_affected** | **int** |  | [optional] 
+**germline_pn_wgs_not_affected** | **int** |  | [optional] 
 **gnomad_loeuf** | **float** |  | [optional] 
 **gnomad_pli** | **float** |  | [optional] 
 **gnomad_v3_af** | **float** |  | 
@@ -44,14 +51,7 @@ Name | Type | Description | Notes
 **mother_calls** | **List[int]** |  | [optional] 
 **omim_conditions** | [**List[OmimGenePanel]**](OmimGenePanel.md) |  | [optional] 
 **parental_origin** | **str** |  | [optional] 
-**pc_wgs_affected** | **int** |  | [optional] 
-**pc_wgs_not_affected** | **int** |  | [optional] 
-**pf_wgs** | **float** |  | [optional] 
-**pf_wgs_affected** | **float** |  | [optional] 
-**pf_wgs_not_affected** | **float** |  | [optional] 
 **picked_consequences** | **List[str]** |  | 
-**pn_wgs_affected** | **int** |  | [optional] 
-**pn_wgs_not_affected** | **int** |  | [optional] 
 **polyphen2_hvar_pred** | **str** |  | [optional] 
 **polyphen2_hvar_score** | **float** |  | [optional] 
 **qd** | **float** |  | [optional] 

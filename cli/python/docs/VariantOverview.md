@@ -17,6 +17,9 @@ Name | Type | Description | Notes
 **exon_total** | **int** |  | [optional] 
 **fathmm_pred** | **str** |  | [optional] 
 **fathmm_score** | **float** |  | [optional] 
+**germline_pc_wgs** | **int** |  | [optional] 
+**germline_pf_wgs** | **float** |  | 
+**germline_pn_wgs** | **int** |  | [optional] 
 **gnomad_loeuf** | **float** |  | [optional] 
 **gnomad_pli** | **float** |  | [optional] 
 **gnomad_v3_af** | **float** |  | 
@@ -28,11 +31,8 @@ Name | Type | Description | Notes
 **lrt_pred** | **str** |  | [optional] 
 **lrt_score** | **float** |  | [optional] 
 **omim_conditions** | [**List[OmimGenePanel]**](OmimGenePanel.md) |  | [optional] 
-**pc_wgs** | **int** |  | [optional] 
-**pf_wgs** | **float** |  | 
 **phylo_p17way_primate** | **float** |  | [optional] 
 **picked_consequences** | **List[str]** |  | 
-**pn_wgs** | **int** |  | [optional] 
 **polyphen2_hvar_pred** | **str** |  | [optional] 
 **polyphen2_hvar_score** | **float** |  | [optional] 
 **revel_score** | **float** |  | [optional] 
