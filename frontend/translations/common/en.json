@@ -899,7 +899,7 @@
       "pe": "PE",
       "pe_tooltip": "Number of improperly paired end reads at start and stop breakpoints",
       "germline_pf_wgs": "Freq.",
-      "pf_wgs_tooltip": "Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
+      "germline_pf_wgs_tooltip": "Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
       "picked_consequences": "Consequence",
       "picked_consequences_tooltip": "Most deleterious consequence annotated using VEP",
       "quality": "Qual.",

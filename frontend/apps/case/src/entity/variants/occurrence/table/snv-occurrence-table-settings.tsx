@@ -204,7 +204,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
       id: 'germline_pf_wgs',
       cell: info => <ParticipantFrequencyCell locusId={info.row.original.locus_id} value={info.getValue()} />,
       header: () => (
-        <TooltipHeader tooltip={t('variant.headers.pf_wgs_tooltip')}>
+        <TooltipHeader tooltip={t('variant.headers.germline_pf_wgs_tooltip')}>
           {t('variant.headers.germline_pf_wgs')}
         </TooltipHeader>
       ),
