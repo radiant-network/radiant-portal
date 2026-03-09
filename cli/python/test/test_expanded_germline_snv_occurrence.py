@@ -91,16 +91,16 @@ class TestExpandedGermlineSNVOccurrence(unittest.TestCase):
                         panel = '', )
                     ],
                 parental_origin = '',
-                pc_wgs_affected = 56,
-                pc_wgs_not_affected = 56,
-                pf_wgs = 1.337,
-                pf_wgs_affected = 1.337,
-                pf_wgs_not_affected = 1.337,
+                germline_pc_wgs_affected = 56,
+                germline_pc_wgs_not_affected = 56,
+                germline_pf_wgs = 1.337,
+                germline_pf_wgs_affected = 1.337,
+                germline_pf_wgs_not_affected = 1.337,
                 picked_consequences = [
                     ''
                     ],
-                pn_wgs_affected = 56,
-                pn_wgs_not_affected = 56,
+                germline_pn_wgs_affected = 56,
+                germline_pn_wgs_not_affected = 56,
                 qd = 1.337,
                 revel_score = 1.337,
                 rsnumber = '',

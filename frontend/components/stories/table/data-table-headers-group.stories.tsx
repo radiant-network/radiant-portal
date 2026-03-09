@@ -225,12 +225,12 @@ const meta = {
     serverOptions: {
       defaultSorting: [
         {
-          field: 'pf_wgs',
+          field: 'germline_pf_wgs',
           order: SortBodyOrderEnum.Asc,
         },
       ],
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      onSortingChange: sorting => { },
+      onSortingChange: sorting => {},
     },
     defaultColumnSettings: mockDefaultColumnSettings,
     loadingStates: {
@@ -243,7 +243,7 @@ const meta = {
         pageIndex: 0,
         pageSize: 10,
       },
-      onPaginationChange: () => { },
+      onPaginationChange: () => {},
     },
     total: 10,
   },
