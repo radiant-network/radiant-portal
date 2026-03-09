@@ -4,7 +4,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 
 const toggleVariants = tv({
   slots: {
-    base: 'inline-flex items-center justify-center rounded-md text-sm font-medium text-foreground ring-offset-background transition-colors bg-background hover:bg-muted enabled:hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 gap-2',
+    base: 'inline-flex items-center justify-center rounded-md text-sm font-medium text-foreground ring-offset-background transition-colors bg-transparent hover:bg-muted enabled:hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 gap-2',
   },
   variants: {
     variant: {

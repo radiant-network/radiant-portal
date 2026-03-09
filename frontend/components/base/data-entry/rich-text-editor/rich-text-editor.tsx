@@ -15,6 +15,7 @@ export type RichTextEditorProps = Omit<EditorContentProps, 'ref' | 'editor' | 'o
   onChange?: (value: string) => void;
   onBlur?: () => void;
   autofocus?: boolean;
+  showHeadingLevel?: boolean;
   children?: React.ReactNode;
 };
 
@@ -25,6 +26,7 @@ const RichTextEditor = ({
   onChange,
   onBlur,
   autofocus,
+  showHeadingLevel,
   children,
   ...props
 }: RichTextEditorProps) => {
@@ -106,7 +108,7 @@ const RichTextEditor = ({
         wrapperClassName,
       )}
     >
-      {editor ? <RichTextEditorToolbar editor={editor} /> : null}
+      {editor ? <RichTextEditorToolbar editor={editor} showHeadingLevel={showHeadingLevel} /> : null}
       <EditorContent editor={editor} {...props} />
       {children}
     </div>

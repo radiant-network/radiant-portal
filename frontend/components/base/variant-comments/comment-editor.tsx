@@ -34,6 +34,7 @@ function CommentEditor({ initialValue = '', onSubmit, onCancel, submitLabel }: C
     <RichTextEditor
       key={resetKey}
       autofocus
+      showHeadingLevel={false}
       value={initialValue}
       onChange={setValue}
       className="min-h-[60px] max-h-[200px] resize-none"
