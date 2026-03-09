@@ -20,17 +20,19 @@ type CommentEditorProps = {
 function CommentEditor({ initialValue = '', onSubmit, onCancel, submitLabel }: CommentEditorProps) {
   const { t } = useI18n();
   const [value, setValue] = useState(initialValue);
+  const [resetKey, setResetKey] = useState(0);
   const isEmpty = useMemo(() => stripHtml(value).length === 0, [value]);
 
   const handleSubmit = () => {
     if (isEmpty) return;
     onSubmit(value);
     setValue('');
+    setResetKey(k => k + 1);
   };
 
   return (
     <div className="space-y-2">
-      <RichTextEditor autofocus value={initialValue} onChange={setValue} className="min-h-[60px] max-h-[120px]" />
+      <RichTextEditor key={resetKey} autofocus value={initialValue} onChange={setValue} className="min-h-[60px] max-h-[120px]" />
       <div className="flex justify-end gap-2">
         {onCancel && (
           <Button variant="outline" size="sm" onClick={onCancel}>
