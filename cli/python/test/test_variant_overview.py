@@ -71,13 +71,13 @@ class TestVariantOverview(unittest.TestCase):
                         omim_phenotype_id = '', 
                         panel = '', )
                     ],
-                pc_wgs = 56,
-                pf_wgs = 1.337,
+                germline_pc_wgs = 56,
+                germline_pf_wgs = 1.337,
                 phylo_p17way_primate = 1.337,
                 picked_consequences = [
                     ''
                     ],
-                pn_wgs = 56,
+                germline_pn_wgs = 56,
                 polyphen2_hvar_pred = '',
                 polyphen2_hvar_score = 1.337,
                 revel_score = 1.337,
@@ -99,7 +99,7 @@ class TestVariantOverview(unittest.TestCase):
                 is_mane_plus = True,
                 is_mane_select = True,
                 locus = '',
-                pf_wgs = 1.337,
+                germline_pf_wgs = 1.337,
                 picked_consequences = [
                     ''
                     ],

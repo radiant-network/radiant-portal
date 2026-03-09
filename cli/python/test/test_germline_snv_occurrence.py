@@ -62,12 +62,12 @@ class TestGermlineSNVOccurrence(unittest.TestCase):
                 omim_inheritance_code = [
                     ''
                     ],
-                pc_wgs = 56,
-                pf_wgs = 1.337,
+                germline_pc_wgs = 56,
+                germline_pf_wgs = 1.337,
                 picked_consequences = [
                     ''
                     ],
-                pn_wgs = 56,
+                germline_pn_wgs = 56,
                 rsnumber = '',
                 seq_id = 56,
                 start = 56,
@@ -96,7 +96,7 @@ class TestGermlineSNVOccurrence(unittest.TestCase):
                 locus = '',
                 locus_id = '',
                 max_impact_score = 56,
-                pf_wgs = 1.337,
+                germline_pf_wgs = 1.337,
                 picked_consequences = [
                     ''
                     ],

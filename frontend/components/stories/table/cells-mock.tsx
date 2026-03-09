@@ -139,7 +139,7 @@ export type BaseCellMockData = {
   aa_change?: string;
   picked_consequences?: string[];
   omim_inheritance_code?: string[];
-  pf_wgs?: number;
+  germline_pf_wgs?: number;
   locus_id?: string;
   zygosity?: string;
   priority_code?: 'asap' | 'routine' | 'stat' | 'urgent' | undefined;
@@ -457,8 +457,8 @@ export const secondSetCellColumns = [
     minSize: 120,
     enableSorting: false,
   }),
-  baseCellColumnHelper.accessor(row => row.pf_wgs, {
-    id: 'pf_wgs',
+  baseCellColumnHelper.accessor(row => row.germline_pf_wgs, {
+    id: 'germline_pf_wgs',
     cell: info => <ParticipantFrequencyCell locusId={info.row.original.locus_id} value={info.getValue()} />,
     header: 'ParticipantFrequencyCell',
     minSize: 120,
@@ -483,7 +483,7 @@ export const secondSetCellData = [
     picked_consequences: ['frameshift_variant'],
     vep_impact: 'HIGH',
     omim_inheritance_code: ['AD', 'AR', 'DD', 'DR'],
-    pf_wgs: 0.5,
+    germline_pf_wgs: 0.5,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
   },
@@ -497,7 +497,7 @@ export const secondSetCellData = [
     picked_consequences: ['frameshift_variant'],
     vep_impact: 'MODERATE',
     omim_inheritance_code: ['IC', 'Mi', 'Mu', 'NA'],
-    pf_wgs: 0.1,
+    germline_pf_wgs: 0.1,
     locus_id: '-7485572602358923261',
     zygosity: 'HET',
   },
@@ -511,7 +511,7 @@ export const secondSetCellData = [
     picked_consequences: ['frameshift_variant'],
     vep_impact: 'LOW',
     omim_inheritance_code: ['NRT', 'SMo', 'Smu', 'XL'],
-    pf_wgs: 100,
+    germline_pf_wgs: 100,
     locus_id: '-7485572602358923261',
     zygosity: 'HET',
   },
@@ -532,7 +532,7 @@ export const secondSetCellData = [
     picked_consequences: ['intron_variant'],
     vep_impact: 'MODIFIER',
     omim_inheritance_code: ['XLD', 'XLR', 'YL'],
-    pf_wgs: 0.0001,
+    germline_pf_wgs: 0.0001,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
   },
@@ -552,7 +552,7 @@ export const secondSetCellData = [
     picked_consequences: ['frameshift_variant'],
     vep_impact: 'MODIFIER',
     omim_inheritance_code: ['NRT', 'SMo'],
-    pf_wgs: 0.01,
+    germline_pf_wgs: 0.01,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
   },
@@ -567,7 +567,7 @@ export const secondSetCellData = [
     picked_consequences: ['uncertain_significance'],
     vep_impact: 'HIGH',
     omim_inheritance_code: ['null'],
-    pf_wgs: 0.1,
+    germline_pf_wgs: 0.1,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
   },
@@ -582,7 +582,7 @@ export const secondSetCellData = [
     picked_consequences: ['uncertain_significance'],
     vep_impact: 'HIGH',
     omim_inheritance_code: ['null'],
-    pf_wgs: 0.1,
+    germline_pf_wgs: 0.1,
     locus_id: '-7485572602358923261',
     zygosity: 'HEM',
   },
@@ -598,7 +598,7 @@ export const secondSetCellData = [
     picked_consequences: undefined,
     vep_impact: undefined,
     omim_inheritance_code: undefined,
-    pf_wgs: undefined,
+    germline_pf_wgs: undefined,
     locus_id: undefined,
     zygosity: undefined,
     hgvsg: undefined,

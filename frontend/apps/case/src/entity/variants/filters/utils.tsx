@@ -15,9 +15,9 @@ export const filtersWithTooltip = [
   'polyphen2_hvar_pred',
   'revel_score',
   'sift_pred',
-  'pf_wgs',
-  'pf_wgs_affected',
-  'pf_wgs_not_affected',
+  'germline_pf_wgs',
+  'germline_pf_wgs_affected',
+  'germline_pf_wgs_not_affected',
   'transmission_mode',
   // CNV filters
   'nb_snv',
