@@ -42,7 +42,7 @@ function RichTextEditorToolbar({ editor }: { editor: Editor }) {
   }, [editor, t]);
 
   return (
-    <div className="border border-input bg-transparent rounded-tr-md rounded-tl-md p-1 flex flex-row items-center gap-1">
+    <div className="border-b border-input bg-transparent p-1 flex flex-row items-center gap-1">
       <RichTextEditorLevelToggle editor={editor} />
       <Toggle
         size="sm"

@@ -31,19 +31,24 @@ function CommentEditor({ initialValue = '', onSubmit, onCancel, submitLabel }: C
   };
 
   return (
-    <div className="space-y-2">
-      <RichTextEditor key={resetKey} autofocus value={initialValue} onChange={setValue} className="min-h-[60px] max-h-[120px]" />
-      <div className="flex justify-end gap-2">
+    <RichTextEditor
+      key={resetKey}
+      autofocus
+      value={initialValue}
+      onChange={setValue}
+      className="min-h-[60px] max-h-[200px] resize-none"
+    >
+      <div className="flex justify-end gap-1.5 px-2 py-2">
         {onCancel && (
-          <Button variant="outline" size="sm" onClick={onCancel}>
+          <Button variant="outline" size="xxs" onClick={onCancel}>
             {t('variant_comments.cancel')}
           </Button>
         )}
-        <Button size="sm" onClick={handleSubmit} disabled={isEmpty}>
+        <Button size="xxs" onClick={handleSubmit} disabled={isEmpty}>
           {submitLabel || t('variant_comments.submit')}
         </Button>
       </div>
-    </div>
+    </RichTextEditor>
   );
 }
 
