@@ -10,6 +10,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
@@ -43,6 +44,8 @@ func main() {
 	}
 
 	StartHealthProbe(dbPostgres)
+	StartCleanUpWorker(dbPostgres)
+
 	glog.Info("Worker started...")
 	for {
 		processBatch(dbPostgres, context)
@@ -102,6 +105,34 @@ func StartHealthProbe(db *gorm.DB) {
 
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			glog.Fatalf("Failed to start health probe: %v", err)
+		}
+	}()
+}
+
+func StartCleanUpWorker(db *gorm.DB) {
+	go func() {
+		cleanUpIntervalPollHourStr := utils.GetEnvOrDefault("CLEAN_UP_INTERVAL_POLL_HOUR", "24")
+		pollInterval, pollIntervalErr := strconv.Atoi(cleanUpIntervalPollHourStr)
+		if pollIntervalErr != nil {
+			glog.Fatalf("Polling interval defined in env var CLEAN_UP_INTERVAL_POLL_HOUR (%v) must be an integer ", cleanUpIntervalPollHourStr)
+		}
+
+		duration := time.Duration(pollInterval) * time.Hour
+
+		glog.Infof("Starting clean-up worker with interval: %v", duration)
+
+		ticker := time.NewTicker(duration)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			glog.Info("Clean up worker started...")
+			batchRepo := repository.NewBatchRepository(db)
+			rowUpdated, err := batchRepo.UpdateStuckBatch()
+			if err != nil {
+				glog.Errorf("Error executing batch clean up: %v", err)
+				return
+			}
+			glog.Info("Stuck batches updated: ", rowUpdated)
 		}
 	}()
 }
