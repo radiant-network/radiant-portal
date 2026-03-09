@@ -110,20 +110,20 @@ func StartHealthProbe(db *gorm.DB) {
 }
 
 func StartCleanUpWorker(db *gorm.DB) {
-	cleanUpIntervalPollHourStr := utils.GetEnvOrDefault("CLEAN_UP_INTERVAL_POLL_HOUR", "24")
-	pollInterval, pollIntervalErr := strconv.Atoi(cleanUpIntervalPollHourStr)
-	if pollIntervalErr != nil {
-		glog.Fatalf("Polling interval defined in env var CLEAN_UP_INTERVAL_POLL_HOUR (%v) must be an integer ", cleanUpIntervalPollHourStr)
-	}
-
-	duration := time.Duration(pollInterval) * time.Hour
-
-	glog.Infof("Starting clean-up worker with interval: %v", duration)
-
-	ticker := time.NewTicker(duration)
-	defer ticker.Stop()
-
 	go func() {
+		cleanUpIntervalPollHourStr := utils.GetEnvOrDefault("CLEAN_UP_INTERVAL_POLL_HOUR", "24")
+		pollInterval, pollIntervalErr := strconv.Atoi(cleanUpIntervalPollHourStr)
+		if pollIntervalErr != nil {
+			glog.Fatalf("Polling interval defined in env var CLEAN_UP_INTERVAL_POLL_HOUR (%v) must be an integer ", cleanUpIntervalPollHourStr)
+		}
+
+		duration := time.Duration(pollInterval) * time.Hour
+
+		glog.Infof("Starting clean-up worker with interval: %v", duration)
+
+		ticker := time.NewTicker(duration)
+		defer ticker.Stop()
+
 		for range ticker.C {
 			glog.Info("Clean up worker started...")
 			batchRepo := repository.NewBatchRepository(db)
@@ -135,6 +135,4 @@ func StartCleanUpWorker(db *gorm.DB) {
 			glog.Info("Stuck batches updated: ", rowUpdated)
 		}
 	}()
-
-	select {}
 }
