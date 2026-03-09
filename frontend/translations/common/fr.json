@@ -900,7 +900,7 @@
       "pe": "PE",
       "pe_tooltip": "Nombre de fragments incorrectement appariés au début et à la fin des points de cassure",
       "germline_pf_wgs": "Fréq.",
-      "pf_wgs_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
+      "germline_pf_wgs_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
       "picked_consequences": "Conséquence",
       "picked_consequences_tooltip": "Conséquence la plus délétère annotée avec VEP",
       "quality": "Qual.",
