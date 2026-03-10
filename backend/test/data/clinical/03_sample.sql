@@ -120,7 +120,11 @@ VALUES (1, 'dna', 62, NULL, 'normal', 'S13224', 3, 6),
        (119,  'blood', NULL, NULL, 'normal', 'B-958.3',56,6),
        (120,  'blood', NULL, NULL, 'normal', 'B-990.1',60,6),
        (121,  'blood', NULL, NULL, 'normal', 'B-990.2',61,6),
-       (122,  'blood', NULL, NULL, 'normal', 'B-990.3',59,6)
+       (122,  'blood', NULL, NULL, 'normal', 'B-990.3',59,6),
+       (123,  'blood', NULL, NULL, 'normal', 'B-990.4',62,4),
+       (124,  'dna', 123, NULL, 'normal', 'SRX1091646',62,4),
+       (125,  'solid_tissue', NULL, NULL, 'tumoral', 'T-100.1',62,4),
+       (126,  'dna', 125, 'brain', 'tumoral', 'SRX1091647',62,4)
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE sample ALTER COLUMN id RESTART WITH 1000;

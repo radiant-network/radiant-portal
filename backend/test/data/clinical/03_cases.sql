@@ -21,7 +21,8 @@ VALUES
     (19, 55, 2, 2, 'completed', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Fadi Hamdan', 3, '2:19'),
     (20, 58, 2, 2, 'completed', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 3, '2:20'),
     (21, 60, 2, 2, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 3, '2:21'),
-    (70, 3, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Isabella Murphy', 1, '1:70')
+    (70, 3, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Isabella Murphy', 1, '1:70'),
+    (71, 62, 1, 1, 'in_progress', 6, 'MONDO:0001657', 'Administrative comment', '2026-03-09T13:08:00-04:00', '2026-03-09T13:08:00-04:00', 'stat',  'somatic', 'postnatal', 'mondo', 'unsolved', 'Sam Attic', 3, '1:71')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE cases ALTER COLUMN id RESTART WITH 1000;

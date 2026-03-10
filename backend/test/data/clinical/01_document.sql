@@ -544,7 +544,11 @@ VALUES (1, 'FI0037662.S13230.cram', 'genomic', 'alignment', 'cram', 110187385978
        (264, 'FI0005568.S14359.vcf.gz', 'genomic', 'snv', 'vcf', 2411725,
         's3://cqdg-prod-file-workspace/sarek/preprocessing/', '5d41402abc4b2a76b9719d911017c855', '2021-09-12T13:08:00-04:00'),
        (265, 'FI0005568.S14359.vcf.gz.tbi', 'genomic', 'snv', 'tbi', 2411724,
-        's3://cqdg-prod-file-workspace/sarek/preprocessing/', '5d41402abc4b2a76b9719d911017c856', '2021-09-12T13:08:00-04:00')
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/', '5d41402abc4b2a76b9719d911017c856', '2021-09-12T13:08:00-04:00'),
+       (266, 'variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz', 'genomic', 'snv', 'vcf', 2411725,
+        's3://cqdg-qa-file-import/radiant/postprocessing/TCRB/TN_WGS/ensemblvep/SRX1091647-T_vs_SRX1091646-N/variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz', '5d41402abc4b2a76b9719d911017c857', '2026-03-09T13:08:00-04:00'),
+       (267, 'variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz.tbi', 'genomic', 'snv', 'tbi', 2411724,
+        's3://cqdg-qa-file-import/radiant/postprocessing/TCRB/TN_WGS/ensemblvep/SRX1091647-T_vs_SRX1091646-N/variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz.tbi', '5d41402abc4b2a76b9719d911017c858', '2026-03-09T13:08:00-04:00')
 ON CONFLICT(id) DO NOTHING;
 
 ALTER TABLE document ALTER COLUMN id RESTART WITH 1000;
