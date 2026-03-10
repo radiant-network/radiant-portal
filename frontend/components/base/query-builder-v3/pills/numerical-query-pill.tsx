@@ -12,7 +12,7 @@ import Operator from './operators/operator';
 import QueryPillValues from './values/query-pill-values';
 
 type NumericalPillProps = {
-  content: IValueFacet;
+  sqon: IValueFacet;
 };
 
 /**
@@ -22,25 +22,25 @@ type NumericalPillProps = {
  * └───────└──────────────────────────────────────────┘─────────────────┘
  *          └───────────────────┘
  */
-function NumericalQueryPill({ content }: NumericalPillProps) {
+function NumericalQueryPill({ sqon }: NumericalPillProps) {
   const { aggregations } = useQBContext();
-  const aggregation = getAggregationByField(aggregations, content.content.field);
+  const aggregation = getAggregationByField(aggregations, sqon.content.field);
   const dispatch = useQBDispatch();
 
   const onRemovePill = useCallback(() => {
     dispatch({
       type: QBActionType.REMOVE_FACET_PILL,
-      payload: content,
+      payload: sqon,
     });
-  }, [content]);
+  }, [sqon]);
 
   return (
     <QueryPillContainer onRemovePill={onRemovePill}>
       <div className="flex gap-2">
-        <LabelOperator field={content.content.field} operator={<Operator size={14} type={content.op} />} />
+        <LabelOperator field={sqon.content.field} operator={<Operator size={14} type={sqon.op} />} />
         <Popover>
           <PopoverTrigger>
-            <QueryPillValues valueFacet={content} />
+            <QueryPillValues sqon={sqon} />
           </PopoverTrigger>
           <PopoverContent align="start" className="p-2.5">
             <FacetComponent field={aggregation} isOpen />

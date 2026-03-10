@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/base/shadcn/radio-group
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { QBActionType, useQBBooleanValue, useQBDispatch, useQBHistory } from '../hooks/use-query-builder';
+import { QBActionType, useQBBooleanValue, useQBContext, useQBDispatch, useQBHistory } from '../hooks/use-query-builder';
 
 import { useFacetConfig } from './hooks/use-facet-config';
 
@@ -21,6 +21,7 @@ type BooleanFacetProps = {
 export function BooleanFacet({ field }: BooleanFacetProps) {
   const { t } = useI18n();
   const { builderFetcher } = useFacetConfig();
+  const { activeQueryId } = useQBContext();
   const dispatch = useQBDispatch();
   const history = useQBHistory();
 
@@ -85,6 +86,15 @@ export function BooleanFacet({ field }: BooleanFacetProps) {
       }
     }
   }, [history.uuid]);
+
+  /**
+   * Update when active query change
+   */
+  useEffect(() => {
+    if (defaultItem !== selectedItem) {
+      setSelectedItem(defaultItem);
+    }
+  }, [activeQueryId]);
 
   return (
     <div className="p-2 w-full max-w-md">
