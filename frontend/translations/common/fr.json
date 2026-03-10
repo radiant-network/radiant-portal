@@ -1721,5 +1721,27 @@
   },
   "pubmed_list_dialog": {
     "title": "Publications PubMed"
+  },
+  "variant_comments": {
+    "title": "Commentaires sur le variant",
+    "button": "Commentaires",
+    "empty_title": "Aucun commentaire",
+    "empty_description": "Ajoutez des commentaires afin de documenter votre analyse et vos décisions (visibles par tous les utilisateurs ayant accès à ce cas).",
+    "editor_placeholder": "Ajoutez votre commentaire",
+    "submit": "Enregistrer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "edited": "(modifié)",
+    "char_limit": "{{count}}/{{max}}",
+    "delete_dialog": {
+      "title": "Supprimer le commentaire ?",
+      "description": "Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible.",
+      "cancel": "Annuler",
+      "delete": "Supprimer"
+    },
+    "actions": {
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    }
   }
 }
