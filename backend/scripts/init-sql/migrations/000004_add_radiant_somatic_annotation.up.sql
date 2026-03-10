@@ -1,0 +1,1 @@
+INSERT INTO public.task_type VALUES ('radiant_somatic_annotation', 'RADIANT Somatic Annotation');
