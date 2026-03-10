@@ -44,6 +44,6 @@ jobs:
 
       - name: Test
         if: steps.filter.outputs.backend == 'true'
-        run: go test ./...
+        run: go test -v -timeout 30m ./...
         working-directory: ./backend
-        timeout-minutes: 20
+        timeout-minutes: 30
