@@ -377,8 +377,9 @@ export const Multiselect: Story = {
                 op: 'and',
               },
             ],
-            savedFilters: [],
-            selectedQueryIndexes: [0],
+            settings: {
+              labelsEnabled: true,
+            },
           });
         }),
       ],
@@ -437,8 +438,9 @@ export const Boolean: Story = {
                 op: 'and',
               },
             ],
-            savedFilters: [],
-            selectedQueryIndexes: [0],
+            settings: {
+              labelsEnabled: true,
+            },
           });
         }),
       ],
@@ -504,8 +506,158 @@ export const Numerical: Story = {
                 op: 'and',
               },
             ],
-            savedFilters: [],
-            selectedQueryIndexes: [0],
+            settings: {
+              labelsEnabled: true,
+            },
+          });
+        }),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.snv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
+      <QueryBuilderDataTable
+        id="storybook-query-builder"
+        columns={
+          [
+            ...mockColumns,
+            mockColumnHelper.accessor('isActive', {
+              header: 'Active',
+            }),
+          ] as TableColumnDef<TableMockData, any>[]
+        }
+        defaultColumnSettings={[]}
+      />
+    </QueryBuilder>
+  ),
+};
+
+export const MultiQueries: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get(userPreferenceApi, ({ params }: any) => {
+          const key = params.key;
+          if (key === 'data-table-storybook-query-builder') {
+            return new HttpResponse(null, { status: 404 });
+          }
+          return HttpResponse.json({
+            activeQueryId: '3593dbdf-44e7-49c9-934a-7b10db87b605',
+            sqons: [
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+                content: [
+                  {
+                    content: {
+                      field: 'firstName',
+                      value: ['jack', 'karen'],
+                    },
+                    op: 'in',
+                  },
+                  {
+                    content: {
+                      field: 'lastName',
+                      value: ['tremblay'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'or',
+              },
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b605',
+                content: [
+                  {
+                    content: {
+                      field: 'firstName',
+                      value: ['jack', 'karen'],
+                    },
+                    op: 'in',
+                  },
+                  {
+                    content: {
+                      field: 'lastName',
+                      value: ['tremblay'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b601',
+                content: [
+                  {
+                    content: {
+                      field: 'firstName',
+                      value: ['liam', 'karen'],
+                    },
+                    op: 'in',
+                  },
+                  {
+                    content: {
+                      field: 'progress',
+                      value: ['50'],
+                    },
+                    op: '<',
+                  },
+                  {
+                    content: {
+                      field: 'visits',
+                      value: ['1', '100'],
+                    },
+                    op: 'between',
+                  },
+                ],
+                op: 'or',
+              },
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b600',
+                content: [
+                  {
+                    content: {
+                      field: 'firstName',
+                      value: ['henry', 'karen'],
+                    },
+                    op: 'in',
+                  },
+                  {
+                    content: {
+                      field: 'progress',
+                      value: ['10'],
+                    },
+                    op: '>',
+                  },
+                  {
+                    content: {
+                      field: 'visits',
+                      value: ['95'],
+                    },
+                    op: '<',
+                  },
+                  {
+                    content: {
+                      field: 'isActive',
+                      value: ['true'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+            settings: {
+              labelsEnabled: true,
+            },
           });
         }),
       ],
