@@ -854,6 +854,7 @@
       "chromosome": "Chr",
       "chromosome_tooltip": "Chromosome",
       "clinical_interpretation": "Clinical Interpretation",
+      "comments": "Comments",
       "clingen": "ClinGen",
       "clinvar": "ClinVar",
       "cn": "CN",
@@ -926,6 +927,12 @@
       "AL": "Acceptor Loss",
       "DG": "Donor Gain",
       "DL": "Donor Loss"
+    },
+    "comments": {
+      "tooltip": {
+        "add": "Add a comment",
+        "view": "View comments"
+      }
     },
     "interpretation": {
       "tooltip": {
@@ -1717,5 +1724,27 @@
   },
   "pubmed_list_dialog": {
     "title": "PubMed Publications"
+  },
+  "variant_comments": {
+    "title": "Variant Comments",
+    "button": "Comments",
+    "empty_title": "No comments yet",
+    "empty_description": "Use comments to add notes about your case analysis and document decisions. Comments are visible to all users with access to this case.",
+    "editor_placeholder": "Add your comment",
+    "submit": "Save",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edited": "(edited)",
+    "char_limit": "{{count}}/{{max}}",
+    "delete_dialog": {
+      "title": "Delete comment?",
+      "description": "Are you sure you want to delete this comment? This cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    }
   }
 }

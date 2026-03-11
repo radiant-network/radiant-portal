@@ -14,15 +14,29 @@ export type RichTextEditorProps = Omit<EditorContentProps, 'ref' | 'editor' | 'o
   wrapperClassName?: string;
   onChange?: (value: string) => void;
   onBlur?: () => void;
+  autofocus?: boolean;
+  showHeadingLevel?: boolean;
+  children?: React.ReactNode;
 };
 
-const RichTextEditor = ({ value, className, wrapperClassName, onChange, onBlur, ...props }: RichTextEditorProps) => {
+const RichTextEditor = ({
+  value,
+  className,
+  wrapperClassName,
+  onChange,
+  onBlur,
+  autofocus,
+  showHeadingLevel,
+  children,
+  ...props
+}: RichTextEditorProps) => {
   const editor = useEditor(
     {
+      autofocus: autofocus ? 'end' : false,
       editorProps: {
         attributes: {
           class: cn(
-            'min-h-[80px] w-full rounded-md rounded-tr-none rounded-tl-none border border-input bg-transparent px-3 py-2 border-t-0 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-auto resize-y',
+            'min-h-[80px] w-full bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-auto resize-y',
             className,
           ),
         },
@@ -89,10 +103,14 @@ const RichTextEditor = ({ value, className, wrapperClassName, onChange, onBlur, 
 
   return (
     <div
-      className={cn('shadow-xs rounded-md bg-background focus-within:ring-1 focus-within:ring-ring', wrapperClassName)}
+      className={cn(
+        'shadow-xs rounded-md bg-background border border-input focus-within:ring-1 focus-within:ring-ring overflow-hidden',
+        wrapperClassName,
+      )}
     >
-      {editor ? <RichTextEditorToolbar editor={editor} /> : null}
+      {editor ? <RichTextEditorToolbar editor={editor} showHeadingLevel={showHeadingLevel} /> : null}
       <EditorContent editor={editor} {...props} />
+      {children}
     </div>
   );
 };
