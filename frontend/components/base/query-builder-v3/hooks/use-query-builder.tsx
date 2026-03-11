@@ -209,9 +209,6 @@ export function qBReducer(context: IQBContext, action: ActionType) {
     }
     /**
      * Remove a query
-     *
-     * @TODO: should choose next query when mutli-query will be supported
-     * @TODO: should clear active-query if active query is deleted
      */
     case QBActionType.REMOVE_QUERY: {
       const { activeQueryId } = context;
@@ -219,15 +216,36 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       const index = sqons.findIndex(sqon => sqon.id === action.payload.id);
       sqons.splice(index, 1);
 
+      // queries are now empty
+      if (sqons.length === 0) {
+        const uuid = v4();
+        return {
+          ...context,
+          activeQueryId: uuid,
+          sqons: [
+            {
+              content: [],
+              id: uuid,
+              op: BooleanOperators.And,
+            },
+          ],
+        };
+      }
+
+      // deleted query is the latest entry
+      if (index < sqons.length) {
+        return {
+          ...context,
+          activeQueryId: action.payload.id === activeQueryId ? sqons[index].id : activeQueryId,
+          sqons: [...sqons],
+        };
+      }
+
+      // select next query
       return {
         ...context,
-        sqons: [
-          {
-            content: [],
-            op: BooleanOperators.And,
-            id: activeQueryId,
-          },
-        ],
+        activeQueryId: action.payload.id === activeQueryId ? sqons[index - 1].id : activeQueryId,
+        sqons: [...sqons],
       };
     }
     /**
