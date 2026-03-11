@@ -1,4 +1,5 @@
 import { createContext, Dispatch, useContext, useReducer } from 'react';
+import cloneDeep from 'lodash/cloneDeep';
 import { v4 } from 'uuid';
 
 import { Count, CountBodyWithSqon, SortBody, Sqon, SqonContent, SqonOpEnum } from '@/api/api';
@@ -13,11 +14,15 @@ export const DEFAULT_EMPTY_QUERY = {
 };
 
 export enum QBActionType {
+  ADD_QUERY = 'add-query',
   REMOVE_QUERY = 'remove-query',
+  DUPLICATE_QUERY = 'duplicate-query',
   SET_ACTIVE_QUERY = 'set-active-query',
   ADD_OR_UPDATE_FACET_PILL = 'add-or-update-facet-pill',
   REMOVE_FACET_PILL = 'remove-facet-pill',
   CHANGE_COMBINER_OPERATOR = 'change-combiner-operator',
+  SET_LABELS_ENABLED = 'set-labels-enabled',
+  REMOVE_ALL_QUERIES = 'remove-all-queries-all',
 }
 
 export enum PillUserAction {
@@ -44,6 +49,10 @@ export interface IHistory {
   target: string;
 }
 
+export interface ISettings {
+  labelsEnabled: boolean;
+}
+
 export interface ICountInput {
   countBody: CountBodyWithSqon;
 }
@@ -59,6 +68,7 @@ export interface IQBContext {
   activeQueryId: string;
   fetcher: IQBFetcher;
   history: IHistory;
+  settings: ISettings;
 }
 
 type QBDispatch = Dispatch<ActionType>;
@@ -93,6 +103,9 @@ export function getDefaultQBContext() {
       target: '',
       uuid: uuid,
     },
+    settings: {
+      labelsEnabled: true,
+    },
   };
 }
 export const QBContext = createContext<IQBContext>(getDefaultQBContext());
@@ -105,52 +118,97 @@ export const QBDispatchContext = createContext<QBDispatch>(() => {
  *
  * Each payload is his own type
  */
-type SetActiveQueryAction = {
-  type: QBActionType.SET_ACTIVE_QUERY;
-  payload: string;
-};
-type AddMultiselectAction = {
-  type: QBActionType.ADD_OR_UPDATE_FACET_PILL;
-  payload: IValueFacet;
-};
-type RemoveMultiselectAction = {
-  type: QBActionType.REMOVE_FACET_PILL;
-  payload: IValueFacet;
+// Query
+type AddQueryAction = {
+  type: QBActionType.ADD_QUERY;
 };
 type RemoveQueryAction = {
   type: QBActionType.REMOVE_QUERY;
 };
-
+type DuplicateQueryAction = {
+  type: QBActionType.DUPLICATE_QUERY;
+  payload: IValueFacet;
+};
+type SetActiveQueryAction = {
+  type: QBActionType.SET_ACTIVE_QUERY;
+  payload: {
+    id: string;
+  };
+};
 type ChangeCombinerOperatorAction = {
   type: QBActionType.CHANGE_COMBINER_OPERATOR;
   payload: BooleanOperators;
 };
+// Facet/Pills
+type AddOrUpdateFacetAction = {
+  type: QBActionType.ADD_OR_UPDATE_FACET_PILL;
+  payload: IValueFacet;
+};
+type RemoveFacetPillAction = {
+  type: QBActionType.REMOVE_FACET_PILL;
+  payload: IValueFacet;
+};
+// Settings
+type SetLabelsEnabledAction = {
+  type: QBActionType.SET_LABELS_ENABLED;
+  payload: {
+    labelsEnabled: boolean;
+  };
+};
+type RemoveAllQueriesAction = {
+  type: QBActionType.REMOVE_ALL_QUERIES;
+};
 
 export type ActionType =
+  | AddQueryAction
   | SetActiveQueryAction
+  | DuplicateQueryAction
   | RemoveQueryAction
-  | AddMultiselectAction
-  | RemoveMultiselectAction
+  | AddOrUpdateFacetAction
+  | RemoveFacetPillAction
   | ChangeCombinerOperatorAction
+  | SetLabelsEnabledAction
+  | RemoveAllQueriesAction
   | any;
 
 export function qBReducer(context: IQBContext, action: ActionType) {
   switch (action.type) {
     /**
-     * Set new active query
-     * @TODO: To be updated when multi-queries are supported
+     * Add new query
      */
-    case QBActionType.SET_ACTIVE_QUERY: {
+    case QBActionType.ADD_QUERY: {
+      const uuid = v4();
       return {
         ...context,
-        activeQueryId: action.payload,
+        activeQueryId: uuid,
+        sqons: [
+          ...context.sqons,
+          {
+            content: [],
+            id: uuid,
+            op: BooleanOperators.And,
+          },
+        ],
+      };
+    }
+    /**
+     * Duplicate a query
+     */
+    case QBActionType.DUPLICATE_QUERY: {
+      const uuid = v4();
+      const { sqons } = context;
+      sqons.push({
+        ...action.payload,
+        id: uuid,
+      });
+      return {
+        ...context,
+        sqons: [...sqons],
+        activeQueryId: uuid,
       };
     }
     /**
      * Remove a query
-     *
-     * @TODO: should choose next query when mutli-query will be supported
-     * @TODO: should clear active-query if active query is deleted
      */
     case QBActionType.REMOVE_QUERY: {
       const { activeQueryId } = context;
@@ -158,13 +216,60 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       const index = sqons.findIndex(sqon => sqon.id === action.payload.id);
       sqons.splice(index, 1);
 
+      // queries are now empty
+      if (sqons.length === 0) {
+        const uuid = v4();
+        return {
+          ...context,
+          activeQueryId: uuid,
+          sqons: [
+            {
+              content: [],
+              id: uuid,
+              op: BooleanOperators.And,
+            },
+          ],
+        };
+      }
+
+      // deleted query is the latest entry
+      if (index < sqons.length) {
+        return {
+          ...context,
+          activeQueryId: action.payload.id === activeQueryId ? sqons[index].id : activeQueryId,
+          sqons: [...sqons],
+        };
+      }
+
+      // select next query
       return {
         ...context,
+        activeQueryId: action.payload.id === activeQueryId ? sqons[index - 1].id : activeQueryId,
+        sqons: [...sqons],
+      };
+    }
+    /**
+     * Set new active query
+     */
+    case QBActionType.SET_ACTIVE_QUERY: {
+      return {
+        ...context,
+        activeQueryId: action.payload.id,
+      };
+    }
+    /**
+     * Remove all queries (clear the queries-bar-card)
+     */
+    case QBActionType.REMOVE_ALL_QUERIES: {
+      const uuid = v4();
+      return {
+        ...context,
+        activeQueryId: uuid,
         sqons: [
           {
             content: [],
+            id: uuid,
             op: BooleanOperators.And,
-            id: activeQueryId,
           },
         ],
       };
@@ -201,7 +306,7 @@ export function qBReducer(context: IQBContext, action: ActionType) {
         sqons[index].content[fieldIndex] = action.payload;
         return {
           ...context,
-          sqons: [...sqons],
+          sqons: cloneDeep(sqons),
           history: { uuid: v4(), type: PillUserAction.UPDATE, target: field },
         };
       }
@@ -233,7 +338,6 @@ export function qBReducer(context: IQBContext, action: ActionType) {
         history: { uuid: v4(), type: PillUserAction.REMOVE, target: field },
       };
     }
-
     /**
      * Change combiner operator (toggle between and | or)
      */
@@ -249,6 +353,20 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       sqons[index].op = action.payload.operator;
       return { ...context };
     }
+    /**
+     * Show/hide labels of all query pill
+     */
+    case QBActionType.SET_LABELS_ENABLED: {
+      return {
+        ...context,
+        settings: {
+          labelsEnabled: action.payload.labelsEnabled,
+        },
+      };
+    }
+    /**
+     * Something when wrong
+     */
     default: {
       throw Error(`Unknown action: ${action.type} ${JSON.stringify(action.payload)}`);
     }
@@ -327,6 +445,14 @@ export function useQBActiveSqon(): { content: SqonContent; op: SqonOpEnum } {
 export function useQBHistory(): IHistory {
   const { history } = useQBContext();
   return history;
+}
+
+/**
+ * Return query-builder settings
+ */
+export function useQBSettings(): ISettings {
+  const { settings } = useQBContext();
+  return settings;
 }
 
 /**

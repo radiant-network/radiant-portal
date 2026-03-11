@@ -19,7 +19,13 @@ import { type Aggregation as AggregationConfig } from '@/components/cores/applic
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 
-import { QBActionType, useQBDispatch, useQBHistory, useQBMultiselectValue } from '../hooks/use-query-builder';
+import {
+  QBActionType,
+  useQBContext,
+  useQBDispatch,
+  useQBHistory,
+  useQBMultiselectValue,
+} from '../hooks/use-query-builder';
 import { TermOperators } from '../type';
 
 import { getFacetSessionDictionary, setFacetSessionDictionary } from './libs/facet-storage';
@@ -121,6 +127,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
   });
 
   const history = useQBHistory();
+  const { activeQueryId } = useQBContext();
   const defaultItems = useQBMultiselectValue(field.key) as string[];
 
   const aggregates = useMemo(() => {
@@ -261,6 +268,16 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
       }
     }
   }, [history.uuid]);
+
+  /**
+   * Update when active query change
+   */
+  useEffect(() => {
+    setItems(aggregates);
+    if (!isEqual(defaultItems, selectedItems)) {
+      setSelectedItems(defaultItems);
+    }
+  }, [activeQueryId]);
 
   return (
     <>

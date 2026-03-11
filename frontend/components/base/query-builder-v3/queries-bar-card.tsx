@@ -1,9 +1,22 @@
-import { useQBActiveQuery, useQBContext } from '@/components/base/query-builder-v3/hooks/use-query-builder';
-import { isSqonEmpty } from '@/components/base/query-builder-v3/libs/sqon';
+import { useCallback } from 'react';
+import { PlusIcon } from 'lucide-react';
+
+import {
+  QBActionType,
+  useQBActiveQuery,
+  useQBContext,
+  useQBDispatch,
+  useQBSettings,
+} from '@/components/base/query-builder-v3/hooks/use-query-builder';
+import { isQueryEmpty, isSqonEmpty } from '@/components/base/query-builder-v3/libs/sqon';
 import QueryBar from '@/components/base/query-builder-v3/query-bar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
 import { Card } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
+
+import { alertDialog } from '../dialog/alert-dialog-store';
+import { Button } from '../shadcn/button';
+import { Switch } from '../shadcn/switch';
 
 /**
  * Card that display all queries for query-builder
@@ -23,7 +36,53 @@ import { useI18n } from '@/components/hooks/i18n';
 function QueriesBarCard() {
   const { t } = useI18n();
   const { sqons, activeQueryId } = useQBContext();
+  const { labelsEnabled } = useQBSettings();
+  const dispatch = useQBDispatch();
   const activeQuery = useQBActiveQuery();
+
+  /**
+   * Add and active a new query
+   */
+  const handleNewQueryOnClick = useCallback(() => {
+    dispatch({
+      type: QBActionType.ADD_QUERY,
+    });
+  }, []);
+
+  /**
+   * Toggle labelsEnabled setting
+   */
+  const handleLabelsCheckedChange = useCallback((checked: boolean) => {
+    dispatch({
+      type: QBActionType.SET_LABELS_ENABLED,
+      payload: {
+        labelsEnabled: checked,
+      },
+    });
+  }, []);
+
+  /**
+   * Remove all queries
+   */
+  const handleClearOnClick = useCallback(() => {
+    alertDialog.open({
+      type: 'warning',
+      title: t('common.toolbar.clear_all_dialog.title'),
+      description: t('common.toolbar.clear_all_dialog.description'),
+      cancelProps: {
+        children: t('common.toolbar.clear_all_dialog.cancel'),
+      },
+      actionProps: {
+        variant: 'destructive',
+        onClick: () => {
+          dispatch({
+            type: QBActionType.REMOVE_ALL_QUERIES,
+          });
+        },
+        children: t('common.toolbar.clear_all_dialog.ok'),
+      },
+    });
+  }, []);
 
   return (
     <Card className="py-0">
@@ -36,13 +95,44 @@ function QueriesBarCard() {
             TODO
           </AccordionTrigger>
           <AccordionContent className="py-4 px-6 space-y-4">
-            <div className="flex gap-2 max-h-[30vh] overflow-y-scroll">
+            <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">
               {sqons
                 .filter(sqon => !isSqonEmpty(sqon))
-                .map(sqon => (
-                  <QueryBar key={sqon.id} sqon={sqon} active={activeQueryId === sqon.id} />
+                .map((sqon, index) => (
+                  <QueryBar key={sqon.id} index={index + 1} sqon={sqon} active={activeQueryId === sqon.id} />
                 ))}
               {isSqonEmpty(activeQuery) && t('common.query_bar.empty')}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {/* Add New Query */}
+                <Button size="xs" disabled={isQueryEmpty(sqons)} onClick={handleNewQueryOnClick}>
+                  <PlusIcon />
+                  {t('common.toolbar.new_query')}
+                </Button>
+
+                {/* Toggle labelsEnabled Settings */}
+                <div className="flex items-center gap-1.5">
+                  <Switch size="xs" checked={labelsEnabled} onCheckedChange={handleLabelsCheckedChange} />
+                  {t('common.toolbar.labels')}
+                </div>
+              </div>
+
+              {/* Remove all queries */}
+              {sqons.length > 1 && (
+                <div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="no-underline enabled:hover:no-underline"
+                    onClick={handleClearOnClick}
+                  >
+                    {t('common.toolbar.clear_all')}
+                  </Button>
+                </div>
+              )}
             </div>
           </AccordionContent>
         </AccordionItem>

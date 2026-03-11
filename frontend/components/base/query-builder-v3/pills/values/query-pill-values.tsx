@@ -14,7 +14,7 @@ const UNION_OPERATOR = ',';
 const ALL_OPERATOR = '&';
 
 export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canExpand'> & {
-  valueFacet: IValueFacet;
+  sqon: IValueFacet;
 };
 
 /**
@@ -29,30 +29,30 @@ export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canEx
  *                         └──────────┘
  *
  */
-function QueryPillValues({ valueFacet, ...props }: QueryPillValuesProps) {
+function QueryPillValues({ sqon, ...props }: QueryPillValuesProps) {
   const [expanded, setExpanded] = useState(false);
   const { t, sanitize, lazyTranslate } = useI18n();
 
-  const canExpand = valueFacet.content.value.length > MAX_VALUES;
+  const canExpand = sqon.content.value.length > MAX_VALUES;
   // Reduce to the MAX_VALUES to display
-  const values = expanded ? valueFacet.content.value : take(valueFacet.content.value, MAX_VALUES);
+  const values = expanded ? sqon.content.value : take(sqon.content.value, MAX_VALUES);
 
   return (
     <QueryPillValuesContainer canExpand={canExpand} {...props}>
-      {valueFacet.content.overrideValuesName ? (
+      {sqon.content.overrideValuesName ? (
         <div>
-          <span>{valueFacet.content.overrideValuesName}</span>
+          <span>{sqon.content.overrideValuesName}</span>
         </div>
       ) : (
         values.map((val, index) => (
           <div key={`${val}-${index}`}>
             <span>
-              {t(`common.filters.values.${valueFacet.content.field}.${sanitize(val)}`, {
+              {t(`common.filters.values.${sqon.content.field}.${sanitize(val)}`, {
                 defaultValue: lazyTranslate(val),
               })}
             </span>
             {values.length - 1 > index && (
-              <span className="px-1">{valueFacet.op === SqonOpEnum.All ? ALL_OPERATOR : UNION_OPERATOR}</span>
+              <span className="px-1">{sqon.op === SqonOpEnum.All ? ALL_OPERATOR : UNION_OPERATOR}</span>
             )}
           </div>
         ))

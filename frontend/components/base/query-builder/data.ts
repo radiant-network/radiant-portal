@@ -66,7 +66,7 @@ export const useQueryBuilderDictionary = (): QueryBuilderDictionary => {
     },
     toolbar: {
       combine: t('common.toolbar.combine'),
-      newQuery: t('common.toolbar.newQuery'),
+      newQuery: t('common.toolbar.new_query'),
       clearAll: t('common.toolbar.clear_all'),
       clearAllDialog: {
         title: t('common.toolbar.clear_all_dialog.title'),
