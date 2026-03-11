@@ -36,8 +36,8 @@ type VariantsDAO interface {
 	GetVariantCasesCount(locusId int) (*VariantCasesCount, error)
 	GetVariantCasesFilters() (*VariantCasesFilters, error)
 	GetVariantExternalFrequencies(locusId int) (*VariantExternalFrequencies, error)
-	GetVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error)
-	GetVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error)
+	GetGermlineVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error)
+	GetGermlineVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error)
 }
 
 func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
@@ -375,7 +375,7 @@ func (r *VariantsRepository) GetVariantExternalFrequencies(locusId int) (*Varian
 	return &result, nil
 }
 
-func (r *VariantsRepository) GetVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error) {
+func (r *VariantsRepository) GetGermlineVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error) {
 	var globalFrequencies types.InternalFrequencies
 
 	tx := r.db.Table(fmt.Sprintf("%s v", types.VariantTable.Name))
@@ -393,7 +393,7 @@ func (r *VariantsRepository) GetVariantGlobalInternalFrequencies(locusId int) (*
 	return &globalFrequencies, nil
 }
 
-func (r *VariantsRepository) GetVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
+func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
 	type TempFreqBySplit struct {
 		SplitCode          string
 		SplitName          string
