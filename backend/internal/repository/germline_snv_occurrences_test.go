@@ -38,8 +38,8 @@ func Test_GetOccurrences(t *testing.T) {
 			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 			assert.Equal(t, "PASS", occurrences[0].Filter)
 			assert.Equal(t, "HET", occurrences[0].Zygosity)
-			assert.Equal(t, 0.99, occurrences[0].PfWgs)
-			assert.Equal(t, 3, occurrences[0].PcWgs)
+			assert.Equal(t, 0.99, occurrences[0].GermlinePfWgs)
+			assert.Equal(t, 3, occurrences[0].GermlinePcWgs)
 			assert.Equal(t, "hgvsg1", occurrences[0].Hgvsg)
 			assert.Equal(t, float32(1.0), occurrences[0].AdRatio)
 			assert.Equal(t, "class1", occurrences[0].VariantClass)
@@ -179,8 +179,8 @@ func Test_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
 			assert.EqualValues(t, "1000", occurrences[0].LocusId)
 			assert.Equal(t, "PASS", occurrences[0].Filter)
 			assert.Equal(t, "HET", occurrences[0].Zygosity)
-			assert.Equal(t, 0.99, occurrences[0].PfWgs)
-			assert.Equal(t, 3, occurrences[0].PcWgs)
+			assert.Equal(t, 0.99, occurrences[0].GermlinePfWgs)
+			assert.Equal(t, 3, occurrences[0].GermlinePcWgs)
 			assert.Equal(t, "hgvsg1", occurrences[0].Hgvsg)
 			assert.Equal(t, float32(1.0), occurrences[0].AdRatio)
 			assert.Equal(t, "class1", occurrences[0].VariantClass)
@@ -272,7 +272,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Speci
 
 		sortedBody := []types.SortBody{
 			{
-				Field: "pf_wgs",
+				Field: "germline_pf_wgs",
 				Order: "desc",
 			},
 		}
@@ -299,7 +299,7 @@ func Test_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_PageIndex_Sp
 
 		sortedBody := []types.SortBody{
 			{
-				Field: "pf_wgs",
+				Field: "germline_pf_wgs",
 				Order: "desc",
 			},
 		}
@@ -629,7 +629,7 @@ func Test_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(
 func Test_GetStatisticsOccurrences_Decimal(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
-		query, err := types.NewStatisticsQueryFromSqon("pf_wgs", nil, types.GermlineSNVOccurrencesFields)
+		query, err := types.NewStatisticsQueryFromSqon("germline_pf_wgs", nil, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
 		statistics, err := repo.GetStatisticsOccurrences(1, 1, query)
 		assert.NoError(t, err)
@@ -642,7 +642,7 @@ func Test_GetStatisticsOccurrences_Decimal(t *testing.T) {
 func Test_GetStatisticsOccurrences_Integer(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
-		query, err := types.NewStatisticsQueryFromSqon("pc_wgs", nil, types.GermlineSNVOccurrencesFields)
+		query, err := types.NewStatisticsQueryFromSqon("germline_pc_wgs", nil, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
 		statistics, err := repo.GetStatisticsOccurrences(1, 1, query)
 		assert.NoError(t, err)
@@ -674,12 +674,12 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, "D", expandedOccurrence.Polyphen2HvarPred)
 		assert.Equal(t, 0.7, expandedOccurrence.ExomiserGeneCombinedScore)
 		assert.Equal(t, types.JsonArray[string]{"PS1", "PVS2"}, expandedOccurrence.ExomiserAcmgEvidence)
-		assert.Equal(t, 3, expandedOccurrence.PcWgsAffected)
-		assert.Equal(t, 3, expandedOccurrence.PnWgsAffected)
-		assert.Equal(t, float64(1.0), expandedOccurrence.PfWgsAffected)
-		assert.Equal(t, 0, expandedOccurrence.PcWgsNotAffected)
-		assert.Equal(t, 0, expandedOccurrence.PnWgsNotAffected)
-		assert.Equal(t, float64(0), expandedOccurrence.PfWgsNotAffected)
+		assert.Equal(t, 3, expandedOccurrence.GermlinePcWgsAffected)
+		assert.Equal(t, 3, expandedOccurrence.GermlinePnWgsAffected)
+		assert.Equal(t, float64(1.0), expandedOccurrence.GermlinePfWgsAffected)
+		assert.Equal(t, 0, expandedOccurrence.GermlinePcWgsNotAffected)
+		assert.Equal(t, 0, expandedOccurrence.GermlinePnWgsNotAffected)
+		assert.Equal(t, float64(0), expandedOccurrence.GermlinePfWgsNotAffected)
 		assert.Equal(t, "UNCERTAIN_SIGNIFICANCE", expandedOccurrence.ExomiserAcmgClassification)
 		assert.Equal(t, "T001", expandedOccurrence.TranscriptId)
 		assert.Equal(t, "LA6668-3", expandedOccurrence.InterpretationClassificationCode)

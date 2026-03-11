@@ -71,7 +71,7 @@
       },
       "frequency": {
         "items": [
-          { "key": "pf_wgs", "type": "numerical", "defaults": {
+          { "key": "germline_pf_wgs", "type": "numerical", "defaults": {
             "min": 0, 
             "max": 100, 
             "defaultOperator": "LessThan",

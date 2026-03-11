@@ -21,8 +21,8 @@ func (m *MockRepository) GetOccurrences(int, int, types.ListQuery) ([]types.Germ
 			Locus:              "1_1_1000",
 			Filter:             "PASS",
 			Zygosity:           "HET",
-			PfWgs:              0.99,
-			PcWgs:              3,
+			GermlinePfWgs:      0.99,
+			GermlinePcWgs:      3,
 			Hgvsg:              "hgvsg1",
 			AdRatio:            1.0,
 			VariantClass:       "class1",
@@ -99,7 +99,7 @@ func Test_OccurrencesListHandler(t *testing.T) {
 	router.POST("/occurrences/germline/snv/:case_id/:seq_id/list", OccurrencesGermlineSNVListHandler(repo))
 	body := `{
 			"additional_fields":[
-				"seq_id","task_id","locus_id","filter","zygosity","pf_wgs","pc_wgs","af","hgvsg","ad_ratio","variant_class", "rsnumber", "aa_change", "picked_consequences"
+				"seq_id","task_id","locus_id","filter","zygosity","germline_pf_wgs","germline_pc_wgs","af","hgvsg","ad_ratio","variant_class", "rsnumber", "aa_change", "picked_consequences"
 			]
 	}`
 	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/list", bytes.NewBuffer([]byte(body)))
@@ -119,8 +119,8 @@ func Test_OccurrencesListHandler(t *testing.T) {
 		"locus": "1_1_1000",
         "filter": "PASS",
         "zygosity": "HET",
-        "pf_wgs": 0.99,
-        "pc_wgs": 3,
+        "germline_pf_wgs": 0.99,
+        "germline_pc_wgs": 3,
         "hgvsg": "hgvsg1",
         "ad_ratio": 1.0,
         "variant_class": "class1",
@@ -204,7 +204,7 @@ func Test_OccurrencesStatisticsHandler(t *testing.T) {
 	router.POST("/occurrences/germline/snv/:case_id/:seq_id/statistics", OccurrencesGermlineSNVStatisticsHandler(repo))
 
 	body := `{
-			"field": "pf_wgs",
+			"field": "germline_pf_wgs",
 			"sqon":{
 				"op":"in",
 				"content":{

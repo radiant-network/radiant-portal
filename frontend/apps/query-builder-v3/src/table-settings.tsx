@@ -184,11 +184,13 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>) {
       minSize: 40,
     }),
     // Freq.
-    columnHelper.accessor(row => row.pf_wgs, {
-      id: 'pf_wgs',
+    columnHelper.accessor(row => row.germline_pf_wgs, {
+      id: 'germline_pf_wgs',
       cell: info => <ParticipantFrequencyCell locusId={info.row.original.locus_id} value={info.getValue()} />,
       header: () => (
-        <TooltipHeader tooltip={t('variant.headers.pf_wgs_tooltip')}>{t('variant.headers.pf_wgs')}</TooltipHeader>
+        <TooltipHeader tooltip={t('variant.headers.germline_pf_wgs_tooltip')}>
+          {t('variant.headers.germline_pf_wgs')}
+        </TooltipHeader>
       ),
       size: 124,
       minSize: 40,
@@ -313,10 +315,10 @@ const defaultSNVSettings = createColumnSettings([
     label: 'variant.headers.gnomad_v3_af',
   },
   {
-    id: 'pf_wgs',
+    id: 'germline_pf_wgs',
     visible: true,
-    label: 'variant.headers.pf_wgs',
-    additionalFields: ['pf_wgs'],
+    label: 'variant.headers.germline_pf_wgs',
+    additionalFields: ['germline_pf_wgs'],
   },
   {
     id: 'genotype_quality',

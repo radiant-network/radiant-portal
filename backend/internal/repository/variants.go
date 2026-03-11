@@ -49,7 +49,7 @@ func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
 }
 
 func (r *VariantsRepository) GetVariantHeader(locusId int) (*VariantHeader, error) {
-	tx := r.db.Table("germline__snv__variant v")
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.VariantTable.Name, types.VariantTable.Alias))
 	tx = tx.Where("v.locus_id = ?", locusId)
 	tx = tx.Select("v.hgvsg")
 
@@ -69,10 +69,10 @@ func (r *VariantsRepository) GetVariantHeader(locusId int) (*VariantHeader, erro
 }
 
 func (r *VariantsRepository) GetVariantOverview(locusId int) (*VariantOverview, error) {
-	tx := r.db.Table("germline__snv__variant v")
-	tx = tx.Joins("JOIN germline__snv__consequence c ON v.locus_id=c.locus_id AND v.locus_id = ? AND c.is_picked = true", locusId)
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.VariantTable.Name, types.VariantTable.Alias))
+	tx = tx.Joins("JOIN snv__consequence c ON v.locus_id=c.locus_id AND v.locus_id = ? AND c.is_picked = true", locusId)
 	tx = tx.Joins("LEFT JOIN clinvar cl ON cl.locus_id = v.locus_id")
-	tx = tx.Select("v.symbol, v.consequences, v.clinvar_interpretation, v.clinvar_name, v.pc_wgs, v.pf_wgs, v.pn_wgs, v.gnomad_v3_af, v.is_canonical, v.is_mane_select, c.is_mane_plus, c.exon_rank, c.exon_total, c.transcript_id, c.dna_change, v.rsnumber, v.vep_impact, v.aa_change, c.consequences, c.sift_pred, c.sift_score, c.revel_score,c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, v.locus, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate, c.gnomad_pli, cl.name as clinvar_id")
+	tx = tx.Select("v.symbol, v.consequences, v.clinvar_interpretation, v.clinvar_name, v.germline_pc_wgs, v.germline_pf_wgs, v.germline_pn_wgs, v.gnomad_v3_af, v.is_canonical, v.is_mane_select, c.is_mane_plus, c.exon_rank, c.exon_total, c.transcript_id, c.dna_change, v.rsnumber, v.vep_impact, v.aa_change, c.consequences, c.sift_pred, c.sift_score, c.revel_score,c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, v.locus, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate, c.gnomad_pli, cl.name as clinvar_id")
 
 	var variantOverview VariantOverview
 	if err := tx.First(&variantOverview).Error; err != nil {
@@ -379,7 +379,7 @@ func (r *VariantsRepository) GetVariantGlobalInternalFrequencies(locusId int) (*
 	var globalFrequencies types.InternalFrequencies
 
 	tx := r.db.Table(fmt.Sprintf("%s v", types.VariantTable.Name))
-	tx = tx.Select("v.pc_wgs as pc_all, v.pn_wgs as pn_all, v.pf_wgs as pf_all, v.pc_wgs_affected as pc_affected, v.pn_wgs_affected as pn_affected, v.pf_wgs_affected as pf_affected, v.pc_wgs_not_affected as pc_non_affected, v.pn_wgs_not_affected as pn_non_affected, v.pf_wgs_not_affected as pf_non_affected")
+	tx = tx.Select("v.germline_pc_wgs as pc_all, v.germline_pn_wgs as pn_all, v.germline_pf_wgs as pf_all, v.germline_pc_wgs_affected as pc_affected, v.germline_pn_wgs_affected as pn_affected, v.germline_pf_wgs_affected as pf_affected, v.germline_pc_wgs_not_affected as pc_non_affected, v.germline_pn_wgs_not_affected as pn_non_affected, v.germline_pf_wgs_not_affected as pf_non_affected")
 	tx = tx.Where("v.locus_id = ?", locusId)
 
 	if err := tx.First(&globalFrequencies).Error; err != nil {

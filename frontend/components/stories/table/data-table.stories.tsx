@@ -9,7 +9,7 @@ import DataTable, { TableColumnDef } from '@/components/base/data-table/data-tab
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
-import { data, mockColumns, TableMockData, mockDefaultColumnSettings } from './table-mock';
+import { data, mockColumns, mockDefaultColumnSettings, TableMockData } from './table-mock';
 
 const columnHelper = createColumnHelper<TableMockData>();
 
@@ -45,12 +45,12 @@ const meta = {
     serverOptions: {
       defaultSorting: [
         {
-          field: 'pf_wgs',
+          field: 'germline_pf_wgs',
           order: SortBodyOrderEnum.Asc,
         },
       ],
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      onSortingChange: sorting => { },
+      onSortingChange: sorting => {},
     },
     defaultColumnSettings: mockDefaultColumnSettings,
     loadingStates: {
@@ -63,7 +63,7 @@ const meta = {
         pageIndex: 0,
         pageSize: 10,
       },
-      onPaginationChange: () => { },
+      onPaginationChange: () => {},
     },
     total: 10,
   },
@@ -196,7 +196,7 @@ export const DataTableFiltersAndLessThan10Results: Story = {
   args: {
     data: data.slice(0, 1),
     total: 1,
-    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => { }} />,
+    TableFilters: () => <TableFilters loading={false} setSearchCriteria={() => {}} />,
     enableFullscreen: true,
     enableColumnOrdering: true,
     tableIndexResultPosition: 'bottom',

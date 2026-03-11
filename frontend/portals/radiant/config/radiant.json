@@ -157,8 +157,8 @@
             "type": "divider"
           },
           {
-            "key": "pf_wgs",
-            "translation_key": "pf_wgs",
+            "key": "germline_pf_wgs",
+            "translation_key": "germline_pf_wgs",
             "type": "numerical",
             "defaults": {
               "min": 0,
@@ -169,8 +169,8 @@
             }
           },
           {
-            "key": "pf_wgs_affected",
-            "translation_key": "pf_wgs_affected",
+            "key": "germline_pf_wgs_affected",
+            "translation_key": "germline_pf_wgs_affected",
             "type": "numerical",
             "defaults": {
               "min": 0,
@@ -181,8 +181,8 @@
             }
           },
           {
-            "key": "pf_wgs_not_affected",
-            "translation_key": "pf_wgs_not_affected",
+            "key": "germline_pf_wgs_not_affected",
+            "translation_key": "germline_pf_wgs_not_affected",
             "type": "numerical",
             "defaults": {
               "min": 0,

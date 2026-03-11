@@ -78,13 +78,13 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 }
 
 func Test_SNVOccurrences_List(t *testing.T) {
-	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "hgvsg":"hgvsg1", "locus":"locus1", "locus_id":"1000", "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "max_impact_score":4, "pf_wgs":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":1, "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`)
+	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "hgvsg":"hgvsg1", "locus":"locus1", "locus_id":"1000", "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "max_impact_score":4, "germline_pf_wgs":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":1, "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"impact1", "zygosity":"HET"}]`)
 }
 
 func Test_SNVOccurrences_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
 	body := `{
 			"additional_fields":[
-				"seq_id","locus_id","filter","zygosity","pf_wgs","pc_wgs","hgvsg","ad_ratio","variant_class"
+				"seq_id","locus_id","filter","zygosity","germline_pf_wgs","germline_pc_wgs","hgvsg","ad_ratio","variant_class"
 			],
 			"sqon":{
 				"op":"in",
@@ -114,8 +114,8 @@ func Test_SNVOccurrences_List_Return_Filtered_Occurrences_When_Sqon_Specified(t 
 				"is_canonical": false,
 				"is_mane_plus": false,
 				"is_mane_select": true,
-				"pc_wgs": 3,
-				"pf_wgs": 0.99,
+				"germline_pc_wgs": 3,
+				"germline_pf_wgs": 0.99,
 				"picked_consequences": null,
 				"seq_id": 1,
 				"task_id": 1,
@@ -190,7 +190,7 @@ func Test_SNVOccurrence_Aggregation_With_Dictionary(t *testing.T) {
 
 func Test_SNVOccurrence_Statistics(t *testing.T) {
 	body := `{
-			"field": "pf_wgs",
+			"field": "germline_pf_wgs",
 			"sqon": {
 				"op": "and",
 				"content": [
@@ -211,7 +211,7 @@ func Test_SNVOccurrence_Statistics(t *testing.T) {
 func Test_SNVOccurrence_List_Filter_On_Consequence_Column(t *testing.T) {
 	body := `{
 			"additional_fields":[
-				"seq_id","task_id","locus_id","filter","zygosity","pf_wgs","pc_wgs","hgvsg","ad_ratio","variant_class"
+				"seq_id","task_id","locus_id","filter","zygosity","germline_pf_wgs","germline_pc_wgs","hgvsg","ad_ratio","variant_class"
 			],
 			"sqon": {
 				"op": "and",
@@ -248,8 +248,8 @@ func Test_SNVOccurrence_List_Filter_On_Consequence_Column(t *testing.T) {
 			"is_canonical": false,
 			"is_mane_plus": false,
 			"is_mane_select": true,
-			"pc_wgs": 3,
-			"pf_wgs": 0.99,
+			"germline_pc_wgs": 3,
+			"germline_pf_wgs": 0.99,
 			"picked_consequences": null,
 			"seq_id": 1,
 			"task_id": 1,
@@ -428,17 +428,18 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 			{"inheritance_code":["AD"], "omim_phenotype_id":"613706", "panel":"Noonan syndrome 7"}, 
 			{"inheritance_code":["AD"], "omim_phenotype_id":"613707", "panel":"LEOPARD syndrome 3"}
 		], 
-		"pc_wgs_affected":3, 
-		"pf_wgs":0.99, 
-		"pf_wgs_affected":1, 
+		"germline_pc_wgs_affected":3, 
+		"germline_pf_wgs":0.99, 
+		"germline_pf_wgs_affected":1, 
 		"lrt_pred": "U",
 		"lrt_score":0.01,
 		"picked_consequences":["splice acceptor"],
 		"polyphen2_hvar_pred": "D",
 		"polyphen2_hvar_score":0.991,
-		"pn_wgs_affected":3, 
+		"germline_pn_wgs_affected":3, 
 		"qd":0.1, 
 		"revel_score":0.1, 
+		"rsnumber":"rs111111111", 
 		"sift_pred":"T", 
 		"sift_score":0.1, 
 		"spliceai_ds":0.1, 

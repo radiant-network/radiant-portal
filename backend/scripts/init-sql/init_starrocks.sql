@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS test_db;
 
 USE test_db;
 
-CREATE TABLE IF NOT EXISTS `germline__snv__consequence`
+CREATE TABLE IF NOT EXISTS `snv__consequence`
 (
     `locus_id`                bigint(20) NOT NULL COMMENT "",
     `symbol`                  varchar(30)  NOT NULL COMMENT "",
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `clinvar`
     ) ENGINE = OLAP
     PRIMARY KEY(`locus_id`);
 
-CREATE TABLE IF NOT EXISTS `germline__snv__consequence_filter_partitioned`
+CREATE TABLE IF NOT EXISTS `snv__consequence_filter_partitioned`
 (
     `part`                    tinyint NOT NULL COMMENT "",
     `locus_id`                bigint(20) NULL COMMENT "",
@@ -169,47 +169,61 @@ CREATE TABLE IF NOT EXISTS `germline__snv__occurrence`
     ) ENGINE=OLAP
     DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`);
 
-CREATE TABLE IF NOT EXISTS `germline__snv__variant`
-(
-    locus_id               BIGINT NOT NULL,
-    pf_wgs DOUBLE,
-    gnomad_v3_af DOUBLE,
-    topmed_af DOUBLE,
-    tg_af DOUBLE,
-    pc_wgs INT(11),
-    pn_wgs INT(11),
-    pc_wgs_affected INT(11),
-    pn_wgs_affected INT(11),
-    pf_wgs_affected DOUBLE,
-    pc_wgs_not_affected INT(11),
-    pn_wgs_not_affected INT(11),
-    pf_wgs_not_affected DOUBLE,
-    chromosome             CHAR(2),
-    start                  BIGINT NULL COMMENT '',
-    end                    BIGINT NULL COMMENT '',
-    clinvar_name           VARCHAR(2000) NULL COMMENT '',
-    variant_class          VARCHAR(50) NULL COMMENT '',
-    clinvar_interpretation ARRAY<VARCHAR(100)> NULL COMMENT '',
-    symbol                 VARCHAR(20) NULL COMMENT '',
-    impact_score           tinyint NULL COMMENT "",
-    consequences           ARRAY<VARCHAR(50)> NULL COMMENT '',
-    vep_impact             VARCHAR(20) NULL COMMENT '',
-    is_mane_select         BOOLEAN NULL COMMENT '',
-    is_mane_plus           BOOLEAN NULL COMMENT '',
-    is_canonical           BOOLEAN NULL COMMENT '',
-    rsnumber               ARRAY<VARCHAR(15)> NULL COMMENT '',
-    reference              VARCHAR(2000),
-    alternate              VARCHAR(2000),
-    mane_select            varchar(200) NULL,
-    hgvsg                  VARCHAR(2000) NULL,
-    hgvsc                  varchar(2000) NULL,
-    hgvsp                  varchar(2000) NULL,
-    locus                  VARCHAR(2000) NULL,
-    dna_change             VARCHAR(2000),
-    aa_change              VARCHAR(2000),
-    transcript_id          varchar(100) COMMENT "",
-    omim_inheritance_code  array<varchar(5)> COMMENT ""
-    ) PRIMARY KEY(locus_id);
+CREATE TABLE IF NOT EXISTS `snv__variant`(
+                                             locus_id BIGINT NOT NULL,
+                                             germline_pf_wgs DOUBLE,
+                                             germline_pf_wxs DOUBLE,
+                                             somatic_pf_tn_wgs DOUBLE,
+                                             somatic_pf_tn_wxs DOUBLE,
+                                             gnomad_v3_af DOUBLE,
+                                             topmed_af DOUBLE,
+                                             tg_af DOUBLE,
+                                             germline_pc_wgs INT(11),
+                                             germline_pn_wgs INT(11),
+                                             germline_pc_wgs_affected INT(11),
+                                             germline_pn_wgs_affected INT(11),
+                                             germline_pf_wgs_affected DOUBLE,
+                                             germline_pc_wgs_not_affected INT(11),
+                                             germline_pn_wgs_not_affected INT(11),
+                                             germline_pf_wgs_not_affected DOUBLE,
+                                             germline_pc_wxs INT(11),
+                                             germline_pn_wxs INT(11),
+                                             germline_pc_wxs_affected INT(11),
+                                             germline_pn_wxs_affected INT(11),
+                                             germline_pf_wxs_affected DOUBLE,
+                                             germline_pc_wxs_not_affected INT(11),
+                                             germline_pn_wxs_not_affected INT(11),
+                                             germline_pf_wxs_not_affected DOUBLE,
+                                             somatic_pc_tn_wgs INT(11),
+                                             somatic_pn_tn_wgs INT(11),
+                                             somatic_pc_tn_wxs INT(11),
+                                             somatic_pn_tn_wxs INT(11),
+                                             chromosome CHAR(2),
+                                             start BIGINT NULL,
+                                             end BIGINT NULL,
+                                             clinvar_name VARCHAR(2000) NULL,
+                                             variant_class VARCHAR(50) NULL,
+                                             clinvar_interpretation ARRAY<VARCHAR(100)> NULL,
+                                             symbol VARCHAR(20) NULL,
+                                             impact_score tinyint NULL,
+                                             consequences ARRAY<VARCHAR(50)> NULL,
+                                             vep_impact VARCHAR(20) NULL,
+                                             is_mane_select BOOLEAN NULL,
+                                             is_mane_plus BOOLEAN NULL,
+                                             is_canonical BOOLEAN NULL,
+                                             rsnumber VARCHAR(20) NULL,
+                                             reference VARCHAR(2000),
+                                             alternate VARCHAR(2000),
+                                             mane_select varchar(200) NULL,
+                                             hgvsg VARCHAR(2000) NULL,
+                                             hgvsc varchar(2000) NULL,
+                                             hgvsp varchar(2000) NULL,
+                                             locus VARCHAR(2000) NULL,
+                                             dna_change VARCHAR(2000),
+                                             aa_change VARCHAR(2000),
+                                             transcript_id varchar(100),
+                                             omim_inheritance_code array<varchar(5)>
+) PRIMARY KEY(locus_id);
 
 create table IF NOT EXISTS hpo_gene_panel
 (
@@ -364,13 +378,13 @@ VALUES
     (1000, '1', '1111', 'A', 'T', '111111'),
     (2000, '2', '2222', 'C', 'G', '222222');
 
-INSERT INTO germline__snv__consequence (locus_id, consequences, is_picked, sift_pred, sift_score, fathmm_score, fathmm_pred, revel_score, cadd_score, cadd_phred, spliceai_ds, spliceai_type, gnomad_pli, gnomad_loeuf, biotype, symbol, transcript_id)
+INSERT INTO snv__consequence (locus_id, consequences, is_picked, sift_pred, sift_score, fathmm_score, fathmm_pred, revel_score, cadd_score, cadd_phred, spliceai_ds, spliceai_type, gnomad_pli, gnomad_loeuf, biotype, symbol, transcript_id)
 VALUES
     (1000, ['csq10'], true, 'T', 0.1, 0.1, 'T', 0.1, 0.1, 0.1, 0.1, ['AG'], 0.1, 0.1, 'IG_C_gene', 'BRAF', 'T001'),
     (1000, ['csq11'], false, 'T', 0.11, 0.11, 'T', 0.11, 0.11, 0.11, 0.11, ['AT'], 0.11, 0.11, 'IG_C_pseudogene', 'BRAC', 'T011'),
     (2000, ['csq20'], true, 'T', 0.2, 0.2, 'T', 0.2, 0.2, 0.2, 0.2, ['AT'], 0.2, 0.2, 'IG_C_pseudogene', 'BRAC', 'T002');
 
-INSERT INTO germline__snv__consequence_filter_partitioned (part, locus_id, consequence, symbol, impact_score, sift_pred, is_deleterious)
+INSERT INTO snv__consequence_filter_partitioned (part, locus_id, consequence, symbol, impact_score, sift_pred, is_deleterious)
 VALUES
     (1, 1000, 'csq10', 'BRAF', 3, 'T', true),
     (1, 1000, 'csq11', 'BRAC', 3, 'T', true),
@@ -382,7 +396,7 @@ VALUES
     (1, 1, 1, 1000, 150, 'PASS', 'HOM', 0.5, 0, 'Likely pathogenic', ['PP3'], 0.85, 0.75),
     (1, 19, 19, 2000, 200, 'PASS', 'HET', 1.0, 0, 'Benign', ['BP4'], 0.95, 0.9);
 
-INSERT INTO germline__snv__variant (locus_id, impact_score, pf_wgs, pc_wgs, pn_wgs, pc_wgs_affected, pn_wgs_affected, pf_wgs_affected, pc_wgs_not_affected, pn_wgs_not_affected, pf_wgs_not_affected, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate, transcript_id)
+INSERT INTO snv__variant (locus_id, impact_score, germline_pf_wgs, germline_pc_wgs, germline_pn_wgs, germline_pc_wgs_affected, germline_pn_wgs_affected, germline_pf_wgs_affected, germline_pc_wgs_not_affected, germline_pn_wgs_not_affected, germline_pf_wgs_not_affected, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate, transcript_id)
 VALUES
     (1000, 3, 0.01, 10, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 0.01, 'hgvsg1', 'AD', 'class1', 'MODIFIER', 'BRAF', true, true, ['Benign', 'Pathogenic'], 'rs111111111', 'p.Arg19His', ['splice acceptor'], 'locus_full_1000', '1', 1111, 'A', 'T', 'T001'),
     (2000, 1, 0.02, 20, 100, 40, 50, 0.80, 20, 50, 0.4, 0.02, 'hgvsg2', 'Smu', 'class2', 'MODIFIER', 'BRAC', false, true, ['Pathogenic'], 'rs2222222', 'p.Arg19His', ['splice acceptor'], 'locus_full_2000', '2', 2222, 'C', 'G', 'T002');
