@@ -139,7 +139,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = ig.condition")
 	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = spl.patient_id", txAggPhenotypes)
 
-	tx = tx.Where("o.locus_id = ?", locusId)
+	tx = tx.Where("g_snv_o.locus_id = ?", locusId)
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
 	}
@@ -154,7 +154,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 
 	tx = tx.Select("s.id as seq_id, c.id as case_id, spl.patient_id as patient_id, ig.transcript_id as transcript_id, " +
 		"ig.updated_at as interpretation_updated_on, mondo.id as condition_id, mondo.name as condition_name, " +
-		"ig.classification as classification_code, o.zygosity, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, " +
+		"ig.classification as classification_code, g_snv_o.zygosity, lab.code as diagnosis_lab_code, lab.name as diagnosis_lab_name, " +
 		"ca.code as analysis_catalog_code, ca.name as analysis_catalog_name, c.status_code, " +
 		"agg_phenotypes.phenotypes_term as phenotypes_unparsed, " +
 		"spl.submitter_sample_id as submitter_sample_id, " +
@@ -207,7 +207,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
 	tx = utils.AntiJoinCaseHasSeqExpWithGermlineInterpretationForLocus(tx, locusIdString)
 	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = spl.patient_id", txAggPhenotypes)
-	tx = tx.Where("o.locus_id = ?", locusId)
+	tx = tx.Where("g_snv_o.locus_id = ?", locusId)
 
 	if userQuery != nil {
 		utils.AddWhere(userQuery, tx)
@@ -262,7 +262,7 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCou
 	txUnInterpreted = utils.JoinGermlineSNVOccurrenceWithCaseHasSeqExp(txUnInterpreted)
 	txUnInterpreted = utils.AntiJoinCaseHasSeqExpWithGermlineInterpretationForLocus(txUnInterpreted, locusIdString)
 	txUnInterpreted = txUnInterpreted.Select("COUNT(DISTINCT CONCAT(chseq.case_id, chseq.sequencing_experiment_id))")
-	txUnInterpreted = txUnInterpreted.Where("o.locus_id = ?", locusId)
+	txUnInterpreted = txUnInterpreted.Where("g_snv_o.locus_id = ?", locusId)
 
 	if err := txUnInterpreted.Find(&countUnInterpreted).Error; err != nil {
 		return nil, fmt.Errorf("error counting variant interpreted cases: %w", err)
@@ -440,12 +440,12 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(locusI
 					%s as split_code,
 					seq.patient_id,
 					seq.affected_status as affected_status_code,
-					o.zygosity
+					g_snv_o.zygosity
 				FROM radiant_jdbc.public.cases c
 				%s
 				LEFT JOIN radiant_jdbc.public.case_has_sequencing_experiment chse ON chse.case_id = c.id
 				JOIN staging_sequencing_experiment seq ON seq.seq_id = chse.sequencing_experiment_id AND seq.case_id = chse.case_id AND seq.experimental_strategy = 'wgs' AND analysis_type = 'germline'
-				LEFT JOIN germline__snv__occurrence o ON o.seq_id = seq.seq_id AND o.locus_id = ? AND o.gq >= 20 AND o.filter = 'PASS' AND o.ad_alt > 3
+				LEFT JOIN germline__snv__occurrence g_snv_o ON g_snv_o.seq_id = seq.seq_id AND g_snv_o.locus_id = ? AND g_snv_o.gq >= 20 AND g_snv_o.filter = 'PASS' AND g_snv_o.ad_alt > 3
 			),
 			result AS (
 				SELECT

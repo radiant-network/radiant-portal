@@ -365,3 +365,19 @@ var PickedImpactScoreField = Field{
 	CanBeSorted:   true,
 	Table:         VariantTable,
 }
+
+var SomaticPfTnWgsField = Field{
+	Name:          "somatic_pf_tn_wgs",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}
+
+var SomaticPcTnWgsField = Field{
+	Name:          "somatic_pc_tn_wgs",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         VariantTable,
+}

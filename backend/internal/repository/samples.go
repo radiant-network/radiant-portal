@@ -57,8 +57,8 @@ func (r *SamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(organizationC
 	var sample Sample
 	tx := r.db.
 		Table(types.SampleTable.Name).
-		Joins("JOIN organization o ON o.id = sample.organization_id").
-		Where("sample.submitter_sample_id = ? AND o.code = ?", submitterSampleId, organizationCode)
+		Joins("JOIN organization org ON org.id = sample.organization_id").
+		Where("sample.submitter_sample_id = ? AND org.code = ?", submitterSampleId, organizationCode)
 	if err := tx.First(&sample).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieving sample by org code and submitter sample id: %w", err)
