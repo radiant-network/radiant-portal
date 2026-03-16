@@ -2287,6 +2287,175 @@
       ]
     },
     {
+      "name": "Somatic SNV Occurrences",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"additional_fields\": [\n    ],\n    \"limit\": 10,\n    \"page_index\": 0    \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/list",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "somatic",
+                "snv",
+                "71",
+                "74",
+                "list"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Count",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/count",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "somatic",
+                "snv",
+                "71",
+                "74",
+                "count"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aggregate",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"field\":\"variant_class\",\n    \"limit\": 10,\n    \"sqon\": {\n        \"op\": \"and\",\n        \"content\": [\n            {\n                \"op\": \"in\",\n                \"content\":{\n\t\t\t\t\t\"field\": \"vep_impact\",\n\t\t\t\t\t\"value\": [\"MODIFIER\"]\n\t\t\t\t}\n            }\n        ]\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/aggregate",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "somatic",
+                "snv",
+                "71",
+                "74",
+                "aggregate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Statistics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"field\":\"somatic_pf_tn_wgs\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/statistics",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "somatic",
+                "snv",
+                "71",
+                "74",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "GET status",
       "request": {
         "method": "GET",
