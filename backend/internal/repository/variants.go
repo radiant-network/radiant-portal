@@ -129,7 +129,7 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 	txAggPhenotypes := utils.GetAggregatedPhenotypes(r.db)
 
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias))
-	tx = utils.JoinGermlineInterpretationWithSnvOccurrence(tx)
+	tx = utils.JoinGermlineInterpretationWithSNVOccurrence(tx)
 	tx = utils.JoinGermlineSNVOccurrenceWithSeqExp(tx)
 	tx = utils.JoinGermlineInterpretationWithCase(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
@@ -196,7 +196,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	locusIdString := fmt.Sprintf("%d", locusId)
 
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias))
-	tx = utils.JoinCaseHasSeqExpWithGermlineSnvOccurrence(tx)
+	tx = utils.JoinCaseHasSeqExpWithGermlineSNVOccurrence(tx)
 	tx = utils.JoinCaseHasSeqExpWithSequencingExperiment(tx)
 	tx = utils.JoinCaseHasSeqExpWithCase(tx)
 	tx = utils.JoinCaseWithAnalysisCatalog(tx)

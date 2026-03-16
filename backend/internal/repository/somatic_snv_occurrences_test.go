@@ -10,17 +10,17 @@ import (
 	"gorm.io/gorm"
 )
 
-var allSomaticSnvFields = sliceutils.Map(types.SomaticSNVOccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
+var allSomaticSNVFields = sliceutils.Map(types.SomaticSNVOccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
 	return value.GetAlias()
 })
 
-var defaultSomaticSnvFieldsForTest = []types.Field{
+var defaultSomaticSNVFieldsForTest = []types.Field{
 	types.SomaticSNVLocusIdField,
 }
 
-var SomaticSnvQueryConfigForTest = types.QueryConfig{
+var SomaticSNVQueryConfigForTest = types.QueryConfig{
 	AllFields:     types.SomaticSNVOccurrencesFields,
-	DefaultFields: defaultSomaticSnvFieldsForTest,
+	DefaultFields: defaultSomaticSNVFieldsForTest,
 	DefaultSort:   types.SomaticSNVOccurrencesDefaultSort,
 	IdField:       types.SomaticSNVLocusIdField,
 }
@@ -28,7 +28,7 @@ var SomaticSnvQueryConfigForTest = types.QueryConfig{
 func Test_Somatic_SNV_GetOccurrences(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewSomaticSNVOccurrencesRepository(db)
-		query, err := types.NewListQueryFromSqon(SomaticSnvQueryConfigForTest, allSomaticSnvFields, nil, nil, nil)
+		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(71, 74, query)
 		assert.NoError(t, err)
@@ -65,7 +65,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) 
 		repo := NewSomaticSNVOccurrencesRepository(db)
 		selectedFields := []string{"seq_id", "locus_id", "ad_ratio", "symbol"}
 
-		query, err := types.NewListQueryFromSqon(SomaticSnvQueryConfigForTest, selectedFields, nil, nil, nil)
+		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, selectedFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(71, 74, query)
 		assert.NoError(t, err)
@@ -82,7 +82,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Default_Column_If_No_One_Specified(t
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewSomaticSNVOccurrencesRepository(db)
-		query, err := types.NewListQueryFromSqon(SomaticSnvQueryConfigForTest, nil, nil, nil, nil)
+		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, nil, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(71, 74, query)
 		assert.NoError(t, err)
@@ -99,7 +99,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) 
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewSomaticSNVOccurrencesRepository(db)
 		selectedFields := []string{"clinvar"}
-		query, err := types.NewListQueryFromSqon(SomaticSnvQueryConfigForTest, selectedFields, nil, nil, nil)
+		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, selectedFields, nil, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(71, 74, query)
 		assert.NoError(t, err)
@@ -121,7 +121,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *te
 			},
 			Op: "and",
 		}
-		query, err := types.NewListQueryFromSqon(SomaticSnvQueryConfigForTest, allSomaticSnvFields, sqon, nil, nil)
+		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, sqon, nil, nil)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(71, 74, query)
 		assert.NoError(t, err)
@@ -148,7 +148,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_
 			Offset: 5,
 		}
 
-		query, err := types.NewListQueryFromSqon(SomaticSnvQueryConfigForTest, allSomaticSnvFields, nil, pagination, sortedBody)
+		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, pagination, sortedBody)
 		assert.NoError(t, err)
 		occurrences, err := repo.GetOccurrences(71, 74, query)
 		assert.NoError(t, err)

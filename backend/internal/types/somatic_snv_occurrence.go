@@ -17,17 +17,15 @@ type SomaticSNVOccurrence struct {
 	Rsnumber            string            `json:"rsnumber" validate:"required"`
 	OmimInheritanceCode JsonArray[string] `gorm:"type:json" json:"omim_inheritance_code" validate:"required"`
 	Hotspot             *bool             `json:"hotspot" validate:"required"`
-	// TODO CMC
-	// TODO Tier
-	Clinvar        JsonArray[string] `gorm:"type:json" json:"clinvar" validate:"required"`
-	GnomadV3Af     *float64          `json:"gnomad_v3_af" validate:"required"`
-	GermlinePfWgs  *float64          `json:"germline_pf_wgs" validate:"required"`
-	GermlinePcWgs  *int              `json:"germline_pc_wgs" validate:"required"`
-	SomaticPfTnWgs *float64          `json:"somatic_pf_tn_wgs" validate:"required"`
-	SomaticPcTnWgs *int              `json:"somatic_pc_tn_wgs" validate:"required"`
-	SomaticQuality *int32            `json:"somatic_quality" validate:"required"`
-	Zygosity       string            `json:"zygosity,omitempty"`
-	AdRatio        *float32          `json:"ad_ratio,omitempty"`
+	Clinvar             JsonArray[string] `gorm:"type:json" json:"clinvar" validate:"required"`
+	GnomadV3Af          *float64          `json:"gnomad_v3_af" validate:"required"`
+	GermlinePfWgs       *float64          `json:"germline_pf_wgs" validate:"required"`
+	GermlinePcWgs       *int              `json:"germline_pc_wgs" validate:"required"`
+	SomaticPfTnWgs      *float64          `json:"somatic_pf_tn_wgs" validate:"required"`
+	SomaticPcTnWgs      *int              `json:"somatic_pc_tn_wgs" validate:"required"`
+	SomaticQuality      *int32            `json:"somatic_quality" validate:"required"`
+	Zygosity            string            `json:"zygosity,omitempty"`
+	AdRatio             *float32          `json:"ad_ratio,omitempty"`
 }
 
 var SomaticSNVOccurrenceTable = Table{
@@ -95,6 +93,8 @@ var SomaticSNVOccurrencesDefaultFields = []Field{
 	RsNumberField,
 	PickedOmimInheritanceCodeField,
 	SomaticSNVInfoHotspotAlleleField,
+	// TODO CMC
+	// TODO Tier
 	ClinvarField,
 	GnomadV3AfField,
 	GermlinePfWgsField,

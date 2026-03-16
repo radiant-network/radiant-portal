@@ -3989,7 +3989,7 @@ export interface SomaticSNVOccurrence {
      */
     'ad_ratio'?: number;
     /**
-     * TODO CMC TODO Tier
+     * 
      * @type {Array<string>}
      * @memberof SomaticSNVOccurrence
      */

@@ -43,7 +43,7 @@ func NewGermlineSNVOccurrencesRepository(db *gorm.DB) *GermlineSNVOccurrencesRep
 func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, userQuery types.ListQuery) ([]GermlineSNVOccurrence, error) {
 	var occurrences []GermlineSNVOccurrence
 
-	tx, part, err := PrepareSnvListOrCountQuery(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
+	tx, part, err := PrepareSNVListOrCountQuery(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -76,15 +76,15 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 }
 
 func (r *GermlineSNVOccurrencesRepository) CountOccurrences(_ int, seqId int, userQuery types.CountQuery) (int64, error) {
-	return CountSnv(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
+	return CountSNV(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
 }
 
 func (r *GermlineSNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	return AggregateSnv(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
+	return AggregateSNV(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
 }
 
 func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
-	return StatisticsSnv(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
+	return StatisticsSNV(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
 }
 
 func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(caseId int, seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error) {

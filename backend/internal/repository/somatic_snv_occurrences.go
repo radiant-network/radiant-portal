@@ -34,7 +34,7 @@ func NewSomaticSNVOccurrencesRepository(db *gorm.DB) *SomaticSNVOccurrencesRepos
 func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, userQuery types.ListQuery) ([]SomaticSNVOccurrence, error) {
 	var occurrences []SomaticSNVOccurrence
 
-	tx, part, err := PrepareSnvListOrCountQuery(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
+	tx, part, err := PrepareSNVListOrCountQuery(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -67,13 +67,13 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, 
 }
 
 func (r *SomaticSNVOccurrencesRepository) CountOccurrences(_ int, seqId int, userQuery types.CountQuery) (int64, error) {
-	return CountSnv(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
+	return CountSNV(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
 }
 
 func (r *SomaticSNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	return AggregateSnv(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
+	return AggregateSNV(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
 }
 
 func (r *SomaticSNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
-	return StatisticsSnv(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
+	return StatisticsSNV(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
 }

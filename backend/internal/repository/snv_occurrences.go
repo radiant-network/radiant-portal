@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func AddImplicitSnvOccurrencesFilters(snvTable types.Table, seqId int, db *gorm.DB, part int) *gorm.DB {
+func AddImplicitSNVOccurrencesFilters(snvTable types.Table, seqId int, db *gorm.DB, part int) *gorm.DB {
 	alias := snvTable.Alias
 	tx := db.Table(fmt.Sprintf("%s %s", snvTable.Name, alias))
 	switch snvTable {
@@ -22,33 +22,33 @@ func AddImplicitSnvOccurrencesFilters(snvTable types.Table, seqId int, db *gorm.
 	return tx
 }
 
-func JoinSnvOccurrencesWithVariants(snvTable types.Table, tx *gorm.DB) *gorm.DB {
+func JoinSNVOccurrencesWithVariants(snvTable types.Table, tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("JOIN %s %s ON %s.locus_id=%s.locus_id", types.VariantTable.Name, types.VariantTable.Alias, types.VariantTable.Alias, snvTable.Alias))
 }
 
-func JoinSnvOccurrencesWithTopMedBravo(snvTable types.Table, tx *gorm.DB) *gorm.DB {
+func JoinSNVOccurrencesWithTopMedBravo(snvTable types.Table, tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN topmed_bravo topmed ON topmed.locus_id=%s.locus_id", snvTable.Alias))
 }
 
-func JoinSnvOccurrencesWithThousandGenomes(snvTable types.Table, tx *gorm.DB) *gorm.DB {
+func JoinSNVOccurrencesWithThousandGenomes(snvTable types.Table, tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN 1000_genomes 1000_genomes ON 1000_genomes.locus_id=%s.locus_id", snvTable.Alias))
 }
 
-func PrepareSnvListOrCountQuery(snvTable types.Table, seqId int, userQuery types.Query, db *gorm.DB) (*gorm.DB, int, error) {
+func PrepareSNVListOrCountQuery(snvTable types.Table, seqId int, userQuery types.Query, db *gorm.DB) (*gorm.DB, int, error) {
 	part, err := utils.GetSequencingPart(seqId, db)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
 	}
-	tx := AddImplicitSnvOccurrencesFilters(snvTable, seqId, db, part)
+	tx := AddImplicitSNVOccurrencesFilters(snvTable, seqId, db, part)
 	if userQuery != nil {
-		tx = JoinSnvOccurrencesWithVariants(snvTable, tx)
+		tx = JoinSNVOccurrencesWithVariants(snvTable, tx)
 
 		if userQuery.HasFieldFromTables(types.TopmedTable) {
-			tx = JoinSnvOccurrencesWithTopMedBravo(snvTable, tx)
+			tx = JoinSNVOccurrencesWithTopMedBravo(snvTable, tx)
 		}
 
 		if userQuery.HasFieldFromTables(types.ThousandGenomesTable) {
-			tx = JoinSnvOccurrencesWithThousandGenomes(snvTable, tx)
+			tx = JoinSNVOccurrencesWithThousandGenomes(snvTable, tx)
 		}
 
 		if userQuery.Filters() != nil && (userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...)) {
@@ -112,14 +112,14 @@ func PrepareSnvListOrCountQuery(snvTable types.Table, seqId int, userQuery types
 	return tx, part, nil
 }
 
-func PrepareSnvAggOrStatisticsQuery(snvTable types.Table, seqId int, userQuery types.Query, db *gorm.DB) (*gorm.DB, int, error) {
+func PrepareSNVAggOrStatisticsQuery(snvTable types.Table, seqId int, userQuery types.Query, db *gorm.DB) (*gorm.DB, int, error) {
 	part, err := utils.GetSequencingPart(seqId, db)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
 	}
-	tx := AddImplicitSnvOccurrencesFilters(snvTable, seqId, db, part)
+	tx := AddImplicitSNVOccurrencesFilters(snvTable, seqId, db, part)
 	if userQuery != nil {
-		tx = JoinSnvOccurrencesWithVariants(snvTable, tx)
+		tx = JoinSNVOccurrencesWithVariants(snvTable, tx)
 		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 			joinClause := fmt.Sprintf("LEFT JOIN snv__consequence_filter_partitioned cf ON cf.locus_id=%s.locus_id AND cf.part = %s.part", snvTable.Alias, snvTable.Alias)
 			tx = tx.Joins(joinClause)
@@ -130,10 +130,10 @@ func PrepareSnvAggOrStatisticsQuery(snvTable types.Table, seqId int, userQuery t
 			}
 		}
 		if userQuery.HasFieldFromTables(types.TopmedTable) {
-			tx = JoinSnvOccurrencesWithTopMedBravo(snvTable, tx)
+			tx = JoinSNVOccurrencesWithTopMedBravo(snvTable, tx)
 		}
 		if userQuery.HasFieldFromTables(types.ThousandGenomesTable) {
-			tx = JoinSnvOccurrencesWithThousandGenomes(snvTable, tx)
+			tx = JoinSNVOccurrencesWithThousandGenomes(snvTable, tx)
 		}
 		utils.AddWhere(userQuery, tx)
 
@@ -141,8 +141,8 @@ func PrepareSnvAggOrStatisticsQuery(snvTable types.Table, seqId int, userQuery t
 	return tx, part, nil
 }
 
-func CountSnv(snvTable types.Table, seqId int, userQuery types.CountQuery, db *gorm.DB) (int64, error) {
-	tx, _, err := PrepareSnvListOrCountQuery(snvTable, seqId, userQuery, db)
+func CountSNV(snvTable types.Table, seqId int, userQuery types.CountQuery, db *gorm.DB) (int64, error) {
+	tx, _, err := PrepareSNVListOrCountQuery(snvTable, seqId, userQuery, db)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -153,8 +153,8 @@ func CountSnv(snvTable types.Table, seqId int, userQuery types.CountQuery, db *g
 	return count, nil
 }
 
-func AggregateSnv(snvTable types.Table, seqId int, userQuery types.AggQuery, db *gorm.DB) ([]Aggregation, error) {
-	tx, _, err := PrepareSnvAggOrStatisticsQuery(snvTable, seqId, userQuery, db)
+func AggregateSNV(snvTable types.Table, seqId int, userQuery types.AggQuery, db *gorm.DB) ([]Aggregation, error) {
+	tx, _, err := PrepareSNVAggOrStatisticsQuery(snvTable, seqId, userQuery, db)
 	var aggregation []Aggregation
 	if err != nil {
 		return aggregation, fmt.Errorf("error during query preparation %w", err)
@@ -182,8 +182,8 @@ func AggregateSnv(snvTable types.Table, seqId int, userQuery types.AggQuery, db 
 	return aggregation, nil
 }
 
-func StatisticsSnv(snvTable types.Table, seqId int, userQuery types.StatisticsQuery, db *gorm.DB) (*types.Statistics, error) {
-	tx, _, err := PrepareSnvAggOrStatisticsQuery(snvTable, seqId, userQuery, db)
+func StatisticsSNV(snvTable types.Table, seqId int, userQuery types.StatisticsQuery, db *gorm.DB) (*types.Statistics, error) {
+	tx, _, err := PrepareSNVAggOrStatisticsQuery(snvTable, seqId, userQuery, db)
 	var statistics types.Statistics
 	if err != nil {
 		return &statistics, fmt.Errorf("error during query preparation %w", err)

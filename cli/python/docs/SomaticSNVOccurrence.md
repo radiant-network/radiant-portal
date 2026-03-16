@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **aa_change** | **str** |  | 
 **ad_ratio** | **float** |  | [optional] 
-**clinvar** | **List[str]** | TODO CMC TODO Tier | 
+**clinvar** | **List[str]** |  | 
 **germline_pc_wgs** | **int** |  | 
 **germline_pf_wgs** | **float** |  | 
 **gnomad_v3_af** | **float** |  | 

@@ -204,7 +204,7 @@ func JoinPatientWithManagingOrg(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.organization_id=%s.id", types.ManagingOrganizationTable.FederationName, types.ManagingOrganizationTable.Alias, types.PatientTable.Alias, types.ManagingOrganizationTable.Alias))
 }
 
-func JoinGermlineInterpretationWithSnvOccurrence(tx *gorm.DB) *gorm.DB {
+func JoinGermlineInterpretationWithSNVOccurrence(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.sequencing_id = %s.seq_id and %s.locus_id = %s.locus_id", types.GermlineSNVOccurrenceTable.Name, types.GermlineSNVOccurrenceTable.Alias, types.InterpretationGermlineTable.Alias, types.GermlineSNVOccurrenceTable.Alias, types.InterpretationGermlineTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
 }
 
@@ -220,7 +220,7 @@ func JoinGermlineSNVOccurrenceWithCaseHasSeqExp(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.sequencing_experiment_id = %s.seq_id", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
 }
 
-func JoinCaseHasSeqExpWithGermlineSnvOccurrence(tx *gorm.DB) *gorm.DB {
+func JoinCaseHasSeqExpWithGermlineSNVOccurrence(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.sequencing_experiment_id = %s.seq_id", types.GermlineSNVOccurrenceTable.Name, types.GermlineSNVOccurrenceTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
 }
 

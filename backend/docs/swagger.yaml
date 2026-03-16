@@ -1945,9 +1945,6 @@ components:
         ad_ratio:
           type: number
         clinvar:
-          description: |-
-            TODO CMC
-            TODO Tier
           items:
             type: string
           type: array

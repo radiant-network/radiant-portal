@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from radiant_python.models.vep_impact import VepImpact
 from typing import Optional, Set
@@ -29,7 +29,7 @@ class SomaticSNVOccurrence(BaseModel):
     """ # noqa: E501
     aa_change: StrictStr
     ad_ratio: Optional[Union[StrictFloat, StrictInt]] = None
-    clinvar: List[StrictStr] = Field(description="TODO CMC TODO Tier")
+    clinvar: List[StrictStr]
     germline_pc_wgs: StrictInt
     germline_pf_wgs: Union[StrictFloat, StrictInt]
     gnomad_v3_af: Union[StrictFloat, StrictInt]
