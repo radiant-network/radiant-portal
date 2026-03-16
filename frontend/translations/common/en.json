@@ -207,7 +207,7 @@
     },
     "toolbar": {
       "combine": "Combine",
-      "newQuery": "New query",
+      "new_query": "New query",
       "clear_all": "Clear all",
       "clear_all_dialog": {
         "title": "Delete all queries?",

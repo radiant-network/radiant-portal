@@ -207,7 +207,7 @@
     },
     "toolbar": {
       "combine": "Combiner",
-      "newQuery": "Nouvelle requête",
+      "new_query": "Nouvelle requête",
       "clear_all": "Tout effacer",
       "clear_all_dialog": {
         "title": "Supprimer toutes les requêtes ?",

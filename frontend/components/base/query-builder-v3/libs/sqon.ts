@@ -16,7 +16,7 @@ export const isSet = (value: IValueFacet): boolean =>
  * For boolean facet
  * Check if sqon is boolean
  */
-export function isBoolean(sqon: IValueFacet) {
+export function isBoolean(sqon: IValueFacet): boolean {
   return sqon.content.value.every(val => ['false', 'true'].includes(val.toString().toLowerCase()));
 }
 
@@ -24,7 +24,7 @@ export function isBoolean(sqon: IValueFacet) {
  * For numerical facet
  * Is in-between (or range)
  */
-export function isRange(valueFacet: IValueFacet) {
+export function isRange(valueFacet: IValueFacet): boolean {
   return valueFacet.op === RangeOperators.In ? false : valueFacet.op in RangeOperators;
 }
 
@@ -33,7 +33,7 @@ export function isRange(valueFacet: IValueFacet) {
  * - IValueFacet (with IValueContent)
  * - TSqonContentValue
  */
-export function isEqualToField(sqon: TSyntheticSqonContentValue, field: string) {
+export function isEqualToField(sqon: TSyntheticSqonContentValue, field: string): boolean {
   if (typeof sqon === 'object' && sqon !== null && 'content' in sqon) {
     const content = (sqon as IValueFacet).content;
     if ('field' in content) {
@@ -57,6 +57,17 @@ export function createEmptyQuery() {
 /**
  * Check if current active query is empty
  */
-export function isSqonEmpty(sqon: ISyntheticSqon) {
+export function isSqonEmpty(sqon: ISyntheticSqon): boolean {
   return sqon.content.length === 0;
+}
+
+/**
+ * Check if sqons contains only an empty sqon
+ */
+export function isQueryEmpty(sqons: ISyntheticSqon[]): boolean {
+  if (sqons.length === 1) {
+    return isSqonEmpty(sqons[0]);
+  }
+
+  return false;
 }

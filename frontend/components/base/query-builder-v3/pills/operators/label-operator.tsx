@@ -2,6 +2,8 @@ import { ReactNode } from 'react';
 
 import { useI18n } from '@/components/hooks/i18n';
 
+import { useQBSettings } from '../../hooks/use-query-builder';
+
 type LabelOperatorQueryPillProps = {
   field: string;
   operator: ReactNode;
@@ -19,6 +21,10 @@ type LabelOperatorQueryPillProps = {
  */
 function LabelOperator({ field, operator }: LabelOperatorQueryPillProps) {
   const { t, lazyTranslate } = useI18n();
+  const { labelsEnabled } = useQBSettings();
+
+  if (!labelsEnabled) return null;
+
   return (
     <div className="flex items-center">
       <span className="ml-1 mr-0.5 text-xs font-medium">

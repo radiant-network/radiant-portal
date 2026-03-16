@@ -1,4 +1,5 @@
-import { Fragment, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import cloneDeep from 'lodash/cloneDeep';
 import { CopyIcon, TrashIcon } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -26,6 +27,7 @@ import { ISyntheticSqon, IValueFacet } from './type';
  * Type
  */
 type QueryBarProps = {
+  index: number;
   sqon: ISyntheticSqon;
   active: boolean;
 };
@@ -35,14 +37,14 @@ type QueryBarProps = {
  */
 function factory(content: TSyntheticSqonContentValue) {
   if (isRange(content as IValueFacet)) {
-    return <NumericalQueryPill content={content as IValueFacet} />;
+    return <NumericalQueryPill sqon={content as IValueFacet} />;
   }
 
   if (isBoolean(content as IValueFacet)) {
-    return <BooleanQueryPill content={content as IValueFacet} />;
+    return <BooleanQueryPill sqon={content as IValueFacet} />;
   }
 
-  return <MultiSelectQueryPill content={content as IValueFacet} />;
+  return <MultiSelectQueryPill sqon={content as IValueFacet} />;
 }
 
 /**
@@ -52,19 +54,18 @@ function factory(content: TSyntheticSqonContentValue) {
  * ┌───────┌──────────────────────────────────────────┐─────────────────┐
  * | [] Q1 | Loremp Ipsum = [1,2, 3 >][X]      | 389K | [copy] [trash]  |
  * └───────└──────────────────────────────────────────┘─────────────────┘
- *
  */
-function QueryBar({ sqon, active }: QueryBarProps) {
+function QueryBar({ index, sqon, active }: QueryBarProps) {
   const { t } = useI18n();
   const { fetcher } = useQBContext();
   const dispatch = useQBDispatch();
-  const backgroundColor = useCallback(
+  const backgroundColor = useMemo(
     () => ({
       'border-primary/75 bg-primary/10': active,
       'border-muted-foreground/20 bg-muted/35 text-muted-foreground': !active,
     }),
     [active],
-  )();
+  );
 
   /**
    * Fetcher
@@ -88,15 +89,36 @@ function QueryBar({ sqon, active }: QueryBarProps) {
   );
 
   /**
-   * Actions
+   * Active current query
+   */
+  const handleActive = useCallback(() => {
+    if (active) return;
+    dispatch({
+      type: QBActionType.SET_ACTIVE_QUERY,
+      payload: { id: sqon.id },
+    });
+  }, [active]);
+
+  /**
+   * @TODO: used to combine queries
    */
   const handleSelection = useCallback(() => {
     console.warn('QueryBar:handleSelection has not be implemented');
   }, [sqon]);
+
+  /**
+   * Use to duplicate a query
+   */
   const handleDuplicate = useCallback(() => {
-    console.warn('QueryBar:handleDuplicate has not be implemented');
+    dispatch({
+      type: QBActionType.DUPLICATE_QUERY,
+      payload: cloneDeep(sqon),
+    });
   }, [sqon]);
 
+  /**
+   * Delete current query
+   */
   const handleDelete = useCallback(() => {
     dispatch({
       type: QBActionType.REMOVE_QUERY,
@@ -105,11 +127,11 @@ function QueryBar({ sqon, active }: QueryBarProps) {
   }, [sqon]);
 
   return (
-    <div className="flex flex-1 group/query" data-query-active={active}>
+    <div className="flex flex-1 group/query" data-query-active={active} onClick={handleActive}>
       {/* selector */}
       <div className={cn('flex gap-2 items-center py-4 px-4 border-l border-t border-b', backgroundColor)}>
         <Checkbox size="sm" checked={false} onClick={handleSelection} />
-        <span className="text-xs font-medium">{t('common.query_bar.selector', { index: 1 })}</span>
+        <span className="text-xs font-medium">{t('common.query_bar.selector', { index })}</span>
       </div>
 
       {/* query */}
@@ -118,7 +140,7 @@ function QueryBar({ sqon, active }: QueryBarProps) {
           {sqon.content.map((content, index) => (
             <div key={index} className="flex mt-1">
               {factory(content)}
-              {index < sqon.content.length - 1 && <CombinerOperator />}
+              {index < sqon.content.length - 1 && <CombinerOperator sqon={sqon} />}
             </div>
           ))}
         </div>

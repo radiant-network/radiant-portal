@@ -23,6 +23,7 @@ import {
   QBActionType,
   useQBActiveQuery,
   useQBAggregationsNumericalConfig,
+  useQBContext,
   useQBDispatch,
   useQBHistory,
   useQBNumericalSqon,
@@ -176,6 +177,7 @@ function NumericalInterval({ isLoading, field, min, max, decimal }: IntervalProp
  */
 export function NumericalFacet({ field }: NumericalFacetProps) {
   const { t } = useI18n();
+  const { activeQueryId } = useQBContext();
   const dispatch = useQBDispatch();
   const history = useQBHistory();
   const { appId } = useFacetConfig();
@@ -290,6 +292,14 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
       handleSetFacet(result);
     }
   }, [history.uuid]);
+
+  /**
+   * Update when active query change
+   */
+  useEffect(() => {
+    const result = getNumericalValue({ sqon, config, statistics });
+    handleSetFacet(result);
+  }, [activeQueryId]);
 
   return (
     <>
