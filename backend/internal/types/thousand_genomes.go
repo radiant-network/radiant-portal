@@ -8,7 +8,6 @@ var ThousandGenomesTable = Table{
 var ThousandGenomesAfField = Field{
 	Name:          "af",
 	Alias:         "thousand_genome_af",
-	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          DecimalType,

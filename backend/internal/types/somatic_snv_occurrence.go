@@ -16,7 +16,7 @@ type SomaticSNVOccurrence struct {
 	IsCanonical         *bool             `json:"is_canonical" validate:"required"`
 	Rsnumber            string            `json:"rsnumber" validate:"required"`
 	OmimInheritanceCode JsonArray[string] `gorm:"type:json" json:"omim_inheritance_code" validate:"required"`
-	// TODO Hotspot
+	Hotspot             *bool             `json:"hotspot" validate:"required"`
 	// TODO CMC
 	// TODO Tier
 	Clinvar        JsonArray[string] `gorm:"type:json" json:"clinvar" validate:"required"`
@@ -59,7 +59,24 @@ var SomaticSNVTumorAdRatioField = Field{
 	Alias:         "ad_ratio",
 	CanBeSelected: true,
 	CanBeSorted:   true,
+	CanBeFiltered: true,
 	Table:         SomaticSNVOccurrenceTable,
+}
+
+var SomaticSNVFilterField = Field{
+	Name:            "filter",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           SomaticSNVOccurrenceTable,
+}
+
+var SomaticSNVInfoHotspotAlleleField = Field{
+	Name:            "info_hotspotallele",
+	Alias:           "hotspot",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           SomaticSNVOccurrenceTable,
 }
 
 var SomaticSNVOccurrencesDefaultFields = []Field{
@@ -67,7 +84,7 @@ var SomaticSNVOccurrencesDefaultFields = []Field{
 	SomaticSNVTumorSeqIdField,
 	SomaticSNVTaskIdField,
 	HgvsgField,
-	SymbolField,
+	PickedSymbolField,
 	PickedAaChangeField,
 	VariantClassField,
 	PickedVepImpactField,
@@ -77,6 +94,7 @@ var SomaticSNVOccurrencesDefaultFields = []Field{
 	PickedIsManePlusField,
 	RsNumberField,
 	PickedOmimInheritanceCodeField,
+	SomaticSNVInfoHotspotAlleleField,
 	ClinvarField,
 	GnomadV3AfField,
 	GermlinePfWgsField,
@@ -89,6 +107,46 @@ var SomaticSNVOccurrencesDefaultFields = []Field{
 var SomaticSNVOccurrencesFields = append(SomaticSNVOccurrencesDefaultFields,
 	// TODO zygosity
 	SomaticSNVTumorAdRatioField,
+
+	// Variant facets
+	ConsequenceField,
+	ChromosomeField,
+	StartField,
+
+	// Gene facets
+	SymbolField,
+	BiotypeField,
+	GnomadPliField,
+	GnomadLoeufField,
+	OmimInheritanceField,
+	HpoGenePanelField,
+	OrphanetGenePanelField,
+	OmimGenePanelField,
+	DddGenePanelField,
+	CosmicGenePanelField,
+
+	// Pathogenicity facets
+	VepImpactFilterField,
+	CaddScoreField,
+	CaddPhredField,
+	DannScoreField,
+	FathmmPredField,
+	LrtPredField,
+	Polyphen2HvarPredField,
+	RevelScoreField,
+	SpliceaiDsField,
+	SiftPredField,
+	// TODO COSMIC
+
+	// Frequency facets
+	GermlinePfWgsAffectedField,
+	GermlinePfWgsNotAffectedField,
+	TopmedAfField,
+	ThousandGenomesAfField,
+
+	// Occurrence facets
+	// TODO zygosity and metrics
+	SomaticSNVFilterField,
 )
 
 var SomaticSNVOccurrencesDefaultSort = []SortField{{Field: PickedImpactScoreField, Order: "desc"}}

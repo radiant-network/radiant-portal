@@ -369,6 +369,7 @@ var PickedImpactScoreField = Field{
 var SomaticPfTnWgsField = Field{
 	Name:          "somatic_pf_tn_wgs",
 	CanBeSelected: true,
+	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          DecimalType,
 	Table:         VariantTable,
@@ -377,6 +378,7 @@ var SomaticPfTnWgsField = Field{
 var SomaticPcTnWgsField = Field{
 	Name:          "somatic_pc_tn_wgs",
 	CanBeSelected: true,
+	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          DecimalType,
 	Table:         VariantTable,

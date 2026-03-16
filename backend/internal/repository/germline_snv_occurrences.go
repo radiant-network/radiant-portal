@@ -40,20 +40,10 @@ func NewGermlineSNVOccurrencesRepository(db *gorm.DB) *GermlineSNVOccurrencesRep
 	return &GermlineSNVOccurrencesRepository{db: db}
 }
 
-func addImplicitOccurrencesFilters(seqId int, r *GermlineSNVOccurrencesRepository, part int) *gorm.DB {
-	alias := types.GermlineSNVOccurrenceTable.Alias
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.GermlineSNVOccurrenceTable.Name, alias))
-	tx = tx.Where(fmt.Sprintf("%s.seq_id = ? and %s.part=?", alias, alias), seqId, part)
-	return tx
-}
-func joinWithVariants(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("JOIN %s %s ON %s.locus_id=%s.locus_id", types.VariantTable.Name, types.VariantTable.Alias, types.VariantTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
-}
-
 func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, userQuery types.ListQuery) ([]GermlineSNVOccurrence, error) {
 	var occurrences []GermlineSNVOccurrence
 
-	tx, part, err := prepareListOrCountQuery(seqId, userQuery, r)
+	tx, part, err := PrepareSnvListOrCountQuery(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -85,177 +75,16 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 	return occurrences, nil
 }
 
-func prepareListOrCountQuery(seqId int, userQuery types.Query, r *GermlineSNVOccurrencesRepository) (*gorm.DB, int, error) {
-	part, err := utils.GetSequencingPart(seqId, r.db)
-	if err != nil {
-		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
-	}
-	tx := addImplicitOccurrencesFilters(seqId, r, part)
-	if userQuery != nil {
-		tx = joinWithVariants(tx)
-
-		if userQuery.HasFieldFromTables(types.TopmedTable) {
-			joinClause := "LEFT JOIN topmed_bravo topmed ON topmed.locus_id=g_snv_o.locus_id"
-			tx = tx.Joins(joinClause)
-		}
-
-		if userQuery.HasFieldFromTables(types.ThousandGenomesTable) {
-			joinClause := "LEFT JOIN 1000_genomes 1000_genomes ON 1000_genomes.locus_id=g_snv_o.locus_id"
-			tx = tx.Joins(joinClause)
-		}
-
-		if userQuery.Filters() != nil && (userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...)) {
-			if userQuery.HasFieldFromTables(types.GenePanelsTables...) {
-				// In this case we need to build a subquery that join the consequences_filter_partitioned table with the gene panels tables
-				// This subquery will join the consequences_filter_partitioned table with the gene panels tables on symbol column and will be used to filter the occurrences
-
-				// Example of the generated query:
-				// SELECT g_snv_o.locus_id as locus_id, ... FROM occurrences o
-				// LEFT SEMI JOIN (
-				//		SELECT cf.locus_id,cf.part,om.panel as omim_gene_panel,hpo.panel as hpo_gene_panel,cf.impact_score as impact_score
-				//		FROM consequences_filter_partitioned cf
-				//		LEFT JOIN omim_gene_panel om ON om.symbol=cf.symbol
-				//		LEFT JOIN hpo_gene_panel hpo ON hpo.symbol=cf.symbol
-				//		WHERE part = 1
-				//	) cf ON cf.locus_id=g_snv_o.locus_id
-				//		AND cf.part = g_snv_o.part
-				//		AND ((cf.impact_score > 2 AND cf.omim_gene_panel IN ('panel1', 'panel2') AND cf.hpo_gene_panel = 'hpo_panel1'))
-				//	WHERE g_snv_o.seq_id = 1 and g_snv_o.part=1 and has_alt
-				//	ORDER BY g_snv_o.locus_id asc LIMIT 10
-
-				selectedPanelsField := userQuery.GetFieldsFromTables(types.GenePanelsTables...)
-				selectedPanelsTables := utils.GetDistinctTablesFromFields(selectedPanelsField)
-
-				consequenceFilterTable := r.db.Table("snv__consequence_filter_partitioned cf").Where("part = ?", part)
-
-				// overrideTableAliases will be used to override the table aliases when generating the filter. The sub-query will contain the columns with their aliases.
-				// For instance panel column from omim_gene_panel will be aliased as omim_gene_panel in the subquery.
-				// And in order to filter the occurrences we need to use the same alias.
-				// We also need to use the table alias that corresponds to the table in the subquery.
-				overrideTableAliases := map[string]string{"cf": "cf"}
-				for _, panelsTable := range selectedPanelsTables {
-					consequenceFilterTable = consequenceFilterTable.
-						Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.Name, panelsTable.Alias, panelsTable.Alias))
-					overrideTableAliases[panelsTable.Alias] = "cf"
-				}
-
-				selectedConsequencesFields := userQuery.GetFieldsFromTables(types.ConsequenceFilterTable)
-				allSelectedFields := append(selectedPanelsField, selectedConsequencesFields...)
-				selectedCols := []string{"cf.locus_id", "cf.part"}
-				for _, field := range allSelectedFields {
-					selectedCols = append(selectedCols, fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias()))
-				}
-				consequenceFilterTable = consequenceFilterTable.Select(selectedCols)
-
-				sqlFilters, params := userQuery.Filters().ToSQL(overrideTableAliases)
-				joinClause := "LEFT SEMI JOIN (?) cf ON cf.locus_id=g_snv_o.locus_id AND cf.part = g_snv_o.part AND (?)"
-				tx = tx.Joins(joinClause, consequenceFilterTable, gorm.Expr(sqlFilters, params...))
-
-			} else {
-				filters, params := userQuery.Filters().ToSQL(nil)
-				joinClause := "LEFT SEMI JOIN snv__consequence_filter_partitioned cf ON cf.locus_id=g_snv_o.locus_id AND cf.part = g_snv_o.part and (?)"
-				tx = tx.Joins(joinClause, gorm.Expr(filters, params...))
-			}
-
-		} else {
-			utils.AddWhere(userQuery, tx)
-		}
-
-	}
-	return tx, part, nil
-}
-
-func (r *GermlineSNVOccurrencesRepository) CountOccurrences(caseId int, seqId int, userQuery types.CountQuery) (int64, error) {
-	tx, _, err := prepareListOrCountQuery(seqId, userQuery, r)
-	if err != nil {
-		return 0, fmt.Errorf("error during query preparation %w", err)
-	}
-	var count int64
-	if err = tx.Count(&count).Error; err != nil {
-		return 0, fmt.Errorf("error fetching occurrences: %w", err)
-	}
-	return count, nil
-}
-
-func prepareAggOrStatisticsQuery(seqId int, userQuery types.Query, r *GermlineSNVOccurrencesRepository) (*gorm.DB, int, error) {
-	part, err := utils.GetSequencingPart(seqId, r.db)
-	if err != nil {
-		return nil, 0, fmt.Errorf("error during partition fetch %w", err)
-	}
-	tx := addImplicitOccurrencesFilters(seqId, r, part)
-	if userQuery != nil {
-		tx = joinWithVariants(tx)
-		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...) {
-			joinClause := "LEFT JOIN snv__consequence_filter_partitioned cf ON cf.locus_id=g_snv_o.locus_id AND cf.part = g_snv_o.part"
-			tx = tx.Joins(joinClause)
-			selectedPanelsTables := utils.GetDistinctTablesFromFields(userQuery.GetFieldsFromTables(types.GenePanelsTables...))
-			for _, panelsTable := range selectedPanelsTables {
-				tx = tx.
-					Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.Name, panelsTable.Alias, panelsTable.Alias))
-			}
-		}
-		if userQuery.HasFieldFromTables(types.TopmedTable) {
-			joinClause := "LEFT JOIN topmed_bravo topmed ON topmed.locus_id=g_snv_o.locus_id"
-			tx = tx.Joins(joinClause)
-		}
-		if userQuery.HasFieldFromTables(types.ThousandGenomesTable) {
-			joinClause := "LEFT JOIN 1000_genomes 1000_genomes ON 1000_genomes.locus_id=g_snv_o.locus_id"
-			tx = tx.Joins(joinClause)
-		}
-		utils.AddWhere(userQuery, tx)
-
-	}
-	return tx, part, nil
+func (r *GermlineSNVOccurrencesRepository) CountOccurrences(_ int, seqId int, userQuery types.CountQuery) (int64, error) {
+	return CountSnv(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
 }
 
 func (r *GermlineSNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	tx, _, err := prepareAggOrStatisticsQuery(seqId, userQuery, r)
-	var aggregation []Aggregation
-	if err != nil {
-		return aggregation, fmt.Errorf("error during query preparation %w", err)
-	}
-	aggCol := userQuery.GetAggregateField()
-	var sel string
-	if aggCol.IsArray {
-		//Example :  select unnest  as bucket, count(distinct g_snv_o.locus_id) as c from occurrences o
-		//join variants v on v.locus_id=g_snv_o.locus_id
-		//join unnest(v.clinvar_interpretation) as unnest  on true where g_snv_o.seq_id=4586 and g_snv_o.part=11 and g_snv_o.has_alt
-		//group by bucket order by 2;
-		unnestJoin := fmt.Sprintf("join unnest(%s.%s) as unnest on true", aggCol.Table.Alias, aggCol.Name)
-		tx = tx.Joins(unnestJoin)
-		sel = "unnest as bucket, count(distinct g_snv_o.locus_id) as count"
-	} else {
-		sel = fmt.Sprintf("%s.%s as bucket, count(distinct g_snv_o.locus_id) as count", aggCol.Table.Alias, aggCol.Name)
-	}
-
-	tx = tx.Select(sel).
-		Where(fmt.Sprintf("%s.%s is not null", aggCol.Table.Alias, aggCol.Name)). //We don't want to count null values
-		Group("bucket").Order("count asc, bucket asc")
-	if err = tx.Find(&aggregation).Error; err != nil {
-		return nil, fmt.Errorf("error query aggragation: %w", err)
-	}
-	return aggregation, nil
+	return AggregateSnv(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
 }
 
 func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
-	tx, _, err := prepareAggOrStatisticsQuery(seqId, userQuery, r)
-	var statistics types.Statistics
-	if err != nil {
-		return &statistics, fmt.Errorf("error during query preparation %w", err)
-	}
-	targetCol := userQuery.GetTargetedField()
-	var sel string
-	if targetCol.IsArray {
-		sel = fmt.Sprintf("MIN(ARRAY_MIN(%s.%s)) as min, MAX(ARRAY_MAX(%s.%s)) as max", targetCol.Table.Alias, targetCol.Name, targetCol.Table.Alias, targetCol.Name)
-	} else {
-		sel = fmt.Sprintf("MIN(%s.%s) as min, MAX(%s.%s) as max", targetCol.Table.Alias, targetCol.Name, targetCol.Table.Alias, targetCol.Name)
-	}
-	tx = tx.Select(sel)
-	if err = tx.Find(&statistics).Error; err != nil {
-		return nil, fmt.Errorf("error query statistics: %w", err)
-	}
-	statistics.Type = targetCol.Type
-	return &statistics, nil
+	return StatisticsSnv(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
 }
 
 func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(caseId int, seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error) {
