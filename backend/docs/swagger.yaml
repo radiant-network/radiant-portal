@@ -1938,6 +1938,95 @@ components:
       required:
       - patient_id
       type: object
+    SomaticSNVOccurrence:
+      properties:
+        aa_change:
+          type: string
+        ad_ratio:
+          type: number
+        clinvar:
+          description: |-
+            TODO CMC
+            TODO Tier
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        germline_pc_wgs:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        gnomad_v3_af:
+          type: number
+        has_interpretation:
+          type: boolean
+        hgvsg:
+          type: string
+        hotspot:
+          type: boolean
+        is_canonical:
+          type: boolean
+        is_mane_plus:
+          type: boolean
+        is_mane_select:
+          type: boolean
+        locus_id:
+          type: string
+        omim_inheritance_code:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        picked_consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        rsnumber:
+          type: string
+        seq_id:
+          type: integer
+        somatic_pc_tn_wgs:
+          type: integer
+        somatic_pf_tn_wgs:
+          type: number
+        somatic_quality:
+          type: integer
+        symbol:
+          type: string
+        task_id:
+          type: integer
+        variant_class:
+          type: string
+        vep_impact:
+          $ref: '#/components/schemas/VepImpact'
+        zygosity:
+          type: string
+      required:
+      - aa_change
+      - clinvar
+      - germline_pc_wgs
+      - germline_pf_wgs
+      - gnomad_v3_af
+      - has_interpretation
+      - hgvsg
+      - hotspot
+      - is_canonical
+      - is_mane_plus
+      - is_mane_select
+      - locus_id
+      - omim_inheritance_code
+      - picked_consequences
+      - rsnumber
+      - seq_id
+      - somatic_pc_tn_wgs
+      - somatic_pf_tn_wgs
+      - somatic_quality
+      - symbol
+      - task_id
+      - variant_class
+      - vep_impact
+      type: object
     SortBody:
       properties:
         field:
@@ -4220,6 +4309,232 @@ paths:
       security:
       - bearerauth: []
       summary: Get germline SNV facets dictionary
+      tags:
+      - occurrences
+  /occurrences/somatic/snv/{case_id}/{seq_id}/aggregate:
+    post:
+      description: Aggregate somatic SNV occurrences for a given sequence ID
+      operationId: aggregateSomaticSNVOccurrences
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Whether to include all possible facet values
+        in: query
+        name: with_dictionary
+        schema:
+          default: false
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AggregationBodyWithSqon'
+        description: Aggregation Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Aggregation'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Aggregate somatic SNV occurrences
+      tags:
+      - occurrences
+  /occurrences/somatic/snv/{case_id}/{seq_id}/count:
+    post:
+      description: Counts somatic SNV occurrences for a given sequence ID
+      operationId: countSomaticSNVOccurrences
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountBodyWithSqon'
+        description: Count Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Count'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Count somatic SNV occurrences
+      tags:
+      - occurrences
+  /occurrences/somatic/snv/{case_id}/{seq_id}/list:
+    post:
+      description: List somatic SNV occurrences for a given sequence ID
+      operationId: listSomaticSNVOccurrences
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithSqon'
+        description: List Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SomaticSNVOccurrence'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: List somatic SNV occurrences
+      tags:
+      - occurrences
+  /occurrences/somatic/snv/{case_id}/{seq_id}/statistics:
+    post:
+      description: Return statistics about a field for a given sequence ID
+      operationId: statisticsSomaticSNVOccurrences
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatisticsBodyWithSqon'
+        description: Statistics Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Statistics of somatic SNV occurrences
       tags:
       - occurrences
   /patients/batch:

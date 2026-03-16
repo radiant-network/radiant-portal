@@ -125,15 +125,19 @@ Class | Method | HTTP request | Description
 *MondoApi* | [**mondo_term_auto_complete**](docs/MondoApi.md#mondo_term_auto_complete) | **GET** /mondo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
 *OccurrencesApi* | [**aggregate_germline_cnv_occurrences**](docs/OccurrencesApi.md#aggregate_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/aggregate | Aggregate germline CNV occurrences
 *OccurrencesApi* | [**aggregate_germline_snv_occurrences**](docs/OccurrencesApi.md#aggregate_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/aggregate | Aggregate germline SNV occurrences
+*OccurrencesApi* | [**aggregate_somatic_snv_occurrences**](docs/OccurrencesApi.md#aggregate_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/aggregate | Aggregate somatic SNV occurrences
 *OccurrencesApi* | [**count_germline_cnv_occurrences**](docs/OccurrencesApi.md#count_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/count | Count germline CNV occurrences
 *OccurrencesApi* | [**count_germline_snv_occurrences**](docs/OccurrencesApi.md#count_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/count | Count germline SNV occurrences
+*OccurrencesApi* | [**count_somatic_snv_occurrences**](docs/OccurrencesApi.md#count_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/count | Count somatic SNV occurrences
 *OccurrencesApi* | [**get_expanded_germline_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /occurrences/germline/snv/{case_id}/{seq_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
 *OccurrencesApi* | [**get_germline_snv_dictionary**](docs/OccurrencesApi.md#get_germline_snv_dictionary) | **GET** /occurrences/germline/snv/dictionary | Get germline SNV facets dictionary
 *OccurrencesApi* | [**list_germline_cnv_genes_overlap**](docs/OccurrencesApi.md#list_germline_cnv_genes_overlap) | **GET** /occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap | List genes overlapping a CNV with a given ID
 *OccurrencesApi* | [**list_germline_cnv_occurrences**](docs/OccurrencesApi.md#list_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/list | List germline CNV occurrences
 *OccurrencesApi* | [**list_germline_snv_occurrences**](docs/OccurrencesApi.md#list_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/list | List germline SNV occurrences
+*OccurrencesApi* | [**list_somatic_snv_occurrences**](docs/OccurrencesApi.md#list_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/list | List somatic SNV occurrences
 *OccurrencesApi* | [**statistics_germline_cnv_occurrences**](docs/OccurrencesApi.md#statistics_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/statistics | Statistics of germline CNV occurrences
 *OccurrencesApi* | [**statistics_germline_snv_occurrences**](docs/OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/statistics | Statistics of germline SNV occurrences
+*OccurrencesApi* | [**statistics_somatic_snv_occurrences**](docs/OccurrencesApi.md#statistics_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/statistics | Statistics of somatic SNV occurrences
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /patients/batch | Create a new patient batch
 *SamplesApi* | [**post_sample_batch**](docs/SamplesApi.md#post_sample_batch) | **POST** /samples/batch | Create a new sample batch
 *SavedFiltersApi* | [**delete_saved_filter**](docs/SavedFiltersApi.md#delete_saved_filter) | **DELETE** /users/saved_filters/{saved_filter_id} | Delete a saved filter
@@ -236,6 +240,7 @@ Class | Method | HTTP request | Description
  - [Sequencing](docs/Sequencing.md)
  - [SequencingExperimentBatch](docs/SequencingExperimentBatch.md)
  - [SequencingExperimentDetail](docs/SequencingExperimentDetail.md)
+ - [SomaticSNVOccurrence](docs/SomaticSNVOccurrence.md)
  - [SortBody](docs/SortBody.md)
  - [Sqon](docs/Sqon.md)
  - [SqonContent](docs/SqonContent.md)

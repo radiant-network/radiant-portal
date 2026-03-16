@@ -119,6 +119,7 @@ from radiant_python.models.search_criterion import SearchCriterion
 from radiant_python.models.sequencing import Sequencing
 from radiant_python.models.sequencing_experiment_batch import SequencingExperimentBatch
 from radiant_python.models.sequencing_experiment_detail import SequencingExperimentDetail
+from radiant_python.models.somatic_snv_occurrence import SomaticSNVOccurrence
 from radiant_python.models.sort_body import SortBody
 from radiant_python.models.sqon import Sqon
 from radiant_python.models.sqon_content import SqonContent
