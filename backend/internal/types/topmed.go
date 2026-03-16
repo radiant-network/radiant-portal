@@ -8,7 +8,6 @@ var TopmedTable = Table{
 var TopmedAfField = Field{
 	Name:          "af",
 	Alias:         "topmed_af",
-	CanBeSelected: false,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Type:          DecimalType,
