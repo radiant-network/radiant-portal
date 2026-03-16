@@ -16,8 +16,8 @@ type FrequencySectionProps = {
 export default function FrequencySection({ data }: FrequencySectionProps) {
   const { t } = useI18n();
   const affectedValue =
-    data.pc_wgs_affected && data.pn_wgs_affected && data.pf_wgs_affected?.toExponential(2)
-      ? `${data.pc_wgs_affected} / ${data.pn_wgs_affected} (${data.pf_wgs_affected?.toExponential(2)})`
+    data.germline_pc_wgs_affected && data.germline_pn_wgs_affected && data.germline_pf_wgs_affected?.toExponential(2)
+      ? `${data.germline_pc_wgs_affected} / ${data.germline_pn_wgs_affected} (${data.germline_pf_wgs_affected?.toExponential(2)})`
       : '-';
   const affectedTitle = (
     <Tooltip>
@@ -32,8 +32,10 @@ export default function FrequencySection({ data }: FrequencySectionProps) {
   );
 
   const nonAffectedValue =
-    data.pc_wgs_not_affected && data.pn_wgs_not_affected && data.pf_wgs_not_affected?.toExponential(2)
-      ? `${data.pc_wgs_not_affected} / ${data.pn_wgs_not_affected} (${data.pf_wgs_not_affected?.toExponential(2)})`
+    data.germline_pc_wgs_not_affected &&
+    data.germline_pn_wgs_not_affected &&
+    data.germline_pf_wgs_not_affected?.toExponential(2)
+      ? `${data.germline_pc_wgs_not_affected} / ${data.germline_pn_wgs_not_affected} (${data.germline_pf_wgs_not_affected?.toExponential(2)})`
       : '-';
   const nonAffectedTitle = (
     <Tooltip>

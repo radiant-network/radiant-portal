@@ -17,6 +17,9 @@ Name | Type | Description | Notes
 **exomiser_variant_score** | **float** |  | 
 **filter** | **str** |  | [optional] 
 **genotype_quality** | **int** |  | 
+**germline_pc_wgs** | **int** |  | [optional] 
+**germline_pf_wgs** | **float** |  | 
+**germline_pn_wgs** | **int** |  | [optional] 
 **gnomad_v3_af** | **float** |  | 
 **has_interpretation** | **bool** |  | 
 **hgvsg** | **str** |  | 
@@ -27,10 +30,7 @@ Name | Type | Description | Notes
 **locus_id** | **str** |  | 
 **max_impact_score** | **int** |  | 
 **omim_inheritance_code** | **List[str]** |  | [optional] 
-**pc_wgs** | **int** |  | [optional] 
-**pf_wgs** | **float** |  | 
 **picked_consequences** | **List[str]** |  | 
-**pn_wgs** | **int** |  | [optional] 
 **rsnumber** | **str** |  | [optional] 
 **seq_id** | **int** |  | 
 **start** | **int** |  | 

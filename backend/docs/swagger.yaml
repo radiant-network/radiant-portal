@@ -898,6 +898,20 @@ components:
           type: string
         genotype_quality:
           type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
         gnomad_loeuf:
           type: number
         gnomad_pli:
@@ -936,25 +950,11 @@ components:
           uniqueItems: false
         parental_origin:
           type: string
-        pc_wgs_affected:
-          type: integer
-        pc_wgs_not_affected:
-          type: integer
-        pf_wgs:
-          type: number
-        pf_wgs_affected:
-          type: number
-        pf_wgs_not_affected:
-          type: number
         picked_consequences:
           items:
             type: string
           type: array
           uniqueItems: false
-        pn_wgs_affected:
-          type: integer
-        pn_wgs_not_affected:
-          type: integer
         polyphen2_hvar_pred:
           type: string
         polyphen2_hvar_score:
@@ -1212,6 +1212,12 @@ components:
           type: string
         genotype_quality:
           type: integer
+        germline_pc_wgs:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        germline_pn_wgs:
+          type: integer
         gnomad_v3_af:
           type: number
         has_interpretation:
@@ -1235,17 +1241,11 @@ components:
             type: string
           type: array
           uniqueItems: false
-        pc_wgs:
-          type: integer
-        pf_wgs:
-          type: number
         picked_consequences:
           items:
             type: string
           type: array
           uniqueItems: false
-        pn_wgs:
-          type: integer
         rsnumber:
           type: string
         seq_id:
@@ -1273,13 +1273,13 @@ components:
       - exomiser_moi
       - exomiser_variant_score
       - genotype_quality
+      - germline_pf_wgs
       - gnomad_v3_af
       - has_interpretation
       - hgvsg
       - locus
       - locus_id
       - max_impact_score
-      - pf_wgs
       - picked_consequences
       - seq_id
       - start
@@ -2295,6 +2295,12 @@ components:
           type: string
         fathmm_score:
           type: number
+        germline_pc_wgs:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        germline_pn_wgs:
+          type: integer
         gnomad_loeuf:
           type: number
         gnomad_pli:
@@ -2322,10 +2328,6 @@ components:
             $ref: '#/components/schemas/OmimGenePanel'
           type: array
           uniqueItems: false
-        pc_wgs:
-          type: integer
-        pf_wgs:
-          type: number
         phyloP17way_primate:
           type: number
         picked_consequences:
@@ -2333,8 +2335,6 @@ components:
             type: string
           type: array
           uniqueItems: false
-        pn_wgs:
-          type: integer
         polyphen2_hvar_pred:
           type: string
         polyphen2_hvar_score:
@@ -2361,12 +2361,12 @@ components:
         vep_impact:
           $ref: '#/components/schemas/VepImpact'
       required:
+      - germline_pf_wgs
       - gnomad_v3_af
       - is_canonical
       - is_mane_plus
       - is_mane_select
       - locus
-      - pf_wgs
       - picked_consequences
       type: object
     VariantUninterpretedCase:
