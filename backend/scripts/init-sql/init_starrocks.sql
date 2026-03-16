@@ -282,16 +282,16 @@ CREATE TABLE IF NOT EXISTS staging_sequencing_experiment
     vcf_filepath VARCHAR(1024),
     cnv_vcf_filepath VARCHAR(1024),
     exomiser_filepath VARCHAR(1024),
-    sex VARCHAR(10),
+    sex VARCHAR(50),
     family_id INT,
-    family_role VARCHAR(20),
-    affected_status VARCHAR(20),
+    family_role VARCHAR(50),
+    affected_status VARCHAR(50),
+    histology_type VARCHAR(100),
     created_at DATETIME,
     updated_at DATETIME,
     ingested_at DATETIME,
     deleted BOOLEAN NOT NULL DEFAULT "false"
-) ENGINE = OLAP
-    PRIMARY KEY (case_id, seq_id, task_id);
+) PRIMARY KEY (case_id, seq_id, task_id);
 
 
 CREATE TABLE IF NOT EXISTS `clinvar_rcv_summary`
@@ -373,6 +373,66 @@ CREATE TABLE IF NOT EXISTS `germline__cnv__occurrence` (
 ENGINE=OLAP
 DUPLICATE KEY(`part`, `seq_id`, `id`);
 
+CREATE TABLE IF NOT EXISTS somatic__snv__occurrence
+(
+    part                            INT    NOT NULL,
+    task_id                         INT    NOT NULL,
+    tumor_seq_id                    INT    NOT NULL,
+    locus_id                        BIGINT NOT NULL,
+    normal_seq_id                   INT,
+    quality                         FLOAT,
+    filter                          VARCHAR(255),
+    -- INFO fields
+    info_hotspotallele              VARCHAR(255),
+    info_old_record                 VARCHAR(2000),
+    info_baseq_rank_sum             FLOAT,
+    info_excess_het                 FLOAT,
+    info_fs                         FLOAT,
+    info_ds                         BOOLEAN,
+    info_fraction_informative_reads FLOAT,
+    info_inbreed_coeff              FLOAT,
+    info_mleac                      INT,
+    info_mleaf                      FLOAT,
+    info_mq                         FLOAT,
+    info_mq0                        FLOAT,
+    info_m_qrank_sum                FLOAT,
+    info_qd                         FLOAT,
+    info_r2_5p_bias                 FLOAT,
+    info_read_pos_rank_sum          FLOAT,
+    info_sor                        FLOAT,
+    info_vqslod                     FLOAT,
+    info_culprit                    VARCHAR(255),
+    info_dp                         INT,
+    info_haplotype_score            FLOAT,
+    -- Tumor FORMAT
+    tumor_calls                     ARRAY<INT>,
+    tumor_dp                        INT,
+    tumor_gq                        INT,
+    tumor_has_alt                   BOOLEAN,
+    tumor_af                        FLOAT,
+    tumor_zygosity                  CHAR(3),
+    tumor_ad_ref                    INT,
+    tumor_ad_alt                    INT,
+    tumor_ad_total                  INT,
+    tumor_ad_ratio                  FLOAT,
+    tumor_phased                    BOOLEAN,
+    tumor_gt_status                 VARCHAR(50),
+    -- Normal FORMAT
+    normal_calls                    ARRAY<INT>,
+    normal_dp                       INT,
+    normal_gq                       INT,
+    normal_has_alt                  BOOLEAN,
+    normal_af                       FLOAT,
+    normal_zygosity                 CHAR(3),
+    normal_ad_ref                   INT,
+    normal_ad_alt                   INT,
+    normal_ad_total                 INT,
+    normal_ad_ratio                 FLOAT,
+    normal_phased                   BOOLEAN,
+    normal_gt_status                VARCHAR(50)
+) ENGINE=OLAP
+    DUPLICATE KEY(`part`, `task_id`, `tumor_seq_id`, `locus_id`);
+
 INSERT INTO clinvar (locus_id, chromosome, start, reference, alternate, name)
 VALUES
     (1000, '1', '1111', 'A', 'T', '111111'),
@@ -396,16 +456,21 @@ VALUES
     (1, 1, 1, 1000, 150, 'PASS', 'HOM', 0.5, 0, 'Likely pathogenic', ['PP3'], 0.85, 0.75),
     (1, 19, 19, 2000, 200, 'PASS', 'HET', 1.0, 0, 'Benign', ['BP4'], 0.95, 0.9);
 
-INSERT INTO snv__variant (locus_id, impact_score, germline_pf_wgs, germline_pc_wgs, germline_pn_wgs, germline_pc_wgs_affected, germline_pn_wgs_affected, germline_pf_wgs_affected, germline_pc_wgs_not_affected, germline_pn_wgs_not_affected, germline_pf_wgs_not_affected, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate, transcript_id)
+INSERT INTO snv__variant (locus_id, impact_score, germline_pf_wgs, germline_pc_wgs, germline_pn_wgs, germline_pc_wgs_affected, germline_pn_wgs_affected, germline_pf_wgs_affected, germline_pc_wgs_not_affected, germline_pn_wgs_not_affected, germline_pf_wgs_not_affected, somatic_pc_tn_wgs, somatic_pn_tn_wgs, somatic_pf_tn_wgs, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate, transcript_id)
 VALUES
-    (1000, 3, 0.01, 10, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 0.01, 'hgvsg1', 'AD', 'class1', 'MODIFIER', 'BRAF', true, true, ['Benign', 'Pathogenic'], 'rs111111111', 'p.Arg19His', ['splice acceptor'], 'locus_full_1000', '1', 1111, 'A', 'T', 'T001'),
-    (2000, 1, 0.02, 20, 100, 40, 50, 0.80, 20, 50, 0.4, 0.02, 'hgvsg2', 'Smu', 'class2', 'MODIFIER', 'BRAC', false, true, ['Pathogenic'], 'rs2222222', 'p.Arg19His', ['splice acceptor'], 'locus_full_2000', '2', 2222, 'C', 'G', 'T002');
+    (1000, 3, 0.10, 10, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 10, 50, 0.2, 0.01, 'hgvsg10', 'AD', 'insertion', 'MODIFIER', 'BRAF', true, false, ['Benign', 'Pathogenic'], 'rs111111111', 'p.Arg19His', ['splice acceptor'], 'locus_full_1000', '1', 1111, 'A', 'T', 'T001'),
+    (1001, 3, 0.11, 11, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 11, 51, 0.21, 0.01, 'hgvsg11', 'AD', 'deletion', 'LOW', 'BRCA1', false, true, ['Benign', 'Pathogenic'], 'rs111111112', 'p.Arg2019His', ['splice acceptor'], 'locus_full_1001', '1', 1112, 'A', 'T', 'T001'),
+    (1002, 3, 0.12, 12, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 12, 52, 0.22, 0.01, 'hgvsg12', 'AD', 'SNV', 'MODERATE', 'BRCA2', true, false, ['Benign', 'Pathogenic'], 'rs111111113', 'p.Arg21His', ['splice acceptor'], 'locus_full_1002', '1', 1113, 'A', 'T', 'T001'),
+    (2000, 1, 0.20, 20, 100, 40, 50, 0.80, 20, 50, 0.4, 20, 60, 0.3, 0.02, 'hgvsg21', 'Smu', 'indel', 'HIGH', 'BRAF', false, true, ['Pathogenic'], 'rs2222221', 'p.Arg29His', ['splice acceptor'], 'locus_full_2000', '2', 2221, 'C', 'G', 'T002'),
+    (2001, 1, 0.21, 21, 100, 40, 50, 0.80, 20, 50, 0.4, 21, 61, 0.31, 0.02, 'hgvsg22', 'Smu', 'substitution', 'MODIFIER', 'BRCA1', true, false, ['Pathogenic'], 'rs2222222', 'p.Ar3019His', ['splice acceptor'], 'locus_full_2001', '2', 2222, 'C', 'G', 'T002');
 
-INSERT INTO staging_sequencing_experiment (seq_id, task_id, case_id, task_type, part, analysis_type, ingested_at)
+INSERT INTO staging_sequencing_experiment (seq_id, task_id, case_id, task_type, part, analysis_type, ingested_at, histology_type)
 VALUES
-    (1, 1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01'),
-    (2, 1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01'),
-    (19, 19, 7,'radiant_germline_annotation', 1, 'germline', '1970-01-01');
+    (1, 1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
+    (2, 1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
+    (19, 19, 7,'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
+    (73, 74, 71,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'normal'),
+    (74, 74, 71,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'tumoral');
 
 INSERT INTO omim_gene_panel (symbol, panel, omim_gene_id, omim_phenotype_id, inheritance_code, inheritance)
 VALUES
@@ -477,6 +542,18 @@ VALUES
     (1, 1, 'CNV1_1', 'aliquot1', '1', 1000, 2000, 'DEL', 1000, 'CNV1', 0.999, [1, 2, 3], 'PASS', 2, 1, [1, 2], 0.5, 'DEL', 1000, 1000, [100, 200], [50, 150]),
     (1, 1, 'CNV2_1', 'aliquot2', '2', 2000, 3000, 'DUP', 1000, 'CNV2', 0.888, [4, 5, 6], 'PASS', 3, 2, [3, 4], 0.6, 'DUP', 1000, 1000, [200, 300], [150, 250]),
     (1, 2, 'CNV3_2', 'aliquot3', 'X', 3000, 4000, 'INV', 1000, 'CNV3', 0.777, [7, 8, 9], 'PASS', 4, 3, [5, 6], 0.7, 'INV', 1000, 1000, [300, 400], [250, 350]);
+
+INSERT INTO test_db.somatic__snv__occurrence (
+    part, task_id, tumor_seq_id, locus_id, normal_seq_id, quality, filter,
+    info_hotspotallele,tumor_ad_ratio
+)
+VALUES
+    (1, 74, 74, 1000, 73, 31.63, 'None', 'T', 0.41),
+    (1, 74, 74, 1001, 73, 43.43, 'PASS', 'F', 0.09),
+    (1, 74, 74, 1002, 73, 99.82, 'LowQual', 'T', 0.67),
+    (1, 74, 74, 2000, 73, 55.61, 'None', 'F', 0.72),
+    (1, 74, 74, 2001, 73, 41.56, 'LowQual', 'T', 0.65);
+
 
 CREATE TABLE IF NOT EXISTS `ensembl_gene` (
                                 `gene_id` varchar(128) NULL COMMENT "",
