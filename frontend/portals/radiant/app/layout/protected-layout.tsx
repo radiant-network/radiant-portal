@@ -8,6 +8,7 @@ import MainNavbar from '@/components/base/navbar/main-navbar';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';
 import { useBetaFeatures } from '@/components/hooks/beta-feature-provider';
 import { useI18n } from '@/components/hooks/i18n';
+import { LoginContext } from '@/components/hooks/use-login';
 
 import type { Route } from '../+types/root';
 
@@ -45,75 +46,77 @@ const _ProtectedLayout = () => {
   const { orientation } = features as { orientation: 'left' | 'right' | 'top' };
 
   return (
-    <SidebarProvider>
-      <div className={layoutVariants({ orientation })}>
-        <MainNavbar
-          placement={orientation}
-          logo={<img src={logo} alt="Logo" />}
-          links={[
-            // SJRA-389
-            // {
-            //   title: t('main_navbar.links.dashboard'),
-            //   icon: <LayoutDashboardIcon />,
-            //   as: 'button',
-            // },
-            {
-              title: t('main_navbar.links.cases'),
-              icon: <FolderIcon />,
-              to: '/case',
-              as: Link,
-              active: pathname === '/case',
-            },
-            {
-              title: t('main_navbar.links.files'),
-              icon: <ArchiveIcon />,
-              to: '/file',
-              as: Link,
-              active: pathname === '/file',
-            },
-          ]}
-          actions={
-            [
+    <LoginContext value={{ ...data }}>
+      <SidebarProvider>
+        <div className={layoutVariants({ orientation })}>
+          <MainNavbar
+            placement={orientation}
+            logo={<img src={logo} alt="Logo" />}
+            links={[
               // SJRA-389
               // {
-              //   title: t('main_navbar.actions.community'),
-              //   icon: <UsersIcon />,
+              //   title: t('main_navbar.links.dashboard'),
+              //   icon: <LayoutDashboardIcon />,
               //   as: 'button',
               // },
-              // {
-              //   title: t('main_navbar.actions.resources'),
-              //   icon: <LightbulbIcon />,
-              //   as: 'button',
-              //   subItems: [
-              //     {
-              //       title: t('main_navbar.actions.website'),
-              //       icon: <ExternalLink />,
-              //       as: 'a',
-              //       href: 'https://www.radiant-genomics.com',
-              //     },
-              //     {
-              //       title: t('main_navbar.actions.documentation'),
-              //       icon: <ExternalLink />,
-              //       as: 'button',
-              //     },
-              //     {
-              //       separator: true,
-              //     },
-              //     {
-              //       title: t('main_navbar.actions.contact'),
-              //       icon: <MailIcon />,
-              //       as: 'button',
-              //     },
-              //   ],
-              // },
-            ]
-          }
-          userDetails={data}
-          onLogoutClick={() => navigate('/auth/logout')}
-        />
-        <Outlet />
-      </div>
-    </SidebarProvider>
+              {
+                title: t('main_navbar.links.cases'),
+                icon: <FolderIcon />,
+                to: '/case',
+                as: Link,
+                active: pathname === '/case',
+              },
+              {
+                title: t('main_navbar.links.files'),
+                icon: <ArchiveIcon />,
+                to: '/file',
+                as: Link,
+                active: pathname === '/file',
+              },
+            ]}
+            actions={
+              [
+                // SJRA-389
+                // {
+                //   title: t('main_navbar.actions.community'),
+                //   icon: <UsersIcon />,
+                //   as: 'button',
+                // },
+                // {
+                //   title: t('main_navbar.actions.resources'),
+                //   icon: <LightbulbIcon />,
+                //   as: 'button',
+                //   subItems: [
+                //     {
+                //       title: t('main_navbar.actions.website'),
+                //       icon: <ExternalLink />,
+                //       as: 'a',
+                //       href: 'https://www.radiant-genomics.com',
+                //     },
+                //     {
+                //       title: t('main_navbar.actions.documentation'),
+                //       icon: <ExternalLink />,
+                //       as: 'button',
+                //     },
+                //     {
+                //       separator: true,
+                //     },
+                //     {
+                //       title: t('main_navbar.actions.contact'),
+                //       icon: <MailIcon />,
+                //       as: 'button',
+                //     },
+                //   ],
+                // },
+              ]
+            }
+            userDetails={data}
+            onLogoutClick={() => navigate('/auth/logout')}
+          />
+          <Outlet />
+        </div>
+      </SidebarProvider>
+    </LoginContext>
   );
 };
 

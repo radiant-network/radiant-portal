@@ -12,6 +12,8 @@
     "close": "Close",
     "view_all": "View all",
     "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
     "editor": {
       "headings": {
         "normal": "Normal",
@@ -1685,6 +1687,25 @@
         "seq_id_abrv": "Seq.",
         "view_case": "View Case",
         "view_variants": "View Variants"
+      }
+    }
+  },
+  "notes": {
+    "variant": {
+      "title": "Variant Comments",
+      "button": "Comments",
+      "empty_title": "No comment yet",
+      "empty_description": "Use comments to add notes about your case analysis and document decisions. Comments are visible to all users with access to this case.",
+      "editor_placeholder": "Add your comment",
+      "edited": "(edited)",
+      "char_limit": "{{count}}/{{max}}",
+      "delete_dialog": {
+        "title": "Delete comment?",
+        "description": "Are you sure you want to delete this comment? This cannot be undone."
+      },
+      "tooltip": {
+        "add": "Add a comment",
+        "view": "View comments"
       }
     }
   },
