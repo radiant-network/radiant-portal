@@ -268,7 +268,7 @@ export const tableSNVFacets = [
       {
         id: 'all_patient_freq',
         name: 'All Patient Freq.',
-        apiField: 'pf_wgs',
+        apiField: 'germline_pf_wgs',
         position: 0,
         tooltip: 'Frequency across all patients of the network (WGS)',
         defaultOperator: '<',
@@ -277,7 +277,7 @@ export const tableSNVFacets = [
       {
         id: 'aff_patient_freq',
         name: 'Affected Patient Freq.',
-        apiField: 'pf_wgs_affected',
+        apiField: 'germline_pf_wgs_affected',
         position: 1,
         tooltip: 'Frequency across affected patients of the network (WGS)',
         defaultOperator: '<',
@@ -286,7 +286,7 @@ export const tableSNVFacets = [
       {
         id: 'unaff_patient_freq',
         name: 'Non-Affected Patient Freq.',
-        apiField: 'pf_wgs_not_affected',
+        apiField: 'germline_pf_wgs_not_affected',
         position: 2,
         tooltip: 'Frequency across non-affected patients of the network (WGS)',
         defaultOperator: '<',

@@ -318,7 +318,7 @@ const tableColumns = {
     {
       id: 'sex',
       name: 'Sex',
-      apiField: 'sex_name',
+      apiField: 'sex_code',
       isVisibleByDefault: false,
       pinByDefault: null,
       isSortable: false,
