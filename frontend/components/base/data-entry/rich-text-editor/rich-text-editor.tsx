@@ -14,15 +14,25 @@ export type RichTextEditorProps = Omit<EditorContentProps, 'ref' | 'editor' | 'o
   wrapperClassName?: string;
   onChange?: (value: string) => void;
   onBlur?: () => void;
+  autofocus?: boolean;
+  actions?: React.ReactElement[];
 };
 
-const RichTextEditor = ({ value, className, wrapperClassName, onChange, onBlur, ...props }: RichTextEditorProps) => {
+const RichTextEditor = ({
+  value,
+  actions = [],
+  className,
+  wrapperClassName,
+  onChange,
+  onBlur,
+  ...props
+}: RichTextEditorProps) => {
   const editor = useEditor(
     {
       editorProps: {
         attributes: {
           class: cn(
-            'min-h-[80px] w-full rounded-md rounded-tr-none rounded-tl-none border border-input bg-transparent px-3 py-2 border-t-0 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-auto resize-y',
+            'min-h-[80px] w-full bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-auto resize-y',
             className,
           ),
         },
@@ -89,10 +99,14 @@ const RichTextEditor = ({ value, className, wrapperClassName, onChange, onBlur, 
 
   return (
     <div
-      className={cn('shadow-xs rounded-md bg-background focus-within:ring-1 focus-within:ring-ring', wrapperClassName)}
+      className={cn(
+        'shadow-xs rounded-md bg-background border border-input focus-within:ring-1 focus-within:ring-ring overflow-hidden',
+        wrapperClassName,
+      )}
     >
       {editor ? <RichTextEditorToolbar editor={editor} /> : null}
       <EditorContent editor={editor} {...props} />
+      {actions.length > 0 && <div className="flex justify-end gap-1.5 px-2 py-2">{actions.map(action => action)}</div>}
     </div>
   );
 };

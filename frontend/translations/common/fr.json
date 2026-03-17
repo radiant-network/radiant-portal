@@ -10,6 +10,8 @@
     "no_gene": "Aucun gène",
     "save": "Sauvegarder",
     "edit": "Éditer",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
     "close": "Fermer",
     "view_all": "Voir tout",
     "editor": {
@@ -1689,6 +1691,25 @@
         "seq_id_abrv": "Séq.",
         "view_case": "Voir cas",
         "view_variants": "Voir variants"
+      }
+    }
+  },
+  "notes": {
+    "variant": {
+     "title": "Commentaires sur le variant",
+      "button": "Commentaires",
+      "empty_title": "Aucun commentaire",
+      "empty_description": "Ajoutez des commentaires afin de documenter votre analyse et vos décisions (visibles par tous les utilisateurs ayant accès à ce cas).",
+      "editor_placeholder": "Ajoutez votre commentaire",
+      "edited": "(modifié)",
+      "char_limit": "{{count}}/{{max}}",
+      "delete_dialog": {
+        "title": "Supprimer le commentaire ?",
+        "description": "Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible."
+      },
+      "tooltip": {
+        "add": "Ajouter un commentaire",
+        "view": "Voir les commentaires"
       }
     }
   },
