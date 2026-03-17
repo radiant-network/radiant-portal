@@ -156,7 +156,7 @@ const tableColumns = [
   {
     id: 'freq',
     name: 'Freq.',
-    apiField: 'pf_wgs',
+    apiField: 'germline_pf_wgs',
     isVisibleByDefault: true,
     pinByDefault: null,
     isSortable: true,

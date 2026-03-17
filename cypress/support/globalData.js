@@ -181,19 +181,19 @@ const globalData = {
       ],
       Frequency: [
         {
-          field: 'pf_wgs',
+          field: 'germline_pf_wgs',
           value: '0.5',
           op: '<',
           count: 2073057,
         },
         {
-          field: 'pf_wgs_affected',
+          field: 'germline_pf_wgs_affected',
           value: '0.5',
           op: '<',
           count: 2006606,
         },
         {
-          field: 'pf_wgs_not_affected',
+          field: 'germline_pf_wgs_not_affected',
           value: '0.5',
           op: '<',
           count: 1866517,
