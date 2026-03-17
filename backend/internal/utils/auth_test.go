@@ -316,3 +316,58 @@ func Test_ParseJWTFromHeader_InvalidFormat(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, token)
 }
+
+func Test_RetrieveFullNameFromToken_ValidKeycloakToken(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", ginkeycloak.KeyCloakToken{Name: "John Doe"})
+
+	auth := KeycloakAuth{}
+	fullName, err := auth.RetrieveFullNameFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, fullName)
+	assert.Equal(t, "John Doe", *fullName)
+}
+
+func Test_RetrieveFullNameFromToken_ValidJWT(t *testing.T) {
+	c := gin.Context{}
+
+	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
+	assert.NoError(t, err)
+
+	c.Request = &http.Request{
+		Header: http.Header{
+			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
+		},
+	}
+
+	auth := KeycloakAuth{}
+	fullName, err := auth.RetrieveFullNameFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, fullName)
+	assert.Equal(t, "Bob", *fullName)
+}
+
+func Test_RetrieveFullNameFromToken_InvalidKeycloakTokenType(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", 12345)
+
+	auth := KeycloakAuth{}
+	fullName, err := auth.RetrieveFullNameFromToken(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, fullName)
+}
+
+func Test_RetrieveFullNameFromToken_NoTokenInContext(t *testing.T) {
+	c := gin.Context{
+		Request: &http.Request{},
+	}
+
+	auth := KeycloakAuth{}
+	fullName, err := auth.RetrieveFullNameFromToken(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, fullName)
+}
