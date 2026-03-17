@@ -1,0 +1,1 @@
+const s={NOT_ASSIGNED_USER_ID:"not-assign",MAX_COUNT_DISPLAY:99};function N(n){return{id:s.NOT_ASSIGNED_USER_ID,name:n||"Not assigned",organization:""}}function S(n){return n.id===s.NOT_ASSIGNED_USER_ID}export{s as A,N as c,S as i};
