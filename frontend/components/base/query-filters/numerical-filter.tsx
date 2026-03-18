@@ -102,6 +102,8 @@ import { i18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 import { occurrencesApi } from '@/utils/api';
 
+import { isValidRangeOperator } from '../query-builder-v3/libs/aggregations';
+
 import { useFilterConfig } from './filter-list';
 
 const API_DEFAULT_TYPE = 'integer';
@@ -147,10 +149,6 @@ function useStatisticsBuilder(field: string, appId: string, caseId: number, seqI
   return useSWR<Statistics, any, OccurrenceStatisticsInput>(data, statisticsFetcher(appId as ApplicationId), {
     revalidateOnFocus: false,
   });
-}
-
-function isValidRangeOperator(value: any): value is RangeOperators {
-  return Object.values(RangeOperators).includes(value);
 }
 
 /**
