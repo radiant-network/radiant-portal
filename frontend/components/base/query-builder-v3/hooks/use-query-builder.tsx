@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { createContext, Dispatch, useContext, useReducer } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
 import { v4 } from 'uuid';
@@ -275,7 +276,7 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       };
     }
     /**
-     * Add or update a multi-select pill to the active query
+     * Add or update a pill (multi-select, numerical and toggle) to the active query
      */
     case QBActionType.ADD_OR_UPDATE_FACET_PILL: {
       const { activeQueryId } = context;
@@ -316,7 +317,7 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       return { ...context, sqons: [...sqons], history: { uuid: v4(), type: PillUserAction.UPDATE, target: field } };
     }
     /**
-     * Remove multiselect-pill from active query
+     * Remove pill from active query
      */
     case QBActionType.REMOVE_FACET_PILL: {
       const { activeQueryId } = context;
