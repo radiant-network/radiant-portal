@@ -1,5 +1,7 @@
 import { Aggregation, AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 
+import { RangeOperators } from '../type';
+
 /**
  * Return visible facets
  */
@@ -33,4 +35,11 @@ export function getAggregationByField(aggregations: AggregationConfig, field: st
     key: 'error',
     translation_key: 'error',
   };
+}
+
+/**
+ * Check if a value from config is a valid range operator
+ */
+export function isValidRangeOperator(value: any): value is RangeOperators {
+  return Object.values(RangeOperators).includes(value);
 }

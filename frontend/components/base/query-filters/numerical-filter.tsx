@@ -102,6 +102,8 @@ import { i18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 import { occurrencesApi } from '@/utils/api';
 
+import { isValidRangeOperator } from '../query-builder-v3/libs/aggregations';
+
 import { useFilterConfig } from './filter-list';
 
 const API_DEFAULT_TYPE = 'integer';
@@ -160,12 +162,18 @@ function getNumericalValue(
   statistics?: Statistics,
 ) {
   let hasUnappliedItems: boolean = false;
-  let selectedRange: RangeOperators = aggConfig?.defaultOperator ?? RangeOperators.LessThan;
+  let selectedRange: RangeOperators = RangeOperators.LessThan;
   let minValue: string = '0';
   let maxValue: string = '0';
   let numericalValue: string = '';
   let hasNoData: boolean = false;
   const decimal = statistics?.type === API_DEFAULT_TYPE ? 0 : 3;
+
+  if (aggConfig?.defaultOperator && isValidRangeOperator(aggConfig.defaultOperator)) {
+    selectedRange = aggConfig.defaultOperator as RangeOperators;
+  } else {
+    console.error(`Invalid default operator in config for field ${fieldKey}.`);
+  }
 
   // Find the main numeric field filter
   const numericFilter = activeQuery.content.find((x: TSqonContentValue) =>
@@ -231,10 +239,6 @@ function getNumericalValue(
       maxValue = aggConfig.defaultMax.toLocaleString(i18n.language);
     } else if (statistics?.max !== undefined) {
       maxValue = Number(statistics.max.toFixed(decimal)).toLocaleString(i18n.language);
-    }
-
-    if (aggConfig?.defaultOperator) {
-      selectedRange = RangeOperators[aggConfig.defaultOperator as keyof typeof RangeOperators];
     }
   }
 
