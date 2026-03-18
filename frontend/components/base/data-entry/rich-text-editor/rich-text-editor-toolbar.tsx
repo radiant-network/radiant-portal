@@ -14,8 +14,6 @@ import { Separator } from '@/components/base/shadcn/separator';
 import { Toggle } from '@/components/base/shadcn/toggle';
 import { useI18n } from '@/components/hooks/i18n';
 
-import RichTextEditorLevelToggle from './rich-text-editor-level-toggle';
-
 function RichTextEditorToolbar({ editor }: { editor: Editor }) {
   const { t } = useI18n();
 
@@ -42,31 +40,30 @@ function RichTextEditorToolbar({ editor }: { editor: Editor }) {
   }, [editor, t]);
 
   return (
-    <div className="border border-input bg-transparent rounded-tr-md rounded-tl-md p-1 flex flex-row items-center gap-1">
-      <RichTextEditorLevelToggle editor={editor} />
+    <div className="border-b bg-transparent p-1 flex flex-row items-center gap-1">
       <Toggle
-        size="sm"
+        size="xs"
         pressed={editor.isActive('bold')}
         onPressedChange={() => editor.chain().focus().toggleBold().run()}
       >
         <BoldIcon />
       </Toggle>
       <Toggle
-        size="sm"
+        size="xs"
         pressed={editor.isActive('italic')}
         onPressedChange={() => editor.chain().focus().toggleItalic().run()}
       >
         <ItalicIcon />
       </Toggle>
       <Toggle
-        size="sm"
+        size="xs"
         pressed={editor.isActive('underline')}
         onPressedChange={() => editor.chain().focus().toggleUnderline().run()}
       >
         <UnderlineIcon />
       </Toggle>
       <Toggle
-        size="sm"
+        size="xs"
         pressed={editor.isActive('strike')}
         onPressedChange={() => editor.chain().focus().toggleStrike().run()}
       >
@@ -74,21 +71,21 @@ function RichTextEditorToolbar({ editor }: { editor: Editor }) {
       </Toggle>
       <Separator orientation="vertical" className="w-px h-8" />
       <Toggle
-        size="sm"
+        size="xs"
         pressed={editor.isActive('bulletList')}
         onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
       >
         <ListIcon />
       </Toggle>
       <Toggle
-        size="sm"
+        size="xs"
         pressed={editor.isActive('orderedList')}
         onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}
       >
         <ListOrderedIcon />
       </Toggle>
       <Separator orientation="vertical" className="w-px h-8" />
-      <Toggle size="sm" pressed={editor.isActive('link')} onPressedChange={() => setLink()}>
+      <Toggle size="xs" pressed={editor.isActive('link')} onPressedChange={() => setLink()}>
         <Link2Icon />
       </Toggle>
     </div>
