@@ -129,6 +129,7 @@ from radiant_python.models.statistics import Statistics
 from radiant_python.models.statistics_body_with_sqon import StatisticsBodyWithSqon
 from radiant_python.models.term import Term
 from radiant_python.models.transcript import Transcript
+from radiant_python.models.update_occurrence_note_input import UpdateOccurrenceNoteInput
 from radiant_python.models.user_preference import UserPreference
 from radiant_python.models.user_set import UserSet
 from radiant_python.models.utils_pre_signed_url import UtilsPreSignedURL
