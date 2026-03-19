@@ -24,15 +24,18 @@ function CombinerOperator({ sqon }: CombineOperatorProps) {
   const { t } = useI18n();
   const dispatch = useQBDispatch();
 
-  const handleOnClick = useCallback((e: MouseEvent) => {
-    e.stopPropagation();
-    dispatch({
-      type: QBActionType.CHANGE_COMBINER_OPERATOR,
-      payload: {
-        operator: sqon.op === BooleanOperators.And ? BooleanOperators.Or : BooleanOperators.And,
-      },
-    });
-  }, []);
+  const handleOnClick = useCallback(
+    (e: MouseEvent) => {
+      e.stopPropagation();
+      dispatch({
+        type: QBActionType.CHANGE_COMBINER_OPERATOR,
+        payload: {
+          operator: sqon.op === BooleanOperators.And ? BooleanOperators.Or : BooleanOperators.And,
+        },
+      });
+    },
+    [dispatch, sqon],
+  );
 
   return (
     <div className="px-2">
