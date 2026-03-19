@@ -1367,6 +1367,43 @@ export interface CreateCaseBatchBody {
     'cases': Array<CaseBatch>;
 }
 /**
+ * 
+ * @export
+ * @interface CreateOccurrenceNoteInput
+ */
+export interface CreateOccurrenceNoteInput {
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateOccurrenceNoteInput
+     */
+    'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateOccurrenceNoteInput
+     */
+    'content': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateOccurrenceNoteInput
+     */
+    'occurrence_id': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateOccurrenceNoteInput
+     */
+    'seq_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateOccurrenceNoteInput
+     */
+    'task_id': number;
+}
+/**
  * CreatePatientBatchBody represents the body required to create a patient batch
  * @export
  * @interface CreatePatientBatchBody
@@ -3233,6 +3270,73 @@ export interface ObservationTextBatch {
      * @memberof ObservationTextBatch
      */
     'value': string;
+}
+/**
+ * 
+ * @export
+ * @interface OccurrenceNote
+ */
+export interface OccurrenceNote {
+    /**
+     * 
+     * @type {number}
+     * @memberof OccurrenceNote
+     */
+    'case_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof OccurrenceNote
+     */
+    'content': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OccurrenceNote
+     */
+    'created_at': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OccurrenceNote
+     */
+    'id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OccurrenceNote
+     */
+    'occurrence_id': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof OccurrenceNote
+     */
+    'seq_id': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof OccurrenceNote
+     */
+    'task_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof OccurrenceNote
+     */
+    'updated_at': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OccurrenceNote
+     */
+    'user_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OccurrenceNote
+     */
+    'user_name': string;
 }
 /**
  * 
@@ -7847,6 +7951,214 @@ export class MondoApi extends BaseAPI {
      */
     public mondoTermAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
         return MondoApiFp(this.configuration).mondoTermAutoComplete(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * OccurrenceNotesApi - axios parameter creator
+ * @export
+ */
+export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get all notes associated with an occurrence
+         * @summary Get notes for an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOccurrenceNotes: async (caseId: number, seqId: number, taskId: number, occurrenceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('getOccurrenceNotes', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getOccurrenceNotes', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('getOccurrenceNotes', 'taskId', taskId)
+            // verify required parameter 'occurrenceId' is not null or undefined
+            assertParamExists('getOccurrenceNotes', 'occurrenceId', occurrenceId)
+            const localVarPath = `/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
+                .replace(`{${"occurrence_id"}}`, encodeURIComponent(String(occurrenceId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new note associated with an occurrence (SNV or CNV)
+         * @summary Create a note on an occurrence
+         * @param {CreateOccurrenceNoteInput} createOccurrenceNoteInput Note to create
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postOccurrenceNote: async (createOccurrenceNoteInput: CreateOccurrenceNoteInput, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createOccurrenceNoteInput' is not null or undefined
+            assertParamExists('postOccurrenceNote', 'createOccurrenceNoteInput', createOccurrenceNoteInput)
+            const localVarPath = `/notes`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createOccurrenceNoteInput, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * OccurrenceNotesApi - functional programming interface
+ * @export
+ */
+export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = OccurrenceNotesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get all notes associated with an occurrence
+         * @summary Get notes for an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OccurrenceNote>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.getOccurrenceNotes']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Create a new note associated with an occurrence (SNV or CNV)
+         * @summary Create a note on an occurrence
+         * @param {CreateOccurrenceNoteInput} createOccurrenceNoteInput Note to create
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async postOccurrenceNote(createOccurrenceNoteInput: CreateOccurrenceNoteInput, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OccurrenceNote>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postOccurrenceNote(createOccurrenceNoteInput, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.postOccurrenceNote']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * OccurrenceNotesApi - factory interface
+ * @export
+ */
+export const OccurrenceNotesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = OccurrenceNotesApiFp(configuration)
+    return {
+        /**
+         * Get all notes associated with an occurrence
+         * @summary Get notes for an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<OccurrenceNote>> {
+            return localVarFp.getOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new note associated with an occurrence (SNV or CNV)
+         * @summary Create a note on an occurrence
+         * @param {CreateOccurrenceNoteInput} createOccurrenceNoteInput Note to create
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        postOccurrenceNote(createOccurrenceNoteInput: CreateOccurrenceNoteInput, options?: RawAxiosRequestConfig): AxiosPromise<OccurrenceNote> {
+            return localVarFp.postOccurrenceNote(createOccurrenceNoteInput, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * OccurrenceNotesApi - object-oriented interface
+ * @export
+ * @class OccurrenceNotesApi
+ * @extends {BaseAPI}
+ */
+export class OccurrenceNotesApi extends BaseAPI {
+    /**
+     * Get all notes associated with an occurrence
+     * @summary Get notes for an occurrence
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequencing Experiment ID
+     * @param {number} taskId Task ID
+     * @param {string} occurrenceId Occurrence ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrenceNotesApi
+     */
+    public getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceNotesApiFp(this.configuration).getOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new note associated with an occurrence (SNV or CNV)
+     * @summary Create a note on an occurrence
+     * @param {CreateOccurrenceNoteInput} createOccurrenceNoteInput Note to create
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrenceNotesApi
+     */
+    public postOccurrenceNote(createOccurrenceNoteInput: CreateOccurrenceNoteInput, options?: RawAxiosRequestConfig) {
+        return OccurrenceNotesApiFp(this.configuration).postOccurrenceNote(createOccurrenceNoteInput, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

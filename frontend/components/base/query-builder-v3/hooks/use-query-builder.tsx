@@ -198,14 +198,10 @@ export function qBReducer(context: IQBContext, action: ActionType) {
     case QBActionType.DUPLICATE_QUERY: {
       const uuid = v4();
       const { sqons } = context;
-      sqons.push({
-        ...action.payload,
-        id: uuid,
-      });
       return {
         ...context,
-        sqons: [...sqons],
         activeQueryId: uuid,
+        sqons: [...cloneDeep(sqons), { ...cloneDeep(action.payload), id: uuid }],
       };
     }
     /**
@@ -213,9 +209,10 @@ export function qBReducer(context: IQBContext, action: ActionType) {
      */
     case QBActionType.REMOVE_QUERY: {
       const { activeQueryId } = context;
-      const { sqons } = context;
-      const index = sqons.findIndex(sqon => sqon.id === action.payload.id);
-      sqons.splice(index, 1);
+      let index = context.sqons.findIndex(sqon => sqon.id === action.payload.id);
+      const sqons = context.sqons.filter(sqon => sqon.id !== action.payload.id);
+
+      index = index < sqons.length ? index : index - 1;
 
       // queries are now empty
       if (sqons.length === 0) {
@@ -233,20 +230,11 @@ export function qBReducer(context: IQBContext, action: ActionType) {
         };
       }
 
-      // deleted query is the latest entry
-      if (index < sqons.length) {
-        return {
-          ...context,
-          activeQueryId: action.payload.id === activeQueryId ? sqons[index].id : activeQueryId,
-          sqons: [...sqons],
-        };
-      }
-
       // select next query
       return {
         ...context,
-        activeQueryId: action.payload.id === activeQueryId ? sqons[index - 1].id : activeQueryId,
-        sqons: [...sqons],
+        activeQueryId: action.payload.id === activeQueryId ? sqons[index].id : activeQueryId,
+        sqons,
       };
     }
     /**
@@ -279,64 +267,90 @@ export function qBReducer(context: IQBContext, action: ActionType) {
      * Add or update a pill (multi-select, numerical and toggle) to the active query
      */
     case QBActionType.ADD_OR_UPDATE_FACET_PILL: {
-      const { activeQueryId } = context;
-      const { sqons } = context;
-      const index = sqons.findIndex(sqon => sqon.id === activeQueryId);
+      const index = context.sqons.findIndex(sqon => sqon.id === context.activeQueryId);
 
       // active query is empty
       if (index < 0) {
-        sqons.push({
-          id: activeQueryId,
-          content: [action.payload],
-          op: BooleanOperators.And,
-        });
-        return { ...context, sqons: [...sqons], history: action.payload.content.field };
+        return {
+          ...context,
+          sqons: [
+            ...context.sqons,
+            {
+              id: context.activeQueryId,
+              content: [action.payload],
+              op: BooleanOperators.And,
+            },
+          ],
+        };
       }
 
       const field = action.payload.content.field;
-      const fieldIndex = sqons[index].content.findIndex(c => isEqualToField(c, field));
+      const fieldIndex = context.sqons[index].content.findIndex(c => isEqualToField(c, field));
 
-      // add new field
+      // field doesn't exist in query, add it
       if (fieldIndex < 0) {
-        sqons[index].content = [...sqons[index].content, action.payload];
-        return { ...context, sqons: [...sqons], history: { uuid: v4(), type: PillUserAction.ADD, target: field } };
-      }
-
-      // add new values in field
-      if (action.payload.content.value.length > 0) {
-        sqons[index].content[fieldIndex] = action.payload;
         return {
           ...context,
-          sqons: cloneDeep(sqons),
+          sqons: context.sqons.map((sqon, i) => {
+            if (i != index) return sqon;
+            return { ...sqon, content: [...sqon.content, action.payload] };
+          }),
+          history: { uuid: v4(), type: PillUserAction.ADD, target: field },
+        };
+      }
+
+      // field already existing, add new values in content
+      if (action.payload.content.value.length > 0) {
+        return {
+          ...context,
+          sqons: context.sqons.map((sqon, i) => {
+            if (i != index) return sqon;
+            return {
+              ...sqon,
+              content: sqon.content.map((content, j) => {
+                if (j != fieldIndex) return content;
+                return action.payload;
+              }),
+            };
+          }),
           history: { uuid: v4(), type: PillUserAction.UPDATE, target: field },
         };
       }
 
       // value is empty, remove pills
-      sqons[index].content.splice(fieldIndex, 1);
-      return { ...context, sqons: [...sqons], history: { uuid: v4(), type: PillUserAction.UPDATE, target: field } };
+      return {
+        ...context,
+        sqons: context.sqons.map((sqon, i) => {
+          if (i !== index) return sqon;
+          return {
+            ...sqon,
+            content: sqon.content.filter((_, j) => j !== fieldIndex),
+          };
+        }),
+        history: { uuid: v4(), type: PillUserAction.UPDATE, target: field },
+      };
     }
     /**
      * Remove pill from active query
      */
     case QBActionType.REMOVE_FACET_PILL: {
       const { activeQueryId } = context;
-      const { sqons } = context;
-      const index = sqons.findIndex(sqon => sqon.id === activeQueryId);
 
-      if (index < 0) {
-        throw Error(
-          `Cannot remove pill from an undefined active query: ${action.type} ${activeQueryId} ${action.payload}`,
-        );
+      // verify active query exists
+      if (!context.sqons.some(sqon => sqon.id === activeQueryId)) {
+        throw new Error(`Cannot remove pill: ${QBActionType.REMOVE_FACET_PILL} ${activeQueryId} ${action.payload}`);
       }
-      // remove pill
-      const field = action.payload.content.field;
-      const fieldIndex = sqons[index].content.findIndex(c => isEqualToField(c, field));
-      sqons[index].content.splice(fieldIndex, 1);
+
       return {
         ...context,
-        sqons: [...sqons],
-        history: { uuid: v4(), type: PillUserAction.REMOVE, target: field },
+        history: { uuid: v4(), type: PillUserAction.REMOVE, target: action.payload.content.field },
+        sqons: context.sqons.map(sqon => {
+          if (sqon.id !== activeQueryId) return sqon;
+          return {
+            ...sqon,
+            content: sqon.content.filter(c => !isEqualToField(c, action.payload.content.field)),
+          };
+        }),
       };
     }
     /**
@@ -344,15 +358,25 @@ export function qBReducer(context: IQBContext, action: ActionType) {
      */
     case QBActionType.CHANGE_COMBINER_OPERATOR: {
       const { activeQueryId } = context;
-      const { sqons } = context;
-      const index = sqons.findIndex(sqon => sqon.id === activeQueryId);
+      const index = context.sqons.findIndex(sqon => sqon.id === activeQueryId);
 
       if (index < 0) {
         throw Error(`ActiveQueryId does not exist in sqons: ${action.type} ${activeQueryId} ${action.payload}`);
+        return { ...context };
       }
 
-      sqons[index].op = action.payload.operator;
-      return { ...context };
+      return {
+        ...context,
+        sqons: context.sqons.map(sqon => {
+          if (sqon.id === activeQueryId) {
+            return {
+              ...sqon,
+              op: action.payload.operator,
+            };
+          }
+          return sqon;
+        }),
+      };
     }
     /**
      * Show/hide labels of all query pill

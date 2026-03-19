@@ -47,19 +47,22 @@ function QueriesBarCard() {
     dispatch({
       type: QBActionType.ADD_QUERY,
     });
-  }, []);
+  }, [dispatch]);
 
   /**
    * Toggle labelsEnabled setting
    */
-  const handleLabelsCheckedChange = useCallback((checked: boolean) => {
-    dispatch({
-      type: QBActionType.SET_LABELS_ENABLED,
-      payload: {
-        labelsEnabled: checked,
-      },
-    });
-  }, []);
+  const handleLabelsCheckedChange = useCallback(
+    (checked: boolean) => {
+      dispatch({
+        type: QBActionType.SET_LABELS_ENABLED,
+        payload: {
+          labelsEnabled: checked,
+        },
+      });
+    },
+    [dispatch],
+  );
 
   /**
    * Remove all queries
@@ -88,10 +91,7 @@ function QueriesBarCard() {
     <Card className="py-0">
       <Accordion type="multiple" defaultValue={['query-builder']}>
         <AccordionItem value="query-builder" className="border-none">
-          <AccordionTrigger
-            className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none hover:cursor-pointer"
-            asChild
-          >
+          <AccordionTrigger className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none hover:cursor-pointer">
             TODO
           </AccordionTrigger>
           <AccordionContent className="py-4 px-6 space-y-4">

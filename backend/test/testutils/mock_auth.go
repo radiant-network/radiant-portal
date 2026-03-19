@@ -10,6 +10,7 @@ import (
 const (
 	DefaultMockUserId   = "1"
 	DefaultMockUsername = "mock-username"
+	DefaultMockFullName = "Mock User"
 	DefaultMockAzp      = "mock-azp"
 	DefaultMockRole     = "mock-role"
 )
@@ -17,6 +18,7 @@ const (
 type MockAuth struct {
 	Id             string
 	Username       string
+	Name           string
 	Azp            string
 	ResourceAccess map[string]ginkeycloak.ServiceRole
 	Error          error
@@ -68,6 +70,17 @@ func (m *MockAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, error) {
 		return &result, nil
 	}
 	return &m.Username, nil
+}
+
+func (m *MockAuth) RetrieveFullNameFromToken(c *gin.Context) (*string, error) {
+	if m.Error != nil {
+		return nil, m.Error
+	}
+	if m.Name == "" {
+		result := DefaultMockFullName
+		return &result, nil
+	}
+	return &m.Name, nil
 }
 
 func (m *MockAuth) UserHasRole(c *gin.Context, role string, resourceName string) (bool, error) {

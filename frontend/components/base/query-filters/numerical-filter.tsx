@@ -98,7 +98,6 @@ import {
   TSqonContentValue,
 } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
-import { i18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 import { occurrencesApi } from '@/utils/api';
 
@@ -210,11 +209,11 @@ function getNumericalValue(
     // Handle numeric values
     if (values.length === 2) {
       selectedRange = RangeOperators.Between;
-      minValue = Number(Number(values[0]).toFixed(decimal)).toLocaleString(i18n.language);
-      maxValue = Number(Number(values[1]).toFixed(decimal)).toLocaleString(i18n.language);
+      minValue = Number(Number(values[0]).toFixed(decimal)).toString();
+      maxValue = Number(Number(values[1]).toFixed(decimal)).toString();
     } else {
       // Single value case
-      numericalValue = Number(values[0]).toLocaleString(i18n.language);
+      numericalValue = Number(values[0]).toString();
     }
 
     if (numericFilter.op) {
@@ -228,17 +227,17 @@ function getNumericalValue(
 
     // Use defaults from config if available
     if (aggConfig?.defaultMin !== undefined) {
-      minValue = aggConfig.defaultMin.toLocaleString(i18n.language);
-      numericalValue = aggConfig.defaultMin.toLocaleString(i18n.language);
+      minValue = aggConfig.defaultMin.toString();
+      numericalValue = aggConfig.defaultMin.toString();
     } else if (statistics?.min !== undefined) {
-      minValue = Number(statistics.min.toFixed(decimal)).toLocaleString(i18n.language);
-      numericalValue = Number(statistics.min.toFixed(decimal)).toLocaleString(i18n.language);
+      minValue = Number(statistics.min.toFixed(decimal)).toString();
+      numericalValue = Number(statistics.min.toFixed(decimal)).toString();
     }
 
     if (aggConfig?.defaultMax !== undefined) {
-      maxValue = aggConfig.defaultMax.toLocaleString(i18n.language);
+      maxValue = aggConfig.defaultMax.toString();
     } else if (statistics?.max !== undefined) {
-      maxValue = Number(statistics.max.toFixed(decimal)).toLocaleString(i18n.language);
+      maxValue = Number(statistics.max.toFixed(decimal)).toString();
     }
   }
 

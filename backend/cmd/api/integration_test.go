@@ -71,6 +71,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"variants/germline/1/conditions/clinvar",
 			"variants/germline/1/external_frequencies",
 			"variants/germline/1/internal_frequencies",
+			"notes/1/1/1/10000",
 		} {
 			resp, err = http.Get(fmt.Sprintf("http://localhost:%d/%s", randomPort, route))
 			assert.NoError(t, err)
@@ -95,6 +96,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"users/preferences/table_1",
 			"variants/germline/1/cases/interpreted",
 			"variants/germline/1/cases/uninterpreted",
+			"notes",
 		} {
 			resp, err = http.Post(fmt.Sprintf("http://localhost:%d/%s", randomPort, route), "application/json", nil)
 			assert.NoError(t, err)

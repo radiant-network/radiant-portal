@@ -35,6 +35,7 @@ func cleanUp(gormDb *gorm.DB) {
 	db.Exec("DELETE FROM case_has_sequencing_experiment WHERE case_id >= 1000")
 	db.Exec("DELETE FROM family WHERE id >= 1000")
 	db.Exec("DELETE FROM obs_categorical WHERE id >= 1000")
+	db.Exec("TRUNCATE TABLE occurrence_note")
 	db.Exec("DELETE FROM task WHERE id >= 1000")
 	db.Exec("DELETE FROM task_context WHERE task_id >= 1000")
 	db.Exec("DELETE FROM task_has_document WHERE task_id >= 1000")

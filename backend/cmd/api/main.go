@@ -57,6 +57,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoClinvarRCV := repository.NewClinvarRCVRepository(dbStarrocks)
 	repoIGV := repository.NewIGVRepository(dbStarrocks)
 	repoDocuments := repository.NewDocumentsRepository(dbStarrocks)
+	repoOccurrenceNotes := repository.NewOccurrenceNotesRepository(dbPostgres)
 	repoSavedFilters := repository.NewSavedFiltersRepository(dbPostgres)
 	repoUserPreferences := repository.NewUserPreferencesRepository(dbPostgres)
 	repoFacets := repository.NewFacetsRepository()
@@ -129,6 +130,10 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	mondoGroup := privateRoutes.Group("/mondo")
 	mondoGroup.GET("/autocomplete", server.GetMondoTermAutoComplete(repoTerms))
+
+	notesGroup := privateRoutes.Group("/notes")
+	notesGroup.POST("", server.PostOccurrenceNoteHandler(repoOccurrenceNotes, auth))
+	notesGroup.GET("/:case_id/:seq_id/:task_id/:occurrence_id", server.GetOccurrenceNotesHandler(repoOccurrenceNotes))
 
 	occurrencesGroup := privateRoutes.Group("/occurrences")
 	occurrencesGermlineGroup := occurrencesGroup.Group("/germline")
