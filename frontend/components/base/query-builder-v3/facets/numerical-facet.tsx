@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { TextMuted } from '@/components/base/typography/text-muted';
 import { IFilterRangeConfig } from '@/components/cores/applications-config';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
-import i18n, { useI18n } from '@/components/hooks/i18n';
+import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 
 import {
@@ -85,11 +85,11 @@ function getNumericalValue({ sqon, config, statistics }: NumericalValueProps): N
     // Handle numeric values
     if (sqon.content.value.length === 2) {
       selectedRange = RangeOperators.Between;
-      minValue = Number(Number(sqon.content.value[0]).toFixed(decimal)).toLocaleString(i18n.language);
-      maxValue = Number(Number(sqon.content.value[1]).toFixed(decimal)).toLocaleString(i18n.language);
+      minValue = Number(Number(sqon.content.value[0]).toFixed(decimal)).toString();
+      maxValue = Number(Number(sqon.content.value[1]).toFixed(decimal)).toString();
     } else {
       // Single value case
-      numericalValue = Number(sqon.content.value[0]).toLocaleString(i18n.language);
+      numericalValue = Number(sqon.content.value[0]).toString();
     }
 
     if (sqon.op) {
@@ -105,17 +105,17 @@ function getNumericalValue({ sqon, config, statistics }: NumericalValueProps): N
   }
   // check statistics first to set default values
   if (statistics?.min !== undefined) {
-    minValue = Number(statistics.min.toFixed(decimal)).toLocaleString(i18n.language);
-    numericalValue = Number(statistics.min.toFixed(decimal)).toLocaleString(i18n.language);
+    minValue = Number(statistics.min.toFixed(decimal)).toString();
+    numericalValue = Number(statistics.min.toFixed(decimal)).toString();
   } else if (config.defaultMin !== undefined) {
-    minValue = config.defaultMin.toLocaleString(i18n.language);
-    numericalValue = config.defaultMin.toLocaleString(i18n.language);
+    minValue = config.defaultMin.toString();
+    numericalValue = config.defaultMin.toString();
   }
 
   if (statistics?.max !== undefined) {
-    maxValue = Number(statistics.max.toFixed(decimal)).toLocaleString(i18n.language);
+    maxValue = Number(statistics.max.toFixed(decimal)).toString();
   } else if (config.defaultMax !== undefined) {
-    maxValue = config.defaultMax.toLocaleString(i18n.language);
+    maxValue = config.defaultMax.toString();
   }
 
   if (config.defaultOperator) {
@@ -231,7 +231,7 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
   const config = useQBAggregationsNumericalConfig(field.key);
   const hasInterval = getHasInterval(config, statistics);
 
-  // Determine min/max values with precedence: confib first, then statistics
+  // Determine min/max values with precedence: config first, then statistics
   const inputMin = config?.min ?? statistics?.min ?? 0;
   const inputMax = config?.max ?? statistics?.max ?? 100;
 
@@ -258,9 +258,9 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
     setIsPristine(true);
     let values: number[] = [];
     if (selectedRange === RangeOperators.Between) {
-      values = [parseFloat(minValue.toString()), parseFloat(maxValue.toString())];
+      values = [parseFloat(minValue), parseFloat(maxValue)];
     } else {
-      values = [parseFloat(numericValue.toString())];
+      values = [parseFloat(numericValue)];
     }
     dispatch({
       type: QBActionType.ADD_OR_UPDATE_FACET_PILL,
