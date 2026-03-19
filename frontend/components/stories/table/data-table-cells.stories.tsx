@@ -103,7 +103,7 @@ const meta = {
       {
         id: 'visits',
         visible: true,
-        label: 'firstName',
+        label: 'Visits',
       },
       {
         id: 'status',

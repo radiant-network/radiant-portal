@@ -15,7 +15,7 @@
             "key": "start",
             "translation_key": "start",
             "type": "numerical",
-            "defaults": { "min": 0, "max": 100, "defaultOperator": "Between" }
+            "defaults": { "min": 0, "max": 100, "defaultOperator": "between" }
           }
         ]
       },
@@ -28,13 +28,13 @@
             "key": "gnomad_pli",
             "translation_key": "gnomad_pli",
             "type": "numerical",
-            "defaults": { "min": 0, "max": 100, "defaultOperator": "GreaterThan" }
+            "defaults": { "min": 0, "max": 100, "defaultOperator": ">" }
           },
           {
             "key": "gnomad_loeuf",
             "translation_key": "gnomad_loeuf",
             "type": "numerical",
-            "defaults": { "min": 0, "max": 100, "defaultOperator": "LessThan" }
+            "defaults": { "min": 0, "max": 100, "defaultOperator": "<" }
           },
           {
             "key": "omim_inheritance",
@@ -67,7 +67,7 @@
             "defaults": {
               "min": 0,
               "max": 1,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 1
             }
@@ -90,7 +90,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -102,7 +102,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -114,7 +114,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -129,7 +129,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -141,7 +141,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -163,7 +163,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "LessThan",
+              "defaultOperator": "<",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -175,7 +175,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "LessThan",
+              "defaultOperator": "<",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -187,7 +187,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "LessThan",
+              "defaultOperator": "<",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -204,7 +204,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "LessThan",
+              "defaultOperator": "<",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -216,7 +216,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "LessThan",
+              "defaultOperator": "<",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -228,7 +228,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "LessThan",
+              "defaultOperator": "<",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -261,7 +261,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -273,7 +273,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -285,7 +285,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -297,7 +297,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -309,7 +309,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -328,32 +328,32 @@
             "key": "cn",
             "translation_key": "cn",
             "type": "numerical",
-            "defaults": { "min": 0, "max": 100, "defaultOperator": "GreaterThan" }
+            "defaults": { "min": 0, "max": 100, "defaultOperator": ">" }
           },
           {
             "key": "length",
             "translation_key": "cnv_length",
             "type": "numerical",
-            "defaults": { "min": 0, "max": 100, "defaultOperator": "GreaterThan" }
+            "defaults": { "min": 0, "max": 100, "defaultOperator": ">" }
           },
           { "key": "chromosome", "translation_key": "chromosome", "type": "multiple" },
           {
             "key": "start",
             "translation_key": "cnv_start",
             "type": "numerical",
-            "defaults": { "min": 0, "max": 100, "defaultOperator": "Between" }
+            "defaults": { "min": 0, "max": 100, "defaultOperator": "between" }
           },
           {
             "key": "end",
             "translation_key": "cnv_end",
             "type": "numerical",
-            "defaults": { "min": 0, "max": 100, "defaultOperator": "LessThan" }
+            "defaults": { "min": 0, "max": 100, "defaultOperator": "<" }
           },
           {
             "key": "nb_snv",
             "translation_key": "nb_snv",
             "type": "numerical",
-            "defaults": { "min": 0, "max": 100, "defaultOperator": "GreaterThan" }
+            "defaults": { "min": 0, "max": 100, "defaultOperator": ">" }
           }
         ]
       },
@@ -384,7 +384,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "LessThan",
+              "defaultOperator": "<",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -396,7 +396,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "LessThan",
+              "defaultOperator": "<",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -413,7 +413,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "GreaterThan",
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -425,7 +425,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "LessThan",
+              "defaultOperator": "<",
               "defaultMin": 0,
               "defaultMax": 100
             }
@@ -437,7 +437,7 @@
             "defaults": {
               "min": 0,
               "max": 100,
-              "defaultOperator": "LessThan",
+              "defaultOperator": "<",
               "defaultMin": 0,
               "defaultMax": 100
             }
