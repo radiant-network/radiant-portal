@@ -44,7 +44,7 @@ func assertPutOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, a
 	router := gin.Default()
 	router.PUT("/notes/:id", server.PutOccurrenceNoteHandler(repo, auth))
 
-	req, _ := http.NewRequest("PUT", "/notes/"+id, bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/notes/%s", id), bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)

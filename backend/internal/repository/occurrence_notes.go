@@ -7,6 +7,7 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type OccurrenceNotesRepository struct {
@@ -49,12 +50,14 @@ func (r *OccurrenceNotesRepository) GetByID(id string) (*types.OccurrenceNote, e
 
 // Update sets the content of the note with the given ID and returns the updated note.
 func (r *OccurrenceNotesRepository) Update(id string, content string) (*types.OccurrenceNote, error) {
-	if err := r.db.Model(&types.OccurrenceNote{}).
+	var note types.OccurrenceNote
+	if err := r.db.Model(&note).
+		Clauses(clause.Returning{}).
 		Where("id = ?", id).
-		Updates(map[string]interface{}{"content": content}).Error; err != nil {
+		Update("content", content).Error; err != nil {
 		return nil, fmt.Errorf("error updating occurrence note: %w", err)
 	}
-	return r.GetByID(id)
+	return &note, nil
 }
 
 // GetByOccurrence returns all non-deleted notes for the given occurrence, ordered by created_at desc.
