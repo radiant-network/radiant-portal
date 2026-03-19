@@ -29,7 +29,7 @@ function QueryBuilderV3() {
       }}
     >
       <QueryBuilderDataTable
-        id={appId}
+        id={`data-table-${appId}`}
         columns={getSNVOccurrenceColumns(t)}
         defaultColumnSettings={defaultSNVSettings}
         enableColumnOrdering

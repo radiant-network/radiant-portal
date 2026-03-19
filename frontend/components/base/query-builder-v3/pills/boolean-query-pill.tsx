@@ -32,7 +32,7 @@ function BooleanQueryPill({ sqon }: BooleanPillProps) {
       type: QBActionType.REMOVE_FACET_PILL,
       payload: sqon,
     });
-  }, [sqon]);
+  }, [dispatch, sqon]);
 
   return (
     <QueryPillContainer onRemovePill={onRemovePill}>

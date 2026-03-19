@@ -31,7 +31,7 @@ function MultiSelectQueryPill({ sqon }: MultiSelectPillProps) {
       type: QBActionType.REMOVE_FACET_PILL,
       payload: sqon,
     });
-  }, [sqon]);
+  }, [dispatch, sqon]);
 
   return (
     <QueryPillContainer onRemovePill={onRemovePill}>

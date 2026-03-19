@@ -1,5 +1,4 @@
 import { useCallback, useMemo } from 'react';
-import cloneDeep from 'lodash/cloneDeep';
 import { CopyIcon, TrashIcon } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -93,38 +92,47 @@ function QueryBar({ index, sqon, active }: QueryBarProps) {
    */
   const handleActive = useCallback(() => {
     if (active) return;
+
     dispatch({
       type: QBActionType.SET_ACTIVE_QUERY,
       payload: { id: sqon.id },
     });
-  }, [active]);
+  }, [dispatch, active]);
 
   /**
    * @TODO: used to combine queries
    */
   const handleSelection = useCallback(() => {
     console.warn('QueryBar:handleSelection has not be implemented');
-  }, [sqon]);
+  }, [dispatch, sqon]);
 
   /**
    * Use to duplicate a query
    */
-  const handleDuplicate = useCallback(() => {
-    dispatch({
-      type: QBActionType.DUPLICATE_QUERY,
-      payload: cloneDeep(sqon),
-    });
-  }, [sqon]);
+  const handleDuplicate = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      dispatch({
+        type: QBActionType.DUPLICATE_QUERY,
+        payload: sqon,
+      });
+    },
+    [dispatch, sqon],
+  );
 
   /**
    * Delete current query
    */
-  const handleDelete = useCallback(() => {
-    dispatch({
-      type: QBActionType.REMOVE_QUERY,
-      payload: sqon,
-    });
-  }, [sqon]);
+  const handleDelete = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      dispatch({
+        type: QBActionType.REMOVE_QUERY,
+        payload: sqon,
+      });
+    },
+    [dispatch, sqon],
+  );
 
   return (
     <div className="flex flex-1 group/query" data-query-active={active} onClick={handleActive}>
