@@ -1,4 +1,4 @@
 part	task_id	tumor_seq_id	locus_id	normal_seq_id	tumor_ad_ratio	info_hotspotallele
-1	74	74	1000	73	0.66	true
-1	74	74	2000	73	0.77	false
-1	74	74	3000	73	0.88	true
+1	74	74	1000	73	0.66	1
+1	74	74	2000	73	0.77	0
+1	74	74	3000	73	0.88	1
