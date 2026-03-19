@@ -123,6 +123,8 @@ Class | Method | HTTP request | Description
 *InterpretationsApi* | [**search_interpretation_germline**](docs/InterpretationsApi.md#search_interpretation_germline) | **GET** /interpretations/germline | Search interpretation germline
 *InterpretationsApi* | [**search_interpretation_somatic**](docs/InterpretationsApi.md#search_interpretation_somatic) | **GET** /interpretations/somatic | Search interpretation somatic
 *MondoApi* | [**mondo_term_auto_complete**](docs/MondoApi.md#mondo_term_auto_complete) | **GET** /mondo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
+*OccurrenceNotesApi* | [**get_occurrence_notes**](docs/OccurrenceNotesApi.md#get_occurrence_notes) | **GET** /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Get notes for an occurrence
+*OccurrenceNotesApi* | [**post_occurrence_note**](docs/OccurrenceNotesApi.md#post_occurrence_note) | **POST** /notes | Create a note on an occurrence
 *OccurrencesApi* | [**aggregate_germline_cnv_occurrences**](docs/OccurrencesApi.md#aggregate_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/aggregate | Aggregate germline CNV occurrences
 *OccurrencesApi* | [**aggregate_germline_snv_occurrences**](docs/OccurrencesApi.md#aggregate_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/aggregate | Aggregate germline SNV occurrences
 *OccurrencesApi* | [**count_germline_cnv_occurrences**](docs/OccurrencesApi.md#count_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/count | Count germline CNV occurrences
@@ -190,6 +192,7 @@ Class | Method | HTTP request | Description
  - [CountBodyWithSqon](docs/CountBodyWithSqon.md)
  - [CreateBatchResponse](docs/CreateBatchResponse.md)
  - [CreateCaseBatchBody](docs/CreateCaseBatchBody.md)
+ - [CreateOccurrenceNoteInput](docs/CreateOccurrenceNoteInput.md)
  - [CreatePatientBatchBody](docs/CreatePatientBatchBody.md)
  - [CreateSampleBatchBody](docs/CreateSampleBatchBody.md)
  - [CreateSequencingExperimentBatchBody](docs/CreateSequencingExperimentBatchBody.md)
@@ -222,6 +225,7 @@ Class | Method | HTTP request | Description
  - [ListBodyWithSqon](docs/ListBodyWithSqon.md)
  - [ObservationCategoricalBatch](docs/ObservationCategoricalBatch.md)
  - [ObservationTextBatch](docs/ObservationTextBatch.md)
+ - [OccurrenceNote](docs/OccurrenceNote.md)
  - [OmimGenePanel](docs/OmimGenePanel.md)
  - [OutputDocumentBatch](docs/OutputDocumentBatch.md)
  - [PatientBatch](docs/PatientBatch.md)

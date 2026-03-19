@@ -9,6 +9,7 @@ from radiant_python.api.hpo_api import HpoApi
 from radiant_python.api.igv_api import IgvApi
 from radiant_python.api.interpretations_api import InterpretationsApi
 from radiant_python.api.mondo_api import MondoApi
+from radiant_python.api.occurrence_notes_api import OccurrenceNotesApi
 from radiant_python.api.occurrences_api import OccurrencesApi
 from radiant_python.api.patients_api import PatientsApi
 from radiant_python.api.samples_api import SamplesApi

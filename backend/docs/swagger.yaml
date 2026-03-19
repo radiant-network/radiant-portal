@@ -710,6 +710,25 @@ components:
       required:
       - cases
       type: object
+    CreateOccurrenceNoteInput:
+      properties:
+        case_id:
+          type: integer
+        content:
+          type: string
+        occurrence_id:
+          type: string
+        seq_id:
+          type: integer
+        task_id:
+          type: integer
+      required:
+      - case_id
+      - content
+      - occurrence_id
+      - seq_id
+      - task_id
+      type: object
     CreatePatientBatchBody:
       description: CreatePatientBatchBody represents the body required to create a
         patient batch
@@ -1593,6 +1612,40 @@ components:
       required:
       - code
       - value
+      type: object
+    OccurrenceNote:
+      properties:
+        case_id:
+          type: integer
+        content:
+          type: string
+        created_at:
+          type: string
+        id:
+          type: string
+        occurrence_id:
+          type: string
+        seq_id:
+          type: integer
+        task_id:
+          type: integer
+        updated_at:
+          type: string
+        user_id:
+          type: string
+        user_name:
+          type: string
+      required:
+      - case_id
+      - content
+      - created_at
+      - id
+      - occurrence_id
+      - seq_id
+      - task_id
+      - updated_at
+      - user_id
+      - user_name
       type: object
     OmimGenePanel:
       properties:
@@ -3636,6 +3689,96 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - mondo
+  /notes:
+    post:
+      description: Create a new note associated with an occurrence (SNV or CNV)
+      operationId: postOccurrenceNote
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOccurrenceNoteInput'
+        description: Note to create
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OccurrenceNote'
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Create a note on an occurrence
+      tags:
+      - occurrence_notes
+  /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}:
+    get:
+      description: Get all notes associated with an occurrence
+      operationId: getOccurrenceNotes
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequencing Experiment ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Occurrence ID
+        in: path
+        name: occurrence_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/OccurrenceNote'
+                type: array
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get notes for an occurrence
+      tags:
+      - occurrence_notes
   /occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap:
     get:
       description: List genes overlapping a CNV with a given ID

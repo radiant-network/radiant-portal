@@ -2426,6 +2426,78 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Notes",
+      "item": [
+        {
+          "name": "Create Note",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"case_id\": 1,\n    \"seq_id\": 1,\n    \"task_id\": 1,\n    \"occurrence_id\": 10000,\n    \"content\": \"This is a note\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/notes",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "notes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/notes/1/1/1/10000",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "notes",
+                "1",
+                "1",
+                "1",
+                "10000"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

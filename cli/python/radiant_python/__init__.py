@@ -25,6 +25,7 @@ from radiant_python.api.hpo_api import HpoApi
 from radiant_python.api.igv_api import IgvApi
 from radiant_python.api.interpretations_api import InterpretationsApi
 from radiant_python.api.mondo_api import MondoApi
+from radiant_python.api.occurrence_notes_api import OccurrenceNotesApi
 from radiant_python.api.occurrences_api import OccurrencesApi
 from radiant_python.api.patients_api import PatientsApi
 from radiant_python.api.samples_api import SamplesApi
@@ -73,6 +74,7 @@ from radiant_python.models.count import Count
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
 from radiant_python.models.create_batch_response import CreateBatchResponse
 from radiant_python.models.create_case_batch_body import CreateCaseBatchBody
+from radiant_python.models.create_occurrence_note_input import CreateOccurrenceNoteInput
 from radiant_python.models.create_patient_batch_body import CreatePatientBatchBody
 from radiant_python.models.create_sample_batch_body import CreateSampleBatchBody
 from radiant_python.models.create_sequencing_experiment_batch_body import CreateSequencingExperimentBatchBody
@@ -105,6 +107,7 @@ from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
 from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
 from radiant_python.models.observation_categorical_batch import ObservationCategoricalBatch
 from radiant_python.models.observation_text_batch import ObservationTextBatch
+from radiant_python.models.occurrence_note import OccurrenceNote
 from radiant_python.models.omim_gene_panel import OmimGenePanel
 from radiant_python.models.output_document_batch import OutputDocumentBatch
 from radiant_python.models.patient_batch import PatientBatch
