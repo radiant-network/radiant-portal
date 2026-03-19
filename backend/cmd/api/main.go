@@ -130,6 +130,10 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	mondoGroup := privateRoutes.Group("/mondo")
 	mondoGroup.GET("/autocomplete", server.GetMondoTermAutoComplete(repoTerms))
 
+	notesGroup := privateRoutes.Group("/notes")
+	notesGroup.POST("", server.PostOccurrenceNoteHandler(repoOccurrenceNotes, auth))
+	notesGroup.GET("/:case_id/:seq_id/:task_id/:occurrence_id", server.GetOccurrenceNotesHandler(repoOccurrenceNotes))
+
 	occurrencesGroup := privateRoutes.Group("/occurrences")
 	occurrencesGermlineGroup := occurrencesGroup.Group("/germline")
 
@@ -139,8 +143,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/aggregate", server.OccurrencesGermlineCNVAggregateHandler(repoGermlineCNVOccurrences))
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/statistics", server.OccurrencesGermlineCNVStatisticsHandler(repoGermlineCNVOccurrences))
 	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:cnv_id/genes_overlap", server.OccurrencesGermlineCNVGenesOverlapHandler(repoGermlineCNVOccurrences))
-	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:cnv_id/notes", server.PostOccurrenceCNVNoteHandler(repoOccurrenceNotes, auth))
-	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:cnv_id/notes", server.GetOccurrenceCNVNotesHandler(repoOccurrenceNotes))
 
 	occurrencesGermlineSNVGroup := occurrencesGermlineGroup.Group("/snv")
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/count", server.OccurrencesGermlineSNVCountHandler(repoGermlineSNVOccurrences))
@@ -148,8 +150,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repoGermlineSNVOccurrences, repoFacets))
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoPostgres.Interpretations))
-	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:locus_id/notes", server.PostOccurrenceSNVNoteHandler(repoOccurrenceNotes, auth))
-	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:locus_id/notes", server.GetOccurrenceSNVNotesHandler(repoOccurrenceNotes))
 	occurrencesGermlineSNVGroup.GET("/dictionary", server.GetGermlineSNVDictionary(repoFacets))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")

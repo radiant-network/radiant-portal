@@ -12,9 +12,9 @@ var OccurrenceNoteTable = Table{
 // The Deleted field is internal and never serialized to JSON.
 type OccurrenceNote struct {
 	ID           string    `gorm:"primary_key; unique; type:uuid; column:id; default:uuid_generate_v4()" json:"id" validate:"required"`
-	Type         string    `gorm:"column:type"                      json:"type" validate:"required"`
 	CaseID       int       `gorm:"column:case_id"                   json:"case_id" validate:"required"`
 	SeqID        int       `gorm:"column:seq_id"                    json:"seq_id" validate:"required"`
+	TaskID       int       `gorm:"column:task_id"                   json:"task_id" validate:"required"`
 	OccurrenceID int64     `gorm:"column:occurrence_id"             json:"occurrence_id" validate:"required"`
 	UserID       string    `gorm:"column:user_id"                   json:"user_id" validate:"required"`
 	UserName     string    `gorm:"column:user_name"                 json:"user_name" validate:"required"`
@@ -29,8 +29,11 @@ func (OccurrenceNote) TableName() string {
 }
 
 // CreateOccurrenceNoteInput is the POST request body for creating a note.
-// Type is injected from the route (snv/cnv). CaseID, SeqID, OccurrenceID come from path params.
 // UserID and UserName come from the JWT token.
 type CreateOccurrenceNoteInput struct {
-	Content string `json:"content" binding:"required"`
+	CaseID       int    `json:"case_id"       binding:"required"`
+	SeqID        int    `json:"seq_id"        binding:"required"`
+	TaskID       int    `json:"task_id"       binding:"required"`
+	OccurrenceID int64  `json:"occurrence_id" binding:"required"`
+	Content      string `json:"content"       binding:"required"`
 }

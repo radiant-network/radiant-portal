@@ -26,7 +26,7 @@ func (m *MockRepository) Create(note types.OccurrenceNote) (*types.OccurrenceNot
 	return &note, nil
 }
 
-func (m *MockRepository) GetByOccurrence(noteType string, caseID int, seqID int, occurrenceID int64) ([]types.OccurrenceNote, error) {
+func (m *MockRepository) GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID int64) ([]types.OccurrenceNote, error) {
 	if occurrenceID == 99999 {
 		return nil, fmt.Errorf("mock get error")
 	}
@@ -36,9 +36,9 @@ func (m *MockRepository) GetByOccurrence(noteType string, caseID int, seqID int,
 	return []types.OccurrenceNote{
 		{
 			ID:           "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-			Type:         noteType,
 			CaseID:       caseID,
 			SeqID:        seqID,
+			TaskID:       taskID,
 			OccurrenceID: occurrenceID,
 			UserID:       testutils.DefaultMockUserId,
 			UserName:     testutils.DefaultMockFullName,
@@ -49,49 +49,23 @@ func (m *MockRepository) GetByOccurrence(noteType string, caseID int, seqID int,
 	}, nil
 }
 
-func Test_PostOccurrenceCNVNoteHandler(t *testing.T) {
+func Test_PostOccurrenceNoteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/cnv/:case_id/:seq_id/:cnv_id/notes", PostOccurrenceCNVNoteHandler(repo, auth))
+	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
 
-	body := `{"content": "CNV note"}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/2/20000/notes", bytes.NewBuffer([]byte(body)))
+	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": 10000, "content": "Test note"}`
+	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusCreated, w.Code)
 	assert.JSONEq(t, `{
 		"id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-		"type": "cnv",
 		"case_id": 1,
 		"seq_id": 2,
-		"occurrence_id": 20000,
-		"user_id": "1",
-		"user_name": "Mock User",
-		"content": "CNV note",
-		"created_at": "2024-01-15T10:00:00Z",
-		"updated_at": "2024-01-15T10:00:00Z"
-	}`, w.Body.String())
-}
-
-func Test_PostOccurrenceSNVNoteHandler(t *testing.T) {
-	repo := &MockRepository{}
-	auth := &testutils.MockAuth{}
-	router := gin.Default()
-	router.POST("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/notes", PostOccurrenceSNVNoteHandler(repo, auth))
-
-	body := `{"content": "Test note"}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/2/10000/notes", bytes.NewBuffer([]byte(body)))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusCreated, w.Code)
-	assert.JSONEq(t, `{
-		"id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-		"type": "snv",
-		"case_id": 1,
-		"seq_id": 2,
+		"task_id": 1,
 		"occurrence_id": 10000,
 		"user_id": "1",
 		"user_name": "Mock User",
@@ -101,101 +75,77 @@ func Test_PostOccurrenceSNVNoteHandler(t *testing.T) {
 	}`, w.Body.String())
 }
 
-func Test_PostOccurrenceSNVNoteHandler_MissingContent(t *testing.T) {
+func Test_PostOccurrenceNoteHandler_MissingContent(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/notes", PostOccurrenceSNVNoteHandler(repo, auth))
+	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
 
-	body := `{}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/2/10000/notes", bytes.NewBuffer([]byte(body)))
+	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": 10000}`
+	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func Test_PostOccurrenceSNVNoteHandler_InvalidCaseID(t *testing.T) {
+func Test_PostOccurrenceNoteHandler_MissingTaskID(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/notes", PostOccurrenceSNVNoteHandler(repo, auth))
+	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
 
-	body := `{"content": "Test note"}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/abc/2/10000/notes", bytes.NewBuffer([]byte(body)))
+	body := `{"case_id": 1, "seq_id": 2, "occurrence_id": 10000, "content": "Test note"}`
+	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func Test_PostOccurrenceSNVNoteHandler_InvalidSeqID(t *testing.T) {
+func Test_PostOccurrenceNoteHandler_MissingCaseID(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/notes", PostOccurrenceSNVNoteHandler(repo, auth))
+	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
 
-	body := `{"content": "Test note"}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/abc/10000/notes", bytes.NewBuffer([]byte(body)))
+	body := `{"seq_id": 2, "task_id": 1, "occurrence_id": 10000, "content": "Test note"}`
+	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func Test_PostOccurrenceSNVNoteHandler_InvalidLocusID(t *testing.T) {
+func Test_PostOccurrenceNoteHandler_MissingOccurrenceID(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/notes", PostOccurrenceSNVNoteHandler(repo, auth))
+	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
 
-	body := `{"content": "Test note"}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/2/abc/notes", bytes.NewBuffer([]byte(body)))
+	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "content": "Test note"}`
+	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func Test_GetOccurrenceCNVNotesHandler(t *testing.T) {
+func Test_GetOccurrenceNotesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/cnv/:case_id/:seq_id/:cnv_id/notes", GetOccurrenceCNVNotesHandler(repo))
+	router.GET("/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/cnv/1/2/20000/notes", nil)
+	req, _ := http.NewRequest("GET", "/notes/1/2/1/10000", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{
 		"id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-		"type": "cnv",
 		"case_id": 1,
 		"seq_id": 2,
-		"occurrence_id": 20000,
-		"user_id": "1",
-		"user_name": "Mock User",
-		"content": "First note",
-		"created_at": "2024-01-15T10:00:00Z",
-		"updated_at": "2024-01-15T10:00:00Z"
-	}]`, w.Body.String())
-}
-
-func Test_GetOccurrenceSNVNotesHandler(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.GET("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/notes", GetOccurrenceSNVNotesHandler(repo))
-
-	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/1/2/10000/notes", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `[{
-		"id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-		"type": "snv",
-		"case_id": 1,
-		"seq_id": 2,
+		"task_id": 1,
 		"occurrence_id": 10000,
 		"user_id": "1",
 		"user_name": "Mock User",
@@ -205,12 +155,12 @@ func Test_GetOccurrenceSNVNotesHandler(t *testing.T) {
 	}]`, w.Body.String())
 }
 
-func Test_GetOccurrenceSNVNotesHandler_EmptyResult(t *testing.T) {
+func Test_GetOccurrenceNotesHandler_EmptyResult(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/notes", GetOccurrenceSNVNotesHandler(repo))
+	router.GET("/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/1/2/88888/notes", nil)
+	req, _ := http.NewRequest("GET", "/notes/1/2/1/88888", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -218,12 +168,12 @@ func Test_GetOccurrenceSNVNotesHandler_EmptyResult(t *testing.T) {
 	assert.JSONEq(t, `[]`, w.Body.String())
 }
 
-func Test_GetOccurrenceSNVNotesHandler_InvalidCaseID(t *testing.T) {
+func Test_GetOccurrenceNotesHandler_InvalidCaseID(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/notes", GetOccurrenceSNVNotesHandler(repo))
+	router.GET("/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/abc/2/10000/notes", nil)
+	req, _ := http.NewRequest("GET", "/notes/abc/2/1/10000", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
