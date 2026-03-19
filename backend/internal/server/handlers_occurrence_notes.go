@@ -71,7 +71,7 @@ func PostOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Au
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequencing Experiment ID"
 // @Param task_id path int true "Task ID"
-// @Param occurrence_id path int true "Occurrence ID"
+// @Param occurrence_id path string true "Occurrence ID"
 // @Produce json
 // @Success 200 {array} types.OccurrenceNote
 // @Failure 404 {object} types.ApiError
@@ -97,11 +97,7 @@ func GetOccurrenceNotesHandler(repo repository.OccurrenceNotesDAO) gin.HandlerFu
 			return
 		}
 
-		occurrenceID, err := strconv.ParseInt(c.Param("occurrence_id"), 10, 64)
-		if err != nil {
-			HandleNotFoundError(c, "occurrence_id")
-			return
-		}
+		occurrenceID := c.Param("occurrence_id")
 
 		notes, err := repo.GetByOccurrence(caseID, seqID, taskID, occurrenceID)
 		if err != nil {

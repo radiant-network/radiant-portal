@@ -15,7 +15,7 @@ type OccurrenceNote struct {
 	CaseID       int       `gorm:"column:case_id"                   json:"case_id" validate:"required"`
 	SeqID        int       `gorm:"column:seq_id"                    json:"seq_id" validate:"required"`
 	TaskID       int       `gorm:"column:task_id"                   json:"task_id" validate:"required"`
-	OccurrenceID int64     `gorm:"column:occurrence_id"             json:"occurrence_id" validate:"required"`
+	OccurrenceID string    `gorm:"column:occurrence_id"             json:"occurrence_id" validate:"required"`
 	UserID       string    `gorm:"column:user_id"                   json:"user_id" validate:"required"`
 	UserName     string    `gorm:"column:user_name"                 json:"user_name" validate:"required"`
 	Content      string    `gorm:"column:content"                   json:"content" validate:"required"`
@@ -34,6 +34,6 @@ type CreateOccurrenceNoteInput struct {
 	CaseID       int    `json:"case_id"       binding:"required"`
 	SeqID        int    `json:"seq_id"        binding:"required"`
 	TaskID       int    `json:"task_id"       binding:"required"`
-	OccurrenceID int64  `json:"occurrence_id" binding:"required"`
+	OccurrenceID string `json:"occurrence_id" binding:"required"`
 	Content      string `json:"content"       binding:"required"`
 }

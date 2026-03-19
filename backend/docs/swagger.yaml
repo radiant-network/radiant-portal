@@ -717,7 +717,7 @@ components:
         content:
           type: string
         occurrence_id:
-          type: integer
+          type: string
         seq_id:
           type: integer
         task_id:
@@ -1624,7 +1624,7 @@ components:
         id:
           type: string
         occurrence_id:
-          type: integer
+          type: string
         seq_id:
           type: integer
         task_id:
@@ -3752,7 +3752,7 @@ paths:
         name: occurrence_id
         required: true
         schema:
-          type: integer
+          type: string
       responses:
         "200":
           content:

@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **content** | **str** |  | 
 **created_at** | **str** |  | 
 **id** | **str** |  | 
-**occurrence_id** | **int** |  | 
+**occurrence_id** | **str** |  | 
 **seq_id** | **int** |  | 
 **task_id** | **int** |  | 
 **updated_at** | **str** |  | 

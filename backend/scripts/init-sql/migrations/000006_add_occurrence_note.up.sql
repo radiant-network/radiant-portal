@@ -3,7 +3,7 @@ CREATE TABLE public.occurrence_note (
     case_id       integer      NOT NULL REFERENCES public.cases(id),
     seq_id        integer      NOT NULL REFERENCES public.sequencing_experiment(id),
     task_id       integer      NOT NULL REFERENCES public.task(id),
-    occurrence_id bigint       NOT NULL,
+    occurrence_id varchar(255) NOT NULL,
     user_id       uuid         NOT NULL,
     user_name     varchar(255) NOT NULL,
     content       text         NOT NULL,

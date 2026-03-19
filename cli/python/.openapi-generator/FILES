@@ -238,6 +238,3 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
-test/test_create_occurrence_note_input.py
-test/test_occurrence_note.py
-test/test_occurrence_notes_api.py

@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **case_id** | **int** |  | 
 **content** | **str** |  | 
-**occurrence_id** | **int** |  | 
+**occurrence_id** | **str** |  | 
 **seq_id** | **int** |  | 
 **task_id** | **int** |  | 
 

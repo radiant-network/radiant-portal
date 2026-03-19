@@ -1386,10 +1386,10 @@ export interface CreateOccurrenceNoteInput {
     'content': string;
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof CreateOccurrenceNoteInput
      */
-    'occurrence_id': number;
+    'occurrence_id': string;
     /**
      * 
      * @type {number}
@@ -3303,10 +3303,10 @@ export interface OccurrenceNote {
     'id': string;
     /**
      * 
-     * @type {number}
+     * @type {string}
      * @memberof OccurrenceNote
      */
-    'occurrence_id': number;
+    'occurrence_id': string;
     /**
      * 
      * @type {number}
@@ -7809,11 +7809,11 @@ export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Con
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {number} taskId Task ID
-         * @param {number} occurrenceId Occurrence ID
+         * @param {string} occurrenceId Occurrence ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getOccurrenceNotes: async (caseId: number, seqId: number, taskId: number, occurrenceId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getOccurrenceNotes: async (caseId: number, seqId: number, taskId: number, occurrenceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('getOccurrenceNotes', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -7909,11 +7909,11 @@ export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {number} taskId Task ID
-         * @param {number} occurrenceId Occurrence ID
+         * @param {string} occurrenceId Occurrence ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OccurrenceNote>>> {
+        async getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OccurrenceNote>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.getOccurrenceNotes']?.[localVarOperationServerIndex]?.url;
@@ -7948,11 +7948,11 @@ export const OccurrenceNotesApiFactory = function (configuration?: Configuration
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {number} taskId Task ID
-         * @param {number} occurrenceId Occurrence ID
+         * @param {string} occurrenceId Occurrence ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: number, options?: RawAxiosRequestConfig): AxiosPromise<Array<OccurrenceNote>> {
+        getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<OccurrenceNote>> {
             return localVarFp.getOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -7981,12 +7981,12 @@ export class OccurrenceNotesApi extends BaseAPI {
      * @param {number} caseId Case ID
      * @param {number} seqId Sequencing Experiment ID
      * @param {number} taskId Task ID
-     * @param {number} occurrenceId Occurrence ID
+     * @param {string} occurrenceId Occurrence ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrenceNotesApi
      */
-    public getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: number, options?: RawAxiosRequestConfig) {
+    public getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig) {
         return OccurrenceNotesApiFp(this.configuration).getOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options).then((request) => request(this.axios, this.basePath));
     }
 

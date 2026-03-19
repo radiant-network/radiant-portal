@@ -16,7 +16,7 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictInt
+from pydantic import Field, StrictInt, StrictStr
 from typing import List
 from typing_extensions import Annotated
 from radiant_python.models.create_occurrence_note_input import CreateOccurrenceNoteInput
@@ -46,7 +46,7 @@ class OccurrenceNotesApi:
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
-        occurrence_id: Annotated[StrictInt, Field(description="Occurrence ID")],
+        occurrence_id: Annotated[StrictStr, Field(description="Occurrence ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -71,7 +71,7 @@ class OccurrenceNotesApi:
         :param task_id: Task ID (required)
         :type task_id: int
         :param occurrence_id: Occurrence ID (required)
-        :type occurrence_id: int
+        :type occurrence_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -127,7 +127,7 @@ class OccurrenceNotesApi:
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
-        occurrence_id: Annotated[StrictInt, Field(description="Occurrence ID")],
+        occurrence_id: Annotated[StrictStr, Field(description="Occurrence ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -152,7 +152,7 @@ class OccurrenceNotesApi:
         :param task_id: Task ID (required)
         :type task_id: int
         :param occurrence_id: Occurrence ID (required)
-        :type occurrence_id: int
+        :type occurrence_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -208,7 +208,7 @@ class OccurrenceNotesApi:
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
-        occurrence_id: Annotated[StrictInt, Field(description="Occurrence ID")],
+        occurrence_id: Annotated[StrictStr, Field(description="Occurrence ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -233,7 +233,7 @@ class OccurrenceNotesApi:
         :param task_id: Task ID (required)
         :type task_id: int
         :param occurrence_id: Occurrence ID (required)
-        :type occurrence_id: int
+        :type occurrence_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of

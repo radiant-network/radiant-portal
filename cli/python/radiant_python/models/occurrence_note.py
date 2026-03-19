@@ -30,7 +30,7 @@ class OccurrenceNote(BaseModel):
     content: StrictStr
     created_at: StrictStr
     id: StrictStr
-    occurrence_id: StrictInt
+    occurrence_id: StrictStr
     seq_id: StrictInt
     task_id: StrictInt
     updated_at: StrictStr

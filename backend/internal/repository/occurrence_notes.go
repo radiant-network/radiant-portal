@@ -14,7 +14,7 @@ type OccurrenceNotesRepository struct {
 
 type OccurrenceNotesDAO interface {
 	Create(note types.OccurrenceNote) (*types.OccurrenceNote, error)
-	GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID int64) ([]types.OccurrenceNote, error)
+	GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error)
 }
 
 func NewOccurrenceNotesRepository(db *gorm.DB) *OccurrenceNotesRepository {
@@ -33,7 +33,7 @@ func (r *OccurrenceNotesRepository) Create(note types.OccurrenceNote) (*types.Oc
 }
 
 // GetByOccurrence returns all non-deleted notes for the given occurrence, ordered by created_at desc.
-func (r *OccurrenceNotesRepository) GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID int64) ([]types.OccurrenceNote, error) {
+func (r *OccurrenceNotesRepository) GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error) {
 	var notes []types.OccurrenceNote
 	if err := r.db.
 		Where("case_id = ? AND seq_id = ? AND task_id = ? AND occurrence_id = ? AND deleted = false",

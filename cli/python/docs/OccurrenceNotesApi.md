@@ -48,7 +48,7 @@ with radiant_python.ApiClient(configuration) as api_client:
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequencing Experiment ID
     task_id = 56 # int | Task ID
-    occurrence_id = 56 # int | Occurrence ID
+    occurrence_id = 'occurrence_id_example' # str | Occurrence ID
 
     try:
         # Get notes for an occurrence
@@ -69,7 +69,7 @@ Name | Type | Description  | Notes
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequencing Experiment ID | 
  **task_id** | **int**| Task ID | 
- **occurrence_id** | **int**| Occurrence ID | 
+ **occurrence_id** | **str**| Occurrence ID | 
 
 ### Return type
 

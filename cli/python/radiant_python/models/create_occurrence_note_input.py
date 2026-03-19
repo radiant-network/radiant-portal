@@ -28,7 +28,7 @@ class CreateOccurrenceNoteInput(BaseModel):
     """ # noqa: E501
     case_id: StrictInt
     content: StrictStr
-    occurrence_id: StrictInt
+    occurrence_id: StrictStr
     seq_id: StrictInt
     task_id: StrictInt
     __properties: ClassVar[List[str]] = ["case_id", "content", "occurrence_id", "seq_id", "task_id"]

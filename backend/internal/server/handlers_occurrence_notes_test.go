@@ -26,11 +26,11 @@ func (m *MockRepository) Create(note types.OccurrenceNote) (*types.OccurrenceNot
 	return &note, nil
 }
 
-func (m *MockRepository) GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID int64) ([]types.OccurrenceNote, error) {
-	if occurrenceID == 99999 {
+func (m *MockRepository) GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error) {
+	if occurrenceID == "99999" {
 		return nil, fmt.Errorf("mock get error")
 	}
-	if occurrenceID == 88888 {
+	if occurrenceID == "88888" {
 		return []types.OccurrenceNote{}, nil
 	}
 	return []types.OccurrenceNote{
@@ -55,7 +55,7 @@ func Test_PostOccurrenceNoteHandler(t *testing.T) {
 	router := gin.Default()
 	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
 
-	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": 10000, "content": "Test note"}`
+	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "Test note"}`
 	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -66,7 +66,7 @@ func Test_PostOccurrenceNoteHandler(t *testing.T) {
 		"case_id": 1,
 		"seq_id": 2,
 		"task_id": 1,
-		"occurrence_id": 10000,
+		"occurrence_id": "10000",
 		"user_id": "1",
 		"user_name": "Mock User",
 		"content": "Test note",
@@ -81,7 +81,7 @@ func Test_PostOccurrenceNoteHandler_MissingContent(t *testing.T) {
 	router := gin.Default()
 	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
 
-	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": 10000}`
+	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000"}`
 	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -95,7 +95,7 @@ func Test_PostOccurrenceNoteHandler_MissingTaskID(t *testing.T) {
 	router := gin.Default()
 	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
 
-	body := `{"case_id": 1, "seq_id": 2, "occurrence_id": 10000, "content": "Test note"}`
+	body := `{"case_id": 1, "seq_id": 2, "occurrence_id": "10000", "content": "Test note"}`
 	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -109,7 +109,7 @@ func Test_PostOccurrenceNoteHandler_MissingCaseID(t *testing.T) {
 	router := gin.Default()
 	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
 
-	body := `{"seq_id": 2, "task_id": 1, "occurrence_id": 10000, "content": "Test note"}`
+	body := `{"seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "Test note"}`
 	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -146,7 +146,7 @@ func Test_GetOccurrenceNotesHandler(t *testing.T) {
 		"case_id": 1,
 		"seq_id": 2,
 		"task_id": 1,
-		"occurrence_id": 10000,
+		"occurrence_id": "10000",
 		"user_id": "1",
 		"user_name": "Mock User",
 		"content": "First note",
