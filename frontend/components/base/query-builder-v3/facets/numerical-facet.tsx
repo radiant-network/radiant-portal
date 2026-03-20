@@ -244,7 +244,7 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
   const [minValue, setMinValue] = useState<string>('');
 
   const [isPristine, setIsPristine] = useState<boolean>(
-    isInputValuesEmpty(selectedRange, minValue, maxValue, numericValue),
+    !isInputValuesEmpty(selectedRange, minValue, maxValue, numericValue),
   );
   const config = useQBAggregationsNumericalConfig(field.key);
   const hasInterval = getHasInterval(config, statistics);
@@ -278,13 +278,13 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
     setMaxValue('');
     setNumericValue('');
     setSelectedRange(config?.defaultOperator ?? RangeOperators.LessThan);
-    setIsPristine(isInputValuesEmpty(selectedRange, minValue, maxValue, numericValue));
+    setIsPristine(true);
   };
 
   const handleApply = useCallback(() => {
-    setIsPristine(isInputValuesEmpty(selectedRange, minValue, maxValue, numericValue));
     // Check if inputs are empty - if so, remove the facet pill
     const isEmpty = isInputValuesEmpty(selectedRange, minValue, maxValue, numericValue);
+    setIsPristine(isEmpty);
 
     if (isEmpty) {
       dispatch({
