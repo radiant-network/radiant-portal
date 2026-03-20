@@ -7,7 +7,7 @@ import { Count, CountBodyWithSqon, SortBody, Sqon, SqonContent, SqonOpEnum } fro
 import { AggregationConfig, IFilterRangeConfig } from '@/components/cores/applications-config';
 
 import { createEmptyQuery, isEqualToField } from '../libs/sqon';
-import { BooleanOperators, ISyntheticSqon, IValueContent, IValueFacet, TFacetValue } from '../type';
+import { BooleanOperators, ISqonGroupFacet, ISyntheticSqon, IValueContent, IValueFacet, TFacetValue } from '../type';
 
 export const DEFAULT_EMPTY_QUERY = {
   content: [],
@@ -16,14 +16,17 @@ export const DEFAULT_EMPTY_QUERY = {
 
 export enum QBActionType {
   ADD_QUERY = 'add-query',
+  SELECT_QUERY = 'select-query',
   REMOVE_QUERY = 'remove-query',
   DUPLICATE_QUERY = 'duplicate-query',
   SET_ACTIVE_QUERY = 'set-active-query',
   ADD_OR_UPDATE_FACET_PILL = 'add-or-update-facet-pill',
   REMOVE_FACET_PILL = 'remove-facet-pill',
+  REMOVE_COMBINED_PILL = 'remove-combined-pill',
   CHANGE_COMBINER_OPERATOR = 'change-combiner-operator',
   SET_LABELS_ENABLED = 'set-labels-enabled',
   REMOVE_ALL_QUERIES = 'remove-all-queries-all',
+  COMBINE_QUERIES = 'combine-queries',
 }
 
 export enum PillUserAction {
@@ -52,6 +55,8 @@ export interface IHistory {
 
 export interface ISettings {
   labelsEnabled: boolean;
+  selectedQueries: string[];
+  combinedQueries: Record<string, string[]>;
 }
 
 export interface ICountInput {
@@ -61,6 +66,10 @@ export interface ICountInput {
 export interface IQBFetcher {
   list: (params: IListInput) => Promise<any[]>;
   count: (params: ICountInput) => Promise<Count>;
+}
+
+export interface ICombinedSqon {
+  ids: string[];
 }
 
 export interface IQBContext {
@@ -106,6 +115,8 @@ export function getDefaultQBContext() {
     },
     settings: {
       labelsEnabled: true,
+      selectedQueries: [],
+      combinedQueries: [],
     },
   };
 }
@@ -140,6 +151,17 @@ type ChangeCombinerOperatorAction = {
   type: QBActionType.CHANGE_COMBINER_OPERATOR;
   payload: BooleanOperators;
 };
+type SelectQuerieAction = {
+  type: QBActionType.SELECT_QUERY;
+  payload: {
+    uuid: string;
+    isSelected: boolean;
+  };
+};
+type CombineQueriesAction = {
+  type: QBActionType.CHANGE_COMBINER_OPERATOR;
+  payload: BooleanOperators;
+};
 // Facet/Pills
 type AddOrUpdateFacetAction = {
   type: QBActionType.ADD_OR_UPDATE_FACET_PILL;
@@ -147,6 +169,10 @@ type AddOrUpdateFacetAction = {
 };
 type RemoveFacetPillAction = {
   type: QBActionType.REMOVE_FACET_PILL;
+  payload: IValueFacet;
+};
+type RemoveCombinedPillAction = {
+  type: QBActionType.REMOVE_COMBINED_PILL;
   payload: IValueFacet;
 };
 // Settings
@@ -163,6 +189,7 @@ type RemoveAllQueriesAction = {
 export type ActionType =
   | AddQueryAction
   | SetActiveQueryAction
+  | SelectQuerieAction
   | DuplicateQueryAction
   | RemoveQueryAction
   | AddOrUpdateFacetAction
@@ -170,6 +197,8 @@ export type ActionType =
   | ChangeCombinerOperatorAction
   | SetLabelsEnabledAction
   | RemoveAllQueriesAction
+  | CombineQueriesAction
+  | RemoveCombinedPillAction
   | any;
 
 export function qBReducer(context: IQBContext, action: ActionType) {
@@ -210,8 +239,25 @@ export function qBReducer(context: IQBContext, action: ActionType) {
     case QBActionType.REMOVE_QUERY: {
       const { activeQueryId } = context;
       let index = context.sqons.findIndex(sqon => sqon.id === action.payload.id);
-      const sqons = context.sqons.filter(sqon => sqon.id !== action.payload.id);
+      let sqons = context.sqons.filter(sqon => sqon.id !== action.payload.id);
+      const combinedQueries = { ...context.settings.combinedQueries };
 
+      // queries is a combined queries
+      if (combinedQueries[action.payload.id]) {
+        delete combinedQueries[action.payload.id];
+      }
+
+      // remove sqon from combined queries sqons, clean combinedQueries
+      Object.keys(combinedQueries).forEach(key => {
+        combinedQueries[key] = combinedQueries[key].filter(id => id != action.payload.id);
+      });
+
+      sqons = sqons.map(sqon => ({
+        ...sqon,
+        content: sqon.content.filter(content => (content as IValueFacet).id !== action.payload.id),
+      }));
+
+      // filter sqons for combined queries
       index = index < sqons.length ? index : index - 1;
 
       // queries are now empty
@@ -227,6 +273,10 @@ export function qBReducer(context: IQBContext, action: ActionType) {
               op: BooleanOperators.And,
             },
           ],
+          settings: {
+            ...context.settings,
+            combinedQueries,
+          },
         };
       }
 
@@ -235,6 +285,10 @@ export function qBReducer(context: IQBContext, action: ActionType) {
         ...context,
         activeQueryId: action.payload.id === activeQueryId ? sqons[index].id : activeQueryId,
         sqons,
+        settings: {
+          ...context.settings,
+          combinedQueries,
+        },
       };
     }
     /**
@@ -244,6 +298,56 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       return {
         ...context,
         activeQueryId: action.payload.id,
+      };
+    }
+    /**
+     * Add a query to selectedQueriesList
+     * Active combine button when more than one is selected
+     */
+    case QBActionType.SELECT_QUERY: {
+      const { isSelected } = action.payload;
+      if (isSelected) {
+        return {
+          ...context,
+          settings: {
+            ...context.settings,
+            selectedQueries: [...context.settings.selectedQueries, action.payload.uuid],
+          },
+        };
+      }
+
+      return {
+        ...context,
+        settings: {
+          ...context.settings,
+          selectedQueries: context.settings.selectedQueries.filter(uuid => uuid != action.payload.uuid),
+        },
+      };
+    }
+    /**
+     * Combine all selected queries
+     */
+    case QBActionType.COMBINE_QUERIES: {
+      const uuid = v4();
+      const { selectedQueries } = context.settings;
+      const content = context.sqons.filter(sqon => selectedQueries.includes(sqon.id));
+
+      return {
+        ...context,
+        activeQueryId: uuid,
+        sqons: [
+          ...context.sqons,
+          {
+            id: uuid,
+            content,
+            op: action.payload,
+          },
+        ],
+        settings: {
+          ...context.settings,
+          combinedQueries: { ...context.settings.combinedQueries, [uuid]: content.map(c => c.id) },
+          selectedQueries: [],
+        },
       };
     }
     /**
@@ -267,7 +371,8 @@ export function qBReducer(context: IQBContext, action: ActionType) {
      * Add or update a pill (multi-select, numerical and toggle) to the active query
      */
     case QBActionType.ADD_OR_UPDATE_FACET_PILL: {
-      const index = context.sqons.findIndex(sqon => sqon.id === context.activeQueryId);
+      const activeQueryId = context.activeQueryId;
+      const index = context.sqons.findIndex(sqon => sqon.id === activeQueryId);
 
       // active query is empty
       if (index < 0) {
@@ -286,13 +391,17 @@ export function qBReducer(context: IQBContext, action: ActionType) {
 
       const field = action.payload.content.field;
       const fieldIndex = context.sqons[index].content.findIndex(c => isEqualToField(c, field));
+      const combinedQueries = { ...context.settings.combinedQueries };
+      const combinedQueryReferences = Object.keys(combinedQueries).filter(key =>
+        combinedQueries[key].includes(activeQueryId),
+      );
 
       // field doesn't exist in query, add it
       if (fieldIndex < 0) {
         return {
           ...context,
-          sqons: context.sqons.map((sqon, i) => {
-            if (i != index) return sqon;
+          sqons: context.sqons.map(sqon => {
+            if (sqon.id !== activeQueryId) return sqon;
             return { ...sqon, content: [...sqon.content, action.payload] };
           }),
           history: { uuid: v4(), type: PillUserAction.ADD, target: field },
@@ -303,8 +412,29 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       if (action.payload.content.value.length > 0) {
         return {
           ...context,
-          sqons: context.sqons.map((sqon, i) => {
-            if (i != index) return sqon;
+          sqons: context.sqons.map(sqon => {
+            if (combinedQueryReferences.includes(sqon.id)) {
+              const content = ((sqon.content as ISqonGroupFacet[]) ?? []).map(content => {
+                if (content.id !== activeQueryId) {
+                  return content;
+                }
+                return {
+                  ...content,
+                  content: content.content.map((c, j) => {
+                    if (j != fieldIndex) return c;
+                    return action.payload;
+                  }),
+                };
+              });
+
+              return {
+                ...sqon,
+                content,
+              };
+            } else if (sqon.id != activeQueryId) {
+              return sqon;
+            }
+
             return {
               ...sqon,
               content: sqon.content.map((content, j) => {
@@ -320,8 +450,8 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       // value is empty, remove pills
       return {
         ...context,
-        sqons: context.sqons.map((sqon, i) => {
-          if (i !== index) return sqon;
+        sqons: context.sqons.map(sqon => {
+          if (sqon.id !== activeQueryId) return sqon;
           return {
             ...sqon,
             content: sqon.content.filter((_, j) => j !== fieldIndex),
@@ -335,22 +465,127 @@ export function qBReducer(context: IQBContext, action: ActionType) {
      */
     case QBActionType.REMOVE_FACET_PILL: {
       const { activeQueryId } = context;
+      const index = context.sqons.findIndex(sqon => sqon.id === activeQueryId);
 
       // verify active query exists
       if (!context.sqons.some(sqon => sqon.id === activeQueryId)) {
-        throw new Error(`Cannot remove pill: ${QBActionType.REMOVE_FACET_PILL} ${activeQueryId} ${action.payload}`);
+        throw new Error(`Cannot remove pill: ${action.type} ${activeQueryId} ${action.payload}`);
+      }
+
+      const combinedQueries = { ...context.settings.combinedQueries };
+      const combinedQueryReferences = Object.keys(combinedQueries).filter(key =>
+        combinedQueries[key].includes(activeQueryId),
+      );
+
+      let isQueryNowEmpty = false;
+      const sqons = context.sqons
+        .map(sqon => {
+          // update sqon
+          if (sqon.id === activeQueryId) {
+            const content = (sqon.content ?? []).filter(c => !isEqualToField(c, action.payload.content.field));
+            if (content.length > 0) {
+              return {
+                ...sqon,
+                content,
+              };
+            }
+            isQueryNowEmpty = true;
+            return undefined;
+          }
+          // update sqon of combined query where the pill is referenced
+          if (combinedQueryReferences.includes(sqon.id)) {
+            const content = ((sqon.content as ISqonGroupFacet[]) ?? [])
+              .map(content => {
+                if (content.id !== activeQueryId) {
+                  return content;
+                }
+
+                const sqonContent = content.content.filter(
+                  (c: any) => !isEqualToField(c, action.payload.content.field),
+                );
+                if (sqonContent.length > 0) {
+                  return {
+                    ...content,
+                    content: sqonContent.filter((c: any) => !isEqualToField(c, action.payload.content.field)),
+                  };
+                }
+
+                return undefined;
+              })
+              .filter(c => c !== undefined);
+
+            return {
+              ...sqon,
+              content,
+            };
+          }
+          return sqon;
+        })
+        .filter(sqon => sqon != undefined);
+
+      if (isQueryNowEmpty) {
+        // remove sqon from combined queries sqons, clean combinedQueries
+        Object.keys(combinedQueries).forEach(key => {
+          combinedQueries[key] = combinedQueries[key].filter(id => id != action.payload.id);
+        });
       }
 
       return {
         ...context,
+        activeQueryId: index < sqons.length ? sqons[index].id : sqons[index - 1].id,
+        sqons,
+        settings: {
+          ...context.settings,
+          combinedQueries,
+        },
         history: { uuid: v4(), type: PillUserAction.REMOVE, target: action.payload.content.field },
-        sqons: context.sqons.map(sqon => {
-          if (sqon.id !== activeQueryId) return sqon;
-          return {
-            ...sqon,
-            content: sqon.content.filter(c => !isEqualToField(c, action.payload.content.field)),
-          };
-        }),
+      };
+    }
+    /**
+     * Combined pill are reference to another query
+     * Must have their own logic to be removed
+     */
+    case QBActionType.REMOVE_COMBINED_PILL: {
+      const { activeQueryId } = context;
+
+      // verify active query exists
+      if (!context.sqons.some(sqon => sqon.id === activeQueryId)) {
+        throw new Error(`Cannot remove combined pill: ${action.type} ${activeQueryId} ${action.payload}`);
+      }
+
+      const index = context.sqons.findIndex(sqon => sqon.id === activeQueryId);
+      const combinedQueries = { ...context.settings.combinedQueries };
+      combinedQueries[activeQueryId] = combinedQueries[activeQueryId].filter(id => id !== action.payload.id);
+
+      // Remove sqon from combined sqons
+      let isQueryNowEmpty = false;
+      const sqons = context.sqons
+        .map(sqon => {
+          if (sqon.id === activeQueryId) {
+            // remove sqon from combined pill
+            const content = (sqon.content ?? []).filter(content => (content as IValueFacet).id !== action.payload.id);
+
+            if (content.length > 0) {
+              return {
+                ...sqon,
+                content,
+              };
+            }
+            isQueryNowEmpty = true;
+            return undefined;
+          }
+          return sqon;
+        })
+        .filter(sqon => sqon != undefined);
+
+      return {
+        ...context,
+        activeQueryId: isQueryNowEmpty ? context.sqons[index - 1].id : activeQueryId,
+        sqons,
+        settings: {
+          ...context.settings,
+          combinedQueries,
+        },
       };
     }
     /**
@@ -462,6 +697,22 @@ export function useQBActiveSqon(): { content: SqonContent; op: SqonOpEnum } {
     content: activeQuery.content as SqonContent,
     op: activeQuery.op as SqonOpEnum,
   };
+}
+
+/**
+ * Return list of sqon
+ */
+export function useQBSqons(): ISyntheticSqon[] {
+  const { sqons } = useQBContext();
+  return sqons;
+}
+
+/**
+ * Return the number of sqon in sqons
+ */
+export function useQBSqonsCount(): number {
+  const { sqons } = useQBContext();
+  return sqons.length;
 }
 
 /**

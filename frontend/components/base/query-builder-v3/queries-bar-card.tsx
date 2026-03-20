@@ -1,6 +1,9 @@
 import { useCallback } from 'react';
+import capitalize from 'lodash/capitalize';
 import { PlusIcon } from 'lucide-react';
 
+import { ActionButton } from '@/components/base/buttons';
+import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import {
   QBActionType,
   useQBActiveQuery,
@@ -11,12 +14,12 @@ import {
 import { isQueryEmpty, isSqonEmpty } from '@/components/base/query-builder-v3/libs/sqon';
 import QueryBar from '@/components/base/query-builder-v3/query-bar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
+import { Button } from '@/components/base/shadcn/button';
 import { Card } from '@/components/base/shadcn/card';
+import { Switch } from '@/components/base/shadcn/switch';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { alertDialog } from '../dialog/alert-dialog-store';
-import { Button } from '../shadcn/button';
-import { Switch } from '../shadcn/switch';
+import { BooleanOperators } from './type';
 
 /**
  * Card that display all queries for query-builder
@@ -35,7 +38,8 @@ import { Switch } from '../shadcn/switch';
  */
 function QueriesBarCard() {
   const { t } = useI18n();
-  const { sqons, activeQueryId } = useQBContext();
+  const settings = useQBSettings();
+  const { sqons } = useQBContext();
   const { labelsEnabled } = useQBSettings();
   const dispatch = useQBDispatch();
   const activeQuery = useQBActiveQuery();
@@ -43,11 +47,25 @@ function QueriesBarCard() {
   /**
    * Add and active a new query
    */
-  const handleNewQueryOnClick = useCallback(() => {
+  const handleNewQueryClick = useCallback(() => {
     dispatch({
       type: QBActionType.ADD_QUERY,
     });
   }, [dispatch]);
+
+  /**
+   * Combine queries
+   */
+  const handleCombineQueriesClick = useCallback(
+    (operator: BooleanOperators) =>
+      function() {
+        dispatch({
+          type: QBActionType.COMBINE_QUERIES,
+          payload: operator,
+        });
+      },
+    [dispatch],
+  );
 
   /**
    * Toggle labelsEnabled setting
@@ -99,7 +117,7 @@ function QueriesBarCard() {
               {sqons
                 .filter(sqon => !isSqonEmpty(sqon))
                 .map((sqon, index) => (
-                  <QueryBar key={sqon.id} index={index + 1} sqon={sqon} active={activeQueryId === sqon.id} />
+                  <QueryBar key={sqon.id} index={index} sqon={sqon} />
                 ))}
               {isSqonEmpty(activeQuery) && t('common.query_bar.empty')}
             </div>
@@ -107,17 +125,41 @@ function QueriesBarCard() {
             {/* Actions */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                {/* Add New Query */}
-                <Button size="xs" disabled={isQueryEmpty(sqons)} onClick={handleNewQueryOnClick}>
-                  <PlusIcon />
-                  {t('common.toolbar.new_query')}
-                </Button>
+                {settings.selectedQueries.length > 1 ? (
+                  <>
+                    {/* Combine Queries */}
+                    <ActionButton
+                      size="xs"
+                      actions={[
+                        {
+                          label: capitalize(t('common.query_pill.operator.and')),
+                          onClick: handleCombineQueriesClick(BooleanOperators.And),
+                        },
+                        {
+                          label: capitalize(t('common.query_pill.operator.or')),
+                          onClick: handleCombineQueriesClick(BooleanOperators.Or),
+                        },
+                      ]}
+                      onDefaultAction={handleCombineQueriesClick(BooleanOperators.And)}
+                    >
+                      {t('common.toolbar.combine')}
+                    </ActionButton>
+                  </>
+                ) : (
+                  <>
+                    {/* Add New Query */}
+                    <Button size="xs" disabled={isQueryEmpty(sqons)} onClick={handleNewQueryClick}>
+                      <PlusIcon />
+                      {t('common.toolbar.new_query')}
+                    </Button>
 
-                {/* Toggle labelsEnabled Settings */}
-                <div className="flex items-center gap-1.5">
-                  <Switch size="xs" checked={labelsEnabled} onCheckedChange={handleLabelsCheckedChange} />
-                  {t('common.toolbar.labels')}
-                </div>
+                    {/* Toggle labelsEnabled Settings */}
+                    <div className="flex items-center gap-1.5">
+                      <Switch size="xs" checked={labelsEnabled} onCheckedChange={handleLabelsCheckedChange} />
+                      {t('common.toolbar.labels')}
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Remove all queries */}

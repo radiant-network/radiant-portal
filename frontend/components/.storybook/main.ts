@@ -29,7 +29,9 @@ const config: StorybookConfig = {
   ],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
-    options: {},
+    options: {
+      strictMode: true
+    },
   },
   viteFinal: async (config) => {
     return mergeConfig(config, {

@@ -2,6 +2,7 @@ import { v4 } from 'uuid';
 
 import {
   BooleanOperators,
+  ISqonGroupFacet,
   ISyntheticSqon,
   IValueFacet,
   RangeOperators,
@@ -11,6 +12,14 @@ import {
 
 export const isSet = (value: IValueFacet): boolean =>
   value.content.value && value.content.value.some(value => value?.toString().startsWith(SET_ID_PREFIX));
+
+/**
+ * Check if sqon is a ISqonGroupFacet
+ * Generaly use to detect a combinaison of multiple queries
+ */
+export function isCombinedQuery(sqon: ISqonGroupFacet): boolean {
+  return Array.isArray(sqon.content);
+}
 
 /**
  * For boolean facet

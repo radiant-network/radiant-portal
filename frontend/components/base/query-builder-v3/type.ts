@@ -80,6 +80,7 @@ export interface ISqonGroupFacet {
   op: TSqonGroupOp;
   skipBooleanOperatorCheck?: boolean;
   content: TSqonContent;
+  id?: string;
 }
 
 export type TSyntheticSqonContentValue = ISqonGroupFacet | IValueFacet | IValueQuery | IValueFacetQuery | number;
