@@ -97,6 +97,7 @@ docs/StatisticsBodyWithSqon.md
 docs/StatusApi.md
 docs/Term.md
 docs/Transcript.md
+docs/UpdateOccurrenceNoteInput.md
 docs/UserPreference.md
 docs/UserPreferencesApi.md
 docs/UserSet.md
@@ -222,6 +223,7 @@ radiant_python/models/statistics.py
 radiant_python/models/statistics_body_with_sqon.py
 radiant_python/models/term.py
 radiant_python/models/transcript.py
+radiant_python/models/update_occurrence_note_input.py
 radiant_python/models/user_preference.py
 radiant_python/models/user_set.py
 radiant_python/models/utils_pre_signed_url.py

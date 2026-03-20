@@ -89,6 +89,68 @@ func Test_GetByOccurrence_EmptyResult(t *testing.T) {
 	})
 }
 
+func Test_GetByID(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewOccurrenceNotesRepository(db)
+		note := types.OccurrenceNote{
+			CaseID:       1,
+			SeqID:        1,
+			TaskID:       1,
+			OccurrenceID: "10000",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "John Doe",
+			Content:      "Test note",
+		}
+		created, err := repo.Create(note)
+		assert.NoError(t, err)
+
+		found, err := repo.GetByID(created.ID)
+
+		assert.NoError(t, err)
+		if assert.NotNil(t, found) {
+			assert.Equal(t, created.ID, found.ID)
+			assert.Equal(t, "Test note", found.Content)
+		}
+	})
+}
+
+func Test_GetByID_NotFound(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewOccurrenceNotesRepository(db)
+
+		found, err := repo.GetByID("00000000-0000-0000-0000-000000000000")
+
+		assert.NoError(t, err)
+		assert.Nil(t, found)
+	})
+}
+
+func Test_UpdateOccurrenceNote(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewOccurrenceNotesRepository(db)
+		note := types.OccurrenceNote{
+			CaseID:       1,
+			SeqID:        1,
+			TaskID:       1,
+			OccurrenceID: "10000",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "John Doe",
+			Content:      "Original content",
+		}
+		created, err := repo.Create(note)
+		assert.NoError(t, err)
+
+		updated, err := repo.Update(created.ID, "Updated content")
+
+		assert.NoError(t, err)
+		if assert.NotNil(t, updated) {
+			assert.Equal(t, created.ID, updated.ID)
+			assert.Equal(t, "Updated content", updated.Content)
+			assert.True(t, updated.UpdatedAt.After(created.UpdatedAt) || updated.UpdatedAt.Equal(created.UpdatedAt))
+		}
+	})
+}
+
 func Test_GetByOccurrence_IgnoresDeletedNotes(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)

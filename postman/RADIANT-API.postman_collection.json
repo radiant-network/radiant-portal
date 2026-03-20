@@ -2616,7 +2616,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"case_id\": 1,\n    \"seq_id\": 1,\n    \"task_id\": 1,\n    \"occurrence_id\": 10000,\n    \"content\": \"This is a note\"\n}",
+              "raw": "{\n    \"case_id\": 1,\n    \"seq_id\": 1,\n    \"task_id\": 1,\n    \"occurrence_id\": \"10000\",\n    \"content\": \"This is a note\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2661,6 +2661,49 @@
                 "1",
                 "1",
                 "10000"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Note",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"This is the updated note content\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/notes/:id",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "notes",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
               ]
             }
           },

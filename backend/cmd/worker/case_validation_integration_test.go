@@ -826,6 +826,31 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 				Message: "Missing output documents for case 0 - task 3 of type family_variant_calling.",
 				Path:    "case[0].tasks[3]",
 			},
+			{
+				Code:    "TASK-007",
+				Message: "Task type exomiser doesn't support being associated with more than 1 aliquot value.",
+				Path:    "case[0].tasks[4]",
+			},
+			{
+				Code:    "TASK-003",
+				Message: "Missing input documents for case 0 - task 4 of type exomiser.",
+				Path:    "case[0].tasks[4]",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 4 of type exomiser.",
+				Path:    "case[0].tasks[4]",
+			},
+			{
+				Code:    "TASK-007",
+				Message: "Task type alignment_germline_variant_calling doesn't support being associated with more than 1 aliquot value.",
+				Path:    "case[0].tasks[5]",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 5 of type alignment_germline_variant_calling.",
+				Path:    "case[0].tasks[5]",
+			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
 	})

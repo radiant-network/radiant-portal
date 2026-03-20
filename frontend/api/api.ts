@@ -4533,6 +4533,19 @@ export interface Transcript {
 /**
  * 
  * @export
+ * @interface UpdateOccurrenceNoteInput
+ */
+export interface UpdateOccurrenceNoteInput {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateOccurrenceNoteInput
+     */
+    'content': string;
+}
+/**
+ * 
+ * @export
  * @interface UserPreference
  */
 export interface UserPreference {
@@ -8052,6 +8065,50 @@ export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Con
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Update the content of an existing note. Only the owner of the note can update it.
+         * @summary Update a note on an occurrence
+         * @param {string} id Note ID
+         * @param {UpdateOccurrenceNoteInput} updateOccurrenceNoteInput Updated content
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putOccurrenceNote: async (id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('putOccurrenceNote', 'id', id)
+            // verify required parameter 'updateOccurrenceNoteInput' is not null or undefined
+            assertParamExists('putOccurrenceNote', 'updateOccurrenceNoteInput', updateOccurrenceNoteInput)
+            const localVarPath = `/notes/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOccurrenceNoteInput, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -8091,6 +8148,20 @@ export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.postOccurrenceNote']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Update the content of an existing note. Only the owner of the note can update it.
+         * @summary Update a note on an occurrence
+         * @param {string} id Note ID
+         * @param {UpdateOccurrenceNoteInput} updateOccurrenceNoteInput Updated content
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putOccurrenceNote(id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OccurrenceNote>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putOccurrenceNote(id, updateOccurrenceNoteInput, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.putOccurrenceNote']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -8123,6 +8194,17 @@ export const OccurrenceNotesApiFactory = function (configuration?: Configuration
          */
         postOccurrenceNote(createOccurrenceNoteInput: CreateOccurrenceNoteInput, options?: RawAxiosRequestConfig): AxiosPromise<OccurrenceNote> {
             return localVarFp.postOccurrenceNote(createOccurrenceNoteInput, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Update the content of an existing note. Only the owner of the note can update it.
+         * @summary Update a note on an occurrence
+         * @param {string} id Note ID
+         * @param {UpdateOccurrenceNoteInput} updateOccurrenceNoteInput Updated content
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putOccurrenceNote(id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options?: RawAxiosRequestConfig): AxiosPromise<OccurrenceNote> {
+            return localVarFp.putOccurrenceNote(id, updateOccurrenceNoteInput, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -8159,6 +8241,19 @@ export class OccurrenceNotesApi extends BaseAPI {
      */
     public postOccurrenceNote(createOccurrenceNoteInput: CreateOccurrenceNoteInput, options?: RawAxiosRequestConfig) {
         return OccurrenceNotesApiFp(this.configuration).postOccurrenceNote(createOccurrenceNoteInput, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Update the content of an existing note. Only the owner of the note can update it.
+     * @summary Update a note on an occurrence
+     * @param {string} id Note ID
+     * @param {UpdateOccurrenceNoteInput} updateOccurrenceNoteInput Updated content
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrenceNotesApi
+     */
+    public putOccurrenceNote(id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options?: RawAxiosRequestConfig) {
+        return OccurrenceNotesApiFp(this.configuration).putOccurrenceNote(id, updateOccurrenceNoteInput, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

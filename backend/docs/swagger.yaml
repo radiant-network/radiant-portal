@@ -2195,6 +2195,13 @@ components:
         vep_impact:
           $ref: '#/components/schemas/VepImpact'
       type: object
+    UpdateOccurrenceNoteInput:
+      properties:
+        content:
+          type: string
+      required:
+      - content
+      type: object
     UserPreference:
       properties:
         content:
@@ -3863,6 +3870,61 @@ paths:
       security:
       - bearerauth: []
       summary: Get notes for an occurrence
+      tags:
+      - occurrence_notes
+  /notes/{id}:
+    put:
+      description: Update the content of an existing note. Only the owner of the note
+        can update it.
+      operationId: putOccurrenceNote
+      parameters:
+      - description: Note ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOccurrenceNoteInput'
+        description: Updated content
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OccurrenceNote'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Update a note on an occurrence
       tags:
       - occurrence_notes
   /occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap:

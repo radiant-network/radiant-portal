@@ -73,7 +73,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     corsAllowedOrigins,
-		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "OPTIONS"},
 		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true, // Enable cookies/auth
 	}))
@@ -133,6 +133,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	notesGroup := privateRoutes.Group("/notes")
 	notesGroup.POST("", server.PostOccurrenceNoteHandler(repoOccurrenceNotes, auth))
+	notesGroup.PUT("/:id", server.PutOccurrenceNoteHandler(repoOccurrenceNotes, auth))
 	notesGroup.GET("/:case_id/:seq_id/:task_id/:occurrence_id", server.GetOccurrenceNotesHandler(repoOccurrenceNotes))
 
 	occurrencesGroup := privateRoutes.Group("/occurrences")

@@ -1,11 +1,13 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type OccurrenceNotesRepository struct {
@@ -14,7 +16,9 @@ type OccurrenceNotesRepository struct {
 
 type OccurrenceNotesDAO interface {
 	Create(note types.OccurrenceNote) (*types.OccurrenceNote, error)
+	GetByID(id string) (*types.OccurrenceNote, error)
 	GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error)
+	Update(id string, content string) (*types.OccurrenceNote, error)
 }
 
 func NewOccurrenceNotesRepository(db *gorm.DB) *OccurrenceNotesRepository {
@@ -28,6 +32,30 @@ func NewOccurrenceNotesRepository(db *gorm.DB) *OccurrenceNotesRepository {
 func (r *OccurrenceNotesRepository) Create(note types.OccurrenceNote) (*types.OccurrenceNote, error) {
 	if err := r.db.Create(&note).Error; err != nil {
 		return nil, fmt.Errorf("error creating occurrence note: %w", err)
+	}
+	return &note, nil
+}
+
+// GetByID returns the non-deleted note with the given ID, or nil if not found.
+func (r *OccurrenceNotesRepository) GetByID(id string) (*types.OccurrenceNote, error) {
+	var note types.OccurrenceNote
+	if err := r.db.Where("id = ? AND deleted = false", id).First(&note).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error retrieving occurrence note: %w", err)
+		}
+		return nil, nil
+	}
+	return &note, nil
+}
+
+// Update sets the content of the note with the given ID and returns the updated note.
+func (r *OccurrenceNotesRepository) Update(id string, content string) (*types.OccurrenceNote, error) {
+	var note types.OccurrenceNote
+	if err := r.db.Model(&note).
+		Clauses(clause.Returning{}).
+		Where("id = ?", id).
+		Update("content", content).Error; err != nil {
+		return nil, fmt.Errorf("error updating occurrence note: %w", err)
 	}
 	return &note, nil
 }
