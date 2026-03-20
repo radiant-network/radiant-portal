@@ -3758,9 +3758,41 @@ func Test_validateTaskAliquot_ErrorExomiserNotExactly1Aliquot(t *testing.T) {
 	record.validateTaskAliquot(0)
 
 	expected := types.BatchMessage{
-		Code:    "TASK-001",
-		Message: "Invalid field aliquots for case 0 - task 0. Reason: aliquots must contain exactly one value for exomiser task.",
-		Path:    "case[0].tasks[0].aliquots",
+		Code:    "TASK-007",
+		Message: "Task type exomiser doesn't support being associated with more than 1 aliquot value.",
+		Path:    "case[0].tasks[0]",
+	}
+
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
+}
+
+func Test_validateTaskAliquot_ErrorAlignmentGermlineVariantCallingNotExactly1Aliquot(t *testing.T) {
+	record := CaseValidationRecord{
+		Case: types.CaseBatch{
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
+				{
+					Aliquot: "ALIQUOT-1",
+				},
+				{
+					Aliquot: "ALIQUOT-2",
+				},
+			},
+			Tasks: []*types.CaseTaskBatch{
+				{
+					TypeCode: AlignmentGermlineVariantCallingTaskTypeCode,
+					Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
+				},
+			},
+		},
+	}
+	record.validateTaskAliquot(0)
+
+	expected := types.BatchMessage{
+		Code:    "TASK-007",
+		Message: "Task type alignment_germline_variant_calling doesn't support being associated with more than 1 aliquot value.",
+		Path:    "case[0].tasks[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)

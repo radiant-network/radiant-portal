@@ -57,3 +57,17 @@ ordering_organization_code = "CHUSJ"
     pipeline_name = "Dragen"
     pipeline_version = "4.4.4"
     genome_build = "GRch38"
+
+    [[cases.tasks]] # TASK-003/4 missing input/output documents
+    type_code = "exomiser"
+    aliquots = ["NA12891", "NA12892"]  # TASK-007 exactly 1 aliquot required for exomiser
+    pipeline_name = "Dragen"
+    pipeline_version = "4.4.4"
+    genome_build = "GRch38"
+
+    [[cases.tasks]] # TASK-004 missing output documents
+    type_code = "alignment_germline_variant_calling"
+    aliquots = ["NA12891", "NA12892"]  # TASK-007 exactly 1 aliquot required for alignment_germline_variant_calling
+    pipeline_name = "Dragen"
+    pipeline_version = "4.4.4"
+    genome_build = "GRch38"

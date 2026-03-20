@@ -73,6 +73,7 @@ const (
 	TaskMissingOutputDocuments                  = "TASK-004"
 	TaskInputDocumentNotFound                   = "TASK-005"
 	TaskInputDocumentNotInSequencingExperiments = "TASK-006"
+	TaskTypeDoesNotSupportMultipleAliquots      = "TASK-007"
 )
 
 // Documents error codes
@@ -91,6 +92,7 @@ const (
 const RelationshipProbandCode = "proband"
 const RadiantGermlineAnnotationTask = "radiant_germline_annotation"
 const ExomiserTaskTypeCode = "exomiser"
+const AlignmentGermlineVariantCallingTaskTypeCode = "alignment_germline_variant_calling"
 
 var CaseRelatedTaskTypes = map[string]struct{}{
 	"family_variant_calling":            {},
@@ -106,6 +108,11 @@ var RequiresInputDocumentsTaskTypes = map[string]struct{}{
 	"tumor_only_variant_calling":  {},
 	RadiantGermlineAnnotationTask: {},
 	ExomiserTaskTypeCode:          {},
+}
+
+var SingleAliquotTaskTypes = map[string]struct{}{
+	ExomiserTaskTypeCode:                        {},
+	AlignmentGermlineVariantCallingTaskTypeCode: {},
 }
 
 type CaseKey struct {
@@ -947,10 +954,10 @@ func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 		return
 	}
 
-	if len(task.Aliquots) > 1 && task.TypeCode == ExomiserTaskTypeCode {
-		path := cr.formatFieldPath("tasks", &taskIndex, "aliquots", nil)
-		msg := cr.formatTaskFieldErrorMessage("aliquots", cr.Index, taskIndex)
-		cr.AddErrors(fmt.Sprintf("%s aliquots must contain exactly one value for exomiser task.", msg), TaskInvalidField, path)
+	if _, ok := SingleAliquotTaskTypes[task.TypeCode]; ok && len(task.Aliquots) > 1 {
+		path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+		msg := fmt.Sprintf("Task type %s doesn't support being associated with more than 1 aliquot value.", task.TypeCode)
+		cr.AddErrors(msg, TaskTypeDoesNotSupportMultipleAliquots, path)
 		return
 	}
 
