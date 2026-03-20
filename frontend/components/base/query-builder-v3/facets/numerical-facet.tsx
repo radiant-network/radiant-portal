@@ -317,7 +317,8 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
   const isApplyDisabled = useMemo(() => {
     if (sqon) {
       return false;
-    } else if (selectedRange === RangeOperators.Between) {
+    }
+    if (selectedRange === RangeOperators.Between) {
       return (
         !minValue ||
         !maxValue ||
@@ -326,9 +327,8 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
         isNaN(Number(minValue)) ||
         isNaN(Number(maxValue))
       );
-    } else {
-      return !numericValue || numericValue.trim() === '' || isNaN(Number(numericValue));
     }
+    return !numericValue || numericValue.trim() === '' || isNaN(Number(numericValue));
   }, [selectedRange, minValue, maxValue, numericValue, sqon]);
 
   /**
