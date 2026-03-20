@@ -828,7 +828,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 			},
 			{
 				Code:    "TASK-007",
-				Message: "Task type exomiser doesn’t support being associated to more than 1 aliquot value.",
+				Message: "Task type exomiser doesn't support being associated with more than 1 aliquot value.",
 				Path:    "case[0].tasks[4]",
 			},
 			{
@@ -843,7 +843,7 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 			},
 			{
 				Code:    "TASK-007",
-				Message: "Task type alignment_germline_variant_calling doesn’t support being associated to more than 1 aliquot value.",
+				Message: "Task type alignment_germline_variant_calling doesn't support being associated with more than 1 aliquot value.",
 				Path:    "case[0].tasks[5]",
 			},
 			{

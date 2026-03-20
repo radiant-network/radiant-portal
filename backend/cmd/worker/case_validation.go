@@ -956,7 +956,7 @@ func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 
 	if _, ok := SingleAliquotTaskTypes[task.TypeCode]; ok && len(task.Aliquots) > 1 {
 		path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
-		msg := fmt.Sprintf("Task type %s doesn’t support being associated to more than 1 aliquot value.", task.TypeCode)
+		msg := fmt.Sprintf("Task type %s doesn't support being associated with more than 1 aliquot value.", task.TypeCode)
 		cr.AddErrors(msg, TaskTypeDoesNotSupportMultipleAliquots, path)
 		return
 	}
