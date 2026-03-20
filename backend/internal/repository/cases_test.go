@@ -92,11 +92,14 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Len(t, *cases, 10)
 		assert.Equal(t, int64(23), *count)
+		assert.Equal(t, "somatic", (*cases)[0].CaseTypeCode)
+		assert.Equal(t, "somatic", (*cases)[0].CaseType)
+		assert.Equal(t, true, (*cases)[0].HasVariants)
+
 		assert.Equal(t, "germline", (*cases)[1].CaseTypeCode)
 		assert.Equal(t, "MONDO:0700092", (*cases)[1].PrimaryConditionID)
 		assert.Equal(t, "neurodevelopmental disorder", (*cases)[1].PrimaryConditionName)
 		assert.Equal(t, "germline_family", (*cases)[1].CaseType)
-		assert.Equal(t, "germline", (*cases)[1].CaseTypeCode)
 		assert.Equal(t, true, (*cases)[1].HasVariants)
 		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*cases)[1].OrganizationName)
 		assert.Equal(t, "CHUSJ", (*cases)[1].OrganizationCode)
@@ -483,7 +486,7 @@ func Test_RetrieveCaseLevelData(t *testing.T) {
 	})
 }
 
-func Test_RetrieveCaseSequencingExperiments(t *testing.T) {
+func Test_RetrieveCaseSequencingExperiments_Germline(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(1)
@@ -521,6 +524,33 @@ func Test_RetrieveCaseSequencingExperiments(t *testing.T) {
 		assert.Equal(t, "dna", (*sequencingExperiments)[2].SampleTypeCode)
 		assert.Equal(t, "normal", (*sequencingExperiments)[2].HistologyCode)
 		assert.False(t, (*sequencingExperiments)[2].HasVariants)
+	})
+}
+
+func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(71)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(*sequencingExperiments))
+
+		assert.Equal(t, "proband", (*sequencingExperiments)[0].RelationshipToProband)
+		assert.Equal(t, 74, (*sequencingExperiments)[0].SeqID)
+		assert.Equal(t, 62, (*sequencingExperiments)[0].PatientID)
+		assert.Equal(t, "affected", (*sequencingExperiments)[0].AffectedStatusCode)
+		assert.Equal(t, 126, (*sequencingExperiments)[0].SampleID)
+		assert.Equal(t, "dna", (*sequencingExperiments)[0].SampleTypeCode)
+		assert.Equal(t, "tumoral", (*sequencingExperiments)[0].HistologyCode)
+		assert.True(t, (*sequencingExperiments)[0].HasVariants)
+
+		assert.Equal(t, "proband", (*sequencingExperiments)[1].RelationshipToProband)
+		assert.Equal(t, 73, (*sequencingExperiments)[1].SeqID)
+		assert.Equal(t, 62, (*sequencingExperiments)[1].PatientID)
+		assert.Equal(t, "affected", (*sequencingExperiments)[1].AffectedStatusCode)
+		assert.Equal(t, 124, (*sequencingExperiments)[1].SampleID)
+		assert.Equal(t, "dna", (*sequencingExperiments)[1].SampleTypeCode)
+		assert.Equal(t, "normal", (*sequencingExperiments)[1].HistologyCode)
+		assert.False(t, (*sequencingExperiments)[1].HasVariants)
 	})
 }
 
