@@ -73,6 +73,7 @@ const (
 	TaskMissingOutputDocuments                  = "TASK-004"
 	TaskInputDocumentNotFound                   = "TASK-005"
 	TaskInputDocumentNotInSequencingExperiments = "TASK-006"
+	TaskTypeDoesNotSupportMultipleAliquots      = "TASK-007"
 )
 
 // Documents error codes
@@ -954,9 +955,9 @@ func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
 	}
 
 	if _, ok := SingleAliquotTaskTypes[task.TypeCode]; ok && len(task.Aliquots) > 1 {
-		path := cr.formatFieldPath("tasks", &taskIndex, "aliquots", nil)
-		msg := cr.formatTaskFieldErrorMessage("aliquots", cr.Index, taskIndex)
-		cr.AddErrors(fmt.Sprintf("%s aliquots must contain exactly one value for %s task.", msg, task.TypeCode), TaskInvalidField, path)
+		path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+		msg := fmt.Sprintf("Task type %s doesn’t support being associated to more than 1 aliquot value.", task.TypeCode)
+		cr.AddErrors(msg, TaskTypeDoesNotSupportMultipleAliquots, path)
 		return
 	}
 

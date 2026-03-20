@@ -3758,9 +3758,9 @@ func Test_validateTaskAliquot_ErrorExomiserNotExactly1Aliquot(t *testing.T) {
 	record.validateTaskAliquot(0)
 
 	expected := types.BatchMessage{
-		Code:    "TASK-001",
-		Message: "Invalid field aliquots for case 0 - task 0. Reason: aliquots must contain exactly one value for exomiser task.",
-		Path:    "case[0].tasks[0].aliquots",
+		Code:    "TASK-007",
+		Message: "Task type exomiser doesn’t support being associated to more than 1 aliquot value.",
+		Path:    "case[0].tasks[0]",
 	}
 
 	assert.Len(t, record.Infos, 0)

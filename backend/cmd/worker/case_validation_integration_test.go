@@ -827,9 +827,9 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 				Path:    "case[0].tasks[3]",
 			},
 			{
-				Code:    "TASK-001",
-				Message: "Invalid field aliquots for case 0 - task 4. Reason: aliquots must contain exactly one value for exomiser task.",
-				Path:    "case[0].tasks[4].aliquots",
+				Code:    "TASK-007",
+				Message: "Task type exomiser doesn’t support being associated to more than 1 aliquot value.",
+				Path:    "case[0].tasks[4]",
 			},
 			{
 				Code:    "TASK-003",
@@ -842,9 +842,9 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 				Path:    "case[0].tasks[4]",
 			},
 			{
-				Code:    "TASK-001",
-				Message: "Invalid field aliquots for case 0 - task 5. Reason: aliquots must contain exactly one value for alignment_germline_variant_calling task.",
-				Path:    "case[0].tasks[5].aliquots",
+				Code:    "TASK-007",
+				Message: "Task type alignment_germline_variant_calling doesn’t support being associated to more than 1 aliquot value.",
+				Path:    "case[0].tasks[5]",
 			},
 			{
 				Code:    "TASK-004",
