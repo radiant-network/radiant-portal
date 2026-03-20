@@ -17,8 +17,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List
+from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,7 +28,7 @@ class CreateOccurrenceNoteInput(BaseModel):
     CreateOccurrenceNoteInput
     """ # noqa: E501
     case_id: StrictInt
-    content: StrictStr
+    content: Annotated[str, Field(strict=True, max_length=1000)]
     occurrence_id: StrictStr
     seq_id: StrictInt
     task_id: StrictInt
