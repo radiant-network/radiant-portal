@@ -28,6 +28,7 @@ import {
   useQBHistory,
   useQBNumericalSqon,
 } from '../hooks/use-query-builder';
+import { createEmptyQuery } from '../libs/sqon';
 import { IValueFacet, RangeOperators } from '../type';
 
 const INTEGER_TYPE = 'integer';
@@ -165,6 +166,21 @@ function NumericalInterval({ isLoading, field, min, max, decimal }: IntervalProp
 }
 
 /**
+ * Check if numerical input values are empty
+ */
+function isInputValuesEmpty(
+  selectedRange: RangeOperators,
+  minValue: string,
+  maxValue: string,
+  numericValue: string,
+): boolean {
+  if (selectedRange === RangeOperators.Between) {
+    return !minValue || minValue.trim() === '' || !maxValue || maxValue.trim() === '';
+  }
+  return !numericValue || numericValue.trim() === '';
+}
+
+/**
  * Numerical facet
  * -Use statistics API for dynamic min/max values
  * -Configurable decimal precision and intervals
@@ -223,11 +239,13 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
   const { data: statistics, isLoading } = statisticFetcher({ field: field.key });
   const decimal = getDecimal(statistics?.type);
   const [selectedRange, setSelectedRange] = useState<RangeOperators>(RangeOperators.GreaterThan);
-  const [numericValue, setNumericValue] = useState<string>('0');
-  const [maxValue, setMaxValue] = useState<string>('0');
-  const [minValue, setMinValue] = useState<string>('0');
+  const [numericValue, setNumericValue] = useState<string>('');
+  const [maxValue, setMaxValue] = useState<string>('');
+  const [minValue, setMinValue] = useState<string>('');
 
-  const [isPristine, setIsPristine] = useState<boolean>(sqon === undefined);
+  const [isPristine, setIsPristine] = useState<boolean>(
+    isInputValuesEmpty(selectedRange, minValue, maxValue, numericValue),
+  );
   const config = useQBAggregationsNumericalConfig(field.key);
   const hasInterval = getHasInterval(config, statistics);
 
@@ -237,42 +255,81 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
 
   const handleRangeValueChanged = useCallback((value: string) => {
     setSelectedRange(value as RangeOperators);
-    setIsPristine(false);
+    setIsPristine(isInputValuesEmpty(selectedRange, minValue, maxValue, numericValue));
   }, []);
 
-  const handleSetFacet = useCallback((result: NumericalValueResult) => {
-    setMinValue(result.minValue);
-    setMaxValue(result.maxValue);
+  const handleSetFacet = useCallback((result: NumericalValueResult, hasSqon: boolean = false) => {
+    // Only update min/max values if there's an applied facet (sqon exists)
+    if (hasSqon) {
+      setMinValue(result.minValue);
+      setMaxValue(result.maxValue);
+      setNumericValue(result.numericalValue);
+    } else {
+      setMinValue('');
+      setMaxValue('');
+      setNumericValue('');
+      setIsPristine(true);
+    }
     setSelectedRange(result.selectedRange);
-    setNumericValue(result.numericalValue);
   }, []);
 
   const reset = () => {
-    // use an empty sqon to reset to default config/statistic value
-    const result = getNumericalValue({ sqon: undefined, config, statistics });
-    setIsPristine(true);
-    handleSetFacet(result);
+    setMinValue('');
+    setMaxValue('');
+    setNumericValue('');
+    setSelectedRange(config?.defaultOperator ?? RangeOperators.LessThan);
+    setIsPristine(isInputValuesEmpty(selectedRange, minValue, maxValue, numericValue));
   };
 
   const handleApply = useCallback(() => {
-    setIsPristine(true);
-    let values: number[] = [];
-    if (selectedRange === RangeOperators.Between) {
-      values = [parseFloat(minValue), parseFloat(maxValue)];
+    setIsPristine(isInputValuesEmpty(selectedRange, minValue, maxValue, numericValue));
+    // Check if inputs are empty - if so, remove the facet pill
+    const isEmpty = isInputValuesEmpty(selectedRange, minValue, maxValue, numericValue);
+
+    if (isEmpty) {
+      dispatch({
+        type: QBActionType.REMOVE_FACET_PILL,
+        payload: sqon || createEmptyQuery(),
+      });
     } else {
-      values = [parseFloat(numericValue)];
-    }
-    dispatch({
-      type: QBActionType.ADD_OR_UPDATE_FACET_PILL,
-      payload: {
-        content: {
-          field: field.key,
-          value: values,
+      let values: number[] = [];
+      if (selectedRange === RangeOperators.Between) {
+        values = [parseFloat(minValue), parseFloat(maxValue)];
+      } else {
+        values = [parseFloat(numericValue)];
+      }
+      dispatch({
+        type: QBActionType.ADD_OR_UPDATE_FACET_PILL,
+        payload: {
+          content: {
+            field: field.key,
+            value: values,
+          },
+          op: selectedRange,
         },
-        op: selectedRange,
-      },
-    });
+      });
+    }
   }, [appId, field.key, selectedRange, numericValue, minValue, maxValue]);
+
+  /**
+   * Determine if apply button should be disabled based on input values
+   */
+  const isApplyDisabled = useMemo(() => {
+    if (sqon) {
+      return false;
+    } else if (selectedRange === RangeOperators.Between) {
+      return (
+        !minValue ||
+        !maxValue ||
+        minValue.trim() === '' ||
+        maxValue.trim() === '' ||
+        isNaN(Number(minValue)) ||
+        isNaN(Number(maxValue))
+      );
+    } else {
+      return !numericValue || numericValue.trim() === '' || isNaN(Number(numericValue));
+    }
+  }, [selectedRange, minValue, maxValue, numericValue, sqon]);
 
   /**
    * Update min/max values when statistics are loaded
@@ -280,7 +337,7 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
   useEffect(() => {
     if (!activeQuery?.content) return;
     const result = getNumericalValue({ sqon, config, statistics });
-    handleSetFacet(result);
+    handleSetFacet(result, !!sqon);
   }, [sqon, activeQuery, config, statistics]);
 
   /**
@@ -289,7 +346,7 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
   useEffect(() => {
     if (history.target == field.key) {
       const result = getNumericalValue({ sqon, config, statistics });
-      handleSetFacet(result);
+      handleSetFacet(result, !!sqon);
     }
   }, [history.uuid]);
 
@@ -298,7 +355,7 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
    */
   useEffect(() => {
     const result = getNumericalValue({ sqon, config, statistics });
-    handleSetFacet(result);
+    handleSetFacet(result, !!sqon);
   }, [activeQueryId]);
 
   return (
@@ -398,7 +455,13 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
             {t('common.filters.buttons.clear')}
           </Button>
           <div className="flex space-x-2">
-            <Button size="xxs" variant="outline" onClick={handleApply} id={`${field.key}_apply`}>
+            <Button
+              size="xxs"
+              variant="outline"
+              onClick={handleApply}
+              id={`${field.key}_apply`}
+              disabled={isApplyDisabled}
+            >
               {t('common.filters.buttons.apply')}
             </Button>
           </div>
