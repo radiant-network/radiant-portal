@@ -47,7 +47,7 @@ ordering_organization_code = "CHUSJ"
     submitter_sample_id = "S13224"
 
     [[cases.tasks]]
-    type_code = "alignment_germline_variant_calling"
+    type_code = "alignment"
     aliquots = ["NA12891", "NA12892"]
     pipeline_name = "Dragen"
     pipeline_version = "4.4.4"

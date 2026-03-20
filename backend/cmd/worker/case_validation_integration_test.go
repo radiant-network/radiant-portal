@@ -826,6 +826,31 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 				Message: "Missing output documents for case 0 - task 3 of type family_variant_calling.",
 				Path:    "case[0].tasks[3]",
 			},
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field aliquots for case 0 - task 4. Reason: aliquots must contain exactly one value for exomiser task.",
+				Path:    "case[0].tasks[4].aliquots",
+			},
+			{
+				Code:    "TASK-003",
+				Message: "Missing input documents for case 0 - task 4 of type exomiser.",
+				Path:    "case[0].tasks[4]",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 4 of type exomiser.",
+				Path:    "case[0].tasks[4]",
+			},
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field aliquots for case 0 - task 5. Reason: aliquots must contain exactly one value for alignment_germline_variant_calling task.",
+				Path:    "case[0].tasks[5].aliquots",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 5 of type alignment_germline_variant_calling.",
+				Path:    "case[0].tasks[5]",
+			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
 	})
