@@ -62,6 +62,61 @@ func PostOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Au
 	}
 }
 
+// PutOccurrenceNoteHandler
+// @Summary Update a note on an occurrence
+// @Id putOccurrenceNote
+// @Description Update the content of an existing note. Only the owner of the note can update it.
+// @Tags occurrence_notes
+// @Security bearerauth
+// @Param id path string true "Note ID"
+// @Param message body types.UpdateOccurrenceNoteInput true "Updated content"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.OccurrenceNote
+// @Failure 400 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /notes/{id} [put]
+func PutOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+
+		var body types.UpdateOccurrenceNoteInput
+		if err := c.ShouldBindJSON(&body); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		userID, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleNotFoundError(c, "user id")
+			return
+		}
+
+		note, err := repo.GetByID(id)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if note == nil {
+			HandleNotFoundError(c, "note")
+			return
+		}
+		if note.UserID != *userID {
+			HandleForbiddenError(c)
+			return
+		}
+
+		updated, err := repo.Update(id, body.Content)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, updated)
+	}
+}
+
 // GetOccurrenceNotesHandler
 // @Summary Get notes for an occurrence
 // @Id getOccurrenceNotes

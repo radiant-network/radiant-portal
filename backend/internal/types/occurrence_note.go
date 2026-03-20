@@ -37,3 +37,8 @@ type CreateOccurrenceNoteInput struct {
 	OccurrenceID string `json:"occurrence_id" binding:"required"`
 	Content      string `json:"content"       binding:"required"`
 }
+
+// UpdateOccurrenceNoteInput is the PUT request body for updating a note.
+type UpdateOccurrenceNoteInput struct {
+	Content string `json:"content" binding:"required"`
+}

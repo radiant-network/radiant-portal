@@ -39,6 +39,26 @@ func assertPostOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, 
 	return nil
 }
 
+func assertPutOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, auth *testutils.MockAuth, id string, body string, expectedStatus int) *types.OccurrenceNote {
+	t.Helper()
+	router := gin.Default()
+	router.PUT("/notes/:id", server.PutOccurrenceNoteHandler(repo, auth))
+
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/notes/%s", id), bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, expectedStatus, w.Code)
+	if expectedStatus == http.StatusOK {
+		var note types.OccurrenceNote
+		err := json.Unmarshal(w.Body.Bytes(), &note)
+		assert.NoError(t, err)
+		return &note
+	}
+	return nil
+}
+
 func assertGetOccurrenceNotes(t *testing.T, repo repository.OccurrenceNotesDAO, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) []types.OccurrenceNote {
 	t.Helper()
 	router := gin.Default()
@@ -111,5 +131,49 @@ func Test_GetOccurrenceNotes(t *testing.T) {
 			assert.Equal(t, "Second note", notes[0].Content)
 			assert.Equal(t, "First note", notes[1].Content)
 		}
+	})
+}
+
+func Test_PutOccurrenceNote(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewOccurrenceNotesRepository(db)
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		created := assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "10000", "content": "Original content"}`, http.StatusCreated)
+		if !assert.NotNil(t, created) {
+			return
+		}
+
+		updated := assertPutOccurrenceNote(t, repo, auth, created.ID, `{"content": "Updated content"}`, http.StatusOK)
+
+		if assert.NotNil(t, updated) {
+			assert.Equal(t, created.ID, updated.ID)
+			assert.Equal(t, "Updated content", updated.Content)
+			assert.Equal(t, mockUserUUID, updated.UserID)
+		}
+	})
+}
+
+func Test_PutOccurrenceNote_NoteNotFound(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewOccurrenceNotesRepository(db)
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		assertPutOccurrenceNote(t, repo, auth, "00000000-0000-0000-0000-000000000000", `{"content": "Updated content"}`, http.StatusNotFound)
+	})
+}
+
+func Test_PutOccurrenceNote_Forbidden(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewOccurrenceNotesRepository(db)
+		ownerAuth := &testutils.MockAuth{Id: mockUserUUID}
+		otherAuth := &testutils.MockAuth{Id: "22222222-2222-2222-2222-222222222222"}
+
+		created := assertPostOccurrenceNote(t, repo, ownerAuth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "10000", "content": "Original content"}`, http.StatusCreated)
+		if !assert.NotNil(t, created) {
+			return
+		}
+
+		assertPutOccurrenceNote(t, repo, otherAuth, created.ID, `{"content": "Hijacked content"}`, http.StatusForbidden)
 	})
 }
