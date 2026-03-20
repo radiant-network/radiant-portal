@@ -1,0 +1,8 @@
+import{j as e}from"./iframe-CVlWAN6a.js";import{V as i}from"./api-D1Ry_Ajg.js";import{C as o}from"./consequence-indicator-Dwr8wrzh.js";import{C as p,A as c}from"./applications-config-2uN5EeJU.js";import{B as m}from"./chunk-EPOLDU6W-D1WNZCoS.js";import"./preload-helper-Dp1pzeXC.js";import"./index-D-Epa_If.js";import"./i18n-DC6feKe5.js";import"./impact-indicator-BTnjrbHO.js";import"./indicator-qY1bFrmd.js";import"./shape-triangle-up-icon-DBN_1YJ3.js";const d={variant_entity:{app_id:c.variant_entity},snv_occurrence:{app_id:c.snv_occurrence,aggregations:[]},cnv_occurrence:{app_id:c.cnv_occurrence,aggregations:[]},admin:{admin_code:"admin",app_id:c.admin},portal:{name:"",navigation:{}}},V={title:"Indicators/ConsequenceIndicator",component:o,args:{},decorators:[n=>e.jsx(m,{children:e.jsx(p,{config:d,children:e.jsx(n,{})})})]},a={render:()=>e.jsx("div",{className:"flex flex-col gap-2",children:Object.keys(i).map(n=>e.jsxs(e.Fragment,{children:[e.jsx(o,{size:"sm",vepImpact:n,consequence:`consequence-${n}`}),e.jsx(o,{size:"lg",vepImpact:n,consequence:`consequence-${n}`})]}))})};var r,s,t;a.parameters={...a.parameters,docs:{...(r=a.parameters)==null?void 0:r.docs,source:{originalSource:`{
+  render: () => <div className="flex flex-col gap-2">
+      {Object.keys(VepImpact).map(impact => <>
+          <ConsequenceIndicator size="sm" vepImpact={impact as VepImpact} consequence={\`consequence-\${impact}\`} />
+          <ConsequenceIndicator size="lg" vepImpact={impact as VepImpact} consequence={\`consequence-\${impact}\`} />
+        </>)}
+    </div>
+}`,...(t=(s=a.parameters)==null?void 0:s.docs)==null?void 0:t.source}}};const h=["Default"];export{a as Default,h as __namedExportsOrder,V as default};
