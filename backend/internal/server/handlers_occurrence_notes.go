@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -13,8 +14,12 @@ import (
 
 var htmlPolicy = bluemonday.UGCPolicy()
 
-func sanitizeNoteContent(content string) string {
-	return htmlPolicy.Sanitize(content)
+func sanitizeNoteContent(content string, userID string) string {
+	sanitized := htmlPolicy.Sanitize(content)
+	if sanitized != content {
+		log.Printf("WARN: suspect content detected and sanitized for user %s: %s", userID, content)
+	}
+	return sanitized
 }
 
 // PostOccurrenceNoteHandler
@@ -56,7 +61,7 @@ func PostOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Au
 			OccurrenceID: body.OccurrenceID,
 			UserID:       *userID,
 			UserName:     *fullName,
-			Content:      sanitizeNoteContent(body.Content),
+			Content:      sanitizeNoteContent(body.Content, *userID),
 		}
 
 		created, err := repo.Create(note)
@@ -113,7 +118,7 @@ func PutOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Aut
 			return
 		}
 
-		updated, err := repo.Update(id, sanitizeNoteContent(body.Content))
+		updated, err := repo.Update(id, sanitizeNoteContent(body.Content, *userID))
 		if err != nil {
 			HandleError(c, err)
 			return
