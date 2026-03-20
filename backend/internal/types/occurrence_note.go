@@ -35,10 +35,10 @@ type CreateOccurrenceNoteInput struct {
 	SeqID        int    `json:"seq_id"        binding:"required"`
 	TaskID       int    `json:"task_id"       binding:"required"`
 	OccurrenceID string `json:"occurrence_id" binding:"required"`
-	Content      string `json:"content"       binding:"required"`
+	Content      string `json:"content"       binding:"required,max=1000"`
 }
 
 // UpdateOccurrenceNoteInput is the PUT request body for updating a note.
 type UpdateOccurrenceNoteInput struct {
-	Content string `json:"content" binding:"required"`
+	Content string `json:"content" binding:"required,max=1000"`
 }

@@ -170,6 +170,53 @@ func Test_PostOccurrenceNoteHandler_MissingOccurrenceID(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
+func Test_PostOccurrenceNoteHandler_ContentTooLong(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
+
+	longContent := string(make([]byte, 1001))
+	body := fmt.Sprintf(`{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": %q}`, longContent)
+	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PostOccurrenceNoteHandler_ContentSanitized(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
+
+	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "<p>Safe text</p><script>alert('xss')</script><img src=x onerror=alert(1)>"}`
+	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Contains(t, w.Body.String(), `\u003cp\u003eSafe text\u003c/p\u003e`)
+	assert.NotContains(t, w.Body.String(), "script")
+	assert.NotContains(t, w.Body.String(), "onerror")
+}
+
+func Test_PostOccurrenceNoteHandler_ContentWithSafeHTMLPreserved(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
+
+	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "<p>Some <strong>bold</strong> text</p>"}`
+	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Contains(t, w.Body.String(), "bold")
+}
+
 func Test_GetOccurrenceNotesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -252,6 +299,21 @@ func Test_PutOccurrenceNoteHandler_MissingContent(t *testing.T) {
 	router.PUT("/notes/:id", PutOccurrenceNoteHandler(repo, auth))
 
 	body := `{}`
+	req, _ := http.NewRequest("PUT", "/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_PutOccurrenceNoteHandler_ContentTooLong(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.PUT("/notes/:id", PutOccurrenceNoteHandler(repo, auth))
+
+	longContent := string(make([]byte, 1001))
+	body := fmt.Sprintf(`{"content": %q}`, longContent)
 	req, _ := http.NewRequest("PUT", "/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)

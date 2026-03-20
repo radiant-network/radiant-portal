@@ -715,6 +715,7 @@ components:
         case_id:
           type: integer
         content:
+          maxLength: 1000
           type: string
         occurrence_id:
           type: string
@@ -2198,6 +2199,7 @@ components:
     UpdateOccurrenceNoteInput:
       properties:
         content:
+          maxLength: 1000
           type: string
       required:
       - content

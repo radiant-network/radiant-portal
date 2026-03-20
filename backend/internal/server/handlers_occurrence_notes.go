@@ -1,14 +1,26 @@
 package server
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
+
+var htmlPolicy = bluemonday.UGCPolicy()
+
+func sanitizeNoteContent(content string, userID string) string {
+	sanitized := htmlPolicy.Sanitize(content)
+	if sanitized != content {
+		log.Printf("WARN: suspect content detected and sanitized for user %s: %s", userID, content)
+	}
+	return sanitized
+}
 
 // PostOccurrenceNoteHandler
 // @Summary Create a note on an occurrence
@@ -30,7 +42,6 @@ func PostOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Au
 			HandleValidationError(c, err)
 			return
 		}
-
 		userID, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
 			HandleNotFoundError(c, "user id")
@@ -50,7 +61,7 @@ func PostOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Au
 			OccurrenceID: body.OccurrenceID,
 			UserID:       *userID,
 			UserName:     *fullName,
-			Content:      body.Content,
+			Content:      sanitizeNoteContent(body.Content, *userID),
 		}
 
 		created, err := repo.Create(note)
@@ -87,7 +98,6 @@ func PutOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Aut
 			HandleValidationError(c, err)
 			return
 		}
-
 		userID, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
 			HandleNotFoundError(c, "user id")
@@ -108,7 +118,7 @@ func PutOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Aut
 			return
 		}
 
-		updated, err := repo.Update(id, body.Content)
+		updated, err := repo.Update(id, sanitizeNoteContent(body.Content, *userID))
 		if err != nil {
 			HandleError(c, err)
 			return

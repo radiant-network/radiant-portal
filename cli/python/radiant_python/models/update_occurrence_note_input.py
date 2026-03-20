@@ -17,8 +17,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Any, ClassVar, Dict, List
+from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,7 +27,7 @@ class UpdateOccurrenceNoteInput(BaseModel):
     """
     UpdateOccurrenceNoteInput
     """ # noqa: E501
-    content: StrictStr
+    content: Annotated[str, Field(strict=True, max_length=1000)]
     __properties: ClassVar[List[str]] = ["content"]
 
     model_config = ConfigDict(
