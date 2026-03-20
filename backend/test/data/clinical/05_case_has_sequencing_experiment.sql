@@ -62,5 +62,7 @@ VALUES (1, 1),
        (61, 21),
        (70, 70),
        (71, 70),
-       (72, 70)
+       (72, 70),
+       (73, 71),
+       (74, 71)
 ON CONFLICT (case_id, sequencing_experiment_id) DO NOTHING;

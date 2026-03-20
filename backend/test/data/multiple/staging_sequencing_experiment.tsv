@@ -1,3 +1,5 @@
-seq_id	task_id	part	task_type	case_id
-1	1	1	radiant_germline_annotation	1
-2	1	1	radiant_germline_annotation	1
+part	seq_id	task_id	case_id	patient_id	analysis_type	affected_status	ingested_at	task_type	experimental_strategy	histology_type
+1	1	1	1	3	germline	affected	1969-12-31 19:00:00.0	radiant_germline_annotation	wgs	normal
+1	2	1	1	2	germline	non_affected	1969-12-31 19:00:00.0	radiant_germline_annotation	wgs	normal
+1	74	74	71	62	somatic	affected	1969-12-31 19:00:00.0	radiant_somatic_annotation	wgs	tumoral
+1	73	74	71	62	somatic	affected	1969-12-31 19:00:00.0	radiant_somatic_annotation	wgs	normal

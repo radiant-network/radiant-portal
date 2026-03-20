@@ -1,3 +1,4 @@
 locus_id	impact_score	germline_pf_wgs	germline_pc_wgs	gnomad_v3_af	hgvsg	omim_inheritance_code	variant_class	vep_impact	symbol	is_mane_select	is_canonical	chromosome	start	locus
-1000	4	0.99	3	0.001	hgvsg1	code1	class1	impact1	symbol1	true	true	1	1111	locus_1_1000
-2000	4	0.99	3	0.001	hgvsg2	code1	class1	impact1	symbol1	true	true	2	2222	locus_2_2000
+1000	4	0.99	3	0.001	hgvsg1	["code1"]	class1	MODIFIER	BRAF	true	true	1	1111	locus_1_1000
+2000	4	0.99	3	0.001	hgvsg2	["code2"]	class2	LOW	BRCA1	true	true	2	2222	locus_2_2000
+3000	5	0.88	4	0.003	hgvsg3	["code3"]	class3	MODERATE	BRCA2	true	true	3	3333	locus_3_3000

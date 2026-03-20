@@ -501,7 +501,7 @@ func Test_GetVariantExternalFrequencies_VariantNotFound(t *testing.T) {
 func Test_GetVariantGlobalInternalFrequencies_VariantNotFound(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
-		globalFrequencies, err := repo.GetVariantGlobalInternalFrequencies(4000)
+		globalFrequencies, err := repo.GetGermlineVariantGlobalInternalFrequencies(4000)
 		assert.NoError(t, err)
 		assert.Nil(t, globalFrequencies)
 	})
@@ -510,7 +510,7 @@ func Test_GetVariantGlobalInternalFrequencies_VariantNotFound(t *testing.T) {
 func Test_GetVariantGlobalInternalFrequencies(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
-		globalFrequencies, err := repo.GetVariantGlobalInternalFrequencies(1000)
+		globalFrequencies, err := repo.GetGermlineVariantGlobalInternalFrequencies(1000)
 		assert.NoError(t, err)
 		assert.NotNil(t, globalFrequencies)
 		assert.Equal(t, 3, *(globalFrequencies).PcAll)
@@ -531,7 +531,7 @@ func Test_GetVariantGlobalInternalFrequencies(t *testing.T) {
 func Test_GetVariantInternalFrequenciesSplitBy_ByProject(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
-		splitRows, err := repo.GetVariantInternalFrequenciesSplitBy(1000, types.SPLIT_BY_PROJECT)
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(1000, types.SPLIT_BY_PROJECT)
 		assert.NoError(t, err)
 		assert.NotNil(t, splitRows)
 		assert.Len(t, *splitRows, 2)
@@ -574,7 +574,7 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByProject(t *testing.T) {
 func Test_GetVariantInternalFrequenciesSplitBy_ByPrimaryCondition(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
-		splitRows, err := repo.GetVariantInternalFrequenciesSplitBy(1000, types.SPLIT_BY_PRIMARY_CONDITION)
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(1000, types.SPLIT_BY_PRIMARY_CONDITION)
 		assert.NoError(t, err)
 		assert.NotNil(t, splitRows)
 		assert.Len(t, *splitRows, 2)
@@ -617,7 +617,7 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByPrimaryCondition(t *testing.T) 
 func Test_GetVariantInternalFrequenciesSplitBy_ByAnalysis(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
-		splitRows, err := repo.GetVariantInternalFrequenciesSplitBy(1000, types.SPLIT_BY_ANALYSIS)
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(1000, types.SPLIT_BY_ANALYSIS)
 		assert.NoError(t, err)
 		assert.NotNil(t, splitRows)
 		assert.Len(t, *splitRows, 2)
@@ -660,7 +660,7 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByAnalysis(t *testing.T) {
 func Test_GetVariantInternalFrequenciesSplitBy_IncorrectSplit(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewVariantsRepository(db)
-		splitRows, err := repo.GetVariantInternalFrequenciesSplitBy(1000, "incorrect")
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(1000, "incorrect")
 		assert.Nil(t, splitRows)
 		assert.Error(t, err)
 	})

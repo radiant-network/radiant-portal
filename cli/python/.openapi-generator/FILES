@@ -88,6 +88,7 @@ docs/Sequencing.md
 docs/SequencingApi.md
 docs/SequencingExperimentBatch.md
 docs/SequencingExperimentDetail.md
+docs/SomaticSNVOccurrence.md
 docs/SortBody.md
 docs/Sqon.md
 docs/SqonContent.md
@@ -214,6 +215,7 @@ radiant_python/models/search_criterion.py
 radiant_python/models/sequencing.py
 radiant_python/models/sequencing_experiment_batch.py
 radiant_python/models/sequencing_experiment_detail.py
+radiant_python/models/somatic_snv_occurrence.py
 radiant_python/models/sort_body.py
 radiant_python/models/sqon.py
 radiant_python/models/sqon_content.py

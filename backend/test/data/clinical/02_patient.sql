@@ -60,7 +60,8 @@ VALUES
     (58, 'MRN-283830','mrn',3,'female', '1994-06-26', 'alive', 'Simon', 'Côté', 'CÔT9406263607'),
     (59, 'MRN-283831','mrn',3,'male', '1984-02-09', 'alive', 'Camille', 'Bélanger', 'BÉL8402099104'),
     (60, 'MRN-283832','mrn',3,'female', '1979-07-01', 'alive', 'Gabriel', 'Fortin', 'FOR7907010876'),
-    (61, 'MRN-283833','mrn',3,'female', '1971-07-25', 'alive', 'Camille', 'Bergeron', 'BER7107256143')
+    (61, 'MRN-283833','mrn',3,'female', '1971-07-25', 'alive', 'Camille', 'Bergeron', 'BER7107256143'),
+    (62, 'MRN-283834','mrn',3,'female', '2020-03-08', 'alive', 'Ada', 'Lovelace', 'LOV2003081815')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE patient ALTER COLUMN id RESTART WITH 1000;

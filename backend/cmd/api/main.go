@@ -48,6 +48,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoGenes := repository.NewGenesRepository(dbStarrocks)
 	repoGermlineCNVOccurrences := repository.NewGermlineCNVOccurrencesRepository(dbStarrocks)
 	repoGermlineSNVOccurrences := repository.NewGermlineSNVOccurrencesRepository(dbStarrocks)
+	repoSomaticSNVOccurrences := repository.NewSomaticSNVOccurrencesRepository(dbStarrocks)
 	repoTerms := repository.NewTermsRepository(dbStarrocks)
 	repoCases := repository.NewCasesRepository(dbStarrocks)
 	repoGenePanels := repository.NewGenePanelsRepository(dbStarrocks)
@@ -137,6 +138,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	occurrencesGroup := privateRoutes.Group("/occurrences")
 	occurrencesGermlineGroup := occurrencesGroup.Group("/germline")
+	occurrencesSomaticGroup := occurrencesGroup.Group("/somatic")
 
 	occurrencesGermlineCNVGroup := occurrencesGermlineGroup.Group("/cnv")
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/count", server.OccurrencesGermlineCNVCountHandler(repoGermlineCNVOccurrences))
@@ -152,6 +154,12 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoPostgres.Interpretations))
 	occurrencesGermlineSNVGroup.GET("/dictionary", server.GetGermlineSNVDictionary(repoFacets))
+
+	occurrencesSomaticSNVGroup := occurrencesSomaticGroup.Group("/snv")
+	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/count", server.OccurrencesSomaticSNVCountHandler(repoSomaticSNVOccurrences))
+	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/list", server.OccurrencesSomaticSNVListHandler(repoSomaticSNVOccurrences))
+	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/aggregate", server.OccurrencesSomaticSNVAggregateHandler(repoSomaticSNVOccurrences, repoFacets))
+	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/statistics", server.OccurrencesSomaticSNVStatisticsHandler(repoSomaticSNVOccurrences))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoStagingSeq))

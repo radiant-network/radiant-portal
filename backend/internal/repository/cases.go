@@ -86,7 +86,7 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 
 	txStg := r.db.Table(fmt.Sprintf("%s chse", types.CaseHasSequencingExperimentTable.FederationName))
 	txStg = txStg.Select("DISTINCT(chse.case_id)")
-	txStg = txStg.Where("se.ingested_at IS NOT NULL AND se.task_type = 'radiant_germline_annotation'")
+	txStg = txStg.Where("se.ingested_at IS NOT NULL AND (se.task_type = 'radiant_germline_annotation' OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral'))")
 	txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.Name))
 
 	txMembersCount := r.db.Table(types.FamilyTable.FederationName).Select("case_id, count(distinct family_member_id) as distinct_members_count").Group("case_id")
@@ -304,10 +304,10 @@ func (r *CasesRepository) retrieveCaseSequencingExperiments(caseId int) (*[]Case
 	txSeqExp = utils.JoinCaseHasSeqExpWithSequencingExperiment(txSeqExp)
 	txSeqExp = utils.JoinSeqExpWithSample(txSeqExp)
 	txSeqExp = utils.JoinSampleAndCaseHasSeqExpWithFamily(txSeqExp)
-	txSeqExp = txSeqExp.Joins("LEFT JOIN staging_sequencing_experiment se on s.id = se.seq_id and se.ingested_at is not null and se.task_type = 'radiant_germline_annotation' and se.case_id = ?", caseId)
+	txSeqExp = txSeqExp.Joins("LEFT JOIN staging_sequencing_experiment se on s.id = se.seq_id and se.ingested_at is not null and (se.task_type = 'radiant_germline_annotation' OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral')) and se.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
 	txSeqExp = txSeqExp.Where("chseq.case_id = ?", caseId)
-	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc, relationship_to_proband desc")
+	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc, relationship_to_proband desc, seq_id desc")
 	if err := txSeqExp.Find(&sequencingExperiments).Error; err != nil {
 		return nil, fmt.Errorf("error fetching sequencing experiments: %w", err)
 	}

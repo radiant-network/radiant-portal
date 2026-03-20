@@ -79,8 +79,8 @@ func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquotAndSubm
 	var seqExp SequencingExperiment
 	txSeqExp := r.db.Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name))
 	txSeqExp.Joins(fmt.Sprintf("LEFT JOIN %s sa ON sa.id = se.sample_id", types.SampleTable.Name))
-	txSeqExp.Joins(fmt.Sprintf("LEFT JOIN %s o ON o.id = sa.organization_id", types.OrganizationTable.Name))
-	txSeqExp.Where("se.aliquot = ? AND sa.submitter_sample_id = ? AND o.code = ?", aliquot, submitterSampleID, sampleOrganizationCode)
+	txSeqExp.Joins(fmt.Sprintf("LEFT JOIN %s org ON org.id = sa.organization_id", types.OrganizationTable.Name))
+	txSeqExp.Where("se.aliquot = ? AND sa.submitter_sample_id = ? AND org.code = ?", aliquot, submitterSampleID, sampleOrganizationCode)
 	result := txSeqExp.First(&seqExp)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {

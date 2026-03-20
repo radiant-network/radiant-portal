@@ -1,3 +1,5 @@
-seq_id	task_id	part	task_type	case_id
-1	1	1	radiant_germline_annotation	1
-2	1	1	radiant_germline_annotation	1
+seq_id	task_id	part	task_type	case_id	histology_type
+1	1	1	radiant_germline_annotation	1	normal
+2	1	1	radiant_germline_annotation	1	normal
+74	74	1	radiant_somatic_annotation	71	tumoral
+73	74	1	radiant_somatic_annotation	71	normal

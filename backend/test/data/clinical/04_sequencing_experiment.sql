@@ -169,7 +169,11 @@ VALUES (1, 1, 'completed', 'NA12892', 6, 1617, 'A00516_0169', '2021-08-17', 'Sur
        (71, 2, 'completed', 'NA12891', 6, 1618, 'A00516_0170', '2021-08-17', 'SureSelect Custom DNA Target',
         '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
        (72, 3, 'completed', 'NA12878', 6, 1619, 'A00516_0171', '2021-08-17', 'SureSelect Custom DNA Target',
-        '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina')
+        '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
+       (73, 124, 'completed', 'NSRX1091646', 6, 1678, 'NSRX1091646_1678', '2026-03-08', 'SureSelect Custom DNA Target',
+        '2026-03-09T13:08:00-04:00', '2026-03-09T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
+       (74, 126, 'completed', 'TSRX1091647', 6, 1679, 'TSRX1091647_1679', '2026-03-08', 'SureSelect Custom DNA Target',
+        '2026-03-09T13:08:00-04:00', '2026-03-09T13:08:00-04:00', 'wgs', 'short_read', 'illumina')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE sequencing_experiment ALTER COLUMN id RESTART WITH 1000;

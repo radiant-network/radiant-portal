@@ -403,7 +403,7 @@ func GetGermlineVariantInternalFrequenciesHandler(repo repository.VariantsDAO) g
 			HandleValidationError(c, fmt.Errorf("incorrect split"))
 			return
 		}
-		splitRows, err = repo.GetVariantInternalFrequenciesSplitBy(locusID, split)
+		splitRows, err = repo.GetGermlineVariantInternalFrequenciesSplitBy(locusID, split)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -439,7 +439,7 @@ func GetGermlineVariantGlobalInternalFrequenciesHandler(repo repository.Variants
 			return
 		}
 
-		globalFrequencies, err = repo.GetVariantGlobalInternalFrequencies(locusID)
+		globalFrequencies, err = repo.GetGermlineVariantGlobalInternalFrequencies(locusID)
 		if err != nil {
 			HandleError(c, err)
 			return

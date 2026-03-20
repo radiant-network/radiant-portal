@@ -43,8 +43,8 @@ func (r *PatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(organizati
 	var patient Patient
 	tx := r.db.
 		Table("patient").
-		Joins("JOIN organization o ON o.id = patient.organization_id").
-		Where("patient.submitter_patient_id = ? AND o.code = ?", submitterPatientId, organizationCode)
+		Joins("JOIN organization org ON org.id = patient.organization_id").
+		Where("patient.submitter_patient_id = ? AND org.code = ?", submitterPatientId, organizationCode)
 	if err := tx.First(&patient).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieve patient its ID: %w", err)

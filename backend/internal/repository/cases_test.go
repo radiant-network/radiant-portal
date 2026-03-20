@@ -91,23 +91,26 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 		cases, count, err := repo.SearchCases(query)
 		assert.NoError(t, err)
 		assert.Len(t, *cases, 10)
-		assert.Equal(t, int64(22), *count)
-		assert.Equal(t, "germline", (*cases)[0].CaseTypeCode)
-		assert.Equal(t, "MONDO:0700092", (*cases)[0].PrimaryConditionID)
-		assert.Equal(t, "neurodevelopmental disorder", (*cases)[0].PrimaryConditionName)
-		assert.Equal(t, "germline_family", (*cases)[0].CaseType)
-		assert.Equal(t, "germline", (*cases)[0].CaseTypeCode)
+		assert.Equal(t, int64(23), *count)
+		assert.Equal(t, "somatic", (*cases)[0].CaseTypeCode)
+		assert.Equal(t, "somatic", (*cases)[0].CaseType)
 		assert.Equal(t, true, (*cases)[0].HasVariants)
-		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*cases)[0].OrganizationName)
-		assert.Equal(t, "CHUSJ", (*cases)[0].OrganizationCode)
-		assert.Equal(t, "LAM7303233380", (*cases)[0].ProbandJhn)
-		assert.Equal(t, "alive", (*cases)[0].ProbandLifeStatusCode)
-		assert.Equal(t, "Marie", (*cases)[0].ProbandFirstName)
-		assert.Equal(t, "Lambert", (*cases)[0].ProbandLastName)
-		assert.Equal(t, "EPILEP", (*cases)[0].PanelCode)
-		assert.Equal(t, "Epilepsy", (*cases)[0].PanelName)
-		assert.Equal(t, "postnatal", (*cases)[0].CaseCategoryCode)
-		assert.Equal(t, "unsolved", (*cases)[0].ResolutionStatusCode)
+
+		assert.Equal(t, "germline", (*cases)[1].CaseTypeCode)
+		assert.Equal(t, "MONDO:0700092", (*cases)[1].PrimaryConditionID)
+		assert.Equal(t, "neurodevelopmental disorder", (*cases)[1].PrimaryConditionName)
+		assert.Equal(t, "germline_family", (*cases)[1].CaseType)
+		assert.Equal(t, true, (*cases)[1].HasVariants)
+		assert.Equal(t, "Centre hospitalier universitaire Sainte-Justine", (*cases)[1].OrganizationName)
+		assert.Equal(t, "CHUSJ", (*cases)[1].OrganizationCode)
+		assert.Equal(t, "LAM7303233380", (*cases)[1].ProbandJhn)
+		assert.Equal(t, "alive", (*cases)[1].ProbandLifeStatusCode)
+		assert.Equal(t, "Marie", (*cases)[1].ProbandFirstName)
+		assert.Equal(t, "Lambert", (*cases)[1].ProbandLastName)
+		assert.Equal(t, "EPILEP", (*cases)[1].PanelCode)
+		assert.Equal(t, "Epilepsy", (*cases)[1].PanelName)
+		assert.Equal(t, "postnatal", (*cases)[1].CaseCategoryCode)
+		assert.Equal(t, "unsolved", (*cases)[1].ResolutionStatusCode)
 	})
 }
 
@@ -117,7 +120,7 @@ func Test_SearchCasesNoResult(t *testing.T) {
 		searchCriteria := []types.SearchCriterion{
 			{
 				FieldName: types.CasePriorityCodeField.GetAlias(),
-				Value:     []interface{}{"stat", "urgent"},
+				Value:     []interface{}{"urgent"},
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
@@ -251,7 +254,7 @@ func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(22), *count)
+		assert.Equal(t, int64(23), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{
@@ -305,7 +308,7 @@ func Test_SearchCases_OnPanelCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(16), *count)
+		assert.Equal(t, int64(17), *count)
 	})
 }
 
@@ -321,7 +324,7 @@ func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(22), *count)
+		assert.Equal(t, int64(23), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{
@@ -348,7 +351,7 @@ func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err := repo.SearchCases(query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(22), *count)
+		assert.Equal(t, int64(23), *count)
 
 		searchCriteria = []types.SearchCriterion{
 			{
@@ -386,7 +389,7 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
 		_, count, err = repo.SearchCases(query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(0), *count)
+		assert.Equal(t, int64(1), *count)
 	})
 }
 
@@ -483,7 +486,7 @@ func Test_RetrieveCaseLevelData(t *testing.T) {
 	})
 }
 
-func Test_RetrieveCaseSequencingExperiments(t *testing.T) {
+func Test_RetrieveCaseSequencingExperiments_Germline(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(1)
@@ -521,6 +524,33 @@ func Test_RetrieveCaseSequencingExperiments(t *testing.T) {
 		assert.Equal(t, "dna", (*sequencingExperiments)[2].SampleTypeCode)
 		assert.Equal(t, "normal", (*sequencingExperiments)[2].HistologyCode)
 		assert.False(t, (*sequencingExperiments)[2].HasVariants)
+	})
+}
+
+func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(71)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(*sequencingExperiments))
+
+		assert.Equal(t, "proband", (*sequencingExperiments)[0].RelationshipToProband)
+		assert.Equal(t, 74, (*sequencingExperiments)[0].SeqID)
+		assert.Equal(t, 62, (*sequencingExperiments)[0].PatientID)
+		assert.Equal(t, "affected", (*sequencingExperiments)[0].AffectedStatusCode)
+		assert.Equal(t, 126, (*sequencingExperiments)[0].SampleID)
+		assert.Equal(t, "dna", (*sequencingExperiments)[0].SampleTypeCode)
+		assert.Equal(t, "tumoral", (*sequencingExperiments)[0].HistologyCode)
+		assert.True(t, (*sequencingExperiments)[0].HasVariants)
+
+		assert.Equal(t, "proband", (*sequencingExperiments)[1].RelationshipToProband)
+		assert.Equal(t, 73, (*sequencingExperiments)[1].SeqID)
+		assert.Equal(t, 62, (*sequencingExperiments)[1].PatientID)
+		assert.Equal(t, "affected", (*sequencingExperiments)[1].AffectedStatusCode)
+		assert.Equal(t, 124, (*sequencingExperiments)[1].SampleID)
+		assert.Equal(t, "dna", (*sequencingExperiments)[1].SampleTypeCode)
+		assert.Equal(t, "normal", (*sequencingExperiments)[1].HistologyCode)
+		assert.False(t, (*sequencingExperiments)[1].HasVariants)
 	})
 }
 

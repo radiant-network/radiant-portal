@@ -308,5 +308,8 @@ VALUES (1, 27, 'output'),
        (72, 85, 'output'),
        (72, 86, 'output'),
        (73, 27, 'output'),
-       (73, 28, 'output')
+       (73, 28, 'output'),
+
+       (74, 266, 'output'),
+       (74, 267, 'output')
 ON CONFLICT(task_id, document_id, type) DO NOTHING;

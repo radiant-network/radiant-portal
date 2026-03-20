@@ -237,7 +237,7 @@ func (m *MockRepository) GetVariantExternalFrequencies(locusId int) (*types.Vari
 	}, nil
 }
 
-func (m *MockRepository) GetVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error) {
+func (m *MockRepository) GetGermlineVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error) {
 	af := 0.01
 	ac := 1
 	an := 100
@@ -259,7 +259,7 @@ func (m *MockRepository) GetVariantGlobalInternalFrequencies(locusId int) (*type
 	}, nil
 }
 
-func (m *MockRepository) GetVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
+func (m *MockRepository) GetGermlineVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
 	af := 0.01
 	ac := 1
 	an := 100

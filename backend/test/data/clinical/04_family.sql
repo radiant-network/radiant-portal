@@ -62,7 +62,8 @@ VALUES (1, 1, 1, 'mother', 'affected'),
        (61, 21, 60, 'proband', 'affected'),
        (62, 70, 1, 'mother', 'non_affected'),
        (63, 70, 2, 'father', 'affected'),
-       (64, 70, 3, 'proband', 'affected')
+       (64, 70, 3, 'proband', 'affected'),
+       (65, 71, 62, 'proband', 'affected')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE family ALTER COLUMN id RESTART WITH 1000;
