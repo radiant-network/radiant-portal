@@ -134,6 +134,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	notesGroup := privateRoutes.Group("/notes")
 	notesGroup.POST("", server.PostOccurrenceNoteHandler(repoOccurrenceNotes, auth))
 	notesGroup.PUT("/:id", server.PutOccurrenceNoteHandler(repoOccurrenceNotes, auth))
+	notesGroup.DELETE("/:id", server.DeleteOccurrenceNoteHandler(repoOccurrenceNotes, auth))
 	notesGroup.GET("/:case_id/:seq_id/:task_id/:occurrence_id", server.GetOccurrenceNotesHandler(repoOccurrenceNotes))
 
 	occurrencesGroup := privateRoutes.Group("/occurrences")

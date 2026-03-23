@@ -19,6 +19,7 @@ type OccurrenceNotesDAO interface {
 	GetByID(id string) (*types.OccurrenceNote, error)
 	GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error)
 	Update(id string, content string) (*types.OccurrenceNote, error)
+	Delete(id string) error
 }
 
 func NewOccurrenceNotesRepository(db *gorm.DB) *OccurrenceNotesRepository {
@@ -58,6 +59,16 @@ func (r *OccurrenceNotesRepository) Update(id string, content string) (*types.Oc
 		return nil, fmt.Errorf("error updating occurrence note: %w", err)
 	}
 	return &note, nil
+}
+
+// Delete soft-deletes the note with the given ID by setting deleted = true.
+func (r *OccurrenceNotesRepository) Delete(id string) error {
+	if err := r.db.Model(&types.OccurrenceNote{}).
+		Where("id = ?", id).
+		Update("deleted", true).Error; err != nil {
+		return fmt.Errorf("error deleting occurrence note: %w", err)
+	}
+	return nil
 }
 
 // GetByOccurrence returns all non-deleted notes for the given occurrence, ordered by created_at desc.
