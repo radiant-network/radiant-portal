@@ -3875,6 +3875,43 @@ paths:
       tags:
       - occurrence_notes
   /notes/{id}:
+    delete:
+      description: Soft-delete a note by ID. Only the owner of the note can delete
+        it.
+      operationId: deleteOccurrenceNote
+      parameters:
+      - description: Note ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Delete a note on an occurrence
+      tags:
+      - occurrence_notes
     put:
       description: Update the content of an existing note. Only the owner of the note
         can update it.

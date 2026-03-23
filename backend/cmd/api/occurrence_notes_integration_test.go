@@ -163,6 +163,18 @@ func Test_PutOccurrenceNote_NoteNotFound(t *testing.T) {
 	})
 }
 
+func assertDeleteOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, auth *testutils.MockAuth, id string, expectedStatus int) {
+	t.Helper()
+	router := gin.Default()
+	router.DELETE("/notes/:id", server.DeleteOccurrenceNoteHandler(repo, auth))
+
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("/notes/%s", id), nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, expectedStatus, w.Code)
+}
+
 func Test_PutOccurrenceNote_Forbidden(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
@@ -175,5 +187,50 @@ func Test_PutOccurrenceNote_Forbidden(t *testing.T) {
 		}
 
 		assertPutOccurrenceNote(t, repo, otherAuth, created.ID, `{"content": "Hijacked content"}`, http.StatusForbidden)
+	})
+}
+
+func Test_DeleteOccurrenceNote(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewOccurrenceNotesRepository(db)
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		created := assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "10000", "content": "Note to delete"}`, http.StatusCreated)
+		if !assert.NotNil(t, created) {
+			return
+		}
+
+		assertDeleteOccurrenceNote(t, repo, auth, created.ID, http.StatusNoContent)
+
+		notes := assertGetOccurrenceNotes(t, repo, 1, 1, 1, "10000", http.StatusOK)
+		assert.Empty(t, notes)
+	})
+}
+
+func Test_DeleteOccurrenceNote_NoteNotFound(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewOccurrenceNotesRepository(db)
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		assertDeleteOccurrenceNote(t, repo, auth, "00000000-0000-0000-0000-000000000000", http.StatusNotFound)
+	})
+}
+
+func Test_DeleteOccurrenceNote_Forbidden(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewOccurrenceNotesRepository(db)
+		ownerAuth := &testutils.MockAuth{Id: mockUserUUID}
+		otherAuth := &testutils.MockAuth{Id: "22222222-2222-2222-2222-222222222222"}
+
+		created := assertPostOccurrenceNote(t, repo, ownerAuth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "10000", "content": "Note to delete"}`, http.StatusCreated)
+		if !assert.NotNil(t, created) {
+			return
+		}
+
+		assertDeleteOccurrenceNote(t, repo, otherAuth, created.ID, http.StatusForbidden)
+
+		// Note should still be visible after failed delete attempt
+		notes := assertGetOccurrenceNotes(t, repo, 1, 1, 1, "10000", http.StatusOK)
+		assert.Len(t, notes, 1)
 	})
 }

@@ -127,6 +127,51 @@ func PutOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Aut
 	}
 }
 
+// DeleteOccurrenceNoteHandler
+// @Summary Delete a note on an occurrence
+// @Id deleteOccurrenceNote
+// @Description Soft-delete a note by ID. Only the owner of the note can delete it.
+// @Tags occurrence_notes
+// @Security bearerauth
+// @Param id path string true "Note ID"
+// @Produce json
+// @Success 204
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /notes/{id} [delete]
+func DeleteOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+
+		userID, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleNotFoundError(c, "user id")
+			return
+		}
+
+		note, err := repo.GetByID(id)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if note == nil {
+			HandleNotFoundError(c, "note")
+			return
+		}
+		if note.UserID != *userID {
+			HandleForbiddenError(c)
+			return
+		}
+
+		if err := repo.Delete(id); err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.Status(http.StatusNoContent)
+	}
+}
+
 // GetOccurrenceNotesHandler
 // @Summary Get notes for an occurrence
 // @Id getOccurrenceNotes

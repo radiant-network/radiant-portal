@@ -123,6 +123,7 @@ Class | Method | HTTP request | Description
 *InterpretationsApi* | [**search_interpretation_germline**](docs/InterpretationsApi.md#search_interpretation_germline) | **GET** /interpretations/germline | Search interpretation germline
 *InterpretationsApi* | [**search_interpretation_somatic**](docs/InterpretationsApi.md#search_interpretation_somatic) | **GET** /interpretations/somatic | Search interpretation somatic
 *MondoApi* | [**mondo_term_auto_complete**](docs/MondoApi.md#mondo_term_auto_complete) | **GET** /mondo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
+*OccurrenceNotesApi* | [**delete_occurrence_note**](docs/OccurrenceNotesApi.md#delete_occurrence_note) | **DELETE** /notes/{id} | Delete a note on an occurrence
 *OccurrenceNotesApi* | [**get_occurrence_notes**](docs/OccurrenceNotesApi.md#get_occurrence_notes) | **GET** /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Get notes for an occurrence
 *OccurrenceNotesApi* | [**post_occurrence_note**](docs/OccurrenceNotesApi.md#post_occurrence_note) | **POST** /notes | Create a note on an occurrence
 *OccurrenceNotesApi* | [**put_occurrence_note**](docs/OccurrenceNotesApi.md#put_occurrence_note) | **PUT** /notes/{id} | Update a note on an occurrence

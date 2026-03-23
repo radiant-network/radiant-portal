@@ -151,6 +151,30 @@ func Test_UpdateOccurrenceNote(t *testing.T) {
 	})
 }
 
+func Test_DeleteOccurrenceNote(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewOccurrenceNotesRepository(db)
+		note := types.OccurrenceNote{
+			CaseID:       1,
+			SeqID:        1,
+			TaskID:       1,
+			OccurrenceID: "10000",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "John Doe",
+			Content:      "Note to delete",
+		}
+		created, err := repo.Create(note)
+		assert.NoError(t, err)
+
+		err = repo.Delete(created.ID)
+		assert.NoError(t, err)
+
+		found, err := repo.GetByID(created.ID)
+		assert.NoError(t, err)
+		assert.Nil(t, found)
+	})
+}
+
 func Test_GetByOccurrence_IgnoresDeletedNotes(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)

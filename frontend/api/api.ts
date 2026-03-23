@@ -7976,6 +7976,44 @@ export class MondoApi extends BaseAPI {
 export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Soft-delete a note by ID. Only the owner of the note can delete it.
+         * @summary Delete a note on an occurrence
+         * @param {string} id Note ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOccurrenceNote: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('deleteOccurrenceNote', 'id', id)
+            const localVarPath = `/notes/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Get all notes associated with an occurrence
          * @summary Get notes for an occurrence
          * @param {number} caseId Case ID
@@ -8120,6 +8158,19 @@ export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = OccurrenceNotesApiAxiosParamCreator(configuration)
     return {
         /**
+         * Soft-delete a note by ID. Only the owner of the note can delete it.
+         * @summary Delete a note on an occurrence
+         * @param {string} id Note ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteOccurrenceNote(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOccurrenceNote(id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.deleteOccurrenceNote']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Get all notes associated with an occurrence
          * @summary Get notes for an occurrence
          * @param {number} caseId Case ID
@@ -8173,6 +8224,16 @@ export const OccurrenceNotesApiFactory = function (configuration?: Configuration
     const localVarFp = OccurrenceNotesApiFp(configuration)
     return {
         /**
+         * Soft-delete a note by ID. Only the owner of the note can delete it.
+         * @summary Delete a note on an occurrence
+         * @param {string} id Note ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOccurrenceNote(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteOccurrenceNote(id, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Get all notes associated with an occurrence
          * @summary Get notes for an occurrence
          * @param {number} caseId Case ID
@@ -8216,6 +8277,18 @@ export const OccurrenceNotesApiFactory = function (configuration?: Configuration
  * @extends {BaseAPI}
  */
 export class OccurrenceNotesApi extends BaseAPI {
+    /**
+     * Soft-delete a note by ID. Only the owner of the note can delete it.
+     * @summary Delete a note on an occurrence
+     * @param {string} id Note ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrenceNotesApi
+     */
+    public deleteOccurrenceNote(id: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceNotesApiFp(this.configuration).deleteOccurrenceNote(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Get all notes associated with an occurrence
      * @summary Get notes for an occurrence

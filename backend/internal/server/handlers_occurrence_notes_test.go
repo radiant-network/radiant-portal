@@ -65,6 +65,13 @@ func (m *MockRepository) Update(id string, content string) (*types.OccurrenceNot
 	}, nil
 }
 
+func (m *MockRepository) Delete(id string) error {
+	if id == "error-delete-id" {
+		return fmt.Errorf("mock delete error")
+	}
+	return nil
+}
+
 func (m *MockRepository) GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error) {
 	if occurrenceID == "99999" {
 		return nil, fmt.Errorf("mock get error")
@@ -347,4 +354,56 @@ func Test_PutOccurrenceNoteHandler_Forbidden(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+func Test_DeleteOccurrenceNoteHandler(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.DELETE("/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
+
+	req, _ := http.NewRequest("DELETE", "/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNoContent, w.Code)
+}
+
+func Test_DeleteOccurrenceNoteHandler_NoteNotFound(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.DELETE("/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
+
+	req, _ := http.NewRequest("DELETE", "/notes/not-found-id", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_DeleteOccurrenceNoteHandler_Forbidden(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{Id: "other-user-id"}
+	router := gin.Default()
+	router.DELETE("/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
+
+	req, _ := http.NewRequest("DELETE", "/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
+func Test_DeleteOccurrenceNoteHandler_GetByIDError(t *testing.T) {
+	repo := &MockRepository{}
+	auth := &testutils.MockAuth{}
+	router := gin.Default()
+	router.DELETE("/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
+
+	req, _ := http.NewRequest("DELETE", "/notes/error-id", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
