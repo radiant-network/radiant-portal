@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import capitalize from 'lodash/capitalize';
 import { PlusIcon } from 'lucide-react';
+import { tv } from 'tailwind-variants';
 
 import { ActionButton } from '@/components/base/buttons';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
@@ -20,6 +21,19 @@ import { Switch } from '@/components/base/shadcn/switch';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { BooleanOperators } from './type';
+
+const queryBar = tv({
+  base: 'flex flex-1 py-2 px-3 border ',
+  variants: {
+    active: {
+      true: ['border-primary/75 bg-primary/10'],
+      false: ['border-muted-foreground/20 bg-muted/35 text-muted-foreground'],
+    },
+  },
+  defaultVariants: {
+    active: false,
+  },
+});
 
 /**
  * Card that display all queries for query-builder
@@ -119,7 +133,11 @@ function QueriesBarCard() {
                 .map((sqon, index) => (
                   <QueryBar key={sqon.id} index={index} sqon={sqon} />
                 ))}
-              {isSqonEmpty(activeQuery) && t('common.query_bar.empty')}
+              {isSqonEmpty(activeQuery) && (
+                <div className={queryBar({ active: activeQueryId === activeQuery.id })}>
+                  {t('common.query_bar.empty')}
+                </div>
+              )}
             </div>
 
             {/* Actions */}
