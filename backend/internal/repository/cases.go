@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
@@ -387,7 +387,8 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 
 	for i, task := range tasks {
 		patients := utils.SplitRemoveEmptyString(task.PatientsUnparsed, ",")
-		sort.Strings(patients)
+		patients = utils.RemoveDuplicates(patients)
+		slices.Sort(patients)
 		tasks[i].Patients = patients
 	}
 

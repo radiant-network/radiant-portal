@@ -640,6 +640,20 @@ func Test_RetrieveCaseTasks(t *testing.T) {
 	})
 }
 
+func Test_RetrieveCaseTasks_DeduplicatePatients(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+		tasks, err := repo.retrieveCaseTasks(71)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(*tasks))
+
+		assert.Equal(t, 74, (*tasks)[0].ID)
+		assert.Equal(t, "radiant_somatic_annotation", (*tasks)[0].TypeCode)
+		assert.Equal(t, 1, len((*tasks)[0].Patients))
+		assert.True(t, slices.Contains((*tasks)[0].Patients, "proband"))
+	})
+}
+
 func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)

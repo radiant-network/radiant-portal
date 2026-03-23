@@ -63,3 +63,28 @@ func Test_SplitRemoveEmptyString_EmptyInput(t *testing.T) {
 	result := SplitRemoveEmptyString(input, ",")
 	assert.Equal(t, expectedOutput, result)
 }
+
+func Test_RemoveDuplicates(t *testing.T) {
+	result := RemoveDuplicates([]string{"a", "b", "a", "c", "b"})
+	assert.Equal(t, []string{"a", "b", "c"}, result)
+}
+
+func Test_RemoveDuplicates_Ints(t *testing.T) {
+	result := RemoveDuplicates([]int{1, 2, 3, 2, 1})
+	assert.Equal(t, []int{1, 2, 3}, result)
+}
+
+func Test_RemoveDuplicates_NoDuplicates(t *testing.T) {
+	result := RemoveDuplicates([]string{"a", "b", "c"})
+	assert.Equal(t, []string{"a", "b", "c"}, result)
+}
+
+func Test_RemoveDuplicates_AllDuplicates(t *testing.T) {
+	result := RemoveDuplicates([]string{"x", "x", "x"})
+	assert.Equal(t, []string{"x"}, result)
+}
+
+func Test_RemoveDuplicates_Empty(t *testing.T) {
+	result := RemoveDuplicates([]string{})
+	assert.Equal(t, []string{}, result)
+}
