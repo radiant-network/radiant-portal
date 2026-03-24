@@ -6,12 +6,11 @@ import { ActionButton } from '@/components/base/buttons';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import {
   QBActionType,
-  useQBActiveQuery,
   useQBContext,
   useQBDispatch,
   useQBSettings,
 } from '@/components/base/query-builder-v3/hooks/use-query-builder';
-import { isQueryEmpty, isSqonEmpty } from '@/components/base/query-builder-v3/libs/sqon';
+import { hasEmptyQuery } from '@/components/base/query-builder-v3/libs/sqon';
 import QueryBar from '@/components/base/query-builder-v3/query-bar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
@@ -42,7 +41,6 @@ function QueriesBarCard() {
   const { sqons } = useQBContext();
   const { labelsEnabled } = useQBSettings();
   const dispatch = useQBDispatch();
-  const activeQuery = useQBActiveQuery();
 
   /**
    * Add and active a new query
@@ -58,7 +56,7 @@ function QueriesBarCard() {
    */
   const handleCombineQueriesClick = useCallback(
     (operator: BooleanOperators) =>
-      function() {
+      function () {
         dispatch({
           type: QBActionType.COMBINE_QUERIES,
           payload: operator,
@@ -114,12 +112,9 @@ function QueriesBarCard() {
           </AccordionTrigger>
           <AccordionContent className="py-4 px-6 space-y-4">
             <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">
-              {sqons
-                .filter(sqon => !isSqonEmpty(sqon))
-                .map((sqon, index) => (
-                  <QueryBar key={sqon.id} index={index} sqon={sqon} />
-                ))}
-              {isSqonEmpty(activeQuery) && t('common.query_bar.empty')}
+              {sqons.map((sqon, index) => (
+                <QueryBar key={sqon.id} index={index} sqon={sqon} />
+              ))}
             </div>
 
             {/* Actions */}
@@ -148,7 +143,7 @@ function QueriesBarCard() {
                 ) : (
                   <>
                     {/* Add New Query */}
-                    <Button size="xs" disabled={isQueryEmpty(sqons)} onClick={handleNewQueryClick}>
+                    <Button size="xs" disabled={hasEmptyQuery(sqons)} onClick={handleNewQueryClick}>
                       <PlusIcon />
                       {t('common.toolbar.new_query')}
                     </Button>
@@ -182,4 +177,5 @@ function QueriesBarCard() {
     </Card>
   );
 }
+
 export default QueriesBarCard;
