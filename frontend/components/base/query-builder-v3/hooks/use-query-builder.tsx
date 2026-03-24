@@ -535,6 +535,27 @@ export function qBReducer(context: IQBContext, action: ActionType) {
         });
       }
 
+      // If all queries are now empty, create a new empty query
+      if (isQueryNowEmpty && sqons.length === 0) {
+        const uuid = v4();
+        return {
+          ...context,
+          activeQueryId: uuid,
+          sqons: [
+            {
+              content: [],
+              id: uuid,
+              op: BooleanOperators.And,
+            },
+          ],
+          settings: {
+            ...context.settings,
+            combinedQueries,
+          },
+          history: { uuid: v4(), type: PillUserAction.REMOVE, target: action.payload.content.field },
+        };
+      }
+
       return {
         ...context,
         activeQueryId: index < sqons.length ? sqons[index].id : sqons[index - 1].id,
@@ -677,7 +698,6 @@ export function useQBActiveQuery(): ISyntheticSqon {
 /**
  * Retrieve aggregations
  */
-// ICI
 export function useQBAggregations(): AggregationConfig {
   const { aggregations } = useQBContext();
   return aggregations;
@@ -784,14 +804,6 @@ export function useQBBooleanValue(field: string): string | null {
 
   return null;
 }
-
-// /**
-//  * Check if a field is a search field based on aggregation config
-//  */
-// export function useQBIsSearch(field: string): boolean {
-//   const aggregations = useQBAggregations();
-//   return isSearchField(field, aggregations);
-// }
 
 /**
  * Return usable value for numerical field (facet or pill)
