@@ -9,6 +9,7 @@ import {
   SET_ID_PREFIX,
   TSyntheticSqonContentValue,
 } from '@/components/base/query-builder-v3/type';
+import { AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 
 export const isSet = (value: IValueFacet): boolean =>
   value.content.value && value.content.value.some(value => value?.toString().startsWith(SET_ID_PREFIX));
@@ -35,6 +36,19 @@ export function isBoolean(sqon: IValueFacet): boolean {
  */
 export function isRange(valueFacet: IValueFacet): boolean {
   return valueFacet.op === RangeOperators.In ? false : valueFacet.op in RangeOperators;
+}
+
+/**
+ * For search facet
+ * Check if a field name corresponds to a search field in aggregations
+ */
+export function isSearchField(valueFacet: IValueFacet, aggregations: AggregationConfig): boolean {
+  const field = valueFacet.content.field;
+  const searchKey = `${FilterTypes.SEARCH_BY}_${field}`;
+
+  // Search in all aggregation groups and items
+  const allAggregations = Object.values(aggregations).flatMap(group => group.items);
+  return allAggregations.some(agg => agg.key === searchKey && agg.type === FilterTypes.SEARCH_BY);
 }
 
 /**

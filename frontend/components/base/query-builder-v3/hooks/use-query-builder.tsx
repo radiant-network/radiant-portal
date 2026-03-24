@@ -677,6 +677,7 @@ export function useQBActiveQuery(): ISyntheticSqon {
 /**
  * Retrieve aggregations
  */
+// ICI
 export function useQBAggregations(): AggregationConfig {
   const { aggregations } = useQBContext();
   return aggregations;
@@ -783,6 +784,14 @@ export function useQBBooleanValue(field: string): string | null {
 
   return null;
 }
+
+// /**
+//  * Check if a field is a search field based on aggregation config
+//  */
+// export function useQBIsSearch(field: string): boolean {
+//   const aggregations = useQBAggregations();
+//   return isSearchField(field, aggregations);
+// }
 
 /**
  * Return usable value for numerical field (facet or pill)
