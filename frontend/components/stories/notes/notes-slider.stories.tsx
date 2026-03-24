@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { delay, http, HttpResponse } from 'msw';
 
 import NotesSlider from '@/components/base/notes/notes-slider';

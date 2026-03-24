@@ -53,7 +53,7 @@ export function useQueryBuilderGetPreferenceEffect({ appId, setPreference }: use
 
   useEffect(() => {
     if (qbUserPreference.data) {
-      setPreference({ ...qbUserPreference.data, history: getDefaultQBContext().history });
+      setPreference({ ...getDefaultQBContext(), ...qbUserPreference.data });
     } else if (qbUserPreference.error) {
       setPreference(getDefaultQBContext());
     }

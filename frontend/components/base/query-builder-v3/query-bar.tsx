@@ -7,20 +7,20 @@ import VariantIcon from '@/components/base/icons/variant-icon';
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 import { Spinner } from '@/components/base/shadcn/spinner';
-import { TSyntheticSqonContentValue } from '@/components/cores/sqon';
+import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
 import { numberFormatWithAbbrv } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
 
-import { Button } from '../shadcn/button';
-
-import { QBActionType, useQBContext, useQBDispatch } from './hooks/use-query-builder';
-import { isBoolean, isRange } from './libs/sqon';
+import { QBActionType, useQBContext, useQBDispatch, useQBSettings, useQBSqonsCount } from './hooks/use-query-builder';
+import { isBoolean, isCombinedQuery, isRange } from './libs/sqon';
 import BooleanQueryPill from './pills/boolean-query-pill';
+import CombinedQueryPill from './pills/combined-query-pill';
 import MultiSelectQueryPill from './pills/multiselect-query-pill';
 import NumericalQueryPill from './pills/numerical-query-pill';
 import CombinerOperator from './pills/operators/combiner-operator';
-import { ISyntheticSqon, IValueFacet } from './type';
+import { ISqonGroupFacet, ISyntheticSqon, IValueFacet, TSyntheticSqonContentValue } from './type';
+import { getColorByIndex } from './libs/theme';
 
 /**
  * Type
@@ -28,13 +28,17 @@ import { ISyntheticSqon, IValueFacet } from './type';
 type QueryBarProps = {
   index: number;
   sqon: ISyntheticSqon;
-  active: boolean;
 };
+
 
 /**
  * Simple factory design pattern to create the correct query-pill
  */
 function factory(content: TSyntheticSqonContentValue) {
+  if (isCombinedQuery(content as ISqonGroupFacet)) {
+    return <CombinedQueryPill sqon={content as ISyntheticSqon} />;
+  }
+
   if (isRange(content as IValueFacet)) {
     return <NumericalQueryPill sqon={content as IValueFacet} />;
   }
@@ -54,10 +58,17 @@ function factory(content: TSyntheticSqonContentValue) {
  * | [] Q1 | Loremp Ipsum = [1,2, 3 >][X]      | 389K | [copy] [trash]  |
  * └───────└──────────────────────────────────────────┘─────────────────┘
  */
-function QueryBar({ index, sqon, active }: QueryBarProps) {
+function QueryBar({ index, sqon }: QueryBarProps) {
   const { t } = useI18n();
-  const { fetcher } = useQBContext();
   const dispatch = useQBDispatch();
+  const sqonsCount = useQBSqonsCount();
+  const { activeQueryId } = useQBContext();
+  const { combinedQueries } = useQBSettings();
+  const { fetcher } = useQBContext();
+  const { selectedQueries } = useQBSettings();
+  const active = useMemo(() => {
+    return activeQueryId === sqon.id
+  }, [activeQueryId]);
   const backgroundColor = useMemo(
     () => ({
       'border-primary/75 bg-primary/10': active,
@@ -65,6 +76,17 @@ function QueryBar({ index, sqon, active }: QueryBarProps) {
     }),
     [active],
   );
+  const identifierStyle = useMemo(() => {
+    // is referenced by an active combined query
+    if (!active && combinedQueries[activeQueryId] !== undefined &&
+      Object.keys(combinedQueries).includes(activeQueryId) &&
+      combinedQueries[activeQueryId].includes(sqon.id)) {
+
+      return { "backgroundColor": getColorByIndex(index) };
+    }
+    return {};
+  }, [activeQueryId, active, combinedQueries]);
+
 
   /**
    * Fetcher
@@ -100,11 +122,20 @@ function QueryBar({ index, sqon, active }: QueryBarProps) {
   }, [dispatch, active]);
 
   /**
-   * @TODO: used to combine queries
+   * Active selection of the query
    */
-  const handleSelection = useCallback(() => {
-    console.warn('QueryBar:handleSelection has not be implemented');
-  }, [dispatch, sqon]);
+  const handleSelection = useCallback(
+    (checked: boolean) => {
+      dispatch({
+        type: QBActionType.SELECT_QUERY,
+        payload: {
+          uuid: sqon.id,
+          isSelected: checked,
+        },
+      });
+    },
+    [dispatch, sqon],
+  );
 
   /**
    * Use to duplicate a query
@@ -136,10 +167,24 @@ function QueryBar({ index, sqon, active }: QueryBarProps) {
 
   return (
     <div className="flex flex-1 group/query" data-query-active={active} onClick={handleActive}>
+
+      {/* Identifier: color for combined query quick identification */}
+      <div
+        className={cn("w-1 rounded-s-sm bg-muted-foreground", {
+          "bg-primary": active,
+        })}
+        style={identifierStyle}
+      />
+
       {/* selector */}
-      <div className={cn('flex gap-2 items-center py-4 px-4 border-l border-t border-b', backgroundColor)}>
-        <Checkbox size="sm" checked={false} onClick={handleSelection} />
-        <span className="text-xs font-medium">{t('common.query_bar.selector', { index })}</span>
+      <div className={cn('flex gap-2 items-center py-4 px-4 border-l border-t border-b', backgroundColor, { 'hidden': sqonsCount <= 1 })}>
+        <Checkbox
+          size="sm"
+          defaultChecked={false}
+          checked={selectedQueries.includes(sqon.id)}
+          onCheckedChange={handleSelection}
+        />
+        <span className="text-xs font-medium">{t('common.query_bar.selector', { index: index + 1 })}</span>
       </div>
 
       {/* query */}
@@ -167,10 +212,7 @@ function QueryBar({ index, sqon, active }: QueryBarProps) {
       </div>
 
       {/* actions */}
-      <div
-        className={cn('flex items-center py-2 px-3 border-r border-t border-b', backgroundColor)}
-        onClick={e => e.stopPropagation()}
-      >
+      <div className={cn('flex items-center py-2 px-3 border-r border-t border-b', backgroundColor)}>
         <Button iconOnly variant="ghost" size="sm" onClick={handleDuplicate}>
           <CopyIcon />
         </Button>

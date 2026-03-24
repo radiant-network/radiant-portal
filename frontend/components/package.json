@@ -14,12 +14,11 @@
   "description": "",
   "type": "module",
   "devDependencies": {
-    "@chromatic-com/storybook": "^5.0.1",
-    "@storybook/addon-onboarding": "^10.2.10",
-    "@storybook/addon-themes": "^10.2.10",
-    "@storybook/addon-vitest": "^10.2.10",
-    "@storybook/react": "^10.2.10",
-    "@storybook/react-vite": "^10.2.10",
+    "@chromatic-com/storybook": "^5.0.2",
+    "@storybook/addon-onboarding": "^10.3.1",
+    "@storybook/addon-themes": "^10.3.1",
+    "@storybook/addon-vitest": "^10.3.1",
+    "@storybook/react-vite": "^10.3.1",
     "@tailwindcss/vite": "^4.1.8",
     "@types/i18next": "^13.0.0",
     "@types/lodash": "^4.17.14",
@@ -32,9 +31,10 @@
     "msw": "^2.12.10",
     "msw-storybook-addon": "^2.0.6",
     "playwright": "^1.50.1",
-    "storybook": "^10.2.10",
+    "storybook": "^10.3.1",
     "tailwindcss": "^4.1.8",
-    "vitest": "^3.0.9"
+    "vitest": "^3.0.9",
+    "eslint-plugin-storybook": "10.3.1"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

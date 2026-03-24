@@ -6,7 +6,7 @@ import { delay, http, HttpResponse } from 'msw';
 import { mocked } from 'storybook/test';
 
 import { TableColumnDef } from '@/components/base/data-table/data-table';
-import { ICountInput, IListInput } from '@/components/base/query-builder-v3/hooks/use-query-builder';
+import { getDefaultQBContext, ICountInput, IListInput } from '@/components/base/query-builder-v3/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder-v3/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder-v3/query-builder-data-table';
 import { ApplicationId, ConfigProvider, FilterTypes, PortalConfig } from '@/components/cores/applications-config';
@@ -347,6 +347,7 @@ export const Multiselect: Story = {
             return new HttpResponse(null, { status: 404 });
           }
           return HttpResponse.json({
+            ...getDefaultQBContext(),
             activeQueryId: '3593dbdf-44e7-49c9-934a-7b10db87b603',
             sqons: [
               {
@@ -377,9 +378,6 @@ export const Multiselect: Story = {
                 op: 'and',
               },
             ],
-            settings: {
-              labelsEnabled: true,
-            },
           });
         }),
       ],
@@ -422,6 +420,7 @@ export const Boolean: Story = {
             return new HttpResponse(null, { status: 404 });
           }
           return HttpResponse.json({
+            ...getDefaultQBContext(),
             activeQueryId: '3593dbdf-44e7-49c9-934a-7b10db87b603',
             sqons: [
               {
@@ -438,9 +437,6 @@ export const Boolean: Story = {
                 op: 'and',
               },
             ],
-            settings: {
-              labelsEnabled: true,
-            },
           });
         }),
       ],
@@ -483,6 +479,7 @@ export const Numerical: Story = {
             return new HttpResponse(null, { status: 404 });
           }
           return HttpResponse.json({
+            ...getDefaultQBContext(),
             activeQueryId: '3593dbdf-44e7-49c9-934a-7b10db87b603',
             sqons: [
               {
@@ -506,9 +503,6 @@ export const Numerical: Story = {
                 op: 'and',
               },
             ],
-            settings: {
-              labelsEnabled: true,
-            },
           });
         }),
       ],
@@ -551,6 +545,7 @@ export const MultiQueries: Story = {
             return new HttpResponse(null, { status: 404 });
           }
           return HttpResponse.json({
+            ...getDefaultQBContext(),
             activeQueryId: '3593dbdf-44e7-49c9-934a-7b10db87b605',
             sqons: [
               {
@@ -655,9 +650,132 @@ export const MultiQueries: Story = {
                 op: 'and',
               },
             ],
-            settings: {
-              labelsEnabled: true,
-            },
+          });
+        }),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.snv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
+      <QueryBuilderDataTable
+        id="storybook-query-builder"
+        columns={
+          [
+            ...mockColumns,
+            mockColumnHelper.accessor('isActive', {
+              header: 'Active',
+            }),
+          ] as TableColumnDef<TableMockData, any>[]
+        }
+        defaultColumnSettings={[]}
+      />
+    </QueryBuilder>
+  ),
+};
+
+export const CombinedQueries: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get(userPreferenceApi, ({ params }: any) => {
+          const key = params.key;
+          if (key === 'data-table-storybook-query-builder') {
+            return new HttpResponse(null, { status: 404 });
+          }
+          return HttpResponse.json({
+            ...getDefaultQBContext(),
+            activeQueryId: '3593dbdf-44e7-49c9-934a-7b10db87b601',
+            sqons: [
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b601',
+                content: [
+                  {
+                    content: {
+                      field: 'firstName',
+                      value: ['jack', 'karen'],
+                    },
+                    op: 'in',
+                  },
+                  {
+                    content: {
+                      field: 'lastName',
+                      value: ['tremblay'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'or',
+              },
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b602',
+                content: [
+                  {
+                    content: {
+                      field: 'firstName',
+                      value: ['jack', 'karen'],
+                    },
+                    op: 'in',
+                  },
+                  {
+                    content: {
+                      field: 'lastName',
+                      value: ['tremblay'],
+                    },
+                    op: 'in',
+                  },
+                  {
+                    content: {
+                      field: 'progress',
+                      value: ['50'],
+                    },
+                    op: '<',
+                  },
+                  {
+                    content: {
+                      field: 'visits',
+                      value: ['1', '100'],
+                    },
+                    op: 'between',
+                  },
+                ],
+                op: 'and',
+              },
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+                content: [
+                  {
+                    content: {
+                      field: 'firstName',
+                      value: ['jack'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'or',
+              },
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b604',
+                content: [
+                  {
+                    content: {
+                      field: 'lastName',
+                      value: ['miller'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'or',
+              },
+            ],
           });
         }),
       ],
