@@ -116,7 +116,7 @@ export function getDefaultQBContext() {
     settings: {
       labelsEnabled: true,
       selectedQueries: [],
-      combinedQueries: [],
+      combinedQueries: {},
     },
   };
 }
@@ -620,6 +620,7 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       return {
         ...context,
         settings: {
+          ...context.settings,
           labelsEnabled: action.payload.labelsEnabled,
         },
       };

@@ -18,6 +18,9 @@ const queryBar = tv({
   },
 });
 
+/**
+ * Represent an empty query bar
+ */
 function QueryBarEmpty() {
   const { t } = useI18n();
   const dispatch = useQBDispatch();
