@@ -6,12 +6,11 @@ import { ActionButton } from '@/components/base/buttons';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import {
   QBActionType,
-  useQBActiveQuery,
   useQBContext,
   useQBDispatch,
   useQBSettings,
 } from '@/components/base/query-builder-v3/hooks/use-query-builder';
-import { hasEmptyQuery, isSqonEmpty } from '@/components/base/query-builder-v3/libs/sqon';
+import { hasEmptyQuery } from '@/components/base/query-builder-v3/libs/sqon';
 import QueryBar from '@/components/base/query-builder-v3/query-bar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
@@ -19,7 +18,6 @@ import { Card } from '@/components/base/shadcn/card';
 import { Switch } from '@/components/base/shadcn/switch';
 import { useI18n } from '@/components/hooks/i18n';
 
-import QueryBarEmpty from './query-bar-empty';
 import { BooleanOperators } from './type';
 
 /**
@@ -43,7 +41,6 @@ function QueriesBarCard() {
   const { sqons } = useQBContext();
   const { labelsEnabled } = useQBSettings();
   const dispatch = useQBDispatch();
-  const activeQuery = useQBActiveQuery();
 
   /**
    * Add and active a new query
@@ -115,12 +112,9 @@ function QueriesBarCard() {
           </AccordionTrigger>
           <AccordionContent className="py-4 px-6 space-y-4">
             <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">
-              {sqons
-                .filter(sqon => !isSqonEmpty(sqon))
-                .map((sqon, index) => (
-                  <QueryBar key={sqon.id} index={index} sqon={sqon} />
-                ))}
-              {isSqonEmpty(activeQuery) && <QueryBarEmpty key={activeQuery.id} />}
+              {sqons.map((sqon, index) => (
+                <QueryBar key={sqon.id} index={index} sqon={sqon} />
+              ))}
             </div>
 
             {/* Actions */}

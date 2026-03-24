@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { CopyIcon, TrashIcon } from 'lucide-react';
 import useSWR from 'swr';
+import { tv } from 'tailwind-variants';
 
 import { Count, SqonContent, SqonOpEnum } from '@/api/api';
 import VariantIcon from '@/components/base/icons/variant-icon';
@@ -8,6 +9,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 import { Spinner } from '@/components/base/shadcn/spinner';
+import { isEmptySqon } from '@/components/cores/query-builder';
 import { useI18n } from '@/components/hooks/i18n';
 import { numberFormatWithAbbrv } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
@@ -21,6 +23,19 @@ import MultiSelectQueryPill from './pills/multiselect-query-pill';
 import NumericalQueryPill from './pills/numerical-query-pill';
 import CombinerOperator from './pills/operators/combiner-operator';
 import { ISqonGroupFacet, ISyntheticSqon, IValueFacet, TSyntheticSqonContentValue } from './type';
+
+const queryBar = tv({
+  base: 'flex flex-1 py-2 px-3 border ',
+  variants: {
+    active: {
+      true: ['border-primary/75 bg-primary/10'],
+      false: ['border-muted-foreground/20 bg-muted/35 text-muted-foreground'],
+    },
+  },
+  defaultVariants: {
+    active: false,
+  },
+});
 
 /**
  * Type
@@ -173,74 +188,82 @@ function QueryBar({ index, sqon }: QueryBarProps) {
         style={identifierStyle}
       />
 
-      {/* selector */}
-      <div
-        className={cn('flex gap-2 items-center py-4 px-4 border-l border-t border-b', backgroundColor, {
-          hidden: sqonsCount <= 1,
-        })}
-      >
-        <Checkbox
-          size="sm"
-          defaultChecked={false}
-          checked={selectedQueries.includes(sqon.id)}
-          onCheckedChange={handleSelection}
-        />
-        <span className="text-xs font-medium">{t('common.query_bar.selector', { index: index + 1 })}</span>
-      </div>
+      {/* Empty query */}
+      {isEmptySqon(sqon) && <div className={queryBar({ active })}>{t('common.query_bar.empty')}</div>}
 
-      {/* query */}
-      <div className={cn('flex flex-1 justify-between py-3 px-3 border', backgroundColor)}>
-        <div className="flex flex-1 flex-wrap max-h-[30vh]">
-          {sqon.content.map((content, index) => (
-            <div key={index} className="flex mt-1">
-              {factory(content)}
-              {index < sqon.content.length - 1 && <CombinerOperator sqon={sqon} />}
+      {/* Query with pills */}
+      {!isEmptySqon(sqon) && (
+        <>
+          {/* selector */}
+          <div
+            className={cn('flex gap-2 items-center py-4 px-4 border-l border-t border-b', backgroundColor, {
+              hidden: sqonsCount <= 1,
+            })}
+          >
+            <Checkbox
+              size="sm"
+              defaultChecked={false}
+              checked={selectedQueries.includes(sqon.id)}
+              onCheckedChange={handleSelection}
+            />
+            <span className="text-xs font-medium">{t('common.query_bar.selector', { index: index + 1 })}</span>
+          </div>
+
+          {/* query */}
+          <div className={cn('flex flex-1 justify-between py-3 px-3 border', backgroundColor)}>
+            <div className="flex flex-1 flex-wrap max-h-[30vh]">
+              {sqon.content.map((content, index) => (
+                <div key={index} className="flex mt-1">
+                  {factory(content)}
+                  {index < sqon.content.length - 1 && <CombinerOperator sqon={sqon} />}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* count */}
-        <div className="flex items-center gap-1">
-          {fetchTotal.isLoading ? (
-            <Spinner />
-          ) : (
-            <>
-              <VariantIcon size={14} />
-              <span className="font-medium">{numberFormatWithAbbrv(fetchTotal.data?.count ?? 0)}</span>
-            </>
-          )}
-        </div>
-      </div>
+            {/* count */}
+            <div className="flex items-center gap-1">
+              {fetchTotal.isLoading ? (
+                <Spinner />
+              ) : (
+                <>
+                  <VariantIcon size={14} />
+                  <span className="font-medium">{numberFormatWithAbbrv(fetchTotal.data?.count ?? 0)}</span>
+                </>
+              )}
+            </div>
+          </div>
 
-      {/* actions */}
-      <div className={cn('flex items-center py-2 px-3 border-r border-t border-b', backgroundColor)}>
-        <Button iconOnly variant="ghost" size="sm" onClick={handleDuplicate}>
-          <CopyIcon />
-        </Button>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button iconOnly variant="ghost" size="sm">
-              <TrashIcon />
+          {/* actions */}
+          <div className={cn('flex items-center py-2 px-3 border-r border-t border-b', backgroundColor)}>
+            <Button iconOnly variant="ghost" size="sm" onClick={handleDuplicate}>
+              <CopyIcon />
             </Button>
-          </PopoverTrigger>
-          <PopoverContent side="left" className="w-[200px] space-y-3">
-            <div className="text-sm">{t('common.query_bar.delete_popover.title')}</div>
-            <div className="flex gap-1 justify-end">
-              <PopoverClose asChild>
-                <Button size="xs" variant="outline">
-                  {t('common.query_bar.delete_popover.cancel')}
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button iconOnly variant="ghost" size="sm">
+                  <TrashIcon />
                 </Button>
-              </PopoverClose>
-              <PopoverClose asChild>
-                <Button size="xs" variant="destructive" onClick={handleDelete}>
-                  {t('common.query_bar.delete_popover.ok')}
-                </Button>
-              </PopoverClose>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+              </PopoverTrigger>
+              <PopoverContent side="left" className="w-[200px] space-y-3">
+                <div className="text-sm">{t('common.query_bar.delete_popover.title')}</div>
+                <div className="flex gap-1 justify-end">
+                  <PopoverClose asChild>
+                    <Button size="xs" variant="outline">
+                      {t('common.query_bar.delete_popover.cancel')}
+                    </Button>
+                  </PopoverClose>
+                  <PopoverClose asChild>
+                    <Button size="xs" variant="destructive" onClick={handleDelete}>
+                      {t('common.query_bar.delete_popover.ok')}
+                    </Button>
+                  </PopoverClose>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </>
+      )}
     </div>
   );
 }
