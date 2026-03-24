@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import capitalize from 'lodash/capitalize';
 import { PlusIcon } from 'lucide-react';
-import { tv } from 'tailwind-variants';
 
 import { ActionButton } from '@/components/base/buttons';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
@@ -20,20 +19,8 @@ import { Card } from '@/components/base/shadcn/card';
 import { Switch } from '@/components/base/shadcn/switch';
 import { useI18n } from '@/components/hooks/i18n';
 
+import QueryBarEmpty from './query-bar-empty';
 import { BooleanOperators } from './type';
-
-const queryBar = tv({
-  base: 'flex flex-1 py-2 px-3 border ',
-  variants: {
-    active: {
-      true: ['border-primary/75 bg-primary/10'],
-      false: ['border-muted-foreground/20 bg-muted/35 text-muted-foreground'],
-    },
-  },
-  defaultVariants: {
-    active: false,
-  },
-});
 
 /**
  * Card that display all queries for query-builder
@@ -72,7 +59,7 @@ function QueriesBarCard() {
    */
   const handleCombineQueriesClick = useCallback(
     (operator: BooleanOperators) =>
-      function() {
+      function () {
         dispatch({
           type: QBActionType.COMBINE_QUERIES,
           payload: operator,
@@ -133,11 +120,7 @@ function QueriesBarCard() {
                 .map((sqon, index) => (
                   <QueryBar key={sqon.id} index={index} sqon={sqon} />
                 ))}
-              {isSqonEmpty(activeQuery) && (
-                <div className={queryBar({ active: activeQueryId === activeQuery.id })}>
-                  {t('common.query_bar.empty')}
-                </div>
-              )}
+              {isSqonEmpty(activeQuery) && <QueryBarEmpty key={activeQuery.id} />}
             </div>
 
             {/* Actions */}
@@ -200,4 +183,5 @@ function QueriesBarCard() {
     </Card>
   );
 }
+
 export default QueriesBarCard;

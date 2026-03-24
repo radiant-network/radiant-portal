@@ -4,23 +4,23 @@ import useSWR from 'swr';
 
 import { Count, SqonContent, SqonOpEnum } from '@/api/api';
 import VariantIcon from '@/components/base/icons/variant-icon';
+import { Button } from '@/components/base/shadcn/button';
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 import { Spinner } from '@/components/base/shadcn/spinner';
-import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
 import { numberFormatWithAbbrv } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
 
 import { QBActionType, useQBContext, useQBDispatch, useQBSettings, useQBSqonsCount } from './hooks/use-query-builder';
 import { isBoolean, isCombinedQuery, isRange } from './libs/sqon';
+import { getColorByIndex } from './libs/theme';
 import BooleanQueryPill from './pills/boolean-query-pill';
 import CombinedQueryPill from './pills/combined-query-pill';
 import MultiSelectQueryPill from './pills/multiselect-query-pill';
 import NumericalQueryPill from './pills/numerical-query-pill';
 import CombinerOperator from './pills/operators/combiner-operator';
 import { ISqonGroupFacet, ISyntheticSqon, IValueFacet, TSyntheticSqonContentValue } from './type';
-import { getColorByIndex } from './libs/theme';
 
 /**
  * Type
@@ -29,7 +29,6 @@ type QueryBarProps = {
   index: number;
   sqon: ISyntheticSqon;
 };
-
 
 /**
  * Simple factory design pattern to create the correct query-pill
@@ -66,9 +65,7 @@ function QueryBar({ index, sqon }: QueryBarProps) {
   const { combinedQueries } = useQBSettings();
   const { fetcher } = useQBContext();
   const { selectedQueries } = useQBSettings();
-  const active = useMemo(() => {
-    return activeQueryId === sqon.id
-  }, [activeQueryId]);
+  const active = useMemo(() => activeQueryId === sqon.id, [activeQueryId]);
   const backgroundColor = useMemo(
     () => ({
       'border-primary/75 bg-primary/10': active,
@@ -78,15 +75,16 @@ function QueryBar({ index, sqon }: QueryBarProps) {
   );
   const identifierStyle = useMemo(() => {
     // is referenced by an active combined query
-    if (!active && combinedQueries[activeQueryId] !== undefined &&
+    if (
+      !active &&
+      combinedQueries[activeQueryId] !== undefined &&
       Object.keys(combinedQueries).includes(activeQueryId) &&
-      combinedQueries[activeQueryId].includes(sqon.id)) {
-
-      return { "backgroundColor": getColorByIndex(index) };
+      combinedQueries[activeQueryId].includes(sqon.id)
+    ) {
+      return { backgroundColor: getColorByIndex(index) };
     }
     return {};
   }, [activeQueryId, active, combinedQueries]);
-
 
   /**
    * Fetcher
@@ -167,17 +165,20 @@ function QueryBar({ index, sqon }: QueryBarProps) {
 
   return (
     <div className="flex flex-1 group/query" data-query-active={active} onClick={handleActive}>
-
       {/* Identifier: color for combined query quick identification */}
       <div
-        className={cn("w-1 rounded-s-sm bg-muted-foreground", {
-          "bg-primary": active,
+        className={cn('w-1 rounded-s-sm bg-muted-foreground', {
+          'bg-primary': active,
         })}
         style={identifierStyle}
       />
 
       {/* selector */}
-      <div className={cn('flex gap-2 items-center py-4 px-4 border-l border-t border-b', backgroundColor, { 'hidden': sqonsCount <= 1 })}>
+      <div
+        className={cn('flex gap-2 items-center py-4 px-4 border-l border-t border-b', backgroundColor, {
+          hidden: sqonsCount <= 1,
+        })}
+      >
         <Checkbox
           size="sm"
           defaultChecked={false}
