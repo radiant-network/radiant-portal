@@ -11,7 +11,7 @@ import {
   useQBDispatch,
   useQBSettings,
 } from '@/components/base/query-builder-v3/hooks/use-query-builder';
-import { isQueryEmpty, isSqonEmpty } from '@/components/base/query-builder-v3/libs/sqon';
+import { hasEmptyQuery, isSqonEmpty } from '@/components/base/query-builder-v3/libs/sqon';
 import QueryBar from '@/components/base/query-builder-v3/query-bar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
@@ -149,7 +149,7 @@ function QueriesBarCard() {
                 ) : (
                   <>
                     {/* Add New Query */}
-                    <Button size="xs" disabled={isQueryEmpty(sqons)} onClick={handleNewQueryClick}>
+                    <Button size="xs" disabled={hasEmptyQuery(sqons)} onClick={handleNewQueryClick}>
                       <PlusIcon />
                       {t('common.toolbar.new_query')}
                     </Button>

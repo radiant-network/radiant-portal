@@ -6,7 +6,7 @@ import { v4 } from 'uuid';
 import { Count, CountBodyWithSqon, SortBody, Sqon, SqonContent, SqonOpEnum } from '@/api/api';
 import { AggregationConfig, IFilterRangeConfig } from '@/components/cores/applications-config';
 
-import { createEmptyQuery, isEqualToField } from '../libs/sqon';
+import { createEmptyQuery, hasEmptyQuery, isEqualToField } from '../libs/sqon';
 import { BooleanOperators, ISqonGroupFacet, ISyntheticSqon, IValueContent, IValueFacet, TFacetValue } from '../type';
 
 export const DEFAULT_EMPTY_QUERY = {
@@ -207,6 +207,11 @@ export function qBReducer(context: IQBContext, action: ActionType) {
      * Add new query
      */
     case QBActionType.ADD_QUERY: {
+      // Don't create a new query if there's already an empty one
+      if (hasEmptyQuery(context.sqons)) {
+        return context;
+      }
+
       const uuid = v4();
       return {
         ...context,

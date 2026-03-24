@@ -80,3 +80,10 @@ export function isQueryEmpty(sqons: ISyntheticSqon[]): boolean {
 
   return false;
 }
+
+/**
+ * Check if there's already an empty query
+ */
+export function hasEmptyQuery(sqons: ISyntheticSqon[]): boolean {
+  return sqons.some(sqon => sqon.content.length === 0);
+}
