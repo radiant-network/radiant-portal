@@ -2334,6 +2334,12 @@ export interface GermlineCNVOccurrence {
     'symbol'?: Array<string>;
     /**
      * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'task_id': number;
+    /**
+     * 
      * @type {string}
      * @memberof GermlineCNVOccurrence
      */

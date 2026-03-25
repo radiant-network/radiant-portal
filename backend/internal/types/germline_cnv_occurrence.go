@@ -4,6 +4,7 @@ package types
 // @Description GermlineCNVOccurrence represents a germline CNV occurrence
 type GermlineCNVOccurrence struct {
 	SeqID      int               `json:"seq_id" validate:"required"`
+	TaskID     int               `json:"task_id" validate:"required"`
 	CnvID      string            `json:"cnv_id" validate:"required"`
 	Aliquot    string            `json:"aliquot,omitempty"`
 	Chromosome string            `json:"chromosome" validate:"required"`
@@ -40,6 +41,15 @@ var GermlineCNVOccurrenceTable = Table{
 
 var GermlineCNVSeqIdField = Field{
 	Name:          "seq_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVTaskIdField = Field{
+	Name:          "task_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
@@ -280,6 +290,7 @@ var GermlineCNVSymbolField = Field{
 
 var GermlineCNVOccurrencesFields = []Field{
 	GermlineCNVSeqIdField,
+	GermlineCNVTaskIdField,
 	GermlineCNVIdField,
 	GermlineCNVAliquotField,
 	GermlineCNVChromosomeField,
@@ -317,6 +328,7 @@ var GermlineCNVOccurrencesFields = []Field{
 
 var GermlineCNVOccurrencesDefaultFields = []Field{
 	GermlineCNVSeqIdField,
+	GermlineCNVTaskIdField,
 	GermlineCNVIdField,
 	GermlineCNVChromosomeField,
 	GermlineCNVStartField,

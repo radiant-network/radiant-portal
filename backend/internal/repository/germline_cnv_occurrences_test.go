@@ -35,6 +35,7 @@ func Test_GermlineCNV_GetOccurrences(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
+			assert.Equal(t, 1, occurrences[0].TaskID)
 		}
 	})
 }
@@ -56,6 +57,7 @@ func Test_GermlineCNV_GetOccurrences_QualityFilter(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
+			assert.Equal(t, 1, occurrences[0].TaskID)
 			assert.Equal(t, "CNV1", occurrences[0].Name)
 		}
 	})
@@ -78,6 +80,7 @@ func Test_GermlineCNV_GetOccurrences_PanelFilter(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
+			assert.Equal(t, 1, occurrences[0].TaskID)
 			assert.Equal(t, "CNV1", occurrences[0].Name)
 		}
 	})
@@ -105,6 +108,7 @@ func Test_GermlineCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
+			assert.Equal(t, 1, occurrences[0].TaskID)
 			assert.Equal(t, "CNV2", occurrences[0].Name)
 		}
 
@@ -119,6 +123,7 @@ func Test_GermlineCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
+			assert.Equal(t, 1, occurrences[0].TaskID)
 			assert.Equal(t, "CNV1", occurrences[0].Name)
 		}
 	})

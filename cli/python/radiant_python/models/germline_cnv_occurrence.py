@@ -53,8 +53,9 @@ class GermlineCNVOccurrence(BaseModel):
     svlen: Optional[StrictInt] = None
     svtype: Optional[StrictStr] = None
     symbol: Optional[List[StrictStr]] = None
+    task_id: StrictInt
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "filter", "gnomad_sc", "gnomad_sf", "gnomad_sn", "length", "name", "nb_genes", "nb_snv", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "type"]
+    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "filter", "gnomad_sc", "gnomad_sf", "gnomad_sn", "length", "name", "nb_genes", "nb_snv", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -134,6 +135,7 @@ class GermlineCNVOccurrence(BaseModel):
             "svlen": obj.get("svlen"),
             "svtype": obj.get("svtype"),
             "symbol": obj.get("symbol"),
+            "task_id": obj.get("task_id"),
             "type": obj.get("type")
         })
         return _obj
