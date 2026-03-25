@@ -11,8 +11,13 @@ import { type Aggregation as AggregationConfig } from '@/components/cores/applic
 import { useI18n } from '@/components/hooks/i18n';
 import { genesApi } from '@/utils/api';
 
-import { QBActionType, useQBActiveQuery, useQBDispatch, useQBHistory } from '../hooks/use-query-builder';
-import { IValueContent, IValueFacet } from '../type';
+import {
+  QBActionType,
+  useQBActiveQuery,
+  useQBDispatch,
+  useQBHistory,
+  useQBSearchValue,
+} from '../hooks/use-query-builder';
 
 interface SearchFilterProps {
   search: AggregationConfig;
@@ -30,19 +35,10 @@ export function SearchFacet({ search }: SearchFilterProps) {
 
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<MultiSelectorOption[]>([]);
+  const initialValues = useQBSearchValue(fieldKey);
 
   // Load initial values from query builder and sync when pills are removed
   useEffect(() => {
-    const fieldFilter = activeQuery.content.find(
-      (x: any) =>
-        typeof x === 'object' &&
-        x !== null &&
-        'content' in x &&
-        'field' in (x.content as IValueFacet) &&
-        (x.content as IValueContent).field === fieldKey,
-    ) as IValueFacet | undefined;
-
-    const initialValues = fieldFilter?.content?.value || [];
     if (Array.isArray(initialValues)) {
       setSelectedValues(initialValues as string[]);
     } else {
@@ -53,18 +49,8 @@ export function SearchFacet({ search }: SearchFilterProps) {
   // Sync when history changes (when pills are removed)
   useEffect(() => {
     if (history.target === fieldKey) {
-      const fieldFilter = activeQuery.content.find(
-        (x: any) =>
-          typeof x === 'object' &&
-          x !== null &&
-          'content' in x &&
-          'field' in (x.content as IValueFacet) &&
-          (x.content as IValueContent).field === fieldKey,
-      ) as IValueFacet | undefined;
-
-      const values = fieldFilter?.content?.value || [];
-      if (Array.isArray(values)) {
-        setSelectedValues(values as string[]);
+      if (Array.isArray(initialValues)) {
+        setSelectedValues(initialValues as string[]);
       } else {
         setSelectedValues([]);
       }

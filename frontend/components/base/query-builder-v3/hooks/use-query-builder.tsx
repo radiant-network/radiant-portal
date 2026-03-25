@@ -827,3 +827,26 @@ export function useQBNumericalSqon(field: string): IValueFacet | undefined {
 
   return undefined;
 }
+
+/**
+ * Return usable value for search field (facet or pill)
+ */
+export function useQBSearchValue(field: string) {
+  const activeQuery = useQBActiveQuery();
+  if (activeQuery.content.length === 0) return [];
+
+  const index = activeQuery.content.findIndex(
+    (value: any) =>
+      typeof value === 'object' &&
+      value !== null &&
+      'content' in value &&
+      'field' in (value.content as IValueFacet) &&
+      (value.content as IValueContent).field === field,
+  );
+
+  if (activeQuery.content[index]) {
+    return (activeQuery.content[index] as IValueFacet).content.value;
+  }
+
+  return [];
+}
