@@ -6,7 +6,11 @@ import { delay, http, HttpResponse } from 'msw';
 import { mocked } from 'storybook/test';
 
 import { TableColumnDef } from '@/components/base/data-table/data-table';
-import { getDefaultQBContext, ICountInput, IListInput } from '@/components/base/query-builder-v3/hooks/use-query-builder';
+import {
+  getDefaultQBContext,
+  ICountInput,
+  IListInput,
+} from '@/components/base/query-builder-v3/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder-v3/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder-v3/query-builder-data-table';
 import { ApplicationId, ConfigProvider, FilterTypes, PortalConfig } from '@/components/cores/applications-config';
@@ -94,6 +98,16 @@ const facetListConfig: PortalConfig = {
             key: 'isActive',
             translation_key: 'isActive (boolean)',
             type: FilterTypes.BOOLEAN,
+          },
+          {
+            key: 'search_by_symbol',
+            translation_key: 'search_by_symbol',
+            type: FilterTypes.SEARCH_BY,
+          },
+          {
+            key: 'upload_list_symbol',
+            translation_key: 'upload',
+            type: FilterTypes.UPLOAD_LIST,
           },
         ],
       },
@@ -801,5 +815,199 @@ export const CombinedQueries: Story = {
         defaultColumnSettings={[]}
       />
     </QueryBuilder>
+  ),
+};
+
+export const SearchFacet: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        // Mock for gene autoComplete API
+        http.get('*/genes/autocomplete', ({ request }) => {
+          const url = new URL(request.url);
+          const prefix = url.searchParams.get('prefix') || '';
+
+          const genes = [
+            { name: 'BRCA1', id: 'ENSG00000012048' },
+            { name: 'BRCA2', id: 'ENSG00000139618' },
+            { name: 'TP53', id: 'ENSG00000141510' },
+          ];
+
+          return HttpResponse.json(
+            genes
+              .filter(gene => gene.name.toLowerCase().includes(prefix.toLowerCase()))
+              .map(gene => {
+                const nameRegex = new RegExp(`(${prefix})`, 'gi');
+                const highlightedName = gene.name.replace(nameRegex, '<strong>$1</strong>');
+
+                return {
+                  source: { name: gene.name, id: gene.id },
+                  highlight: { name: highlightedName, id: gene.id },
+                };
+              }),
+          );
+        }),
+        http.get(userPreferenceApi, ({ params }: any) => {
+          const key = params.key;
+          if (key === 'data-table-storybook-query-builder') {
+            return new HttpResponse(null, { status: 404 });
+          }
+          return HttpResponse.json({
+            ...getDefaultQBContext(),
+            activeQueryId: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+            sqons: [
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+                content: [
+                  {
+                    content: {
+                      field: 'gene_symbol',
+                      value: ['BRCA1', 'TP53'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          });
+        }),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.snv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <>
+      <div className="flex flex-col gap-2 p-4 mb-4 bg-muted rounded-lg">
+        <div className="font-mono text-sm">
+          <strong>Test genes available:</strong> BRCA1, BRCA2, TP53.
+        </div>
+      </div>
+      <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
+        <QueryBuilderDataTable
+          id="storybook-query-builder"
+          columns={
+            [
+              ...mockColumns,
+              mockColumnHelper.accessor('isActive', {
+                header: 'Active',
+              }),
+            ] as TableColumnDef<TableMockData, any>[]
+          }
+          defaultColumnSettings={[]}
+        />
+      </QueryBuilder>
+    </>
+  ),
+};
+
+export const UploadIdModal: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        // Mock for gene autoComplete API
+        http.get('*/genes/autocomplete', ({ request }) => {
+          const url = new URL(request.url);
+          const prefix = url.searchParams.get('prefix') || '';
+
+          const genes = [
+            { name: 'BRCA1', id: 'ENSG00000012048' },
+            { name: 'BRCA2', id: 'ENSG00000139618' },
+            { name: 'TP53', id: 'ENSG00000141510' },
+          ];
+
+          return HttpResponse.json(
+            genes
+              .filter(gene => gene.name.toLowerCase().includes(prefix.toLowerCase()))
+              .map(gene => {
+                const nameRegex = new RegExp(`(${prefix})`, 'gi');
+                const highlightedName = gene.name.replace(nameRegex, '<strong>$1</strong>');
+
+                return {
+                  source: { name: gene.name, id: gene.id },
+                  highlight: { name: highlightedName, id: gene.id },
+                };
+              }),
+          );
+        }),
+        // Mock for gene search API (used by upload modal)
+        http.post('*/genes/search', async ({ request }) => {
+          try {
+            const body = (await request.json()) as any;
+            const inputs = body.inputs || [];
+
+            const geneDatabase = [
+              { symbol: 'BRCA1', ensembl_gene_id: 'ENSG00000012048' },
+              { symbol: 'BRCA2', ensembl_gene_id: 'ENSG00000139618' },
+              { symbol: 'TP53', ensembl_gene_id: 'ENSG00000141510' },
+              { symbol: 'EGFR', ensembl_gene_id: 'ENSG00000146648' },
+              { symbol: 'PTEN', ensembl_gene_id: 'ENSG00000171862' },
+              { symbol: 'MYC', ensembl_gene_id: 'ENSG00000136997' },
+              { symbol: 'KRAS', ensembl_gene_id: 'ENSG00000133703' },
+            ];
+
+            const results = geneDatabase.filter(gene =>
+              inputs.some(
+                (input: string) =>
+                  gene.symbol.toLowerCase() === input.toLowerCase() ||
+                  gene.ensembl_gene_id.toLowerCase() === input.toLowerCase(),
+              ),
+            );
+
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            return HttpResponse.json(results);
+          } catch (error) {
+            console.error('🧬 Gene search error:', error);
+            return HttpResponse.json([], { status: 500 });
+          }
+        }),
+        http.get(userPreferenceApi, () => new HttpResponse(null, { status: 404 })),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.snv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <>
+      <div className="flex flex-col gap-2 p-4 mb-4 bg-muted rounded-lg">
+        <div className="font-mono text-sm">
+          <strong>Test genes available:</strong> BRCA1, BRCA2, TP53, EGFR, PTEN, MYC, KRAS.
+        </div>
+        <div className="text-sm text-muted-foreground">
+          Try uploading a text file with gene names/IDs or paste them in the textarea.
+        </div>
+      </div>
+      <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
+        <QueryBuilderDataTable
+          id="storybook-query-builder"
+          columns={
+            [
+              ...mockColumns,
+              mockColumnHelper.accessor('isActive', {
+                header: 'Active',
+              }),
+            ] as TableColumnDef<TableMockData, any>[]
+          }
+          defaultColumnSettings={[]}
+        />
+      </QueryBuilder>
+    </>
   ),
 };

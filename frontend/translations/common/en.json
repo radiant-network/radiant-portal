@@ -690,7 +690,7 @@
       "resume": "{{total}} submitted identifiers mapped to {{unique}} unique system identifier",
       "matched": "Matched ({{total}})",
       "unmatched": "Unmatched ({{total}})",
-      "gene": {
+      "symbol": {
         "button": "Upload a gene list",
         "dialog_title": "Upload a gene list",
         "input_placeholder": "e.g. ENSG00000157764, TP53",

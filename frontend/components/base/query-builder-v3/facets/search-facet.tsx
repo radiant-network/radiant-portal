@@ -2,18 +2,22 @@ import { useEffect, useState } from 'react';
 import parse from 'html-react-parser';
 import { InfoIcon } from 'lucide-react';
 
+import { SqonOpEnum } from '@/api/index';
 import MultiSelector from '@/components/base/data-entry/multi-selector/multi-selector';
 import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
 import { Label } from '@/components/base/shadcn/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
-import { queryBuilderRemote } from '@/components/cores/query-builder/query-builder-remote';
 import { useI18n } from '@/components/hooks/i18n';
 import { genesApi } from '@/utils/api';
 
-import { IValueFacet, TSqonContentValue } from '../type';
-
-import { useFacetConfig } from './hooks/use-facet-config';
+import {
+  QBActionType,
+  useQBActiveQuery,
+  useQBDispatch,
+  useQBHistory,
+  useQBSearchValue,
+} from '../hooks/use-query-builder';
 
 interface SearchFilterProps {
   search: AggregationConfig;
@@ -23,32 +27,35 @@ const MAX_API_CALLS = 2;
 
 export function SearchFacet({ search }: SearchFilterProps) {
   const { t } = useI18n();
-  const { appId } = useFacetConfig();
+  const dispatch = useQBDispatch();
+  const activeQuery = useQBActiveQuery();
+  const history = useQBHistory();
   const { translation_key, key } = search;
   const fieldKey = key.replace(/search_by_/g, '');
 
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<MultiSelectorOption[]>([]);
-  const [lastActiveQuery, setLastActiveQuery] = useState<any>(null);
+  const initialValues = useQBSearchValue(fieldKey);
 
-  // Load initial values from query builder
-  // Listen to query builder changes
+  // Load initial values from query builder and sync when pills are removed
   useEffect(() => {
-    const activeQuery = queryBuilderRemote.getResolvedActiveQuery(appId);
-    if (JSON.stringify(activeQuery) === JSON.stringify(lastActiveQuery)) {
-      return;
-    }
-
-    const fieldFilter = activeQuery.content.find((x: TSqonContentValue) =>
-      'content' in x && 'field' in x.content ? x.content.field === fieldKey : false,
-    ) as IValueFacet | undefined;
-
-    const initialValues = fieldFilter?.content?.value || [];
     if (Array.isArray(initialValues)) {
       setSelectedValues(initialValues as string[]);
+    } else {
+      setSelectedValues([]);
     }
-    setLastActiveQuery(activeQuery);
-  }, [appId, fieldKey, queryBuilderRemote.getActiveQuery(appId)]);
+  }, [fieldKey, activeQuery]);
+
+  // Sync when history changes (when pills are removed)
+  useEffect(() => {
+    if (history.target === fieldKey) {
+      if (Array.isArray(initialValues)) {
+        setSelectedValues(initialValues as string[]);
+      } else {
+        setSelectedValues([]);
+      }
+    }
+  }, [history.uuid, fieldKey, activeQuery]);
 
   useEffect(() => {
     // Create options for selected values (for multi selector badges)
@@ -142,7 +149,16 @@ export function SearchFacet({ search }: SearchFilterProps) {
 
   const handleChange = (newValues: string[]) => {
     setSelectedValues(newValues);
-    // @TODO: add dispatch to add to query-builder
+    dispatch({
+      type: QBActionType.ADD_OR_UPDATE_FACET_PILL,
+      payload: {
+        content: {
+          field: fieldKey,
+          value: newValues,
+        },
+        op: SqonOpEnum.In,
+      },
+    });
   };
 
   return (

@@ -691,7 +691,7 @@
       "resume": "{{total}} identifiants soumis correspondant à {{unique}} identifiants uniques au système",
       "matched": "Correspondants ({{total}})",
       "unmatched": "Non correspondants ({{total}})",
-      "gene": {
+      "symbol": {
         "button": "Téléverser une liste de gènes",
         "dialog_title": "Téléverser une liste de gènes",
         "input_placeholder": "ex. ENSG00000157764, TP53",
@@ -1696,7 +1696,7 @@
   },
   "notes": {
     "variant": {
-     "title": "Commentaires sur le variant",
+      "title": "Commentaires sur le variant",
       "button": "Commentaires",
       "empty_title": "Aucun commentaire",
       "empty_description": "Ajoutez des commentaires afin de documenter votre analyse et vos décisions (visibles par tous les utilisateurs ayant accès à ce cas).",

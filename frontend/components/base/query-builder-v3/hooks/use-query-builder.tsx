@@ -535,6 +535,27 @@ export function qBReducer(context: IQBContext, action: ActionType) {
         });
       }
 
+      // If query is now empty and no other query, create a new empty query
+      if (isQueryNowEmpty && sqons.length === 0) {
+        const uuid = v4();
+        return {
+          ...context,
+          activeQueryId: uuid,
+          sqons: [
+            {
+              content: [],
+              id: uuid,
+              op: BooleanOperators.And,
+            },
+          ],
+          settings: {
+            ...context.settings,
+            combinedQueries,
+          },
+          history: { uuid: v4(), type: PillUserAction.REMOVE, target: action.payload.content.field },
+        };
+      }
+
       return {
         ...context,
         activeQueryId: index < sqons.length ? sqons[index].id : sqons[index - 1].id,
@@ -805,4 +826,27 @@ export function useQBNumericalSqon(field: string): IValueFacet | undefined {
   }
 
   return undefined;
+}
+
+/**
+ * Return usable value for search field (facet or pill)
+ */
+export function useQBSearchValue(field: string) {
+  const activeQuery = useQBActiveQuery();
+  if (activeQuery.content.length === 0) return [];
+
+  const index = activeQuery.content.findIndex(
+    (value: any) =>
+      typeof value === 'object' &&
+      value !== null &&
+      'content' in value &&
+      'field' in (value.content as IValueFacet) &&
+      (value.content as IValueContent).field === field,
+  );
+
+  if (activeQuery.content[index]) {
+    return (activeQuery.content[index] as IValueFacet).content.value;
+  }
+
+  return [];
 }

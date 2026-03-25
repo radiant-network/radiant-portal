@@ -47,7 +47,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    variant: 'gene',
+    variant: 'symbol',
   },
   render: args => (
     <div className="w-80">

@@ -9,19 +9,28 @@ import { Button } from '@/components/base/shadcn/button';
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 import { Spinner } from '@/components/base/shadcn/spinner';
+import { AggregationConfig } from '@/components/cores/applications-config';
 import { isEmptySqon } from '@/components/cores/query-builder';
 import { useI18n } from '@/components/hooks/i18n';
 import { numberFormatWithAbbrv } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
 
-import { QBActionType, useQBContext, useQBDispatch, useQBSettings, useQBSqonsCount } from './hooks/use-query-builder';
-import { isBoolean, isCombinedQuery, isRange } from './libs/sqon';
+import {
+  QBActionType,
+  useQBAggregations,
+  useQBContext,
+  useQBDispatch,
+  useQBSettings,
+  useQBSqonsCount,
+} from './hooks/use-query-builder';
+import { isBoolean, isCombinedQuery, isRange, isSearchField } from './libs/sqon';
 import { getColorByIndex } from './libs/theme';
 import BooleanQueryPill from './pills/boolean-query-pill';
 import CombinedQueryPill from './pills/combined-query-pill';
 import MultiSelectQueryPill from './pills/multiselect-query-pill';
 import NumericalQueryPill from './pills/numerical-query-pill';
 import CombinerOperator from './pills/operators/combiner-operator';
+import SearchQueryPill from './pills/search-query-pill';
 import { ISqonGroupFacet, ISyntheticSqon, IValueFacet, TSyntheticSqonContentValue } from './type';
 
 const queryBar = tv({
@@ -48,9 +57,13 @@ type QueryBarProps = {
 /**
  * Simple factory design pattern to create the correct query-pill
  */
-function factory(content: TSyntheticSqonContentValue) {
+function factory(content: TSyntheticSqonContentValue, aggregations: AggregationConfig) {
   if (isCombinedQuery(content as ISqonGroupFacet)) {
     return <CombinedQueryPill sqon={content as ISyntheticSqon} />;
+  }
+
+  if (isSearchField(content as IValueFacet, aggregations)) {
+    return <SearchQueryPill sqon={content as IValueFacet} />;
   }
 
   if (isRange(content as IValueFacet)) {
@@ -80,6 +93,7 @@ function QueryBar({ index, sqon }: QueryBarProps) {
   const { combinedQueries } = useQBSettings();
   const { fetcher } = useQBContext();
   const { selectedQueries } = useQBSettings();
+  const aggregations = useQBAggregations();
   const active = useMemo(() => activeQueryId === sqon.id, [activeQueryId]);
   const backgroundColor = useMemo(
     () => ({
@@ -214,7 +228,7 @@ function QueryBar({ index, sqon }: QueryBarProps) {
             <div className="flex flex-1 flex-wrap max-h-[30vh]">
               {sqon.content.map((content, index) => (
                 <div key={index} className="flex mt-1">
-                  {factory(content)}
+                  {factory(content, aggregations)}
                   {index < sqon.content.length - 1 && <CombinerOperator sqon={sqon} />}
                 </div>
               ))}
