@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 
-import UploadIdModal from '@/components/base/modals/upload-id-modal';
 import { FacetContainer } from '@/components/base/query-builder-v3/facets/facet-container';
 import { SearchFacet } from '@/components/base/query-builder-v3/facets/search-facet';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
 import { AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
+
+import UploadIdModal from './modal/upload-id-modal';
 
 /**
  * Create facets

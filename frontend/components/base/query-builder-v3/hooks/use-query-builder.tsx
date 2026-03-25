@@ -535,7 +535,7 @@ export function qBReducer(context: IQBContext, action: ActionType) {
         });
       }
 
-      // If all queries are now empty, create a new empty query
+      // If query is now empty and no other query, create a new empty query
       if (isQueryNowEmpty && sqons.length === 0) {
         const uuid = v4();
         return {
