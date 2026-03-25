@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import { EditorContent, EditorContentProps, useEditor } from '@tiptap/react';
@@ -7,6 +8,12 @@ import { cn } from '@/components/lib/utils';
 
 import RichTextEditorToolbar from './rich-text-editor-toolbar';
 
+export const EDITOR_EMPTY_CONTENT = '<p></p>';
+
+export function isEditorHasEmptyContent(content: string) {
+  return content.length === 0 || content === EDITOR_EMPTY_CONTENT;
+}
+
 export type RichTextEditorProps = Omit<EditorContentProps, 'ref' | 'editor' | 'onChange' | 'onBlur'> & {
   ref?: React.Ref<HTMLDivElement>;
   value?: string;
@@ -14,7 +21,10 @@ export type RichTextEditorProps = Omit<EditorContentProps, 'ref' | 'editor' | 'o
   wrapperClassName?: string;
   onChange?: (value: string) => void;
   onBlur?: () => void;
+  clearContent?: boolean;
   autofocus?: boolean;
+  editable?: boolean;
+  resisizable?: boolean;
   actions?: React.ReactElement[];
 };
 
@@ -24,16 +34,25 @@ const RichTextEditor = ({
   className,
   wrapperClassName,
   onChange,
+  clearContent,
   onBlur,
+  editable = true,
+  resisizable = true,
+  autofocus,
   ...props
 }: RichTextEditorProps) => {
   const editor = useEditor(
     {
+      autofocus: autofocus ? 'end' : false,
+      editable: editable,
       editorProps: {
         attributes: {
           class: cn(
-            'min-h-[80px] w-full bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-auto resize-y',
+            'min-h-[80px] w-full bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-auto',
             className,
+            {
+              ['resize-y']: resisizable,
+            },
           ),
         },
       },
@@ -96,6 +115,18 @@ const RichTextEditor = ({
     },
     [],
   );
+
+  useEffect(() => {
+    if (editor && clearContent) {
+      editor.commands.clearContent();
+    }
+  }, [editor, clearContent]);
+
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(editable);
+    }
+  }, [editor, editable]);
 
   return (
     <div

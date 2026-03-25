@@ -79,7 +79,7 @@ function SequencingInformationsDialog({ open, seqId, onClose }: SequencingInform
               label={t('case_entity.details.created_on_male')}
               tooltipText={t('case_entity.details.date_format_tooltip')}
             >
-              {data?.created_on && <>{formatDate(data.created_on, t('common.date'))}</>}
+              {data?.created_on && <>{formatDate(data.created_on, t('common.date.year_month_day'))}</>}
             </InformationField>
 
             {/* Last Update */}
@@ -87,7 +87,7 @@ function SequencingInformationsDialog({ open, seqId, onClose }: SequencingInform
               label={t('case_entity.details.last_update')}
               tooltipText={t('case_entity.details.date_format_tooltip')}
             >
-              {data?.updated_on && <>{formatDate(data.updated_on, t('common.date'))}</>}
+              {data?.updated_on && <>{formatDate(data.updated_on, t('common.date.year_month_day'))}</>}
             </InformationField>
 
             {/* Diag. Lab. */}
@@ -113,7 +113,7 @@ function SequencingInformationsDialog({ open, seqId, onClose }: SequencingInform
               label={t('case_entity.details.run_date')}
               tooltipText={t('case_entity.details.date_format_tooltip')}
             >
-              {data?.run_date && <>{formatDate(data.run_date, t('common.date'))}</>}
+              {data?.run_date && <>{formatDate(data.run_date, t('common.date.year_month_day'))}</>}
             </InformationField>
           </div>
           <Separator orientation="vertical" className="hidden mx-8 md:block" />

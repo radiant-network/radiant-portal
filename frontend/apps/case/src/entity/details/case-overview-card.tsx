@@ -36,7 +36,7 @@ function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentPr
                   label={t('case_entity.details.created_on_male')}
                   tooltipText={t('case_entity.details.date_format_tooltip')}
                 >
-                  {formatDate(data.created_on, t('common.date'))}
+                  {formatDate(data.created_on, t('common.date.year_month_day'))}
                 </InformationField>
               )}
 
@@ -45,7 +45,7 @@ function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentPr
                   label={t('case_entity.details.last_update')}
                   tooltipText={t('case_entity.details.date_format_tooltip')}
                 >
-                  {formatDate(data.updated_on, t('common.date'))}
+                  {formatDate(data.updated_on, t('common.date.year_month_day'))}
                 </InformationField>
               )}
 

@@ -1,9 +1,12 @@
 import { useCallback, useState } from 'react';
-import { formatDate } from 'date-fns';
 import { EllipsisVertical } from 'lucide-react';
+import useSWRMutation from 'swr/mutation';
 
-import { AvatarUser } from '@/components/base/assignation/avatar';
+import { OccurrenceNote, UpdateOccurrenceNoteInput } from '@/api/api';
 import { SingleAvatar } from '@/components/base/assignation/avatar/single-avatar';
+import RichTextEditor, {
+  isEditorHasEmptyContent,
+} from '@/components/base/data-entry/rich-text-editor/rich-text-editor';
 import RichTextViewer from '@/components/base/data-entry/rich-text-editor/rich-text-viewer';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import { Button } from '@/components/base/shadcn/button';
@@ -15,20 +18,46 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { formatRelativeByCurrentTime } from '@/components/lib/date';
+import { occurencesNotesApi } from '@/utils/api';
 
-import RichTextEditor from '../data-entry/rich-text-editor/rich-text-editor';
+import { useNotesContext } from './hooks/use-notes';
+import NoteSkeleton from './note-skeleton';
 
-export type NoteProps = {
-  text: string;
-  user: AvatarUser;
-  updatedAt: string;
-  createdAt: string;
+export type NoteProps = OccurrenceNote & {
   isOwner: boolean;
+  onChanged: () => Promise<OccurrenceNote[] | undefined>;
 };
 
-function Note({ user, createdAt, updatedAt, text, isOwner }: NoteProps) {
+type PutOccurrenceNoteInput = UpdateOccurrenceNoteInput & {
+  id: string;
+};
+
+async function updateNote(_url: string, { arg }: { arg: PutOccurrenceNoteInput }) {
+  const response = await occurencesNotesApi.putOccurrenceNote(arg.id, { content: arg.content });
+  return response.data;
+}
+
+async function deleteNote(_url: string, { arg }: { arg: string }) {
+  const response = await occurencesNotesApi.deleteOccurrenceNote(arg);
+  return response.data;
+}
+
+function Note({ id, user_id, user_name, created_at, updated_at, content, isOwner, onChanged }: NoteProps) {
   const { t } = useI18n();
+  const { listFetcher } = useNotesContext();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [editedContent, setEditedContent] = useState<string>(content);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const { trigger: triggerDelete } = useSWRMutation(`note/delete/${id}`, deleteNote);
+  const { trigger: triggerUpdate } = useSWRMutation(`note/update/${id}`, updateNote);
+
+  const changedCallback = useCallback(async () => {
+    onChanged().then(() => {
+      setIsLoading(false);
+    });
+  }, [onChanged]);
+
   const handleDelete = useCallback(() => {
     alertDialog.open({
       type: 'warning',
@@ -40,39 +69,50 @@ function Note({ user, createdAt, updatedAt, text, isOwner }: NoteProps) {
       actionProps: {
         color: 'destructive',
         children: t('common.delete'),
-        onClick: () => {
-          console.warn('Delete has not been implemented');
+        onClick: async () => {
+          setIsLoading(true);
+          triggerDelete(id).then(() => {
+            listFetcher();
+            changedCallback();
+          });
         },
       },
     });
   }, []);
 
-  const handleEdit = useCallback(() => {
+  const handleSaveEdit = useCallback(async () => {
+    setIsEditing(false);
+    setIsLoading(true);
+    triggerUpdate({ id, content: editedContent }).then(changedCallback);
+  }, [id, editedContent, onChanged]);
+
+  const handleActiveEditing = useCallback(() => {
     setIsEditing(true);
   }, []);
 
-  const handleCancelEdit = useCallback(() => {
+  const handleCancelEditing = useCallback(() => {
+    setEditedContent(content);
     setIsEditing(false);
   }, []);
 
-  const handleSaveEdit = useCallback(() => {
-    setIsEditing(false);
-    console.warn('handleSaveEdit has not been implemented');
-  }, []);
+  if (isLoading) {
+    return <NoteSkeleton />;
+  }
 
   if (isEditing) {
     return (
       <div className="px-4 py-3">
         <RichTextEditor
           autofocus
-          value={text}
-          // onChange={setValue}
-          className="min-h-[60px] max-h-[200px] resize-none"
+          value={content}
+          onChange={setEditedContent}
+          resisizable={false}
+          className="min-h-15 max-h-c50 resize-none"
           actions={[
-            <Button key="cancel" variant="outline" size="xxs" onClick={handleCancelEdit}>
+            <Button key="cancel" variant="outline" size="xxs" onClick={handleCancelEditing}>
               {t('common.cancel')}
             </Button>,
-            <Button key="save" size="xxs" onClick={handleSaveEdit} disabled={text.length === 0}>
+            <Button key="save" size="xxs" onClick={handleSaveEdit} disabled={isEditorHasEmptyContent(editedContent)}>
               {t('common.save')}
             </Button>,
           ]}
@@ -84,19 +124,19 @@ function Note({ user, createdAt, updatedAt, text, isOwner }: NoteProps) {
   return (
     <div className="flex gap-3 px-4 py-3">
       <div className="shrink-0">
-        <SingleAvatar user={user} size="md" />
+        <SingleAvatar user={{ id: user_id, name: user_name }} size="md" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-foreground truncate">{user.name}</span>
+          <span className="text-sm font-semibold text-foreground truncate">{user_name}</span>
           <span className="text-sm font-normal text-muted-foreground whitespace-nowrap">
-            {formatDate(createdAt, t('common.date'))}
-            {updatedAt && (
+            {formatRelativeByCurrentTime(t, created_at)}
+            {created_at !== updated_at && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="ml-1 cursor-default text-muted-foreground/70">{t('notes.variant.edited')}</span>
                 </TooltipTrigger>
-                <TooltipContent>{formatDate(updatedAt, t('common.date'))}</TooltipContent>
+                <TooltipContent>{formatRelativeByCurrentTime(t, updated_at)}</TooltipContent>
               </Tooltip>
             )}
           </span>
@@ -108,7 +148,7 @@ function Note({ user, createdAt, updatedAt, text, isOwner }: NoteProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleEdit}>{t('common.edit')}</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleActiveEditing}>{t('common.edit')}</DropdownMenuItem>
                 <DropdownMenuItem className="text-destructive" onClick={handleDelete}>
                   {t('common.delete')}
                 </DropdownMenuItem>
@@ -116,7 +156,7 @@ function Note({ user, createdAt, updatedAt, text, isOwner }: NoteProps) {
             </DropdownMenu>
           )}
         </div>
-        <RichTextViewer value={text} />
+        <RichTextViewer value={content} />
       </div>
     </div>
   );

@@ -34,12 +34,10 @@ function NotesPopover({ hasNotes, ...props }: NotesPopoverProps) {
               </Button>
             </PopoverTrigger>
           </TooltipTrigger>
-          <TooltipContent>
-            {hasNotes ? t('notes.variant.tooltip.view') : t('note.variant.comments.tooltip.add')}
-          </TooltipContent>
+          <TooltipContent>{hasNotes ? t('notes.variant.tooltip.view') : t('notes.variant.tooltip.add')}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <PopoverContent align="start" className="w-[420px] p-0 gap-0 flex flex-col max-h-[520px]">
+      <PopoverContent align="start" className="w-105 p-0 gap-0 flex flex-col max-h-130">
         <NotesContainer {...props} />
       </PopoverContent>
     </Popover>

@@ -1,8 +1,12 @@
 {
   "common": {
-    "date": "yyyy-MM-dd",
-    "time": "hh:mm a",
-    "datetime": "{{date}} at {{time}}",
+    "date": {
+      "hour": "h:mm a",
+      "month_day_hour": "MMMM d, h:mm a",
+      "year_month_day": "yyyy-MM-dd",
+      "year_month_day_hour": "MMMM d yyyy, h:mm a",
+      "year_month_day_at_hour": "{{date}} at {{time}}"
+    },
     "empty_section": "No {{title}} data reported",
     "unspecified": "Unspecified",
     "no_data_available": "No data available",

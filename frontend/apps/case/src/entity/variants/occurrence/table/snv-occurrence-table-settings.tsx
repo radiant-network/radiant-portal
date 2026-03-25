@@ -1,6 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
-import { ClipboardList } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
@@ -22,6 +21,7 @@ import { Badge } from '@/components/base/shadcn/badge';
 import HgvsgCell from './cells/hgvsg-cell';
 import InterpretationCell from './cells/interpretation-cell';
 import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
+import VariantNoteCell from './cells/variant-note-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
@@ -36,22 +36,6 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
     //   enablePinning: false,
     //   enableResizing: false,
     // },
-    // lightning icon
-    columnHelper.accessor(row => row, {
-      id: 'clinical_interpretation',
-      cell: info => <InterpretationCell occurrence={info.getValue()} />,
-      header: () => (
-        <div className="flex justify-center">
-          <TooltipHeader tooltip={t('variant.headers.clinical_interpretation')} iconOnly>
-            <ClipboardList size={16} />
-          </TooltipHeader>
-        </div>
-      ),
-      size: 48,
-      enablePinning: false,
-      enableResizing: false,
-      enableSorting: false,
-    }),
     // Variant
     columnHelper.accessor(row => row.hgvsg, {
       id: 'hgvsg',
@@ -59,6 +43,21 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
       header: t('variant.headers.hgvsg'),
       size: 70,
       minSize: 40,
+    }),
+    // interpretation and note cell
+    columnHelper.accessor(row => row, {
+      id: 'row-info',
+      cell: info => (
+        <div className="flex items-center gap-1">
+          <InterpretationCell occurrence={info.getValue()} />
+          <VariantNoteCell occurrence={info.getValue()} />
+        </div>
+      ),
+      header: () => null,
+      size: 68,
+      enablePinning: false,
+      enableResizing: false,
+      enableSorting: false,
     }),
     // Gene
     columnHelper.accessor(row => row.symbol, {
@@ -256,12 +255,6 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
 }
 
 const defaultSNVSettings = createColumnSettings([
-  {
-    id: 'row_expand',
-    visible: true,
-    fixed: true,
-    pinningPosition: 'left',
-  },
   // TODO: To be enabled when row selection function are implemented
   // {
   //   id: 'row_selection',
@@ -270,18 +263,17 @@ const defaultSNVSettings = createColumnSettings([
   //   pinningPosition: 'left',
   // },
   {
-    id: 'clinical_interpretation',
-    visible: true,
-    fixed: true,
-    pinningPosition: 'left',
-    label: 'variant.headers.clinical_interpretation',
-    additionalFields: ['transcript_id', 'has_interpretation'],
-  },
-  {
     id: 'hgvsg',
     visible: true,
     pinningPosition: 'left',
     label: 'variant.headers.hgvsg',
+  },
+  {
+    id: 'row-info',
+    visible: true,
+    fixed: true,
+    pinningPosition: 'left',
+    additionalFields: ['transcript_id', 'has_interpretation'],
   },
   {
     id: 'symbol',
@@ -375,4 +367,4 @@ const defaultSNVSettings = createColumnSettings([
   },
 ]);
 
-export { getSNVOccurrenceColumns, defaultSNVSettings };
+export { defaultSNVSettings, getSNVOccurrenceColumns };

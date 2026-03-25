@@ -15,12 +15,12 @@ type DateTimeProps = {
  */
 function DateTime({ date }: DateTimeProps) {
   const { t } = useI18n();
-  const formattedDate = formatDate(date, t('common.date'));
-  const formattedTime = formatDate(date, t('common.time'));
+  const formattedDate = formatDate(date, t('common.date.year_month_day'));
+  const formattedTime = formatDate(date, t('common.date.hour'));
 
   return (
     <span>
-      {t('common.datetime', {
+      {t('common.date.year_month_day_at_hour', {
         date: formattedDate,
         time: formattedTime,
       })}
