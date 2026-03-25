@@ -1189,6 +1189,8 @@ components:
             type: string
           type: array
           uniqueItems: false
+        task_id:
+          type: integer
         type:
           type: string
       required:
@@ -1199,6 +1201,7 @@ components:
       - name
       - seq_id
       - start
+      - task_id
       - type
       type: object
     GermlineSNVOccurrence:

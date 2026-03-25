@@ -33,6 +33,7 @@ Name | Type | Description | Notes
 **svlen** | **int** |  | [optional] 
 **svtype** | **str** |  | [optional] 
 **symbol** | **List[str]** |  | [optional] 
+**task_id** | **int** |  | 
 **type** | **str** |  | 
 
 ## Example
