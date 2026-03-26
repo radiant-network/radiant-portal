@@ -13,7 +13,7 @@ func Test_CreateOccurrenceNote(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 		note := types.OccurrenceNote{
-			CaseID:       1,
+			CaseID:       2,
 			SeqID:        1,
 			TaskID:       1,
 			OccurrenceID: "10000",
@@ -27,7 +27,7 @@ func Test_CreateOccurrenceNote(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.NotNil(t, created) {
 			assert.NotEmpty(t, created.ID)
-			assert.Equal(t, 1, created.CaseID)
+			assert.Equal(t, 2, created.CaseID)
 			assert.Equal(t, 1, created.SeqID)
 			assert.Equal(t, 1, created.TaskID)
 			assert.Equal(t, "10000", created.OccurrenceID)
@@ -45,7 +45,7 @@ func Test_GetByOccurrence(t *testing.T) {
 		repo := NewOccurrenceNotesRepository(db)
 
 		note1 := types.OccurrenceNote{
-			CaseID:       1,
+			CaseID:       2,
 			SeqID:        1,
 			TaskID:       1,
 			OccurrenceID: "10000",
@@ -54,7 +54,7 @@ func Test_GetByOccurrence(t *testing.T) {
 			Content:      "First note",
 		}
 		note2 := types.OccurrenceNote{
-			CaseID:       1,
+			CaseID:       2,
 			SeqID:        1,
 			TaskID:       1,
 			OccurrenceID: "10000",
@@ -68,7 +68,7 @@ func Test_GetByOccurrence(t *testing.T) {
 		_, err = repo.Create(note2)
 		assert.NoError(t, err)
 
-		notes, err := repo.GetByOccurrence(1, 1, 1, "10000")
+		notes, err := repo.GetByOccurrence(2, 1, 1, "10000")
 
 		assert.NoError(t, err)
 		assert.Len(t, notes, 2)
@@ -93,7 +93,7 @@ func Test_GetByID(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 		note := types.OccurrenceNote{
-			CaseID:       1,
+			CaseID:       2,
 			SeqID:        1,
 			TaskID:       1,
 			OccurrenceID: "10000",
@@ -129,7 +129,7 @@ func Test_UpdateOccurrenceNote(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 		note := types.OccurrenceNote{
-			CaseID:       1,
+			CaseID:       2,
 			SeqID:        1,
 			TaskID:       1,
 			OccurrenceID: "10000",
@@ -155,7 +155,7 @@ func Test_DeleteOccurrenceNote(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 		note := types.OccurrenceNote{
-			CaseID:       1,
+			CaseID:       2,
 			SeqID:        1,
 			TaskID:       1,
 			OccurrenceID: "10000",
@@ -180,7 +180,7 @@ func Test_GetByOccurrence_IgnoresDeletedNotes(t *testing.T) {
 		repo := NewOccurrenceNotesRepository(db)
 
 		note := types.OccurrenceNote{
-			CaseID:       1,
+			CaseID:       2,
 			SeqID:        1,
 			TaskID:       1,
 			OccurrenceID: "10000",
@@ -193,7 +193,7 @@ func Test_GetByOccurrence_IgnoresDeletedNotes(t *testing.T) {
 
 		db.Model(&types.OccurrenceNote{}).Where("id = ?", created.ID).Update("deleted", true)
 
-		notes, err := repo.GetByOccurrence(1, 1, 1, "10000")
+		notes, err := repo.GetByOccurrence(2, 1, 1, "10000")
 
 		assert.NoError(t, err)
 		assert.Empty(t, notes)

@@ -1157,6 +1157,8 @@ components:
           type: number
         gnomad_sn:
           type: integer
+        has_note:
+          type: boolean
         length:
           type: integer
         name:
@@ -1197,6 +1199,7 @@ components:
       - chromosome
       - cnv_id
       - end
+      - has_note
       - length
       - name
       - seq_id
@@ -1244,6 +1247,8 @@ components:
         gnomad_v3_af:
           type: number
         has_interpretation:
+          type: boolean
+        has_note:
           type: boolean
         hgvsg:
           type: string
@@ -1299,6 +1304,7 @@ components:
       - germline_pf_wgs
       - gnomad_v3_af
       - has_interpretation
+      - has_note
       - hgvsg
       - locus
       - locus_id
@@ -2014,6 +2020,8 @@ components:
           type: number
         has_interpretation:
           type: boolean
+        has_note:
+          type: boolean
         hgvsg:
           type: string
         hotspot:
@@ -2063,6 +2071,7 @@ components:
       - germline_pf_wgs
       - gnomad_v3_af
       - has_interpretation
+      - has_note
       - hgvsg
       - hotspot
       - is_canonical

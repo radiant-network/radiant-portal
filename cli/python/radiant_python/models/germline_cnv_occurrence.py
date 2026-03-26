@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
@@ -40,6 +40,7 @@ class GermlineCNVOccurrence(BaseModel):
     gnomad_sc: Optional[StrictInt] = None
     gnomad_sf: Optional[Union[StrictFloat, StrictInt]] = None
     gnomad_sn: Optional[StrictInt] = None
+    has_note: StrictBool
     length: StrictInt
     name: StrictStr
     nb_genes: Optional[StrictInt] = None
@@ -55,7 +56,7 @@ class GermlineCNVOccurrence(BaseModel):
     symbol: Optional[List[StrictStr]] = None
     task_id: StrictInt
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "filter", "gnomad_sc", "gnomad_sf", "gnomad_sn", "length", "name", "nb_genes", "nb_snv", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "type"]
+    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "filter", "gnomad_sc", "gnomad_sf", "gnomad_sn", "has_note", "length", "name", "nb_genes", "nb_snv", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -122,6 +123,7 @@ class GermlineCNVOccurrence(BaseModel):
             "gnomad_sc": obj.get("gnomad_sc"),
             "gnomad_sf": obj.get("gnomad_sf"),
             "gnomad_sn": obj.get("gnomad_sn"),
+            "has_note": obj.get("has_note"),
             "length": obj.get("length"),
             "name": obj.get("name"),
             "nb_genes": obj.get("nb_genes"),

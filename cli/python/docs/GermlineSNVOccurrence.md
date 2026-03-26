@@ -22,6 +22,7 @@ Name | Type | Description | Notes
 **germline_pn_wgs** | **int** |  | [optional] 
 **gnomad_v3_af** | **float** |  | 
 **has_interpretation** | **bool** |  | 
+**has_note** | **bool** |  | 
 **hgvsg** | **str** |  | 
 **is_canonical** | **bool** |  | [optional] 
 **is_mane_plus** | **bool** |  | [optional] 

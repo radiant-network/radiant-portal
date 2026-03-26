@@ -36,6 +36,7 @@ func Test_GermlineCNV_GetOccurrences(t *testing.T) {
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
 			assert.Equal(t, 1, occurrences[0].TaskID)
+			assert.True(t, occurrences[0].HasNote)
 		}
 	})
 }

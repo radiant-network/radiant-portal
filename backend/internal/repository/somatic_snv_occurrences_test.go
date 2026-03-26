@@ -37,6 +37,7 @@ func Test_Somatic_SNV_GetOccurrences(t *testing.T) {
 			assert.Equal(t, 74, occurrences[0].SeqId)
 			assert.Equal(t, 74, occurrences[0].TaskId)
 			assert.False(t, occurrences[0].HasInterpretation)
+			assert.True(t, occurrences[0].HasNote)
 			assert.Equal(t, "hgvsg1", occurrences[0].Hgvsg)
 			assert.Equal(t, "BRAF", occurrences[0].Symbol)
 			assert.Equal(t, "p.Arg19His", occurrences[0].AaChange)

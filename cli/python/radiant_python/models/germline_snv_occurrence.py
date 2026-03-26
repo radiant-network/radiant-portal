@@ -43,6 +43,7 @@ class GermlineSNVOccurrence(BaseModel):
     germline_pn_wgs: Optional[StrictInt] = None
     gnomad_v3_af: Union[StrictFloat, StrictInt]
     has_interpretation: StrictBool
+    has_note: StrictBool
     hgvsg: StrictStr
     is_canonical: Optional[StrictBool] = None
     is_mane_plus: Optional[StrictBool] = None
@@ -61,7 +62,7 @@ class GermlineSNVOccurrence(BaseModel):
     variant_class: StrictStr
     vep_impact: Optional[VepImpact] = None
     zygosity: StrictStr
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "genotype_quality", "germline_pc_wgs", "germline_pf_wgs", "germline_pn_wgs", "gnomad_v3_af", "has_interpretation", "hgvsg", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "genotype_quality", "germline_pc_wgs", "germline_pf_wgs", "germline_pn_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -130,6 +131,7 @@ class GermlineSNVOccurrence(BaseModel):
             "germline_pn_wgs": obj.get("germline_pn_wgs"),
             "gnomad_v3_af": obj.get("gnomad_v3_af"),
             "has_interpretation": obj.get("has_interpretation"),
+            "has_note": obj.get("has_note"),
             "hgvsg": obj.get("hgvsg"),
             "is_canonical": obj.get("is_canonical"),
             "is_mane_plus": obj.get("is_mane_plus"),

@@ -2256,6 +2256,12 @@ export interface GermlineCNVOccurrence {
     'gnomad_sn'?: number;
     /**
      * 
+     * @type {boolean}
+     * @memberof GermlineCNVOccurrence
+     */
+    'has_note': boolean;
+    /**
+     * 
      * @type {number}
      * @memberof GermlineCNVOccurrence
      */
@@ -2447,6 +2453,12 @@ export interface GermlineSNVOccurrence {
      * @memberof GermlineSNVOccurrence
      */
     'has_interpretation': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
+    'has_note': boolean;
     /**
      * 
      * @type {string}
@@ -4128,6 +4140,12 @@ export interface SomaticSNVOccurrence {
      * @memberof SomaticSNVOccurrence
      */
     'has_interpretation': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SomaticSNVOccurrence
+     */
+    'has_note': boolean;
     /**
      * 
      * @type {string}

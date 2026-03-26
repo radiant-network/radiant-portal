@@ -34,6 +34,7 @@ class SomaticSNVOccurrence(BaseModel):
     germline_pf_wgs: Union[StrictFloat, StrictInt]
     gnomad_v3_af: Union[StrictFloat, StrictInt]
     has_interpretation: StrictBool
+    has_note: StrictBool
     hgvsg: StrictStr
     hotspot: StrictBool
     is_canonical: StrictBool
@@ -52,7 +53,7 @@ class SomaticSNVOccurrence(BaseModel):
     variant_class: StrictStr
     vep_impact: VepImpact
     zygosity: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "clinvar", "germline_pc_wgs", "germline_pf_wgs", "gnomad_v3_af", "has_interpretation", "hgvsg", "hotspot", "is_canonical", "is_mane_plus", "is_mane_select", "locus_id", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_pc_tn_wgs", "somatic_pf_tn_wgs", "somatic_quality", "symbol", "task_id", "variant_class", "vep_impact", "zygosity"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "clinvar", "germline_pc_wgs", "germline_pf_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "hotspot", "is_canonical", "is_mane_plus", "is_mane_select", "locus_id", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_pc_tn_wgs", "somatic_pf_tn_wgs", "somatic_quality", "symbol", "task_id", "variant_class", "vep_impact", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -112,6 +113,7 @@ class SomaticSNVOccurrence(BaseModel):
             "germline_pf_wgs": obj.get("germline_pf_wgs"),
             "gnomad_v3_af": obj.get("gnomad_v3_af"),
             "has_interpretation": obj.get("has_interpretation"),
+            "has_note": obj.get("has_note"),
             "hgvsg": obj.get("hgvsg"),
             "hotspot": obj.get("hotspot"),
             "is_canonical": obj.get("is_canonical"),

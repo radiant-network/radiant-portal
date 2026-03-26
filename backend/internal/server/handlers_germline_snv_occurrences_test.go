@@ -34,6 +34,7 @@ func (m *MockRepository) GetOccurrences(int, int, types.ListQuery) ([]types.Germ
 			Chromosome:         "1",
 			Start:              1,
 			HasInterpretation:  true,
+			HasNote:            true,
 			MaxImpactScore:     4,
 		},
 	}, nil
@@ -130,6 +131,7 @@ func Test_OccurrencesListHandler(t *testing.T) {
 		"genotype_quality": 1,
 		"gnomad_v3_af":0.1,
 		"has_interpretation": true,
+		"has_note": true,
 		"max_impact_score":4,
 		"exomiser_moi": "",
 		"exomiser_acmg_classification": "",
