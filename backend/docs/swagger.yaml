@@ -1245,6 +1245,8 @@ components:
           type: number
         has_interpretation:
           type: boolean
+        has_note:
+          type: boolean
         hgvsg:
           type: string
         is_canonical:
@@ -1299,6 +1301,7 @@ components:
       - germline_pf_wgs
       - gnomad_v3_af
       - has_interpretation
+      - has_note
       - hgvsg
       - locus
       - locus_id
@@ -2014,6 +2017,8 @@ components:
           type: number
         has_interpretation:
           type: boolean
+        has_note:
+          type: boolean
         hgvsg:
           type: string
         hotspot:
@@ -2063,6 +2068,7 @@ components:
       - germline_pf_wgs
       - gnomad_v3_af
       - has_interpretation
+      - has_note
       - hgvsg
       - hotspot
       - is_canonical

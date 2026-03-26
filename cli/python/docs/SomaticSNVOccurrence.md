@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **germline_pf_wgs** | **float** |  | 
 **gnomad_v3_af** | **float** |  | 
 **has_interpretation** | **bool** |  | 
+**has_note** | **bool** |  | 
 **hgvsg** | **str** |  | 
 **hotspot** | **bool** |  | 
 **is_canonical** | **bool** |  | 

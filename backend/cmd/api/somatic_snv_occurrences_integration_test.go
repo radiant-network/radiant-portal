@@ -78,7 +78,7 @@ func testSomaticSNVStatistics(t *testing.T, data string, body string, expected s
 }
 
 func Test_Somatic_SNV_List(t *testing.T) {
-	testSomaticSNVList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "clinvar":["Benign", "Pathogenic"], "germline_pc_wgs":3, "germline_pf_wgs":0.99, "gnomad_v3_af":0.001, "has_interpretation":false, "hgvsg":"hgvsg1", "hotspot":true, "is_canonical":true, "is_mane_plus":null, "is_mane_select":true, "locus_id":"1000", "omim_inheritance_code":["code1"], "picked_consequences":["splice acceptor"], "rsnumber":"rs111111111", "seq_id":74, "somatic_pc_tn_wgs":6, "somatic_pf_tn_wgs":0.55, "somatic_quality":null, "symbol":"BRAF", "task_id":74, "variant_class":"class1", "vep_impact":"MODIFIER"}]`)
+	testSomaticSNVList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "clinvar":["Benign", "Pathogenic"], "germline_pc_wgs":3, "germline_pf_wgs":0.99, "gnomad_v3_af":0.001, "has_interpretation":false, "has_note": true, "hgvsg":"hgvsg1", "hotspot":true, "is_canonical":true, "is_mane_plus":null, "is_mane_select":true, "locus_id":"1000", "omim_inheritance_code":["code1"], "picked_consequences":["splice acceptor"], "rsnumber":"rs111111111", "seq_id":74, "somatic_pc_tn_wgs":6, "somatic_pf_tn_wgs":0.55, "somatic_quality":null, "symbol":"BRAF", "task_id":74, "variant_class":"class1", "vep_impact":"MODIFIER"}]`)
 }
 
 func Test_Somatic_SNV_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
@@ -103,6 +103,7 @@ func Test_Somatic_SNV_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *te
 				"germline_pf_wgs":0.99, 
 				"gnomad_v3_af":0.001, 
 				"has_interpretation":false, 
+				"has_note":true, 
 				"hgvsg":"hgvsg1", 
 				"hotspot": true, 
 				"is_canonical":true, 

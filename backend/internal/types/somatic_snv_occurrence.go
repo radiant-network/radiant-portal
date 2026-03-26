@@ -5,6 +5,7 @@ type SomaticSNVOccurrence struct {
 	SeqId               int               `json:"seq_id" validate:"required"`
 	TaskId              int               `json:"task_id" validate:"required"`
 	HasInterpretation   bool              `json:"has_interpretation" validate:"required"`
+	HasNote             bool              `json:"has_note" validate:"required"`
 	Hgvsg               string            `json:"hgvsg" validate:"required"`
 	Symbol              string            `json:"symbol" validate:"required"`
 	AaChange            string            `json:"aa_change" validate:"required"`

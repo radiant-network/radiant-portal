@@ -2449,6 +2449,12 @@ export interface GermlineSNVOccurrence {
     'has_interpretation': boolean;
     /**
      * 
+     * @type {boolean}
+     * @memberof GermlineSNVOccurrence
+     */
+    'has_note': boolean;
+    /**
+     * 
      * @type {string}
      * @memberof GermlineSNVOccurrence
      */
@@ -4128,6 +4134,12 @@ export interface SomaticSNVOccurrence {
      * @memberof SomaticSNVOccurrence
      */
     'has_interpretation': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SomaticSNVOccurrence
+     */
+    'has_note': boolean;
     /**
      * 
      * @type {string}

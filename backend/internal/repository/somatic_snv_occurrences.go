@@ -42,6 +42,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, 
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
 	columns = append(columns, "i.locus_id IS NOT NULL AS has_interpretation")
+	columns = append(columns, "note.occurrence_id IS NOT NULL AS has_note")
 	columns = append(columns, "v.locus")
 
 	utils.AddLimitAndSort(tx, userQuery)
@@ -49,12 +50,14 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, 
 	// SELECT s_snv_o.locus_id, s_snv_o.quality, s_snv_o.ad_ratio, ...., v.variant_class, v.hgvsg..., i.locus_id IS NOT NULL AS has_interpretation
 	// FROM (somatic__snv__occurrence o, snv__variant v)
 	// 		LEFT JOIN (SELECT DISTINCT locus_id, sequencing_id FROM radiant_jdbc.public.interpretation_somatic) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ?
+	// 		LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM radiant_jdbc.public.occurrence_note) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?
 	// WHERE s_snv_o.locus_id in (
 	//	SELECT s_snv_o.locus_id FROM somatic__snv__occurrence JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
 	// ) AND s_snv_o.tumor_seq_id=? AND s_snv_o.part=? AND v.locus_id=s_snv_o.locus_id ORDER BY ad_ratio DESC
 	tx = tx.Select("s_snv_o.locus_id")
 	tx = r.db.Table("(somatic__snv__occurrence s_snv_o, snv__variant v)").
 		Joins("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM radiant_jdbc.public.interpretation_somatic) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
+		Joins("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM radiant_jdbc.public.occurrence_note) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?", seqId, caseId).
 		Select(columns).
 		Where("s_snv_o.tumor_seq_id = ? and part=? and v.locus_id = s_snv_o.locus_id and s_snv_o.locus_id in (?)", seqId, part, tx)
 
