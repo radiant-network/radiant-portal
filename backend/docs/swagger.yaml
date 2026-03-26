@@ -963,6 +963,8 @@ components:
             type: integer
           type: array
           uniqueItems: false
+        note_count:
+          type: integer
         omim_conditions:
           items:
             $ref: '#/components/schemas/OmimGenePanel'
@@ -1016,6 +1018,7 @@ components:
       - hgvsg
       - locus
       - locus_id
+      - note_count
       - picked_consequences
       type: object
     ExternalFrequencies:

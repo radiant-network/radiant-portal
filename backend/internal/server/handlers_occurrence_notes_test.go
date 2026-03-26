@@ -72,6 +72,10 @@ func (m *MockRepository) Delete(id string) error {
 	return nil
 }
 
+func (m *MockRepository) CountByOccurrence(int, int, int, string) (int, error) {
+	return 5, nil
+}
+
 func (m *MockRepository) GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error) {
 	if occurrenceID == "99999" {
 		return nil, fmt.Errorf("mock get error")

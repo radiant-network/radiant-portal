@@ -104,6 +104,8 @@ type ExpandedGermlineSNVOccurrence = struct {
 	InterpretationClassificationCode   string                   `json:"-"`
 	InterpretationClassification       string                   `json:"interpretation_classification,omitempty"`
 	EnsemblGeneId                      string                   `json:"ensembl_gene_id,omitempty"`
+	TaskId                             int                      `json:"-"`
+	NoteCount                          int                      `json:"note_count" validate:"required"`
 } // @name ExpandedGermlineSNVOccurrence
 
 var GermlineSNVOccurrenceTable = Table{

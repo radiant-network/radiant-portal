@@ -175,6 +175,37 @@ func Test_DeleteOccurrenceNote(t *testing.T) {
 	})
 }
 
+func Test_CountByOccurrence(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewOccurrenceNotesRepository(db)
+
+		_, err := repo.Create(types.OccurrenceNote{CaseID: 2, SeqID: 1, TaskID: 1, OccurrenceID: "10000", UserID: "11111111-1111-1111-1111-111111111111", UserName: "John Doe", Content: "Note 1"})
+		assert.NoError(t, err)
+		_, err = repo.Create(types.OccurrenceNote{CaseID: 2, SeqID: 1, TaskID: 1, OccurrenceID: "10000", UserID: "11111111-1111-1111-1111-111111111111", UserName: "John Doe", Content: "Note 2"})
+		assert.NoError(t, err)
+
+		count, err := repo.CountByOccurrence(2, 1, 1, "10000")
+
+		assert.NoError(t, err)
+		assert.Equal(t, 2, count)
+	})
+}
+
+func Test_CountByOccurrence_IgnoresDeletedNotes(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewOccurrenceNotesRepository(db)
+
+		created, err := repo.Create(types.OccurrenceNote{CaseID: 2, SeqID: 1, TaskID: 1, OccurrenceID: "10000", UserID: "11111111-1111-1111-1111-111111111111", UserName: "John Doe", Content: "Deleted note"})
+		assert.NoError(t, err)
+		db.Model(&types.OccurrenceNote{}).Where("id = ?", created.ID).Update("deleted", true)
+
+		count, err := repo.CountByOccurrence(2, 1, 1, "10000")
+
+		assert.NoError(t, err)
+		assert.Equal(t, 0, count)
+	})
+}
+
 func Test_GetByOccurrence_IgnoresDeletedNotes(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)

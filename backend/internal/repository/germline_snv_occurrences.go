@@ -92,7 +92,8 @@ func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId
 
 func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(caseId int, seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error) {
 	tx := r.db.Table("germline__snv__occurrence g_snv_o")
-	tx = tx.Joins("JOIN snv__consequence c ON g_snv_o.locus_id=c.locus_id AND g_snv_o.seq_id = ? AND g_snv_o.locus_id = ? AND c.is_picked = true", seqId, locusId)
+	tx = tx.Where("g_snv_o.seq_id = ? AND g_snv_o.locus_id = ?", seqId, locusId)
+	tx = tx.Joins("JOIN snv__consequence c ON g_snv_o.locus_id=c.locus_id AND c.is_picked = true")
 	tx = tx.Joins("JOIN snv__variant v ON g_snv_o.locus_id=v.locus_id")
 	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.interpretation_germline i ON i.locus_id=g_snv_o.locus_id AND i.sequencing_id = g_snv_o.seq_id AND i.transcript_id = v.transcript_id AND i.case_id = ?", fmt.Sprintf("%d", caseId))
 	tx = tx.Joins("LEFT JOIN ensembl_gene g ON g.name=v.symbol")
@@ -103,10 +104,11 @@ func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(caseId int, seq
 		"c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, g_snv_o.zygosity, g_snv_o.transmission_mode, g_snv_o.parental_origin, " +
 		"g_snv_o.father_calls, g_snv_o.mother_calls, g_snv_o.info_qd, g_snv_o.ad_alt, g_snv_o.ad_total, g_snv_o.filter, g_snv_o.gq," +
 		"g_snv_o.exomiser_gene_combined_score, g_snv_o.exomiser_acmg_evidence, g_snv_o.exomiser_acmg_classification, v.germline_pc_wgs_affected, v.germline_pn_wgs_affected, v.germline_pf_wgs_affected, " +
-		"v.germline_pc_wgs_not_affected, v.germline_pn_wgs_not_affected, v.germline_pf_wgs_not_affected, i.classification as interpretation_classification_code, g.gene_id as ensembl_gene_id")
+		"v.germline_pc_wgs_not_affected, v.germline_pn_wgs_not_affected, v.germline_pf_wgs_not_affected, i.classification as interpretation_classification_code, g.gene_id as ensembl_gene_id, " +
+		"g_snv_o.task_id")
 
 	var expandedOccurrence ExpandedGermlineSNVOccurrence
-	if err := tx.First(&expandedOccurrence).Error; err != nil {
+	if err := tx.Take(&expandedOccurrence).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching expanded occurrence: %w", err)
 		} else {

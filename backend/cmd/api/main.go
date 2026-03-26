@@ -153,7 +153,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/list", server.OccurrencesGermlineSNVListHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repoGermlineSNVOccurrences, repoFacets))
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
-	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoPostgres.Interpretations))
+	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoPostgres.Interpretations, repoOccurrenceNotes))
 	occurrencesGermlineSNVGroup.GET("/dictionary", server.GetGermlineSNVDictionary(repoFacets))
 
 	occurrencesSomaticSNVGroup := occurrencesSomaticGroup.Group("/snv")

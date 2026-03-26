@@ -1873,6 +1873,12 @@ export interface ExpandedGermlineSNVOccurrence {
     'mother_calls'?: Array<number>;
     /**
      * 
+     * @type {number}
+     * @memberof ExpandedGermlineSNVOccurrence
+     */
+    'note_count': number;
+    /**
+     * 
      * @type {Array<OmimGenePanel>}
      * @memberof ExpandedGermlineSNVOccurrence
      */

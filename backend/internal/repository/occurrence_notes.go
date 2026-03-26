@@ -18,6 +18,7 @@ type OccurrenceNotesDAO interface {
 	Create(note types.OccurrenceNote) (*types.OccurrenceNote, error)
 	GetByID(id string) (*types.OccurrenceNote, error)
 	GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error)
+	CountByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) (int, error)
 	Update(id string, content string) (*types.OccurrenceNote, error)
 	Delete(id string) error
 }
@@ -69,6 +70,18 @@ func (r *OccurrenceNotesRepository) Delete(id string) error {
 		return fmt.Errorf("error deleting occurrence note: %w", err)
 	}
 	return nil
+}
+
+// CountByOccurrence returns the number of non-deleted notes for the given occurrence.
+func (r *OccurrenceNotesRepository) CountByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) (int, error) {
+	var count int64
+	if err := r.db.Model(&types.OccurrenceNote{}).
+		Where("case_id = ? AND seq_id = ? AND task_id = ? AND occurrence_id = ? AND deleted = false",
+			caseID, seqID, taskID, occurrenceID).
+		Count(&count).Error; err != nil {
+		return 0, fmt.Errorf("error counting occurrence notes: %w", err)
+	}
+	return int(count), nil
 }
 
 // GetByOccurrence returns all non-deleted notes for the given occurrence, ordered by created_at desc.

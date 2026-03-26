@@ -687,6 +687,7 @@ func Test_Germline_SNV_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, "pathogenic", expandedOccurrence.InterpretationClassification)
 		assert.Equal(t, "BRAF", expandedOccurrence.Symbol)
 		assert.Equal(t, "ENSG00000157764", expandedOccurrence.EnsemblGeneId)
+		assert.Equal(t, 1, expandedOccurrence.TaskId)
 	})
 }
 
