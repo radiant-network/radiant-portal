@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Security
+
+**Never read or access any `.env` files** in this repository. These files may contain secrets and credentials.
+
 ## Overview
 
 Radiant Portal — a medical/genomic data platform. Monorepo containing a Go REST API backend, a React/TypeScript frontend monorepo, Cypress e2e tests, a Docusaurus documentation site, and design assets.
