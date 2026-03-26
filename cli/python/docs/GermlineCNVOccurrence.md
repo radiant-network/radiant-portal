@@ -20,6 +20,7 @@ Name | Type | Description | Notes
 **gnomad_sc** | **int** |  | [optional] 
 **gnomad_sf** | **float** |  | [optional] 
 **gnomad_sn** | **int** |  | [optional] 
+**has_note** | **bool** |  | 
 **length** | **int** |  | 
 **name** | **str** |  | 
 **nb_genes** | **int** |  | [optional] 

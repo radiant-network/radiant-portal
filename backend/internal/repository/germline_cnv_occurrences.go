@@ -33,12 +33,13 @@ func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRep
 	return &GermlineCNVOccurrencesRepository{db: db}
 }
 
-func (r *GermlineCNVOccurrencesRepository) GetOccurrences(_ int, seqId int, userQuery types.ListQuery) ([]GermlineCNVOccurrence, error) {
+func (r *GermlineCNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, userQuery types.ListQuery) ([]GermlineCNVOccurrence, error) {
 	var occurrences []GermlineCNVOccurrence
 	tx, err := r.prepareQuery(seqId, userQuery)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
+	tx = tx.Joins("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM radiant_jdbc.public.occurrence_note) note ON note.occurrence_id = cnvo.cnv_id AND note.task_id = cnvo.task_id AND note.seq_id = ? AND note.case_id = ?", seqId, caseId)
 	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 		// We group by name to avoid duplicates when joining with gene panels tables
 		// and use any_value for other fields to satisfy sql requirements
@@ -55,6 +56,7 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(_ int, seqId int, user
 
 			return fmt.Sprintf("any_value(%s.%s) as %s", field.Table.Alias, field.Name, field.GetAlias())
 		})
+		columns = append(columns, "any_value(note.occurrence_id IS NOT NULL) AS has_note")
 
 		tx = tx.Select(columns)
 		// We dont use AdddSort because we want to sort on aggregated fields
@@ -67,6 +69,7 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(_ int, seqId int, user
 		var columns = sliceutils.Map(userQuery.SelectedFields(), func(field types.Field, index int, slice []types.Field) string {
 			return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 		})
+		columns = append(columns, "note.occurrence_id IS NOT NULL AS has_note")
 		tx = tx.Select(columns)
 		utils.AddSort(tx, userQuery)
 	}
@@ -104,7 +107,7 @@ func (r *GermlineCNVOccurrencesRepository) prepareQuery(seqId int, userQuery typ
 
 	tx := r.db.Table(
 		fmt.Sprintf("%s %s", types.GermlineCNVOccurrenceTable.Name, types.GermlineCNVOccurrenceTable.Alias),
-	).Where("seq_id = ? and part=?", seqId, part)
+	).Where("cnvo.seq_id = ? and cnvo.part=?", seqId, part)
 
 	if userQuery != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 		selectedPanelsField := userQuery.GetFieldsFromTables(types.GenePanelsTables...)

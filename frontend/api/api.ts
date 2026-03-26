@@ -2256,6 +2256,12 @@ export interface GermlineCNVOccurrence {
     'gnomad_sn'?: number;
     /**
      * 
+     * @type {boolean}
+     * @memberof GermlineCNVOccurrence
+     */
+    'has_note': boolean;
+    /**
+     * 
      * @type {number}
      * @memberof GermlineCNVOccurrence
      */
