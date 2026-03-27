@@ -228,9 +228,8 @@ func Test_GetExpandedOccurrenceHandler_withExomiserACMGCounts(t *testing.T) {
 	repo := &MockRepository{}
 	exomiserRepo := &MockExomiserRepository{}
 	interpretationRepo := &MockRepository{}
-	notesRepo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo, notesRepo))
+	router.GET("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
 
 	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/1/1/1000/expanded", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -238,19 +237,19 @@ func Test_GetExpandedOccurrenceHandler_withExomiserACMGCounts(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"cadd_phred":0.1, 
+		"cadd_phred":0.1,
 		"cadd_score":0.1,
 		"chromosome":"1",
 		"ensembl_gene_id": "ENSG00000157764",
 		"exomiser_acmg_classification_counts":{"Benign":2, "Pathogenic":1},
 		"fathmm_pred":"T",
-		"fathmm_score":0.1, 
-		"filter":"PASS", 
-		"genotype_quality":100, 
-		"gnomad_loeuf":0.1, 
-		"gnomad_pli":0.1, 
-		"gnomad_v3_af":0.01, 
-		"hgvsg":"hgvsg1", 
+		"fathmm_score":0.1,
+		"filter":"PASS",
+		"genotype_quality":100,
+		"gnomad_loeuf":0.1,
+		"gnomad_pli":0.1,
+		"gnomad_v3_af":0.01,
+		"hgvsg":"hgvsg1",
 		"interpretation_classification": "pathogenic",
 		"interpretation_classification_counts":{"benign":2, "pathogenic":1},
 		"is_canonical":false,
@@ -263,16 +262,15 @@ func Test_GetExpandedOccurrenceHandler_withExomiserACMGCounts(t *testing.T) {
 		"picked_consequences":["splice acceptor"],
 		"polyphen2_hvar_pred": "D",
 		"polyphen2_hvar_score":0.991,
-		"revel_score":0.1, 
-		"sift_pred":"T", 
-		"sift_score":0.1, 
-		"spliceai_ds":0.1, 
+		"revel_score":0.1,
+		"sift_pred":"T",
+		"sift_score":0.1,
+		"spliceai_ds":0.1,
 		"spliceai_type":["AG"],
 		"symbol": "BRAF",
 		"transcript_id": "T001",
 		"exomiser_acmg_evidence": null,
-		"exomiser_gene_combined_score": 0,
-		"note_count": 5
+		"exomiser_gene_combined_score": 0
 	}`, w.Body.String())
 }
 
@@ -280,9 +278,8 @@ func Test_GetExpandedOccurrenceHandler_emptyExomiserACMGCounts(t *testing.T) {
 	repo := &MockRepository{}
 	exomiserRepo := &MockEmptyExomiserRepository{}
 	interpretationRepo := &MockRepository{}
-	notesRepo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo, notesRepo))
+	router.GET("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
 
 	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/1/1/1000/expanded", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -290,18 +287,18 @@ func Test_GetExpandedOccurrenceHandler_emptyExomiserACMGCounts(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"cadd_phred":0.1, 
+		"cadd_phred":0.1,
 		"cadd_score":0.1,
 		"chromosome":"1",
 		"ensembl_gene_id":"ENSG00000157764",
 		"fathmm_pred":"T",
-		"fathmm_score":0.1, 
-		"filter":"PASS", 
-		"genotype_quality":100, 
-		"gnomad_loeuf":0.1, 
-		"gnomad_pli":0.1, 
-		"gnomad_v3_af":0.01, 
-		"hgvsg":"hgvsg1", 
+		"fathmm_score":0.1,
+		"filter":"PASS",
+		"genotype_quality":100,
+		"gnomad_loeuf":0.1,
+		"gnomad_pli":0.1,
+		"gnomad_v3_af":0.01,
+		"hgvsg":"hgvsg1",
 		"interpretation_classification": "pathogenic",
 		"interpretation_classification_counts":{"benign":2, "pathogenic":1},
 		"is_canonical":false,
@@ -314,16 +311,15 @@ func Test_GetExpandedOccurrenceHandler_emptyExomiserACMGCounts(t *testing.T) {
 		"picked_consequences":["splice acceptor"],
 		"polyphen2_hvar_pred": "D",
 		"polyphen2_hvar_score":0.991,
-		"revel_score":0.1, 
-		"sift_pred":"T", 
-		"sift_score":0.1, 
-		"spliceai_ds":0.1, 
+		"revel_score":0.1,
+		"sift_pred":"T",
+		"sift_score":0.1,
+		"spliceai_ds":0.1,
 		"spliceai_type":["AG"],
 		"symbol": "BRAF",
 		"transcript_id": "T001",
 		"exomiser_acmg_evidence": null,
-		"exomiser_gene_combined_score": 0,
-		"note_count": 5
+		"exomiser_gene_combined_score": 0
 	}`, w.Body.String())
 }
 

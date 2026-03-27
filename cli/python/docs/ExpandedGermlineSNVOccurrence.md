@@ -49,7 +49,6 @@ Name | Type | Description | Notes
 **lrt_pred** | **str** |  | [optional] 
 **lrt_score** | **float** |  | [optional] 
 **mother_calls** | **List[int]** |  | [optional] 
-**note_count** | **int** |  | 
 **omim_conditions** | [**List[OmimGenePanel]**](OmimGenePanel.md) |  | [optional] 
 **parental_origin** | **str** |  | [optional] 
 **picked_consequences** | **List[str]** |  | 

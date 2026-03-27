@@ -252,6 +252,19 @@ func Test_GetOccurrenceNotesHandler(t *testing.T) {
 	}]`, w.Body.String())
 }
 
+func Test_GetOccurrenceNoteCountHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/notes/:case_id/:seq_id/:task_id/:occurrence_id/count", GetOccurrenceNoteCountHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/notes/1/2/1/10000/count", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"count": 5}`, w.Body.String())
+}
+
 func Test_GetOccurrenceNotesHandler_EmptyResult(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()

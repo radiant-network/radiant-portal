@@ -2667,6 +2667,38 @@
           "response": []
         },
         {
+          "name": "Count Notes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/notes/1/1/1/10000/count",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "notes",
+                "1",
+                "1",
+                "1",
+                "10000",
+                "count"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Update Note",
           "request": {
             "auth": {

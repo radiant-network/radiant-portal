@@ -1873,12 +1873,6 @@ export interface ExpandedGermlineSNVOccurrence {
     'mother_calls'?: Array<number>;
     /**
      * 
-     * @type {number}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'note_count': number;
-    /**
-     * 
      * @type {Array<OmimGenePanel>}
      * @memberof ExpandedGermlineSNVOccurrence
      */
@@ -8006,6 +8000,56 @@ export class MondoApi extends BaseAPI {
 export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Count all notes associated with an occurrence
+         * @summary Count notes for an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        countOccurrenceNotes: async (caseId: number, seqId: number, taskId: number, occurrenceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('countOccurrenceNotes', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('countOccurrenceNotes', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('countOccurrenceNotes', 'taskId', taskId)
+            // verify required parameter 'occurrenceId' is not null or undefined
+            assertParamExists('countOccurrenceNotes', 'occurrenceId', occurrenceId)
+            const localVarPath = `/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
+                .replace(`{${"occurrence_id"}}`, encodeURIComponent(String(occurrenceId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Soft-delete a note by ID. Only the owner of the note can delete it.
          * @summary Delete a note on an occurrence
          * @param {string} id Note ID
@@ -8188,6 +8232,22 @@ export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = OccurrenceNotesApiAxiosParamCreator(configuration)
     return {
         /**
+         * Count all notes associated with an occurrence
+         * @summary Count notes for an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async countOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.countOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.countOccurrenceNotes']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Soft-delete a note by ID. Only the owner of the note can delete it.
          * @summary Delete a note on an occurrence
          * @param {string} id Note ID
@@ -8254,6 +8314,19 @@ export const OccurrenceNotesApiFactory = function (configuration?: Configuration
     const localVarFp = OccurrenceNotesApiFp(configuration)
     return {
         /**
+         * Count all notes associated with an occurrence
+         * @summary Count notes for an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        countOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+            return localVarFp.countOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Soft-delete a note by ID. Only the owner of the note can delete it.
          * @summary Delete a note on an occurrence
          * @param {string} id Note ID
@@ -8307,6 +8380,21 @@ export const OccurrenceNotesApiFactory = function (configuration?: Configuration
  * @extends {BaseAPI}
  */
 export class OccurrenceNotesApi extends BaseAPI {
+    /**
+     * Count all notes associated with an occurrence
+     * @summary Count notes for an occurrence
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequencing Experiment ID
+     * @param {number} taskId Task ID
+     * @param {string} occurrenceId Occurrence ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrenceNotesApi
+     */
+    public countOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceNotesApiFp(this.configuration).countOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Soft-delete a note by ID. Only the owner of the note can delete it.
      * @summary Delete a note on an occurrence

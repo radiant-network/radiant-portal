@@ -387,9 +387,8 @@ func assertGetExpandedOccurrence(t *testing.T, data string, caseId int, seqId in
 		exomiserRepo := repository.NewExomiserRepository(starrocks)
 		pubmedClient := &MockExternalClient{}
 		interpretationRepo := repository.NewInterpretationsRepository(postgres, pubmedClient)
-		noteRepo := repository.NewOccurrenceNotesRepository(postgres)
 		router := gin.Default()
-		router.GET("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo, noteRepo))
+		router.GET("/occurrences/germline/snv/:case_id/:seq_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/germline/snv/%d/%d/%d/expanded", caseId, seqId, locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
@@ -428,8 +427,7 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		"is_mane_select":true, 
 		"locus":"locus1", 
 		"locus_id":"1000", 
-		"is_mane_select":true, 
-		"note_count": 2,
+		"is_mane_select":true,
 		"omim_conditions":[
 			{"inheritance_code":["AD"], "omim_phenotype_id":"613706", "panel":"Noonan syndrome 7"}, 
 			{"inheritance_code":["AD"], "omim_phenotype_id":"613707", "panel":"LEOPARD syndrome 3"}

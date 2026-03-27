@@ -277,7 +277,7 @@ func OccurrencesGermlineSNVStatisticsHandler(repo repository.GermlineSNVOccurren
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /occurrences/germline/snv/{case_id}/{seq_id}/{locus_id}/expanded [get]
-func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO, exomiserRepo repository.ExomiserDAO, interpretationRepo repository.InterpretationsDAO, notesRepo repository.OccurrenceNotesDAO) gin.HandlerFunc {
+func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO, exomiserRepo repository.ExomiserDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errSeq := strconv.Atoi(c.Param("case_id"))
 		if errSeq != nil {
@@ -323,13 +323,6 @@ func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO,
 		if interpretationClassificationCounts != nil {
 			expandedOccurrence.InterpretationClassificationCounts = interpretationClassificationCounts
 		}
-
-		noteCount, err := notesRepo.CountByOccurrence(caseId, seqId, expandedOccurrence.TaskId, strconv.Itoa(locusId))
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		expandedOccurrence.NoteCount = noteCount
 
 		c.JSON(http.StatusOK, expandedOccurrence)
 	}
