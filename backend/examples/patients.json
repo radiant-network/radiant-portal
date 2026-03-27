@@ -1,0 +1,34 @@
+{
+  "patients": [
+    {
+      "submitter_patient_id": "MRN-001",
+      "submitter_patient_id_type": "MRN",
+      "first_name": "Alex",
+      "last_name": "Smith",
+      "date_of_birth": "2015-06-15",
+      "sex_code": "male",
+      "life_status_code": "alive",
+      "patient_organization_code": "CHUSJ"
+    },
+    {
+      "submitter_patient_id": "MRN-002",
+      "submitter_patient_id_type": "MRN",
+      "first_name": "Marie",
+      "last_name": "Smith",
+      "date_of_birth": "1985-03-22",
+      "sex_code": "female",
+      "life_status_code": "alive",
+      "patient_organization_code": "CHUSJ"
+    },
+    {
+      "submitter_patient_id": "MRN-003",
+      "submitter_patient_id_type": "MRN",
+      "first_name": "Jean",
+      "last_name": "Smith",
+      "date_of_birth": "1983-11-08",
+      "sex_code": "male",
+      "life_status_code": "alive",
+      "patient_organization_code": "CHUSJ"
+    }
+  ]
+}

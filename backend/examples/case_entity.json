@@ -1,0 +1,150 @@
+{
+  "case_id": 1,
+  "case_type": "germline",
+  "analysis_catalog_code": "WGA",
+  "analysis_catalog_name": "Whole Genome Analysis",
+  "case_category_code": "postnatal",
+  "case_category_name": "Postnatal",
+  "created_on": "2024-01-15T09:00:00Z",
+  "updated_on": "2024-01-15T09:00:00Z",
+  "prescriber": "Dr. Dupont",
+  "ordering_organization_code": "CHUSJ",
+  "ordering_organization_name": "CHU Sainte-Justine",
+  "diagnosis_lab_code": "CQGC",
+  "diagnosis_lab_name": "Quebec Clinical Genomic Center",
+  "priority_code": "routine",
+  "status_code": "active",
+  "primary_condition_id": "MONDO:0700092",
+  "primary_condition_name": "Neurodevelopmental disorder",
+  "note": "Germline trio analysis for epilepsy workup",
+  "project_code": "N1",
+  "project_name": "Project N1",
+  "sequencing_experiments": [
+    {
+      "seq_id": 1,
+      "patient_id": 1,
+      "relationship_to_proband": "proband",
+      "sample_id": 1,
+      "sample_submitter_id": "SP-PROBAND-001",
+      "sample_type_code": "DNA",
+      "affected_status_code": "affected",
+      "histology_code": "normal",
+      "experimental_strategy_code": "wgs",
+      "status_code": "completed",
+      "updated_on": "2024-01-15T08:00:00Z",
+      "has_variants": true
+    },
+    {
+      "seq_id": 2,
+      "patient_id": 2,
+      "relationship_to_proband": "mother",
+      "sample_id": 2,
+      "sample_submitter_id": "SP-MOTHER-001",
+      "sample_type_code": "DNA",
+      "affected_status_code": "non_affected",
+      "histology_code": "normal",
+      "experimental_strategy_code": "wgs",
+      "status_code": "completed",
+      "updated_on": "2024-01-15T08:00:00Z",
+      "has_variants": false
+    },
+    {
+      "seq_id": 3,
+      "patient_id": 3,
+      "relationship_to_proband": "father",
+      "sample_id": 3,
+      "sample_submitter_id": "SP-FATHER-001",
+      "sample_type_code": "DNA",
+      "affected_status_code": "non_affected",
+      "histology_code": "normal",
+      "experimental_strategy_code": "wgs",
+      "status_code": "completed",
+      "updated_on": "2024-01-15T08:00:00Z",
+      "has_variants": false
+    }
+  ],
+  "members": [
+    {
+      "relationship_to_proband": "proband",
+      "affected_status_code": "affected",
+      "patient_id": 1,
+      "first_name": "Alex",
+      "last_name": "Smith",
+      "date_of_birth": "2015-06-15T00:00:00Z",
+      "life_status_code": "alive",
+      "sex_code": "male",
+      "submitter_patient_id": "MRN-001",
+      "organization_code": "CHUSJ",
+      "organization_name": "CHU Sainte-Justine",
+      "ethnicity_codes": [],
+      "observed_phenotypes": [
+        {
+          "id": "HP:0001250",
+          "name": "Seizures",
+          "onset_code": "infantile"
+        },
+        {
+          "id": "HP:0001249",
+          "name": "Intellectual disability",
+          "onset_code": "infantile"
+        }
+      ],
+      "non_observed_phenotypes": []
+    },
+    {
+      "relationship_to_proband": "mother",
+      "affected_status_code": "non_affected",
+      "patient_id": 2,
+      "first_name": "Marie",
+      "last_name": "Smith",
+      "date_of_birth": "1985-03-22T00:00:00Z",
+      "life_status_code": "alive",
+      "sex_code": "female",
+      "submitter_patient_id": "MRN-002",
+      "organization_code": "CHUSJ",
+      "organization_name": "CHU Sainte-Justine",
+      "ethnicity_codes": [],
+      "observed_phenotypes": [],
+      "non_observed_phenotypes": []
+    },
+    {
+      "relationship_to_proband": "father",
+      "affected_status_code": "non_affected",
+      "patient_id": 3,
+      "first_name": "Jean",
+      "last_name": "Smith",
+      "date_of_birth": "1983-11-08T00:00:00Z",
+      "life_status_code": "alive",
+      "sex_code": "male",
+      "submitter_patient_id": "MRN-003",
+      "organization_code": "CHUSJ",
+      "organization_name": "CHU Sainte-Justine",
+      "ethnicity_codes": [],
+      "observed_phenotypes": [],
+      "non_observed_phenotypes": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "type_code": "alignment_germline_variant_calling",
+      "type_name": "Genome Alignment and Germline Variant Calling",
+      "created_on": "2024-01-15T09:00:00Z",
+      "patients": ["proband", "mother", "father"]
+    },
+    {
+      "id": 2,
+      "type_code": "radiant_germline_annotation",
+      "type_name": "RADIANT Germline Annotation",
+      "created_on": "2024-01-15T09:00:00Z",
+      "patients": ["proband", "mother", "father"]
+    },
+    {
+      "id": 3,
+      "type_code": "exomiser",
+      "type_name": "Exomiser",
+      "created_on": "2024-01-15T09:00:00Z",
+      "patients": ["proband"]
+    }
+  ]
+}
