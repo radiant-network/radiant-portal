@@ -45,7 +45,7 @@ async function deleteNote(_url: string, { arg }: { arg: string }) {
 
 function Note({ id, user_id, user_name, created_at, updated_at, content, isOwner, onChanged }: NoteProps) {
   const { t } = useI18n();
-  const { listFetcher } = useNotesContext();
+  const { onChangeCallback } = useNotesContext();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [editedContent, setEditedContent] = useState<string>(content);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -72,7 +72,7 @@ function Note({ id, user_id, user_name, created_at, updated_at, content, isOwner
         onClick: async () => {
           setIsLoading(true);
           triggerDelete(id).then(() => {
-            listFetcher();
+            onChangeCallback();
             changedCallback();
           });
         },

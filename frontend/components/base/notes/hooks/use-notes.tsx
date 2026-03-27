@@ -1,11 +1,11 @@
 import { createContext, useContext } from 'react';
 
 interface INotesContext {
-  listFetcher: () => void;
+  onChangeCallback: () => void;
 }
 
 export const NotesProvider = createContext<INotesContext>({
-  listFetcher: () => {},
+  onChangeCallback: () => {},
 });
 
 export function useNotesContext(): INotesContext {
