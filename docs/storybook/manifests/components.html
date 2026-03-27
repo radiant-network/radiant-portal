@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>4.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>5.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -8972,7 +8972,7 @@ value?: string[]</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NotesPopover</h2>
       <div class="badges">
-        <label for="c-46-notes-popover-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-46-notes-popover-props" class="badge ok as-toggle">6 prop types</label>
         
         <label for="c-46-notes-popover-stories" class="badge ok as-toggle">3 stories</label>
         
@@ -8999,23 +8999,21 @@ value?: string[]</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">7 prop types</span>
+              <span class="badge ok">6 prop types</span>
             </div>
             <pre><code>Component: base/notes/notes-popover.tsx::default</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>caseId: string
+            <pre><code>caseId: number
 
 enableEmptyIcon?: boolean
 
 hasNotes: boolean
 
-locusId: string
+occurenceId: string
 
-seqId: string
+seqId: number
 
-taskId: string
-
-type: string</code></pre>
+taskId: number</code></pre>
           </div>
         </div>
     
@@ -9039,7 +9037,7 @@ import { ConfigProvider, LoginContext, NotesPopover } from "components";</code><
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;NotesPopover hasNotes type=&quot;variant&quot; caseId=&quot;1&quot; seqId=&quot;1&quot; taskId=&quot;1&quot; locusId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;NotesPopover hasNotes caseId={1} seqId={1} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -9048,7 +9046,7 @@ import { ConfigProvider, LoginContext, NotesPopover } from "components";</code><
               </div>
               
               
-              <pre><code>const Loading = () =&gt; &lt;NotesPopover hasNotes type=&quot;variant&quot; caseId=&quot;1&quot; seqId=&quot;2&quot; taskId=&quot;1&quot; locusId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Loading = () =&gt; &lt;NotesPopover hasNotes caseId={1} seqId={2} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -9057,13 +9055,7 @@ import { ConfigProvider, LoginContext, NotesPopover } from "components";</code><
               </div>
               
               
-              <pre><code>const Empty = () =&gt; &lt;NotesPopover
-    hasNotes={false}
-    type=&quot;variant&quot;
-    caseId=&quot;1&quot;
-    seqId=&quot;3&quot;
-    taskId=&quot;1&quot;
-    locusId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Empty = () =&gt; &lt;NotesPopover hasNotes={false} caseId={1} seqId={3} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
         </div>
     
@@ -9076,18 +9068,18 @@ import { ConfigProvider, LoginContext, NotesPopover } from "components";</code><
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="NotesSlider">
+  aria-label="NotesSliderSheet">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> NotesSlider</h2>
+      <h2><span class="status-dot dot-ok"></span> NotesSliderSheet</h2>
       <div class="badges">
-        <label for="c-47-notes-notesslider-props" class="badge ok as-toggle">6 prop types</label>
-        <label for="c-47-notes-notesslider-info" class="badge info as-toggle">1 info</label>
-        <label for="c-47-notes-notesslider-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-47-notes-notesslidersheet-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-47-notes-notesslidersheet-info" class="badge info as-toggle">1 info</label>
+        <label for="c-47-notes-notesslidersheet-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./stories/notes/notes-slider.stories.tsx">notes-notesslider · ./stories/notes/notes-slider.stories.tsx</div>
+    <div class="meta" title="./stories/notes/notes-slider-sheet.stories.tsx">notes-notesslidersheet · ./stories/notes/notes-slider-sheet.stories.tsx</div>
     
     
     
@@ -9095,10 +9087,10 @@ import { ConfigProvider, LoginContext, NotesPopover } from "components";</code><
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-47-notes-notesslider-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-47-notes-notesslider-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-47-notes-notesslidersheet-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-47-notes-notesslidersheet-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-47-notes-notesslider-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-47-notes-notesslidersheet-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -9115,21 +9107,19 @@ import { ConfigProvider, LoginContext, NotesPopover } from "components";</code><
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">6 prop types</span>
+              <span class="badge ok">5 prop types</span>
             </div>
-            <pre><code>Component: base/notes/notes-slider.tsx::default</code></pre>
+            <pre><code>Component: base/notes/notes-slider-sheet.tsx::default</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>caseId: string
+            <pre><code>caseId: number
 
 enableEmptyIcon?: boolean
 
-locusId: string
+occurenceId: string
 
-seqId: string
+seqId: number
 
-taskId: string
-
-type: string</code></pre>
+taskId: number</code></pre>
           </div>
         </div>
     
@@ -9142,7 +9132,7 @@ type: string</code></pre>
                   <span class="ex-name">Imports</span>
                 </div>
                 <pre><code>import { BrowserRouter } from "react-router-dom";
-import { ConfigProvider, LoginContext, NotesSlider } from "components";</code></pre>
+import { ConfigProvider, LoginContext, NotesSliderSheet } from "components";</code></pre>
               </div>
           
           
@@ -9153,7 +9143,7 @@ import { ConfigProvider, LoginContext, NotesSlider } from "components";</code></
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;NotesSlider type=&quot;variant&quot; caseId=&quot;1&quot; seqId=&quot;1&quot; taskId=&quot;1&quot; locusId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;NotesSliderSheet caseId={1} seqId={1} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -9162,7 +9152,7 @@ import { ConfigProvider, LoginContext, NotesSlider } from "components";</code></
               </div>
               
               
-              <pre><code>const Loading = () =&gt; &lt;NotesSlider type=&quot;variant&quot; caseId=&quot;1&quot; seqId=&quot;3&quot; taskId=&quot;1&quot; locusId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Loading = () =&gt; &lt;NotesSliderSheet caseId={1} seqId={3} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -9171,7 +9161,7 @@ import { ConfigProvider, LoginContext, NotesSlider } from "components";</code></
               </div>
               
               
-              <pre><code>const Empty = () =&gt; &lt;NotesSlider type=&quot;variant&quot; caseId=&quot;1&quot; seqId=&quot;4&quot; taskId=&quot;1&quot; locusId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Empty = () =&gt; &lt;NotesSliderSheet caseId={1} seqId={4} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
         </div>
     
@@ -10909,7 +10899,7 @@ import { ConfigProvider, RelationshipToProbandField } from "components";</code><
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> RichTextEditor</h2>
       <div class="badges">
-        <label for="c-58-inputs-richtext-editor-props" class="badge ok as-toggle">8 prop types</label>
+        <label for="c-58-inputs-richtext-editor-props" class="badge ok as-toggle">11 prop types</label>
         <label for="c-58-inputs-richtext-editor-info" class="badge info as-toggle">1 info</label>
         <label for="c-58-inputs-richtext-editor-stories" class="badge ok as-toggle">3 stories</label>
         
@@ -10943,7 +10933,7 @@ import { ConfigProvider, RelationshipToProbandField } from "components";</code><
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">8 prop types</span>
+              <span class="badge ok">11 prop types</span>
             </div>
             <pre><code>Component: base/data-entry/rich-text-editor/rich-text-editor.tsx::default</code></pre>
             <pre><code>Props:</code></pre>
@@ -10953,11 +10943,17 @@ autofocus?: boolean
 
 className?: string
 
+clearContent?: boolean
+
+editable?: boolean = true
+
 onBlur?: () =&gt; void
 
 onChange?: (value: string) =&gt; void
 
 ref?: React.Ref&lt;HTMLDivElement&gt;
+
+resisizable?: boolean = true
 
 value?: string
 
