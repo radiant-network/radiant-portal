@@ -67,8 +67,10 @@ jobs:
           go-version: '1.23'
           cache: true
           cache-dependency-path: backend/go.sum
-      - name: Install dependencies
-        run: go mod download
+      - name: Tidy and Install dependencies
+        run: |
+          go mod tidy
+          go mod download
         working-directory: ./backend
       - name: Test internal/repository
         run: go test -timeout 30m ./internal/repository/...
@@ -86,8 +88,10 @@ jobs:
           go-version: '1.23'
           cache: true
           cache-dependency-path: backend/go.sum
-      - name: Install dependencies
-        run: go mod download
+      - name: Tidy and Install dependencies
+        run: |
+          go mod tidy
+          go mod download
         working-directory: ./backend
       - name: Test cmd/api
         run: go test -timeout 30m ./cmd/api/...
@@ -105,8 +109,10 @@ jobs:
           go-version: '1.23'
           cache: true
           cache-dependency-path: backend/go.sum
-      - name: Install dependencies
-        run: go mod download
+      - name: Tidy and Install dependencies
+        run: |
+          go mod tidy
+          go mod download
         working-directory: ./backend
       - name: Test remaining packages
         run: |
