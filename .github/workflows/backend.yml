@@ -67,6 +67,9 @@ jobs:
           go-version: '1.23'
           cache: true
           cache-dependency-path: backend/go.sum
+      - name: Install dependencies
+        run: go mod download
+        working-directory: ./backend
       - name: Test internal/repository
         run: go test -timeout 30m ./internal/repository/...
         working-directory: ./backend
@@ -83,6 +86,9 @@ jobs:
           go-version: '1.23'
           cache: true
           cache-dependency-path: backend/go.sum
+      - name: Install dependencies
+        run: go mod download
+        working-directory: ./backend
       - name: Test cmd/api
         run: go test -timeout 30m ./cmd/api/...
         working-directory: ./backend
@@ -99,6 +105,9 @@ jobs:
           go-version: '1.23'
           cache: true
           cache-dependency-path: backend/go.sum
+      - name: Install dependencies
+        run: go mod download
+        working-directory: ./backend
       - name: Test remaining packages
         run: |
           go test -timeout 30m $(go list ./... | grep -v './internal/repository' | grep -v './cmd/api')
