@@ -3886,6 +3886,59 @@ paths:
       summary: Get notes for an occurrence
       tags:
       - occurrence_notes
+  /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count:
+    get:
+      description: Count all notes associated with an occurrence
+      operationId: countOccurrenceNotes
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequencing Experiment ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Occurrence ID
+        in: path
+        name: occurrence_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Count'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Count notes for an occurrence
+      tags:
+      - occurrence_notes
   /notes/{id}:
     delete:
       description: Soft-delete a note by ID. Only the owner of the note can delete

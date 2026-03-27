@@ -76,6 +76,61 @@ func assertGetOccurrenceNotes(t *testing.T, repo repository.OccurrenceNotesDAO, 
 	return notes
 }
 
+func assertGetOccurrenceNoteCount(t *testing.T, repo repository.OccurrenceNotesDAO, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) int64 {
+	t.Helper()
+	router := gin.Default()
+	router.GET("/notes/:case_id/:seq_id/:task_id/:occurrence_id/count", server.GetOccurrenceNoteCountHandler(repo))
+
+	url := fmt.Sprintf("/notes/%d/%d/%d/%s/count", caseID, seqID, taskID, occurrenceID)
+	req, _ := http.NewRequest("GET", url, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, expectedStatus, w.Code)
+	var count types.Count
+	err := json.Unmarshal(w.Body.Bytes(), &count)
+	assert.NoError(t, err)
+	return count.Count
+}
+
+func Test_GetOccurrenceNoteCount(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewOccurrenceNotesRepository(db)
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		assertPostOccurrenceNote(t, repo, auth, `{"case_id": 2, "seq_id": 1, "task_id": 1, "occurrence_id": "10000", "content": "First note"}`, http.StatusCreated)
+		assertPostOccurrenceNote(t, repo, auth, `{"case_id": 2, "seq_id": 1, "task_id": 1, "occurrence_id": "10000", "content": "Second note"}`, http.StatusCreated)
+
+		count := assertGetOccurrenceNoteCount(t, repo, 2, 1, 1, "10000", http.StatusOK)
+		assert.Equal(t, int64(2), count)
+	})
+}
+
+func Test_GetOccurrenceNoteCount_EmptyResult(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewOccurrenceNotesRepository(db)
+
+		count := assertGetOccurrenceNoteCount(t, repo, 2, 1, 1, "99999", http.StatusOK)
+		assert.Equal(t, int64(0), count)
+	})
+}
+
+func Test_GetOccurrenceNoteCount_ExcludesDeletedNotes(t *testing.T) {
+	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewOccurrenceNotesRepository(db)
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		created := assertPostOccurrenceNote(t, repo, auth, `{"case_id": 2, "seq_id": 1, "task_id": 1, "occurrence_id": "10000", "content": "Note to delete"}`, http.StatusCreated)
+		if !assert.NotNil(t, created) {
+			return
+		}
+		assertDeleteOccurrenceNote(t, repo, auth, created.ID, http.StatusNoContent)
+
+		count := assertGetOccurrenceNoteCount(t, repo, 2, 1, 1, "10000", http.StatusOK)
+		assert.Equal(t, int64(0), count)
+	})
+}
+
 func Test_PostOccurrenceNote(t *testing.T) {
 	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)

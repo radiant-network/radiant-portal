@@ -427,7 +427,7 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		"is_mane_select":true, 
 		"locus":"locus1", 
 		"locus_id":"1000", 
-		"is_mane_select":true, 
+		"is_mane_select":true,
 		"omim_conditions":[
 			{"inheritance_code":["AD"], "omim_phenotype_id":"613706", "panel":"Noonan syndrome 7"}, 
 			{"inheritance_code":["AD"], "omim_phenotype_id":"613707", "panel":"LEOPARD syndrome 3"}

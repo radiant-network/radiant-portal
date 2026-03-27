@@ -172,6 +172,52 @@ func DeleteOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.
 	}
 }
 
+// GetOccurrenceNoteCountHandler handles counting notes for an occurrence
+// @Summary Count notes for an occurrence
+// @Id countOccurrenceNotes
+// @Description Count all notes associated with an occurrence
+// @Tags occurrence_notes
+// @Security bearerauth
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequencing Experiment ID"
+// @Param task_id path int true "Task ID"
+// @Param occurrence_id path string true "Occurrence ID"
+// @Produce json
+// @Success 200 {object} types.Count
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count [get]
+func GetOccurrenceNoteCountHandler(repo repository.OccurrenceNotesDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseID, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+
+		seqID, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+
+		taskID, err := strconv.Atoi(c.Param("task_id"))
+		if err != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
+
+		occurrenceID := c.Param("occurrence_id")
+
+		count, err := repo.CountByOccurrence(caseID, seqID, taskID, occurrenceID)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, types.Count{int64(count)})
+	}
+}
+
 // GetOccurrenceNotesHandler
 // @Summary Get notes for an occurrence
 // @Id getOccurrenceNotes
