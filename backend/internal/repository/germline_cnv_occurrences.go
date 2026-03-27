@@ -39,7 +39,7 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
-	tx = tx.Joins("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM radiant_jdbc.public.occurrence_note) note ON note.occurrence_id = cnvo.cnv_id AND note.task_id = cnvo.task_id AND note.seq_id = ? AND note.case_id = ?", seqId, caseId)
+	tx = tx.Joins("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM radiant_jdbc.public.occurrence_note WHERE deleted = false) note ON note.occurrence_id = cnvo.cnv_id AND note.task_id = cnvo.task_id AND note.seq_id = ? AND note.case_id = ?", seqId, caseId)
 	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 		// We group by name to avoid duplicates when joining with gene panels tables
 		// and use any_value for other fields to satisfy sql requirements
