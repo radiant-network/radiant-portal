@@ -20,7 +20,8 @@ func Test_CheckDatabaseConnection_Return_up(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	testutils.StartAllContainers()
+	testutils.StartPostgresContainer()
+	testutils.StartStarrocksContainer()
 	code := m.Run()
 	testutils.StopAllContainers()
 	os.Exit(code)
