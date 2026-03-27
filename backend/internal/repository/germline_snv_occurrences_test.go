@@ -690,6 +690,42 @@ func Test_Germline_SNV_GetExpandedOccurrence(t *testing.T) {
 	})
 }
 
+func Test_Germline_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testing.T) {
+	testutils.ParallelTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+		repo := NewGermlineSNVOccurrencesRepository(starrocks)
+		notesRepo := NewOccurrenceNotesRepository(postgres)
+
+		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+
+		note, err := notesRepo.Create(types.OccurrenceNote{
+			CaseID:       2,
+			SeqID:        1,
+			TaskID:       1,
+			OccurrenceID: "1000",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "Test User",
+			Content:      "Test note",
+		})
+		assert.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(2, 1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.True(t, occurrences[0].HasNote)
+		}
+
+		err = notesRepo.Delete(note.ID)
+		assert.NoError(t, err)
+
+		occurrences, err = repo.GetOccurrences(2, 1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.False(t, occurrences[0].HasNote)
+		}
+	})
+}
+
 func Test_Germline_SNV_GetExpandedOccurrence_NoInterpretation(t *testing.T) {
 	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
