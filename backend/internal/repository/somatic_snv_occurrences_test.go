@@ -142,7 +142,7 @@ func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testi
 		assert.NoError(t, err)
 
 		note, err := notesRepo.Create(types.OccurrenceNote{
-			CaseID:       72,
+			CaseID:       70,
 			SeqID:        74,
 			TaskID:       74,
 			OccurrenceID: "1000",
@@ -152,7 +152,7 @@ func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testi
 		})
 		assert.NoError(t, err)
 
-		occurrences, err := repo.GetOccurrences(72, 74, query)
+		occurrences, err := repo.GetOccurrences(70, 74, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.True(t, occurrences[0].HasNote)
@@ -161,7 +161,7 @@ func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testi
 		err = notesRepo.Delete(note.ID)
 		assert.NoError(t, err)
 
-		occurrences, err = repo.GetOccurrences(72, 74, query)
+		occurrences, err = repo.GetOccurrences(70, 74, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.False(t, occurrences[0].HasNote)
