@@ -10,7 +10,7 @@ import (
 
 func Test_GetOrganizationByCode_Not_Null(t *testing.T) {
 
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOrganizationRepository(db)
 		org, err := repo.GetOrganizationByCode("CHOP")
 		assert.NoError(t, err)
@@ -21,7 +21,7 @@ func Test_GetOrganizationByCode_Not_Null(t *testing.T) {
 	})
 }
 func Test_GetOrganizationByCode_Null(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOrganizationRepository(db)
 		org, err := repo.GetOrganizationByCode("Unknown")
 		assert.NoError(t, err)

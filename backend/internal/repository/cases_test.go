@@ -66,7 +66,7 @@ func Test_CreateCases(t *testing.T) {
 }
 
 func Test_GetCaseAnalysisCatalogIdByCode(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode("WGA")
 		assert.NoError(t, err)
@@ -76,7 +76,7 @@ func Test_GetCaseAnalysisCatalogIdByCode(t *testing.T) {
 }
 
 func Test_GetCaseAnalysisCatalogIdByCode_NotFound(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode("NON_EXISTENT_CODE")
 		assert.NoError(t, err)

@@ -62,7 +62,7 @@ func Test_GetBatchByID_Success(t *testing.T) {
 }
 
 func Test_GetBatchByID_NotFound(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 		nonExistentId := uuid.NewString()
 		batch, err := repo.GetBatchByID(nonExistentId)
@@ -72,7 +72,7 @@ func Test_GetBatchByID_NotFound(t *testing.T) {
 }
 
 func Test_GetBatchByID_InvalidUUID(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 		invalidId := "not-a-valid-uuid"
 		batch, err := repo.GetBatchByID(invalidId)
@@ -82,7 +82,7 @@ func Test_GetBatchByID_InvalidUUID(t *testing.T) {
 }
 
 func Test_ClaimNextBatch_Without_Pending(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 		batch, err := repo.ClaimNextBatch()
 		assert.NoError(t, err)

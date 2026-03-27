@@ -9,7 +9,7 @@ import (
 )
 
 func Test_GetProjectByCode_OK(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewProjectRepository(db)
 		project, err := repo.GetProjectByCode("N1")
 		assert.NoError(t, err)
@@ -20,7 +20,7 @@ func Test_GetProjectByCode_OK(t *testing.T) {
 }
 
 func Test_GetProjectByCode_NotFound(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewProjectRepository(db)
 		project, err := repo.GetProjectByCode("notexists")
 		assert.NoError(t, err)

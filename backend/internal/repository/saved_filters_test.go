@@ -11,7 +11,7 @@ import (
 )
 
 func Test_GetSavedFilterByID(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilter, err := repo.GetSavedFilterByID("1e1c5bc3-4f65-496a-ad61-cab239bf72d5")
 		assert.NoError(t, err)
@@ -30,7 +30,7 @@ func Test_GetSavedFilterByID(t *testing.T) {
 }
 
 func Test_GetSavedFilterByID_NotFound(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilter, err := repo.GetSavedFilterByID("ac2df672-9702-4dcf-8cfd-457494384762")
 		assert.NoError(t, err)
@@ -39,7 +39,7 @@ func Test_GetSavedFilterByID_NotFound(t *testing.T) {
 }
 
 func Test_GetSavedFiltersByUserID_NotType(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilters, err := repo.GetSavedFiltersByUserID("1", "")
 		assert.NoError(t, err)
@@ -49,7 +49,7 @@ func Test_GetSavedFiltersByUserID_NotType(t *testing.T) {
 }
 
 func Test_GetSavedFiltersByUserID_UserIdNotFound(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilters, err := repo.GetSavedFiltersByUserID("not_existing_user", "")
 		assert.NoError(t, err)
@@ -59,7 +59,7 @@ func Test_GetSavedFiltersByUserID_UserIdNotFound(t *testing.T) {
 }
 
 func Test_GetSavedFiltersByUserID(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilters, err := repo.GetSavedFiltersByUserID("1", types.GERMLINE_SNV_OCCURRENCE)
 		assert.NoError(t, err)
@@ -69,7 +69,7 @@ func Test_GetSavedFiltersByUserID(t *testing.T) {
 }
 
 func Test_GetSavedFiltersByUserID_NotFound(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilters, err := repo.GetSavedFiltersByUserID("1", types.SOMATIC_SNV_VARIANT)
 		assert.NoError(t, err)

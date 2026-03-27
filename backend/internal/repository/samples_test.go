@@ -9,7 +9,7 @@ import (
 )
 
 func Test_GetSampleBySubmitterSampleId_Found(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
 		sample, err := repo.GetSampleBySubmitterSampleId(6, "S13224")
@@ -22,7 +22,7 @@ func Test_GetSampleBySubmitterSampleId_Found(t *testing.T) {
 }
 
 func Test_GetSampleBySubmitterSampleId_NotFound_InvalidSampleId(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
 		sample, err := repo.GetSampleBySubmitterSampleId(6, "SAMPLE-UNKNOWN")
@@ -33,7 +33,7 @@ func Test_GetSampleBySubmitterSampleId_NotFound_InvalidSampleId(t *testing.T) {
 }
 
 func Test_GetSampleBySubmitterSampleId_NotFound_InvalidOrgId(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
 		sample, err := repo.GetSampleBySubmitterSampleId(999999, "S13224")
@@ -44,7 +44,7 @@ func Test_GetSampleBySubmitterSampleId_NotFound_InvalidOrgId(t *testing.T) {
 }
 
 func Test_GetSampleBySubmitterSampleId_NotFound_BothInvalid(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
 		sample, err := repo.GetSampleBySubmitterSampleId(999999, "SAMPLE-UNKNOWN")
@@ -55,7 +55,7 @@ func Test_GetSampleBySubmitterSampleId_NotFound_BothInvalid(t *testing.T) {
 }
 
 func Test_GetTypeCodes(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
 		typeCodes, err := repo.GetTypeCodes()
@@ -67,7 +67,7 @@ func Test_GetTypeCodes(t *testing.T) {
 }
 
 func Test_GetSampleByOrgCodeAndSubmitterSampleId_Found(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("CQGC", "S13224")
@@ -80,7 +80,7 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_Found(t *testing.T) {
 }
 
 func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidSampleId(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("CQGC", "SAMPLE-UNKNOWN")
@@ -91,7 +91,7 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidSampleId(t *tes
 }
 
 func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidOrgCode(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("INVALID-ORG", "S13224")
@@ -102,7 +102,7 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidOrgCode(t *test
 }
 
 func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_BothInvalid(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
 		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("INVALID-ORG", "SAMPLE-UNKNOWN")
