@@ -8,7 +8,23 @@ on:
     branches: [ "**" ]
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Changed Files 👀
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+
   build:
+    needs: [changes]
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,28 +38,62 @@ jobs:
               - 'backend/**'
 
       - name: Set up Go
-        if: steps.filter.outputs.backend == 'true'
         uses: actions/setup-go@v4
         with:
           go-version: '1.23'
 
       - name: Install dependencies
-        if: steps.filter.outputs.backend == 'true'
         run: go mod download
         working-directory: ./backend
 
       - name: Ensure dependencies are up-to-date
-        if: steps.filter.outputs.backend == 'true'
         run: go mod tidy
         working-directory: ./backend
 
       - name: Build
-        if: steps.filter.outputs.backend == 'true'
+
         run: go build -v ./...
         working-directory: ./backend
 
-      - name: Test
-        if: steps.filter.outputs.backend == 'true'
-        run: go test -timeout 30m ./...
+  test-repository:
+    needs: [changes]
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+          cache: true
+          cache-dependency-path: backend/go.sum
+      - name: Tidy and Install dependencies
+        run: |
+          go mod tidy
+          go mod download
+        working-directory: ./backend
+      - name: Test internal/repository
+        run: go test -v -timeout 30m ./internal/repository/...
+        working-directory: ./backend
+        timeout-minutes: 30
+
+  test-other:
+    needs: [changes]
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+          cache: true
+          cache-dependency-path: backend/go.sum
+      - name: Tidy and Install dependencies
+        run: |
+          go mod tidy
+          go mod download
+        working-directory: ./backend
+      - name: Test remaining packages
+        run: |
+          go test -timeout 30m $(go list ./... | grep -v './internal/repository')
         working-directory: ./backend
         timeout-minutes: 30
