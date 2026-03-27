@@ -17,7 +17,7 @@
       "resolution_status_code": "unresolved",
       "patients": [
         {
-          "submitter_patient_id": "PT-PROBAND-001",
+          "submitter_patient_id": "MRN-001",
           "patient_organization_code": "CHUSJ",
           "relation_to_proband_code": "proband",
           "affected_status_code": "affected",
@@ -47,7 +47,7 @@
           "family_history": []
         },
         {
-          "submitter_patient_id": "PT-MOTHER-001",
+          "submitter_patient_id": "MRN-002",
           "patient_organization_code": "CHUSJ",
           "relation_to_proband_code": "mother",
           "affected_status_code": "non_affected",
@@ -61,7 +61,7 @@
           ]
         },
         {
-          "submitter_patient_id": "PT-FATHER-001",
+          "submitter_patient_id": "MRN-003",
           "patient_organization_code": "CHUSJ",
           "relation_to_proband_code": "father",
           "affected_status_code": "non_affected",
