@@ -22,4 +22,5 @@ func InitAuthorizer(auth *utils.KeycloakAuth) (gin.HandlerFunc, error) {
 		log.Printf("Unrecognized RADIANT_AUTHORIZATION_PROVIDER=%q; defaulting to Keycloak", provider)
 		return NewKeyCloakAuthorizer()
 	}
+
 }
