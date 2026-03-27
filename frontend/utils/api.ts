@@ -6,6 +6,7 @@ import {
   IgvApi,
   InterpretationsApi,
   MondoApi,
+  OccurrenceNotesApi,
   OccurrencesApi,
   SavedFiltersApi,
   SequencingApi,
@@ -22,6 +23,7 @@ const config = new Configuration({
 
 export const variantsApi = new VariantApi(config, BASE_PATH, axiosClient);
 export const occurrencesApi = new OccurrencesApi(config, BASE_PATH, axiosClient);
+export const occurencesNotesApi = new OccurrenceNotesApi(config, BASE_PATH, axiosClient);
 export const interpretationApi = new InterpretationsApi(config, BASE_PATH, axiosClient);
 export const userPreferenceApi = new UserPreferencesApi(config, BASE_PATH, axiosClient);
 export const mondoApi = new MondoApi(config, BASE_PATH, axiosClient);

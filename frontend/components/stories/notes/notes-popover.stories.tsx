@@ -35,11 +35,10 @@ const meta = {
   component: NotesPopover,
   args: {
     hasNotes: true,
-    type: 'variant',
-    caseId: '1',
-    seqId: '1',
-    taskId: '1',
-    locusId: '1',
+    caseId: 1,
+    seqId: 1,
+    taskId: 1,
+    occurenceId: '1',
   },
   decorators: [
     Story => (
@@ -62,7 +61,7 @@ export const Default: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post(notesListApi, async () => {
+        http.get(notesListApi, async () => {
           await delay(500);
           return getHTTPMockNotesList();
         }),
@@ -76,7 +75,7 @@ export const Loading: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post(notesListApi, async () => {
+        http.get(notesListApi, async () => {
           await delay(10000);
           return getHTTPMockNotesList();
         }),
@@ -84,7 +83,7 @@ export const Loading: Story = {
     },
   },
   args: {
-    seqId: '2',
+    seqId: 2,
   },
   render: args => <NotesPopover {...args} />,
 };
@@ -93,7 +92,7 @@ export const Empty: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post(notesListApi, async () => {
+        http.get(notesListApi, async () => {
           await delay(1000);
           return HttpResponse.json([]);
         }),
@@ -102,7 +101,7 @@ export const Empty: Story = {
   },
   args: {
     hasNotes: false,
-    seqId: '3',
+    seqId: 3,
   },
   render: args => <NotesPopover {...args} />,
 };

@@ -2,7 +2,7 @@ import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { delay, http, HttpResponse } from 'msw';
 
-import NotesSlider from '@/components/base/notes/notes-slider';
+import NotesSliderSheet from '@/components/base/notes/notes-slider-sheet';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 import { LoginContext } from '@/components/hooks/use-login';
 
@@ -31,14 +31,13 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Notes/NotesSlider',
-  component: NotesSlider,
+  title: 'Notes/NotesSliderSheet',
+  component: NotesSliderSheet,
   args: {
-    type: 'variant',
-    caseId: '1',
-    seqId: '1',
-    taskId: '1',
-    locusId: '1',
+    caseId: 1,
+    seqId: 1,
+    taskId: 1,
+    occurenceId: '1',
   },
   decorators: [
     Story => (
@@ -51,7 +50,7 @@ const meta = {
       </BrowserRouter>
     ),
   ],
-} satisfies Meta<typeof NotesSlider>;
+} satisfies Meta<typeof NotesSliderSheet>;
 
 export default meta;
 
@@ -61,21 +60,21 @@ export const Default: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post(notesListApi, async () => {
-          await delay(1100);
+        http.get(notesListApi, async () => {
+          await delay(1000);
           return getHTTPMockNotesList();
         }),
       ],
     },
   },
-  render: args => <NotesSlider {...args} />,
+  render: args => <NotesSliderSheet {...args} />,
 };
 
 export const Loading: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post(notesListApi, async () => {
+        http.get(notesListApi, async () => {
           await delay(10000);
           return getHTTPMockNotesList();
         }),
@@ -83,16 +82,16 @@ export const Loading: Story = {
     },
   },
   args: {
-    seqId: '3',
+    seqId: 3,
   },
-  render: args => <NotesSlider {...args} />,
+  render: args => <NotesSliderSheet {...args} />,
 };
 
 export const Empty: Story = {
   parameters: {
     msw: {
       handlers: [
-        http.post(notesListApi, async () => {
+        http.get(notesListApi, async () => {
           await delay(1000);
           return HttpResponse.json([]);
         }),
@@ -100,7 +99,7 @@ export const Empty: Story = {
     },
   },
   args: {
-    seqId: '4',
+    seqId: 4,
   },
-  render: args => <NotesSlider {...args} />,
+  render: args => <NotesSliderSheet {...args} />,
 };

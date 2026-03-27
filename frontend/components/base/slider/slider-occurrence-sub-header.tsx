@@ -1,7 +1,7 @@
 import { useI18n } from '@/components/hooks/i18n';
 
-import AnchorLink from '../navigation/anchor-link';
-import { Badge } from '../shadcn/badge';
+import AnchorLink from '@/components/base/navigation/anchor-link';
+import { Badge } from '@/components/base/shadcn/badge';
 
 type SliderOccurrenceSubHeader = {
   hgvsg: string;

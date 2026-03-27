@@ -1,4 +1,3 @@
-import { useContext } from 'react';
 import { useSearchParams } from 'react-router';
 import { ClipboardList } from 'lucide-react';
 
@@ -56,7 +55,7 @@ function InterpretationCell({ occurrence }: InterpretationCellProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <Button className="size-6" iconOnly variant="ghost" onClick={handleClick}>
-          <ClipboardList className="text-primary fill-primary/30" size={16} />
+          <ClipboardList className="text-primary fill-primary/20" size={16} />
         </Button>
       </TooltipTrigger>
       <TooltipContent>{t('variant.interpretation.tooltip.view')}</TooltipContent>

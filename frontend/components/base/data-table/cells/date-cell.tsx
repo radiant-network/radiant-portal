@@ -13,7 +13,7 @@ function DateCell({ date }: DateCellProps) {
 
   if (!date) return <EmptyCell />;
 
-  return <div className="font-mono text-xs font-medium">{formatDate(date, t('common.date'))}</div>;
+  return <div className="font-mono text-xs font-medium">{formatDate(date, t('common.date.year_month_day'))}</div>;
 }
 
 export default DateCell;
