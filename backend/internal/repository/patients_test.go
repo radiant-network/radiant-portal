@@ -9,7 +9,7 @@ import (
 )
 
 func Test_GetPatientBySubmitterPatientId_Not_Null(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewPatientsRepository(db)
 		patient, err := repo.GetPatientBySubmitterPatientId(3, "MRN-283773")
 		assert.NoError(t, err)
@@ -20,7 +20,7 @@ func Test_GetPatientBySubmitterPatientId_Not_Null(t *testing.T) {
 }
 
 func Test_GetPatientBySubmitterPatientId_Null_Mrn(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewPatientsRepository(db)
 		patient, err := repo.GetPatientBySubmitterPatientId(3, "MRN-UNKNOWN")
 		assert.NoError(t, err)
@@ -29,7 +29,7 @@ func Test_GetPatientBySubmitterPatientId_Null_Mrn(t *testing.T) {
 }
 
 func Test_GetPatientBySubmitterPatientId_Null_OrgId(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewPatientsRepository(db)
 		patient, err := repo.GetPatientBySubmitterPatientId(999999, "MRN-283773")
 		assert.NoError(t, err)
