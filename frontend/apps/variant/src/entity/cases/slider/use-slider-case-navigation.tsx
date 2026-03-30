@@ -10,7 +10,10 @@ interface UseSliderCaseNavigationParams<T extends CaseItem> {
   casesData: T[];
   searchParams: URLSearchParams;
   setSearchParams: SetURLSearchParams;
-  selectedCaseParamKey: string;
+  searchParamsKey: {
+    patientId: string;
+    caseId: string;
+  };
   setRowSelection: (
     selection: Record<string, boolean> | ((prev: Record<string, boolean>) => Record<string, boolean>),
   ) => void;
@@ -33,19 +36,27 @@ export function useSliderCasePatientIdNavigation<T extends CaseItem>({
   casesData,
   searchParams,
   setSearchParams,
-  selectedCaseParamKey,
+  searchParamsKey,
   setRowSelection,
 }: UseSliderCaseNavigationParams<T>): UseSliderCaseNavigationReturn<T> {
-  const selectedId = searchParams.get(selectedCaseParamKey);
-  const selectedCase = casesData.find(caseItem => caseItem.patient_id.toString() === selectedId);
+  const selectedPatientId = searchParams.get(searchParamsKey.patientId);
+  const selectedCaseId = searchParams.get(searchParamsKey.caseId);
 
-  const selectedCaseIndex = selectedId
-    ? casesData.findIndex(caseItem => caseItem.patient_id.toString() === selectedId)
+  const selectedCase = casesData.find(
+    caseItem => caseItem.patient_id.toString() === selectedPatientId && caseItem.case_id.toString() === selectedCaseId,
+  );
+
+  const selectedCaseIndex = selectedPatientId
+    ? casesData.findIndex(
+        caseItem =>
+          caseItem.patient_id.toString() === selectedPatientId && caseItem.case_id.toString() === selectedCaseId,
+      )
     : -1;
 
   const handleClosePreview = () => {
     setSearchParams(prev => {
-      prev.delete(selectedCaseParamKey);
+      prev.delete(searchParamsKey.patientId);
+      prev.delete(searchParamsKey.caseId);
       return prev;
     });
   };
@@ -56,7 +67,8 @@ export function useSliderCasePatientIdNavigation<T extends CaseItem>({
       for (let i = selectedCaseIndex - 1; i >= 0; i--) {
         if (casesData[i].patient_id !== currentId) {
           setSearchParams(prev => {
-            prev.set(selectedCaseParamKey, casesData[i].patient_id.toString());
+            prev.set(searchParamsKey.patientId, casesData[i].patient_id.toString());
+            prev.set(searchParamsKey.caseId, casesData[i].case_id.toString());
             return prev;
           });
           return;
@@ -72,7 +84,8 @@ export function useSliderCasePatientIdNavigation<T extends CaseItem>({
       for (let i = selectedCaseIndex + 1; i < casesData.length; i++) {
         if (casesData[i].patient_id !== currentId) {
           setSearchParams(prev => {
-            prev.set(selectedCaseParamKey, casesData[i].patient_id.toString());
+            prev.set(searchParamsKey.patientId, casesData[i].patient_id.toString());
+            prev.set(searchParamsKey.caseId, casesData[i].case_id.toString());
             return prev;
           });
           return;
@@ -106,8 +119,11 @@ export function useSliderCasePatientIdNavigation<T extends CaseItem>({
   }, [selectedCaseIndex, selectedCase, casesData]);
 
   useEffect(() => {
-    if (selectedId && casesData.length > 0) {
-      const rowIndex = casesData.findIndex(caseItem => caseItem.patient_id.toString() === selectedId);
+    if (selectedPatientId && casesData.length > 0) {
+      const rowIndex = casesData.findIndex(
+        caseItem =>
+          caseItem.patient_id.toString() === selectedPatientId && caseItem.case_id.toString() === selectedCaseId,
+      );
       if (rowIndex !== -1) {
         setRowSelection({ [rowIndex]: true });
       } else {
@@ -116,7 +132,7 @@ export function useSliderCasePatientIdNavigation<T extends CaseItem>({
     } else {
       setRowSelection({});
     }
-  }, [selectedId, casesData, setRowSelection]);
+  }, [selectedPatientId, casesData, setRowSelection]);
 
   return {
     selectedCase,

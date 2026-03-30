@@ -12,7 +12,7 @@ import SliderInterpretedCaseSheet from './slider/slider-interpreted-case-sheet';
 import { useSliderCasePatientIdNavigation } from './slider/use-slider-case-navigation';
 import InterpretedCasesFilters, { InterpretedCasesFiltersState } from './table/interpreted-cases-filters';
 import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table/interpreted-cases-table-settings';
-import { SELECTED_INTERPRETED_CASE_PARAM } from './constants';
+import { INTERPRETED_CASE_ID_PARAM, INTERPRETED_PATIENT_ID_PARAM } from './constants';
 
 type InterpretedCasesSearchInput = {
   key: string;
@@ -108,7 +108,7 @@ function InterpretedCasesTable() {
       casesData,
       searchParams,
       setSearchParams,
-      selectedCaseParamKey: SELECTED_INTERPRETED_CASE_PARAM,
+      searchParamsKey: { patientId: INTERPRETED_PATIENT_ID_PARAM, caseId: INTERPRETED_CASE_ID_PARAM },
       setRowSelection,
     });
 
