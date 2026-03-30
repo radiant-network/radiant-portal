@@ -1,0 +1,31 @@
+{
+  "samples": [
+    {
+      "submitter_sample_id": "SP-PROBAND-001",
+      "submitter_patient_id": "MRN-001",
+      "patient_organization_code": "CHUSJ",
+      "sample_organization_code": "CHUSJ",
+      "type_code": "dna",
+      "histology_code": "normal",
+      "tissue_site": "blood"
+    },
+    {
+      "submitter_sample_id": "SP-MOTHER-001",
+      "submitter_patient_id": "MRN-002",
+      "patient_organization_code": "CHUSJ",
+      "sample_organization_code": "CHUSJ",
+      "type_code": "dna",
+      "histology_code": "normal",
+      "tissue_site": "blood"
+    },
+    {
+      "submitter_sample_id": "SP-FATHER-001",
+      "submitter_patient_id": "MRN-003",
+      "patient_organization_code": "CHUSJ",
+      "sample_organization_code": "CHUSJ",
+      "type_code": "dna",
+      "histology_code": "normal",
+      "tissue_site": "blood"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "sequencing_experiments": [
+    {
+      "aliquot": "ALQ-PROBAND-001",
+      "submitter_sample_id": "SP-PROBAND-001",
+      "sample_organization_code": "CHUSJ",
+      "sequencing_lab_code": "CQGC",
+      "experimental_strategy_code": "wgs",
+      "platform_code": "illumina",
+      "sequencing_read_technology_code": "short_read",
+      "run_name": "RUN-TRIO-001-PROBAND",
+      "run_alias": "trio001_proband",
+      "run_date": "2024-01-15T08:00:00Z",
+      "status_code": "completed"
+    },
+    {
+      "aliquot": "ALQ-MOTHER-001",
+      "submitter_sample_id": "SP-MOTHER-001",
+      "sample_organization_code": "CHUSJ",
+      "sequencing_lab_code": "CQGC",
+      "experimental_strategy_code": "wgs",
+      "platform_code": "illumina",
+      "sequencing_read_technology_code": "short_read",
+      "run_name": "RUN-TRIO-001-MOTHER",
+      "run_alias": "trio001_mother",
+      "run_date": "2024-01-15T08:00:00Z",
+      "status_code": "completed"
+    },
+    {
+      "aliquot": "ALQ-FATHER-001",
+      "submitter_sample_id": "SP-FATHER-001",
+      "sample_organization_code": "CHUSJ",
+      "sequencing_lab_code": "CQGC",
+      "experimental_strategy_code": "wgs",
+      "platform_code": "illumina",
+      "sequencing_read_technology_code": "short_read",
+      "run_name": "RUN-TRIO-001-FATHER",
+      "run_alias": "trio001_father",
+      "run_date": "2024-01-15T08:00:00Z",
+      "status_code": "completed"
+    }
+  ]
+}
