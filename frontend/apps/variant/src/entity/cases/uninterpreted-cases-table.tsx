@@ -21,7 +21,7 @@ import {
   getUninterpretedCasesColumns,
   uninterpretedCasesDefaultSettings,
 } from './table/uninterpreted-cases-table-settings';
-import { SELECTED_UNINTERPRETED_CASE_PARAM } from './constants';
+import { UNINTERPRETED_CASE_ID_PARAM, UNINTERPRETED_PATIENT_ID_PARAM } from './constants';
 
 type UninterpretedCasesSearchInput = {
   key: string;
@@ -77,7 +77,7 @@ function UninterpretedCasesTable() {
       casesData,
       searchParams,
       setSearchParams,
-      selectedCaseParamKey: SELECTED_UNINTERPRETED_CASE_PARAM,
+      searchParamsKey: { patientId: UNINTERPRETED_PATIENT_ID_PARAM, caseId: UNINTERPRETED_CASE_ID_PARAM },
       setRowSelection,
     });
 

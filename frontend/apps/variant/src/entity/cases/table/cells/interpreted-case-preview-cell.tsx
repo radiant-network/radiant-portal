@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
-import { SELECTED_INTERPRETED_CASE_PARAM } from '../../constants';
+import { INTERPRETED_CASE_ID_PARAM, INTERPRETED_PATIENT_ID_PARAM } from '../../constants';
 
 type CasePreviewCellProps = {
   caseId: number;
@@ -16,7 +16,8 @@ function InterpretedCasePreviewCell({ caseId, patiendId, relationshipToProband }
 
   const handleClick = () => {
     setSearchParams(prev => {
-      prev.set(SELECTED_INTERPRETED_CASE_PARAM, patiendId.toString());
+      prev.set(INTERPRETED_PATIENT_ID_PARAM, patiendId.toString());
+      prev.set(INTERPRETED_CASE_ID_PARAM, caseId.toString());
       return prev;
     });
   };

@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router';
 
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
-import { SELECTED_UNINTERPRETED_CASE_PARAM } from '../../constants';
+import { UNINTERPRETED_CASE_ID_PARAM, UNINTERPRETED_PATIENT_ID_PARAM } from '../../constants';
 import { useI18n } from '@/components/hooks/i18n';
 
 type CasePreviewCellProps = {
@@ -21,7 +21,8 @@ function UninterpretedCasePreviewCell({ caseId, patientId, seqId }: CasePreviewC
 
   const handleClick = () => {
     setSearchParams(prev => {
-      prev.set(SELECTED_UNINTERPRETED_CASE_PARAM, patientId.toString());
+      prev.set(UNINTERPRETED_PATIENT_ID_PARAM, patientId.toString());
+      prev.set(UNINTERPRETED_CASE_ID_PARAM, caseId.toString());
       return prev;
     });
   };
