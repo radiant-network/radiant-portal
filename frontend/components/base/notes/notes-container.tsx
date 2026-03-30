@@ -32,7 +32,7 @@ export type NotesContainerProps = NoteContainerBaseProps & {
   enableEmptyIcon?: boolean;
 };
 
-type GetOccurrenceNoteInput = Omit<NotesContainerProps, 'enableEmptyIcon'>;
+export type GetOccurrenceNoteInput = Omit<NotesContainerProps, 'enableEmptyIcon'>;
 
 async function fetchNotes(input: GetOccurrenceNoteInput) {
   const response = await occurencesNotesApi.getOccurrenceNotes(
@@ -57,7 +57,7 @@ async function saveNote(_url: string, { arg }: { arg: CreateOccurrenceNoteInput 
 function NotesContainer({ enableEmptyIcon = false, ...props }: NotesContainerProps) {
   const { t } = useI18n();
   const { sub } = useLoginContext();
-  const { listFetcher } = useNotesContext();
+  const { onChangeCallback } = useNotesContext();
   const [content, setContent] = useState<string>('');
   const [clearContent, setClearContent] = useState<boolean>(false);
   const save = useSWRMutation('notes/save', saveNote);
@@ -93,7 +93,7 @@ function NotesContainer({ enableEmptyIcon = false, ...props }: NotesContainerPro
         setContent('');
         fetcher.mutate().then(() => {
           setClearContent(false);
-          listFetcher();
+          onChangeCallback();
         });
       });
   }, [content, props]);

@@ -112,7 +112,7 @@ function OccurrenceSheetContent({
         hgvsg={occurrence.hgvsg}
         actions={
           <div className="flex gap-2">
-            <NotesProvider value={{ listFetcher }}>
+            <NotesProvider value={{ onChangeCallback: listFetcher }}>
               <NotesSliderSheet
                 caseId={caseId}
                 seqId={occurrence.seq_id}
