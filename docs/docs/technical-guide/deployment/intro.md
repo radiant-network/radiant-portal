@@ -1,47 +1,64 @@
-# How TO
+---
+sidebar_position: 1
+---
 
-## Current deployments
+# How To
 
-We currently have two deployments:
+## Current Deployments
 
-- CQDG QA (Ferlab managed)
-- AWS (CHOP managed)
+The Radiant network currently runs two main deployments:
 
-### CQDG QA (Ferlab managed)
+- **CQDG QA** – Managed by **Ferlab**
+- **AWS** – Managed by **CHOP**
 
-Repositories:
-- Apps deployment: https://github.com/Ferlab-Ste-Justine/cqdg-pre-prod-kubernetes-environments/blob/main/qa-etl/fluxcd/airflow.yml
-
-**Parallelization using a Custom Airflow Operator**:
-
-We use Kubernetes pod operators to parallelize certain operations. 
-
-![CQDG QA Deployment](./cqdg_qa_deployment.drawio.png)
-
-### AWS (CHOP managed)
+## CQDG QA (Ferlab Managed)
 
 Repositories:
-- StarRocks module: https://github.com/radiant-network/terraform-aws-starrocks-s3
-- StarRocks deployment: https://github.com/radiant-network/star-rocks
-- Apps deployment: https://github.com/radiant-network/radiant-portal-deployment
+- **Apps Deployment:** [Ferlab CQDG Pre-Prod Environment (Airflow Config)](https://github.com/Ferlab-Ste-Justine/cqdg-pre-prod-kubernetes-environments/blob/main/qa-etl/fluxcd/airflow.yml)
 
-**Parallelization using a Custom Airflow Operator**:
+### Parallelization via Custom Airflow Operator
 
-MWAA will deploy instances of a custom Radiant-Airflow operator as ECS tasks for certain operations that need to run in parallel.
+The CQDG QA environment leverages **KubernetesPodOperators** within **Apache Airflow** to parallelize specific workloads.  
+This allows different jobs to run as individual Kubernetes pods, improving scalability and pipeline efficiency.
 
-(Similar to a Kubernetes Pod Operator)
+![CQDG QA Deployment](./cqdg_qa_deployment.png)
 
-![AWS Deployment](../deployment/aws_deployment.drawio.png)
+:::note
+Parallel task execution is especially beneficial for VCF extraction. 
 
-#### Accessing applications on AWS
+A pod will be launched for each VCF file, allowing multiple files to be processed simultaneously, which significantly reduces overall processing time.
+:::
 
-To access applications in the AWS environment, users have 2 main options:
+## AWS (CHOP Managed)
 
-- Using a VPN connection that allows connecting to the private network where the applications are deployed. 
-- Using a Bastion host to create an SSH tunnel to access the applications.
+Repositories:
+- **Terraform StarRocks Module:** [radiant-network/terraform-aws-starrocks-s3](https://github.com/radiant-network/terraform-aws-starrocks-s3)
+- **StarRocks Deployment:** [radiant-network/star-rocks](https://github.com/radiant-network/star-rocks)
+- **Apps Deployment:** [radiant-network/radiant-portal-deployment](https://github.com/radiant-network/radiant-portal-deployment)
 
-Depending on the use case, one option may be more suitable than the other. 
+### Parallelization via Custom Airflow Operator
 
-For example, data exploration in StarRocks is done through tunneling a connection to the StarRocks FE node through the Bastion host, while Airflow UI is more easily accessed through the VPN connection.
+In the AWS environment, **Amazon MWAA (Managed Workflows for Apache Airflow)** orchestrates workloads using a custom **Radiant-Airflow Operator**.
 
-![Accessing applications](../deployment/accessing_applications.drawio.png)
+![AWS Deployment](../deployment/aws_deployment.png)
+
+:::info
+Tasks that benefit from parallel execution (e.g. VCF extraction) are deployed as **ECS fargate tasks**.
+
+This behavior is similar to the `KubernetesPodOperators` used in CQDG environment.
+:::
+
+## Accessing Applications on AWS
+
+To access applications deployed in the AWS environment, users have two secure connection options:
+
+- **VPN Connection** – Connect directly to the private network where the services are hosted.
+- **Bastion Host (SSH Tunnel)** – Create an SSH-based tunnel through the bastion host to reach specific internal endpoints.
+
+:::info
+Use the method best suited for your workflow:
+- The **VPN** connection is ideal for interactive tools such as the Airflow UI.
+- The **SSH tunnel** via Bastion is commonly used to connect to backend services like the **StarRocks FE node** for data exploration.
+:::
+
+![Accessing Applications](../deployment/accessing_applications.png)
