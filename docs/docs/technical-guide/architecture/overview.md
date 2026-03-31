@@ -29,7 +29,7 @@ For details about the case creation workflow, refer to the [Case Creation](#case
 
 Variant data is processed using an **ETL pipeline** that extracts genomic information from **VCF files** and loads it into **Apache Iceberg**.
 
-Data is then imported into **StarRocks** using a "Extract-Transform-Load" (ELT) model that runs import queries, pulling records from the federated Iceberg catalog.
+Data is then imported into **StarRocks** using a "Extract-Load-Transform" (ELT) model that runs import queries, pulling records from the federated Iceberg catalog.
 
 **StarRocks** operates in **shared-data mode**, with data stored in an **S3-compatible object storage** backend.
 
