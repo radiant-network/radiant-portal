@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { setDefaultOptions } from 'date-fns';
+import { enUS, frCA } from 'date-fns/locale';
 
 import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
@@ -17,6 +19,13 @@ function NavbarLangSwitcher({ className }: NavbarLangSwitcherProps) {
     setIsLoading(true);
     try {
       await setLanguage(lang);
+      switch (lang) {
+        case 'fr':
+          setDefaultOptions({ locale: frCA });
+          break;
+        default:
+          setDefaultOptions({ locale: enUS });
+      }
     } finally {
       setIsLoading(false);
     }

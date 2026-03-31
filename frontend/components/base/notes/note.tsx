@@ -126,7 +126,7 @@ function Note({ id, user_id, user_name, created_at, updated_at, content, isOwner
       <div className="shrink-0">
         <SingleAvatar user={{ id: user_id, name: user_name }} size="md" />
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="flex flex-col gap-1 flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-foreground truncate">{user_name}</span>
           <span className="text-sm font-normal text-muted-foreground whitespace-nowrap">
