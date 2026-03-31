@@ -98,7 +98,7 @@ const globalData = {
           field: 'clinvar',
           value: 'Benign',
           op: 'in',
-          count: 41346,
+          count: 41345,
         },
         {
           field: 'vep_impact',
@@ -298,7 +298,7 @@ const globalData = {
           field: 'cn',
           value: '100',
           op: '<',
-          count: 476,
+          count: 648,
         },
         {
           field: 'length',
