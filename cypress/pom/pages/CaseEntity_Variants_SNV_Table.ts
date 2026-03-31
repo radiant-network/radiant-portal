@@ -11,17 +11,6 @@ const selectors = {
 
 const tableColumns = [
   {
-    id: 'interpretation',
-    name: CommonSelectors.interpretationIcon,
-    apiField: 'has_interpretation',
-    isVisibleByDefault: true,
-    pinByDefault: 'left',
-    isSortable: false,
-    isPinnable: false,
-    position: 0,
-    tooltip: 'Clinical Interpretation',
-  },
-  {
     id: 'variant',
     name: 'Variant',
     apiField: 'hgvsg',
@@ -29,6 +18,17 @@ const tableColumns = [
     pinByDefault: 'left',
     isSortable: true,
     isPinnable: true,
+    position: 0,
+    tooltip: null,
+  },
+  {
+    id: 'interpretation',
+    name: '',
+    apiField: 'has_interpretation',
+    isVisibleByDefault: true,
+    pinByDefault: 'left',
+    isSortable: false,
+    isPinnable: false,
     position: 1,
     tooltip: null,
   },
