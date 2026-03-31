@@ -26,12 +26,12 @@ const RichTextViewer = ({ value, className, wrapperClassName, ...props }: RichTe
         StarterKit.configure({
           orderedList: {
             HTMLAttributes: {
-              class: 'list-decimal pl-4',
+              class: 'list-decimal pl-5',
             },
           },
           bulletList: {
             HTMLAttributes: {
-              class: 'list-disc pl-4',
+              class: 'list-disc pl-5',
             },
           },
         }),
