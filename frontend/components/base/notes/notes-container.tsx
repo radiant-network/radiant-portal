@@ -116,7 +116,7 @@ function NotesContainer({ enableEmptyIcon = false, ...props }: NotesContainerPro
           actions={[
             <Button
               key="save"
-              size="xxs"
+              size="2xs"
               onClick={handleSave}
               loading={save.isMutating}
               disabled={isEditorHasEmptyContent(content)}

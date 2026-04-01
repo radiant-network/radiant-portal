@@ -3,6 +3,8 @@ import { fn } from 'storybook/test';
 
 import ActionButton from '@/components/base/buttons/action-button';
 
+import { buttonSizes, buttonVariants } from './utils';
+
 const meta = {
   title: 'Buttons/Action Button',
   component: ActionButton,
@@ -33,9 +35,9 @@ export const Variants: Story = {
   },
   render: args => (
     <div className="flex flex-col gap-6">
-      {['default', 'outline', 'secondary', 'destructive'].map(variant => (
+      {buttonVariants.map(variant => (
         <div key={variant} className="flex gap-2">
-          {['xxs', 'xs', 'sm', 'default', 'lg'].map(size => (
+          {buttonSizes.map(size => (
             <ActionButton key={`${variant}-${size}`} {...args} variant={variant} size={size}>
               {variant}-{size}
             </ActionButton>
