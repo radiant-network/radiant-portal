@@ -50,7 +50,7 @@ function OccurrenceActionsMenu({ row, onInterpretationSaved }: OccurrenceActions
       <ActionButton
         className="px-0"
         variant="outline"
-        size="xxs"
+        size="2xs"
         tooltip={t('variant.actions.view_variant')}
         tooltipSide="top"
         actions={[

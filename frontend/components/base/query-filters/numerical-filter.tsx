@@ -560,11 +560,11 @@ export function NumericalFilter({ field }: IProps) {
       </CardContent>
       <CardFooter size="sm">
         <div className="flex align-right justify-end items-center space-x-2">
-          <Button size="xxs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems} id={`${fieldKey}_clear`}>
+          <Button size="2xs" variant="ghost" onClick={reset} disabled={!hasUnappliedItems} id={`${fieldKey}_clear`}>
             {t('common.filters.buttons.clear')}
           </Button>
           <div className="flex space-x-2">
-            <Button size="xxs" variant="outline" onClick={apply} id={`${fieldKey}_apply`}>
+            <Button size="2xs" variant="outline" onClick={apply} id={`${fieldKey}_apply`}>
               {t('common.filters.buttons.apply')}
             </Button>
           </div>

@@ -11,4 +11,4 @@ export const buttonVariants: VariantProps<typeof baseButtonVariants>['variant'][
   'link',
 ];
 
-export const buttonSizes: VariantProps<typeof buttonVar>['size'][] = ['default', 'xxs', 'xs', 'sm', 'lg'];
+export const buttonSizes: VariantProps<typeof buttonVar>['size'][] = ['3xs', '2xs', 'xs', 'sm', 'default', 'lg'];

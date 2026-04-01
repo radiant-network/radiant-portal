@@ -109,10 +109,10 @@ function Note({ id, user_id, user_name, created_at, updated_at, content, isOwner
           resisizable={false}
           className="min-h-15 max-h-c50 resize-none"
           actions={[
-            <Button key="cancel" variant="outline" size="xxs" onClick={handleCancelEditing}>
+            <Button key="cancel" variant="outline" size="2xs" onClick={handleCancelEditing}>
               {t('common.cancel')}
             </Button>,
-            <Button key="save" size="xxs" onClick={handleSaveEdit} disabled={isEditorHasEmptyContent(editedContent)}>
+            <Button key="save" size="2xs" onClick={handleSaveEdit} disabled={isEditorHasEmptyContent(editedContent)}>
               {t('common.save')}
             </Button>,
           ]}
@@ -143,7 +143,7 @@ function Note({ id, user_id, user_name, created_at, updated_at, content, isOwner
           {isOwner && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="xxs" iconOnly className="ml-auto shrink-0">
+                <Button variant="ghost" size="2xs" iconOnly className="ml-auto shrink-0">
                   <EllipsisVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

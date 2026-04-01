@@ -627,12 +627,12 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
       </CardContent>
       <CardFooter size="sm">
         <div className="flex align-right justify-end items-center space-x-2">
-          <Button size="xxs" variant="ghost" onClick={reset} disabled={selectedItems.length === 0 || isLoading}>
+          <Button size="2xs" variant="ghost" onClick={reset} disabled={selectedItems.length === 0 || isLoading}>
             {t('common.filters.buttons.clear')}
           </Button>
           <div className="flex space-x-2">
             <ActionButton
-              size="xxs"
+              size="2xs"
               variant="outline"
               className="h-7"
               color="primary"

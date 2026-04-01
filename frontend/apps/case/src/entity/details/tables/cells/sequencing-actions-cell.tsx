@@ -24,7 +24,7 @@ function SequencingActionsCell({ row }: CellContext<any, any>) {
             setSequencingExperimentDialogOpen(true);
           }}
           variant="outline"
-          size="xxs"
+          size="2xs"
         >
           {t('case_entity.details.sequencing_details')}
         </Button>

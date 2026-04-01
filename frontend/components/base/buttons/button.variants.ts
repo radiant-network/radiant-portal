@@ -31,11 +31,14 @@ export const baseButtonVariants = tv({
       },
     },
     size: {
-      xxs: {
-        base: 'h-6 p-2 gap-[4px] text-xs [&_svg]:size-3',
+      '3xs': {
+        base: 'h-5 pt-0.5 pb-0.5 pr-1.5 pl-1.5 gap-[4px] text-xs [&_svg]:size-3',
+      },
+      '2xs': {
+        base: 'h-6 p-2 gap-[4px] text-xs [&_svg]:size-4',
       },
       xs: {
-        base: 'h-7 px-2.5 py-2 gap-[6px] text-xs [&_svg]:size-3',
+        base: 'h-7 px-2.5 py-2 gap-[6px] text-xs [&_svg]:size-4',
       },
       sm: {
         base: 'h-8 px-3 py-2',
@@ -65,7 +68,7 @@ export const buttonVariants = tv({
   compoundVariants: [
     {
       iconOnly: true,
-      size: 'xxs',
+      size: '2xs',
       className: {
         base: 'w-6 h-6 px-0',
       },

@@ -451,12 +451,12 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
       </CardContent>
       <CardFooter size="sm">
         <div className="flex align-right justify-end items-center space-x-2">
-          <Button size="xxs" variant="ghost" onClick={reset} disabled={isPristine} id={`${field.key}_clear`}>
+          <Button size="2xs" variant="ghost" onClick={reset} disabled={isPristine} id={`${field.key}_clear`}>
             {t('common.filters.buttons.clear')}
           </Button>
           <div className="flex space-x-2">
             <Button
-              size="xxs"
+              size="2xs"
               variant="outline"
               onClick={handleApply}
               id={`${field.key}_apply`}
