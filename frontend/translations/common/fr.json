@@ -1194,8 +1194,8 @@
         "metrics": {
           "title": "Métriques",
           "quality_depth": "Profondeur Qualité",
-          "allele_depth_alt": "Profondeur Aléle ALT",
-          "total_depth_alt_ref": "Profondeur Total ALT + REF",
+          "allele_depth_alt": "Profondeur allélique ALT",
+          "total_depth_alt_ref": "Profondeur Totale ALT + REF",
           "genotype_quality": "Qualité de Génotype",
           "filter": "Filtre",
           "pass": "Pass",
