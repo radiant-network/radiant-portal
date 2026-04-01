@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">64/74 infos</a><span class="filter-pill ok" aria-disabled="true">200 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">64/74 infos</a><span class="filter-pill ok" aria-disabled="true">198 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>5.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>4.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -677,9 +677,9 @@ tooltipSide?: &#39;top&#39; | &#39;right&#39; | &#39;bottom&#39; | &#39;left&#39
               
               <pre><code>const Variants = args =&gt; (
   &lt;div className=&quot;flex flex-col gap-6&quot;&gt;
-    {[&#39;default&#39;, &#39;outline&#39;, &#39;secondary&#39;, &#39;destructive&#39;].map(variant =&gt; (
+    {buttonVariants.map(variant =&gt; (
       &lt;div key={variant} className=&quot;flex gap-2&quot;&gt;
-        {[&#39;xxs&#39;, &#39;xs&#39;, &#39;sm&#39;, &#39;default&#39;, &#39;lg&#39;].map(size =&gt; (
+        {buttonSizes.map(size =&gt; (
           &lt;ActionButton key={`${variant}-${size}`} {...args} variant={variant} size={size}&gt;
             {variant}-{size}
           &lt;/ActionButton&gt;
@@ -2372,7 +2372,7 @@ import { CircleAlert } from "lucide-react";</code></pre>
       <div class="badges">
         <label for="c-11-buttons-button-props" class="badge ok as-toggle">3 prop types</label>
         <label for="c-11-buttons-button-info" class="badge info as-toggle">1 info</label>
-        <label for="c-11-buttons-button-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-11-buttons-button-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -2424,7 +2424,7 @@ loading?: boolean = false</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { Button } from "components";
+                <pre><code>import { Button, Separator } from "components";
 import { Circle } from "lucide-react";</code></pre>
               </div>
           
@@ -2437,59 +2437,48 @@ import { Circle } from "lucide-react";</code></pre>
               
               
               <pre><code>const Variants = () =&gt; (
-  &lt;div className=&quot;flex flex-col items-start gap-2&quot;&gt;
-    {buttonVariants.map(variant =&gt; (
-      &lt;div key={variant} className=&quot;flex gap-2 items-center&quot;&gt;
-        {buttonSizes.map(size =&gt; (
-          &lt;Button key={size} size={size} variant={variant}&gt;
-            Button {size}
-          &lt;/Button&gt;
+  &lt;div className=&quot;flex flex-col gap-8&quot;&gt;
+    &lt;div className=&quot;flex flex-col items-start gap-2&quot;&gt;
+      &lt;h2&gt;Text Only&lt;/h2&gt;
+      {buttonVariants.map(variant =&gt; (
+        &lt;div key={variant} className=&quot;flex gap-2&quot;&gt;
+          {buttonSizes.map(size =&gt; (
+            &lt;Button key={size} size={size} variant={variant}&gt;
+              Button {size}
+            &lt;/Button&gt;
+          ))}
+        &lt;/div&gt;
+      ))}
+
+      &lt;Separator /&gt;
+      &lt;div className=&quot;flex flex-col items-start gap-2&quot;&gt;
+        &lt;h2&gt;Icon Only&lt;/h2&gt;
+        {buttonVariants.map(variant =&gt; (
+          &lt;div key={variant} className=&quot;flex gap-2&quot;&gt;
+            {buttonSizes.map(size =&gt; (
+              &lt;Button key={size} size={size} variant={variant} iconOnly&gt;
+                &lt;Circle /&gt;
+              &lt;/Button&gt;
+            ))}
+          &lt;/div&gt;
         ))}
       &lt;/div&gt;
-    ))}
-  &lt;/div&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Icon Only</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const IconOnly = args =&gt; (
-  &lt;div className=&quot;flex flex-col items-start gap-2&quot;&gt;
-    {buttonVariants.map(variant =&gt; (
-      &lt;div key={variant} className=&quot;flex gap-2 items-center&quot;&gt;
-        {buttonSizes.map(size =&gt; (
-          &lt;Button key={size} size={size} variant={variant} {...args}&gt;
-            &lt;Circle /&gt;
-          &lt;/Button&gt;
+
+      &lt;Separator /&gt;
+      &lt;div className=&quot;flex flex-col items-start gap-2&quot;&gt;
+        &lt;h2&gt;Icon + Text&lt;/h2&gt;
+        {buttonVariants.map(variant =&gt; (
+          &lt;div key={variant} className=&quot;flex gap-2&quot;&gt;
+            {buttonSizes.map(size =&gt; (
+              &lt;Button key={size} size={size} variant={variant}&gt;
+                &lt;Circle /&gt;
+                Button {size}
+              &lt;/Button&gt;
+            ))}
+          &lt;/div&gt;
         ))}
       &lt;/div&gt;
-    ))}
-  &lt;/div&gt;
-);</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
-                <span class="ex-name">Icon And Text</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const IconAndText = () =&gt; (
-  &lt;div className=&quot;flex flex-col items-start gap-2&quot;&gt;
-    {buttonVariants.map(variant =&gt; (
-      &lt;div key={variant} className=&quot;flex gap-2 items-center&quot;&gt;
-        {buttonSizes.map(size =&gt; (
-          &lt;Button key={size} size={size} variant={variant}&gt;
-            &lt;Circle /&gt;
-            Button {size}
-          &lt;/Button&gt;
-        ))}
-      &lt;/div&gt;
-    ))}
+    &lt;/div&gt;
   &lt;/div&gt;
 );</code></pre>
             </div>
@@ -11013,12 +11002,12 @@ wrapperClassName?: string</code></pre>
             wrapperClassName=&quot;max-w-[500px]&quot;
             autoFocus
             actions={[
-              &lt;Button key=&quot;cancel&quot; variant=&quot;outline&quot; size=&quot;xxs&quot;&gt;
+              &lt;Button key=&quot;cancel&quot; variant=&quot;outline&quot; size=&quot;2xs&quot;&gt;
                 {t(&#39;common.cancel&#39;)}
               &lt;/Button&gt;,
-              &lt;Button key=&quot;save&quot; size=&quot;xxs&quot;&gt;
+              &lt;Button key=&quot;save&quot; size=&quot;2xs&quot;&gt;
                 {t(&#39;common.save&#39;)}
-              &lt;/Button&gt;
+              &lt;/Button&gt;,
             ]} /&gt;
     );
 };</code></pre>
@@ -11031,15 +11020,11 @@ wrapperClassName?: string</code></pre>
               
               
               <pre><code>const Viewer = args =&gt; {
-  const [value, setValue] = useState&lt;string&gt;(args.value ?? &quot;&quot;);
+  const [value, setValue] = useState&lt;string&gt;(args.value ?? &#39;&#39;);
   return (
-    &lt;div className=&#39;flex w-full gap-6&#39;&gt;
-      &lt;RichTextEditor className=&quot;w-[800px]&quot; value={value} onChange={(value) =&gt; setValue(value)} /&gt;
-      &lt;RichTextViewer
-        value={value}
-        wrapperClassName=&quot;max-w-[800px]&quot;
-        autoFocus
-      /&gt;
+    &lt;div className=&quot;flex w-full gap-6&quot;&gt;
+      &lt;RichTextEditor className=&quot;w-[800px]&quot; value={value} onChange={value =&gt; setValue(value)} /&gt;
+      &lt;RichTextViewer value={value} wrapperClassName=&quot;max-w-[800px]&quot; autoFocus /&gt;
     &lt;/div&gt;
   );
 };</code></pre>
