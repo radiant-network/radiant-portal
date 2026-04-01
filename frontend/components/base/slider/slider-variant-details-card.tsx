@@ -250,6 +250,30 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
     );
   }
 
+  const classification = [];
+
+  if ((data.clinvar ?? []).length) {
+    classification.push(
+      <DescriptionRow label={t('preview_sheet.variant_details.sections.classification.clinvar')}>
+        <div className="flex gap-1">
+          {(data.clinvar ?? []).map(key => (
+            <ClassificationBadge key={key} value={key} abbreviated />
+          ))}
+        </div>
+      </DescriptionRow>,
+    );
+  }
+
+  if (Object.keys(data.exomiser_acmg_classification_counts ?? {}).length) {
+    classification.push(
+      <DescriptionRow label={t('preview_sheet.variant_details.sections.classification.exomiser')}>
+        {Object.entries(data.exomiser_acmg_classification_counts ?? {}).map(([key, count]) => (
+          <ClassificationBadge key={key} value={key} count={count} abbreviated />
+        ))}
+      </DescriptionRow>,
+    );
+  }
+
   return (
     <div className="flex flex-wrap gap-4 rounded-md border border-border p-3 sm:gap-20 w-full">
       <div className="flex flex-1 flex-col gap-4">
@@ -267,12 +291,8 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
           )}
         </DescriptionSection>
         <DescriptionSection title={t('preview_sheet.variant_details.sections.classification.title')}>
-          {Object.keys(data.exomiser_acmg_classification_counts ?? {}).length ? (
-            <DescriptionRow label={t('preview_sheet.variant_details.sections.classification.exomiser')}>
-              {Object.entries(data.exomiser_acmg_classification_counts ?? {}).map(([key, count]) => (
-                <ClassificationBadge key={key} value={key} count={count} abbreviated />
-              ))}
-            </DescriptionRow>
+          {classification.length > 0 ? (
+            classification.map(element => element)
           ) : (
             <span className="text-muted-foreground text-xs">
               {t('preview_sheet.variant_details.sections.classification.no_data')}

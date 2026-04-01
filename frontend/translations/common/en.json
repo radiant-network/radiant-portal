@@ -1139,6 +1139,7 @@
         "classification": {
           "title": "Classification",
           "exomiser": "Exomiser",
+          "clinvar": "ClinVar",
           "no_data": "No classification data reported"
         },
         "frequencies": {
