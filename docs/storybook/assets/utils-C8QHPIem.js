@@ -1,0 +1,1 @@
+const e=["default","secondary","destructive","outline","ghost","link","red","orange","yellow","lime","green","cyan","violet","fuchsia","neutral"],t=["3xs","2xs","xs","sm","default","lg"];export{t as a,e as b};
