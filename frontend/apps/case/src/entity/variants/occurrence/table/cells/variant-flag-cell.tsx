@@ -34,17 +34,23 @@ const FLAG_CONFIG = {
 
 const FLAG_TYPES = Object.entries(FLAG_CONFIG) as [FlagType, (typeof FLAG_CONFIG)[FlagType]][];
 
-function VariantFlagCell() {
+type VariantFlagCellProps = {
+  variant?: 'ghost' | 'outline';
+  size?: '2xs' | 'sm';
+};
+
+function VariantFlagCell({ variant = 'ghost', size = '2xs' }: VariantFlagCellProps) {
   const [currentFlag, setCurrentFlag] = useState<FlagType | null>(null);
 
   const config = currentFlag ? FLAG_CONFIG[currentFlag] : null;
   const TriggerIcon = config?.icon ?? Flag;
-  const triggerClass = config?.triggerClass ?? 'text-muted-foreground/40';
+  const inactiveClass = variant === 'ghost' ? 'text-muted-foreground/40' : '';
+  const triggerClass = config?.triggerClass ?? inactiveClass;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="size-6" iconOnly variant="ghost">
+        <Button iconOnly variant={variant} size={size}>
           <TriggerIcon className={triggerClass} size={16} />
         </Button>
       </DropdownMenuTrigger>

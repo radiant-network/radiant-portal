@@ -20,6 +20,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { useSeqIdContext } from '../hooks/use-seq-id';
+import VariantFlagCell from '../table/cells/variant-flag-cell';
 
 type OccurrenceSliderSheetProps = {
   occurrence?: GermlineSNVOccurrence;
@@ -112,6 +113,7 @@ function OccurrenceSheetContent({
         hgvsg={occurrence.hgvsg}
         actions={
           <div className="flex gap-2">
+            <VariantFlagCell variant="outline" size="sm" />
             <NotesProvider value={{ onChangeCallback: listFetcher }}>
               <NotesSliderSheet
                 caseId={caseId}
