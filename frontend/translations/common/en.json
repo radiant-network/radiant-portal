@@ -339,7 +339,7 @@
       },
       "reset": "Reset",
       "results": "Results",
-      "no_result": "No results found",
+      "no_result": "No results",
       "no_result_description": "Adjust your filters and try again.",
       "has_error": "Error loading this content",
       "has_error_description": "Try refreshing the page or try again in a few minutes."

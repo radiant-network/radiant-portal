@@ -339,7 +339,7 @@
       },
       "reset": "Réinitialiser",
       "results": "Résultats",
-      "no_result": "Aucun résultat trouvé",
+      "no_result": "Aucun résultat",
       "no_result_description": "Ajuster vos filtres et essayer à nouveau.",
       "has_error": "Erreur lors du chargement du contenu",
       "has_error_description": "Essayer de rafraichir la page ou essayer à nouveau dans quelques minutes."

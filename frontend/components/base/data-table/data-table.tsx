@@ -738,21 +738,6 @@ function DataTable<T>({
   const footerGroups = table.getFooterGroups();
   const hasFooterDefinitions = useMemo(() => columns.some(column => column.footer !== undefined), [columns]);
 
-  // Determine if pagination should be hidden based on data size vs total
-  const shouldHidePagination = useMemo(() => {
-    if (pagination.type === 'hidden') return true;
-
-    const pageSize = pagination.state?.pageSize || 20;
-
-    // For client side pagination, we base it on the local data
-    if (pagination.type === 'locale') {
-      return data.length <= pageSize;
-    }
-
-    // Hide pagination if data rows are fewer than total records
-    return total < (pageSize || 20);
-  }, [pagination.type, pagination.state?.pageSize, total, data.length]);
-
   /**
    * On component mount
    * - update additional field
@@ -905,7 +890,7 @@ function DataTable<T>({
       <div className={cn('w-full flex text-left justify-between items-end', { 'mb-4': hasUpperSettings })}>
         {/* Total */}
         {tableIndexResultPosition === 'top' && (
-          <div className={cn('flex-1', { invisible: shouldHidePagination })}>
+          <div className={cn('flex-1', { invisible: pagination.type === 'hidden' })}>
             <TableIndexResult
               loading={loadingStates?.total}
               pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
@@ -1058,7 +1043,7 @@ function DataTable<T>({
           </Table>
         )}
       </div>
-      {!shouldHidePagination && (
+      {pagination.type !== 'hidden' && (
         <div className={'flex items-center justify-between py-3 '}>
           <div>
             {tableIndexResultPosition === 'bottom' && (

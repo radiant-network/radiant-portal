@@ -26,8 +26,14 @@ function TableIndexResult({ loading, pageIndex, pageSize, total }: TableIndexRes
 
   return (
     <span className="text-xs text-muted-foreground">
-      {t('common.table.results')} {thousandNumberFormat(from)} - {thousandNumberFormat(to)} of{' '}
-      {thousandNumberFormat(total)}
+      {total > 0 ? (
+        <>
+          {t('common.table.results')} {thousandNumberFormat(from)} - {thousandNumberFormat(to)} of{' '}
+          {thousandNumberFormat(total)}
+        </>
+      ) : (
+        t('common.table.no_result')
+      )}
     </span>
   );
 }
