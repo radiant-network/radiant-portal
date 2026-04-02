@@ -98,6 +98,13 @@ export const buttonVariants = tv({
   compoundVariants: [
     {
       iconOnly: true,
+      size: '3xs',
+      className: {
+        base: 'w-5 h-5 px-0',
+      },
+    },
+    {
+      iconOnly: true,
       size: '2xs',
       className: {
         base: 'w-6 h-6 px-0',
