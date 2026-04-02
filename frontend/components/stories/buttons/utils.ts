@@ -9,6 +9,15 @@ export const buttonVariants: VariantProps<typeof baseButtonVariants>['variant'][
   'outline',
   'ghost',
   'link',
+  'red',
+  'orange',
+  'yellow',
+  'lime',
+  'green',
+  'cyan',
+  'violet',
+  'fuchsia',
+  'neutral',
 ];
 
 export const buttonSizes: VariantProps<typeof buttonVar>['size'][] = ['3xs', '2xs', 'xs', 'sm', 'default', 'lg'];
