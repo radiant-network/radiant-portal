@@ -24,6 +24,36 @@ export const baseButtonVariants = tv({
       link: {
         base: 'text-primary underline-offset-4 hover:underline',
       },
+      red: {
+        base: 'bg-red/20 border-1 text-red-foreground border-red-foreground/30 shadow-xs',
+      },
+      orange: {
+        base: 'bg-orange/20 border-1 text-orange-foreground border-orange-foreground/30 shadow-xs',
+      },
+      yellow: {
+        base: 'bg-yellow/20 border-1 text-yellow-foreground border-yellow-foreground/30 shadow-xs',
+      },
+      lime: {
+        base: 'bg-lime/20 border-1 text-lime-foreground border-lime-foreground/30 shadow-xs',
+      },
+      green: {
+        base: 'bg-green/20 border-1 text-green-foreground border-green-foreground/30 shadow-xs',
+      },
+      cyan: {
+        base: 'bg-cyan/20 border-1 text-cyan-foreground border-cyant-foreground/30 shadow-xs',
+      },
+      blue: {
+        base: 'bg-blue/20 border-1 text-blue-foreground border-blue-foreground/30 shadow-xs',
+      },
+      violet: {
+        base: 'bg-violet/20 border-1 text-violet-foreground border-violet-foreground/30 shadow-xs',
+      },
+      fuchsia: {
+        base: 'bg-fuchsia/20 border-1 text-fuchsia-foreground border-fuchsia-foreground/30 shadow-xs',
+      },
+      neutral: {
+        base: 'bg-neutral/20 border-1 text-neutral-foreground border-neutral-foreground/30 shadow-xs',
+      },
     },
     disabled: {
       true: {
