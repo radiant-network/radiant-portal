@@ -113,7 +113,7 @@ function OccurrenceSheetContent({
         hgvsg={occurrence.hgvsg}
         actions={
           <div className="flex gap-2">
-            <VariantFlagCell variant="outline" size="sm" />
+            <VariantFlagCell locusId={occurrence.locus_id} variant="outline" size="sm" />
             <NotesProvider value={{ onChangeCallback: listFetcher }}>
               <NotesSliderSheet
                 caseId={caseId}

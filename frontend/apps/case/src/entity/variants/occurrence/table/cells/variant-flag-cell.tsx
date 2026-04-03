@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Flag, Pin, Star } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
@@ -9,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/base/shadcn/dropdown-menu';
 
-type FlagType = 'flag' | 'pin' | 'star';
+import { type FlagType, useVariantFlag } from '../../hooks/use-variant-flags';
 
 const FLAG_CONFIG = {
   flag: {
@@ -35,12 +34,13 @@ const FLAG_CONFIG = {
 const FLAG_TYPES = Object.entries(FLAG_CONFIG) as [FlagType, (typeof FLAG_CONFIG)[FlagType]][];
 
 type VariantFlagCellProps = {
+  locusId: string;
   variant?: 'ghost' | 'outline';
   size?: '2xs' | 'sm';
 };
 
-function VariantFlagCell({ variant = 'ghost', size = '2xs' }: VariantFlagCellProps) {
-  const [currentFlag, setCurrentFlag] = useState<FlagType | null>(null);
+function VariantFlagCell({ locusId, variant = 'ghost', size = '2xs' }: VariantFlagCellProps) {
+  const [currentFlag, setFlag] = useVariantFlag(locusId);
 
   const config = currentFlag ? FLAG_CONFIG[currentFlag] : null;
   const TriggerIcon = config?.icon ?? Flag;
@@ -61,7 +61,7 @@ function VariantFlagCell({ variant = 'ghost', size = '2xs' }: VariantFlagCellPro
             <DropdownMenuCheckboxItem
               key={type}
               checked={currentFlag === type}
-              onSelect={() => setCurrentFlag(currentFlag === type ? null : type)}
+              onSelect={() => setFlag(currentFlag === type ? null : type)}
             >
               <span className="flex items-center gap-2">
                 <Icon className={cfg.menuClass} size={14} />

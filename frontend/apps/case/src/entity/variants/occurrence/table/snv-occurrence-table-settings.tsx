@@ -52,7 +52,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
         <div className="flex items-center gap-1">
           <InterpretationCell occurrence={info.getValue()} />
           <VariantNoteCell occurrence={info.getValue()} />
-          <VariantFlagCell />
+          <VariantFlagCell locusId={info.getValue().locus_id} />
         </div>
       ),
       header: () => null,
