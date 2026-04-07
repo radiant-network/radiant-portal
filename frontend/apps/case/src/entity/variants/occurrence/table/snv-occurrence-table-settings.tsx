@@ -36,14 +36,6 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
     //   enablePinning: false,
     //   enableResizing: false,
     // },
-    // Variant
-    columnHelper.accessor(row => row.hgvsg, {
-      id: 'hgvsg',
-      cell: info => <HgvsgCell occurrence={info.row.original} />,
-      header: t('variant.headers.hgvsg'),
-      size: 70,
-      minSize: 40,
-    }),
     // interpretation and note cell
     columnHelper.accessor(row => row, {
       id: 'row-info',
@@ -58,6 +50,14 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
       enablePinning: false,
       enableResizing: false,
       enableSorting: false,
+    }),
+    // Variant
+    columnHelper.accessor(row => row.hgvsg, {
+      id: 'hgvsg',
+      cell: info => <HgvsgCell occurrence={info.row.original} />,
+      header: t('variant.headers.hgvsg'),
+      size: 70,
+      minSize: 40,
     }),
     // Gene
     columnHelper.accessor(row => row.symbol, {
@@ -247,7 +247,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
     {
       id: 'actions',
       cell: info => <OccurrenceActionsMenu row={info.row} onInterpretationSaved={onInterpretationSaved} />,
-      size: 74,
+      size: 86,
       enableResizing: false,
       enablePinning: true,
     },
@@ -263,17 +263,17 @@ const defaultSNVSettings = createColumnSettings([
   //   pinningPosition: 'left',
   // },
   {
-    id: 'hgvsg',
-    visible: true,
-    pinningPosition: 'left',
-    label: 'variant.headers.hgvsg',
-  },
-  {
     id: 'row-info',
     visible: true,
     fixed: true,
     pinningPosition: 'left',
     additionalFields: ['transcript_id', 'has_interpretation'],
+  },
+  {
+    id: 'hgvsg',
+    visible: true,
+    pinningPosition: 'left',
+    label: 'variant.headers.hgvsg',
   },
   {
     id: 'symbol',
