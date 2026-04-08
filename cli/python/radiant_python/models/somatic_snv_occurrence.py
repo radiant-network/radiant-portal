@@ -47,13 +47,11 @@ class SomaticSNVOccurrence(BaseModel):
     seq_id: StrictInt
     somatic_pc_tn_wgs: StrictInt
     somatic_pf_tn_wgs: Union[StrictFloat, StrictInt]
-    somatic_quality: StrictInt
     symbol: StrictStr
     task_id: StrictInt
     variant_class: StrictStr
     vep_impact: VepImpact
-    zygosity: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "clinvar", "germline_pc_wgs", "germline_pf_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "hotspot", "is_canonical", "is_mane_plus", "is_mane_select", "locus_id", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_pc_tn_wgs", "somatic_pf_tn_wgs", "somatic_quality", "symbol", "task_id", "variant_class", "vep_impact", "zygosity"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "clinvar", "germline_pc_wgs", "germline_pf_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "hotspot", "is_canonical", "is_mane_plus", "is_mane_select", "locus_id", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_pc_tn_wgs", "somatic_pf_tn_wgs", "symbol", "task_id", "variant_class", "vep_impact"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -126,12 +124,10 @@ class SomaticSNVOccurrence(BaseModel):
             "seq_id": obj.get("seq_id"),
             "somatic_pc_tn_wgs": obj.get("somatic_pc_tn_wgs"),
             "somatic_pf_tn_wgs": obj.get("somatic_pf_tn_wgs"),
-            "somatic_quality": obj.get("somatic_quality"),
             "symbol": obj.get("symbol"),
             "task_id": obj.get("task_id"),
             "variant_class": obj.get("variant_class"),
-            "vep_impact": obj.get("vep_impact"),
-            "zygosity": obj.get("zygosity")
+            "vep_impact": obj.get("vep_impact")
         })
         return _obj
 

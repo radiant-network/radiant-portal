@@ -4220,12 +4220,6 @@ export interface SomaticSNVOccurrence {
     'somatic_pf_tn_wgs': number;
     /**
      * 
-     * @type {number}
-     * @memberof SomaticSNVOccurrence
-     */
-    'somatic_quality': number;
-    /**
-     * 
      * @type {string}
      * @memberof SomaticSNVOccurrence
      */
@@ -4248,12 +4242,6 @@ export interface SomaticSNVOccurrence {
      * @memberof SomaticSNVOccurrence
      */
     'vep_impact': VepImpact;
-    /**
-     * 
-     * @type {string}
-     * @memberof SomaticSNVOccurrence
-     */
-    'zygosity'?: string;
 }
 
 

@@ -25,12 +25,10 @@ Name | Type | Description | Notes
 **seq_id** | **int** |  | 
 **somatic_pc_tn_wgs** | **int** |  | 
 **somatic_pf_tn_wgs** | **float** |  | 
-**somatic_quality** | **int** |  | 
 **symbol** | **str** |  | 
 **task_id** | **int** |  | 
 **variant_class** | **str** |  | 
 **vep_impact** | [**VepImpact**](VepImpact.md) |  | 
-**zygosity** | **str** |  | [optional] 
 
 ## Example
 
