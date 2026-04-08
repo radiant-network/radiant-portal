@@ -2052,8 +2052,6 @@ components:
           type: integer
         somatic_pf_tn_wgs:
           type: number
-        somatic_quality:
-          type: integer
         symbol:
           type: string
         task_id:
@@ -2062,8 +2060,6 @@ components:
           type: string
         vep_impact:
           $ref: '#/components/schemas/VepImpact'
-        zygosity:
-          type: string
       required:
       - aa_change
       - clinvar
@@ -2084,7 +2080,6 @@ components:
       - seq_id
       - somatic_pc_tn_wgs
       - somatic_pf_tn_wgs
-      - somatic_quality
       - symbol
       - task_id
       - variant_class

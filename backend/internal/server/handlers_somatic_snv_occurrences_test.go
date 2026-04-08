@@ -80,7 +80,7 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/list", OccurrencesSomaticSNVListHandler(repo))
 	body := `{
 			"additional_fields":[
-				"zygosity", "ad_ratio"
+				"ad_ratio"
 			]
 	}`
 	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/list", bytes.NewBuffer([]byte(body)))
@@ -109,7 +109,6 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 		"seq_id":74, 
 		"somatic_pc_tn_wgs":6, 
 		"somatic_pf_tn_wgs":0.55, 
-		"somatic_quality": null, 
 		"symbol":"BRAF", 
 		"task_id":74, 
 		"variant_class":"class1", 
