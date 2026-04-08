@@ -24,8 +24,6 @@ type SomaticSNVOccurrence struct {
 	GermlinePcWgs       *int              `json:"germline_pc_wgs" validate:"required"`
 	SomaticPfTnWgs      *float64          `json:"somatic_pf_tn_wgs" validate:"required"`
 	SomaticPcTnWgs      *int              `json:"somatic_pc_tn_wgs" validate:"required"`
-	SomaticQuality      *int32            `json:"somatic_quality" validate:"required"`
-	Zygosity            string            `json:"zygosity,omitempty"`
 	AdRatio             *float32          `json:"ad_ratio,omitempty"`
 }
 
@@ -62,8 +60,33 @@ var SomaticSNVTumorAdRatioField = Field{
 	Table:         SomaticSNVOccurrenceTable,
 }
 
+var SomaticSNVTumorAdAltField = Field{
+	Name:          "tumor_ad_alt",
+	Alias:         "ad_alt",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         SomaticSNVOccurrenceTable,
+}
+
+var SomaticSNVTumorAdTotalField = Field{
+	Name:          "tumor_ad_total",
+	Alias:         "ad_total",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         SomaticSNVOccurrenceTable,
+}
+
 var SomaticSNVFilterField = Field{
 	Name:            "filter",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           SomaticSNVOccurrenceTable,
+}
+
+var SomaticSNVInfoQdField = Field{
+	Name:            "info_qd",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
 	Table:           SomaticSNVOccurrenceTable,
@@ -94,21 +117,15 @@ var SomaticSNVOccurrencesDefaultFields = []Field{
 	RsNumberField,
 	PickedOmimInheritanceCodeField,
 	SomaticSNVInfoHotspotAlleleField,
-	// TODO CMC
-	// TODO Tier
 	ClinvarField,
 	GnomadV3AfField,
 	GermlinePfWgsField,
 	GermlinePcWgsField,
 	SomaticPfTnWgsField,
 	SomaticPcTnWgsField,
-	// TODO somatic quality
 }
 
 var SomaticSNVOccurrencesFields = append(SomaticSNVOccurrencesDefaultFields,
-	// TODO zygosity
-	SomaticSNVTumorAdRatioField,
-
 	// Variant facets
 	ConsequenceField,
 	ChromosomeField,
@@ -137,7 +154,6 @@ var SomaticSNVOccurrencesFields = append(SomaticSNVOccurrencesDefaultFields,
 	RevelScoreField,
 	SpliceaiDsField,
 	SiftPredField,
-	// TODO COSMIC
 
 	// Frequency facets
 	GermlinePfWgsAffectedField,
@@ -146,8 +162,11 @@ var SomaticSNVOccurrencesFields = append(SomaticSNVOccurrencesDefaultFields,
 	ThousandGenomesAfField,
 
 	// Occurrence facets
-	// TODO zygosity and metrics
 	SomaticSNVFilterField,
+	SomaticSNVInfoQdField,
+	SomaticSNVTumorAdRatioField,
+	SomaticSNVTumorAdAltField,
+	SomaticSNVTumorAdTotalField,
 )
 
 var SomaticSNVOccurrencesDefaultSort = []SortField{{Field: PickedImpactScoreField, Order: "desc"}}

@@ -109,7 +109,6 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 		"seq_id":74, 
 		"somatic_pc_tn_wgs":6, 
 		"somatic_pf_tn_wgs":0.55, 
-		"somatic_quality": null, 
 		"symbol":"BRAF", 
 		"task_id":74, 
 		"variant_class":"class1", 
