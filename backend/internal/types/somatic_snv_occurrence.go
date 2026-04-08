@@ -57,6 +57,7 @@ var SomaticSNVTumorAdRatioField = Field{
 	CanBeSelected: true,
 	CanBeSorted:   true,
 	CanBeFiltered: true,
+	Type:          DecimalType,
 	Table:         SomaticSNVOccurrenceTable,
 }
 
@@ -66,6 +67,7 @@ var SomaticSNVTumorAdAltField = Field{
 	CanBeSelected: true,
 	CanBeSorted:   true,
 	CanBeFiltered: true,
+	Type:          IntegerType,
 	Table:         SomaticSNVOccurrenceTable,
 }
 
@@ -75,6 +77,7 @@ var SomaticSNVTumorAdTotalField = Field{
 	CanBeSelected: true,
 	CanBeSorted:   true,
 	CanBeFiltered: true,
+	Type:          IntegerType,
 	Table:         SomaticSNVOccurrenceTable,
 }
 
@@ -86,10 +89,12 @@ var SomaticSNVFilterField = Field{
 }
 
 var SomaticSNVInfoQdField = Field{
-	Name:            "info_qd",
-	CanBeFiltered:   true,
-	CanBeAggregated: true,
-	Table:           SomaticSNVOccurrenceTable,
+	Name:          "info_qd",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         SomaticSNVOccurrenceTable,
 }
 
 var SomaticSNVInfoHotspotAlleleField = Field{
