@@ -80,7 +80,7 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/list", OccurrencesSomaticSNVListHandler(repo))
 	body := `{
 			"additional_fields":[
-				"zygosity", "ad_ratio"
+				"ad_ratio"
 			]
 	}`
 	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/list", bytes.NewBuffer([]byte(body)))
