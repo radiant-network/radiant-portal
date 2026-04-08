@@ -15,7 +15,6 @@ import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePe
 import { documentApi } from '@/utils/api';
 
 type FilesTableFilters = {
-  loading: boolean;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
 };
 
@@ -40,14 +39,14 @@ async function fetchFilters() {
   return response.data;
 }
 
-function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
+function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
   const { t } = useI18n();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('files-filters', {
     ...FILTER_DEFAULTS,
   });
-  const { data: apiFilters } = useSWR<DocumentFilters>('document-filters', () => fetchFilters(), {
+  const { data: apiFilters, isLoading } = useSWR<DocumentFilters>('document-filters', () => fetchFilters(), {
     revalidateOnFocus: false,
     revalidateOnMount: true,
     revalidateIfStale: false,
@@ -115,7 +114,7 @@ function FilesTableFilters({ setSearchCriteria, loading }: FilesTableFilters) {
       setFilters={setFilters}
       openFilters={openFilters}
       setOpenFilters={setOpenFilters}
-      loading={loading}
+      loading={isLoading}
       setSearchCriteria={setSearchCriteria}
       criterias={CRITERIAS}
       defaultFilters={FILTER_DEFAULTS}
