@@ -498,8 +498,6 @@ function MultiSelector({
                             setInputValue('');
                             // Clear search results by reverting to default options
                             setOptions(transToGroupOption(arrayDefaultOptions, groupBy));
-                            // Close the dropdown
-                            setOpen(false);
 
                             let newOptions: MultiSelectorOption[] = [];
 
