@@ -11,17 +11,6 @@ const selectors = {
 
 const tableColumns = [
   {
-    id: 'variant',
-    name: 'Variant',
-    apiField: 'hgvsg',
-    isVisibleByDefault: true,
-    pinByDefault: 'left',
-    isSortable: true,
-    isPinnable: true,
-    position: 0,
-    tooltip: null,
-  },
-  {
     id: 'interpretation',
     name: '',
     apiField: 'has_interpretation',
@@ -29,6 +18,17 @@ const tableColumns = [
     pinByDefault: 'left',
     isSortable: false,
     isPinnable: false,
+    position: 0,
+    tooltip: null,
+  },
+  {
+    id: 'variant',
+    name: 'Variant',
+    apiField: 'hgvsg',
+    isVisibleByDefault: true,
+    pinByDefault: 'left',
+    isSortable: true,
+    isPinnable: true,
     position: 1,
     tooltip: null,
   },
