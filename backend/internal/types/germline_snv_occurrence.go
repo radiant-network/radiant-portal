@@ -190,7 +190,7 @@ var GermlineSNVAdRatioField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
-	Type:          IntegerType,
+	Type:          DecimalType,
 	Table:         GermlineSNVOccurrenceTable,
 }
 var GermlineSNVAdAltField = Field{
