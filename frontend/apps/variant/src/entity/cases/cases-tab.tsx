@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
 import { ApiError, VariantCasesCount, VariantCasesFilters } from '@/api/api';
@@ -17,6 +18,8 @@ enum Tabs {
   InterpretedCases = 'InterpretedCases',
   OtherCases = 'OtherCases',
 }
+
+const TAB_SEARCH_PARAM = 'cases';
 
 type CasesCountInput = {
   key: string;
@@ -36,8 +39,10 @@ async function fetchCasesFilters() {
 function CasesTab() {
   const { t } = useI18n();
   const params = useParams<{ locusId: string }>();
-
-  const [activeTab, setActiveTab] = useState<Tabs>(Tabs.InterpretedCases);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<Tabs>(
+    (searchParams.get(TAB_SEARCH_PARAM) as Tabs) ?? Tabs.InterpretedCases,
+  );
 
   const { data } = useSWR<VariantCasesCount, ApiError, CasesCountInput>(
     {
@@ -53,6 +58,19 @@ function CasesTab() {
 
   const filtersQuery = useSWR<VariantCasesFilters, ApiError, string>('cases-filters', fetchCasesFilters);
 
+  const handleOnTabChange = useCallback(
+    (value: Tabs) => {
+      searchParams.set('cases', value);
+      setSearchParams(searchParams, { replace: true });
+      setActiveTab(value);
+    },
+    [searchParams],
+  );
+
+  useEffect(() => {
+    setActiveTab((searchParams.get(TAB_SEARCH_PARAM) as Tabs) ?? Tabs.InterpretedCases);
+  }, [searchParams]);
+
   return (
     <div className={tabContentClassName}>
       <CasesFiltersProvider filters={filtersQuery.data} isLoading={filtersQuery.isLoading}>
@@ -66,7 +84,7 @@ function CasesTab() {
             <CardDescription className="font-normal">{t('variant_entity.cases.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <TabsNav value={activeTab} onValueChange={setActiveTab}>
+            <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
               <TabsList>
                 <TabsListItem data-cy="interpreted-tab" value={Tabs.InterpretedCases}>
                   {t('variant_entity.cases.interpreted_table.title', {

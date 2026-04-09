@@ -5,9 +5,12 @@ import { RangeOperators } from '@/components/cores/sqon';
 
 export enum ApplicationId {
   'admin' = 'admin',
-  'snv_occurrence' = 'snv_occurrence',
-  'cnv_occurrence' = 'cnv_occurrence',
-  'variant_entity' = 'snv_occurrence',
+  'germline_snv_occurrence' = 'germline_snv_occurrence',
+  'germline_cnv_occurrence' = 'germline_cnv_occurrence',
+  'somatic_snv_to_occurrence' = 'somatic_snv_to_occurrence',
+  'somatic_snv_tn_occurrence' = 'somatic_snv_tn_occurrence',
+  'somatic_cnv_to_occurrence' = 'somatic_cnv_to_occurrence',
+  'variant_entity' = 'germline_snv_occurrence',
 }
 
 export interface IFilterRangeTypes {
@@ -94,8 +97,11 @@ export interface AppsAdminConfig extends BaseAppsConfig {
 export interface PortalConfig {
   admin: AppsAdminConfig;
   variant_entity: BaseAppsConfig;
-  snv_occurrence: AppsConfig;
-  cnv_occurrence: AppsConfig;
+  germline_snv_occurrence: AppsConfig;
+  germline_cnv_occurrence: AppsConfig;
+  somatic_snv_to_occurrence: AppsConfig;
+  somatic_snv_tn_occurrence: AppsConfig;
+  somatic_cnv_to_occurrence: AppsConfig;
   portal: {
     name: string;
     navigation: {

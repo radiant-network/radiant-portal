@@ -7,9 +7,10 @@ type SliderOccurrenceSubHeader = {
   hgvsg: string;
   locusId: string;
   actions: React.ReactNode;
+  type?: string;
 };
 
-function SliderOccurrenceSubHeader({ hgvsg, locusId, actions }: SliderOccurrenceSubHeader) {
+function SliderOccurrenceSubHeader({ hgvsg, locusId, actions, type = 'germline' }: SliderOccurrenceSubHeader) {
   const { t } = useI18n();
   return (
     <div className="flex flex-wrap gap-4 items-center justify-between w-full">
@@ -26,7 +27,7 @@ function SliderOccurrenceSubHeader({ hgvsg, locusId, actions }: SliderOccurrence
           <span className="overflow-hidden text-ellipsis max-w-52">{hgvsg}</span>
         </AnchorLink>
         <Badge variant="secondary" className="bg-slate-500/20 text-slate-800 border-transparent">
-          {t('preview_sheet.header.germline')}
+          {t(`preview_sheet.header.${type}`)}
         </Badge>
       </div>
       {actions}

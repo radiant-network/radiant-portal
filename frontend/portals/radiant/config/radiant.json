@@ -3,8 +3,8 @@
     "app_id": "admin",
     "admin_code": "admin"
   },
-  "snv_occurrence": {
-    "app_id": "snv_occurrence",
+  "germline_snv_occurrence": {
+    "app_id": "germline_snv_occurrence",
     "saved_filter_type": "germline_snv_occurrence",
     "aggregations": {
       "variant": {
@@ -319,8 +319,8 @@
       }
     }
   },
-  "cnv_occurrence": {
-    "app_id": "cnv_occurrence",
+  "germline_cnv_occurrence": {
+    "app_id": "germline_cnv_occurrence",
     "saved_filter_type": "germline_cnv_occurrence",
     "aggregations": {
       "variant": {
@@ -440,6 +440,290 @@
               "min": 0,
               "max": 100,
               "defaultOperator": "<",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          }
+        ]
+      }
+    }
+  },
+  "somatic_snv_to_occurrence": {
+    "app_id": "somatic_snv_to_occurrence",
+    "saved_filter_type": "somatic_snv_occurrence",
+    "aggregations": {
+      "variant": {
+        "items": [
+          { "key": "variant_class", "translation_key": "variant_class", "type": "multiple", "withDictionary": true },
+          { "key": "consequence", "translation_key": "consequence", "type": "multiple", "withDictionary": true },
+          { "key": "chromosome", "translation_key": "chromosome", "type": "multiple", "withDictionary": true },
+          {
+            "key": "start",
+            "translation_key": "start",
+            "type": "numerical",
+            "defaults": { "min": 0, "max": 100, "defaultOperator": "between" }
+          }
+        ]
+      },
+      "gene": {
+        "items": [
+          { "key": "search_by_symbol", "translation_key": "search_by_symbol", "type": "search_by" },
+          { "key": "upload_list_symbol", "translation_key": "upload_list_symbol", "type": "upload_list" },
+          { "key": "biotype", "translation_key": "biotype", "type": "multiple", "withDictionary": true },
+          {
+            "key": "gnomad_pli",
+            "translation_key": "gnomad_pli",
+            "type": "numerical",
+            "defaults": { "min": 0, "max": 100, "defaultOperator": ">" }
+          },
+          {
+            "key": "gnomad_loeuf",
+            "translation_key": "gnomad_loeuf",
+            "type": "numerical",
+            "defaults": { "min": 0, "max": 100, "defaultOperator": "<" }
+          },
+          {
+            "key": "omim_inheritance",
+            "translation_key": "omim_inheritance",
+            "type": "multiple",
+            "withDictionary": true
+          },
+          { "key": "gene_divider", "translation_key": "gene_divider", "type": "divider" },
+          { "key": "hpo_gene_panel", "translation_key": "hpo_gene_panel", "type": "multiple" },
+          { "key": "orphanet_gene_panel", "translation_key": "orphanet_gene_panel", "type": "multiple" },
+          { "key": "omim_gene_panel", "translation_key": "omim_gene_panel", "type": "multiple" },
+          { "key": "ddd_gene_panel", "translation_key": "ddd_gene_panel", "type": "multiple" },
+          { "key": "cosmic_gene_panel", "translation_key": "cosmic_gene_panel", "type": "multiple" },
+          { "key": "symbol", "translation_key": "symbol", "type": "multiple", "facetHidden": true }
+        ]
+      },
+      "pathogenicity": {
+        "items": [
+          { "key": "clinvar", "translation_key": "clinvar", "type": "multiple", "withDictionary": true },
+          { "key": "vep_impact", "translation_key": "vep_impact", "type": "multiple", "withDictionary": true },
+          {
+            "key": "pathogenicity_predictions_divider",
+            "translation_key": "pathogenicity_predictions_divider",
+            "type": "divider"
+          },
+          {
+            "key": "cadd_score",
+            "translation_key": "cadd_score",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": ">",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "cadd_phred",
+            "translation_key": "cadd_phred",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": ">",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "dann_score",
+            "translation_key": "dann_score",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": ">",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          { "key": "fathmm_pred", "translation_key": "fathmm_pred", "type": "multiple" },
+          { "key": "lrt_pred", "translation_key": "lrt_pred", "type": "multiple", "withDictionary": true },
+          { "key": "polyphen2_hvar_pred", "translation_key": "polyphen2_hvar_pred", "type": "multiple" },
+          {
+            "key": "revel_score",
+            "translation_key": "revel_score",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": ">",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "spliceai_ds",
+            "translation_key": "spliceai_ds",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": ">",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          { "key": "sift_pred", "translation_key": "sift_pred", "type": "multiple" },
+          {
+            "key": "pathogenicity_oncology_divider",
+            "translation_key": "pathogenicity_oncology_divider",
+            "type": "divider"
+          },
+          { "key": "hotspot", "translation_key": "hotspot", "type": "boolean" }
+        ]
+      },
+      "frequency": {
+        "items": [
+          {
+            "key": "frequency_divider_my_organization",
+            "translation_key": "frequency_divider_my_organization",
+            "type": "divider"
+          },
+          {
+            "key": "somatic_pf_tn_wgs",
+            "translation_key": "somatic_pf_tn_wgs",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": "<",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "germline_pf_wgs",
+            "translation_key": "germline_pf_wgs",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": "<",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "germline_pf_wgs_affected",
+            "translation_key": "germline_pf_wgs_affected",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": "<",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "frequency_divider_pulic_cohorts",
+            "translation_key": "frequency_divider_pulic_cohorts",
+            "type": "divider"
+          },
+          {
+            "key": "germline_pf_wgs_not_affected",
+            "translation_key": "germline_pf_wgs_not_affected",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": "<",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "gnomad_v3_af",
+            "translation_key": "gnomad_v3_af",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": "<",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "topmed_af",
+            "translation_key": "topmed_af",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": "<",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "thousand_genome_af",
+            "translation_key": "thousand_genome_af",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": "<",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          }
+        ]
+      },
+      "occurrence": {
+        "items": [
+          { "key": "occurrence_metrics_divider", "translation_key": "occurrence_metrics_divider", "type": "divider" },
+          { "key": "filter", "translation_key": "filter", "type": "multiple" },
+          {
+            "key": "info_qd",
+            "translation_key": "info_qd",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": ">",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "ad_alt",
+            "translation_key": "ad_alt",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": ">",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "ad_total",
+            "translation_key": "ad_total",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": ">",
+              "defaultMin": 0,
+              "defaultMax": 100
+            }
+          },
+          {
+            "key": "ad_ratio",
+            "translation_key": "ad_ratio",
+            "type": "numerical",
+            "defaults": {
+              "min": 0,
+              "max": 100,
+              "defaultOperator": ">",
               "defaultMin": 0,
               "defaultMax": 100
             }

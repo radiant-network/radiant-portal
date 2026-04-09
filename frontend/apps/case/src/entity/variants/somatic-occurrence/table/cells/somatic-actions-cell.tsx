@@ -1,41 +1,37 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { Row } from '@tanstack/react-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import { useI18n } from '@/components/hooks/i18n';
+import { SELECTED_VARIANT_PARAM } from '@/entity/variants/constants';
 import { useCaseIdFromParam } from '@/utils/helper';
 import IGVDialog from 'components/base/igv/igv-dialog';
 
-import OccurrenceSliderSheet from '../../slider/slider-occurrence-sheet';
-
-type OccurrenceActionsMenuProps = {
+type SomaticActionsMenuProps = {
   row: Row<GermlineSNVOccurrence>;
-  onInterpretationSaved: () => void;
 };
 
-function OccurrenceActionsMenu({ row, onInterpretationSaved }: OccurrenceActionsMenuProps) {
+function SomaticActionsCell({ row }: SomaticActionsMenuProps) {
   const { t } = useI18n();
-  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
   const [igvOpen, setIgvOpen] = useState<boolean>(false);
-
   const caseId = useCaseIdFromParam();
-
   const { locus_id, chromosome, start, rsnumber, seq_id, locus } = row.original;
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const onNavigateToVariantPage = () => {
+  const handlePreview = useCallback(() => {
+    searchParams.set(SELECTED_VARIANT_PARAM, locus_id);
+    setSearchParams(searchParams, { replace: true });
+  }, []);
+
+  const handleNavigateToVariantPage = useCallback(() => {
     window.open(`/variants/entity/${locus_id}`, '_blank');
-  };
+  }, [locus_id]);
 
   return (
     <>
-      <OccurrenceSliderSheet
-        open={sheetOpen}
-        setOpen={setSheetOpen}
-        occurrence={row.original as GermlineSNVOccurrence}
-        onInterpretationSaved={onInterpretationSaved}
-      />
       {caseId && (
         <IGVDialog
           open={igvOpen}
@@ -57,12 +53,12 @@ function OccurrenceActionsMenu({ row, onInterpretationSaved }: OccurrenceActions
           {
             icon: <EyeIcon />,
             label: t('variant.actions.preview'),
-            onClick: () => setSheetOpen(true),
+            onClick: handlePreview,
           },
           {
             icon: <ArrowUpRight />,
             label: t('variant.actions.view_variant'),
-            onClick: onNavigateToVariantPage,
+            onClick: handleNavigateToVariantPage,
             hasSeparator: true,
           },
           {
@@ -93,11 +89,11 @@ function OccurrenceActionsMenu({ row, onInterpretationSaved }: OccurrenceActions
             },
           },
         ]}
-        onDefaultAction={onNavigateToVariantPage}
+        onDefaultAction={handleNavigateToVariantPage}
       >
         <ArrowUpRight size={16} />
       </ActionButton>
     </>
   );
 }
-export default OccurrenceActionsMenu;
+export default SomaticActionsCell;

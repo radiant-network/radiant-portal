@@ -20,7 +20,7 @@ import {
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
 import { caseApi, occurrencesApi } from '@/utils/api';
-import { useCaseIdFromParam } from '@/utils/helper';
+import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
 import InterpretationVariantHeader from './header';
 import { useInterpretationHelper } from './hook';
@@ -32,7 +32,6 @@ import InterpretationTranscript from './transcript';
 import { Interpretation, InterpretationFormRef } from './types';
 
 type InterpretationDialogButtonProps = {
-  seqId: number;
   locusId: string;
   transcriptId?: string;
   handleSaveCallback?: () => void;
@@ -55,7 +54,6 @@ async function fetchCaseEntity(input: CaseEntityInput) {
 }
 
 function InterpretationDialog({
-  seqId,
   locusId,
   transcriptId,
   handleSaveCallback,
@@ -68,6 +66,8 @@ function InterpretationDialog({
   const gerlimeFormRef = useRef<InterpretationFormRef>(null);
   const somaticFormRef = useRef<InterpretationFormRef>(null);
   const caseId = useCaseIdFromParam();
+  const seqId = useSeqIdFromSearchParam();
+
   const { fetch: fetchInterpretationHelper, save: saveInterpretationHelper } = useInterpretationHelper({
     caseId,
     seqId: seqId,

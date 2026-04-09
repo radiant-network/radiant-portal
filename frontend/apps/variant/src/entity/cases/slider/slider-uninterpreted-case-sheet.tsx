@@ -86,6 +86,7 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
       </SliderHeader>
       <Separator />
       <SliderOccurrenceSubHeader
+        type={caseResult.data.case_type}
         hgvsg={expandResult.data.hgvsg}
         locusId={expandResult.data.locus_id}
         actions={

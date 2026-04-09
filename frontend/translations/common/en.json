@@ -477,6 +477,8 @@
         "spliceai_ds": "SpliceAI",
         "sm": "SM",
         "sm_tooltip": "Linear copy ratio of the segment mean",
+        "somatic_pf_tn_wgs": "Freq. TN All Patients",
+        "somatic_pf_tn_wgs_tooltip": "Frequency across all patients of the network (WGS)",
         "start": "Position",
         "study_code": "Study Code",
         "study_id": "Study ID",
@@ -680,6 +682,7 @@
       "gene_divider": "Gene Panels",
       "pathogenicity_exomiser_divider": "Exomiser",
       "pathogenicity_predictions_divider": "Predictions",
+      "pathogenicity_oncology_divider": "Oncology",
       "occurrence_metrics_divider": "Metrics",
       "occurrence_parental_divider": "Parental Analysis",
       "frequency_divider_my_organization": "My Organization",
@@ -873,6 +876,10 @@
       "exomiser_gene_combined_score": "Exo.",
       "exomiser_gene_combined_score_tooltip": "Exomiser score based on variant properties and patient phenotypes",
       "filter": "Filter",
+      "freq_tn": "Freq. TN",
+      "freq_tn_tooltip": "Number of tumor-normal genomes containing this variant. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.",
+      "freq_g": "Freq. G",
+      "freq_g_tooltip": "Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
       "gene_length": "Length",
       "gene_length_tooltip": "Gene base length",
       "genotype_quality": "GQ",
@@ -882,6 +889,8 @@
       "gnomad_v3_af": "gnomAD",
       "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (allele Frequency)",
       "hgvsg": "Variant",
+      "hotspot": "Hotspot",
+      "hotspot_tooltip": "Hotspot Cancer",
       "is_mane_select": "MANE",
       "length": "Length",
       "length_tooltip": "CNV bases length",
@@ -1093,7 +1102,9 @@
   },
   "preview_sheet": {
     "header": {
-      "germline": "Germline"
+      "germline": "Germline",
+      "germline_family": "Germline",
+      "somatic": "Somatic"
     },
     "actions": {
       "download_report": "Download report",
@@ -1297,6 +1308,7 @@
       "cases": "Cases",
       "germline": "Germline Solo",
       "germline_family": "Germline Family",
+      "somatic": "Somatic",
       "priority_tooltip": "Priority",
       "status_tooltip": "Status",
       "unknown": "Unknown"
@@ -1411,6 +1423,9 @@
         },
         "snv": "SNV",
         "cnv": "CNV",
+        "snv_to": "SNV (TO)",
+        "snv_tn": "SNV (TN)",
+        "cnv_to": "CNV (TO)",
         "sequencing_id": "Seq. ID"
       },
       "dialog": {

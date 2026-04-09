@@ -8,6 +8,7 @@ import DataTable, { TableProps } from '../data-table/data-table';
 import { Card, CardContent } from '../shadcn/card';
 
 import { useQBActiveQuery, useQBContext } from './hooks/use-query-builder';
+import { DataTableProvider } from '../data-table/hooks/use-data-table';
 
 type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'>;
 
@@ -49,7 +50,7 @@ function QueryBuilderDataTable<T>({ ...props }: QueryBuilderDataTableProps<T>) {
     },
   );
 
-  const fetchTotal = useSWR<Count>(
+  const fetchCount = useSWR<Count>(
     `${JSON.stringify(activeQuery)}-count`,
     () =>
       fetcher.count({
@@ -70,17 +71,19 @@ function QueryBuilderDataTable<T>({ ...props }: QueryBuilderDataTableProps<T>) {
   return (
     <Card>
       <CardContent>
-        <DataTable
-          data={fetchList.data ?? []}
-          total={fetchTotal.data?.count ?? 0}
-          loadingStates={{ list: fetchList.isLoading, total: fetchTotal.isLoading }}
-          serverOptions={{
-            setAdditionalFields,
-            onSortingChange: setSorting,
-          }}
-          pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
-          {...props}
-        />
+        <DataTableProvider list={fetchList} count={fetchCount}>
+          <DataTable
+            data={fetchList.data ?? []}
+            total={fetchCount.data?.count ?? 0}
+            loadingStates={{ list: fetchList.isLoading, total: fetchCount.isLoading }}
+            serverOptions={{
+              setAdditionalFields,
+              onSortingChange: setSorting,
+            }}
+            pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
+            {...props}
+          />
+        </DataTableProvider>
       </CardContent>
     </Card>
   );

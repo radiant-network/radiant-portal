@@ -1,47 +1,40 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
-import { GermlineSNVOccurrence } from '@/api/api';
+import { GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
+import GermlineGenomeFrequencyCell from '@/components/base/data-table/cells/germline-genome-frequency-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
 import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
-import ParticipantFrequencyCell from '@/components/base/data-table/cells/participant-frequency-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
-import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
+import TumorNormalFrequencyCell from '@/components/base/data-table/cells/tumor-normal-frequency-cell';
 import { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
 
-import HgvsgCell from './cells/hgvsg-cell';
-import InterpretationCell from './cells/interpretation-cell';
-import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
-import VariantNoteCell from './cells/variant-note-cell';
+import HgvsgCell from '../../table/cells/hgvsg-cell';
+import VariantNoteCell from '../../table/cells/variant-note-cell';
 
-const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
+import SomaticActionsCell from './cells/somatic-actions-cell';
+import SomaticHotspotCell from './cells/somatic-hotspot-cell';
+import SomaticInterpretationCell from './cells/somatic-interpretation-cell';
 
-function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretationSaved: () => void) {
+const columnHelper = createColumnHelper<SomaticSNVOccurrence>();
+
+function getSomaticSNVOccurrenceColumns(t: TFunction<string, undefined>) {
   return [
-    // TODO: To be enabled when row selection function are implemented
-    // {
-    //   id: 'row_selection',
-    //   header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
-    //   cell: info => <RowSelectionCell row={info.row} />,
-    //   size: 40,
-    //   enablePinning: false,
-    //   enableResizing: false,
-    // },
     // interpretation and note cell
     columnHelper.accessor(row => row, {
       id: 'row-info',
       cell: info => (
         <div className="flex items-center gap-1">
-          <InterpretationCell occurrence={info.getValue()} />
+          <SomaticInterpretationCell occurrence={info.getValue()} />
           <VariantNoteCell occurrence={info.getValue()} />
         </div>
       ),
@@ -54,7 +47,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
     // Variant
     columnHelper.accessor(row => row.hgvsg, {
       id: 'hgvsg',
-      cell: info => <HgvsgCell occurrence={info.row.original} />,
+      cell: info => <HgvsgCell locusId={info.row.original.locus_id} hgvsg={info.getValue()} />,
       header: t('variant.headers.hgvsg'),
       size: 70,
       minSize: 40,
@@ -140,7 +133,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
       minSize: 40,
       enableSorting: false,
     }),
-    // omim
+    // OMIM
     columnHelper.accessor(row => row.omim_inheritance_code, {
       id: 'omim_inheritance_code',
       cell: info => <OmimCell codes={info.getValue()} />,
@@ -153,6 +146,19 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
       minSize: 40,
       enableSorting: false,
     }),
+    // Hotspot
+    columnHelper.accessor(row => row.hotspot, {
+      id: 'hotspot',
+      cell: info => <SomaticHotspotCell value={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.hotspot_tooltip')}>{t('variant.headers.hotspot')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // @TODO: Tier is missing in somatic api
+    // @TODO: CMC is missing in somatic api
     // ClinVar
     columnHelper.accessor(row => row.clinvar, {
       id: 'clinvar',
@@ -161,30 +167,6 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
       size: 124,
       minSize: 40,
       enableSorting: false,
-    }),
-    //Exo.
-    columnHelper.accessor(row => row.exomiser_gene_combined_score, {
-      id: 'exomiser_gene_combined_score',
-      cell: info => <NumberCell value={info.getValue()} fractionDigits={3} />,
-      header: () => (
-        <TooltipHeader tooltip={t('variant.headers.exomiser_gene_combined_score_tooltip')}>
-          {t('variant.headers.exomiser_gene_combined_score')}
-        </TooltipHeader>
-      ),
-      size: 96,
-      minSize: 40,
-    }),
-    //ACMG. Exo.
-    columnHelper.accessor(row => row.exomiser_acmg_classification, {
-      id: 'exomiser_acmg_classification',
-      cell: info => <ClassificationCell codes={[info.getValue()]} />,
-      header: () => (
-        <TooltipHeader tooltip={t('variant.headers.exomiser_acmg_classification_tooltip')}>
-          {t('variant.headers.exomiser_acmg_classification')}
-        </TooltipHeader>
-      ),
-      size: 96,
-      minSize: 40,
     }),
     // gnomAD
     columnHelper.accessor(row => row.gnomad_v3_af, {
@@ -198,42 +180,41 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
       size: 124,
       minSize: 40,
     }),
-    // Freq.
-    columnHelper.accessor(row => row.germline_pf_wgs, {
-      id: 'germline_pf_wgs',
-      cell: info => <ParticipantFrequencyCell locusId={info.row.original.locus_id} value={info.getValue()} />,
+    // Freq. TN
+    columnHelper.accessor(row => row, {
+      id: 'freq_tn',
+      cell: info => (
+        <TumorNormalFrequencyCell
+          locusId={info.row.original.locus_id}
+          pc={info.row.original.somatic_pc_tn_wgs}
+          pf={info.row.original.somatic_pf_tn_wgs}
+        />
+      ),
       header: () => (
-        <TooltipHeader tooltip={t('variant.headers.germline_pf_wgs_tooltip')}>
-          {t('variant.headers.germline_pf_wgs')}
-        </TooltipHeader>
+        <TooltipHeader tooltip={t('variant.headers.freq_tn_tooltip')}>{t('variant.headers.freq_tn')}</TooltipHeader>
       ),
       size: 124,
       minSize: 40,
     }),
-    // GQ.
-    columnHelper.accessor(row => row.genotype_quality, {
-      id: 'genotype_quality',
-      cell: info => <NumberCell value={info.getValue()} />,
+    // Freq. G
+    columnHelper.accessor(row => row, {
+      id: 'freq_g',
+      cell: info => (
+        <GermlineGenomeFrequencyCell
+          locusId={info.row.original.locus_id}
+          pc={info.row.original.germline_pc_wgs}
+          pf={info.row.original.germline_pf_wgs}
+        />
+      ),
       header: () => (
-        <TooltipHeader tooltip={t('variant.headers.genotype_quality_tooltip')}>
-          {t('variant.headers.genotype_quality')}
-        </TooltipHeader>
+        <TooltipHeader tooltip={t('variant.headers.freq_g_tooltip')}>{t('variant.headers.freq_g')}</TooltipHeader>
       ),
       size: 124,
       minSize: 40,
     }),
-    // Zyg.
-    columnHelper.accessor(row => row.zygosity, {
-      id: 'zygosity',
-      cell: info => <ZygosityCell value={info.getValue()} />,
-      header: () => (
-        <TooltipHeader tooltip={t('variant.headers.zygosity_tooltip')}>{t('variant.headers.zygosity')}</TooltipHeader>
-      ),
-      size: 124,
-      minSize: 40,
-      enableSorting: false,
-    }),
-    // Ratio PA
+    // @TODO: SQ. (Somatic Quality) is missing in somatic api
+    // @TODO: Zyg. is missing in somatic api
+    // Ratio AD
     columnHelper.accessor(row => row.ad_ratio, {
       id: 'ad_ratio',
       cell: info => <NumberCell value={info.getValue()} />,
@@ -246,7 +227,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
     // Actions Buttons
     {
       id: 'actions',
-      cell: info => <OccurrenceActionsMenu row={info.row} onInterpretationSaved={onInterpretationSaved} />,
+      cell: info => <SomaticActionsCell row={info.row} />,
       size: 86,
       enableResizing: false,
       enablePinning: true,
@@ -254,7 +235,7 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
   ] as TableColumnDef<GermlineSNVOccurrence, any>[];
 }
 
-const defaultSNVSettings = createColumnSettings([
+const defaultSomaticSNVSettings = createColumnSettings([
   // TODO: To be enabled when row selection function are implemented
   // {
   //   id: 'row_selection',
@@ -316,22 +297,16 @@ const defaultSNVSettings = createColumnSettings([
     additionalFields: ['omim_inheritance_code'],
   },
   {
+    id: 'hotspot',
+    visible: true,
+    label: 'variant.headers.hotspot',
+    additionalFields: ['hotspot'],
+  },
+  {
     id: 'clinvar',
     visible: true,
     label: 'variant.headers.clinvar',
     additionalFields: ['clinvar'],
-  },
-  {
-    id: 'exomiser_gene_combined_score',
-    visible: true,
-    label: 'variant.headers.exomiser_gene_combined_score',
-    additionalFields: ['exomiser_gene_combined_score'],
-  },
-  {
-    id: 'exomiser_acmg_classification',
-    visible: true,
-    label: 'variant.headers.exomiser_acmg_classification',
-    additionalFields: ['exomiser_acmg_classification'],
   },
   {
     id: 'gnomad_v3_af',
@@ -339,20 +314,15 @@ const defaultSNVSettings = createColumnSettings([
     label: 'variant.headers.gnomad_v3_af',
   },
   {
-    id: 'germline_pf_wgs',
+    id: 'freq_tn',
     visible: true,
-    label: 'variant.headers.germline_pf_wgs',
+    label: 'variant.headers.freq_tn',
+  },
+  {
+    id: 'freq_g',
+    visible: true,
+    label: 'variant.headers.freq_g',
     additionalFields: ['germline_pf_wgs'],
-  },
-  {
-    id: 'genotype_quality',
-    visible: true,
-    label: 'variant.headers.genotype_quality',
-  },
-  {
-    id: 'zygosity',
-    visible: true,
-    label: 'variant.headers.zygosity',
   },
   {
     id: 'ad_ratio',
@@ -367,4 +337,4 @@ const defaultSNVSettings = createColumnSettings([
   },
 ]);
 
-export { defaultSNVSettings, getSNVOccurrenceColumns };
+export { defaultSomaticSNVSettings, getSomaticSNVOccurrenceColumns };

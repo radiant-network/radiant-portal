@@ -95,7 +95,6 @@ function SliderInterpretationDetailsCard({
       actions={
         canEditInterpretation && (
           <InterpretationDialog
-            seqId={seqId}
             locusId={locusId}
             transcriptId={transcriptId}
             handleSaveCallback={() => {

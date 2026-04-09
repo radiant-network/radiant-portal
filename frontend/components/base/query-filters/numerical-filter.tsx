@@ -115,7 +115,7 @@ type OccurrenceStatisticsInput = {
 
 const statisticsFetcher = (appId: ApplicationId) => {
   switch (appId) {
-    case ApplicationId.cnv_occurrence:
+    case ApplicationId.germline_cnv_occurrence:
       return (input: OccurrenceStatisticsInput): Promise<Statistics> =>
         occurrencesApi
           .statisticsGermlineCNVOccurrences(input.caseId, input.seqId, input.statisticsBody)

@@ -24,7 +24,7 @@ import { QueryBuilderState, resolveSyntheticSqon } from 'components/cores/query-
 import { queryBuilderRemote } from 'components/cores/query-builder/query-builder-remote';
 
 import { isValidSeqId } from './libs/seq-id';
-import { defaultCNVSettings, getCNVOccurrenceColumns } from './table/cnv-occurrence-table-settings';
+import { defaultCNVSettings, getCNVOccurrenceColumns } from './table/germline-cnv-occurrence-table-settings';
 
 async function fetchQueryCount(input: CnvOccurrenceCountInput) {
   const response = await occurrencesApi.countGermlineCNVOccurrences(input.caseId, input.seqId, input.countBody);
@@ -75,11 +75,11 @@ function CNVTab({ seqId }: CNVTabProps) {
   const [open, setOpen] = useState(false);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
 
-  const appId = config.cnv_occurrence.app_id;
-  const aggregations = config.cnv_occurrence.aggregations;
+  const appId = config.germline_cnv_occurrence.app_id;
+  const aggregations = config.germline_cnv_occurrence.aggregations;
 
   function getAggregationFromConfig(key: string) {
-    return Object.values(config.cnv_occurrence.aggregations)
+    return Object.values(config.germline_cnv_occurrence.aggregations)
       .flatMap(f => f.items)
       .find(f => f.key === key)!;
   }

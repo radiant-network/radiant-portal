@@ -21,8 +21,8 @@ const filterListConfig: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
   },
-  snv_occurrence: {
-    app_id: ApplicationId.snv_occurrence,
+  germline_snv_occurrence: {
+    app_id: ApplicationId.germline_snv_occurrence,
     aggregations: {
       variant: {
         items: [
@@ -99,8 +99,8 @@ const filterListConfig: PortalConfig = {
       },
     },
   },
-  cnv_occurrence: {
-    app_id: ApplicationId.cnv_occurrence,
+  germline_cnv_occurrence: {
+    app_id: ApplicationId.germline_cnv_occurrence,
     aggregations: {
       variant: {
         items: [
@@ -156,8 +156,8 @@ const meta = {
   title: 'QueryBuilder/Facets/FilterList',
   component: FilterList,
   args: {
-    appId: filterListConfig.snv_occurrence.app_id,
-    aggregations: filterListConfig.snv_occurrence.aggregations,
+    appId: filterListConfig.germline_snv_occurrence.app_id,
+    aggregations: filterListConfig.germline_snv_occurrence.aggregations,
     groupKey: 'variant',
   },
   decorators: [
@@ -170,8 +170,8 @@ const meta = {
               <ConfigProvider config={filterListConfig}>
                 <FilterConfigContext.Provider
                   value={{
-                    appId: filterListConfig.snv_occurrence.app_id,
-                    aggregations: filterListConfig.snv_occurrence.aggregations,
+                    appId: filterListConfig.germline_snv_occurrence.app_id,
+                    aggregations: filterListConfig.germline_snv_occurrence.aggregations,
                   }}
                 >
                   <AggregateContext.Provider value={{ caseId: 1, seqId: 1 }}>
