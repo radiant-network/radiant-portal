@@ -58,9 +58,7 @@ function FilesTab() {
           <DataTable
             id="case-entity-files"
             columns={getCaseEntityDocumentsColumns(t)}
-            TableFilters={
-              <FilesTableFilters caseId={caseId} setSearchCriteria={setSearchCriteria} loading={isLoading} />
-            }
+            TableFilters={<FilesTableFilters caseId={caseId} setSearchCriteria={setSearchCriteria} />}
             data={data?.list ?? []}
             defaultColumnSettings={defaultSettings}
             hasError={!!error}
