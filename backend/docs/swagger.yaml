@@ -940,8 +940,6 @@ components:
           type: number
         hgvsg:
           type: string
-        interpretation_classification:
-          type: string
         interpretation_classification_counts:
           $ref: '#/components/schemas/JsonMap-string-int'
         is_canonical:

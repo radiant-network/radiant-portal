@@ -683,8 +683,6 @@ func Test_Germline_SNV_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, float64(0), expandedOccurrence.GermlinePfWgsNotAffected)
 		assert.Equal(t, "UNCERTAIN_SIGNIFICANCE", expandedOccurrence.ExomiserAcmgClassification)
 		assert.Equal(t, "T001", expandedOccurrence.TranscriptId)
-		assert.Equal(t, "LA6668-3", expandedOccurrence.InterpretationClassificationCode)
-		assert.Equal(t, "pathogenic", expandedOccurrence.InterpretationClassification)
 		assert.Equal(t, "BRAF", expandedOccurrence.Symbol)
 		assert.Equal(t, "ENSG00000157764", expandedOccurrence.EnsemblGeneId)
 	})
@@ -723,16 +721,5 @@ func Test_Germline_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *test
 		if assert.Len(t, occurrences, 1) {
 			assert.False(t, occurrences[0].HasNote)
 		}
-	})
-}
-
-func Test_Germline_SNV_GetExpandedOccurrence_NoInterpretation(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
-		repo := NewGermlineSNVOccurrencesRepository(db)
-		expandedOccurrence, err := repo.GetExpandedOccurrence(1, 10, 1000)
-		assert.NoError(t, err)
-		assert.Equal(t, "1000", expandedOccurrence.LocusId)
-		assert.Equal(t, "", expandedOccurrence.InterpretationClassificationCode)
-		assert.Equal(t, "", expandedOccurrence.InterpretationClassification)
 	})
 }

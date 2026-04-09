@@ -1813,12 +1813,6 @@ export interface ExpandedGermlineSNVOccurrence {
     'hgvsg': string;
     /**
      * 
-     * @type {string}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'interpretation_classification'?: string;
-    /**
-     * 
      * @type {{ [key: string]: number; }}
      * @memberof ExpandedGermlineSNVOccurrence
      */
