@@ -27,6 +27,44 @@
 
 Radiant Portal is a medical/genomic data platform serving clinical and research users. The current architecture has **no multi-tenancy** and relies on a **single layer of authorization** at the Go API level. This is insufficient for a platform handling sensitive health data across multiple organizations.
 
+### Current Architecture
+
+```mermaid
+graph LR
+    subgraph Users
+        Portal[Portal User<br/>browser]
+        Analyst[Data Analyst<br/>Jupyter / SQL]
+        BI[BI Tool<br/>Tableau / Power BI]
+        AI[AI Tool<br/>MCP Server]
+    end
+
+    subgraph "Go API"
+        Auth[Keycloak JWT<br/>Validation]
+        FGA[OpenFGA<br/>ListObjects]
+        Handlers[Handlers +<br/>Repositories]
+    end
+
+    subgraph "Databases"
+        SR[(StarRocks<br/><b>root</b> account<br/>shared pool)]
+        PG[(PostgreSQL<br/><b>radiant</b> account<br/>shared pool)]
+    end
+
+    Portal --> Auth --> FGA --> Handlers
+    Handlers -- "all queries as root<br/>no tenant filtering" --> SR
+    Handlers -- "all queries as radiant<br/>no tenant filtering" --> PG
+    Analyst -. "direct access<br/>NO authorization" .-> SR
+    BI -. "direct access<br/>NO authorization" .-> SR
+    AI -. "direct access<br/>NO authorization" .-> SR
+
+    style SR fill:#f96,stroke:#333
+    style PG fill:#f96,stroke:#333
+    style Analyst stroke:#f00,stroke-width:2px,stroke-dasharray:5 5
+    style BI stroke:#f00,stroke-width:2px,stroke-dasharray:5 5
+    style AI stroke:#f00,stroke-width:2px,stroke-dasharray:5 5
+```
+
+> **Red paths = unprotected.** Direct StarRocks access bypasses all authorization. The Go API is the only enforcement point, and even it does not filter by project (the `allowed` context key is computed but never consumed by repositories).
+
 ### Current State
 
 | Aspect | Current Implementation | Risk |
@@ -67,6 +105,60 @@ The platform must support 10--50 tenants (hospitals, research institutions, juri
 **Implication for each option:**
 - **Option A (API-only):** Direct access users bypass all authorization. This option cannot be the final state.
 - **Options B, C, D:** StarRocks-level enforcement (DB RBAC, views, Ranger) protects all access paths equally, regardless of whether the query originates from the Go API, a Jupyter notebook, or a Tableau dashboard.
+
+### Target Architecture (Option D -- Recommended)
+
+```mermaid
+graph LR
+    subgraph Users
+        Portal[Portal User<br/>browser]
+        Analyst[Data Analyst<br/>Jupyter / SQL]
+        BI[BI Tool<br/>Tableau / Power BI]
+        AI[AI Tool<br/>MCP Server]
+    end
+
+    subgraph "Go API"
+        Auth[Keycloak JWT +<br/>Tenant Middleware]
+        FGA[OpenFGA<br/>tenant / group / access level]
+        Handlers[Handlers +<br/>Repositories<br/>project_id filtering<br/>PII masking]
+    end
+
+    subgraph "StarRocks — Per-Tenant View DBs"
+        direction TB
+        CBTN["radiant_cbtn<br/>(views: WHERE tenant_id=1)<br/>+ pass-through shared views"]
+        CBTN_ID["radiant_cbtn_identified<br/>(full PII clinical views)"]
+        CBTN_DEID["radiant_cbtn_deidentified<br/>(masked PII clinical views)"]
+        UDP["radiant_udp<br/>(views: WHERE tenant_id=2)"]
+    end
+
+    subgraph "StarRocks — Base"
+        BASE[("radiant_base<br/>ALL tables<br/>colocation group on locus_id<br/>PARTITION BY tenant_id")]
+    end
+
+    PG[(PostgreSQL)]
+
+    Portal --> Auth --> FGA --> Handlers
+    Handlers -- "svc_cbtn<br/>per-tenant pool" --> CBTN
+    Analyst -- "JWT auth<br/>per-user" --> CBTN
+    Analyst -- "identified?" --> CBTN_ID
+    Analyst -- "de-identified?" --> CBTN_DEID
+    BI -- "JWT / OAuth<br/>per-user" --> CBTN
+    AI -- "JWT passthrough<br/>per-user" --> CBTN
+    CBTN -- "views resolve to" --> BASE
+    CBTN_ID -- "views resolve to" --> BASE
+    CBTN_DEID -- "views resolve to" --> BASE
+    UDP -- "views resolve to" --> BASE
+    BASE -. "JDBC federation" .-> PG
+    Handlers --> PG
+
+    style BASE fill:#e6f3ff,stroke:#333
+    style CBTN fill:#d4edda,stroke:#333
+    style CBTN_ID fill:#d4edda,stroke:#333
+    style CBTN_DEID fill:#d4edda,stroke:#333
+    style UDP fill:#fff3cd,stroke:#333
+```
+
+> All access paths -- portal, Jupyter, BI tools, AI/MCP -- are protected by StarRocks DB RBAC. No user can access `radiant_base` directly. Views enforce tenant isolation and PII masking at the database level.
 
 ---
 
@@ -997,6 +1089,42 @@ For most operations, the views are static per tenant (they filter by `tenant_id`
 
 **Option D provides robust direct access support through views + DB RBAC.** This is a key advantage over Option A and avoids the operational overhead of Ranger (Option C).
 
+```mermaid
+graph TB
+    subgraph "Access Paths to StarRocks"
+        direction LR
+        API["Go API<br/>(portal)"]
+        JUP["Jupyter<br/>Notebook"]
+        DBA["SQL Client<br/>(DBeaver)"]
+        TAB["Tableau /<br/>Power BI"]
+        MCP["MCP Server<br/>(AI tools)"]
+    end
+
+    subgraph "Authentication"
+        SVC["svc_cbtn<br/>(service account)"]
+        JWT["Per-user JWT<br/>via Keycloak"]
+    end
+
+    subgraph "StarRocks View Databases"
+        OCC["radiant_cbtn<br/>(occurrences + shared)"]
+        ID["radiant_cbtn_identified<br/>(full PII clinical)"]
+        DEID["radiant_cbtn_deidentified<br/>(masked PII clinical)"]
+    end
+
+    API -- "per-tenant pool" --> SVC --> OCC
+    JUP --> JWT --> OCC
+    DBA --> JWT
+    TAB --> JWT
+    MCP --> JWT
+    JWT -- "if identified_member" --> ID
+    JWT -- "if deidentified_member" --> DEID
+
+    style SVC fill:#fff3cd,stroke:#856404
+    style JWT fill:#d4edda,stroke:#155724
+    style ID fill:#d4edda,stroke:#155724
+    style DEID fill:#f8d7da,stroke:#721c24
+```
+
 **How it works for each access path:**
 
 | Access Path | Authentication | Authorization | PII Handling |
@@ -1113,6 +1241,80 @@ The view layer stays unchanged -- views point to `iceberg_catalog.radiant_base.g
 ## 4. Proposed Schema Organization
 
 This section details the schema for the recommended approach (Option D, with Option A as the first phase).
+
+### StarRocks Database Hierarchy
+
+```mermaid
+graph TB
+    subgraph "default_catalog"
+        subgraph radiant_base ["radiant_base (single DB — preserves colocation)"]
+            direction LR
+            subgraph shared ["Shared Reference Tables"]
+                SV[snv__variant_annotations]
+                SC[snv__consequence]
+                CL[clinvar]
+                EG[ensembl_gene]
+                GP["gene panels<br/>(hpo, omim, orphanet,<br/>ddd, cosmic)"]
+                PF["pop. frequencies<br/>(gnomad, topmed, 1kG)"]
+            end
+            subgraph tenant_scoped ["Tenant-Scoped Tables (+ tenant_id)"]
+                GSO[germline__snv__occurrence]
+                SSO[somatic__snv__occurrence]
+                GCO[germline__cnv__occurrence]
+                EX[exomiser]
+                SSE[staging_sequencing_experiment]
+                SVF[snv__variant_frequencies]
+            end
+        end
+
+        subgraph views_cbtn ["radiant_cbtn (view DB)"]
+            V1["Views WHERE tenant_id = 1<br/>+ pass-through views for shared tables"]
+        end
+        subgraph views_cbtn_id ["radiant_cbtn_identified (view DB)"]
+            V2["Clinical views with full PII<br/>filtered by CBTN orgs"]
+        end
+        subgraph views_cbtn_deid ["radiant_cbtn_deidentified (view DB)"]
+            V3["Clinical views with masked PII<br/>filtered by CBTN orgs"]
+        end
+        subgraph views_udp ["radiant_udp (view DB)"]
+            V4["Views WHERE tenant_id = 2<br/>+ pass-through views for shared tables"]
+        end
+    end
+
+    subgraph jdbc ["radiant_jdbc (external JDBC catalog)"]
+        PG_T["PostgreSQL tables<br/>patient, cases, sample,<br/>sequencing_experiment, ..."]
+    end
+
+    V1 --> radiant_base
+    V2 --> jdbc
+    V3 --> jdbc
+    V4 --> radiant_base
+
+    style radiant_base fill:#e6f3ff,stroke:#0066cc
+    style shared fill:#f0f0f0,stroke:#999
+    style tenant_scoped fill:#fff3cd,stroke:#999
+    style views_cbtn fill:#d4edda,stroke:#28a745
+    style views_cbtn_id fill:#d4edda,stroke:#28a745
+    style views_cbtn_deid fill:#d4edda,stroke:#28a745
+    style views_udp fill:#cce5ff,stroke:#004085
+    style jdbc fill:#f8d7da,stroke:#721c24
+```
+
+```mermaid
+graph LR
+    subgraph "Colocation Group: locus_colocation_group"
+        direction TB
+        A["germline__snv__occurrence<br/>HASH(locus_id) BUCKETS 10"] ~~~ B["snv__variant_annotations<br/>HASH(locus_id) BUCKETS 10"]
+        B ~~~ C["snv__consequence<br/>HASH(locus_id) BUCKETS 10"]
+        C ~~~ D["clinvar<br/>HASH(locus_id) BUCKETS 10"]
+        D ~~~ E["snv__variant_frequencies<br/>HASH(locus_id) BUCKETS 10"]
+        E ~~~ F["exomiser<br/>HASH(locus_id) BUCKETS 10"]
+    end
+
+    note["All in radiant_base DB<br/>= colocate JOINs on locus_id<br/>(local, shuffle-free)"]
+
+    style note fill:#ffffcc,stroke:#333
+```
 
 ### 4.1 StarRocks Schema (Target State -- Option D)
 
@@ -1491,6 +1693,85 @@ The single `radiant_jdbc` catalog remains unchanged. The Go API's per-tenant ser
 
 ## 5. OpenFGA Authorization Model
 
+### Tenant / Group / Access Level Hierarchy
+
+```mermaid
+graph TB
+    subgraph "Tenant: CBTN"
+        direction TB
+        T1[tenant:cbtn]
+
+        subgraph "Group: CHOP"
+            G1[group:cbtn-chop]
+            G1_ID["identified_member<br/>(full PII)"]
+            G1_DEID["deidentified_member<br/>(masked PII)"]
+            G1_ACTIONS["Portal actions:<br/>can_interpret, can_upload,<br/>can_approve, can_assign,<br/>can_generate_report"]
+        end
+
+        subgraph "Group: Seattle"
+            G2[group:cbtn-seattle]
+            G2_ID["identified_member"]
+            G2_DEID["deidentified_member"]
+        end
+
+        T1 -- "parent_tenant" --> G1
+        T1 -- "parent_tenant" --> G2
+    end
+
+    subgraph "Tenant: UDP"
+        direction TB
+        T2[tenant:udp]
+
+        subgraph "Group: Rare Disease"
+            G3[group:udp-rare_disease]
+        end
+
+        subgraph "Group: Epilepsy"
+            G4[group:udp-epilepsy]
+        end
+
+        T2 -- "parent_tenant" --> G3
+        T2 -- "parent_tenant" --> G4
+    end
+
+    U1((Alice<br/>admin)) -- "admin" --> T1
+    U2((Bob<br/>member)) -- "member" --> T1
+    U2 -- "identified_member" --> G1
+    U2 -- "deidentified_member" --> G2
+    U3((Charlie<br/>member)) -- "member" --> T1
+    U3 -- "deidentified_member" --> G1
+
+    style T1 fill:#cce5ff,stroke:#004085
+    style T2 fill:#fff3cd,stroke:#856404
+    style G1 fill:#d4edda,stroke:#155724
+    style G2 fill:#d4edda,stroke:#155724
+    style G3 fill:#ffeeba,stroke:#856404
+    style G4 fill:#ffeeba,stroke:#856404
+    style U1 fill:#f8d7da,stroke:#721c24
+    style U2 fill:#d1ecf1,stroke:#0c5460
+    style U3 fill:#d1ecf1,stroke:#0c5460
+```
+
+```mermaid
+graph LR
+    subgraph "Authorization Check Flow"
+        REQ["HTTP Request<br/>X-Active-Tenant: cbtn"] --> CHECK1{"OpenFGA Check<br/>user:bob member tenant:cbtn?"}
+        CHECK1 -- "yes" --> LIST["OpenFGA ListObjects<br/>user:bob, cases_reader, group"]
+        CHECK1 -- "no" --> DENY1[403 Forbidden]
+        LIST --> GROUPS["allowed groups:<br/>cbtn-chop, cbtn-seattle"]
+        GROUPS --> ACCESS{"Per-group access level check"}
+        ACCESS --> ID["cbtn-chop: can_view_identified = true"]
+        ACCESS --> DEID["cbtn-seattle: can_view_deidentified = true"]
+        ID --> HANDLER["Handler: full PII for CHOP data"]
+        DEID --> HANDLER
+        HANDLER --> QUERY["Repository: WHERE project_id IN (...)"]
+    end
+
+    style DENY1 fill:#f8d7da,stroke:#721c24
+    style ID fill:#d4edda,stroke:#155724
+    style DEID fill:#fff3cd,stroke:#856404
+```
+
 ### 5.1 Proposed Model
 
 ```fga
@@ -1820,6 +2101,82 @@ Implemented in three phases:
 ---
 
 ## 7. Migration Strategy
+
+### Migration Phases Overview
+
+```mermaid
+gantt
+    title Migration to Multi-Tenant Architecture
+    dateFormat YYYY-MM-DD
+    axisFormat %b %d
+
+    section Phase 1 — API-Layer
+    PG schema + tenant tables           :p1a, 2026-05-01, 1w
+    OpenFGA model update                :p1b, 2026-05-01, 2w
+    Tenant resolution middleware        :p1c, after p1b, 2w
+    Wire project filtering to repos     :p1d, after p1c, 3w
+    PII masking in handlers             :p1e, after p1c, 2w
+    Frontend tenant switcher            :p1f, 2026-05-15, 4w
+
+    section Phase 2 — Views + Pools
+    StarRocks schema restructuring      :p2a, after p1d, 2w
+    Per-tenant view databases           :p2b, after p2a, 1w
+    TenantPoolManager                   :p2c, after p2a, 2w
+    Data ingestion updates              :p2d, after p2b, 2w
+    Tenant onboarding automation        :p2e, after p2c, 1w
+    Verification + hardening            :p2f, after p2e, 1w
+
+    section Phase 3 — Direct Access
+    StarRocks JWT Security Integration  :p3a, after p2f, 1w
+    Identified / de-identified view DBs :p3b, after p3a, 2w
+    User provisioning sync daemon       :p3c, after p3a, 2w
+    BI tool + MCP integration           :p3d, after p3b, 2w
+    End-to-end verification             :p3e, after p3d, 1w
+
+    section Phase 4 — Hardening
+    PostgreSQL RLS                      :p4a, after p3e, 2w
+    Structured audit logging            :p4b, after p3e, 2w
+    Resource group isolation            :p4c, after p3e, 1w
+```
+
+```mermaid
+graph LR
+    subgraph "Phase 1 (4-8 wks)"
+        P1["API-Layer<br/>Enforcement"]
+        P1A["OpenFGA: tenant + group types"]
+        P1B["Middleware: X-Active-Tenant"]
+        P1C["Repos: WHERE project_id IN"]
+        P1D["PII masking in handlers"]
+    end
+
+    subgraph "Phase 2 (4-6 wks)"
+        P2["Views + DB RBAC<br/>Defense-in-Depth"]
+        P2A["radiant_base + colocation"]
+        P2B["Per-tenant view DBs"]
+        P2C["TenantPoolManager"]
+    end
+
+    subgraph "Phase 3 (2-4 wks)"
+        P3["Direct Access<br/>Enablement"]
+        P3A["JWT auth for StarRocks"]
+        P3B["identified / deidentified DBs"]
+        P3C["User provisioning sync"]
+    end
+
+    subgraph "Phase 4 (optional)"
+        P4["Hardening"]
+        P4A["PG RLS, audit logging,<br/>resource groups"]
+    end
+
+    P1 -- "portal works<br/>single defense layer" --> P2
+    P2 -- "DB-level isolation<br/>no direct access yet" --> P3
+    P3 -- "all access paths<br/>protected" --> P4
+
+    style P1 fill:#fff3cd,stroke:#856404
+    style P2 fill:#d4edda,stroke:#155724
+    style P3 fill:#cce5ff,stroke:#004085
+    style P4 fill:#f0f0f0,stroke:#999
+```
 
 ### Phase 1: API-Layer Multi-Tenancy (Option A)
 
