@@ -1,5 +1,6 @@
 import { createContext, type ReactNode, useContext } from 'react';
 
+import { SavedFilterType } from '@/api/index';
 import { RangeOperators } from '@/components/cores/sqon';
 
 export enum ApplicationId {
@@ -79,6 +80,7 @@ export type AggregationConfig = {
 
 export interface BaseAppsConfig {
   app_id: ApplicationId;
+  saved_filter_type: SavedFilterType;
 }
 
 export interface AppsConfig extends BaseAppsConfig {

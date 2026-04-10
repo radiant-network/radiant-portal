@@ -20,7 +20,7 @@ function QueryBuilderV3() {
 
   return (
     <QueryBuilder
-      appId={config.snv_occurrence.app_id}
+      appId={appId}
       fetcher={{
         list: async (params: IListInput) =>
           occurrencesApi.listGermlineSNVOccurrences(caseId, seqId, params.listBody).then(response => response.data),

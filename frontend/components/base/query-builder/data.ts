@@ -92,9 +92,9 @@ export const useQueryBuilderDictionary = (): QueryBuilderDictionary => {
         ok: t('common.saved_filter.overwrite_dialog.ok'),
       },
       editDialog: {
-        title: t('common.saved_filter.edit_dialog.title'),
-        cancel: t('common.saved_filter.edit_dialog.cancel'),
-        ok: t('common.saved_filter.edit_dialog.ok'),
+        title: t('common.saved_filter.edit_dialog.edit_title'),
+        cancel: t('common.cancel'),
+        ok: t('common.saved'),
         fields: {
           title: {
             label: t('common.saved_filter.edit_dialog.fields.title.label'),
