@@ -54,13 +54,8 @@ function SavedFiltersList() {
               {filter.name}
             </SelectItem>
           ))}
-          {/* <SelectSeparator /> */}
-          {/* <Button size="sm" variant="ghost" className="w-full pl-2 justify-start" onClick={handleManageAction}>
-            {t('common.saved_filter.manage_filters')}
-          </Button> */}
         </SelectContent>
       </Select>
-      {/* <SavedFiltersManageDialog open={openManage} onOpenChange={setOpenManage} /> */}
     </>
   );
 }

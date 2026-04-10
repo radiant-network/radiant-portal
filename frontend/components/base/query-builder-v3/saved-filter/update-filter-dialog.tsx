@@ -37,7 +37,6 @@ const formSchema = z.object({
 function UpdateFilterDialog({ open, onOpenChange }: UpdateFilterDialogProps) {
   const { t } = useI18n();
   const dispatch = useSavedFiltersDispatch();
-  // isNew if no selectedSavedFilter
   const { selectedSavedFilter, savedFilterType } = useSavedFiltersContext();
   const { sqons } = useQBContext();
   const form = useForm<z.infer<typeof formSchema>>({
