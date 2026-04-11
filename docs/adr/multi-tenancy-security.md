@@ -249,6 +249,37 @@ These are hard constraints that apply across all options:
 
 **Summary:** All authorization stays in the Go backend. StarRocks and PostgreSQL remain unaware of users, tenants, or groups. The existing shared connection pool is unchanged.
 
+```mermaid
+graph LR
+    subgraph Users
+        Portal[Portal User]
+        Analyst[Data Analyst]
+        BI[BI / MCP]
+    end
+
+    subgraph "Go API — single enforcement layer"
+        MW["OpenFGA middleware<br/>resolves allowed projects"]
+        H["Handlers add<br/>WHERE project_id IN (...)"]
+        MASK["PII masking<br/>in response"]
+    end
+
+    subgraph "StarRocks"
+        SR[("Single DB<br/><b>root</b> account<br/>shared pool<br/>NO tenant awareness")]
+    end
+
+    PG[(PostgreSQL)]
+
+    Portal --> MW --> H --> MASK
+    H -- "root / shared pool" --> SR
+    H --> PG
+    Analyst -. "NO protection" .-> SR
+    BI -. "NO protection" .-> SR
+
+    style SR fill:#f8d7da,stroke:#721c24
+    style Analyst stroke:#f00,stroke-dasharray:5 5
+    style BI stroke:#f00,stroke-dasharray:5 5
+```
+
 #### Tenant Isolation Model
 
 No database-level isolation. Tenant boundaries are enforced by adding `WHERE` clauses to every data query in the Go API layer.
@@ -366,6 +397,43 @@ The handler validates:
 ### Option B -- Hybrid: Per-User StarRocks Connections + DB/Catalog Isolation
 
 **Summary:** Push tenant isolation and user identity into StarRocks via JWT-authenticated connections and per-tenant databases. Keep row/column masking in the Go API layer.
+
+```mermaid
+graph LR
+    subgraph Users
+        Portal[Portal User]
+        Analyst[Data Analyst]
+        BI[BI / MCP]
+    end
+
+    subgraph "Go API"
+        MW["OpenFGA + JWT"]
+        H["Handlers<br/>PII masking in response"]
+    end
+
+    subgraph "StarRocks — per-user JWT connections"
+        direction TB
+        CBTN[("radiant_tenant_cbtn<br/>duplicated tables")]
+        UDP[("radiant_tenant_udp<br/>duplicated tables")]
+        SHARED[("radiant_shared<br/>reference data")]
+    end
+
+    PG[(PostgreSQL)]
+
+    Portal --> MW --> H
+    H -- "user JWT<br/>per-request conn" --> CBTN
+    Analyst -- "user JWT" --> CBTN
+    Analyst -- "user JWT" --> SHARED
+    BI -- "user JWT" --> CBTN
+
+    CBTN -. "no colocation<br/>with shared" .-> SHARED
+
+    style CBTN fill:#d4edda,stroke:#28a745
+    style UDP fill:#cce5ff,stroke:#004085
+    style SHARED fill:#fff3cd,stroke:#856404
+```
+
+> **Colocation broken:** Shared reference tables (`snv__variant`, `clinvar`) are in a different database than per-tenant occurrence tables -- colocate JOINs on `locus_id` are lost. Every `occurrence JOIN variant` requires a network shuffle.
 
 #### Tenant Isolation Model
 
@@ -548,6 +616,49 @@ Same as Option A for non-query actions (OpenFGA checks). **Inconsistency:** Star
 
 **Summary:** Deploy Apache Ranger to manage all data access policies. Row-level security and column masking are enforced at the StarRocks level. The Go API becomes a thin query proxy.
 
+```mermaid
+graph LR
+    subgraph Users
+        Portal[Portal User]
+        Analyst[Data Analyst]
+        BI[BI / MCP]
+    end
+
+    subgraph "Go API — thin proxy"
+        MW["JWT passthrough"]
+    end
+
+    subgraph "Apache Ranger"
+        RP["Row-Level Security<br/>tenant_id filter per user"]
+        CM["Column Masking<br/>PII redaction per role"]
+    end
+
+    subgraph "StarRocks — single DB + Ranger plugin"
+        SR[("radiant_db<br/>+ tenant_id on all tables<br/>per-user JWT connections")]
+    end
+
+    subgraph "Sync"
+        SYNC["OpenFGA → Ranger<br/>policy sync daemon"]
+    end
+
+    PG[(PostgreSQL)]
+    FGA[(OpenFGA)]
+
+    Portal --> MW --> SR
+    Analyst -- "user JWT" --> SR
+    BI -- "user JWT" --> SR
+    SR --> RP
+    SR --> CM
+    FGA --> SYNC --> RP
+
+    style RP fill:#d4edda,stroke:#28a745
+    style CM fill:#d4edda,stroke:#28a745
+    style SYNC fill:#fff3cd,stroke:#856404
+    style SR fill:#e6f3ff,stroke:#0066cc
+```
+
+> **Strongest enforcement** but requires deploying and operating Apache Ranger (Java stack), plus a sync daemon to translate OpenFGA decisions into Ranger policies. Creates a dual-authorization-system (Ranger + OpenFGA).
+
 #### Tenant Isolation Model
 
 **Single shared database with Ranger row-filtering policies.** Unlike Option B, tables are not duplicated per tenant. Instead, a `tenant_id` column is added to all tenant-scoped tables, and Ranger policies filter rows based on the authenticated user's tenant membership.
@@ -711,6 +822,54 @@ This means the team must maintain **two authorization policy systems** (Ranger +
 ### Option D -- Views-Based with Per-Tenant Service Account Pools
 
 **Summary:** Use StarRocks views as the tenant isolation layer. Base tables live in a shared database with a `tenant_id` column. Per-tenant view databases expose only that tenant's data. Identified/de-identified view databases enforce PII masking at the StarRocks level for direct-access users. A hybrid connection model uses per-tenant service account pools for the Go API and per-user JWT connections for direct access (Jupyter, BI tools, MCP). API-layer enforcement handles within-tenant project filtering for portal users.
+
+```mermaid
+graph LR
+    subgraph Users
+        Portal[Portal User]
+        Analyst[Data Analyst]
+        BI[BI / MCP]
+    end
+
+    subgraph "Go API"
+        MW["OpenFGA: tenant +<br/>per-group access level"]
+        H["Handlers: project filtering<br/>+ PII masking"]
+    end
+
+    subgraph "StarRocks View DBs"
+        CBTN["radiant_cbtn<br/>occurrences + shared<br/>(per-tenant)"]
+        DEID["radiant_cbtn_deidentified<br/>masked PII, all groups<br/>(per-tenant)"]
+        CHOP_ID["radiant_cbtn_chop_identified<br/>full PII, CHOP only<br/>(per-group)"]
+        SEA_ID["radiant_cbtn_seattle_identified<br/>full PII, Seattle only<br/>(per-group)"]
+    end
+
+    subgraph "Base + Catalogs"
+        BASE[("radiant_base<br/>colocation group<br/>on locus_id")]
+        ICE[("radiant_iceberg")]
+        JDBC[("radiant_jdbc")]
+    end
+
+    Portal --> MW --> H
+    H -- "svc_cbtn pool" --> CBTN
+    Analyst -- "JWT per-user" --> CBTN
+    Analyst -- "all members" --> DEID
+    Analyst -- "if identified" --> CHOP_ID
+    BI -- "JWT per-user" --> CBTN
+    CBTN --> BASE
+    DEID --> JDBC
+    DEID --> ICE
+    CHOP_ID --> JDBC
+    CHOP_ID --> ICE
+
+    style CBTN fill:#d4edda,stroke:#28a745
+    style DEID fill:#fff3cd,stroke:#856404
+    style CHOP_ID fill:#d4edda,stroke:#28a745
+    style SEA_ID fill:#d4edda,stroke:#28a745
+    style BASE fill:#e6f3ff,stroke:#0066cc
+    style ICE fill:#e2d5f1,stroke:#6f42c1
+```
+
+> **Recommended.** Preserves colocation (single `radiant_base`), supports all access paths, per-group identified control, no Ranger. Hybrid connection model: per-tenant pools for the API, per-user JWT for direct access.
 
 #### Tenant Isolation Model
 
