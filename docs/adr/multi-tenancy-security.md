@@ -13,9 +13,9 @@
 2. [Decision Drivers](#2-decision-drivers)
 3. [Options Considered](#3-options-considered)
    - [Option A -- API-Layer-Only Enforcement](#option-a--api-layer-only-enforcement)
-   - [Option B -- Hybrid: Per-User StarRocks Connections + DB/Catalog Isolation](#option-b--hybrid-per-user-starrocks-connections--dbcatalog-isolation)
-   - [Option C -- Full Push-Down: Ranger + Per-User Connections + RLS/Masking](#option-c--full-push-down-ranger--per-user-connections--rlsmasking)
-   - [Option D -- Views-Based with Per-Tenant Service Account Pools](#option-d--views-based-with-per-tenant-service-account-pools)
+   - [Option B -- Full Push-Down: Ranger + Per-User Connections + RLS/Masking](#option-b--full-push-down-ranger--per-user-connections--rlsmasking)
+   - [Option C -- Views-Based with Per-Tenant Service Account Pools (Recommended)](#option-c--views-based-with-per-tenant-service-account-pools-recommended)
+   - [Option D -- Views-Based with Per-User JWT Connections](#option-d--views-based-with-per-user-jwt-connections)
 4. [Proposed Schema Organization](#4-proposed-schema-organization)
 5. [OpenFGA Authorization Model](#5-openfga-authorization-model)
 6. [Recommendation](#6-recommendation)
@@ -106,7 +106,7 @@ The platform must support 10--50 tenants (hospitals, research institutions, juri
 - **Option A (API-only):** Direct access users bypass all authorization. This option cannot be the final state.
 - **Options B, C, D:** StarRocks-level enforcement (DB RBAC, views, Ranger) protects all access paths equally, regardless of whether the query originates from the Go API, a Jupyter notebook, or a Tableau dashboard.
 
-### Target Architecture (Option D -- Recommended)
+### Target Architecture (Option C -- Recommended)
 
 ```mermaid
 graph LR
@@ -394,225 +394,7 @@ The handler validates:
 
 ---
 
-### Option B -- Hybrid: Per-User StarRocks Connections + DB/Catalog Isolation
-
-**Summary:** Push tenant isolation and user identity into StarRocks via JWT-authenticated connections and per-tenant databases. Keep row/column masking in the Go API layer.
-
-```mermaid
-graph LR
-    subgraph Users
-        Portal[Portal User]
-        Analyst[Data Analyst]
-        BI[BI / MCP]
-    end
-
-    subgraph "Go API"
-        MW["OpenFGA + JWT"]
-        H["Handlers<br/>PII masking in response"]
-    end
-
-    subgraph "StarRocks — per-user JWT connections"
-        direction TB
-        CBTN[("radiant_tenant_cbtn<br/>duplicated tables")]
-        UDP[("radiant_tenant_udp<br/>duplicated tables")]
-        SHARED[("radiant_shared<br/>reference data")]
-    end
-
-    PG[(PostgreSQL)]
-
-    Portal --> MW --> H
-    H -- "user JWT<br/>per-request conn" --> CBTN
-    Analyst -- "user JWT" --> CBTN
-    Analyst -- "user JWT" --> SHARED
-    BI -- "user JWT" --> CBTN
-
-    CBTN -. "no colocation<br/>with shared" .-> SHARED
-
-    style CBTN fill:#d4edda,stroke:#28a745
-    style UDP fill:#cce5ff,stroke:#004085
-    style SHARED fill:#fff3cd,stroke:#856404
-```
-
-> **Colocation broken:** Shared reference tables (`snv__variant`, `clinvar`) are in a different database than per-tenant occurrence tables -- colocate JOINs on `locus_id` are lost. Every `occurrence JOIN variant` requires a network shuffle.
-
-#### Tenant Isolation Model
-
-**Database-per-tenant in StarRocks.** Each tenant gets its own database containing duplicated table schemas for occurrence/analytical data:
-
-```
-default_catalog/
-  radiant_shared/                    -- Shared reference/annotation data
-    clinvar
-    clinvar_rcv_summary
-    snv__consequence
-    snv__variant                     -- Shared annotation columns only
-    gnomad_genomes_v3
-    topmed_bravo
-    1000_genomes
-    ensembl_gene
-    ensembl_exon_by_gene
-    cytoband
-    hpo_term, mondo_term
-    hpo_gene_panel, omim_gene_panel, orphanet_gene_panel, ddd_gene_panel, cosmic_gene_panel
-
-  radiant_tenant_cbtn/               -- Tenant: CBTN
-    germline__snv__occurrence
-    somatic__snv__occurrence
-    germline__cnv__occurrence
-    exomiser
-    snv__consequence_filter_partitioned
-    staging_sequencing_experiment
-    snv__variant_frequencies          -- Tenant-scoped frequency data
-
-  radiant_tenant_udp/              -- Tenant: UDP
-    (same table set)
-```
-
-StarRocks RBAC enforces database-level isolation:
-
-```sql
-CREATE USER 'user_alice' IDENTIFIED BY JWT;
-GRANT SELECT ON DATABASE radiant_tenant_cbtn TO 'user_alice';
-GRANT SELECT ON DATABASE radiant_cbtn TO 'user_alice';  -- includes pass-through views for shared tables
--- No grant on radiant_tenant_udp -> access denied
-```
-
-#### JDBC Federation for PostgreSQL
-
-**Problem:** The current `radiant_jdbc` catalog points to a single PostgreSQL database (`radiant`). All tenants' clinical data is in the same PostgreSQL `public` schema.
-
-**Two sub-approaches:**
-
-**(B1) Per-tenant PostgreSQL schemas:**
-```sql
--- In PostgreSQL
-CREATE SCHEMA cbtn;
-CREATE SCHEMA udp;
--- Move tenant-specific tables into schemas
-ALTER TABLE patient SET SCHEMA cbtn;  -- for CBTN patients
--- Shared value-set tables stay in public
-```
-
-StarRocks accesses them as `radiant_jdbc.cbtn.patient`, `radiant_jdbc.udp.patient`.
-
-**(B2) Single JDBC catalog, API-layer filtering:**
-Keep one `radiant_jdbc` catalog. The API adds `WHERE organization_id IN (?)` for all federated queries. Simpler but weaker isolation.
-
-**Recommendation: B2 for initial implementation,** because per-tenant PG schemas require migrating all foreign keys and is a complex operation.
-
-#### Group / Identified vs De-identified Enforcement
-
-Same as Option A: API-layer PII masking. StarRocks column-level RBAC (`GRANT SELECT (col)`) could theoretically restrict PII columns, but this is difficult to apply to JDBC federation catalog tables (column grants on external catalog tables may not be supported -- needs verification).
-
-#### Connection Model
-
-**Per-user JWT-authenticated connections.**
-
-StarRocks Security Integration setup:
-```sql
-CREATE SECURITY INTEGRATION keycloak_jwt
-PROPERTIES (
-    "type" = "jwt",
-    "jwks_url" = "https://keycloak:8080/realms/CQDG/protocol/openid-connect/certs",
-    "jwt_username_claim" = "preferred_username"
-);
-```
-
-Go API connection flow per request:
-```
-1. Extract JWT from Authorization header
-2. Look up cached *gorm.DB for this user (keyed by JWT sub + tenant)
-3. If cache miss: open new StarRocks connection with JWT as password
-   DSN: "{username}:{jwt_token}@tcp(starrocks:9030)/radiant_tenant_{tenant}"
-4. Execute queries using this connection
-5. Return connection to per-user pool (or close after request)
-```
-
-**Performance implications:**
-
-| Metric | Current (shared pool) | Per-user connections |
-|--------|----------------------|---------------------|
-| Connection establishment | Amortized (pool) | 10-50ms per cache miss |
-| Concurrent connections | 100 max, shared | N users * M concurrent requests |
-| Connection cache | N/A | Must cache by user+tenant, evict on JWT expiry |
-| Memory overhead | 1 pool | 1 pool per active user (file descriptors, buffers) |
-| GORM repository refactor | None | **All 61 repository files** must accept per-request DB |
-
-**GORM refactor impact:** Every repository currently stores `db *gorm.DB` as a struct field. For per-user connections, this must become per-request. Options:
-1. Pass `*gorm.DB` as a method parameter -- changes all DAO interfaces and all handler calls
-2. Create repositories per-request -- changes `main.go` wiring entirely
-3. Use a `TenantDBResolver` middleware that injects the correct DB into context -- handlers extract it
-
-Option 3 is the least invasive but still requires changing how handlers obtain the DB reference.
-
-#### OpenFGA Integration
-
-Same model as Option A. OpenFGA determines which tenant the user can access. The Go API uses this to select the correct tenant database.
-
-**Sync to StarRocks:** When a user's tenant membership changes in OpenFGA, the corresponding StarRocks `GRANT` must be updated. This requires a sync daemon:
-```
-On OpenFGA tuple change:
-  1. Read user's tenant memberships
-  2. For each tenant: GRANT SELECT ON DATABASE radiant_tenant_{tenant} TO user
-  3. For removed memberships: REVOKE
-```
-
-#### Audit Trail
-
-| Layer | Attribution | Coverage |
-|-------|------------|----------|
-| Application log | User ID from JWT | All HTTP requests |
-| **StarRocks audit log** | **Individual user** (JWT identity) | **All StarRocks queries** |
-| PostgreSQL history tables | `created_by`/`updated_by` | Write operations |
-
-**Significant improvement** over Option A: StarRocks audit log now attributes queries to individual users. Two independent audit trails can be cross-referenced.
-
-#### Direct StarRocks Access
-
-**Option B natively supports direct access.** Each user authenticates to StarRocks with their own JWT. A data analyst connecting via Jupyter or DBeaver uses the same JWT-based authentication and receives the same DB-level grants as when accessing through the Go API.
-
-**Per-user identity works well here:** The same StarRocks user account used by the Go API proxy is used by Jupyter/Tableau/MCP tools. Database-level GRANT/REVOKE controls which tenant databases the user can see. Each direct query is attributed to the individual user in the StarRocks audit log.
-
-**Limitation:** RLS/column masking are still API-layer only. A direct-access user connecting to `radiant_tenant_cbtn` sees all data within that tenant, including PII. Group-level and identified/de-identified filtering is not enforced for direct access paths. This would require either Ranger (Option C) or de-identified views within the tenant database.
-
-#### Operational Complexity
-
-| Component | Change Required |
-|-----------|----------------|
-| StarRocks | Security Integration config; per-tenant databases; per-user RBAC grants |
-| PostgreSQL | `tenant` table + mapping (same as Option A) |
-| Go API | Connection manager; per-request DB injection; all Option A changes |
-| Infrastructure | JWKS endpoint exposure (already exists in Keycloak) |
-| Ongoing | User provisioning in StarRocks when new users join; sync daemon |
-
-#### Compliance Posture
-
-| Criterion | Assessment |
-|-----------|------------|
-| Defense-in-depth | **Moderate** -- API + DB-level identity and grants |
-| Principle of least privilege | **Partial** -- user can only access granted tenant DB |
-| Blast radius of a bug | **Contained to tenant** -- DB grants prevent cross-tenant access |
-| Audit independence | **Strong** -- StarRocks audit log independently attributable |
-| Direct access support | **Tenant-level** -- DB isolation works; PII masking not enforced for direct users |
-
-#### Migration Path
-
-1. Configure StarRocks Security Integration for JWT auth
-2. Create per-tenant databases; migrate data
-3. Build connection manager in Go backend
-4. Refactor repository layer for per-request DB
-5. All Option A steps (OpenFGA model, middleware, project filtering)
-6. Build sync daemon for RBAC grants
-
-**Estimated effort:** 8--14 weeks. High risk due to GORM refactor scope.
-
-#### Portal-Specific Action Authorization
-
-Same as Option A for non-query actions (OpenFGA checks). **Inconsistency:** StarRocks has per-user identity, but PostgreSQL still uses a shared connection. Write operations to PostgreSQL (interpretations, notes) are not DB-level isolated. This creates an asymmetric trust model.
-
----
-
-### Option C -- Full Push-Down: Ranger + Per-User Connections + RLS/Masking
+### Option B -- Full Push-Down: Ranger + Per-User Connections + RLS/Masking
 
 **Summary:** Deploy Apache Ranger to manage all data access policies. Row-level security and column masking are enforced at the StarRocks level. The Go API becomes a thin query proxy.
 
@@ -702,7 +484,7 @@ Ranger row-filter policy:
 
 #### Group / Identified vs De-identified Enforcement
 
-**Ranger column masking policies.** This is where Option C uniquely excels:
+**Ranger column masking policies.** This is where Option B uniquely excels:
 
 ```json
 {
@@ -731,7 +513,7 @@ When a de-identified user queries `patient.first_name`, Ranger transparently ret
 
 #### Connection Model
 
-Same per-user JWT connection model as Option B, with all the same performance and GORM refactor implications. Additionally, each StarRocks query passes through the Ranger plugin for policy evaluation.
+**Per-user JWT-authenticated connections.** Each user authenticates to StarRocks with their JWT. The Go API opens a per-request connection (or uses a per-user cache). This requires the same GORM refactor as Option D (all 61 repositories accept per-request DB). Additionally, each StarRocks query passes through the Ranger plugin for policy evaluation.
 
 **Additional overhead:** Ranger policy evaluation adds 1--5ms per query (the StarRocks Ranger plugin caches policies locally).
 
@@ -767,7 +549,7 @@ OpenFGA tuple:                          -> Ranger policy:
 
 #### Direct StarRocks Access
 
-**Option C provides the strongest direct access story.** Ranger policies enforce row-level and column-level restrictions regardless of whether the query comes from the Go API, a Jupyter notebook, Power BI, or an MCP-connected AI tool. Every access path is equally protected.
+**Option B provides the strongest direct access story.** Ranger policies enforce row-level and column-level restrictions regardless of whether the query comes from the Go API, a Jupyter notebook, Power BI, or an MCP-connected AI tool. Every access path is equally protected.
 
 **For data analysts:** A bioinformatician connecting via DBeaver with their JWT sees only their tenant's rows (Ranger RLS), with PII columns masked if they have de-identified access (Ranger column masking). They can write arbitrary SQL and the results are always scoped correctly -- no application-layer cooperation needed.
 
@@ -775,7 +557,7 @@ OpenFGA tuple:                          -> Ranger policy:
 
 **For AI tools (MCP):** An MCP server connecting to StarRocks on behalf of a user inherits that user's Ranger policies. The AI agent cannot see data the user is not authorized for.
 
-**This is Option C's primary advantage.** If the organization requires unrestricted direct SQL access with full tenant isolation, group-level RLS, and PII masking for all access paths, Ranger is the most comprehensive solution.
+**This is Option B's primary advantage.** If the organization requires unrestricted direct SQL access with full tenant isolation, group-level RLS, and PII masking for all access paths, Ranger is the most comprehensive solution.
 
 #### Operational Complexity
 
@@ -806,7 +588,7 @@ OpenFGA tuple:                          -> Ranger policy:
 3. Add `tenant_id` to StarRocks tables; backfill (requires data pipeline changes)
 4. Author Ranger policies for all tables (RLS + column masking)
 5. Build OpenFGA-to-Ranger sync service
-6. Connection manager + GORM refactor (same as Option B)
+6. Connection manager + GORM refactor (same as Option D)
 7. Simplify Go API handlers (remove authz logic pushed to Ranger)
 
 **Estimated effort:** 12--20 weeks, with significant ongoing operational overhead.
@@ -819,7 +601,7 @@ This means the team must maintain **two authorization policy systems** (Ranger +
 
 ---
 
-### Option D -- Views-Based with Per-Tenant Service Account Pools
+### Option C -- Views-Based with Per-Tenant Service Account Pools (Recommended)
 
 **Summary:** Use StarRocks views as the tenant isolation layer. Base tables live in a shared database with a `tenant_id` column. Per-tenant view databases expose only that tenant's data. Identified/de-identified view databases enforce PII masking at the StarRocks level for direct-access users. A hybrid connection model uses per-tenant service account pools for the Go API and per-user JWT connections for direct access (Jupyter, BI tools, MCP). API-layer enforcement handles within-tenant project filtering for portal users.
 
@@ -1209,7 +991,7 @@ PROPERTIES (
 
 **Performance comparison:**
 
-| Metric | Current | Option B/C (per-user for all) | Option D (hybrid) |
+| Metric | Current | Option B/D (per-user for all) | Option C (hybrid) |
 |--------|---------|-------------------------------|-------------------|
 | Go API pools | 1 | N users | N tenants (10-50) |
 | Direct access | N/A (not supported) | Same per-user pool | Per-user JWT connections |
@@ -1318,7 +1100,7 @@ For most operations, the views are static per tenant (they filter by `tenant_id`
 
 #### Direct StarRocks Access
 
-**Option D provides robust direct access support through views + DB RBAC.** This is a key advantage over Option A and avoids the operational overhead of Ranger (Option C).
+**Option C provides robust direct access support through views + DB RBAC.** This is a key advantage over Option A and avoids the operational overhead of Ranger (Option B).
 
 ```mermaid
 graph TB
@@ -1462,31 +1244,219 @@ The view layer stays unchanged -- views would point to Iceberg tables instead of
 
 ---
 
+
+### Option D -- Views-Based with Per-User JWT Connections
+
+**Summary:** Same views-based architecture as Option C (single `radiant_base`, per-tenant view databases, per-group identified databases, per-tenant de-identified database), but **all** StarRocks connections -- including the Go API -- use per-user JWT authentication. Every query is attributed to the individual user in StarRocks, providing the strongest audit trail without Ranger.
+
+```mermaid
+graph LR
+    subgraph Users
+        Portal[Portal User]
+        Analyst[Data Analyst]
+        BI[BI / MCP]
+    end
+
+    subgraph "Go API"
+        MW["OpenFGA: tenant +<br/>per-group access level"]
+        H["Handlers: project filtering<br/>+ PII masking"]
+        CM["ConnectionManager<br/>per-user JWT pool"]
+    end
+
+    subgraph "StarRocks View DBs — per-user JWT everywhere"
+        CBTN["radiant_cbtn<br/>occurrences + shared"]
+        DEID["radiant_cbtn_deidentified<br/>masked PII, all groups"]
+        CHOP_ID["radiant_cbtn_chop_identified<br/>full PII, CHOP only"]
+    end
+
+    subgraph "Base + Catalogs"
+        BASE[("radiant_base<br/>colocation group<br/>on locus_id")]
+        ICE[("radiant_iceberg")]
+        JDBC[("radiant_jdbc")]
+    end
+
+    Portal --> MW --> H --> CM
+    CM -- "user JWT<br/>per-request" --> CBTN
+    Analyst -- "user JWT" --> CBTN
+    Analyst -- "user JWT" --> DEID
+    Analyst -- "user JWT" --> CHOP_ID
+    BI -- "user JWT" --> CBTN
+    CBTN --> BASE
+    DEID --> JDBC
+    DEID --> ICE
+    CHOP_ID --> JDBC
+    CHOP_ID --> ICE
+
+    style CBTN fill:#d4edda,stroke:#28a745
+    style DEID fill:#fff3cd,stroke:#856404
+    style CHOP_ID fill:#d4edda,stroke:#28a745
+    style BASE fill:#e6f3ff,stroke:#0066cc
+    style ICE fill:#e2d5f1,stroke:#6f42c1
+    style CM fill:#f8d7da,stroke:#721c24
+```
+
+> **Same view/RBAC model as Option C** but with per-user JWT connections for the Go API too. Strongest audit trail (every query attributed to individual user), at the cost of a significant GORM refactor and per-request connection overhead.
+
+#### Tenant Isolation Model
+
+**Identical to Option C.** Same `radiant_base` database with colocation groups, same per-tenant view databases, same per-tenant de-identified database, same per-group identified databases. The schema, views, and RBAC setup are exactly as described in Option C.
+
+The only difference is the **connection model**: the Go API connects to StarRocks using the portal user's JWT rather than a per-tenant service account.
+
+#### Group / Identified vs De-identified Enforcement
+
+**Identical to Option C.** Per-tenant de-identified + per-group identified view databases. The Go API applies PII masking in the response layer based on OpenFGA per-group access levels.
+
+The additional benefit: since the Go API connects as the individual user, StarRocks RBAC prevents the API from accidentally querying a database the user is not authorized for -- even if the API code has a bug in tenant/group resolution.
+
+#### Connection Model
+
+**Per-user JWT connections for ALL access paths, including the Go API.**
+
+```sql
+-- StarRocks Security Integration (same as Option C Phase 3)
+CREATE SECURITY INTEGRATION keycloak_jwt
+PROPERTIES (
+    "type" = "jwt",
+    "jwks_url" = "https://keycloak:8080/realms/CQDG/protocol/openid-connect/certs",
+    "jwt_username_claim" = "preferred_username"
+);
+```
+
+Go API connection flow per request:
+```
+1. Extract JWT from Authorization header
+2. Look up cached *gorm.DB for this user (keyed by JWT sub + expiry)
+3. If cache miss: open new StarRocks connection with JWT as password
+   DSN: "{username}:{jwt_token}@tcp(starrocks:9030)/radiant_{tenant}"
+4. Execute all queries in the request using this connection
+5. Return connection to user-specific cache (evict on JWT expiry)
+```
+
+**Performance implications:**
+
+| Metric | Option C (per-tenant pools) | Option D (per-user JWT) |
+|--------|---------------------------|------------------------|
+| Connection establishment (API) | Amortized (pool per tenant) | 10-50ms per cache miss per user |
+| Total connections (API) | 20 * N tenants | N concurrent users (potentially hundreds) |
+| Connection cache | Per-tenant, long-lived | Per-user, evict on JWT expiry (5-15 min) |
+| Memory overhead | N tenants * pool buffers | N active users * connection buffers |
+| GORM refactor scope | Minimal (wiring change) | **Major** -- all 61 repositories must accept per-request DB |
+
+**GORM refactor impact:** Every repository currently stores `db *gorm.DB` as a struct field set at startup. For per-user connections, this must become per-request. The least invasive approach is a `UserDBResolver` middleware that injects the user's `*gorm.DB` into the Gin context, and handlers extract it:
+
+```go
+// Middleware: resolve per-user connection
+func UserDBMiddleware(connMgr *UserConnectionManager) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        jwt := c.GetHeader("Authorization")
+        db, err := connMgr.GetOrCreate(jwt)
+        c.Set("user_db", db)
+        c.Next()
+    }
+}
+
+// Handler: extract per-user DB (changes required in every handler)
+func SearchCasesHandler(c *gin.Context) {
+    db := c.MustGet("user_db").(*gorm.DB)
+    repo := repository.NewCasesRepository(db, pgDB)
+    // ...
+}
+```
+
+All 61 repository constructors and all handler initializations change from startup-time to request-time. DAO interfaces themselves are unchanged, but the wiring is fundamentally different.
+
+#### OpenFGA Integration
+
+Same model as Option C. The sync daemon manages StarRocks user creation and per-group GRANT/REVOKE when OpenFGA tuples change. Since the Go API also connects as the individual user (not a service account), every portal user needs a StarRocks user -- not just direct-access users.
+
+**Implication:** The sync daemon must provision StarRocks users for **all** portal users, not just data analysts. With 500 portal users, that's 500 StarRocks users to manage (vs. ~50 for Option C where only direct-access analysts need StarRocks users).
+
+#### Audit Trail
+
+| Layer | Attribution | Coverage |
+|-------|------------|----------|
+| Application log | User ID from JWT | All HTTP requests |
+| **StarRocks audit log** | **Individual user for ALL queries** | Portal + direct access -- full per-user attribution |
+| PostgreSQL history tables | `created_by`/`updated_by` | Write operations |
+
+**This is Option D's primary advantage over Option C.** Every StarRocks query -- whether from the portal, Jupyter, Tableau, or MCP -- is attributed to the individual user in the StarRocks audit log. No cross-referencing with application logs needed. Compliance auditors get a single, independent, tamper-resistant audit trail.
+
+#### Direct StarRocks Access
+
+**Identical to Option C.** Per-user JWT connections, same view databases, same RBAC grants. The only difference is that portal queries are also per-user (in Option C, portal queries use service accounts).
+
+#### Operational Complexity
+
+| Component | Change Required | Ongoing Burden |
+|-----------|----------------|----------------|
+| StarRocks | Security Integration; same view/RBAC setup as Option C | User provisioning for ALL portal users (not just analysts) |
+| PostgreSQL | Same as Option C | Same |
+| Go API | **UserConnectionManager** + per-request DB injection + GORM refactor | Connection cache monitoring, JWT expiry handling |
+| Infrastructure | JWKS endpoint (already exists in Keycloak) | Same |
+
+#### Compliance Posture
+
+| Criterion | Assessment |
+|-----------|------------|
+| Defense-in-depth | **Good** -- 2 layers (StarRocks RBAC + API), same as Option C |
+| Principle of least privilege | **Satisfied** -- same view/RBAC model as Option C |
+| Blast radius of a bug | **Contained to tenant** -- same as Option C, plus DB rejects unauthorized queries even from API |
+| Audit independence | **Best without Ranger** -- per-user attribution for ALL queries |
+| Direct access support | **Full** -- same as Option C |
+
+#### Migration Path
+
+Same as Option C Phases 1-3, but Phase 2 requires the GORM refactor:
+
+1. Phase 1: Option A (API-layer enforcement) -- 4-8 weeks
+2. Phase 2: Views + per-user JWT connections -- 6-8 weeks (includes GORM refactor)
+3. Phase 3: Per-group identified databases + user provisioning sync -- 2-4 weeks
+
+**Estimated effort:** 12--18 weeks. Higher than Option C due to GORM refactor.
+
+#### Portal-Specific Action Authorization
+
+Same as Option C. OpenFGA governs all non-query actions (interpret, upload, approve, assign, report) scoped by tenant + group + role.
+
+#### When to Choose Option D Over Option C
+
+Option D is the right choice if:
+- **Regulatory requirements mandate per-user audit attribution for ALL data access**, including portal queries (not just direct access)
+- The team is willing to accept the GORM refactor and per-request connection overhead
+- The number of concurrent portal users is manageable (< 200) so per-user connection pools don't exhaust StarRocks FE capacity
+
+Option C is preferred if:
+- Per-user audit for direct access + application-log-based audit for portal queries is sufficient
+- Minimizing code changes and operational complexity is a priority
+- The portal has many concurrent users (> 200)
+
+---
 ## Comparison Matrix
 
-| Dimension | Option A | Option B | Option C | Option D |
-|-----------|----------|----------|----------|----------|
-| **Tenant isolation** | API-layer only | DB-per-tenant + user identity | Ranger RLS | Views + DB RBAC |
-| **PII masking** | API-layer | API-layer (+ optional column RBAC) | Ranger column masking | Identified/de-identified view DBs |
-| **Connection model** | Shared pool (unchanged) | Per-user JWT connections | Per-user JWT connections | Hybrid: per-tenant pools (API) + per-user JWT (direct) |
-| **Direct StarRocks access** | **Not supported** | Tenant-level (no PII masking) | **Full** (RLS + column masking) | **Full** (views + DB RBAC + PII views) |
-| **Colocation group preserved** | Yes (no changes) | **No** (tables duplicated per-tenant DB) | Yes (single DB) | **Yes** (single radiant_base DB) |
-| **StarRocks schema changes** | None | Per-tenant databases + table duplication | Add `tenant_id` to tables | Add `tenant_id` + base DB + view DBs |
-| **PostgreSQL changes** | Add tenant table | Add tenant table (+ optional per-tenant schemas) | Add tenant table + enable RLS | Add tenant table |
-| **New infrastructure** | None | JWKS config | **Apache Ranger** (Java stack) | JWKS config (for direct access) |
-| **GORM refactor scope** | Moderate (add WHERE clauses) | **Major** (all 61 repos) | **Major** (all 61 repos) | Minimal (wiring change; table names unchanged) |
-| **Defense-in-depth** | 1 layer | 2 layers | 3 layers | 2 layers |
-| **Bug blast radius** | All tenants | Within tenant | Minimal | Within tenant |
-| **StarRocks audit attribution** | None (root) | Per-user | Per-user + policy | Per-user (direct) / per-tenant (API) |
-| **Operational burden** | Low | High | **Very high** | Low-moderate |
-| **Estimated effort** | 4-8 weeks | 8-14 weeks | 12-20 weeks | 8-13 weeks |
-| **Rollback difficulty** | Easy | Hard | Very hard | Moderate |
+| Dimension | Option A | Option B (Ranger) | Option C (Recommended) | Option D (Per-User JWT) |
+|-----------|----------|-------------------|----------------------|------------------------|
+| **Tenant isolation** | API-layer only | Ranger RLS | Views + DB RBAC | Views + DB RBAC |
+| **PII masking** | API-layer | Ranger column masking | Per-tenant deidentified + per-group identified DBs | Same as C |
+| **Connection model** | Shared pool (unchanged) | Per-user JWT connections | Hybrid: per-tenant pools (API) + per-user JWT (direct) | Per-user JWT for ALL (API + direct) |
+| **Direct StarRocks access** | **Not supported** | **Full** (RLS + column masking) | **Full** (views + DB RBAC + PII views) | **Full** (same as C) |
+| **Colocation group preserved** | Yes (no changes) | Yes (single DB) | **Yes** (single radiant_base DB) | **Yes** (same as C) |
+| **StarRocks schema changes** | None | Add `tenant_id` to tables | Add `tenant_id` + base DB + view DBs | Same as C |
+| **PostgreSQL changes** | Add tenant table | Add tenant table + enable RLS | Add tenant table | Same as C |
+| **New infrastructure** | None | **Apache Ranger** (Java stack) | JWKS config (for direct access) | JWKS config (for all access) |
+| **GORM refactor scope** | Moderate (add WHERE clauses) | **Major** (all 61 repos) | Minimal (wiring change; table names unchanged) | **Major** (all 61 repos, per-request DB) |
+| **Defense-in-depth** | 1 layer | 3 layers | 2 layers | 2 layers (+ DB rejects API bugs) |
+| **Bug blast radius** | All tenants | Minimal | Within tenant | Within tenant (stronger: DB-enforced per user) |
+| **StarRocks audit attribution** | None (root) | Per-user + policy | Per-user (direct) / per-tenant (API) | **Per-user for ALL queries** |
+| **Operational burden** | Low | **Very high** | Low-moderate | Moderate-high |
+| **Estimated effort** | 4-8 weeks | 12-20 weeks | 8-13 weeks | 12-18 weeks |
+| **Rollback difficulty** | Easy | Very hard | Moderate | Hard |
 
 ---
 
 ## 4. Proposed Schema Organization
 
-This section details the schema for the recommended approach (Option D, with Option A as the first phase).
+This section details the schema for the recommended approach (Option C, with Option A as the first phase).
 
 ### StarRocks Database Hierarchy
 
@@ -1569,7 +1539,7 @@ graph LR
     style note fill:#ffffcc,stroke:#333
 ```
 
-### 4.1 StarRocks Schema (Target State -- Option D)
+### 4.1 StarRocks Schema (Target State -- Option C)
 
 #### radiant_base Database
 
@@ -2264,16 +2234,16 @@ model
       - "deidentified_group_ids" = ["cbtn-seattle"]
 
 5. Handler + Repository:
-   a. Select tenant-specific StarRocks pool (Option D)
+   a. Select tenant-specific StarRocks pool (Option C)
    b. Add WHERE project_id IN (allowed_project_ids) to queries
    c. For results: mask PII for deidentified_group_ids
 ```
 
 **Keycloak enrichment (optional):** Add a `tenants` custom claim to the JWT via a Keycloak protocol mapper. This allows the frontend to render the tenant switcher dropdown without an extra API call on page load. The OpenFGA check remains the authoritative validation.
 
-### 5.5 OpenFGA-to-StarRocks Sync (Option D)
+### 5.5 OpenFGA-to-StarRocks Sync (Option C)
 
-For Option D, OpenFGA state must be synced to StarRocks RBAC at two levels: **tenant lifecycle** (low-frequency) and **user access grants** (moderate-frequency, required for direct access users).
+For Option C, OpenFGA state must be synced to StarRocks RBAC at two levels: **tenant lifecycle** (low-frequency) and **user access grants** (moderate-frequency, required for direct access users).
 
 #### Tenant & Group Lifecycle Sync
 
@@ -2332,41 +2302,41 @@ On user "bob" removed from tenant "cbtn" entirely:
 
 ## 6. Recommendation
 
-### Recommended Architecture: Option D (Views-Based with Per-Tenant Pools)
+### Recommended Architecture: Option C (Views-Based with Per-Tenant Pools)
 
 Implemented in three phases:
 
 | Phase | Architecture | Duration | Deliverable |
 |-------|-------------|----------|------------|
 | **Phase 1** | Option A (API-layer enforcement) | 4-8 weeks | Multi-tenancy functional for portal; single defense layer |
-| **Phase 2** | Option D core (views + per-tenant pools) | 4-6 weeks additional | Defense-in-depth; DB-level tenant isolation for portal |
+| **Phase 2** | Option C (views + per-tenant pools) | 4-6 weeks additional | Defense-in-depth; DB-level tenant isolation for portal |
 | **Phase 3** | Direct access enablement | 2-4 weeks additional | JWT auth, identified/de-identified view DBs, user provisioning sync |
 
-### Why Option D
+### Why Option C
 
-**It delivers the best balance of security, operational simplicity, and migration feasibility for a mid-size team -- while being the only non-Ranger option that fully supports direct StarRocks access.**
+**It delivers the best balance of security, operational simplicity, and migration feasibility for a mid-size team -- while fully supporting direct StarRocks access without Ranger.**
 
-1. **Supports all access paths without Ranger.** Data analysts (Jupyter, SQL clients), BI tools (Power BI, Tableau), and AI tools (MCP) can query StarRocks directly with tenant isolation and PII masking enforced by views and DB RBAC. This is a **hard requirement** that eliminates Option A as a final state and makes Option D the pragmatic choice over Option C's operational overhead.
+1. **Supports all access paths without Ranger.** Data analysts (Jupyter, SQL clients), BI tools (Power BI, Tableau), and AI tools (MCP) can query StarRocks directly with tenant isolation and PII masking enforced by views and DB RBAC. This is a **hard requirement** that eliminates Option A as a final state and makes Option C the pragmatic choice over Option B's operational overhead.
 
 2. **Meaningful defense-in-depth without Ranger.** StarRocks views + DB RBAC provide a second enforcement layer that prevents cross-tenant access even if the API layer has a bug. This addresses the core compliance concern without deploying new infrastructure.
 
 3. **Hybrid connection model.** Per-tenant service account pools for the Go API (no GORM refactor, no per-request connection overhead) + per-user JWT connections for direct-access users (full audit attribution). Best of both worlds.
 
-4. **Views are zero-copy and self-maintaining.** Unlike per-tenant table duplication (Option B), views reference the base data. No data synchronization, no storage multiplication. Adding a new tenant is a DDL operation (create views + RBAC), not a data migration.
+4. **Views are zero-copy and self-maintaining.** Views reference the base data -- no data synchronization, no storage multiplication. Adding a new tenant is a DDL operation (create views + RBAC), not a data migration.
 
-5. **Preserves colocation groups.** All base tables (tenant-scoped and shared) are in a single `radiant_base` database, maintaining the colocation group on `HASH(locus_id)`. The most critical query pattern -- `occurrence JOIN variant JOIN consequence JOIN clinvar` -- continues to use colocate JOINs (local, shuffle-free). Option B, which duplicates tables per-tenant database, **breaks colocation** between tenant-specific and shared reference tables.
+5. **Preserves colocation groups.** All base tables (tenant-scoped and shared) are in a single `radiant_base` database, maintaining the colocation group on `HASH(locus_id)`. The most critical query pattern -- `occurrence JOIN variant JOIN consequence JOIN clinvar` -- continues to use colocate JOINs (local, shuffle-free).
 
 6. **Partition pruning on `tenant_id`.** With `PARTITION BY (tenant_id)` on base tables, StarRocks only scans the relevant tenant's partition when a view filters `WHERE tenant_id = N`. Query performance is equivalent to having physically separate tables.
 
-7. **Identified/de-identified via separate view databases.** By creating `radiant_{tenant}_identified` and `radiant_{tenant}_deidentified` databases with appropriately projecting views, PII masking is enforced at the StarRocks level for direct-access users. No Ranger column masking needed.
+7. **Per-group identified + per-tenant de-identified.** Per-group identified databases give fine-grained PII access control. The per-tenant de-identified database keeps things simple for the common case. Iceberg tables with identified data are also protected through these view databases.
 
-7. **Clean Iceberg evolution path.** The base tables can later be migrated to Iceberg format without changing the view layer or tenant isolation model.
+8. **Clean Iceberg integration.** The `radiant_iceberg` catalog is accessed exclusively through per-group identified and per-tenant de-identified view databases, ensuring PII masking and tenant isolation apply to Iceberg data too.
 
 ### Why Not the Others
 
 - **Option A alone:** **Cannot support direct StarRocks access.** Jupyter/BI/MCP users bypass the Go API entirely. Also insufficient for health data compliance (single enforcement layer, no DB-level audit attribution). Acceptable only as a transitional Phase 1 for portal-only usage.
-- **Option B:** Per-user connections for the Go API are operationally expensive and require a complete GORM repository refactor (all 61 files). Supports direct access at the tenant level but not PII masking without Ranger or additional views. If you add de-identified views (as in Option D), the two options converge -- except Option B forces the expensive per-user connection model on the Go API unnecessarily.
-- **Option C:** Apache Ranger provides the most comprehensive enforcement (native RLS + column masking for all access paths). However, it adds significant operational burden (Java stack, policy management, sync service) and creates a dual-authorization-system problem (Ranger + OpenFGA). **Option D achieves 90% of Ranger's benefit using native StarRocks views and DB RBAC.** The remaining 10% (within-tenant RLS for direct users) is addressed by giving direct-access users only the databases their OpenFGA role permits. Option C should be reconsidered only if regulatory requirements explicitly mandate database-level RLS within a tenant -- not just across tenants.
+- **Option B (Ranger):** Provides the most comprehensive enforcement (native RLS + column masking for all access paths). However, it adds significant operational burden (Java stack, policy management, sync service) and creates a dual-authorization-system problem (Ranger + OpenFGA). **Option C achieves 90% of Ranger's benefit using native StarRocks views and DB RBAC.** Option B should be reconsidered only if regulatory requirements explicitly mandate database-level RLS within a tenant -- not just across tenants.
+- **Option D (per-user JWT for API):** Same view/RBAC architecture as Option C, but forces per-user JWT connections on the Go API too. This provides per-user audit attribution for all queries (Option C only has per-user for direct access) but requires a **major GORM refactor** (all 61 repositories) and increases connection overhead. The added audit granularity rarely justifies the cost -- Option C's application log already provides per-user attribution for portal queries. Consider Option D only if regulations mandate per-user DB-level audit for portal traffic.
 
 ### Risk Mitigation
 
@@ -2589,7 +2559,7 @@ func MaskPatientPII(patient *types.Patient) {
 
 ---
 
-### Phase 2: Views-Based Tenant Isolation (Option D)
+### Phase 2: Views-Based Tenant Isolation (Option C)
 
 **Goal:** Add database-level defense-in-depth. StarRocks DB RBAC prevents cross-tenant access even if the API layer has a bug.
 
