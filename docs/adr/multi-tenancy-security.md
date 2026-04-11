@@ -120,45 +120,48 @@ graph LR
     subgraph "Go API"
         Auth[Keycloak JWT +<br/>Tenant Middleware]
         FGA[OpenFGA<br/>tenant / group / access level]
-        Handlers[Handlers +<br/>Repositories<br/>project_id filtering<br/>PII masking]
+        Handlers[Handlers +<br/>Repositories<br/>project_id filtering<br/>per-group PII masking]
     end
 
-    subgraph "StarRocks — Per-Tenant View DBs"
+    subgraph "StarRocks View DBs"
         direction TB
-        CBTN["radiant_cbtn<br/>(views: WHERE tenant_id=1)<br/>+ pass-through shared views"]
-        CBTN_ID["radiant_cbtn_identified<br/>(full PII clinical views)"]
-        CBTN_DEID["radiant_cbtn_deidentified<br/>(masked PII clinical views)"]
-        UDP["radiant_udp<br/>(views: WHERE tenant_id=2)"]
+        CBTN["radiant_cbtn<br/>(occurrences + shared)<br/>per-tenant"]
+        DEID["radiant_cbtn_deidentified<br/>(masked PII, all groups)<br/>per-tenant"]
+        CHOP_ID["radiant_cbtn_chop_identified<br/>(full PII, CHOP only)<br/>per-group"]
+        SEA_ID["radiant_cbtn_seattle_identified<br/>(full PII, Seattle only)<br/>per-group"]
     end
 
-    subgraph "StarRocks — Base"
-        BASE[("radiant_base<br/>ALL tables<br/>colocation group on locus_id<br/>PARTITION BY tenant_id")]
+    subgraph "StarRocks — Base + Catalogs"
+        BASE[("radiant_base<br/>ALL native tables<br/>colocation group on locus_id")]
+        ICE[("radiant_iceberg<br/>Iceberg tables<br/>may contain identified data")]
     end
 
-    PG[(PostgreSQL)]
+    PG[(PostgreSQL<br/>radiant_jdbc)]
 
     Portal --> Auth --> FGA --> Handlers
     Handlers -- "svc_cbtn<br/>per-tenant pool" --> CBTN
-    Analyst -- "JWT auth<br/>per-user" --> CBTN
-    Analyst -- "identified?" --> CBTN_ID
-    Analyst -- "de-identified?" --> CBTN_DEID
-    BI -- "JWT / OAuth<br/>per-user" --> CBTN
-    AI -- "JWT passthrough<br/>per-user" --> CBTN
-    CBTN -- "views resolve to" --> BASE
-    CBTN_ID -- "views resolve to" --> BASE
-    CBTN_DEID -- "views resolve to" --> BASE
-    UDP -- "views resolve to" --> BASE
-    BASE -. "JDBC federation" .-> PG
+    Analyst -- "JWT per-user" --> CBTN
+    Analyst -- "CHOP identified" --> CHOP_ID
+    Analyst -- "de-identified" --> DEID
+    BI -- "JWT per-user" --> CBTN
+    AI -- "JWT passthrough" --> CBTN
+    CBTN -- "views" --> BASE
+    CHOP_ID -- "views" --> PG
+    CHOP_ID -- "views" --> ICE
+    DEID -- "views" --> PG
+    DEID -- "views" --> ICE
+    SEA_ID -- "views" --> PG
     Handlers --> PG
 
     style BASE fill:#e6f3ff,stroke:#333
+    style ICE fill:#e6f3ff,stroke:#333
     style CBTN fill:#d4edda,stroke:#333
-    style CBTN_ID fill:#d4edda,stroke:#333
-    style CBTN_DEID fill:#d4edda,stroke:#333
-    style UDP fill:#fff3cd,stroke:#333
+    style DEID fill:#fff3cd,stroke:#333
+    style CHOP_ID fill:#d4edda,stroke:#333
+    style SEA_ID fill:#d4edda,stroke:#333
 ```
 
-> All access paths -- portal, Jupyter, BI tools, AI/MCP -- are protected by StarRocks DB RBAC. No user can access `radiant_base` directly. Views enforce tenant isolation and PII masking at the database level.
+> All access paths are protected by StarRocks DB RBAC. No user accesses `radiant_base`, `radiant_jdbc`, or `radiant_iceberg` directly. Per-group view databases enforce both tenant isolation and **per-group PII masking** -- a user can have identified access to CHOP and de-identified to Seattle within the same CBTN tenant.
 
 ---
 
@@ -229,6 +232,7 @@ These are hard constraints that apply across all options:
 | Resource group isolation | CPU/memory partitioning per resource group | Can prevent one tenant from starving others |
 | Hierarchy | Catalog > Database > Table (no schema concept) | Cannot use PostgreSQL-style schemas within a database |
 | **Colocation groups** | Tables must be in the **same database** to share a colocation group | Colocate JOINs (local, shuffle-free) require co-located tables; splitting tables across databases breaks colocation |
+| Iceberg catalog support | Native read support via external catalog | Iceberg tables can be queried alongside native tables; JOINs use shuffle (not colocate) |
 
 **Key implication -- colocation groups:** The current StarRocks schema uses colocation to enable colocate JOINs (local, shuffle-free) between tables distributed by `locus_id` -- e.g., `germline__snv__occurrence JOIN snv__variant JOIN snv__consequence JOIN clinvar`. Colocation groups **must be in the same database**. This means **all tables that participate in colocate JOINs must remain in one database**. Any schema design that splits occurrence tables and variant/annotation tables across databases will break colocate JOINs and cause expensive network shuffles on every query. The recommended schema (Option D) addresses this by placing all base tables -- both tenant-scoped and shared reference data -- in a single `radiant_base` database.
 
@@ -753,12 +757,26 @@ default_catalog/
     clinvar                             -- VIEW: pass-through
     # ... (all shared reference tables)
 
-  radiant_udp/                        -- Per-tenant VIEW database (tenant_id = 2)
-    (same view pattern)
+  # Per-TENANT de-identified database (masked PII for all groups)
+  radiant_cbtn_deidentified/            -- Masked PII clinical + Iceberg views (all CBTN groups)
 
-radiant_jdbc/                           -- Single JDBC catalog to PostgreSQL (unchanged)
+  # Per-GROUP identified databases (full PII, one per group)
+  radiant_cbtn_chop_identified/         -- Full PII clinical + Iceberg for CHOP only
+  radiant_cbtn_seattle_identified/      -- Full PII clinical + Iceberg for Seattle only
+
+  radiant_udp/                          -- Per-tenant VIEW database (tenant_id = 2)
+    (same occurrence + shared view pattern)
+  radiant_udp_deidentified/             -- Masked PII for all UDP groups
+  radiant_udp_rare_disease_identified/  -- Full PII for Rare Disease group
+  radiant_udp_epilepsy_identified/      -- Full PII for Epilepsy group
+
+radiant_jdbc/                           -- JDBC catalog to PostgreSQL (unchanged)
   public/
     patient, cases, sample, sequencing_experiment, ...
+
+radiant_iceberg/                        -- Iceberg catalog (may contain identified data)
+  radiant_data/
+    genomic_files, analysis_results, ...
 ```
 
 **Why all base tables in one database:** Tables in `radiant_base` share a colocation group distributed by `HASH(locus_id)` with matching bucket counts. This enables colocate JOINs between `germline__snv__occurrence`, `snv__variant_annotations`, `snv__consequence`, and `clinvar` -- the most frequent and performance-critical query pattern. If these tables were in separate databases, every such JOIN would require a network shuffle.
@@ -820,32 +838,40 @@ SELECT * FROM radiant_base.clinvar;
 **StarRocks RBAC for tenant isolation:**
 
 ```sql
--- Service account for Go API (CBTN)
+-- Service account for Go API (CBTN) -- used by the portal, not by direct-access users
 CREATE USER 'svc_cbtn' IDENTIFIED BY 'secure_password_cbtn';
 CREATE ROLE role_cbtn_api;
 GRANT SELECT ON DATABASE radiant_cbtn TO ROLE role_cbtn_api;
 GRANT SELECT ON ALL TABLES IN DATABASE radiant_jdbc.public TO ROLE role_cbtn_api;
--- NO grant on radiant_base (only views), radiant_udp, or PII-specific DBs
+GRANT SELECT ON ALL TABLES IN ALL DATABASES IN CATALOG radiant_iceberg TO ROLE role_cbtn_api;
+-- NO grant on radiant_base, radiant_udp, or per-group clinical DBs
+-- API-layer handles per-group PII masking for portal users
 GRANT role_cbtn_api TO 'svc_cbtn';
 
--- Roles for direct-access users (per tenant + access level)
-CREATE ROLE role_cbtn_identified;
-GRANT SELECT ON DATABASE radiant_cbtn TO ROLE role_cbtn_identified;
-GRANT SELECT ON DATABASE radiant_cbtn_identified TO ROLE role_cbtn_identified;
-
+-- Tenant-level de-identified role (any CBTN member gets this)
 CREATE ROLE role_cbtn_deidentified;
 GRANT SELECT ON DATABASE radiant_cbtn TO ROLE role_cbtn_deidentified;
 GRANT SELECT ON DATABASE radiant_cbtn_deidentified TO ROLE role_cbtn_deidentified;
 
+-- Per-group identified roles (only for users with identified access to that group)
+CREATE ROLE role_cbtn_chop_identified;
+GRANT SELECT ON DATABASE radiant_cbtn TO ROLE role_cbtn_chop_identified;
+GRANT SELECT ON DATABASE radiant_cbtn_chop_identified TO ROLE role_cbtn_chop_identified;
+
+CREATE ROLE role_cbtn_seattle_identified;
+GRANT SELECT ON DATABASE radiant_cbtn TO ROLE role_cbtn_seattle_identified;
+GRANT SELECT ON DATABASE radiant_cbtn_seattle_identified TO ROLE role_cbtn_seattle_identified;
+
 -- Direct-access user provisioning (by sync daemon)
 CREATE USER 'analyst_bob' IDENTIFIED BY JWT;
-GRANT role_cbtn_identified TO 'analyst_bob';      -- Bob has identified access to CBTN (CHOP group)
+GRANT role_cbtn_deidentified TO 'analyst_bob';             -- de-identified for all CBTN groups
+GRANT role_cbtn_chop_identified TO 'analyst_bob';          -- + identified for CHOP specifically
 
 CREATE USER 'analyst_charlie' IDENTIFIED BY JWT;
-GRANT role_cbtn_deidentified TO 'analyst_charlie'; -- Charlie has de-identified access to CBTN
+GRANT role_cbtn_deidentified TO 'analyst_charlie';         -- de-identified for all CBTN groups only
 ```
 
-**Why this works:** Even if the Go API has a bug and constructs a query against the wrong database, the StarRocks service account lacks permission. The `svc_cbtn` user physically cannot query `radiant_udp` or other tenant databases or `radiant_base` -- StarRocks returns an access denied error. Direct-access users connecting via Jupyter or BI tools are similarly restricted to their granted databases. A de-identified user **cannot** access `radiant_cbtn_identified` -- the GRANT does not exist. This is **defense-in-depth without Ranger**.
+**Why this works:** Even if the Go API has a bug and constructs a query against the wrong database, the StarRocks service account lacks permission. The `svc_cbtn` user physically cannot query `radiant_udp` or other tenant databases or `radiant_base` -- StarRocks returns an access denied error. Direct-access users connecting via Jupyter or BI tools are restricted to their granted databases. Bob can access `radiant_cbtn_chop_identified` (full PII for CHOP) but **cannot** access `radiant_cbtn_seattle_identified` -- the GRANT does not exist. He can only see Seattle data through the tenant-level `radiant_cbtn_deidentified` (masked PII). This is **defense-in-depth without Ranger, with per-group identified granularity**.
 
 #### Reference Data Handling
 
@@ -871,54 +897,100 @@ WHERE ...
 
 #### Group / Identified vs De-identified Enforcement
 
-**Two-tier approach: de-identified views for direct access + API-layer masking for the portal.**
+**Per-group view databases: a user can have identified access to one group and de-identified to another within the same tenant.**
 
-Because users access StarRocks directly (Jupyter, BI tools, MCP), API-layer PII masking is not sufficient -- direct-access users bypass the Go API entirely. The solution is to create **two sets of views per tenant**: one identified (full PII) and one de-identified (masked PII).
+Because users access StarRocks directly (Jupyter, BI tools, MCP), API-layer PII masking is not sufficient -- direct-access users bypass the Go API entirely. The solution is to create **per-group view databases** for clinical data, with separate identified and de-identified variants. This allows a user to have identified access to CHOP but only de-identified access to Seattle, both within the CBTN tenant.
 
-**De-identified views for JDBC-federated clinical data:**
+**Hybrid approach: per-tenant de-identified + per-group identified.**
+
+Identified (full PII) access is sensitive and must be per-group — a user may have identified access to CHOP but not Seattle. De-identified (masked PII) access is per-tenant — any tenant member can see masked data for all groups within the tenant, since de-identification removes the privacy risk.
+
 ```sql
--- In radiant_cbtn_deidentified database
-CREATE VIEW patient AS
+-- ============================================================
+-- Per-TENANT de-identified database (masked PII for ALL groups in CBTN)
+-- ============================================================
+CREATE DATABASE IF NOT EXISTS radiant_cbtn_deidentified;
+
+CREATE VIEW radiant_cbtn_deidentified.patient AS
 SELECT p.id, p.sex_code, p.life_status_code, p.organization_id,
        '***' AS first_name, '***' AS last_name, '***' AS jhn,
        NULL AS date_of_birth, CONCAT('DEID-', p.id) AS submitter_patient_id
 FROM radiant_jdbc.public.patient p
 WHERE p.organization_id IN (
     SELECT o.id FROM radiant_jdbc.public.organization o
-    WHERE o.code IN ('cbtn-org-chop', 'cbtn-org-seattle')
+    WHERE o.code IN ('cbtn-org-chop', 'cbtn-org-seattle')  -- ALL CBTN organizations
 );
 
--- Identified view (full PII) in radiant_cbtn_identified database
-CREATE VIEW patient AS
+-- Iceberg tables with masked identified data (all CBTN groups)
+CREATE VIEW radiant_cbtn_deidentified.genomic_files AS
+SELECT file_id, file_format, data_category, file_size,
+       '***' AS patient_name, CONCAT('DEID-', patient_id) AS patient_id
+FROM radiant_iceberg.radiant_data.genomic_files
+WHERE tenant_code = 'cbtn';
+
+-- ============================================================
+-- Per-GROUP identified databases (full PII, filtered to one group)
+-- ============================================================
+CREATE DATABASE IF NOT EXISTS radiant_cbtn_chop_identified;
+
+CREATE VIEW radiant_cbtn_chop_identified.patient AS
 SELECT p.id, p.sex_code, p.life_status_code, p.organization_id,
        p.first_name, p.last_name, p.jhn, p.date_of_birth,
        p.submitter_patient_id
 FROM radiant_jdbc.public.patient p
 WHERE p.organization_id IN (
     SELECT o.id FROM radiant_jdbc.public.organization o
-    WHERE o.code IN ('cbtn-org-chop', 'cbtn-org-seattle')
+    WHERE o.code IN ('cbtn-org-chop')  -- Only CHOP organizations
 );
+
+-- Iceberg tables with full identified data for CHOP
+CREATE VIEW radiant_cbtn_chop_identified.genomic_files AS
+SELECT * FROM radiant_iceberg.radiant_data.genomic_files
+WHERE group_code = 'chop';
+
+CREATE DATABASE IF NOT EXISTS radiant_cbtn_seattle_identified;
+-- ... (same pattern, filtered to Seattle's organizations)
 ```
 
-**StarRocks RBAC for identified vs de-identified:**
+**StarRocks RBAC:**
 ```sql
--- User with identified access to CBTN
-CREATE USER 'analyst_bob' IDENTIFIED BY JWT;
-GRANT SELECT ON DATABASE radiant_cbtn TO 'analyst_bob';              -- occurrence views
-GRANT SELECT ON DATABASE radiant_cbtn_identified TO 'analyst_bob';   -- full PII clinical views
--- No separate radiant_shared grant needed; shared tables are exposed via pass-through views in radiant_cbtn
+-- Tenant-level de-identified role (any CBTN member)
+CREATE ROLE role_cbtn_deidentified;
+GRANT SELECT ON DATABASE radiant_cbtn TO ROLE role_cbtn_deidentified;        -- occurrences + shared
+GRANT SELECT ON DATABASE radiant_cbtn_deidentified TO ROLE role_cbtn_deidentified;
 
--- User with de-identified access to CBTN
+-- Per-group identified roles
+CREATE ROLE role_cbtn_chop_identified;
+GRANT SELECT ON DATABASE radiant_cbtn TO ROLE role_cbtn_chop_identified;
+GRANT SELECT ON DATABASE radiant_cbtn_chop_identified TO ROLE role_cbtn_chop_identified;
+
+CREATE ROLE role_cbtn_seattle_identified;
+GRANT SELECT ON DATABASE radiant_cbtn TO ROLE role_cbtn_seattle_identified;
+GRANT SELECT ON DATABASE radiant_cbtn_seattle_identified TO ROLE role_cbtn_seattle_identified;
+
+-- Bob: identified to CHOP, de-identified to Seattle (gets tenant deidentified + CHOP identified)
+CREATE USER 'analyst_bob' IDENTIFIED BY JWT;
+GRANT role_cbtn_deidentified TO 'analyst_bob';          -- masked PII for all CBTN groups
+GRANT role_cbtn_chop_identified TO 'analyst_bob';       -- full PII for CHOP only
+-- Bob sees full PII when querying radiant_cbtn_chop_identified.patient
+-- Bob sees masked PII when querying radiant_cbtn_deidentified.patient (includes Seattle)
+-- Bob CANNOT access radiant_cbtn_seattle_identified (no GRANT)
+
+-- Charlie: de-identified only (no identified access to any group)
 CREATE USER 'analyst_charlie' IDENTIFIED BY JWT;
-GRANT SELECT ON DATABASE radiant_cbtn TO 'analyst_charlie';            -- occurrence views (no PII)
-GRANT SELECT ON DATABASE radiant_cbtn_deidentified TO 'analyst_charlie'; -- masked PII clinical views
--- No separate radiant_shared grant needed; shared tables accessible via pass-through views
--- NO grant on radiant_cbtn_identified
+GRANT role_cbtn_deidentified TO 'analyst_charlie';      -- masked PII for all CBTN groups
 ```
 
-**For the Go API (portal):** The API continues to use the per-tenant service account pool. The handler applies PII masking in the response layer (same as Option A). The de-identified views are primarily for direct-access users.
+**For the Go API (portal):** The API continues to use the per-tenant service account pool. The handler applies PII masking in the response layer based on the user's per-group access level from OpenFGA.
 
-**For direct-access users:** The user's StarRocks GRANT determines whether they connect to `radiant_cbtn_identified` or `radiant_cbtn_deidentified` for clinical data. Both databases use the same table names (`patient`, `cases`), so SQL queries work identically regardless of access level -- only the data returned differs.
+**For direct-access users:** The user's StarRocks GRANTs determine access. All tenant members get the de-identified database. Users with identified access to specific groups additionally get those group-specific identified databases. SQL queries use the same table names across all databases — only the data returned differs.
+
+**Database naming convention:**
+```
+radiant_{tenant}                                  -- occurrence/analytical views (no PII)
+radiant_{tenant}_deidentified                     -- masked clinical + Iceberg views (all groups, per-tenant)
+radiant_{tenant}_{group}_identified               -- full PII clinical + Iceberg views (per-group)
+```
 
 #### Connection Model
 
@@ -1107,8 +1179,8 @@ graph TB
 
     subgraph "StarRocks View Databases"
         OCC["radiant_cbtn<br/>(occurrences + shared)"]
-        ID["radiant_cbtn_identified<br/>(full PII clinical)"]
-        DEID["radiant_cbtn_deidentified<br/>(masked PII clinical)"]
+        DEID["radiant_cbtn_deidentified<br/>(all groups, masked PII)"]
+        CHOP_ID["radiant_cbtn_chop_identified<br/>(CHOP: full PII + Iceberg)"]
     end
 
     API -- "per-tenant pool" --> SVC --> OCC
@@ -1116,13 +1188,13 @@ graph TB
     DBA --> JWT
     TAB --> JWT
     MCP --> JWT
-    JWT -- "if identified_member" --> ID
-    JWT -- "if deidentified_member" --> DEID
+    JWT -- "all tenant members" --> DEID
+    JWT -- "Bob: identified for CHOP" --> CHOP_ID
 
     style SVC fill:#fff3cd,stroke:#856404
     style JWT fill:#d4edda,stroke:#155724
-    style ID fill:#d4edda,stroke:#155724
-    style DEID fill:#f8d7da,stroke:#721c24
+    style DEID fill:#fff3cd,stroke:#856404
+    style CHOP_ID fill:#d4edda,stroke:#155724
 ```
 
 **How it works for each access path:**
@@ -1160,7 +1232,7 @@ conn = pymysql.connect(
     port=9030,
     user='analyst_bob',
     password=jwt_token,
-    database='radiant_cbtn'  # Tenant-scoped view DB
+    database='radiant_cbtn'  # Tenant-scoped view DB (occurrences + shared)
 )
 
 # Query occurrence data -- views filter to CBTN's tenant_id automatically
@@ -1173,14 +1245,25 @@ cursor.execute("""
 """)
 # Results contain only CBTN's data -- enforced by the view, not by the analyst's query
 
-# Query clinical data -- uses identified or deidentified DB based on grants
+# Query CHOP clinical data -- Bob has identified access to CHOP
 cursor.execute("""
     SELECT p.first_name, p.last_name, p.date_of_birth
-    FROM radiant_cbtn_identified.patient p
+    FROM radiant_cbtn_chop_identified.patient p
     WHERE p.id = 100
 """)
-# If analyst_bob only has deidentified access, this query fails with ACCESS DENIED
-# They must use radiant_cbtn_deidentified.patient instead (which returns masked values)
+# Returns full PII because Bob has role_cbtn_chop_identified
+
+# Query de-identified clinical data (all CBTN groups, including Seattle -- masked PII)
+cursor.execute("""
+    SELECT p.first_name, p.last_name, p.date_of_birth
+    FROM radiant_cbtn_deidentified.patient p
+    WHERE p.id = 200
+""")
+# Returns masked PII: first_name='***', last_name='***', date_of_birth=NULL
+# This includes patients from ALL CBTN groups (CHOP + Seattle), all masked
+
+# Bob CANNOT access radiant_cbtn_seattle_identified -- no GRANT exists
+# cursor.execute("SELECT * FROM radiant_cbtn_seattle_identified.patient")  # ACCESS DENIED
 ```
 
 **Example: MCP server integration:**
@@ -1205,14 +1288,18 @@ async def query_variants(user_jwt: str, tenant: str, sql: str):
 
 Same as Option A. OpenFGA governs all non-query actions (interpret, upload, approve, assign, report) scoped by tenant + group + role. No inconsistency because both StarRocks and portal actions use the same tenant context from the `X-Active-Tenant` header. Direct-access users (Jupyter, BI tools) are read-only against StarRocks -- write operations (interpretations, notes, case assignments) go through the portal API.
 
-#### Future Evolution: Iceberg Path
+#### Iceberg Catalog Integration
 
-The `radiant_base` tables can later be migrated to Apache Iceberg format (StarRocks supports Iceberg catalogs natively). Benefits:
+The `radiant_iceberg` catalog is an additional data source alongside `radiant_base` and `radiant_jdbc`. Iceberg tables may contain **identified data** (patient-linked genomic files, analysis results with patient metadata).
+
+**Current role:** Per-group view databases include views over Iceberg tables, filtered by `group_code` and with PII masking for de-identified access. This ensures that direct-access users see Iceberg data only through their authorized, correctly masked views.
+
+**Future evolution:** The native `radiant_base` tables can also be migrated to Iceberg format for additional benefits:
 - Partition evolution (change partitioning strategy without rewriting data)
 - Time-travel queries (audit: "what did the data look like at time T?")
 - Open table format (accessible by Spark, Trino, etc. for advanced analytics)
 
-The view layer stays unchanged -- views point to `iceberg_catalog.radiant_base.germline__snv__occurrence` instead of `default_catalog.radiant_base.germline__snv__occurrence`. The tenant isolation architecture is unaffected.
+The view layer stays unchanged -- views would point to Iceberg tables instead of native tables. The tenant and group isolation architecture is unaffected. **Note:** Migrating `radiant_base` to Iceberg would mean losing colocation groups (Iceberg tables don't support StarRocks colocation). This trade-off should be evaluated when the time comes -- if colocate JOINs are still critical for query performance, keep the high-frequency analytical tables native and use Iceberg only for bulk/file-oriented data.
 
 ---
 
@@ -1267,37 +1354,44 @@ graph TB
             end
         end
 
-        subgraph views_cbtn ["radiant_cbtn (view DB)"]
+        subgraph views_cbtn ["radiant_cbtn (per-tenant: occurrences + shared)"]
             V1["Views WHERE tenant_id = 1<br/>+ pass-through views for shared tables"]
         end
-        subgraph views_cbtn_id ["radiant_cbtn_identified (view DB)"]
-            V2["Clinical views with full PII<br/>filtered by CBTN orgs"]
+        subgraph views_deid ["radiant_cbtn_deidentified (per-tenant)"]
+            V2["Masked PII clinical + Iceberg<br/>ALL CBTN groups"]
         end
-        subgraph views_cbtn_deid ["radiant_cbtn_deidentified (view DB)"]
-            V3["Clinical views with masked PII<br/>filtered by CBTN orgs"]
+        subgraph views_chop ["radiant_cbtn_chop_identified (per-group)"]
+            V3["Full PII clinical + Iceberg<br/>CHOP only"]
         end
-        subgraph views_udp ["radiant_udp (view DB)"]
-            V4["Views WHERE tenant_id = 2<br/>+ pass-through views for shared tables"]
+        subgraph views_sea ["radiant_cbtn_seattle_identified (per-group)"]
+            V4["Full PII clinical + Iceberg<br/>Seattle only"]
         end
     end
 
-    subgraph jdbc ["radiant_jdbc (external JDBC catalog)"]
-        PG_T["PostgreSQL tables<br/>patient, cases, sample,<br/>sequencing_experiment, ..."]
+    subgraph jdbc ["radiant_jdbc (JDBC catalog)"]
+        PG_T["PostgreSQL tables<br/>patient, cases, sample, ..."]
+    end
+
+    subgraph iceberg ["radiant_iceberg (Iceberg catalog)"]
+        ICE_T["Iceberg tables<br/>genomic_files, analysis_results, ..."]
     end
 
     V1 --> radiant_base
     V2 --> jdbc
+    V2 --> iceberg
     V3 --> jdbc
-    V4 --> radiant_base
+    V3 --> iceberg
+    V4 --> jdbc
 
     style radiant_base fill:#e6f3ff,stroke:#0066cc
     style shared fill:#f0f0f0,stroke:#999
     style tenant_scoped fill:#fff3cd,stroke:#999
     style views_cbtn fill:#d4edda,stroke:#28a745
-    style views_cbtn_id fill:#d4edda,stroke:#28a745
-    style views_cbtn_deid fill:#d4edda,stroke:#28a745
-    style views_udp fill:#cce5ff,stroke:#004085
+    style views_deid fill:#fff3cd,stroke:#856404
+    style views_chop fill:#d4edda,stroke:#28a745
+    style views_sea fill:#d4edda,stroke:#28a745
     style jdbc fill:#f8d7da,stroke:#721c24
+    style iceberg fill:#e2d5f1,stroke:#6f42c1
 ```
 
 ```mermaid
@@ -1551,32 +1645,16 @@ GRANT SELECT ON ALL TABLES IN DATABASE radiant_jdbc.public TO ROLE role_{tenant_
 GRANT role_{tenant_code} TO 'svc_{tenant_code}';
 ```
 
-#### Per-Tenant Identified/De-identified View Databases (Phase 3)
+#### Per-Tenant De-identified + Per-Group Identified View Databases (Phase 3)
 
-Created during Phase 3 (direct access enablement) to support data analysts, BI tools, and MCP:
+Created during Phase 3 (direct access enablement). De-identified databases are **per-tenant** (any tenant member sees masked data for all groups). Identified databases are **per-group** (a user must be explicitly granted identified access to a specific group).
+
+This design reflects that de-identified data carries no privacy risk -- the sensitive boundary is who gets **identified** (full PII) access, and that must be per-group.
 
 ```sql
--- Identified clinical data views (full PII, tenant-scoped)
-CREATE DATABASE IF NOT EXISTS radiant_cbtn_identified;
-
-CREATE VIEW radiant_cbtn_identified.patient AS
-SELECT p.id, p.sex_code, p.life_status_code, p.organization_id,
-       p.first_name, p.last_name, p.jhn, p.date_of_birth,
-       p.submitter_patient_id
-FROM radiant_jdbc.public.patient p
-WHERE p.organization_id IN (
-    SELECT o.id FROM radiant_jdbc.public.organization o
-    WHERE o.code IN ('cbtn-org-chop', 'cbtn-org-seattle')  -- CBTN's organizations (CHOP + Seattle)
-);
-
-CREATE VIEW radiant_cbtn_identified.cases AS
-SELECT c.* FROM radiant_jdbc.public.cases c
-WHERE c.project_id IN (
-    SELECT p.id FROM radiant_jdbc.public.project p
-    WHERE p.code IN ('cbtn-proj-chop', 'cbtn-proj-seattle')  -- CBTN's projects (CHOP + Seattle groups)
-);
-
--- De-identified clinical data views (masked PII, tenant-scoped)
+-- ============================================================
+-- Per-TENANT de-identified database (all CBTN groups, masked PII)
+-- ============================================================
 CREATE DATABASE IF NOT EXISTS radiant_cbtn_deidentified;
 
 CREATE VIEW radiant_cbtn_deidentified.patient AS
@@ -1589,31 +1667,72 @@ SELECT p.id, p.sex_code, p.life_status_code, p.organization_id,
 FROM radiant_jdbc.public.patient p
 WHERE p.organization_id IN (
     SELECT o.id FROM radiant_jdbc.public.organization o
-    WHERE o.code IN ('cbtn-org-chop', 'cbtn-org-seattle')
+    WHERE o.code IN ('cbtn-org-chop', 'cbtn-org-seattle')  -- ALL CBTN organizations
 );
 
-CREATE VIEW radiant_cbtn_deidentified.cases AS
-SELECT c.id, c.proband_id, c.project_id, c.analysis_catalog_id,
-       c.ordering_organization_id, c.diagnosis_lab_id,
-       c.status_code, c.priority_code, c.case_type_code,
-       -- submitter_case_id may be identifying depending on convention
-       CONCAT('DEID-CASE-', c.id) AS submitter_case_id,
-       c.created_at, c.updated_at
-FROM radiant_jdbc.public.cases c
-WHERE c.project_id IN (
-    SELECT p.id FROM radiant_jdbc.public.project p
-    WHERE p.code IN ('cbtn-proj-chop', 'cbtn-proj-seattle')
+-- Iceberg tables with masked PII (all CBTN groups)
+CREATE VIEW radiant_cbtn_deidentified.genomic_files AS
+SELECT file_id, file_format, data_category, file_size,
+       '***' AS patient_name,
+       CONCAT('DEID-', patient_id) AS patient_id
+FROM radiant_iceberg.radiant_data.genomic_files
+WHERE tenant_code = 'cbtn';
+
+-- ============================================================
+-- Per-GROUP identified databases (full PII, one per group)
+-- ============================================================
+CREATE DATABASE IF NOT EXISTS radiant_cbtn_chop_identified;
+
+CREATE VIEW radiant_cbtn_chop_identified.patient AS
+SELECT p.id, p.sex_code, p.life_status_code, p.organization_id,
+       p.first_name, p.last_name, p.jhn, p.date_of_birth,
+       p.submitter_patient_id
+FROM radiant_jdbc.public.patient p
+WHERE p.organization_id IN (
+    SELECT o.id FROM radiant_jdbc.public.organization o
+    WHERE o.code IN ('cbtn-org-chop')  -- Only CHOP organizations
 );
+
+-- Iceberg tables with full identified data for CHOP
+CREATE VIEW radiant_cbtn_chop_identified.genomic_files AS
+SELECT * FROM radiant_iceberg.radiant_data.genomic_files
+WHERE group_code = 'chop';
+
+CREATE DATABASE IF NOT EXISTS radiant_cbtn_seattle_identified;
+-- ... (same pattern, filtered to Seattle's organizations/group_code)
 ```
 
 **Complete database hierarchy per tenant (target state):**
 ```
-radiant_cbtn/                  -- Occurrence/analytical views (no PII)
-radiant_cbtn_identified/       -- Clinical data views with full PII (for identified users)
-radiant_cbtn_deidentified/     -- Clinical data views with masked PII (for de-identified users)
+radiant_cbtn/                              -- Occurrence/analytical views (no PII, all groups)
+radiant_cbtn_deidentified/                 -- Masked PII clinical + Iceberg (all CBTN groups)
+radiant_cbtn_chop_identified/              -- Full PII clinical + Iceberg for CHOP only
+radiant_cbtn_seattle_identified/           -- Full PII clinical + Iceberg for Seattle only
 ```
 
-All three include pass-through views for shared reference tables (annotations, gene panels, ontology terms) from `radiant_base`.
+**Database count formula:** Per tenant: 1 (occurrences) + 1 (de-identified) + M (identified per group) = `2 + M`. For 10 tenants with 3 groups each = 50 databases. Lightweight metadata in StarRocks.
+
+View databases include views over:
+- `radiant_jdbc` (PostgreSQL clinical tables) -- filtered by tenant/group organizations
+- `radiant_iceberg` (Iceberg tables) -- filtered by tenant/group code, with PII masking for de-identified
+
+#### Iceberg Catalog (`radiant_iceberg`)
+
+The `radiant_iceberg` catalog provides access to data stored in Apache Iceberg format. Iceberg tables may contain **identified data** (patient-linked genomic files, analysis results with patient metadata). These tables are treated as another data source alongside `radiant_jdbc` and `radiant_base`.
+
+```sql
+-- Iceberg catalog configuration (example)
+CREATE EXTERNAL CATALOG radiant_iceberg
+PROPERTIES (
+    "type" = "iceberg",
+    "iceberg.catalog.type" = "hive",
+    "hive.metastore.uris" = "thrift://hive-metastore:9083"
+);
+```
+
+**Iceberg tables are never accessed directly by users.** Like `radiant_base` and `radiant_jdbc`, they are exposed exclusively through per-group view databases. Direct-access users see Iceberg data only through the views in their granted databases (identified or de-identified), which filter by group and apply PII masking where needed.
+
+**Colocation note:** Iceberg tables live in a separate catalog and do not participate in StarRocks colocation groups. JOINs between `radiant_base` native tables and Iceberg tables will use shuffle joins, not colocate joins. This is expected -- Iceberg tables serve a different access pattern (file-level metadata, bulk analysis) than the high-frequency `locus_id`-based analytical JOINs within `radiant_base`.
 
 #### Resource Group Isolation (Optional)
 
@@ -1997,25 +2116,27 @@ model
 
 For Option D, OpenFGA state must be synced to StarRocks RBAC at two levels: **tenant lifecycle** (low-frequency) and **user access grants** (moderate-frequency, required for direct access users).
 
-#### Tenant Lifecycle Sync
+#### Tenant & Group Lifecycle Sync
 
-**Trigger:** Tenant administration API (create/delete tenant).
+**Trigger:** Tenant/group administration API (create/delete tenant or group).
 
 ```
 On new tenant "xyz" created:
-  1. CREATE DATABASE radiant_xyz in StarRocks (occurrence views)
-  2. CREATE DATABASE radiant_xyz_identified (clinical views with full PII)
-  3. CREATE DATABASE radiant_xyz_deidentified (clinical views with masked PII)
-  4. Create all views from templates in each database
-  5. CREATE USER svc_xyz; CREATE ROLE role_xyz_api; GRANT ...
-  6. CREATE ROLE role_xyz_identified; CREATE ROLE role_xyz_deidentified; GRANT ...
-  7. Add pool to TenantPoolManager
+  1. CREATE DATABASE radiant_xyz in StarRocks (occurrence + shared views)
+  2. CREATE USER svc_xyz; CREATE ROLE role_xyz_api; GRANT ...
+  3. Add pool to TenantPoolManager
+
+On new group "groupA" added to tenant "xyz":
+  1. CREATE DATABASE radiant_xyz_groupA_identified (clinical + Iceberg views, full PII for groupA)
+  2. Create views from templates (filtered to groupA's organizations/group_code)
+  3. CREATE ROLE role_xyz_groupA_identified; GRANT on the identified DB
+  4. Update radiant_xyz_deidentified views to include groupA's data (if needed)
 
 On tenant "xyz" decommissioned:
   1. Remove pool from TenantPoolManager
   2. REVOKE all roles from affected users
-  3. DROP USER svc_xyz; DROP ROLEs;
-  4. DROP DATABASEs radiant_xyz, radiant_xyz_identified, radiant_xyz_deidentified
+  3. DROP USER svc_xyz; DROP all ROLEs;
+  4. DROP all DATABASEs (radiant_xyz, radiant_xyz_deidentified, radiant_xyz_*_identified)
   5. (Data in radiant_base retained for archival; partition can be dropped later)
 ```
 
@@ -2026,23 +2147,27 @@ On tenant "xyz" decommissioned:
 - A webhook/event-driven sync triggered by the tenant admin API when access is modified
 
 ```
-On user "bob" granted identified_member on group "xyz-group1":
-  1. Resolve tenant for group -> "xyz"
-  2. CREATE USER 'bob' IDENTIFIED BY JWT (if not exists)
-  3. GRANT role_xyz_identified TO 'bob'
+On user "bob" added to tenant "cbtn" (any group membership):
+  1. CREATE USER 'bob' IDENTIFIED BY JWT (if not exists)
+  2. GRANT role_cbtn_deidentified TO 'bob'  (de-identified for all CBTN groups)
 
-On user "bob" changed from identified to deidentified on group "xyz-group1":
-  1. REVOKE role_xyz_identified FROM 'bob'
-  2. GRANT role_xyz_deidentified TO 'bob'
+On user "bob" granted identified_member on group "cbtn-chop":
+  1. GRANT role_cbtn_chop_identified TO 'bob'
+  (Bob now has: de-identified for all CBTN + identified for CHOP)
 
-On user "bob" removed from all groups in tenant "xyz":
-  1. REVOKE role_xyz_identified FROM 'bob' (if held)
-  2. REVOKE role_xyz_deidentified FROM 'bob' (if held)
+On user "bob" downgraded from identified to deidentified on group "cbtn-chop":
+  1. REVOKE role_cbtn_chop_identified FROM 'bob'
+  (Bob still has de-identified via tenant-level role)
+
+On user "bob" removed from tenant "cbtn" entirely:
+  1. REVOKE role_cbtn_deidentified FROM 'bob'
+  2. REVOKE role_cbtn_chop_identified FROM 'bob' (if held)
+  3. REVOKE role_cbtn_seattle_identified FROM 'bob' (if held)
 ```
 
-**For portal-only users (no direct access):** No StarRocks user provisioning is needed. The Go API uses the shared service account (`svc_xyz`). OpenFGA checks at the API layer handle authorization.
+**For portal-only users (no direct access):** No StarRocks user provisioning is needed. The Go API uses the shared service account (`svc_cbtn`). OpenFGA checks at the API layer handle per-group authorization and PII masking.
 
-**For direct-access users:** StarRocks user creation and GRANT management is required. The sync daemon determines which users need direct access based on their roles (e.g., users with a `data_analyst` or `researcher` role in OpenFGA). Not every portal user needs a StarRocks user -- only those who will connect directly.
+**For direct-access users:** StarRocks user creation and per-group GRANT management is required. The sync daemon determines which users need direct access based on their roles (e.g., users with a `data_analyst` or `researcher` role in OpenFGA). Not every portal user needs a StarRocks user -- only those who will connect directly.
 
 ---
 
@@ -2096,7 +2221,8 @@ Implemented in three phases:
 | Per-tenant pool memory overhead at 50 tenants | With 5 MaxOpenConns per tenant * 50 tenants = 250 connections. Monitor and tune. StarRocks FE default max connections is 1024. |
 | JWT token expiry for direct-access connections | BI tools (Tableau, Power BI) may hold long-lived connections. Configure Keycloak token lifetime appropriately (e.g., 8h for interactive sessions). StarRocks will reject queries on expired JWT connections. |
 | User provisioning sync lag | When OpenFGA grants are updated, the StarRocks GRANT sync may lag. Implement eventual consistency with a short sync interval (30s) or webhook-triggered sync. |
-| De-identified view databases multiply the view count | With N tenants, you have up to 3N databases (occurrences + identified + deidentified). At 50 tenants = 150 databases. StarRocks handles this well -- databases are lightweight metadata. Automate creation via templated SQL. |
+| View databases multiply with groups | Per tenant: 1 occurrence + 1 de-identified + M identified = 2+M databases. At 10 tenants with 3 groups each = 50 databases. StarRocks handles this well -- databases and views are lightweight metadata. Automate creation via templated SQL. |
+| Iceberg tables require consistent group_code column | All Iceberg tables with identified data must include a `group_code` column for view filtering. Enforce this at data ingestion time. |
 
 ---
 
