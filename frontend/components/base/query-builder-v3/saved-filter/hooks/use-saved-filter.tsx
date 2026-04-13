@@ -5,7 +5,7 @@ import { SavedFilter, SavedFilterType } from '@/api/index';
 export enum SavedFiltersActionType {
   SET_SELECTED = 'set-selected',
   SAVE = 'save',
-  SET_HAS_CHANGES_NOT_SAVED = 'set-has-changes-not-saved',
+  SET_IS_UNSAVED = 'set-is-unsaved',
 }
 
 type SavedFilterDispatch = Dispatch<ActionType>;
@@ -14,7 +14,7 @@ export interface ISavedFilterContextProps {
   savedFilterType: SavedFilterType;
   savedFilters: SavedFilter[];
   selectedSavedFilter?: SavedFilter;
-  hasChangesNotSaved?: boolean;
+  isUnsaved?: boolean;
 }
 
 /**
@@ -24,7 +24,7 @@ export const SavedFilterContext = createContext<ISavedFilterContextProps>({
   savedFilterType: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
   savedFilters: [],
   selectedSavedFilter: undefined,
-  hasChangesNotSaved: false,
+  isUnsaved: false,
 });
 
 export const SavedFilterDispatchContext = createContext<SavedFilterDispatch>(() => {
@@ -45,12 +45,12 @@ type SaveSavedFilters = {
   payload: { savedFilters: SavedFilter[]; selectedSavedFilter?: SavedFilter };
 };
 
-type SetHasChangesNotSaved = {
-  type: SavedFiltersActionType.SET_HAS_CHANGES_NOT_SAVED;
+type SetIsUnsaved = {
+  type: SavedFiltersActionType.SET_IS_UNSAVED;
   payload: boolean;
 };
 
-export type ActionType = SetSelectedSavedFilter | SaveSavedFilters | SetHasChangesNotSaved | any;
+export type ActionType = SetSelectedSavedFilter | SaveSavedFilters | SetIsUnsaved | any;
 
 export function savedFiltersReducer(context: ISavedFilterContextProps, action: ActionType) {
   switch (action.type) {
@@ -58,7 +58,7 @@ export function savedFiltersReducer(context: ISavedFilterContextProps, action: A
       return {
         ...context,
         selectedSavedFilter: action.payload,
-        hasChangesNotSaved: false,
+        isUnsaved: false,
       };
     }
     case SavedFiltersActionType.SAVE: {
@@ -66,13 +66,13 @@ export function savedFiltersReducer(context: ISavedFilterContextProps, action: A
         ...context,
         savedFilters: action.payload.savedFilters,
         selectedSavedFilter: action.payload.selectedSavedFilter,
-        hasChangesNotSaved: false,
+        isUnsaved: false,
       };
     }
-    case SavedFiltersActionType.SET_HAS_CHANGES_NOT_SAVED: {
+    case SavedFiltersActionType.SET_IS_UNSAVED: {
       return {
         ...context,
-        hasChangesNotSaved: action.payload,
+        isUnsaved: action.payload,
       };
     }
     default: {

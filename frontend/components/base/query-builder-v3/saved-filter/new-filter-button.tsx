@@ -13,29 +13,30 @@ function NewFilterButton() {
   const { t } = useI18n();
   const dispatchSavedFilter = useSavedFiltersDispatch();
   const dispatchQB = useQBDispatch();
-  const { selectedSavedFilter, hasChangesNotSaved } = useSavedFiltersContext();
+  const { selectedSavedFilter, isUnsaved } = useSavedFiltersContext();
 
   function handleNew() {
-    if (hasChangesNotSaved) {
-      alertDialog.open({
-        type: 'warning',
-        title: t('common.saved_filter.overwrite_dialog.title'),
-        description: t('common.saved_filter.overwrite_dialog.description'),
-        cancelProps: {
-          children: t('common.saved_filter.overwrite_dialog.cancel'),
-        },
-        actionProps: {
-          onClick: () => {
-            dispatchSavedFilter({ type: SavedFiltersActionType.SET_SELECTED, payload: undefined });
-            dispatchQB({ type: QBActionType.REMOVE_ALL_QUERIES });
-          },
-          children: t('common.saved_filter.overwrite_dialog.ok'),
-        },
-      });
-    } else {
+    if (!isUnsaved) {
       dispatchSavedFilter({ type: SavedFiltersActionType.SET_SELECTED, payload: undefined });
       dispatchQB({ type: QBActionType.REMOVE_ALL_QUERIES });
+      return;
     }
+
+    alertDialog.open({
+      type: 'warning',
+      title: t('common.saved_filter.overwrite_dialog.title'),
+      description: t('common.saved_filter.overwrite_dialog.description'),
+      cancelProps: {
+        children: t('common.saved_filter.overwrite_dialog.cancel'),
+      },
+      actionProps: {
+        onClick: () => {
+          dispatchSavedFilter({ type: SavedFiltersActionType.SET_SELECTED, payload: undefined });
+          dispatchQB({ type: QBActionType.REMOVE_ALL_QUERIES });
+        },
+        children: t('common.saved_filter.overwrite_dialog.ok'),
+      },
+    });
   }
 
   return (

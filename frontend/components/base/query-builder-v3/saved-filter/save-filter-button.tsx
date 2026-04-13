@@ -35,12 +35,12 @@ function SaveFilterButton() {
     }
     const isEqual = deepSqonsEqual(sqons, selectedSavedFilter.queries || []);
     setIsPristine(isEqual);
-    dispatch({ type: SavedFiltersActionType.SET_HAS_CHANGES_NOT_SAVED, payload: !isEqual });
+    dispatch({ type: SavedFiltersActionType.SET_IS_UNSAVED, payload: !isEqual });
   }, [sqons, selectedSavedFilter]);
 
   const fetchFilters = useCallback(
-    async (newSavedFilter: SavedFilter) => {
-      await fetchSavedFilters(savedFilterType).then(response =>
+    (newSavedFilter: SavedFilter) => {
+      fetchSavedFilters(savedFilterType).then(response =>
         dispatch({
           type: SavedFiltersActionType.SAVE,
           payload: { savedFilters: response, selectedSavedFilter: newSavedFilter },
@@ -56,7 +56,18 @@ function SaveFilterButton() {
     }
 
     try {
-      if (isPristine) {
+      if (selectedSavedFilter && !isPristine) {
+        // Update existing filter queries
+        const updatedFilterData: SavedFilterUpdateInput = {
+          ...selectedSavedFilter,
+          queries: sqons as Sqon[],
+        };
+        const updatedSavedFilter = await savedFiltersApi.putSavedFilter(selectedSavedFilter.id, updatedFilterData);
+        // Refresh saved filters list after update
+        fetchFilters(updatedSavedFilter.data);
+
+        toast.success(t('common.saved_filter.notifications.updated'));
+      } else if (isPristine) {
         // Create a new saved filter with current sqons
         const newFilterData: SavedFilterCreationInput = {
           name: t('common.saved_filter.untitled_filter'),
@@ -66,21 +77,9 @@ function SaveFilterButton() {
 
         const newSavedFilter = await savedFiltersApi.postSavedFilter(newFilterData);
         // Refresh saved filters list after creation
-        await fetchFilters(newSavedFilter.data);
+        fetchFilters(newSavedFilter.data);
 
         toast.success(t('common.saved_filter.notifications.created'));
-      }
-      if (selectedSavedFilter && !isPristine) {
-        // Update existing filter queries
-        const updatedFilterData: SavedFilterUpdateInput = {
-          ...selectedSavedFilter,
-          queries: sqons as Sqon[],
-        };
-        const updatedSavedFilter = await savedFiltersApi.putSavedFilter(selectedSavedFilter.id, updatedFilterData);
-        // Refresh saved filters list after update
-        await fetchFilters(updatedSavedFilter.data);
-
-        toast.success(t('common.saved_filter.notifications.updated'));
       }
     } catch (error: any) {
       if (error.response.data.detail.includes('unique_saved_filter')) {
@@ -110,7 +109,7 @@ function SaveFilterButton() {
             iconOnly
             variant="ghost"
             size="sm"
-            disabled={!hasFilters}
+            disabled={!hasFilters || (isPristine && !!selectedSavedFilter)}
             onClick={handleSave}
             className={isPristine ? '' : 'text-yellow-500'}
           >
