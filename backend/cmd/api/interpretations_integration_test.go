@@ -110,7 +110,7 @@ func assertPostInterpretationGermline(t *testing.T, repo repository.Interpretati
 }
 
 func Test_GetInterpretationsomatic(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		pubmedService := &MockExternalClient{}
 		repo := repository.NewPostgresRepository(db, pubmedService)
 		// not found
@@ -136,7 +136,7 @@ func Test_GetInterpretationsomatic(t *testing.T) {
 }
 
 func Test_GetInterpretationSomaticWithPartialContent(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		pubmedService := &MockExternalClient{}
 		repo := repository.NewPostgresRepository(db, pubmedService)
 		interpretation := &types.InterpretationSomatic{}
@@ -182,7 +182,7 @@ func assertPostInterpretationSomatic(t *testing.T, repo repository.Interpretatio
 }
 
 func Test_SearchGermline(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		// db + repo
 		pubmedService := &MockExternalClient{}
 		repo := repository.NewPostgresRepository(db, pubmedService).Interpretations
@@ -218,7 +218,7 @@ func assertSearchInterpretationGermline(t *testing.T, repo repository.Interpreta
 }
 
 func Test_SearchSomatic(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		// db + repo
 		pubmedService := &MockExternalClient{}
 		repo := repository.NewPostgresRepository(db, pubmedService).Interpretations

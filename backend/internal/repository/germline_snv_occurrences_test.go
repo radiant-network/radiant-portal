@@ -27,7 +27,7 @@ var GermlineSNVQueryConfigForTest = types.QueryConfig{
 }
 
 func Test_Germline_SNV_GetOccurrences(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
@@ -50,7 +50,7 @@ func Test_Germline_SNV_GetOccurrences(t *testing.T) {
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		selectedFields := []string{"seq_id", "locus_id", "ad_ratio", "filter"}
 
@@ -68,7 +68,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Selected_Columns_Only(t *testing.T)
 }
 
 func Test_Germline_SNV_GetOccurrencesReturn_Default_Column_If_No_One_Specified(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, nil, nil, nil, nil)
@@ -85,7 +85,7 @@ func Test_Germline_SNV_GetOccurrencesReturn_Default_Column_If_No_One_Specified(t
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		selectedFields := []string{"clinvar"}
 		sort := []types.SortBody{
@@ -104,7 +104,7 @@ func Test_Germline_SNV_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T)
 }
 
 func Test_Germline_SNV_CountOccurrences(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		count, err := repo.CountOccurrences(1, 1, nil)
 		assert.NoError(t, err)
@@ -113,7 +113,7 @@ func Test_Germline_SNV_CountOccurrences(t *testing.T) {
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_When_Filter_By_Exomiser_Gene_Combined_Score(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
@@ -139,7 +139,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_When_Filter_By_Exo
 }
 
 func Test_Germline_SNV_CountOccurrences_Return_Count_That_Match_Filters(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
@@ -161,7 +161,7 @@ func Test_Germline_SNV_CountOccurrences_Return_Count_That_Match_Filters(t *testi
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
@@ -190,7 +190,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *t
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: &types.LeafContent{
@@ -221,7 +221,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Array(t *
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Array_When_All(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: &types.LeafContent{
@@ -250,7 +250,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Array_Whe
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_N_Occurrences_When_Limit_Specified(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "pagination", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewGermlineSNVOccurrencesRepository(db)
 
@@ -267,7 +267,7 @@ func Test_Germline_SNV_GetOccurrences_Return_N_Occurrences_When_Limit_Specified(
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Specified(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "pagination", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewGermlineSNVOccurrencesRepository(db)
 
@@ -294,7 +294,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_PageIndex_Specified(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "pagination", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewGermlineSNVOccurrencesRepository(db)
 
@@ -321,7 +321,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_Score(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "consequence", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
@@ -351,7 +351,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Filter_By
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Filter_By_Impact_ScoreAnd_Quality(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "consequence", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
@@ -379,7 +379,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Filter_By
 }
 
 func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "aggregation", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewAggregationQueryFromSqon("zygosity", nil, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
@@ -395,7 +395,7 @@ func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_B
 }
 
 func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_With_Filter(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "aggregation", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.LeafContent{
@@ -418,7 +418,7 @@ func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_B
 }
 
 func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Zygosity_With_Filter_But_Ignore_Self_Filter(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "aggregation", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "aggregation", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
@@ -441,7 +441,7 @@ func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_B
 }
 
 func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Clinvar(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewAggregationQueryFromSqon("clinvar", nil, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
@@ -459,7 +459,7 @@ func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_B
 }
 
 func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Score(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "consequence", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewAggregationQueryFromSqon("impact_score", nil, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
@@ -478,7 +478,7 @@ func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_B
 }
 
 func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Impact_Score_Combined_With_Filter(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "consequence", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "consequence", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
@@ -504,7 +504,7 @@ func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_B
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.LeafContent{
@@ -533,7 +533,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Gene_pane
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Gene_panel_And_Impact_Score(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
@@ -560,7 +560,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Gene_pane
 }
 
 func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Multiple_Gene_panel_And_Impact_Score(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
@@ -587,7 +587,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Multiple_
 }
 
 func Test_Germline_SNV_CountOccurrences_Return_Number_Occurrences_Matching_Multiple_Gene_panel_And_Impact_Score(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
 			Content: types.SqonArray{
@@ -607,7 +607,7 @@ func Test_Germline_SNV_CountOccurrences_Return_Number_Occurrences_Matching_Multi
 }
 
 func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By_Gene_Panel(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "gene_panels", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewAggregationQueryFromSqon("omim_gene_panel", nil, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
@@ -628,7 +628,7 @@ func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_B
 }
 
 func Test_Germline_SNV_GetStatisticsOccurrences_Decimal(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "pagination", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewStatisticsQueryFromSqon("germline_pf_wgs", nil, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
@@ -641,7 +641,7 @@ func Test_Germline_SNV_GetStatisticsOccurrences_Decimal(t *testing.T) {
 }
 
 func Test_Germline_SNV_GetStatisticsOccurrences_Integer(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "pagination", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewStatisticsQueryFromSqon("germline_pc_wgs", nil, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
@@ -654,14 +654,14 @@ func Test_Germline_SNV_GetStatisticsOccurrences_Integer(t *testing.T) {
 }
 
 func Test_Germline_SNV_GetStatisticsOccurrences_Non_Numeric_Field(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "pagination", func(t *testing.T, db *gorm.DB) {
 		_, err := types.NewStatisticsQueryFromSqon("hgvsg", nil, types.GermlineSNVOccurrencesFields)
 		assert.Error(t, err)
 	})
 }
 
 func Test_Germline_SNV_GetExpandedOccurrence(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		expandedOccurrence, err := repo.GetExpandedOccurrence(1, 1, 1000)
 		assert.NoError(t, err)
@@ -689,7 +689,7 @@ func Test_Germline_SNV_GetExpandedOccurrence(t *testing.T) {
 }
 
 func Test_Germline_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testing.T) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(starrocks)
 		notesRepo := NewOccurrenceNotesRepository(postgres)
 

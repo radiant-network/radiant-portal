@@ -11,7 +11,7 @@ import (
 )
 
 func Test_CheckDatabaseConnection_Return_up(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewStarrocksRepository(db)
 		status := repo.CheckDatabaseConnection()
 		assert.Equal(t, "up", status)

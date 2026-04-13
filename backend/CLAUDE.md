@@ -118,7 +118,12 @@ fga model test --tests ./scripts/init-openfga/tests.fga.yaml
 
 Test utilities in `test/testutils/`: DB container setup, fixtures, JWT generation, mock auth, object store setup.
 
-Parallel test helper: `testutils.ParallelTestWithPostgresAndStarrocks()`.
+Helpers in `test/testutils/fixtures.go`:
+- `ParallelTestWithStarrocks` / `ParallelTestWithPostgres` — read-only StarRocks or Postgres-only tests, run in parallel.
+- `ParallelTestWithReadOnlyPostgresAndStarrocks` — tests that read from both DBs (typically a handler composing a Postgres + StarRocks repository). Test body MUST NOT mutate Postgres.
+- `SequentialTestWithPostgresAndStarrocks` (and `...OpenFGA...`, `...All` variants) — tests that mutate Postgres while reading via the StarRocks JDBC federation. Run serially because concurrent runs race on federation visibility; Postgres is reset via `cleanUp` after each test.
+
+StarRocks fixtures (`test/data/<folder>/*.tsv`) are loaded once per process per folder and shared across tests; the StarRocks test database is treated as read-only.
 
 ## Adding a New API Endpoint
 

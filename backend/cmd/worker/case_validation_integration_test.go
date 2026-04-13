@@ -1097,7 +1097,7 @@ func Test_ProcessBatch_Case_Exomiser_TaskContext(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Template(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		t.Skip("Template test - implement specific error case tests as needed")
 
 		//// FIXME: The following test is for example purposes only.

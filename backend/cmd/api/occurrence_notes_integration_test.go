@@ -94,7 +94,7 @@ func assertGetOccurrenceNoteCount(t *testing.T, repo repository.OccurrenceNotesD
 }
 
 func Test_GetOccurrenceNoteCount(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
@@ -107,7 +107,7 @@ func Test_GetOccurrenceNoteCount(t *testing.T) {
 }
 
 func Test_GetOccurrenceNoteCount_EmptyResult(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 
 		count := assertGetOccurrenceNoteCount(t, repo, 2, 1, 1, "99999", http.StatusOK)
@@ -116,7 +116,7 @@ func Test_GetOccurrenceNoteCount_EmptyResult(t *testing.T) {
 }
 
 func Test_GetOccurrenceNoteCount_ExcludesDeletedNotes(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
@@ -132,7 +132,7 @@ func Test_GetOccurrenceNoteCount_ExcludesDeletedNotes(t *testing.T) {
 }
 
 func Test_PostOccurrenceNote(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
@@ -154,7 +154,7 @@ func Test_PostOccurrenceNote(t *testing.T) {
 }
 
 func Test_PostOccurrenceNote_MissingContent(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
@@ -163,7 +163,7 @@ func Test_PostOccurrenceNote_MissingContent(t *testing.T) {
 }
 
 func Test_GetOccurrenceNotes_EmptyResult(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 
 		notes := assertGetOccurrenceNotes(t, repo, 2, 1, 1, "99999", http.StatusOK)
@@ -172,7 +172,7 @@ func Test_GetOccurrenceNotes_EmptyResult(t *testing.T) {
 }
 
 func Test_GetOccurrenceNotes(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
@@ -190,7 +190,7 @@ func Test_GetOccurrenceNotes(t *testing.T) {
 }
 
 func Test_PutOccurrenceNote(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
@@ -210,7 +210,7 @@ func Test_PutOccurrenceNote(t *testing.T) {
 }
 
 func Test_PutOccurrenceNote_NoteNotFound(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
@@ -231,7 +231,7 @@ func assertDeleteOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO
 }
 
 func Test_PutOccurrenceNote_Forbidden(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 		ownerAuth := &testutils.MockAuth{Id: mockUserUUID}
 		otherAuth := &testutils.MockAuth{Id: "22222222-2222-2222-2222-222222222222"}
@@ -246,7 +246,7 @@ func Test_PutOccurrenceNote_Forbidden(t *testing.T) {
 }
 
 func Test_DeleteOccurrenceNote(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
@@ -263,7 +263,7 @@ func Test_DeleteOccurrenceNote(t *testing.T) {
 }
 
 func Test_DeleteOccurrenceNote_NoteNotFound(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 		auth := &testutils.MockAuth{Id: mockUserUUID}
 
@@ -272,7 +272,7 @@ func Test_DeleteOccurrenceNote_NoteNotFound(t *testing.T) {
 }
 
 func Test_DeleteOccurrenceNote_Forbidden(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewOccurrenceNotesRepository(db)
 		ownerAuth := &testutils.MockAuth{Id: mockUserUUID}
 		otherAuth := &testutils.MockAuth{Id: "22222222-2222-2222-2222-222222222222"}

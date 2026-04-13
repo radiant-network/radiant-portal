@@ -55,7 +55,7 @@ func openStarrocksGorm(dbName string) (*gorm.DB, error) {
 	return gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
 }
 
-func initDb(folderName string) (*gorm.DB, string, error) {
+func initStarrocksDb(folderName string) (*gorm.DB, string, error) {
 	dbName := folderName
 
 	st := fixtureStateFor(folderName)
