@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">64/74 infos</a><span class="filter-pill ok" aria-disabled="true">198 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/74 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">64/74 infos</a><span class="filter-pill ok" aria-disabled="true">199 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>5.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>4.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -9974,7 +9974,7 @@ import { ConfigProvider, PriorityIndicator } from "components";</code></pre>
       <div class="badges">
         <label for="c-53-querybuilder-querybuilderv3-props" class="badge ok as-toggle">4 prop types</label>
         
-        <label for="c-53-querybuilder-querybuilderv3-stories" class="badge ok as-toggle">9 stories</label>
+        <label for="c-53-querybuilder-querybuilderv3-stories" class="badge ok as-toggle">10 stories</label>
         
       </div>
     </div>
@@ -10305,6 +10305,35 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
             defaultColumnSettings={[]} /&gt;
     &lt;/QueryBuilder&gt;
 &lt;/&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Saved Filters</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const SavedFilters = () =&gt; &lt;QueryBuilder
+    appId={ApplicationId.snv_occurrence}
+    defaultSidebarOpen
+    fetcher={{
+      list: async (params: IListInput) =&gt;
+        axios.post(mockListApi, { listBody: params.listBody }).then(response =&gt; response.data),
+      count: async (params: ICountInput) =&gt;
+        axios.post(mockCountApi, { countBody: params.countBody }).then(response =&gt; response.data),
+    }}&gt;
+    &lt;QueryBuilderDataTable
+        id=&quot;storybook-query-builder&quot;
+        columns={
+          [
+            ...mockColumns,
+            mockColumnHelper.accessor(&#39;isActive&#39;, {
+              header: &#39;Active&#39;,
+            }),
+          ] as TableColumnDef&lt;TableMockData, any&gt;[]
+        }
+        defaultColumnSettings={[]} /&gt;
+&lt;/QueryBuilder&gt;;</code></pre>
             </div>
         </div>
     
