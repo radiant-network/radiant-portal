@@ -2,7 +2,6 @@ package testutils
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"testing"
 
@@ -22,7 +21,7 @@ func SequentialPostgresTestWithDb(t *testing.T, testFunc func(t *testing.T, db *
 }
 
 func SequentialTestWithPostgresAndStarrocks(t *testing.T, dbName string, testFunc func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB)) {
-	starrocks, dbName, err := initDb(dbName)
+	starrocks, _, err := initDb(dbName)
 	if err != nil {
 		log.Fatal("Failed to init db connection:", err)
 
@@ -33,8 +32,6 @@ func SequentialTestWithPostgresAndStarrocks(t *testing.T, dbName string, testFun
 
 	}
 	testFunc(t, starrocks, postgres)
-	//Drop database
-	starrocks.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
 }
 
 func SequentialTestWithMinIO(t *testing.T, testFunc func(t *testing.T, context context.Context, client *minio.Client, endpoint string)) {
@@ -84,7 +81,7 @@ func SequentialTestWithPostgresAndMinIO(t *testing.T, testFunc func(t *testing.T
 
 func ParallelTestWithDb(t *testing.T, dbName string, testFunc func(t *testing.T, db *gorm.DB)) {
 	t.Parallel()
-	db, dbName, err := initDb(dbName)
+	db, _, err := initDb(dbName)
 	if err != nil {
 		log.Fatal("Failed to init db connection:", err)
 
@@ -95,8 +92,6 @@ func ParallelTestWithDb(t *testing.T, dbName string, testFunc func(t *testing.T,
 
 	}
 	testFunc(t, db)
-	//Drop database
-	db.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
 }
 
 func ParallelTestWithPostgres(t *testing.T, testFunc func(t *testing.T, postgres *gorm.DB)) {
@@ -112,8 +107,12 @@ func ParallelTestWithPostgres(t *testing.T, testFunc func(t *testing.T, postgres
 }
 
 func ParallelTestWithPostgresAndStarrocks(t *testing.T, dbName string, testFunc func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB)) {
-	t.Parallel()
-	starrocks, dbName, err := initDb(dbName)
+	// NOTE: despite the helper's name, tests using this combined Postgres +
+	// StarRocks helper do not call t.Parallel(). The StarRocks JDBC federation
+	// catalog reads Postgres state mutated by these tests, and concurrent runs
+	// race on visibility through the federation. Serializing them keeps the
+	// helper's contract observable while only adding a few seconds total.
+	starrocks, _, err := initDb(dbName)
 	if err != nil {
 		log.Fatal("Failed to init db connection:", err)
 
@@ -123,19 +122,18 @@ func ParallelTestWithPostgresAndStarrocks(t *testing.T, dbName string, testFunc 
 		log.Fatal("Failed to init PostgreSQL db connection:", err)
 
 	}
+	defer cleanUp(postgres)
 	testFunc(t, starrocks, postgres)
-	//Drop database
-	starrocks.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
 }
 
 func ParallelTestWithOpenFGAAndPostgresAndStarrocks(t *testing.T, dbName string, testFunc func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB)) {
-	t.Parallel()
+	// See note on ParallelTestWithPostgresAndStarrocks — runs serially.
 	storeID, err := initOpenFGA()
 	if err != nil {
 		log.Fatal("Failed to init OpenFGA store")
 	}
 
-	starrocks, dbName, err := initDb(dbName)
+	starrocks, _, err := initDb(dbName)
 	if err != nil {
 		log.Fatal("Failed to init db connection:", err)
 
@@ -145,15 +143,13 @@ func ParallelTestWithOpenFGAAndPostgresAndStarrocks(t *testing.T, dbName string,
 		log.Fatal("Failed to init PostgreSQL db connection:", err)
 
 	}
+	defer cleanUp(postgres)
 	testFunc(t, storeID, starrocks, postgres)
-	//Drop database
-	starrocks.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
 }
 
 func ParallelTestWithAll(t *testing.T, dbName string, testFunc func(t *testing.T, client *minio.Client, endpoint string, postgres *gorm.DB, starrocks *gorm.DB)) {
-	t.Parallel()
-
-	starrocks, dbName, err := initDb(dbName)
+	// See note on ParallelTestWithPostgresAndStarrocks — runs serially.
+	starrocks, _, err := initDb(dbName)
 	if err != nil {
 		log.Fatal("Failed to init db connection:", err)
 
@@ -163,8 +159,6 @@ func ParallelTestWithAll(t *testing.T, dbName string, testFunc func(t *testing.T
 		log.Fatal("Failed to init PostgreSQL db connection:", err)
 
 	}
-
-	defer starrocks.Exec(fmt.Sprintf("DROP DATABASE %s;", dbName))
 
 	ctx := context.Background()
 	minioC, err := initMinioContainer(ctx)
@@ -176,5 +170,6 @@ func ParallelTestWithAll(t *testing.T, dbName string, testFunc func(t *testing.T
 	if err != nil {
 		log.Fatalf("Failed to init S3 bucket: %v", err)
 	}
+	defer cleanUp(postgres)
 	testFunc(t, client, minioC.Endpoint, postgres, starrocks)
 }
