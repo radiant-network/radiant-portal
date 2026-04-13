@@ -25,11 +25,7 @@ describe('Patients - Batch - Process worker - Partial key', () => {
     cy.apiCall('POST', 'patients/batch?dry_run=true', body, Auth.token)
       .then((postRes: any) => {
         batch_id = postRes.body.id;
-        return batch_id;
-      })
-      .then(id => {
-        cy.wait(1000);
-        cy.apiCall('GET', `batches/${id}`, '', Auth.token);
+        return cy.waitForBatchStatus(batch_id, Auth.token);
       })
       .then((getRes: any) => {
         response = getRes;

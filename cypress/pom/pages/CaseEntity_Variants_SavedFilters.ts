@@ -1,5 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
+import { CommonTexts } from 'pom/shared/Texts';
 
 const generateSavedFiltersFunctions = () => {
   const actions = {
@@ -99,7 +100,7 @@ const generateSavedFiltersFunctions = () => {
      */
     openManager() {
       actions.openMyFiltersDropdown();
-      cy.get('body').contains('Manage filters').clickAndWait({ force: true });
+      cy.get('body').contains(CommonTexts.en.manageFilters).clickAndWait({ force: true });
     },
     /**
      * Opens the My Filters dropdown.

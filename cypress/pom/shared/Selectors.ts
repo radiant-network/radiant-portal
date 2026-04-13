@@ -6,6 +6,7 @@ export const CommonSelectors = {
   anchorIcon: '[class*="lucide-arrow-up-right"]',
   animateIn: '[class*="data-[state=open]:animate-in"]',
   checkIcon: '[class*="lucide-check"]',
+  circlePlusIcon: '[class*="lucide-circle-plus"]',
   closeButton: 'button:contains("Close")',
   colorIndicator: (color: string) => `[class*="text-indicator-${color}"]`,
   detailsButton: 'button:contains("Details")',

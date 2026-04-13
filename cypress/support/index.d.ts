@@ -12,6 +12,7 @@ declare namespace Cypress {
     validateReport(response: any, level: string, code: string, message: string, path: string): cy & CyEventEmitter;
     validateSuccessBatchProcessed(response: any, batch_type: string, batch_id: string): cy & CyEventEmitter;
     validateSummary(response: any, created: number, updated: number, skipped: number, errors: number): cy & CyEventEmitter;
+    waitForBatchStatus(batchId: string, token: string, expectedStatus: string = 'SUCCESS', maxRetries: number = 10): Cypress.Chainable;
 
     // commands
     clickAndWait(options?: Partial<ClickOptions>): Chainable<Element>;

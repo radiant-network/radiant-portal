@@ -97,11 +97,10 @@ Cypress.Commands.add('login', () => {
  */
 Cypress.Commands.add('logout', () => {
   cy.visit('/');
-  cy.wait(2000);
-
-  cy.get(CommonSelectors.userIcon).eq(0).click();
+  cy.waitWhileLoad(oneMinute);
+  cy.get(CommonSelectors.userIcon).eq(0).should('be.visible').click();
   cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.logoutIcon}`).click();
-  cy.wait(2000);
+  cy.url().should('include', '/realms/');
 });
 
 /**
@@ -115,7 +114,7 @@ Cypress.Commands.add('pinColumn', (position: number, tableId: string = '') => {
     .find(CommonSelectors.pinIcon)
     .click({ force: true });
   cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.pinLeftIcon}`).click({ force: true });
-  cy.wait(1000);
+  cy.get(CommonSelectors.menuPopper).should('not.exist');
 });
 
 /**
@@ -213,11 +212,10 @@ Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, 
       .scrollIntoView({ offset: { top: -300, left: -300 } })
       .should('be.visible');
   } else {
-    scrollIntoSubject = cy.wrap(subject).scrollIntoView().wait(1000).should('be.visible');
+    scrollIntoSubject = cy.wrap(subject).scrollIntoView().should('be.visible');
   }
   if (object.tooltip) {
-    cy.wait(6000);
-    scrollIntoSubject.find(`${CommonSelectors.underlineHeader}, ${CommonSelectors.facetTriggerTooltip}`).realHover();
+    scrollIntoSubject.find(`${CommonSelectors.underlineHeader}, ${CommonSelectors.facetTriggerTooltip}`).should('be.visible').realHover();
     cy.get(CommonSelectors.tooltipPopper).invoke('css', { position: 'fixed', left: '20px' } /*Avoid hiding the logo*/).contains(object.tooltip).first().should('exist');
     cy.get(CommonSelectors.logo).click(); // Close the popper
     cy.get(CommonSelectors.tooltipPopper).should('not.exist');
@@ -271,7 +269,10 @@ Cypress.Commands.add('sortTableAndWait', (position: number, tableId: string = ''
     .eq(position)
     .find(CommonSelectors.sortIcon)
     .click({ force: true });
-  cy.wait(1000);
+  cy.get(`${CommonSelectors.tableHeadCell(tableId)}`)
+    .eq(position)
+    .find(CommonSelectors.sortIcon)
+    .should('exist');
 });
 
 /**
@@ -285,7 +286,7 @@ Cypress.Commands.add('unpinColumn', (position: number, tableId: string = '') => 
     .find(CommonSelectors.pinIcon)
     .click({ force: true });
   cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.unpinIcon}`).click({ force: true });
-  cy.wait(1000);
+  cy.get(CommonSelectors.menuPopper).should('not.exist');
 });
 
 /**
@@ -314,7 +315,7 @@ Cypress.Commands.add('validatePillSelectedQuery', (facetTitle: string | RegExp, 
  * @param tableId The table ID to check (default: '').
  */
 Cypress.Commands.add('validateTableFirstRowAttr', (expectedAttr: string, expectedValue: string, columnIndex: number, tableId: string = '') => {
-  cy.wait(2000);
+  cy.get(CommonSelectors.tableRow(tableId)).should('have.length.gte', 1);
   cy.get(CommonSelectors.tableRow(tableId))
     .eq(0)
     .find(CommonSelectors.tableCellData)
@@ -330,7 +331,7 @@ Cypress.Commands.add('validateTableFirstRowAttr', (expectedAttr: string, expecte
  * @param tableId The table ID to check (default: '').
  */
 Cypress.Commands.add('validateTableFirstRowClass', (expectedClass: string, columnIndex: number, tableId: string = '') => {
-  cy.wait(2000);
+  cy.get(CommonSelectors.tableRow(tableId)).should('have.length.gte', 1);
   cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(columnIndex).find(expectedClass).should('exist');
 });
 
@@ -341,7 +342,7 @@ Cypress.Commands.add('validateTableFirstRowClass', (expectedClass: string, colum
  * @param tableId The table ID to check (default: '').
  */
 Cypress.Commands.add('validateTableFirstRowContent', (expectedValue: string | RegExp, columnIndex: number, tableId: string = '') => {
-  cy.wait(2000);
+  cy.get(CommonSelectors.tableRow(tableId)).should('have.length.gte', 1);
   cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(columnIndex).contains(expectedValue).should('exist');
 });
 
