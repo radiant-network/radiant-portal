@@ -27,6 +27,7 @@ export enum QBActionType {
   SET_LABELS_ENABLED = 'set-labels-enabled',
   REMOVE_ALL_QUERIES = 'remove-all-queries-all',
   COMBINE_QUERIES = 'combine-queries',
+  LOAD_QUERIES = 'load-queries',
 }
 
 export enum PillUserAction {
@@ -185,6 +186,10 @@ type SetLabelsEnabledAction = {
 type RemoveAllQueriesAction = {
   type: QBActionType.REMOVE_ALL_QUERIES;
 };
+type LoadQueriesAction = {
+  type: QBActionType.LOAD_QUERIES;
+  payload: Sqon[] | undefined;
+};
 
 export type ActionType =
   | AddQueryAction
@@ -199,6 +204,7 @@ export type ActionType =
   | RemoveAllQueriesAction
   | CombineQueriesAction
   | RemoveCombinedPillAction
+  | LoadQueriesAction
   | any;
 
 export function qBReducer(context: IQBContext, action: ActionType) {
@@ -370,6 +376,29 @@ export function qBReducer(context: IQBContext, action: ActionType) {
             op: BooleanOperators.And,
           },
         ],
+      };
+    }
+    /**
+     * Load queries (load a saved filter for example)
+     */
+    case QBActionType.LOAD_QUERIES: {
+      const newSqons = action.payload;
+      // Set activeQueryId to the first loaded query, or create a new one if empty
+      const newActiveQueryId = newSqons?.length > 0 ? newSqons[0].id : v4();
+
+      return {
+        ...context,
+        activeQueryId: newActiveQueryId,
+        sqons:
+          newSqons?.length > 0
+            ? newSqons
+            : [
+                {
+                  content: [],
+                  id: newActiveQueryId,
+                  op: BooleanOperators.And,
+                },
+              ],
       };
     }
     /**
@@ -655,7 +684,7 @@ export function qBReducer(context: IQBContext, action: ActionType) {
      * Something when wrong
      */
     default: {
-      throw Error(`Unknown action: ${action.type} ${JSON.stringify(action.payload)}`);
+      throw Error(`Query builder unknown action: ${action.type} ${JSON.stringify(action.payload)}`);
     }
   }
 }

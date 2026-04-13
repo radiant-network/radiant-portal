@@ -5,6 +5,7 @@ import axios from 'axios';
 import { delay, http, HttpResponse } from 'msw';
 import { mocked } from 'storybook/test';
 
+import { SavedFilterType } from '@/api/index';
 import { TableColumnDef } from '@/components/base/data-table/data-table';
 import {
   getDefaultQBContext,
@@ -30,9 +31,11 @@ import { mockColumnHelper, mockColumns, TableMockData } from '../table/table-moc
 const facetListConfig: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
+    saved_filter_type: SavedFilterType.GERMLINE_SNV_VARIANT,
   },
   snv_occurrence: {
     app_id: ApplicationId.snv_occurrence,
+    saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
     aggregations: {
       variant: {
         items: [
@@ -115,6 +118,7 @@ const facetListConfig: PortalConfig = {
   },
   cnv_occurrence: {
     app_id: ApplicationId.cnv_occurrence,
+    saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
     aggregations: {
       pathogenicity: {
         items: [
@@ -225,6 +229,7 @@ const facetListConfig: PortalConfig = {
   admin: {
     admin_code: 'admin',
     app_id: ApplicationId.admin,
+    saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
   },
   portal: {
     name: '',
@@ -1009,5 +1014,179 @@ export const UploadIdModal: Story = {
         />
       </QueryBuilder>
     </>
+  ),
+};
+
+export const SavedFilters: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        // Mock saved filters API
+        http.get('*/users/saved_filters', ({ request }) => {
+          const url = new URL(request.url);
+          const type = url.searchParams.get('type');
+
+          // Mock saved filters data
+          const mockSavedFilters = [
+            {
+              id: 'filter-1',
+              name: 'Active Patients Filter',
+              type: type,
+              favorite: false,
+              user_id: 'user-123',
+              created_on: '2024-01-15T10:00:00Z',
+              updated_on: '2024-01-15T10:00:00Z',
+              queries: [
+                {
+                  id: 'query-1',
+                  content: [
+                    {
+                      content: {
+                        field: 'isActive',
+                        value: ['true'],
+                      },
+                      op: 'in',
+                    },
+                    {
+                      content: {
+                        field: 'firstName',
+                        value: ['jack', 'karen'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
+            {
+              id: 'filter-2',
+              name: 'High Progress Filter',
+              type: type,
+              favorite: false,
+              user_id: 'user-123',
+              created_on: '2024-01-10T14:30:00Z',
+              updated_on: '2024-01-12T16:45:00Z',
+              queries: [
+                {
+                  id: 'query-2',
+                  content: [
+                    {
+                      content: {
+                        field: 'progress',
+                        value: ['75'],
+                      },
+                      op: '>',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
+            {
+              id: 'filter-3',
+              name: 'Complex Multi-Query Filter',
+              type: type,
+              favorite: false,
+              user_id: 'user-123',
+              created_on: '2024-01-05T09:15:00Z',
+              updated_on: '2024-01-08T11:20:00Z',
+              queries: [
+                {
+                  id: 'query-3a',
+                  content: [
+                    {
+                      content: {
+                        field: 'firstName',
+                        value: ['henry', 'liam'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'or',
+                },
+                {
+                  id: 'query-3b',
+                  content: [
+                    {
+                      content: {
+                        field: 'visits',
+                        value: ['50', '200'],
+                      },
+                      op: 'between',
+                    },
+                    {
+                      content: {
+                        field: 'status',
+                        value: ['single'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
+          ];
+
+          return HttpResponse.json(mockSavedFilters);
+        }),
+        // Mock saved filter creation
+        http.post('*/users/saved_filters', async ({ request }) => {
+          const body = (await request.json()) as any;
+          const newFilter = {
+            id: `filter-${Date.now()}`,
+            name: body.name,
+            type: body.type,
+            favorite: false,
+            user_id: 'user-123',
+            created_on: new Date().toISOString(),
+            updated_on: new Date().toISOString(),
+            queries: body.queries,
+          };
+          return HttpResponse.json(newFilter);
+        }),
+        // Mock saved filter update
+        http.put('*/users/saved_filters/:id', async ({ request, params }) => {
+          const body = (await request.json()) as any;
+          const updatedFilter = {
+            id: params.id,
+            name: body.name,
+            type: body.type,
+            favorite: body.favorite ?? false,
+            user_id: 'user-123',
+            created_on: '2024-01-15T10:00:00Z',
+            updated_on: new Date().toISOString(),
+            queries: body.queries,
+          };
+          return HttpResponse.json(updatedFilter);
+        }),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.snv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
+      <QueryBuilderDataTable
+        id="storybook-query-builder"
+        columns={
+          [
+            ...mockColumns,
+            mockColumnHelper.accessor('isActive', {
+              header: 'Active',
+            }),
+          ] as TableColumnDef<TableMockData, any>[]
+        }
+        defaultColumnSettings={[]}
+      />
+    </QueryBuilder>
   ),
 };

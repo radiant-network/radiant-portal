@@ -239,12 +239,11 @@
         "ok": "Create"
       },
       "edit_dialog": {
-        "title": "Edit filter",
-        "cancel": "Cancel",
-        "ok": "Save",
+        "edit_title": "Edit filter",
+        "save_title": "Save filter",
         "fields": {
           "title": {
-            "label": "Title",
+            "label": "Name",
             "placeholder": "Untitled query"
           }
         }

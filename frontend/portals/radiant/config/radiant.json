@@ -5,6 +5,7 @@
   },
   "snv_occurrence": {
     "app_id": "snv_occurrence",
+    "saved_filter_type": "germline_snv_occurrence",
     "aggregations": {
       "variant": {
         "items": [
@@ -320,6 +321,7 @@
   },
   "cnv_occurrence": {
     "app_id": "cnv_occurrence",
+    "saved_filter_type": "germline_cnv_occurrence",
     "aggregations": {
       "variant": {
         "items": [
