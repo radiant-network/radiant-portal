@@ -1,23 +1,27 @@
 /// <reference types="cypress"/>
 export const CommonTexts = {
   en: {
+    collapseAll: 'Collapse all',
+    expandAll: 'Expand all',
+    format: 'Format',
     igvMaxZoom: '40 bp',
     igvTitle: 'Alignment and variant',
-    igvTrackRefseq: 'Refseq Genes',
     igvTrackReads: (sample: string, relationship: string) => `Reads: ${sample} ${relationship}`,
+    igvTrackRefseq: 'Refseq Genes',
     loginContent: 'Log in with',
+    manageFilters: 'Manage filters',
     switchLanguage: 'FR',
-    expandAll: 'Expand all',
-    collapseAll: 'Collapse all',
   },
   fr: {
+    collapseAll: 'Réduire tout',
+    expandAll: 'Développer tout',
+    format: 'Format',
     igvMaxZoom: '40 bp',
     igvTitle: 'Alignement et variant',
-    igvTrackRefseq: 'Refseq Genes',
     igvTrackReads: (sample: string, relationship: string) => `Reads: ${sample} ${relationship}`,
+    igvTrackRefseq: 'Refseq Genes',
     loginContent: 'Choisir votre identifiant',
+    manageFilters: 'Gérer les filtres',
     switchLanguage: 'EN',
-    expandAll: 'Développer tout',
-    collapseAll: 'Réduire tout',
   },
 };

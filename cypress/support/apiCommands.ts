@@ -184,3 +184,29 @@ Cypress.Commands.add('validateSummary', (response: any, created: number, updated
     errors: errors,
   });
 });
+
+/**
+ * Polls a batch until it reaches the expected status or fails.
+ * Uses a polling mechanism with configurable retry attempts and wait intervals.
+ * Automatically stops if the status is ERROR or the maximum retries are reached.
+ * @param batchId The unique identifier of the batch to monitor.
+ * @param token The Bearer authentication token.
+ * @param expectedStatus The target status to wait for (default: 'SUCCESS').
+ * @param maxRetries The maximum number of polling attempts (default: 10).
+ * @returns A Cypress chain containing the final batch status response.
+ */
+Cypress.Commands.add('waitForBatchStatus', (batchId: string, token: string, expectedStatus: string = 'SUCCESS', maxRetries: number = 10) => {
+  const poll = (attempt: number): Cypress.Chainable => {
+    return cy.apiCall('GET', `batches/${batchId}`, '', token).then((res: any) => {
+      if (res.body.status === expectedStatus || res.body.status === 'ERROR') {
+        return res;
+      }
+      if (attempt >= maxRetries) {
+        throw new Error(`Batch ${batchId} did not reach status "${expectedStatus}" after ${maxRetries} attempts`);
+      }
+      cy.wait(500);
+      return poll(attempt + 1);
+    });
+  };
+  return poll(0);
+});

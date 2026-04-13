@@ -1,5 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
+import { CommonTexts } from 'pom/shared/Texts';
 import { getUrlLink, stringToRegExp } from 'pom/shared/Utils';
 import { getColumnName, getColumnPosition } from 'pom/shared/Utils';
 
@@ -170,7 +171,7 @@ export const CaseEntity_Files = {
      * @param dataValue The data value to filter.
      */
     filterFormat(dataValue: string) {
-      cy.get('button:has([class*="lucide-circle-plus"]):contains("Format")').clickAndWait({ force: true });
+      cy.get(`button:has(${CommonSelectors.circlePlusIcon}):contains("${CommonTexts.en.format}")`).clickAndWait({ force: true });
       cy.get(`[data-value="${dataValue}"] button[role="checkbox"]`).click({ force:true });
     },
     /**
