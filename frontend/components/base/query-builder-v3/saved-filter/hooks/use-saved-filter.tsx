@@ -6,6 +6,7 @@ export enum SavedFiltersActionType {
   SET_SELECTED = 'set-selected',
   SAVE = 'save',
   SET_IS_UNSAVED = 'set-is-unsaved',
+  DELETE = 'delete',
 }
 
 type SavedFilterDispatch = Dispatch<ActionType>;
@@ -44,13 +45,16 @@ type SaveSavedFilters = {
   type: SavedFiltersActionType.SAVE;
   payload: { savedFilters: SavedFilter[]; selectedSavedFilter?: SavedFilter };
 };
-
 type SetIsUnsaved = {
   type: SavedFiltersActionType.SET_IS_UNSAVED;
   payload: boolean;
 };
+type DeleteSavedFilter = {
+  type: SavedFiltersActionType.DELETE;
+  payload: SavedFilter[];
+};
 
-export type ActionType = SetSelectedSavedFilter | SaveSavedFilters | SetIsUnsaved | any;
+export type ActionType = SetSelectedSavedFilter | SaveSavedFilters | SetIsUnsaved | DeleteSavedFilter | any;
 
 export function savedFiltersReducer(context: ISavedFilterContextProps, action: ActionType) {
   switch (action.type) {
@@ -73,6 +77,14 @@ export function savedFiltersReducer(context: ISavedFilterContextProps, action: A
       return {
         ...context,
         isUnsaved: action.payload,
+      };
+    }
+    case SavedFiltersActionType.DELETE: {
+      return {
+        ...context,
+        savedFilters: action.payload,
+        selectedSavedFilter: undefined,
+        isUnsaved: false,
       };
     }
     default: {

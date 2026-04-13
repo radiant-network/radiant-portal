@@ -1,6 +1,7 @@
 import { useI18n } from '@/components/hooks/i18n';
 
 import { useSavedFiltersContext } from './hooks/use-saved-filter';
+import DeleteFilterButton from './delete-filter-button';
 import DiscardFilterButton from './discard-filter-button';
 import NewFilterButton from './new-filter-button';
 import SaveFilterButton from './save-filter-button';
@@ -17,9 +18,11 @@ function QueryBuilderSavedFilters() {
         <div className="text-ellipsis overflow-hidden text-base">
           {selectedSavedFilter ? selectedSavedFilter.name : t('common.saved_filter.untitled_filter')}
         </div>
-        <div className="flex items-center">
-          <UpdateFilterButton />
-          <DiscardFilterButton />
+        <div className="flex items-center" onClick={e => e.stopPropagation()}>
+          <div className="flex whitespace-nowrap">
+            <UpdateFilterButton />
+            <DiscardFilterButton />
+          </div>
         </div>
       </div>
       <div className={'flex ml-auto py-4'}>
@@ -27,6 +30,7 @@ function QueryBuilderSavedFilters() {
           <div className="flex whitespace-nowrap">
             <NewFilterButton />
             <SaveFilterButton />
+            <DeleteFilterButton />
           </div>
           <SavedFiltersList />
         </div>

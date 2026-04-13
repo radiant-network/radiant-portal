@@ -225,6 +225,7 @@
     },
     "saved_filter": {
       "delete_tooltip": "Delete filter",
+      "no_filter_selected": "No filter selected",
       "delete_dialog": {
         "title": "Permanently delete this filter?",
         "description": "You are about to permanently delete this filter and all of its queries.",
@@ -270,6 +271,7 @@
         "unset": "Unset default filter"
       },
       "discard_tooltip": "Discard unsaved changes",
+      "no_discard_tooltip": "No changes to discard",
       "no_saved_filters": "You have no saved filters",
       "untitled_filter": "Untitled filter",
       "notifications": {
