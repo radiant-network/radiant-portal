@@ -25,6 +25,52 @@ graph LR
 | `ranger` | `apache/ranger:2.7.0` | 6080 | Ranger Admin UI + policy REST API |
 | `starrocks` | `starrocks/allin1-ubuntu:3.5.0` | 9030, 8030, 8040 | StarRocks with `access_control = ranger` |
 
+## How StarRocks Communicates with Ranger
+
+StarRocks FE embeds a **Ranger plugin** that polls Ranger Admin for policies. Configuration is in `ranger-conf/ranger-starrocks-security.xml`, mounted into the FE conf directory.
+
+```mermaid
+sequenceDiagram
+    participant User as mysql client
+    participant FE as StarRocks FE
+    participant RP as Ranger Plugin<br/>(embedded in FE)
+    participant RA as Ranger Admin<br/>:6080
+
+    Note over RP,RA: Every 10s (pollIntervalMs)
+    RP->>RA: GET /service/plugins/policies/download/starrocks
+    RA-->>RP: Full policy set (JSON)
+    RP->>RP: Cache policies locally
+
+    User->>FE: SELECT * FROM patients
+    FE->>RP: Evaluate: user=user_cbtn_chop, resource=patients
+    RP->>RP: Check cached policies
+    RP-->>FE: Row filter: tenant='cbtn'<br/>Mask mrn: CASE WHEN org='chop'...
+    FE-->>User: Filtered + masked results
+```
+
+**Key points:**
+- The plugin downloads the **entire policy set** and evaluates locally -- no per-query call to Ranger Admin
+- The poll endpoint (`/service/plugins/policies/download/{serviceName}`) is **unauthenticated by default** in this POC
+- In production, add authentication to `ranger-starrocks-security.xml`:
+  ```xml
+  <property>
+      <name>ranger.plugin.starrocks.policy.rest.client.auth.type</name>
+      <value>basic</value>
+  </property>
+  <property>
+      <name>ranger.plugin.starrocks.policy.rest.client.auth.username</name>
+      <value>admin</value>
+  </property>
+  <property>
+      <name>ranger.plugin.starrocks.policy.rest.client.auth.password</name>
+      <value>rangerR0cks!</value>
+  </property>
+  ```
+  Or use Kerberos/SSL for production-grade security.
+- If Ranger Admin is down, StarRocks continues using the **last cached policies** -- no outage
+
+## Init Container
+
 One init container (`init`) runs after startup:
 1. Registers StarRocks service definition in Ranger
 2. Creates user stubs (`user_*`) in Ranger
