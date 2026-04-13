@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { TrashIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { SavedFilter } from '@/api/index';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -13,6 +14,36 @@ import { fetchSavedFilters } from '../query-builder';
 
 import { SavedFiltersActionType, useSavedFiltersContext, useSavedFiltersDispatch } from './hooks/use-saved-filter';
 
+export function openDeleteSavedFilterAlert(
+  selectedSavedFilter: SavedFilter | undefined,
+  fetchFilters: () => void,
+  t: ReturnType<typeof useI18n>['t'],
+) {
+  alertDialog.open({
+    type: 'warning',
+    title: t('common.saved_filter.delete_dialog.title'),
+    description: t('common.saved_filter.delete_dialog.description'),
+    cancelProps: {
+      children: t('common.cancel'),
+    },
+    actionProps: {
+      color: 'destructive',
+      onClick: async () => {
+        try {
+          if (selectedSavedFilter) {
+            await savedFiltersApi.deleteSavedFilter(selectedSavedFilter.id);
+            fetchFilters();
+            toast.success(t('common.saved_filter.notifications.deleted'));
+          }
+        } catch (error) {
+          toast.error(t('common.saved_filter.notifications.errors.deleted'));
+        }
+      },
+      children: t('common.saved_filter.delete_dialog.ok'),
+    },
+  });
+}
+
 function DeleteFilterButton() {
   const { t } = useI18n();
   const dispatchSavedFilter = useSavedFiltersDispatch();
@@ -23,7 +54,7 @@ function DeleteFilterButton() {
     fetchSavedFilters(savedFilterType).then(response => {
       dispatchSavedFilter({
         type: SavedFiltersActionType.DELETE,
-        payload: response,
+        payload: { savedFilters: response, selectedSavedFilter: undefined },
       });
       dispatchQB({ type: QBActionType.REMOVE_ALL_QUERIES });
     });
@@ -46,29 +77,7 @@ function DeleteFilterButton() {
             size="sm"
             disabled={!selectedSavedFilter}
             onClick={() => {
-              alertDialog.open({
-                type: 'warning',
-                title: t('common.saved_filter.delete_dialog.title'),
-                description: t('common.saved_filter.delete_dialog.description'),
-                cancelProps: {
-                  children: t('common.cancel'),
-                },
-                actionProps: {
-                  color: 'destructive',
-                  onClick: async () => {
-                    try {
-                      if (selectedSavedFilter) {
-                        await savedFiltersApi.deleteSavedFilter(selectedSavedFilter.id);
-                        fetchFilters();
-                        toast.success(t('common.saved_filter.notifications.deleted'));
-                      }
-                    } catch (error) {
-                      toast.error(t('common.saved_filter.notifications.errors.deleted'));
-                    }
-                  },
-                  children: t('common.saved_filter.delete_dialog.ok'),
-                },
-              });
+              openDeleteSavedFilterAlert(selectedSavedFilter, fetchFilters, t);
             }}
           >
             <TrashIcon />

@@ -3,9 +3,11 @@ import { PencilLineIcon } from 'lucide-react';
 
 import { Button } from '../../shadcn/button';
 
+import { useSavedFiltersContext } from './hooks/use-saved-filter';
 import UpdateFilterDialog from './update-filter-dialog';
 
 function UpdateFilterButton() {
+  const { selectedSavedFilter } = useSavedFiltersContext();
   const [open, setOpen] = useState(false);
 
   return (
@@ -21,7 +23,14 @@ function UpdateFilterButton() {
       >
         <PencilLineIcon />
       </Button>
-      {open && <UpdateFilterDialog open={open} onOpenChange={setOpen} />}
+      {open && (
+        <UpdateFilterDialog
+          open={open}
+          onOpenChange={setOpen}
+          savedFilter={selectedSavedFilter}
+          isSelectedEdition={true}
+        />
+      )}
     </>
   );
 }

@@ -51,7 +51,7 @@ type SetIsUnsaved = {
 };
 type DeleteSavedFilter = {
   type: SavedFiltersActionType.DELETE;
-  payload: SavedFilter[];
+  payload: { savedFilters: SavedFilter[]; selectedSavedFilter?: SavedFilter };
 };
 
 export type ActionType = SetSelectedSavedFilter | SaveSavedFilters | SetIsUnsaved | DeleteSavedFilter | any;
@@ -82,8 +82,8 @@ export function savedFiltersReducer(context: ISavedFilterContextProps, action: A
     case SavedFiltersActionType.DELETE: {
       return {
         ...context,
-        savedFilters: action.payload,
-        selectedSavedFilter: undefined,
+        savedFilters: action.payload.savedFilters,
+        selectedSavedFilter: action.payload.selectedSavedFilter,
         isUnsaved: false,
       };
     }
