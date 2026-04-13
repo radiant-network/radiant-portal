@@ -48,6 +48,7 @@ from radiant_python.models.document_filters import DocumentFilters
 from radiant_python.models.document_result import DocumentResult
 from radiant_python.models.documents_search_response import DocumentsSearchResponse
 from radiant_python.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
+from radiant_python.models.expanded_somatic_snv_occurrence import ExpandedSomaticSNVOccurrence
 from radiant_python.models.external_frequencies import ExternalFrequencies
 from radiant_python.models.facet import Facet
 from radiant_python.models.family_history_batch import FamilyHistoryBatch
