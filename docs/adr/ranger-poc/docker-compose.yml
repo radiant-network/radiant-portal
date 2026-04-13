@@ -1,0 +1,80 @@
+services:
+  # =============================================================================
+  # Apache Ranger stack (no audit -- minimal for POC)
+  # =============================================================================
+
+  ranger-db:
+    image: apache/ranger-db:2.7.0
+    container_name: ranger-db
+    hostname: ranger-db
+    healthcheck:
+      test: ["CMD-SHELL", "su -c 'pg_isready -q' postgres"]
+      interval: 10s
+      timeout: 2s
+      retries: 30
+
+  ranger:
+    image: apache/ranger:2.7.0
+    container_name: ranger
+    hostname: ranger
+    depends_on:
+      ranger-db:
+        condition: service_healthy
+    environment:
+      RANGER_VERSION: "2.7.0"
+      RANGER_DB_TYPE: postgres
+    ports:
+      - "6080:6080"
+    command: ["/home/ranger/scripts/ranger.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:6080/login.jsp > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  # =============================================================================
+  # StarRocks 3.5 with Ranger plugin enabled
+  # =============================================================================
+
+  starrocks:
+    image: starrocks/allin1-ubuntu:3.5.0
+    container_name: starrocks-ranger-poc
+    hostname: starrocks
+    ports:
+      - "9030:9030"
+      - "8030:8030"
+      - "8040:8040"
+    volumes:
+      - ./ranger-conf/ranger-starrocks-security.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-security.xml
+      - ./ranger-conf/ranger-starrocks-audit.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-audit.xml
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        echo 'access_control = ranger' >> /data/deploy/starrocks/fe/conf/fe.conf
+        cd /data/deploy && ./entrypoint.sh
+    healthcheck:
+      test: curl -sf http://localhost:8030/api/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # =============================================================================
+  # Init container (single container: Ranger policies first, then StarRocks DDL)
+  # Needs both curl (for Ranger REST) and mysql client (for StarRocks).
+  # The starrocks image has mysql; we install curl at runtime.
+  # =============================================================================
+
+  init:
+    image: starrocks/allin1-ubuntu:3.5.0
+    container_name: init-ranger-poc
+    depends_on:
+      starrocks:
+        condition: service_healthy
+      ranger:
+        condition: service_healthy
+    volumes:
+      - ./init:/init
+    entrypoint: ["/bin/bash", "/init/init-all.sh"]
+    restart: "no"
