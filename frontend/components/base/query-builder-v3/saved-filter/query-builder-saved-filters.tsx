@@ -1,6 +1,7 @@
 import { useI18n } from '@/components/hooks/i18n';
 
 import { useSavedFiltersContext } from './hooks/use-saved-filter';
+import DiscardFilterButton from './discard-filter-button';
 import NewFilterButton from './new-filter-button';
 import SaveFilterButton from './save-filter-button';
 import SavedFiltersList from './saved-filters-list';
@@ -18,6 +19,7 @@ function QueryBuilderSavedFilters() {
         </div>
         <div className="flex items-center">
           <UpdateFilterButton />
+          <DiscardFilterButton />
         </div>
       </div>
       <div className={'flex ml-auto py-4'}>
