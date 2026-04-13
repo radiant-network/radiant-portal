@@ -195,3 +195,28 @@ func Test_Somatic_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_
 		}
 	})
 }
+
+func Test_Somatic_SNV_GetExpandedOccurrence(t *testing.T) {
+	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewSomaticSNVOccurrencesRepository(db)
+		expandedOccurrence, err := repo.GetExpandedOccurrence(71, 74, 1000)
+		assert.NoError(t, err)
+		assert.Equal(t, "1000", expandedOccurrence.LocusId)
+		assert.Equal(t, "locus1", expandedOccurrence.Locus)
+		assert.Equal(t, "1", expandedOccurrence.Chromosome)
+		assert.Equal(t, "hgvsg1", expandedOccurrence.Hgvsg)
+		assert.Equal(t, "BRAF", expandedOccurrence.Symbol)
+		assert.Equal(t, "T001", expandedOccurrence.TranscriptId)
+		assert.Equal(t, float32(0.1), *expandedOccurrence.SiftScore)
+		assert.Equal(t, "T", expandedOccurrence.SiftPred)
+		assert.Equal(t, float32(0.01), *expandedOccurrence.LrtScore)
+		assert.Equal(t, "U", expandedOccurrence.LrtPred)
+		assert.Equal(t, float32(0.991), *expandedOccurrence.Polyphen2HvarScore)
+		assert.Equal(t, "D", expandedOccurrence.Polyphen2HvarPred)
+		assert.Equal(t, 6, *expandedOccurrence.SomaticPcTnWgs)
+		assert.Equal(t, float64(0.55), *expandedOccurrence.SomaticPfTnWgs)
+		assert.Equal(t, float64(0.001), *expandedOccurrence.GnomadV3Af)
+		assert.Equal(t, float32(0.66), *expandedOccurrence.AdRatio)
+		assert.Equal(t, "ENSG00000157764", expandedOccurrence.EnsemblGeneId)
+	})
+}

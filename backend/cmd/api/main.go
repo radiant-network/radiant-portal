@@ -162,6 +162,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/list", server.OccurrencesSomaticSNVListHandler(repoSomaticSNVOccurrences))
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/aggregate", server.OccurrencesSomaticSNVAggregateHandler(repoSomaticSNVOccurrences, repoFacets))
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/statistics", server.OccurrencesSomaticSNVStatisticsHandler(repoSomaticSNVOccurrences))
+	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:locus_id/expanded", server.GetExpandedSomaticSNVOccurrence(repoSomaticSNVOccurrences, repoPostgres.Interpretations))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoStagingSeq))
