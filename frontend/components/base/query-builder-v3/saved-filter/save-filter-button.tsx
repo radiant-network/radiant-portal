@@ -67,7 +67,7 @@ function SaveFilterButton() {
         fetchFilters(updatedSavedFilter.data);
 
         toast.success(t('common.saved_filter.notifications.updated'));
-      } else if (isPristine) {
+      } else {
         // Create a new saved filter with current sqons
         const newFilterData: SavedFilterCreationInput = {
           name: t('common.saved_filter.untitled_filter'),
