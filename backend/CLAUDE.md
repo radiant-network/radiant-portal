@@ -136,6 +136,10 @@ Serial is also forced when `MinIO: true` (t.Setenv incompatibility) or `OpenFGA:
 
 Legacy shims (`ParallelTestWithStarrocks`, `ParallelTestWithPostgres`, `SequentialTestWithPostgres`, etc.) still exist and route through `RunTest`. New tests should use `RunTest` directly.
 
+To make a Postgres write test parallel-safe (`WritePostgres` instead of `ExclusivePostgres`):
+- Use IDs/keys that `cleanUp` preserves (e.g., `case_id=1` or `case_id=71` for `occurrence_note`). Check `test/testutils/setup_postgres.go:cleanUp` for the full list of preserved ranges.
+- Use a unique identifier per test (e.g., a distinct `occurrence_id`) so count/list assertions don't see rows from other tests.
+
 StarRocks fixtures (`test/data/<folder>/*.tsv`) are loaded once per process per folder and shared across tests; the StarRocks test database is treated as read-only. This invariant is enforced at runtime by a GORM read-only guard (`test/testutils/setup_starrocks.go`): any attempt to INSERT, UPDATE, DELETE, DROP, ALTER, or TRUNCATE through a test StarRocks connection will fail immediately with `testutils.ErrStarrocksReadOnly`. This applies to both ORM operations (`db.Create`, `db.Save`, `db.Delete`) and raw SQL (`db.Exec`).
 
 ## Adding a New API Endpoint
