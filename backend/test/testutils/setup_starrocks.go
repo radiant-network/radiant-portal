@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -15,6 +16,9 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
+
+// ErrStarrocksReadOnly is returned when test code attempts to write to StarRocks.
+var ErrStarrocksReadOnly = errors.New("StarRocks is read-only in tests: writes are not allowed")
 
 // StarRocks is treated as read-only by the test suite: no repository code writes
 // to it. To avoid re-ingesting the same fixture folder for every test, we load
@@ -70,7 +74,38 @@ func initStarrocksDb(folderName string) (*gorm.DB, string, error) {
 	if err != nil {
 		log.Fatal("failed to open connection to StarRocks: ", err)
 	}
+	registerReadOnlyGuard(gormDb)
 	return gormDb, dbName, nil
+}
+
+// registerReadOnlyGuard registers GORM callbacks that reject write operations.
+// This enforces the read-only invariant at runtime: any production or test code
+// that attempts to INSERT, UPDATE, or DELETE through the StarRocks *gorm.DB
+// will get an immediate error instead of silently succeeding and breaking the
+// shared fixture cache.
+//
+// Guards are registered on both the ORM pipeline (Create/Update/Delete) and
+// the Raw pipeline (db.Exec) to cover all write paths.
+func registerReadOnlyGuard(db *gorm.DB) {
+	rejectWrite := func(db *gorm.DB) {
+		db.AddError(ErrStarrocksReadOnly)
+	}
+	db.Callback().Create().Before("gorm:create").Register("starrocksReadOnly:create", rejectWrite)
+	db.Callback().Update().Before("gorm:update").Register("starrocksReadOnly:update", rejectWrite)
+	db.Callback().Delete().Before("gorm:delete").Register("starrocksReadOnly:delete", rejectWrite)
+	db.Callback().Raw().Before("gorm:raw").Register("starrocksReadOnly:raw", func(db *gorm.DB) {
+		if db.Statement != nil && db.Statement.SQL.Len() > 0 {
+			upper := strings.ToUpper(db.Statement.SQL.String())
+			if strings.HasPrefix(upper, "INSERT") ||
+				strings.HasPrefix(upper, "UPDATE") ||
+				strings.HasPrefix(upper, "DELETE") ||
+				strings.HasPrefix(upper, "DROP") ||
+				strings.HasPrefix(upper, "ALTER") ||
+				strings.HasPrefix(upper, "TRUNCATE") {
+				db.AddError(ErrStarrocksReadOnly)
+			}
+		}
+	})
 }
 
 // loadFixtureFolder is run exactly once per fixture folder per process. It

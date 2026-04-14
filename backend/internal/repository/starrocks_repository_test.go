@@ -15,7 +15,22 @@ func Test_CheckDatabaseConnection_Return_up(t *testing.T) {
 		repo := NewStarrocksRepository(db)
 		status := repo.CheckDatabaseConnection()
 		assert.Equal(t, "up", status)
+	})
+}
 
+func Test_StarrocksReadOnlyGuard_RejectsCreate(t *testing.T) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
+		err := db.Exec("INSERT INTO ensembl_gene (gene_id, name) VALUES ('TEST', 'TEST')").Error
+		assert.ErrorIs(t, err, testutils.ErrStarrocksReadOnly)
+	})
+}
+
+func Test_StarrocksReadOnlyGuard_AllowsRead(t *testing.T) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
+		var count int64
+		err := db.Table("ensembl_gene").Count(&count).Error
+		assert.NoError(t, err)
+		assert.Greater(t, count, int64(0))
 	})
 }
 
