@@ -62,7 +62,7 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilter }) => {
   const { currentLanguage, t } = useI18n();
   const dispatchQB = useQBDispatch();
   const dispatchSavedFilter = useSavedFiltersDispatch();
-  const { savedFilterType } = useSavedFiltersContext();
+  const { savedFilterType, selectedSavedFilter } = useSavedFiltersContext();
   const [openEdit, setOpenEdit] = useState(false);
 
   const getLastSaveAtDisplay = useCallback(() => {
@@ -79,14 +79,14 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilter }) => {
 
   const fetchFilters = useCallback(() => {
     fetchSavedFilters(savedFilterType).then(response => {
-      const selectedFilter = response.find((filter: SavedFilter) => filter.id === savedFilter.id);
+      const isSelectedDeletion = selectedSavedFilter?.id === savedFilter.id;
       dispatchSavedFilter({
         type: SavedFiltersActionType.DELETE,
-        payload: { savedFilters: response, selectedSavedFilter: selectedFilter },
+        payload: { savedFilters: response, selectedSavedFilter: isSelectedDeletion ? undefined : selectedSavedFilter },
       });
-      dispatchQB({ type: QBActionType.REMOVE_ALL_QUERIES });
+      if (isSelectedDeletion) dispatchQB({ type: QBActionType.REMOVE_ALL_QUERIES });
     });
-  }, [savedFilterType]);
+  }, [savedFilterType, selectedSavedFilter]);
 
   return (
     <>
