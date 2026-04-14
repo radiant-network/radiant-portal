@@ -254,7 +254,7 @@
       "manage_dialog": {
         "title": "Manage filters",
         "close": "Close",
-        "last_save_at": "Last saved at: {lastSaveAt} ago"
+        "last_save_at": "Last saved at: {{lastSaveAt}} ago"
       },
       "new_filter": "New filter",
       "save_tooltip": {

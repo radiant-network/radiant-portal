@@ -72,14 +72,14 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilterInstance
     };
 
     if (!savedFilterObj.updated_on) {
-      return dict.savedFilter.manageDialog.lastSaveAt.replace('{lastSaveAt}', 'n/a');
+      return dict.savedFilter.manageDialog.lastSaveAt.replace('{{lastSaveAt}}', 'n/a');
     }
 
     const lastSaveAt = formatDistance(new Date(), new Date(savedFilterObj.updated_on), {
       locale: currentLanguage === 'fr' ? frCA : enCA,
     });
 
-    return dict.savedFilter.manageDialog.lastSaveAt.replace('{lastSaveAt}', lastSaveAt);
+    return dict.savedFilter.manageDialog.lastSaveAt.replace('{{lastSaveAt}}', lastSaveAt);
   }, [savedFilter.raw()]);
 
   return (
