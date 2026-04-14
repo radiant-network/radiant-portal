@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { FolderIcon } from 'lucide-react';
 
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/base/shadcn/select';
+import { Button } from '@/components/base/shadcn/button';
+import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger } from '@/components/base/shadcn/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { QBActionType, useQBDispatch } from '../hooks/use-query-builder';
 
 import { SavedFiltersActionType, useSavedFiltersContext, useSavedFiltersDispatch } from './hooks/use-saved-filter';
+import ManageFiltersDialog from './manage-filters-dialog';
 
 function SavedFiltersList() {
   const { t } = useI18n();
@@ -15,6 +17,7 @@ function SavedFiltersList() {
   const dispatchSavedFilter = useSavedFiltersDispatch();
   const dispatchQB = useQBDispatch();
   const [open, setOpen] = useState(false);
+  const [openManageDialog, setOpenManageDialog] = useState(false);
 
   const handleValueChange = (savedFilterId: string) => {
     const selectedFilter = savedFilters.find(filter => filter.id === savedFilterId);
@@ -27,6 +30,11 @@ function SavedFiltersList() {
       type: QBActionType.LOAD_QUERIES,
       payload: selectedFilter?.queries,
     });
+  };
+
+  const handleManageAction = function () {
+    setOpen(false);
+    setOpenManageDialog(true);
   };
 
   return (
@@ -54,8 +62,13 @@ function SavedFiltersList() {
               {filter.name}
             </SelectItem>
           ))}
+          <SelectSeparator />
+          <Button size="sm" variant="ghost" className="w-full pl-2 justify-start" onClick={handleManageAction}>
+            {t('common.saved_filter.manage_filters')}
+          </Button>
         </SelectContent>
       </Select>
+      <ManageFiltersDialog open={openManageDialog} onOpenChange={setOpenManageDialog} />
     </>
   );
 }

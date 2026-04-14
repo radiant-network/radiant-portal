@@ -225,6 +225,7 @@
     },
     "saved_filter": {
       "delete_tooltip": "Supprimer le filtre",
+      "no_filter_selected": "Aucun filtre sélectionné",
       "delete_dialog": {
         "title": "Supprimer définitivement ce filtre ?",
         "description": "Vous êtes sur le point de supprimer définitivement ce filtre et toutes ses requêtes.",
@@ -253,7 +254,7 @@
       "manage_dialog": {
         "title": "Gérer les filtres",
         "close": "Fermer",
-        "last_save_at": "Dernière sauvegarde il y a : {lastSaveAt}"
+        "last_save_at": "Dernière sauvegarde il y a : {{lastSaveAt}}"
       },
       "new_filter": "Nouveau filtre",
       "save_tooltip": {
@@ -270,6 +271,7 @@
         "unset": "Retirer comme filtre par défaut"
       },
       "discard_tooltip": "Annuler les modifications non enregistrées",
+      "no_discard_tooltip": "Aucune modification à annuler",
       "no_saved_filters": "Vous n'avez aucun filtre enregistré",
       "untitled_filter": "Filtre sans titre",
       "notifications": {

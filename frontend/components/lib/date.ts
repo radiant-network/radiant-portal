@@ -1,4 +1,6 @@
-import { format, isThisYear, isToday } from 'date-fns';
+import { format, formatDistance, isThisYear, isToday } from 'date-fns';
+import { enCA } from 'date-fns/locale/en-CA';
+import { frCA } from 'date-fns/locale/fr-CA';
 import { TFunction } from 'i18next';
 
 export function formatRelativeByCurrentTime(t: TFunction<string, undefined>, datetime: string) {
@@ -13,4 +15,10 @@ export function formatRelativeByCurrentTime(t: TFunction<string, undefined>, dat
   }
 
   return format(date, t('common.date.year_month_day_hour'));
+}
+
+export function formatDistanceDate(datetime: string, currentLanguage: string) {
+  return formatDistance(new Date(), new Date(datetime), {
+    locale: currentLanguage === 'fr' ? frCA : enCA,
+  });
 }
