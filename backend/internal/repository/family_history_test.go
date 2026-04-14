@@ -32,7 +32,7 @@ func Test_GetFamilyHistoryById_NotFound(t *testing.T) {
 }
 
 func Test_CreateFamilyHistory_OK(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		newFamilyHistory := &types.FamilyHistory{
 			ID:               9999,
 			CaseID:           1,

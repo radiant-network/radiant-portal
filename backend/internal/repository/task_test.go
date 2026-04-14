@@ -10,7 +10,7 @@ import (
 )
 
 func Test_CreateAndGetTask_OK(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
 
 		newTask := &types.Task{

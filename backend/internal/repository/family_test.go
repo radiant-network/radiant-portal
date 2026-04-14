@@ -37,7 +37,7 @@ func Test_GetFamilyById_NotFound(t *testing.T) {
 }
 
 func Test_CreateFamily_OK(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		newFamily := &types.Family{
 			ID:                        999,
 			CaseID:                    1,
