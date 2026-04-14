@@ -1,7 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { formatDistance } from 'date-fns';
-import { enCA } from 'date-fns/locale/en-CA';
-import { frCA } from 'date-fns/locale/fr-CA';
 
 import { SavedFilter } from '@/api/index';
 import List from '@/components/base/list/list';
@@ -17,6 +14,7 @@ import {
   DialogTitle,
 } from '@/components/base/shadcn/dialog';
 import { useI18n } from '@/components/hooks/i18n';
+import { formatDistanceDate } from '@/components/lib/date';
 
 import { QBActionType, useQBDispatch } from '../hooks/use-query-builder';
 import { fetchSavedFilters } from '../query-builder';
@@ -70,9 +68,7 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilter }) => {
       return t('common.saved_filter.manage_dialog.last_save_at', { lastSaveAt: 'n/a' });
     }
 
-    const lastSaveAt = formatDistance(new Date(), new Date(savedFilter.updated_on), {
-      locale: currentLanguage === 'fr' ? frCA : enCA,
-    });
+    const lastSaveAt = formatDistanceDate(savedFilter.updated_on, currentLanguage);
 
     return t('common.saved_filter.manage_dialog.last_save_at', { lastSaveAt });
   }, [savedFilter.updated_on, currentLanguage]);
