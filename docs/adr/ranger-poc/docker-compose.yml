@@ -66,6 +66,28 @@ services:
   # The starrocks image has mysql; we install curl at runtime.
   # =============================================================================
 
+  # =============================================================================
+  # POC API -- lightweight Go API that checks Ranger portal policies
+  # =============================================================================
+
+  poc-api:
+    build: ./api
+    container_name: poc-api
+    hostname: poc-api
+    depends_on:
+      ranger:
+        condition: service_healthy
+      starrocks:
+        condition: service_healthy
+      init:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+
+  # =============================================================================
+  # Init container
+  # =============================================================================
+
   init:
     image: starrocks/allin1-ubuntu:3.5.0
     container_name: init-ranger-poc

@@ -6,7 +6,6 @@ CREATE DATABASE IF NOT EXISTS poc_db;
 
 USE poc_db;
 
--- Patients table with tenant and organization columns for row-level filtering
 CREATE TABLE IF NOT EXISTS patients (
     id                INT          NOT NULL,
     first_name        VARCHAR(100) NOT NULL,
@@ -20,7 +19,6 @@ CREATE TABLE IF NOT EXISTS patients (
 PRIMARY KEY(id)
 DISTRIBUTED BY HASH(id) BUCKETS 1;
 
--- Sample data: 2 tenants (cbtn, udp), 2 organizations per tenant
 INSERT INTO patients (id, first_name, last_name, mrn, date_of_birth, tenant, organization, diagnosis) VALUES
     -- Tenant: CBTN, Organization: CHOP
     (1, 'Alice',   'Smith',    'MRN-000001', '1992-03-15', 'cbtn', 'chop',    'Glioblastoma'),
@@ -36,13 +34,9 @@ INSERT INTO patients (id, first_name, last_name, mrn, date_of_birth, tenant, org
     (8, 'Hank',    'Taylor',   'MRN-000008', '2005-04-17', 'udp',  'duke',    'Dravet syndrome'),
     (9, 'Ivy',     'Anderson', 'MRN-000009', '1997-08-29', 'udp',  'duke',    'Lennox-Gastaut syndrome');
 
--- Create test users (local authentication, passwords for POC)
+-- Users: named by role (submitter/analyst/network_manager) and organization
 -- StarRocks handles authentication only. Ranger handles all authorization.
--- Users are prefixed with user_ to distinguish from Ranger roles (role_).
-CREATE USER IF NOT EXISTS user_cbtn_all     IDENTIFIED BY 'cbtnallpass';
-CREATE USER IF NOT EXISTS user_cbtn_chop    IDENTIFIED BY 'cbtnchoppass';
-CREATE USER IF NOT EXISTS user_cbtn_seattle IDENTIFIED BY 'cbtnseattlepass';
-CREATE USER IF NOT EXISTS user_udp_all      IDENTIFIED BY 'udpallpass';
-
--- Note: with access_control=ranger, StarRocks native GRANT is bypassed.
--- All access control is managed through Ranger policies and roles.
+CREATE USER IF NOT EXISTS user_cbtn_submitter_chop   IDENTIFIED BY 'submitterpass';
+CREATE USER IF NOT EXISTS user_cbtn_analyst_chop     IDENTIFIED BY 'analystchoppass';
+CREATE USER IF NOT EXISTS user_cbtn_analyst_seattle   IDENTIFIED BY 'analystseattlepass';
+CREATE USER IF NOT EXISTS user_cbtn_network_manager  IDENTIFIED BY 'networkmanagerpass';
