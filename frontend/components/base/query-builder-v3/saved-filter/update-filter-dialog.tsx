@@ -29,17 +29,17 @@ interface UpdateFilterDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   savedFilter?: SavedFilter;
-  isSelectedEdition?: boolean;
+  isFromManage?: boolean;
 }
 
 const formSchema = z.object({
   name: z.string().min(2, 'Min 2 characters').max(50, 'Max 50 characters'),
 });
 
-function UpdateFilterDialog({ open, onOpenChange, savedFilter, isSelectedEdition = false }: UpdateFilterDialogProps) {
+function UpdateFilterDialog({ open, onOpenChange, savedFilter, isFromManage = false }: UpdateFilterDialogProps) {
   const { t } = useI18n();
   const dispatch = useSavedFiltersDispatch();
-  const { savedFilterType } = useSavedFiltersContext();
+  const { savedFilterType, selectedSavedFilter } = useSavedFiltersContext();
   const { sqons } = useQBContext();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,24 +50,31 @@ function UpdateFilterDialog({ open, onOpenChange, savedFilter, isSelectedEdition
 
   const fetchFilters = useCallback(
     async (newSavedFilter: SavedFilter) => {
-      await fetchSavedFilters(savedFilterType).then(response =>
+      await fetchSavedFilters(savedFilterType).then(response => {
         dispatch({
           type: SavedFiltersActionType.SAVE,
-          payload: { savedFilters: response, selectedSavedFilter: isSelectedEdition ? newSavedFilter : undefined },
-        }),
-      );
+          payload: {
+            savedFilters: response,
+            selectedSavedFilter: isFromManage
+              ? response.find((filter: SavedFilter) => filter.id === selectedSavedFilter?.id)
+              : newSavedFilter,
+          },
+        });
+      });
     },
-    [savedFilterType, dispatch, isSelectedEdition],
+    [savedFilterType, dispatch, isFromManage, selectedSavedFilter],
   );
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (savedFilter) {
         // Update existing saved filter with the new name and current sqons
+        // Save current sqon from QB only if it's the selected saved filter that is being edited
+        const isSelectedEdition = selectedSavedFilter?.id === savedFilter.id;
         const updatedFilterData: SavedFilterUpdateInput = {
           ...savedFilter,
           name: values.name || t('common.saved_filter.untitled_filter'),
-          queries: sqons as Sqon[],
+          queries: !isSelectedEdition ? savedFilter.queries : (sqons as Sqon[]),
         };
         const updatedSavedFilter = await savedFiltersApi.putSavedFilter(savedFilter.id, updatedFilterData);
         // Refresh saved filters list after update

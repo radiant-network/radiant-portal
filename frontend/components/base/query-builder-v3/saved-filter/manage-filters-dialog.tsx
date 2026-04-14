@@ -62,7 +62,7 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilter }) => {
   const { currentLanguage, t } = useI18n();
   const dispatchQB = useQBDispatch();
   const dispatchSavedFilter = useSavedFiltersDispatch();
-  const { selectedSavedFilter, savedFilterType } = useSavedFiltersContext();
+  const { savedFilterType } = useSavedFiltersContext();
   const [openEdit, setOpenEdit] = useState(false);
 
   const getLastSaveAtDisplay = useCallback(() => {
@@ -88,8 +88,6 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilter }) => {
     });
   }, [savedFilterType]);
 
-  const isSelectedEdition = selectedSavedFilter?.id === savedFilter.id;
-
   return (
     <>
       <ListItemAction
@@ -101,12 +99,7 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilter }) => {
         onDelete={() => openDeleteSavedFilterAlert(savedFilter, fetchFilters, t)}
       />
       {openEdit && (
-        <UpdateFilterDialog
-          open={openEdit}
-          onOpenChange={setOpenEdit}
-          savedFilter={savedFilter}
-          isSelectedEdition={isSelectedEdition}
-        />
+        <UpdateFilterDialog open={openEdit} onOpenChange={setOpenEdit} savedFilter={savedFilter} isFromManage={true} />
       )}
     </>
   );

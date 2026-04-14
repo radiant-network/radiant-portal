@@ -24,12 +24,7 @@ function UpdateFilterButton() {
         <PencilLineIcon />
       </Button>
       {open && (
-        <UpdateFilterDialog
-          open={open}
-          onOpenChange={setOpen}
-          savedFilter={selectedSavedFilter}
-          isSelectedEdition={true}
-        />
+        <UpdateFilterDialog open={open} onOpenChange={setOpen} savedFilter={selectedSavedFilter} isFromManage={false} />
       )}
     </>
   );
