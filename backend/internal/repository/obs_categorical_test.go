@@ -36,7 +36,7 @@ func Test_GetObservationCategoricalById_NotFound(t *testing.T) {
 }
 
 func Test_CreateObservationCategorical_OK(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		newObs := &types.ObsCategorical{
 			ID:                 9999,
 			CaseID:             1,

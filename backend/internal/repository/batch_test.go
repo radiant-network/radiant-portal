@@ -12,7 +12,7 @@ import (
 )
 
 func Test_CreateBatch_Valid(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 		type samplePayload struct {
 			Message string `json:"message"`
@@ -40,7 +40,7 @@ func Test_CreateBatch_Valid(t *testing.T) {
 }
 
 func Test_GetBatchByID_Success(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 		batchId := uuid.NewString()
 		initErr := db.Exec(`
@@ -118,7 +118,7 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 }
 
 func Test_UpdateBatch(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 
 		var id string

@@ -29,7 +29,7 @@ var CasesQueryConfigForTest = types.QueryConfig{
 }
 
 func Test_CreateCases(t *testing.T) {
-	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		orgId := 1
 		labId := 6

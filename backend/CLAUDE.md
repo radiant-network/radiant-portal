@@ -118,10 +118,23 @@ fga model test --tests ./scripts/init-openfga/tests.fga.yaml
 
 Test utilities in `test/testutils/`: DB container setup, fixtures, JWT generation, mock auth, object store setup.
 
-Helpers in `test/testutils/fixtures.go`:
-- `ParallelTestWithStarrocks` / `ParallelTestWithPostgres` — read-only StarRocks or Postgres-only tests, run in parallel.
-- `ParallelTestWithReadOnlyPostgresAndStarrocks` — tests that read from both DBs (typically a handler composing a Postgres + StarRocks repository). Test body MUST NOT mutate Postgres.
-- `SequentialTestWithPostgresAndStarrocks` (and `...OpenFGA...`, `...All` variants) — tests that mutate Postgres while reading via the StarRocks JDBC federation. Run serially because concurrent runs race on federation visibility; Postgres is reset via `cleanUp` after each test.
+**Prefer `testutils.RunTest`** (in `test/testutils/fixtures.go`) for new tests. Declare what you need via `Need`; the framework derives parallel vs serial and cleanup behavior:
+
+```go
+testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+    repo := NewGenesRepository(env.Starrocks)
+    ...
+})
+```
+
+PostgresMode controls both cleanup and isolation:
+- `ReadPostgres` — read-only, no cleanup, parallel.
+- `WritePostgres` — writes with unique keys, cleanup after test, parallel.
+- `ExclusivePostgres` — writes to shared state (seed data, count assertions on shared keys), cleanup after test, forces serial. Use only when the test can't use unique keys.
+
+Serial is also forced when `MinIO: true` (t.Setenv incompatibility) or `OpenFGA: true` (process env mutation).
+
+Legacy shims (`ParallelTestWithStarrocks`, `ParallelTestWithPostgres`, `SequentialTestWithPostgres`, etc.) still exist and route through `RunTest`. New tests should use `RunTest` directly.
 
 StarRocks fixtures (`test/data/<folder>/*.tsv`) are loaded once per process per folder and shared across tests; the StarRocks test database is treated as read-only.
 
