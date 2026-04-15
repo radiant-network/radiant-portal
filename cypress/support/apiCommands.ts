@@ -1,8 +1,8 @@
 /// <reference types="cypress"/>
 
-// Simple environment variable getter
-const getEnv = (key: string): string => {
-  return Cypress.env(key) || '';
+// Public configuration getter (non-sensitive values)
+const getExpose = (key: string): string => {
+  return Cypress.expose(key) || '';
 };
 
 /**
@@ -15,9 +15,9 @@ const getEnv = (key: string): string => {
  * @param retries The number of retry attempts on 500 errors (default: 3).
  */
 Cypress.Commands.add('apiCall', (method: string, query: string, body: string, token: string, retries: number = 3) => {
-  const apiUrl = Cypress.env('api_base_url');
+  const apiUrl = Cypress.expose('api_base_url');
 
-  if (Cypress.env('debug')) {
+  if (Cypress.expose('debug')) {
     cy.log('with body: ' + body);
   }
 
@@ -49,18 +49,21 @@ Cypress.Commands.add('apiCall', (method: string, query: string, body: string, to
  */
 Cypress.Commands.add('getToken', () => {
   return cy
-    .request({
-      method: 'POST',
-      url: `${getEnv('keycloak_host')}/realms/${getEnv('keycloak_realm')}/protocol/openid-connect/token`,
-      form: true,
-      body: {
-        client_id: getEnv('api_client'),
-        client_role: getEnv('api_client'),
-        client_secret: getEnv('keycloak_client_secret'),
-        username: getEnv('user_username'),
-        password: getEnv('user_password'),
-        grant_type: 'password',
-      },
+    .env(['user_username', 'user_password', 'keycloak_client_secret'])
+    .then(({ user_username, user_password, keycloak_client_secret }) => {
+      return cy.request({
+        method: 'POST',
+        url: `${getExpose('keycloak_host')}/realms/${getExpose('keycloak_realm')}/protocol/openid-connect/token`,
+        form: true,
+        body: {
+          client_id: getExpose('api_client'),
+          client_role: getExpose('api_client'),
+          client_secret: keycloak_client_secret,
+          username: user_username,
+          password: user_password,
+          grant_type: 'password',
+        },
+      });
     })
     .then(response => {
       expect(response.status).to.eq(200);

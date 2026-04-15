@@ -6,7 +6,7 @@ describe('Samples - Batch - Process worker - Sample004', () => {
   let batch_id: string;
 
   before(() => {
-    const Auth = Cypress.env('globalData').Authorization;
+    const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
       "samples": [
         {

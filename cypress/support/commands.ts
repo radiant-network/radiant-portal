@@ -5,9 +5,9 @@ import { getSettingsCheckbox, oneMinute } from 'pom/shared/Utils';
 import 'cypress-real-events';
 import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
 
-// Simple environment variable getter
-const getEnv = (key: string): string => {
-  return Cypress.env(key) || '';
+// Public configuration getter (non-sensitive values)
+const getExpose = (key: string): string => {
+  return Cypress.expose(key) || '';
 };
 
 /**
@@ -47,37 +47,39 @@ Cypress.Commands.add('login', () => {
   cy.session(
     ['user'],
     () => {
-      cy.request({
-        url: `${getEnv('keycloak_host')}/realms/${getEnv('keycloak_realm')}/protocol/openid-connect/auth`,
-        qs: {
-          client_id: getEnv('keycloak_client'), // Now uses the working cqdg-client from config
-          redirect_uri: Cypress.config('baseUrl'),
-          kc_idp_hint: null,
-          scope: 'openid',
-          state: createUUID(),
-          nonce: createUUID(),
-          response_type: 'code',
-          response_mode: 'fragment',
-        },
-      }).then(response => {
-        const html: HTMLElement = document.createElement('html');
-        html.innerHTML = response.body;
-
-        const script = html.getElementsByTagName('script')[0] as HTMLScriptElement;
-
-        eval(script.textContent ?? '');
-
-        const loginUrl: string = (window as any).kcContext.url.loginAction;
-
-        return cy.request({
-          form: true,
-          method: 'POST',
-          url: loginUrl,
-          followRedirect: false,
-          body: {
-            username: getEnv('user_username'),
-            password: getEnv('user_password'),
+      cy.env(['user_username', 'user_password']).then(({ user_username, user_password }) => {
+        cy.request({
+          url: `${getExpose('keycloak_host')}/realms/${getExpose('keycloak_realm')}/protocol/openid-connect/auth`,
+          qs: {
+            client_id: getExpose('keycloak_client'),
+            redirect_uri: Cypress.config('baseUrl'),
+            kc_idp_hint: null,
+            scope: 'openid',
+            state: createUUID(),
+            nonce: createUUID(),
+            response_type: 'code',
+            response_mode: 'fragment',
           },
+        }).then(response => {
+          const html: HTMLElement = document.createElement('html');
+          html.innerHTML = response.body;
+
+          const script = html.getElementsByTagName('script')[0] as HTMLScriptElement;
+
+          eval(script.textContent ?? '');
+
+          const loginUrl: string = (window as any).kcContext.url.loginAction;
+
+          return cy.request({
+            form: true,
+            method: 'POST',
+            url: loginUrl,
+            followRedirect: false,
+            body: {
+              username: user_username,
+              password: user_password,
+            },
+          });
         });
       });
     },

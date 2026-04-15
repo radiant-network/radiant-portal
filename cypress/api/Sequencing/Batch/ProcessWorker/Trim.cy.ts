@@ -5,7 +5,7 @@ describe('Sequencing - Batch - Process worker - Trim', () => {
   let batch_id: string;
 
   before(() => {
-    const Auth = Cypress.env('globalData').Authorization;
+    const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
       "sequencing_experiments": [
         {
