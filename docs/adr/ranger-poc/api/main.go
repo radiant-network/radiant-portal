@@ -185,9 +185,15 @@ func (pc *PolicyCache) IsAllowed(userRoles []string, tenant, org, resource, acce
 	return false
 }
 
+// matchesAny checks if any policy value matches the target.
+// Policy value "*" matches any target (including empty).
+// Empty target (network-scoped request) only matches policy value "*".
 func matchesAny(values []string, target string) bool {
 	for _, v := range values {
-		if v == "*" || v == target {
+		if v == "*" {
+			return true
+		}
+		if target != "" && v == target {
 			return true
 		}
 	}
@@ -291,16 +297,40 @@ func getUser(r *http.Request) (*User, []string, error) {
 	return &u, roles, nil
 }
 
-// extractTenantOrg returns tenant and organization from the URL path: /{tenant}/{org}/...
-func extractTenantOrg(r *http.Request) (string, string, string, error) {
-	// path is like /cbtn/chop/cases or /cbtn/chop/cases/1/interpret
+// knownResources is the set of top-level resource path segments.
+// Used to distinguish /{tenant}/{resource} from /{tenant}/{org}/{resource}.
+var knownResources = map[string]bool{
+	"cases": true, "reports": true, "users": true, "kb": true, "projects": true,
+}
+
+// parsePath extracts tenant, organization, and the remaining path.
+//
+// Two forms:
+//   /{tenant}/{resource}/...          → org="" (network-scoped)
+//   /{tenant}/{org}/{resource}/...    → org="{org}" (org-scoped)
+//
+// We distinguish them by checking if the second segment is a known resource name.
+func parsePath(r *http.Request) (tenant, org, rest string, err error) {
 	parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
-	if len(parts) < 3 {
-		return "", "", "", fmt.Errorf("expected /{tenant}/{org}/..., got: %s", r.URL.Path)
+	if len(parts) < 2 {
+		return "", "", "", fmt.Errorf("expected /{tenant}/..., got: %s", r.URL.Path)
 	}
-	tenant := parts[0]
-	org := parts[1]
-	rest := "/" + strings.Join(parts[2:], "/")
+
+	tenant = parts[0]
+
+	if knownResources[parts[1]] {
+		// /{tenant}/{resource}/... → network-scoped, no org
+		rest = "/" + strings.Join(parts[1:], "/")
+		return tenant, "", rest, nil
+	}
+
+	if len(parts) < 3 {
+		return "", "", "", fmt.Errorf("expected /{tenant}/{org}/{resource}/..., got: %s", r.URL.Path)
+	}
+
+	// /{tenant}/{org}/{resource}/...
+	org = parts[1]
+	rest = "/" + strings.Join(parts[2:], "/")
 	return tenant, org, rest, nil
 }
 
@@ -346,9 +376,9 @@ func matchRoute(method, path string) *route {
 	return nil
 }
 
-// tenantHandler handles all /{tenant}/{org}/... requests
+// tenantHandler handles all /{tenant}/... requests
 func tenantHandler(w http.ResponseWriter, r *http.Request) {
-	tenant, org, rest, err := extractTenantOrg(r)
+	tenant, org, rest, err := parsePath(r)
 	if err != nil {
 		jsonResponse(w, 400, map[string]string{"error": err.Error()})
 		return

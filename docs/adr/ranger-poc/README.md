@@ -112,18 +112,19 @@ sequenceDiagram
 ### URL Pattern
 
 ```
-/{tenant}/{organization}/{resource-path}
+/{tenant}/{resource-path}              → network-scoped (no org)
+/{tenant}/{organization}/{resource-path} → org-scoped
 ```
+
+The API detects the scope by checking if the second path segment is a known resource (`cases`, `reports`, `users`, `kb`, `projects`). If it is, the request is network-scoped. Otherwise, it's treated as an organization.
 
 | Example | Scope | Action |
 |---------|-------|--------|
-| `GET /cbtn/*/cases` | Network | Search cases across CBTN |
+| `GET /cbtn/cases` | Network | Search cases across CBTN |
 | `POST /cbtn/chop/cases` | Org | Create case at CHOP |
 | `GET /cbtn/chop/cases/1/interpret` | Org | Interpret variant (CHOP case) |
 | `POST /cbtn/chop/reports/generate` | Org | Generate report (CHOP case) |
-| `POST /cbtn/*/users/invite` | Network | Invite user to CBTN |
-
-Use `*` as the organization for network-scoped actions.
+| `POST /cbtn/users/invite` | Network | Invite user to CBTN |
 
 ### How Policies Are Evaluated
 
@@ -217,38 +218,38 @@ From the [Notion Role & Security doc](https://www.notion.so/ferlab/Role-and-Secu
 ### Portal action authorization
 
 ```bash
-# CHOP analyst creates case at CHOP → 200 (org matches)
+# Org-scoped: CHOP analyst creates case at CHOP → 200
 curl -s -H "X-User: user_cbtn_analyst_chop" -X POST http://localhost:8080/cbtn/chop/cases | jq
 
-# CHOP analyst creates case at SEATTLE → 403 (wrong org)
+# Org-scoped: CHOP analyst creates case at SEATTLE → 403 (wrong org)
 curl -s -H "X-User: user_cbtn_analyst_chop" -X POST http://localhost:8080/cbtn/seattle/cases | jq
 
-# Seattle analyst creates case at SEATTLE → 200
+# Org-scoped: Seattle analyst creates case at SEATTLE → 200
 curl -s -H "X-User: user_cbtn_analyst_seattle" -X POST http://localhost:8080/cbtn/seattle/cases | jq
 
-# CHOP analyst interprets at CHOP → 200
+# Org-scoped: CHOP analyst interprets at CHOP → 200
 curl -s -H "X-User: user_cbtn_analyst_chop" http://localhost:8080/cbtn/chop/cases/1/interpret | jq
 
-# CHOP analyst interprets at SEATTLE → 403 (wrong org)
+# Org-scoped: CHOP analyst interprets at SEATTLE → 403 (wrong org)
 curl -s -H "X-User: user_cbtn_analyst_chop" http://localhost:8080/cbtn/seattle/cases/1/interpret | jq
 
-# Submitter creates case at CHOP → 200
+# Org-scoped: Submitter creates case at CHOP → 200
 curl -s -H "X-User: user_cbtn_submitter_chop" -X POST http://localhost:8080/cbtn/chop/cases | jq
 
-# Submitter creates case at SEATTLE → 403 (wrong org)
+# Org-scoped: Submitter creates case at SEATTLE → 403 (wrong org)
 curl -s -H "X-User: user_cbtn_submitter_chop" -X POST http://localhost:8080/cbtn/seattle/cases | jq
 
-# Analyst searches across network → 200 + data
-curl -s -H "X-User: user_cbtn_analyst_chop" http://localhost:8080/cbtn/*/cases | jq
+# Network-scoped: Analyst searches cases → 200 + data
+curl -s -H "X-User: user_cbtn_analyst_chop" http://localhost:8080/cbtn/cases | jq
 
-# Submitter searches → 403 (submitters can't search)
-curl -s -H "X-User: user_cbtn_submitter_chop" http://localhost:8080/cbtn/*/cases | jq
+# Network-scoped: Submitter searches → 403 (submitters can't search)
+curl -s -H "X-User: user_cbtn_submitter_chop" http://localhost:8080/cbtn/cases | jq
 
-# Network manager invites → 200
-curl -s -H "X-User: user_cbtn_network_manager" -X POST http://localhost:8080/cbtn/*/users/invite | jq
+# Network-scoped: Network manager invites → 200
+curl -s -H "X-User: user_cbtn_network_manager" -X POST http://localhost:8080/cbtn/users/invite | jq
 
-# Analyst invites → 403
-curl -s -H "X-User: user_cbtn_analyst_chop" -X POST http://localhost:8080/cbtn/*/users/invite | jq
+# Network-scoped: Analyst invites → 403
+curl -s -H "X-User: user_cbtn_analyst_chop" -X POST http://localhost:8080/cbtn/users/invite | jq
 ```
 
 ### StarRocks data enforcement
