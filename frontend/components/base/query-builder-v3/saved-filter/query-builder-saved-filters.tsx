@@ -3,6 +3,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useSavedFiltersContext } from './hooks/use-saved-filter';
 import DeleteFilterButton from './delete-filter-button';
 import DiscardFilterButton from './discard-filter-button';
+import DuplicateFilterButton from './duplicate-filter-button';
 import NewFilterButton from './new-filter-button';
 import SaveFilterButton from './save-filter-button';
 import SavedFiltersList from './saved-filters-list';
@@ -30,6 +31,7 @@ function QueryBuilderSavedFilters() {
           <div className="flex whitespace-nowrap">
             <NewFilterButton />
             <SaveFilterButton />
+            <DuplicateFilterButton />
             <DeleteFilterButton />
           </div>
           <SavedFiltersList />

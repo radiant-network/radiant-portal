@@ -1051,13 +1051,6 @@ export const SavedFilters: Story = {
                       },
                       op: 'in',
                     },
-                    {
-                      content: {
-                        field: 'firstName',
-                        value: ['jack', 'karen'],
-                      },
-                      op: 'in',
-                    },
                   ],
                   op: 'and',
                 },
@@ -1131,6 +1124,126 @@ export const SavedFilters: Story = {
                 },
               ],
             },
+            {
+              id: 'filter-4',
+              name: 'Test Filter for Deletion',
+              type: type,
+              favorite: false,
+              user_id: 'user-123',
+              created_on: '2024-01-01T12:00:00Z',
+              updated_on: '2024-01-01T12:00:00Z',
+              queries: [
+                {
+                  id: 'query-4',
+                  content: [
+                    {
+                      content: {
+                        field: 'lastName',
+                        value: ['smith'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
+            {
+              id: 'filter-5',
+              name: 'Simple Filter',
+              type: type,
+              favorite: false,
+              user_id: 'user-123',
+              created_on: '2024-01-01T12:00:00Z',
+              updated_on: '2024-01-01T12:00:00Z',
+              queries: [
+                {
+                  id: 'query-5',
+                  content: [
+                    {
+                      content: {
+                        field: 'firstName',
+                        value: ['alice'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
+            {
+              id: 'filter-6',
+              name: 'Duplicate Test COPY',
+              type: type,
+              favorite: false,
+              user_id: 'user-123',
+              created_on: '2024-01-02T12:00:00Z',
+              updated_on: '2024-01-02T12:00:00Z',
+              queries: [
+                {
+                  id: 'query-6',
+                  content: [
+                    {
+                      content: {
+                        field: 'firstName',
+                        value: ['bob'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
+            {
+              id: 'filter-7',
+              name: 'Duplicate Test',
+              type: type,
+              favorite: true,
+              user_id: 'user-123',
+              created_on: '2024-01-03T12:00:00Z',
+              updated_on: '2024-01-03T12:00:00Z',
+              queries: [
+                {
+                  id: 'query-7',
+                  content: [
+                    {
+                      content: {
+                        field: 'firstName',
+                        value: ['charlie'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
+            {
+              id: 'filter-8',
+              name: 'Duplicate Test COPY 1',
+              type: type,
+              favorite: false,
+              user_id: 'user-123',
+              created_on: '2024-01-04T12:00:00Z',
+              updated_on: '2024-01-04T12:00:00Z',
+              queries: [
+                {
+                  id: 'query-8',
+                  content: [
+                    {
+                      content: {
+                        field: 'firstName',
+                        value: ['david'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
           ];
 
           return HttpResponse.json(mockSavedFilters);
@@ -1164,6 +1277,47 @@ export const SavedFilters: Story = {
             queries: body.queries,
           };
           return HttpResponse.json(updatedFilter);
+        }),
+        // Mock saved filter deletion
+        http.delete(
+          '*/users/saved_filters/:id',
+          async () =>
+            // Simulate successful deletion
+            new HttpResponse(null, { status: 204 }),
+        ),
+        // Mock user preferences for query builder state (with unsaved changes)
+        http.get(userPreferenceApi, ({ params }: any) => {
+          const key = params.key;
+          if (key === 'data-table-storybook-query-builder') {
+            return new HttpResponse(null, { status: 404 });
+          }
+          return HttpResponse.json({
+            ...getDefaultQBContext(),
+            activeQueryId: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+            sqons: [
+              {
+                id: '3593dbdf-44e7-49c9-934a-7b10db87b603',
+                content: [
+                  {
+                    content: {
+                      field: 'isActive',
+                      value: ['true'],
+                    },
+                    op: 'in',
+                  },
+                  // This additional filter creates "unsaved changes" compared to the saved filter
+                  {
+                    content: {
+                      field: 'firstName',
+                      value: ['jack', 'karen'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          });
         }),
       ],
     },
