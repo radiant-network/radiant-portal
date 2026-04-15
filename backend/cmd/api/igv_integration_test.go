@@ -22,7 +22,7 @@ import (
 )
 
 func Test_GetIGVBySeqIdHandler(t *testing.T) {
-	testutils.ParallelTestWithAll(t, "simple", func(t *testing.T, client *minio.Client, endpoint string, postgres *gorm.DB, starrocks *gorm.DB) {
+	testutils.SequentialTestWithMinIOPostgresStarrocks(t, "simple", func(t *testing.T, client *minio.Client, endpoint string, postgres *gorm.DB, starrocks *gorm.DB) {
 		// Setup env vars for S3
 		_ = os.Setenv("AWS_REGION", "us-east-1")
 		_ = os.Setenv("AWS_ENDPOINT_URL", client.EndpointURL().String())

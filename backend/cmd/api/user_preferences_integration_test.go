@@ -29,7 +29,7 @@ func assertGetUserPreferencesHandler(t *testing.T, repo repository.UserPreferenc
 }
 
 func Test_GetUserPreferencesHandler_NotFound(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewUserPreferencesRepository(db)
 		auth := &testutils.MockAuth{}
 		assertGetUserPreferencesHandler(t, repo, auth, http.StatusNotFound, "table_1", `{"status": 404, "message":"user preferences not found"}`)
@@ -37,7 +37,7 @@ func Test_GetUserPreferencesHandler_NotFound(t *testing.T) {
 }
 
 func Test_GetUserPreferencesHandler_Found(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewUserPreferencesRepository(db)
 		auth := &testutils.MockAuth{
 			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",
@@ -65,7 +65,7 @@ func assertUpdateUserPreferencesHandler(t *testing.T, repo repository.UserPrefer
 }
 
 func Test_UpdateUserPreferencesHandler(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewUserPreferencesRepository(db)
 		auth := &testutils.MockAuth{
 			Id: "b3a74785-b0a9-4a45-879e-f13c476976f7",

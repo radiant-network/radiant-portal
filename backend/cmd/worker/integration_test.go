@@ -49,7 +49,7 @@ func assertBatchProcessing(t *testing.T, db *gorm.DB, id string, expectedStatus 
 }
 
 func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
 				"submitter_patient_id": "MRN-TEST-123",
@@ -98,7 +98,7 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 }
 
 func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
 				"submitter_patient_id": "MRN-283773",
@@ -144,7 +144,7 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 }
 
 func Test_ProcessBatch_Patient_Errors(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
 				"submitter_patient_id": "MRN-283773",
@@ -259,7 +259,7 @@ func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
 }
 
 func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
 				"submitter_patient_id": "MRN-TEST-123",
@@ -308,7 +308,7 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
             {
                 "submitter_sample_id": "SAMPLE-001",
@@ -356,7 +356,7 @@ func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
             {
                 "submitter_sample_id": "SAMPLE-NEW-001",
@@ -404,7 +404,7 @@ func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		db.Exec(`
             INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_id, patient_id)
             VALUES ('SAMPLE-EXISTS', 'dna', 'blood', 'normal', 3, 1)
@@ -447,7 +447,7 @@ func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Existing_Different_Field_Warning(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		db.Exec(`
             INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_id, patient_id)
             VALUES ('SAMPLE-DIFF', 'dna', 'liver', 'normal', 3, 1)
@@ -490,7 +490,7 @@ func Test_ProcessBatch_Sample_Existing_Different_Field_Warning(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Patient_Not_Exist(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
             {
                 "submitter_sample_id": "SAMPLE-003",
@@ -526,7 +526,7 @@ func Test_ProcessBatch_Sample_Patient_Not_Exist(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Organization_Not_Exist(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
             {
                 "submitter_sample_id": "SAMPLE-004",
@@ -562,7 +562,7 @@ func Test_ProcessBatch_Sample_Organization_Not_Exist(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
             {
                 "submitter_sample_id": "SAMPLE-PARENT",
@@ -624,7 +624,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
             {
                 "submitter_sample_id": "SAMPLE-CHILD-DB-PARENT",
@@ -677,7 +677,7 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Unknown_Parent_Sample(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
             {
                 "submitter_sample_id": "SAMPLE-CHILD-ORPHAN",
@@ -715,7 +715,7 @@ func Test_ProcessBatch_Sample_Unknown_Parent_Sample(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Invalid_Patient_For_Parent_Sample(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		// Insert parent sample for a different patient
 		db.Exec(`
             INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_id, patient_id)
@@ -758,7 +758,7 @@ func Test_ProcessBatch_Sample_Invalid_Patient_For_Parent_Sample(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Duplicate_In_Batch(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
             {
                 "submitter_sample_id": "SAMPLE-DUP",
@@ -803,7 +803,7 @@ func Test_ProcessBatch_Sample_Duplicate_In_Batch(t *testing.T) {
 }
 
 func Test_ProcessBatch_Sample_Field_Too_Long(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		longString := strings.Repeat("a", TextMaxLength+1)
 		payload := fmt.Sprintf(`[
             {
@@ -897,7 +897,7 @@ func Test_ProcessBatch_Sample_All_Codes(t *testing.T) {
 }
 
 func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
 				"aliquot": "ALIQUOT-12345",
@@ -949,7 +949,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
 }
 
 func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
 				"aliquot": "ALIQUOT-12345",
@@ -1024,7 +1024,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 }
 
 func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 
 		payload := `[
 			{
@@ -1096,7 +1096,7 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
 }
 
 func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 
 		payload := `[
 			{
@@ -1190,7 +1190,7 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 }
 
 func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 
 		payload := `[
 			{
@@ -1248,7 +1248,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
 }
 
 func Test_ProcessBatch_SequencingExperiment_Errors_InvalidOrgs(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 
 		payload := `[
 			{
@@ -1306,7 +1306,7 @@ func Test_ProcessBatch_SequencingExperiment_Errors_InvalidOrgs(t *testing.T) {
 }
 
 func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 
 		payload := `[
 			{
@@ -1454,7 +1454,7 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 }
 
 func Test_ProcessBatch_Using_Cache(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewValueSetsRepository(db)
 		ctx := batchval.BatchValidationContext{
 			ValueSetsRepo: repo,
@@ -1492,7 +1492,7 @@ func Test_ProcessBatch_Using_Cache(t *testing.T) {
 }
 
 func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		payload := `[
 			{
 				"batch": "fake"	

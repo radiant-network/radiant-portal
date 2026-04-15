@@ -17,7 +17,7 @@ import (
 )
 
 func Test_SecureRoutes(t *testing.T) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
@@ -107,7 +107,7 @@ func Test_SecureRoutes(t *testing.T) {
 }
 
 func Test_OpenFGA_Authorization(t *testing.T) {
-	testutils.ParallelTestWithOpenFGAAndPostgresAndStarrocks(t, "simple",
+	testutils.SequentialTestWithOpenFGAAndPostgresAndStarrocks(t, "simple",
 		func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB) {
 			token, err := jwt.GenerateMockJWT("radiant", []string{"data_manager"})
 			assert.NoError(t, err)

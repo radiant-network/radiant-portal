@@ -53,7 +53,7 @@ func Test_Interpretations_FirstGermline_NotFound(t *testing.T) {
 }
 
 func Test_Interpretations_CreateOrUpdateGermline_Create(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
 		interpretation := &types.InterpretationGermline{
 			InterpretationCommon: types.InterpretationCommon{
@@ -83,7 +83,7 @@ func Test_Interpretations_CreateOrUpdateGermline_Create(t *testing.T) {
 }
 
 func Test_Interpretations_CreateOrUpdateGermline_Update(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
 
 		// Create a fresh record (not fixture) to update
@@ -178,7 +178,7 @@ func Test_Interpretations_FirstSomatic_NotFound(t *testing.T) {
 }
 
 func Test_Interpretations_CreateOrUpdateSomatic_Create(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
 		interpretation := &types.InterpretationSomatic{
 			InterpretationCommon: types.InterpretationCommon{
@@ -208,7 +208,7 @@ func Test_Interpretations_CreateOrUpdateSomatic_Create(t *testing.T) {
 }
 
 func Test_Interpretations_CreateOrUpdateSomatic_Update(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
 
 		interpretation := &types.InterpretationSomatic{

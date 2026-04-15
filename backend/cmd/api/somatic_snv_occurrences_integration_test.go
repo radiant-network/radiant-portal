@@ -17,7 +17,7 @@ import (
 )
 
 func testSomaticSNVList(t *testing.T, data string, body string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/somatic/snv/:case_id/:seq_id/list", server.OccurrencesSomaticSNVListHandler(repo))
@@ -31,7 +31,7 @@ func testSomaticSNVList(t *testing.T, data string, body string, expected string)
 	})
 }
 func testSomaticSNVCount(t *testing.T, data string, body string, expected int) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/somatic/snv/:case_id/:seq_id/count", server.OccurrencesSomaticSNVCountHandler(repo))
@@ -45,7 +45,7 @@ func testSomaticSNVCount(t *testing.T, data string, body string, expected int) {
 	})
 }
 func testSomaticSNVAggregation(t *testing.T, data string, body string, queryParams []string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
 		facetsRepo := repository.NewFacetsRepository()
 		router := gin.Default()
@@ -63,7 +63,7 @@ func testSomaticSNVAggregation(t *testing.T, data string, body string, queryPara
 	})
 }
 func testSomaticSNVStatistics(t *testing.T, data string, body string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/somatic/snv/:case_id/:seq_id/statistics", server.OccurrencesSomaticSNVStatisticsHandler(repo))
@@ -198,7 +198,7 @@ func Test_Somatic_SNV_Statistics(t *testing.T) {
 }
 
 func assertGetExpandedSomaticOccurrence(t *testing.T, data string, caseId int, seqId int, locusId int, expected string) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(starrocks)
 		pubmedClient := &MockExternalClient{}
 		interpretationRepo := repository.NewInterpretationsRepository(postgres, pubmedClient)

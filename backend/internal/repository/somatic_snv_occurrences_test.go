@@ -26,7 +26,7 @@ var SomaticSNVQueryConfigForTest = types.QueryConfig{
 }
 
 func Test_Somatic_SNV_GetOccurrences(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewSomaticSNVOccurrencesRepository(db)
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
@@ -62,7 +62,7 @@ func Test_Somatic_SNV_GetOccurrences(t *testing.T) {
 }
 
 func Test_Somatic_SNV_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewSomaticSNVOccurrencesRepository(db)
 		selectedFields := []string{"seq_id", "locus_id", "ad_ratio", "symbol"}
 
@@ -80,7 +80,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) 
 }
 
 func Test_Somatic_SNV_GetOccurrences_Return_Default_Column_If_No_One_Specified(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewSomaticSNVOccurrencesRepository(db)
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, nil, nil, nil, nil)
@@ -97,7 +97,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Default_Column_If_No_One_Specified(t
 }
 
 func Test_Somatic_SNV_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewSomaticSNVOccurrencesRepository(db)
 		selectedFields := []string{"clinvar"}
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, selectedFields, nil, nil, nil)
@@ -112,7 +112,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) 
 }
 
 func Test_Somatic_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewSomaticSNVOccurrencesRepository(db)
 		sqon := &types.Sqon{
@@ -134,7 +134,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *te
 }
 
 func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testing.T) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		repo := NewSomaticSNVOccurrencesRepository(starrocks)
 		notesRepo := NewOccurrenceNotesRepository(postgres)
 
@@ -170,7 +170,7 @@ func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testi
 }
 
 func Test_Somatic_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Specified(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "pagination", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "pagination", func(t *testing.T, db *gorm.DB) {
 
 		repo := NewSomaticSNVOccurrencesRepository(db)
 
@@ -197,7 +197,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_
 }
 
 func Test_Somatic_SNV_GetExpandedOccurrence(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewSomaticSNVOccurrencesRepository(db)
 		expandedOccurrence, err := repo.GetExpandedOccurrence(71, 74, 1000)
 		assert.NoError(t, err)
