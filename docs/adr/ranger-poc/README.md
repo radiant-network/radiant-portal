@@ -264,6 +264,54 @@ mysql -h127.0.0.1 -P9030 -uuser_cbtn_submitter_chop -psubmitterpass \
   -e 'SELECT id, first_name, mrn, date_of_birth, organization FROM poc_db.patients ORDER BY id;'
 ```
 
+### Column masking under complex queries
+
+Masking is applied at the column-read level, **before** any SQL expression evaluates. The real value behind a mask cannot be extracted by any query pattern.
+
+```bash
+# GROUP BY on masked column: seattle rows collapse into '***'
+mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
+  -e "SELECT mrn, COUNT(*) as cnt FROM poc_db.patients GROUP BY mrn ORDER BY mrn;"
+# → ***: 2, MRN-000001: 1, MRN-000002: 1, MRN-000003: 1
+
+# WHERE on real value: returns nothing (mask applied before WHERE)
+mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
+  -e "SELECT id, mrn, organization FROM poc_db.patients WHERE mrn = 'MRN-000004';"
+# → empty (MRN-000004 belongs to seattle Diana, masked to '***')
+
+# WHERE on masked value: matches the masked rows
+mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
+  -e "SELECT id, mrn, organization FROM poc_db.patients WHERE mrn = '***';"
+# → rows 4,5 (seattle)
+
+# CONCAT with masked column
+mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
+  -e "SELECT id, CONCAT(first_name, ' - ', mrn) as name_mrn FROM poc_db.patients ORDER BY id;"
+# → 'Diana - ***', 'Eve - ***'
+
+# Subquery on masked column
+mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
+  -e "SELECT * FROM poc_db.patients WHERE mrn IN (SELECT mrn FROM poc_db.patients WHERE organization='seattle');"
+# → only seattle rows (inner select sees '***', outer matches on '***')
+
+# Window function on masked date_of_birth
+mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
+  -e "SELECT id, first_name, date_of_birth, DENSE_RANK() OVER (ORDER BY date_of_birth) as rank FROM poc_db.patients;"
+# → seattle dates ranked by year-only values (1995-01-01, 1999-01-01)
+```
+
+| Query pattern | Masking holds? | Behavior |
+|--------------|---------------|----------|
+| GROUP BY | Yes | Masked rows collapse (e.g., all seattle mrn = `***`) |
+| WHERE = real value | Yes | Returns 0 rows -- real value not accessible |
+| WHERE = masked value | Yes | Matches the masked representation |
+| ORDER BY | Yes | Sorts on masked values |
+| DISTINCT | Yes | Deduplicates on masked values |
+| CONCAT / string functions | Yes | Operates on masked values |
+| Subquery / IN | Yes | Inner and outer queries see masked values |
+| CASE WHEN / LIKE | Yes | Pattern matching on masked values |
+| Window functions | Yes | Ranking/aggregation uses masked values |
+
 ## Adding a New User
 
 ### 1. Create in StarRocks
