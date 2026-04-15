@@ -18,7 +18,7 @@ import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
-import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
+import { toExponentialNotation, toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
 
 type SliderVariantDetailsCardProps = {
@@ -328,18 +328,19 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
           </DescriptionRow>
           <DescriptionRow label={t('occurrence_expand.gene.splice_ai')}>
             {data.spliceai_type ? (
-              <AnchorLink
-                href={`https://spliceailookup.broadinstitute.org/#variant=${data.hgvsg}&hg=38`}
-                target="_blank"
-                size="sm"
-              >
-                <span className="text-xs text-muted-foreground">
-                  {data.spliceai_ds}{' '}
-                  {data.spliceai_type.map(v => (
-                    <Badge key={v}>{v}</Badge>
-                  ))}
-                </span>
-              </AnchorLink>
+              <div className="flex gap-1">
+                <AnchorLink
+                  href={`https://spliceailookup.broadinstitute.org/#variant=${data.hgvsg}&hg=38`}
+                  target="_blank"
+                  size="sm"
+                >
+                  {data.spliceai_ds}
+                </AnchorLink>
+
+                {data.spliceai_type.map(v => (
+                  <Badge key={v}>{v}</Badge>
+                ))}
+              </div>
             ) : (
               <EmptyField />
             )}
@@ -357,7 +358,7 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
                 href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`}
                 target="_blank"
               >
-                {toExponentialNotationAtThreshold(data.gnomad_v3_af)}
+                {toExponentialNotation(data.gnomad_v3_af)}
               </AnchorLink>
             ) : (
               <EmptyField />

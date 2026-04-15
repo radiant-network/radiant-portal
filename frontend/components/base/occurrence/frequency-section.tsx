@@ -5,7 +5,7 @@ import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
+import { toExponentialNotation } from '@/components/lib/number-format';
 
 import DetailSection, { DetailItem } from './detail-section';
 
@@ -62,7 +62,7 @@ export default function FrequencySection({ data }: FrequencySectionProps) {
               href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`}
               target="_blank"
             >
-              {toExponentialNotationAtThreshold(data.gnomad_v3_af)}
+              {toExponentialNotation(data.gnomad_v3_af)}
             </AnchorLink>
           ) : (
             '-'
