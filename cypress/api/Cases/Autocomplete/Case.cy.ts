@@ -6,7 +6,7 @@ describe('Cases - Autocomplete - Case', () => {
   let response: any;
 
   before(() => {
-    const Auth = Cypress.env('globalData').Authorization;
+    const Auth = Cypress.expose('globalData').Authorization;
 
     cy.apiCall('GET', `cases/autocomplete?prefix=${caseId}&limit=10`, '', Auth.token).then(res => {
       response = res;

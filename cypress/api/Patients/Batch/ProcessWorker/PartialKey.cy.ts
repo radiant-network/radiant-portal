@@ -5,7 +5,7 @@ describe('Patients - Batch - Process worker - Partial key', () => {
   let batch_id: string;
 
   before(() => {
-    const Auth = Cypress.env('globalData').Authorization;
+    const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
       "patients": [
         {
