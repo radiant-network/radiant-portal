@@ -35,8 +35,8 @@ var users = map[string]User{
 	"user_cbtn_analyst_seattle": {
 		Name: "user_cbtn_analyst_seattle", SRUser: "user_cbtn_analyst_seattle", SRPass: "analystseattlepass",
 	},
-	"user_cbtn_network_manager": {
-		Name: "user_cbtn_network_manager", SRUser: "user_cbtn_network_manager", SRPass: "networkmanagerpass",
+	"user_cbtn_tenant_manager": {
+		Name: "user_cbtn_tenant_manager", SRUser: "user_cbtn_tenant_manager", SRPass: "tenantmanagerpass",
 	},
 }
 
@@ -187,7 +187,7 @@ func (pc *PolicyCache) IsAllowed(userRoles []string, tenant, org, resource, acce
 
 // matchesAny checks if any policy value matches the target.
 // Policy value "*" matches any target (including empty).
-// Empty target (network-scoped request) only matches policy value "*".
+// Empty target (tenant-scoped request) only matches policy value "*".
 func matchesAny(values []string, target string) bool {
 	for _, v := range values {
 		if v == "*" {
@@ -306,7 +306,7 @@ var knownResources = map[string]bool{
 // parsePath extracts tenant, organization, and the remaining path.
 //
 // Two forms:
-//   /{tenant}/{resource}/...          → org="" (network-scoped)
+//   /{tenant}/{resource}/...          → org="" (tenant-scoped)
 //   /{tenant}/{org}/{resource}/...    → org="{org}" (org-scoped)
 //
 // We distinguish them by checking if the second segment is a known resource name.
@@ -319,7 +319,7 @@ func parsePath(r *http.Request) (tenant, org, rest string, err error) {
 	tenant = parts[0]
 
 	if knownResources[parts[1]] {
-		// /{tenant}/{resource}/... → network-scoped, no org
+		// /{tenant}/{resource}/... → tenant-scoped, no org
 		rest = "/" + strings.Join(parts[1:], "/")
 		return tenant, "", rest, nil
 	}

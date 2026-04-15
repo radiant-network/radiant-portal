@@ -35,7 +35,7 @@
       "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
       "matcherOptions": { "wildCard": true, "ignoreCase": true },
       "label": "Organization",
-      "description": "Organization within the tenant (e.g. chop, seattle). Use * for network-scoped actions."
+      "description": "Organization within the tenant (e.g. chop, seattle). Use * for tenant-scoped actions."
     },
     {
       "itemId": 3,

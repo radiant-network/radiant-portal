@@ -34,9 +34,9 @@ INSERT INTO patients (id, first_name, last_name, mrn, date_of_birth, tenant, org
     (8, 'Hank',    'Taylor',   'MRN-000008', '2005-04-17', 'udp',  'duke',    'Dravet syndrome'),
     (9, 'Ivy',     'Anderson', 'MRN-000009', '1997-08-29', 'udp',  'duke',    'Lennox-Gastaut syndrome');
 
--- Users: named by role (submitter/analyst/network_manager) and organization
+-- Users: named by role (submitter/analyst/tenant_manager) and organization
 -- StarRocks handles authentication only. Ranger handles all authorization.
 CREATE USER IF NOT EXISTS user_cbtn_submitter_chop   IDENTIFIED BY 'submitterpass';
 CREATE USER IF NOT EXISTS user_cbtn_analyst_chop     IDENTIFIED BY 'analystchoppass';
 CREATE USER IF NOT EXISTS user_cbtn_analyst_seattle   IDENTIFIED BY 'analystseattlepass';
-CREATE USER IF NOT EXISTS user_cbtn_network_manager  IDENTIFIED BY 'networkmanagerpass';
+CREATE USER IF NOT EXISTS user_cbtn_tenant_manager  IDENTIFIED BY 'tenantmanagerpass';

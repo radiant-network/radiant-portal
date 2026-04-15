@@ -1,6 +1,6 @@
 # StarRocks + Apache Ranger POC
 
-Proof-of-concept for using Apache Ranger as a **single source of truth** for both data access (StarRocks row-filtering + column masking) and portal action authorization (org-scoped and network-scoped).
+Proof-of-concept for using Apache Ranger as a **single source of truth** for both data access (StarRocks row-filtering + column masking) and portal action authorization (org-scoped and tenant-scoped).
 
 Related ADR: [../multi-tenancy-security.md](../multi-tenancy-security.md) (Option B -- Ranger Full Push-Down).
 
@@ -40,7 +40,7 @@ graph TB
         end
         subgraph "Service: radiant_portal"
             P_ORG["Org-scoped: create, edit,<br/>interpret, assign, generate...<br/>(tenant > org > resource)"]
-            P_NET["Network-scoped: search,<br/>view, invite, manage...<br/>(tenant > * > resource)"]
+            P_NET["Tenant-scoped: search,<br/>view, invite, manage...<br/>(tenant > * > resource)"]
         end
     end
 
@@ -48,7 +48,7 @@ graph TB
         R1["role_cbtn_submitter_chop"]
         R2["role_cbtn_analyst_chop"]
         R3["role_cbtn_analyst_seattle"]
-        R4["role_cbtn_network_manager"]
+        R4["role_cbtn_tenant_manager"]
     end
 
     R1 --> SR_P
@@ -74,7 +74,7 @@ Controls **portal actions** -- who can create cases, interpret variants, invite 
 Resource hierarchy: **`tenant > organization > resource`**
 
 - **Org-scoped** actions (create case, interpret variant, assign, generate report): policy specifies the exact organization (e.g., `chop`). A CHOP analyst cannot write at Seattle.
-- **Network-scoped** actions (search cases, view KB, invite users): policy uses `organization = *`. Any analyst in the tenant can search.
+- **Tenant-scoped** actions (search cases, view KB, invite users): policy uses `organization = *`. Any analyst in the tenant can perform these actions.
 
 ## POC API
 
@@ -112,19 +112,19 @@ sequenceDiagram
 ### URL Pattern
 
 ```
-/{tenant}/{resource-path}              → network-scoped (no org)
+/{tenant}/{resource-path}              → tenant-scoped (no org)
 /{tenant}/{organization}/{resource-path} → org-scoped
 ```
 
-The API detects the scope by checking if the second path segment is a known resource (`cases`, `reports`, `users`, `kb`, `projects`). If it is, the request is network-scoped. Otherwise, it's treated as an organization.
+The API detects the scope by checking if the second path segment is a known resource (`cases`, `reports`, `users`, `kb`, `projects`). If it is, the request is tenant-scoped. Otherwise, it's treated as an organization.
 
 | Example | Scope | Action |
 |---------|-------|--------|
-| `GET /cbtn/cases` | Network | Search cases across CBTN |
+| `GET /cbtn/cases` | Tenant | Search cases across CBTN |
 | `POST /cbtn/chop/cases` | Org | Create case at CHOP |
 | `GET /cbtn/chop/cases/1/interpret` | Org | Interpret variant (CHOP case) |
 | `POST /cbtn/chop/reports/generate` | Org | Generate report (CHOP case) |
-| `POST /cbtn/users/invite` | Network | Invite user to CBTN |
+| `POST /cbtn/users/invite` | Tenant | Invite user to CBTN |
 
 ### How Policies Are Evaluated
 
@@ -132,7 +132,7 @@ The API downloads the full `radiant_portal` policy set from Ranger every 10s. On
 
 > Does any of the user's roles have the required **access type** on the required **tenant + organization + resource**?
 
-This is a simple in-memory lookup over the cached policy JSON -- no network call per request.
+This is a simple in-memory lookup over the cached policy JSON -- no remote call per request.
 
 ## How StarRocks Communicates with Ranger
 
@@ -173,27 +173,27 @@ Wait until it prints "All Ranger roles and policies created!" (~2-3 minutes).
 | `user_cbtn_submitter_chop` | `submitterpass` | `role_cbtn_submitter_chop` | Submitter at CHOP |
 | `user_cbtn_analyst_chop` | `analystchoppass` | `role_cbtn_analyst_chop` | Analyst at CHOP |
 | `user_cbtn_analyst_seattle` | `analystseattlepass` | `role_cbtn_analyst_seattle` | Analyst at Seattle |
-| `user_cbtn_network_manager` | `networkmanagerpass` | `role_cbtn_network_manager` | Network manager for CBTN |
+| `user_cbtn_tenant_manager` | `tenantmanagerpass` | `role_cbtn_tenant_manager` | Tenant manager for CBTN |
 
 ## Permissions Matrix
 
 From the [Notion Role & Security doc](https://www.notion.so/ferlab/Role-and-Security-33eb0fcecb3d8080b746ef12aa3dccfc):
 
-| Action | Scope | submitter | analyst | network_manager |
+| Action | Scope | submitter | analyst | tenant_manager |
 |--------|-------|-----------|---------|-----------------|
 | Create/edit/delete case | org | Y | Y | - |
-| Search/view cases | network | - | Y | - |
+| Search/view cases | tenant | - | Y | - |
 | Interpret variant | org | - | Y | - |
 | Assign case | org | - | Y | - |
 | Generate report | org | - | Y | - |
 | Download file | org | - | Y | - |
-| Knowledge base search | network | - | Y | - |
-| Create projects | network | - | - | Y |
-| Invite users | network | - | - | Y |
-| Manage code systems/gene panels | network | - | - | Y |
+| Knowledge base search | tenant | - | Y | - |
+| Create projects | tenant | - | - | Y |
+| Invite users | tenant | - | - | Y |
+| Manage code systems/gene panels | tenant | - | - | Y |
 
 **Org-scoped** = action restricted to the user's organization.
-**Network-scoped** = action available across the entire tenant.
+**Tenant-scoped** = action available across all organizations in the tenant.
 
 ## Data Model
 
@@ -239,16 +239,16 @@ curl -s -H "X-User: user_cbtn_submitter_chop" -X POST http://localhost:8080/cbtn
 # Org-scoped: Submitter creates case at SEATTLE → 403 (wrong org)
 curl -s -H "X-User: user_cbtn_submitter_chop" -X POST http://localhost:8080/cbtn/seattle/cases | jq
 
-# Network-scoped: Analyst searches cases → 200 + data
+# Tenant-scoped: Analyst searches cases → 200 + data
 curl -s -H "X-User: user_cbtn_analyst_chop" http://localhost:8080/cbtn/cases | jq
 
-# Network-scoped: Submitter searches → 403 (submitters can't search)
+# Tenant-scoped: Submitter searches → 403 (submitters can't search)
 curl -s -H "X-User: user_cbtn_submitter_chop" http://localhost:8080/cbtn/cases | jq
 
-# Network-scoped: Network manager invites → 200
-curl -s -H "X-User: user_cbtn_network_manager" -X POST http://localhost:8080/cbtn/users/invite | jq
+# Tenant-scoped: Tenant manager invites → 200
+curl -s -H "X-User: user_cbtn_tenant_manager" -X POST http://localhost:8080/cbtn/users/invite | jq
 
-# Network-scoped: Analyst invites → 403
+# Tenant-scoped: Analyst invites → 403
 curl -s -H "X-User: user_cbtn_analyst_chop" -X POST http://localhost:8080/cbtn/users/invite | jq
 ```
 
@@ -301,7 +301,7 @@ No policy edit needed. The user inherits all permissions (data + portal actions)
 1. **Custom Ranger service definitions work** -- `radiant_portal` with `tenant > organization > resource` hierarchy enforces org-scoped portal actions
 2. **Same roles across both services** -- one role controls StarRocks data access AND portal action permissions
 3. **Org-scoped enforcement via Ranger** -- a CHOP analyst cannot create cases or interpret variants at Seattle
-4. **Network-scoped actions use `organization = *`** in policies
+4. **Tenant-scoped actions use `organization = *`** in Ranger policies
 5. **User-to-role mapping fetched from Ranger** -- single API call, no hardcoded roles in the Go API
 6. **Policies fetched from Ranger** -- evaluated locally in ~50 lines of Go
 7. **Ranger as single source of truth** -- no OpenFGA, no hardcoded permission maps

@@ -72,7 +72,7 @@ sleep 2
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Registering user stubs in Ranger ==="
-for USER in user_cbtn_submitter_chop user_cbtn_analyst_chop user_cbtn_analyst_seattle user_cbtn_network_manager; do
+for USER in user_cbtn_submitter_chop user_cbtn_analyst_chop user_cbtn_analyst_seattle user_cbtn_tenant_manager; do
   HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
     -H "Accept: application/json" -H "Content-Type: application/json" \
     "${RANGER_URL}/service/xusers/secure/users" \
@@ -109,8 +109,8 @@ echo "  role_cbtn_analyst_seattle: HTTP ${HTTP_CODE}"
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
   -H "Content-Type: application/json" -H "Accept: application/json" \
   "${RANGER_URL}/service/public/v2/api/roles" \
-  -d '{"name":"role_cbtn_network_manager","users":[{"name":"user_cbtn_network_manager","isAdmin":false}]}')
-echo "  role_cbtn_network_manager: HTTP ${HTTP_CODE}"
+  -d '{"name":"role_cbtn_tenant_manager","users":[{"name":"user_cbtn_tenant_manager","isAdmin":false}]}')
+echo "  role_cbtn_tenant_manager: HTTP ${HTTP_CODE}"
 sleep 2
 
 # ---------------------------------------------------------------------------
@@ -146,7 +146,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "column": {"values": ["*"]}
     },
     "policyItems": [{
-      "roles": ["role_cbtn_submitter_chop", "role_cbtn_analyst_chop", "role_cbtn_analyst_seattle", "role_cbtn_network_manager"],
+      "roles": ["role_cbtn_submitter_chop", "role_cbtn_analyst_chop", "role_cbtn_analyst_seattle", "role_cbtn_tenant_manager"],
       "accesses": [{"type": "select", "isAllowed": true}]
     }]
   }')
@@ -173,7 +173,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
         "rowFilterInfo": {"filterExpr": "tenant = '\''cbtn'\'' AND organization = '\''chop'\''"}
       },
       {
-        "roles": ["role_cbtn_analyst_chop", "role_cbtn_analyst_seattle", "role_cbtn_network_manager"],
+        "roles": ["role_cbtn_analyst_chop", "role_cbtn_analyst_seattle", "role_cbtn_tenant_manager"],
         "accesses": [{"type": "select", "isAllowed": true}],
         "rowFilterInfo": {"filterExpr": "tenant = '\''cbtn'\''"}
       }
@@ -246,7 +246,7 @@ sleep 2
 # Step 8: Portal action policies
 # Resources: tenant > organization > resource
 # org-scoped actions use specific org (e.g. "chop")
-# network-scoped actions use org = "*"
+# tenant-scoped actions use org = "*"
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Creating portal policies ==="
@@ -294,12 +294,12 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
   }')
 echo "  portal_case_org_write (seattle): HTTP ${HTTP_CODE}"
 
-# Network-scoped: analyst can search/view cases across the network (org=*)
+# Tenant-scoped: analyst can search/view cases across the tenant (org=*)
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
   -H "Content-Type: application/json" -H "Accept: application/json" \
   "${RANGER_URL}/service/plugins/policies" \
   -d '{
-    "policyType": 0, "name": "portal_case_network_read", "isEnabled": true, "isAuditEnabled": false,
+    "policyType": 0, "name": "portal_case_tenant_read", "isEnabled": true, "isAuditEnabled": false,
     "service": "radiant_portal",
     "resources": {"tenant": {"values": ["cbtn"]}, "organization": {"values": ["*"]}, "resource": {"values": ["case"]}},
     "policyItems": [
@@ -312,7 +312,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       }
     ]
   }')
-echo "  portal_case_network_read: HTTP ${HTTP_CODE}"
+echo "  portal_case_tenant_read: HTTP ${HTTP_CODE}"
 
 # Org-scoped: analyst can interpret/comment variants at their org only
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
@@ -372,12 +372,12 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
   }')
 echo "  portal_report_file_org (seattle): HTTP ${HTTP_CODE}"
 
-# Network-scoped: analyst can search/view knowledge base (org=*)
+# Tenant-scoped: analyst can search/view knowledge base (org=*)
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
   -H "Content-Type: application/json" -H "Accept: application/json" \
   "${RANGER_URL}/service/plugins/policies" \
   -d '{
-    "policyType": 0, "name": "portal_kb_network", "isEnabled": true, "isAuditEnabled": false,
+    "policyType": 0, "name": "portal_kb_tenant", "isEnabled": true, "isAuditEnabled": false,
     "service": "radiant_portal",
     "resources": {"tenant": {"values": ["cbtn"]}, "organization": {"values": ["*"]}, "resource": {"values": ["kb"]}},
     "policyItems": [{
@@ -385,18 +385,18 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "accesses": [{"type": "search", "isAllowed": true}, {"type": "view", "isAllowed": true}]
     }]
   }')
-echo "  portal_kb_network: HTTP ${HTTP_CODE}"
+echo "  portal_kb_tenant: HTTP ${HTTP_CODE}"
 
-# Network-scoped: network_manager admin actions (org=*)
+# Tenant-scoped: tenant_manager admin actions (org=*)
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
   -H "Content-Type: application/json" -H "Accept: application/json" \
   "${RANGER_URL}/service/plugins/policies" \
   -d '{
-    "policyType": 0, "name": "portal_network_manager", "isEnabled": true, "isAuditEnabled": false,
+    "policyType": 0, "name": "portal_tenant_manager", "isEnabled": true, "isAuditEnabled": false,
     "service": "radiant_portal",
     "resources": {"tenant": {"values": ["cbtn"]}, "organization": {"values": ["*"]}, "resource": {"values": ["project", "user", "codesystem", "genepanel"]}},
     "policyItems": [{
-      "roles": ["role_cbtn_network_manager"],
+      "roles": ["role_cbtn_tenant_manager"],
       "accesses": [
         {"type": "create", "isAllowed": true},
         {"type": "invite", "isAllowed": true},
@@ -405,7 +405,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       ]
     }]
   }')
-echo "  portal_network_manager: HTTP ${HTTP_CODE}"
+echo "  portal_tenant_manager: HTTP ${HTTP_CODE}"
 
 echo ""
 echo "=========================================="
@@ -426,8 +426,8 @@ echo ""
 echo "  # Submitter interprets variant (denied)"
 echo "  curl -s -H 'X-User: user_cbtn_submitter_chop' http://localhost:8080/cases/1/interpret | jq"
 echo ""
-echo "  # Network manager invites user (allowed)"
-echo "  curl -s -X POST -H 'X-User: user_cbtn_network_manager' http://localhost:8080/users/invite | jq"
+echo "  # Tenant manager invites user (allowed)"
+echo "  curl -s -X POST -H 'X-User: user_cbtn_tenant_manager' http://localhost:8080/users/invite | jq"
 echo ""
 echo "  # Analyst invites user (denied)"
 echo "  curl -s -X POST -H 'X-User: user_cbtn_analyst_chop' http://localhost:8080/users/invite | jq"
