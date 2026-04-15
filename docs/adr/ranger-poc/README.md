@@ -259,6 +259,10 @@ curl -s -H "X-User: user_cbtn_analyst_chop" -X POST http://localhost:8080/cbtn/u
 mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
   -e 'SELECT id, first_name, mrn, date_of_birth, organization FROM poc_db.patients ORDER BY id;'
 
+# Direct StarRocks: analyst at Seattle sees all CBTN, PII masked for chop
+mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_seattle -panalystseattlepass \
+  -e 'SELECT id, first_name, mrn, date_of_birth, organization FROM poc_db.patients ORDER BY id;'
+
 # Submitter sees only CHOP rows (row-filter restricts to their org)
 mysql -h127.0.0.1 -P9030 -uuser_cbtn_submitter_chop -psubmitterpass \
   -e 'SELECT id, first_name, mrn, date_of_birth, organization FROM poc_db.patients ORDER BY id;'
