@@ -1148,6 +1148,102 @@ export const SavedFilters: Story = {
                 },
               ],
             },
+            {
+              id: 'filter-5',
+              name: 'Simple Filter',
+              type: type,
+              favorite: false,
+              user_id: 'user-123',
+              created_on: '2024-01-01T12:00:00Z',
+              updated_on: '2024-01-01T12:00:00Z',
+              queries: [
+                {
+                  id: 'query-5',
+                  content: [
+                    {
+                      content: {
+                        field: 'firstName',
+                        value: ['alice'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
+            {
+              id: 'filter-6',
+              name: 'Duplicate Test COPY',
+              type: type,
+              favorite: false,
+              user_id: 'user-123',
+              created_on: '2024-01-02T12:00:00Z',
+              updated_on: '2024-01-02T12:00:00Z',
+              queries: [
+                {
+                  id: 'query-6',
+                  content: [
+                    {
+                      content: {
+                        field: 'firstName',
+                        value: ['bob'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
+            {
+              id: 'filter-7',
+              name: 'Duplicate Test',
+              type: type,
+              favorite: true,
+              user_id: 'user-123',
+              created_on: '2024-01-03T12:00:00Z',
+              updated_on: '2024-01-03T12:00:00Z',
+              queries: [
+                {
+                  id: 'query-7',
+                  content: [
+                    {
+                      content: {
+                        field: 'firstName',
+                        value: ['charlie'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
+            {
+              id: 'filter-8',
+              name: 'Duplicate Test COPY 1',
+              type: type,
+              favorite: false,
+              user_id: 'user-123',
+              created_on: '2024-01-04T12:00:00Z',
+              updated_on: '2024-01-04T12:00:00Z',
+              queries: [
+                {
+                  id: 'query-8',
+                  content: [
+                    {
+                      content: {
+                        field: 'firstName',
+                        value: ['david'],
+                      },
+                      op: 'in',
+                    },
+                  ],
+                  op: 'and',
+                },
+              ],
+            },
           ];
 
           return HttpResponse.json(mockSavedFilters);
