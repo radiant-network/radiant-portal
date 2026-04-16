@@ -67,7 +67,7 @@ function CNVTab({ seqId }: CNVTabProps) {
   });
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 30,
   });
 
   // Variant count Request
