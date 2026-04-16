@@ -4,6 +4,8 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 
+import EmptyField from '../information/empty-field';
+
 import DetailSection, { DetailItem } from './detail-section';
 
 interface GeneSectionProps {
@@ -26,7 +28,7 @@ export default function GeneSection({ data }: GeneSectionProps) {
               {toExponentialNotationAtThreshold(data.gnomad_pli)}
             </AnchorLink>
           ) : (
-            '-'
+            <EmptyField />
           )
         }
       />
@@ -42,7 +44,7 @@ export default function GeneSection({ data }: GeneSectionProps) {
               {toExponentialNotationAtThreshold(data.gnomad_loeuf)}
             </AnchorLink>
           ) : (
-            '-'
+            <EmptyField />
           )
         }
       />
@@ -51,20 +53,21 @@ export default function GeneSection({ data }: GeneSectionProps) {
         title={t('occurrence_expand.gene.splice_ai')}
         value={
           data.spliceai_type ? (
-            <AnchorLink
-              href={`https://spliceailookup.broadinstitute.org/#variant=${data.hgvsg}&hg=38`}
-              target="_blank"
-              size="sm"
-            >
-              <span className="text-xs text-muted-foreground">
-                {data.spliceai_ds}{' '}
-                {data.spliceai_type.map(v => (
-                  <Badge key={v}>{v}</Badge>
-                ))}
-              </span>
-            </AnchorLink>
+            <div className="flex gap-1">
+              <AnchorLink
+                href={`https://spliceailookup.broadinstitute.org/#variant=${data.hgvsg}&hg=38`}
+                target="_blank"
+                size="sm"
+              >
+                {data.spliceai_ds}
+              </AnchorLink>
+
+              {data.spliceai_type.map(v => (
+                <Badge key={v}>{v}</Badge>
+              ))}
+            </div>
           ) : (
-            '-'
+            <EmptyField />
           )
         }
       />
