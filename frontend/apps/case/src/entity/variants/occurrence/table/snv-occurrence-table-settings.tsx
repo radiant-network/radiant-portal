@@ -21,6 +21,7 @@ import { Badge } from '@/components/base/shadcn/badge';
 import HgvsgCell from './cells/hgvsg-cell';
 import InterpretationCell from './cells/interpretation-cell';
 import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
+import VariantFlagCell from './cells/variant-flag-cell';
 import VariantNoteCell from './cells/variant-note-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
@@ -43,10 +44,11 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
         <div className="flex items-center gap-1">
           <InterpretationCell occurrence={info.getValue()} />
           <VariantNoteCell occurrence={info.getValue()} />
+          <VariantFlagCell locusId={info.getValue().locus_id} />
         </div>
       ),
       header: () => null,
-      size: 68,
+      size: 100,
       enablePinning: false,
       enableResizing: false,
       enableSorting: false,
