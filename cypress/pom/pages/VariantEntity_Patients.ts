@@ -373,7 +373,7 @@ const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
    * Shows all columns in the table.
    */
   showAllColumns() {
-    columns.forEach((column) => {
+    columns.forEach(column => {
       if (!column.isVisibleByDefault) {
         cy.showColumn(stringToRegExp(column.name, true /*exact*/));
       }

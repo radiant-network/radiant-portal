@@ -42,15 +42,18 @@ describe('Documents - Search - Paging', () => {
     }`;
     let firstItemOfAll: any;
 
-    cy.apiCall('POST', `documents/search`, firstBody, Auth.token).then(firstRes => {
-      firstItemOfAll = firstRes.body.list[0].document_id;
-    }).then(() => {
-      cy.apiCall('POST', `documents/search`, secondBody, Auth.token);
-    }).then((secondRes: any) => {
-      expect(secondRes.status).to.eq(200);
-      cy.validateItemCount(secondRes, 10, 'list');
-      expect(secondRes.body.list[0].document_id).to.not.eq(firstItemOfAll);
-    });
+    cy.apiCall('POST', `documents/search`, firstBody, Auth.token)
+      .then(firstRes => {
+        firstItemOfAll = firstRes.body.list[0].document_id;
+      })
+      .then(() => {
+        cy.apiCall('POST', `documents/search`, secondBody, Auth.token);
+      })
+      .then((secondRes: any) => {
+        expect(secondRes.status).to.eq(200);
+        cy.validateItemCount(secondRes, 10, 'list');
+        expect(secondRes.body.list[0].document_id).to.not.eq(firstItemOfAll);
+      });
   });
 
   it('No more items', () => {

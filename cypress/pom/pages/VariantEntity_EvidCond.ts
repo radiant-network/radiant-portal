@@ -403,7 +403,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    * @param hasUniqueValues The data of the column to sort has unique values.
    * @param isReverseSorting The first sort of the column is Ascending (compare to Descending by default).
    */
-    shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean, sortAction: () => void) {
+  shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean, sortAction: () => void) {
     cy.then(() =>
       getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
         if (position !== -1) {
@@ -429,7 +429,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
                       throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
                     }
                   } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
-                      throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                    throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
                   } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
                     throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
                   }

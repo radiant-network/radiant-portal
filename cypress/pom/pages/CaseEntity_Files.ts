@@ -172,7 +172,7 @@ export const CaseEntity_Files = {
      */
     filterFormat(dataValue: string) {
       cy.get(`button:has(${CommonSelectors.circlePlusIcon}):contains("${CommonTexts.en.format}")`).clickAndWait({ force: true });
-      cy.get(`[data-value="${dataValue}"] button[role="checkbox"]`).click({ force:true });
+      cy.get(`[data-value="${dataValue}"] button[role="checkbox"]`).click({ force: true });
     },
     /**
      * Hides a specific column in the table.
@@ -501,7 +501,7 @@ export const CaseEntity_Files = {
                         throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
                       }
                     } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
-                        throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                      throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
                     } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
                       throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
                     }

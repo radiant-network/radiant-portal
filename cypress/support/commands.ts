@@ -231,7 +231,7 @@ Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, 
  * Shows a column in the table by checking it in the column selector.
  * @param column The column name to show.
  */
-Cypress.Commands.add('showColumn', (column: string|RegExp) => {
+Cypress.Commands.add('showColumn', (column: string | RegExp) => {
   cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
   getSettingsCheckbox(column).click({ force: true });
   cy.get(CommonSelectors.logo).clickAndWait({ force: true }); // Close the popper

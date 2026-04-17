@@ -171,7 +171,7 @@ export const FilesTable = {
      * @param buttonName The button name to click (First | Last | Previous | Next | Select)
      */
     clickPaginationButton(buttonName: string) {
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
       cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
     },
     /**
@@ -384,7 +384,7 @@ export const FilesTable = {
       }).as('searchRequest1');
       cy.visitFilesPage();
       cy.wait('@searchRequest1');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
         expect(req.body.limit).to.deep.equal(20);
@@ -393,7 +393,7 @@ export const FilesTable = {
       }).as('searchRequest2');
       FilesTable.actions.clickPaginationButton('Next');
       cy.wait('@searchRequest2');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
         expect(req.body.limit).to.deep.equal(20);
@@ -402,7 +402,7 @@ export const FilesTable = {
       }).as('searchRequest3');
       FilesTable.actions.clickPaginationButton('Next');
       cy.wait('@searchRequest3');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
         expect(req.body.limit).to.deep.equal(20);
@@ -411,7 +411,7 @@ export const FilesTable = {
       }).as('searchRequest4');
       FilesTable.actions.clickPaginationButton('Previous');
       cy.wait('@searchRequest4');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
         expect(req.body.limit).to.deep.equal(20);
