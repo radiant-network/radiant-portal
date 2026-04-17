@@ -491,7 +491,7 @@ export const CaseEntity_Variants_SNV_Table = {
      */
     shouldRequestOnPageChange(dataCase: any) {
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest1');
@@ -500,7 +500,7 @@ export const CaseEntity_Variants_SNV_Table = {
       cy.waitWhileLoad(60*1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest2');
@@ -509,7 +509,7 @@ export const CaseEntity_Variants_SNV_Table = {
       cy.waitWhileLoad(60*1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(2);
         req.continue();
       }).as('listRequest3');
@@ -518,7 +518,7 @@ export const CaseEntity_Variants_SNV_Table = {
       cy.waitWhileLoad(60*1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest4');
@@ -527,7 +527,7 @@ export const CaseEntity_Variants_SNV_Table = {
       cy.waitWhileLoad(60*1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest5');
