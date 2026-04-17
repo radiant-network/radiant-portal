@@ -10,8 +10,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
-import { VariantInterface } from '../variants-tab';
-
 function SequencingVariantFiltersSelectValue({ relationship_to_proband, seq_id }: CaseSequencingExperiment) {
   const { t } = useI18n();
 
@@ -49,11 +47,12 @@ function SequencingVariantFiltersSelectItem(caseSeqExp: CaseSequencingExperiment
 
 type SequencingVariantFiltersProps = {
   sequencingExperiments?: CaseSequencingExperiment[];
-  value?: number;
+  selectedSeqId?: number;
   handleChange: (value: number) => void;
+  options: string[];
   isLoading: boolean;
-  activeInterface: VariantInterface;
-  onActiveInterfaceChange: (value: VariantInterface) => void;
+  activeInterface: string;
+  onActiveInterfaceChange: (value: string) => void;
 };
 
 /**
@@ -66,7 +65,8 @@ type SequencingVariantFiltersProps = {
  */
 function SequencingVariantFilters({
   sequencingExperiments = [],
-  value,
+  options,
+  selectedSeqId,
   activeInterface,
   onActiveInterfaceChange,
   handleChange,
@@ -74,7 +74,7 @@ function SequencingVariantFilters({
 }: SequencingVariantFiltersProps) {
   const { t } = useI18n();
 
-  const selectedSequencingExperiment = sequencingExperiments.find(seqExp => seqExp.seq_id === value);
+  const selectedSequencingExperiment = sequencingExperiments.find(seqExp => seqExp.seq_id === selectedSeqId);
 
   if (isLoading || sequencingExperiments.length === 0) {
     return (
@@ -93,7 +93,7 @@ function SequencingVariantFilters({
     <div className="inline-flex gap-4 items-center border-b px-3 py-4">
       <span>{t('case_entity.variants.filters.sequencing')}</span>
       <Select
-        value={`${value}`}
+        value={`${selectedSeqId}`}
         onValueChange={value => {
           handleChange(Number(value));
         }}
@@ -124,15 +124,17 @@ function SequencingVariantFilters({
 
       <Tabs value={activeInterface}>
         <TabsList className="w-full">
-          {Object.values(VariantInterface).map(variant => (
+          {options.map((option: string) => (
             <TabsTrigger
-              key={variant}
-              value={variant}
+              key={option}
+              value={option}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
-              data-cy={`tabs-trigger-${variant}`}
-              onClick={() => onActiveInterfaceChange(variant)}
+              data-cy={`tabs-trigger-${option}`}
+              onClick={() => {
+                onActiveInterfaceChange(option);
+              }}
             >
-              {t(`case_entity.variants.filters.${variant.toLowerCase()}`)}
+              {t(`case_entity.variants.filters.${option.toLowerCase()}`)}
             </TabsTrigger>
           ))}
         </TabsList>

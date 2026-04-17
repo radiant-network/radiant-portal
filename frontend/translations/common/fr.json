@@ -478,6 +478,8 @@
         "spliceai_ds": "SpliceAI",
         "sm": "SM",
         "sm_tooltip": "Taux de copie linéaire de la moyenne du segment",
+        "somatic_pf_tn_wgs": "Fréq. TN tous les patients",
+        "somatic_pf_tn_wgs_tooltip": "Fréquence sur l’ensemble des patients du réseau (WGS)",
         "start": "Position",
         "study_code": "Code d'étude",
         "study_id": "ID de l'étude",
@@ -681,6 +683,7 @@
       "gene_divider": "Panels de gènes",
       "pathogenicity_exomiser_divider": "Exomiser",
       "pathogenicity_predictions_divider": "Prédictions",
+      "pathogenicity_oncology_divider": "Oncologie",
       "occurrence_metrics_divider": "Métriques",
       "occurrence_parental_divider": "Analyse parentale",
       "frequency_divider_my_organization": "Mon organisation",
@@ -873,6 +876,10 @@
       "exomiser_acmg_classification_tooltip": "ACMG de Exomiser",
       "exomiser_gene_combined_score": "Exo.",
       "exomiser_gene_combined_score_tooltip": "Score Exomiser calculé en fonction des caractéristiques du variant et des phénotypes du patient",
+      "freq_tn": "Fréq. TN",
+      "freq_tn_tooltip": "Nombre de génomes tumeur-normal comportant ce variant. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
+      "freq_g": "Fréq. G",
+      "freq_g_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
       "filter": "Filtre",
       "gene_length": "Longueur du gène",
       "gene_length_tooltip": "Longueur du gène en bases",
@@ -883,6 +890,8 @@
       "gnomad_v3_af": "gnomAD",
       "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (fréquence allélique)",
       "hgvsg": "Variant",
+      "hotspot": "Hotspot",
+      "hotspot_tooltip": "Hotspot Cancer",
       "is_mane_select": "MANE",
       "length": "Longueur",
       "length_tooltip": "Longueur du CNV en bases",
@@ -1097,7 +1106,9 @@
   },
   "preview_sheet": {
     "header": {
-      "germline": "Germinal"
+      "germline": "Germinal",
+      "germline_family": "Germline",
+      "somatic": "Somatique"
     },
     "actions": {
       "download_report": "Télécharger le rapport",
@@ -1301,6 +1312,7 @@
       "cases": "Cas",
       "germline": "Germinal",
       "germline_family": "Germinal familial",
+      "somatic": "Somatique",
       "priority_tooltip": "Priorité",
       "status_tooltip": "Statut",
       "unknown": "Inconnu"

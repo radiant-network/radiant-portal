@@ -31,31 +31,45 @@ type OccurrenceStatisticsInput = {
  */
 export function getAggregationsFetcher(appId: ApplicationId) {
   switch (appId) {
-    case ApplicationId.snv_occurrence:
+    case ApplicationId.germline_snv_occurrence:
       return {
-        builderFetcher: useSNVAggregationBuilder,
-        statisticFetcher: useSNVAggregationStatistics,
+        builderFetcher: useGermlineSNVAggregationBuilder,
+        statisticFetcher: useGermlineSNVAggregationStatistics,
       };
-    case ApplicationId.cnv_occurrence:
+    case ApplicationId.germline_cnv_occurrence:
       return {
-        builderFetcher: useCNVAggregationBuilder,
-        statisticFetcher: useCNVAggregationStatistics,
+        builderFetcher: useGermlineCNVAggregationBuilder,
+        statisticFetcher: useGermlineCNVAggregationStatistics,
+      };
+    case ApplicationId.somatic_snv_to_occurrence:
+      return {
+        builderFetcher: useSomaticSNVAggregationBuilder,
+        statisticFetcher: useSomaticSNVAggregationStatistics,
+      };
+    case ApplicationId.somatic_snv_tn_occurrence:
+      return {
+        builderFetcher: useSomaticSNVAggregationBuilder,
+        statisticFetcher: useSomaticSNVAggregationStatistics,
       };
     default:
       return {
-        builderFetcher: useSNVAggregationBuilder,
-        statisticFetcher: useSNVAggregationStatistics,
+        builderFetcher: useGermlineSNVAggregationBuilder,
+        statisticFetcher: useGermlineSNVAggregationStatistics,
       };
   }
 }
 
 /**
- * SNV
+ * Germline SNV
  */
 type SNVAggregationBuilderProps = IAggregationBuilder & {
   withDictionary?: boolean;
 };
-export function useSNVAggregationBuilder({ field, size = 30, withDictionary = false }: SNVAggregationBuilderProps) {
+export function useGermlineSNVAggregationBuilder({
+  field,
+  size = 30,
+  withDictionary = false,
+}: SNVAggregationBuilderProps) {
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
@@ -83,7 +97,7 @@ export function useSNVAggregationBuilder({ field, size = 30, withDictionary = fa
   );
 }
 
-export function useSNVAggregationStatistics({ field }: CNVAggregationBuilderProps) {
+export function useGermlineSNVAggregationStatistics({ field }: CNVAggregationBuilderProps) {
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
@@ -110,10 +124,10 @@ export function useSNVAggregationStatistics({ field }: CNVAggregationBuilderProp
 }
 
 /**
- * CNV
+ * Germline CNV
  */
 type CNVAggregationBuilderProps = IAggregationBuilder;
-export function useCNVAggregationBuilder({ field, size = 30 }: CNVAggregationBuilderProps) {
+export function useGermlineCNVAggregationBuilder({ field, size = 30 }: CNVAggregationBuilderProps) {
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
@@ -140,7 +154,7 @@ export function useCNVAggregationBuilder({ field, size = 30 }: CNVAggregationBui
   );
 }
 
-export function useCNVAggregationStatistics({ field }: CNVAggregationBuilderProps) {
+export function useGermlineCNVAggregationStatistics({ field }: CNVAggregationBuilderProps) {
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
@@ -159,6 +173,67 @@ export function useCNVAggregationStatistics({ field }: CNVAggregationBuilderProp
     async () =>
       occurrencesApi
         .statisticsGermlineCNVOccurrences(data.caseId, data.seqId, data.statisticsBody)
+        .then(response => response.data),
+    {
+      revalidateOnFocus: false,
+    },
+  );
+}
+
+/**
+ * Somatic SNV
+ */
+export function useSomaticSNVAggregationBuilder({
+  field,
+  size = 30,
+  withDictionary = false,
+}: SNVAggregationBuilderProps) {
+  const activeSqon = useQBActiveSqon();
+  const caseId = useCaseIdFromParam();
+  const seqId = useSeqIdFromSearchParam();
+
+  const data: OccurrenceAggregationInput = {
+    caseId,
+    seqId,
+    aggregationBody: {
+      field: field,
+      size: size,
+      sqon: activeSqon,
+    },
+    withDictionary,
+  };
+
+  return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(
+    data,
+    async () =>
+      occurrencesApi
+        .aggregateSomaticSNVOccurrences(data.caseId, data.seqId, data.aggregationBody, data.withDictionary)
+        .then(response => response.data),
+    {
+      revalidateOnFocus: false,
+    },
+  );
+}
+
+export function useSomaticSNVAggregationStatistics({ field }: CNVAggregationBuilderProps) {
+  const activeSqon = useQBActiveSqon();
+  const caseId = useCaseIdFromParam();
+  const seqId = useSeqIdFromSearchParam();
+
+  const data: OccurrenceStatisticsInput = {
+    caseId,
+    seqId,
+    statisticsBody: {
+      field: field,
+      sqon: activeSqon,
+    },
+  };
+
+  return useSWR<Statistics, any, OccurrenceStatisticsInput | null>(
+    data,
+    async () =>
+      occurrencesApi
+        .statisticsSomaticSNVOccurrences(data.caseId, data.seqId, data.statisticsBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,

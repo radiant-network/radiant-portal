@@ -1,13 +1,13 @@
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { Term, VepImpact } from '@/api/api';
-import ClingenCell from '@/apps/case/src/entity/variants/occurrence/table/cells/clingen-cell';
-import CNVNameCell from '@/apps/case/src/entity/variants/occurrence/table/cells/cnv-name-cell';
-import HgvsgCell from '@/apps/case/src/entity/variants/occurrence/table/cells/hgvsg-cell';
-import InterpretationCell from '@/apps/case/src/entity/variants/occurrence/table/cells/interpretation-cell';
-import OccurrenceActionsMenu from '@/apps/case/src/entity/variants/occurrence/table/cells/occurrence-actions-cell';
-import OverlapTypeGeneCell from '@/apps/case/src/entity/variants/occurrence/table/cells/overlap-type-gene-cell';
-import OverlappingGeneLinkCell from '@/apps/case/src/entity/variants/occurrence/table/cells/overlapping-gene-link-cell';
+import ClingenCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/clingen-cell';
+import CNVNameCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/cnv-name-cell';
+import HgvsgCell from '@/apps/case/src/entity/variants/table/cells/hgvsg-cell';
+import InterpretationCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/interpretation-cell';
+import OccurrenceActionsMenu from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/occurrence-actions-cell';
+import OverlapTypeGeneCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/overlap-type-gene-cell';
+import OverlappingGeneLinkCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/overlapping-gene-link-cell';
 import CaseActionsMenuCell from '@/apps/case/src/exploration/table/cells/case-actions-menu-cell';
 import UninterpretedCasePreviewCell from '@/apps/variant/src/entity/cases/table/cells/uninterpreted-case-preview-cell';
 import { Status } from '@/components/base/badges/status-badge';

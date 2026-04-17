@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useSWR from 'swr';
 
 import { CNVGeneOverlap, GermlineCNVOccurrence } from '@/api/api';
@@ -14,13 +14,12 @@ import {
 import { useI18n } from '@/components/hooks/i18n';
 import { toKiloBases } from '@/components/lib/number-format';
 import { occurrencesApi } from '@/utils/api';
-import { useCaseIdFromParam } from '@/utils/helper';
+import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
-import { useSeqIdContext } from './hooks/use-seq-id';
 import {
   defaultCNVOverlappingGenesSettings,
   getCNVOverlappingGenesColumns,
-} from './table/cnv-overlapping-gene-table-settings';
+} from './table/germline-cnv-overlapping-gene-table-settings';
 
 type OverlappingGenesInput = {
   caseId: number;
@@ -50,9 +49,8 @@ export function useCNVOverlappingGenesListHelper(input: OverlappingGenesInput) {
 function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState<boolean>(false);
-  const seqId = useSeqIdContext();
-
   const caseId = useCaseIdFromParam();
+  const seqId = useSeqIdFromSearchParam();
 
   const { fetch: fetchCNVOverlappingListHelper } = useCNVOverlappingGenesListHelper({
     caseId,

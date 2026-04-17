@@ -38,8 +38,8 @@ import { SELECTED_VARIANT_PARAM } from '../constants';
 import { getVisibleAggregations } from '../utils';
 
 import { isValidSeqId } from './libs/seq-id';
-import SliderOccurrenceSheet from './slider/slider-occurrence-sheet';
-import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/snv-occurrence-table-settings';
+import SliderGermlineOccurrenceSheet from './slider/slider-germline-occurrence-sheet';
+import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/germline-snv-occurrence-table-settings';
 
 type SnvOccurrenceListInput = {
   caseId: number;
@@ -53,7 +53,7 @@ type SnvOccurrenceListInput = {
   };
 };
 
-type SnvOccurrenceLCountInput = {
+type SnvOccurrenceCountInput = {
   caseId: number;
   seqId: number;
   countBody: CountBodyWithSqon;
@@ -64,7 +64,7 @@ type SNVTabProps = {
   patientSelected?: CaseSequencingExperiment;
 };
 
-async function fetchQueryCount(input: SnvOccurrenceLCountInput) {
+async function fetchQueryCount(input: SnvOccurrenceCountInput) {
   const response = await occurrencesApi.countGermlineSNVOccurrences(input.caseId, input.seqId, input.countBody);
   return response.data;
 }
@@ -94,12 +94,12 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
   const [open, setOpen] = useState(false);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
 
-  const appId = config.snv_occurrence.app_id;
-  const aggregations = config.snv_occurrence.aggregations;
+  const appId = config.germline_snv_occurrence.app_id;
+  const aggregations = config.germline_snv_occurrence.aggregations;
   const visibleAggregations = getVisibleAggregations(aggregations);
 
   function getAggregationFromConfig(key: string) {
-    return Object.values(config.snv_occurrence.aggregations)
+    return Object.values(config.germline_snv_occurrence.aggregations)
       .flatMap(f => f.items)
       .find(f => f.key === key)!;
   }
@@ -134,7 +134,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
       seqId,
       countBody: { sqon: activeSqon },
     },
-    async (params: SnvOccurrenceLCountInput) =>
+    async (params: SnvOccurrenceCountInput) =>
       seqId
         ? occurrencesApi.countGermlineSNVOccurrences(caseId, seqId, params.countBody).then(response => response.data)
         : { count: 0 },
@@ -348,7 +348,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
                 />
               </CardContent>
             </Card>
-            <SliderOccurrenceSheet
+            <SliderGermlineOccurrenceSheet
               onInterpretationSaved={onInterpretationSaved}
               open={!!selectedOccurrence}
               setOpen={() => handleClosePreview()}

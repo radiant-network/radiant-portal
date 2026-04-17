@@ -33,8 +33,8 @@ const facetListConfig: PortalConfig = {
     app_id: ApplicationId.variant_entity,
     saved_filter_type: SavedFilterType.GERMLINE_SNV_VARIANT,
   },
-  snv_occurrence: {
-    app_id: ApplicationId.snv_occurrence,
+  germline_snv_occurrence: {
+    app_id: ApplicationId.germline_snv_occurrence,
     saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
     aggregations: {
       variant: {
@@ -116,8 +116,8 @@ const facetListConfig: PortalConfig = {
       },
     },
   },
-  cnv_occurrence: {
-    app_id: ApplicationId.cnv_occurrence,
+  germline_cnv_occurrence: {
+    app_id: ApplicationId.germline_cnv_occurrence,
     saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
     aggregations: {
       pathogenicity: {
@@ -292,7 +292,7 @@ export const Loading: Story = {
     },
   },
   args: {
-    appId: ApplicationId.snv_occurrence,
+    appId: ApplicationId.germline_snv_occurrence,
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
@@ -330,7 +330,7 @@ export const Default: Story = {
     },
   },
   args: {
-    appId: ApplicationId.cnv_occurrence,
+    appId: ApplicationId.germline_cnv_occurrence,
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
@@ -403,7 +403,7 @@ export const Multiselect: Story = {
     },
   },
   args: {
-    appId: ApplicationId.snv_occurrence,
+    appId: ApplicationId.germline_snv_occurrence,
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
@@ -462,7 +462,7 @@ export const Boolean: Story = {
     },
   },
   args: {
-    appId: ApplicationId.snv_occurrence,
+    appId: ApplicationId.germline_snv_occurrence,
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
@@ -528,7 +528,7 @@ export const Numerical: Story = {
     },
   },
   args: {
-    appId: ApplicationId.snv_occurrence,
+    appId: ApplicationId.germline_snv_occurrence,
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
@@ -675,7 +675,7 @@ export const MultiQueries: Story = {
     },
   },
   args: {
-    appId: ApplicationId.snv_occurrence,
+    appId: ApplicationId.germline_snv_occurrence,
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
@@ -801,7 +801,7 @@ export const CombinedQueries: Story = {
     },
   },
   args: {
-    appId: ApplicationId.snv_occurrence,
+    appId: ApplicationId.germline_snv_occurrence,
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
@@ -885,7 +885,7 @@ export const SearchFacet: Story = {
     },
   },
   args: {
-    appId: ApplicationId.snv_occurrence,
+    appId: ApplicationId.germline_snv_occurrence,
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
@@ -985,7 +985,7 @@ export const UploadIdModal: Story = {
     },
   },
   args: {
-    appId: ApplicationId.snv_occurrence,
+    appId: ApplicationId.germline_snv_occurrence,
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
