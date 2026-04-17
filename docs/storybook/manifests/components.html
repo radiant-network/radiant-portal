@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>5.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>4.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -4164,7 +4164,7 @@ variant?: &#39;default&#39; | &#39;ghost&#39; | &#39;outline&#39; | &#39;seconda
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DataTable</h2>
       <div class="badges">
-        <label for="c-24-tables-data-table-cells-props" class="badge ok as-toggle">17 prop types</label>
+        <label for="c-24-tables-data-table-cells-props" class="badge ok as-toggle">18 prop types</label>
         
         <label for="c-24-tables-data-table-cells-stories" class="badge ok as-toggle">2 stories</label>
         
@@ -4191,7 +4191,7 @@ variant?: &#39;default&#39; | &#39;ghost&#39; | &#39;outline&#39; | &#39;seconda
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">17 prop types</span>
+              <span class="badge ok">18 prop types</span>
             </div>
             <pre><code>Component: base/data-table/data-table.tsx::default</code></pre>
             <pre><code>Props:</code></pre>
@@ -4206,6 +4206,8 @@ defaultColumnSettings: ColumnSettings[]
 enableColumnOrdering?: boolean = false
 
 enableFullscreen?: boolean = false
+
+extras?: React.ReactElement[]
 
 hasError?: boolean = false
 
@@ -4376,7 +4378,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DataTable</h2>
       <div class="badges">
-        <label for="c-25-tables-data-table-filters-props" class="badge ok as-toggle">17 prop types</label>
+        <label for="c-25-tables-data-table-filters-props" class="badge ok as-toggle">18 prop types</label>
         
         <label for="c-25-tables-data-table-filters-stories" class="badge ok as-toggle">2 stories</label>
         
@@ -4403,7 +4405,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">17 prop types</span>
+              <span class="badge ok">18 prop types</span>
             </div>
             <pre><code>Component: base/data-table/data-table.tsx::default</code></pre>
             <pre><code>Props:</code></pre>
@@ -4418,6 +4420,8 @@ defaultColumnSettings: ColumnSettings[]
 enableColumnOrdering?: boolean = false
 
 enableFullscreen?: boolean = false
+
+extras?: React.ReactElement[]
 
 hasError?: boolean = false
 
@@ -4674,7 +4678,7 @@ import { ConfigProvider, DataTable, TableFilters } from "components";</code></pr
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DataTable</h2>
       <div class="badges">
-        <label for="c-26-tables-data-table-headersgroup-props" class="badge ok as-toggle">17 prop types</label>
+        <label for="c-26-tables-data-table-headersgroup-props" class="badge ok as-toggle">18 prop types</label>
         
         <label for="c-26-tables-data-table-headersgroup-stories" class="badge ok as-toggle">4 stories</label>
         
@@ -4701,7 +4705,7 @@ import { ConfigProvider, DataTable, TableFilters } from "components";</code></pr
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">17 prop types</span>
+              <span class="badge ok">18 prop types</span>
             </div>
             <pre><code>Component: base/data-table/data-table.tsx::default</code></pre>
             <pre><code>Props:</code></pre>
@@ -4716,6 +4720,8 @@ defaultColumnSettings: ColumnSettings[]
 enableColumnOrdering?: boolean = false
 
 enableFullscreen?: boolean = false
+
+extras?: React.ReactElement[]
 
 hasError?: boolean = false
 
@@ -5392,7 +5398,7 @@ import {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DataTable</h2>
       <div class="badges">
-        <label for="c-27-tables-data-table-props" class="badge ok as-toggle">17 prop types</label>
+        <label for="c-27-tables-data-table-props" class="badge ok as-toggle">18 prop types</label>
         
         <label for="c-27-tables-data-table-stories" class="badge ok as-toggle">11 stories</label>
         
@@ -5419,7 +5425,7 @@ import {
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">17 prop types</span>
+              <span class="badge ok">18 prop types</span>
             </div>
             <pre><code>Component: base/data-table/data-table.tsx::default</code></pre>
             <pre><code>Props:</code></pre>
@@ -5434,6 +5440,8 @@ defaultColumnSettings: ColumnSettings[]
 enableColumnOrdering?: boolean = false
 
 enableFullscreen?: boolean = false
+
+extras?: React.ReactElement[]
 
 hasError?: boolean = false
 
@@ -7739,8 +7747,8 @@ import { X } from "lucide-react";</code></pre>
               
               
               <pre><code>const Default = () =&gt; &lt;FilterList
-    appId={filterListConfig.snv_occurrence.app_id}
-    aggregations={filterListConfig.snv_occurrence.aggregations}
+    appId={filterListConfig.germline_snv_occurrence.app_id}
+    aggregations={filterListConfig.germline_snv_occurrence.aggregations}
     groupKey=&quot;variant&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
@@ -7751,8 +7759,8 @@ import { X } from "lucide-react";</code></pre>
               
               
               <pre><code>const Error = () =&gt; &lt;FilterList
-    appId={filterListConfig.snv_occurrence.app_id}
-    aggregations={filterListConfig.snv_occurrence.aggregations}
+    appId={filterListConfig.germline_snv_occurrence.app_id}
+    aggregations={filterListConfig.germline_snv_occurrence.aggregations}
     groupKey=&quot;variant&quot; /&gt;;</code></pre>
             </div>
         </div>
@@ -10036,7 +10044,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
               <pre><code>const Loading = () =&gt; &lt;&gt;
     &lt;div className=&quot;bold font-mono text-red&quot;&gt;Do a hard refresh to reset loading state&lt;/div&gt;
     &lt;QueryBuilder
-        appId={ApplicationId.snv_occurrence}
+        appId={ApplicationId.germline_snv_occurrence}
         defaultSidebarOpen
         fetcher={{
           list: async (params: IListInput) =&gt;
@@ -10066,7 +10074,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
               
               
               <pre><code>const Default = () =&gt; &lt;QueryBuilder
-    appId={ApplicationId.cnv_occurrence}
+    appId={ApplicationId.germline_cnv_occurrence}
     defaultSidebarOpen
     fetcher={{
       list: async (params: IListInput) =&gt;
@@ -10095,7 +10103,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
               
               
               <pre><code>const Multiselect = () =&gt; &lt;QueryBuilder
-    appId={ApplicationId.snv_occurrence}
+    appId={ApplicationId.germline_snv_occurrence}
     defaultSidebarOpen
     fetcher={{
       list: async (params: IListInput) =&gt;
@@ -10124,7 +10132,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
               
               
               <pre><code>const Boolean = () =&gt; &lt;QueryBuilder
-    appId={ApplicationId.snv_occurrence}
+    appId={ApplicationId.germline_snv_occurrence}
     defaultSidebarOpen
     fetcher={{
       list: async (params: IListInput) =&gt;
@@ -10153,7 +10161,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
               
               
               <pre><code>const Numerical = () =&gt; &lt;QueryBuilder
-    appId={ApplicationId.snv_occurrence}
+    appId={ApplicationId.germline_snv_occurrence}
     defaultSidebarOpen
     fetcher={{
       list: async (params: IListInput) =&gt;
@@ -10182,7 +10190,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
               
               
               <pre><code>const MultiQueries = () =&gt; &lt;QueryBuilder
-    appId={ApplicationId.snv_occurrence}
+    appId={ApplicationId.germline_snv_occurrence}
     defaultSidebarOpen
     fetcher={{
       list: async (params: IListInput) =&gt;
@@ -10211,7 +10219,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
               
               
               <pre><code>const CombinedQueries = () =&gt; &lt;QueryBuilder
-    appId={ApplicationId.snv_occurrence}
+    appId={ApplicationId.germline_snv_occurrence}
     defaultSidebarOpen
     fetcher={{
       list: async (params: IListInput) =&gt;
@@ -10246,7 +10254,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
                     &lt;/div&gt;
     &lt;/div&gt;
     &lt;QueryBuilder
-        appId={ApplicationId.snv_occurrence}
+        appId={ApplicationId.germline_snv_occurrence}
         defaultSidebarOpen
         fetcher={{
           list: async (params: IListInput) =&gt;
@@ -10284,7 +10292,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";</code></pre>
                     &lt;/div&gt;
     &lt;/div&gt;
     &lt;QueryBuilder
-        appId={ApplicationId.snv_occurrence}
+        appId={ApplicationId.germline_snv_occurrence}
         defaultSidebarOpen
         fetcher={{
           list: async (params: IListInput) =&gt;
