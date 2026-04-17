@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
 import { User } from 'lucide-react';
+import { fn } from 'storybook/test';
 
 import { Badge } from '@/components/base/shadcn/badge';
 

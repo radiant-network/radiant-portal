@@ -25,34 +25,34 @@ export const baseButtonVariants = tv({
         base: 'text-primary underline-offset-4 hover:underline',
       },
       red: {
-        base: 'bg-red/20 border-1 text-red-foreground border-red-foreground/30 shadow-xs hover:bg-red/30',
+        base: 'bg-red/20 border-1 text-red-foreground border-red-foreground/30 shadow-xs hover:bg-red/15',
       },
       orange: {
-        base: 'bg-orange/20 border-1 text-orange-foreground border-orange-foreground/30 shadow-xs hover:bg-orange/30',
+        base: 'bg-orange/20 border-1 text-orange-foreground border-orange-foreground/30 shadow-xs hover:bg-orange/15',
       },
       yellow: {
-        base: 'bg-yellow/20 border-1 text-yellow-foreground border-yellow-foreground/30 shadow-xs hover:bg-yellow/30',
+        base: 'bg-yellow/20 border-1 text-yellow-foreground border-yellow-foreground/30 shadow-xs hover:bg-yellow/15',
       },
       lime: {
-        base: 'bg-lime/20 border-1 text-lime-foreground border-lime-foreground/30 shadow-xs hover:bg-lime/30',
+        base: 'bg-lime/20 border-1 text-lime-foreground border-lime-foreground/30 shadow-xs hover:bg-lime/15',
       },
       green: {
-        base: 'bg-green/20 border-1 text-green-foreground border-green-foreground/30 shadow-xs hover:bg-green/30',
+        base: 'bg-green/20 border-1 text-green-foreground border-green-foreground/30 shadow-xs hover:bg-green/15',
       },
       cyan: {
-        base: 'bg-cyan/20 border-1 text-cyan-foreground border-cyan-foreground/30 shadow-xs hover:bg-cyan/30',
+        base: 'bg-cyan/20 border-1 text-cyan-foreground border-cyan-foreground/30 shadow-xs hover:bg-cyan/15',
       },
       blue: {
-        base: 'bg-blue/20 border-1 text-blue-foreground border-blue-foreground/30 shadow-xs hover:bg-blue/30',
+        base: 'bg-blue/20 border-1 text-blue-foreground border-blue-foreground/30 shadow-xs hover:bg-blue/15',
       },
       violet: {
-        base: 'bg-violet/20 border-1 text-violet-foreground border-violet-foreground/30 shadow-xs hover:bg-violet/30',
+        base: 'bg-violet/20 border-1 text-violet-foreground border-violet-foreground/30 shadow-xs hover:bg-violet/15',
       },
       fuchsia: {
-        base: 'bg-fuchsia/20 border-1 text-fuchsia-foreground border-fuchsia-foreground/30 shadow-xs hover:bg-fuchsia/30',
+        base: 'bg-fuchsia/20 border-1 text-fuchsia-foreground border-fuchsia-foreground/30 shadow-xs hover:bg-fuchsia/15',
       },
       neutral: {
-        base: 'bg-neutral/20 border-1 text-neutral-foreground border-neutral-foreground/30 shadow-xs hover:bg-neutral/30',
+        base: 'bg-neutral/20 border-1 text-neutral-foreground border-neutral-foreground/30 shadow-xs hover:bg-neutral/15',
       },
     },
     disabled: {
