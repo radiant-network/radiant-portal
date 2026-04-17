@@ -5,6 +5,7 @@ import { generateBooleanData, generateMultiSelectData, generateSortedAdvancedDat
 export const occurrenceListApi = `api/occurrences/germline/:type/:case_id/:seq_id/list`;
 export const occurrenceAggregateApi = `api/occurrences/germline/:type/:case_id/:seq_id/aggregate`;
 export const occurrenceAggregateStatisticApi = `api/occurrences/germline/:type/:case_id/:seq_id/statistics`;
+export const occurrenceExpandApi = `api/occurrences/germline/:type/:case_id/:seq_id/:locus_id/expanded`;
 
 export type OccurenceHandler = {
   case_id: string;
@@ -131,5 +132,52 @@ export async function httpOccurrenceAggregateStatisticsApiResponse({ request }: 
     max: 100,
     min: 1,
     type: 'decimal',
+  });
+}
+
+export async function httpOccurrenceExpandResponse() {
+  return HttpResponse.json({
+    locus_id: '-1111111111111111111',
+    hgvsg: 'chr1:g.9244928_9244935del',
+    locus: '1-9244919-CCCCAGGCA-C',
+    chromosome: '1',
+    start: 9244919,
+    end: 9244927,
+    symbol: 'H6PD',
+    transcript_id: 'ENST00000377403',
+    is_canonical: true,
+    is_mane_select: false,
+    is_mane_plus: false,
+    exon_rank: 2,
+    exon_total: 5,
+    vep_impact: 'HIGH',
+    picked_consequences: ['splice_acceptor_variant', '5_prime_UTR_variant', 'intron_variant'],
+    clinvar: ['Benign'],
+    gnomad_pli: 8.5874e-9,
+    gnomad_loeuf: 0.941,
+    germline_pf_wgs: 0.14285714285714285,
+    germline_pc_wgs_affected: 1,
+    germline_pn_wgs_affected: 10,
+    germline_pf_wgs_affected: 0.1,
+    germline_pc_wgs_not_affected: 1,
+    germline_pn_wgs_not_affected: 4,
+    germline_pf_wgs_not_affected: 0.25,
+    gnomad_v3_af: 0.123104,
+    zygosity: 'HET',
+    omim_conditions: [
+      {
+        omim_phenotype_id: '604931',
+        panel: 'Cortisone reductase deficiency 1',
+        inheritance_code: ['AR'],
+      },
+    ],
+    qd: 14.57,
+    ad_alt: 20,
+    ad_total: 48,
+    genotype_quality: 99,
+    filter: 'PASS',
+    exomiser_acmg_evidence: null,
+    exomiser_gene_combined_score: 0,
+    ensembl_gene_id: 'ENSG00000049239',
   });
 }

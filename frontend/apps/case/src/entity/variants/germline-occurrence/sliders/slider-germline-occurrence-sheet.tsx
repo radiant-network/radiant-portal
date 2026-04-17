@@ -82,7 +82,7 @@ function GermlineOccurrenceSheetContent({
 }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
   const caseId = useCaseIdFromParam();
-  // in some case occurrence could still fetching, we need seqId to make it works
+  // seqId is to fetch the occurrence
   const seqId = useSeqIdFromSearchParam();
   const { mutate: listFetcher } = useOccurrenceListContext();
   const { patient, caseResult, caseSequencing, expandResult, isLoading } = useGermlineOccurrenceAndCase(

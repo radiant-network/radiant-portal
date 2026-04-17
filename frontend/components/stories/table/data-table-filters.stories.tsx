@@ -10,7 +10,7 @@ import DataTable, { createColumnSettings, TableColumnDef } from '@/components/ba
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 import {
-  caseAutocomplete,
+  caseAutocompleteApi,
   caseFiltersApi,
   caseSearchApi,
   httpCaseAutocompleteResponse,
@@ -165,7 +165,7 @@ export const Default: Story = {
       handlers: [
         http.post(caseSearchApi, httpCaseSearchApiResponse),
         http.post(caseFiltersApi, httpCaseFiltersApiResponse),
-        http.get(caseAutocomplete, httpCaseAutocompleteResponse),
+        http.get(caseAutocompleteApi, httpCaseAutocompleteResponse),
       ],
     },
   },

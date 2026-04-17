@@ -31,7 +31,6 @@ import { mockColumnHelper, mockColumns, TableMockData } from '../table/table-moc
 const facetListConfig: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
-    saved_filter_type: SavedFilterType.GERMLINE_SNV_VARIANT,
   },
   germline_snv_occurrence: {
     app_id: ApplicationId.germline_snv_occurrence,
@@ -226,10 +225,24 @@ const facetListConfig: PortalConfig = {
       },
     },
   },
+  somatic_snv_to_occurrence: {
+    app_id: ApplicationId.somatic_snv_to_occurrence,
+    saved_filter_type: 'somatic_snv_occurrence',
+    aggregations: {},
+  },
+  somatic_snv_tn_occurrence: {
+    app_id: ApplicationId.somatic_snv_tn_occurrence,
+    saved_filter_type: 'somatic_snv_occurrence',
+    aggregations: {},
+  },
+  somatic_cnv_to_occurrence: {
+    app_id: ApplicationId.somatic_cnv_to_occurrence,
+    saved_filter_type: 'somatic_snv_occurrence',
+    aggregations: {},
+  },
   admin: {
     admin_code: 'admin',
     app_id: ApplicationId.admin,
-    saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
   },
   portal: {
     name: '',
@@ -1323,7 +1336,7 @@ export const SavedFilters: Story = {
     },
   },
   args: {
-    appId: ApplicationId.snv_occurrence,
+    appId: ApplicationId.germline_snv_occurrence,
     children: <></>, // unused
     defaultSidebarOpen: true,
   },

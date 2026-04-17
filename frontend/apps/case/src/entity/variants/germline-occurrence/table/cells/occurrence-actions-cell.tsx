@@ -8,7 +8,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useCaseIdFromParam } from '@/utils/helper';
 import IGVDialog from 'components/base/igv/igv-dialog';
 
-import OccurrenceSliderSheet from '../../slider/slider-germline-occurrence-sheet';
+import OccurrenceSliderSheet from '../../sliders/slider-germline-occurrence-sheet';
 
 type OccurrenceActionsMenuProps = {
   row: Row<GermlineSNVOccurrence>;
