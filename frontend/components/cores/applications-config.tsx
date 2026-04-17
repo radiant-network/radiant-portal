@@ -83,11 +83,11 @@ export type AggregationConfig = {
 
 export interface BaseAppsConfig {
   app_id: ApplicationId;
-  saved_filter_type: SavedFilterType;
 }
 
 export interface AppsConfig extends BaseAppsConfig {
   aggregations: AggregationConfig;
+  saved_filter_type: SavedFilterType;
 }
 
 export interface AppsAdminConfig extends BaseAppsConfig {

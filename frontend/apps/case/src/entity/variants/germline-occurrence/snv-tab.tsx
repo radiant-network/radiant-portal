@@ -38,7 +38,7 @@ import { SELECTED_VARIANT_PARAM } from '../constants';
 import { getVisibleAggregations } from '../utils';
 
 import { isValidSeqId } from './libs/seq-id';
-import SliderGermlineOccurrenceSheet from './slider/slider-germline-occurrence-sheet';
+import SliderGermlineOccurrenceSheet from './sliders/slider-germline-occurrence-sheet';
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/germline-snv-occurrence-table-settings';
 
 type SnvOccurrenceListInput = {
