@@ -446,13 +446,14 @@ Cypress.Commands.add('visitCaseFilesPage', (caseId: string, searchCriteria?: str
 /**
  * Visits the case variants page for a specific case.
  * @param caseId The case ID to visit.
+ * @param seqId The seq ID to visit.
  * @param type The type of variants (SNV | CNV).
  * @param sqon Optional query filter to apply (JSON string).
  */
-Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, type: string, sqon?: string) => {
+Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, seqId: string, type: string, sqon?: string) => {
   if (type === 'SNV') {
     if (sqon == undefined) {
-      cy.visitAndIntercept(`/case/entity/${caseId}?tab=variants`, 'POST', '**/list', 1);
+      cy.visitAndIntercept(`/case/entity/${caseId}?tab=variants&seq_id=${seqId}`, 'POST', '**/list', 1);
     } else {
       cy.intercept('POST', '**/list', interception => {
         const mockBody = { ...interception.body };
@@ -460,11 +461,11 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, type: string, sqo
         interception.alias = 'postListSNV';
         interception.body = mockBody;
       });
-      cy.visit(`/case/entity/${caseId}?tab=variants`, { failOnStatusCode: false });
+      cy.visit(`/case/entity/${caseId}?tab=variants&seq_id=${seqId}`, { failOnStatusCode: false });
       cy.wait('@postListSNV');
     }
   } else if (type === 'CNV') {
-    cy.visitAndIntercept(`/case/entity/${caseId}?tab=variants`, 'POST', '**/list', 1);
+    cy.visitAndIntercept(`/case/entity/${caseId}?tab=variants&seq_id=${seqId}`, 'POST', '**/list', 1);
 
     if (sqon == undefined) {
       cy.intercept('POST', '**/list').as('postListCNV');

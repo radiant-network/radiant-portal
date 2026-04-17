@@ -10,7 +10,7 @@ describe('Case Entity - Variants - SNV - Table - Request Validation', () => {
 
   it('Sort', () => {
     setupTest();
-    cy.visitCaseVariantsPage(data.case.case, 'SNV');
+    cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV');
     CaseEntity_Variants_SNV_Table.validations.shouldRequestOnSort('variant');
   });
 

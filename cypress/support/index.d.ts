@@ -42,7 +42,7 @@ declare namespace Cypress {
     visitFilesPage(search_criteria?: string): cy & CyEventEmitter;
     visitCaseDetailsPage(caseID: string): cy & CyEventEmitter;
     visitCaseFilesPage(caseID: string, searchCriteria?: string): cy & CyEventEmitter;
-    visitCaseVariantsPage(caseID: string, type: string, sqon?: string): cy & CyEventEmitter;
+    visitCaseVariantsPage(caseID: string, seqId: string, type: string, sqon?: string): cy & CyEventEmitter;
     visitVariantEvidCondPage(locusID: string): cy & CyEventEmitter;
     visitVariantFrequencyPage(locusID: string): cy & CyEventEmitter;
     visitVariantPatientsPage(locusID: string): cy & CyEventEmitter;

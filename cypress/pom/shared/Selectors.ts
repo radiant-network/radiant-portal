@@ -7,7 +7,7 @@ export const CommonSelectors = {
   animateIn: '[class*="data-[state=open]:animate-in"]',
   checkIcon: '[class*="lucide-check"]',
   circlePlusIcon: '[class*="lucide-circle-plus"]',
-  closeButton: 'button:contains("Close")',
+  closeButton: '[data-cy="CloseButton"]',
   colorIndicator: (color: string) => `[class*="text-indicator-${color}"]`,
   detailsButton: 'button:contains("Details")',
   comboboxButton: 'button[role="combobox"]',
