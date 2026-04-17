@@ -6,7 +6,7 @@ import { getColumnName, getColumnPosition } from '../shared/Utils';
 const selectors = {
   tableCell: (dataVariant: any) => `${CommonSelectors.tableRow()}:contains("${dataVariant.variant}") ${CommonSelectors.tableCellData}`,
   tab: '[data-cy="variants-tab"]',
-  toggle: '[data-cy="tabs-trigger-snv"]',
+  toggle: '[data-cy="tabs-trigger-SNV"]',
 };
 
 const tableColumns = [
@@ -495,7 +495,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest1');
-      cy.visitCaseVariantsPage(dataCase.case, 'SNV');
+      cy.visitCaseVariantsPage(dataCase.case, dataCase.seq.seq_id, 'SNV');
       cy.wait('@listRequest1');
       cy.waitWhileLoad(60 * 1000);
 

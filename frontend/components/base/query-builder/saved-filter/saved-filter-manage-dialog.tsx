@@ -50,7 +50,7 @@ function SavedFiltersManageDialog({ open, onOpenChange }: { open: boolean; onOpe
           </DialogBody>
           <DialogFooter>
             <DialogClose asChild>
-              <Button>{dict.savedFilter.manageDialog.close}</Button>
+              <Button data-cy="CloseButton">{dict.savedFilter.manageDialog.close}</Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>

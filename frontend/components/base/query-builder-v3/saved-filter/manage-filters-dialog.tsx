@@ -48,7 +48,7 @@ function SavedFiltersManageDialog({ open, onOpenChange }: { open: boolean; onOpe
         </DialogBody>
         <DialogFooter>
           <DialogClose asChild>
-            <Button>{t('common.close')}</Button>
+            <Button data-cy="CloseButton">{t('common.close')}</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

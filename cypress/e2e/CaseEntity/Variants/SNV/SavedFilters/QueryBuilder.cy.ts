@@ -7,7 +7,7 @@ import { ManagerFilterModal } from 'pom/pages/ManagerFilterModal';
 describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage(data.case.case, 'SNV', data.variantGermline.sqon);
+    cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV', data.variantGermline.sqon);
     CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton();
   };
 
