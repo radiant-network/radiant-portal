@@ -6,7 +6,6 @@ This file provides guidance to Claude Code when working in the `cypress/` direct
 
 End-to-end (E2E) and API test suite for the Radiant Portal. Tests run against a live QA environment using Cypress with a Page Object Model (POM) pattern.
 
-- **162 tests total**: 66 E2E (UI) + 96 API
 - **QA base URL**: `https://radiant.qa.juno.cqdg.ferlab.bio/`
 - **API base URL**: `https://radiant-api.qa.juno.cqdg.ferlab.bio/`
 - **Auth**: Keycloak at `https://auth.qa.juno.cqdg.ferlab.bio`
@@ -44,7 +43,6 @@ cypress/
 │   ├── Cases/             # Case list table tests
 │   ├── CaseEntity/        # Case detail page (Details, Files, Variants SNV/CNV)
 │   ├── Connexion/         # Login tests
-│   ├── DataQuality/       # Data quality checks
 │   ├── Files/             # Files list tests
 │   └── VariantEntity/     # Variant detail page (EvidCond, Frequency, Patients)
 ├── pom/                   # Page Object Model

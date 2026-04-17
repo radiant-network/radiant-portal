@@ -111,6 +111,16 @@ export const data = {
       homo: '0',
       freq: '1.54e-3',
     },
+    myNetwork: {
+      primary_condition_name: 'cerebral ventricle cancer',
+      primary_condition_id: 'MONDO:0002682',
+      freq_all: '0/1',
+      homo_all: '0',
+      freq_affected: '0/1',
+      homo_affected: '0',
+      freq_non_affected: '-',
+      homo_non_affected: '-',
+    },
     interpreted: {
       case: '1',
       relationship: 'proband',

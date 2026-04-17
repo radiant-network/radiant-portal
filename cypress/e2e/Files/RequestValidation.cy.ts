@@ -12,7 +12,7 @@ describe('Files - Request Validation', () => {
     cy.visitFilesPage();
     FilesTable.validations.shouldRequestOnSort('name');
   });
-    
+
   it('Paging', () => {
     setupTest();
     FilesTable.validations.shouldRequestOnPageChange();

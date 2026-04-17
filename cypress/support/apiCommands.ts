@@ -22,21 +22,23 @@ Cypress.Commands.add('apiCall', (method: string, query: string, body: string, to
   }
 
   const makeRequest = (attemptsLeft: number): Cypress.Chainable => {
-    return cy.request({
-      method: method,
-      url: `${apiUrl}${query}`,
-      headers: { Authorization: `Bearer ${token}` },
-      body: body,
-      failOnStatusCode: false,
-      timeout: 60000,
-    }).then(res => {
-      if (res.status === 500 && attemptsLeft > 0) {
-        cy.log(`Retrying API call, remaining retries: ${attemptsLeft - 1}`);
-        return makeRequest(attemptsLeft - 1);
-      } else {
-        return res;
-      }
-    });
+    return cy
+      .request({
+        method: method,
+        url: `${apiUrl}${query}`,
+        headers: { Authorization: `Bearer ${token}` },
+        body: body,
+        failOnStatusCode: false,
+        timeout: 60000,
+      })
+      .then(res => {
+        if (res.status === 500 && attemptsLeft > 0) {
+          cy.log(`Retrying API call, remaining retries: ${attemptsLeft - 1}`);
+          return makeRequest(attemptsLeft - 1);
+        } else {
+          return res;
+        }
+      });
   };
 
   return makeRequest(retries);
@@ -104,8 +106,7 @@ Cypress.Commands.add('validateAcceptedBatchResponse', (response: any, batch_type
 Cypress.Commands.add('validateItemCount', (response: any, count: number, field?: string) => {
   if (field == undefined) {
     expect(response.body).to.have.lengthOf(count);
-  }
-  else {
+  } else {
     expect(response.body[field]).to.have.lengthOf(count);
   }
 });

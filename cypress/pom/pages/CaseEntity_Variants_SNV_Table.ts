@@ -217,7 +217,7 @@ export const CaseEntity_Variants_SNV_Table = {
      * @param buttonName The button name to click (First | Last | Previous | Next | Select)
      */
     clickPaginationButton(buttonName: string) {
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
       cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
     },
     /**
@@ -497,7 +497,7 @@ export const CaseEntity_Variants_SNV_Table = {
       }).as('listRequest1');
       cy.visitCaseVariantsPage(dataCase.case, 'SNV');
       cy.wait('@listRequest1');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
         expect(req.body.limit).to.deep.equal(30);
@@ -506,7 +506,7 @@ export const CaseEntity_Variants_SNV_Table = {
       }).as('listRequest2');
       CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Next');
       cy.wait('@listRequest2');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
         expect(req.body.limit).to.deep.equal(30);
@@ -515,7 +515,7 @@ export const CaseEntity_Variants_SNV_Table = {
       }).as('listRequest3');
       CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Next');
       cy.wait('@listRequest3');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
         expect(req.body.limit).to.deep.equal(30);
@@ -524,7 +524,7 @@ export const CaseEntity_Variants_SNV_Table = {
       }).as('listRequest4');
       CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Previous');
       cy.wait('@listRequest4');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
         expect(req.body.limit).to.deep.equal(30);
@@ -721,7 +721,7 @@ export const CaseEntity_Variants_SNV_Table = {
                         throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
                       }
                     } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
-                        throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                      throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
                     } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
                       throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
                     }

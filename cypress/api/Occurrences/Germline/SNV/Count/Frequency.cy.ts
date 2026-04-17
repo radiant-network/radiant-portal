@@ -41,7 +41,7 @@ describe('Occurrences - Germline - SNV - Count - Frequency', () => {
             expect(response.body.count.toString()).to.match(facetData.count);
           } else {
             expect(response.body.count).to.eq(facetData.count);
-          };
+          }
         });
       });
     });

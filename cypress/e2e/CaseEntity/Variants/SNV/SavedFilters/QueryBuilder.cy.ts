@@ -22,7 +22,7 @@ describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
 
     ManagerFilterModal.validations.shouldDisplayInManager('Cypress_F0');
     ManagerFilterModal.actions.closeManager();
-    
+
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', false /*isDisable*/, false /*isDirty*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('duplicate', false /*isDisable*/, false /*isDirty*/);
