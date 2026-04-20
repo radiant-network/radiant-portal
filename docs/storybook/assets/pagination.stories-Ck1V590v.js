@@ -1,0 +1,242 @@
+import{j as n,r as b}from"./iframe-w_-n8Mse.js";import{a as c,b as P,c as i,g as e,d as C,e as S,h as r,f,i as L,P as N}from"./pagination-QlmwBkS4.js";import{C as Pn,A as l}from"./applications-config-Beijd3sM.js";import{B as mn}from"./chunk-UVKPFVEO-B7mRh0hx.js";import"./preload-helper-Dp1pzeXC.js";import"./button-BwQvD6u9.js";import"./index-CgRbIQdG.js";import"./action-button-lST57tav.js";import"./dropdown-menu-9y_mbS5r.js";import"./index-O5sh9deS.js";import"./circle-BFupXhCr.js";import"./check-C9r4UgAI.js";import"./separator-_t-sRdkq.js";import"./i18n-BQVoti6G.js";import"./select-DlVVUDfR.js";import"./index-DmfFdEQL.js";import"./chevron-down-S0y0w5tU.js";import"./chevron-up-B0xNnr65.js";import"./ellipsis-DilRjIjc.js";const ln={variant_entity:{app_id:l.variant_entity},germline_snv_occurrence:{app_id:l.germline_snv_occurrence,aggregations:[]},germline_cnv_occurrence:{app_id:l.germline_cnv_occurrence,aggregations:[]},admin:{admin_code:"admin",app_id:l.admin},portal:{name:"",navigation:{}}},An={title:"Paginations/Pagination",component:c,decorators:[a=>n.jsx(mn,{children:n.jsx(Pn,{config:ln,children:n.jsx(a,{className:"w-full"})})})],parameters:{layout:"centered"}},d={render:()=>n.jsx(c,{children:n.jsxs(P,{children:[n.jsx(i,{children:n.jsx(e,{children:"1"})}),n.jsx(i,{children:n.jsx(e,{children:"2"})}),n.jsx(i,{children:n.jsx(e,{children:"3"})})]})})},x={render:()=>n.jsx(C,{})},h={render:()=>n.jsx(L,{})},p={render:()=>n.jsx(S,{})},u={render:()=>n.jsx(f,{})},j={render:()=>n.jsx(r,{})},I={render:()=>n.jsx(N,{pageSize:20,onPageSizeChange:()=>{}})},k={render:()=>n.jsxs("div",{className:"space-y-8",children:[n.jsxs("div",{children:[n.jsx("h3",{className:"text-sm font-medium mb-2",children:"Basic Pagination"}),n.jsx(c,{children:n.jsxs(P,{children:[n.jsx(i,{children:n.jsx(e,{children:"1"})}),n.jsx(i,{children:n.jsx(e,{isActive:!0,children:"2"})}),n.jsx(i,{children:n.jsx(e,{children:"3"})}),n.jsx(i,{children:n.jsx(e,{children:"4"})}),n.jsx(i,{children:n.jsx(e,{children:"5"})})]})})]}),n.jsxs("div",{children:[n.jsx("h3",{className:"text-sm font-medium mb-2",children:"Pagination with Navigation"}),n.jsx(c,{children:n.jsxs(P,{children:[n.jsx(i,{children:n.jsx(C,{})}),n.jsx(i,{children:n.jsx(S,{})}),n.jsx(i,{children:n.jsx(r,{})}),n.jsx(i,{children:n.jsx(e,{children:"4"})}),n.jsx(i,{children:n.jsx(e,{isActive:!0,children:"5"})}),n.jsx(i,{children:n.jsx(e,{children:"6"})}),n.jsx(i,{children:n.jsx(r,{})}),n.jsx(i,{children:n.jsx(f,{})}),n.jsx(i,{children:n.jsx(L,{})})]})})]}),n.jsxs("div",{children:[n.jsx("h3",{className:"text-sm font-medium mb-2",children:"Complete Pagination Example"}),n.jsxs("div",{className:"flex items-center justify-between",children:[n.jsxs("div",{className:"flex items-center gap-2",children:[n.jsx("span",{className:"text-sm text-muted-foreground",children:"Showing 21-40"}),n.jsx("span",{className:"text-sm text-muted-foreground",children:"of 1,234 results"})]}),n.jsx(c,{children:n.jsxs(P,{children:[n.jsx(i,{children:n.jsx(N,{pageSize:20,onPageSizeChange:()=>{}})}),n.jsx(i,{children:n.jsx(C,{})}),n.jsx(i,{children:n.jsx(S,{})}),n.jsx(i,{children:n.jsx(e,{children:"1"})}),n.jsx(i,{children:n.jsx(r,{})}),n.jsx(i,{children:n.jsx(e,{children:"4"})}),n.jsx(i,{children:n.jsx(e,{isActive:!0,children:"5"})}),n.jsx(i,{children:n.jsx(e,{children:"6"})}),n.jsx(i,{children:n.jsx(r,{})}),n.jsx(i,{children:n.jsx(e,{children:"62"})}),n.jsx(i,{children:n.jsx(f,{})}),n.jsx(i,{children:n.jsx(L,{})})]})})]})]})]})},v={render:()=>{const[a,an]=b.useState(5),[m,tn]=b.useState(20),t=62,z=1234,sn=(a-1)*m+1,on=Math.min(a*m,z),o=s=>{an(Math.max(1,Math.min(s,t)))},rn=()=>{const s=[];{s.push(n.jsx(i,{children:n.jsx(e,{isActive:a===1,onClick:()=>o(1),children:"1"})},1)),a>3&&s.push(n.jsx(i,{children:n.jsx(r,{})},"ellipsis1"));const gn=Math.max(2,a-1),cn=Math.min(t-1,a+1);for(let g=gn;g<=cn;g++)s.push(n.jsx(i,{children:n.jsx(e,{isActive:g===a,onClick:()=>o(g),children:g})},g));a<t-2&&s.push(n.jsx(i,{children:n.jsx(r,{})},"ellipsis2")),s.push(n.jsx(i,{children:n.jsx(e,{isActive:t===a,onClick:()=>o(t),children:t})},t))}return s};return n.jsxs("div",{className:"space-y-4",children:[n.jsxs("div",{className:"text-center",children:[n.jsxs("p",{className:"text-sm text-muted-foreground",children:["Current Page: ",a," | Page Size: ",m," | Total Pages: ",t]}),n.jsxs("p",{className:"text-sm text-muted-foreground",children:["Showing ",sn,"-",on," of ",z," results"]})]}),n.jsx(c,{children:n.jsxs(P,{children:[n.jsx(i,{children:n.jsx(C,{onClick:()=>o(1)})}),n.jsx(i,{children:n.jsx(S,{onClick:()=>o(a-1)})}),rn(),n.jsx(i,{children:n.jsx(f,{onClick:()=>o(a+1)})}),n.jsx(i,{children:n.jsx(L,{onClick:()=>o(t)})})]})}),n.jsx("div",{className:"flex justify-center",children:n.jsx(N,{pageSize:m,onPageSizeChange:tn,pageSizeOptions:[10,20,50,100]})})]})}};var w,y,_;d.parameters={...d.parameters,docs:{...(w=d.parameters)==null?void 0:w.docs,source:{originalSource:`{
+  render: () => <Pagination>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationLink>1</PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink>2</PaginationLink>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink>3</PaginationLink>
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+}`,...(_=(y=d.parameters)==null?void 0:y.docs)==null?void 0:_.source}}};var A,E,M;x.parameters={...x.parameters,docs:{...(A=x.parameters)==null?void 0:A.docs,source:{originalSource:`{
+  render: () => <PaginationFirst />
+}`,...(M=(E=x.parameters)==null?void 0:E.docs)==null?void 0:M.source}}};var R,F,B;h.parameters={...h.parameters,docs:{...(R=h.parameters)==null?void 0:R.docs,source:{originalSource:`{
+  render: () => <PaginationLast />
+}`,...(B=(F=h.parameters)==null?void 0:F.docs)==null?void 0:B.source}}};var O,T,V;p.parameters={...p.parameters,docs:{...(O=p.parameters)==null?void 0:O.docs,source:{originalSource:`{
+  render: () => <PaginationPrevious />
+}`,...(V=(T=p.parameters)==null?void 0:T.docs)==null?void 0:V.source}}};var W,q,D;u.parameters={...u.parameters,docs:{...(W=u.parameters)==null?void 0:W.docs,source:{originalSource:`{
+  render: () => <PaginationNext />
+}`,...(D=(q=u.parameters)==null?void 0:q.docs)==null?void 0:D.source}}};var G,H,J;j.parameters={...j.parameters,docs:{...(G=j.parameters)==null?void 0:G.docs,source:{originalSource:`{
+  render: () => <PaginationEllipsis />
+}`,...(J=(H=j.parameters)==null?void 0:H.docs)==null?void 0:J.source}}};var K,Q,U;I.parameters={...I.parameters,docs:{...(K=I.parameters)==null?void 0:K.docs,source:{originalSource:`{
+  render: () => <PaginationPageSize pageSize={20} onPageSizeChange={() => {}} />
+}`,...(U=(Q=I.parameters)==null?void 0:Q.docs)==null?void 0:U.source}}};var X,Y,Z;k.parameters={...k.parameters,docs:{...(X=k.parameters)==null?void 0:X.docs,source:{originalSource:`{
+  render: () => <div className="space-y-8">
+      {/* Basic pagination with numbers */}
+      <div>
+        <h3 className="text-sm font-medium mb-2">Basic Pagination</h3>
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationLink>1</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink isActive>2</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>3</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>4</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>5</PaginationLink>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+
+      {/* Pagination with navigation buttons */}
+      <div>
+        <h3 className="text-sm font-medium mb-2">Pagination with Navigation</h3>
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationFirst />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationPrevious />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>4</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink isActive>5</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>6</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLast />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-medium mb-2">Complete Pagination Example</h3>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Showing 21-40</span>
+            <span className="text-sm text-muted-foreground">of 1,234 results</span>
+          </div>
+
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPageSize pageSize={20} onPageSizeChange={() => {}} />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationFirst />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationPrevious />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink>1</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink>4</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink isActive>5</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink>6</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink>62</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLast />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </div>
+    </div>
+}`,...(Z=(Y=k.parameters)==null?void 0:Y.docs)==null?void 0:Z.source}}};var $,nn,en;v.parameters={...v.parameters,docs:{...($=v.parameters)==null?void 0:$.docs,source:{originalSource:`{
+  render: () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [currentPage, setCurrentPage] = React.useState(5);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [pageSize, setPageSize] = React.useState(20);
+    const totalPages = 62;
+    const totalResults = 1234;
+    const startItem = (currentPage - 1) * pageSize + 1;
+    const endItem = Math.min(currentPage * pageSize, totalResults);
+    const handlePageChange = (page: number) => {
+      setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    };
+    const renderPageNumbers = () => {
+      const pages = [];
+      const maxVisiblePages = 5;
+      if (totalPages <= maxVisiblePages) {
+        // Show all pages if total is small
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(<PaginationItem key={i}>
+              <PaginationLink isActive={i === currentPage} onClick={() => handlePageChange(i)}>
+                {i}
+              </PaginationLink>
+            </PaginationItem>);
+        }
+      } else {
+        // Show first page
+        pages.push(<PaginationItem key={1}>
+            <PaginationLink isActive={1 === currentPage} onClick={() => handlePageChange(1)}>
+              1
+            </PaginationLink>
+          </PaginationItem>);
+
+        // Show ellipsis if needed
+        if (currentPage > 3) {
+          pages.push(<PaginationItem key="ellipsis1">
+              <PaginationEllipsis />
+            </PaginationItem>);
+        }
+
+        // Show current page and neighbors
+        const start = Math.max(2, currentPage - 1);
+        const end = Math.min(totalPages - 1, currentPage + 1);
+        for (let i = start; i <= end; i++) {
+          pages.push(<PaginationItem key={i}>
+              <PaginationLink isActive={i === currentPage} onClick={() => handlePageChange(i)}>
+                {i}
+              </PaginationLink>
+            </PaginationItem>);
+        }
+
+        // Show ellipsis if needed
+        if (currentPage < totalPages - 2) {
+          pages.push(<PaginationItem key="ellipsis2">
+              <PaginationEllipsis />
+            </PaginationItem>);
+        }
+
+        // Show last page
+        pages.push(<PaginationItem key={totalPages}>
+            <PaginationLink isActive={totalPages === currentPage} onClick={() => handlePageChange(totalPages)}>
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>);
+      }
+      return pages;
+    };
+    return <div className="space-y-4">
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">
+            Current Page: {currentPage} | Page Size: {pageSize} | Total Pages: {totalPages}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Showing {startItem}-{endItem} of {totalResults} results
+          </p>
+        </div>
+
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationFirst onClick={() => handlePageChange(1)} />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
+            </PaginationItem>
+
+            {renderPageNumbers()}
+
+            <PaginationItem>
+              <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLast onClick={() => handlePageChange(totalPages)} />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+
+        <div className="flex justify-center">
+          <PaginationPageSize pageSize={pageSize} onPageSizeChange={setPageSize} pageSizeOptions={[10, 20, 50, 100]} />
+        </div>
+      </div>;
+  }
+}`,...(en=(nn=v.parameters)==null?void 0:nn.docs)==null?void 0:en.source}}};const En=["ContainerWithNumbers","First","Last","Previous","Next","Ellipsis","PageSize","CompletePagination","InteractivePagination"];export{k as CompletePagination,d as ContainerWithNumbers,j as Ellipsis,x as First,v as InteractivePagination,h as Last,u as Next,I as PageSize,p as Previous,En as __namedExportsOrder,An as default};
