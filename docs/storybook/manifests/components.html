@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/76 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">66/76 infos</a><span class="filter-pill ok" aria-disabled="true">201 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/76 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">66/76 infos</a><span class="filter-pill ok" aria-disabled="true">203 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>5.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>5.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7781,11 +7781,11 @@ import { X } from "lucide-react";</code></pre>
       <div class="badges">
         <label for="c-38-sliders-occurrences-germline-props" class="badge ok as-toggle">10 prop types</label>
         <label for="c-38-sliders-occurrences-germline-info" class="badge info as-toggle">1 info</label>
-        <label for="c-38-sliders-occurrences-germline-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-38-sliders-occurrences-germline-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./stories/sliders/slider-germline-occurrence.stories.tsx">sliders-occurrences-germline · ./stories/sliders/slider-germline-occurrence.stories.tsx</div>
+    <div class="meta" title="./stories/sliders/slider-germline-occurrence-sheet.stories.tsx">sliders-occurrences-germline · ./stories/sliders/slider-germline-occurrence-sheet.stories.tsx</div>
     
     
     
@@ -7848,12 +7848,7 @@ setOpen: (open: boolean) =&gt; void</code></pre>
                   <span class="ex-name">Imports</span>
                 </div>
                 <pre><code>import { BrowserRouter } from "react-router-dom";
-import {
-    Button,
-    ConfigProvider,
-    FetchOccurrencesListContext,
-    GermlineOccurrenceSheet,
-} from "case";</code></pre>
+import { ConfigProvider, FetchOccurrencesListContext, GermlineOccurrenceSheet } from "case";</code></pre>
               </div>
           
           
@@ -7865,36 +7860,85 @@ import {
               
               
               <pre><code>const Default = () =&gt; &lt;GermlineOccurrenceSheet
-    occurrence={{
-      seq_id: 1,
-      task_id: 1,
-      chromosome: &#39;1&#39;,
-      start: 192392792,
-      locus_id: &#39;-1111111111111111111&#39;,
-      locus: &#39;1-192392792-C-G&#39;,
-      genotype_quality: 99,
-      zygosity: &#39;HET&#39;,
-      germline_pf_wgs: 0.07142857142857142,
-      gnomad_v3_af: 0.00813917,
-      hgvsg: &#39;chr1:g.192392792C&gt;G&#39;,
-      ad_ratio: 0.5714286,
-      variant_class: &#39;SNV&#39;,
-      vep_impact: &#39;HIGH&#39;,
-      is_mane_select: false,
-      is_mane_plus: false,
-      is_canonical: false,
-      rsnumber: &#39;rs72732972&#39;,
-      picked_consequences: [&#39;splice_donor_variant&#39;, &#39;non_coding_transcript_variant&#39;],
-      transcript_id: &#39;ENST00000643151&#39;,
-      max_impact_score: 4,
-      has_interpretation: false,
-      has_note: false,
-      exomiser_moi: &#39;&#39;,
-      exomiser_acmg_classification: &#39;&#39;,
-      exomiser_acmg_evidence: [],
-      exomiser_variant_score: 0,
-      exomiser_gene_combined_score: 0,
+    occurrence={occurrenceMock}
+    open
+    setOpen={() =&gt; {
+      console.warn(&#39;setOpen&#39;);
     }}
+    onPrevious={() =&gt; {
+      console.warn(&#39;onPrevious&#39;);
+    }}
+    onNext={() =&gt; {
+      console.warn(&#39;onNext&#39;);
+    }}
+    hasPrevious={false}
+    hasNext={false}
+    patientSelected={{
+      seq_id: 1,
+      patient_id: 3,
+      relationship_to_proband: &#39;proband&#39;,
+      sample_id: 1,
+      sample_submitter_id: &#39;S13224&#39;,
+      sample_type_code: &#39;dna&#39;,
+      affected_status_code: &#39;affected&#39;,
+      histology_code: &#39;normal&#39;,
+      experimental_strategy_code: &#39;wgs&#39;,
+      status_code: &#39;completed&#39;,
+      updated_on: &#39;2021-10-12T13:08:00Z&#39;,
+      has_variants: true,
+    }}
+    onInterpretationSaved={() =&gt; {
+      console.warn(&#39;onInterpretationSaved&#39;);
+    }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Interpretation</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const Interpretation = () =&gt; &lt;GermlineOccurrenceSheet
+    occurrence={{ ...occurrenceMock, has_interpretation: true }}
+    open
+    setOpen={() =&gt; {
+      console.warn(&#39;setOpen&#39;);
+    }}
+    onPrevious={() =&gt; {
+      console.warn(&#39;onPrevious&#39;);
+    }}
+    onNext={() =&gt; {
+      console.warn(&#39;onNext&#39;);
+    }}
+    hasPrevious={false}
+    hasNext={false}
+    patientSelected={{
+      seq_id: 1,
+      patient_id: 3,
+      relationship_to_proband: &#39;proband&#39;,
+      sample_id: 1,
+      sample_submitter_id: &#39;S13224&#39;,
+      sample_type_code: &#39;dna&#39;,
+      affected_status_code: &#39;affected&#39;,
+      histology_code: &#39;normal&#39;,
+      experimental_strategy_code: &#39;wgs&#39;,
+      status_code: &#39;completed&#39;,
+      updated_on: &#39;2021-10-12T13:08:00Z&#39;,
+      has_variants: true,
+    }}
+    onInterpretationSaved={() =&gt; {
+      console.warn(&#39;onInterpretationSaved&#39;);
+    }} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Relationship To Proband</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const RelationshipToProband = () =&gt; &lt;GermlineOccurrenceSheet
+    occurrence={occurrenceMock}
     open
     setOpen={() =&gt; {
       console.warn(&#39;setOpen&#39;);
@@ -7910,11 +7954,11 @@ import {
     patientSelected={{
       seq_id: 1,
       patient_id: 1,
-      relationship_to_proband: &#39;proband&#39;,
-      sample_id: 1,
-      sample_submitter_id: &#39;S11111&#39;,
-      sample_type_code: &#39;dna&#39;,
+      relationship_to_proband: &#39;mother&#39;,
       affected_status_code: &#39;affected&#39;,
+      sample_id: 1,
+      sample_submitter_id: &#39;S13224&#39;,
+      sample_type_code: &#39;dna&#39;,
       histology_code: &#39;normal&#39;,
       experimental_strategy_code: &#39;wgs&#39;,
       status_code: &#39;completed&#39;,
@@ -7923,7 +7967,7 @@ import {
     }}
     onInterpretationSaved={() =&gt; {
       console.warn(&#39;onInterpretationSaved&#39;);
-    }}&gt;&lt;Button&gt;Open&lt;/Button&gt;&lt;/GermlineOccurrenceSheet&gt;;</code></pre>
+    }} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -11608,12 +11652,12 @@ selectedItemId?: string | null</code></pre>
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="SliderSomaticOccurrenceSheet">
+  aria-label="SomaticOccurrenceSheetContent">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> SliderSomaticOccurrenceSheet</h2>
+      <h2><span class="status-dot dot-ok"></span> SomaticOccurrenceSheetContent</h2>
       <div class="badges">
-        <label for="c-62-sliders-occurrences-somatic-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-62-sliders-occurrences-somatic-props" class="badge ok as-toggle">6 prop types</label>
         <label for="c-62-sliders-occurrences-somatic-info" class="badge info as-toggle">1 info</label>
         <label for="c-62-sliders-occurrences-somatic-stories" class="badge ok as-toggle">1 story</label>
         
@@ -11647,11 +11691,19 @@ selectedItemId?: string | null</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">2 prop types</span>
+              <span class="badge ok">6 prop types</span>
             </div>
-            <pre><code>Component: ../apps/case/src/entity/variants/somatic-occurrence/sliders/slider-somatic-occurrence-sheet.tsx::default</code></pre>
+            <pre><code>Component: ../apps/case/src/entity/variants/somatic-occurrence/sliders/slider-somatic-occurrence-sheet.tsx::SomaticOccurrenceSheetContent</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>children?: React.ReactElement
+            <pre><code>hasNext?: boolean
+
+hasPrevious?: boolean
+
+occurrence: SomaticSNVOccurrence
+
+onNext?: () =&gt; void
+
+onPrevious?: () =&gt; void
 
 patientSelected?: CaseSequencingExperiment</code></pre>
           </div>
@@ -11666,7 +11718,7 @@ patientSelected?: CaseSequencingExperiment</code></pre>
                   <span class="ex-name">Imports</span>
                 </div>
                 <pre><code>import { BrowserRouter } from "react-router-dom";
-import { ConfigProvider, SliderSomaticOccurrenceSheet } from "case";</code></pre>
+import { ConfigProvider, SliderSheet, SomaticOccurrenceSheetContent } from "case";</code></pre>
               </div>
           
           
@@ -11677,7 +11729,32 @@ import { ConfigProvider, SliderSomaticOccurrenceSheet } from "case";</code></pre
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;SliderSomaticOccurrenceSheet /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;SliderSheet open&gt;
+    &lt;SomaticOccurrenceSheetContent
+        occurrence={occurrenceMock}
+        onPrevious={() =&gt; {
+          console.warn(&#39;onPrevious&#39;);
+        }}
+        onNext={() =&gt; {
+          console.warn(&#39;onNext&#39;);
+        }}
+        hasPrevious={false}
+        hasNext={false}
+        patientSelected={{
+          seq_id: 1,
+          patient_id: 1,
+          relationship_to_proband: &#39;proband&#39;,
+          sample_id: 1,
+          sample_submitter_id: &#39;S11111&#39;,
+          sample_type_code: &#39;dna&#39;,
+          affected_status_code: &#39;affected&#39;,
+          histology_code: &#39;normal&#39;,
+          experimental_strategy_code: &#39;wgs&#39;,
+          status_code: &#39;completed&#39;,
+          updated_on: &#39;2021-10-12T13:08:00Z&#39;,
+          has_variants: true,
+        }} /&gt;
+&lt;/SliderSheet&gt;;</code></pre>
             </div>
         </div>
     
