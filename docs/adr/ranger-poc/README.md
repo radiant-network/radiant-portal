@@ -1,8 +1,8 @@
-# StarRocks + Apache Ranger POC
+# StarRocks + Apache Ranger POC (Auth Tables)
 
-Proof-of-concept for using Apache Ranger as a **single source of truth** for both data access (StarRocks row-filtering + column masking) and portal action authorization (org-scoped and tenant-scoped).
+Proof-of-concept where the **authorization model lives in StarRocks tables** and **Ranger enforces data access** via generic, subquery-based policies. Adding or removing a user's role is a simple `INSERT`/`DELETE` in `auth_db` -- no Ranger policy changes needed.
 
-Related ADR: [../multi-tenancy-security.md](../multi-tenancy-security.md) (Option B -- Ranger Full Push-Down).
+Related ADR: [../multi-tenancy-security.md](../multi-tenancy-security.md)
 
 ## Architecture
 
@@ -12,14 +12,15 @@ graph LR
         RDB[(ranger-db<br/>PostgreSQL)]
         R[ranger<br/>Admin :6080]
         SR[starrocks<br/>FE :9030<br/>access_control=ranger]
-        API[poc-api<br/>:8080<br/>polls Ranger]
+        API[poc-api<br/>:8080]
+        AUTH[(auth_db<br/>in StarRocks)]
     end
 
     RDB --> R
-    SR -- "polls starrocks<br/>policies / 10s" --> R
-    API -- "polls radiant_portal<br/>policies / 10s" --> R
-    API -- "polls user→role<br/>mapping / 30s" --> R
-    API -- "queries as<br/>SR user" --> SR
+    SR -- "polls generic<br/>policies / 10s" --> R
+    API -- "queries auth<br/>tables" --> SR
+    API -- "queries data<br/>as user" --> SR
+    SR -- "row-filter/mask<br/>subqueries" --> AUTH
     User([curl / browser]) --> API
 ```
 
@@ -28,119 +29,130 @@ graph LR
 | `ranger-db` | `apache/ranger-db:2.7.0` | - | PostgreSQL for Ranger metadata |
 | `ranger` | `apache/ranger:2.7.0` | 6080 | Ranger Admin UI + policy REST API |
 | `starrocks` | `starrocks/allin1-ubuntu:3.5.0` | 9030, 8030 | StarRocks with `access_control = ranger` |
-| `poc-api` | Built from `./api` | 8080 | Go API evaluating Ranger portal policies |
+| `poc-api` | Built from `./api` | 8080 | Go API (queries auth tables, no Ranger polling) |
 
-## Two Ranger Services, One Set of Roles
+## How It Works
 
-```mermaid
-graph TB
-    subgraph "Ranger (single source of truth)"
-        subgraph "Service: starrocks"
-            SR_P["Row filter: tenant isolation<br/>+ submitter org restriction<br/>Column mask: PII per org"]
-        end
-        subgraph "Service: radiant_portal"
-            P_ORG["Org-scoped: create, edit,<br/>interpret, assign, generate...<br/>(tenant > org > resource)"]
-            P_NET["Tenant-scoped: search,<br/>view, invite, manage...<br/>(tenant > * > resource)"]
-        end
-    end
+### Authorization Model (auth_db)
 
-    subgraph "Shared Roles"
-        R1["role_cbtn_submitter_chop"]
-        R2["role_cbtn_analyst_chop"]
-        R3["role_cbtn_analyst_seattle"]
-        R4["role_cbtn_tenant_manager"]
-    end
-
-    R1 --> SR_P
-    R1 --> P_ORG
-    R2 --> SR_P
-    R2 --> P_ORG
-    R2 --> P_NET
-    R3 --> SR_P
-    R3 --> P_ORG
-    R3 --> P_NET
-    R4 --> SR_P
-    R4 --> P_NET
-```
-
-### Service: `starrocks`
-
-Controls **data access** -- which rows a user sees, which columns are masked. Enforced by the StarRocks FE Ranger plugin.
-
-### Service: `radiant_portal`
-
-Controls **portal actions** -- who can create cases, interpret variants, invite users, etc. Enforced by the POC Go API which polls and evaluates policies locally.
-
-Resource hierarchy: **`tenant > organization > resource`**
-
-- **Org-scoped** actions (create case, interpret variant, assign, generate report): policy specifies the exact organization (e.g., `chop`). A CHOP analyst cannot write at Seattle.
-- **Tenant-scoped** actions (search cases, view KB, invite users): policy uses `organization = *`. Any analyst in the tenant can perform these actions.
-
-## POC API
-
-The Go API in `./api/` demonstrates how an application can use Ranger as its authorization backend without any Ranger Java library:
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant API as poc-api :8080
-    participant R as Ranger :6080
-    participant SR as StarRocks :9030
-
-    Note over API,R: On startup + every 10s/30s
-    API->>R: GET /plugins/policies/download/radiant_portal
-    R-->>API: Portal policies (cached locally)
-    API->>R: GET /public/v2/api/roles
-    R-->>API: All roles + user memberships (cached locally)
-
-    User->>API: POST /cbtn/chop/cases<br/>X-User: user_cbtn_analyst_chop
-    API->>API: 1. Lookup roles from cache → [role_cbtn_analyst_chop]
-    API->>API: 2. Evaluate cached policies:<br/>role has "create" on tenant=cbtn, org=chop, resource=case?
-    API-->>User: 200 OK (allowed)
-
-    User->>API: POST /cbtn/seattle/cases<br/>X-User: user_cbtn_analyst_chop
-    API->>API: 2. Evaluate: role has "create"<br/>on tenant=cbtn, org=seattle, resource=case?
-    API-->>User: 403 Forbidden (wrong org)
-```
-
-**Key design:**
-- **Roles are NOT hardcoded** -- fetched from Ranger via `GET /service/public/v2/api/roles` (single call, all roles + members)
-- **Policies are NOT hardcoded** -- downloaded from Ranger every 10s, evaluated locally (~50 lines of Go)
-- **Tenant and organization come from the URL path** -- not from user metadata
-- Only StarRocks credentials are hardcoded (in production: Keycloak JWT)
-
-### URL Pattern
+The source of truth for "who can do what" lives in StarRocks tables:
 
 ```
-/{tenant}/{resource-path}              → tenant-scoped (no org)
-/{tenant}/{organization}/{resource-path} → org-scoped
+auth_db.users              - identity registry
+auth_db.tenant             - tenant definitions
+auth_db.organization       - organizations within tenants
+auth_db.user_tenant_role   - tenant-scoped role assignments
+auth_db.user_org_role      - organization-scoped role assignments
 ```
 
-The API detects the scope by checking if the second path segment is a known resource (`cases`, `reports`, `users`, `kb`, `projects`). If it is, the request is tenant-scoped. Otherwise, it's treated as an organization.
+### Role Hierarchy
 
-| Example | Scope | Action |
-|---------|-------|--------|
-| `GET /cbtn/cases` | Tenant | Search cases across CBTN |
-| `POST /cbtn/chop/cases` | Org | Create case at CHOP |
-| `GET /cbtn/chop/cases/1/interpret` | Org | Interpret variant (CHOP case) |
-| `POST /cbtn/chop/reports/generate` | Org | Generate report (CHOP case) |
-| `POST /cbtn/users/invite` | Tenant | Invite user to CBTN |
+**Org chain** (scoped to one organization):
+```
+org_member   - read PHI for this org
+org_editor   - + create/edit/delete operational data at this org
+org_admin    - + manage users at this org
+org_owner    - + manage org_admins
+```
 
-### How Policies Are Evaluated
+**Tenant chain** (scoped to all organizations in a tenant):
+```
+tenant_member  - read de-identified data across all orgs (PHI masked)
+tenant_admin   - + PHI unmasked everywhere + write anywhere + manage orgs
+tenant_owner   - + delete orgs + manage tenant_admins
+```
 
-The API downloads the full `radiant_portal` policy set from Ranger every 10s. On each request it checks:
+Any org role implies `tenant_member` in the containing tenant.
 
-> Does any of the user's roles have the required **access type** on the required **tenant + organization + resource**?
+### Data Access (Ranger + auth_db subqueries)
 
-This is a simple in-memory lookup over the cached policy JSON -- no remote call per request.
+Ranger holds ~11 **generic** policies (not per-user). All policies reference a single `role_authenticated` Ranger role containing all users. The policies use `IN(SELECT ...)` subqueries against auth tables:
 
-## How StarRocks Communicates with Ranger
+**Access policies** (policyType=0):
 
-StarRocks FE embeds a Ranger plugin that polls Ranger Admin for the `starrocks` service policies:
+| Policy | Database | Permissions |
+|--------|----------|-------------|
+| `sr_select_auth` | auth_db | SELECT |
+| `sr_select_clinical` | poc_db | SELECT |
+| `sr_access_operational` | operational_db | SELECT, INSERT |
 
-- Downloads the **entire policy set** and evaluates locally per query
-- **Unauthenticated** in this POC; production would add basic auth in `ranger-starrocks-security.xml`
-- If Ranger is down, StarRocks uses **last cached policies**
+**Row-filter policies** (policyType=2) -- auth table isolation:
+
+| Policy | Table | Filter |
+|--------|-------|--------|
+| `sr_rowfilter_user_tenant_role` | auth_db.user_tenant_role | `username = current_user()` |
+| `sr_rowfilter_user_org_role` | auth_db.user_org_role | `username = current_user()` |
+| `sr_rowfilter_users` | auth_db.users | `username = current_user()` |
+
+Users can only see their own rows in auth tables. `auth_db.tenant` and `auth_db.organization` are reference data with no row filter.
+
+**Row-filter policies** (policyType=2) -- data tenant isolation:
+
+| Policy | Table | Filter |
+|--------|-------|--------|
+| `sr_rowfilter_patients` | poc_db.patients | `tenant_id IN (SELECT tenant_id FROM auth_db.user_tenant_role WHERE username=...)` |
+| `sr_rowfilter_cases` | operational_db.cases | Same tenant isolation |
+
+**Column masking policies** (policyType=1):
+
+| Policy | Column | Mask expression |
+|--------|--------|----------------|
+| `sr_mask_mrn` | mrn | `CASE WHEN org_id IN (SELECT org_id FROM user_org_role WHERE ...) OR tenant_id IN (SELECT ... WHERE role IN ('tenant_admin','tenant_owner')) THEN col ELSE '***'` |
+| `sr_mask_first_name` | first_name | Same pattern |
+| `sr_mask_dob` | date_of_birth | Same pattern, masked to year-only |
+
+**Note**: Ranger groups do NOT work with StarRocks Ranger plugin (role membership is resolved, group membership is not). All generic policies use a single `role_authenticated` Ranger role.
+
+### Portal Action Authorization (Go API + auth_db)
+
+The Go API queries auth tables directly for authorization. No Ranger portal service needed.
+
+```
+Permission matrix (hardcoded in Go API):
+  org_editor+ at org       - create/edit/delete case, interpret variant, generate report, download file
+  tenant_member+ at tenant - search/view cases, search/view kb
+  tenant_admin+ at tenant  - all org_editor actions at ANY org + manage projects/users/etc.
+```
+
+## Test Users
+
+| User | Password | Tenant Roles | Org Roles |
+|------|----------|-------------|-----------|
+| `jane` | `janepass` | tenant_member(cbtn) | org_member(chop), org_member(bch) |
+| `alice` | `alicepass` | tenant_member(cbtn) | org_member(chop) |
+| `bob` | `bobpass` | tenant_owner(cbtn) | _(none, implied by tenant_owner)_ |
+| `carol` | `carolpass` | tenant_member(cbtn), tenant_member(udn) | org_member(chop) |
+| `dan` | `danpass` | tenant_member(cbtn) | _(none)_ |
+
+## Expected Test Matrix
+
+| Patient row | Jane | Alice | Bob | Carol | Dan |
+|-------------|------|-------|-----|-------|-----|
+| **CHOP** (cbtn) | Full | Full | Full | Full | Masked |
+| **BCH** (cbtn) | Full | Masked | Full | Masked | Masked |
+| **NIH-UDN** (udn) | Invisible | Invisible | Invisible | Masked | Invisible |
+
+- **Full** = row visible, PHI (first_name, mrn, date_of_birth) unmasked
+- **Masked** = row visible, PHI replaced with `***` / year-only date
+- **Invisible** = row not returned (user has no tenant role)
+
+## Data Model
+
+### Clinical: `poc_db.patients` (read-only for humans)
+
+| id | first_name | mrn | date_of_birth | tenant_id | org_id |
+|----|-----------|-----|---------------|-----------|--------|
+| 1-3 | Patient_A..C | MRN-CHOP-001..003 | various | cbtn | chop |
+| 4-5 | Patient_D..E | MRN-BCH-001..002 | various | cbtn | bch |
+| 6-7 | Patient_F..G | MRN-NIH-001..002 | various | udn | nih-udn |
+
+### Operational: `operational_db.cases` (writable by humans with roles)
+
+| case_id | case_name | tenant_id | org_id |
+|---------|-----------|-----------|--------|
+| 1-2 | Case-CHOP-001..002 | cbtn | chop |
+| 3 | Case-BCH-001 | cbtn | bch |
+| 4 | Case-NIH-001 | udn | nih-udn |
 
 ## Quick Start
 
@@ -152,171 +164,135 @@ docker compose up -d --build
 docker compose logs -f init
 ```
 
-Wait until it prints "All Ranger roles and policies created!" (~2-3 minutes).
+Wait until it prints "Auth-Tables POC initialization complete!" (~2-3 minutes).
 
-## User & Role Management
+## POC API Endpoints
 
-**Naming convention:**
-- `user_*` -- users (exist in both StarRocks and Ranger)
-- `role_*` -- roles (exist only in Ranger, shared across both services)
-
-| System | What | Why |
-|--------|------|-----|
-| **StarRocks** | `CREATE USER ... IDENTIFIED BY '...'` | Authentication |
-| **Ranger** | User stub via `POST /xusers/secure/users` | Ranger needs the name to assign it to a role |
-| **Ranger** | Roles via `POST /public/v2/api/roles` | Policies reference roles. Users inherit permissions via membership. |
-
-### Test Users
-
-| User | Password | Role | Persona |
-|------|----------|------|---------|
-| `user_cbtn_submitter_chop` | `submitterpass` | `role_cbtn_submitter_chop` | Submitter at CHOP |
-| `user_cbtn_analyst_chop` | `analystchoppass` | `role_cbtn_analyst_chop` | Analyst at CHOP |
-| `user_cbtn_analyst_seattle` | `analystseattlepass` | `role_cbtn_analyst_seattle` | Analyst at Seattle |
-| `user_cbtn_tenant_manager` | `tenantmanagerpass` | `role_cbtn_tenant_manager` | Tenant manager for CBTN |
-
-## Permissions Matrix
-
-From the [Notion Role & Security doc](https://www.notion.so/ferlab/Role-and-Security-33eb0fcecb3d8080b746ef12aa3dccfc):
-
-| Action | Scope | submitter | analyst | tenant_manager |
-|--------|-------|-----------|---------|-----------------|
-| Create/edit/delete case | org | Y | Y | - |
-| Search/view cases | tenant | - | Y | - |
-| Interpret variant | org | - | Y | - |
-| Assign case | org | - | Y | - |
-| Generate report | org | - | Y | - |
-| Download file | org | - | Y | - |
-| Knowledge base search | tenant | - | Y | - |
-| Create projects | tenant | - | - | Y |
-| Invite users | tenant | - | - | Y |
-| Manage code systems/gene panels | tenant | - | - | Y |
-
-**Org-scoped** = action restricted to the user's organization.
-**Tenant-scoped** = action available across all organizations in the tenant.
-
-## Data Model
-
-| id | first_name | mrn | date_of_birth | tenant | organization |
-|----|-----------|-----|---------------|--------|-------------|
-| 1-3 | Alice, Bob, Charlie | MRN-000001..3 | various | cbtn | chop |
-| 4-5 | Diana, Eve | MRN-000004..5 | various | cbtn | seattle |
-| 6-7 | Frank, Grace | MRN-000006..7 | various | udp | nih |
-| 8-9 | Hank, Ivy | MRN-000008..9 | various | udp | duke |
-
-## StarRocks Data Policies
-
-| Policy | Type | What it does |
+| Method | Path | Description |
 |--------|------|-------------|
-| `sr_select_patients` | Access (0) | Grants SELECT to all roles |
-| `sr_rowfilter_patients` | Row-filter (2) | Submitter: `tenant='cbtn' AND organization='chop'`; Analysts/NM: `tenant='cbtn'` |
-| `sr_mask_mrn` | Masking (1) | CHOP analyst: chop=full, others=`***`. Seattle analyst: seattle=full, others=`***` |
-| `sr_mask_dob` | Masking (1) | Same pattern for date_of_birth (year-only for other orgs) |
+| GET | `/health` | Health check |
+| GET | `/auth/me` | User's roles from auth tables |
+| GET | `/{tenant}/patients` | Read patients (Ranger row-filter + masking) |
+| GET | `/{tenant}/cases` | Read cases (Ranger row-filter) |
+| POST | `/{tenant}/{org}/cases` | Create case (write scope enforced) |
+| POST | `/admin/grant-org-role` | Grant org role (INSERT into auth_db) |
+| POST | `/admin/revoke-org-role` | Revoke org role (DELETE from auth_db) |
+
+All endpoints (except `/health`, `/auth/me`, `/admin/*`) require `X-User` header.
 
 ## Verify
 
-### Portal action authorization
+### 1. Full test matrix (direct StarRocks)
 
 ```bash
-# Org-scoped: CHOP analyst creates case at CHOP → 200
-curl -s -H "X-User: user_cbtn_analyst_chop" -X POST http://localhost:8080/cbtn/chop/cases | jq
+# Jane: org_member at ALL cbtn orgs -> CBTN visible, ALL PHI unmasked
+mysql -h127.0.0.1 -P9030 -ujane -pjanepass \
+  -e 'SELECT id, first_name, mrn, date_of_birth, org_id FROM poc_db.patients ORDER BY id;'
+# -> 5 CBTN rows, all PHI visible
 
-# Org-scoped: CHOP analyst creates case at SEATTLE → 403 (wrong org)
-curl -s -H "X-User: user_cbtn_analyst_chop" -X POST http://localhost:8080/cbtn/seattle/cases | jq
+# Alice: org_member at CHOP only -> CBTN visible, CHOP full, BCH masked
+mysql -h127.0.0.1 -P9030 -ualice -palicepass \
+  -e 'SELECT id, first_name, mrn, date_of_birth, org_id FROM poc_db.patients ORDER BY id;'
+# -> 5 CBTN rows. ids 1-3 (chop): full PHI. ids 4-5 (bch): ***, year-only
 
-# Org-scoped: Seattle analyst creates case at SEATTLE → 200
-curl -s -H "X-User: user_cbtn_analyst_seattle" -X POST http://localhost:8080/cbtn/seattle/cases | jq
+# Bob: tenant_owner(cbtn) -> CBTN visible, ALL PHI unmasked
+mysql -h127.0.0.1 -P9030 -ubob -pbobpass \
+  -e 'SELECT id, first_name, mrn, date_of_birth, org_id FROM poc_db.patients ORDER BY id;'
+# -> 5 CBTN rows, all PHI visible
 
-# Org-scoped: CHOP analyst interprets at CHOP → 200
-curl -s -H "X-User: user_cbtn_analyst_chop" http://localhost:8080/cbtn/chop/cases/1/interpret | jq
+# Carol: tenant_member(cbtn+udn), org_member(chop) -> 7 rows, CHOP full, rest masked
+mysql -h127.0.0.1 -P9030 -ucarol -pcarolpass \
+  -e 'SELECT id, first_name, mrn, date_of_birth, org_id FROM poc_db.patients ORDER BY id;'
+# -> 7 rows. ids 1-3 (chop): full. ids 4-5 (bch): masked. ids 6-7 (nih-udn): masked
 
-# Org-scoped: CHOP analyst interprets at SEATTLE → 403 (wrong org)
-curl -s -H "X-User: user_cbtn_analyst_chop" http://localhost:8080/cbtn/seattle/cases/1/interpret | jq
-
-# Org-scoped: Submitter creates case at CHOP → 200
-curl -s -H "X-User: user_cbtn_submitter_chop" -X POST http://localhost:8080/cbtn/chop/cases | jq
-
-# Org-scoped: Submitter creates case at SEATTLE → 403 (wrong org)
-curl -s -H "X-User: user_cbtn_submitter_chop" -X POST http://localhost:8080/cbtn/seattle/cases | jq
-
-# Tenant-scoped: Analyst searches cases → 200 + data
-curl -s -H "X-User: user_cbtn_analyst_chop" http://localhost:8080/cbtn/cases | jq
-
-# Tenant-scoped: Submitter searches → 403 (submitters can't search)
-curl -s -H "X-User: user_cbtn_submitter_chop" http://localhost:8080/cbtn/cases | jq
-
-# Tenant-scoped: Tenant manager invites → 200
-curl -s -H "X-User: user_cbtn_tenant_manager" -X POST http://localhost:8080/cbtn/users/invite | jq
-
-# Tenant-scoped: Analyst invites → 403
-curl -s -H "X-User: user_cbtn_analyst_chop" -X POST http://localhost:8080/cbtn/users/invite | jq
+# Dan: tenant_member(cbtn), no org roles -> CBTN visible, ALL PHI masked
+mysql -h127.0.0.1 -P9030 -udan -pdanpass \
+  -e 'SELECT id, first_name, mrn, date_of_birth, org_id FROM poc_db.patients ORDER BY id;'
+# -> 5 CBTN rows, all PHI masked
 ```
 
-### StarRocks data enforcement
+### 2. Write scope via API
 
 ```bash
-# Direct StarRocks: analyst at CHOP sees all CBTN, PII masked for seattle
-mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
-  -e 'SELECT id, first_name, mrn, date_of_birth, organization FROM poc_db.patients ORDER BY id;'
+# Jane (org_member at chop) cannot write (org_member < org_editor)
+curl -s -X POST -H 'X-User: jane' -H 'Content-Type: application/json' \
+  http://localhost:8080/cbtn/chop/cases -d '{"case_name":"New Case","patient_id":1}' | jq
+# -> 403
 
-# Direct StarRocks: analyst at Seattle sees all CBTN, PII masked for chop
-mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_seattle -panalystseattlepass \
-  -e 'SELECT id, first_name, mrn, date_of_birth, organization FROM poc_db.patients ORDER BY id;'
-
-# Submitter sees only CHOP rows (row-filter restricts to their org)
-mysql -h127.0.0.1 -P9030 -uuser_cbtn_submitter_chop -psubmitterpass \
-  -e 'SELECT id, first_name, mrn, date_of_birth, organization FROM poc_db.patients ORDER BY id;'
+# Bob (tenant_owner) can write anywhere in CBTN
+curl -s -X POST -H 'X-User: bob' -H 'Content-Type: application/json' \
+  http://localhost:8080/cbtn/bch/cases -d '{"case_name":"Admin Case","patient_id":4}' | jq
+# -> 200
 ```
 
-### Column masking under complex queries
-
-Masking is applied at the column-read level, **before** any SQL expression evaluates. The real value behind a mask cannot be extracted by any query pattern.
+### 3. Dynamic role change (THE KEY DEMO)
 
 ```bash
-# GROUP BY on masked column: seattle rows collapse into '***'
-mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
-  -e "SELECT mrn, COUNT(*) as cnt FROM poc_db.patients GROUP BY mrn ORDER BY mrn;"
-# → ***: 2, MRN-000001: 1, MRN-000002: 1, MRN-000003: 1
+# BEFORE: Dan sees all PHI masked
+mysql -h127.0.0.1 -P9030 -udan -pdanpass \
+  -e 'SELECT id, first_name, mrn, org_id FROM poc_db.patients ORDER BY id;'
+# -> all ***
 
-# WHERE on real value: returns nothing (mask applied before WHERE)
-mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
-  -e "SELECT id, mrn, organization FROM poc_db.patients WHERE mrn = 'MRN-000004';"
-# → empty (MRN-000004 belongs to seattle Diana, masked to '***')
+# Admin grants org_member at chop (just an INSERT!)
+curl -s -X POST -H 'Content-Type: application/json' \
+  http://localhost:8080/admin/grant-org-role \
+  -d '{"username":"dan","org_id":"chop","role":"org_member"}' | jq
 
-# WHERE on masked value: matches the masked rows
-mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
-  -e "SELECT id, mrn, organization FROM poc_db.patients WHERE mrn = '***';"
-# → rows 4,5 (seattle)
+# AFTER: CHOP PHI now unmasked! (no Ranger change happened)
+mysql -h127.0.0.1 -P9030 -udan -pdanpass \
+  -e 'SELECT id, first_name, mrn, org_id FROM poc_db.patients ORDER BY id;'
+# -> chop rows (1-3) show real PHI, bch rows (4-5) still masked
 
-# CONCAT with masked column
-mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
-  -e "SELECT id, CONCAT(first_name, ' - ', mrn) as name_mrn FROM poc_db.patients ORDER BY id;"
-# → 'Diana - ***', 'Eve - ***'
+# Revoke the role
+curl -s -X POST -H 'Content-Type: application/json' \
+  http://localhost:8080/admin/revoke-org-role \
+  -d '{"username":"dan","org_id":"chop","role":"org_member"}' | jq
 
-# Subquery on masked column
-mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
-  -e "SELECT * FROM poc_db.patients WHERE mrn IN (SELECT mrn FROM poc_db.patients WHERE organization='seattle');"
-# → only seattle rows (inner select sees '***', outer matches on '***')
-
-# Window function on masked date_of_birth
-mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
-  -e "SELECT id, first_name, date_of_birth, DENSE_RANK() OVER (ORDER BY date_of_birth) as rank FROM poc_db.patients;"
-# → seattle dates ranked by year-only values (1995-01-01, 1999-01-01)
+# Back to all masked
+mysql -h127.0.0.1 -P9030 -udan -pdanpass \
+  -e 'SELECT id, first_name, mrn, org_id FROM poc_db.patients ORDER BY id;'
+# -> all ***
 ```
 
-| Query pattern | Masking holds? | Behavior |
-|--------------|---------------|----------|
-| GROUP BY | Yes | Masked rows collapse (e.g., all seattle mrn = `***`) |
-| WHERE = real value | Yes | Returns 0 rows -- real value not accessible |
-| WHERE = masked value | Yes | Matches the masked representation |
-| ORDER BY | Yes | Sorts on masked values |
-| DISTINCT | Yes | Deduplicates on masked values |
-| CONCAT / string functions | Yes | Operates on masked values |
-| Subquery / IN | Yes | Inner and outer queries see masked values |
-| CASE WHEN / LIKE | Yes | Pattern matching on masked values |
-| Window functions | Yes | Ranking/aggregation uses masked values |
+### 4. Auth table isolation
+
+Users can only see their own rows in auth tables. They cannot discover other users' roles or org memberships.
+
+```bash
+# Dan sees only his own tenant role
+mysql -h127.0.0.1 -P9030 -udan -pdanpass \
+  -e 'SELECT * FROM auth_db.user_tenant_role;'
+# -> 1 row: dan / cbtn / tenant_member
+
+# Dan sees no org roles (he has none)
+mysql -h127.0.0.1 -P9030 -udan -pdanpass \
+  -e 'SELECT * FROM auth_db.user_org_role;'
+# -> empty
+
+# Dan sees only his own user record
+mysql -h127.0.0.1 -P9030 -udan -pdanpass \
+  -e 'SELECT * FROM auth_db.users;'
+# -> 1 row: dan
+
+# Carol sees her 2 tenant roles (cbtn + udn) and 1 org role (chop)
+mysql -h127.0.0.1 -P9030 -ucarol -pcarolpass \
+  -e 'SELECT * FROM auth_db.user_tenant_role; SELECT * FROM auth_db.user_org_role;'
+
+# Reference data (tenants, orgs) is visible to all — not sensitive
+mysql -h127.0.0.1 -P9030 -udan -pdanpass \
+  -e 'SELECT * FROM auth_db.tenant; SELECT * FROM auth_db.organization;'
+```
+
+### 5. API role inspection
+
+```bash
+curl -s -H 'X-User: carol' http://localhost:8080/auth/me | jq
+curl -s -H 'X-User: carol' http://localhost:8080/cbtn/patients | jq
+```
 
 ## Adding a New User
+
+3 steps needed. No Ranger **policy** changes, but the user must be added to the `role_authenticated` Ranger role.
 
 ### 1. Create in StarRocks
 
@@ -324,18 +300,16 @@ mysql -h127.0.0.1 -P9030 -uuser_cbtn_analyst_chop -panalystchoppass \
 mysql -h127.0.0.1 -P9030 -uroot -e "CREATE USER user_new IDENTIFIED BY 'newpass';"
 ```
 
-### 2. Create stub in Ranger
+### 2. Register in Ranger + add to role_authenticated
 
 ```bash
+# Create user stub
 curl -u admin:rangerR0cks! -X POST -H "Content-Type: application/json" \
   http://localhost:6080/service/xusers/secure/users \
   -d '{"name":"user_new","password":"Passw0rd!","userRoleList":["ROLE_USER"],"firstName":"user_new","userSource":0}'
-```
 
-### 3. Add to a Ranger role
-
-```bash
-ROLE=$(curl -s -u admin:rangerR0cks! http://localhost:6080/service/public/v2/api/roles/name/role_cbtn_analyst_chop)
+# Add to role_authenticated (fetch current role, append user, PUT back)
+ROLE=$(curl -s -u admin:rangerR0cks! http://localhost:6080/service/public/v2/api/roles/name/role_authenticated)
 ROLE_ID=$(echo "$ROLE" | python3 -c 'import sys,json; print(json.load(sys.stdin)["id"])')
 echo "$ROLE" | python3 -c "
 import sys, json
@@ -346,26 +320,39 @@ json.dump(role, sys.stdout)
   "http://localhost:6080/service/public/v2/api/roles/${ROLE_ID}" -d @-
 ```
 
-No policy edit needed. The user inherits all permissions (data + portal actions) from the role.
+### 3. Insert into auth tables
+
+```sql
+mysql -h127.0.0.1 -P9030 -uroot -e "
+  INSERT INTO auth_db.users (username) VALUES ('user_new');
+  INSERT INTO auth_db.user_tenant_role (username, tenant_id, role, granted_by)
+    VALUES ('user_new', 'cbtn', 'tenant_member', 'admin');
+  INSERT INTO auth_db.user_org_role (username, org_id, role, granted_by)
+    VALUES ('user_new', 'chop', 'org_member', 'admin');
+"
+```
+
+The user immediately has access -- Ranger subqueries pick up the new rows. Subsequent role changes (grant/revoke org roles) only require auth table updates.
 
 ## Key Findings
 
-1. **Custom Ranger service definitions work** -- `radiant_portal` with `tenant > organization > resource` hierarchy enforces org-scoped portal actions
-2. **Same roles across both services** -- one role controls StarRocks data access AND portal action permissions
-3. **Org-scoped enforcement via Ranger** -- a CHOP analyst cannot create cases or interpret variants at Seattle
-4. **Tenant-scoped actions use `organization = *`** in Ranger policies
-5. **User-to-role mapping fetched from Ranger** -- single API call, no hardcoded roles in the Go API
-6. **Policies fetched from Ranger** -- evaluated locally in ~50 lines of Go
-7. **Ranger as single source of truth** -- no OpenFGA, no hardcoded permission maps
-8. **Ranger roles work, groups do NOT** for StarRocks row-filter enforcement
-9. **Conditional column masking works** -- `CUSTOM` + `CASE WHEN` for per-org PII masking
-10. **Cannot bypass row filters** -- even with explicit WHERE clauses
+1. **Auth tables as source of truth** -- role assignments live in StarRocks, not Ranger roles/groups
+2. **Auth tables are isolated** -- row-filter policies on `user_tenant_role`, `user_org_role`, and `users` ensure each user can only see their own rows; reference tables (`tenant`, `organization`) remain fully readable
+3. **Generic Ranger policies** -- ~11 policies using `IN(SELECT FROM auth_db.*)` subqueries replace ~12+ per-role policies
+3. **Dynamic role changes** -- INSERT/DELETE in auth tables takes effect immediately, no Ranger admin action needed
+4. **Subquery-based row filtering** -- tenant isolation via `tenant_id IN (SELECT ... FROM auth_db.user_tenant_role)`
+5. **Subquery-based column masking** -- PHI visibility based on org role or tenant_admin/owner status
+6. **Use `IN` not `EXISTS` for correlated masking** -- `EXISTS` subqueries in mask expressions cause column ambiguity; `IN` avoids it
+7. **Go API without Ranger dependency** -- no polling, no policy cache; queries auth tables directly
+8. **Three table classifications** -- clinical (read-only), operational (writable), authorization (admin-only)
+9. **`current_user()` in subqueries** -- StarRocks returns `'user'@'%'`; cleaned via `replace(substring_index(current_user(), '@', 1), char(39), '')`
+10. **Ranger groups don't work with StarRocks** -- use a `role_authenticated` Ranger role containing all users
 
 ## Ranger Admin UI
 
 - URL: http://localhost:6080
 - Credentials: `admin` / `rangerR0cks!`
-- Two services visible: `starrocks` and `radiant_portal`
+- One service visible: `starrocks` (no portal service)
 
 ## Cleanup
 

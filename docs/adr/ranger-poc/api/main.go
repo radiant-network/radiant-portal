@@ -4,246 +4,227 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"strings"
-	"sync"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 // ---------------------------------------------------------------------------
-// Hardcoded users: only StarRocks credentials.
-// Roles are fetched from Ranger. Tenant comes from the URL path.
+// Users: StarRocks credentials for each test user
 // ---------------------------------------------------------------------------
 
 type User struct {
 	Name   string
-	SRUser string // StarRocks username
-	SRPass string // StarRocks password
+	SRUser string
+	SRPass string
 }
 
 var users = map[string]User{
-	"user_cbtn_submitter_chop": {
-		Name: "user_cbtn_submitter_chop", SRUser: "user_cbtn_submitter_chop", SRPass: "submitterpass",
-	},
-	"user_cbtn_analyst_chop": {
-		Name: "user_cbtn_analyst_chop", SRUser: "user_cbtn_analyst_chop", SRPass: "analystchoppass",
-	},
-	"user_cbtn_analyst_seattle": {
-		Name: "user_cbtn_analyst_seattle", SRUser: "user_cbtn_analyst_seattle", SRPass: "analystseattlepass",
-	},
-	"user_cbtn_tenant_manager": {
-		Name: "user_cbtn_tenant_manager", SRUser: "user_cbtn_tenant_manager", SRPass: "tenantmanagerpass",
-	},
+	"jane":  {Name: "jane", SRUser: "jane", SRPass: "janepass"},
+	"alice": {Name: "alice", SRUser: "alice", SRPass: "alicepass"},
+	"bob":   {Name: "bob", SRUser: "bob", SRPass: "bobpass"},
+	"carol": {Name: "carol", SRUser: "carol", SRPass: "carolpass"},
+	"dan":   {Name: "dan", SRUser: "dan", SRPass: "danpass"},
+}
+
+// Root connection for admin operations and auth-table reads
+func rootDSN(dbName string) string {
+	return fmt.Sprintf("root:@tcp(starrocks:9030)/%s?interpolateParams=true", dbName)
 }
 
 // ---------------------------------------------------------------------------
-// Ranger role cache: user -> roles (fetched from Ranger, not hardcoded)
+// Role hierarchy
 // ---------------------------------------------------------------------------
 
-var (
-	rangerURL  = "http://ranger:6080"
-	rangerAuth = "admin:rangerR0cks!"
-)
-
-type RoleCache struct {
-	mu    sync.RWMutex
-	roles map[string][]string // user -> [role1, role2, ...]
+var orgRoleLevel = map[string]int{
+	"org_member": 1,
+	"org_editor": 2,
+	"org_admin":  3,
+	"org_owner":  4,
 }
 
-var roleCache = &RoleCache{roles: make(map[string][]string)}
-
-func (rc *RoleCache) Get(user string) []string {
-	rc.mu.RLock()
-	defer rc.mu.RUnlock()
-	return rc.roles[user]
+var tenantRoleLevel = map[string]int{
+	"tenant_member": 1,
+	"tenant_admin":  2,
+	"tenant_owner":  3,
 }
 
-func (rc *RoleCache) Update(userRoles map[string][]string) {
-	rc.mu.Lock()
-	defer rc.mu.Unlock()
-	rc.roles = userRoles
+// ---------------------------------------------------------------------------
+// Auth-table queries
+// ---------------------------------------------------------------------------
+
+type TenantRole struct {
+	TenantID string `json:"tenant_id"`
+	Role     string `json:"role"`
 }
 
-type RangerRole struct {
-	Name  string `json:"name"`
-	Users []struct {
-		Name string `json:"name"`
-	} `json:"users"`
+type OrgRole struct {
+	OrgID    string `json:"org_id"`
+	TenantID string `json:"tenant_id"`
+	Role     string `json:"role"`
 }
 
-func fetchUserRoles() map[string][]string {
-	// Single call: GET all roles, then invert to user -> [roles]
-	url := fmt.Sprintf("%s/service/public/v2/api/roles", rangerURL)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.SetBasicAuth("admin", "rangerR0cks!")
-
-	resp, err := http.DefaultClient.Do(req)
+func getUserTenantRoles(username string) ([]TenantRole, error) {
+	db, err := sql.Open("mysql", rootDSN("auth_db"))
 	if err != nil {
-		log.Printf("[role-poller] Error fetching roles: %v", err)
-		return nil
+		return nil, err
 	}
-	body, _ := io.ReadAll(resp.Body)
-	resp.Body.Close()
+	defer db.Close()
 
-	var roles []RangerRole
-	if err := json.Unmarshal(body, &roles); err != nil {
-		log.Printf("[role-poller] Error parsing roles: %v", err)
-		return nil
+	rows, err := db.Query(
+		"SELECT tenant_id, role FROM auth_db.user_tenant_role WHERE username = ?", username)
+	if err != nil {
+		return nil, err
 	}
+	defer rows.Close()
 
-	// Invert: role.users -> user -> [role names]
-	result := make(map[string][]string)
-	for _, role := range roles {
-		for _, u := range role.Users {
-			result[u.Name] = append(result[u.Name], role.Name)
-		}
+	var roles []TenantRole
+	for rows.Next() {
+		var r TenantRole
+		rows.Scan(&r.TenantID, &r.Role)
+		roles = append(roles, r)
 	}
-	return result
+	return roles, nil
 }
 
-func pollUserRoles(interval time.Duration) {
-	for {
-		userRoles := fetchUserRoles()
-		roleCache.Update(userRoles)
-		log.Printf("[role-poller] Cached roles for %d users", len(userRoles))
-		for u, r := range userRoles {
-			log.Printf("[role-poller]   %s -> %v", u, r)
-		}
-		time.Sleep(interval)
+func getUserOrgRoles(username string) ([]OrgRole, error) {
+	db, err := sql.Open("mysql", rootDSN("auth_db"))
+	if err != nil {
+		return nil, err
 	}
+	defer db.Close()
+
+	rows, err := db.Query(`
+		SELECT uor.org_id, o.tenant_id, uor.role
+		FROM auth_db.user_org_role uor
+		JOIN auth_db.organization o ON o.org_id = uor.org_id
+		WHERE uor.username = ?`, username)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var roles []OrgRole
+	for rows.Next() {
+		var r OrgRole
+		rows.Scan(&r.OrgID, &r.TenantID, &r.Role)
+		roles = append(roles, r)
+	}
+	return roles, nil
 }
 
 // ---------------------------------------------------------------------------
-// Ranger portal policy cache
+// Permission matrix
 // ---------------------------------------------------------------------------
 
-type RangerAccess struct {
-	Type      string `json:"type"`
-	IsAllowed bool   `json:"isAllowed"`
+type Permission struct {
+	Resource       string
+	Action         string
+	Scope          string // "org" or "tenant"
+	MinOrgRole     string // minimum org role (empty = not sufficient via org role alone)
+	MinTenantRole  string // minimum tenant role (empty = not sufficient via tenant role alone)
 }
 
-type RangerPolicyItem struct {
-	Roles    []string       `json:"roles"`
-	Users    []string       `json:"users"`
-	Accesses []RangerAccess `json:"accesses"`
+// Permissions define what each action requires.
+// For org-scoped: user needs MinOrgRole+ at the org, OR MinTenantRole+ at the tenant.
+// For tenant-scoped: user needs MinTenantRole+ at the tenant.
+var permissions = []Permission{
+	// Org-scoped actions
+	{Resource: "case", Action: "create", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
+	{Resource: "case", Action: "edit", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
+	{Resource: "case", Action: "delete", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
+	{Resource: "case", Action: "assign", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
+	{Resource: "variant", Action: "interpret", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
+	{Resource: "variant", Action: "comment", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
+	{Resource: "report", Action: "generate", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
+	{Resource: "file", Action: "download", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
+	// Tenant-scoped actions (data reads)
+	{Resource: "patient", Action: "search", Scope: "tenant", MinTenantRole: "tenant_member"},
+	{Resource: "case", Action: "search", Scope: "tenant", MinTenantRole: "tenant_member"},
+	{Resource: "case", Action: "view", Scope: "tenant", MinTenantRole: "tenant_member"},
+	{Resource: "kb", Action: "search", Scope: "tenant", MinTenantRole: "tenant_member"},
+	{Resource: "kb", Action: "view", Scope: "tenant", MinTenantRole: "tenant_member"},
+	// Tenant admin actions
+	{Resource: "project", Action: "create", Scope: "tenant", MinTenantRole: "tenant_admin"},
+	{Resource: "user", Action: "invite", Scope: "tenant", MinTenantRole: "tenant_admin"},
+	{Resource: "codesystem", Action: "manage", Scope: "tenant", MinTenantRole: "tenant_admin"},
+	{Resource: "genepanel", Action: "manage", Scope: "tenant", MinTenantRole: "tenant_admin"},
 }
 
-type RangerResourceValue struct {
-	Values []string `json:"values"`
-}
-
-type RangerPolicy struct {
-	Name      string                         `json:"name"`
-	Resources map[string]RangerResourceValue `json:"resources"`
-	Items     []RangerPolicyItem             `json:"policyItems"`
-}
-
-type RangerPolicyDownload struct {
-	Policies []RangerPolicy `json:"policies"`
-}
-
-type PolicyCache struct {
-	mu       sync.RWMutex
-	policies []RangerPolicy
-}
-
-var portalPolicies = &PolicyCache{}
-
-func (pc *PolicyCache) Update(policies []RangerPolicy) {
-	pc.mu.Lock()
-	defer pc.mu.Unlock()
-	pc.policies = policies
-}
-
-func (pc *PolicyCache) IsAllowed(userRoles []string, tenant, org, resource, accessType string) bool {
-	pc.mu.RLock()
-	defer pc.mu.RUnlock()
-
-	for _, policy := range pc.policies {
-		tenantValues := policy.Resources["tenant"].Values
-		orgValues := policy.Resources["organization"].Values
-		resourceValues := policy.Resources["resource"].Values
-		if !matchesAny(tenantValues, tenant) || !matchesAny(orgValues, org) || !matchesAny(resourceValues, resource) {
-			continue
+func findPermission(resource, action string) *Permission {
+	for i := range permissions {
+		if permissions[i].Resource == resource && permissions[i].Action == action {
+			return &permissions[i]
 		}
+	}
+	return nil
+}
 
-		for _, item := range policy.Items {
-			if !hasRoleOverlap(item.Roles, userRoles) {
-				continue
-			}
-			for _, access := range item.Accesses {
-				if access.Type == accessType && access.IsAllowed {
+func hasMinOrgRole(userOrgRoles []OrgRole, orgID, minRole string) bool {
+	minLevel := orgRoleLevel[minRole]
+	for _, r := range userOrgRoles {
+		if r.OrgID == orgID && orgRoleLevel[r.Role] >= minLevel {
+			return true
+		}
+	}
+	return false
+}
+
+func hasMinTenantRole(userTenantRoles []TenantRole, tenantID, minRole string) bool {
+	minLevel := tenantRoleLevel[minRole]
+	for _, r := range userTenantRoles {
+		if r.TenantID == tenantID && tenantRoleLevel[r.Role] >= minLevel {
+			return true
+		}
+	}
+	return false
+}
+
+// isAllowed checks if a user can perform an action given their roles.
+func isAllowed(tenantRoles []TenantRole, orgRoles []OrgRole, tenant, org, resource, action string) bool {
+	perm := findPermission(resource, action)
+	if perm == nil {
+		return false
+	}
+
+	if perm.Scope == "tenant" {
+		// Tenant-scoped: need MinTenantRole at the tenant
+		// Any org role in this tenant also implies tenant_member
+		if perm.MinTenantRole != "" && hasMinTenantRole(tenantRoles, tenant, perm.MinTenantRole) {
+			return true
+		}
+		// Org role in this tenant implies tenant_member
+		if perm.MinTenantRole == "tenant_member" {
+			for _, r := range orgRoles {
+				if r.TenantID == tenant {
 					return true
 				}
 			}
 		}
+		return false
+	}
+
+	// Org-scoped: need MinOrgRole at the specific org, OR MinTenantRole at the tenant
+	if org == "" {
+		return false
+	}
+	if perm.MinOrgRole != "" && hasMinOrgRole(orgRoles, org, perm.MinOrgRole) {
+		return true
+	}
+	if perm.MinTenantRole != "" && hasMinTenantRole(tenantRoles, tenant, perm.MinTenantRole) {
+		return true
 	}
 	return false
-}
-
-// matchesAny checks if any policy value matches the target.
-// Policy value "*" matches any target (including empty).
-// Empty target (tenant-scoped request) only matches policy value "*".
-func matchesAny(values []string, target string) bool {
-	for _, v := range values {
-		if v == "*" {
-			return true
-		}
-		if target != "" && v == target {
-			return true
-		}
-	}
-	return false
-}
-
-func hasRoleOverlap(policyRoles, userRoles []string) bool {
-	for _, pr := range policyRoles {
-		for _, ur := range userRoles {
-			if pr == ur {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func pollRangerPolicies(serviceName string, interval time.Duration) {
-	url := fmt.Sprintf("%s/service/plugins/policies/download/%s", rangerURL, serviceName)
-
-	for {
-		resp, err := http.Get(url)
-		if err != nil {
-			log.Printf("[policy-poller] Error fetching policies: %v", err)
-			time.Sleep(interval)
-			continue
-		}
-
-		body, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
-
-		var download RangerPolicyDownload
-		if err := json.Unmarshal(body, &download); err != nil {
-			log.Printf("[policy-poller] Error parsing policies: %v", err)
-			time.Sleep(interval)
-			continue
-		}
-
-		portalPolicies.Update(download.Policies)
-		log.Printf("[policy-poller] Cached %d policies for %s", len(download.Policies), serviceName)
-		time.Sleep(interval)
-	}
 }
 
 // ---------------------------------------------------------------------------
-// StarRocks query helper
+// StarRocks query helpers
 // ---------------------------------------------------------------------------
 
-func queryStarRocks(srUser, srPass, query string) ([]map[string]string, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(starrocks:9030)/poc_db", srUser, srPass)
+func queryStarRocks(srUser, srPass, dbName, query string) ([]map[string]string, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(starrocks:9030)/%s", srUser, srPass, dbName)
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
@@ -280,59 +261,19 @@ func queryStarRocks(srUser, srPass, query string) ([]map[string]string, error) {
 	return results, nil
 }
 
+func execStarRocks(dsn, query string, args ...interface{}) error {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	_, err = db.Exec(query, args...)
+	return err
+}
+
 // ---------------------------------------------------------------------------
-// HTTP handlers
+// HTTP helpers
 // ---------------------------------------------------------------------------
-
-func getUser(r *http.Request) (*User, []string, error) {
-	name := r.Header.Get("X-User")
-	if name == "" {
-		return nil, nil, fmt.Errorf("missing X-User header")
-	}
-	u, ok := users[name]
-	if !ok {
-		return nil, nil, fmt.Errorf("unknown user: %s", name)
-	}
-	roles := roleCache.Get(name)
-	return &u, roles, nil
-}
-
-// knownResources is the set of top-level resource path segments.
-// Used to distinguish /{tenant}/{resource} from /{tenant}/{org}/{resource}.
-var knownResources = map[string]bool{
-	"cases": true, "reports": true, "users": true, "kb": true, "projects": true,
-}
-
-// parsePath extracts tenant, organization, and the remaining path.
-//
-// Two forms:
-//   /{tenant}/{resource}/...          → org="" (tenant-scoped)
-//   /{tenant}/{org}/{resource}/...    → org="{org}" (org-scoped)
-//
-// We distinguish them by checking if the second segment is a known resource name.
-func parsePath(r *http.Request) (tenant, org, rest string, err error) {
-	parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
-	if len(parts) < 2 {
-		return "", "", "", fmt.Errorf("expected /{tenant}/..., got: %s", r.URL.Path)
-	}
-
-	tenant = parts[0]
-
-	if knownResources[parts[1]] {
-		// /{tenant}/{resource}/... → tenant-scoped, no org
-		rest = "/" + strings.Join(parts[1:], "/")
-		return tenant, "", rest, nil
-	}
-
-	if len(parts) < 3 {
-		return "", "", "", fmt.Errorf("expected /{tenant}/{org}/{resource}/..., got: %s", r.URL.Path)
-	}
-
-	// /{tenant}/{org}/{resource}/...
-	org = parts[1]
-	rest = "/" + strings.Join(parts[2:], "/")
-	return tenant, org, rest, nil
-}
 
 func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
@@ -340,38 +281,185 @@ func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
 	json.NewEncoder(w).Encode(data)
 }
 
+func getUser(r *http.Request) (*User, error) {
+	name := r.Header.Get("X-User")
+	if name == "" {
+		return nil, fmt.Errorf("missing X-User header")
+	}
+	u, ok := users[name]
+	if !ok {
+		return nil, fmt.Errorf("unknown user: %s", name)
+	}
+	return &u, nil
+}
+
+// knownResources distinguishes /{tenant}/{resource} from /{tenant}/{org}/{resource}
+var knownResources = map[string]bool{
+	"patients": true, "cases": true, "reports": true, "users": true, "kb": true, "projects": true,
+}
+
+func parsePath(r *http.Request) (tenant, org, rest string, err error) {
+	parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/"), "/")
+	if len(parts) < 2 {
+		return "", "", "", fmt.Errorf("expected /{tenant}/..., got: %s", r.URL.Path)
+	}
+
+	tenant = parts[0]
+	if knownResources[parts[1]] {
+		rest = "/" + strings.Join(parts[1:], "/")
+		return tenant, "", rest, nil
+	}
+
+	if len(parts) < 3 {
+		return "", "", "", fmt.Errorf("expected /{tenant}/{org}/{resource}/..., got: %s", r.URL.Path)
+	}
+	org = parts[1]
+	rest = "/" + strings.Join(parts[2:], "/")
+	return tenant, org, rest, nil
+}
+
+// ---------------------------------------------------------------------------
+// Handlers
+// ---------------------------------------------------------------------------
+
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, 200, map[string]string{"status": "ok"})
 }
 
-// Route table: path pattern -> (resource, action, needsData)
+// GET /auth/me — return user's roles from auth tables
+func authMeHandler(w http.ResponseWriter, r *http.Request) {
+	user, err := getUser(r)
+	if err != nil {
+		jsonResponse(w, 401, map[string]string{"error": err.Error()})
+		return
+	}
+
+	tenantRoles, err := getUserTenantRoles(user.Name)
+	if err != nil {
+		jsonResponse(w, 500, map[string]string{"error": "failed to fetch tenant roles: " + err.Error()})
+		return
+	}
+	orgRoles, err := getUserOrgRoles(user.Name)
+	if err != nil {
+		jsonResponse(w, 500, map[string]string{"error": "failed to fetch org roles: " + err.Error()})
+		return
+	}
+
+	jsonResponse(w, 200, map[string]interface{}{
+		"user":         user.Name,
+		"tenant_roles": tenantRoles,
+		"org_roles":    orgRoles,
+	})
+}
+
+// POST /admin/grant-org-role — insert into auth_db.user_org_role
+func adminGrantOrgRoleHandler(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Username string `json:"username"`
+		OrgID    string `json:"org_id"`
+		Role     string `json:"role"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonResponse(w, 400, map[string]string{"error": "invalid JSON: " + err.Error()})
+		return
+	}
+	if req.Username == "" || req.OrgID == "" || req.Role == "" {
+		jsonResponse(w, 400, map[string]string{"error": "username, org_id, and role are required"})
+		return
+	}
+	if orgRoleLevel[req.Role] == 0 {
+		jsonResponse(w, 400, map[string]string{"error": "invalid role, must be: org_member, org_editor, org_admin, or org_owner"})
+		return
+	}
+
+	err := execStarRocks(rootDSN("auth_db"),
+		"INSERT INTO auth_db.user_org_role (username, org_id, role, granted_by) VALUES (?, ?, ?, 'admin')",
+		req.Username, req.OrgID, req.Role)
+	if err != nil {
+		jsonResponse(w, 500, map[string]string{"error": "grant failed: " + err.Error()})
+		return
+	}
+
+	jsonResponse(w, 200, map[string]interface{}{
+		"status":   "granted",
+		"username": req.Username,
+		"org_id":   req.OrgID,
+		"role":     req.Role,
+	})
+}
+
+// POST /admin/revoke-org-role — delete from auth_db.user_org_role
+func adminRevokeOrgRoleHandler(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Username string `json:"username"`
+		OrgID    string `json:"org_id"`
+		Role     string `json:"role"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonResponse(w, 400, map[string]string{"error": "invalid JSON: " + err.Error()})
+		return
+	}
+	if req.Username == "" || req.OrgID == "" || req.Role == "" {
+		jsonResponse(w, 400, map[string]string{"error": "username, org_id, and role are required"})
+		return
+	}
+
+	err := execStarRocks(rootDSN("auth_db"),
+		"DELETE FROM auth_db.user_org_role WHERE username = ? AND org_id = ? AND role = ?",
+		req.Username, req.OrgID, req.Role)
+	if err != nil {
+		jsonResponse(w, 500, map[string]string{"error": "revoke failed: " + err.Error()})
+		return
+	}
+
+	jsonResponse(w, 200, map[string]interface{}{
+		"status":   "revoked",
+		"username": req.Username,
+		"org_id":   req.OrgID,
+		"role":     req.Role,
+	})
+}
+
+// Route matching
 type route struct {
-	resource  string
-	action    string
-	method    string
-	withData  bool // if true, query StarRocks and return results
+	resource string
+	action   string
+	method   string
+	dataDB   string // non-empty: query this database and return results
+	dataSQL  string
 }
 
 var routes = []route{
-	{resource: "case", action: "search", method: "GET", withData: true},       // GET  /{tenant}/cases
-	{resource: "case", action: "create", method: "POST", withData: false},     // POST /{tenant}/cases
-	{resource: "variant", action: "interpret", method: "", withData: false},    // *    /{tenant}/cases/{id}/interpret
-	{resource: "report", action: "generate", method: "", withData: false},     // *    /{tenant}/reports/generate
-	{resource: "user", action: "invite", method: "POST", withData: false},     // POST /{tenant}/users/invite
+	// GET /{tenant}/patients — read clinical data (row-filtered + masked by StarRocks/Ranger)
+	{resource: "patient", action: "search", method: "GET", dataDB: "poc_db",
+		dataSQL: "SELECT id, first_name, last_name, mrn, date_of_birth, tenant_id, org_id, diagnosis FROM poc_db.patients ORDER BY id"},
+	// GET /{tenant}/cases — read operational data (row-filtered by StarRocks/Ranger)
+	{resource: "case", action: "view", method: "GET", dataDB: "operational_db",
+		dataSQL: "SELECT case_id, patient_id, case_name, status, tenant_id, org_id, created_by FROM operational_db.cases ORDER BY case_id"},
+	// POST /{tenant}/{org}/cases — create case
+	{resource: "case", action: "create", method: "POST"},
+	// interpret variant
+	{resource: "variant", action: "interpret"},
+	// generate report
+	{resource: "report", action: "generate"},
+	// invite user
+	{resource: "user", action: "invite", method: "POST"},
 }
 
 func matchRoute(method, path string) *route {
 	switch {
 	case strings.HasSuffix(path, "/interpret"):
-		return &routes[2]
-	case path == "/reports/generate":
 		return &routes[3]
-	case path == "/users/invite" && method == "POST":
+	case path == "/reports/generate":
 		return &routes[4]
-	case path == "/cases" && method == "GET":
+	case path == "/users/invite" && method == "POST":
+		return &routes[5]
+	case path == "/patients" && method == "GET":
 		return &routes[0]
-	case path == "/cases" && method == "POST":
+	case path == "/cases" && method == "GET":
 		return &routes[1]
+	case path == "/cases" && method == "POST":
+		return &routes[2]
 	}
 	return nil
 }
@@ -384,7 +472,7 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, roles, err := getUser(r)
+	user, err := getUser(r)
 	if err != nil {
 		jsonResponse(w, 401, map[string]string{"error": err.Error()})
 		return
@@ -396,45 +484,98 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !portalPolicies.IsAllowed(roles, tenant, org, rt.resource, rt.action) {
+	// Fetch user's roles from auth tables
+	tenantRoles, err := getUserTenantRoles(user.Name)
+	if err != nil {
+		jsonResponse(w, 500, map[string]string{"error": "failed to fetch roles: " + err.Error()})
+		return
+	}
+	orgRoles, err := getUserOrgRoles(user.Name)
+	if err != nil {
+		jsonResponse(w, 500, map[string]string{"error": "failed to fetch roles: " + err.Error()})
+		return
+	}
+
+	// Check authorization
+	if !isAllowed(tenantRoles, orgRoles, tenant, org, rt.resource, rt.action) {
 		jsonResponse(w, 403, map[string]string{
-			"error":        "access denied",
-			"user":         user.Name,
-			"tenant":       tenant,
-			"organization": org,
-			"action":       rt.action,
-			"resource":     rt.resource,
-			"roles":        strings.Join(roles, ", "),
+			"error":    "access denied",
+			"user":     user.Name,
+			"tenant":   tenant,
+			"org":      org,
+			"action":   rt.action,
+			"resource": rt.resource,
 		})
 		return
 	}
 
-	if rt.withData {
-		rows, err := queryStarRocks(user.SRUser, user.SRPass,
-			"SELECT id, first_name, last_name, mrn, date_of_birth, tenant, organization, diagnosis FROM poc_db.patients ORDER BY id")
+	// For POST /cases: insert a new case
+	if rt.resource == "case" && rt.action == "create" {
+		var body struct {
+			CaseName  string `json:"case_name"`
+			PatientID int    `json:"patient_id"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			jsonResponse(w, 400, map[string]string{"error": "invalid JSON: " + err.Error()})
+			return
+		}
+
+		// Get next case_id (simple approach for POC)
+		db, _ := sql.Open("mysql", rootDSN("operational_db"))
+		defer db.Close()
+		var maxID sql.NullInt64
+		db.QueryRow("SELECT MAX(case_id) FROM operational_db.cases").Scan(&maxID)
+		nextID := 1
+		if maxID.Valid {
+			nextID = int(maxID.Int64) + 1
+		}
+
+		err := execStarRocks(rootDSN("operational_db"),
+			"INSERT INTO operational_db.cases (case_id, patient_id, case_name, status, tenant_id, org_id, created_by) VALUES (?, ?, ?, 'open', ?, ?, ?)",
+			nextID, body.PatientID, body.CaseName, tenant, org, user.Name)
+		if err != nil {
+			jsonResponse(w, 500, map[string]string{"error": "insert failed: " + err.Error()})
+			return
+		}
+
+		jsonResponse(w, 200, map[string]interface{}{
+			"status":   "created",
+			"case_id":  nextID,
+			"user":     user.Name,
+			"tenant":   tenant,
+			"org":      org,
+			"resource": rt.resource,
+			"action":   rt.action,
+		})
+		return
+	}
+
+	// For data queries: run against StarRocks as the user
+	if rt.dataDB != "" {
+		rows, err := queryStarRocks(user.SRUser, user.SRPass, rt.dataDB, rt.dataSQL)
 		if err != nil {
 			jsonResponse(w, 500, map[string]string{"error": err.Error()})
 			return
 		}
 		jsonResponse(w, 200, map[string]interface{}{
-			"user":         user.Name,
-			"tenant":       tenant,
-			"organization": org,
-			"roles":        roles,
-			"action":       rt.action,
-			"resource":     rt.resource,
-			"patients":     rows,
+			"user":     user.Name,
+			"tenant":   tenant,
+			"org":      org,
+			"action":   rt.action,
+			"resource": rt.resource,
+			"data":     rows,
 		})
 		return
 	}
 
+	// Non-data action (interpret, generate, invite, etc.)
 	jsonResponse(w, 200, map[string]string{
-		"user":         user.Name,
-		"tenant":       tenant,
-		"organization": org,
-		"action":       rt.action,
-		"resource":     rt.resource,
-		"status":       "allowed",
+		"user":     user.Name,
+		"tenant":   tenant,
+		"org":      org,
+		"action":   rt.action,
+		"resource": rt.resource,
+		"status":   "allowed",
 	})
 }
 
@@ -443,17 +584,14 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 // ---------------------------------------------------------------------------
 
 func main() {
-	// Start polling Ranger for portal policies and user roles
-	go pollRangerPolicies("radiant_portal", 10*time.Second)
-	go pollUserRoles(30 * time.Second)
-
-	// Wait for the first fetch
-	time.Sleep(3 * time.Second)
-
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthHandler)
-	mux.HandleFunc("/", tenantHandler) // All /{tenant}/... routes
+	mux.HandleFunc("/auth/me", authMeHandler)
+	mux.HandleFunc("/admin/grant-org-role", adminGrantOrgRoleHandler)
+	mux.HandleFunc("/admin/revoke-org-role", adminRevokeOrgRoleHandler)
+	mux.HandleFunc("/", tenantHandler)
 
 	log.Println("[poc-api] Starting on :8080")
+	log.Println("[poc-api] No Ranger polling — auth tables are the source of truth")
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }

@@ -67,7 +67,7 @@ services:
   # =============================================================================
 
   # =============================================================================
-  # POC API -- lightweight Go API that checks Ranger portal policies
+  # POC API -- Go API that queries auth tables for authorization
   # =============================================================================
 
   poc-api:
