@@ -154,17 +154,40 @@ Permission matrix (hardcoded in Go API):
 | 3 | Case-BCH-001 | cbtn | bch |
 | 4 | Case-NIH-001 | udn | nih-udn |
 
+## Prerequisites
+
+- Docker and Docker Compose
+- MySQL client (`mysql` CLI) for direct StarRocks queries
+- `curl` and `jq` for API tests
+
 ## Quick Start
 
 ```bash
 cd docs/adr/ranger-poc
+
+# Start all containers (builds the Go API image)
 docker compose up -d --build
 
-# Watch init container
+# Watch the init container until it prints "Auth-Tables POC initialization complete!"
+# This takes ~2-3 minutes (Ranger startup + StarRocks policy sync)
 docker compose logs -f init
 ```
 
-Wait until it prints "Auth-Tables POC initialization complete!" (~2-3 minutes).
+Once init completes, wait ~15 seconds for the StarRocks Ranger plugin to sync the new policies, then run the tests below.
+
+### Stop
+
+```bash
+docker compose down -v   # -v removes volumes (clean state)
+```
+
+### Restart from scratch
+
+```bash
+docker compose down -v
+docker compose up -d --build
+docker compose logs -f init
+```
 
 ## POC API Endpoints
 
