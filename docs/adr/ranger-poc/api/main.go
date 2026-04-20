@@ -26,10 +26,18 @@ type User struct {
 }
 
 var users = map[string]User{
-	"user_alice": {Name: "user_alice", SRUser: "user_alice", SRPass: "alice123"},
-	"user_bob":   {Name: "user_bob",   SRUser: "user_bob",   SRPass: "bob123"},
-	"user_carol": {Name: "user_carol", SRUser: "user_carol", SRPass: "carol123"},
-	"user_dave":  {Name: "user_dave",  SRUser: "user_dave",  SRPass: "dave123"},
+	"user_cbtn_submitter_chop": {
+		Name: "user_cbtn_submitter_chop", SRUser: "user_cbtn_submitter_chop", SRPass: "submitterpass",
+	},
+	"user_cbtn_analyst_chop": {
+		Name: "user_cbtn_analyst_chop", SRUser: "user_cbtn_analyst_chop", SRPass: "analystchoppass",
+	},
+	"user_cbtn_analyst_seattle": {
+		Name: "user_cbtn_analyst_seattle", SRUser: "user_cbtn_analyst_seattle", SRPass: "analystseattlepass",
+	},
+	"user_cbtn_tenant_manager": {
+		Name: "user_cbtn_tenant_manager", SRUser: "user_cbtn_tenant_manager", SRPass: "tenantmanagerpass",
+	},
 }
 
 // ---------------------------------------------------------------------------
@@ -58,37 +66,6 @@ func (rc *RoleCache) Update(userRoles map[string][]string) {
 	rc.mu.Lock()
 	defer rc.mu.Unlock()
 	rc.roles = userRoles
-}
-
-// OrgsCache: user -> [org1, org2] fetched from Ranger user attributes
-type OrgsCache struct {
-	mu   sync.RWMutex
-	orgs map[string][]string
-}
-
-var orgsCache = &OrgsCache{orgs: make(map[string][]string)}
-
-func (oc *OrgsCache) Get(user string) []string {
-	oc.mu.RLock()
-	defer oc.mu.RUnlock()
-	return oc.orgs[user]
-}
-
-func (oc *OrgsCache) Update(userOrgs map[string][]string) {
-	oc.mu.Lock()
-	defer oc.mu.Unlock()
-	oc.orgs = userOrgs
-}
-
-func (oc *OrgsCache) Contains(user, org string) bool {
-	oc.mu.RLock()
-	defer oc.mu.RUnlock()
-	for _, o := range oc.orgs[user] {
-		if o == org {
-			return true
-		}
-	}
-	return false
 }
 
 type RangerRole struct {
@@ -128,69 +105,13 @@ func fetchUserRoles() map[string][]string {
 	return result
 }
 
-func fetchUserOrgs() map[string][]string {
-	// GET all users, parse otherAttributes.orgs
-	url := fmt.Sprintf("%s/service/xusers/users", rangerURL)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.SetBasicAuth("admin", "rangerR0cks!")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Printf("[orgs-poller] Error fetching users: %v", err)
-		return nil
-	}
-	body, _ := io.ReadAll(resp.Body)
-	resp.Body.Close()
-
-	var data struct {
-		Users []struct {
-			Name            string `json:"name"`
-			OtherAttributes string `json:"otherAttributes"`
-		} `json:"vXUsers"`
-	}
-	if err := json.Unmarshal(body, &data); err != nil {
-		log.Printf("[orgs-poller] Error parsing users: %v", err)
-		return nil
-	}
-
-	result := make(map[string][]string)
-	for _, u := range data.Users {
-		if u.OtherAttributes == "" {
-			continue
-		}
-		var attrs map[string]string
-		if err := json.Unmarshal([]byte(u.OtherAttributes), &attrs); err != nil {
-			continue
-		}
-		orgsStr := attrs["orgs"]
-		if orgsStr == "" {
-			continue
-		}
-		// Parse "'chop','seattle'" -> ["chop", "seattle"]
-		var orgs []string
-		for _, o := range strings.Split(orgsStr, ",") {
-			o = strings.TrimSpace(o)
-			o = strings.Trim(o, "'")
-			if o != "" {
-				orgs = append(orgs, o)
-			}
-		}
-		result[u.Name] = orgs
-	}
-	return result
-}
-
-func pollUserRolesAndOrgs(interval time.Duration) {
+func pollUserRoles(interval time.Duration) {
 	for {
 		userRoles := fetchUserRoles()
 		roleCache.Update(userRoles)
-
-		userOrgs := fetchUserOrgs()
-		orgsCache.Update(userOrgs)
-
-		log.Printf("[poller] Cached %d users with roles, %d with orgs", len(userRoles), len(userOrgs))
-		for u, o := range userOrgs {
-			log.Printf("[poller]   %s -> roles=%v orgs=%v", u, roleCache.Get(u), o)
+		log.Printf("[role-poller] Cached roles for %d users", len(userRoles))
+		for u, r := range userRoles {
+			log.Printf("[role-poller]   %s -> %v", u, r)
 		}
 		time.Sleep(interval)
 	}
@@ -238,14 +159,15 @@ func (pc *PolicyCache) Update(policies []RangerPolicy) {
 	pc.policies = policies
 }
 
-func (pc *PolicyCache) IsAllowed(userRoles []string, tenant, resource, accessType string) bool {
+func (pc *PolicyCache) IsAllowed(userRoles []string, tenant, org, resource, accessType string) bool {
 	pc.mu.RLock()
 	defer pc.mu.RUnlock()
 
 	for _, policy := range pc.policies {
 		tenantValues := policy.Resources["tenant"].Values
+		orgValues := policy.Resources["organization"].Values
 		resourceValues := policy.Resources["resource"].Values
-		if !matchesAny(tenantValues, tenant) || !matchesAny(resourceValues, resource) {
+		if !matchesAny(tenantValues, tenant) || !matchesAny(orgValues, org) || !matchesAny(resourceValues, resource) {
 			continue
 		}
 
@@ -263,9 +185,15 @@ func (pc *PolicyCache) IsAllowed(userRoles []string, tenant, resource, accessTyp
 	return false
 }
 
+// matchesAny checks if any policy value matches the target.
+// Policy value "*" matches any target (including empty).
+// Empty target (tenant-scoped request) only matches policy value "*".
 func matchesAny(values []string, target string) bool {
 	for _, v := range values {
-		if v == "*" || v == target {
+		if v == "*" {
+			return true
+		}
+		if target != "" && v == target {
 			return true
 		}
 	}
@@ -468,7 +396,7 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !portalPolicies.IsAllowed(roles, tenant, rt.resource, rt.action) {
+	if !portalPolicies.IsAllowed(roles, tenant, org, rt.resource, rt.action) {
 		jsonResponse(w, 403, map[string]string{
 			"error":        "access denied",
 			"user":         user.Name,
@@ -477,18 +405,6 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 			"action":       rt.action,
 			"resource":     rt.resource,
 			"roles":        strings.Join(roles, ", "),
-		})
-		return
-	}
-
-	// For org-scoped actions, also verify the user's orgs attribute includes this org
-	if org != "" && !orgsCache.Contains(user.Name, org) {
-		jsonResponse(w, 403, map[string]string{
-			"error":        "access denied - not a member of this organization",
-			"user":         user.Name,
-			"tenant":       tenant,
-			"organization": org,
-			"user_orgs":    strings.Join(orgsCache.Get(user.Name), ", "),
 		})
 		return
 	}
@@ -527,9 +443,9 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 // ---------------------------------------------------------------------------
 
 func main() {
-	// Start polling Ranger for portal policies, roles, and user orgs
+	// Start polling Ranger for portal policies and user roles
 	go pollRangerPolicies("radiant_portal", 10*time.Second)
-	go pollUserRolesAndOrgs(30 * time.Second)
+	go pollUserRoles(30 * time.Second)
 
 	// Wait for the first fetch
 	time.Sleep(3 * time.Second)

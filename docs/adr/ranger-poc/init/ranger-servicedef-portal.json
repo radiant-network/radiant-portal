@@ -3,7 +3,7 @@
   "displayName": "Radiant Portal",
   "implClass": "",
   "label": "Radiant Portal Actions",
-  "description": "Authorization for Radiant portal actions. Resources: tenant > resource. Org-scoped enforcement handled by the API using user orgs attribute.",
+  "description": "Authorization for Radiant portal actions. Resources: tenant > organization > resource.",
   "resources": [
     {
       "itemId": 1,
@@ -23,10 +23,26 @@
     },
     {
       "itemId": 2,
-      "name": "resource",
+      "name": "organization",
       "type": "string",
       "level": 20,
       "parent": "tenant",
+      "mandatory": true,
+      "isValidLeaf": false,
+      "lookupSupported": false,
+      "recursiveSupported": false,
+      "excludesSupported": false,
+      "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+      "matcherOptions": { "wildCard": true, "ignoreCase": true },
+      "label": "Organization",
+      "description": "Organization within the tenant (e.g. chop, seattle). Use * for tenant-scoped actions."
+    },
+    {
+      "itemId": 3,
+      "name": "resource",
+      "type": "string",
+      "level": 30,
+      "parent": "organization",
       "mandatory": true,
       "isValidLeaf": true,
       "lookupSupported": false,

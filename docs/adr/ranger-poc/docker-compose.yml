@@ -48,8 +48,6 @@ services:
     volumes:
       - ./ranger-conf/ranger-starrocks-security.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-security.xml
       - ./ranger-conf/ranger-starrocks-audit.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-audit.xml
-      - ./ranger-conf/nashorn-core-15.4.jar:/data/deploy/starrocks/fe/lib/nashorn-core-15.4.jar
-      - ./ranger-conf/jwks.json:/data/deploy/starrocks/fe/conf/jwks.json
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |
@@ -67,23 +65,6 @@ services:
   # Needs both curl (for Ranger REST) and mysql client (for StarRocks).
   # The starrocks image has mysql; we install curl at runtime.
   # =============================================================================
-
-  # =============================================================================
-  # MySQL JWT Proxy -- translates native_password(JWT) to OIDC auth for StarRocks
-  # =============================================================================
-
-  mysql-proxy:
-    build: ./proxy
-    container_name: mysql-jwt-proxy
-    hostname: mysql-proxy
-    depends_on:
-      starrocks:
-        condition: service_healthy
-    environment:
-      LISTEN_ADDR: ":9031"
-      BACKEND_ADDR: "starrocks:9030"
-    ports:
-      - "9031:9031"
 
   # =============================================================================
   # POC API -- lightweight Go API that checks Ranger portal policies

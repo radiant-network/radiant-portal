@@ -27,13 +27,4 @@
     <name>ranger.plugin.starrocks.policy.rest.client.read.timeoutMs</name>
     <value>30000</value>
   </property>
-  <!-- Userstore enricher: enables ${{USER.attr}} in dynamic expressions -->
-  <property>
-    <name>ranger.plugin.starrocks.enable.implicit.userstore.enricher</name>
-    <value>true</value>
-  </property>
-  <property>
-    <name>ranger.plugin.starrocks.userstore.pollIntervalMs</name>
-    <value>10000</value>
-  </property>
 </configuration>
