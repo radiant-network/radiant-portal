@@ -20,13 +20,14 @@ type SliderOccurrenceDetailsCardProps = {
   caseId: number;
   seqId: number;
   locus: string;
-  start: number;
-  chromosome: string;
+  start?: number;
+  chromosome?: string;
   zygosity?: string;
   transmission?: string;
   parental_origin?: string;
   genotype_quality?: number;
   filter?: string;
+  quality_depth?: number;
   relationshipToProband?: string;
   father_calls?: number[];
   mother_calls?: number[];
@@ -69,6 +70,7 @@ const SliderOccurrenceDetailsCard = ({
   transmission,
   parental_origin,
   genotype_quality,
+  quality_depth,
   relationshipToProband,
   filter,
   father_calls,
@@ -83,7 +85,7 @@ const SliderOccurrenceDetailsCard = ({
   const filterValue = getFilterValue(filter, t);
 
   let actions = undefined;
-  if (enableIGV) {
+  if (enableIGV && start && chromosome) {
     actions = (
       <IGVDialog
         open={igvOpen}
@@ -187,7 +189,9 @@ const SliderOccurrenceDetailsCard = ({
             <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
               <DescriptionSection title="Metrics" values={[ad_alt, ad_total, genotype_quality, filter]}>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.quality_depth')}>
-                  <EmptyField />
+                  <span className="font-mono">
+                    {quality_depth ? thousandNumberFormat(quality_depth) : <EmptyField />}
+                  </span>
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.allele_depth_alt')}>
                   <span className="font-mono">{ad_alt ? thousandNumberFormat(ad_alt) : <EmptyField />}</span>
@@ -195,9 +199,12 @@ const SliderOccurrenceDetailsCard = ({
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.total_depth_alt_ref')}>
                   <span className="font-mono">{ad_total ? thousandNumberFormat(ad_total) : <EmptyField />}</span>
                 </DescriptionRow>
-                <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.genotype_quality')}>
-                  {getGenotypeQuality(genotype_quality)}
-                </DescriptionRow>
+                {/* Optional display */}
+                {genotype_quality && (
+                  <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.genotype_quality')}>
+                    {getGenotypeQuality(genotype_quality)}
+                  </DescriptionRow>
+                )}
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.filter')}>
                   {filterValue}
                 </DescriptionRow>

@@ -156,6 +156,7 @@ function GermlineOccurrenceSheetContent({
           seqId={occurrence.seq_id}
           locus={occurrence.locus}
           start={occurrence.start}
+          quality_depth={expandResult.data.qd}
           chromosome={occurrence.chromosome}
           zygosity={expandResult.data.zygosity}
           transmission={expandResult.data.transmission}
@@ -170,7 +171,50 @@ function GermlineOccurrenceSheetContent({
           enableIGV
         />
       )}
-      <SliderVariantDetailsCard data={expandResult.data} />
+      <SliderVariantDetailsCard
+        type="germline"
+        omim_conditions={expandResult.data.omim_conditions}
+        locus_id={occurrence.locus_id}
+        germline_pc_wgs_affected={expandResult.data.germline_pc_wgs_affected}
+        germline_pn_wgs_affected={expandResult.data.germline_pn_wgs_affected}
+        germline_pf_wgs_affected={expandResult.data.germline_pf_wgs_affected}
+        germline_pc_wgs_not_affected={expandResult.data.germline_pc_wgs_not_affected}
+        germline_pn_wgs_not_affected={expandResult.data.germline_pn_wgs_not_affected}
+        germline_pf_wgs_not_affected={expandResult.data.germline_pf_wgs_not_affected}
+        cadd_phred={expandResult.data.cadd_phred}
+        cadd_score={expandResult.data.cadd_score}
+        dann_score={expandResult.data.dann_score}
+        lrt_pred={expandResult.data.lrt_pred}
+        lrt_score={expandResult.data.lrt_score}
+        sift_pred={expandResult.data.sift_pred}
+        sift_score={expandResult.data.sift_score}
+        fathmm_pred={expandResult.data.fathmm_pred}
+        fathmm_score={expandResult.data.fathmm_score}
+        polyphen2_hvar_pred={expandResult.data.polyphen2_hvar_pred}
+        polyphen2_hvar_score={expandResult.data.polyphen2_hvar_score}
+        clinvar={expandResult.data.clinvar}
+        exomiser_acmg_classification_counts={expandResult.data.exomiser_acmg_classification_counts}
+        interpretation_classification_counts={expandResult.data.interpretation_classification_counts}
+        gnomad_pli={expandResult.data.gnomad_pli}
+        gnomad_loeuf={expandResult.data.gnomad_loeuf}
+        ensembl_gene_id={expandResult.data.ensembl_gene_id}
+        spliceai_type={expandResult.data.spliceai_type}
+        spliceai_ds={expandResult.data.spliceai_ds}
+        hgvsg={expandResult.data.hgvsg}
+        gnomad_v3_af={expandResult.data.gnomad_v3_af}
+        locus={expandResult.data.locus}
+        symbol={expandResult.data.symbol}
+        aa_change={expandResult.data.aa_change}
+        vep_impact={expandResult.data.vep_impact}
+        picked_consequences={expandResult.data.picked_consequences}
+        dna_change={expandResult.data.dna_change}
+        transcript_id={expandResult.data.transcript_id}
+        is_mane_select={expandResult.data.is_mane_select}
+        is_canonical={expandResult.data.is_canonical}
+        exon_rank={expandResult.data.exon_rank}
+        exon_total={expandResult.data.exon_total}
+        rsnumber={expandResult.data.rsnumber}
+      />
     </div>
   );
 }

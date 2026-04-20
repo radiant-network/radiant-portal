@@ -1156,11 +1156,13 @@
           "title": "Classification",
           "exomiser": "Exomiser",
           "clinvar": "ClinVar",
+          "hotspot": "Hotspot",
           "no_data": "Aucune donnée de classification rapportée"
         },
         "frequencies": {
           "title": "Fréquences",
           "affected": "Affectés",
+          "tn": "Tumor-normal",
           "gnomad": "gnomAD"
         },
         "functional_scores": {
