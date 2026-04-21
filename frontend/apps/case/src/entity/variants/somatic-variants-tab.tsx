@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { CaseEntity, CaseSequencingExperiment } from '@/api/api';
+import { useI18n } from '@/components/hooks/i18n';
 
 import SequencingExperimentVariantFilters from './filters/sequencing-experiment-variant-filters';
 import { getDefaultSeqId, useSeqIdSearchParamsEffect } from './hooks/use-seqid-by-search';
@@ -19,6 +20,7 @@ type VariantTabProps = {
 };
 
 function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
+  const { t } = useI18n();
   const [searchParams] = useSearchParams();
   const [activeInterface, setActiveInterface] = useState<SomaticVariantInterface>(SomaticVariantInterface.SNV_TO);
   const [patientSelected, setPatientSelected] = useState<CaseSequencingExperiment | undefined>(undefined);
@@ -43,7 +45,12 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
       <SequencingExperimentVariantFilters
         isLoading={isLoading}
         sequencingExperiments={seqExpVariants}
-        options={['SNV_TO']}
+        options={[
+          {
+            value: 'SNV_TO',
+            tooltip: t(`case_entity.variants.filters.snv_to_tooltip`),
+          },
+        ]}
         selectedSeqId={seqId}
         handleChange={handlechange}
         activeInterface={activeInterface}

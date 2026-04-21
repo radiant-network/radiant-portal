@@ -42,12 +42,15 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
         isLoading={isLoading}
         sequencingExperiments={seqExpVariants}
         selectedSeqId={seqId}
-        options={Object.keys(GermlineVariantInterface)}
+        options={Object.keys(GermlineVariantInterface).map(key => ({
+          value: key,
+        }))}
         handleChange={handlechange}
         activeInterface={activeInterface}
         onActiveInterfaceChange={value => {
           setActiveInterface(value as GermlineVariantInterface);
         }}
+        showAffectedStatusBadge
       />
 
       {activeInterface == GermlineVariantInterface.SNV && <SNVTab seqId={seqId} patientSelected={patientSelected} />}

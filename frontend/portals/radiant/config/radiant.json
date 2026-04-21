@@ -569,13 +569,7 @@
               "defaultMax": 100
             }
           },
-          { "key": "sift_pred", "translation_key": "sift_pred", "type": "multiple" },
-          {
-            "key": "pathogenicity_oncology_divider",
-            "translation_key": "pathogenicity_oncology_divider",
-            "type": "divider"
-          },
-          { "key": "hotspot", "translation_key": "hotspot", "type": "boolean" }
+          { "key": "sift_pred", "translation_key": "sift_pred", "type": "multiple" }
         ]
       },
       "frequency": {
@@ -622,11 +616,6 @@
             }
           },
           {
-            "key": "frequency_divider_pulic_cohorts",
-            "translation_key": "frequency_divider_pulic_cohorts",
-            "type": "divider"
-          },
-          {
             "key": "germline_pf_wgs_not_affected",
             "translation_key": "germline_pf_wgs_not_affected",
             "type": "numerical",
@@ -637,6 +626,11 @@
               "defaultMin": 0,
               "defaultMax": 100
             }
+          },
+          {
+            "key": "frequency_divider_pulic_cohorts",
+            "translation_key": "frequency_divider_pulic_cohorts",
+            "type": "divider"
           },
           {
             "key": "gnomad_v3_af",

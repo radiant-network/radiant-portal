@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { filtersWithTooltip } from '@/apps/case/src/entity/variants/filters/utils';
 import { BooleanFacet } from '@/components/base/query-builder-v3/facets/boolean-facet';
 import { MultiSelectFacet } from '@/components/base/query-builder-v3/facets/multiselect-facet';
 import { NumericalFacet } from '@/components/base/query-builder-v3/facets/numerical-facet';
@@ -31,11 +30,8 @@ export function AccordionContainer({ field, children }: AccordionContainerProps)
   const { history } = useAccordionContext();
 
   const label = t(`common.filters.labels.${field.translation_key}`, { defaultValue: field.key });
-  let tooltipContent: string | null = null;
-  if (filtersWithTooltip.includes(field.key)) {
-    const tooltipKey = `common.filters.labels.${field.translation_key}_tooltip`;
-    tooltipContent = t(tooltipKey) === tooltipKey ? null : t(tooltipKey);
-  }
+  const tooltipKey = `common.filters.labels.${field.translation_key}_tooltip`;
+  const tooltipContent = t(tooltipKey) === tooltipKey ? null : t(tooltipKey);
 
   function renderTrigger() {
     return (
