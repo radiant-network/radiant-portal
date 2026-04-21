@@ -1,6 +1,7 @@
 import { useI18n } from '@/components/hooks/i18n';
 
 import { useSavedFiltersContext } from './hooks/use-saved-filter';
+import { useSavedFiltersUpdatePreferenceEffect } from './hooks/use-saved-filters-preference';
 import DeleteFilterButton from './delete-filter-button';
 import DiscardFilterButton from './discard-filter-button';
 import DuplicateFilterButton from './duplicate-filter-button';
@@ -11,7 +12,13 @@ import UpdateFilterButton from './update-filter-button';
 
 function QueryBuilderSavedFilters() {
   const { t } = useI18n();
-  const { selectedSavedFilter } = useSavedFiltersContext();
+  const { selectedSavedFilter, savedFilterType } = useSavedFiltersContext();
+
+  // Sync selectedSavedFilter changes with user preference
+  useSavedFiltersUpdatePreferenceEffect({
+    savedFilterType: savedFilterType,
+    selectedSavedFilter,
+  });
 
   return (
     <>

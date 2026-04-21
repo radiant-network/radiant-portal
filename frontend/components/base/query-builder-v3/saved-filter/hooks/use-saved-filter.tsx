@@ -21,12 +21,16 @@ export interface ISavedFilterContextProps {
 /**
  * Context
  */
-export const SavedFilterContext = createContext<ISavedFilterContextProps>({
-  savedFilterType: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
-  savedFilters: [],
-  selectedSavedFilter: undefined,
-  isUnsaved: false,
-});
+export function getDefaultSavedFilterContext(): ISavedFilterContextProps {
+  return {
+    savedFilterType: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
+    savedFilters: [],
+    selectedSavedFilter: undefined,
+    isUnsaved: false,
+  };
+}
+
+export const SavedFilterContext = createContext<ISavedFilterContextProps>(getDefaultSavedFilterContext());
 
 export const SavedFilterDispatchContext = createContext<SavedFilterDispatch>(() => {
   console.warn('SavedFilterDispatchContext has been initialized without any dispatch props');
