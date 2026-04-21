@@ -102,9 +102,24 @@ tenant_admin   - + PHI unmasked everywhere + write anywhere + manage orgs
 tenant_owner   - + delete orgs + manage tenant_admins
 ```
 
+### Why Users and Roles Exist in Ranger
+
+Even though authorization is driven by `auth_db` tables, Ranger still requires:
+
+- **User stubs** — Ranger policies reference users by name. The StarRocks Ranger plugin downloads policies and matches them against the connected username. If a user doesn't exist as a Ranger stub, Ranger cannot resolve role membership for that user, and policy evaluation fails silently (default-deny).
+
+- **`role_authenticated` role** — Ranger groups do NOT work with the StarRocks Ranger plugin (groups are resolved by Ranger Admin, not by the embedded plugin). Since we need all users to match the generic policies (row-filters, masking, access), we create a single Ranger role containing every user. The policies reference this role, and the plugin resolves membership at query time.
+
+In short: Ranger needs to *know* the user exists and that they belong to `role_authenticated` so the generic policies apply. The actual permissions (which tenant, which org, what role level) are entirely determined by `auth_db` subqueries — Ranger just gates "can this user run queries at all."
+
+When onboarding a new user, you must:
+1. Create the StarRocks user (authentication)
+2. Create a Ranger user stub + add to `role_authenticated` (policy matching)
+3. Insert into `auth_db` tables (authorization)
+
 ### Data Access (Ranger + auth_db subqueries)
 
-Ranger holds ~11 **generic** policies. All reference a single `role_authenticated` Ranger role.
+Ranger holds ~11 **generic** policies. All reference the `role_authenticated` Ranger role.
 
 **Access policies**: grant SELECT/INSERT on auth_db, poc_db, operational_db
 
