@@ -168,7 +168,7 @@ export const FilesTable = {
   actions: {
     /**
      * Click the specific button to change table paging
-     * @param buttonName The button name to click (First | Last | Previous | Next | Select)
+     * @param buttonName The button name to click (first | last | previous | next | select)
      */
     clickPaginationButton(buttonName: string) {
       cy.waitWhileLoad(60 * 1000);
@@ -391,7 +391,7 @@ export const FilesTable = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('searchRequest2');
-      FilesTable.actions.clickPaginationButton('Next');
+      FilesTable.actions.clickPaginationButton('next');
       cy.wait('@searchRequest2');
       cy.waitWhileLoad(60 * 1000);
 
@@ -400,7 +400,7 @@ export const FilesTable = {
         expect(req.body.page_index).to.deep.equal(2);
         req.continue();
       }).as('searchRequest3');
-      FilesTable.actions.clickPaginationButton('Next');
+      FilesTable.actions.clickPaginationButton('next');
       cy.wait('@searchRequest3');
       cy.waitWhileLoad(60 * 1000);
 
@@ -409,7 +409,7 @@ export const FilesTable = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('searchRequest4');
-      FilesTable.actions.clickPaginationButton('Previous');
+      FilesTable.actions.clickPaginationButton('previous');
       cy.wait('@searchRequest4');
       cy.waitWhileLoad(60 * 1000);
 
@@ -418,7 +418,7 @@ export const FilesTable = {
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('searchRequest5');
-      FilesTable.actions.clickPaginationButton('First');
+      FilesTable.actions.clickPaginationButton('first');
       cy.wait('@searchRequest5');
     },
     /**

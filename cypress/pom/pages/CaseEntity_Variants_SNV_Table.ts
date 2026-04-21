@@ -214,7 +214,7 @@ export const CaseEntity_Variants_SNV_Table = {
   actions: {
     /**
      * Click the specific button to change table paging
-     * @param buttonName The button name to click (First | Last | Previous | Next | Select)
+     * @param buttonName The button name to click (first | last | previous | next | select)
      */
     clickPaginationButton(buttonName: string) {
       cy.waitWhileLoad(60 * 1000);
@@ -504,7 +504,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest2');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Next');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('next');
       cy.wait('@listRequest2');
       cy.waitWhileLoad(60 * 1000);
 
@@ -513,7 +513,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(2);
         req.continue();
       }).as('listRequest3');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Next');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('next');
       cy.wait('@listRequest3');
       cy.waitWhileLoad(60 * 1000);
 
@@ -522,7 +522,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest4');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Previous');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('previous');
       cy.wait('@listRequest4');
       cy.waitWhileLoad(60 * 1000);
 
@@ -531,7 +531,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest5');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('First');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('first');
       cy.wait('@listRequest5');
     },
     /**

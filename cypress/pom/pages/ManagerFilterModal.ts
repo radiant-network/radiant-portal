@@ -18,7 +18,7 @@ export const ManagerFilterModal = {
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.deleteIcon}:visible`).clickAndWait({ force: true });
 
       cy.intercept('**/saved_filters{,/**}').as('deleteSavedFilters');
-      cy.get(CommonSelectors.deleteFilterButton).click({ force: true });
+      cy.get(CommonSelectors.deleteFilterConfirmButton).click({ force: true });
       cy.wait('@deleteSavedFilters');
 
       ManagerFilterModal.actions.closeManager();

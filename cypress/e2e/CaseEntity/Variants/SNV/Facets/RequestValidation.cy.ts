@@ -8,6 +8,7 @@ describe('Case Entity - Variants - SNV - Facets - Request Validation', () => {
   const setupTest = () => {
     cy.login();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV');
+    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Clean Query Builder
     CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
   };
 
