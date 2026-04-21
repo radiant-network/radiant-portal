@@ -162,25 +162,13 @@ Ranger holds ~11 **generic** policies. All reference a single `role_authenticate
 
 ```bash
 cd docs/adr/ranger-poc
-
-# Generate TLS keystore for StarRocks (one-time)
-# If starrocks-conf/starrocks-keystore.jks already exists, skip this step
-openssl req -x509 -newkey rsa:2048 -keyout starrocks-conf/starrocks-key.pem \
-  -out starrocks-conf/starrocks-cert.pem -days 365 -nodes -subj '/CN=starrocks'
-openssl pkcs12 -export -in starrocks-conf/starrocks-cert.pem \
-  -inkey starrocks-conf/starrocks-key.pem -out starrocks-conf/starrocks.p12 \
-  -name starrocks -password pass:changeit
-keytool -importkeystore -srckeystore starrocks-conf/starrocks.p12 \
-  -srcstoretype PKCS12 -srcstorepass changeit \
-  -destkeystore starrocks-conf/starrocks-keystore.jks \
-  -deststoretype JKS -deststorepass changeit -noprompt
-
-# Start all containers
 docker compose up -d --build
 
 # Watch init (~3 min: Ranger + Keycloak + StarRocks setup)
 docker compose logs -f init
 ```
+
+The TLS keystore (`starrocks-conf/starrocks-keystore.jks`) is already committed. No generation step needed.
 
 Wait for "Auth-Tables POC initialization complete!", then wait ~15s for Ranger policy sync.
 
