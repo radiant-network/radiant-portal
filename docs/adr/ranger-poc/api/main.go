@@ -2,36 +2,34 @@ package main
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 // ---------------------------------------------------------------------------
-// Users: StarRocks credentials for each test user
+// Connection config
 // ---------------------------------------------------------------------------
 
-type User struct {
-	Name   string
-	SRUser string
-	SRPass string
-}
+// proxyAddr is the mysql-proxy that translates native_password → authentication_jwt
+const proxyAddr = "mysql-proxy:9031"
 
-var users = map[string]User{
-	"jane":  {Name: "jane", SRUser: "jane", SRPass: "janepass"},
-	"alice": {Name: "alice", SRUser: "alice", SRPass: "alicepass"},
-	"bob":   {Name: "bob", SRUser: "bob", SRPass: "bobpass"},
-	"carol": {Name: "carol", SRUser: "carol", SRPass: "carolpass"},
-	"dan":   {Name: "dan", SRUser: "dan", SRPass: "danpass"},
-}
-
-// Root connection for admin operations and auth-table reads
+// Root connection for admin operations (direct to StarRocks, native password)
 func rootDSN(dbName string) string {
 	return fmt.Sprintf("root:@tcp(starrocks:9030)/%s?interpolateParams=true", dbName)
+}
+
+// userDSN builds a DSN to connect via the proxy with JWT as the password.
+// allowCleartextPasswords=true sends the JWT in cleartext (proxy needs the raw token).
+func userDSN(username, jwt, dbName string) string {
+	return fmt.Sprintf("%s:%s@tcp(%s)/%s?allowCleartextPasswords=true",
+		username, url.QueryEscape(jwt), proxyAddr, dbName)
 }
 
 // ---------------------------------------------------------------------------
@@ -66,8 +64,8 @@ type OrgRole struct {
 	Role     string `json:"role"`
 }
 
-func getUserTenantRoles(username string) ([]TenantRole, error) {
-	db, err := sql.Open("mysql", rootDSN("auth_db"))
+func getUserTenantRoles(username, jwt string) ([]TenantRole, error) {
+	db, err := sql.Open("mysql", userDSN(username, jwt, "auth_db"))
 	if err != nil {
 		return nil, err
 	}
@@ -89,8 +87,8 @@ func getUserTenantRoles(username string) ([]TenantRole, error) {
 	return roles, nil
 }
 
-func getUserOrgRoles(username string) ([]OrgRole, error) {
-	db, err := sql.Open("mysql", rootDSN("auth_db"))
+func getUserOrgRoles(username, jwt string) ([]OrgRole, error) {
+	db, err := sql.Open("mysql", userDSN(username, jwt, "auth_db"))
 	if err != nil {
 		return nil, err
 	}
@@ -223,8 +221,8 @@ func isAllowed(tenantRoles []TenantRole, orgRoles []OrgRole, tenant, org, resour
 // StarRocks query helpers
 // ---------------------------------------------------------------------------
 
-func queryStarRocks(srUser, srPass, dbName, query string) ([]map[string]string, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(starrocks:9030)/%s", srUser, srPass, dbName)
+func queryStarRocks(username, jwt, dbName, query string) ([]map[string]string, error) {
+	dsn := userDSN(username, jwt, dbName)
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
@@ -281,16 +279,53 @@ func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
 	json.NewEncoder(w).Encode(data)
 }
 
-func getUser(r *http.Request) (*User, error) {
-	name := r.Header.Get("X-User")
-	if name == "" {
-		return nil, fmt.Errorf("missing X-User header")
+// UserContext holds the user identity extracted from the JWT
+type UserContext struct {
+	Username string
+	JWT      string // raw JWT token for StarRocks proxy auth
+}
+
+// getUser extracts user identity from Authorization: Bearer <jwt> header.
+// Decodes the JWT payload (base64, no signature verification — StarRocks validates).
+func getUser(r *http.Request) (*UserContext, error) {
+	auth := r.Header.Get("Authorization")
+	if auth == "" {
+		return nil, fmt.Errorf("missing Authorization header")
 	}
-	u, ok := users[name]
-	if !ok {
-		return nil, fmt.Errorf("unknown user: %s", name)
+	if !strings.HasPrefix(auth, "Bearer ") {
+		return nil, fmt.Errorf("expected Bearer token")
 	}
-	return &u, nil
+	jwt := strings.TrimPrefix(auth, "Bearer ")
+
+	// Decode JWT payload to extract preferred_username
+	parts := strings.Split(jwt, ".")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("invalid JWT format")
+	}
+
+	// Pad base64url
+	payload := parts[1]
+	if m := len(payload) % 4; m != 0 {
+		payload += strings.Repeat("=", 4-m)
+	}
+
+	decoded, err := base64.URLEncoding.DecodeString(payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode JWT payload: %w", err)
+	}
+
+	var claims struct {
+		PreferredUsername string `json:"preferred_username"`
+	}
+	if err := json.Unmarshal(decoded, &claims); err != nil {
+		return nil, fmt.Errorf("failed to parse JWT claims: %w", err)
+	}
+
+	if claims.PreferredUsername == "" {
+		return nil, fmt.Errorf("JWT missing preferred_username claim")
+	}
+
+	return &UserContext{Username: claims.PreferredUsername, JWT: jwt}, nil
 }
 
 // knownResources distinguishes /{tenant}/{resource} from /{tenant}/{org}/{resource}
@@ -334,19 +369,19 @@ func authMeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tenantRoles, err := getUserTenantRoles(user.Name)
+	tenantRoles, err := getUserTenantRoles(user.Username, user.JWT)
 	if err != nil {
 		jsonResponse(w, 500, map[string]string{"error": "failed to fetch tenant roles: " + err.Error()})
 		return
 	}
-	orgRoles, err := getUserOrgRoles(user.Name)
+	orgRoles, err := getUserOrgRoles(user.Username, user.JWT)
 	if err != nil {
 		jsonResponse(w, 500, map[string]string{"error": "failed to fetch org roles: " + err.Error()})
 		return
 	}
 
 	jsonResponse(w, 200, map[string]interface{}{
-		"user":         user.Name,
+		"user":         user.Username,
 		"tenant_roles": tenantRoles,
 		"org_roles":    orgRoles,
 	})
@@ -484,13 +519,13 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch user's roles from auth tables
-	tenantRoles, err := getUserTenantRoles(user.Name)
+	// Fetch user's roles from auth tables (via proxy with JWT)
+	tenantRoles, err := getUserTenantRoles(user.Username, user.JWT)
 	if err != nil {
 		jsonResponse(w, 500, map[string]string{"error": "failed to fetch roles: " + err.Error()})
 		return
 	}
-	orgRoles, err := getUserOrgRoles(user.Name)
+	orgRoles, err := getUserOrgRoles(user.Username, user.JWT)
 	if err != nil {
 		jsonResponse(w, 500, map[string]string{"error": "failed to fetch roles: " + err.Error()})
 		return
@@ -500,7 +535,7 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 	if !isAllowed(tenantRoles, orgRoles, tenant, org, rt.resource, rt.action) {
 		jsonResponse(w, 403, map[string]string{
 			"error":    "access denied",
-			"user":     user.Name,
+			"user":     user.Username,
 			"tenant":   tenant,
 			"org":      org,
 			"action":   rt.action,
@@ -509,7 +544,7 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// For POST /cases: insert a new case
+	// For POST /cases: insert a new case (uses root for INSERT)
 	if rt.resource == "case" && rt.action == "create" {
 		var body struct {
 			CaseName  string `json:"case_name"`
@@ -532,7 +567,7 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 
 		err := execStarRocks(rootDSN("operational_db"),
 			"INSERT INTO operational_db.cases (case_id, patient_id, case_name, status, tenant_id, org_id, created_by) VALUES (?, ?, ?, 'open', ?, ?, ?)",
-			nextID, body.PatientID, body.CaseName, tenant, org, user.Name)
+			nextID, body.PatientID, body.CaseName, tenant, org, user.Username)
 		if err != nil {
 			jsonResponse(w, 500, map[string]string{"error": "insert failed: " + err.Error()})
 			return
@@ -541,7 +576,7 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 		jsonResponse(w, 200, map[string]interface{}{
 			"status":   "created",
 			"case_id":  nextID,
-			"user":     user.Name,
+			"user":     user.Username,
 			"tenant":   tenant,
 			"org":      org,
 			"resource": rt.resource,
@@ -550,15 +585,15 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// For data queries: run against StarRocks as the user
+	// For data queries: run against StarRocks via proxy as the user
 	if rt.dataDB != "" {
-		rows, err := queryStarRocks(user.SRUser, user.SRPass, rt.dataDB, rt.dataSQL)
+		rows, err := queryStarRocks(user.Username, user.JWT, rt.dataDB, rt.dataSQL)
 		if err != nil {
 			jsonResponse(w, 500, map[string]string{"error": err.Error()})
 			return
 		}
 		jsonResponse(w, 200, map[string]interface{}{
-			"user":     user.Name,
+			"user":     user.Username,
 			"tenant":   tenant,
 			"org":      org,
 			"action":   rt.action,
@@ -570,7 +605,7 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Non-data action (interpret, generate, invite, etc.)
 	jsonResponse(w, 200, map[string]string{
-		"user":     user.Name,
+		"user":     user.Username,
 		"tenant":   tenant,
 		"org":      org,
 		"action":   rt.action,
@@ -592,6 +627,7 @@ func main() {
 	mux.HandleFunc("/", tenantHandler)
 
 	log.Println("[poc-api] Starting on :8080")
-	log.Println("[poc-api] No Ranger polling — auth tables are the source of truth")
+	log.Println("[poc-api] Auth: Bearer JWT → StarRocks via mysql-proxy")
+	log.Println("[poc-api] Admin: root → StarRocks direct (port 9030)")
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }

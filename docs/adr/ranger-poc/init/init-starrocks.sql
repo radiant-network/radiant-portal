@@ -164,14 +164,47 @@ INSERT INTO operational_db.cases (case_id, patient_id, case_name, status, tenant
     (4, 6, 'Case-NIH-001',  'open', 'udn',  'nih-udn', 'root');
 
 -- =============================================================================
--- 4. StarRocks users (native authentication)
+-- 4. StarRocks users (JWT authentication via Keycloak)
 -- =============================================================================
+-- Users authenticate with JWT tokens issued by Keycloak.
+-- StarRocks validates the token signature against Keycloak's JWKS endpoint.
+-- The preferred_username claim in the JWT maps to the StarRocks username.
+-- Clients connect via the mysql-proxy which translates native_password → authentication_jwt.
 
-CREATE USER IF NOT EXISTS jane  IDENTIFIED BY 'janepass';
-CREATE USER IF NOT EXISTS alice IDENTIFIED BY 'alicepass';
-CREATE USER IF NOT EXISTS bob   IDENTIFIED BY 'bobpass';
-CREATE USER IF NOT EXISTS carol IDENTIFIED BY 'carolpass';
-CREATE USER IF NOT EXISTS dan   IDENTIFIED BY 'danpass';
+CREATE USER IF NOT EXISTS jane IDENTIFIED WITH authentication_jwt AS '{
+  "jwks_url": "http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs",
+  "principal_field": "preferred_username",
+  "required_issuer": "http://keycloak:8080/realms/starrocks",
+  "required_audience": "starrocks"
+}';
+
+CREATE USER IF NOT EXISTS alice IDENTIFIED WITH authentication_jwt AS '{
+  "jwks_url": "http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs",
+  "principal_field": "preferred_username",
+  "required_issuer": "http://keycloak:8080/realms/starrocks",
+  "required_audience": "starrocks"
+}';
+
+CREATE USER IF NOT EXISTS bob IDENTIFIED WITH authentication_jwt AS '{
+  "jwks_url": "http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs",
+  "principal_field": "preferred_username",
+  "required_issuer": "http://keycloak:8080/realms/starrocks",
+  "required_audience": "starrocks"
+}';
+
+CREATE USER IF NOT EXISTS carol IDENTIFIED WITH authentication_jwt AS '{
+  "jwks_url": "http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs",
+  "principal_field": "preferred_username",
+  "required_issuer": "http://keycloak:8080/realms/starrocks",
+  "required_audience": "starrocks"
+}';
+
+CREATE USER IF NOT EXISTS dan IDENTIFIED WITH authentication_jwt AS '{
+  "jwks_url": "http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs",
+  "principal_field": "preferred_username",
+  "required_issuer": "http://keycloak:8080/realms/starrocks",
+  "required_audience": "starrocks"
+}';
 
 -- NOTE: With access_control=ranger, StarRocks delegates all authorization to Ranger.
 -- The Ranger policy "sr_select_auth" (created in init-all.sh) grants role_authenticated

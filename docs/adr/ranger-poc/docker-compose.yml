@@ -48,10 +48,14 @@ services:
     volumes:
       - ./ranger-conf/ranger-starrocks-security.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-security.xml
       - ./ranger-conf/ranger-starrocks-audit.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-audit.xml
+      - ./ranger-conf/starrocks-keystore.jks:/data/deploy/starrocks/fe/conf/starrocks-keystore.jks
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |
         echo 'access_control = ranger' >> /data/deploy/starrocks/fe/conf/fe.conf
+        echo 'ssl_keystore_location = /data/deploy/starrocks/fe/conf/starrocks-keystore.jks' >> /data/deploy/starrocks/fe/conf/fe.conf
+        echo 'ssl_keystore_password = changeit' >> /data/deploy/starrocks/fe/conf/fe.conf
+        echo 'ssl_key_password = changeit' >> /data/deploy/starrocks/fe/conf/fe.conf
         cd /data/deploy && ./entrypoint.sh
     healthcheck:
       test: curl -sf http://localhost:8030/api/health || exit 1
@@ -61,13 +65,46 @@ services:
       start_period: 30s
 
   # =============================================================================
-  # Init container (single container: Ranger policies first, then StarRocks DDL)
-  # Needs both curl (for Ranger REST) and mysql client (for StarRocks).
-  # The starrocks image has mysql; we install curl at runtime.
+  # Keycloak (OIDC provider for JWT authentication)
   # =============================================================================
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    hostname: keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: keycloak
+      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
+    command: start-dev
+    ports:
+      - "8180:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "cat < /dev/null > /dev/tcp/127.0.0.1/8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
   # =============================================================================
-  # POC API -- Go API that queries auth tables for authorization
+  # MySQL Proxy (translates native_password with JWT → authentication_jwt)
+  # =============================================================================
+
+  mysql-proxy:
+    build: ./proxy
+    container_name: mysql-proxy
+    hostname: mysql-proxy
+    depends_on:
+      starrocks:
+        condition: service_healthy
+    ports:
+      - "9031:9031"
+
+  # =============================================================================
+  # POC API -- Go API that uses Bearer JWT via proxy
   # =============================================================================
 
   poc-api:
@@ -79,6 +116,8 @@ services:
         condition: service_healthy
       starrocks:
         condition: service_healthy
+      mysql-proxy:
+        condition: service_started
       init:
         condition: service_completed_successfully
     ports:
@@ -95,6 +134,8 @@ services:
       starrocks:
         condition: service_healthy
       ranger:
+        condition: service_healthy
+      keycloak:
         condition: service_healthy
     volumes:
       - ./init:/init

@@ -92,27 +92,32 @@ echo "  role_authenticated: HTTP ${HTTP_CODE}"
 sleep 2
 
 # ---------------------------------------------------------------------------
-# Step 6: Wait for default policies, then create StarRocks schema + data
+# Step 6: Configure Keycloak (realm, client, users)
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== Configuring Keycloak ==="
+bash /init/init-keycloak.sh
+
+# ---------------------------------------------------------------------------
+# Step 7: Wait for default policies, then create StarRocks schema + data
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Waiting for StarRocks to sync Ranger default policies (20s) ==="
 sleep 20
 
 echo ""
-echo "=== Creating StarRocks databases, tables, users, and seed data ==="
+echo "=== Creating StarRocks databases, tables, users (JWT auth), and seed data ==="
 mysql -hstarrocks -P9030 -uroot < /init/init-starrocks.sql
 echo "  Done."
 sleep 2
 
 # ---------------------------------------------------------------------------
-# Step 6: Verify current_user() expression
+# Step 8: Verify current_user() expression (using root — JWT users need proxy)
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Verifying current_user() cleanup expression ==="
 RESULT=$(mysql -hstarrocks -P9030 -uroot -N -e "SELECT ${CU} AS clean_user;")
 echo "  current_user() via root: '${RESULT}'"
-RESULT=$(mysql -hstarrocks -P9030 -ujane -pjanepass -N -e "SELECT ${CU} AS clean_user;")
-echo "  current_user() via jane: '${RESULT}'"
 
 # ---------------------------------------------------------------------------
 # Step 7: Ranger access policies (what users can SELECT/INSERT)
@@ -184,7 +189,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
 echo "  sr_access_operational: HTTP ${HTTP_CODE}"
 
 # ---------------------------------------------------------------------------
-# Step 8: Row-filter policies on auth tables (users see only their own rows)
+# Step 9: Row-filter policies on auth tables (users see only their own rows)
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Creating auth-table row-filter policies ==="
@@ -258,7 +263,7 @@ echo "  sr_rowfilter_users: HTTP ${HTTP_CODE}"
 # Note: auth_db.tenant and auth_db.organization are reference data — no row filter needed.
 
 # ---------------------------------------------------------------------------
-# Step 9: Row-filter policies on data tables (tenant isolation via subquery)
+# Step 10: Row-filter policies on data tables (tenant isolation via subquery)
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Creating data row-filter policies ==="
@@ -308,7 +313,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
 echo "  sr_rowfilter_cases: HTTP ${HTTP_CODE}"
 
 # ---------------------------------------------------------------------------
-# Step 10: Column masking policies (PHI visibility via subquery)
+# Step 11: Column masking policies (PHI visibility via subquery)
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Creating column masking policies ==="
@@ -394,26 +399,20 @@ echo "=========================================="
 echo "  Auth-Tables POC initialization complete!"
 echo "=========================================="
 echo ""
-echo "=== Test: Full matrix from design doc ==="
+echo "=== Test via mysql-proxy (port 9031) with JWT tokens ==="
 echo ""
-echo "  # Jane (org_member at ALL cbtn orgs) - sees CBTN, full PHI everywhere"
-echo "  mysql -h127.0.0.1 -P9030 -ujane -pjanepass \\"
+echo "  # 1. Get a JWT token for jane from Keycloak:"
+echo "  TOKEN=\$(curl -s -X POST http://localhost:8180/realms/starrocks/protocol/openid-connect/token \\"
+echo "    -d 'client_id=starrocks&username=jane&password=janepass&grant_type=password' | jq -r '.access_token')"
+echo ""
+echo "  # 2. Connect via proxy with JWT as password (use --enable-cleartext-plugin):"
+echo "  mysql -h127.0.0.1 -P9031 -ujane -p\"\${TOKEN}\" --enable-cleartext-plugin \\"
 echo "    -e 'SELECT id, first_name, mrn, tenant_id, org_id FROM poc_db.patients ORDER BY id;'"
 echo ""
-echo "  # Alice (org_member at CHOP only) - sees CBTN, CHOP full, BCH masked"
-echo "  mysql -h127.0.0.1 -P9030 -ualice -palicepass \\"
-echo "    -e 'SELECT id, first_name, mrn, tenant_id, org_id FROM poc_db.patients ORDER BY id;'"
+echo "  # 3. Test API with Bearer token:"
+echo "  curl -s -H \"Authorization: Bearer \${TOKEN}\" http://localhost:8080/cbtn/patients | jq"
 echo ""
-echo "  # Bob (tenant_owner CBTN) - sees CBTN, full PHI everywhere"
-echo "  mysql -h127.0.0.1 -P9030 -ubob -pbobpass \\"
-echo "    -e 'SELECT id, first_name, mrn, tenant_id, org_id FROM poc_db.patients ORDER BY id;'"
-echo ""
-echo "  # Carol (tenant_member CBTN+UDN, org_member CHOP) - sees CBTN+UDN, CHOP full, rest masked"
-echo "  mysql -h127.0.0.1 -P9030 -ucarol -pcarolpass \\"
-echo "    -e 'SELECT id, first_name, mrn, tenant_id, org_id FROM poc_db.patients ORDER BY id;'"
-echo ""
-echo "  # Dan (tenant_member CBTN, no org roles) - sees CBTN, all masked"
-echo "  mysql -h127.0.0.1 -P9030 -udan -pdanpass \\"
-echo "    -e 'SELECT id, first_name, mrn, tenant_id, org_id FROM poc_db.patients ORDER BY id;'"
-echo ""
-echo "Ranger Admin UI: http://localhost:6080  (admin / rangerR0cks!)"
+echo "Ranger Admin UI:  http://localhost:6080  (admin / rangerR0cks!)"
+echo "Keycloak Admin:   http://localhost:8180  (admin / admin)"
+echo "MySQL Proxy:      port 9031 (JWT as password)"
+echo "StarRocks Direct: port 9030 (root only, native password)"
