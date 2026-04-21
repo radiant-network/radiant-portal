@@ -437,6 +437,7 @@
         "gnomad_sf": "gnomAD 4.1.0",
         "gnomad_sc": "gnomAD 4.1.0 ALT",
         "gnomad_v3_af": "gnomAD Genome 3.1.2",
+        "hotspot": "Hotspot",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
         "impact_score": "Impact Score",
@@ -461,7 +462,7 @@
         "germline_pf_wgs_affected": "Affected Patient Freq.",
         "germline_pf_wgs_affected_tooltip": "Frequency across affected patients of the network (WGS)",
         "germline_pf_wgs_not_affected": "Non-Affected Patient Freq.",
-        "germline_pf_wgs_not_affected_tooltip": "Frequency across non-affected patients of the network (WGS) ",
+        "germline_pf_wgs_not_affected_tooltip": "Frequency across non-affected patients of the network (WGS)",
         "germline_pf_wgs_tooltip": "Frequency across all patients of the network (WGS)",
         "polyphen2_hvar_pred": "PolyPhen-2 HVAR",
         "polyphen2_hvar_pred_tooltip": "Polymorphism Phenotyping v2 HumVar",
@@ -478,7 +479,7 @@
         "sm": "SM",
         "sm_tooltip": "Linear copy ratio of the segment mean",
         "somatic_pf_tn_wgs": "Freq. TN All Patients",
-        "somatic_pf_tn_wgs_tooltip": "Frequency across all patients of the network (WGS)",
+        "somatic_pf_tn_wgs_tooltip": "Frequency across all patients of the network who had a tumor-normal analysis (WGS)",
         "start": "Position",
         "study_code": "Study Code",
         "study_id": "Study ID",
@@ -856,7 +857,7 @@
       "aa_change": "AA",
       "aa_change_tooltip": "Amino acid change",
       "ad_ratio": "AD Ratio",
-      "ad_ratio_tooltip": "Allele depth ratio",
+      "ad_ratio_tooltip": "Allele depth ratio ALT/(ALT+REF)",
       "bc": "BC",
       "bc_tooltip": "Number of bins in the region",
       "calls": "GT",
@@ -1423,12 +1424,14 @@
           "partial": "Gene overlaps the CNV",
           "full_cnv": "Gene contains the CNV entirely"
         },
+        "cnv_to": "CNV (TO)",
+        "sequencing_id": "Seq. ID",
+        "sample_submitter_id": "Submitter Sample ID",
         "snv": "SNV",
         "cnv": "CNV",
-        "snv_to": "SNV (TO)",
         "snv_tn": "SNV (TN)",
-        "cnv_to": "CNV (TO)",
-        "sequencing_id": "Seq. ID"
+        "snv_to": "SNV (TO)",
+        "snv_to_tooltip": "SNV (tumor-normal)"
       },
       "dialog": {
         "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
