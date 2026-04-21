@@ -1,7 +1,7 @@
-ranger-conf/nashorn-core-15.4.jar
-ranger-conf/jwt_private_key.pem
-ranger-conf/jwks.json
-ranger-conf/starrocks-key.pem
-ranger-conf/starrocks-cert.pem
-ranger-conf/starrocks.p12
+# Transient build artifacts
 udf/target/
+
+# TLS generation intermediates (only starrocks-keystore.jks is committed)
+starrocks-conf/starrocks-key.pem
+starrocks-conf/starrocks-cert.pem
+starrocks-conf/starrocks.p12

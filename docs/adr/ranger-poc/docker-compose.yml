@@ -48,7 +48,7 @@ services:
     volumes:
       - ./ranger-conf/ranger-starrocks-security.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-security.xml
       - ./ranger-conf/ranger-starrocks-audit.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-audit.xml
-      - ./ranger-conf/starrocks-keystore.jks:/data/deploy/starrocks/fe/conf/starrocks-keystore.jks
+      - ./starrocks-conf/starrocks-keystore.jks:/data/deploy/starrocks/fe/conf/starrocks-keystore.jks
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |

@@ -164,15 +164,15 @@ Ranger holds ~11 **generic** policies. All reference a single `role_authenticate
 cd docs/adr/ranger-poc
 
 # Generate TLS keystore for StarRocks (one-time)
-# If ranger-conf/starrocks-keystore.jks already exists, skip this step
-openssl req -x509 -newkey rsa:2048 -keyout ranger-conf/starrocks-key.pem \
-  -out ranger-conf/starrocks-cert.pem -days 365 -nodes -subj '/CN=starrocks'
-openssl pkcs12 -export -in ranger-conf/starrocks-cert.pem \
-  -inkey ranger-conf/starrocks-key.pem -out ranger-conf/starrocks.p12 \
+# If starrocks-conf/starrocks-keystore.jks already exists, skip this step
+openssl req -x509 -newkey rsa:2048 -keyout starrocks-conf/starrocks-key.pem \
+  -out starrocks-conf/starrocks-cert.pem -days 365 -nodes -subj '/CN=starrocks'
+openssl pkcs12 -export -in starrocks-conf/starrocks-cert.pem \
+  -inkey starrocks-conf/starrocks-key.pem -out starrocks-conf/starrocks.p12 \
   -name starrocks -password pass:changeit
-keytool -importkeystore -srckeystore ranger-conf/starrocks.p12 \
+keytool -importkeystore -srckeystore starrocks-conf/starrocks.p12 \
   -srcstoretype PKCS12 -srcstorepass changeit \
-  -destkeystore ranger-conf/starrocks-keystore.jks \
+  -destkeystore starrocks-conf/starrocks-keystore.jks \
   -deststoretype JKS -deststorepass changeit -noprompt
 
 # Start all containers
