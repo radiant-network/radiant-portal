@@ -325,7 +325,7 @@
     "aggregations": {
       "variant": {
         "items": [
-          { "key": "type", "translation_key": "variant_type", "type": "multiple" },
+          { "key": "variant_class", "translation_key": "variant_class", "type": "multiple", "withDictionary": true },
           {
             "key": "cn",
             "translation_key": "cn",
@@ -338,7 +338,7 @@
             "type": "numerical",
             "defaults": { "min": 0, "max": 100, "defaultOperator": ">" }
           },
-          { "key": "chromosome", "translation_key": "chromosome", "type": "multiple" },
+          { "key": "chromosome", "translation_key": "chromosome", "type": "multiple", "withDictionary": true },
           {
             "key": "start",
             "translation_key": "cnv_start",
