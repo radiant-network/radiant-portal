@@ -1015,9 +1015,10 @@
       "title": "Clinical Interpretation",
       "cancel_text": "Cancel",
       "ok_text": "Save interpretation",
-      "last_update": "Last update: <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
+      "last_update": "Last update:",
       "header": {
         "germline": "Germline",
+        "germline_family": "Germline",
         "somatic": "Somatic"
       },
       "transcript": {

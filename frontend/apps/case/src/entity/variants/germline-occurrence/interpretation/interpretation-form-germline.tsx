@@ -5,6 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
 import { getTransmissionModeList } from '@/components/base/badges/transmission-mode-badge';
+import {
+  classificationCriterias,
+  getClassificationCriteriaColor,
+} from '@/components/base/classifications/interpretation';
 import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
@@ -13,15 +17,14 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/base/shadcn/toggle-gr
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { classificationCriterias, getClassificationCriteriaColor } from './data';
-import InterpretationFormGeneric from './interpretation-form-generic';
-import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
+import InterpretationFormGeneric from '../../interpretation/interpretation-form-generic';
+import MondoAutoCompleteFormField from '../../interpretation/mondo-auto-complete-form-field';
 import {
   germlineInterpretationFormSchema,
   GermlineInterpretationSchemaType,
   InterpretationFormProps,
   InterpretationFormRef,
-} from './types';
+} from '../../interpretation/types';
 
 const InterpretationFormGermline = forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationGermline>>(
   ({ interpretation, saveInterpretation, onDirtyChange }, ref) => {

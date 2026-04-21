@@ -1,31 +1,77 @@
 import { useCallback } from 'react';
 import { SquarePen } from 'lucide-react';
+import useSWR from 'swr';
 
-import { CaseSequencingExperiment, SomaticSNVOccurrence } from '@/api/api';
+import {
+  CaseEntity,
+  CaseSequencingExperiment,
+  ExpandedSomaticSNVOccurrence,
+  InterpretationSomatic,
+  SomaticSNVOccurrence,
+} from '@/api/api';
 import { useDataTable, useDataTableRowNavigation } from '@/components/base/data-table/hooks/use-data-table';
-import InterpretationDialog from '@/components/base/interpretation/interpretation-dialog';
 import { NotesProvider } from '@/components/base/notes/hooks/use-notes';
 import NotesSliderSheet from '@/components/base/notes/notes-slider-sheet';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
-import { useSomaticOccurrenceAndCase } from '@/components/base/slider/hooks/use-slider-occurrence-and-case';
 import SliderHeader from '@/components/base/slider/slider-header';
-import SliderInterpretationDetailsCard from '@/components/base/slider/slider-interpretation-details-card';
 import SliderOccurrenceDetailsCard from '@/components/base/slider/slider-occurrence-details-card';
 import SliderOccurrenceSubHeader from '@/components/base/slider/slider-occurrence-sub-header';
 import SliderPatientRow from '@/components/base/slider/slider-patient-row';
 import SliderSheet from '@/components/base/slider/slider-sheet';
 import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
 import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
+import SomaticSliderInterpretationDetailsCard from '@/components/base/slider/somatic-slider-interpretation-details-card';
 import { useI18n } from '@/components/hooks/i18n';
+import { getCaseSequencingExperimentByPatient, getPatientClinicalInformation } from '@/components/lib/case-entity';
+import { caseApi, interpretationApi, occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
+import SomaticInterpretationDialog from '../interpretation/somatic-interpretation-dialog';
 
 type SomaticOccurrenceSheetProps = {
   children?: React.ReactElement;
   patientSelected?: CaseSequencingExperiment;
 };
+
+type CaseInput = {
+  key: string;
+  caseId: number;
+};
+
+type OccurrenceExpandInput = {
+  caseId: number;
+  seqId: number;
+  locusId: string;
+};
+
+type InterpretationInput = {
+  caseId: string;
+  seqId: string;
+  locusId: string;
+  transcriptId: string;
+};
+
+export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput) {
+  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(input.caseId, input.seqId, input.locusId);
+  return response.data;
+}
+
+export async function fetchCaseEntity(input: CaseInput) {
+  const response = await caseApi.caseEntity(input.caseId);
+  return response.data;
+}
+
+export async function fetchInterpretation(input: InterpretationInput) {
+  const response = await interpretationApi.getInterpretationSomatic(
+    input.caseId,
+    input.seqId,
+    input.locusId,
+    input.transcriptId,
+  );
+  return response.data;
+}
 
 function SomaticOccurrenceSheet({ patientSelected, children }: SomaticOccurrenceSheetProps) {
   const { list } = useDataTable();
@@ -75,20 +121,57 @@ export function SomaticOccurrenceSheetContent({
 
   const { list } = useDataTable();
 
-  const { patient, caseResult, caseSequencing, expandResult, isLoading } = useSomaticOccurrenceAndCase(
-    caseId,
-    occurrence.seq_id,
-    occurrence.locus_id.toString(),
-    patientSelected,
+  // somatic/expand
+  const expandResult = useSWR<ExpandedSomaticSNVOccurrence, any, OccurrenceExpandInput>(
+    {
+      caseId: caseId,
+      locusId: occurrence.locus_id.toString(),
+      seqId: occurrence.seq_id,
+    },
+    fetchSomaticOccurrenceExpand,
+    {
+      shouldRetryOnError: false,
+      revalidateOnFocus: false,
+    },
   );
 
-  const listFetcher = useCallback(() => {
-    if (list) {
-      list.mutate();
-    }
-  }, [list]);
+  // case-entity
+  const caseEntity = useSWR<CaseEntity>(
+    {
+      key: 'case-entity',
+      caseId: caseId,
+    },
+    fetchCaseEntity,
+    {
+      shouldRetryOnError: false,
+      revalidateOnFocus: false,
+    },
+  );
 
-  if (isLoading || !expandResult.data) {
+  const interpretation = useSWR<InterpretationSomatic>(
+    {
+      caseId,
+      seqId: occurrence.seq_id,
+      locusId: occurrence.locus_id,
+      transcriptId: expandResult.data?.transcript_id,
+    },
+    fetchInterpretation,
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+      shouldRetryOnError: false,
+    },
+  );
+
+  const patient = getPatientClinicalInformation(caseEntity.data, patientSelected);
+  const caseSequencing = getCaseSequencingExperimentByPatient(caseEntity.data, patientSelected);
+
+  const handleInterpretationSaveCallback = useCallback(() => {
+    list?.mutate();
+    interpretation.mutate();
+  }, [list, interpretation]);
+
+  if (caseEntity.isLoading || !expandResult.data) {
     return <SliderSheetSkeleton />;
   }
 
@@ -103,12 +186,12 @@ export function SomaticOccurrenceSheetContent({
       </SliderHeader>
       <Separator />
       <SliderOccurrenceSubHeader
-        type={caseResult.data?.case_type}
+        type={caseEntity.data?.case_type}
         locusId={occurrence.locus_id}
         hgvsg={occurrence.hgvsg}
         actions={
           <div className="flex gap-2">
-            <NotesProvider value={{ onChangeCallback: listFetcher }}>
+            <NotesProvider value={{ onChangeCallback: () => list?.mutate }}>
               <NotesSliderSheet
                 caseId={caseId}
                 seqId={occurrence.seq_id}
@@ -117,9 +200,11 @@ export function SomaticOccurrenceSheetContent({
               />
             </NotesProvider>
             {!occurrence.has_interpretation && (
-              <InterpretationDialog
+              <SomaticInterpretationDialog
+                isCreation
                 locusId={occurrence.locus_id}
-                handleSaveCallback={listFetcher}
+                handleSaveCallback={handleInterpretationSaveCallback}
+                transcriptId={expandResult.data.transcript_id}
                 renderTrigger={handleOpen => (
                   <Button size="sm" onClick={handleOpen}>
                     <SquarePen />
@@ -133,9 +218,7 @@ export function SomaticOccurrenceSheetContent({
       />
 
       {occurrence.has_interpretation && (
-        <SliderInterpretationDetailsCard
-          canEditInterpretation
-          onInterpretationSaved={listFetcher}
+        <SomaticSliderInterpretationDetailsCard
           seqId={occurrence.seq_id}
           caseId={caseId}
           symbol={occurrence?.symbol}
@@ -143,6 +226,20 @@ export function SomaticOccurrenceSheetContent({
           isManeSelect={occurrence?.is_mane_select}
           isManePlus={occurrence?.is_mane_plus}
           isCanonical={occurrence?.is_canonical}
+          transcriptId={expandResult.data?.transcript_id}
+          actions={
+            <SomaticInterpretationDialog
+              locusId={occurrence.locus_id}
+              transcriptId={expandResult.data.transcript_id}
+              handleSaveCallback={handleInterpretationSaveCallback}
+              renderTrigger={handleOpen => (
+                <Button size="sm" onClick={handleOpen}>
+                  <SquarePen />
+                  {t('common.edit')}
+                </Button>
+              )}
+            />
+          }
         />
       )}
 

@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { CaseSequencingExperiment } from '@/api/api';
 import { ICountInput, IListInput } from '@/components/base/query-builder-v3/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder-v3/query-builder';

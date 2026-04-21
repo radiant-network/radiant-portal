@@ -1,8 +1,12 @@
-import { forwardRef, useEffect, useImperativeHandle } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { InterpretationSomatic } from '@/api/api';
+import {
+  getOncogenicityClassificationCriteriaColor,
+  oncogenicityClassificationCriterias,
+} from '@/components/base/classifications/oncogenicity';
 import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
 import { Badge } from '@/components/base/shadcn/badge';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/base/shadcn/form';
@@ -11,19 +15,14 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/base/shadcn/toggle-gr
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
-import {
-  getClinicalUtilitys,
-  getOncogenicityClassificationCriteriaColor,
-  oncogenicityClassificationCriterias,
-} from './data';
-import InterpretationFormGeneric from './interpretation-form-generic';
-import MondoAutoCompleteFormField from './mondo-auto-complete-form-field';
+import InterpretationFormGeneric from '../../interpretation/interpretation-form-generic';
+import MondoAutoCompleteFormField from '../../interpretation/mondo-auto-complete-form-field';
 import {
   InterpretationFormProps,
   InterpretationFormRef,
   somaticInterpretationFormSchema,
   SomaticInterpretationSchemaType,
-} from './types';
+} from '../../interpretation/types';
 
 const InterpretationFormSomatic = forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationSomatic>>(
   ({ interpretation, saveInterpretation, onDirtyChange }, ref) => {
@@ -45,6 +44,32 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
     function onSubmit(values: SomaticInterpretationSchemaType) {
       saveInterpretation(values);
     }
+
+    const clinicalUtilities = useMemo(
+      () => [
+        {
+          label: t('variant.interpretation_form.somatic.clinical_utility_options.category_ia'),
+          value: 'category_ia',
+        },
+        {
+          label: t('variant.interpretation_form.somatic.clinical_utility_options.category_ib'),
+          value: 'category_ib',
+        },
+        {
+          label: t('variant.interpretation_form.somatic.clinical_utility_options.category_iic'),
+          value: 'category_iic',
+        },
+        {
+          label: t('variant.interpretation_form.somatic.clinical_utility_options.category_iid'),
+          value: 'category_iid',
+        },
+        {
+          label: t('variant.interpretation_form.somatic.clinical_utility_options.category_iii'),
+          value: 'category_iii',
+        },
+      ],
+      [],
+    );
 
     useEffect(() => {
       onDirtyChange(form.formState.isDirty);
@@ -203,7 +228,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {getClinicalUtilitys(t).map(clinicalUtility => (
+                      {clinicalUtilities.map(clinicalUtility => (
                         <SelectItem key={clinicalUtility.value} value={clinicalUtility.value}>
                           {clinicalUtility.label}
                         </SelectItem>
@@ -221,7 +246,5 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
     );
   },
 );
-
-InterpretationFormSomatic.displayName = 'InterpretationFormSomatic';
 
 export default InterpretationFormSomatic;

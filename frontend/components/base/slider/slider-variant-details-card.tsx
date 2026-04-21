@@ -329,15 +329,9 @@ const PredictionCard = ({
     frequencies.push(
       <DescriptionRow
         label={
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-flex gap-1 items-center">
-                {t('preview_sheet.variant_details.sections.frequencies.tn')}
-                <ShapeDiamondIcon className="size-[13px] text-red-500" />
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>{t('occurrence_expand.frequencies.affected_tooltip')}</TooltipContent>
-          </Tooltip>
+          <span className="inline-flex gap-1 items-center">
+            {t('preview_sheet.variant_details.sections.frequencies.tn')}
+          </span>
         }
       >
         {somatic_pc_tn_wgs && somatic_pn_tn_wgs && somatic_pf_tn_wgs?.toExponential(2) ? (

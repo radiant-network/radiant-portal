@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
-import { CalendarIcon, ClipboardList, LibraryBig, SquarePen, StethoscopeIcon } from 'lucide-react';
-import useSWR from 'swr';
+import { CalendarIcon, ClipboardList, LibraryBig, StethoscopeIcon } from 'lucide-react';
 
+import useSWR from 'swr';
 import { InterpretationGermline } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import TransmissionModeBadge from '@/components/base/badges/transmission-mode-badge';
+import { getClassificationCriteriaColor } from '@/components/base/classifications/interpretation';
 import RichTextViewer from '@/components/base/data-entry/rich-text-editor/rich-text-viewer';
 import DateTime from '@/components/base/date/datetime';
 import EmptyField from '@/components/base/information/empty-field';
-import { getClassificationCriteriaColor } from '@/components/base/interpretation/data';
-import { useInterpretationHelper } from '@/components/base/interpretation/hook';
-import InterpretationDialog from '@/components/base/interpretation/interpretation-dialog';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 import PubmedListDialog from '@/components/base/pubmed/pubmed-list-dialog';
@@ -23,10 +21,10 @@ import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
+import { Tooltip, TooltipContent, TooltipTrigger } from 'components/base/shadcn/tooltip';
+import { interpretationApi } from '@/utils/api';
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '../shadcn/tooltip';
-
-type SliderInterpretationDetailsCardProps = {
+type GermlineSliderInterpretationDetailsCardProps = {
   seqId: number;
   caseId: number;
   locusId: string;
@@ -35,11 +33,28 @@ type SliderInterpretationDetailsCardProps = {
   isCanonical?: boolean;
   isManeSelect?: boolean;
   isManePlus?: boolean;
-  canEditInterpretation?: boolean;
-  onInterpretationSaved?: () => void;
+  actions: React.ReactNode;
 };
 
-function SliderInterpretationDetailsCard({
+type InterpretationInput = {
+  caseId: string;
+  seqId: string;
+  locusId: string;
+  transcriptId: string;
+};
+
+export async function fetchInterpretation(input: InterpretationInput) {
+  const response = await interpretationApi.getInterpretationGermline(
+    input.caseId,
+    input.seqId,
+    input.locusId,
+    input.transcriptId,
+  );
+  return response.data;
+}
+
+function GermlineSliderInterpretationDetailsCard({
+  actions,
   seqId,
   caseId,
   locusId,
@@ -48,32 +63,30 @@ function SliderInterpretationDetailsCard({
   isManePlus,
   isCanonical,
   transcriptId,
-  canEditInterpretation = false,
-  onInterpretationSaved,
-}: SliderInterpretationDetailsCardProps) {
+}: GermlineSliderInterpretationDetailsCardProps) {
   const { t } = useI18n();
   const [isPubmedOpen, setIsPubmedOpen] = useState<boolean>(false);
 
-  const { fetch } = useInterpretationHelper({
-    caseId,
-    seqId,
-    locusId,
-    transcriptId,
-    isSomatic: false,
-  });
-  const interpretationUniqueKey = `interpretation-details-${seqId}-${locusId}-${transcriptId}`;
-  const fetchInterpretation = useSWR<InterpretationGermline>(interpretationUniqueKey, fetch, {
-    revalidateOnFocus: false,
-    revalidateOnMount: false,
-    shouldRetryOnError: false,
-  });
-  const { data: interpretation } = fetchInterpretation;
+  const interpretation = useSWR<InterpretationGermline>(
+    {
+      caseId,
+      seqId: seqId,
+      locusId: locusId,
+      transcriptId: transcriptId,
+    },
+    fetchInterpretation,
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+      shouldRetryOnError: false,
+    },
+  );
 
   useEffect(() => {
-    fetchInterpretation.mutate();
+    interpretation.mutate();
   }, []);
 
-  if (fetchInterpretation.isLoading || fetchInterpretation.isValidating) {
+  if (interpretation.isLoading) {
     return (
       <SliderCard icon={ClipboardList} title={t('preview_sheet.interpretation_details.title')}>
         <div className="flex flex-col gap-4">
@@ -89,28 +102,7 @@ function SliderInterpretationDetailsCard({
   }
 
   return (
-    <SliderCard
-      icon={ClipboardList}
-      title={t('preview_sheet.interpretation_details.title')}
-      actions={
-        canEditInterpretation && (
-          <InterpretationDialog
-            locusId={locusId}
-            transcriptId={transcriptId}
-            handleSaveCallback={() => {
-              fetchInterpretation.mutate();
-              onInterpretationSaved?.();
-            }}
-            renderTrigger={handleOpen => (
-              <Button size="sm" onClick={handleOpen}>
-                <SquarePen />
-                {t('common.edit')}
-              </Button>
-            )}
-          />
-        )
-      }
-    >
+    <SliderCard icon={ClipboardList} title={t('preview_sheet.interpretation_details.title')} actions={actions}>
       <div className="rounded-md w-full border">
         <div className="size-full">
           <div className="flex flex-col flex-wrap gap-4 items-start p-3 w-full">
@@ -148,7 +140,7 @@ function SliderInterpretationDetailsCard({
               </div>
               <div className="flex justify-end w-full">
                 <div>
-                  <ClassificationBadge value={interpretation?.classification ?? ''} size="lg" />
+                  <ClassificationBadge value={interpretation.data?.classification ?? ''} size="lg" />
                 </div>
               </div>
             </div>
@@ -156,12 +148,12 @@ function SliderInterpretationDetailsCard({
               <div className="flex gap-2">
                 <PhenotypeConditionLink
                   className="capitalize"
-                  name={interpretation?.condition_name}
-                  code={interpretation?.condition}
+                  name={interpretation.data?.condition_name}
+                  code={interpretation.data?.condition}
                   showCode={false}
                 />
                 <div className="flex gap-1">
-                  {(interpretation?.transmission_modes ?? []).map(omim => (
+                  {(interpretation.data?.transmission_modes ?? []).map(omim => (
                     <TransmissionModeBadge value={omim} key={omim} />
                   ))}
                 </div>
@@ -169,7 +161,7 @@ function SliderInterpretationDetailsCard({
             </DescriptionSection>
             <DescriptionSection title={t('preview_sheet.interpretation_details.fields.classification_criteria')}>
               <div className="space-x-1">
-                {(interpretation?.classification_criterias ?? []).map((criteria: string) => (
+                {(interpretation.data?.classification_criterias ?? []).map((criteria: string) => (
                   <Badge key={criteria} variant={getClassificationCriteriaColor(criteria)}>
                     {criteria}
                   </Badge>
@@ -182,19 +174,19 @@ function SliderInterpretationDetailsCard({
                 <TooltipTrigger>
                   <span className="flex items-center gap-1">
                     <StethoscopeIcon size="14" />
-                    {interpretation?.updated_by_name}
+                    {interpretation.data?.updated_by_name}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
                   {t('preview_sheet.interpretation_details.fields.updated_by_name_tooltip')}
                 </TooltipContent>
               </Tooltip>
-              {interpretation?.updated_at && (
+              {interpretation.data?.updated_at && (
                 <Tooltip>
                   <TooltipTrigger>
                     <span className="flex items-center gap-1">
                       <CalendarIcon size="14" />
-                      <DateTime date={interpretation.updated_at} />
+                      <DateTime date={interpretation.data?.updated_at} />
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>{t('preview_sheet.interpretation_details.fields.updated_at_tooltip')}</TooltipContent>
@@ -203,19 +195,19 @@ function SliderInterpretationDetailsCard({
             </div>
 
             <DescriptionSection title={t('preview_sheet.interpretation_details.fields.interpretation')}>
-              <RichTextViewer className="max-h-[200px]" value={interpretation?.interpretation ?? ''} />
+              <RichTextViewer className="max-h-[200px]" value={interpretation.data?.interpretation ?? ''} />
             </DescriptionSection>
 
-            {(interpretation?.pubmed ?? []).length > 0 && (
+            {(interpretation.data?.pubmed ?? []).length > 0 && (
               <>
                 <Button variant="link" className="p-0" onClick={() => setIsPubmedOpen(true)}>
                   <LibraryBig />
                   {t('preview_sheet.interpretation_details.fields.references', {
-                    count: interpretation?.pubmed?.length ?? 0,
+                    count: interpretation.data?.pubmed?.length ?? 0,
                   })}
                 </Button>
                 <PubmedListDialog
-                  pubmeds={interpretation?.pubmed ?? []}
+                  pubmeds={interpretation.data?.pubmed ?? []}
                   open={isPubmedOpen}
                   onClose={() => setIsPubmedOpen(false)}
                 />
@@ -227,4 +219,4 @@ function SliderInterpretationDetailsCard({
     </SliderCard>
   );
 }
-export default SliderInterpretationDetailsCard;
+export default GermlineSliderInterpretationDetailsCard;
