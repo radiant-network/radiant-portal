@@ -20,6 +20,7 @@ function SequencingActionsCell({ row }: CellContext<any, any>) {
           />
         )}
         <Button
+          data-cy="details-button"
           onClick={() => {
             setSequencingExperimentDialogOpen(true);
           }}

@@ -55,6 +55,7 @@ export function FacetList({ groupKey, aggregations }: FacetListProps) {
       </div>
       <div className="flex justify-end">
         <Button
+          data-cy="expand-collapse-button"
           variant="link"
           size="xs"
           onClick={() => {
