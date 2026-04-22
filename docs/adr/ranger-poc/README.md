@@ -102,24 +102,19 @@ tenant_admin   - + PHI unmasked everywhere + write anywhere + manage orgs
 tenant_owner   - + delete orgs + manage tenant_admins
 ```
 
-### Why Users and Roles Exist in Ranger
+### Ranger Policies Use `{USER}` Wildcard
 
-Even though authorization is driven by `auth_db` tables, Ranger still requires:
+All Ranger policies use `"users": ["{USER}"]` which matches **any authenticated StarRocks user**. No Ranger user stubs or roles are needed. The StarRocks Ranger plugin resolves `{USER}` to the connected username at query time.
 
-- **User stubs** — Ranger policies reference users by name. The StarRocks Ranger plugin downloads policies and matches them against the connected username. If a user doesn't exist as a Ranger stub, Ranger cannot resolve role membership for that user, and policy evaluation fails silently (default-deny).
+This means Ranger is completely hands-off for user management. Onboarding a new user requires only:
+1. Create the StarRocks user (authentication — JWT or native)
+2. Insert into `auth_db` tables (authorization)
 
-- **`role_authenticated` role** — Ranger groups do NOT work with the StarRocks Ranger plugin (groups are resolved by Ranger Admin, not by the embedded plugin). Since we need all users to match the generic policies (row-filters, masking, access), we create a single Ranger role containing every user. The policies reference this role, and the plugin resolves membership at query time.
-
-In short: Ranger needs to *know* the user exists and that they belong to `role_authenticated` so the generic policies apply. The actual permissions (which tenant, which org, what role level) are entirely determined by `auth_db` subqueries — Ranger just gates "can this user run queries at all."
-
-When onboarding a new user, you must:
-1. Create the StarRocks user (authentication)
-2. Create a Ranger user stub + add to `role_authenticated` (policy matching)
-3. Insert into `auth_db` tables (authorization)
+No Ranger configuration changes needed.
 
 ### Data Access (Ranger + auth_db subqueries)
 
-Ranger holds ~11 **generic** policies. All reference the `role_authenticated` Ranger role.
+Ranger holds ~11 **generic** policies. All use the `{USER}` wildcard.
 
 **Access policies**: grant SELECT/INSERT on auth_db, poc_db, operational_db
 
@@ -302,12 +297,12 @@ curl -s -X POST -H 'Content-Type: application/json' \
 
 1. **Auth tables as source of truth** — role assignments live in StarRocks, not Ranger
 2. **Auth tables are isolated** — row-filter policies ensure users see only their own rows
-3. **Generic Ranger policies** — ~11 policies using `IN(SELECT FROM auth_db.*)` subqueries
-4. **Dynamic role changes** — INSERT/DELETE in auth tables takes effect immediately
-5. **Use `IN` not `EXISTS` for masking subqueries** — `EXISTS` causes column ambiguity in mask expressions
-6. **JWT auth requires TLS** — StarRocks needs JKS keystore for the OIDC plugin to work
-7. **OIDC auth response format** — requires `0x01` capability flag + lenenc JWT (not raw bytes)
-8. **Ranger groups don't work with StarRocks** — use a `role_authenticated` role instead
+3. **`{USER}` wildcard** — all Ranger policies use `"users": ["{USER}"]`, matching any authenticated user. No Ranger user stubs or roles needed.
+4. **Generic Ranger policies** — ~11 policies using `IN(SELECT FROM auth_db.*)` subqueries
+5. **Dynamic role changes** — INSERT/DELETE in auth tables takes effect immediately
+6. **Use `IN` not `EXISTS` for masking subqueries** — `EXISTS` causes column ambiguity in mask expressions
+7. **JWT auth requires TLS** — StarRocks needs JKS keystore for the OIDC plugin to work
+8. **OIDC auth response format** — requires `0x01` capability flag + lenenc JWT (not raw bytes)
 9. **`current_user()` returns `'user'@'%'`** — cleaned via `replace(substring_index(current_user(), '@', 1), char(39), '')`
 10. **Go clients need a proxy** — `go-sql-driver/mysql` doesn't support `authentication_openid_connect_client`; Python `mysql-connector-python >= 9.1.0` supports it natively
 

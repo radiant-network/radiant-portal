@@ -1,12 +1,12 @@
 #!/bin/bash
 # =============================================================================
 # Auth-Tables POC init:
-#   1. Register StarRocks service definition in Ranger (no portal service)
+#   1. Register StarRocks service definition in Ranger
 #   2. Create StarRocks service instance
-#   3. Create user stubs in Ranger
-#   4. Wait for default policies, then run StarRocks DDL
-#   5. Verify current_user() expression
-#   6. Create generic Ranger policies (subquery-based row-filter + column mask)
+#   3. Configure Keycloak (realm, client, users)
+#   4. Create StarRocks schema + data (JWT-authenticated users)
+#   5. Create generic Ranger policies (subquery-based row-filter + column mask)
+#      All policies use {USER} wildcard — no Ranger user stubs or roles needed.
 # =============================================================================
 
 set -e
@@ -58,48 +58,14 @@ echo "  Response: HTTP ${HTTP_CODE}"
 sleep 2
 
 # ---------------------------------------------------------------------------
-# Step 4: Create user stubs in Ranger
-# ---------------------------------------------------------------------------
-echo ""
-echo "=== Registering user stubs in Ranger ==="
-for USER in jane alice bob carol dan; do
-  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
-    -H "Accept: application/json" -H "Content-Type: application/json" \
-    "${RANGER_URL}/service/xusers/secure/users" \
-    -d "{\"name\":\"${USER}\",\"password\":\"Passw0rd!\",\"userRoleList\":[\"ROLE_USER\"],\"firstName\":\"${USER}\",\"userSource\":0}")
-  echo "  ${USER}: HTTP ${HTTP_CODE}"
-done
-sleep 2
-
-# ---------------------------------------------------------------------------
-# Step 5: Create Ranger role for all authenticated users
-# Ranger groups do NOT work with StarRocks Ranger plugin.
-# We use a single role containing all users for generic policies.
-# ---------------------------------------------------------------------------
-echo ""
-echo "=== Creating role_authenticated (all users) ==="
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
-  -H "Content-Type: application/json" -H "Accept: application/json" \
-  "${RANGER_URL}/service/public/v2/api/roles" \
-  -d '{"name":"role_authenticated","users":[
-    {"name":"jane","isAdmin":false},
-    {"name":"alice","isAdmin":false},
-    {"name":"bob","isAdmin":false},
-    {"name":"carol","isAdmin":false},
-    {"name":"dan","isAdmin":false}
-  ]}')
-echo "  role_authenticated: HTTP ${HTTP_CODE}"
-sleep 2
-
-# ---------------------------------------------------------------------------
-# Step 6: Configure Keycloak (realm, client, users)
+# Step 4: Configure Keycloak (realm, client, users)
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Configuring Keycloak ==="
 bash /init/init-keycloak.sh
 
 # ---------------------------------------------------------------------------
-# Step 7: Wait for default policies, then create StarRocks schema + data
+# Step 5: Wait for default policies, then create StarRocks schema + data
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Waiting for StarRocks to sync Ranger default policies (20s) ==="
@@ -112,7 +78,7 @@ echo "  Done."
 sleep 2
 
 # ---------------------------------------------------------------------------
-# Step 8: Verify current_user() expression (using root — JWT users need proxy)
+# Step 6: Verify current_user() expression (using root — JWT users need proxy)
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Verifying current_user() cleanup expression ==="
@@ -120,7 +86,7 @@ RESULT=$(mysql -hstarrocks -P9030 -uroot -N -e "SELECT ${CU} AS clean_user;")
 echo "  current_user() via root: '${RESULT}'"
 
 # ---------------------------------------------------------------------------
-# Step 7: Ranger access policies (what users can SELECT/INSERT)
+# Step 7: Ranger access policies — {USER} matches any authenticated user
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Creating Ranger access policies ==="
@@ -139,7 +105,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "column": {"values": ["*"]}
     },
     "policyItems": [{
-      "roles": ["role_authenticated"],
+      "users": ["{USER}"],
       "accesses": [{"type": "select", "isAllowed": true}]
     }]
   }')
@@ -159,7 +125,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "column": {"values": ["*"]}
     },
     "policyItems": [{
-      "roles": ["role_authenticated"],
+      "users": ["{USER}"],
       "accesses": [{"type": "select", "isAllowed": true}]
     }]
   }')
@@ -179,7 +145,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "column": {"values": ["*"]}
     },
     "policyItems": [{
-      "roles": ["role_authenticated"],
+      "users": ["{USER}"],
       "accesses": [
         {"type": "select", "isAllowed": true},
         {"type": "insert", "isAllowed": true}
@@ -206,13 +172,10 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "database": {"values": ["auth_db"]},
       "table": {"values": ["user_tenant_role"]}
     },
-    "rowFilterPolicyItems": [{
-      "roles": ["role_authenticated"],
-      "accesses": [{"type": "select", "isAllowed": true}],
-      "rowFilterInfo": {
-        "filterExpr": "username = '"${CU}"'"
-      }
-    }]
+    "rowFilterPolicyItems": [
+      {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "1=1"}},
+      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "username = '"${CU}"'"}}
+    ]
   }')
 echo "  sr_rowfilter_user_tenant_role: HTTP ${HTTP_CODE}"
 
@@ -228,13 +191,10 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "database": {"values": ["auth_db"]},
       "table": {"values": ["user_org_role"]}
     },
-    "rowFilterPolicyItems": [{
-      "roles": ["role_authenticated"],
-      "accesses": [{"type": "select", "isAllowed": true}],
-      "rowFilterInfo": {
-        "filterExpr": "username = '"${CU}"'"
-      }
-    }]
+    "rowFilterPolicyItems": [
+      {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "1=1"}},
+      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "username = '"${CU}"'"}}
+    ]
   }')
 echo "  sr_rowfilter_user_org_role: HTTP ${HTTP_CODE}"
 
@@ -250,13 +210,10 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "database": {"values": ["auth_db"]},
       "table": {"values": ["users"]}
     },
-    "rowFilterPolicyItems": [{
-      "roles": ["role_authenticated"],
-      "accesses": [{"type": "select", "isAllowed": true}],
-      "rowFilterInfo": {
-        "filterExpr": "username = '"${CU}"'"
-      }
-    }]
+    "rowFilterPolicyItems": [
+      {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "1=1"}},
+      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "username = '"${CU}"'"}}
+    ]
   }')
 echo "  sr_rowfilter_users: HTTP ${HTTP_CODE}"
 
@@ -280,13 +237,10 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "database": {"values": ["poc_db"]},
       "table": {"values": ["patients"]}
     },
-    "rowFilterPolicyItems": [{
-      "roles": ["role_authenticated"],
-      "accesses": [{"type": "select", "isAllowed": true}],
-      "rowFilterInfo": {
-        "filterExpr": "tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = '"${CU}"')"
-      }
-    }]
+    "rowFilterPolicyItems": [
+      {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "1=1"}},
+      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = '"${CU}"')"}}
+    ]
   }')
 echo "  sr_rowfilter_patients: HTTP ${HTTP_CODE}"
 
@@ -302,13 +256,10 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "database": {"values": ["operational_db"]},
       "table": {"values": ["cases"]}
     },
-    "rowFilterPolicyItems": [{
-      "roles": ["role_authenticated"],
-      "accesses": [{"type": "select", "isAllowed": true}],
-      "rowFilterInfo": {
-        "filterExpr": "tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = '"${CU}"')"
-      }
-    }]
+    "rowFilterPolicyItems": [
+      {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "1=1"}},
+      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = '"${CU}"')"}}
+    ]
   }')
 echo "  sr_rowfilter_cases: HTTP ${HTTP_CODE}"
 
@@ -339,11 +290,10 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "table": {"values": ["patients"]},
       "column": {"values": ["mrn"]}
     },
-    "dataMaskPolicyItems": [{
-      "roles": ["role_authenticated"],
-      "accesses": [{"type": "select", "isAllowed": true}],
-      "dataMaskInfo": {"dataMaskType": "CUSTOM", "valueExpr": "'"${MASK_MRN}"'"}
-    }]
+    "dataMaskPolicyItems": [
+      {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "dataMaskInfo": {"dataMaskType": "CUSTOM", "valueExpr": "{col}"}},
+      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "dataMaskInfo": {"dataMaskType": "CUSTOM", "valueExpr": "'"${MASK_MRN}"'"}}
+    ]
   }')
 echo "  sr_mask_mrn: HTTP ${HTTP_CODE}"
 
@@ -360,11 +310,10 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "table": {"values": ["patients"]},
       "column": {"values": ["first_name"]}
     },
-    "dataMaskPolicyItems": [{
-      "roles": ["role_authenticated"],
-      "accesses": [{"type": "select", "isAllowed": true}],
-      "dataMaskInfo": {"dataMaskType": "CUSTOM", "valueExpr": "'"${MASK_NAME}"'"}
-    }]
+    "dataMaskPolicyItems": [
+      {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "dataMaskInfo": {"dataMaskType": "CUSTOM", "valueExpr": "{col}"}},
+      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "dataMaskInfo": {"dataMaskType": "CUSTOM", "valueExpr": "'"${MASK_NAME}"'"}}
+    ]
   }')
 echo "  sr_mask_first_name: HTTP ${HTTP_CODE}"
 
@@ -381,11 +330,10 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "table": {"values": ["patients"]},
       "column": {"values": ["date_of_birth"]}
     },
-    "dataMaskPolicyItems": [{
-      "roles": ["role_authenticated"],
-      "accesses": [{"type": "select", "isAllowed": true}],
-      "dataMaskInfo": {"dataMaskType": "CUSTOM", "valueExpr": "'"${MASK_DOB}"'"}
-    }]
+    "dataMaskPolicyItems": [
+      {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "dataMaskInfo": {"dataMaskType": "CUSTOM", "valueExpr": "{col}"}},
+      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "dataMaskInfo": {"dataMaskType": "CUSTOM", "valueExpr": "'"${MASK_DOB}"'"}}
+    ]
   }')
 echo "  sr_mask_dob: HTTP ${HTTP_CODE}"
 
