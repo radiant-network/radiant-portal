@@ -1,7 +1,7 @@
 # StarRocks + Apache Ranger + Keycloak POC
 
 Proof-of-concept for multi-tenant data access with:
-- **Authorization model in StarRocks tables** (auth_db)
+- **RBAC model in StarRocks tables** (roles, actions, role-action mappings)
 - **Data access enforcement via Apache Ranger** (generic subquery-based policies)
 - **JWT authentication via Keycloak** (OIDC)
 - **MySQL proxy** translating cleartext JWT to TLS+OIDC for Go/BI clients
@@ -67,100 +67,126 @@ sequenceDiagram
     Note over Client,SR: Bidirectional TCP pipe (queries flow through)
 ```
 
-**Key insight**: The `authentication_openid_connect_client` plugin requires:
-1. A TLS connection (StarRocks needs SSL enabled via JKS keystore)
-2. A 1-byte capability flag (`0x01`) prepended before the lenenc-encoded JWT in the auth response
+## Authorization Model (RBAC)
 
-## How It Works
-
-### Authorization Model (auth_db)
-
-The source of truth for "who can do what" lives in StarRocks tables:
+### Tables
 
 ```
-auth_db.users              - identity registry
-auth_db.tenant             - tenant definitions (cbtn, udn)
-auth_db.organization       - organizations within tenants (chop, bch, nih-udn)
-auth_db.user_tenant_role   - tenant-scoped role assignments
-auth_db.user_org_role      - organization-scoped role assignments
+auth_db.role            - role catalog (geneticist, researcher, tenant_admin, ...)
+auth_db.action          - action catalog (can_read_pii, can_create_case, ...)
+auth_db.role_action     - role → action mappings
+auth_db.user_tenant_role - user → role at tenant scope
+auth_db.user_org_role    - user → role at org scope (org_id='*' = all orgs in tenant)
+auth_db.users           - identity registry
+auth_db.tenant          - tenant definitions
+auth_db.organization    - organizations within tenants
 ```
 
-### Role Hierarchy
+### Roles
 
-**Org chain** (scoped to one organization):
+**Org-scoped** (assigned per organization):
+
+| Role | Actions |
+|------|---------|
+| `geneticist` | can_read_pii, can_create_case, can_edit_case, can_assign_case, can_interpret_variant, can_comment_variant, can_generate_report, can_download_file |
+| `bioinformatician` | can_read_pii, can_create_case, can_edit_case, can_generate_report, can_download_file |
+| `submitter` | can_create_case, can_edit_case |
+| `data_analyst` | can_read_pii |
+
+**Tenant-scoped** (assigned per tenant):
+
+| Role | Actions |
+|------|---------|
+| `researcher` | can_search_case, can_view_kb |
+| `tenant_admin` | can_search_case, can_view_kb, can_manage_project, can_invite_user, can_manage_codesystem, can_manage_genepanel, can_manage_org |
+| `tenant_owner` | _(all tenant_admin actions)_ + can_delete_org |
+
+**Tenant roles do NOT grant PII access.** A tenant_owner manages the tenant but sees PHI masked unless they also have an org-level role with `can_read_pii`.
+
+### Actions
+
+| Action | Scope | Enforced by |
+|--------|-------|-------------|
+| `can_read_pii` | org | Ranger (masking subquery) |
+| `can_create_case` | org | API |
+| `can_edit_case` | org | API |
+| `can_delete_case` | org | API |
+| `can_assign_case` | org | API |
+| `can_interpret_variant` | org | API |
+| `can_comment_variant` | org | API |
+| `can_generate_report` | org | API |
+| `can_download_file` | org | API |
+| `can_search_case` | tenant | API |
+| `can_view_kb` | tenant | API |
+| `can_manage_project` | tenant | API |
+| `can_invite_user` | tenant | API |
+| `can_manage_codesystem` | tenant | API |
+| `can_manage_genepanel` | tenant | API |
+| `can_manage_org` | tenant | API |
+| `can_delete_org` | tenant | API |
+
+### Wildcard `*` for org_id
+
+A user can be assigned a role at all organizations in a tenant:
+
+```sql
+INSERT INTO auth_db.user_org_role (username, tenant_id, org_id, role_id, granted_by)
+VALUES ('jane', 'cbtn', '*', 'geneticist', 'admin');
+-- Jane is a geneticist at ALL orgs in CBTN
 ```
-org_member  - read PHI for this org
-org_editor  - + write operational data at this org
-org_admin   - + manage users at this org
-org_owner   - + manage org_admins
+
+The Ranger masking subquery expands `*` via UNION with the organization table.
+
+### Ranger Policies
+
+All policies use `"users": ["{USER}"]` — no Ranger user stubs or roles needed.
+
+**Row-filter** (tenant isolation):
+```sql
+tenant_id IN (
+  SELECT tenant_id FROM auth_db.user_tenant_role WHERE username = current_user()
+  UNION
+  SELECT tenant_id FROM auth_db.user_org_role WHERE username = current_user()
+)
 ```
 
-**Tenant chain** (scoped to all organizations in a tenant):
+**Column masking** (PII via `can_read_pii` action):
+```sql
+CASE WHEN org_id IN (
+  -- Specific org assignments with can_read_pii
+  SELECT uor.org_id FROM user_org_role uor
+  JOIN role_action ra ON ra.role_id = uor.role_id
+  WHERE uor.username = current_user() AND ra.action_id = 'can_read_pii' AND uor.org_id != '*'
+  UNION
+  -- Wildcard: expand * to all orgs in tenant
+  SELECT o.org_id FROM organization o
+  JOIN user_org_role uor ON uor.tenant_id = o.tenant_id AND uor.org_id = '*'
+  JOIN role_action ra ON ra.role_id = uor.role_id
+  WHERE uor.username = current_user() AND ra.action_id = 'can_read_pii'
+) THEN col ELSE '***' END
 ```
-tenant_member  - read de-identified data across all orgs (PHI masked)
-tenant_admin   - + PHI unmasked everywhere + write anywhere + manage orgs
-tenant_owner   - + delete orgs + manage tenant_admins
-```
-
-### Ranger Policies Use `{USER}` Wildcard
-
-All Ranger policies use `"users": ["{USER}"]` which matches **any authenticated StarRocks user**. No Ranger user stubs or roles are needed. The StarRocks Ranger plugin resolves `{USER}` to the connected username at query time.
-
-This means Ranger is completely hands-off for user management. Onboarding a new user requires only:
-1. Create the StarRocks user (authentication — JWT or native)
-2. Insert into `auth_db` tables (authorization)
-
-No Ranger configuration changes needed.
-
-### Data Access (Ranger + auth_db subqueries)
-
-Ranger holds ~11 **generic** policies. All use the `{USER}` wildcard.
-
-**Access policies**: grant SELECT/INSERT on auth_db, poc_db, operational_db
-
-**Row-filter policies** (auth table isolation):
-
-| Table | Filter |
-|-------|--------|
-| `auth_db.user_tenant_role` | `username = current_user()` |
-| `auth_db.user_org_role` | `username = current_user()` |
-| `auth_db.users` | `username = current_user()` |
-
-**Row-filter policies** (data tenant isolation):
-
-| Table | Filter |
-|-------|--------|
-| `poc_db.patients` | `tenant_id IN (SELECT tenant_id FROM auth_db.user_tenant_role WHERE username=...)` |
-| `operational_db.cases` | Same |
-
-**Column masking** (PHI visibility):
-
-| Column | Expression |
-|--------|-----------|
-| mrn, first_name | `CASE WHEN org_id IN (SELECT ... FROM user_org_role) OR tenant_id IN (SELECT ... WHERE role IN ('tenant_admin','tenant_owner')) THEN col ELSE '***'` |
-| date_of_birth | Same, masked to year-only |
 
 ## Test Users
 
-| User | Password | Tenant Roles | Org Roles |
-|------|----------|-------------|-----------|
-| `jane` | `janepass` | tenant_member(cbtn) | org_member(chop), org_member(bch) |
-| `alice` | `alicepass` | tenant_member(cbtn) | org_member(chop) |
-| `bob` | `bobpass` | tenant_owner(cbtn) | _(implied)_ |
-| `carol` | `carolpass` | tenant_member(cbtn), tenant_member(udn) | org_member(chop) |
-| `dan` | `danpass` | tenant_member(cbtn) | _(none)_ |
+| User | Password | Tenant Role | Org Role | Meaning |
+|------|----------|------------|----------|---------|
+| `jane` | `janepass` | researcher(cbtn) | geneticist(cbtn, *) | Geneticist at all CBTN orgs |
+| `alice` | `alicepass` | researcher(cbtn) | geneticist(cbtn, chop) | Geneticist at CHOP only |
+| `bob` | `bobpass` | tenant_owner(cbtn) | — | Manages tenant, no PII |
+| `carol` | `carolpass` | researcher(cbtn), researcher(udn) | bioinformatician(cbtn, chop) | Bioinformatician at CHOP |
+| `dan` | `danpass` | researcher(cbtn) | — | Researcher only, no PII |
 
 ## Expected Test Matrix
 
-| Patient row | Jane | Alice | Bob | Carol | Dan |
-|-------------|------|-------|-----|-------|-----|
-| **CHOP** (cbtn) | Full | Full | Full | Full | Masked |
-| **BCH** (cbtn) | Full | Masked | Full | Masked | Masked |
+| Patient row | Jane (geneticist *) | Alice (geneticist chop) | Bob (tenant_owner) | Carol (bioinf chop) | Dan (researcher) |
+|-------------|-----|-------|-----|-------|-----|
+| **CHOP** (cbtn) | Full | Full | Masked | Full | Masked |
+| **BCH** (cbtn) | Full | Masked | Masked | Masked | Masked |
 | **NIH-UDN** (udn) | Invisible | Invisible | Invisible | Masked | Invisible |
 
-- **Full** = row visible, PHI unmasked
-- **Masked** = row visible, PHI = `***` / year-only date
-- **Invisible** = row not returned
+- **Full** = row visible, PHI unmasked (user has `can_read_pii` at this org)
+- **Masked** = row visible, PHI = `***` / year-only date (no `can_read_pii` at this org)
+- **Invisible** = row not returned (user has no tenant role)
 
 ## Prerequisites
 
@@ -196,26 +222,19 @@ docker compose up -d --build    # fresh start
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8180/realms/starrocks/protocol/openid-connect/token \
   -d "client_id=starrocks&username=jane&password=janepass&grant_type=password" | jq -r '.access_token')
-echo "Token: ${#TOKEN} bytes"
 ```
 
 ### 2. Connect via proxy with JWT
 
 ```bash
-# Jane: org_member at CHOP + BCH → all CBTN PHI unmasked
+# Jane: geneticist at * (all CBTN orgs) → all CBTN PHI unmasked
 mysql -h127.0.0.1 -P9031 -ujane -p"${TOKEN}" --enable-cleartext-plugin \
   -e 'SELECT id, first_name, mrn, date_of_birth, org_id FROM poc_db.patients ORDER BY id;'
 
-# Alice: org_member at CHOP only → CHOP full, BCH masked
-TOKEN_ALICE=$(curl -s -X POST http://localhost:8180/realms/starrocks/protocol/openid-connect/token \
-  -d "client_id=starrocks&username=alice&password=alicepass&grant_type=password" | jq -r '.access_token')
-mysql -h127.0.0.1 -P9031 -ualice -p"${TOKEN_ALICE}" --enable-cleartext-plugin \
-  -e 'SELECT id, first_name, mrn, date_of_birth, org_id FROM poc_db.patients ORDER BY id;'
-
-# Dan: tenant_member only → all PHI masked
-TOKEN_DAN=$(curl -s -X POST http://localhost:8180/realms/starrocks/protocol/openid-connect/token \
-  -d "client_id=starrocks&username=dan&password=danpass&grant_type=password" | jq -r '.access_token')
-mysql -h127.0.0.1 -P9031 -udan -p"${TOKEN_DAN}" --enable-cleartext-plugin \
+# Bob: tenant_owner (no PII) → all CBTN rows masked
+TOKEN_BOB=$(curl -s -X POST http://localhost:8180/realms/starrocks/protocol/openid-connect/token \
+  -d "client_id=starrocks&username=bob&password=bobpass&grant_type=password" | jq -r '.access_token')
+mysql -h127.0.0.1 -P9031 -ubob -p"${TOKEN_BOB}" --enable-cleartext-plugin \
   -e 'SELECT id, first_name, mrn, date_of_birth, org_id FROM poc_db.patients ORDER BY id;'
 ```
 
@@ -224,12 +243,12 @@ mysql -h127.0.0.1 -P9031 -udan -p"${TOKEN_DAN}" --enable-cleartext-plugin \
 Python `mysql-connector-python >= 9.1.0` supports the OIDC plugin natively:
 
 ```python
-import mysql.connector, tempfile, os
+import mysql.connector
 
 conn = mysql.connector.connect(
     host='127.0.0.1', port=9030, user='jane',
     auth_plugin='authentication_openid_connect_client',
-    openid_token_file='/path/to/jwt_token.txt',  # file containing JWT
+    openid_token_file='/path/to/jwt_token.txt',
     ssl_disabled=False, ssl_verify_cert=False,
 )
 ```
@@ -238,48 +257,66 @@ conn = mysql.connector.connect(
 
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8180/realms/starrocks/protocol/openid-connect/token \
-  -d "client_id=starrocks&username=carol&password=carolpass&grant_type=password" | jq -r '.access_token')
+  -d "client_id=starrocks&username=alice&password=alicepass&grant_type=password" | jq -r '.access_token')
 
-# Carol's roles
+# Alice's roles
 curl -s -H "Authorization: Bearer ${TOKEN}" http://localhost:8080/auth/me | jq
 
-# Carol reads patients (7 rows: CBTN + UDN, CHOP full, rest masked)
-curl -s -H "Authorization: Bearer ${TOKEN}" http://localhost:8080/cbtn/patients | jq
+# Alice creates case at CHOP (geneticist has can_create_case)
+curl -s -X POST -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" \
+  http://localhost:8080/cbtn/chop/cases -d '{"case_name":"New Case","patient_id":1}' | jq
 ```
 
-### 5. Auth table isolation
+### 5. Dynamic role change
 
 ```bash
 TOKEN_DAN=$(curl -s -X POST http://localhost:8180/realms/starrocks/protocol/openid-connect/token \
   -d "client_id=starrocks&username=dan&password=danpass&grant_type=password" | jq -r '.access_token')
 
-# Dan can only see his own roles
-mysql -h127.0.0.1 -P9031 -udan -p"${TOKEN_DAN}" --enable-cleartext-plugin \
-  -e 'SELECT * FROM auth_db.user_tenant_role;'
-# → 1 row: dan / cbtn / tenant_member
-```
-
-### 6. Dynamic role change
-
-```bash
-# BEFORE: Dan sees all PHI masked
+# BEFORE: Dan sees all PHI masked (researcher, no can_read_pii)
 mysql -h127.0.0.1 -P9031 -udan -p"${TOKEN_DAN}" --enable-cleartext-plugin \
   -e 'SELECT id, first_name, mrn, org_id FROM poc_db.patients ORDER BY id;'
 
-# Grant org_member at CHOP (just an INSERT — no Ranger change)
+# Grant data_analyst at CHOP (data_analyst has can_read_pii)
 curl -s -X POST -H 'Content-Type: application/json' \
   http://localhost:8080/admin/grant-org-role \
-  -d '{"username":"dan","org_id":"chop","role":"org_member"}' | jq
+  -d '{"username":"dan","tenant_id":"cbtn","org_id":"chop","role_id":"data_analyst"}' | jq
 
-# AFTER: CHOP PHI unmasked
+# AFTER: CHOP PHI unmasked, BCH still masked
 mysql -h127.0.0.1 -P9031 -udan -p"${TOKEN_DAN}" --enable-cleartext-plugin \
   -e 'SELECT id, first_name, mrn, org_id FROM poc_db.patients ORDER BY id;'
 
 # Revoke
 curl -s -X POST -H 'Content-Type: application/json' \
   http://localhost:8080/admin/revoke-org-role \
-  -d '{"username":"dan","org_id":"chop","role":"org_member"}' | jq
+  -d '{"username":"dan","tenant_id":"cbtn","org_id":"chop","role_id":"data_analyst"}' | jq
 ```
+
+## Adding a New User
+
+Only 2 steps. No Ranger changes needed.
+
+### 1. Create StarRocks user (+ Keycloak user for JWT auth)
+
+```sql
+mysql -h127.0.0.1 -P9030 -uroot -e "
+  CREATE USER new_user IDENTIFIED WITH authentication_jwt AS '{...}';
+"
+```
+
+### 2. Insert into auth_db
+
+```sql
+mysql -h127.0.0.1 -P9030 -uroot -e "
+  INSERT INTO auth_db.users (username) VALUES ('new_user');
+  INSERT INTO auth_db.user_tenant_role (username, tenant_id, role_id, granted_by)
+    VALUES ('new_user', 'cbtn', 'researcher', 'admin');
+  INSERT INTO auth_db.user_org_role (username, tenant_id, org_id, role_id, granted_by)
+    VALUES ('new_user', 'cbtn', 'chop', 'geneticist', 'admin');
+"
+```
+
+Subsequent role changes only require auth_db updates.
 
 ## POC API Endpoints
 
@@ -289,21 +326,21 @@ curl -s -X POST -H 'Content-Type: application/json' \
 | GET | `/auth/me` | Bearer JWT | User's roles from auth tables |
 | GET | `/{tenant}/patients` | Bearer JWT | Read patients (Ranger row-filter + masking) |
 | GET | `/{tenant}/cases` | Bearer JWT | Read cases (Ranger row-filter) |
-| POST | `/{tenant}/{org}/cases` | Bearer JWT | Create case (write scope enforced) |
-| POST | `/admin/grant-org-role` | none | Grant org role (INSERT into auth_db) |
-| POST | `/admin/revoke-org-role` | none | Revoke org role (DELETE from auth_db) |
+| POST | `/{tenant}/{org}/cases` | Bearer JWT | Create case (checks `can_create_case` action) |
+| POST | `/admin/grant-org-role` | none | Grant org role |
+| POST | `/admin/revoke-org-role` | none | Revoke org role |
 
 ## Key Findings
 
-1. **Auth tables as source of truth** — role assignments live in StarRocks, not Ranger
-2. **Auth tables are isolated** — row-filter policies ensure users see only their own rows
-3. **`{USER}` wildcard** — all Ranger policies use `"users": ["{USER}"]`, matching any authenticated user. No Ranger user stubs or roles needed.
-4. **Generic Ranger policies** — ~11 policies using `IN(SELECT FROM auth_db.*)` subqueries
-5. **Dynamic role changes** — INSERT/DELETE in auth tables takes effect immediately
-6. **Use `IN` not `EXISTS` for masking subqueries** — `EXISTS` causes column ambiguity in mask expressions
-7. **JWT auth requires TLS** — StarRocks needs JKS keystore for the OIDC plugin to work
-8. **OIDC auth response format** — requires `0x01` capability flag + lenenc JWT (not raw bytes)
-9. **`current_user()` returns `'user'@'%'`** — cleaned via `replace(substring_index(current_user(), '@', 1), char(39), '')`
+1. **RBAC with action-based permissions** — roles define capabilities (geneticist → can_read_pii), not access levels
+2. **PII access is org-scoped only** — tenant roles (even tenant_owner) never grant PII; `can_read_pii` must come from an org-level role
+3. **`*` wildcard** — `org_id='*'` in user_org_role means all orgs in the tenant; expanded via UNION in Ranger subqueries
+4. **`{USER}` wildcard** — all Ranger policies match any authenticated user; no Ranger user stubs or roles needed
+5. **Auth tables are isolated** — row-filter policies ensure users see only their own role assignments
+6. **Dynamic role changes** — INSERT/DELETE in auth tables takes effect immediately
+7. **Use `IN` not `EXISTS` for masking subqueries** — `EXISTS` causes column ambiguity in mask expressions
+8. **JWT auth requires TLS** — StarRocks needs JKS keystore for the OIDC plugin
+9. **OIDC auth response format** — requires `0x01` capability flag + lenenc JWT
 10. **Go clients need a proxy** — `go-sql-driver/mysql` doesn't support `authentication_openid_connect_client`; Python `mysql-connector-python >= 9.1.0` supports it natively
 
 ## Admin UIs
