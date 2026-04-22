@@ -19,7 +19,7 @@ import { savedFiltersApi } from '@/utils/api';
 
 import { ISavedFilterContextProps, SavedFiltersProvider } from './saved-filter/hooks/use-saved-filter';
 import { useSavedFilterGetPreferenceEffect } from './saved-filter/hooks/use-saved-filters-preference';
-import { SavedFilterSyncWrapper } from './saved-filter/saved-filter-sync-wrapper';
+import { SavedFilterInitializer } from './saved-filter/saved-filter-initializer';
 
 type QueryBuilderLayoutProps = {
   appId: ApplicationId;
@@ -61,7 +61,7 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: 
 
   return (
     <QBProvider {...qbPreference} aggregations={aggregations} fetcher={fetcher}>
-      <SavedFilterSyncWrapper selectedSavedFilter={savedFilterPreference?.selectedSavedFilter}>
+      <SavedFilterInitializer selectedSavedFilter={savedFilterPreference?.selectedSavedFilter}>
         <FacetConfigContext value={{ appId, ...facetFetchers }}>
           <SavedFiltersProvider
             savedFilters={savedFilterFetcher.data || []}
@@ -109,7 +109,7 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: 
             </div>
           </SavedFiltersProvider>
         </FacetConfigContext>
-      </SavedFilterSyncWrapper>
+      </SavedFilterInitializer>
     </QBProvider>
   );
 }

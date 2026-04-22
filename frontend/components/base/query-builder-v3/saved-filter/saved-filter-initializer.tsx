@@ -14,7 +14,7 @@ type SavedFilterSyncWrapperProps = {
  * Wrapper component that synchronizes selected saved filter with QB context
  * Must be used inside QBProvider
  */
-export function SavedFilterSyncWrapper({ children, selectedSavedFilter }: SavedFilterSyncWrapperProps) {
+export function SavedFilterInitializer({ children, selectedSavedFilter }: SavedFilterSyncWrapperProps) {
   const dispatchQB = useQBDispatch();
   const hasInitialized = useRef(false);
 
