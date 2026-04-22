@@ -33,35 +33,18 @@ func userDSN(username, jwt, dbName string) string {
 }
 
 // ---------------------------------------------------------------------------
-// Role hierarchy
-// ---------------------------------------------------------------------------
-
-var orgRoleLevel = map[string]int{
-	"org_member": 1,
-	"org_editor": 2,
-	"org_admin":  3,
-	"org_owner":  4,
-}
-
-var tenantRoleLevel = map[string]int{
-	"tenant_member": 1,
-	"tenant_admin":  2,
-	"tenant_owner":  3,
-}
-
-// ---------------------------------------------------------------------------
 // Auth-table queries
 // ---------------------------------------------------------------------------
 
 type TenantRole struct {
 	TenantID string `json:"tenant_id"`
-	Role     string `json:"role"`
+	RoleID   string `json:"role_id"`
 }
 
 type OrgRole struct {
-	OrgID    string `json:"org_id"`
 	TenantID string `json:"tenant_id"`
-	Role     string `json:"role"`
+	OrgID    string `json:"org_id"`
+	RoleID   string `json:"role_id"`
 }
 
 func getUserTenantRoles(username, jwt string) ([]TenantRole, error) {
@@ -72,7 +55,7 @@ func getUserTenantRoles(username, jwt string) ([]TenantRole, error) {
 	defer db.Close()
 
 	rows, err := db.Query(
-		"SELECT tenant_id, role FROM auth_db.user_tenant_role WHERE username = ?", username)
+		"SELECT tenant_id, role_id FROM auth_db.user_tenant_role WHERE username = ?", username)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +64,7 @@ func getUserTenantRoles(username, jwt string) ([]TenantRole, error) {
 	var roles []TenantRole
 	for rows.Next() {
 		var r TenantRole
-		rows.Scan(&r.TenantID, &r.Role)
+		rows.Scan(&r.TenantID, &r.RoleID)
 		roles = append(roles, r)
 	}
 	return roles, nil
@@ -94,11 +77,8 @@ func getUserOrgRoles(username, jwt string) ([]OrgRole, error) {
 	}
 	defer db.Close()
 
-	rows, err := db.Query(`
-		SELECT uor.org_id, o.tenant_id, uor.role
-		FROM auth_db.user_org_role uor
-		JOIN auth_db.organization o ON o.org_id = uor.org_id
-		WHERE uor.username = ?`, username)
+	rows, err := db.Query(
+		"SELECT tenant_id, org_id, role_id FROM auth_db.user_org_role WHERE username = ?", username)
 	if err != nil {
 		return nil, err
 	}
@@ -107,113 +87,60 @@ func getUserOrgRoles(username, jwt string) ([]OrgRole, error) {
 	var roles []OrgRole
 	for rows.Next() {
 		var r OrgRole
-		rows.Scan(&r.OrgID, &r.TenantID, &r.Role)
+		rows.Scan(&r.TenantID, &r.OrgID, &r.RoleID)
 		roles = append(roles, r)
 	}
 	return roles, nil
 }
 
 // ---------------------------------------------------------------------------
-// Permission matrix
+// Action-based permission checks
 // ---------------------------------------------------------------------------
 
-type Permission struct {
-	Resource       string
-	Action         string
-	Scope          string // "org" or "tenant"
-	MinOrgRole     string // minimum org role (empty = not sufficient via org role alone)
-	MinTenantRole  string // minimum tenant role (empty = not sufficient via tenant role alone)
+// Route → action_id mapping
+var routeActions = map[string]string{
+	"patient.search":    "can_search_case",
+	"case.view":         "can_search_case",
+	"case.create":       "can_create_case",
+	"variant.interpret": "can_interpret_variant",
+	"report.generate":   "can_generate_report",
+	"user.invite":       "can_invite_user",
 }
 
-// Permissions define what each action requires.
-// For org-scoped: user needs MinOrgRole+ at the org, OR MinTenantRole+ at the tenant.
-// For tenant-scoped: user needs MinTenantRole+ at the tenant.
-var permissions = []Permission{
-	// Org-scoped actions
-	{Resource: "case", Action: "create", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
-	{Resource: "case", Action: "edit", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
-	{Resource: "case", Action: "delete", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
-	{Resource: "case", Action: "assign", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
-	{Resource: "variant", Action: "interpret", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
-	{Resource: "variant", Action: "comment", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
-	{Resource: "report", Action: "generate", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
-	{Resource: "file", Action: "download", Scope: "org", MinOrgRole: "org_editor", MinTenantRole: "tenant_admin"},
-	// Tenant-scoped actions (data reads)
-	{Resource: "patient", Action: "search", Scope: "tenant", MinTenantRole: "tenant_member"},
-	{Resource: "case", Action: "search", Scope: "tenant", MinTenantRole: "tenant_member"},
-	{Resource: "case", Action: "view", Scope: "tenant", MinTenantRole: "tenant_member"},
-	{Resource: "kb", Action: "search", Scope: "tenant", MinTenantRole: "tenant_member"},
-	{Resource: "kb", Action: "view", Scope: "tenant", MinTenantRole: "tenant_member"},
-	// Tenant admin actions
-	{Resource: "project", Action: "create", Scope: "tenant", MinTenantRole: "tenant_admin"},
-	{Resource: "user", Action: "invite", Scope: "tenant", MinTenantRole: "tenant_admin"},
-	{Resource: "codesystem", Action: "manage", Scope: "tenant", MinTenantRole: "tenant_admin"},
-	{Resource: "genepanel", Action: "manage", Scope: "tenant", MinTenantRole: "tenant_admin"},
-}
-
-func findPermission(resource, action string) *Permission {
-	for i := range permissions {
-		if permissions[i].Resource == resource && permissions[i].Action == action {
-			return &permissions[i]
-		}
-	}
-	return nil
-}
-
-func hasMinOrgRole(userOrgRoles []OrgRole, orgID, minRole string) bool {
-	minLevel := orgRoleLevel[minRole]
-	for _, r := range userOrgRoles {
-		if r.OrgID == orgID && orgRoleLevel[r.Role] >= minLevel {
-			return true
-		}
-	}
-	return false
-}
-
-func hasMinTenantRole(userTenantRoles []TenantRole, tenantID, minRole string) bool {
-	minLevel := tenantRoleLevel[minRole]
-	for _, r := range userTenantRoles {
-		if r.TenantID == tenantID && tenantRoleLevel[r.Role] >= minLevel {
-			return true
-		}
-	}
-	return false
-}
-
-// isAllowed checks if a user can perform an action given their roles.
-func isAllowed(tenantRoles []TenantRole, orgRoles []OrgRole, tenant, org, resource, action string) bool {
-	perm := findPermission(resource, action)
-	if perm == nil {
+// hasAction checks if the user has a specific action_id at the given tenant+org scope.
+// Uses root connection to query role_action (not subject to row-filter).
+func hasAction(username, actionID, tenant, org string) bool {
+	db, err := sql.Open("mysql", rootDSN("auth_db"))
+	if err != nil {
 		return false
 	}
+	defer db.Close()
 
-	if perm.Scope == "tenant" {
-		// Tenant-scoped: need MinTenantRole at the tenant
-		// Any org role in this tenant also implies tenant_member
-		if perm.MinTenantRole != "" && hasMinTenantRole(tenantRoles, tenant, perm.MinTenantRole) {
-			return true
-		}
-		// Org role in this tenant implies tenant_member
-		if perm.MinTenantRole == "tenant_member" {
-			for _, r := range orgRoles {
-				if r.TenantID == tenant {
-					return true
-				}
-			}
-		}
-		return false
-	}
-
-	// Org-scoped: need MinOrgRole at the specific org, OR MinTenantRole at the tenant
-	if org == "" {
-		return false
-	}
-	if perm.MinOrgRole != "" && hasMinOrgRole(orgRoles, org, perm.MinOrgRole) {
+	// Check tenant-scoped roles
+	var count int
+	db.QueryRow(`
+		SELECT COUNT(*) FROM auth_db.user_tenant_role utr
+		JOIN auth_db.role_action ra ON ra.role_id = utr.role_id
+		WHERE utr.username = ? AND utr.tenant_id = ? AND ra.action_id = ?`,
+		username, tenant, actionID).Scan(&count)
+	if count > 0 {
 		return true
 	}
-	if perm.MinTenantRole != "" && hasMinTenantRole(tenantRoles, tenant, perm.MinTenantRole) {
-		return true
+
+	// Check org-scoped roles (specific org or * wildcard)
+	if org != "" {
+		db.QueryRow(`
+			SELECT COUNT(*) FROM auth_db.user_org_role uor
+			JOIN auth_db.role_action ra ON ra.role_id = uor.role_id
+			WHERE uor.username = ? AND uor.tenant_id = ?
+			  AND (uor.org_id = ? OR uor.org_id = '*')
+			  AND ra.action_id = ?`,
+			username, tenant, org, actionID).Scan(&count)
+		if count > 0 {
+			return true
+		}
 	}
+
 	return false
 }
 
@@ -391,35 +318,33 @@ func authMeHandler(w http.ResponseWriter, r *http.Request) {
 func adminGrantOrgRoleHandler(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Username string `json:"username"`
+		TenantID string `json:"tenant_id"`
 		OrgID    string `json:"org_id"`
-		Role     string `json:"role"`
+		RoleID   string `json:"role_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		jsonResponse(w, 400, map[string]string{"error": "invalid JSON: " + err.Error()})
 		return
 	}
-	if req.Username == "" || req.OrgID == "" || req.Role == "" {
-		jsonResponse(w, 400, map[string]string{"error": "username, org_id, and role are required"})
-		return
-	}
-	if orgRoleLevel[req.Role] == 0 {
-		jsonResponse(w, 400, map[string]string{"error": "invalid role, must be: org_member, org_editor, org_admin, or org_owner"})
+	if req.Username == "" || req.TenantID == "" || req.OrgID == "" || req.RoleID == "" {
+		jsonResponse(w, 400, map[string]string{"error": "username, tenant_id, org_id, and role_id are required"})
 		return
 	}
 
 	err := execStarRocks(rootDSN("auth_db"),
-		"INSERT INTO auth_db.user_org_role (username, org_id, role, granted_by) VALUES (?, ?, ?, 'admin')",
-		req.Username, req.OrgID, req.Role)
+		"INSERT INTO auth_db.user_org_role (username, tenant_id, org_id, role_id, granted_by) VALUES (?, ?, ?, ?, 'admin')",
+		req.Username, req.TenantID, req.OrgID, req.RoleID)
 	if err != nil {
 		jsonResponse(w, 500, map[string]string{"error": "grant failed: " + err.Error()})
 		return
 	}
 
 	jsonResponse(w, 200, map[string]interface{}{
-		"status":   "granted",
-		"username": req.Username,
-		"org_id":   req.OrgID,
-		"role":     req.Role,
+		"status":    "granted",
+		"username":  req.Username,
+		"tenant_id": req.TenantID,
+		"org_id":    req.OrgID,
+		"role_id":   req.RoleID,
 	})
 }
 
@@ -427,31 +352,33 @@ func adminGrantOrgRoleHandler(w http.ResponseWriter, r *http.Request) {
 func adminRevokeOrgRoleHandler(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Username string `json:"username"`
+		TenantID string `json:"tenant_id"`
 		OrgID    string `json:"org_id"`
-		Role     string `json:"role"`
+		RoleID   string `json:"role_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		jsonResponse(w, 400, map[string]string{"error": "invalid JSON: " + err.Error()})
 		return
 	}
-	if req.Username == "" || req.OrgID == "" || req.Role == "" {
-		jsonResponse(w, 400, map[string]string{"error": "username, org_id, and role are required"})
+	if req.Username == "" || req.TenantID == "" || req.OrgID == "" || req.RoleID == "" {
+		jsonResponse(w, 400, map[string]string{"error": "username, tenant_id, org_id, and role_id are required"})
 		return
 	}
 
 	err := execStarRocks(rootDSN("auth_db"),
-		"DELETE FROM auth_db.user_org_role WHERE username = ? AND org_id = ? AND role = ?",
-		req.Username, req.OrgID, req.Role)
+		"DELETE FROM auth_db.user_org_role WHERE username = ? AND tenant_id = ? AND org_id = ? AND role_id = ?",
+		req.Username, req.TenantID, req.OrgID, req.RoleID)
 	if err != nil {
 		jsonResponse(w, 500, map[string]string{"error": "revoke failed: " + err.Error()})
 		return
 	}
 
 	jsonResponse(w, 200, map[string]interface{}{
-		"status":   "revoked",
-		"username": req.Username,
-		"org_id":   req.OrgID,
-		"role":     req.Role,
+		"status":    "revoked",
+		"username":  req.Username,
+		"tenant_id": req.TenantID,
+		"org_id":    req.OrgID,
+		"role_id":   req.RoleID,
 	})
 }
 
@@ -519,20 +446,15 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch user's roles from auth tables (via proxy with JWT)
-	tenantRoles, err := getUserTenantRoles(user.Username, user.JWT)
-	if err != nil {
-		jsonResponse(w, 500, map[string]string{"error": "failed to fetch roles: " + err.Error()})
-		return
-	}
-	orgRoles, err := getUserOrgRoles(user.Username, user.JWT)
-	if err != nil {
-		jsonResponse(w, 500, map[string]string{"error": "failed to fetch roles: " + err.Error()})
+	// Check authorization via action-based model
+	actionKey := rt.resource + "." + rt.action
+	actionID, ok := routeActions[actionKey]
+	if !ok {
+		jsonResponse(w, 403, map[string]string{"error": "no action mapped for " + actionKey})
 		return
 	}
 
-	// Check authorization
-	if !isAllowed(tenantRoles, orgRoles, tenant, org, rt.resource, rt.action) {
+	if !hasAction(user.Username, actionID, tenant, org) {
 		jsonResponse(w, 403, map[string]string{
 			"error":    "access denied",
 			"user":     user.Username,

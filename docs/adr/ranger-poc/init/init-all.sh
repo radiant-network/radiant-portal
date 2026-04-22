@@ -156,6 +156,7 @@ echo "  sr_access_operational: HTTP ${HTTP_CODE}"
 
 # ---------------------------------------------------------------------------
 # Step 9: Row-filter policies on auth tables (users see only their own rows)
+# Note: role, action, role_action, tenant, organization are reference data — no row filter needed.
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Creating auth-table row-filter policies ==="
@@ -239,7 +240,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
     },
     "rowFilterPolicyItems": [
       {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "1=1"}},
-      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = '"${CU}"')"}}
+      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = '"${CU}"' UNION SELECT uor.tenant_id FROM auth_db.user_org_role uor WHERE uor.username = '"${CU}"')"}}
     ]
   }')
 echo "  sr_rowfilter_patients: HTTP ${HTTP_CODE}"
@@ -258,7 +259,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
     },
     "rowFilterPolicyItems": [
       {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "1=1"}},
-      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = '"${CU}"')"}}
+      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = '"${CU}"' UNION SELECT uor.tenant_id FROM auth_db.user_org_role uor WHERE uor.username = '"${CU}"')"}}
     ]
   }')
 echo "  sr_rowfilter_cases: HTTP ${HTTP_CODE}"
@@ -269,13 +270,14 @@ echo "  sr_rowfilter_cases: HTTP ${HTTP_CODE}"
 echo ""
 echo "=== Creating column masking policies ==="
 
-# Mask expression: show PHI if user has org role at that org OR tenant_admin/tenant_owner at tenant
-# This single expression replaces all per-role mask policies!
-MASK_MRN="CASE WHEN org_id IN (SELECT uor.org_id FROM auth_db.user_org_role uor WHERE uor.username = ${CU}) OR tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = ${CU} AND utr.role IN ('tenant_admin', 'tenant_owner')) THEN {col} ELSE '***' END"
+# Mask expression: show PHI if user has an org role with can_read_pii action.
+# PII is strictly org-scoped — tenant roles never grant PII.
+# Handles both specific org assignments and * (all orgs in tenant) via UNION.
+PII_ORGS="SELECT uor.org_id FROM auth_db.user_org_role uor JOIN auth_db.role_action ra ON ra.role_id = uor.role_id WHERE uor.username = ${CU} AND ra.action_id = 'can_read_pii' AND uor.org_id != '*' UNION SELECT o.org_id FROM auth_db.organization o JOIN auth_db.user_org_role uor ON uor.tenant_id = o.tenant_id AND uor.org_id = '*' JOIN auth_db.role_action ra ON ra.role_id = uor.role_id WHERE uor.username = ${CU} AND ra.action_id = 'can_read_pii'"
 
-MASK_DOB="CASE WHEN org_id IN (SELECT uor.org_id FROM auth_db.user_org_role uor WHERE uor.username = ${CU}) OR tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = ${CU} AND utr.role IN ('tenant_admin', 'tenant_owner')) THEN {col} ELSE date_trunc('year', {col}) END"
-
-MASK_NAME="CASE WHEN org_id IN (SELECT uor.org_id FROM auth_db.user_org_role uor WHERE uor.username = ${CU}) OR tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = ${CU} AND utr.role IN ('tenant_admin', 'tenant_owner')) THEN {col} ELSE '***' END"
+MASK_MRN="CASE WHEN org_id IN (${PII_ORGS}) THEN {col} ELSE '***' END"
+MASK_DOB="CASE WHEN org_id IN (${PII_ORGS}) THEN {col} ELSE date_trunc('year', {col}) END"
+MASK_NAME="CASE WHEN org_id IN (${PII_ORGS}) THEN {col} ELSE '***' END"
 
 # Mask: mrn
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
