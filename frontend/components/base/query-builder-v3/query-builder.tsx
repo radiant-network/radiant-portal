@@ -17,7 +17,9 @@ import { AggregationConfig, ApplicationId, AppsConfig, useConfig } from '@/compo
 import { cn } from '@/components/lib/utils';
 import { savedFiltersApi } from '@/utils/api';
 
-import { SavedFiltersProvider } from './saved-filter/hooks/use-saved-filter';
+import { ISavedFilterContextProps, SavedFiltersProvider } from './saved-filter/hooks/use-saved-filter';
+import { useSavedFilterGetPreferenceEffect } from './saved-filter/hooks/use-saved-filters-preference';
+import { SavedFilterInitializer } from './saved-filter/saved-filter-initializer';
 
 type QueryBuilderLayoutProps = {
   appId: ApplicationId;
@@ -40,74 +42,74 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: 
   const aggregations: AggregationConfig = (config[appId] as AppsConfig).aggregations;
   const visibleAggregations = getVisibleAggregations(aggregations);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
-  const [preference, setPreference] = useState<IQBContext | undefined>();
+  const [qbPreference, setQbPreference] = useState<IQBContext | undefined>();
+  const [savedFilterPreference, setSavedFilterPreference] = useState<ISavedFilterContextProps | undefined>();
   const facetFetchers = getAggregationsFetcher(appId);
   const savedFilterType = (config[appId] as AppsConfig).saved_filter_type;
 
-  useQueryBuilderGetPreferenceEffect({ appId, setPreference });
+  useQueryBuilderGetPreferenceEffect({ appId, setPreference: setQbPreference });
+  useSavedFilterGetPreferenceEffect({ savedFilterType, setPreference: setSavedFilterPreference });
 
   // Fetch saved filters
   const savedFilterFetcher = useSWR<SavedFilter[]>('fetch-saved-filters', () => fetchSavedFilters(savedFilterType), {
     revalidateOnFocus: false,
   });
 
-  // TODO useEffect to getUserPreferences and set selectedSavedFilter (like useQueryBuilderGetPreferenceEffect but for saved filter context)
-  // TODO post user pref when changes
-
-  if (!preference || savedFilterFetcher.isLoading) {
+  if (!qbPreference || !savedFilterPreference || savedFilterFetcher.isLoading) {
     return <QueryBuilderSkeleton defaultSidebarOpen={defaultSidebarOpen} aggregations={aggregations} />;
   }
 
   return (
-    <QBProvider {...preference} aggregations={aggregations} fetcher={fetcher}>
-      <FacetConfigContext value={{ appId, ...facetFetchers }}>
-        <SavedFiltersProvider
-          savedFilters={savedFilterFetcher.data || []}
-          // TODO handle selected saved filter with preference ?
-          selectedSavedFilter={undefined}
-          savedFilterType={savedFilterType}
-        >
-          <div className="bg-muted w-full">
-            <div className="flex flex-1 h-screen overflow-hidden">
-              <aside className="w-auto min-w-fit h-full shrink-0">
-                <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
-                  <div className="z-10">
-                    <SidebarGroups
-                      aggregationGroups={visibleAggregations}
-                      selectedItemId={selectedSidebarItem}
-                      onItemSelect={setSelectedSidebarItem}
-                    />
-                  </div>
-                  <div
-                    className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
-                      'w-[280px] p-4 opacity-100 relative': selectedSidebarItem,
-                      'w-0 opacity-0': !selectedSidebarItem,
-                    })}
-                  >
-                    <div className="whitespace-nowrap">
-                      <div className="flex justify-end mb-4">
-                        <button
-                          onClick={() => setSelectedSidebarItem(null)}
-                          className="text-muted-foreground hover:text-foreground"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                      <FacetList aggregations={visibleAggregations} groupKey={selectedSidebarItem} />
+    <QBProvider {...qbPreference} aggregations={aggregations} fetcher={fetcher}>
+      <SavedFilterInitializer selectedSavedFilter={savedFilterPreference?.selectedSavedFilter}>
+        <FacetConfigContext value={{ appId, ...facetFetchers }}>
+          <SavedFiltersProvider
+            savedFilters={savedFilterFetcher.data || []}
+            selectedSavedFilter={savedFilterPreference.selectedSavedFilter || undefined}
+            savedFilterType={savedFilterType}
+          >
+            <div className="bg-muted w-full">
+              <div className="flex flex-1 h-screen overflow-hidden">
+                <aside className="w-auto min-w-fit h-full shrink-0">
+                  <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
+                    <div className="z-10">
+                      <SidebarGroups
+                        aggregationGroups={visibleAggregations}
+                        selectedItemId={selectedSidebarItem}
+                        onItemSelect={setSelectedSidebarItem}
+                      />
                     </div>
+                    <div
+                      className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
+                        'w-[280px] p-4 opacity-100 relative': selectedSidebarItem,
+                        'w-0 opacity-0': !selectedSidebarItem,
+                      })}
+                    >
+                      <div className="whitespace-nowrap">
+                        <div className="flex justify-end mb-4">
+                          <button
+                            onClick={() => setSelectedSidebarItem(null)}
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                        <FacetList aggregations={visibleAggregations} groupKey={selectedSidebarItem} />
+                      </div>
+                    </div>
+                  </SidebarProvider>
+                </aside>
+                <main className="flex-1 shrink px-3 pb-3 overflow-auto">
+                  <div className="py-3 space-y-2">
+                    <QueriesBarCard />
                   </div>
-                </SidebarProvider>
-              </aside>
-              <main className="flex-1 shrink px-3 pb-3 overflow-auto">
-                <div className="py-3 space-y-2">
-                  <QueriesBarCard />
-                </div>
-                {children}
-              </main>
+                  {children}
+                </main>
+              </div>
             </div>
-          </div>
-        </SavedFiltersProvider>
-      </FacetConfigContext>
+          </SavedFiltersProvider>
+        </FacetConfigContext>
+      </SavedFilterInitializer>
     </QBProvider>
   );
 }
