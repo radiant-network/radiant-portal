@@ -75,8 +75,8 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HOSTNAME: keycloak
-      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8180
       KC_HOSTNAME_STRICT: false
       KC_HTTP_ENABLED: true
     command: start-dev
@@ -88,6 +88,25 @@ services:
       timeout: 5s
       retries: 30
       start_period: 30s
+
+  # =============================================================================
+  # Admin UI (React app for managing roles and user assignments)
+  # =============================================================================
+
+  admin-ui:
+    build:
+      context: ./admin-ui
+      args:
+        VITE_KC_URL: http://localhost:8180
+    container_name: admin-ui
+    hostname: admin-ui
+    depends_on:
+      poc-api:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
 
   # =============================================================================
   # MySQL Proxy (translates native_password with JWT → authentication_jwt)

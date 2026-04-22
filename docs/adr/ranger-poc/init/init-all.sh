@@ -273,7 +273,7 @@ echo "=== Creating column masking policies ==="
 # Mask expression: show PHI if user has an org role with can_read_pii action.
 # PII is strictly org-scoped — tenant roles never grant PII.
 # Handles both specific org assignments and * (all orgs in tenant) via UNION.
-PII_ORGS="SELECT uor.org_id FROM auth_db.user_org_role uor JOIN auth_db.role_action ra ON ra.role_id = uor.role_id WHERE uor.username = ${CU} AND ra.action_id = 'can_read_pii' AND uor.org_id != '*' UNION SELECT o.org_id FROM auth_db.organization o JOIN auth_db.user_org_role uor ON uor.tenant_id = o.tenant_id AND uor.org_id = '*' JOIN auth_db.role_action ra ON ra.role_id = uor.role_id WHERE uor.username = ${CU} AND ra.action_id = 'can_read_pii'"
+PII_ORGS="SELECT uor.org_id FROM auth_db.user_org_role uor JOIN auth_db.role_action ra ON ra.tenant_id = uor.tenant_id AND ra.role_id = uor.role_id WHERE uor.username = ${CU} AND ra.action_id = 'can_read_pii' AND uor.org_id != '*' UNION SELECT o.org_id FROM auth_db.organization o JOIN auth_db.user_org_role uor ON uor.tenant_id = o.tenant_id AND uor.org_id = '*' JOIN auth_db.role_action ra ON ra.tenant_id = uor.tenant_id AND ra.role_id = uor.role_id WHERE uor.username = ${CU} AND ra.action_id = 'can_read_pii'"
 
 MASK_MRN="CASE WHEN org_id IN (${PII_ORGS}) THEN {col} ELSE '***' END"
 MASK_DOB="CASE WHEN org_id IN (${PII_ORGS}) THEN {col} ELSE date_trunc('year', {col}) END"

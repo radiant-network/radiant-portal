@@ -43,13 +43,14 @@ DISTRIBUTED BY HASH(org_id) BUCKETS 1;
 -- scope: 'org' (assigned per org) or 'tenant' (assigned per tenant)
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS auth_db.role (
+    tenant_id   VARCHAR(50)  NOT NULL,
     role_id     VARCHAR(50)  NOT NULL,
     role_name   VARCHAR(200) NOT NULL,
     scope       VARCHAR(10)  NOT NULL,
     description VARCHAR(500)
 ) ENGINE=OLAP
-PRIMARY KEY(role_id)
-DISTRIBUTED BY HASH(role_id) BUCKETS 1;
+PRIMARY KEY(tenant_id, role_id)
+DISTRIBUTED BY HASH(tenant_id) BUCKETS 1;
 
 -- ---------------------------------------------------------------------------
 -- Action catalog
@@ -67,11 +68,12 @@ DISTRIBUTED BY HASH(action_id) BUCKETS 1;
 -- Role → Action mapping
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS auth_db.role_action (
+    tenant_id VARCHAR(50) NOT NULL,
     role_id   VARCHAR(50) NOT NULL,
     action_id VARCHAR(50) NOT NULL
 ) ENGINE=OLAP
-PRIMARY KEY(role_id, action_id)
-DISTRIBUTED BY HASH(role_id) BUCKETS 1;
+PRIMARY KEY(tenant_id, role_id, action_id)
+DISTRIBUTED BY HASH(tenant_id) BUCKETS 1;
 
 -- ---------------------------------------------------------------------------
 -- Tenant-scoped role assignments
@@ -116,19 +118,27 @@ INSERT INTO auth_db.organization (org_id, tenant_id, org_name) VALUES
     ('nih-udn', 'udn',  'NIH Undiagnosed Diseases Network');
 
 -- =============================================================================
--- Seed: roles
+-- Seed: roles (per tenant — each tenant defines its own roles)
 -- =============================================================================
 
-INSERT INTO auth_db.role (role_id, role_name, scope, description) VALUES
-    -- Org-scoped roles
-    ('geneticist',       'Geneticist',       'org',    'Interprets variants, manages cases, reads PHI'),
-    ('bioinformatician', 'Bioinformatician',  'org',    'Creates cases, generates reports, reads PHI'),
-    ('submitter',        'Submitter',         'org',    'Creates and edits cases'),
-    ('data_analyst',     'Data Analyst',      'org',    'Read-only PHI access'),
-    -- Tenant-scoped roles
-    ('researcher',       'Researcher',        'tenant', 'Search cases and view knowledge base across tenant'),
-    ('tenant_admin',     'Tenant Admin',      'tenant', 'Manage projects, users, code systems, gene panels, orgs'),
-    ('tenant_owner',     'Tenant Owner',      'tenant', 'All tenant_admin actions + delete organizations');
+-- CBTN roles
+INSERT INTO auth_db.role (tenant_id, role_id, role_name, scope, description) VALUES
+    ('cbtn', 'geneticist',       'Geneticist',       'org',    'Interprets variants, manages cases, reads PHI'),
+    ('cbtn', 'bioinformatician', 'Bioinformatician',  'org',    'Creates cases, generates reports, reads PHI'),
+    ('cbtn', 'submitter',        'Submitter',         'org',    'Creates and edits cases'),
+    ('cbtn', 'data_analyst',     'Data Analyst',      'org',    'Read-only PHI access'),
+    ('cbtn', 'researcher',       'Researcher',        'tenant', 'Search cases and view knowledge base'),
+    ('cbtn', 'tenant_admin',     'Tenant Admin',      'tenant', 'Manage projects, users, code systems, gene panels, orgs'),
+    ('cbtn', 'tenant_owner',     'Tenant Owner',      'tenant', 'All tenant_admin actions + delete organizations');
+
+-- UDN roles (different set — no submitter, has clinical_coordinator instead)
+INSERT INTO auth_db.role (tenant_id, role_id, role_name, scope, description) VALUES
+    ('udn', 'geneticist',           'Geneticist',           'org',    'Interprets variants, manages cases, reads PHI'),
+    ('udn', 'clinical_coordinator', 'Clinical Coordinator', 'org',    'Creates cases, reads PHI, assigns cases'),
+    ('udn', 'data_analyst',         'Data Analyst',         'org',    'Read-only PHI access'),
+    ('udn', 'researcher',           'Researcher',           'tenant', 'Search cases and view knowledge base'),
+    ('udn', 'tenant_admin',         'Tenant Admin',         'tenant', 'Manage projects, users, orgs'),
+    ('udn', 'tenant_owner',         'Tenant Owner',         'tenant', 'All tenant_admin actions + delete organizations');
 
 -- =============================================================================
 -- Seed: actions
@@ -156,69 +166,79 @@ INSERT INTO auth_db.action (action_id, scope, description) VALUES
     ('can_delete_org',        'tenant', 'Delete organizations');
 
 -- =============================================================================
--- Seed: role → action mappings
+-- Seed: role → action mappings (per tenant)
 -- =============================================================================
 
--- Geneticist: full clinical workflow + PII
-INSERT INTO auth_db.role_action (role_id, action_id) VALUES
-    ('geneticist', 'can_read_pii'),
-    ('geneticist', 'can_create_case'),
-    ('geneticist', 'can_edit_case'),
-    ('geneticist', 'can_assign_case'),
-    ('geneticist', 'can_interpret_variant'),
-    ('geneticist', 'can_comment_variant'),
-    ('geneticist', 'can_generate_report'),
-    ('geneticist', 'can_download_file');
+-- CBTN role-action mappings
+INSERT INTO auth_db.role_action (tenant_id, role_id, action_id) VALUES
+    ('cbtn', 'geneticist', 'can_read_pii'),
+    ('cbtn', 'geneticist', 'can_create_case'),
+    ('cbtn', 'geneticist', 'can_edit_case'),
+    ('cbtn', 'geneticist', 'can_assign_case'),
+    ('cbtn', 'geneticist', 'can_interpret_variant'),
+    ('cbtn', 'geneticist', 'can_comment_variant'),
+    ('cbtn', 'geneticist', 'can_generate_report'),
+    ('cbtn', 'geneticist', 'can_download_file'),
+    ('cbtn', 'bioinformatician', 'can_read_pii'),
+    ('cbtn', 'bioinformatician', 'can_create_case'),
+    ('cbtn', 'bioinformatician', 'can_edit_case'),
+    ('cbtn', 'bioinformatician', 'can_generate_report'),
+    ('cbtn', 'bioinformatician', 'can_download_file'),
+    ('cbtn', 'submitter', 'can_create_case'),
+    ('cbtn', 'submitter', 'can_edit_case'),
+    ('cbtn', 'data_analyst', 'can_read_pii'),
+    ('cbtn', 'researcher', 'can_search_case'),
+    ('cbtn', 'researcher', 'can_view_kb'),
+    ('cbtn', 'tenant_admin', 'can_search_case'),
+    ('cbtn', 'tenant_admin', 'can_view_kb'),
+    ('cbtn', 'tenant_admin', 'can_manage_project'),
+    ('cbtn', 'tenant_admin', 'can_invite_user'),
+    ('cbtn', 'tenant_admin', 'can_manage_codesystem'),
+    ('cbtn', 'tenant_admin', 'can_manage_genepanel'),
+    ('cbtn', 'tenant_admin', 'can_manage_org'),
+    ('cbtn', 'tenant_owner', 'can_search_case'),
+    ('cbtn', 'tenant_owner', 'can_view_kb'),
+    ('cbtn', 'tenant_owner', 'can_manage_project'),
+    ('cbtn', 'tenant_owner', 'can_invite_user'),
+    ('cbtn', 'tenant_owner', 'can_manage_codesystem'),
+    ('cbtn', 'tenant_owner', 'can_manage_genepanel'),
+    ('cbtn', 'tenant_owner', 'can_manage_org'),
+    ('cbtn', 'tenant_owner', 'can_delete_org');
 
--- Bioinformatician: case management + reports + PII
-INSERT INTO auth_db.role_action (role_id, action_id) VALUES
-    ('bioinformatician', 'can_read_pii'),
-    ('bioinformatician', 'can_create_case'),
-    ('bioinformatician', 'can_edit_case'),
-    ('bioinformatician', 'can_generate_report'),
-    ('bioinformatician', 'can_download_file');
-
--- Submitter: case creation only (no PII)
-INSERT INTO auth_db.role_action (role_id, action_id) VALUES
-    ('submitter', 'can_create_case'),
-    ('submitter', 'can_edit_case');
-
--- Data Analyst: read-only PII
-INSERT INTO auth_db.role_action (role_id, action_id) VALUES
-    ('data_analyst', 'can_read_pii');
-
--- Researcher: tenant-wide search
-INSERT INTO auth_db.role_action (role_id, action_id) VALUES
-    ('researcher', 'can_search_case'),
-    ('researcher', 'can_view_kb');
-
--- Tenant Admin: all tenant management
-INSERT INTO auth_db.role_action (role_id, action_id) VALUES
-    ('tenant_admin', 'can_search_case'),
-    ('tenant_admin', 'can_view_kb'),
-    ('tenant_admin', 'can_manage_project'),
-    ('tenant_admin', 'can_invite_user'),
-    ('tenant_admin', 'can_manage_codesystem'),
-    ('tenant_admin', 'can_manage_genepanel'),
-    ('tenant_admin', 'can_manage_org');
-
--- Tenant Owner: tenant_admin + delete org
-INSERT INTO auth_db.role_action (role_id, action_id) VALUES
-    ('tenant_owner', 'can_search_case'),
-    ('tenant_owner', 'can_view_kb'),
-    ('tenant_owner', 'can_manage_project'),
-    ('tenant_owner', 'can_invite_user'),
-    ('tenant_owner', 'can_manage_codesystem'),
-    ('tenant_owner', 'can_manage_genepanel'),
-    ('tenant_owner', 'can_manage_org'),
-    ('tenant_owner', 'can_delete_org');
+-- UDN role-action mappings (different role set — clinical_coordinator instead of bioinformatician/submitter)
+INSERT INTO auth_db.role_action (tenant_id, role_id, action_id) VALUES
+    ('udn', 'geneticist', 'can_read_pii'),
+    ('udn', 'geneticist', 'can_create_case'),
+    ('udn', 'geneticist', 'can_edit_case'),
+    ('udn', 'geneticist', 'can_interpret_variant'),
+    ('udn', 'geneticist', 'can_comment_variant'),
+    ('udn', 'geneticist', 'can_generate_report'),
+    ('udn', 'geneticist', 'can_download_file'),
+    ('udn', 'clinical_coordinator', 'can_read_pii'),
+    ('udn', 'clinical_coordinator', 'can_create_case'),
+    ('udn', 'clinical_coordinator', 'can_edit_case'),
+    ('udn', 'clinical_coordinator', 'can_assign_case'),
+    ('udn', 'data_analyst', 'can_read_pii'),
+    ('udn', 'researcher', 'can_search_case'),
+    ('udn', 'researcher', 'can_view_kb'),
+    ('udn', 'tenant_admin', 'can_search_case'),
+    ('udn', 'tenant_admin', 'can_view_kb'),
+    ('udn', 'tenant_admin', 'can_manage_project'),
+    ('udn', 'tenant_admin', 'can_invite_user'),
+    ('udn', 'tenant_admin', 'can_manage_org'),
+    ('udn', 'tenant_owner', 'can_search_case'),
+    ('udn', 'tenant_owner', 'can_view_kb'),
+    ('udn', 'tenant_owner', 'can_manage_project'),
+    ('udn', 'tenant_owner', 'can_invite_user'),
+    ('udn', 'tenant_owner', 'can_manage_org'),
+    ('udn', 'tenant_owner', 'can_delete_org');
 
 -- =============================================================================
 -- Seed: users
 -- =============================================================================
 
 INSERT INTO auth_db.users (username) VALUES
-    ('jane'), ('alice'), ('bob'), ('carol'), ('dan');
+    ('jane'), ('alice'), ('bob'), ('carol'), ('dan'), ('admin1');
 
 -- =============================================================================
 -- Seed: tenant role assignments
@@ -235,7 +255,9 @@ INSERT INTO auth_db.user_tenant_role (username, tenant_id, role_id, granted_by) 
     ('bob',   'cbtn', 'tenant_owner',  'root'),
     ('carol', 'cbtn', 'researcher',    'root'),
     ('carol', 'udn',  'researcher',    'root'),
-    ('dan',   'cbtn', 'researcher',    'root');
+    ('dan',   'cbtn', 'researcher',    'root'),
+    ('admin1', 'cbtn', 'tenant_admin',  'root'),
+    ('admin1', 'udn',  'tenant_admin',  'root');
 
 -- =============================================================================
 -- Seed: org role assignments
@@ -311,34 +333,41 @@ INSERT INTO operational_db.cases (case_id, patient_id, case_name, status, tenant
 CREATE USER IF NOT EXISTS jane IDENTIFIED WITH authentication_jwt AS '{
   "jwks_url": "http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs",
   "principal_field": "preferred_username",
-  "required_issuer": "http://keycloak:8080/realms/starrocks",
+  "required_issuer": "http://localhost:8180/realms/starrocks",
   "required_audience": "starrocks"
 }';
 
 CREATE USER IF NOT EXISTS alice IDENTIFIED WITH authentication_jwt AS '{
   "jwks_url": "http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs",
   "principal_field": "preferred_username",
-  "required_issuer": "http://keycloak:8080/realms/starrocks",
+  "required_issuer": "http://localhost:8180/realms/starrocks",
   "required_audience": "starrocks"
 }';
 
 CREATE USER IF NOT EXISTS bob IDENTIFIED WITH authentication_jwt AS '{
   "jwks_url": "http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs",
   "principal_field": "preferred_username",
-  "required_issuer": "http://keycloak:8080/realms/starrocks",
+  "required_issuer": "http://localhost:8180/realms/starrocks",
   "required_audience": "starrocks"
 }';
 
 CREATE USER IF NOT EXISTS carol IDENTIFIED WITH authentication_jwt AS '{
   "jwks_url": "http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs",
   "principal_field": "preferred_username",
-  "required_issuer": "http://keycloak:8080/realms/starrocks",
+  "required_issuer": "http://localhost:8180/realms/starrocks",
   "required_audience": "starrocks"
 }';
 
 CREATE USER IF NOT EXISTS dan IDENTIFIED WITH authentication_jwt AS '{
   "jwks_url": "http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs",
   "principal_field": "preferred_username",
-  "required_issuer": "http://keycloak:8080/realms/starrocks",
+  "required_issuer": "http://localhost:8180/realms/starrocks",
+  "required_audience": "starrocks"
+}';
+
+CREATE USER IF NOT EXISTS admin1 IDENTIFIED WITH authentication_jwt AS '{
+  "jwks_url": "http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs",
+  "principal_field": "preferred_username",
+  "required_issuer": "http://localhost:8180/realms/starrocks",
   "required_audience": "starrocks"
 }';

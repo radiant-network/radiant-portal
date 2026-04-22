@@ -57,7 +57,9 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${KC_URL}/admin/real
     "enabled": true,
     "publicClient": true,
     "directAccessGrantsEnabled": true,
-    "standardFlowEnabled": false,
+    "standardFlowEnabled": true,
+    "redirectUris": ["http://localhost:3001/*", "http://localhost:8180/*"],
+    "webOrigins": ["http://localhost:3001", "http://localhost:8180"],
     "protocol": "openid-connect",
     "protocolMappers": [{
       "name": "starrocks-audience",
@@ -102,7 +104,8 @@ create_user "jane"  "janepass"
 create_user "alice" "alicepass"
 create_user "bob"   "bobpass"
 create_user "carol" "carolpass"
-create_user "dan"   "danpass"
+create_user "dan"    "danpass"
+create_user "admin1" "admin1pass"
 
 # ---------------------------------------------------------------------------
 # Verify: get a token for jane
