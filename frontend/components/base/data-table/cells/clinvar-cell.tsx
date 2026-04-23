@@ -1,11 +1,16 @@
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 
-type ClassificationCellProps = {
+type ClinvarCellProps = {
   codes?: string[];
 };
 
-function ClassificationCell({ codes = [] }: ClassificationCellProps) {
+/*
+ * @TODO: When api send clinvar_id, a link to the ncbi website should be created to redirect on click
+ * ClinVar website using clinvar_id
+ * e.g: https://www.ncbi.nlm.nih.gov/clinvar/variation/128882/
+ */
+function ClinvarCell({ codes = [] }: ClinvarCellProps) {
   if (codes === null || codes.filter(code => code != '' && code != null).length === 0) return <EmptyCell />;
 
   return (
@@ -17,4 +22,4 @@ function ClassificationCell({ codes = [] }: ClassificationCellProps) {
   );
 }
 
-export default ClassificationCell;
+export default ClinvarCell;

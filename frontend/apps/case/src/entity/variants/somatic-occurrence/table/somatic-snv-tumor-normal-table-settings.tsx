@@ -3,7 +3,7 @@ import { TFunction } from 'i18next';
 
 import { GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
-import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
+import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import GermlineGenomeFrequencyCell from '@/components/base/data-table/cells/germline-genome-frequency-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
@@ -27,7 +27,7 @@ import SomaticInterpretationCell from './cells/somatic-interpretation-cell';
 
 const columnHelper = createColumnHelper<SomaticSNVOccurrence>();
 
-function getSomaticSNVOccurrenceColumns(t: TFunction<string, undefined>) {
+function getSomaticSNVTumorNormalColumns(t: TFunction<string, undefined>) {
   return [
     // interpretation and note cell
     columnHelper.accessor(row => row, {
@@ -162,7 +162,7 @@ function getSomaticSNVOccurrenceColumns(t: TFunction<string, undefined>) {
     // ClinVar
     columnHelper.accessor(row => row.clinvar, {
       id: 'clinvar',
-      cell: info => <ClassificationCell codes={info.getValue()} />,
+      cell: info => <ClinvarCell codes={info.getValue()} />,
       header: t('variant.headers.clinvar'),
       size: 124,
       minSize: 40,
@@ -337,4 +337,4 @@ const defaultSomaticSNVSettings = createColumnSettings([
   },
 ]);
 
-export { defaultSomaticSNVSettings, getSomaticSNVOccurrenceColumns };
+export { defaultSomaticSNVSettings, getSomaticSNVTumorNormalColumns };

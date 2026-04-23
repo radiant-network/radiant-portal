@@ -888,7 +888,7 @@
       "gnomad_sf": "gnomAD",
       "gnomad_sf_tooltip": "gnomAD 4.1.0 (Allele Frequency)",
       "gnomad_v3_af": "gnomAD",
-      "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (allele Frequency)",
+      "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (Allele Frequency)",
       "hgvsg": "Variant",
       "hotspot": "Hotspot",
       "hotspot_tooltip": "Hotspot Cancer",
@@ -1431,8 +1431,8 @@
         "snv": "SNV",
         "cnv": "CNV",
         "snv_tn": "SNV (TN)",
-        "snv_to": "SNV (TO)",
-        "snv_to_tooltip": "SNV (tumor-normal)"
+        "snv_tn_tooltip": "SNV (tumor-normal)",
+        "snv_to": "SNV (TO)"
       },
       "dialog": {
         "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"

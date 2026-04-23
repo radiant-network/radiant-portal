@@ -14,7 +14,7 @@ function TumorNormalFrequencyCell({ pc, pf, locusId }: NumberCellProps) {
   }
 
   const scientificNotationPC = toExponentialNotation(pc);
-  const scientificNotationPF = toExponentialNotation(pc);
+  const scientificNotationPF = toExponentialNotation(pf);
   return (
     <AnchorLink size="sm" href={`/variants/entity/${locusId}?tab=patients&cases=OtherCases`} target="_blank">
       {scientificNotationPC ? scientificNotationPC : pc} ({scientificNotationPF ? scientificNotationPF : pf})
