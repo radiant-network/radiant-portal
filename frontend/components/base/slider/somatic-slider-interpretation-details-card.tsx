@@ -1,26 +1,27 @@
 import { useEffect, useState } from 'react';
 import { CalendarIcon, ClipboardList, LibraryBig, StethoscopeIcon } from 'lucide-react';
-
 import useSWR from 'swr';
+
 import { InterpretationSomatic } from '@/api/api';
-import ClassificationBadge from '@/components/base/badges/classification-badge';
-import TransmissionModeBadge from '@/components/base/badges/transmission-mode-badge';
 import RichTextViewer from '@/components/base/data-entry/rich-text-editor/rich-text-viewer';
 import DateTime from '@/components/base/date/datetime';
 import EmptyField from '@/components/base/information/empty-field';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
 import PubmedListDialog from '@/components/base/pubmed/pubmed-list-dialog';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { DescriptionSection } from '@/components/base/slider/description';
 import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
-import { Tooltip, TooltipContent, TooltipTrigger } from 'components/base/shadcn/tooltip';
 import { interpretationApi } from '@/utils/api';
+
+import ClassificationBadge from '../badges/classification-badge';
+import { getOncogenicityClassificationCriteriaColor } from '../classifications/oncogenicity';
+import { Badge } from '../shadcn/badge';
 
 type SliderInterpretationDetailsCardProps = {
   seqId: number;
@@ -136,6 +137,46 @@ function SomaticSliderInterpretationDetailsCard({
                   )}
                 </DescriptionSection>
               </div>
+              <div className="flex justify-end w-full">
+                <div>
+                  <ClassificationBadge value={interpretation.data?.oncogenicity ?? ''} isSomatic={true} size="lg" />
+                </div>
+              </div>
+            </div>
+            {/* TODO: waiting back fix to display the real tumoral type */}
+            {interpretation.data?.tumoral_type && (
+              <DescriptionSection title={t('preview_sheet.interpretation_details.fields.tumoral_type')}>
+                <div className="flex gap-2">
+                  <AnchorLink
+                    href={`http://purl.obolibrary.org/obo/MONDO_${interpretation.data?.tumoral_type.replace('MONDO:', '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    size="sm"
+                  >
+                    {interpretation.data?.tumoral_type}
+                  </AnchorLink>
+                </div>
+              </DescriptionSection>
+            )}
+            <div className="flex w-full">
+              <DescriptionSection title={t('preview_sheet.interpretation_details.fields.classification_criteria')}>
+                <div className="space-x-1">
+                  {(interpretation.data?.oncogenicity_classification_criterias ?? []).map((criteria: string) => (
+                    <Badge key={criteria} variant={getOncogenicityClassificationCriteriaColor(criteria)}>
+                      {criteria}
+                    </Badge>
+                  ))}
+                </div>
+              </DescriptionSection>
+              <DescriptionSection title={t('preview_sheet.interpretation_details.fields.clinical_utility')}>
+                {interpretation.data?.clinical_utility ? (
+                  <Badge>
+                    {t(`preview_sheet.interpretation_details.clinical_utility.${interpretation.data.clinical_utility}`)}
+                  </Badge>
+                ) : (
+                  <EmptyField />
+                )}
+              </DescriptionSection>
             </div>
             <Separator />
             <div className="flex gap-6 text-sm text-muted-foreground font-sans">

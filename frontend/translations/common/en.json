@@ -57,6 +57,9 @@
       "likely_benign": "Likely Benign",
       "likely_benign.abbrev": "LB",
       "likely_benign.tooltip": "Likely Benign",
+      "likely_oncogenic": "Likely Oncogenic",
+      "likely_oncogenic.abbrev": "LO",
+      "likely_oncogenic.tooltip": "Likely Oncogenic",
       "likely_pathogenic": "Likely Patho.",
       "likely_pathogenic.abbrev": "LP",
       "likely_pathogenic.tooltip": "Likely Pathogenic",
@@ -75,6 +78,9 @@
       "no_data": "No Data",
       "no_data.abbrev": "ND",
       "no_data.tooltip": "No Data",
+      "oncogenic": "Oncogenic",
+      "oncogenic.abbrev": "O",
+      "oncogenic.tooltip": "Oncogenic",
       "pathogenic": "Pathogenic",
       "pathogenic.abbrev": "P",
       "pathogenic.tooltip": "Pathogenic",
@@ -1125,10 +1131,19 @@
         "classification": "Classification",
         "primary_condition": "Primary Condition",
         "classification_criteria": "Classification criteria",
+        "clinical_utility": "Clinical utility",
         "interpretation": "Interpretation",
         "references": "{{count}} references",
+        "tumoral_type": "Tumor Type",
         "updated_at_tooltip": "Last interpretation date",
         "updated_by_name_tooltip": "Authored by"
+      },
+      "clinical_utility": {
+        "category_ia": "Tier IA",
+        "category_ib": "Tier IB",
+        "category_iic": "Tier IIC",
+        "category_iid": "Tier IID",
+        "category_iii": "Tier III"
       }
     },
     "variant_details": {
