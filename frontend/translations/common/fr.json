@@ -1016,9 +1016,10 @@
       "title": "Interprétation clinique",
       "cancel_text": "Annuler",
       "ok_text": "Sauvegarder l'interprétation",
-      "last_update": "Dernière mise à jour : <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
+      "last_update": "Dernière mise à jour :",
       "header": {
         "germline": "Germinal",
+        "germline_family": "Germinal",
         "somatic": "Somatic"
       },
       "transcript": {

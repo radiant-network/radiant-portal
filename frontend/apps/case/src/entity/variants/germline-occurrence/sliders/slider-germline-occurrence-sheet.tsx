@@ -1,15 +1,14 @@
 import { SquarePen } from 'lucide-react';
 
 import { CaseSequencingExperiment, GermlineSNVOccurrence } from '@/api/api';
-import InterpretationDialog from '@/components/base/interpretation/interpretation-dialog';
 import { NotesProvider } from '@/components/base/notes/hooks/use-notes';
 import NotesSliderSheet from '@/components/base/notes/notes-slider-sheet';
 import { useOccurrenceListContext } from '@/components/base/occurrence/hooks/use-occurrences-list';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
+import GermlineSliderInterpretationDetailsCard from '@/components/base/slider/germline-slider-interpretation-details-card';
 import { useGermlineOccurrenceAndCase } from '@/components/base/slider/hooks/use-slider-occurrence-and-case';
 import SliderHeader from '@/components/base/slider/slider-header';
-import SliderInterpretationDetailsCard from '@/components/base/slider/slider-interpretation-details-card';
 import SliderOccurrenceDetailsCard from '@/components/base/slider/slider-occurrence-details-card';
 import SliderOccurrenceSubHeader from '@/components/base/slider/slider-occurrence-sub-header';
 import SliderPatientRow from '@/components/base/slider/slider-patient-row';
@@ -18,6 +17,8 @@ import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton'
 import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
 import { useI18n } from '@/components/hooks/i18n';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
+
+import GermlineInterpretationDialog from '../interpretation/germline-interpretation-form';
 
 type GermlineOccurrenceSliderSheetProps = {
   occurrence?: GermlineSNVOccurrence;
@@ -84,6 +85,8 @@ function GermlineOccurrenceSheetContent({
   const caseId = useCaseIdFromParam();
   // seqId is to fetch the occurrence
   const seqId = useSeqIdFromSearchParam();
+
+  // @TODO: To remove when using query-buidler v3, see somatic slider for reference
   const { mutate: listFetcher } = useOccurrenceListContext();
   const { patient, caseResult, caseSequencing, expandResult, isLoading } = useGermlineOccurrenceAndCase(
     caseId,
@@ -121,7 +124,8 @@ function GermlineOccurrenceSheetContent({
               />
             </NotesProvider>
             {!occurrence.has_interpretation && (
-              <InterpretationDialog
+              <GermlineInterpretationDialog
+                isCreation
                 locusId={occurrence.locus_id}
                 transcriptId={occurrence.transcript_id}
                 handleSaveCallback={onInterpretationSaved}
@@ -137,9 +141,7 @@ function GermlineOccurrenceSheetContent({
         }
       />
       {occurrence.has_interpretation && (
-        <SliderInterpretationDetailsCard
-          canEditInterpretation
-          onInterpretationSaved={onInterpretationSaved}
+        <GermlineSliderInterpretationDetailsCard
           seqId={seqId}
           caseId={caseId}
           symbol={occurrence?.symbol}
@@ -148,6 +150,19 @@ function GermlineOccurrenceSheetContent({
           isManePlus={occurrence?.is_mane_plus}
           isCanonical={occurrence?.is_canonical}
           transcriptId={occurrence?.transcript_id}
+          actions={
+            <GermlineInterpretationDialog
+              locusId={occurrence.locus_id}
+              transcriptId={expandResult.data.transcript_id}
+              handleSaveCallback={onInterpretationSaved}
+              renderTrigger={handleOpen => (
+                <Button size="sm" onClick={handleOpen}>
+                  <SquarePen />
+                  {t('common.edit')}
+                </Button>
+              )}
+            />
+          }
         />
       )}
       {caseId && (

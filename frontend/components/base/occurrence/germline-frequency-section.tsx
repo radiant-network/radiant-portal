@@ -1,6 +1,5 @@
 import { Diamond } from 'lucide-react';
 
-import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -9,15 +8,31 @@ import { toExponentialNotation } from '@/components/lib/number-format';
 
 import DetailSection, { DetailItem } from './detail-section';
 
-type FrequencySectionProps = {
-  data: ExpandedGermlineSNVOccurrence;
+export type GermlineFrequencySectionProps = {
+  germline_pc_wgs_affected?: number;
+  germline_pn_wgs_affected?: number;
+  germline_pf_wgs_affected?: number;
+  germline_pc_wgs_not_affected?: number;
+  germline_pn_wgs_not_affected?: number;
+  germline_pf_wgs_not_affected?: number;
+  gnomad_v3_af?: number;
+  locus?: string;
 };
 
-export default function FrequencySection({ data }: FrequencySectionProps) {
+export default function GermlineFrequencySection({
+  germline_pc_wgs_affected,
+  germline_pn_wgs_affected,
+  germline_pf_wgs_affected,
+  germline_pc_wgs_not_affected,
+  germline_pn_wgs_not_affected,
+  germline_pf_wgs_not_affected,
+  gnomad_v3_af,
+  locus,
+}: GermlineFrequencySectionProps) {
   const { t } = useI18n();
   const affectedValue =
-    data.germline_pc_wgs_affected && data.germline_pn_wgs_affected && data.germline_pf_wgs_affected?.toExponential(2)
-      ? `${data.germline_pc_wgs_affected} / ${data.germline_pn_wgs_affected} (${data.germline_pf_wgs_affected?.toExponential(2)})`
+    germline_pc_wgs_affected && germline_pn_wgs_affected && germline_pf_wgs_affected?.toExponential(2)
+      ? `${germline_pc_wgs_affected} / ${germline_pn_wgs_affected} (${germline_pf_wgs_affected?.toExponential(2)})`
       : '-';
   const affectedTitle = (
     <Tooltip>
@@ -32,10 +47,8 @@ export default function FrequencySection({ data }: FrequencySectionProps) {
   );
 
   const nonAffectedValue =
-    data.germline_pc_wgs_not_affected &&
-    data.germline_pn_wgs_not_affected &&
-    data.germline_pf_wgs_not_affected?.toExponential(2)
-      ? `${data.germline_pc_wgs_not_affected} / ${data.germline_pn_wgs_not_affected} (${data.germline_pf_wgs_not_affected?.toExponential(2)})`
+    germline_pc_wgs_not_affected && germline_pn_wgs_not_affected && germline_pf_wgs_not_affected?.toExponential(2)
+      ? `${germline_pc_wgs_not_affected} / ${germline_pn_wgs_not_affected} (${germline_pf_wgs_not_affected?.toExponential(2)})`
       : '-';
   const nonAffectedTitle = (
     <Tooltip>
@@ -56,13 +69,13 @@ export default function FrequencySection({ data }: FrequencySectionProps) {
       <DetailItem
         title={t('occurrence_expand.frequencies.gnomad')}
         value={
-          data.gnomad_v3_af ? (
+          gnomad_v3_af ? (
             <AnchorLink
               size="sm"
-              href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`}
+              href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r3`}
               target="_blank"
             >
-              {toExponentialNotation(data.gnomad_v3_af)}
+              {toExponentialNotation(gnomad_v3_af)}
             </AnchorLink>
           ) : (
             '-'

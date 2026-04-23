@@ -2,12 +2,13 @@ import { useSearchParams } from 'react-router';
 import { ClipboardList } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
-import InterpretationDialog from '@/components/base/interpretation/interpretation-dialog';
 import { useOccurrenceListContext } from '@/components/base/occurrence/hooks/use-occurrences-list';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { SELECTED_VARIANT_PARAM } from '@/entity/variants/constants';
+
+import GermlineInterpretationDialog from '../../interpretation/germline-interpretation-form';
 
 type InterpretationCellProps = {
   occurrence: GermlineSNVOccurrence;
@@ -28,7 +29,8 @@ function InterpretationCell({ occurrence }: InterpretationCellProps) {
 
   if (!occurrence.has_interpretation) {
     return (
-      <InterpretationDialog
+      <GermlineInterpretationDialog
+        isCreation
         locusId={occurrence.locus_id}
         transcriptId={occurrence.transcript_id}
         handleSaveCallback={mutate}
@@ -42,7 +44,6 @@ function InterpretationCell({ occurrence }: InterpretationCellProps) {
             <TooltipContent>{t('variant.interpretation.tooltip.add')}</TooltipContent>
           </Tooltip>
         )}
-        isCreation
       />
     );
   }
