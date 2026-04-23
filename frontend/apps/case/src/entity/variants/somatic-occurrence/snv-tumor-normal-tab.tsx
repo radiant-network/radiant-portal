@@ -12,15 +12,15 @@ import { isValidSeqId } from '../germline-occurrence/libs/seq-id';
 import SliderSomaticOccurrenceSheet from './sliders/slider-somatic-occurrence-sheet';
 import {
   defaultSomaticSNVSettings,
-  getSomaticSNVOccurrenceColumns,
-} from './table/somatic-snv-to-occurrence-table-settings';
+  getSomaticSNVTumorNormalColumns,
+} from './table/somatic-snv-tumor-normal-table-settings';
 
 type SomaticOccurrencesProps = {
   seqId: number;
   patientSelected?: CaseSequencingExperiment;
 };
 
-function SNVToTab({ seqId, patientSelected }: SomaticOccurrencesProps) {
+function SNVTumorNormalTab({ seqId, patientSelected }: SomaticOccurrencesProps) {
   const { t } = useI18n();
   const config = useConfig();
   const caseId = useCaseIdFromParam();
@@ -42,7 +42,7 @@ function SNVToTab({ seqId, patientSelected }: SomaticOccurrencesProps) {
     >
       <QueryBuilderDataTable
         id={appId}
-        columns={getSomaticSNVOccurrenceColumns(t)}
+        columns={getSomaticSNVTumorNormalColumns(t)}
         defaultColumnSettings={defaultSomaticSNVSettings}
         enableColumnOrdering
         enableFullscreen
@@ -53,4 +53,4 @@ function SNVToTab({ seqId, patientSelected }: SomaticOccurrencesProps) {
     </QueryBuilder>
   );
 }
-export default SNVToTab;
+export default SNVTumorNormalTab;

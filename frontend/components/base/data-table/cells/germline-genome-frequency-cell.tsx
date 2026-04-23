@@ -14,7 +14,7 @@ function GermlineGenomeFrequencyCell({ pc, pf, locusId }: GermlineGenomeFrequenc
   }
 
   const scientificNotationPC = toExponentialNotation(pc);
-  const scientificNotationPF = toExponentialNotation(pc);
+  const scientificNotationPF = toExponentialNotation(pf);
   return (
     <AnchorLink size="sm" href={`/variants/entity/${locusId}?tab=patients&cases=InterpretedCases`} target="_blank">
       {scientificNotationPC ? scientificNotationPC : pc} ({scientificNotationPF ? scientificNotationPF : pf})
