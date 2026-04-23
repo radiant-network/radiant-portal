@@ -1,16 +1,9 @@
 import { ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
-import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import {
-  ApiError,
-  CaseEntity,
-  CaseSequencingExperiment,
-  ExpandedSomaticSNVOccurrence,
-  InterpretationSomatic,
-} from '@/api/api';
+import { CaseEntity, CaseSequencingExperiment, ExpandedSomaticSNVOccurrence, InterpretationSomatic } from '@/api/api';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import ClassificationSection from '@/components/base/occurrence/classification-section';
 import ClinicalAssociationSection from '@/components/base/occurrence/clinical-association-section';
@@ -73,23 +66,23 @@ type SomaticInterpretationFormInput = {
   interpretationSomatic: InterpretationSomatic;
 };
 
-async function fetchCaseEntity(input: CaseEntityInput) {
-  const response = await caseApi.caseEntity(input.caseId);
+async function fetchCaseEntity(_url: string, { arg }: { arg: CaseEntityInput }) {
+  const response = await caseApi.caseEntity(arg.caseId);
   return response.data;
 }
 
-async function fetchInterpretationSomatic(input: InterpretationSomaticInput) {
+async function fetchInterpretationSomatic(_url: string, { arg }: { arg: InterpretationSomaticInput }) {
   const response = await interpretationApi.getInterpretationSomatic(
-    input.caseId,
-    input.seqId,
-    input.locusId,
-    input.transcriptId,
+    arg.caseId,
+    arg.seqId,
+    arg.locusId,
+    arg.transcriptId,
   );
   return response.data;
 }
 
-async function fetchExpandedSomaticSNVOccurrence(input: ExpandSomaticInput) {
-  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(input.caseId, input.seqId, input.locusId);
+async function fetchExpandedSomaticSNVOccurrence(_url: string, { arg }: { arg: ExpandSomaticInput }) {
+  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(arg.caseId, arg.seqId, arg.locusId);
   return response.data;
 }
 
@@ -119,46 +112,16 @@ function SomaticInterpretationDialog({
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
 
-  const caseEntity = useSWR<CaseEntity, ApiError, CaseEntityInput>(
-    {
-      key: 'case-entity',
-      caseId,
-    },
-    fetchCaseEntity,
-    {
-      revalidateOnFocus: false,
-      shouldRetryOnError: false,
-    },
-  );
+  const caseEntity = useSWRMutation<CaseEntity, any, string, CaseEntityInput>('case-entity', fetchCaseEntity);
 
-  const occurrenceExpand = useSWR<ExpandedSomaticSNVOccurrence>(
-    {
-      caseId,
-      locusId,
-      seqId,
-    },
+  const occurrenceExpand = useSWRMutation<ExpandedSomaticSNVOccurrence, any, string, ExpandSomaticInput>(
+    `form-somatic-expand-${caseId}-${locusId}-${seqId}`,
     fetchExpandedSomaticSNVOccurrence,
-    {
-      revalidateOnFocus: false,
-      revalidateOnMount: false,
-      shouldRetryOnError: false,
-    },
   );
 
-  const interpretation = useSWR<Interpretation>(
-    {
-      key: `form-somatic-interpretation-${seqId}-${locusId}-${transcriptId}`,
-      caseId,
-      seqId,
-      locusId,
-      transcriptId,
-    },
+  const interpretation = useSWRMutation<Interpretation, any, string, InterpretationSomaticInput>(
+    `form-somatic-interpretation-${seqId}-${locusId}-${transcriptId}`,
     fetchInterpretationSomatic,
-    {
-      revalidateOnFocus: false,
-      revalidateOnMount: false,
-      shouldRetryOnError: false,
-    },
   );
 
   const saveInterpretation = useSWRMutation(
@@ -202,8 +165,8 @@ function SomaticInterpretationDialog({
   );
 
   const isLoading = useMemo(
-    () => interpretation.isLoading || occurrenceExpand?.isLoading,
-    [interpretation.isLoading, occurrenceExpand?.isLoading],
+    () => interpretation.isMutating || occurrenceExpand?.isMutating,
+    [interpretation.isMutating, occurrenceExpand?.isMutating],
   );
 
   const handleSave = useCallback(() => {
@@ -212,8 +175,18 @@ function SomaticInterpretationDialog({
 
   const handleOpen = useCallback(async () => {
     setOpen(true);
-    interpretation.mutate();
-    occurrenceExpand?.mutate();
+    caseEntity.trigger({ key: 'case-entity', caseId });
+    interpretation.trigger({
+      caseId: caseId.toString(),
+      seqId: seqId.toString(),
+      locusId,
+      transcriptId: transcriptId ?? '',
+    });
+    occurrenceExpand.trigger({
+      caseId,
+      seqId,
+      locusId,
+    });
   }, []);
 
   return (
@@ -269,10 +242,10 @@ function SomaticInterpretationDialog({
                     interpretation={interpretation.data}
                     saveInterpretation={interpretation =>
                       saveInterpretation.trigger({
-                        caseId,
-                        seqId,
+                        caseId: caseId.toString(),
+                        seqId: seqId.toString(),
                         locusId,
-                        transcriptId,
+                        transcriptId: transcriptId ?? '',
                         interpretationSomatic: interpretation,
                       })
                     }
