@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
@@ -65,6 +65,13 @@ function QueryBuilderDataTable<T>({ ...props }: QueryBuilderDataTableProps<T>) {
       shouldRetryOnError: false,
     },
   );
+
+  useEffect(() => {
+    setPagination({
+      pageIndex: 0,
+      pageSize: pagination.pageSize,
+    });
+  }, [activeQuery]);
 
   return (
     <Card>
