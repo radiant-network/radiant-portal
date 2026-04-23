@@ -1,16 +1,9 @@
 import { ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
-import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import {
-  ApiError,
-  CaseEntity,
-  CaseSequencingExperiment,
-  ExpandedGermlineSNVOccurrence,
-  InterpretationGermline,
-} from '@/api/api';
+import { CaseEntity, CaseSequencingExperiment, ExpandedGermlineSNVOccurrence, InterpretationGermline } from '@/api/api';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import ClassificationSection from '@/components/base/occurrence/classification-section';
 import ClinicalAssociationSection from '@/components/base/occurrence/clinical-association-section';
@@ -75,23 +68,23 @@ type GermlineInterpretationFormInput = {
   interpretationGermline: InterpretationGermline;
 };
 
-async function fetchCaseEntity(input: CaseEntityInput) {
-  const response = await caseApi.caseEntity(input.caseId);
+async function fetchCaseEntity(_url: string, { arg }: { arg: CaseEntityInput }) {
+  const response = await caseApi.caseEntity(arg.caseId);
   return response.data;
 }
 
-async function fetchInterpretationGermline(input: InterpretationGermlineInput) {
+async function fetchInterpretationGermline(_url: string, { arg }: { arg: InterpretationGermlineInput }) {
   const response = await interpretationApi.getInterpretationGermline(
-    input.caseId,
-    input.seqId,
-    input.locusId,
-    input.transcriptId,
+    arg.caseId,
+    arg.seqId,
+    arg.locusId,
+    arg.transcriptId,
   );
   return response.data;
 }
 
-async function fetchExpandedGermlineSNVOccurrence(input: ExpandGermlineInput) {
-  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(input.caseId, input.seqId, input.locusId);
+async function fetchExpandedGermlineSNVOccurrence(_url: string, { arg }: { arg: ExpandGermlineInput }) {
+  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(arg.caseId, arg.seqId, arg.locusId);
   return response.data;
 }
 
@@ -121,46 +114,16 @@ function GermlineInterpretationDialog({
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
 
-  const caseEntity = useSWR<CaseEntity, ApiError, CaseEntityInput>(
-    {
-      key: 'case-entity',
-      caseId,
-    },
-    fetchCaseEntity,
-    {
-      revalidateOnFocus: false,
-      shouldRetryOnError: false,
-    },
-  );
+  const caseEntity = useSWRMutation<CaseEntity, any, string, CaseEntityInput>('case-entity', fetchCaseEntity);
 
-  const occurrenceExpand = useSWR<ExpandedGermlineSNVOccurrence>(
-    {
-      caseId,
-      locusId,
-      seqId,
-    },
+  const occurrenceExpand = useSWRMutation<ExpandedGermlineSNVOccurrence, any, string, ExpandGermlineInput>(
+    `form-somatic-expand-${caseId}-${locusId}-${seqId}`,
     fetchExpandedGermlineSNVOccurrence,
-    {
-      revalidateOnFocus: false,
-      revalidateOnMount: false,
-      shouldRetryOnError: false,
-    },
   );
 
-  const interpretation = useSWR<Interpretation>(
-    {
-      key: `fetch-germline-interpretation-${seqId}-${locusId}-${transcriptId}`,
-      caseId,
-      seqId,
-      locusId,
-      transcriptId,
-    },
+  const interpretation = useSWRMutation<Interpretation, any, string, InterpretationGermlineInput>(
+    `form-somatic-interpretation-${seqId}-${locusId}-${transcriptId}`,
     fetchInterpretationGermline,
-    {
-      revalidateOnFocus: false,
-      revalidateOnMount: true,
-      shouldRetryOnError: false,
-    },
   );
 
   const saveInterpretation = useSWRMutation(
@@ -204,8 +167,8 @@ function GermlineInterpretationDialog({
   );
 
   const isLoading = useMemo(
-    () => interpretation.isLoading || occurrenceExpand?.isLoading,
-    [interpretation.isLoading, occurrenceExpand?.isLoading],
+    () => interpretation.isMutating || occurrenceExpand?.isMutating,
+    [interpretation.isMutating, occurrenceExpand?.isMutating],
   );
 
   const handleSave = useCallback(() => {
@@ -214,8 +177,18 @@ function GermlineInterpretationDialog({
 
   const handleOpen = useCallback(async () => {
     setOpen(true);
-    interpretation.mutate();
-    occurrenceExpand?.mutate();
+    caseEntity.trigger({ key: 'case-entity', caseId });
+    interpretation.trigger({
+      caseId: caseId.toString(),
+      seqId: seqId.toString(),
+      locusId,
+      transcriptId: transcriptId ?? '',
+    });
+    occurrenceExpand.trigger({
+      caseId,
+      seqId,
+      locusId,
+    });
   }, []);
 
   return (
@@ -271,10 +244,10 @@ function GermlineInterpretationDialog({
                     interpretation={interpretation.data}
                     saveInterpretation={interpretation =>
                       saveInterpretation.trigger({
-                        caseId,
-                        seqId,
+                        caseId: caseId.toString(),
+                        seqId: seqId.toString(),
                         locusId,
-                        transcriptId,
+                        transcriptId: transcriptId ?? '',
                         interpretationGermline: interpretation,
                       })
                     }
