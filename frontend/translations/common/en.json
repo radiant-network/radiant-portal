@@ -999,7 +999,8 @@
       "insertion": "Insertion",
       "snv": "SNV",
       "deletion": "Deletion",
-      "sequence_alteration": "Sequence Alteration"
+      "sequence_alteration": "Sequence Alteration",
+      "substitution": "Substitution"
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
