@@ -16,10 +16,16 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Button } from '@/components/base/shadcn/button';
 import { Card } from '@/components/base/shadcn/card';
 import { Switch } from '@/components/base/shadcn/switch';
+import { ApplicationId } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
+import { useSqonsQBUpdatePreferenceEffect } from './hooks/use-query-builder-preference';
 import QueryBuilderSavedFilters from './saved-filter/query-builder-saved-filters';
 import { BooleanOperators } from './type';
+
+type QueriesBarCardProps = {
+  appId: ApplicationId;
+};
 
 /**
  * Card that display all queries for query-builder
@@ -36,11 +42,17 @@ import { BooleanOperators } from './type';
  * |  [New Query] (*) Label                                                  |
  * └─────────────────────────────────────────────────────────────────────────┘
  */
-function QueriesBarCard() {
+function QueriesBarCard({ appId }: QueriesBarCardProps) {
   const { t } = useI18n();
   const settings = useQBSettings();
   const { sqons } = useQBContext();
   const dispatch = useQBDispatch();
+
+  // Sync sqons changes with user preference
+  useSqonsQBUpdatePreferenceEffect({
+    appId,
+    sqons,
+  });
 
   /**
    * Add and active a new query

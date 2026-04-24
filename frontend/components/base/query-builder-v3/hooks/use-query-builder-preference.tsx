@@ -1,11 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import useSWR from 'swr';
+import useSWRMutation from 'swr/mutation';
 
 import { UserPreference } from '@/api/api';
 import { ApplicationId } from '@/components/cores/applications-config';
 import { userPreferenceApi } from '@/utils/api';
 
-import { getDefaultQBContext } from './use-query-builder';
+import { ISyntheticSqon } from '../type';
+
+import { getDefaultQBContext, IQBContext } from './use-query-builder';
 
 type FetchUserPreferenceInput = {
   key: string;
@@ -18,6 +21,11 @@ type PostUserPreferenceInput = FetchUserPreferenceInput & {
 type useQueryBuilderGetPreferenceEffectProps = {
   appId: ApplicationId;
   setPreference: (value: any) => void;
+};
+
+type useSqonsQBStateObserverProps = {
+  appId: ApplicationId;
+  sqons: ISyntheticSqon[];
 };
 
 /**
@@ -53,9 +61,51 @@ export function useQueryBuilderGetPreferenceEffect({ appId, setPreference }: use
 
   useEffect(() => {
     if (qbUserPreference.data) {
-      setPreference({ ...getDefaultQBContext(), ...qbUserPreference.data });
+      setPreference({ ...getDefaultQBContext(), ...(qbUserPreference.data.content as Partial<IQBContext>) });
     } else if (qbUserPreference.error) {
       setPreference(getDefaultQBContext());
     }
   }, [qbUserPreference.isLoading]);
+}
+
+/**
+ * Update user-preference of saved filters with a POST request
+ * A debounce of 350 is used to prevent multiple post when use onChange event of data-table
+ */
+export function useSqonsQBUpdatePreferenceEffect({ appId, sqons }: useSqonsQBStateObserverProps) {
+  const qbUserPreference = useSWR(
+    `query-builder-get-${appId}`,
+    () => fetchUserPreference({ key: `query-builder-${appId}` }),
+    {
+      revalidateOnMount: true,
+      revalidateIfStale: false,
+      revalidateOnFocus: false,
+    },
+  );
+  const { trigger } = useSWRMutation(`query-builder-post-${appId}`, postUserPreference);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    const handler = setTimeout(() => {
+      trigger({
+        key: `query-builder-${appId}`,
+        userPreference: {
+          content: {
+            ...qbUserPreference.data?.content,
+            sqons,
+          },
+          key: `query-builder-${appId}`,
+        },
+      });
+    }, 350);
+
+    return () => {
+      if (handler) clearTimeout(handler);
+    };
+  }, [sqons]);
 }
