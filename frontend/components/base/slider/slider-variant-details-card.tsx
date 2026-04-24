@@ -20,7 +20,6 @@ import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from '@/components/base/var
 import { useI18n } from '@/components/hooks/i18n';
 import { toExponentialNotation, toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
-import Empty from '../empty';
 
 const MAX_CLINICAL_ASSOCIATION = 3;
 
@@ -324,8 +323,8 @@ const PredictionCard = ({
 
   // Frequencies differ from somatic to germline
   const frequencies = [];
-
   if (type == 'somatic') {
+    // Tumor-Normal
     frequencies.push(
       <DescriptionRow
         label={
@@ -342,6 +341,7 @@ const PredictionCard = ({
       </DescriptionRow>,
     );
   } else {
+    // Germline Affected
     frequencies.push(
       <DescriptionRow
         label={
@@ -362,6 +362,10 @@ const PredictionCard = ({
           <EmptyField />
         )}
       </DescriptionRow>,
+    );
+
+    // Germline Non Affected
+    frequencies.push(
       <DescriptionRow
         label={
           <Tooltip>
@@ -379,6 +383,23 @@ const PredictionCard = ({
         germline_pn_wgs_not_affected &&
         germline_pf_wgs_not_affected?.toExponential(2) ? (
           `${germline_pc_wgs_not_affected} / ${germline_pn_wgs_not_affected} (${germline_pf_wgs_not_affected?.toExponential(2)})`
+        ) : (
+          <EmptyField />
+        )}
+      </DescriptionRow>,
+    );
+
+    // GnomAD
+    frequencies.push(
+      <DescriptionRow label={t('preview_sheet.variant_details.sections.frequencies.gnomad')}>
+        {gnomad_v3_af ? (
+          <AnchorLink
+            size="sm"
+            href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r3`}
+            target="_blank"
+          >
+            {toExponentialNotation(gnomad_v3_af)}
+          </AnchorLink>
         ) : (
           <EmptyField />
         )}
@@ -577,19 +598,6 @@ const PredictionCard = ({
       <div className="flex flex-1 flex-col gap-4">
         <DescriptionSection title={t('preview_sheet.variant_details.sections.frequencies.title')}>
           {frequencies.map(element => element)}
-          <DescriptionRow label={t('preview_sheet.variant_details.sections.frequencies.gnomad')}>
-            {gnomad_v3_af ? (
-              <AnchorLink
-                size="sm"
-                href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r3`}
-                target="_blank"
-              >
-                {toExponentialNotation(gnomad_v3_af)}
-              </AnchorLink>
-            ) : (
-              <EmptyField />
-            )}
-          </DescriptionRow>
         </DescriptionSection>
         <DescriptionSection title={t('preview_sheet.variant_details.sections.functional_scores.title')}>
           <ExpandableList
