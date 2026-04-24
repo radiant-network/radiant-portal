@@ -36,7 +36,7 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     [seqExpVariants],
   );
 
-  useSeqIdSearchParamsEffect({ seqId });
+  useSeqIdSearchParamsEffect({ seqId, setSeqId, caseEntity });
 
   // @TODO: to be changed when all tabs are implemented
   // options={Object.keys(SomaticVariantInterface)}

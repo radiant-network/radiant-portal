@@ -9,13 +9,13 @@ import { CaseEntityTabs } from '@/types';
  */
 export function getDefaultSeqId(searchParamSeqId: string | null, caseEntity?: CaseEntity) {
   // only use sequencing experiments with variants
-  const sequencingExperimentsWithVariants =
-    caseEntity?.sequencing_experiments.filter(seqExp => seqExp.has_variants) ?? [];
+  const validSeqIds =
+    caseEntity?.sequencing_experiments.filter(seqExp => seqExp.has_variants).map(seqExp => seqExp.seq_id) ?? [];
 
   let defaultSeqId = searchParamSeqId != null ? Number(searchParamSeqId) : -1;
 
-  if (defaultSeqId < 0 && sequencingExperimentsWithVariants[0]?.seq_id) {
-    defaultSeqId = sequencingExperimentsWithVariants[0]?.seq_id;
+  if (validSeqIds.length > 0 && !validSeqIds.includes(defaultSeqId)) {
+    defaultSeqId = validSeqIds[0];
   }
 
   return defaultSeqId;
@@ -23,6 +23,8 @@ export function getDefaultSeqId(searchParamSeqId: string | null, caseEntity?: Ca
 
 type UseSeqIdSearchEffectProps = {
   seqId: number;
+  setSeqId: (value: number) => void;
+  caseEntity?: CaseEntity;
 };
 
 /**
@@ -30,7 +32,7 @@ type UseSeqIdSearchEffectProps = {
  *
  * seqId is used to update SequencingExperimentVariantFilters value
  */
-export function useSeqIdSearchParamsEffect({ seqId }: UseSeqIdSearchEffectProps) {
+export function useSeqIdSearchParamsEffect({ seqId, setSeqId, caseEntity }: UseSeqIdSearchEffectProps) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -38,13 +40,15 @@ export function useSeqIdSearchParamsEffect({ seqId }: UseSeqIdSearchEffectProps)
       searchParams.set('seq_id', `${seqId}`);
       setSearchParams(searchParams, { replace: true });
     }
-  }, [seqId]);
+  }, [seqId, searchParams.get('tab')]);
 
   useEffect(() => {
-    if (searchParams.get('tab') == CaseEntityTabs.Variants) {
-      searchParams.set('seq_id', `${seqId}`);
-      setSearchParams(searchParams, { replace: true });
-      return;
+    const searchParamSeqId = Number(searchParams.get('seq_id'));
+    const validSeqIds =
+      caseEntity?.sequencing_experiments.filter(seqExp => seqExp.has_variants).map(seqExp => seqExp.seq_id) ?? [];
+
+    if (validSeqIds.length > 0 && !validSeqIds.includes(searchParamSeqId)) {
+      setSeqId(validSeqIds[0]);
     }
-  }, [searchParams.get('tab')]);
+  }, [caseEntity]);
 }

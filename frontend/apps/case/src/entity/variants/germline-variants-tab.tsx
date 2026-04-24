@@ -34,7 +34,7 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     [seqExpVariants],
   );
 
-  useSeqIdSearchParamsEffect({ seqId });
+  useSeqIdSearchParamsEffect({ seqId, setSeqId, caseEntity });
 
   return (
     <div className="bg-background flex flex-col">
