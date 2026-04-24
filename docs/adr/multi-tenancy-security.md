@@ -1,9 +1,10 @@
 # ADR: Security & Multi-Tenancy Architecture for Radiant Portal
 
-- **Status:** Proposed
-- **Date:** 2026-04-10
+- **Status:** Proposed (revised after POC validation)
+- **Date:** 2026-04-10 (original) / 2026-04-24 (revision)
 - **Authors:** Architecture Team
 - **Stakeholders:** Security reviewers, compliance officers, platform engineers
+- **Revision note:** This document was revised after the POC at [`docs/adr/ranger-poc/`](./ranger-poc/README.md) validated key hypotheses. The recommendation has shifted from **Option C (views-based)** to **Option B variant (Ranger + `auth_db` tables)**. OpenFGA has been replaced by `auth_db` tables in StarRocks as the single source of truth for authorization. The role model has shifted from flat tiers (admin/member + identified/deidentified) to **domain roles** (geneticist, bioinformatician, ...) with explicit **actions** (`can_read_pii`, `can_create_case`, ...). See [POC validation summary](#poc-validation-summary) for what changed and why.
 
 ---
 
@@ -13,13 +14,20 @@
 2. [Decision Drivers](#2-decision-drivers)
 3. [Options Considered](#3-options-considered)
    - [Option A -- API-Layer-Only Enforcement](#option-a--api-layer-only-enforcement)
-   - [Option B -- Full Push-Down: Ranger + Per-User Connections + RLS/Masking](#option-b--full-push-down-ranger--per-user-connections--rlsmasking)
-   - [Option C -- Views-Based with Per-Tenant Service Account Pools (Recommended)](#option-c--views-based-with-per-tenant-service-account-pools-recommended)
+   - [Option B -- Ranger + `auth_db` (Recommended)](#option-b--full-push-down-ranger--per-user-connections--rlsmasking)
+   - [Option C -- Views-Based with Per-Tenant Service Account Pools (Alternative)](#option-c--views-based-with-per-tenant-service-account-pools-recommended)
    - [Option D -- Views-Based with Per-User JWT Connections](#option-d--views-based-with-per-user-jwt-connections)
 4. [Proposed Schema Organization](#4-proposed-schema-organization)
-5. [OpenFGA Authorization Model](#5-openfga-authorization-model)
+5. [Authorization Model (`auth_db`)](#5-authorization-model-auth_db)
 6. [Recommendation](#6-recommendation)
 7. [Migration Strategy](#7-migration-strategy)
+8. [POC-validated details](#poc-validated-details)
+   - [TLS requirement for OIDC](#tls-requirement-for-oidc)
+   - [MySQL proxy for Go clients](#mysql-proxy-for-go-clients)
+   - [REST API tenant routing — path prefix](#rest-api-tenant-routing--path-prefix)
+   - [Admin tooling — Radiant portal](#admin-tooling--radiant-portal)
+   - [Wildcard `*` for org_id](#wildcard--for-org_id)
+   - [POC validation summary](#poc-validation-summary)
 
 ---
 
@@ -106,62 +114,69 @@ The platform must support 10--50 tenants (hospitals, research institutions, juri
 - **Option A (API-only):** Direct access users bypass all authorization. This option cannot be the final state.
 - **Options B, C, D:** StarRocks-level enforcement (DB RBAC, views, Ranger) protects all access paths equally, regardless of whether the query originates from the Go API, a Jupyter notebook, or a Tableau dashboard.
 
-### Target Architecture (Option C -- Recommended)
+### Target Architecture (Recommended — Option B: Ranger + `auth_db`)
 
 ```mermaid
 graph LR
     subgraph Users
         Portal[Portal User<br/>browser]
-        Analyst[Data Analyst<br/>Jupyter / SQL]
+        Analyst[Data Analyst<br/>Jupyter / Python]
         BI[BI Tool<br/>Tableau / Power BI]
         AI[AI Tool<br/>MCP Server]
+        GoApp[Go Apps / GORM<br/>go-sql-driver]
     end
 
-    subgraph "Go API"
-        Auth[Keycloak JWT +<br/>Tenant Middleware]
-        FGA[OpenFGA<br/>tenant / group / access level]
-        Handlers[Handlers +<br/>Repositories<br/>project_id filtering<br/>per-group PII masking]
+    subgraph "Identity"
+        KC[Keycloak<br/>OIDC provider<br/>issues JWT]
     end
 
-    subgraph "StarRocks View DBs"
+    subgraph "Authorization"
+        R[Apache Ranger<br/>~11 generic policies<br/>user={USER} wildcard]
+    end
+
+    subgraph "Go API (Radiant portal)"
+        Auth[Keycloak JWT<br/>Bearer auth]
+        Handlers[Handlers<br/>action check via auth_db]
+    end
+
+    subgraph "Proxy"
+        Proxy[mysql-proxy<br/>native_password → OIDC]
+    end
+
+    subgraph "StarRocks"
         direction TB
-        CBTN["radiant_cbtn<br/>(occurrences + shared)<br/>per-tenant"]
-        DEID["radiant_cbtn_deidentified<br/>(masked PII, all groups)<br/>per-tenant"]
-        CHOP_ID["radiant_cbtn_chop_identified<br/>(full PII, CHOP only)<br/>per-group"]
-        SEA_ID["radiant_cbtn_seattle_identified<br/>(full PII, Seattle only)<br/>per-group"]
+        SR_FE["FE<br/>access_control=ranger<br/>TLS/JKS"]
+        AUTH[("auth_db<br/>role, action, role_action<br/>user_tenant_role<br/>user_org_role")]
+        POC[("poc_db<br/>clinical tables")]
+        OPS[("operational_db<br/>cases, reports")]
+        PG[(PostgreSQL<br/>radiant_jdbc)]
+        ICE[(Iceberg<br/>radiant_iceberg)]
     end
 
-    subgraph "StarRocks — Base + Catalogs"
-        BASE[("radiant_base<br/>ALL native tables<br/>colocation group on locus_id")]
-        ICE[("radiant_iceberg<br/>Iceberg tables<br/>may contain identified data")]
-    end
+    Portal --> Auth --> Handlers
+    Handlers -- "queries auth_db for actions" --> AUTH
+    Handlers -- "queries data via proxy" --> Proxy
+    Analyst -- "JWT token file<br/>mysql-connector-python ≥9.1" --> SR_FE
+    BI -- "JWT / ODBC" --> SR_FE
+    AI -- "JWT passthrough" --> SR_FE
+    GoApp --> Proxy --> SR_FE
+    SR_FE -- "validates JWT<br/>via JWKS" --> KC
+    SR_FE -- "polls policies / 10s" --> R
+    SR_FE -- "row-filter + masking<br/>subqueries" --> AUTH
+    SR_FE --> POC
+    SR_FE --> OPS
+    SR_FE --> PG
+    SR_FE --> ICE
 
-    PG[(PostgreSQL<br/>radiant_jdbc)]
-
-    Portal --> Auth --> FGA --> Handlers
-    Handlers -- "svc_cbtn<br/>per-tenant pool" --> CBTN
-    Analyst -- "JWT per-user" --> CBTN
-    Analyst -- "CHOP identified" --> CHOP_ID
-    Analyst -- "de-identified" --> DEID
-    BI -- "JWT per-user" --> CBTN
-    AI -- "JWT passthrough" --> CBTN
-    CBTN -- "views" --> BASE
-    CHOP_ID -- "views" --> PG
-    CHOP_ID -- "views" --> ICE
-    DEID -- "views" --> PG
-    DEID -- "views" --> ICE
-    SEA_ID -- "views" --> PG
-    Handlers --> PG
-
-    style BASE fill:#e6f3ff,stroke:#333
-    style ICE fill:#e6f3ff,stroke:#333
-    style CBTN fill:#d4edda,stroke:#333
-    style DEID fill:#fff3cd,stroke:#333
-    style CHOP_ID fill:#d4edda,stroke:#333
-    style SEA_ID fill:#d4edda,stroke:#333
+    style AUTH fill:#d4edda,stroke:#333
+    style POC fill:#e6f3ff,stroke:#333
+    style OPS fill:#e6f3ff,stroke:#333
+    style R fill:#fff3cd,stroke:#333
+    style KC fill:#fff3cd,stroke:#333
+    style Proxy fill:#ffe6e6,stroke:#333
 ```
 
-> All access paths are protected by StarRocks DB RBAC. No user accesses `radiant_base`, `radiant_jdbc`, or `radiant_iceberg` directly. Per-group view databases enforce both tenant isolation and **per-group PII masking** -- a user can have identified access to CHOP and de-identified to Seattle within the same CBTN tenant.
+> **Single source of truth**: `auth_db` tables in StarRocks hold the authorization model (roles, actions, role-action mappings, user role assignments). **Ranger** applies ~11 generic policies (`"users": ["{USER}"]` wildcard) whose row-filter and masking expressions are subqueries against `auth_db`. **All access paths** (Go API, Jupyter, BI, MCP) hit the same Ranger-enforced rules. Go apps that can't speak the `authentication_openid_connect_client` plugin natively go through `mysql-proxy`, which translates cleartext JWT → TLS + OIDC.
 
 ---
 
@@ -234,7 +249,7 @@ These are hard constraints that apply across all options:
 | **Colocation groups** | Tables must be in the **same database** to share a colocation group | Colocate JOINs (local, shuffle-free) require co-located tables; splitting tables across databases breaks colocation |
 | Iceberg catalog support | Native read support via external catalog | Iceberg tables can be queried alongside native tables; JOINs use shuffle (not colocate) |
 
-**Key implication -- colocation groups:** The current StarRocks schema uses colocation to enable colocate JOINs (local, shuffle-free) between tables distributed by `locus_id` -- e.g., `germline__snv__occurrence JOIN snv__variant JOIN snv__consequence JOIN clinvar`. Colocation groups **must be in the same database**. This means **all tables that participate in colocate JOINs must remain in one database**. Any schema design that splits occurrence tables and variant/annotation tables across databases will break colocate JOINs and cause expensive network shuffles on every query. The recommended schema (Option D) addresses this by placing all base tables -- both tenant-scoped and shared reference data -- in a single `radiant_base` database.
+**Key implication -- colocation groups:** The current StarRocks schema uses colocation to enable colocate JOINs (local, shuffle-free) between tables distributed by `locus_id` -- e.g., `germline__snv__occurrence JOIN snv__variant JOIN snv__consequence JOIN clinvar`. Colocation groups **must be in the same database**. This means **all tables that participate in colocate JOINs must remain in one database**. Any schema design that splits occurrence tables and variant/annotation tables across databases will break colocate JOINs and cause expensive network shuffles on every query. The recommended schema (Option B) addresses this by placing all base tables -- both tenant-scoped and shared reference data -- in a single `radiant_base` database. Row-filter policies on individual tables do not affect colocation, which the POC confirmed.
 
 **Key references:**
 - [StarRocks Security Integration (JWT)](https://docs.starrocks.io/docs/administration/Authentication/#json-web-token-jwt-based-authentication)
@@ -320,7 +335,7 @@ A masking utility function in the handler layer would replace these with `"***"`
 
 #### OpenFGA Integration
 
-The OpenFGA model is extended with `tenant` and `group` types (see [Section 5](#5-openfga-authorization-model)). The authorizer middleware:
+The OpenFGA model is extended with `tenant` and `group` types (see [Section 5](#5-authorization-model-auth_db)). The authorizer middleware:
 1. Validates the active tenant from the `X-Active-Tenant` header
 2. Calls `ListObjects(user, relation, "group")` to find allowed groups within the tenant
 3. Maps groups to `project_id` values
@@ -394,214 +409,247 @@ The handler validates:
 
 ---
 
-### Option B -- Full Push-Down: Ranger + Per-User Connections + RLS/Masking
+### Option B -- Ranger + `auth_db` (Recommended, POC-validated)
 
-**Summary:** Deploy Apache Ranger to manage all data access policies. Row-level security and column masking are enforced at the StarRocks level. The Go API becomes a thin query proxy.
+**Summary:** Deploy Apache Ranger to enforce row-filtering and column masking at the StarRocks level. **Authorization data (roles, actions, assignments) lives in StarRocks `auth_db` tables, not in Ranger or OpenFGA.** Ranger holds ~11 **generic** policies using the `{USER}` wildcard; the policy expressions are SQL subqueries against `auth_db`. Every access path — Go API, Jupyter, BI, MCP — is enforced identically. This is the POC-validated architecture ([`docs/adr/ranger-poc/`](./ranger-poc/README.md)).
 
 ```mermaid
 graph LR
     subgraph Users
         Portal[Portal User]
-        Analyst[Data Analyst]
-        BI[BI / MCP]
+        Analyst[Data Analyst / BI / MCP]
+        GoApp[Go Apps via GORM]
     end
 
-    subgraph "Go API — thin proxy"
-        MW["JWT passthrough"]
+    subgraph "Go API (Radiant)"
+        MW["Bearer JWT validation<br/>action checks via auth_db"]
+    end
+
+    subgraph "mysql-proxy"
+        PROXY["native_password (JWT)<br/>→ TLS + OIDC<br/>(for go-sql-driver)"]
     end
 
     subgraph "Apache Ranger"
-        RP["Row-Level Security<br/>tenant_id filter per user"]
-        CM["Column Masking<br/>PII redaction per role"]
+        RP["Row-filter policies<br/>{USER} wildcard<br/>subqueries on auth_db"]
+        CM["Column masking<br/>{USER} wildcard<br/>can_read_pii via role_action"]
     end
 
-    subgraph "StarRocks — single DB + Ranger plugin"
-        SR[("radiant_db<br/>+ tenant_id on all tables<br/>per-user JWT connections")]
+    subgraph "StarRocks (access_control=ranger, TLS)"
+        AUTH[("auth_db<br/>source of truth")]
+        POC[(poc_db)]
+        OPS[(operational_db)]
     end
 
-    subgraph "Sync"
-        SYNC["OpenFGA → Ranger<br/>policy sync daemon"]
-    end
+    KC[(Keycloak)]
 
-    PG[(PostgreSQL)]
-    FGA[(OpenFGA)]
+    Portal --> MW --> PROXY --> AUTH
+    MW -- "action check" --> AUTH
+    Analyst -- "OIDC plugin" --> AUTH
+    GoApp --> PROXY --> AUTH
+    AUTH -. "row-filter + mask<br/>subqueries" .-> RP
+    AUTH -. "subqueries" .-> CM
+    KC -- "JWKS" --> AUTH
 
-    Portal --> MW --> SR
-    Analyst -- "user JWT" --> SR
-    BI -- "user JWT" --> SR
-    SR --> RP
-    SR --> CM
-    FGA --> SYNC --> RP
-
-    style RP fill:#d4edda,stroke:#28a745
-    style CM fill:#d4edda,stroke:#28a745
-    style SYNC fill:#fff3cd,stroke:#856404
-    style SR fill:#e6f3ff,stroke:#0066cc
+    style AUTH fill:#d4edda,stroke:#28a745
+    style RP fill:#fff3cd,stroke:#856404
+    style CM fill:#fff3cd,stroke:#856404
+    style PROXY fill:#ffe6e6,stroke:#856404
 ```
 
-> **Strongest enforcement** but requires deploying and operating Apache Ranger (Java stack), plus a sync daemon to translate OpenFGA decisions into Ranger policies. Creates a dual-authorization-system (Ranger + OpenFGA).
+> **Strongest enforcement + simplest data model**. The POC proved Option B is far cheaper than the original ADR feared: no user stubs in Ranger, no Ranger role management, ~11 generic policies total, no OpenFGA-to-Ranger sync daemon. `auth_db` is the single source of truth for authorization; Ranger's role reduces to a thin, static policy layer that delegates all lookups to SQL subqueries.
 
-#### Tenant Isolation Model
+#### `auth_db`: Authorization as Data
 
-**Single shared database with Ranger row-filtering policies.** Unlike Option B, tables are not duplicated per tenant. Instead, a `tenant_id` column is added to all tenant-scoped tables, and Ranger policies filter rows based on the authenticated user's tenant membership.
+A dedicated database in StarRocks holds the entire authorization model:
 
-```sql
--- Add tenant_id to occurrence tables
-ALTER TABLE germline__snv__occurrence ADD COLUMN tenant_id INT NOT NULL;
-ALTER TABLE somatic__snv__occurrence ADD COLUMN tenant_id INT NOT NULL;
-ALTER TABLE germline__cnv__occurrence ADD COLUMN tenant_id INT NOT NULL;
-ALTER TABLE exomiser ADD COLUMN tenant_id INT NOT NULL;
-ALTER TABLE staging_sequencing_experiment ADD COLUMN tenant_id INT NOT NULL;
-```
+| Table | Purpose |
+|-------|---------|
+| `auth_db.tenant` | Tenant catalog (e.g. `cbtn`, `udn`) |
+| `auth_db.organization` | Orgs within tenants (e.g. `chop`, `bch`, `nih-udn`) |
+| `auth_db.users` | Identity registry |
+| `auth_db.role(tenant_id, role_id, ...)` | **Per-tenant** role catalog (geneticist, bioinformatician, tenant_admin, ...) |
+| `auth_db.action(action_id, ...)` | Global action catalog (can_read_pii, can_create_case, ...) |
+| `auth_db.role_action(tenant_id, role_id, action_id)` | Role → action mapping (per tenant) |
+| `auth_db.user_tenant_role(username, tenant_id, role_id)` | Tenant-scoped role assignments |
+| `auth_db.user_org_role(username, tenant_id, org_id, role_id)` | Org-scoped role assignments; `org_id = '*'` means all orgs in tenant |
 
-Ranger row-filter policy:
+Granting a permission is a single `INSERT`; revoking is a single `DELETE`. No Ranger admin calls required, no sync lag. Ranger reads these tables via its subquery-based policy expressions on every query evaluation.
+
+See [Section 5 (Authorization Model)](#5-authorization-model-auth_db) for the full schema, domain roles, and action catalog.
+
+#### Tenant Isolation — Generic Row-Filter with `{USER}` Wildcard
+
+A single row-filter policy per table. `{USER}` matches any authenticated StarRocks user — **no user stubs or Ranger roles needed**:
+
 ```json
 {
   "policyType": 2,
-  "name": "tenant_isolation_snv_occurrences",
+  "name": "sr_rowfilter_patients",
+  "service": "starrocks",
   "resources": {
-    "database": { "values": ["radiant_db"] },
-    "table": { "values": ["germline__snv__occurrence"] }
+    "catalog":  { "values": ["default_catalog"] },
+    "database": { "values": ["poc_db"] },
+    "table":    { "values": ["patients"] }
   },
   "rowFilterPolicyItems": [
     {
-      "accesses": [{ "type": "select" }],
-      "users": ["alice", "bob"],
-      "rowFilterInfo": {
-        "filterExpr": "tenant_id = 1"
-      }
+      "users": ["root"],
+      "accesses": [{ "type": "select", "isAllowed": true }],
+      "rowFilterInfo": { "filterExpr": "1=1" }
     },
     {
-      "accesses": [{ "type": "select" }],
-      "users": ["charlie"],
+      "users": ["{USER}"],
+      "accesses": [{ "type": "select", "isAllowed": true }],
       "rowFilterInfo": {
-        "filterExpr": "tenant_id = 2"
+        "filterExpr": "tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = replace(substring_index(current_user(), '@', 1), char(39), '') UNION SELECT uor.tenant_id FROM auth_db.user_org_role uor WHERE uor.username = replace(substring_index(current_user(), '@', 1), char(39), ''))"
       }
     }
   ]
 }
 ```
 
-#### Group / Identified vs De-identified Enforcement
+Key properties:
+- **One policy per table**, not per user. Adding users has zero impact on Ranger config.
+- **`root` exemption** so admin/service accounts bypass the filter.
+- **`current_user()` cleanup**: StarRocks returns `'username'@'%'`; the expression `replace(substring_index(current_user(), '@', 1), char(39), '')` strips quotes and host.
+- Having any org role implies tenant membership (the `UNION` over `user_org_role.tenant_id`), so users with only `user_org_role(*, cbtn, chop, geneticist)` and no tenant role still see CBTN rows.
 
-**Ranger column masking policies.** This is where Option B uniquely excels:
+#### PII Masking — Action-Driven, Not Role-Tier-Driven
 
-```json
-{
-  "policyType": 1,
-  "name": "patient_pii_masking",
-  "resources": {
-    "database": { "values": ["radiant_db"] },
-    "table": { "values": ["patient"] },
-    "column": { "values": ["first_name", "last_name", "jhn", "date_of_birth"] }
-  },
-  "dataMaskPolicyItems": [
-    {
-      "accesses": [{ "type": "select" }],
-      "groups": ["deidentified_users"],
-      "dataMaskInfo": {
-        "dataMaskType": "MASK_SHOW_LAST_4"
-      }
-    }
-  ]
-}
+Rather than two tiers (identified/deidentified groups), PII access is controlled by an explicit **action** `can_read_pii` mapped to roles in `auth_db.role_action`. A user who holds any role with `can_read_pii` at an org sees that org's PHI unmasked; otherwise it is masked.
+
+PHI columns (`mrn`, `first_name`, `date_of_birth`) use a CUSTOM mask expression that checks, via subquery, whether the user has `can_read_pii` at the row's `org_id`. The expression handles both specific-org assignments and the `*` wildcard (all orgs in tenant) via `UNION`:
+
+```sql
+CASE WHEN org_id IN (
+  -- specific-org assignments with can_read_pii
+  SELECT uor.org_id FROM auth_db.user_org_role uor
+  JOIN auth_db.role_action ra
+    ON ra.tenant_id = uor.tenant_id AND ra.role_id = uor.role_id
+  WHERE uor.username = <current_user>
+    AND ra.action_id = 'can_read_pii'
+    AND uor.org_id != '*'
+  UNION
+  -- wildcard assignments expanded to all orgs in tenant
+  SELECT o.org_id FROM auth_db.organization o
+  JOIN auth_db.user_org_role uor
+    ON uor.tenant_id = o.tenant_id AND uor.org_id = '*'
+  JOIN auth_db.role_action ra
+    ON ra.tenant_id = uor.tenant_id AND ra.role_id = uor.role_id
+  WHERE uor.username = <current_user>
+    AND ra.action_id = 'can_read_pii'
+) THEN {col} ELSE '***' END
 ```
 
-When a de-identified user queries `patient.first_name`, Ranger transparently returns the masked value. The Go API does not need to implement any masking logic for StarRocks queries.
+Tenant roles (`tenant_owner`, `tenant_admin`, `researcher`) **never** grant `can_read_pii` — PII access is strictly org-scoped. A tenant owner who manages the tenant but has no org-level role sees PHI masked.
 
-**Caveat:** Ranger's ability to apply column masking and row-filtering on **JDBC external catalog tables** (as opposed to native StarRocks tables) is not well-documented. If Ranger cannot mask JDBC catalog columns, PII masking for PostgreSQL-sourced data still falls to the API layer.
+Use `IN (SELECT ...)` rather than `EXISTS (SELECT ...)` in the mask expression. The POC found that correlated `EXISTS` subqueries with references like `uor.org_id = org_id` resolve to the inner table (self-reference) and silently degenerate to "exists any row", producing a security bug. `IN` avoids the ambiguity.
 
-#### Connection Model
+**Caveat (unchanged from original ADR):** Ranger's ability to apply column masking on JDBC external catalog tables is not fully documented. For PostgreSQL-sourced data reaching StarRocks through JDBC, either (a) materialize into a native StarRocks table and apply masking there, or (b) mask at the API layer as a fallback.
 
-**Per-user JWT-authenticated connections.** Each user authenticates to StarRocks with their JWT. The Go API opens a per-request connection (or uses a per-user cache). This requires the same GORM refactor as Option D (all 61 repositories accept per-request DB). Additionally, each StarRocks query passes through the Ranger plugin for policy evaluation.
+#### Connection Model & Access Paths
 
-**Additional overhead:** Ranger policy evaluation adds 1--5ms per query (the StarRocks Ranger plugin caches policies locally).
+- **Go API (Radiant portal):** Bearer JWT end-to-end. The JWT is forwarded through `mysql-proxy` to StarRocks, which validates it against Keycloak's JWKS. Every query runs as the authenticated user — Ranger sees `{USER}` = `alice`/`bob`/... — producing per-user audit attribution without a GORM refactor (no per-request DB instance needed; the proxy fans out to a per-JWT backend connection).
+- **Python analysts:** `mysql-connector-python ≥ 9.1.0` supports the `authentication_openid_connect_client` plugin natively.
+- **BI tools:** JDBC/ODBC connection with JWT as password, or a gateway if the tool lacks OIDC support.
+- **MCP servers / AI tools:** forward the user's JWT to StarRocks; queries are attributed to the user.
+- **Go clients using `go-sql-driver/mysql`:** cannot speak the OIDC plugin; they go through `mysql-proxy` which translates `mysql_clear_password` (JWT as cleartext password) to TLS + OIDC. See [MySQL proxy for Go clients](#mysql-proxy-for-go-clients).
+- **StarRocks must have TLS enabled** — the OIDC client plugin refuses to transmit the JWT over a cleartext channel. See [TLS requirement for OIDC](#tls-requirement-for-oidc).
 
-#### OpenFGA Integration
+**Policy evaluation overhead:** The StarRocks Ranger plugin caches policies locally (poll interval default 10s), so Ranger evaluation does not add a network round-trip per query. The only per-query cost is the subquery against `auth_db` tables (small, primary-key lookups — typically <5 ms).
 
-**Dual authorization system.** This is a significant drawback:
+#### No OpenFGA Sync — `auth_db` is the Single Source of Truth
+
+The original ADR treated a Ranger-based design as requiring an OpenFGA-to-Ranger sync daemon (and warned about sync lag). **The POC eliminates that by dropping OpenFGA entirely.** `auth_db` lives in StarRocks; Ranger policies are subqueries against it; nothing to sync. Permissions take effect on the next policy-cache poll (default 10s) with no custom infrastructure.
 
 | Concern | Engine |
 |---------|--------|
-| StarRocks data access (RLS, column masking) | Apache Ranger |
-| Portal actions (interpret, upload, approve) | OpenFGA |
-| Tenant/group membership | OpenFGA (source of truth) |
+| StarRocks data access (row-filter, column masking) | Apache Ranger (expressions → `auth_db` subqueries) |
+| Portal actions (interpret, upload, approve, invite) | Go API (action check via `auth_db.role_action`) |
+| Tenant/org/role membership | `auth_db` (single source of truth) |
 
-A sync service must translate OpenFGA state to Ranger policies:
-```
-OpenFGA tuple:                          -> Ranger policy:
-  user:bob identified_member group:X    -> Row filter (tenant_id=1) + no column mask
-  user:charlie deidentified_member group:X -> Row filter (tenant_id=1) + column mask on PII
-  user:dave member tenant:Y             -> Row filter (tenant_id=2)
-```
-
-**Consistency risk:** If the sync lags, OpenFGA may grant access that Ranger denies (or vice versa). This creates confusing failure modes.
+Both authorization layers read the same source data. Portal "can Alice interpret a variant at CHOP?" and StarRocks "should this row be visible?" resolve to the same `role_action` table — no cross-system inconsistency possible.
 
 #### Audit Trail
 
 | Layer | Attribution | Coverage |
 |-------|------------|----------|
-| Application log | User ID from JWT | All HTTP requests |
-| StarRocks audit log | Individual user | All StarRocks queries |
-| **Ranger audit log** | Individual user + **policy applied** | All access decisions, including denials |
+| Application log | User from JWT | All HTTP requests to Go API |
+| StarRocks audit log | Individual user (every access path) | All queries — portal, Jupyter, BI, MCP |
+| Ranger audit log | Individual user + policy applied | All access decisions, including denials |
+| PostgreSQL history tables | `created_by` / `updated_by` | Portal write operations |
 
-**Best-in-class audit posture.** Three independent, cross-referenceable audit trails. Ranger audit logs are particularly valuable because they record not just what was accessed, but which policy governed the decision.
+**Per-user attribution in StarRocks** is available for every access path because every query runs under the user's JWT-authenticated identity. The portal's Bearer JWT is forwarded to StarRocks via the proxy, so portal queries are attributed to `alice` (not to a shared `svc_cbtn` pool account). Ranger audit logs additionally record which policy made the decision, supporting compliance reviews.
 
 #### Direct StarRocks Access
 
-**Option B provides the strongest direct access story.** Ranger policies enforce row-level and column-level restrictions regardless of whether the query comes from the Go API, a Jupyter notebook, Power BI, or an MCP-connected AI tool. Every access path is equally protected.
+Ranger policies enforce row-filter and column masking regardless of query origin. Every access path is equally protected:
 
-**For data analysts:** A bioinformatician connecting via DBeaver with their JWT sees only their tenant's rows (Ranger RLS), with PII columns masked if they have de-identified access (Ranger column masking). They can write arbitrary SQL and the results are always scoped correctly -- no application-layer cooperation needed.
-
-**For BI tools:** Tableau/Power BI connect with the user's credentials. Ranger transparently filters data. Dashboards reflect only authorized data without any BI-layer configuration.
-
-**For AI tools (MCP):** An MCP server connecting to StarRocks on behalf of a user inherits that user's Ranger policies. The AI agent cannot see data the user is not authorized for.
-
-**This is Option B's primary advantage.** If the organization requires unrestricted direct SQL access with full tenant isolation, group-level RLS, and PII masking for all access paths, Ranger is the most comprehensive solution.
+- **Data analysts (Jupyter / DBeaver):** JWT-authenticated connection; subject to `{USER}` row-filter and masking policies.
+- **BI tools (Tableau / Power BI):** JWT-authenticated (native OIDC where supported, or via gateway). Dashboards reflect only authorized data without BI-layer configuration.
+- **AI tools (MCP):** JWT passthrough from the user's session; the AI agent cannot see data the user is not authorized for.
 
 #### Operational Complexity
 
 | Component | Change Required | Ongoing Burden |
 |-----------|----------------|----------------|
-| **Apache Ranger** | Deploy Ranger server (Java), MySQL/PG for Ranger metadata, admin UI | Version upgrades, policy management, monitoring |
-| **StarRocks Ranger plugin** | Compile and deploy to all FE nodes | Plugin compatibility with StarRocks upgrades |
-| StarRocks | Security Integration + `tenant_id` columns | Per-user provisioning |
-| Go API | Connection manager; simplified handlers (remove authz logic) | Maintain sync service |
-| **OpenFGA-to-Ranger sync** | Build custom sync service | Monitor sync lag, handle failures |
+| Apache Ranger | Deploy Ranger + Ranger PG | Version upgrades; policies are static (not per user) |
+| StarRocks Ranger plugin | Bundled in StarRocks 3.5; enable `access_control = ranger` | None |
+| StarRocks | JWT users (`authentication_jwt`), TLS keystore, Ranger service registration | Per-tenant DDL for new tenants (one-time) |
+| `auth_db` | Create schema, seed domain roles/actions | Admin UI (Radiant portal) handles all CRUD |
+| Keycloak | Realm + client + users | Identity provider standard ops |
+| mysql-proxy | Small Go binary (~400 LOC) | Single process; deploy alongside StarRocks |
 
-**For a mid-size team, Ranger is operationally heavy.** It is enterprise-grade software designed for organizations with dedicated security teams. The Java stack (Ranger server + Solr/Elasticsearch for audit) adds infrastructure diversity to an otherwise Go/TypeScript/Python stack.
+The original ADR rated this option as "operationally very heavy" — assuming full Ranger policy authoring plus an OpenFGA→Ranger sync daemon. The POC's actual footprint is:
+- **~11 static Ranger policies** (not one per user/tenant)
+- **No sync daemon** — `auth_db` is the source of truth
+- **Admin UI replaces manual Ranger administration** for day-to-day ops
+
+The Java stack (Ranger + Ranger PG) remains a new infrastructure dependency. For teams without Java operations expertise this is a one-time learning cost, not a day-to-day burden.
 
 #### Compliance Posture
 
 | Criterion | Assessment |
 |-----------|------------|
-| Defense-in-depth | **Strong** -- 3 independent enforcement layers |
-| Principle of least privilege | **Fully satisfied** -- Ranger enforces row + column restrictions |
-| Blast radius of a bug | **Minimal** -- Ranger prevents access regardless of API bugs |
-| Audit independence | **Best** -- 3 independent audit trails with policy attribution |
-| Direct access support | **Full** -- Ranger enforces RLS + column masking for all access paths |
+| Defense-in-depth | **Strong** — Ranger enforcement is independent of API code |
+| Principle of least privilege | **Fully satisfied** — row-filter + column masking per user |
+| Blast radius of a bug | **Minimal** — API bugs cannot grant extra data; Ranger is the authoritative gate |
+| Audit independence | **Best** — StarRocks audit log + Ranger audit log, per-user across all paths |
+| Direct access support | **Full** — analysts, BI, MCP all subject to the same policies as the portal |
 
-#### Migration Path
+#### Migration Path (POC-validated)
 
-1. Deploy Apache Ranger infrastructure (2--4 weeks)
-2. Install StarRocks Ranger plugin on all FE nodes
-3. Add `tenant_id` to StarRocks tables; backfill (requires data pipeline changes)
-4. Author Ranger policies for all tables (RLS + column masking)
-5. Build OpenFGA-to-Ranger sync service
-6. Connection manager + GORM refactor (same as Option D)
-7. Simplify Go API handlers (remove authz logic pushed to Ranger)
+1. Deploy Keycloak (realm, client with OIDC + audience mapper) — **1–2 weeks**
+2. Deploy Ranger (Ranger Admin + Ranger PG) — **1–2 weeks**
+3. Create `auth_db` schema; seed domain roles and actions; migrate existing users into `auth_db` — **1–2 weeks**
+4. Generate StarRocks TLS keystore (JKS); enable `ssl_keystore_location` in `fe.conf` — **<1 week**
+5. Create StarRocks users with `authentication_jwt`; register Ranger service; apply generic policies; enable `access_control = ranger` — **1 week**
+6. Build and deploy `mysql-proxy` for Go API + `go-sql-driver` clients — **1–2 weeks**
+7. Update Go API: action checks via `auth_db`; Bearer JWT forwarded to StarRocks via proxy — **1–2 weeks**
+8. Radiant admin UI (tenant switcher, role CRUD, user assignments) — **1–2 weeks**
 
-**Estimated effort:** 12--20 weeks, with significant ongoing operational overhead.
+Total: ~**8–12 weeks** with one or two engineers, incrementally shippable per phase.
 
 #### Portal-Specific Action Authorization
 
-**Ranger does not cover portal actions.** Actions like interpreting a case, uploading files, approving variants, and assigning cases write to PostgreSQL, not StarRocks. These remain governed by OpenFGA.
+Unlike the original ADR's framing (Ranger doesn't cover portal actions → OpenFGA needed), portal actions are governed by the **same** `auth_db` source of truth. The Go API evaluates action permissions by running the equivalent subquery against `auth_db.role_action` (same query shape Ranger uses). No sync, no dual systems:
 
-This means the team must maintain **two authorization policy systems** (Ranger + OpenFGA) with a sync layer between them. Policy changes must be coordinated across both systems.
+```go
+// Pseudo-code: handler checks can_create_case at the target org
+hasAction := authDB.QueryRow(`
+  SELECT 1 FROM user_org_role uor
+  JOIN role_action ra ON ra.tenant_id=uor.tenant_id AND ra.role_id=uor.role_id
+  WHERE uor.username = ? AND uor.tenant_id = ? AND (uor.org_id = ? OR uor.org_id = '*')
+    AND ra.action_id = 'can_create_case'
+  LIMIT 1
+`, user, tenant, org)
+```
 
 ---
 
-### Option C -- Views-Based with Per-Tenant Service Account Pools (Recommended)
+### Option C -- Views-Based with Per-Tenant Service Account Pools (Alternative)
+
+> **Status:** Alternative to the recommended Option B. Considered in the original ADR, preserved here for reference. **Not validated by the POC.** Several risks listed below (view predicate pushdown, colocation preservation through pass-through views, per-group identified database proliferation at scale) remain open. Choose Option C only if a Java dependency (Apache Ranger) is unacceptable in the operational environment.
 
 **Summary:** Use StarRocks views as the tenant isolation layer. Base tables live in a shared database with a `tenant_id` column. Per-tenant view databases expose only that tenant's data. Identified/de-identified view databases enforce PII masking at the StarRocks level for direct-access users. A hybrid connection model uses per-tenant service account pools for the Go API and per-user JWT connections for direct access (Jupyter, BI tools, MCP). API-layer enforcement handles within-tenant project filtering for portal users.
 
@@ -651,7 +699,7 @@ graph LR
     style ICE fill:#e2d5f1,stroke:#6f42c1
 ```
 
-> **Recommended.** Preserves colocation (single `radiant_base`), supports all access paths, per-group identified control, no Ranger. Hybrid connection model: per-tenant pools for the API, per-user JWT for direct access.
+> **Alternative to Option B.** Preserves colocation (single `radiant_base`), supports all access paths, per-group identified control, no Ranger. Hybrid connection model: per-tenant pools for the API, per-user JWT for direct access. Not POC-validated; see the note at the top of this option for outstanding risks.
 
 #### Tenant Isolation Model
 
@@ -1434,458 +1482,130 @@ Option C is preferred if:
 ---
 ## Comparison Matrix
 
-| Dimension | Option A | Option B (Ranger) | Option C (Recommended) | Option D (Per-User JWT) |
-|-----------|----------|-------------------|----------------------|------------------------|
-| **Tenant isolation** | API-layer only | Ranger RLS | Views + DB RBAC | Views + DB RBAC |
-| **PII masking** | API-layer | Ranger column masking | Per-tenant deidentified + per-group identified DBs | Same as C |
-| **Connection model** | Shared pool (unchanged) | Per-user JWT connections | Hybrid: per-tenant pools (API) + per-user JWT (direct) | Per-user JWT for ALL (API + direct) |
-| **Direct StarRocks access** | **Not supported** | **Full** (RLS + column masking) | **Full** (views + DB RBAC + PII views) | **Full** (same as C) |
-| **Colocation group preserved** | Yes (no changes) | Yes (single DB) | **Yes** (single radiant_base DB) | **Yes** (same as C) |
-| **StarRocks schema changes** | None | Add `tenant_id` to tables | Add `tenant_id` + base DB + view DBs | Same as C |
-| **PostgreSQL changes** | Add tenant table | Add tenant table + enable RLS | Add tenant table | Same as C |
-| **New infrastructure** | None | **Apache Ranger** (Java stack) | JWKS config (for direct access) | JWKS config (for all access) |
-| **GORM refactor scope** | Moderate (add WHERE clauses) | **Major** (all 61 repos) | Minimal (wiring change; table names unchanged) | **Major** (all 61 repos, per-request DB) |
-| **Defense-in-depth** | 1 layer | 3 layers | 2 layers | 2 layers (+ DB rejects API bugs) |
-| **Bug blast radius** | All tenants | Minimal | Within tenant | Within tenant (stronger: DB-enforced per user) |
-| **StarRocks audit attribution** | None (root) | Per-user + policy | Per-user (direct) / per-tenant (API) | **Per-user for ALL queries** |
-| **Operational burden** | Low | **Very high** | Low-moderate | Moderate-high |
-| **Estimated effort** | 4-8 weeks | 12-20 weeks | 8-13 weeks | 12-18 weeks |
-| **Rollback difficulty** | Easy | Very hard | Moderate | Hard |
+| Dimension | Option A | **Option B — Ranger + `auth_db`** (Recommended, POC-validated) | Option C — Views + Per-Tenant Pools (Alternative) | Option D — Views + Per-User JWT |
+|-----------|----------|---------------------------------------------|-----------------------------------------|--------------------------------|
+| **Tenant isolation** | API-layer only | Ranger row-filter with `auth_db` subqueries | Views + DB RBAC | Views + DB RBAC |
+| **PII masking** | API-layer | Ranger column mask (`can_read_pii` via `role_action`) | Per-tenant deidentified + per-group identified DBs | Same as C |
+| **Connection model** | Shared pool (unchanged) | Per-user JWT end-to-end (Go API via `mysql-proxy`) | Hybrid: per-tenant pools (API) + per-user JWT (direct) | Per-user JWT for ALL |
+| **Direct StarRocks access** | **Not supported** | **Full** — Ranger applies to every query | **Full** (views + DB RBAC + PII views) | **Full** (same as C) |
+| **Colocation group preserved** | Yes (no changes) | **Yes** (single `radiant_base` DB, row-filter has no structural impact) | Yes (single `radiant_base` DB) | Same as C |
+| **StarRocks schema changes** | None | Add `tenant_id` + `org_id` to tenant-scoped tables; add `auth_db` | Add `tenant_id` + base DB + view DBs | Same as C |
+| **PostgreSQL changes** | Add tenant table | Add tenant table | Add tenant table | Same as C |
+| **New infrastructure** | None | **Keycloak, Ranger + Ranger PG, mysql-proxy** | JWKS config (for direct access) | JWKS config (for all access) |
+| **GORM refactor scope** | Moderate (add WHERE clauses) | Minimal (Bearer JWT wiring only; proxy handles per-user connection) | Minimal (wiring change) | **Major** (all 61 repos, per-request DB) |
+| **Defense-in-depth** | 1 layer | **3 layers** (Ranger + API action checks + network) | 2 layers | 2 layers (+ DB rejects API bugs) |
+| **Bug blast radius** | All tenants | **Minimal** (Ranger is independent of API code) | Within tenant | Within tenant (stronger: DB-enforced per user) |
+| **StarRocks audit attribution** | None (root) | **Per-user + policy** (every access path) | Per-user (direct) / per-tenant (API) | Per-user for ALL queries |
+| **Operational burden** | Low | **Low–moderate** (Ranger policies are generic, not per-user) | Low–moderate | Moderate–high |
+| **Estimated effort** | 4–8 weeks | **12–19 weeks** (Phase 1 + 2 + 3, POC-validated) | 8–13 weeks | 12–18 weeks |
+| **Rollback difficulty** | Easy | Moderate (disable `access_control = ranger`) | Moderate | Hard |
+| **POC validated** | N/A | ✅ `docs/adr/ranger-poc/` | ❌ | ❌ |
 
 ---
 
 ## 4. Proposed Schema Organization
 
-This section details the schema for the recommended approach (Option C, with Option A as the first phase).
+This section describes StarRocks and PostgreSQL schema changes for the recommended Option B (Ranger + `auth_db`). The authorization model itself is in [Section 5](#5-authorization-model-auth_db).
 
 ### StarRocks Database Hierarchy
 
 ```mermaid
 graph TB
-    subgraph "default_catalog"
-        subgraph radiant_base ["radiant_base (single DB — preserves colocation)"]
+    subgraph "default_catalog (StarRocks native)"
+        subgraph auth_db ["auth_db (authorization source of truth)"]
+            direction TB
+            AT[users / tenant / organization]
+            AR["role, action, role_action<br/>(per-tenant role catalog)"]
+            AA["user_tenant_role<br/>user_org_role<br/>(assignments)"]
+        end
+
+        subgraph radiant_base ["radiant_base (clinical + operational tables)"]
             direction LR
             subgraph shared ["Shared Reference Tables"]
                 SV[snv__variant_annotations]
                 SC[snv__consequence]
                 CL[clinvar]
                 EG[ensembl_gene]
-                GP["gene panels<br/>(hpo, omim, orphanet,<br/>ddd, cosmic)"]
-                PF["pop. frequencies<br/>(gnomad, topmed, 1kG)"]
+                GP["gene panels<br/>(hpo, omim, orphanet, …)"]
+                PF["pop. frequencies<br/>(gnomad, topmed, 1kG, …)"]
             end
-            subgraph tenant_scoped ["Tenant-Scoped Tables (+ tenant_id)"]
+            subgraph tenant_scoped ["Tenant-Scoped Tables (+ tenant_id, org_id)"]
                 GSO[germline__snv__occurrence]
                 SSO[somatic__snv__occurrence]
                 GCO[germline__cnv__occurrence]
                 EX[exomiser]
                 SSE[staging_sequencing_experiment]
+                PAT[patients]
                 SVF[snv__variant_frequencies]
             end
         end
-
-        subgraph views_cbtn ["radiant_cbtn (per-tenant: occurrences + shared)"]
-            V1["Views WHERE tenant_id = 1<br/>+ pass-through views for shared tables"]
-        end
-        subgraph views_deid ["radiant_cbtn_deidentified (per-tenant)"]
-            V2["Masked PII clinical + Iceberg<br/>ALL CBTN groups"]
-        end
-        subgraph views_chop ["radiant_cbtn_chop_identified (per-group)"]
-            V3["Full PII clinical + Iceberg<br/>CHOP only"]
-        end
-        subgraph views_sea ["radiant_cbtn_seattle_identified (per-group)"]
-            V4["Full PII clinical + Iceberg<br/>Seattle only"]
-        end
     end
 
-    subgraph jdbc ["radiant_jdbc (JDBC catalog)"]
-        PG_T["PostgreSQL tables<br/>patient, cases, sample, ..."]
+    subgraph "radiant_jdbc (external)"
+        PG[(PostgreSQL<br/>case, interpretation,<br/>history, ...)]
     end
 
-    subgraph iceberg ["radiant_iceberg (Iceberg catalog)"]
-        ICE_T["Iceberg tables<br/>genomic_files, analysis_results, ..."]
+    subgraph "radiant_iceberg (external)"
+        ICE[(Iceberg tables<br/>+ tenant_id, org_id)]
     end
 
-    V1 --> radiant_base
-    V2 --> jdbc
-    V2 --> iceberg
-    V3 --> jdbc
-    V3 --> iceberg
-    V4 --> jdbc
+    RP["Apache Ranger<br/>row-filter + column-mask<br/>expressions read auth_db"]
+    RP -. reads .-> auth_db
+    RP -. enforces .-> radiant_base
+    RP -. enforces .-> PG
+    RP -. enforces .-> ICE
 
-    style radiant_base fill:#e6f3ff,stroke:#0066cc
-    style shared fill:#f0f0f0,stroke:#999
-    style tenant_scoped fill:#fff3cd,stroke:#999
-    style views_cbtn fill:#d4edda,stroke:#28a745
-    style views_deid fill:#fff3cd,stroke:#856404
-    style views_chop fill:#d4edda,stroke:#28a745
-    style views_sea fill:#d4edda,stroke:#28a745
-    style jdbc fill:#f8d7da,stroke:#721c24
-    style iceberg fill:#e2d5f1,stroke:#6f42c1
+    style auth_db fill:#d4edda,stroke:#28a745
+    style RP fill:#fff3cd,stroke:#856404
 ```
 
-```mermaid
-graph LR
-    subgraph "Colocation Group: locus_colocation_group"
-        direction TB
-        A["germline__snv__occurrence<br/>HASH(locus_id) BUCKETS 10"] ~~~ B["snv__variant_annotations<br/>HASH(locus_id) BUCKETS 10"]
-        B ~~~ C["snv__consequence<br/>HASH(locus_id) BUCKETS 10"]
-        C ~~~ D["clinvar<br/>HASH(locus_id) BUCKETS 10"]
-        D ~~~ E["snv__variant_frequencies<br/>HASH(locus_id) BUCKETS 10"]
-        E ~~~ F["exomiser<br/>HASH(locus_id) BUCKETS 10"]
-    end
+Key changes from the current schema:
 
-    note["All in radiant_base DB<br/>= colocate JOINs on locus_id<br/>(local, shuffle-free)"]
+- **New database `auth_db`** holds roles, actions, assignments (see [Section 5](#5-authorization-model-auth_db)).
+- **Tenant-scoped tables get a `tenant_id` column and, where appropriate, an `org_id` column.** This is the only base-schema change for tenant isolation — no view databases, no per-group identified/deidentified DBs. Isolation and PII masking are applied by Ranger as row-filter and column-mask expressions that subquery `auth_db`.
+- **Shared reference tables are unchanged.** No `tenant_id` column; they are accessible to all users. They stay in `radiant_base` so that colocation groups on `HASH(locus_id)` (required for fast `occurrence JOIN variant JOIN consequence JOIN clinvar`) are preserved.
 
-    style note fill:#ffffcc,stroke:#333
-```
+### 4.1 StarRocks Schema
 
-### 4.1 StarRocks Schema (Target State -- Option C)
+#### Tenant-scoped tables
 
-#### radiant_base Database
-
-**Single database containing ALL base tables** -- both tenant-scoped and shared reference data. This is required by the colocation group constraint: tables that participate in colocate JOINs (e.g., `germline__snv__occurrence JOIN snv__variant_annotations JOIN clinvar` on `locus_id`) must be in the same database to share a colocation group.
-
-Not directly accessible by any tenant service account or direct-access user. All access goes through per-tenant view databases.
+Add `tenant_id VARCHAR(50) NOT NULL` (and `org_id VARCHAR(50) NOT NULL` where the row has an organization owner). Partition by `tenant_id` for pruning.
 
 ```sql
-CREATE DATABASE IF NOT EXISTS radiant_base;
-
--- ============================================================
--- COLOCATION GROUP: All locus_id-distributed tables share this
--- group for colocate JOINs (local, shuffle-free).
--- All tables in this group MUST use:
---   DISTRIBUTED BY HASH(locus_id) BUCKETS 10
---   PROPERTIES ("colocate_with" = "locus_colocation_group")
--- ============================================================
-
--- Shared reference tables (no tenant_id, same data for all tenants)
--- These are in radiant_base to satisfy the colocation constraint.
-
-CREATE TABLE radiant_base.snv__variant_annotations (
-    locus_id BIGINT NOT NULL,
-    chromosome VARCHAR(5) NOT NULL,
-    start BIGINT NOT NULL,
-    end BIGINT NOT NULL,
-    reference VARCHAR(1000),
-    alternate VARCHAR(1000),
-    variant_class VARCHAR(50),
-    rsnumber VARCHAR(50),
-    hgvsg VARCHAR(500),
-    clinvar_name VARCHAR(500),
-    clinvar_interpretation ARRAY<VARCHAR(200)>,
-    symbol VARCHAR(100),
-    impact_score INT,
-    consequences ARRAY<VARCHAR(100)>,
-    vep_impact VARCHAR(50),
-    is_mane_select BOOLEAN,
-    is_mane_plus BOOLEAN,
-    is_canonical BOOLEAN,
-    mane_select VARCHAR(100),
-    transcript_id VARCHAR(100),
-    hgvsc VARCHAR(500),
-    hgvsp VARCHAR(500),
-    locus VARCHAR(500),
-    dna_change VARCHAR(500),
-    aa_change VARCHAR(500),
-    omim_inheritance_code ARRAY<VARCHAR(50)>,
-    gnomad_v3_af DOUBLE,
-    topmed_af DOUBLE,
-    tg_af DOUBLE
-) ENGINE=OLAP
-PRIMARY KEY (locus_id)
-DISTRIBUTED BY HASH(locus_id) BUCKETS 10
-PROPERTIES ("colocate_with" = "locus_colocation_group");
-
--- clinvar, snv__consequence, etc. also use:
--- DISTRIBUTED BY HASH(locus_id) BUCKETS 10
--- PROPERTIES ("colocate_with" = "locus_colocation_group")
-
--- Other shared reference tables NOT in colocation group (different keys):
--- ensembl_gene (DUPLICATE KEY gene_id, chromosome)
--- hpo_term, mondo_term (lookup tables)
--- gene panels (DUPLICATE KEY symbol, panel)
--- These do not participate in locus_id-based colocate JOINs.
-
--- ============================================================
--- Tenant-scoped tables (have tenant_id column)
--- ============================================================
-
--- Germline SNV occurrences with tenant_id
-CREATE TABLE radiant_base.germline__snv__occurrence (
-    tenant_id INT NOT NULL,
-    part INT NOT NULL,
-    seq_id INT NOT NULL,
-    task_id INT NOT NULL,
-    locus_id BIGINT NOT NULL,
-    quality DOUBLE,
-    filter VARCHAR(100),
-    ad_ratio DOUBLE,
-    gq INT,
-    dp INT,
-    ad_total INT,
-    ad_ref INT,
-    ad_alt INT,
-    zygosity VARCHAR(50),
-    calls ARRAY<INT>,
-    phased BOOLEAN,
-    info_qd DOUBLE,
-    -- ... (all existing columns) ...
-    transmission_mode VARCHAR(50),
-    parental_origin VARCHAR(50),
-    father_dp INT, father_gq INT, father_ad_ref INT, father_ad_alt INT,
-    father_ad_total INT, father_ad_ratio DOUBLE, father_calls ARRAY<INT>, father_zygosity VARCHAR(50),
-    mother_dp INT, mother_gq INT, mother_ad_ref INT, mother_ad_alt INT,
-    mother_ad_total INT, mother_ad_ratio DOUBLE, mother_calls ARRAY<INT>, mother_zygosity VARCHAR(50),
-    exomiser_moi VARCHAR(50),
-    exomiser_acmg_classification VARCHAR(50),
-    exomiser_acmg_evidence ARRAY<VARCHAR(50)>,
-    exomiser_variant_score DOUBLE,
-    exomiser_gene_combined_score DOUBLE
-) ENGINE=OLAP
-DUPLICATE KEY(tenant_id, part, seq_id, task_id, locus_id)
-PARTITION BY (tenant_id)
-DISTRIBUTED BY HASH(locus_id) BUCKETS 10
-PROPERTIES ("colocate_with" = "locus_colocation_group");
-
--- Per-tenant internal frequency aggregates
-CREATE TABLE radiant_base.snv__variant_frequencies (
-    tenant_id INT NOT NULL,
-    locus_id BIGINT NOT NULL,
-    germline_pf_wgs DOUBLE,
-    germline_pc_wgs INT,
-    germline_pn_wgs INT,
-    germline_pc_wgs_affected INT,
-    germline_pn_wgs_affected INT,
-    germline_pf_wgs_affected DOUBLE,
-    germline_pc_wgs_not_affected INT,
-    germline_pn_wgs_not_affected INT,
-    germline_pf_wgs_not_affected DOUBLE,
-    germline_pf_wxs DOUBLE,
-    germline_pc_wxs INT,
-    germline_pn_wxs INT,
-    -- ... (all frequency columns) ...
-    somatic_pf_tn_wgs DOUBLE,
-    somatic_pc_tn_wgs INT,
-    somatic_pn_tn_wgs INT,
-    somatic_pf_tn_wxs DOUBLE,
-    somatic_pc_tn_wxs INT,
-    somatic_pn_tn_wxs INT
-) ENGINE=OLAP
-PRIMARY KEY (tenant_id, locus_id)
-PARTITION BY (tenant_id)
-DISTRIBUTED BY HASH(locus_id) BUCKETS 10
-PROPERTIES ("colocate_with" = "locus_colocation_group");
-
--- Similar pattern for all tenant-scoped tables:
--- somatic__snv__occurrence (+ tenant_id, PARTITION BY tenant_id, colocate_with locus_colocation_group)
--- germline__cnv__occurrence (+ tenant_id, PARTITION BY tenant_id -- different distribution key, separate colocation group)
--- exomiser (+ tenant_id, PARTITION BY tenant_id, colocate_with locus_colocation_group)
--- snv__consequence_filter_partitioned (+ tenant_id, PARTITION BY tenant_id)
--- staging_sequencing_experiment (+ tenant_id, PARTITION BY tenant_id -- keyed by case_id/seq_id, not locus_id)
+ALTER TABLE germline__snv__occurrence ADD COLUMN tenant_id VARCHAR(50) NOT NULL;
+ALTER TABLE germline__snv__occurrence ADD COLUMN org_id    VARCHAR(50) NOT NULL;
+-- (repeat for somatic__snv__occurrence, germline__cnv__occurrence, exomiser,
+--  staging_sequencing_experiment, snv__variant_frequencies, patients, ...)
 ```
 
-**Partition key design:** Using `PARTITION BY (tenant_id)` enables StarRocks to prune partitions when the view's `WHERE tenant_id = N` predicate is pushed down. A query against `radiant_cbtn.germline__snv__occurrence` only scans tenant 1's partition, giving excellent performance isolation.
+`snv__variant_frequencies` is the one dataset that is effectively per-tenant (it aggregates over the tenant's cohort); it stays in `radiant_base` with `tenant_id` so colocate JOINs with `snv__variant_annotations` (shared) and occurrence tables (per-tenant) remain local.
 
-#### Per-Tenant View Databases
+#### Ranger policies
 
-Created from a template for each tenant:
+The policies in the POC are representative. All use `"users": ["{USER}"]` with a `root` exemption and subqueries against `auth_db`:
 
-```sql
--- Template (parameterized by tenant_code and tenant_id)
-CREATE DATABASE IF NOT EXISTS radiant_{tenant_code};
+| Policy | Type | Resource | Expression (summary) |
+|--------|------|----------|----------------------|
+| `sr_select_auth` | access | `auth_db.*` | `select` for `{USER}` |
+| `sr_select_clinical` | access | `radiant_base.*` | `select` for `{USER}` |
+| `sr_access_operational` | access | `operational_db.*` | `select` + `insert` for `{USER}` |
+| `sr_rowfilter_user_tenant_role` | row-filter | `auth_db.user_tenant_role` | `username = current_user()` |
+| `sr_rowfilter_user_org_role` | row-filter | `auth_db.user_org_role` | `username = current_user()` |
+| `sr_rowfilter_users` | row-filter | `auth_db.users` | `username = current_user()` |
+| `sr_rowfilter_patients` | row-filter | `radiant_base.patients` | tenant membership subquery |
+| `sr_rowfilter_*_occurrence` | row-filter | occurrence tables | same tenant membership subquery |
+| `sr_mask_mrn`, `sr_mask_first_name`, `sr_mask_dob`, … | column-mask | PHI columns | `can_read_pii` subquery |
 
-CREATE VIEW radiant_{tenant_code}.germline__snv__occurrence AS
-SELECT part, seq_id, task_id, locus_id,
-       quality, filter, ad_ratio, gq, dp, ad_total, ad_ref, ad_alt,
-       zygosity, calls, phased,
-       info_qd,
-       -- ... all columns except tenant_id ...
-       transmission_mode, parental_origin,
-       father_dp, father_gq, father_ad_ref, father_ad_alt,
-       father_ad_total, father_ad_ratio, father_calls, father_zygosity,
-       mother_dp, mother_gq, mother_ad_ref, mother_ad_alt,
-       mother_ad_total, mother_ad_ratio, mother_calls, mother_zygosity,
-       exomiser_moi, exomiser_acmg_classification,
-       exomiser_acmg_evidence, exomiser_variant_score, exomiser_gene_combined_score
-FROM radiant_base.germline__snv__occurrence
-WHERE tenant_id = {tenant_id};
+~11 generic policies cover the POC; production will grow with the number of PHI columns and tenant-scoped tables, but not with users, orgs, or tenants.
 
-CREATE VIEW radiant_{tenant_code}.staging_sequencing_experiment AS
-SELECT case_id, seq_id, task_id, task_type, part, analysis_type,
-       aliquot, patient_id, experimental_strategy, sex, family_id,
-       family_role, affected_status, histology_type,
-       created_at, updated_at, ingested_at
-FROM radiant_base.staging_sequencing_experiment
-WHERE tenant_id = {tenant_id};
+#### Iceberg and JDBC catalogs
 
-CREATE VIEW radiant_{tenant_code}.snv__variant_frequencies AS
-SELECT locus_id,
-       germline_pf_wgs, germline_pc_wgs, germline_pn_wgs,
-       -- ... all frequency columns ...
-       somatic_pf_tn_wxs, somatic_pc_tn_wxs, somatic_pn_tn_wxs
-FROM radiant_base.snv__variant_frequencies
-WHERE tenant_id = {tenant_id};
+`radiant_iceberg` and `radiant_jdbc` tables that contain tenant-scoped data must also expose `tenant_id` and (where applicable) `org_id`. Ranger row-filter policies apply to external-catalog tables the same way as to native tables, **with the caveat that column masking on JDBC catalogs is not fully documented.** For PostgreSQL-sourced PHI reaching StarRocks via JDBC, either:
 
--- Pass-through views for shared reference tables
--- (enables natural JOINs within tenant DB; planner sees through to colocated base tables)
-CREATE VIEW radiant_{tenant_code}.snv__variant_annotations AS
-SELECT * FROM radiant_base.snv__variant_annotations;
+1. Materialize into a native StarRocks table and mask there, or
+2. Mask at the API layer (Go helper that zeros PHI columns when the caller lacks `can_read_pii`).
 
-CREATE VIEW radiant_{tenant_code}.snv__consequence AS
-SELECT * FROM radiant_base.snv__consequence;
-
-CREATE VIEW radiant_{tenant_code}.clinvar AS
-SELECT * FROM radiant_base.clinvar;
-
-CREATE VIEW radiant_{tenant_code}.clinvar_rcv_summary AS
-SELECT * FROM radiant_base.clinvar_rcv_summary;
-
-CREATE VIEW radiant_{tenant_code}.ensembl_gene AS
-SELECT * FROM radiant_base.ensembl_gene;
-
--- ... (pass-through views for all remaining shared reference tables:
---      ensembl_exon_by_gene, cytoband, hpo_term, mondo_term,
---      gnomad_genomes_v3, topmed_bravo, 1000_genomes,
---      hpo_gene_panel, omim_gene_panel, orphanet_gene_panel,
---      ddd_gene_panel, cosmic_gene_panel)
-
--- ... views for all other tenant-scoped tables ...
-```
-
-#### RBAC Setup Per Tenant
-
-```sql
-CREATE USER 'svc_{tenant_code}' IDENTIFIED BY '{generated_password}';
-CREATE ROLE role_{tenant_code};
-
--- Tenant-specific view database: full SELECT
-GRANT SELECT ON DATABASE radiant_{tenant_code} TO ROLE role_{tenant_code};
-
--- Shared reference database: full SELECT
--- No radiant_shared grant needed; shared tables are pass-through views in radiant_{tenant_code}
-
--- JDBC catalog: SELECT for federated queries
--- (Within-tenant project filtering enforced at API layer)
-GRANT SELECT ON ALL TABLES IN DATABASE radiant_jdbc.public TO ROLE role_{tenant_code};
-
--- Base database: NO access (views enforce filtering)
--- (No GRANT on radiant_base)
-
-GRANT role_{tenant_code} TO 'svc_{tenant_code}';
-```
-
-#### Per-Tenant De-identified + Per-Group Identified View Databases (Phase 3)
-
-Created during Phase 3 (direct access enablement). De-identified databases are **per-tenant** (any tenant member sees masked data for all groups). Identified databases are **per-group** (a user must be explicitly granted identified access to a specific group).
-
-This design reflects that de-identified data carries no privacy risk -- the sensitive boundary is who gets **identified** (full PII) access, and that must be per-group.
-
-```sql
--- ============================================================
--- Per-TENANT de-identified database (all CBTN groups, masked PII)
--- ============================================================
-CREATE DATABASE IF NOT EXISTS radiant_cbtn_deidentified;
-
-CREATE VIEW radiant_cbtn_deidentified.patient AS
-SELECT p.id, p.sex_code, p.life_status_code, p.organization_id,
-       '***' AS first_name,
-       '***' AS last_name,
-       '***' AS jhn,
-       NULL AS date_of_birth,
-       CONCAT('DEID-', p.id) AS submitter_patient_id
-FROM radiant_jdbc.public.patient p
-WHERE p.organization_id IN (
-    SELECT o.id FROM radiant_jdbc.public.organization o
-    WHERE o.code IN ('cbtn-org-chop', 'cbtn-org-seattle')  -- ALL CBTN organizations
-);
-
--- Iceberg tables with masked PII (all CBTN groups)
-CREATE VIEW radiant_cbtn_deidentified.genomic_files AS
-SELECT file_id, file_format, data_category, file_size,
-       '***' AS patient_name,
-       CONCAT('DEID-', patient_id) AS patient_id
-FROM radiant_iceberg.radiant_data.genomic_files
-WHERE tenant_code = 'cbtn';
-
--- ============================================================
--- Per-GROUP identified databases (full PII, one per group)
--- ============================================================
-CREATE DATABASE IF NOT EXISTS radiant_cbtn_chop_identified;
-
-CREATE VIEW radiant_cbtn_chop_identified.patient AS
-SELECT p.id, p.sex_code, p.life_status_code, p.organization_id,
-       p.first_name, p.last_name, p.jhn, p.date_of_birth,
-       p.submitter_patient_id
-FROM radiant_jdbc.public.patient p
-WHERE p.organization_id IN (
-    SELECT o.id FROM radiant_jdbc.public.organization o
-    WHERE o.code IN ('cbtn-org-chop')  -- Only CHOP organizations
-);
-
--- Iceberg tables with full identified data for CHOP
-CREATE VIEW radiant_cbtn_chop_identified.genomic_files AS
-SELECT * FROM radiant_iceberg.radiant_data.genomic_files
-WHERE group_code = 'chop';
-
-CREATE DATABASE IF NOT EXISTS radiant_cbtn_seattle_identified;
--- ... (same pattern, filtered to Seattle's organizations/group_code)
-```
-
-**Complete database hierarchy per tenant (target state):**
-```
-radiant_cbtn/                              -- Occurrence/analytical views (no PII, all groups)
-radiant_cbtn_deidentified/                 -- Masked PII clinical + Iceberg (all CBTN groups)
-radiant_cbtn_chop_identified/              -- Full PII clinical + Iceberg for CHOP only
-radiant_cbtn_seattle_identified/           -- Full PII clinical + Iceberg for Seattle only
-```
-
-**Database count formula:** Per tenant: 1 (occurrences) + 1 (de-identified) + M (identified per group) = `2 + M`. For 10 tenants with 3 groups each = 50 databases. Lightweight metadata in StarRocks.
-
-View databases include views over:
-- `radiant_jdbc` (PostgreSQL clinical tables) -- filtered by tenant/group organizations
-- `radiant_iceberg` (Iceberg tables) -- filtered by tenant/group code, with PII masking for de-identified
-
-#### Iceberg Catalog (`radiant_iceberg`)
-
-The `radiant_iceberg` catalog provides access to data stored in Apache Iceberg format. Iceberg tables may contain **identified data** (patient-linked genomic files, analysis results with patient metadata). These tables are treated as another data source alongside `radiant_jdbc` and `radiant_base`.
-
-```sql
--- Iceberg catalog configuration (example)
-CREATE EXTERNAL CATALOG radiant_iceberg
-PROPERTIES (
-    "type" = "iceberg",
-    "iceberg.catalog.type" = "hive",
-    "hive.metastore.uris" = "thrift://hive-metastore:9083"
-);
-```
-
-**Iceberg tables are never accessed directly by users.** Like `radiant_base` and `radiant_jdbc`, they are exposed exclusively through per-group view databases. Direct-access users see Iceberg data only through the views in their granted databases (identified or de-identified), which filter by group and apply PII masking where needed.
-
-**Colocation note:** Iceberg tables live in a separate catalog and do not participate in StarRocks colocation groups. JOINs between `radiant_base` native tables and Iceberg tables will use shuffle joins, not colocate joins. This is expected -- Iceberg tables serve a different access pattern (file-level metadata, bulk analysis) than the high-frequency `locus_id`-based analytical JOINs within `radiant_base`.
-
-#### Resource Group Isolation (Optional)
-
-For workload isolation between tenants:
-
-```sql
-CREATE RESOURCE GROUP rg_cbtn
-PROPERTIES (
-    "cpu_weight" = "20",
-    "mem_limit" = "20%",
-    "type" = "normal"
-);
-
-CREATE RESOURCE GROUP rg_udp
-PROPERTIES (
-    "cpu_weight" = "20",
-    "mem_limit" = "20%",
-    "type" = "normal"
-);
-
--- Assign service accounts to resource groups
-ALTER USER 'svc_cbtn' SET DEFAULT RESOURCE GROUP 'rg_cbtn';
-ALTER USER 'svc_udp' SET DEFAULT RESOURCE GROUP 'rg_udp';
-```
+Both approaches are compatible with the rest of the architecture.
 
 ### 4.2 PostgreSQL Schema Changes
 
@@ -1939,493 +1659,341 @@ The single `radiant_jdbc` catalog remains unchanged. The Go API's per-tenant ser
 
 ---
 
-## 5. OpenFGA Authorization Model
+## 5. Authorization Model (`auth_db`)
 
-### Tenant / Group / Access Level Hierarchy
+**OpenFGA has been removed.** The POC validated that a small set of StarRocks tables is simpler, faster to query, and more auditable than an external authorization service for this domain. `auth_db` lives in the same cluster as the data it protects; Ranger row-filter and column-mask expressions read it via SQL subqueries on every query. Permissions take effect on the next policy-cache poll (default ~10 s) with zero custom sync infrastructure.
 
-```mermaid
-graph TB
-    subgraph "Tenant: CBTN"
-        direction TB
-        T1[tenant:cbtn]
+This section documents the schema, the domain role model, the action catalog, and the assignment rules. It supersedes the original Section 5 (OpenFGA model).
 
-        subgraph "Group: CHOP"
-            G1[group:cbtn-chop]
-            G1_ID["identified_member<br/>(full PII)"]
-            G1_DEID["deidentified_member<br/>(masked PII)"]
-            G1_ACTIONS["Portal actions:<br/>can_interpret, can_upload,<br/>can_approve, can_assign,<br/>can_generate_report"]
-        end
+### 5.1 Schema
 
-        subgraph "Group: Seattle"
-            G2[group:cbtn-seattle]
-            G2_ID["identified_member"]
-            G2_DEID["deidentified_member"]
-        end
+All tables are **StarRocks Primary Key tables** in database `auth_db`, distributed by the leading key.
 
-        T1 -- "parent_tenant" --> G1
-        T1 -- "parent_tenant" --> G2
-    end
+```sql
+-- Identity / structure
+CREATE TABLE auth_db.users (
+    username    VARCHAR(100) PRIMARY KEY,
+    created_at  DATETIME,
+    disabled_at DATETIME NULL
+);
 
-    subgraph "Tenant: UDP"
-        direction TB
-        T2[tenant:udp]
+CREATE TABLE auth_db.tenant (
+    tenant_id   VARCHAR(50) PRIMARY KEY,
+    tenant_name VARCHAR(200)
+);
 
-        subgraph "Group: Rare Disease"
-            G3[group:udp-rare_disease]
-        end
+CREATE TABLE auth_db.organization (
+    org_id    VARCHAR(50) PRIMARY KEY,
+    tenant_id VARCHAR(50),
+    org_name  VARCHAR(200)
+);
 
-        subgraph "Group: Epilepsy"
-            G4[group:udp-epilepsy]
-        end
+-- Role catalog (per tenant — tenants define their own roles)
+CREATE TABLE auth_db.role (
+    tenant_id   VARCHAR(50),
+    role_id     VARCHAR(50),
+    role_name   VARCHAR(200),
+    scope       VARCHAR(10),   -- 'org' or 'tenant'
+    description VARCHAR(500),
+    PRIMARY KEY (tenant_id, role_id)
+);
 
-        T2 -- "parent_tenant" --> G3
-        T2 -- "parent_tenant" --> G4
-    end
+-- Action catalog (global — actions are immutable across tenants)
+CREATE TABLE auth_db.action (
+    action_id   VARCHAR(50) PRIMARY KEY,
+    scope       VARCHAR(10),   -- 'org' or 'tenant'
+    description VARCHAR(500)
+);
 
-    U1((Alice<br/>admin)) -- "admin" --> T1
-    U2((Bob<br/>member)) -- "member" --> T1
-    U2 -- "identified_member" --> G1
-    U2 -- "deidentified_member" --> G2
-    U3((Charlie<br/>member)) -- "member" --> T1
-    U3 -- "deidentified_member" --> G1
+-- Role → Action mapping (per tenant)
+CREATE TABLE auth_db.role_action (
+    tenant_id VARCHAR(50),
+    role_id   VARCHAR(50),
+    action_id VARCHAR(50),
+    PRIMARY KEY (tenant_id, role_id, action_id)
+);
 
-    style T1 fill:#cce5ff,stroke:#004085
-    style T2 fill:#fff3cd,stroke:#856404
-    style G1 fill:#d4edda,stroke:#155724
-    style G2 fill:#d4edda,stroke:#155724
-    style G3 fill:#ffeeba,stroke:#856404
-    style G4 fill:#ffeeba,stroke:#856404
-    style U1 fill:#f8d7da,stroke:#721c24
-    style U2 fill:#d1ecf1,stroke:#0c5460
-    style U3 fill:#d1ecf1,stroke:#0c5460
+-- Tenant-scoped role assignments
+CREATE TABLE auth_db.user_tenant_role (
+    username   VARCHAR(100),
+    tenant_id  VARCHAR(50),
+    role_id    VARCHAR(50),
+    granted_at DATETIME,
+    granted_by VARCHAR(100),
+    PRIMARY KEY (username, tenant_id, role_id)
+);
+
+-- Org-scoped role assignments
+-- org_id = '*' means "all organizations in this tenant"
+CREATE TABLE auth_db.user_org_role (
+    username   VARCHAR(100),
+    tenant_id  VARCHAR(50),
+    org_id     VARCHAR(50),   -- specific org_id or '*'
+    role_id    VARCHAR(50),
+    granted_at DATETIME,
+    granted_by VARCHAR(100),
+    PRIMARY KEY (username, tenant_id, org_id, role_id)
+);
 ```
 
-```mermaid
-graph LR
-    subgraph "Authorization Check Flow"
-        REQ["HTTP Request<br/>X-Active-Tenant: cbtn"] --> CHECK1{"OpenFGA Check<br/>user:bob member tenant:cbtn?"}
-        CHECK1 -- "yes" --> LIST["OpenFGA ListObjects<br/>user:bob, cases_reader, group"]
-        CHECK1 -- "no" --> DENY1[403 Forbidden]
-        LIST --> GROUPS["allowed groups:<br/>cbtn-chop, cbtn-seattle"]
-        GROUPS --> ACCESS{"Per-group access level check"}
-        ACCESS --> ID["cbtn-chop: can_view_identified = true"]
-        ACCESS --> DEID["cbtn-seattle: can_view_deidentified = true"]
-        ID --> HANDLER["Handler: full PII for CHOP data"]
-        DEID --> HANDLER
-        HANDLER --> QUERY["Repository: WHERE project_id IN (...)"]
-    end
+### 5.2 Domain Roles (Example for CBTN)
 
-    style DENY1 fill:#f8d7da,stroke:#721c24
-    style ID fill:#d4edda,stroke:#155724
-    style DEID fill:#fff3cd,stroke:#856404
+Roles are **domain concepts** (job titles), not access tiers. Tenants define their own roles with their own action mappings. CBTN and UDN may name roles differently (e.g. CBTN uses `submitter`, UDN uses `clinical_coordinator`).
+
+**Org-scoped roles** — assigned per organization via `user_org_role`:
+
+| Role | Grants |
+|------|--------|
+| `geneticist` | `can_read_pii`, `can_create_case`, `can_edit_case`, `can_assign_case`, `can_interpret_variant`, `can_comment_variant`, `can_generate_report`, `can_download_file` |
+| `bioinformatician` | `can_read_pii`, `can_create_case`, `can_edit_case`, `can_generate_report`, `can_download_file` |
+| `submitter` | `can_create_case`, `can_edit_case` |
+| `data_analyst` | `can_read_pii` (read-only PHI) |
+
+**Tenant-scoped roles** — assigned per tenant via `user_tenant_role`:
+
+| Role | Grants |
+|------|--------|
+| `researcher` | `can_search_case`, `can_view_kb` |
+| `tenant_admin` | `can_search_case`, `can_view_kb`, `can_manage_project`, `can_invite_user`, `can_manage_codesystem`, `can_manage_genepanel`, `can_manage_org` |
+| `tenant_owner` | all `tenant_admin` actions **+** `can_delete_org` |
+
+**Important rule:** **tenant-scoped roles never grant `can_read_pii`.** A `tenant_owner` can manage the tenant but sees PHI masked unless they additionally hold an org-level role with `can_read_pii`. This is a deliberate separation of "administrative authority over a tenant" from "permission to see patient identifiers".
+
+### 5.3 Action Catalog
+
+Actions are global and immutable across tenants. The catalog is seeded once; tenants map actions to their roles via `role_action`.
+
+**Org-scoped actions** — enforced against a specific org:
+
+| Action | Enforced by | Purpose |
+|--------|-------------|---------|
+| `can_read_pii` | **Ranger column mask** | Reveal PHI columns (`mrn`, `first_name`, `last_name`, `date_of_birth`) for rows in this org |
+| `can_create_case` | Go API | Create a case |
+| `can_edit_case` | Go API | Edit a case |
+| `can_delete_case` | Go API | Delete a case |
+| `can_assign_case` | Go API | Assign a case to a user |
+| `can_interpret_variant` | Go API | Interpret a variant |
+| `can_comment_variant` | Go API | Comment on a variant |
+| `can_generate_report` | Go API | Generate a report |
+| `can_download_file` | Go API | Download a file |
+
+**Tenant-scoped actions** — enforced against a tenant:
+
+| Action | Enforced by | Purpose |
+|--------|-------------|---------|
+| `can_search_case` | Go API | Search/view cases across the tenant |
+| `can_view_kb` | Go API | View knowledge base |
+| `can_manage_project` | Go API | Create/manage projects |
+| `can_invite_user` | Go API | Invite users into the tenant |
+| `can_manage_codesystem` | Go API | Manage code systems |
+| `can_manage_genepanel` | Go API | Manage gene panels |
+| `can_manage_org` | Go API | Create/manage organizations |
+| `can_delete_org` | Go API | Delete organizations |
+
+### 5.4 The `*` Wildcard for `org_id`
+
+`user_org_role.org_id = '*'` means *the user holds this role at every organization in `tenant_id`*. A common use case: a tenant-wide geneticist who can interpret variants for any site.
+
+```sql
+-- Jane is a geneticist at every org in CBTN
+INSERT INTO auth_db.user_org_role (username, tenant_id, org_id, role_id, granted_by)
+VALUES ('jane', 'cbtn', '*', 'geneticist', 'admin1');
 ```
 
-### 5.1 Proposed Model
+Ranger row-filter and column-mask expressions expand `*` via `UNION` with `auth_db.organization`:
 
-```fga
-model
-  schema 1.2
-
-  type user
-
-  # ---- Tenant ----
-  # Represents a top-level organizational boundary (hospital, institution, jurisdiction).
-  type tenant
-    relations
-      define admin: [user]
-      define member: [user] or admin
-      define viewer: [user] or member
-
-  # ---- Group ----
-  # Represents a subdivision within a tenant (project cluster, cohort, department).
-  # Groups are the unit of data access control.
-  type group
-    relations
-      define parent_tenant: [tenant]
-
-      # Direct role assignments (must also be tenant member)
-      define admin: [user] and member from parent_tenant
-      define identified_member: [user] and member from parent_tenant
-      define deidentified_member: [user] and member from parent_tenant
-
-      # Computed membership
-      define member: admin or identified_member or deidentified_member
-
-      # ---- Data access level checks ----
-      # Handler checks these to determine PII masking behavior
-      define can_view_identified: admin or identified_member
-      define can_view_deidentified: can_view_identified or deidentified_member
-
-      # ---- Portal action permissions ----
-      # Fine-grained per-user, per-group action grants
-      define can_interpret: [user] and member
-      define can_upload: [user] and member
-      define can_approve: [user] and member
-      define can_assign: [user] and member
-      define can_generate_report: [user] and member
-
-      # ---- API scope permissions (backward-compatible names) ----
-      define cases_reader: can_view_deidentified
-      define cases_writer: admin
-
-      define genes_reader: can_view_deidentified
-      define hpo_reader: can_view_deidentified
-      define igv_reader: can_view_deidentified
-
-      define interpretations_reader: can_view_deidentified
-      define interpretations_writer: admin or can_interpret
-
-      define occurrences_reader: can_view_deidentified
-      define occurrences_writer: admin
-
-      define mondo_reader: can_view_deidentified
-
-      define cnv_writer: admin
-      define snv_reader: can_view_deidentified
-      define snv_writer: admin
-
-      define sequencing_reader: can_view_deidentified
-
-      define users_reader: can_view_deidentified
-      define users_writer: admin
-
-      define variants_reader: can_view_deidentified
-      define variants_writer: admin
-
-      define documents_reader: can_view_deidentified
-      define documents_writer: admin
-
-  # ---- Backward compatibility (retain during migration) ----
-  type project
-    relations
-      define parent: [application]
-      define geneticist: [user]
-      define requester: [user]
-      define member: geneticist or requester
-
-      define cases_reader: member
-      define cases_writer: geneticist
-      define genes_reader: member
-      define hpo_reader: member
-      define igv_reader: member
-      define interpretations_reader: member
-      define interpretations_writer: geneticist
-      define occurrences_reader: member
-      define occurrences_writer: geneticist
-      define mondo_reader: member
-      define cnv_writer: geneticist
-      define snv_reader: member
-      define snv_writer: geneticist
-      define sequencing_reader: member
-      define users_reader: member
-      define users_writer: geneticist
-      define variants_reader: member
-      define variants_writer: geneticist
-      define documents_reader: member
-      define documents_writer: geneticist
-
-  type application
-    relations
-      define data_manager: [user]
+```sql
+-- Expand *-assignments into all orgs of the tenant
+SELECT o.org_id FROM auth_db.organization o
+JOIN auth_db.user_org_role uor
+  ON uor.tenant_id = o.tenant_id AND uor.org_id = '*'
+WHERE uor.username = <current_user>
 ```
 
-### 5.2 Model Design Rationale
+### 5.5 Example Assignments
 
-**Schema 1.2 requirement:** The `define admin: [user] and member from parent_tenant` pattern requires schema 1.2's intersection support. This ensures a user can only be a group admin if they are also a member of the parent tenant, preventing orphan group access.
+```sql
+-- Jane: tenant member of CBTN, geneticist at every CBTN org
+INSERT INTO auth_db.user_tenant_role VALUES ('jane', 'cbtn', 'researcher', NOW(), 'admin1');
+INSERT INTO auth_db.user_org_role     VALUES ('jane', 'cbtn', '*', 'geneticist', NOW(), 'admin1');
 
-**`can_view_identified` vs `can_view_deidentified`:** These computed relations are the primary check points for the Go handler layer. The handler calls:
-1. `Check(user:X, can_view_identified, group:Y)` -- if true, return full PII
-2. `Check(user:X, can_view_deidentified, group:Y)` -- if true, return masked PII
-3. If neither, the user has no access to this group's data
+-- Alice: geneticist only at CHOP
+INSERT INTO auth_db.user_tenant_role VALUES ('alice', 'cbtn', 'researcher', NOW(), 'admin1');
+INSERT INTO auth_db.user_org_role     VALUES ('alice', 'cbtn', 'chop', 'geneticist', NOW(), 'admin1');
 
-**Portal actions as direct relations:** `can_interpret`, `can_upload`, etc. are `[user]` relations (directly assignable) intersected with group membership. This allows a tenant admin to grant specific actions to specific users on specific groups -- fine-grained without being complex.
+-- Bob: tenant_owner of CBTN; he administrates the tenant but sees PHI masked
+INSERT INTO auth_db.user_tenant_role VALUES ('bob', 'cbtn', 'tenant_owner', NOW(), 'admin1');
 
-**Backward compatibility:** The `project` type is retained verbatim. During migration, the authorizer checks both `project` and `group` types and unions the results. Once migration is complete, the `project` type is removed.
+-- Carol: tenant-member of both CBTN and UDN; bioinformatician at CHOP
+INSERT INTO auth_db.user_tenant_role VALUES ('carol', 'cbtn', 'researcher', NOW(), 'admin1');
+INSERT INTO auth_db.user_tenant_role VALUES ('carol', 'udn',  'researcher', NOW(), 'admin1');
+INSERT INTO auth_db.user_org_role     VALUES ('carol', 'cbtn', 'chop', 'bioinformatician', NOW(), 'admin1');
 
-### 5.3 Example Tuples
+-- Dan: researcher-only (no org role, no PII access anywhere)
+INSERT INTO auth_db.user_tenant_role VALUES ('dan', 'cbtn', 'researcher', NOW(), 'admin1');
 
-```yaml
-# ---- Tenant membership ----
-- user: user:alice
-  relation: admin
-  object: tenant:cbtn
-
-- user: user:bob
-  relation: member
-  object: tenant:cbtn
-
-- user: user:charlie
-  relation: member
-  object: tenant:cbtn
-
-# ---- Group hierarchy ----
-- user: tenant:cbtn
-  relation: parent_tenant
-  object: group:cbtn-chop
-
-- user: tenant:cbtn
-  relation: parent_tenant
-  object: group:cbtn-seattle
-
-# ---- Group-level access ----
-# Bob has identified access to CHOP group (within CBTN tenant)
-- user: user:bob
-  relation: identified_member
-  object: group:cbtn-chop
-
-# Charlie has de-identified access to CHOP group
-- user: user:charlie
-  relation: deidentified_member
-  object: group:cbtn-chop
-
-# Bob has de-identified access to Seattle group
-- user: user:bob
-  relation: deidentified_member
-  object: group:cbtn-seattle
-
-# ---- Portal action grants ----
-- user: user:bob
-  relation: can_interpret
-  object: group:cbtn-chop
-
-- user: user:bob
-  relation: can_generate_report
-  object: group:cbtn-chop
-
-# ---- Check results ----
-# Check(user:bob, can_view_identified, group:cbtn-chop) -> true
-# Check(user:bob, can_view_deidentified, group:cbtn-seattle) -> true
-# Check(user:bob, can_view_identified, group:cbtn-seattle) -> false
-# Check(user:charlie, can_view_identified, group:cbtn-chop) -> false
-# Check(user:charlie, can_view_deidentified, group:cbtn-chop) -> true
-# ListObjects(user:bob, cases_reader, group) -> [group:cbtn-chop, group:cbtn-seattle]
+-- admin1: tenant_admin on both CBTN and UDN
+INSERT INTO auth_db.user_tenant_role VALUES ('admin1', 'cbtn', 'tenant_admin', NOW(), 'root');
+INSERT INTO auth_db.user_tenant_role VALUES ('admin1', 'udn',  'tenant_admin', NOW(), 'root');
 ```
 
-### 5.4 Active Tenant Selection
+Resulting PHI visibility (row visible + PHI column unmasked):
 
-**Mechanism:** `X-Active-Tenant` HTTP header, validated by OpenFGA.
+| Patient row | Jane (geneticist `*`) | Alice (geneticist chop) | Bob (tenant_owner) | Carol (bioinf chop) | Dan (researcher) |
+|-------------|-----|-------|-----|-------|-----|
+| **CHOP** (cbtn) | Full | Full | Masked | Full | Masked |
+| **BCH** (cbtn) | Full | Masked | Masked | Masked | Masked |
+| **NIH-UDN** (udn) | Invisible | Invisible | Invisible | Masked | Invisible |
 
-**Why this approach:**
-- **Stateless:** No server-side session management. Works with horizontal scaling.
-- **Explicit:** The frontend declares which tenant context it wants. No ambiguity.
-- **Secure:** The backend validates that the user is a member of the claimed tenant via OpenFGA before proceeding.
+### 5.6 Auth-Table Isolation
 
-**Why not alternatives:**
-- **Keycloak realm/client switching:** Requires re-authentication on tenant switch (poor UX). Keycloak realms are heavyweight and meant for identity isolation, not organization switching.
-- **JWT-embedded tenant:** Would require token refresh on switch. Stale tokens during switch window.
+Users can read `auth_db.role`, `auth_db.action`, `auth_db.role_action` (needed so Ranger subqueries work), but **only their own rows** of `user_tenant_role`, `user_org_role`, and `users`. This prevents one user from enumerating others' permissions. Achieved via row-filter policies on those three tables:
 
-**Implementation flow:**
-
-```
-1. Frontend: User selects "CBTN" from tenant switcher
-2. Frontend: Sets X-Active-Tenant: cbtn on all subsequent requests
-3. Frontend: Stores selection in localStorage for persistence
-
-4. Backend middleware:
-   a. Read X-Active-Tenant header
-   b. OpenFGA Check(user:{userId}, member, tenant:{tenantCode})
-   c. If denied -> 403 Forbidden
-   d. ListObjects(user:{userId}, cases_reader, group) -> filter by parent_tenant
-   e. Map groups to project IDs via PostgreSQL lookup
-   f. Store in Gin context:
-      - "active_tenant" = "cbtn"
-      - "allowed_project_ids" = [1, 3, 7]
-      - "identified_group_ids" = ["cbtn-chop"]
-      - "deidentified_group_ids" = ["cbtn-seattle"]
-
-5. Handler + Repository:
-   a. Select tenant-specific StarRocks pool (Option C)
-   b. Add WHERE project_id IN (allowed_project_ids) to queries
-   c. For results: mask PII for deidentified_group_ids
+```json
+{
+  "policyType": 2, "name": "sr_rowfilter_user_tenant_role",
+  "service": "starrocks",
+  "resources": {
+    "catalog":  { "values": ["default_catalog"] },
+    "database": { "values": ["auth_db"] },
+    "table":    { "values": ["user_tenant_role"] }
+  },
+  "rowFilterPolicyItems": [
+    { "users": ["root"],    "rowFilterInfo": { "filterExpr": "1=1" } },
+    { "users": ["{USER}"],  "rowFilterInfo": { "filterExpr": "username = replace(substring_index(current_user(), '@', 1), char(39), '')" } }
+  ]
+}
 ```
 
-**Keycloak enrichment (optional):** Add a `tenants` custom claim to the JWT via a Keycloak protocol mapper. This allows the frontend to render the tenant switcher dropdown without an extra API call on page load. The OpenFGA check remains the authoritative validation.
+### 5.7 Active Tenant Selection
 
-### 5.5 OpenFGA-to-StarRocks Sync (Option C)
+Because a user can belong to multiple tenants (e.g. Carol in CBTN + UDN, admin1 in both), the caller must communicate the **active tenant** on every request. The POC uses a **path prefix** — `/api/{tenant}/patients`, `/api/{tenant}/admin/roles` — rather than a header or JWT claim. See [REST API tenant routing — path prefix](#rest-api-tenant-routing--path-prefix) for the rationale and industry precedent (Atlassian Connect, GitHub, Twilio).
 
-For Option C, OpenFGA state must be synced to StarRocks RBAC at two levels: **tenant lifecycle** (low-frequency) and **user access grants** (moderate-frequency, required for direct access users).
-
-#### Tenant & Group Lifecycle Sync
-
-**Trigger:** Tenant/group administration API (create/delete tenant or group).
-
-```
-On new tenant "xyz" created:
-  1. CREATE DATABASE radiant_xyz in StarRocks (occurrence + shared views)
-  2. CREATE USER svc_xyz; CREATE ROLE role_xyz_api; GRANT ...
-  3. Add pool to TenantPoolManager
-
-On new group "groupA" added to tenant "xyz":
-  1. CREATE DATABASE radiant_xyz_groupA_identified (clinical + Iceberg views, full PII for groupA)
-  2. Create views from templates (filtered to groupA's organizations/group_code)
-  3. CREATE ROLE role_xyz_groupA_identified; GRANT on the identified DB
-  4. Update radiant_xyz_deidentified views to include groupA's data (if needed)
-
-On tenant "xyz" decommissioned:
-  1. Remove pool from TenantPoolManager
-  2. REVOKE all roles from affected users
-  3. DROP USER svc_xyz; DROP all ROLEs;
-  4. DROP all DATABASEs (radiant_xyz, radiant_xyz_deidentified, radiant_xyz_*_identified)
-  5. (Data in radiant_base retained for archival; partition can be dropped later)
-```
-
-#### User Access Sync (for direct StarRocks access)
-
-**Trigger:** When a user's group membership or access level changes in OpenFGA. This can be implemented as:
-- A periodic sync (every 30s-60s) that diffs OpenFGA state vs StarRocks GRANTs
-- A webhook/event-driven sync triggered by the tenant admin API when access is modified
-
-```
-On user "bob" added to tenant "cbtn" (any group membership):
-  1. CREATE USER 'bob' IDENTIFIED BY JWT (if not exists)
-  2. GRANT role_cbtn_deidentified TO 'bob'  (de-identified for all CBTN groups)
-
-On user "bob" granted identified_member on group "cbtn-chop":
-  1. GRANT role_cbtn_chop_identified TO 'bob'
-  (Bob now has: de-identified for all CBTN + identified for CHOP)
-
-On user "bob" downgraded from identified to deidentified on group "cbtn-chop":
-  1. REVOKE role_cbtn_chop_identified FROM 'bob'
-  (Bob still has de-identified via tenant-level role)
-
-On user "bob" removed from tenant "cbtn" entirely:
-  1. REVOKE role_cbtn_deidentified FROM 'bob'
-  2. REVOKE role_cbtn_chop_identified FROM 'bob' (if held)
-  3. REVOKE role_cbtn_seattle_identified FROM 'bob' (if held)
-```
-
-**For portal-only users (no direct access):** No StarRocks user provisioning is needed. The Go API uses the shared service account (`svc_cbtn`). OpenFGA checks at the API layer handle per-group authorization and PII masking.
-
-**For direct-access users:** StarRocks user creation and per-group GRANT management is required. The sync daemon determines which users need direct access based on their roles (e.g., users with a `data_analyst` or `researcher` role in OpenFGA). Not every portal user needs a StarRocks user -- only those who will connect directly.
-
----
+For direct StarRocks access (Jupyter, BI, MCP), the client issues SQL against a specific table; the row-filter automatically restricts rows to tenants the user belongs to. No "active tenant" concept is needed — the user simply sees everything they are authorized to see across all their tenants in a single query.
 
 ## 6. Recommendation
 
-### Recommended Architecture: Option C (Views-Based with Per-Tenant Pools)
+### Recommended Architecture: Option B (Ranger + `auth_db`, POC-validated)
 
-Implemented in three phases:
+The POC at [`docs/adr/ranger-poc/`](./ranger-poc/README.md) implemented this architecture end-to-end and validated every critical assumption. Recommended migration sequence:
 
-| Phase | Architecture | Duration | Deliverable |
-|-------|-------------|----------|------------|
-| **Phase 1** | Option A (API-layer enforcement) | 4-8 weeks | Multi-tenancy functional for portal; single defense layer |
-| **Phase 2** | Option C (views + per-tenant pools) | 4-6 weeks additional | Defense-in-depth; DB-level tenant isolation for portal |
-| **Phase 3** | Direct access enablement | 2-4 weeks additional | JWT auth, identified/de-identified view DBs, user provisioning sync |
+| Phase | Deliverable | Duration |
+|-------|-------------|----------|
+| **Phase 1** | Option A (API-layer enforcement) for transitional portal-only multi-tenancy | 4–8 weeks |
+| **Phase 2** | Deploy Keycloak + Ranger + `auth_db`; enable StarRocks TLS + `access_control = ranger`; generic policies; mysql-proxy for Go clients | 6–8 weeks |
+| **Phase 3** | Radiant admin UI (tenant switcher, role CRUD, user assignments); onboard data analysts / BI via direct OIDC | 2–3 weeks |
 
-### Why Option C
+Total: ~**12–19 weeks** (Phase 1 + 2 + 3), with each phase shippable independently.
 
-**It delivers the best balance of security, operational simplicity, and migration feasibility for a mid-size team -- while fully supporting direct StarRocks access without Ranger.**
+### Why Option B (Ranger + `auth_db`)
 
-1. **Supports all access paths without Ranger.** Data analysts (Jupyter, SQL clients), BI tools (Power BI, Tableau), and AI tools (MCP) can query StarRocks directly with tenant isolation and PII masking enforced by views and DB RBAC. This is a **hard requirement** that eliminates Option A as a final state and makes Option C the pragmatic choice over Option B's operational overhead.
+**It is the only option that delivers defense-in-depth for all access paths (portal, Jupyter, BI, MCP) with a single authorization source of truth.**
 
-2. **Meaningful defense-in-depth without Ranger.** StarRocks views + DB RBAC provide a second enforcement layer that prevents cross-tenant access even if the API layer has a bug. This addresses the core compliance concern without deploying new infrastructure.
+1. **All access paths equally protected.** Row-filter and column masking are enforced by the StarRocks FE regardless of whether the query originates from the Go API, a Jupyter notebook, Power BI, or an MCP agent. The POC demonstrated identical behavior for every access path using the same `{USER}` policy.
 
-3. **Hybrid connection model.** Per-tenant service account pools for the Go API (no GORM refactor, no per-request connection overhead) + per-user JWT connections for direct-access users (full audit attribution). Best of both worlds.
+2. **Single source of truth.** `auth_db` in StarRocks holds the entire authorization model. Portal action checks (Go API) and data-layer enforcement (Ranger) both read the same `role_action` table. No OpenFGA-to-Ranger sync daemon, no drift.
 
-4. **Views are zero-copy and self-maintaining.** Views reference the base data -- no data synchronization, no storage multiplication. Adding a new tenant is a DDL operation (create views + RBAC), not a data migration.
+3. **Operational cost is bounded.** The POC showed Ranger needs only ~11 static policies total (independent of user/tenant count) and no user stubs (thanks to the `{USER}` wildcard). The Java dependency (Ranger + Ranger PG) is the only new infrastructure beyond Keycloak.
 
-5. **Preserves colocation groups.** All base tables (tenant-scoped and shared) are in a single `radiant_base` database, maintaining the colocation group on `HASH(locus_id)`. The most critical query pattern -- `occurrence JOIN variant JOIN consequence JOIN clinvar` -- continues to use colocate JOINs (local, shuffle-free).
+4. **Per-user audit across the board.** Every query — including portal queries — runs under the user's JWT-authenticated identity, so StarRocks and Ranger audit logs record the individual user. The Go API can forward the Bearer JWT through `mysql-proxy` without refactoring GORM to per-request DB handles.
 
-6. **Partition pruning on `tenant_id`.** With `PARTITION BY (tenant_id)` on base tables, StarRocks only scans the relevant tenant's partition when a view filters `WHERE tenant_id = N`. Query performance is equivalent to having physically separate tables.
+5. **Fine-grained PII control via actions.** `can_read_pii` is a data action, mapped to specific roles per tenant. A geneticist at CHOP sees CHOP PHI; the same geneticist elsewhere does not. Tenant admins do not inherit PHI automatically (explicit rule).
 
-7. **Per-group identified + per-tenant de-identified.** Per-group identified databases give fine-grained PII access control. The per-tenant de-identified database keeps things simple for the common case. Iceberg tables with identified data are also protected through these view databases.
+6. **Dynamic permission changes.** Granting/revoking a role is a single `INSERT`/`DELETE` in `auth_db`. No Ranger admin call, no sync lag, effective on the next policy-cache poll (~10 s).
 
-8. **Clean Iceberg integration.** The `radiant_iceberg` catalog is accessed exclusively through per-group identified and per-tenant de-identified view databases, ensuring PII masking and tenant isolation apply to Iceberg data too.
+7. **Built and tested.** The POC is a working reference implementation — init scripts, Keycloak configuration, mysql-proxy, Radiant portal UI, full test matrix. Reading the POC is faster than prototyping the architecture from scratch.
 
 ### Why Not the Others
 
-- **Option A alone:** **Cannot support direct StarRocks access.** Jupyter/BI/MCP users bypass the Go API entirely. Also insufficient for health data compliance (single enforcement layer, no DB-level audit attribution). Acceptable only as a transitional Phase 1 for portal-only usage.
-- **Option B (Ranger):** Provides the most comprehensive enforcement (native RLS + column masking for all access paths). However, it adds significant operational burden (Java stack, policy management, sync service) and creates a dual-authorization-system problem (Ranger + OpenFGA). **Option C achieves 90% of Ranger's benefit using native StarRocks views and DB RBAC.** Option B should be reconsidered only if regulatory requirements explicitly mandate database-level RLS within a tenant -- not just across tenants.
-- **Option D (per-user JWT for API):** Same view/RBAC architecture as Option C, but forces per-user JWT connections on the Go API too. This provides per-user audit attribution for all queries (Option C only has per-user for direct access) but requires a **major GORM refactor** (all 61 repositories) and increases connection overhead. The added audit granularity rarely justifies the cost -- Option C's application log already provides per-user attribution for portal queries. Consider Option D only if regulations mandate per-user DB-level audit for portal traffic.
+- **Option A alone:** Cannot protect direct StarRocks access (Jupyter/BI/MCP bypass the Go API entirely). Single enforcement layer; no DB-level audit attribution. Acceptable only as a transitional Phase 1.
+- **Option C (views + per-tenant pools):** Attractive on paper but carries several **unvalidated performance risks**: view predicate pushdown through pass-through views for colocate JOINs, complex federated JOINs through views, and view-database proliferation (1 occurrence + 1 deidentified + M identified per tenant). The POC did not exercise these. Option C also fragments authorization across DB RBAC, API code, and view SQL, which is harder to audit than a single `auth_db` + Ranger policy set. Reconsider Option C only if a Java runtime dependency is operationally unacceptable.
+- **Option D (per-user JWT for API + views):** Inherits Option C's view/RBAC risks plus a major GORM refactor (all 61 repositories). No advantage over Option B.
 
 ### Risk Mitigation
 
 | Risk | Mitigation |
 |------|-----------|
-| Views as RLS workaround may not push predicates efficiently | Verify with `EXPLAIN` on StarRocks 3.5 that view predicates are pushed to partition pruning. Benchmark early. |
-| Pass-through views may break colocate JOIN optimization | Verify with `EXPLAIN` that queries through pass-through views still show `colocate: true`. StarRocks should see through views to the colocated base tables. Test early as this is a hard performance requirement. |
-| `tenant_id` backfill for existing data | All current data becomes tenant_id=1 (single-tenant migration). New tenants start fresh. |
-| StarRocks view limitations (e.g., updatable views, complex JOINs through views) | Views are read-only (all writes go through PostgreSQL). Test complex federated JOINs through views. |
-| OpenFGA schema 1.2 maturity | OpenFGA 1.5+ supports schema 1.2. Verify the deployed version supports intersection in type restrictions. |
-| Per-tenant pool memory overhead at 50 tenants | With 5 MaxOpenConns per tenant * 50 tenants = 250 connections. Monitor and tune. StarRocks FE default max connections is 1024. |
-| JWT token expiry for direct-access connections | BI tools (Tableau, Power BI) may hold long-lived connections. Configure Keycloak token lifetime appropriately (e.g., 8h for interactive sessions). StarRocks will reject queries on expired JWT connections. |
-| User provisioning sync lag | When OpenFGA grants are updated, the StarRocks GRANT sync may lag. Implement eventual consistency with a short sync interval (30s) or webhook-triggered sync. |
-| View databases multiply with groups | Per tenant: 1 occurrence + 1 de-identified + M identified = 2+M databases. At 10 tenants with 3 groups each = 50 databases. StarRocks handles this well -- databases and views are lightweight metadata. Automate creation via templated SQL. |
-| Iceberg tables require consistent group_code column | All Iceberg tables with identified data must include a `group_code` column for view filtering. Enforce this at data ingestion time. |
+| Ranger + Ranger PG add Java infrastructure | Bundle in Docker; Ranger policies are nearly static (no ops burden after initial setup) |
+| StarRocks OIDC plugin requires TLS | Generate JKS keystore; enable `ssl_keystore_location` in `fe.conf`. Documented in [TLS requirement for OIDC](#tls-requirement-for-oidc) |
+| Go clients (`go-sql-driver/mysql`) can't speak OIDC plugin | Deploy `mysql-proxy` (TCP-level, ~400 LOC, Go stdlib only). Documented in [MySQL proxy for Go clients](#mysql-proxy-for-go-clients) |
+| Keycloak JWT expires on long BI connections | Configure token lifetime per client (interactive session ≈ 8h). Alternative: gateway with refresh-token rotation |
+| Ranger column masking on JDBC catalog tables | For PostgreSQL-sourced data through `radiant_jdbc`, materialize into native StarRocks tables or mask at API layer as a fallback |
+| `auth_db` becomes a hot spot | Primary-key lookups; subqueries include user predicates and run on tablets distributed by `username` / `tenant_id`. No observed overhead in the POC |
+| Policy change latency (~10 s) | Acceptable for admin operations. If lower is required, reduce `ranger.plugin.starrocks.policy.pollIntervalMs` (trade-off: Ranger load) |
+| `current_user()` cleanup expression fragility | Documented in the POC README; verified with a startup check during init |
 
 ---
 
 ## 7. Migration Strategy
 
+The POC at [`docs/adr/ranger-poc/`](./ranger-poc/README.md) is the reference implementation of Phases 2 and 3 below. Every step is already demonstrated in a running system.
+
 ### Migration Phases Overview
 
 ```mermaid
 gantt
-    title Migration to Multi-Tenant Architecture
+    title Migration to Multi-Tenant Architecture (Option B — Ranger + auth_db)
     dateFormat YYYY-MM-DD
     axisFormat %b %d
 
-    section Phase 1 — API-Layer
+    section Phase 1 — API-Layer (transitional)
     PG schema + tenant tables           :p1a, 2026-05-01, 1w
-    OpenFGA model update                :p1b, 2026-05-01, 2w
-    Tenant resolution middleware        :p1c, after p1b, 2w
-    Wire project filtering to repos     :p1d, after p1c, 3w
-    PII masking in handlers             :p1e, after p1c, 2w
-    Frontend tenant switcher            :p1f, 2026-05-15, 4w
+    Tenant-path middleware              :p1b, after p1a, 2w
+    Wire project filtering to repos     :p1c, after p1b, 3w
+    PII masking in handlers             :p1d, after p1b, 2w
+    Frontend tenant switcher            :p1e, 2026-05-15, 4w
 
-    section Phase 2 — Views + Pools
-    StarRocks schema restructuring      :p2a, after p1d, 2w
-    Per-tenant view databases           :p2b, after p2a, 1w
-    TenantPoolManager                   :p2c, after p2a, 2w
-    Data ingestion updates              :p2d, after p2b, 2w
-    Tenant onboarding automation        :p2e, after p2c, 1w
-    Verification + hardening            :p2f, after p2e, 1w
+    section Phase 2 — Ranger + auth_db
+    Deploy Keycloak + realm/client      :p2a, after p1c, 1w
+    Deploy Ranger + Ranger PG           :p2b, after p1c, 1w
+    Create auth_db schema + seed roles  :p2c, after p2a, 1w
+    StarRocks TLS (JKS keystore)        :p2d, after p2c, 1w
+    JWT users + generic Ranger policies :p2e, after p2d, 1w
+    mysql-proxy (Go)                    :p2f, after p2e, 1w
+    Go API: Bearer JWT via proxy        :p2g, after p2f, 2w
 
-    section Phase 3 — Direct Access
-    StarRocks JWT Security Integration  :p3a, after p2f, 1w
-    Identified / de-identified view DBs :p3b, after p3a, 2w
-    User provisioning sync daemon       :p3c, after p3a, 2w
-    BI tool + MCP integration           :p3d, after p3b, 2w
-    End-to-end verification             :p3e, after p3d, 1w
+    section Phase 3 — Portal UI + Direct Access
+    Radiant admin UI                    :p3a, after p2g, 2w
+    Onboard direct analysts (Python)    :p3b, after p2g, 1w
+    BI / MCP integration                :p3c, after p3a, 2w
 
-    section Phase 4 — Hardening
-    PostgreSQL RLS                      :p4a, after p3e, 2w
-    Structured audit logging            :p4b, after p3e, 2w
-    Resource group isolation            :p4c, after p3e, 1w
+    section Phase 4 — Hardening (optional)
+    PostgreSQL RLS                      :p4a, after p3c, 2w
+    Structured audit logging            :p4b, after p3c, 2w
+    Resource group isolation            :p4c, after p3c, 1w
 ```
 
 ```mermaid
 graph LR
-    subgraph "Phase 1 (4-8 wks)"
-        P1["API-Layer<br/>Enforcement"]
-        P1A["OpenFGA: tenant + group types"]
-        P1B["Middleware: X-Active-Tenant"]
-        P1C["Repos: WHERE project_id IN"]
-        P1D["PII masking in handlers"]
+    subgraph "Phase 1 (4–8 wks)"
+        P1["API-Layer<br/>Enforcement (Option A)"]
+        P1A["Tenant path prefix /{tenant}/"]
+        P1B["Repos: project filtering"]
+        P1C["PII masking in handlers"]
     end
 
-    subgraph "Phase 2 (4-6 wks)"
-        P2["Views + DB RBAC<br/>Defense-in-Depth"]
-        P2A["radiant_base + colocation"]
-        P2B["Per-tenant view DBs"]
-        P2C["TenantPoolManager"]
+    subgraph "Phase 2 (6–8 wks)"
+        P2["Ranger + auth_db<br/>Defense-in-Depth"]
+        P2A["Keycloak JWT + TLS"]
+        P2B["auth_db tables"]
+        P2C["Generic Ranger policies"]
+        P2D["mysql-proxy for Go"]
     end
 
-    subgraph "Phase 3 (2-4 wks)"
-        P3["Direct Access<br/>Enablement"]
-        P3A["JWT auth for StarRocks"]
-        P3B["identified / deidentified DBs"]
-        P3C["User provisioning sync"]
+    subgraph "Phase 3 (2–3 wks)"
+        P3["Portal UI +<br/>Direct Access"]
+        P3A["Radiant admin UI"]
+        P3B["Jupyter / BI / MCP"]
     end
 
     subgraph "Phase 4 (optional)"
         P4["Hardening"]
-        P4A["PG RLS, audit logging,<br/>resource groups"]
+        P4A["PG RLS, audit log,<br/>resource groups"]
     end
 
     P1 -- "portal works<br/>single defense layer" --> P2
-    P2 -- "DB-level isolation<br/>no direct access yet" --> P3
-    P3 -- "all access paths<br/>protected" --> P4
+    P2 -- "all access paths<br/>subject to Ranger" --> P3
+    P3 -- "users onboarded" --> P4
 
     style P1 fill:#fff3cd,stroke:#856404
     style P2 fill:#d4edda,stroke:#155724
@@ -2433,267 +2001,225 @@ graph LR
     style P4 fill:#f0f0f0,stroke:#999
 ```
 
-### Phase 1: API-Layer Multi-Tenancy (Option A)
+### Phase 1: API-Layer Multi-Tenancy (transitional, Option A)
 
-**Goal:** Achieve functional multi-tenancy with tenant switching, project-level data isolation, and PII masking. Single enforcement layer.
+**Goal:** Unblock multi-tenant portal usage while Phase 2 infrastructure is being stood up. Portal-only — direct access is unprotected in this phase and must be blocked by network policy (e.g., StarRocks accessible only from the Go API subnet).
 
-#### Step 1.1: Database Schema Updates (Week 1)
+**Scope:**
+- Add `tenant` and `organization` tables to PostgreSQL.
+- Add `tenant_id` column to tenant-scoped domain tables (`project`, `case`, etc.) and backfill existing rows to a default tenant.
+- Introduce a tenant-path middleware in the Go API that enforces `/{tenant}/…` and validates membership via `auth_db.user_tenant_role` (either directly, or by deriving membership from a provisional `user.tenants` table if `auth_db` isn't ready).
+- Repository-level `WHERE project_id IN (...)` filtering, sourced from the same membership view.
+- API-layer PII masking utility.
+- Frontend tenant switcher.
 
-**PostgreSQL migration:**
+**Exit criteria:** Portal users are multi-tenant-safe. StarRocks is still accessed via a shared service account.
+
+### Phase 2: Ranger + `auth_db` (core of the recommendation)
+
+**Goal:** Defense-in-depth at the StarRocks layer; direct-access users become safe to enable.
+
+**Scope (each step references the POC artifact):**
+
+| Step | Deliverable | POC reference |
+|------|-------------|---------------|
+| 2.1 Deploy Keycloak | Realm `starrocks`, public client with direct-access grants + OIDC audience mapper | `init/init-keycloak.sh` |
+| 2.2 Deploy Ranger | Ranger Admin + Ranger PG | `docker-compose.yml` (services `ranger`, `ranger-db`) |
+| 2.3 Create `auth_db` | Tables from Section 5.1; seed domain roles + global action catalog | `init/init-starrocks.sql` |
+| 2.4 Enable StarRocks TLS | Generate JKS keystore; set `ssl_keystore_location`, `ssl_keystore_password`, `ssl_key_password` in `fe.conf` | `starrocks-conf/starrocks-keystore.jks` + `docker-compose.yml` |
+| 2.5 Create JWT users | `CREATE USER ... IDENTIFIED WITH authentication_jwt AS '{...}'` per user | `init/init-starrocks.sql` |
+| 2.6 Register Ranger service + policies | `access_control = ranger`; ~11 generic policies with `{USER}` wildcard and `auth_db` subqueries | `init/init-all.sh` |
+| 2.7 Build & deploy mysql-proxy | Go TCP-level proxy: `mysql_clear_password` → TLS + OIDC (capability flag `0x01` + lenenc JWT) | `proxy/main.go` |
+| 2.8 Update Go API | Bearer JWT validation; action checks via `auth_db.role_action`; data queries via `mysql-proxy` | `api/main.go` |
+
+**Exit criteria:**
+- All users authenticate to StarRocks with JWT.
+- Row-filter and column-mask policies enforce tenant isolation and PII rules.
+- The Go API has no privileged service account for data reads — every portal query is attributed to the end user.
+
+### Phase 3: Portal UI + Direct Access Enablement
+
+**Goal:** Give tenant admins self-service tools and open up direct-access paths for analysts and BI tools.
+
+**Scope:**
+- **Radiant admin UI** (`admin-ui/`): React + Vite + Tailwind + Keycloak-js. Tenant switcher; roles CRUD; user assignments (grant/revoke tenant + org roles). Admin tab visible only when current tenant is in `/admin/my-tenants`.
+- **Onboard Python analysts:** install `mysql-connector-python ≥ 9.1.0`; document Keycloak token retrieval; publish example notebooks.
+- **BI integration:** configure Tableau / Power BI JDBC/ODBC drivers with JWT. Where the tool lacks OIDC, stand up a gateway that exchanges a session cookie for a JWT.
+- **MCP:** forward the user's JWT from the agent session to StarRocks.
+
+**Exit criteria:** Analysts and BI tools query StarRocks directly; every row/column policy applies uniformly across all access paths.
+
+### Phase 4: Hardening & Compliance (optional, post-launch)
+
+- PostgreSQL RLS on the operational tables (case, interpretation, etc.) for defense-in-depth on the PG side.
+- Structured audit log sink (e.g. Kafka/OpenSearch) that correlates StarRocks query IDs with Ranger decisions and API request IDs.
+- StarRocks resource groups per tenant (CPU/memory isolation to prevent noisy-neighbor effects).
+- Keycloak hardening: short-lived access tokens + refresh rotation for BI tools; step-up auth for admin actions.
+
+---
+
+## 8. POC-validated details
+
+This section collects findings from the POC ([`docs/adr/ranger-poc/`](./ranger-poc/README.md)) that are too operational to sit inside the main options discussion but are required to reproduce the recommended architecture.
+
+### TLS requirement for OIDC
+
+The StarRocks `authentication_openid_connect_client` plugin refuses to transmit the JWT over a cleartext TCP connection. **TLS is mandatory.** The POC configures StarRocks FE with a JKS keystore:
+
+```properties
+# fe.conf additions
+access_control = ranger
+ssl_keystore_location = /data/deploy/starrocks/fe/conf/starrocks-keystore.jks
+ssl_keystore_password = changeit
+ssl_key_password      = changeit
+```
+
+Keystore generation (one-time):
+
+```bash
+openssl req -x509 -newkey rsa:2048 -keyout starrocks-key.pem \
+  -out starrocks-cert.pem -days 365 -nodes -subj '/CN=starrocks'
+openssl pkcs12 -export -in starrocks-cert.pem -inkey starrocks-key.pem \
+  -out starrocks.p12 -name starrocks -password pass:changeit
+keytool -importkeystore -srckeystore starrocks.p12 -srcstoretype PKCS12 \
+  -srcstorepass changeit -destkeystore starrocks-keystore.jks \
+  -deststoretype JKS -deststorepass changeit -noprompt
+```
+
+Clients must connect with TLS (`ssl_disabled=false` in `mysql-connector-python`; matching flags on the Go proxy's backend dial — see below). In production, replace the self-signed certificate with a trusted cert.
+
+### MySQL proxy for Go clients
+
+**Problem:** `go-sql-driver/mysql` does not implement the `authentication_openid_connect_client` MySQL auth plugin. Any Go service using GORM or the standard `database/sql` can't authenticate directly to a JWT-only StarRocks user.
+
+**Solution:** A small (~400 LOC) Go TCP-level proxy (`proxy/main.go`) sits between Go clients and StarRocks:
+
+1. Client opens a plain TCP connection to the proxy.
+2. Proxy advertises `mysql_clear_password` in its handshake, so the client sends the raw JWT as a cleartext password.
+3. Proxy dials StarRocks, upgrades to TLS, and sends a JWT-authenticated handshake.
+4. When StarRocks issues an AuthSwitchRequest to `authentication_openid_connect_client`, the proxy responds with the OIDC payload: **capability flag `0x01` + length-encoded JWT bytes**. (Sending the raw JWT alone fails silently — the leading flag byte is required by the plugin.)
+5. After authentication succeeds, the proxy becomes a transparent bidirectional byte copier.
+
+Because the JWT crosses the client↔proxy hop in cleartext, deploy the proxy on the same host (or a trusted network) as the Go service, and restrict StarRocks's `mysql_clear_password`-advertising port to that host.
+
+**Alternatives considered:**
+- **Python clients:** Use `mysql-connector-python ≥ 9.1.0` natively. No proxy required.
+- **Upstream the plugin into `go-sql-driver`:** Feasible but out of scope for this POC.
+- **Use `authentication_jwt` (StarRocks-specific plugin):** Behaves similarly; tested and works, but `authentication_openid_connect_client` is the MySQL-protocol standard and is what mainstream clients (MySQL Shell, BI tools) implement.
+
+### REST API tenant routing — path prefix
+
+The Radiant REST API uses a **path prefix** for tenant context: `/api/{tenant}/patients`, `/api/{tenant}/admin/roles`, etc. Global endpoints (not tenant-scoped) remain at the root: `/auth/me`, `/auth/my-tenants`, `/admin/my-tenants`, `/health`.
+
+#### Options considered
+
+| Approach | Example | Verdict |
+|----------|---------|---------|
+| **Path prefix** | `/cbtn/patients` | ✅ Chosen |
+| HTTP header | `X-Tenant: cbtn` then `/patients` | ❌ Rejected |
+| Subdomain | `cbtn.api.radiant.example/patients` | ❌ Impractical (DNS/TLS per tenant) |
+| Query param | `/patients?tenant=cbtn` | ❌ Not idiomatic |
+| JWT claim | Tenant in token | ❌ Multi-tenant users would need multiple tokens |
+
+#### Why path prefix
+
+| Criterion | Path `/{tenant}/…` | Header `X-Tenant` |
+|-----------|-------------------|-------------------|
+| Visible in logs / tracing | ✅ Immediate | ❌ Needs log configuration |
+| Cacheable (CDN, HTTP cache) | ✅ Cache key is the URL | ❌ Requires `Vary: X-Tenant` |
+| Bookmarkable / shareable | ✅ | ❌ |
+| CORS complexity | ✅ None | ❌ Preflight for custom header |
+| REST semantics | ✅ Tenant is a resource container | ⚠️ Headers are metadata, not resources |
+| OpenAPI / Swagger | ✅ Tenant as path param is standard | ⚠️ Global header applies everywhere |
+
+#### Industry precedent
+
+- **Atlassian Cloud** — subdomain for direct site access (`acme.atlassian.net`); **path prefix** for Connect apps and cross-site APIs (`api.atlassian.com/ex/jira/{cloudId}/…`). Does not use a tenant header.
+- **GitHub** — `/orgs/{org}/…`, `/repos/{owner}/{repo}/…`.
+- **Twilio** — `/Accounts/{AccountSid}/…`.
+- **Shopify**, **Salesforce** — subdomain.
+
+Subdomain isn't practical for a developer/POC environment (DNS, certificates, wildcard TLS). Path prefix matches Atlassian's fallback pattern and GitHub/Twilio's choice for their REST APIs.
+
+### Admin tooling — Radiant portal
+
+`admin-ui/` is a Vite + React 19 + Tailwind + keycloak-js SPA served by Nginx. It supersedes the original ADR's brief "admin tooling" section (§6).
+
+**Pages:**
+- **Patients** — tenant-filtered patient list with Ranger masking applied live.
+- **Admin** — visible only when the active tenant is in `/admin/my-tenants`. Two tabs:
+  - **Users** — per-user cards showing tenant + org role assignments; grant/revoke via `auth_db.*` inserts/deletes.
+  - **Roles** — list of tenant-scoped and org-scoped roles with their action chips. Create/edit/delete roles; check/uncheck actions in a form that writes to `auth_db.role` + `auth_db.role_action`.
+
+**Tenant switcher behavior:**
+- Patients page: lists **all** tenants the user belongs to (from `/auth/my-tenants`).
+- Admin tab: visible only when the active tenant is in the intersection with `/admin/my-tenants` (i.e. user has `can_manage_org` at that tenant).
+
+**Auth flow:**
+- keycloak-js redirect-based login against the same realm as StarRocks.
+- Bearer JWT attached to every API call.
+- Admin API endpoints require `tenant_admin` or `tenant_owner` at the target tenant.
+
+### Wildcard `*` for `org_id`
+
+`user_org_role.org_id = '*'` assigns a role at **every organization in `tenant_id`**. Typical use case: a tenant-wide geneticist.
+
 ```sql
--- New migration file
-CREATE TABLE tenant (
-    id SERIAL PRIMARY KEY,
-    code TEXT UNIQUE NOT NULL,
-    name TEXT NOT NULL,
-    starrocks_tenant_id INT UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
-);
-
-ALTER TABLE project ADD COLUMN tenant_id INTEGER REFERENCES tenant(id);
-
-CREATE TABLE tenant_group (
-    id SERIAL PRIMARY KEY,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
-    tenant_id INTEGER NOT NULL REFERENCES tenant(id),
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE(tenant_id, code)
-);
-
-CREATE TABLE group_has_project (
-    group_id INTEGER NOT NULL REFERENCES tenant_group(id),
-    project_id INTEGER NOT NULL REFERENCES project(id),
-    PRIMARY KEY (group_id, project_id)
-);
-
--- Seed: create a default tenant for existing data
-INSERT INTO tenant (code, name, starrocks_tenant_id) VALUES ('default', 'Default Tenant', 1);
-UPDATE project SET tenant_id = 1;
-ALTER TABLE project ALTER COLUMN tenant_id SET NOT NULL;
+INSERT INTO auth_db.user_org_role (username, tenant_id, org_id, role_id, granted_by)
+VALUES ('jane', 'cbtn', '*', 'geneticist', 'admin1');
 ```
 
-**Files to modify:**
-- `backend/scripts/init-sql/migrations/` -- new migration file
-- `backend/internal/types/` -- add `Tenant`, `TenantGroup` types
+Ranger expressions that walk org-level assignments `UNION` a specific-org query with a wildcard-expanded query:
 
-#### Step 1.2: OpenFGA Model Update (Week 1-2)
-
-**Update `backend/scripts/init-openfga/model.fga`** with the model from Section 5.1.
-
-**Update `backend/scripts/init-openfga/tests.fga.yaml`** with test cases for tenant/group types.
-
-**Seed tuples:** Create a migration script that reads existing project-user role assignments and creates equivalent tenant/group tuples.
-
-#### Step 1.3: Tenant Resolution Middleware (Week 2-3)
-
-**New middleware in `backend/internal/authorization/`:**
-
-1. Extract `X-Active-Tenant` header
-2. Validate tenant membership via OpenFGA `Check`
-3. Resolve allowed groups via `ListObjects`
-4. Map groups to project IDs via PostgreSQL lookup
-5. Determine access level per group (`can_view_identified` / `can_view_deidentified`)
-6. Store everything in Gin context
-
-**Files to modify:**
-- `backend/internal/authorization/openfga.go` -- extend `Authorize()` or add new middleware
-- `backend/cmd/api/main.go` -- register new middleware in the chain; add `X-Active-Tenant` to CORS allowed headers
-
-#### Step 1.4: Wire Project Filtering Through Repositories (Weeks 3-6)
-
-**The critical step.** Every repository method that returns tenant-scoped data must accept and use the allowed project IDs.
-
-**Pattern:** Add a `SecurityContext` struct:
-```go
-type SecurityContext struct {
-    UserID             string
-    ActiveTenant       string
-    AllowedProjectIDs  []int
-    IdentifiedGroupIDs []string
-    DeidentifiedGroupIDs []string
-}
+```sql
+-- Orgs where the user has can_read_pii at a specific org
+SELECT uor.org_id FROM auth_db.user_org_role uor
+JOIN auth_db.role_action ra
+  ON ra.tenant_id = uor.tenant_id AND ra.role_id = uor.role_id
+WHERE uor.username = <current_user>
+  AND ra.action_id = 'can_read_pii'
+  AND uor.org_id != '*'
+UNION
+-- Wildcard * expanded to every org in the tenant
+SELECT o.org_id FROM auth_db.organization o
+JOIN auth_db.user_org_role uor
+  ON uor.tenant_id = o.tenant_id AND uor.org_id = '*'
+JOIN auth_db.role_action ra
+  ON ra.tenant_id = uor.tenant_id AND ra.role_id = uor.role_id
+WHERE uor.username = <current_user>
+  AND ra.action_id = 'can_read_pii'
 ```
 
-Pass it from handler to repository. In the repository, add:
-```go
-tx = tx.Where("project_id IN (?)", ctx.AllowedProjectIDs)
-```
+The Go API uses the same pattern (`OR uor.org_id = '*'` in action checks).
 
-**Repository methods to modify** (estimated ~15-20):
-- `cases.go`: `SearchCases`, `GetCaseById`, `GetCaseFilters`, `SearchCaseDocuments`
-- `documents.go`: `SearchDocuments`, `GetDocumentFilters`, `GetDocumentDownloadURL`
-- `germline_snv_occurrences.go`: all count/list/aggregate/statistics methods
-- `somatic_snv_occurrences.go`: all count/list/aggregate/statistics methods
-- `germline_cnv_occurrences.go`: all count/list/aggregate/statistics methods
-- `sequencing.go`: `GetSequencing`, `GetSequencingDetails`
-- `interpretations.go`: all germline/somatic interpretation methods
-- `occurrence_notes.go`: CRUD methods
-- `variants.go`: all variant detail methods
+### POC validation summary
 
-**For occurrence queries:** The handler validates that the requested `case_id` belongs to an allowed project before calling the repository. Add a `ValidateCaseAccess(caseID int, allowedProjectIDs []int)` helper.
+What the POC proved, and how it changed the ADR:
 
-#### Step 1.5: PII Masking (Week 5-6)
+| Original ADR claim | POC finding | ADR impact |
+|-------------------|-------------|------------|
+| Ranger requires user stubs + role management, sync daemon | `{USER}` wildcard + `auth_db` subqueries eliminate both | **Recommendation changed** from C → B |
+| OpenFGA is needed as the authz model | `auth_db` tables are sufficient; no separate service needed | **OpenFGA removed**; Section 5 rewritten |
+| Flat tiers (admin/member, identified/deidentified) | Domain roles (geneticist, …) with explicit actions are clearer and closer to job titles | **Role model replaced** |
+| Views deliver 90% of Ranger's benefit with less ops cost | Views bring own risks (pushdown, colocation, proliferation) that POC didn't exercise; Ranger's ops cost collapses once policies are generic | **Option C demoted** to alternative |
+| Tenant routing via `X-Active-Tenant` header | Path prefix better (logs, caching, REST, CORS); matches Atlassian/GitHub/Twilio | **Routing decision documented** (§8.3) |
+| JWT auth works out of the box | TLS is a hard prerequisite; Go clients need a proxy | **Two new sections** (§8.1, §8.2) |
+| Admin tooling: "tenant switcher component + provisioning API" | Full React portal with role CRUD + users + tenants implemented | **§8.4** supersedes the original sketch |
 
-**New utility in `backend/internal/utils/pii.go`:**
-```go
-func MaskPatientPII(patient *types.Patient) {
-    patient.FirstName = "***"
-    patient.LastName = "***"
-    patient.JHN = "***"
-    patient.DateOfBirth = time.Time{}  // zero value
-    patient.SubmitterPatientId = fmt.Sprintf("DEID-%d", patient.ID)
-}
-```
+Questions the original ADR left open — now resolved by the architecture change:
 
-**Apply in handlers** that return patient data: `SearchCasesHandler`, `GetCaseEntityHandler`, and any handler returning `CasePatientClinicalInformation`. The handler checks the `SecurityContext` to determine if the result's group requires identified or de-identified access.
-
-#### Step 1.6: Frontend Tenant Switcher (Weeks 4-7, parallel)
-
-- Add tenant switcher UI component (similar to GitHub organization switcher)
-- Send `X-Active-Tenant` header on all API requests
-- Store selected tenant in `localStorage`
-- Fetch available tenants from new `/tenants` API endpoint (or from Keycloak JWT `tenants` claim)
-
----
-
-### Phase 2: Views-Based Tenant Isolation (Option C)
-
-**Goal:** Add database-level defense-in-depth. StarRocks DB RBAC prevents cross-tenant access even if the API layer has a bug.
-
-#### Step 2.1: StarRocks Schema Restructuring (Week 1-2)
-
-1. Create `radiant_base` database with colocation group `locus_colocation_group`
-2. Migrate all existing tables from current database to `radiant_base`
-3. Add `tenant_id` column to occurrence tables; backfill `tenant_id = 1`
-4. Update partition keys to include `tenant_id`
-5. Set `PROPERTIES ("colocate_with" = "locus_colocation_group")` on all `locus_id`-distributed tables
-6. Split `snv__variant` into `snv__variant_annotations` (shared, in colocation group) and `snv__variant_frequencies` (per-tenant, in colocation group)
-
-#### Step 2.2: Create Per-Tenant View Databases (Week 2)
-
-1. Create `radiant_default` view database from template:
-   - Tenant-scoped views with `WHERE tenant_id = 1`
-   - Pass-through views for all shared reference tables
-2. Create service account `svc_default` with GRANT on `radiant_default` only (no grant on `radiant_base`)
-3. Verify all existing queries work through views (run full test suite)
-4. Verify colocate JOINs still work through views (check `EXPLAIN` for `colocate: true`)
-
-#### Step 2.3: TenantPoolManager (Week 2-3)
-
-1. Implement `TenantPoolManager` in `backend/internal/database/`
-2. Add tenant resolution middleware that selects the correct `*gorm.DB`
-3. Modify handler initialization to use per-request DB from context
-4. No table name changes needed -- pass-through views in per-tenant DBs use the same names as current tables
-
-**Files to modify:**
-- `backend/internal/database/starrocks.go` -- add `TenantPoolManager`
-- `backend/internal/database/` -- new `tenant_pool.go`
-- `backend/cmd/api/main.go` -- use pool manager instead of single DB
-
-#### Step 2.4: Data Ingestion Updates (Week 3-4)
-
-1. Update the data pipeline to assign `tenant_id` during ingestion
-2. Route ingested data to `radiant_base` tables (not directly to tenant view databases)
-3. Ensure the `staging_sequencing_experiment` insert sets `tenant_id`
-
-#### Step 2.5: Tenant Onboarding Automation (Week 4)
-
-1. Build a tenant provisioning script/API that:
-   - Creates the PostgreSQL `tenant` record
-   - Creates the StarRocks view database from template
-   - Creates the StarRocks service account and RBAC grants
-   - Optionally creates a StarRocks resource group
-2. Document the tenant onboarding process
-
-#### Step 2.6: Verification & Hardening (Week 4-5)
-
-1. **Cross-tenant isolation test:** Attempt to query `radiant_udp` views from `svc_cbtn` connection -- must fail
-2. **View predicate push-down test:** `EXPLAIN` queries through views to confirm partition pruning on `tenant_id`
-3. **Colocate JOIN verification:** `EXPLAIN` a typical `occurrence JOIN variant JOIN clinvar` query through views -- confirm `colocate: true` in the plan, proving that pass-through views preserve colocation optimization
-4. **Performance benchmark:** Compare query latency through views vs. direct base table access -- should be negligible difference
-5. **Integration tests:** Run full Cypress test suite against the new architecture
-6. **Audit log review:** Verify StarRocks audit log shows tenant service account attribution
-
----
-
-### Phase 3: Direct StarRocks Access Enablement
-
-**Goal:** Enable data analysts, BI tools, and AI tools (MCP) to query StarRocks directly with proper tenant isolation, PII masking, and per-user audit attribution.
-
-#### Step 3.1: StarRocks Security Integration (Week 1)
-
-1. Configure JWT authentication on StarRocks:
-   ```sql
-   CREATE SECURITY INTEGRATION keycloak_jwt
-   PROPERTIES (
-       "type" = "jwt",
-       "jwks_url" = "https://keycloak.example.com/realms/CQDG/protocol/openid-connect/certs",
-       "jwt_username_claim" = "preferred_username"
-   );
-   ```
-2. Test JWT-based connection from a SQL client using a Keycloak token
-3. Verify that the JWKS endpoint is reachable from StarRocks FE nodes
-
-#### Step 3.2: Identified/De-identified View Databases (Week 1-2)
-
-1. Create `radiant_{tenant}_identified` databases with views that project full PII from JDBC-federated PostgreSQL tables, filtered by tenant's organizations
-2. Create `radiant_{tenant}_deidentified` databases with views that mask PII columns (`'***'` for names, `NULL` for dates, `CONCAT('DEID-', id)` for IDs)
-3. Create StarRocks roles per tenant per access level:
-   - `role_{tenant}_identified` -- grants on occurrence views + identified clinical views + shared
-   - `role_{tenant}_deidentified` -- grants on occurrence views + de-identified clinical views + shared
-4. Update tenant onboarding automation to create these databases and roles
-
-**Files to create/modify:**
-- `backend/scripts/tenant-provisioning/` -- SQL templates for identified/de-identified view databases
-- Extend tenant provisioning script from Phase 2 Step 2.5
-
-#### Step 3.3: User Provisioning Sync Daemon (Week 2-3)
-
-1. Build a sync service (Go goroutine or standalone service) that:
-   - Periodically reads OpenFGA tuples for group memberships
-   - Diffs against current StarRocks user/GRANT state
-   - Creates StarRocks users for direct-access-eligible users (`CREATE USER '{username}' IDENTIFIED BY JWT`)
-   - GRANTs appropriate roles based on access level per tenant
-   - REVOKEs roles when access is removed
-2. Implement a `/admin/sync-starrocks-users` API endpoint for manual trigger
-3. Add monitoring for sync lag and failure alerts
-
-**Files to create:**
-- `backend/internal/sync/starrocks_user_sync.go` -- sync daemon logic
-- `backend/cmd/api/main.go` -- register sync daemon startup (or separate `cmd/sync/` binary)
-
-#### Step 3.4: BI Tool & MCP Integration (Week 3-4)
-
-1. **BI tool connectivity guide:** Document how to connect Power BI / Tableau to StarRocks using Keycloak OAuth. Most BI tools support MySQL-compatible connections with custom authentication.
-2. **MCP server integration:** Update the AI agent MCP server (`ai-agent/`) to:
-   - Extract the user's JWT from the session context
-   - Connect to StarRocks using the user's JWT (not a system account)
-   - Select the appropriate tenant database based on the user's active tenant
-   - Return query results scoped by the user's StarRocks grants
-3. **Jupyter notebook templates:** Provide template notebooks that authenticate via Keycloak and connect to StarRocks with proper tenant context
-
-#### Step 3.5: Verification (Week 4)
-
-1. **Cross-tenant isolation test (direct access):** Analyst with CBTN access attempts to query UDP views -- must fail
-2. **PII masking test:** De-identified analyst queries `radiant_cbtn_deidentified.patient` -- PII fields must be masked
-3. **Identified access test:** Identified analyst queries `radiant_cbtn_identified.patient` -- full PII visible
-4. **Audit log test:** Verify all direct-access queries appear in StarRocks audit log under the individual user's name
-5. **BI tool test:** Connect Tableau to StarRocks via OAuth, verify tenant-scoped dashboards
-6. **MCP test:** AI agent queries StarRocks via MCP, verify results are tenant-scoped
-
----
-
-### Phase 4: Hardening & Compliance (Optional, post-launch)
-
-These steps are not required for initial launch but strengthen the compliance posture:
-
-1. **PostgreSQL Row-Level Security:** Enable RLS on `patient`, `cases`, and other PII tables. Set `app.tenant_id` per connection. This adds a third defense layer for direct PG access.
-2. **Structured audit logging:** Implement a dedicated audit log service that records all data access events (not just HTTP requests) with user, tenant, group, action, resource, and timestamp.
-3. **Resource group isolation:** Assign per-tenant resource groups in StarRocks to prevent one tenant's heavy queries from starving others.
-4. **Connection governance:** Implement connection limits per user to prevent a single direct-access user from exhausting StarRocks connections. StarRocks supports `ALTER USER SET PROPERTY 'max_user_connections' = '10'`.
+| Original open question | Status |
+|-----------------------|--------|
+| StarRocks view predicate push-down & partition pruning | Moot (no views in recommended path) |
+| Pass-through views & colocation preservation | Moot |
+| OpenFGA schema 1.2 maturity | Moot (OpenFGA removed) |
+| StarRocks view complex JOINs | Moot |
+| GORM table name qualification with per-tenant pools | Moot (single shared pool; Ranger filters rows) |
+| OpenFGA-to-Ranger sync lag | Moot (no sync — `auth_db` is shared source of truth) |
+| BI tool OAuth configuration | Still open for each BI tool; mitigation patterns documented |
+| MCP server JWT passthrough | Validated (POC MCP pattern) |
+| Keycloak JWT token lifetime | Configuration choice; noted in §6 Risk Mitigation |
+| User provisioning sync lag | Moot (`auth_db` is the store of record; Ranger polls every ~10 s) |
 
 ---
 
