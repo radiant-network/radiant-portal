@@ -63,6 +63,9 @@ const SliderVariantDetailsCard = ({
   germline_pc_wgs_not_affected,
   germline_pn_wgs_not_affected,
   germline_pf_wgs_not_affected,
+  somatic_pc_tn_wgs,
+  somatic_pn_tn_wgs,
+  somatic_pf_tn_wgs,
   cadd_phred,
   cadd_score,
   lrt_pred,
@@ -86,6 +89,7 @@ const SliderVariantDetailsCard = ({
   hgvsg,
   gnomad_v3_af,
   locus,
+  locusId,
   hotspot,
 }: SliderVariantDetailsCardProps) => {
   const { t } = useI18n();
@@ -141,6 +145,9 @@ const SliderVariantDetailsCard = ({
           germline_pc_wgs_not_affected={germline_pc_wgs_not_affected}
           germline_pn_wgs_not_affected={germline_pn_wgs_not_affected}
           germline_pf_wgs_not_affected={germline_pf_wgs_not_affected}
+          somatic_pc_tn_wgs={somatic_pc_tn_wgs}
+          somatic_pn_tn_wgs={somatic_pn_tn_wgs}
+          somatic_pf_tn_wgs={somatic_pf_tn_wgs}
           cadd_phred={cadd_phred}
           cadd_score={cadd_score}
           dann_score={dann_score}
@@ -164,6 +171,7 @@ const SliderVariantDetailsCard = ({
           hgvsg={hgvsg}
           gnomad_v3_af={gnomad_v3_af}
           locus={locus}
+          locusId={locusId}
           hotspot={hotspot}
         />
         <ClinicalAssociationCard omim_conditions={omim_conditions} locus_id={locus_id} />
@@ -281,6 +289,7 @@ type PredictionCardProps = SliderVariantType & {
   hgvsg?: string;
   gnomad_v3_af?: number;
   locus?: string;
+  locusId?: string;
   hotspot?: boolean;
 };
 const PredictionCard = ({
@@ -317,6 +326,7 @@ const PredictionCard = ({
   hgvsg,
   gnomad_v3_af,
   locus,
+  locusId,
   hotspot,
 }: PredictionCardProps) => {
   const { t } = useI18n();
@@ -334,7 +344,9 @@ const PredictionCard = ({
         }
       >
         {somatic_pc_tn_wgs && somatic_pn_tn_wgs && somatic_pf_tn_wgs?.toExponential(2) ? (
-          `${somatic_pc_tn_wgs} / ${somatic_pn_tn_wgs} (${somatic_pf_tn_wgs?.toExponential(2)})`
+          <AnchorLink size="sm" href={`/variants/entity/${locusId}?tab=patients&cases=OtherCases`} target="_blank">
+            {somatic_pc_tn_wgs} / {somatic_pn_tn_wgs} ({somatic_pf_tn_wgs?.toExponential(2)})
+          </AnchorLink>
         ) : (
           <EmptyField />
         )}
