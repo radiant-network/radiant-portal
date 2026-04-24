@@ -7,7 +7,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **case_id** | **str** |  | [optional] 
 **clinical_utility** | **str** |  | [optional] 
-**condition** | **str** |  | [optional] 
 **created_at** | **str** |  | [optional] 
 **created_by** | **str** |  | [optional] 
 **created_by_name** | **str** |  | [optional] 
@@ -20,6 +19,7 @@ Name | Type | Description | Notes
 **pubmed** | [**List[InterpretationPubmed]**](InterpretationPubmed.md) |  | [optional] 
 **sequencing_id** | **str** |  | [optional] 
 **transcript_id** | **str** |  | [optional] 
+**tumoral_name** | **str** |  | [optional] 
 **tumoral_type** | **str** |  | [optional] 
 **updated_at** | **str** |  | [optional] 
 **updated_by** | **str** |  | [optional] 

@@ -1605,8 +1605,6 @@ components:
           type: string
         clinical_utility:
           type: string
-        condition:
-          type: string
         created_at:
           type: string
         created_by:
@@ -1636,6 +1634,8 @@ components:
         sequencing_id:
           type: string
         transcript_id:
+          type: string
+        tumoral_name:
           type: string
         tumoral_type:
           type: string

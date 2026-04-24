@@ -3307,12 +3307,6 @@ export interface InterpretationSomatic {
      * @type {string}
      * @memberof InterpretationSomatic
      */
-    'condition'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InterpretationSomatic
-     */
     'created_at'?: string;
     /**
      * 
@@ -3380,6 +3374,12 @@ export interface InterpretationSomatic {
      * @memberof InterpretationSomatic
      */
     'transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
+    'tumoral_name'?: string;
     /**
      * 
      * @type {string}

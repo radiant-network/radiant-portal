@@ -30,7 +30,6 @@ class InterpretationSomatic(BaseModel):
     """ # noqa: E501
     case_id: Optional[StrictStr] = None
     clinical_utility: Optional[StrictStr] = None
-    condition: Optional[StrictStr] = None
     created_at: Optional[StrictStr] = None
     created_by: Optional[StrictStr] = None
     created_by_name: Optional[StrictStr] = None
@@ -43,11 +42,12 @@ class InterpretationSomatic(BaseModel):
     pubmed: Optional[List[InterpretationPubmed]] = None
     sequencing_id: Optional[StrictStr] = None
     transcript_id: Optional[StrictStr] = None
+    tumoral_name: Optional[StrictStr] = None
     tumoral_type: Optional[StrictStr] = None
     updated_at: Optional[StrictStr] = None
     updated_by: Optional[StrictStr] = None
     updated_by_name: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["case_id", "clinical_utility", "condition", "created_at", "created_by", "created_by_name", "id", "interpretation", "locus_id", "metadata", "oncogenicity", "oncogenicity_classification_criterias", "pubmed", "sequencing_id", "transcript_id", "tumoral_type", "updated_at", "updated_by", "updated_by_name"]
+    __properties: ClassVar[List[str]] = ["case_id", "clinical_utility", "created_at", "created_by", "created_by_name", "id", "interpretation", "locus_id", "metadata", "oncogenicity", "oncogenicity_classification_criterias", "pubmed", "sequencing_id", "transcript_id", "tumoral_name", "tumoral_type", "updated_at", "updated_by", "updated_by_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -112,7 +112,6 @@ class InterpretationSomatic(BaseModel):
         _obj = cls.model_validate({
             "case_id": obj.get("case_id"),
             "clinical_utility": obj.get("clinical_utility"),
-            "condition": obj.get("condition"),
             "created_at": obj.get("created_at"),
             "created_by": obj.get("created_by"),
             "created_by_name": obj.get("created_by_name"),
@@ -125,6 +124,7 @@ class InterpretationSomatic(BaseModel):
             "pubmed": [InterpretationPubmed.from_dict(_item) for _item in obj["pubmed"]] if obj.get("pubmed") is not None else None,
             "sequencing_id": obj.get("sequencing_id"),
             "transcript_id": obj.get("transcript_id"),
+            "tumoral_name": obj.get("tumoral_name"),
             "tumoral_type": obj.get("tumoral_type"),
             "updated_at": obj.get("updated_at"),
             "updated_by": obj.get("updated_by"),

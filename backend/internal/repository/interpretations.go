@@ -155,7 +155,6 @@ func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.Interp
 	}
 	interpretation := &types.InterpretationSomatic{
 		InterpretationCommon:                *common,
-		Condition:                           dao.Condition,
 		TumoralType:                         dao.TumoralType,
 		Oncogenicity:                        dao.Oncogenicity,
 		OncogenicityClassificationCriterias: utils.SplitRemoveEmptyString(dao.OncogenicityClassificationCriterias, ","),
@@ -171,7 +170,6 @@ func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(interpretation
 	}
 	dao := &types.InterpretationSomaticDAO{
 		InterpretationCommonDAO:             *common,
-		Condition:                           interpretation.Condition,
 		TumoralType:                         interpretation.TumoralType,
 		Oncogenicity:                        interpretation.Oncogenicity,
 		OncogenicityClassificationCriterias: strings.Join(interpretation.OncogenicityClassificationCriterias, ","),

@@ -125,7 +125,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	interpretationsSomaticGroupDeprecated.GET("", server.GetInterpretationSomaticDeprecated(repoPostgres.Interpretations))
 	interpretationsSomaticGroupDeprecated.POST("", server.PostInterpretationSomaticDeprecated(repoPostgres.Interpretations))
 	interpretationsSomaticGroup := interpretationsGroup.Group("/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id")
-	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations))
+	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations, repoTerms))
 	interpretationsSomaticGroup.POST("", server.PostInterpretationSomatic(repoPostgres.Interpretations))
 
 	mondoGroup := privateRoutes.Group("/mondo")

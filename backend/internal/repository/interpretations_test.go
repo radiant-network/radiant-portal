@@ -164,7 +164,7 @@ func Test_Interpretations_FirstSomatic(t *testing.T) {
 			assert.Equal(t, "Oncogenic", interpretation.Oncogenicity)
 			assert.Equal(t, []string{"OS1"}, interpretation.OncogenicityClassificationCriterias)
 			assert.Equal(t, "tier_1", interpretation.ClinicalUtility)
-			assert.Equal(t, "MONDO:TEST00001", interpretation.Condition)
+			assert.Equal(t, "MONDO:TEST00001", interpretation.TumoralName)
 		}
 	})
 }
@@ -194,7 +194,7 @@ func Test_Interpretations_CreateOrUpdateSomatic_Create(t *testing.T) {
 			},
 			TumoralType:  "solid",
 			Oncogenicity: "Oncogenic",
-			Condition:    "MONDO:TEST00004",
+			TumoralName:  "MONDO:TEST00004",
 		}
 		err := repo.CreateOrUpdateSomatic(interpretation)
 		assert.NoError(t, err)
@@ -205,7 +205,7 @@ func Test_Interpretations_CreateOrUpdateSomatic_Create(t *testing.T) {
 		if assert.NotNil(t, found) {
 			assert.Equal(t, "solid", found.TumoralType)
 			assert.Equal(t, "Oncogenic", found.Oncogenicity)
-			assert.Equal(t, "MONDO:TEST00004", found.Condition)
+			assert.Equal(t, "MONDO:TEST00004", found.TumoralName)
 		}
 	})
 }
