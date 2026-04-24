@@ -131,7 +131,7 @@ graph LR
     end
 
     subgraph "Authorization"
-        R[Apache Ranger<br/>~11 generic policies<br/>user={USER} wildcard]
+        R["Apache Ranger<br/>~11 generic policies<br/>user=#123;USER#125; wildcard"]
     end
 
     subgraph "Go API (Radiant portal)"
@@ -430,8 +430,8 @@ graph LR
     end
 
     subgraph "Apache Ranger"
-        RP["Row-filter policies<br/>{USER} wildcard<br/>subqueries on auth_db"]
-        CM["Column masking<br/>{USER} wildcard<br/>can_read_pii via role_action"]
+        RP["Row-filter policies<br/>#123;USER#125; wildcard<br/>subqueries on auth_db"]
+        CM["Column masking<br/>#123;USER#125; wildcard<br/>can_read_pii via role_action"]
     end
 
     subgraph "StarRocks (access_control=ranger, TLS)"
