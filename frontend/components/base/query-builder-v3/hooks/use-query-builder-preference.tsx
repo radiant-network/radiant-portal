@@ -83,11 +83,11 @@ export function useSqonsQBUpdatePreferenceEffect({ appId, sqons }: useSqonsQBSta
     },
   );
   const { trigger } = useSWRMutation(`query-builder-post-${appId}`, postUserPreference);
-  const isFirstRender = useRef(true);
+  const hasBeenMountedOnce = useRef(true);
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
+    if (hasBeenMountedOnce.current) {
+      hasBeenMountedOnce.current = false;
       return;
     }
 
