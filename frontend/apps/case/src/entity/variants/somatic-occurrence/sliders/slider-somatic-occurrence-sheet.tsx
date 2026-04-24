@@ -258,6 +258,9 @@ export function SomaticOccurrenceSheetContent({
       )}
       <SliderVariantDetailsCard
         type="somatic"
+        chromosome={expandResult.data.chromosome}
+        start={expandResult.data.start}
+        end={expandResult.data.end}
         omim_conditions={expandResult.data.omim_conditions}
         locus_id={occurrence.locus_id}
         cadd_phred={expandResult.data.cadd_phred}
