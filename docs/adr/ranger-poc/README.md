@@ -318,6 +318,46 @@ mysql -h127.0.0.1 -P9030 -uroot -e "
 
 Subsequent role changes only require auth_db updates.
 
+## Design Decision: Tenant in REST API Path Prefix
+
+The REST API uses **path prefix** for tenant context: `/{tenant}/patients`, `/{tenant}/admin/roles`, etc. Global endpoints (not tenant-scoped) live at the root: `/auth/me`, `/auth/my-tenants`, `/health`.
+
+### Options considered
+
+| Approach | Example | Verdict |
+|----------|---------|---------|
+| **Path prefix** | `/cbtn/patients` | ✅ Chosen |
+| **HTTP header** | `X-Tenant: cbtn` then `/patients` | ❌ Rejected |
+| **Subdomain** | `cbtn.api.radiant.example/patients` | ❌ Impractical for POC (DNS, TLS) |
+| **Query param** | `/patients?tenant=cbtn` | ❌ Not idiomatic (query is for filtering) |
+| **JWT claim** | Tenant encoded in token | ❌ Rejected by user (multi-tenant users would need multiple tokens) |
+
+### Why path prefix
+
+| Criterion | Path `/{tenant}/...` | Header `X-Tenant` |
+|-----------|---------------------|-------------------|
+| Visible in logs/monitoring | ✅ Immediate | ❌ Requires log config to include header |
+| Cacheable (CDN, HTTP cache) | ✅ Cache key is the URL | ❌ Requires `Vary: X-Tenant` |
+| Bookmarkable / shareable | ✅ | ❌ Can't share a link to a specific tenant |
+| CORS complexity | ✅ None | ❌ Preflight for custom header |
+| REST semantics | ✅ Tenant IS a resource container | ⚠️ Headers are for metadata, not resources |
+| OpenAPI/Swagger docs | ✅ Tenant as path param is standard | ⚠️ Global header applies to all endpoints |
+
+### Industry precedent
+
+- **Atlassian Cloud**: subdomain for site access (`acme.atlassian.net`), **path prefix** for Connect apps and cross-site APIs (`api.atlassian.com/ex/jira/{cloudId}/rest/...`). They do **not** use a tenant header.
+- **GitHub**: `/orgs/{org}/...`, `/repos/{owner}/{repo}/...`
+- **Twilio**: `/Accounts/{AccountSid}/...`
+- **Shopify**, **Salesforce**: subdomain
+
+Subdomain isn't practical for a localhost POC (DNS, certificates). Path prefix matches Atlassian's fallback pattern when subdomain isn't available — and it's the same approach GitHub and Twilio use for their REST APIs.
+
+### Trade-offs accepted
+
+- **URLs change when switching tenants** — intentional; makes the tenant scope explicit and bookmarkable.
+- **Every tenant-scoped endpoint needs the prefix** — one-time cost, avoids runtime ambiguity.
+- **The MySQL proxy path doesn't use this** — correct; proxy clients go through StarRocks + Ranger row-filter, which enforces tenant via `auth_db.user_tenant_role`. The REST path prefix only applies to endpoints consumed by the portal UI and end-user tools.
+
 ## POC API Endpoints
 
 | Method | Path | Auth | Description |
