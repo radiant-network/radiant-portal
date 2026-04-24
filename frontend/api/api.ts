@@ -3307,6 +3307,12 @@ export interface InterpretationSomatic {
      * @type {string}
      * @memberof InterpretationSomatic
      */
+    'condition'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'created_at'?: string;
     /**
      * 

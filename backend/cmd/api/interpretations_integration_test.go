@@ -119,12 +119,17 @@ func Test_GetInterpretationsomatic(t *testing.T) {
 		interpretation := &types.InterpretationSomatic{}
 		actual := assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
+		assert.Equal(t, "", actual.Condition)
 		// update
 		interpretation.Oncogenicity = "one Oncogenicity"
 		interpretation.Metadata.AnalysisId = "analysis1"
+		interpretation.TumoralType = "solid"
+		interpretation.Condition = "one condition"
 		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.Equal(t, actual.Oncogenicity, "one Oncogenicity")
 		assert.Equal(t, actual.Metadata.AnalysisId, "analysis1")
+		assert.Equal(t, "solid", actual.TumoralType)
+		assert.Equal(t, "one condition", actual.Condition)
 		// Update with unknown pubmed
 		interpretation.Pubmed = append(interpretation.Pubmed, types.InterpretationPubmed{CitationID: "2"})
 		assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusBadRequest, interpretation, `{"status": 400, "message":"pubmed citation not found: 2"}`)
@@ -132,6 +137,10 @@ func Test_GetInterpretationsomatic(t *testing.T) {
 		interpretation.Pubmed[0].CitationID = "1"
 		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
 		assert.NotEmpty(t, actual.ID)
+		// Update with known condition
+		interpretation.Condition = "MONDO:TEST00005"
+		actual = assertPostInterpretationSomatic(t, repo.Interpretations, "11", "seq1", "locus1", "trans1", http.StatusOK, interpretation, "")
+		assert.Equal(t, "MONDO:TEST00005", actual.Condition)
 	})
 }
 
