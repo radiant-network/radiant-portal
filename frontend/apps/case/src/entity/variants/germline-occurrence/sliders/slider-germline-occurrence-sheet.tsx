@@ -188,6 +188,9 @@ function GermlineOccurrenceSheetContent({
       )}
       <SliderVariantDetailsCard
         type="germline"
+        chromosome={expandResult.data.chromosome}
+        start={expandResult.data.start}
+        end={expandResult.data.end}
         omim_conditions={expandResult.data.omim_conditions}
         locus_id={occurrence.locus_id}
         germline_pc_wgs_affected={expandResult.data.germline_pc_wgs_affected}

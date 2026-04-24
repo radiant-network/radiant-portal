@@ -33,6 +33,7 @@ type SliderVariantDetailsCardProps = ClinicalAssociationCardProps &
   GeneCardProps & {
     chromosome?: string;
     start?: number;
+    end?: number;
   };
 
 /**
@@ -44,6 +45,7 @@ const SliderVariantDetailsCard = ({
   type,
   chromosome,
   start,
+  end,
   symbol,
   aa_change,
   vep_impact,
@@ -102,7 +104,7 @@ const SliderVariantDetailsCard = ({
         <div className="flex gap-2">
           <Button variant="outline" size="xs" asChild>
             <a
-              href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${start}`}
+              href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${end}`}
               target="_blank"
               rel="noreferrer"
             >
