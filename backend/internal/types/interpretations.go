@@ -90,7 +90,6 @@ type InterpretationGermlineDAO struct {
 
 type InterpretationSomaticDAO struct {
 	InterpretationCommonDAO
-	Condition                           string
 	TumoralType                         string
 	Oncogenicity                        string
 	OncogenicityClassificationCriterias string
