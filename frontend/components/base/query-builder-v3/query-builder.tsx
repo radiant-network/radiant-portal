@@ -61,7 +61,10 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: 
 
   return (
     <QBProvider {...qbPreference} aggregations={aggregations} fetcher={fetcher}>
-      <SavedFilterInitializer selectedSavedFilter={savedFilterPreference?.selectedSavedFilter}>
+      <SavedFilterInitializer
+        selectedSavedFilter={savedFilterPreference?.selectedSavedFilter}
+        userPrefSqons={qbPreference?.sqons}
+      >
         <FacetConfigContext value={{ appId, ...facetFetchers }}>
           <SavedFiltersProvider
             savedFilters={savedFilterFetcher.data || []}
@@ -101,7 +104,7 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: 
                 </aside>
                 <main className="flex-1 shrink px-3 pb-3 overflow-auto">
                   <div className="py-3 space-y-2">
-                    <QueriesBarCard />
+                    <QueriesBarCard appId={appId} />
                   </div>
                   {children}
                 </main>
