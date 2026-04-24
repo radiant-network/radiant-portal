@@ -296,6 +296,7 @@ export function SomaticOccurrenceSheetContent({
         somatic_pc_tn_wgs={expandResult.data.somatic_pc_tn_wgs}
         somatic_pn_tn_wgs={expandResult.data.somatic_pn_tn_wgs}
         somatic_pf_tn_wgs={expandResult.data.somatic_pf_tn_wgs}
+        locusId={occurrence.locus_id}
       />
     </div>
   );
