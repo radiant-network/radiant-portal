@@ -139,7 +139,7 @@ graph LR
         Handlers[Handlers<br/>action check via auth_db]
     end
 
-    subgraph "Proxy"
+    subgraph "Proxy Layer"
         Proxy[mysql-proxy<br/>native_password → OIDC]
     end
 
