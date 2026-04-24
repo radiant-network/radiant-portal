@@ -112,7 +112,7 @@ func CasesFiltersHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /cases/{case_id} [get]
-func CaseEntityHandler(repo repository.CasesDAO) gin.HandlerFunc {
+func CaseEntityHandler(repo repository.CasesDAO, igvRepo repository.IGVRepositoryDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errCaseId := strconv.Atoi(c.Param("case_id"))
 		if errCaseId != nil {
@@ -128,6 +128,12 @@ func CaseEntityHandler(repo repository.CasesDAO) gin.HandlerFunc {
 			HandleNotFoundError(c, "case")
 			return
 		}
+		igvTracks, err := igvRepo.GetIGV(caseId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		caseEntity.HasIGVFiles = len(igvTracks) > 0
 		c.JSON(http.StatusOK, caseEntity)
 	}
 }

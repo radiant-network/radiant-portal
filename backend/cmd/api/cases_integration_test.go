@@ -160,8 +160,9 @@ func Test_GetCasesFilters(t *testing.T) {
 func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
+		igvRepo := repository.NewIGVRepository(db)
 		router := gin.Default()
-		router.GET("/cases/:case_id", server.CaseEntityHandler(repo))
+		router.GET("/cases/:case_id", server.CaseEntityHandler(repo, igvRepo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/cases/%d", caseId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
@@ -234,6 +235,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"note": "Administrative comment",
 		"diagnosis_lab_code": "CQGC",
 		"diagnosis_lab_name": "Quebec Clinical Genomic Center",
+		"has_igv_files": true,
 		"panel_code": "EPILEP",
 		"panel_name": "Epilepsy",		
 		"prescriber": "Felix Laflamme",

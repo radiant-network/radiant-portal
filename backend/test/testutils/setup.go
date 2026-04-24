@@ -166,7 +166,7 @@ func startStarRocksContainer() (testcontainers.Container, error) {
 	aliases := []string{StarrocksContainerName}
 
 	req := testcontainers.ContainerRequest{
-		Image:        "starrocks/allin1-ubuntu",
+		Image:        "starrocks/allin1-ubuntu:3.4.2",
 		ExposedPorts: []string{"9030/tcp", "8030/tcp", "8040/tcp"},
 		WaitingFor: wait.ForAll(
 			wait.ForListeningPort("9030/tcp"),

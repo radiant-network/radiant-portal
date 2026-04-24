@@ -12,30 +12,30 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (r *MockRepository) GetIGV(caseID int) ([]types.IGVTrack, error) {
-	return []types.IGVTrack{{
-		SequencingExperimentId: 1,
-		SampleId:               "sample_123",
-		PatientId:              1,
-		FamilyRole:             "proband",
-		SexCode:                "male",
-		DataTypeCode:           "alignment",
-		FormatCode:             "cram",
-		URL:                    "s3://example.com/file.cram",
-	}, {
-		SequencingExperimentId: 1,
-		SampleId:               "sample_123",
-		PatientId:              1,
-		FamilyRole:             "proband",
-		SexCode:                "male",
-		DataTypeCode:           "alignment",
-		FormatCode:             "crai",
-		URL:                    "s3://example.com/file.crai",
-	}}, nil
-}
-
 func Test_IGVGetHandler(t *testing.T) {
-	repo := &MockRepository{}
+	repo := &MockIGVRepository{
+		// Return no IGV tracks to test that has_igv_files is set to false
+		igvTracks: []types.IGVTrack{{
+			SequencingExperimentId: 1,
+			SampleId:               "sample_123",
+			PatientId:              1,
+			FamilyRole:             "proband",
+			SexCode:                "male",
+			DataTypeCode:           "alignment",
+			FormatCode:             "cram",
+			URL:                    "s3://example.com/file.cram",
+		}, {
+			SequencingExperimentId: 1,
+			SampleId:               "sample_123",
+			PatientId:              1,
+			FamilyRole:             "proband",
+			SexCode:                "male",
+			DataTypeCode:           "alignment",
+			FormatCode:             "crai",
+			URL:                    "s3://example.com/file.crai",
+		}},
+	}
+
 	router := gin.Default()
 	router.GET("/igv/:case_id", GetIGVHandler(repo, testutils.NewMockS3PreSigner()))
 

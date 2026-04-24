@@ -95,7 +95,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))
 	casesGroup.GET("/autocomplete", server.CasesAutocompleteHandler(repoCases))
 	casesGroup.GET("/filters", server.CasesFiltersHandler(repoCases))
-	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases))
+	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases, repoIGV))
 	casesGroup.POST("/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repoDocuments))
 	casesGroup.GET("/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repoDocuments))
 

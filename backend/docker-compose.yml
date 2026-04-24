@@ -1,6 +1,6 @@
 services:
   starrocks:
-    image: starrocks/allin1-ubuntu
+    image: starrocks/allin1-ubuntu:3.4.2
     container_name: starrocks_radiant
     ports:
       - "9030:9030"
