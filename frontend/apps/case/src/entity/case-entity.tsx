@@ -40,6 +40,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<CaseEntityTabs>(
     (searchParams.get('tab') as CaseEntityTabs) ?? CaseEntityTabs.Details,
   );
+
   const { data, error, isLoading } = useSWR<CaseEntity, ApiError, CaseEntityInput>(
     {
       key: 'case-entity',
@@ -52,10 +53,22 @@ export default function App() {
     },
   );
 
-  const handleOnTabChange = (value: CaseEntityTabs) => {
-    setSearchParams({ tab: value });
-    setActiveTab(value);
-  };
+  const hasVariants = (data?.sequencing_experiments ?? []).some(seqExp => seqExp.has_variants);
+  const handleOnTabChange = useCallback(
+    (value: CaseEntityTabs) => {
+      if (value == CaseEntityTabs.Variants) {
+        const defaultSeqId = (data?.sequencing_experiments ?? []).filter(seqExp => seqExp.has_variants)[0].seq_id ?? -1;
+        setSearchParams({
+          tab: value,
+          seq_id: defaultSeqId.toString(),
+        });
+      } else {
+        setSearchParams({ tab: value });
+      }
+      setActiveTab(value);
+    },
+    [data],
+  );
 
   /**
    * Set active tab by searchParams (from urls)
@@ -98,8 +111,6 @@ export default function App() {
   if (!activeTab) {
     return null;
   }
-
-  const hasVariants = (data?.sequencing_experiments ?? []).some(seqExp => seqExp.has_variants);
   return (
     <CaseEntityContext value={data}>
       <main ref={mainRef} className="bg-muted h-screen overflow-auto">
