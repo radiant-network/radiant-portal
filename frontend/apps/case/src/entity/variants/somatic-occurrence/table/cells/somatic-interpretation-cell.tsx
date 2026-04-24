@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router';
 import { ClipboardList } from 'lucide-react';
 
-import { GermlineSNVOccurrence } from '@/api/api';
+import { SomaticSNVOccurrence } from '@/api/api';
 import { useDataTable } from '@/components/base/data-table/hooks/use-data-table';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -11,7 +11,7 @@ import { SELECTED_VARIANT_PARAM } from '@/entity/variants/constants';
 import SomaticInterpretationDialog from '../../interpretation/somatic-interpretation-dialog';
 
 type InterpretationCellProps = {
-  occurrence: GermlineSNVOccurrence;
+  occurrence: SomaticSNVOccurrence;
 };
 
 function SomaticInterpretationCell({ occurrence }: InterpretationCellProps) {
