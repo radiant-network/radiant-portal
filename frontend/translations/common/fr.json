@@ -1000,7 +1000,8 @@
       "insertion": "Insertion",
       "snv": "SNV",
       "deletion": "Délétion",
-      "sequence_alteration": "Séquence Altération"
+      "sequence_alteration": "Séquence Altération",
+      "substitution": "Substitution"
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
