@@ -35,7 +35,7 @@ export function SavedFilterInitializer({ children, selectedSavedFilter, userPref
       });
       hasInitialized.current = true;
     }
-  }, []);
+  }, []); // Empty deps array to run only once
 
   return <>{children}</>;
 }
