@@ -246,10 +246,10 @@ These are hard constraints that apply across all options:
 | Views | Full support; optimizer pushes predicates through views | Views can enforce row filtering without Ranger |
 | Resource group isolation | CPU/memory partitioning per resource group | Can prevent one tenant from starving others |
 | Hierarchy | Catalog > Database > Table (no schema concept) | Cannot use PostgreSQL-style schemas within a database |
-| **Colocation groups** | Tables must be in the **same database** to share a colocation group | Colocate JOINs (local, shuffle-free) require co-located tables; splitting tables across databases breaks colocation |
+| **Colocation groups** | StarRocks 2.5.4+ supports colocation groups across **different databases** ([docs](https://docs.starrocks.io/docs/using_starrocks/Colocate_join/)). Tables must share the same `colocate_with` property, bucket count, replica count, and bucket-key types | Colocate JOINs (local, shuffle-free) require co-located tables; the legacy "same database" restriction no longer applies |
 | Iceberg catalog support | Native read support via external catalog | Iceberg tables can be queried alongside native tables; JOINs use shuffle (not colocate) |
 
-**Key implication -- colocation groups:** The current StarRocks schema uses colocation to enable colocate JOINs (local, shuffle-free) between tables distributed by `locus_id` -- e.g., `germline__snv__occurrence JOIN snv__variant JOIN snv__consequence JOIN clinvar`. Colocation groups **must be in the same database**. This means **all tables that participate in colocate JOINs must remain in one database**. Any schema design that splits occurrence tables and variant/annotation tables across databases will break colocate JOINs and cause expensive network shuffles on every query. The recommended schema (Option B) addresses this by placing all base tables -- both tenant-scoped and shared reference data -- in a single `radiant_base` database. Row-filter policies on individual tables do not affect colocation, which the POC confirmed.
+**Key implication -- colocation groups:** The current StarRocks schema uses colocation to enable colocate JOINs (local, shuffle-free) between tables distributed by `locus_id` -- e.g., `germline__snv__occurrence JOIN snv__variant JOIN snv__consequence JOIN clinvar`. Tables in a colocation group must share the same `colocate_with` property, bucket count, replica count, and bucket-key types. **As of StarRocks 2.5.4, colocation groups can span multiple databases**, so a single `radiant_base` is no longer a hard requirement — but it remains the simplest layout for these high-frequency joins. The recommended schema (Option B) places all base tables (tenant-scoped and shared reference data) in `radiant_base` for clarity; auth/admin metadata lives in `auth_db` and operational write-paths in `operational_db`, neither of which participates in the colocation group. Row-filter policies on individual tables do not affect colocation — the POC confirmed this.
 
 **Key references:**
 - [StarRocks Security Integration (JWT)](https://docs.starrocks.io/docs/administration/Authentication/#json-web-token-jwt-based-authentication)
@@ -705,13 +705,13 @@ graph LR
 
 **Single base database + per-tenant view databases in StarRocks:**
 
-A critical constraint is that **colocation groups must be in the same database**. The current schema uses colocation to enable colocate JOINs (local, shuffle-free) between tables distributed by `locus_id` -- e.g., `germline__snv__occurrence JOIN snv__variant JOIN snv__consequence JOIN clinvar`. Splitting these tables across databases would break colocation and cause expensive network shuffles.
+A historical constraint frequently cited is that "colocation groups must be in the same database". This was true in older StarRocks/Doris versions but **was lifted in StarRocks 2.5.4** ([Colocate Join docs](https://docs.starrocks.io/docs/using_starrocks/Colocate_join/)): tables in different databases can share a colocation group as long as they declare the same `colocate_with` property, bucket count, replica count, and bucket-key types. Even so, keeping the high-frequency joined tables (`germline__snv__occurrence JOIN snv__variant JOIN snv__consequence JOIN clinvar`) in a single `radiant_base` is the simplest layout and avoids cross-database management overhead.
 
 Therefore, **all base tables -- both tenant-scoped and shared reference data -- live in a single `radiant_base` database** with a common colocation group. Per-tenant view databases provide isolation by exposing filtered subsets.
 
 ```
 default_catalog/
-  radiant_base/                         -- ALL base tables (single DB preserves colocation)
+  radiant_base/                         -- ALL base tables in one DB (simplest colocation layout)
     # Tenant-scoped tables (have tenant_id column)
     germline__snv__occurrence           -- + tenant_id INT NOT NULL
     somatic__snv__occurrence            -- + tenant_id INT NOT NULL
@@ -864,7 +864,7 @@ GRANT role_cbtn_deidentified TO 'analyst_charlie';         -- de-identified for 
 
 #### Reference Data Handling
 
-All reference/annotation tables live in `radiant_base` alongside tenant-scoped tables. This is required by the **colocation group constraint** -- tables that participate in colocate JOINs must be in the same database. Since `germline__snv__occurrence JOIN snv__variant_annotations JOIN snv__consequence JOIN clinvar` is the most common and performance-critical query pattern, all of these must share a colocation group in `radiant_base`.
+All reference/annotation tables live in `radiant_base` alongside tenant-scoped tables. Since StarRocks 2.5.4 colocation groups can technically span databases, this is no longer a hard constraint — but `germline__snv__occurrence JOIN snv__variant_annotations JOIN snv__consequence JOIN clinvar` is the most common and performance-critical query pattern, so keeping all participating tables in a single `radiant_base` with a shared colocation group is the simplest and least error-prone layout.
 
 Reference tables are not duplicated per tenant. They do not have a `tenant_id` column. Per-tenant view databases expose them via **pass-through views** (e.g., `CREATE VIEW clinvar AS SELECT * FROM radiant_base.clinvar`), so direct-access users can write natural JOINs without cross-database references.
 
