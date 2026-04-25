@@ -4,7 +4,7 @@
 - **Date:** 2026-04-10 (original) / 2026-04-24 (revision)
 - **Authors:** Architecture Team
 - **Stakeholders:** Security reviewers, compliance officers, platform engineers
-- **Revision note:** This document was revised after the POC at [`docs/adr/ranger-poc/`](./ranger-poc/README.md) validated key hypotheses. The recommendation has shifted from **Option C (views-based)** to **Option B variant (Ranger + `auth_db` tables)**. OpenFGA has been replaced by `auth_db` tables in StarRocks as the single source of truth for authorization. The role model has shifted from flat tiers (admin/member + identified/deidentified) to **domain roles** (geneticist, bioinformatician, ...) with explicit **actions** (`can_read_pii`, `can_create_case`, ...). See [POC validation summary](#poc-validation-summary) for what changed and why.
+- **Revision note:** This document was revised after the POC at [`docs/adr/ranger-poc/`](./ranger-poc/README.md) validated the recommended architecture (Apache Ranger + `auth_db` tables). The original ADR considered four options (A–D); only the recommendation and a brief description of the closest alternative (view-based + per-user JWT) are retained. OpenFGA has been replaced by `auth_db` tables in StarRocks as the single source of truth for authorization. The role model has shifted from flat tiers (admin/member + identified/deidentified) to **domain roles** (geneticist, bioinformatician, ...) with explicit **actions** (`can_read_pii`, `can_create_case`, ...). See [POC validation summary](#poc-validation-summary) for what changed and why.
 
 ---
 
@@ -12,8 +12,8 @@
 
 1. [Problem Statement](#1-problem-statement)
 2. [Decision Drivers](#2-decision-drivers)
-3. [Options Considered](#3-options-considered)
-   - [Option B -- Ranger + `auth_db` (Recommended)](#option-b--ranger--auth_db-recommended-poc-validated)
+3. [Solution](#3-solution)
+   - [Recommended Architecture — Ranger + `auth_db`](#recommended-architecture--ranger--auth_db-poc-validated)
    - [Alternative Solutions](#alternative-solutions)
 4. [Proposed Schema Organization](#4-proposed-schema-organization)
 5. [Authorization Model (`auth_db`)](#5-authorization-model-auth_db)
@@ -112,7 +112,7 @@ The platform must support 10--50 tenants (hospitals, research institutions, juri
 - **Option A (API-only):** Direct access users bypass all authorization. This option cannot be the final state.
 - **Options B, C, D:** StarRocks-level enforcement (DB RBAC, views, Ranger) protects all access paths equally, regardless of whether the query originates from the Go API, a Jupyter notebook, or a Tableau dashboard.
 
-### Target Architecture (Recommended — Option B: Ranger + `auth_db`)
+### Target Architecture (Ranger + `auth_db`)
 
 ```mermaid
 graph LR
@@ -225,7 +225,7 @@ This driver **eliminates Option A as a viable final state** and makes StarRocks-
 
 ---
 
-## 3. Options Considered
+## 3. Solution
 
 ### StarRocks 3.5 Capabilities & Constraints
 
@@ -247,7 +247,7 @@ These are hard constraints that apply across all options:
 | **Colocation groups** | StarRocks 2.5.4+ supports colocation groups across **different databases** ([docs](https://docs.starrocks.io/docs/using_starrocks/Colocate_join/)). Tables must share the same `colocate_with` property, bucket count, replica count, and bucket-key types | Colocate JOINs (local, shuffle-free) require co-located tables; the legacy "same database" restriction no longer applies |
 | Iceberg catalog support | Native read support via external catalog | Iceberg tables can be queried alongside native tables; JOINs use shuffle (not colocate) |
 
-**Key implication -- colocation groups:** The current StarRocks schema uses colocation to enable colocate JOINs (local, shuffle-free) between tables distributed by `locus_id` -- e.g., `germline__snv__occurrence JOIN snv__variant JOIN snv__consequence JOIN clinvar`. Tables in a colocation group must share the same `colocate_with` property, bucket count, replica count, and bucket-key types. **As of StarRocks 2.5.4, colocation groups can span multiple databases**, so a single `radiant_base` is no longer a hard requirement — but it remains the simplest layout for these high-frequency joins. The recommended schema (Option B) places all base tables (tenant-scoped and shared reference data) in `radiant_base` for clarity; auth/admin metadata lives in `auth_db` and operational write-paths in `operational_db`, neither of which participates in the colocation group. Row-filter policies on individual tables do not affect colocation — the POC confirmed this.
+**Key implication -- colocation groups:** The current StarRocks schema uses colocation to enable colocate JOINs (local, shuffle-free) between tables distributed by `locus_id` -- e.g., `germline__snv__occurrence JOIN snv__variant JOIN snv__consequence JOIN clinvar`. Tables in a colocation group must share the same `colocate_with` property, bucket count, replica count, and bucket-key types. **As of StarRocks 2.5.4, colocation groups can span multiple databases**, so a single `radiant_base` is no longer a hard requirement — but it remains the simplest layout for these high-frequency joins. The recommended schema places all base tables (tenant-scoped and shared reference data) in `radiant_base` for clarity; auth/admin metadata lives in `auth_db` and operational write-paths in `operational_db`, neither of which participates in the colocation group. Row-filter policies on individual tables do not affect colocation — the POC confirmed this.
 
 **Key references:**
 - [StarRocks Security Integration (JWT)](https://docs.starrocks.io/docs/administration/Authentication/#json-web-token-jwt-based-authentication)
@@ -258,7 +258,7 @@ These are hard constraints that apply across all options:
 
 ---
 
-### Option B -- Ranger + `auth_db` (Recommended, POC-validated)
+### Recommended Architecture -- Ranger + `auth_db` (POC-validated)
 
 **Summary:** Deploy Apache Ranger to enforce row-filtering and column masking at the StarRocks level. **Authorization data (roles, actions, assignments) lives in StarRocks `auth_db` tables, not in Ranger or OpenFGA.** Ranger holds ~11 **generic** policies using the `{USER}` wildcard; the policy expressions are SQL subqueries against `auth_db`. Every access path — Go API, Jupyter, BI, MCP — is enforced identically. This is the POC-validated architecture ([`docs/adr/ranger-poc/`](./ranger-poc/README.md)).
 
@@ -305,7 +305,7 @@ graph LR
     style PROXY fill:#ffe6e6,stroke:#856404
 ```
 
-> **Strongest enforcement + simplest data model**. The POC proved Option B is far cheaper than the original ADR feared: no user stubs in Ranger, no Ranger role management, ~11 generic policies total, no OpenFGA-to-Ranger sync daemon. `auth_db` is the single source of truth for authorization; Ranger's role reduces to a thin, static policy layer that delegates all lookups to SQL subqueries.
+> **Strongest enforcement + simplest data model**. The POC proved this approach is far cheaper than the original ADR feared: no user stubs in Ranger, no Ranger role management, ~11 generic policies total, no OpenFGA-to-Ranger sync daemon. `auth_db` is the single source of truth for authorization; Ranger's role reduces to a thin, static policy layer that delegates all lookups to SQL subqueries.
 
 #### `auth_db`: Authorization as Data
 
@@ -510,17 +510,17 @@ The original ADR considered three other options (A — API-only enforcement, C �
 - Same end-state for direct access (Jupyter, BI, MCP go through views; per-user audit comes from JWT).
 - No Apache Ranger / Ranger-PG dependency — pure StarRocks DDL.
 
-**Why Option B is preferred:**
+**Why the Ranger + `auth_db` approach is preferred:**
 - View-based RLS is **less expressive** than Ranger row-filter expressions. Ranger lets us write a single generic policy with a subquery against `auth_db`; the view-based design needs one view per (tenant × variant of access) and DDL changes whenever roles or PII rules change.
 - **PII masking through views requires per-group identified / de-identified databases**. Database proliferation grows with `tenants × groups`; each tenant onboarding is a multi-DDL operation.
-- **Major GORM refactor** in the Go backend: per-request DB injection across all 61 repositories (vs. Option B's Bearer-JWT-via-proxy with no GORM changes).
+- **Major GORM refactor** in the Go backend: per-request DB injection across all 61 repositories (vs. Bearer-JWT-via-proxy with no GORM changes).
 - **Open performance risks** the POC did not exercise: view predicate pushdown, colocate-join preservation through pass-through views.
 
 **When Option D becomes preferable:** if a Java runtime (Apache Ranger + Ranger-PG) is operationally unacceptable in the deployment environment. In that case, accept the proliferation cost and the GORM refactor in exchange for a pure-StarRocks stack.
 
 ## 4. Proposed Schema Organization
 
-This section describes StarRocks and PostgreSQL schema changes for the recommended Option B (Ranger + `auth_db`). The authorization model itself is in [Section 5](#5-authorization-model-auth_db).
+This section describes StarRocks and PostgreSQL schema changes for the recommended architecture (Ranger + `auth_db`). The authorization model itself is in [Section 5](#5-authorization-model-auth_db).
 
 ### StarRocks Database Hierarchy
 
@@ -888,7 +888,7 @@ For direct StarRocks access (Jupyter, BI, MCP), the client issues SQL against a 
 
 ## 6. Recommendation
 
-### Recommended Architecture: Option B (Ranger + `auth_db`, POC-validated)
+### Recommended Architecture: Ranger + `auth_db` (POC-validated)
 
 The POC at [`docs/adr/ranger-poc/`](./ranger-poc/README.md) implemented this architecture end-to-end and validated every critical assumption. Recommended migration sequence:
 
@@ -900,7 +900,7 @@ The POC at [`docs/adr/ranger-poc/`](./ranger-poc/README.md) implemented this arc
 
 Total: ~**12–19 weeks** (Phase 1 + 2 + 3), with each phase shippable independently.
 
-### Why Option B (Ranger + `auth_db`)
+### Why Ranger + `auth_db`
 
 **It is the only option that delivers defense-in-depth for all access paths (portal, Jupyter, BI, MCP) with a single authorization source of truth.**
 
@@ -920,7 +920,7 @@ Total: ~**12–19 weeks** (Phase 1 + 2 + 3), with each phase shippable independe
 
 ### Why Not the Alternative
 
-The closest credible alternative — **Option D (views + per-user JWT)** — is described in the [Alternative Solutions](#alternative-solutions) subsection of Section 3. It is rejected here because it adds a major GORM refactor (per-request DB injection across all 61 repositories), forces per-tenant + per-group view-database proliferation, and carries unvalidated performance risks (view predicate pushdown, colocate-join preservation through pass-through views) that Option B avoids entirely. Option A (API-only) and Option C (views + per-tenant pools) were considered in the original ADR and dropped — see the Alternative Solutions subsection for why.
+The closest credible alternative — **views + per-user JWT** — is described in the [Alternative Solutions](#alternative-solutions) subsection of Section 3. It is rejected here because it adds a major GORM refactor (per-request DB injection across all 61 repositories), forces per-tenant + per-group view-database proliferation, and carries unvalidated performance risks (view predicate pushdown, colocate-join preservation through pass-through views) that the recommended architecture avoids entirely. Two further options considered in the original ADR (API-only enforcement; views with per-tenant pools) were dropped — see the Alternative Solutions subsection for why.
 
 ### Risk Mitigation
 
@@ -945,7 +945,7 @@ The POC at [`docs/adr/ranger-poc/`](./ranger-poc/README.md) is the reference imp
 
 ```mermaid
 gantt
-    title Migration to Multi-Tenant Architecture (Option B — Ranger + auth_db)
+    title Migration to Multi-Tenant Architecture (Ranger + auth_db)
     dateFormat YYYY-MM-DD
     axisFormat %b %d
 
