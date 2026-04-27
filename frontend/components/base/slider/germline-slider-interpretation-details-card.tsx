@@ -107,7 +107,7 @@ function GermlineSliderInterpretationDetailsCard({
         <div className="size-full">
           <div className="flex flex-col flex-wrap gap-4 items-start p-3 w-full">
             <div className="flex grow w-full">
-              <div className="flex gap-6">
+              <div className="flex gap-6 w-full">
                 <DescriptionSection title={t('preview_sheet.interpretation_details.fields.gene')} fullWidth={false}>
                   {symbol ? (
                     <AnchorLink
