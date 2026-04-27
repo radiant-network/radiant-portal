@@ -148,11 +148,12 @@ export default function App() {
             </TabsContent>
           </Container>
           <TabsContent value={CaseEntityTabs.Variants} className="py-0">
-            {data?.case_type === 'somatic' ? (
-              <SomaticVariantsTab isLoading={isLoading} caseEntity={data} />
-            ) : (
-              <GermlineVariantsTab isLoading={isLoading} caseEntity={data} />
-            )}
+            {data &&
+              (data.case_type === 'somatic' ? (
+                <SomaticVariantsTab isLoading={isLoading} caseEntity={data} />
+              ) : (
+                <GermlineVariantsTab isLoading={isLoading} caseEntity={data} />
+              ))}
           </TabsContent>
           <TabsContent value={CaseEntityTabs.Files} className="p-0 md:p-3">
             <FilesTab />
