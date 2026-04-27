@@ -225,6 +225,8 @@ components:
           type: string
         diagnosis_lab_name:
           type: string
+        has_igv_files:
+          type: boolean
         members:
           items:
             $ref: '#/components/schemas/CasePatientClinicalInformation'
@@ -271,6 +273,7 @@ components:
       - case_category_name
       - case_id
       - created_on
+      - has_igv_files
       - members
       - sequencing_experiments
       - status_code

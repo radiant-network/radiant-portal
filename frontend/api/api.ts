@@ -482,6 +482,12 @@ export interface CaseEntity {
     'diagnosis_lab_name'?: string;
     /**
      * 
+     * @type {boolean}
+     * @memberof CaseEntity
+     */
+    'has_igv_files': boolean;
+    /**
+     * 
      * @type {Array<CasePatientClinicalInformation>}
      * @memberof CaseEntity
      */
