@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/76 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">66/76 infos</a><span class="filter-pill ok" aria-disabled="true">203 stories ok</span></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">2/76 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">66/76 infos</a><span class="filter-pill ok" aria-disabled="true">202 stories ok</span></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>4.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>5.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -11982,7 +11982,7 @@ import { ConfigProvider, StatusBadge } from "components";</code></pre>
       <div class="badges">
         
         <label for="c-65-inputs-switch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-65-inputs-switch-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-65-inputs-switch-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -12025,34 +12025,25 @@ import { ConfigProvider, StatusBadge } from "components";</code></pre>
           
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Default</span>
-                <span class="badge ok">story ok</span>
-              </div>
-              
-              
-              <pre><code>const Default = () =&gt; {
-  const [checked, setChecked] = useState(false);
-
-  return &lt;Switch checked={checked} onCheckedChange={setChecked} /&gt;;
-};</code></pre>
-            </div>
-            <div class="note ok">
-              <div class="row">
                 <span class="ex-name">Sizes</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
               <pre><code>const Sizes = () =&gt; {
-  const [checked, setChecked] = useState(false);
+  const [checkedDefault, setCheckedDefault] = useState(false);
+  const [checkedSm, setCheckedSm] = useState(false);
 
   return (
-    &lt;div className=&quot;flex gap-2&quot;&gt;
-      &lt;Switch size=&quot;default&quot; checked={checked} onCheckedChange={setChecked} /&gt;
-      &lt;Switch size=&quot;xs&quot; checked={checked} onCheckedChange={setChecked} /&gt;
-      &lt;Switch size=&quot;sm&quot; checked={checked} onCheckedChange={setChecked} /&gt;
-      &lt;Switch size=&quot;md&quot; checked={checked} onCheckedChange={setChecked} /&gt;
-      &lt;Switch size=&quot;lg&quot; checked={checked} onCheckedChange={setChecked} /&gt;
+    &lt;div className=&quot;flex flex-col gap-2&quot;&gt;
+      &lt;div className=&quot;flex gap-2 items-center&quot;&gt;
+        &lt;span className=&quot;&quot;&gt;Default&lt;/span&gt;
+        &lt;Switch size=&quot;default&quot; checked={checkedDefault} onCheckedChange={setCheckedDefault} /&gt;
+      &lt;/div&gt;
+      &lt;div className=&quot;flex gap-2 items-center&quot;&gt;
+        &lt;span className=&quot;&quot;&gt;Small&lt;/span&gt;
+        &lt;Switch size=&quot;sm&quot; checked={checkedSm} onCheckedChange={setCheckedSm} /&gt;
+      &lt;/div&gt;
     &lt;/div&gt;
   );
 };</code></pre>
