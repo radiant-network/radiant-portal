@@ -165,7 +165,7 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
 
                     {/* Toggle labelsEnabled Settings */}
                     <div className="flex items-center gap-1.5">
-                      <Switch size="xs" checked={settings.labelsEnabled} onCheckedChange={handleLabelsCheckedChange} />
+                      <Switch size="sm" checked={settings.labelsEnabled} onCheckedChange={handleLabelsCheckedChange} />
                       {t('common.toolbar.labels')}
                     </div>
                   </>

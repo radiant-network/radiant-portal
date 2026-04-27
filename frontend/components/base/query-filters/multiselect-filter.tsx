@@ -572,7 +572,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
               <Switch
                 id="with-dictionary-switch"
                 checked={withDictionaryToggle}
-                size="xs"
+                size="sm"
                 onCheckedChange={() => setWithDictionaryToggle(!withDictionaryToggle)}
               />
             </>
