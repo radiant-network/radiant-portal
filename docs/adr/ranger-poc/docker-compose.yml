@@ -139,6 +139,10 @@ services:
         condition: service_started
       init:
         condition: service_completed_successfully
+    environment:
+      RANGER_URL: http://ranger:6080
+      RANGER_USER: admin
+      RANGER_PASSWORD: rangerR0cks!
     ports:
       - "8080:8080"
 

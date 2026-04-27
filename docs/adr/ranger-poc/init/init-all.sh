@@ -5,8 +5,9 @@
 #   2. Create StarRocks service instance
 #   3. Configure Keycloak (realm, client, users)
 #   4. Create StarRocks schema + data (JWT-authenticated users)
-#   5. Create generic Ranger policies (subquery-based row-filter + column mask)
-#      All policies use {USER} wildcard — no Ranger user stubs or roles needed.
+#   5. Create Ranger roles (authenticated, cbtn_member, udn_member)
+#   6. Create Ranger access policies (DB visibility via Ranger roles)
+#      + auth_db self-access row-filters + column-mask policies on data tables.
 # =============================================================================
 
 set -e
@@ -86,12 +87,78 @@ RESULT=$(mysql -hstarrocks -P9030 -uroot -N -e "SELECT ${CU} AS clean_user;")
 echo "  current_user() via root: '${RESULT}'"
 
 # ---------------------------------------------------------------------------
-# Step 7: Ranger access policies — {USER} matches any authenticated user
+# Step 7a: Ranger users
+# Ranger refuses to add a user to a role unless the user record already
+# exists. The password here is unused (StarRocks auth is JWT via Keycloak),
+# but Ranger requires a password meeting its complexity rules.
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== Creating Ranger users ==="
+
+create_ranger_user() {
+  local username="$1"
+  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
+    -H "Content-Type: application/json" -H "Accept: application/json" \
+    "${RANGER_URL}/service/xusers/secure/users" \
+    -d "{\"name\":\"${username}\",\"firstName\":\"${username}\",\"emailAddress\":\"\",\"password\":\"Unused-P0c123!\",\"userRoleList\":[\"ROLE_USER\"]}")
+  echo "  ${username}: HTTP ${HTTP_CODE}"
+}
+
+for u in jane alice bob carol dan admin1; do
+  create_ranger_user "$u"
+done
+
+# ---------------------------------------------------------------------------
+# Step 7b: Ranger roles — DB visibility is enforced via per-tenant roles.
+# Initial membership mirrors the auth_db seed in init-starrocks.sql.
+# The admin API (poc-api) maintains role membership on every grant/revoke.
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== Creating Ranger roles ==="
+
+create_role() {
+  local role_name="$1"
+  local users_json="$2"
+  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
+    -H "Content-Type: application/json" -H "Accept: application/json" \
+    "${RANGER_URL}/service/roles/roles" \
+    -d "{\"name\": \"${role_name}\", \"users\": ${users_json}, \"createdByUser\": \"admin\"}")
+  echo "  ${role_name}: HTTP ${HTTP_CODE}"
+}
+
+# authenticated: every user with any tenant assignment in auth_db.
+create_role "authenticated" '[
+  {"name":"jane","isAdmin":false},
+  {"name":"alice","isAdmin":false},
+  {"name":"bob","isAdmin":false},
+  {"name":"carol","isAdmin":false},
+  {"name":"dan","isAdmin":false},
+  {"name":"admin1","isAdmin":false}
+]'
+
+# cbtn_member: users with any role at tenant cbtn.
+create_role "cbtn_member" '[
+  {"name":"jane","isAdmin":false},
+  {"name":"alice","isAdmin":false},
+  {"name":"bob","isAdmin":false},
+  {"name":"carol","isAdmin":false},
+  {"name":"dan","isAdmin":false},
+  {"name":"admin1","isAdmin":false}
+]'
+
+# udn_member: users with any role at tenant udn.
+create_role "udn_member" '[
+  {"name":"carol","isAdmin":false},
+  {"name":"admin1","isAdmin":false}
+]'
+
+# ---------------------------------------------------------------------------
+# Step 8: Ranger access policies — bound to Ranger roles for DB visibility
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Creating Ranger access policies ==="
 
-# Policy 1: SELECT on auth_db (all users need this for subqueries)
+# Policy: SELECT on auth_db (everyone authenticated, for subquery lookups)
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
   -H "Content-Type: application/json" -H "Accept: application/json" \
   "${RANGER_URL}/service/plugins/policies" \
@@ -105,57 +172,62 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
       "column": {"values": ["*"]}
     },
     "policyItems": [{
-      "users": ["{USER}"],
+      "roles": ["authenticated"],
       "accesses": [{"type": "select", "isAllowed": true}]
     }]
   }')
 echo "  sr_select_auth: HTTP ${HTTP_CODE}"
 
-# Policy 2: SELECT on poc_db (clinical data, read-only)
+# Policy: SELECT + INSERT on cbtn_db (members of Ranger role cbtn_member)
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
   -H "Content-Type: application/json" -H "Accept: application/json" \
   "${RANGER_URL}/service/plugins/policies" \
   -d '{
-    "policyType": 0, "name": "sr_select_clinical", "isEnabled": true, "isAuditEnabled": false,
+    "policyType": 0, "name": "sr_select_cbtn", "isEnabled": true, "isAuditEnabled": false,
     "service": "starrocks",
     "resources": {
       "catalog": {"values": ["default_catalog"]},
-      "database": {"values": ["poc_db"]},
+      "database": {"values": ["cbtn_db"]},
       "table": {"values": ["*"]},
       "column": {"values": ["*"]}
     },
     "policyItems": [{
-      "users": ["{USER}"],
-      "accesses": [{"type": "select", "isAllowed": true}]
-    }]
-  }')
-echo "  sr_select_clinical: HTTP ${HTTP_CODE}"
-
-# Policy 3: SELECT + INSERT on operational_db (cases, writable)
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
-  -H "Content-Type: application/json" -H "Accept: application/json" \
-  "${RANGER_URL}/service/plugins/policies" \
-  -d '{
-    "policyType": 0, "name": "sr_access_operational", "isEnabled": true, "isAuditEnabled": false,
-    "service": "starrocks",
-    "resources": {
-      "catalog": {"values": ["default_catalog"]},
-      "database": {"values": ["operational_db"]},
-      "table": {"values": ["*"]},
-      "column": {"values": ["*"]}
-    },
-    "policyItems": [{
-      "users": ["{USER}"],
+      "roles": ["cbtn_member"],
       "accesses": [
         {"type": "select", "isAllowed": true},
         {"type": "insert", "isAllowed": true}
       ]
     }]
   }')
-echo "  sr_access_operational: HTTP ${HTTP_CODE}"
+echo "  sr_select_cbtn: HTTP ${HTTP_CODE}"
+
+# Policy: SELECT + INSERT on udn_db (members of Ranger role udn_member)
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
+  -H "Content-Type: application/json" -H "Accept: application/json" \
+  "${RANGER_URL}/service/plugins/policies" \
+  -d '{
+    "policyType": 0, "name": "sr_select_udn", "isEnabled": true, "isAuditEnabled": false,
+    "service": "starrocks",
+    "resources": {
+      "catalog": {"values": ["default_catalog"]},
+      "database": {"values": ["udn_db"]},
+      "table": {"values": ["*"]},
+      "column": {"values": ["*"]}
+    },
+    "policyItems": [{
+      "roles": ["udn_member"],
+      "accesses": [
+        {"type": "select", "isAllowed": true},
+        {"type": "insert", "isAllowed": true}
+      ]
+    }]
+  }')
+echo "  sr_select_udn: HTTP ${HTTP_CODE}"
 
 # ---------------------------------------------------------------------------
 # Step 9: Row-filter policies on auth tables (users see only their own rows)
+# These remain unchanged — they protect auth_db.* against self-introspection
+# leakage when alice queries auth_db looking for someone else's assignments.
 # Note: role, action, role_action, tenant, organization are reference data — no row filter needed.
 # ---------------------------------------------------------------------------
 echo ""
@@ -220,52 +292,14 @@ echo "  sr_rowfilter_users: HTTP ${HTTP_CODE}"
 
 # Note: auth_db.tenant and auth_db.organization are reference data — no row filter needed.
 
-# ---------------------------------------------------------------------------
-# Step 10: Row-filter policies on data tables (tenant isolation via subquery)
-# ---------------------------------------------------------------------------
-echo ""
-echo "=== Creating data row-filter policies ==="
-
-# Row-filter on poc_db.patients: user sees only rows from their tenant(s)
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
-  -H "Content-Type: application/json" -H "Accept: application/json" \
-  "${RANGER_URL}/service/plugins/policies" \
-  -d '{
-    "policyType": 2, "name": "sr_rowfilter_patients", "isEnabled": true, "isAuditEnabled": false,
-    "service": "starrocks",
-    "resources": {
-      "catalog": {"values": ["default_catalog"]},
-      "database": {"values": ["poc_db"]},
-      "table": {"values": ["patients"]}
-    },
-    "rowFilterPolicyItems": [
-      {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "1=1"}},
-      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = '"${CU}"' UNION SELECT uor.tenant_id FROM auth_db.user_org_role uor WHERE uor.username = '"${CU}"')"}}
-    ]
-  }')
-echo "  sr_rowfilter_patients: HTTP ${HTTP_CODE}"
-
-# Row-filter on operational_db.cases: same tenant isolation
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
-  -H "Content-Type: application/json" -H "Accept: application/json" \
-  "${RANGER_URL}/service/plugins/policies" \
-  -d '{
-    "policyType": 2, "name": "sr_rowfilter_cases", "isEnabled": true, "isAuditEnabled": false,
-    "service": "starrocks",
-    "resources": {
-      "catalog": {"values": ["default_catalog"]},
-      "database": {"values": ["operational_db"]},
-      "table": {"values": ["cases"]}
-    },
-    "rowFilterPolicyItems": [
-      {"users": ["root"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "1=1"}},
-      {"users": ["{USER}"], "accesses": [{"type": "select", "isAllowed": true}], "rowFilterInfo": {"filterExpr": "tenant_id IN (SELECT utr.tenant_id FROM auth_db.user_tenant_role utr WHERE utr.username = '"${CU}"' UNION SELECT uor.tenant_id FROM auth_db.user_org_role uor WHERE uor.username = '"${CU}"')"}}
-    ]
-  }')
-echo "  sr_rowfilter_cases: HTTP ${HTTP_CODE}"
+# Tenant scoping on data tables (sr_rowfilter_patients, sr_rowfilter_cases)
+# is no longer needed: per-tenant DBs (cbtn_db, udn_db) plus the access
+# policies above mean a non-member can't see the database at all. Org-level
+# row filtering inside a tenant DB is intentionally out of scope; the PII
+# column mask below already keys on org_id.
 
 # ---------------------------------------------------------------------------
-# Step 11: Column masking policies (PHI visibility via subquery)
+# Step 10: Column masking policies (PHI visibility via subquery)
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Creating column masking policies ==="
@@ -288,7 +322,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
     "service": "starrocks",
     "resources": {
       "catalog": {"values": ["default_catalog"]},
-      "database": {"values": ["poc_db"]},
+      "database": {"values": ["cbtn_db", "udn_db"]},
       "table": {"values": ["patients"]},
       "column": {"values": ["mrn"]}
     },
@@ -308,7 +342,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
     "service": "starrocks",
     "resources": {
       "catalog": {"values": ["default_catalog"]},
-      "database": {"values": ["poc_db"]},
+      "database": {"values": ["cbtn_db", "udn_db"]},
       "table": {"values": ["patients"]},
       "column": {"values": ["first_name"]}
     },
@@ -328,7 +362,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
     "service": "starrocks",
     "resources": {
       "catalog": {"values": ["default_catalog"]},
-      "database": {"values": ["poc_db"]},
+      "database": {"values": ["cbtn_db", "udn_db"]},
       "table": {"values": ["patients"]},
       "column": {"values": ["date_of_birth"]}
     },
@@ -357,7 +391,7 @@ echo "    -d 'client_id=starrocks&username=jane&password=janepass&grant_type=pas
 echo ""
 echo "  # 2. Connect via proxy with JWT as password (use --enable-cleartext-plugin):"
 echo "  mysql -h127.0.0.1 -P9031 -ujane -p\"\${TOKEN}\" --enable-cleartext-plugin \\"
-echo "    -e 'SELECT id, first_name, mrn, tenant_id, org_id FROM poc_db.patients ORDER BY id;'"
+echo "    -e 'SELECT id, first_name, mrn, org_id FROM cbtn_db.patients ORDER BY id;'"
 echo ""
 echo "  # 3. Test API with Bearer token:"
 echo "  curl -s -H \"Authorization: Bearer \${TOKEN}\" http://localhost:8080/cbtn/patients | jq"

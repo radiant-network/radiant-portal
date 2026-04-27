@@ -1,10 +1,12 @@
 # StarRocks + Apache Ranger + Keycloak POC
 
 Proof-of-concept for multi-tenant data access with:
-- **RBAC model in StarRocks tables** (roles, actions, role-action mappings)
-- **Data access enforcement via Apache Ranger** (generic subquery-based policies)
-- **JWT authentication via Keycloak** (OIDC)
-- **MySQL proxy** translating cleartext JWT to TLS+OIDC for Go/BI clients
+- **RBAC model in StarRocks tables** (roles, actions, role-action mappings) — `auth_db` is the source of truth.
+- **Database visibility via Ranger roles** — per-tenant Ranger access policies (`sr_select_cbtn`, `sr_select_udn`) gate `cbtn_db` / `udn_db`. `SHOW DATABASES` naturally hides the wrong tenant.
+- **Row-filter + column-mask via Ranger** — auth_db self-access row-filter, and PII column masking on data tables (subqueries against `auth_db`).
+- **JWT authentication via Keycloak** (OIDC).
+- **Admin API auto-syncs Ranger** — every grant/revoke creates the StarRocks user, the Ranger user, and updates Ranger role membership.
+- **MySQL proxy** translating cleartext JWT to TLS+OIDC for Go/BI clients.
 
 ## Architecture
 
@@ -139,18 +141,23 @@ The Ranger masking subquery expands `*` via UNION with the organization table.
 
 ### Ranger Policies
 
-All policies use `"users": ["{USER}"]` — no Ranger user stubs or roles needed.
+Three layers, each with a distinct shape:
 
-**Row-filter** (tenant isolation):
+**Database visibility (access policies bound to Ranger roles)** — one per tenant DB:
+- `sr_select_auth` → role `authenticated`, SELECT on `auth_db.*`
+- `sr_select_cbtn` → role `cbtn_member`, SELECT+INSERT on `cbtn_db.*`
+- `sr_select_udn`  → role `udn_member`,  SELECT+INSERT on `udn_db.*`
+
+A user not in `cbtn_member` sees no `cbtn_db` in `SHOW DATABASES` and `SELECT FROM cbtn_db.*` is denied at the engine level. Ranger role membership is maintained by the admin API; auth_db is the source of truth.
+
+**Row-filter** (auth_db self-access — kept for `auth_db.users`, `user_tenant_role`, `user_org_role`):
 ```sql
-tenant_id IN (
-  SELECT tenant_id FROM auth_db.user_tenant_role WHERE username = current_user()
-  UNION
-  SELECT tenant_id FROM auth_db.user_org_role WHERE username = current_user()
-)
+username = current_user()
 ```
 
-**Column masking** (PII via `can_read_pii` action):
+Tenant-level row-filtering on data tables is no longer needed: per-tenant DBs combined with the access policies above mean a non-member never reaches the table.
+
+**Column masking** (PII via `can_read_pii` action) — applied to `cbtn_db.patients` AND `udn_db.patients`:
 ```sql
 CASE WHEN org_id IN (
   -- Specific org assignments with can_read_pii
@@ -180,13 +187,13 @@ CASE WHEN org_id IN (
 
 | Patient row | Jane (geneticist *) | Alice (geneticist chop) | Bob (tenant_owner) | Carol (bioinf chop) | Dan (researcher) |
 |-------------|-----|-------|-----|-------|-----|
-| **CHOP** (cbtn) | Full | Full | Masked | Full | Masked |
-| **BCH** (cbtn) | Full | Masked | Masked | Masked | Masked |
-| **NIH-UDN** (udn) | Invisible | Invisible | Invisible | Masked | Invisible |
+| **CHOP** (cbtn_db) | Full | Full | Masked | Full | Masked |
+| **BCH** (cbtn_db)  | Full | Masked | Masked | Masked | Masked |
+| **NIH-UDN** (udn_db) | DB hidden | DB hidden | DB hidden | Masked | DB hidden |
 
-- **Full** = row visible, PHI unmasked (user has `can_read_pii` at this org)
-- **Masked** = row visible, PHI = `***` / year-only date (no `can_read_pii` at this org)
-- **Invisible** = row not returned (user has no tenant role)
+- **Full** = row visible, PHI unmasked (user has `can_read_pii` at this org).
+- **Masked** = row visible, PHI = `***` / year-only date (no `can_read_pii` at this org).
+- **DB hidden** = the tenant's database does not appear in `SHOW DATABASES`; cross-DB queries are denied at the engine level (Ranger access policy).
 
 ## Prerequisites
 
@@ -227,15 +234,19 @@ TOKEN=$(curl -s -X POST http://localhost:8180/realms/starrocks/protocol/openid-c
 ### 2. Connect via proxy with JWT
 
 ```bash
-# Jane: geneticist at * (all CBTN orgs) → all CBTN PHI unmasked
+# Jane: geneticist at * (all CBTN orgs) → all CBTN PHI unmasked, udn_db hidden
 mysql -h127.0.0.1 -P9031 -ujane -p"${TOKEN}" --enable-cleartext-plugin \
-  -e 'SELECT id, first_name, mrn, date_of_birth, org_id FROM poc_db.patients ORDER BY id;'
+  -e 'SHOW DATABASES; SELECT id, first_name, mrn, date_of_birth, org_id FROM cbtn_db.patients ORDER BY id;'
+
+# Cross-tenant denial: jane → udn_db is rejected at the engine level
+mysql -h127.0.0.1 -P9031 -ujane -p"${TOKEN}" --enable-cleartext-plugin \
+  -e 'SELECT * FROM udn_db.patients;'   # ERROR: Access denied
 
 # Bob: tenant_owner (no PII) → all CBTN rows masked
 TOKEN_BOB=$(curl -s -X POST http://localhost:8180/realms/starrocks/protocol/openid-connect/token \
   -d "client_id=starrocks&username=bob&password=bobpass&grant_type=password" | jq -r '.access_token')
 mysql -h127.0.0.1 -P9031 -ubob -p"${TOKEN_BOB}" --enable-cleartext-plugin \
-  -e 'SELECT id, first_name, mrn, date_of_birth, org_id FROM poc_db.patients ORDER BY id;'
+  -e 'SELECT id, first_name, mrn, date_of_birth, org_id FROM cbtn_db.patients ORDER BY id;'
 ```
 
 ### 3. Connect directly with Python (no proxy needed)
@@ -275,7 +286,7 @@ TOKEN_DAN=$(curl -s -X POST http://localhost:8180/realms/starrocks/protocol/open
 
 # BEFORE: Dan sees all PHI masked (researcher, no can_read_pii)
 mysql -h127.0.0.1 -P9031 -udan -p"${TOKEN_DAN}" --enable-cleartext-plugin \
-  -e 'SELECT id, first_name, mrn, org_id FROM poc_db.patients ORDER BY id;'
+  -e 'SELECT id, first_name, mrn, org_id FROM cbtn_db.patients ORDER BY id;'
 
 # Grant data_analyst at CHOP (data_analyst has can_read_pii)
 curl -s -X POST -H 'Content-Type: application/json' \
@@ -284,7 +295,7 @@ curl -s -X POST -H 'Content-Type: application/json' \
 
 # AFTER: CHOP PHI unmasked, BCH still masked
 mysql -h127.0.0.1 -P9031 -udan -p"${TOKEN_DAN}" --enable-cleartext-plugin \
-  -e 'SELECT id, first_name, mrn, org_id FROM poc_db.patients ORDER BY id;'
+  -e 'SELECT id, first_name, mrn, org_id FROM cbtn_db.patients ORDER BY id;'
 
 # Revoke
 curl -s -X POST -H 'Content-Type: application/json' \
@@ -294,29 +305,38 @@ curl -s -X POST -H 'Content-Type: application/json' \
 
 ## Adding a New User
 
-Only 2 steps. No Ranger changes needed.
+A new user appears in three places: **Keycloak** (so they can authenticate and get a JWT), **StarRocks** (so the JWT user identity is recognised), and **Ranger** (so they can be added to a tenant role). Only the first must be done out-of-band — the other two are auto-handled by the admin API on first grant.
 
-### 1. Create StarRocks user (+ Keycloak user for JWT auth)
+### 1. Create the user in Keycloak (one-time, via realm admin)
 
-```sql
-mysql -h127.0.0.1 -P9030 -uroot -e "
-  CREATE USER new_user IDENTIFIED WITH authentication_jwt AS '{...}';
-"
+```bash
+docker exec keycloak /opt/keycloak/bin/kcadm.sh config credentials \
+  --server http://localhost:8080 --realm master --user admin --password admin
+docker exec keycloak /opt/keycloak/bin/kcadm.sh create users -r starrocks \
+  -s username=eve -s enabled=true -s emailVerified=true
+docker exec keycloak /opt/keycloak/bin/kcadm.sh set-password -r starrocks \
+  --username eve --new-password evepass
 ```
 
-### 2. Insert into auth_db
+### 2. Grant a role via the admin API (auto-creates StarRocks + Ranger user)
 
-```sql
-mysql -h127.0.0.1 -P9030 -uroot -e "
-  INSERT INTO auth_db.users (username) VALUES ('new_user');
-  INSERT INTO auth_db.user_tenant_role (username, tenant_id, role_id, granted_by)
-    VALUES ('new_user', 'cbtn', 'researcher', 'admin');
-  INSERT INTO auth_db.user_org_role (username, tenant_id, org_id, role_id, granted_by)
-    VALUES ('new_user', 'cbtn', 'chop', 'geneticist', 'admin');
-"
+```bash
+ADMIN_TOKEN=$(curl -s -X POST http://localhost:8180/realms/starrocks/protocol/openid-connect/token \
+  -d "client_id=starrocks&username=admin1&password=admin1pass&grant_type=password" | jq -r '.access_token')
+
+curl -s -X POST -H "Authorization: Bearer ${ADMIN_TOKEN}" -H "Content-Type: application/json" \
+  http://localhost:8080/cbtn/admin/grant-tenant-role \
+  -d '{"username":"eve","role_id":"researcher"}'
 ```
 
-Subsequent role changes only require auth_db updates.
+The admin API runs three side-effects after the auth_db INSERT:
+1. `CREATE USER IF NOT EXISTS 'eve' IDENTIFIED WITH authentication_jwt …` on StarRocks.
+2. Creates the Ranger user record (idempotent).
+3. Adds `eve` to Ranger roles `authenticated` and `cbtn_member`.
+
+After ~10s (Ranger policy poll), `eve` can connect via the proxy and `SHOW DATABASES` returns `auth_db, cbtn_db` (UDN hidden).
+
+Revoke is symmetric — when the last role at a tenant is removed, the admin API removes `eve` from `<tenant>_member`. Subsequent role changes within a tenant only touch auth_db.
 
 ## Design Decision: Tenant in REST API Path Prefix
 
@@ -372,16 +392,17 @@ Subdomain isn't practical for a localhost POC (DNS, certificates). Path prefix m
 
 ## Key Findings
 
-1. **RBAC with action-based permissions** — roles define capabilities (geneticist → can_read_pii), not access levels
-2. **PII access is org-scoped only** — tenant roles (even tenant_owner) never grant PII; `can_read_pii` must come from an org-level role
-3. **`*` wildcard** — `org_id='*'` in user_org_role means all orgs in the tenant; expanded via UNION in Ranger subqueries
-4. **`{USER}` wildcard** — all Ranger policies match any authenticated user; no Ranger user stubs or roles needed
-5. **Auth tables are isolated** — row-filter policies ensure users see only their own role assignments
-6. **Dynamic role changes** — INSERT/DELETE in auth tables takes effect immediately
-7. **Use `IN` not `EXISTS` for masking subqueries** — `EXISTS` causes column ambiguity in mask expressions
-8. **JWT auth requires TLS** — StarRocks needs JKS keystore for the OIDC plugin
-9. **OIDC auth response format** — requires `0x01` capability flag + lenenc JWT
-10. **Go clients need a proxy** — `go-sql-driver/mysql` doesn't support `authentication_openid_connect_client`; Python `mysql-connector-python >= 9.1.0` supports it natively
+1. **RBAC with action-based permissions** — roles define capabilities (geneticist → can_read_pii), not access levels.
+2. **PII access is org-scoped only** — tenant roles (even tenant_owner) never grant PII; `can_read_pii` must come from an org-level role.
+3. **`*` wildcard for org_id** — `org_id='*'` in user_org_role means all orgs in the tenant; expanded via UNION in Ranger column-mask subqueries.
+4. **DB visibility via Ranger roles** — `access_control = ranger` makes Ranger the sole authority in StarRocks (no native-RBAC fallback). Per-tenant access policies bound to Ranger roles `cbtn_member` / `udn_member` give the same end behavior native `GRANT SELECT ON DATABASE` would: `SHOW DATABASES` hides what the user can't access, and cross-DB queries are denied at the engine level (no row-filter trickery).
+5. **Auth tables are isolated** — row-filter policies on `auth_db.users` / `user_tenant_role` / `user_org_role` ensure users see only their own assignments.
+6. **Admin API drives Ranger sync** — every grant/revoke in the API auto-creates the StarRocks user, registers the Ranger user, and patches Ranger role membership. `auth_db` remains the single source of truth; Ranger role membership is a derived projection.
+7. **Dynamic role changes** — INSERT/DELETE in auth tables + Ranger membership update take effect within ~10s (Ranger policy poll interval).
+8. **Ranger requires user records before role membership** — adding an unknown user to a Ranger role fails with HTTP 400; init and the admin API both call `POST /service/xusers/secure/users` first.
+9. **JWT auth requires TLS** — StarRocks needs JKS keystore for the OIDC plugin.
+10. **OIDC auth response format** — requires `0x01` capability flag + lenenc JWT.
+11. **Go clients need a proxy** — `go-sql-driver/mysql` doesn't support `authentication_openid_connect_client`; Python `mysql-connector-python >= 9.1.0` supports it natively.
 
 ## Admin UIs
 

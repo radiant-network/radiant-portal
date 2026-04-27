@@ -1,13 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"regexp"
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -30,6 +34,252 @@ func rootDSN(dbName string) string {
 func userDSN(username, jwt, dbName string) string {
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?allowCleartextPasswords=true",
 		username, url.QueryEscape(jwt), proxyAddr, dbName)
+}
+
+// ---------------------------------------------------------------------------
+// Identifier validation — tenant_id and username are interpolated into DDL
+// (CREATE USER, FROM cbtn_db.patients) where parameter binding isn't allowed.
+// ---------------------------------------------------------------------------
+
+var validIdent = regexp.MustCompile(`^[a-z][a-z0-9_-]{0,49}$`)
+
+func validIdentifier(s string) bool {
+	return validIdent.MatchString(s)
+}
+
+// ---------------------------------------------------------------------------
+// StarRocks user lifecycle — auto-created on first grant
+// ---------------------------------------------------------------------------
+
+// ensureStarRocksUser creates the JWT-authenticated StarRocks user if missing.
+// Same authentication_jwt config as seeded users in init-starrocks.sql.
+const jwtAuthConfig = `{"jwks_url":"http://keycloak:8080/realms/starrocks/protocol/openid-connect/certs","principal_field":"preferred_username","required_issuer":"http://localhost:8180/realms/starrocks","required_audience":"starrocks"}`
+
+func ensureStarRocksUser(username string) error {
+	if !validIdentifier(username) {
+		return fmt.Errorf("invalid username: %q", username)
+	}
+	stmt := fmt.Sprintf(
+		"CREATE USER IF NOT EXISTS '%s' IDENTIFIED WITH authentication_jwt AS '%s'",
+		username, jwtAuthConfig)
+	return execStarRocks(rootDSN("auth_db"), stmt)
+}
+
+// ---------------------------------------------------------------------------
+// Ranger Admin REST client — maintains tenant-membership roles.
+// `authenticated`, `<tenant>_member` are seeded in init-all.sh.
+// ---------------------------------------------------------------------------
+
+var (
+	rangerURL  = getenv("RANGER_URL", "http://ranger:6080")
+	rangerUser = getenv("RANGER_USER", "admin")
+	rangerPass = getenv("RANGER_PASSWORD", "rangerR0cks!")
+)
+
+func getenv(k, def string) string {
+	if v := os.Getenv(k); v != "" {
+		return v
+	}
+	return def
+}
+
+type rangerRoleUser struct {
+	Name    string `json:"name"`
+	IsAdmin bool   `json:"isAdmin"`
+}
+
+type rangerRole struct {
+	ID    int              `json:"id,omitempty"`
+	Name  string           `json:"name"`
+	Users []rangerRoleUser `json:"users"`
+}
+
+func rangerRequest(method, path string, body interface{}) ([]byte, int, error) {
+	var bodyReader io.Reader
+	if body != nil {
+		buf, err := json.Marshal(body)
+		if err != nil {
+			return nil, 0, err
+		}
+		bodyReader = bytes.NewReader(buf)
+	}
+	req, err := http.NewRequest(method, rangerURL+path, bodyReader)
+	if err != nil {
+		return nil, 0, err
+	}
+	req.SetBasicAuth(rangerUser, rangerPass)
+	req.Header.Set("Accept", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer resp.Body.Close()
+	respBody, err := io.ReadAll(resp.Body)
+	return respBody, resp.StatusCode, err
+}
+
+// ensureRangerUser creates a Ranger user record (idempotent: 200 on create,
+// 400 if already exists). Required before adding the user to any Ranger role.
+// The password is unused — StarRocks auth is JWT via Keycloak — but Ranger
+// requires one meeting its complexity rules.
+func ensureRangerUser(username string) error {
+	if !validIdentifier(username) {
+		return fmt.Errorf("invalid username: %q", username)
+	}
+	body := map[string]interface{}{
+		"name":         username,
+		"firstName":    username,
+		"emailAddress": "",
+		"password":     "Unused-P0c123!",
+		"userRoleList": []string{"ROLE_USER"},
+	}
+	respBody, status, err := rangerRequest("POST", "/service/xusers/secure/users", body)
+	if err != nil {
+		return err
+	}
+	// 200 = created. 400 with INVALID_INPUT_DATA + "already exists" = idempotent success.
+	if status == 200 {
+		return nil
+	}
+	if status == 400 && bytes.Contains(respBody, []byte("already exists")) {
+		return nil
+	}
+	return fmt.Errorf("ranger create user %q: HTTP %d: %s", username, status, string(respBody))
+}
+
+func rangerGetRole(name string) (*rangerRole, error) {
+	body, status, err := rangerRequest("GET", "/service/roles/roles/name/"+url.PathEscape(name), nil)
+	if err != nil {
+		return nil, err
+	}
+	if status == 404 {
+		return nil, fmt.Errorf("ranger role %q not found", name)
+	}
+	if status >= 300 {
+		return nil, fmt.Errorf("ranger get role %q: HTTP %d: %s", name, status, string(body))
+	}
+	var role rangerRole
+	if err := json.Unmarshal(body, &role); err != nil {
+		return nil, fmt.Errorf("ranger get role %q decode: %w", name, err)
+	}
+	return &role, nil
+}
+
+func rangerUpdateRole(role *rangerRole) error {
+	path := fmt.Sprintf("/service/roles/roles/%d", role.ID)
+	body, status, err := rangerRequest("PUT", path, role)
+	if err != nil {
+		return err
+	}
+	if status >= 300 {
+		return fmt.Errorf("ranger update role %q: HTTP %d: %s", role.Name, status, string(body))
+	}
+	return nil
+}
+
+func ensureUserInRangerRole(username, roleName string) error {
+	role, err := rangerGetRole(roleName)
+	if err != nil {
+		return err
+	}
+	for _, u := range role.Users {
+		if u.Name == username {
+			return nil
+		}
+	}
+	role.Users = append(role.Users, rangerRoleUser{Name: username, IsAdmin: false})
+	return rangerUpdateRole(role)
+}
+
+func removeUserFromRangerRole(username, roleName string) error {
+	role, err := rangerGetRole(roleName)
+	if err != nil {
+		return err
+	}
+	filtered := role.Users[:0]
+	removed := false
+	for _, u := range role.Users {
+		if u.Name == username {
+			removed = true
+			continue
+		}
+		filtered = append(filtered, u)
+	}
+	if !removed {
+		return nil
+	}
+	role.Users = filtered
+	return rangerUpdateRole(role)
+}
+
+// userHasAnyRoleAtTenant returns true if username has at least one row in
+// auth_db.user_tenant_role OR auth_db.user_org_role for the given tenant.
+// Used to decide whether to revoke <tenant>_member after a revoke.
+func userHasAnyRoleAtTenant(username, tenant string) (bool, error) {
+	db, err := sql.Open("mysql", rootDSN("auth_db"))
+	if err != nil {
+		return false, err
+	}
+	defer db.Close()
+	var n int
+	err = db.QueryRow(`
+		SELECT (
+			(SELECT COUNT(*) FROM auth_db.user_tenant_role WHERE username = ? AND tenant_id = ?) +
+			(SELECT COUNT(*) FROM auth_db.user_org_role    WHERE username = ? AND tenant_id = ?)
+		)`, username, tenant, username, tenant).Scan(&n)
+	if err != nil {
+		return false, err
+	}
+	return n > 0, nil
+}
+
+// syncTenantGrant is called after an auth_db INSERT (tenant or org role grant).
+// Creates the StarRocks user if needed and ensures the user is in
+// `authenticated` and `<tenant>_member` Ranger roles. Errors are logged but
+// don't fail the request — the auth_db row is the source of truth and a Ranger
+// out-of-sync state can be self-healed by re-running the grant.
+func syncTenantGrant(username, tenant string) {
+	if !validIdentifier(tenant) {
+		log.Printf("syncTenantGrant: invalid tenant %q, skipping", tenant)
+		return
+	}
+	if err := ensureStarRocksUser(username); err != nil {
+		log.Printf("syncTenantGrant: ensureStarRocksUser(%q): %v", username, err)
+	}
+	if err := ensureRangerUser(username); err != nil {
+		log.Printf("syncTenantGrant: ensureRangerUser(%q): %v", username, err)
+	}
+	if err := ensureUserInRangerRole(username, "authenticated"); err != nil {
+		log.Printf("syncTenantGrant: authenticated for %q: %v", username, err)
+	}
+	if err := ensureUserInRangerRole(username, tenant+"_member"); err != nil {
+		log.Printf("syncTenantGrant: %s_member for %q: %v", tenant, username, err)
+	}
+}
+
+// syncTenantRevoke is called after an auth_db DELETE. If the user has no
+// remaining role rows at the tenant, removes them from `<tenant>_member`.
+// `authenticated` is intentionally not revoked here — a user with no
+// assignments stays logged-in but sees nothing.
+func syncTenantRevoke(username, tenant string) {
+	if !validIdentifier(tenant) {
+		log.Printf("syncTenantRevoke: invalid tenant %q, skipping", tenant)
+		return
+	}
+	hasAny, err := userHasAnyRoleAtTenant(username, tenant)
+	if err != nil {
+		log.Printf("syncTenantRevoke: check %s/%s: %v", username, tenant, err)
+		return
+	}
+	if hasAny {
+		return
+	}
+	if err := removeUserFromRangerRole(username, tenant+"_member"); err != nil {
+		log.Printf("syncTenantRevoke: %s_member for %q: %v", tenant, username, err)
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -342,6 +592,8 @@ func adminGrantOrgRoleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	syncTenantGrant(req.Username, tenant)
+
 	jsonResponse(w, 200, map[string]interface{}{
 		"status":    "granted",
 		"username":  req.Username,
@@ -379,6 +631,8 @@ func adminRevokeOrgRoleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	syncTenantRevoke(req.Username, tenant)
+
 	jsonResponse(w, 200, map[string]interface{}{
 		"status":    "revoked",
 		"username":  req.Username,
@@ -398,12 +652,13 @@ type route struct {
 }
 
 var routes = []route{
-	// GET /{tenant}/patients — read clinical data (row-filtered + masked by StarRocks/Ranger)
-	{resource: "patient", action: "search", method: "GET", dataDB: "poc_db",
-		dataSQL: "SELECT id, first_name, last_name, mrn, date_of_birth, tenant_id, org_id, diagnosis FROM poc_db.patients WHERE tenant_id = '%s' ORDER BY id"},
-	// GET /{tenant}/cases — read operational data (row-filtered by StarRocks/Ranger)
-	{resource: "case", action: "view", method: "GET", dataDB: "operational_db",
-		dataSQL: "SELECT case_id, patient_id, case_name, status, tenant_id, org_id, created_by FROM operational_db.cases WHERE tenant_id = '%s' ORDER BY case_id"},
+	// GET /{tenant}/patients — clinical data; tenant scoping is enforced by
+	// Ranger access policies on cbtn_db / udn_db (see init-all.sh).
+	{resource: "patient", action: "search", method: "GET", dataDB: "%s_db",
+		dataSQL: "SELECT id, first_name, last_name, mrn, date_of_birth, org_id, diagnosis FROM %s_db.patients ORDER BY id"},
+	// GET /{tenant}/cases — operational data, same tenant-DB scoping.
+	{resource: "case", action: "view", method: "GET", dataDB: "%s_db",
+		dataSQL: "SELECT case_id, patient_id, case_name, status, org_id, created_by FROM %s_db.cases ORDER BY case_id"},
 	// POST /{tenant}/{org}/cases — create case
 	{resource: "case", action: "create", method: "POST"},
 	// interpret variant
@@ -483,19 +738,25 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if !validIdentifier(tenant) {
+			jsonResponse(w, 400, map[string]string{"error": "invalid tenant"})
+			return
+		}
+		tenantDB := tenant + "_db"
+
 		// Get next case_id (simple approach for POC)
-		db, _ := sql.Open("mysql", rootDSN("operational_db"))
+		db, _ := sql.Open("mysql", rootDSN(tenantDB))
 		defer db.Close()
 		var maxID sql.NullInt64
-		db.QueryRow("SELECT MAX(case_id) FROM operational_db.cases").Scan(&maxID)
+		db.QueryRow(fmt.Sprintf("SELECT MAX(case_id) FROM %s.cases", tenantDB)).Scan(&maxID)
 		nextID := 1
 		if maxID.Valid {
 			nextID = int(maxID.Int64) + 1
 		}
 
-		err := execStarRocks(rootDSN("operational_db"),
-			"INSERT INTO operational_db.cases (case_id, patient_id, case_name, status, tenant_id, org_id, created_by) VALUES (?, ?, ?, 'open', ?, ?, ?)",
-			nextID, body.PatientID, body.CaseName, tenant, org, user.Username)
+		err := execStarRocks(rootDSN(tenantDB),
+			fmt.Sprintf("INSERT INTO %s.cases (case_id, patient_id, case_name, status, org_id, created_by) VALUES (?, ?, ?, 'open', ?, ?)", tenantDB),
+			nextID, body.PatientID, body.CaseName, org, user.Username)
 		if err != nil {
 			jsonResponse(w, 500, map[string]string{"error": "insert failed: " + err.Error()})
 			return
@@ -515,8 +776,13 @@ func tenantHandler(w http.ResponseWriter, r *http.Request) {
 
 	// For data queries: run against StarRocks via proxy as the user
 	if rt.dataDB != "" {
+		if !validIdentifier(tenant) {
+			jsonResponse(w, 400, map[string]string{"error": "invalid tenant"})
+			return
+		}
+		dataDB := fmt.Sprintf(rt.dataDB, tenant)
 		query := fmt.Sprintf(rt.dataSQL, tenant)
-		rows, err := queryStarRocks(user.Username, user.JWT, rt.dataDB, query)
+		rows, err := queryStarRocks(user.Username, user.JWT, dataDB, query)
 		if err != nil {
 			jsonResponse(w, 500, map[string]string{"error": err.Error()})
 			return
@@ -834,6 +1100,7 @@ func adminGrantTenantRoleHandler(w http.ResponseWriter, r *http.Request) {
 		jsonResponse(w, 500, map[string]string{"error": err.Error()})
 		return
 	}
+	syncTenantGrant(req.Username, tenant)
 	jsonResponse(w, 200, map[string]string{"status": "granted"})
 }
 
@@ -857,6 +1124,7 @@ func adminRevokeTenantRoleHandler(w http.ResponseWriter, r *http.Request) {
 		jsonResponse(w, 500, map[string]string{"error": err.Error()})
 		return
 	}
+	syncTenantRevoke(req.Username, tenant)
 	jsonResponse(w, 200, map[string]string{"status": "revoked"})
 }
 

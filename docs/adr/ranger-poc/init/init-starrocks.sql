@@ -1,9 +1,18 @@
 -- =============================================================================
 -- StarRocks Auth-Tables POC — RBAC Model
 --   1. auth_db        – roles, actions, role-action mappings, user assignments
---   2. poc_db         – clinical data (read-only for humans)
---   3. operational_db – operational data (writable by humans with roles)
---   4. StarRocks users (JWT authentication via Keycloak)
+--   2. cbtn_db        – clinical + operational data for tenant cbtn
+--   3. udn_db         – clinical + operational data for tenant udn
+--   4. base           – cross-tenant physical tables (root-only access)
+--                       exposed to each tenant DB via SECURITY NONE views
+--   5. StarRocks users (JWT authentication via Keycloak)
+--
+-- Database visibility (cbtn_db / udn_db) is enforced by Ranger access policies
+-- bound to Ranger roles cbtn_member / udn_member. Auth_db remains the source
+-- of truth; the admin API maintains Ranger role membership on every grant.
+-- The `base` database has no Ranger policy — Ranger denies by default for
+-- everyone except root (root bypass). Tenant users reach base.variants only
+-- through cbtn_db.variants / udn_db.variants views (default SECURITY NONE).
 -- =============================================================================
 
 -- =============================================================================
@@ -274,45 +283,56 @@ INSERT INTO auth_db.user_org_role (username, tenant_id, org_id, role_id, granted
     ('carol', 'cbtn', 'chop', 'bioinformatician', 'root');
 
 -- =============================================================================
--- 2. Clinical database (read-only for humans)
+-- 2. Per-tenant data databases (cbtn_db, udn_db)
+--    Each tenant has its own database. Tenant scoping is enforced at the
+--    database-visibility layer via Ranger access policies bound to Ranger
+--    roles. Tenant_id columns are dropped — implicit in the database name.
+--    org_id is kept on data tables; the column-mask subqueries key on it.
 -- =============================================================================
 
-CREATE DATABASE IF NOT EXISTS poc_db;
+CREATE DATABASE IF NOT EXISTS cbtn_db;
+CREATE DATABASE IF NOT EXISTS udn_db;
 
-CREATE TABLE IF NOT EXISTS poc_db.patients (
+CREATE TABLE IF NOT EXISTS cbtn_db.patients (
     id            INT          NOT NULL,
     first_name    VARCHAR(100) NOT NULL,
     last_name     VARCHAR(100) NOT NULL,
     mrn           VARCHAR(20)  NOT NULL,
     date_of_birth DATE         NOT NULL,
-    tenant_id     VARCHAR(50)  NOT NULL,
     org_id        VARCHAR(50)  NOT NULL,
     diagnosis     VARCHAR(200)
 ) ENGINE=OLAP
 PRIMARY KEY(id)
 DISTRIBUTED BY HASH(id) BUCKETS 1;
 
-INSERT INTO poc_db.patients (id, first_name, last_name, mrn, date_of_birth, tenant_id, org_id, diagnosis) VALUES
-    (1, 'Patient_A', 'Smith',    'MRN-CHOP-001', '2010-03-15', 'cbtn', 'chop',    'Glioblastoma'),
-    (2, 'Patient_B', 'Johnson',  'MRN-CHOP-002', '2012-07-22', 'cbtn', 'chop',    'Medulloblastoma'),
-    (3, 'Patient_C', 'Williams', 'MRN-CHOP-003', '2008-11-08', 'cbtn', 'chop',    'Ependymoma'),
-    (4, 'Patient_D', 'Brown',    'MRN-BCH-001',  '2011-01-30', 'cbtn', 'bch',     'Astrocytoma'),
-    (5, 'Patient_E', 'Davis',    'MRN-BCH-002',  '2009-06-12', 'cbtn', 'bch',     'Craniopharyngioma'),
-    (6, 'Patient_F', 'Wilson',   'MRN-NIH-001',  '2013-09-25', 'udn',  'nih-udn', 'Undiagnosed syndrome A'),
-    (7, 'Patient_G', 'Moore',    'MRN-NIH-002',  '2007-12-03', 'udn',  'nih-udn', 'Undiagnosed syndrome B');
+CREATE TABLE IF NOT EXISTS udn_db.patients (
+    id            INT          NOT NULL,
+    first_name    VARCHAR(100) NOT NULL,
+    last_name     VARCHAR(100) NOT NULL,
+    mrn           VARCHAR(20)  NOT NULL,
+    date_of_birth DATE         NOT NULL,
+    org_id        VARCHAR(50)  NOT NULL,
+    diagnosis     VARCHAR(200)
+) ENGINE=OLAP
+PRIMARY KEY(id)
+DISTRIBUTED BY HASH(id) BUCKETS 1;
 
--- =============================================================================
--- 3. Operational database (writable by humans with roles)
--- =============================================================================
+INSERT INTO cbtn_db.patients (id, first_name, last_name, mrn, date_of_birth, org_id, diagnosis) VALUES
+    (1, 'Patient_A', 'Smith',    'MRN-CHOP-001', '2010-03-15', 'chop', 'Glioblastoma'),
+    (2, 'Patient_B', 'Johnson',  'MRN-CHOP-002', '2012-07-22', 'chop', 'Medulloblastoma'),
+    (3, 'Patient_C', 'Williams', 'MRN-CHOP-003', '2008-11-08', 'chop', 'Ependymoma'),
+    (4, 'Patient_D', 'Brown',    'MRN-BCH-001',  '2011-01-30', 'bch',  'Astrocytoma'),
+    (5, 'Patient_E', 'Davis',    'MRN-BCH-002',  '2009-06-12', 'bch',  'Craniopharyngioma');
 
-CREATE DATABASE IF NOT EXISTS operational_db;
+INSERT INTO udn_db.patients (id, first_name, last_name, mrn, date_of_birth, org_id, diagnosis) VALUES
+    (6, 'Patient_F', 'Wilson', 'MRN-NIH-001', '2013-09-25', 'nih-udn', 'Undiagnosed syndrome A'),
+    (7, 'Patient_G', 'Moore',  'MRN-NIH-002', '2007-12-03', 'nih-udn', 'Undiagnosed syndrome B');
 
-CREATE TABLE IF NOT EXISTS operational_db.cases (
+CREATE TABLE IF NOT EXISTS cbtn_db.cases (
     case_id    INT          NOT NULL,
     patient_id INT          NOT NULL,
     case_name  VARCHAR(200) NOT NULL,
     status     VARCHAR(50)  NOT NULL,
-    tenant_id  VARCHAR(50)  NOT NULL,
     org_id     VARCHAR(50)  NOT NULL,
     created_by VARCHAR(100),
     created_at DATETIME     DEFAULT CURRENT_TIMESTAMP
@@ -320,14 +340,71 @@ CREATE TABLE IF NOT EXISTS operational_db.cases (
 PRIMARY KEY(case_id)
 DISTRIBUTED BY HASH(case_id) BUCKETS 1;
 
-INSERT INTO operational_db.cases (case_id, patient_id, case_name, status, tenant_id, org_id, created_by) VALUES
-    (1, 1, 'Case-CHOP-001', 'open', 'cbtn', 'chop',    'root'),
-    (2, 2, 'Case-CHOP-002', 'open', 'cbtn', 'chop',    'root'),
-    (3, 4, 'Case-BCH-001',  'open', 'cbtn', 'bch',     'root'),
-    (4, 6, 'Case-NIH-001',  'open', 'udn',  'nih-udn', 'root');
+CREATE TABLE IF NOT EXISTS udn_db.cases (
+    case_id    INT          NOT NULL,
+    patient_id INT          NOT NULL,
+    case_name  VARCHAR(200) NOT NULL,
+    status     VARCHAR(50)  NOT NULL,
+    org_id     VARCHAR(50)  NOT NULL,
+    created_by VARCHAR(100),
+    created_at DATETIME     DEFAULT CURRENT_TIMESTAMP
+) ENGINE=OLAP
+PRIMARY KEY(case_id)
+DISTRIBUTED BY HASH(case_id) BUCKETS 1;
+
+INSERT INTO cbtn_db.cases (case_id, patient_id, case_name, status, org_id, created_by) VALUES
+    (1, 1, 'Case-CHOP-001', 'open', 'chop', 'root'),
+    (2, 2, 'Case-CHOP-002', 'open', 'chop', 'root'),
+    (3, 4, 'Case-BCH-001',  'open', 'bch',  'root');
+
+INSERT INTO udn_db.cases (case_id, patient_id, case_name, status, org_id, created_by) VALUES
+    (4, 6, 'Case-NIH-001', 'open', 'nih-udn', 'root');
 
 -- =============================================================================
--- 4. StarRocks users (JWT authentication via Keycloak)
+-- 2b. Cross-tenant base tables — partitioned by tenant_id, root-only access.
+--     Tenant users reach base.variants through cbtn_db.variants / udn_db.variants
+--     views, which default to SECURITY NONE and therefore bypass the underlying-
+--     table privilege check. No Ranger policy on `base` ⇒ non-root denied.
+-- =============================================================================
+
+CREATE DATABASE IF NOT EXISTS base;
+
+CREATE TABLE IF NOT EXISTS base.variants (
+    id             INT          NOT NULL,
+    tenant_id      VARCHAR(50)  NOT NULL,
+    patient_id     INT          NOT NULL,
+    gene_symbol    VARCHAR(50)  NOT NULL,
+    classification VARCHAR(50)
+) ENGINE=OLAP
+PRIMARY KEY(id, tenant_id)
+PARTITION BY LIST (tenant_id) (
+    PARTITION p_cbtn VALUES IN ('cbtn'),
+    PARTITION p_udn  VALUES IN ('udn')
+)
+DISTRIBUTED BY HASH(id) BUCKETS 1;
+
+INSERT INTO base.variants (id, tenant_id, patient_id, gene_symbol, classification) VALUES
+    (1, 'cbtn', 1, 'TP53',  'Pathogenic'),
+    (2, 'cbtn', 1, 'BRCA2', 'VUS'),
+    (3, 'cbtn', 2, 'MYCN',  'Pathogenic'),
+    (4, 'cbtn', 4, 'EGFR',  'Likely_Pathogenic'),
+    (5, 'udn',  6, 'SCN1A', 'Pathogenic'),
+    (6, 'udn',  7, 'PTEN',  'VUS');
+
+-- Per-tenant views — default SECURITY NONE bypasses the access check on
+-- base.variants when a tenant user queries cbtn_db.variants / udn_db.variants.
+CREATE VIEW IF NOT EXISTS cbtn_db.variants AS
+SELECT id, patient_id, gene_symbol, classification
+FROM base.variants WHERE tenant_id = 'cbtn';
+
+CREATE VIEW IF NOT EXISTS udn_db.variants AS
+SELECT id, patient_id, gene_symbol, classification
+FROM base.variants WHERE tenant_id = 'udn';
+
+-- =============================================================================
+-- 3. StarRocks users (JWT authentication via Keycloak)
+--    These are the seeded test users. New users granted via the admin UI
+--    are created on-demand by the Go API (CREATE USER IF NOT EXISTS).
 -- =============================================================================
 
 CREATE USER IF NOT EXISTS jane IDENTIFIED WITH authentication_jwt AS '{

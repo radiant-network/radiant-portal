@@ -38,6 +38,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "${KC_URL}/admin/real
   -d '{
     "realm": "starrocks",
     "enabled": true,
+    "sslRequired": "none",
     "registrationAllowed": false,
     "requiredActions": [],
     "defaultDefaultClientScopes": [],
