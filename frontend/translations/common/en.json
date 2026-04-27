@@ -1137,13 +1137,6 @@
         "tumoral_type": "Tumor Type",
         "updated_at_tooltip": "Last interpretation date",
         "updated_by_name_tooltip": "Authored by"
-      },
-      "clinical_utility": {
-        "category_ia": "Tier IA",
-        "category_ib": "Tier IB",
-        "category_iic": "Tier IIC",
-        "category_iid": "Tier IID",
-        "category_iii": "Tier III"
       }
     },
     "variant_details": {

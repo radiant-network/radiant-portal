@@ -170,7 +170,9 @@ function SomaticSliderInterpretationDetailsCard({
               <DescriptionSection title={t('preview_sheet.interpretation_details.fields.clinical_utility')}>
                 {interpretation.data?.clinical_utility ? (
                   <Badge>
-                    {t(`preview_sheet.interpretation_details.clinical_utility.${interpretation.data.clinical_utility}`)}
+                    {t(
+                      `variant.interpretation_form.somatic.clinical_utility_options.${interpretation.data.clinical_utility}`,
+                    )}
                   </Badge>
                 ) : (
                   <EmptyField />
