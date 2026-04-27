@@ -39,6 +39,7 @@ type InterpretationGermline struct {
 
 type InterpretationSomatic struct {
 	InterpretationCommon
+	TumoralName                         string   `json:"tumoral_name,omitempty"`
 	TumoralType                         string   `json:"tumoral_type,omitempty"`
 	Oncogenicity                        string   `json:"oncogenicity,omitempty"`
 	OncogenicityClassificationCriterias []string `json:"oncogenicity_classification_criterias,omitempty"`

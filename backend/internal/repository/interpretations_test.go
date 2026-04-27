@@ -160,7 +160,7 @@ func Test_Interpretations_FirstSomatic(t *testing.T) {
 			assert.Equal(t, "1", interpretation.SequencingId)
 			assert.Equal(t, "1000", interpretation.LocusId)
 			assert.Equal(t, "T001", interpretation.TranscriptId)
-			assert.Equal(t, "solid", interpretation.TumoralType)
+			assert.Equal(t, "MONDO:0000004", interpretation.TumoralType)
 			assert.Equal(t, "Oncogenic", interpretation.Oncogenicity)
 			assert.Equal(t, []string{"OS1"}, interpretation.OncogenicityClassificationCriterias)
 			assert.Equal(t, "tier_1", interpretation.ClinicalUtility)
@@ -191,7 +191,7 @@ func Test_Interpretations_CreateOrUpdateSomatic_Create(t *testing.T) {
 				UpdatedBy:     "user1",
 				UpdatedByName: "User One",
 			},
-			TumoralType:  "solid",
+			TumoralType:  "MONDO:0000004",
 			Oncogenicity: "Oncogenic",
 		}
 		err := repo.CreateOrUpdateSomatic(interpretation)
@@ -201,7 +201,7 @@ func Test_Interpretations_CreateOrUpdateSomatic_Create(t *testing.T) {
 		found, err := repo.FirstSomatic("97", "97", "9997", "T097")
 		assert.NoError(t, err)
 		if assert.NotNil(t, found) {
-			assert.Equal(t, "solid", found.TumoralType)
+			assert.Equal(t, "MONDO:0000004", found.TumoralType)
 			assert.Equal(t, "Oncogenic", found.Oncogenicity)
 		}
 	})
@@ -222,7 +222,7 @@ func Test_Interpretations_CreateOrUpdateSomatic_Update(t *testing.T) {
 				UpdatedBy:     "user1",
 				UpdatedByName: "User One",
 			},
-			TumoralType:  "solid",
+			TumoralType:  "MONDO:TEST00001",
 			Oncogenicity: "Likely Oncogenic",
 		}
 		err := repo.CreateOrUpdateSomatic(interpretation)
