@@ -9,7 +9,7 @@ function QueryToolbarLabelsAction() {
   if (!queryBuilder.canCombine() && enableShowHideLabels) {
     return (
       <div className="flex items-center gap-1.5">
-        <Switch size="xs" checked={showLabels} onCheckedChange={toggleLabels} /> {dict.toolbar.labels}
+        <Switch size="sm" checked={showLabels} onCheckedChange={toggleLabels} /> {dict.toolbar.labels}
       </div>
     );
   }
