@@ -13,7 +13,7 @@ const SelectValue = SelectPrimitive.Value;
 
 export const selectTriggerVariants = tv({
   slots: {
-    base: 'flex w-full items-center hover:cursor-pointer justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs ring-offset-background data-placeholder:text-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
+    base: 'flex w-full items-center hover:cursor-pointer justify-between whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs ring-offset-background data-placeholder:text-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
   },
   variants: {
     size: {

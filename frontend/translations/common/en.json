@@ -888,7 +888,7 @@
       "gnomad_sf": "gnomAD",
       "gnomad_sf_tooltip": "gnomAD 4.1.0 (Allele Frequency)",
       "gnomad_v3_af": "gnomAD",
-      "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (allele Frequency)",
+      "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (Allele Frequency)",
       "hgvsg": "Variant",
       "hotspot": "Hotspot",
       "hotspot_tooltip": "Hotspot Cancer",
@@ -999,7 +999,8 @@
       "insertion": "Insertion",
       "snv": "SNV",
       "deletion": "Deletion",
-      "sequence_alteration": "Sequence Alteration"
+      "sequence_alteration": "Sequence Alteration",
+      "substitution": "Substitution"
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
@@ -1015,9 +1016,10 @@
       "title": "Clinical Interpretation",
       "cancel_text": "Cancel",
       "ok_text": "Save interpretation",
-      "last_update": "Last update: <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
+      "last_update": "Last update:",
       "header": {
         "germline": "Germline",
+        "germline_family": "Germline",
         "somatic": "Somatic"
       },
       "transcript": {
@@ -1430,8 +1432,8 @@
         "snv": "SNV",
         "cnv": "CNV",
         "snv_tn": "SNV (TN)",
-        "snv_to": "SNV (TO)",
-        "snv_to_tooltip": "SNV (tumor-normal)"
+        "snv_tn_tooltip": "SNV (tumor-normal)",
+        "snv_to": "SNV (TO)"
       },
       "dialog": {
         "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"

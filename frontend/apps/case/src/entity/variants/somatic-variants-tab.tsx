@@ -6,11 +6,11 @@ import { useI18n } from '@/components/hooks/i18n';
 
 import SequencingExperimentVariantFilters from './filters/sequencing-experiment-variant-filters';
 import { getDefaultSeqId, useSeqIdSearchParamsEffect } from './hooks/use-seqid-by-search';
-import SNVTOTab from './somatic-occurrence/snv-to-tab';
+import SNVTumorNormalTab from './somatic-occurrence/snv-tumor-normal-tab';
 
 export enum SomaticVariantInterface {
-  SNV_TO = 'SNV_TO',
   SNV_TN = 'SNV_TN',
+  SNV_TO = 'SNV_TO',
   CNV_TO = 'CNV_TO',
 }
 
@@ -22,7 +22,7 @@ type VariantTabProps = {
 function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
   const { t } = useI18n();
   const [searchParams] = useSearchParams();
-  const [activeInterface, setActiveInterface] = useState<SomaticVariantInterface>(SomaticVariantInterface.SNV_TO);
+  const [activeInterface, setActiveInterface] = useState<SomaticVariantInterface>(SomaticVariantInterface.SNV_TN);
   const [patientSelected, setPatientSelected] = useState<CaseSequencingExperiment | undefined>(undefined);
 
   const [seqId, setSeqId] = useState<number>(getDefaultSeqId(searchParams.get('seq_id'), caseEntity));
@@ -36,7 +36,7 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     [seqExpVariants],
   );
 
-  useSeqIdSearchParamsEffect({ seqId });
+  useSeqIdSearchParamsEffect({ seqId, setSeqId, caseEntity });
 
   // @TODO: to be changed when all tabs are implemented
   // options={Object.keys(SomaticVariantInterface)}
@@ -47,8 +47,8 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
         sequencingExperiments={seqExpVariants}
         options={[
           {
-            value: 'SNV_TO',
-            tooltip: t(`case_entity.variants.filters.snv_to_tooltip`),
+            value: 'SNV_TN',
+            tooltip: t(`case_entity.variants.filters.snv_tn_tooltip`),
           },
         ]}
         selectedSeqId={seqId}
@@ -58,8 +58,8 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
           setActiveInterface(value as SomaticVariantInterface);
         }}
       />
-      {activeInterface == SomaticVariantInterface.SNV_TO && (
-        <SNVTOTab seqId={seqId} patientSelected={patientSelected} />
+      {activeInterface == SomaticVariantInterface.SNV_TN && (
+        <SNVTumorNormalTab seqId={seqId} patientSelected={patientSelected} />
       )}
     </div>
   );

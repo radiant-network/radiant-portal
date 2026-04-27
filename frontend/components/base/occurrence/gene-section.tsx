@@ -1,4 +1,3 @@
-import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
@@ -8,24 +7,38 @@ import EmptyField from '../information/empty-field';
 
 import DetailSection, { DetailItem } from './detail-section';
 
-interface GeneSectionProps {
-  data: ExpandedGermlineSNVOccurrence;
+export interface GeneSectionProps {
+  gnomad_pli?: number;
+  gnomad_loeuf?: number;
+  revel_score?: number;
+  spliceai_type?: string[];
+  spliceai_ds?: number;
+  hgvsg?: string;
+  transcript_id?: string;
 }
 
-export default function GeneSection({ data }: GeneSectionProps) {
+export default function GeneSection({
+  gnomad_pli,
+  gnomad_loeuf,
+  revel_score,
+  spliceai_type,
+  spliceai_ds,
+  hgvsg,
+  transcript_id,
+}: GeneSectionProps) {
   const { t } = useI18n();
   return (
     <DetailSection title={t('occurrence_expand.gene.title')}>
       <DetailItem
         title={t('occurrence_expand.gene.pli')}
         value={
-          data.gnomad_pli ? (
+          gnomad_pli ? (
             <AnchorLink
-              href={`https://gnomad.broadinstitute.org/gene/${data.transcript_id}?dataset=gnomad_r2_1`}
+              href={`https://gnomad.broadinstitute.org/gene/${transcript_id}?dataset=gnomad_r2_1`}
               target="_blank"
               size="sm"
             >
-              {toExponentialNotationAtThreshold(data.gnomad_pli)}
+              {toExponentialNotationAtThreshold(gnomad_pli)}
             </AnchorLink>
           ) : (
             <EmptyField />
@@ -35,34 +48,34 @@ export default function GeneSection({ data }: GeneSectionProps) {
       <DetailItem
         title={t('occurrence_expand.gene.loeuf')}
         value={
-          data.gnomad_loeuf ? (
+          gnomad_loeuf ? (
             <AnchorLink
-              href={`https://gnomad.broadinstitute.org/gene/${data.transcript_id}?dataset=gnomad_r2_1`}
+              href={`https://gnomad.broadinstitute.org/gene/${transcript_id}?dataset=gnomad_r2_1`}
               target="_blank"
               size="sm"
             >
-              {toExponentialNotationAtThreshold(data.gnomad_loeuf)}
+              {toExponentialNotationAtThreshold(gnomad_loeuf)}
             </AnchorLink>
           ) : (
             <EmptyField />
           )
         }
       />
-      <DetailItem title={t('occurrence_expand.gene.revel')} value={data.revel_score ?? '-'} />
+      <DetailItem title={t('occurrence_expand.gene.revel')} value={revel_score ?? '-'} />
       <DetailItem
         title={t('occurrence_expand.gene.splice_ai')}
         value={
-          data.spliceai_type ? (
+          spliceai_type ? (
             <div className="flex gap-1">
               <AnchorLink
-                href={`https://spliceailookup.broadinstitute.org/#variant=${data.hgvsg}&hg=38`}
+                href={`https://spliceailookup.broadinstitute.org/#variant=${hgvsg}&hg=38`}
                 target="_blank"
                 size="sm"
               >
-                {data.spliceai_ds}
+                {spliceai_ds}
               </AnchorLink>
 
-              {data.spliceai_type.map(v => (
+              {spliceai_type.map(v => (
                 <Badge key={v}>{v}</Badge>
               ))}
             </div>

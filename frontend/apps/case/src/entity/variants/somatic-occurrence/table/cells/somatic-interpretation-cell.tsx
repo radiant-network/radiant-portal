@@ -3,11 +3,12 @@ import { ClipboardList } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
 import { useDataTable } from '@/components/base/data-table/hooks/use-data-table';
-import InterpretationDialog from '@/components/base/interpretation/interpretation-dialog';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { SELECTED_VARIANT_PARAM } from '@/entity/variants/constants';
+
+import SomaticInterpretationDialog from '../../interpretation/somatic-interpretation-dialog';
 
 type InterpretationCellProps = {
   occurrence: GermlineSNVOccurrence;
@@ -27,7 +28,7 @@ function SomaticInterpretationCell({ occurrence }: InterpretationCellProps) {
 
   if (!occurrence.has_interpretation) {
     return (
-      <InterpretationDialog
+      <SomaticInterpretationDialog
         locusId={occurrence.locus_id}
         transcriptId={occurrence.transcript_id}
         handleSaveCallback={list?.mutate}

@@ -3385,6 +3385,12 @@ export interface InterpretationSomatic {
      * @type {string}
      * @memberof InterpretationSomatic
      */
+    'tumoral_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'tumoral_type'?: string;
     /**
      * 

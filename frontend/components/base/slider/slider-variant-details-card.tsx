@@ -20,7 +20,6 @@ import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from '@/components/base/var
 import { useI18n } from '@/components/hooks/i18n';
 import { toExponentialNotation, toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
-import Empty from '../empty';
 
 const MAX_CLINICAL_ASSOCIATION = 3;
 
@@ -34,6 +33,7 @@ type SliderVariantDetailsCardProps = ClinicalAssociationCardProps &
   GeneCardProps & {
     chromosome?: string;
     start?: number;
+    end?: number;
   };
 
 /**
@@ -45,6 +45,7 @@ const SliderVariantDetailsCard = ({
   type,
   chromosome,
   start,
+  end,
   symbol,
   aa_change,
   vep_impact,
@@ -64,6 +65,9 @@ const SliderVariantDetailsCard = ({
   germline_pc_wgs_not_affected,
   germline_pn_wgs_not_affected,
   germline_pf_wgs_not_affected,
+  somatic_pc_tn_wgs,
+  somatic_pn_tn_wgs,
+  somatic_pf_tn_wgs,
   cadd_phred,
   cadd_score,
   lrt_pred,
@@ -87,6 +91,7 @@ const SliderVariantDetailsCard = ({
   hgvsg,
   gnomad_v3_af,
   locus,
+  locusId,
   hotspot,
 }: SliderVariantDetailsCardProps) => {
   const { t } = useI18n();
@@ -99,7 +104,7 @@ const SliderVariantDetailsCard = ({
         <div className="flex gap-2">
           <Button variant="outline" size="xs" asChild>
             <a
-              href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${start}`}
+              href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${end}`}
               target="_blank"
               rel="noreferrer"
             >
@@ -142,6 +147,9 @@ const SliderVariantDetailsCard = ({
           germline_pc_wgs_not_affected={germline_pc_wgs_not_affected}
           germline_pn_wgs_not_affected={germline_pn_wgs_not_affected}
           germline_pf_wgs_not_affected={germline_pf_wgs_not_affected}
+          somatic_pc_tn_wgs={somatic_pc_tn_wgs}
+          somatic_pn_tn_wgs={somatic_pn_tn_wgs}
+          somatic_pf_tn_wgs={somatic_pf_tn_wgs}
           cadd_phred={cadd_phred}
           cadd_score={cadd_score}
           dann_score={dann_score}
@@ -165,6 +173,7 @@ const SliderVariantDetailsCard = ({
           hgvsg={hgvsg}
           gnomad_v3_af={gnomad_v3_af}
           locus={locus}
+          locusId={locusId}
           hotspot={hotspot}
         />
         <ClinicalAssociationCard omim_conditions={omim_conditions} locus_id={locus_id} />
@@ -282,6 +291,7 @@ type PredictionCardProps = SliderVariantType & {
   hgvsg?: string;
   gnomad_v3_af?: number;
   locus?: string;
+  locusId?: string;
   hotspot?: boolean;
 };
 const PredictionCard = ({
@@ -318,36 +328,34 @@ const PredictionCard = ({
   hgvsg,
   gnomad_v3_af,
   locus,
+  locusId,
   hotspot,
 }: PredictionCardProps) => {
   const { t } = useI18n();
 
   // Frequencies differ from somatic to germline
   const frequencies = [];
-
   if (type == 'somatic') {
+    // Tumor-Normal
     frequencies.push(
       <DescriptionRow
         label={
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-flex gap-1 items-center">
-                {t('preview_sheet.variant_details.sections.frequencies.tn')}
-                <ShapeDiamondIcon className="size-[13px] text-red-500" />
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>{t('occurrence_expand.frequencies.affected_tooltip')}</TooltipContent>
-          </Tooltip>
+          <span className="inline-flex gap-1 items-center">
+            {t('preview_sheet.variant_details.sections.frequencies.tn')}
+          </span>
         }
       >
         {somatic_pc_tn_wgs && somatic_pn_tn_wgs && somatic_pf_tn_wgs?.toExponential(2) ? (
-          `${somatic_pc_tn_wgs} / ${somatic_pn_tn_wgs} (${somatic_pf_tn_wgs?.toExponential(2)})`
+          <AnchorLink size="sm" href={`/variants/entity/${locusId}?tab=patients&cases=OtherCases`} target="_blank">
+            {somatic_pc_tn_wgs} / {somatic_pn_tn_wgs} ({somatic_pf_tn_wgs?.toExponential(2)})
+          </AnchorLink>
         ) : (
           <EmptyField />
         )}
       </DescriptionRow>,
     );
   } else {
+    // Germline Affected
     frequencies.push(
       <DescriptionRow
         label={
@@ -368,6 +376,10 @@ const PredictionCard = ({
           <EmptyField />
         )}
       </DescriptionRow>,
+    );
+
+    // Germline Non Affected
+    frequencies.push(
       <DescriptionRow
         label={
           <Tooltip>
@@ -385,6 +397,23 @@ const PredictionCard = ({
         germline_pn_wgs_not_affected &&
         germline_pf_wgs_not_affected?.toExponential(2) ? (
           `${germline_pc_wgs_not_affected} / ${germline_pn_wgs_not_affected} (${germline_pf_wgs_not_affected?.toExponential(2)})`
+        ) : (
+          <EmptyField />
+        )}
+      </DescriptionRow>,
+    );
+
+    // GnomAD
+    frequencies.push(
+      <DescriptionRow label={t('preview_sheet.variant_details.sections.frequencies.gnomad')}>
+        {gnomad_v3_af ? (
+          <AnchorLink
+            size="sm"
+            href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r3`}
+            target="_blank"
+          >
+            {toExponentialNotation(gnomad_v3_af)}
+          </AnchorLink>
         ) : (
           <EmptyField />
         )}
@@ -583,19 +612,6 @@ const PredictionCard = ({
       <div className="flex flex-1 flex-col gap-4">
         <DescriptionSection title={t('preview_sheet.variant_details.sections.frequencies.title')}>
           {frequencies.map(element => element)}
-          <DescriptionRow label={t('preview_sheet.variant_details.sections.frequencies.gnomad')}>
-            {gnomad_v3_af ? (
-              <AnchorLink
-                size="sm"
-                href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r3`}
-                target="_blank"
-              >
-                {toExponentialNotation(gnomad_v3_af)}
-              </AnchorLink>
-            ) : (
-              <EmptyField />
-            )}
-          </DescriptionRow>
         </DescriptionSection>
         <DescriptionSection title={t('preview_sheet.variant_details.sections.functional_scores.title')}>
           <ExpandableList

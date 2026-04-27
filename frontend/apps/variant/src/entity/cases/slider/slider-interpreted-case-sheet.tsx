@@ -5,10 +5,10 @@ import { VariantInterpretedCase } from '@/api/api';
 import Empty from '@/components/base/empty';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
+import GermlineSliderInterpretationDetailsCard from '@/components/base/slider/germline-slider-interpretation-details-card';
 import { useCase } from '@/components/base/slider/hooks/use-slider-occurrence-and-case';
 import SliderCaseDetailsCard from '@/components/base/slider/slider-case-details-card';
 import SliderHeader from '@/components/base/slider/slider-header';
-import SliderInterpretationDetailsCard from '@/components/base/slider/slider-interpretation-details-card';
 import OccurrenceSheetDetailsCard from '@/components/base/slider/slider-occurrence-details-card';
 import SliderOccurrenceSubHeader from '@/components/base/slider/slider-occurrence-sub-header';
 import SliderPatientRow from '@/components/base/slider/slider-patient-row';
@@ -103,7 +103,7 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
           </Button>
         }
       />
-      <SliderInterpretationDetailsCard
+      <GermlineSliderInterpretationDetailsCard
         seqId={caseData.seq_id}
         caseId={caseData.case_id}
         symbol={expandResult.data.symbol}

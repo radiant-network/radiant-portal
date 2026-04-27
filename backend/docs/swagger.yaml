@@ -1638,6 +1638,8 @@ components:
           type: string
         transcript_id:
           type: string
+        tumoral_name:
+          type: string
         tumoral_type:
           type: string
         updated_at:

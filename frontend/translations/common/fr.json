@@ -1000,7 +1000,8 @@
       "insertion": "Insertion",
       "snv": "SNV",
       "deletion": "Délétion",
-      "sequence_alteration": "Séquence Altération"
+      "sequence_alteration": "Séquence Altération",
+      "substitution": "Substitution"
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
@@ -1016,9 +1017,10 @@
       "title": "Interprétation clinique",
       "cancel_text": "Annuler",
       "ok_text": "Sauvegarder l'interprétation",
-      "last_update": "Dernière mise à jour : <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
+      "last_update": "Dernière mise à jour :",
       "header": {
         "germline": "Germinal",
+        "germline_family": "Germinal",
         "somatic": "Somatic"
       },
       "transcript": {
@@ -1434,8 +1436,8 @@
         "sequencing_id": "ID Séq.",
         "snv": "SNV",
         "snv_tn": "SNV (TN)",
-        "snv_to": "SNV (TO)",
-        "snv_to_tooltip": "SNV (tumor-normal)"
+        "snv_tn_tooltip": "SNV (tumor-normal)",
+        "snv_to": "SNV (TO)"
       },
       "dialog": {
         "overlapping_gene": "Liste des gènes chevauchants le CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"

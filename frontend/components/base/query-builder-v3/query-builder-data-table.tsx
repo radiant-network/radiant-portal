@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
 import { Count, SortBody, SqonContent, SqonOpEnum } from '@/api/api';
 
 import DataTable, { TableProps } from '../data-table/data-table';
+import { DataTableProvider } from '../data-table/hooks/use-data-table';
 import { Card, CardContent } from '../shadcn/card';
 
 import { useQBActiveQuery, useQBContext } from './hooks/use-query-builder';
-import { DataTableProvider } from '../data-table/hooks/use-data-table';
 
 type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'>;
 
@@ -29,20 +29,19 @@ function QueryBuilderDataTable<T>({ ...props }: QueryBuilderDataTableProps<T>) {
   const [sorting, setSorting] = useState<SortBody[]>([]);
 
   const fetchList = useSWR<any[]>(
-    `${JSON.stringify(activeQuery)}-list`,
-    () =>
-      fetcher.list({
-        listBody: {
-          additional_fields: additionalFields,
-          limit: pagination.pageSize,
-          page_index: pagination.pageIndex,
-          sort: sorting,
-          sqon: {
-            content: activeQuery.content as SqonContent,
-            op: activeQuery.op as SqonOpEnum,
-          },
+    {
+      listBody: {
+        additional_fields: additionalFields,
+        limit: pagination.pageSize,
+        page_index: pagination.pageIndex,
+        sort: sorting,
+        sqon: {
+          content: activeQuery.content as SqonContent,
+          op: activeQuery.op as SqonOpEnum,
         },
-      }),
+      },
+    },
+    fetcher.list,
     {
       revalidateOnFocus: false,
       revalidateOnMount: true,
@@ -51,22 +50,28 @@ function QueryBuilderDataTable<T>({ ...props }: QueryBuilderDataTableProps<T>) {
   );
 
   const fetchCount = useSWR<Count>(
-    `${JSON.stringify(activeQuery)}-count`,
-    () =>
-      fetcher.count({
-        countBody: {
-          sqon: {
-            content: activeQuery.content as SqonContent,
-            op: activeQuery.op as SqonOpEnum,
-          },
+    {
+      countBody: {
+        sqon: {
+          content: activeQuery.content as SqonContent,
+          op: activeQuery.op as SqonOpEnum,
         },
-      }),
+      },
+    },
+    fetcher.count,
     {
       revalidateOnFocus: false,
       revalidateOnMount: true,
       shouldRetryOnError: false,
     },
   );
+
+  useEffect(() => {
+    setPagination({
+      pageIndex: 0,
+      pageSize: pagination.pageSize,
+    });
+  }, [activeQuery]);
 
   return (
     <Card>

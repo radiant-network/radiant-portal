@@ -2,20 +2,21 @@ import { ReactElement } from 'react';
 import { useCallback } from 'react';
 import { Link } from 'react-router';
 
-import { ExpandedGermlineSNVOccurrence } from '@/api/api';
+import { OmimGenePanel } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
 import DetailSection, { DetailItem } from './detail-section';
 
-type ClinicalAssociationSectionProps = {
-  data: ExpandedGermlineSNVOccurrence;
+export type ClinicalAssociationSectionProps = {
+  omim_conditions?: OmimGenePanel[];
+  locus_id?: string;
 };
 
 const MAX_CLINICAL_ASSOCIATION = 3; // Maximum number of clinical associations to display before showing "see more"
 
-export default function ClinicalAssociationSection({ data }: ClinicalAssociationSectionProps) {
+export default function ClinicalAssociationSection({ omim_conditions, locus_id }: ClinicalAssociationSectionProps) {
   const { t } = useI18n();
 
   const clinicalAssociationTitle = t('common.no_data_available');
@@ -23,12 +24,12 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
   const omimCode = useCallback((oc: string[]) => oc.map((ic: string) => <Badge key={ic}>{ic}</Badge>), []);
 
   const clinicalAssociationValue: ReactElement[] = [];
-  data.omim_conditions?.forEach((oc, index) => {
+  omim_conditions?.forEach((oc, index) => {
     if (index === MAX_CLINICAL_ASSOCIATION) {
       clinicalAssociationValue.push(
         <AnchorLink
           component={Link}
-          to={`/variants/entity/${data.locus_id}#evidenceAndConditions`}
+          to={`/variants/entity/${locus_id}#evidenceAndConditions`}
           className="justify-start"
           size="sm"
         >
@@ -61,7 +62,7 @@ export default function ClinicalAssociationSection({ data }: ClinicalAssociation
 
   return (
     <DetailSection title={t('occurrence_expand.clinical_association.title')}>
-      {data.omim_conditions ? (
+      {omim_conditions ? (
         clinicalAssociationValue
       ) : (
         <div className="text-sm text-muted-foreground">{t('common.no_data_available')}</div>

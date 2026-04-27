@@ -310,7 +310,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
               <Switch
                 id="with-dictionary-switch"
                 checked={isDictionaryEnabled}
-                size="xs"
+                size="sm"
                 onCheckedChange={handleOnDictionaryChecked}
               />
             </>
