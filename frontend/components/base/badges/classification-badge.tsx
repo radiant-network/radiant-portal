@@ -6,6 +6,7 @@ import { useI18n } from '@/components/hooks/i18n';
 interface ClassificationBadgeProps extends BadgeProps {
   value: string | null; // TODO: Should be replace with enum with API exposes one
   abbreviated?: boolean;
+  isSomatic?: boolean;
 }
 
 export const ClassificationValueMap: Record<string, BadgeProps['variant']> = {
@@ -13,11 +14,13 @@ export const ClassificationValueMap: Record<string, BadgeProps['variant']> = {
   association_not_found: 'neutral',
   uncertain_significance: 'yellow',
   likely_benign: 'lime',
+  likely_oncogenic: 'violet',
   likely_pathogenic: 'orange',
   low_penetrance: 'neutral',
   risk_factor: 'neutral',
   association: 'neutral',
   uncertain_risk_allele: 'neutral',
+  oncogenic: 'red',
   pathogenic: 'red',
   protective: 'neutral',
   conflicting_classifications_of_pathogenicity: 'orange',
@@ -40,11 +43,19 @@ export const AcmgAmpClassificationMap: Record<string, string> = {
   'LA6675-8': 'benign',
 };
 
+export const SomaticAcmgAmpClassificationMap: Record<string, string> = {
+  'LA6668-3': 'oncogenic',
+  'LA26332-9': 'likely_oncogenic',
+  'LA26333-7': 'uncertain_significance',
+  'LA26334-5': 'likely_benign',
+  'LA6675-8': 'benign',
+};
+
 /**
  * API can return non-snake-case key. We needs to map
  * the non-snake-case value to the correct classification value
  */
-function getClassificationValue(value: string): { color: BadgeProps['variant']; key: string } {
+function getClassificationValue(value: string, isSomatic: boolean): { color: BadgeProps['variant']; key: string } {
   const color = ClassificationValueMap[value];
 
   // value is in snake_case
@@ -52,7 +63,10 @@ function getClassificationValue(value: string): { color: BadgeProps['variant']; 
     return { color, key: value };
   }
 
-  const acmgamp = AcmgAmpClassificationMap[value.toUpperCase()];
+  const acmgamp = isSomatic
+    ? SomaticAcmgAmpClassificationMap[value.toUpperCase()]
+    : AcmgAmpClassificationMap[value.toUpperCase()];
+
   if (acmgamp) {
     return {
       color: ClassificationValueMap[acmgamp],
@@ -82,9 +96,9 @@ function getClassificationValue(value: string): { color: BadgeProps['variant']; 
   };
 }
 
-function ClassificationBadge({ value, abbreviated, ...props }: ClassificationBadgeProps) {
+function ClassificationBadge({ value, abbreviated, isSomatic = false, ...props }: ClassificationBadgeProps) {
   const { t } = useI18n();
-  const result = getClassificationValue((value ?? '').toLowerCase());
+  const result = getClassificationValue((value ?? '').toLowerCase(), isSomatic);
 
   return (
     <ConditionalWrapper

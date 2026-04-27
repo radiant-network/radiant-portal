@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CalendarIcon, ClipboardList, LibraryBig, StethoscopeIcon } from 'lucide-react';
-
 import useSWR from 'swr';
+
 import { InterpretationGermline } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import TransmissionModeBadge from '@/components/base/badges/transmission-mode-badge';
@@ -16,12 +16,12 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { DescriptionSection } from '@/components/base/slider/description';
 import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
-import { Tooltip, TooltipContent, TooltipTrigger } from 'components/base/shadcn/tooltip';
 import { interpretationApi } from '@/utils/api';
 
 type GermlineSliderInterpretationDetailsCardProps = {
@@ -107,7 +107,7 @@ function GermlineSliderInterpretationDetailsCard({
         <div className="size-full">
           <div className="flex flex-col flex-wrap gap-4 items-start p-3 w-full">
             <div className="flex grow w-full">
-              <div className="flex gap-6">
+              <div className="flex gap-6 w-full">
                 <DescriptionSection title={t('preview_sheet.interpretation_details.fields.gene')} fullWidth={false}>
                   {symbol ? (
                     <AnchorLink
