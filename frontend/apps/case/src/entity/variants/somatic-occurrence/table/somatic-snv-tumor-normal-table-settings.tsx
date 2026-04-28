@@ -5,12 +5,12 @@ import { CaseEntity, GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/a
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
-import GermlineGenomeFrequencyCell from '@/components/base/data-table/cells/germline-genome-frequency-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
 import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import OmimCell from '@/components/base/data-table/cells/omim-cell';
+import SomaticGermlineFrequencyCell from '@/components/base/data-table/cells/somatic-germline-frequency-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import TumorNormalFrequencyCell from '@/components/base/data-table/cells/tumor-normal-frequency-cell';
@@ -200,7 +200,7 @@ function getSomaticSNVTumorNormalColumns(t: TFunction<string, undefined>, caseEn
     columnHelper.accessor(row => row, {
       id: 'freq_g',
       cell: info => (
-        <GermlineGenomeFrequencyCell
+        <SomaticGermlineFrequencyCell
           locusId={info.row.original.locus_id}
           pc={info.row.original.germline_pc_wgs}
           pf={info.row.original.germline_pf_wgs}
