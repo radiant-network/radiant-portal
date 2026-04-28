@@ -421,7 +421,7 @@ const PredictionCard = ({
     );
   }
 
-  // functional scrore
+  // functional scores
   const functionalScores = [];
 
   // cadd phred
@@ -453,7 +453,7 @@ const PredictionCard = ({
   if (lrt_score) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.lrt')}>
-        {lrt_pred}
+        {t(`common.filters.values.lrt_pred.${lrt_pred?.toLowerCase()}`) || lrt_pred}
         {lrt_score && ` (${lrt_score})`}
       </DescriptionRow>,
     );
@@ -463,7 +463,7 @@ const PredictionCard = ({
   if (sift_pred) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.sift')}>
-        {sift_pred}
+        {t(`common.filters.values.sift_pred.${sift_pred?.toLowerCase()}`) || sift_pred}
         {sift_score && ` (${sift_score})`}
       </DescriptionRow>,
     );
@@ -473,7 +473,7 @@ const PredictionCard = ({
   if (fathmm_pred) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.fathmm')}>
-        {fathmm_pred}
+        {t(`common.filters.values.fathmm_pred.${fathmm_pred?.toLowerCase()}`) || fathmm_pred}
         {fathmm_score && ` (${fathmm_score})`}
       </DescriptionRow>,
     );
@@ -490,7 +490,7 @@ const PredictionCard = ({
   if (polyphen2_hvar_pred) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.polyphen2_hvar')}>
-        {polyphen2_hvar_pred}
+        {t(`common.filters.values.polyphen2_hvar_pred.${polyphen2_hvar_pred?.toLowerCase()}`) || polyphen2_hvar_pred}
         {polyphen2_hvar_score && ` (${polyphen2_hvar_score})`}
       </DescriptionRow>,
     );
