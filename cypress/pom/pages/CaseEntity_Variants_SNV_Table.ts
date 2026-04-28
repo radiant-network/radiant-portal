@@ -151,7 +151,7 @@ const tableColumns = [
     isSortable: true,
     isPinnable: true,
     position: 12,
-    tooltip: 'gnomAD Genome 3.1.2 (allele Frequency)',
+    tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
   },
   {
     id: 'freq',
