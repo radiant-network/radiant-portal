@@ -18,6 +18,7 @@ import { cn } from '@/components/lib/utils';
 import {
   QBActionType,
   useQBAggregations,
+  useQBCache,
   useQBContext,
   useQBDispatch,
   useQBSettings,
@@ -92,7 +93,7 @@ function QueryBar({ index, sqon }: QueryBarProps) {
   const { activeQueryId } = useQBContext();
   const { combinedQueries } = useQBSettings();
   const { fetcher } = useQBContext();
-  const { selectedQueries } = useQBSettings();
+  const { selectedQueries } = useQBCache();
   const aggregations = useQBAggregations();
   const active = useMemo(() => activeQueryId === sqon.id, [activeQueryId]);
   const backgroundColor = useMemo(

@@ -8,7 +8,7 @@ import { userPreferenceApi } from '@/utils/api';
 
 import { ISyntheticSqon } from '../type';
 
-import { getDefaultQBContext, IQBContext } from './use-query-builder';
+import { getDefaultQBContext, IQBContext, ISettings } from './use-query-builder';
 
 type FetchUserPreferenceInput = {
   key: string;
@@ -26,6 +26,7 @@ type useQueryBuilderGetPreferenceEffectProps = {
 type useSqonsQBStateObserverProps = {
   appId: ApplicationId;
   sqons: ISyntheticSqon[];
+  settings: ISettings;
 };
 
 /**
@@ -72,7 +73,7 @@ export function useQueryBuilderGetPreferenceEffect({ appId, setPreference }: use
  * Update user-preference of saved filters with a POST request
  * A debounce of 350 is used to prevent multiple post when use onChange event of data-table
  */
-export function useSqonsQBUpdatePreferenceEffect({ appId, sqons }: useSqonsQBStateObserverProps) {
+export function useSqonsQBUpdatePreferenceEffect({ appId, sqons, settings }: useSqonsQBStateObserverProps) {
   const qbUserPreference = useSWR(
     `query-builder-get-${appId}`,
     () => fetchUserPreference({ key: `query-builder-${appId}` }),
@@ -98,6 +99,7 @@ export function useSqonsQBUpdatePreferenceEffect({ appId, sqons }: useSqonsQBSta
           content: {
             ...qbUserPreference.data?.content,
             sqons,
+            settings,
           },
           key: `query-builder-${appId}`,
         },
@@ -107,5 +109,5 @@ export function useSqonsQBUpdatePreferenceEffect({ appId, sqons }: useSqonsQBSta
     return () => {
       if (handler) clearTimeout(handler);
     };
-  }, [sqons]);
+  }, [sqons, settings]);
 }
