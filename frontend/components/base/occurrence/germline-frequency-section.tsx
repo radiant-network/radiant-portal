@@ -6,6 +6,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { useI18n } from '@/components/hooks/i18n';
 import { toExponentialNotation } from '@/components/lib/number-format';
 
+import EmptyField from '../information/empty-field';
+
 import DetailSection, { DetailItem } from './detail-section';
 
 export type GermlineFrequencySectionProps = {
@@ -31,9 +33,11 @@ export default function GermlineFrequencySection({
 }: GermlineFrequencySectionProps) {
   const { t } = useI18n();
   const affectedValue =
-    germline_pc_wgs_affected && germline_pn_wgs_affected && germline_pf_wgs_affected?.toExponential(2)
-      ? `${germline_pc_wgs_affected} / ${germline_pn_wgs_affected} (${germline_pf_wgs_affected?.toExponential(2)})`
-      : '-';
+    germline_pc_wgs_affected && germline_pn_wgs_affected && germline_pf_wgs_affected?.toExponential(2) ? (
+      `${germline_pc_wgs_affected} / ${germline_pn_wgs_affected} (${germline_pf_wgs_affected?.toExponential(2)})`
+    ) : (
+      <EmptyField />
+    );
   const affectedTitle = (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -47,9 +51,11 @@ export default function GermlineFrequencySection({
   );
 
   const nonAffectedValue =
-    germline_pc_wgs_not_affected && germline_pn_wgs_not_affected && germline_pf_wgs_not_affected?.toExponential(2)
-      ? `${germline_pc_wgs_not_affected} / ${germline_pn_wgs_not_affected} (${germline_pf_wgs_not_affected?.toExponential(2)})`
-      : '-';
+    germline_pc_wgs_not_affected && germline_pn_wgs_not_affected && germline_pf_wgs_not_affected?.toExponential(2) ? (
+      `${germline_pc_wgs_not_affected} / ${germline_pn_wgs_not_affected} (${germline_pf_wgs_not_affected?.toExponential(2)})`
+    ) : (
+      <EmptyField />
+    );
   const nonAffectedTitle = (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -78,7 +84,7 @@ export default function GermlineFrequencySection({
               {toExponentialNotation(gnomad_v3_af)}
             </AnchorLink>
           ) : (
-            '-'
+            <EmptyField />
           )
         }
       />

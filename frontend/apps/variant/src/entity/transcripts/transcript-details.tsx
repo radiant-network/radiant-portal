@@ -2,6 +2,7 @@ import { TFunction } from 'i18next';
 
 import { Transcript } from '@/api/api';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
+import EmptyField from '@/components/base/information/empty-field';
 import ExpandableList from '@/components/base/list/expandable-list';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
@@ -26,7 +27,9 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
           />
         )}
         <div className="flex flex-col gap-2 text-muted-foreground text-xs font-mono">
-          <span>Exon: {data.exon_rank && data.exon_total ? `${data.exon_rank} / ${data.exon_total}` : '-'}</span>
+          <span>
+            Exon: {data.exon_rank && data.exon_total ? `${data.exon_rank} / ${data.exon_total}` : <EmptyField />}
+          </span>
           {data.dna_change && <span>{data.dna_change}</span>}
           <div>
             <Tooltip>
@@ -57,7 +60,7 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
             {data.phyloP17way_primate}
           </>
         ) : (
-          '-'
+          <EmptyField />
         )}
       </div>
     </div>

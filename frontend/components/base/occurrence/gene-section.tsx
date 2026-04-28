@@ -61,7 +61,7 @@ export default function GeneSection({
           )
         }
       />
-      <DetailItem title={t('occurrence_expand.gene.revel')} value={revel_score ?? '-'} />
+      <DetailItem title={t('occurrence_expand.gene.revel')} value={revel_score ?? <EmptyField />} />
       <DetailItem
         title={t('occurrence_expand.gene.splice_ai')}
         value={

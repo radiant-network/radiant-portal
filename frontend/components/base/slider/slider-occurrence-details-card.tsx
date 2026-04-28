@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { useState } from 'react';
 import { FlipVertical2, Triangle, Users } from 'lucide-react';
 
@@ -201,15 +202,17 @@ const SliderOccurrenceDetailsCard = ({
             <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
               <DescriptionSection title="Metrics" values={[ad_alt, ad_total, genotype_quality, filter]}>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.quality_depth')}>
-                  <span className="font-mono">
-                    {quality_depth ? thousandNumberFormat(quality_depth) : <EmptyField />}
-                  </span>
+                  {quality_depth ? (
+                    <span className="font-mono">{thousandNumberFormat(quality_depth)}</span>
+                  ) : (
+                    <EmptyField />
+                  )}
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.allele_depth_alt')}>
-                  <span className="font-mono">{ad_alt ? thousandNumberFormat(ad_alt) : <EmptyField />}</span>
+                  {ad_alt ? <span className="font-mono">{thousandNumberFormat(ad_alt)}</span> : <EmptyField />}
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.total_depth_alt_ref')}>
-                  <span className="font-mono">{ad_total ? thousandNumberFormat(ad_total) : <EmptyField />}</span>
+                  {ad_total ? <span className="font-mono">{thousandNumberFormat(ad_total)}</span> : <EmptyField />}
                 </DescriptionRow>
                 {/* Optional display */}
                 {genotype_quality && (

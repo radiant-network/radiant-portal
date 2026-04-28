@@ -3,6 +3,8 @@ import { getClassificationCriteriaColor } from '@/components/base/classification
 import { Badge } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
+import EmptyField from '../information/empty-field';
+
 import DetailSection, { DetailItem } from './detail-section';
 
 export type PredictionSectionProps = {
@@ -32,14 +34,14 @@ export default function PredictionSection({
           ))}
       </div>
     ) : (
-      '-'
+      <EmptyField />
     );
 
   return (
     <DetailSection title={t('occurrence_expand.predictions.title')}>
       <DetailItem
         title={t('occurrence_expand.predictions.exomiser')}
-        value={exomiser_acmg_classification ? <div>{exomiser}</div> : '-'}
+        value={exomiser_acmg_classification ? <div>{exomiser}</div> : <EmptyField />}
       />
     </DetailSection>
   );

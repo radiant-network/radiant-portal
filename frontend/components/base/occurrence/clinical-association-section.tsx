@@ -7,6 +7,8 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
 
+import EmptyField from '../information/empty-field';
+
 import DetailSection, { DetailItem } from './detail-section';
 
 export type ClinicalAssociationSectionProps = {
@@ -53,7 +55,11 @@ export default function ClinicalAssociationSection({ omim_conditions, locus_id }
           )
         }
         value={
-          oc.inheritance_code ? <div className="flex items-center gap-1">{omimCode(oc.inheritance_code)}</div> : '-'
+          oc.inheritance_code ? (
+            <div className="flex items-center gap-1">{omimCode(oc.inheritance_code)}</div>
+          ) : (
+            <EmptyField />
+          )
         }
         colon={false}
       />,
