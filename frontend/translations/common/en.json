@@ -595,22 +595,22 @@
           "uncertain_significance": "Uncertain Significance"
         },
         "fathmm_pred": {
-          "T": "Tolerated",
-          "D": "Damaging"
+          "t": "Tolerated",
+          "d": "Damaging"
         },
         "lrt_pred": {
-          "N": "Neutral",
-          "D": "Deleterious",
-          "U": "Unknown"
+          "n": "Neutral",
+          "d": "Deleterious",
+          "u": "Unknown"
         },
         "polyphen2_hvar_pred": {
-          "B": "Benign",
-          "D": "Damaging",
-          "P": "Possibly Damaging"
+          "b": "Benign",
+          "d": "Damaging",
+          "p": "Possibly Damaging"
         },
         "sift_pred": {
-          "T": "Tolerated",
-          "D": "Damaging"
+          "t": "Tolerated",
+          "d": "Damaging"
         },
         "transmission_mode": {
           "autosomal_dominant": "Autosomal Dominant",
