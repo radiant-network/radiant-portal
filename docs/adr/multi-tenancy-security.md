@@ -421,8 +421,6 @@ CASE WHEN org_id IN (
 
 Tenant roles (`tenant_owner`, `tenant_admin`, `researcher`) **never** grant `can_read_pii` — PII access is strictly org-scoped. A tenant owner who manages the tenant but has no org-level role sees PHI masked.
 
-**Caveat:** Ranger's ability to apply column masking on JDBC external catalog tables is not fully documented. For PostgreSQL-sourced data reaching StarRocks through JDBC, either (a) create a view into StarRocks table and apply masking there, or (b) mask at the API layer as a fallback.
-
 #### Connection Model & Access Paths
 
 - **Go API (Radiant portal):** Bearer JWT end-to-end. The JWT is forwarded through `mysql-proxy` to StarRocks, which validates it against Keycloak's JWKS. Every query runs as the authenticated user — Ranger evaluates the user's Ranger-role membership (for DB visibility) and `current_user()` (for auth_db row-filter and column-mask subqueries) — producing per-user audit attribution without a GORM refactor (no per-request DB instance needed; the proxy fans out to a per-JWT backend connection).
