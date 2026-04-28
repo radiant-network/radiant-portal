@@ -354,6 +354,7 @@ var GermlineSNVOccurrencesDefaultFields = []Field{
 	PickedVepImpactField,
 	PickedImpactScoreField,
 	PickedSymbolField,
+	PickedTranscriptIdField,
 	ChromosomeField,
 	StartField,
 	GermlineSNVExomiserMoiField,

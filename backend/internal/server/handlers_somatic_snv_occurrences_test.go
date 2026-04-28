@@ -80,6 +80,7 @@ func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(int, int, types.Lis
 			SomaticPfTnWgs:      &somaticPfTn,
 			SomaticPcTnWgs:      &somaticPcTn,
 			AdRatio:             &adRatio,
+			TranscriptId: 	     "T001",
 		},
 	}, nil
 }
@@ -120,7 +121,8 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 		"somatic_pc_tn_wgs":6, 
 		"somatic_pf_tn_wgs":0.55, 
 		"symbol":"BRAF", 
-		"task_id":74, 
+		"task_id":74,
+		"transcript_id":"T001",
 		"variant_class":"class1", 
 		"vep_impact":"MODIFIER"
 	}]`, w.Body.String())

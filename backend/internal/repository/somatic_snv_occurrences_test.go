@@ -57,6 +57,7 @@ func Test_Somatic_SNV_GetOccurrences(t *testing.T) {
 			assert.Equal(t, float64(0.55), *(occurrences[0].SomaticPfTnWgs))
 			assert.Equal(t, 6, *(occurrences[0].SomaticPcTnWgs))
 			assert.Equal(t, float32(0.66), *(occurrences[0].AdRatio))
+			assert.Equal(t, "T001", occurrences[0].TranscriptId)
 		}
 	})
 }
