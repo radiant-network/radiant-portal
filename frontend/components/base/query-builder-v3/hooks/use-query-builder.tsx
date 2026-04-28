@@ -56,8 +56,11 @@ export interface IHistory {
 
 export interface ISettings {
   labelsEnabled: boolean;
-  selectedQueries: string[];
   combinedQueries: Record<string, string[]>;
+}
+
+export interface ICache {
+  selectedQueries: string[];
 }
 
 export interface ICountInput {
@@ -80,6 +83,7 @@ export interface IQBContext {
   fetcher: IQBFetcher;
   history: IHistory;
   settings: ISettings;
+  cache: ICache;
 }
 
 type QBDispatch = Dispatch<ActionType>;
@@ -116,8 +120,10 @@ export function getDefaultQBContext() {
     },
     settings: {
       labelsEnabled: true,
-      selectedQueries: [],
       combinedQueries: {},
+    },
+    cache: {
+      selectedQueries: [],
     },
   };
 }
@@ -320,18 +326,18 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       if (isSelected) {
         return {
           ...context,
-          settings: {
-            ...context.settings,
-            selectedQueries: [...context.settings.selectedQueries, action.payload.uuid],
+          cache: {
+            ...context.cache,
+            selectedQueries: [...context.cache.selectedQueries, action.payload.uuid],
           },
         };
       }
 
       return {
         ...context,
-        settings: {
-          ...context.settings,
-          selectedQueries: context.settings.selectedQueries.filter(uuid => uuid != action.payload.uuid),
+        cache: {
+          ...context.cache,
+          selectedQueries: context.cache.selectedQueries.filter(uuid => uuid != action.payload.uuid),
         },
       };
     }
@@ -340,7 +346,7 @@ export function qBReducer(context: IQBContext, action: ActionType) {
      */
     case QBActionType.COMBINE_QUERIES: {
       const uuid = v4();
-      const { selectedQueries } = context.settings;
+      const { selectedQueries } = context.cache;
       const content = context.sqons.filter(sqon => selectedQueries.includes(sqon.id));
 
       return {
@@ -357,6 +363,8 @@ export function qBReducer(context: IQBContext, action: ActionType) {
         settings: {
           ...context.settings,
           combinedQueries: { ...context.settings.combinedQueries, [uuid]: content.map(c => c.id) },
+        },
+        cache: {
           selectedQueries: [],
         },
       };
@@ -652,7 +660,6 @@ export function qBReducer(context: IQBContext, action: ActionType) {
 
       if (index < 0) {
         throw Error(`ActiveQueryId does not exist in sqons: ${action.type} ${activeQueryId} ${action.payload}`);
-        return { ...context };
       }
 
       return {
@@ -785,6 +792,14 @@ export function useQBHistory(): IHistory {
 export function useQBSettings(): ISettings {
   const { settings } = useQBContext();
   return settings;
+}
+
+/**
+ * Return query-builder settings
+ */
+export function useQBCache(): ICache {
+  const { cache } = useQBContext();
+  return cache;
 }
 
 /**

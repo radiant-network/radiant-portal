@@ -6,6 +6,7 @@ import { ActionButton } from '@/components/base/buttons';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import {
   QBActionType,
+  useQBCache,
   useQBContext,
   useQBDispatch,
   useQBSettings,
@@ -45,13 +46,15 @@ type QueriesBarCardProps = {
 function QueriesBarCard({ appId }: QueriesBarCardProps) {
   const { t } = useI18n();
   const settings = useQBSettings();
-  const { sqons } = useQBContext();
+  const cache = useQBCache();
   const dispatch = useQBDispatch();
+  const { sqons } = useQBContext();
 
   // Sync sqons changes with user preference
   useSqonsQBUpdatePreferenceEffect({
     appId,
     sqons,
+    settings,
   });
 
   /**
@@ -135,7 +138,7 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
             {/* Actions */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                {settings.selectedQueries.length > 1 ? (
+                {cache.selectedQueries.length > 1 ? (
                   <>
                     {/* Combine Queries */}
                     <ActionButton
