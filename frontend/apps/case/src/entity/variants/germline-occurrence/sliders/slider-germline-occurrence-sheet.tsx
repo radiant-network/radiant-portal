@@ -183,7 +183,7 @@ function GermlineOccurrenceSheetContent({
           mother_calls={expandResult.data.mother_calls}
           ad_alt={expandResult.data.ad_alt}
           ad_total={expandResult.data.ad_total}
-          enableIGV
+          has_igv_files={caseResult.data?.has_igv_files}
         />
       )}
       <SliderVariantDetailsCard

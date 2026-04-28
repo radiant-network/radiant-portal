@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { MoreVerticalIcon } from 'lucide-react';
 import { VariantProps } from 'tailwind-variants';
 
@@ -18,6 +19,8 @@ interface Action {
   icon?: React.ReactElement;
   onClick: () => void;
   hasSeparator?: boolean;
+  tooltip?: string;
+  disabled?: boolean;
 }
 
 interface ActionButtonProps
@@ -72,13 +75,25 @@ function ActionButton({
 
           <DropdownMenuContent className="py-1 px-0">
             {actions.map((action, index) => (
-              <>
-                <DropdownMenuItem key={index} onClick={action.onClick}>
-                  {action.icon}
-                  {action.label}
-                </DropdownMenuItem>
+              <Fragment key={index}>
+                {action.tooltip ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuItem disabled={action.disabled ?? false}>
+                        {action.icon}
+                        {action.label}
+                      </DropdownMenuItem>
+                    </TooltipTrigger>
+                    <TooltipContent>{action.tooltip}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <DropdownMenuItem onClick={action.onClick}>
+                    {action.icon}
+                    {action.label}
+                  </DropdownMenuItem>
+                )}
                 {action.hasSeparator && <Separator className="my-1" />}
-              </>
+              </Fragment>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>

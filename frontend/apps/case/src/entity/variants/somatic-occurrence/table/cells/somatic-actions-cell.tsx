@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router';
 import { Row } from '@tanstack/react-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 
-import { GermlineSNVOccurrence } from '@/api/api';
+import { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import { useI18n } from '@/components/hooks/i18n';
 import { SELECTED_VARIANT_PARAM } from '@/entity/variants/constants';
@@ -12,9 +12,10 @@ import IGVDialog from 'components/base/igv/igv-dialog';
 
 type SomaticActionsMenuProps = {
   row: Row<GermlineSNVOccurrence>;
+  caseEntity?: CaseEntity;
 };
 
-function SomaticActionsCell({ row }: SomaticActionsMenuProps) {
+function SomaticActionsCell({ row, caseEntity }: SomaticActionsMenuProps) {
   const { t } = useI18n();
   const [igvOpen, setIgvOpen] = useState<boolean>(false);
   const caseId = useCaseIdFromParam();
@@ -64,6 +65,9 @@ function SomaticActionsCell({ row }: SomaticActionsMenuProps) {
           {
             icon: <FlipHorizontal2Icon />,
             label: t('variant.actions.open_in_igv'),
+            tooltip:
+              caseEntity?.has_igv_files === false ? t('variant.actions.open_in_igv_disabled_tooltip') : undefined,
+            disabled: caseEntity?.has_igv_files === false,
             onClick: () => setIgvOpen(true),
           },
           {

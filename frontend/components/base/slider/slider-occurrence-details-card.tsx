@@ -33,7 +33,7 @@ type SliderOccurrenceDetailsCardProps = {
   mother_calls?: number[];
   ad_alt?: number;
   ad_total?: number;
-  enableIGV?: boolean;
+  has_igv_files?: boolean;
 };
 
 function getFilterValue(filter: string | undefined, t: (key: string) => string): React.ReactNode {
@@ -77,7 +77,7 @@ const SliderOccurrenceDetailsCard = ({
   mother_calls,
   ad_alt,
   ad_total,
-  enableIGV = false,
+  has_igv_files = false,
 }: SliderOccurrenceDetailsCardProps) => {
   const { t } = useI18n();
   const [igvOpen, setIGVOpen] = useState<boolean>(false);
@@ -85,7 +85,7 @@ const SliderOccurrenceDetailsCard = ({
   const filterValue = getFilterValue(filter, t);
 
   let actions = undefined;
-  if (enableIGV && start && chromosome) {
+  if (has_igv_files && start && chromosome) {
     actions = (
       <IGVDialog
         open={igvOpen}
@@ -102,6 +102,18 @@ const SliderOccurrenceDetailsCard = ({
           </Button>
         )}
       />
+    );
+  } else {
+    actions = (
+      <Tooltip>
+        <TooltipTrigger>
+          <Button variant="outline" size="xs" disabled>
+            <FlipVertical2 />
+            {t('preview_sheet.occurrence_details.actions.view_in_igv')}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{t('variant.actions.open_in_igv_disabled_tooltip')}</TooltipContent>
+      </Tooltip>
     );
   }
 

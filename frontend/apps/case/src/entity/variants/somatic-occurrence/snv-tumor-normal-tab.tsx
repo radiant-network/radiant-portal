@@ -1,4 +1,4 @@
-import { CaseSequencingExperiment } from '@/api/api';
+import { CaseEntity, CaseSequencingExperiment } from '@/api/api';
 import { ICountInput, IListInput } from '@/components/base/query-builder-v3/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder-v3/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder-v3/query-builder-data-table';
@@ -18,9 +18,10 @@ import {
 type SomaticOccurrencesProps = {
   seqId: number;
   patientSelected?: CaseSequencingExperiment;
+  caseEntity?: CaseEntity;
 };
 
-function SNVTumorNormalTab({ seqId, patientSelected }: SomaticOccurrencesProps) {
+function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurrencesProps) {
   const { t } = useI18n();
   const config = useConfig();
   const caseId = useCaseIdFromParam();
@@ -42,7 +43,7 @@ function SNVTumorNormalTab({ seqId, patientSelected }: SomaticOccurrencesProps) 
     >
       <QueryBuilderDataTable
         id={appId}
-        columns={getSomaticSNVTumorNormalColumns(t)}
+        columns={getSomaticSNVTumorNormalColumns(t, caseEntity)}
         defaultColumnSettings={defaultSomaticSNVSettings}
         enableColumnOrdering
         enableFullscreen
