@@ -50,7 +50,7 @@ export const ManagerFilterModal = {
      */
     shouldDisplayInManager(name: string, shouldExist: boolean = true) {
       const strExist = shouldExist ? 'exist' : 'not.exist';
-      cy.get(CommonSelectors.modal).contains(name).should(strExist);
+      cy.get(`${CommonSelectors.modal}:contains("${name}")`).should(strExist);
     },
   },
 };

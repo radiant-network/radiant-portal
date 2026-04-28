@@ -1,6 +1,7 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
 import { CommonTexts } from 'pom/shared/Texts';
+import { CaseEntity_Variants_Facets } from './CaseEntity_Variants_Facets';
 
 const generateSavedFiltersFunctions = () => {
   const actions = {
@@ -14,7 +15,7 @@ const generateSavedFiltersFunctions = () => {
      * Clicks the duplicate filter button.
      */
     clickDuplicateButton() {
-      cy.get(`${CommonSelectors.querybuilderHeader} ${CommonSelectors.duplicateIcon}`).clickAndWait({ force: true });
+      cy.get(`${CommonSelectors.querybuilderHeader} button:has(${CommonSelectors.duplicateIcon})`).clickAndWait();
     },
     /**
      * Clicks the edit filter button.
@@ -46,6 +47,12 @@ const generateSavedFiltersFunctions = () => {
      */
     createFilter(name: string) {
       actions.deleteFilter(name);
+
+      CaseEntity_Variants_Facets.snv.actions.clickSidebarSection('Variant'); // Also works for CNV
+      cy.get(CommonSelectors.facetHeader).contains('Chromosome').clickAndWait({ force: true });
+      cy.get(CommonSelectors.facetHeader).contains('Chromosome').parents(CommonSelectors.facet).find(CommonSelectors.facetCheckbox('')).eq(0).click({ force: true });
+      cy.get(CommonSelectors.facetHeader).contains('Chromosome').parents(CommonSelectors.facet).find(CommonSelectors.facetApplyButton).click({ force: true });
+
       actions.clickEditButton();
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.input}`).clear();
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.input}`).type(name);
@@ -56,6 +63,11 @@ const generateSavedFiltersFunctions = () => {
       cy.wait('@postSavedFilters');
 
       validations.shouldDisplayFilterName(name);
+
+      // Prevents a race condition bug that only occurs with automated tests. Allows you to obtain the correct localStorage.
+      cy.url().then(currentUrl => {
+        cy.visit(currentUrl);
+      });
     },
     /**
      * Deletes a filter.
@@ -74,6 +86,11 @@ const generateSavedFiltersFunctions = () => {
             cy.intercept('**/saved_filters{,/**}').as('deleteSavedFilters');
             cy.get(`${CommonSelectors.alert} ${CommonSelectors.destructiveButton}`).click({ force: true });
             cy.wait('@deleteSavedFilters');
+
+            // Prevents a race condition bug that only occurs with automated tests. Allows you to obtain the correct localStorage.
+            cy.url().then(currentUrl => {
+              cy.visit(currentUrl);
+            });
 
             actions.openMyFiltersDropdown();
             cy.get('body').contains(name).should('not.exist');
@@ -145,7 +162,7 @@ const generateSavedFiltersFunctions = () => {
     shouldDisplayInDropdown(name: string | RegExp, shouldExist: boolean = true) {
       const strExist = shouldExist ? 'exist' : 'not.exist';
       actions.openMyFiltersDropdown();
-      cy.get('body').contains(name).should(strExist);
+      cy.get(CommonSelectors.menuPopper).contains(name).should(strExist);
     },
     /**
      * Checks that the icon have the expected enabled/disabled and dirty states.

@@ -9,7 +9,7 @@ describe('Case Entity - Variants - CNV - Facets - Request Validation', () => {
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV');
   };
 
-  it('MultiSelect [SJRA-1368]', () => {
+  it('MultiSelect [SJRA-1390]', () => {
     setupTest();
     CaseEntity_Variants_Facets.cnv.validations.shouldRequestOnApply('Variant', 'variant_type');
   });

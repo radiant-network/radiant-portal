@@ -70,7 +70,7 @@ describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('share', false /*isDisable*/, false /*isDirty*/);
   });
 
-  it('Duplicate without saving [SJRA-1097]', () => {
+  it('Duplicate without saving', () => {
     setupTest();
     CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_FA');
     CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F1 COPY');
@@ -86,13 +86,13 @@ describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
     ManagerFilterModal.actions.closeManager();
 
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', true /*isDisable*/, false /*isDirty*/);
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('save', false /*isDisable*/, false /*isDirty*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('duplicate', true /*isDisable*/, false /*isDirty*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('delete', true /*isDisable*/, false /*isDirty*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('share', true /*isDisable*/, false /*isDirty*/);
   });
 
-  it('Duplicate and save [SJRA-1097]', () => {
+  it('Duplicate and save', () => {
     setupTest();
     CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_FA');
     CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F1 COPY');
@@ -102,17 +102,17 @@ describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
     CaseEntity_Variants_SavedFilters.snv.actions.clickSaveButton();
 
     CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName(/^Cypress_F1 COPY$/);
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('Cypress_F1 COPY', false /*shouldExist*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('Cypress_F1 COPY', true /*shouldExist*/);
     CaseEntity_Variants_SavedFilters.snv.actions.openManager();
 
-    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_F1 COPY', false /*shouldExist*/);
+    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_F1 COPY', true /*shouldExist*/);
     ManagerFilterModal.actions.closeManager();
 
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', false /*isDisable*/, false /*isDirty*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('duplicate', true /*isDisable*/, false /*isDirty*/);
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('delete', true /*isDisable*/, false /*isDirty*/);
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('share', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('duplicate', false /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('delete', false /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('share', false /*isDisable*/, false /*isDirty*/);
   });
 
   it('Delete', () => {
