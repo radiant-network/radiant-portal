@@ -1,6 +1,8 @@
 import { useI18n } from '@/components/hooks/i18n';
 import { replaceUnderscore, titleCase } from '@/components/lib/string-format';
 
+import EmptyField from '../information/empty-field';
+
 import DetailSection, { DetailItem } from './detail-section';
 
 export type ZygositySectionProps = {
@@ -12,9 +14,9 @@ export type ZygositySectionProps = {
 export default function ZygositySection({ zygosity, transmission, parental_origin }: ZygositySectionProps) {
   const { t } = useI18n();
 
-  const zygosityValue = zygosity ? zygosity : '-';
-  const inheritance = transmission ? titleCase(replaceUnderscore(transmission)) : '-';
-  const parentalOrigin = parental_origin ? titleCase(replaceUnderscore(parental_origin)) : '-';
+  const zygosityValue = zygosity ? zygosity : <EmptyField />;
+  const inheritance = transmission ? titleCase(replaceUnderscore(transmission)) : <EmptyField />;
+  const parentalOrigin = parental_origin ? titleCase(replaceUnderscore(parental_origin)) : <EmptyField />;
 
   return (
     <DetailSection title={t('occurrence_expand.zygosity.title')}>

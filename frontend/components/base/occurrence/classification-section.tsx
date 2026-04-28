@@ -1,6 +1,8 @@
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import { useI18n } from '@/components/hooks/i18n';
 
+import EmptyField from '../information/empty-field';
+
 import DetailSection, { DetailItem } from './detail-section';
 
 export type ClassificationSectionProps = {
@@ -20,7 +22,7 @@ export default function ClassificationSection({ clinvar }: ClassificationSection
     <DetailSection title={t('occurrence_expand.classifications.title')}>
       <DetailItem
         title={t('occurrence_expand.classifications.clinvar')}
-        value={badges?.length ? <div className="flex items-center gap-1">{badges}</div> : '-'}
+        value={badges?.length ? <div className="flex items-center gap-1">{badges}</div> : <EmptyField />}
       />
     </DetailSection>
   );
