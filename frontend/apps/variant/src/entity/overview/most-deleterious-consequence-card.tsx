@@ -5,6 +5,7 @@ import { VariantOverview } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import ConditionalField from '@/components/base/information/conditional-field';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, CardProps } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -128,6 +129,17 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             </div>
           )}
           {data?.dna_change && <div className="font-mono">{data?.dna_change}</div>}
+          {data?.rsnumber && (
+            <AnchorLink
+              size="sm"
+              href={`https://www.ncbi.nlm.nih.gov/snp/${data.rsnumber}`}
+              className={'hover:underline font-mono'}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {data.rsnumber}
+            </AnchorLink>
+          )}
         </div>
       </CardContent>
     </Card>
