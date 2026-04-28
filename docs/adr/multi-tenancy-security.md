@@ -77,7 +77,7 @@ graph LR
 |--------|----------------------|------|
 | **StarRocks connection** | Single shared pool (`root` account, 100 max connections) via `backend/internal/database/starrocks.go` | All queries run as a single privileged user; no per-user audit trail in StarRocks |
 | **PostgreSQL connection** | Single shared pool (`radiant` account, 100 max connections) via `backend/internal/database/postgres.go` | Same as above |
-| **Authorization** | Keycloak RBAC or OpenFGA at Go middleware level (`backend/internal/authorization/`) | Single point of enforcement; a bug bypasses all protection |
+| **Authorization** | Keycloak RBAC or OpenFGA at Go middleware level (`backend/internal/authorization/`) | Single point of enforcement; bypasses all protection for now |
 | **Project-level filtering** | OpenFGA `ListObjects` computes allowed projects, stores in Gin context key `"allowed"` (`openfga.go:117`) -- **but no handler or repository ever reads this value** | Authorization is computed but not enforced at the data layer |
 | **Row-level security** | None | Any authenticated user can potentially access any patient/case data |
 | **Column masking** | None | No differentiation between identified and de-identified access |
@@ -108,7 +108,6 @@ The platform must support 10--50 tenants (hospitals, research institutions, juri
 
 **This is a critical architectural constraint.** Any option that relies solely on the Go API layer for authorization leaves direct-access users completely unprotected. Tenant isolation, group-level access control, and PII masking must be enforced **at the StarRocks level** for these access paths -- the Go API cannot intercept or filter their queries.
 
-**Implication:** any design that relies solely on the Go API layer for authorization leaves direct-access users completely unprotected and is therefore not a viable final state. Only StarRocks-level enforcement (DB RBAC, views, or Ranger) protects all access paths equally, regardless of whether the query originates from the Go API, a Jupyter notebook, or a Tableau dashboard.
 
 ### Target Architecture (Ranger + `auth_db`)
 
@@ -181,7 +180,7 @@ graph LR
     style Proxy fill:#ffe6e6,stroke:#333
 ```
 
-> **Single source of truth**: `auth_db` tables in StarRocks hold the authorization model. Each tenant has its own database (`cbtn_db`, `udn_db`, …); database visibility is enforced by Ranger access policies bound to **Ranger roles** (`cbtn_member`, `udn_member`) — `SHOW DATABASES` naturally hides the wrong tenant. The admin API maintains Ranger role membership as a derived projection of `auth_db.user_tenant_role` / `user_org_role` on every grant or revoke. Cross-tenant tables (e.g., `base.variants`) live in a `base` database with **no Ranger access policy** — only root reaches them directly; tenant users go through per-tenant `SECURITY NONE` views. Ranger row-filter and column-mask still drive PHI access via `auth_db` subqueries. Go clients reach StarRocks through `mysql-proxy` (cleartext JWT → TLS + OIDC).
+> **Single source of truth**: `auth_db` tables in StarRocks hold the authorization model. Each tenant has its own database (`cbtn_db`, `udn_db`, …); database visibility is enforced by Ranger access policies bound to **Ranger roles** (`cbtn_member`, `udn_member`) — `SHOW DATABASES` naturally hides the wrong tenant. The admin API maintains Ranger role membership as a derived projection of `auth_db.user_tenant_role` / `user_org_role` on every grant or revoke. Cross-tenant tables (e.g., `base.variants`) live in a `base` database with **no Ranger access policy** — only root or admin services account reaches them directly; tenant users go through per-tenant `SECURITY NONE` views. Ranger row-filter and column-mask still drive PHI access via `auth_db` subqueries. Go clients reach StarRocks through `mysql-proxy` (cleartext JWT → TLS + OIDC).
 
 ---
 
@@ -191,7 +190,6 @@ graph LR
 
 Radiant Portal handles **protected health information (PHI)**. Applicable regulations include:
 
-- **PIPEDA** (Canada) -- requires appropriate safeguards for personal health information, including access controls, audit trails, and data minimization
 - **HIPAA-equivalent requirements** -- even outside the US, many partner institutions require HIPAA-aligned controls: minimum necessary access, access logging, breach notification
 - **Research ethics board requirements** -- de-identified access for approved researchers, identified access only for treating clinicians
 
@@ -208,7 +206,7 @@ A compliance review will ask: *"If your application layer has a bug, what preven
 The team is mid-size. The chosen architecture must be:
 
 - Operable without a dedicated security/infrastructure team
-- Deployable on existing infrastructure (Kubernetes, Docker Compose)
+- Deployable on existing infrastructure (Kubernetes, Docker Compose, ECS)
 - Maintainable as tenant count grows (no O(n) manual configuration per tenant)
 
 ### 2.4 Performance
@@ -423,7 +421,7 @@ CASE WHEN org_id IN (
 
 Tenant roles (`tenant_owner`, `tenant_admin`, `researcher`) **never** grant `can_read_pii` — PII access is strictly org-scoped. A tenant owner who manages the tenant but has no org-level role sees PHI masked.
 
-**Caveat:** Ranger's ability to apply column masking on JDBC external catalog tables is not fully documented. For PostgreSQL-sourced data reaching StarRocks through JDBC, either (a) materialize into a native StarRocks table and apply masking there, or (b) mask at the API layer as a fallback.
+**Caveat:** Ranger's ability to apply column masking on JDBC external catalog tables is not fully documented. For PostgreSQL-sourced data reaching StarRocks through JDBC, either (a) create a view into StarRocks table and apply masking there, or (b) mask at the API layer as a fallback.
 
 #### Connection Model & Access Paths
 
@@ -435,18 +433,6 @@ Tenant roles (`tenant_owner`, `tenant_admin`, `researcher`) **never** grant `can
 - **StarRocks must have TLS enabled** — the OIDC client plugin refuses to transmit the JWT over a cleartext channel. See [TLS requirement for OIDC](#tls-requirement-for-oidc).
 
 **Policy evaluation overhead:** The StarRocks Ranger plugin caches policies locally (poll interval default 10s), so Ranger evaluation does not add a network round-trip per query. The only per-query cost is the subquery against `auth_db` tables (small, primary-key lookups — typically <5 ms).
-
-#### No OpenFGA Sync — `auth_db` is the Single Source of Truth
-
-A naive Ranger-based design would require an OpenFGA-to-Ranger sync daemon (with attendant sync lag). **This architecture eliminates that by not introducing OpenFGA at all.** `auth_db` lives in StarRocks; Ranger policies are subqueries against it; nothing to sync. Permissions take effect on the next policy-cache poll (default 10s) with no custom infrastructure.
-
-| Concern | Engine |
-|---------|--------|
-| StarRocks data access (row-filter, column masking) | Apache Ranger (expressions → `auth_db` subqueries) |
-| Portal actions (interpret, upload, approve, invite) | Go API (action check via `auth_db.role_action`) |
-| Tenant/org/role membership | `auth_db` (single source of truth) |
-
-Both authorization layers read the same source data. Portal "can Alice interpret a variant at CHOP?" and StarRocks "should this row be visible?" resolve to the same `role_action` table — no cross-system inconsistency possible.
 
 #### Audit Trail
 
@@ -478,12 +464,10 @@ Ranger policies enforce row-filter and column masking regardless of query origin
 | Keycloak | Realm + client + users | Identity provider standard ops |
 | mysql-proxy | Small Go binary (~400 LOC) | Single process; deploy alongside StarRocks |
 
-Ranger deployments are often described as "operationally very heavy" — assuming full per-user/per-tenant policy authoring plus an OpenFGA→Ranger sync daemon. The POC's actual footprint is much smaller:
+The POC's actual footprint is :
 - **~12 static Ranger policies + 1 access policy per tenant DB + 1 Ranger role per tenant** (no per-user policies).
 - **No external sync daemon** — `auth_db` is the source of truth and the admin API patches Ranger membership inline with each grant/revoke.
 - **Admin UI replaces manual Ranger administration** for day-to-day ops.
-
-The Java stack (Ranger + Ranger PG) remains a new infrastructure dependency. For teams without Java operations expertise this is a one-time learning cost, not a day-to-day burden.
 
 #### Compliance Posture
 
@@ -497,20 +481,17 @@ The Java stack (Ranger + Ranger PG) remains a new infrastructure dependency. For
 
 #### Migration Path (POC-validated)
 
-1. Deploy Keycloak (realm, client with OIDC + audience mapper) — **1–2 weeks**
-2. Deploy Ranger (Ranger Admin + Ranger PG) — **1–2 weeks**
-3. Create `auth_db` schema; seed domain roles and actions; migrate existing users into `auth_db` — **1–2 weeks**
-4. Generate StarRocks TLS keystore (JKS); enable `ssl_keystore_location` in `fe.conf` — **<1 week**
-5. Register Ranger service; create per-tenant Ranger roles + access policies; apply auth_db row-filter and PHI column-mask policies; enable `access_control = ranger` — **1 week**
-6. Build and deploy `mysql-proxy` for Go API + `go-sql-driver` clients — **1–2 weeks**
-7. Update Go API: action checks via `auth_db`; Bearer JWT forwarded to StarRocks via proxy — **1–2 weeks**
-8. Radiant admin UI (tenant switcher, role CRUD, user assignments) — **1–2 weeks**
+1. Deploy Ranger (Ranger Admin + Ranger PG) 
+2. Create `auth_db` schema; seed domain roles and actions; migrate existing users into `auth_db` 
+3. Register Ranger service; create per-tenant Ranger roles + access policies; apply auth_db row-filter and PHI column-mask policies; enable `access_control = ranger` in Starrocks
+4. Build and deploy `mysql-proxy` for Go API + `go-sql-driver` clients 
+5. Update Go API: action checks via `auth_db`; Bearer JWT forwarded to StarRocks via proxy 
+6. Radiant admin UI (tenant switcher, role CRUD, user assignments) 
 
-Total: ~**8–12 weeks** with one or two engineers, incrementally shippable per phase.
 
 #### Portal-Specific Action Authorization
 
-Although Ranger doesn't directly cover portal actions (interpret, upload, approve, invite), they are governed by the **same** `auth_db` source of truth — no separate OpenFGA-style service required. The Go API evaluates action permissions by running the equivalent subquery against `auth_db.role_action` (same query shape Ranger uses). No sync, no dual systems:
+Although Ranger doesn't directly cover portal actions (interpret, upload, approve, invite), they are governed by the **same** `auth_db` source of truth. The Go API evaluates action permissions by running the equivalent subquery against `auth_db.role_action` (same query shape Ranger uses). No sync, no dual systems:
 
 ```go
 // Pseudo-code: handler checks can_create_case at the target org
@@ -527,10 +508,6 @@ hasAction := authDB.QueryRow(`
 
 ### Alternative Solutions
 
-Three other shapes were explored before settling on Ranger + `auth_db`: API-only enforcement, views with per-tenant service-account pools, and views with per-user JWT. Only the last (views + per-user JWT) is retained below as a noteworthy alternative; the other two are not viable end-states:
-- **API-only enforcement** cannot protect direct StarRocks access (Jupyter, BI, MCP) and is therefore not a valid final state. It survives only as the *transitional Phase 1* in [Section 7](#7-migration-strategy).
-- **Views + per-tenant service-account pools** is structurally a subset of the views + per-user JWT shape and shares all of its risks while adding a hybrid connection model that complicates auditing.
-
 #### Views + per-user JWT (brief)
 
 **Idea:** instead of Apache Ranger, achieve tenant isolation and PII control entirely with **StarRocks views** layered over the base tables. Each tenant gets a per-tenant view database that filters by `tenant_id`; per-tenant identified/de-identified view databases enforce PHI access. All connections (portal and direct) are per-user JWT.
@@ -542,10 +519,6 @@ Three other shapes were explored before settling on Ranger + `auth_db`: API-only
 **Why the Ranger + `auth_db` approach is preferred:**
 - View-based RLS is **less expressive** than Ranger row-filter and column-mask. Ranger lets us write a static auth_db row-filter and per-column mask whose expressions subquery `auth_db`; the view-based design needs one view per (tenant × variant of access) and DDL changes whenever roles or PII rules change. (The recommended architecture does use views in one narrow place — to expose per-tenant slices of cross-tenant `base` tables — but those are static and gated by Ranger access policies, not the masking layer.)
 - **PII masking through views requires per-group identified / de-identified databases**. Database proliferation grows with `tenants × groups`; each tenant onboarding is a multi-DDL operation.
-- **Major GORM refactor** in the Go backend: per-request DB injection across all 61 repositories (vs. Bearer-JWT-via-proxy with no GORM changes).
-- **Open performance risks** the POC did not exercise: view predicate pushdown, colocate-join preservation through pass-through views.
-
-**When this alternative becomes preferable:** if a Java runtime (Apache Ranger + Ranger-PG) is operationally unacceptable in the deployment environment. In that case, accept the proliferation cost and the GORM refactor in exchange for a pure-StarRocks stack.
 
 ## 4. Proposed Schema Organization
 
@@ -624,7 +597,7 @@ Key changes from the current schema:
 - **`base` database for cross-tenant tables.** Tables that are physically co-located across tenants (shared reference data; partitioned wide tables that benefit from a single colocation group) live in `base`. There is **no Ranger access policy on `base`**, so Ranger denies any non-root SELECT. Tenant users reach `base` tables only through per-tenant **`SECURITY NONE` views** in `cbtn_db` / `udn_db` (default StarRocks view security mode); the view bypasses the underlying-table privilege check while exposing only the tenant's slice.
 - **Shared reference tables stay in `base`** so that colocation groups on `HASH(locus_id)` (required for fast `occurrence JOIN variant JOIN consequence JOIN clinvar`) are preserved. As of StarRocks 2.5.4, colocation groups can span databases — but `base` keeps the layout simple.
 
-### 4.1 StarRocks Schema
+### StarRocks Schema
 
 #### Per-tenant databases
 
@@ -684,76 +657,20 @@ This lets root run cross-tenant analytics directly on `base.*`, while tenant use
 
 A baseline production deployment is roughly: 1 access policy on `auth_db` + 1 access policy per tenant DB + 3 auth_db row-filter policies + N column masks (one per PHI column, multi-valued database resource covering all tenant DBs). Tenant scoping at the row level (the previous `tenant_id IN (…)` row-filter) is no longer needed — the database boundary handles it.
 
-#### Iceberg and JDBC catalogs
-
-`radiant_iceberg` and `radiant_jdbc` tables that contain tenant-scoped data must also expose `tenant_id` and (where applicable) `org_id`. Ranger row-filter policies apply to external-catalog tables the same way as to native tables, **with the caveat that column masking on JDBC catalogs is not fully documented.** For PostgreSQL-sourced PHI reaching StarRocks via JDBC, either:
-
-1. Materialize into a native StarRocks table and mask there, or
-2. Mask at the API layer (Go helper that zeros PHI columns when the caller lacks `can_read_pii`).
-
-Both approaches are compatible with the rest of the architecture.
-
-### 4.2 PostgreSQL Schema Changes
-
-#### New Tables
-
-```sql
--- Tenant definition
-CREATE TABLE tenant (
-    id SERIAL PRIMARY KEY,
-    code TEXT UNIQUE NOT NULL,              -- e.g., "cbtn", "udp"
-    name TEXT NOT NULL,                      -- e.g., "Children's Brain Tumor Network"
-    starrocks_tenant_id INT UNIQUE NOT NULL, -- maps to tenant_id in StarRocks
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
-);
-
--- Tenant-to-project mapping (a project belongs to exactly one tenant)
-ALTER TABLE project ADD COLUMN tenant_id INTEGER REFERENCES tenant(id);
-CREATE INDEX idx_project_tenant_id ON project(tenant_id);
-
--- Group definition (within a tenant)
-CREATE TABLE tenant_group (
-    id SERIAL PRIMARY KEY,
-    code TEXT NOT NULL,                      -- e.g., "chop", "seattle"
-    name TEXT NOT NULL,
-    tenant_id INTEGER NOT NULL REFERENCES tenant(id),
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE(tenant_id, code)
-);
-
--- Group-to-project mapping (a group may contain multiple projects)
-CREATE TABLE group_has_project (
-    group_id INTEGER NOT NULL REFERENCES tenant_group(id),
-    project_id INTEGER NOT NULL REFERENCES project(id),
-    PRIMARY KEY (group_id, project_id)
-);
-```
-
-#### No Changes to Existing Tables
-
-The existing `patient`, `cases`, `sample`, `sequencing_experiment`, `organization`, and `project` tables are unchanged. The `organization_id` and `project_id` foreign keys continue to work as-is. Tenant isolation for PostgreSQL data is enforced at the API layer (using the project-to-tenant mapping to resolve allowed project IDs).
-
-### 4.3 JDBC Federation
-
-The single `radiant_jdbc` catalog remains unchanged. The Go API's per-tenant service accounts have `SELECT` on `radiant_jdbc.public` for federated JOINs. Within-tenant project filtering on JDBC-federated tables is enforced by the Go API via `WHERE project_id IN (?)`.
-
-**For direct-access users:** Direct-access users do **not** have `SELECT` on `radiant_jdbc` directly. They access clinical data exclusively through the `radiant_{tenant}_identified` or `radiant_{tenant}_deidentified` view databases, which contain pre-filtered, pre-masked views of the JDBC-federated tables. This prevents a direct-access user from issuing a raw `SELECT * FROM radiant_jdbc.public.patient` and seeing all tenants' data.
-
-**Why not per-tenant JDBC catalogs?** Multiple JDBC catalogs pointing to the same PostgreSQL database provide no real isolation (each sees all tables). Per-tenant PostgreSQL schemas would provide isolation but require a complex migration of all foreign keys and queries. The identified/de-identified view database approach is simpler and provides both tenant isolation and PII masking without modifying PostgreSQL.
 
 ---
 
 ## 5. Authorization Model (`auth_db`)
 
-**Authorization is data, not a separate service.** The POC validated that a small set of StarRocks tables is simpler, faster to query, and more auditable than an external authorization service (e.g. OpenFGA) for this domain. `auth_db` lives in the same cluster as the data it protects; Ranger row-filter and column-mask expressions read it via SQL subqueries on every query. Permissions take effect on the next policy-cache poll (default ~10 s) with zero custom sync infrastructure.
+**Authorization is data, not a separate service.** The POC validated that a small set of tables is simpler, faster to query, and more auditable than an external authorization service (e.g. OpenFGA) for this domain. Ranger row-filter and column-mask expressions read these tables via SQL subqueries on every query. Permissions take effect on the next policy-cache poll (default ~10 s) with zero custom sync infrastructure.
+
+> **Production vs. POC.** In production, `auth_db` will be a **PostgreSQL database federated into StarRocks via the JDBC catalog** (`radiant_jdbc`). Authorization is a transactional/operational concern — small row count, frequent INSERT/UPDATE/DELETE from the admin API, ACID semantics — which fits PostgreSQL and matches where the rest of Radiant's transactional state already lives. The federated catalog lets Ranger row-filter and column-mask subqueries continue to address `auth_db.*` from inside StarRocks, while the admin API writes go directly to PostgreSQL. **For POC simplicity, `auth_db` is implemented as native StarRocks Primary Key tables** in the same cluster — same schema, same subquery shape, same source-of-truth role; only the storage engine differs. Migrating from POC to production is a one-time copy + JDBC-catalog registration step; no policy expressions or admin-API code paths change.
 
 This section documents the schema, the domain role model, the action catalog, and the assignment rules.
 
 ### 5.1 Schema
 
-All tables are **StarRocks Primary Key tables** in database `auth_db`, distributed by the leading key.
+All tables are **StarRocks Primary Key tables** in database `auth_db` (POC) — equivalent PostgreSQL tables in production, federated via `radiant_jdbc.auth_db`. Distribute by the leading key.
 
 ```sql
 -- Identity / structure
@@ -957,192 +874,9 @@ Because a user can belong to multiple tenants (e.g. Carol in CBTN + UDN, admin1 
 
 For direct StarRocks access (Jupyter, BI, MCP), the client issues SQL against a specific table; the row-filter automatically restricts rows to tenants the user belongs to. No "active tenant" concept is needed — the user simply sees everything they are authorized to see across all their tenants in a single query.
 
-## 6. Recommendation
-
-### Recommended Architecture: Ranger + `auth_db` (POC-validated)
-
-The POC at [`docs/adr/ranger-poc/`](./ranger-poc/README.md) implemented this architecture end-to-end and validated every critical assumption. Recommended migration sequence:
-
-| Phase | Deliverable | Duration |
-|-------|-------------|----------|
-| **Phase 1** | API-layer enforcement (transitional, portal-only multi-tenancy) | 4–8 weeks |
-| **Phase 2** | Deploy Keycloak + Ranger + `auth_db`; create per-tenant DBs; create per-tenant Ranger roles + access policies; admin-API Ranger role sync; auth_db row-filter + PHI column-mask; enable StarRocks TLS + `access_control = ranger`; mysql-proxy for Go clients | 6–8 weeks |
-| **Phase 3** | Radiant admin UI (tenant switcher, role CRUD, user assignments); onboard data analysts / BI via direct OIDC | 2–3 weeks |
-
-Total: ~**12–19 weeks** (Phase 1 + 2 + 3), with each phase shippable independently.
-
-### Why Ranger + `auth_db`
-
-**It is the only option that delivers defense-in-depth for all access paths (portal, Jupyter, BI, MCP) with a single authorization source of truth.**
-
-1. **All access paths equally protected.** Database visibility (Ranger access policies bound to Ranger roles) and PHI control (row-filter + column-mask) are enforced by the StarRocks FE regardless of whether the query originates from the Go API, a Jupyter notebook, Power BI, or an MCP agent. The POC demonstrated identical behavior for every access path.
-
-2. **Single source of truth.** `auth_db` in StarRocks holds the entire authorization model. Portal action checks (Go API) and data-layer enforcement (Ranger) both read the same `role_action` table. No OpenFGA-to-Ranger sync daemon, no drift.
-
-3. **Operational cost is bounded.** Static policies are independent of user count: ~3 auth_db row-filter policies + N column-mask policies + 1 access policy per tenant DB. Per-tenant Ranger roles grow only with the number of tenants. The admin API patches Ranger user records and role membership inline with each grant/revoke — no external sync daemon. The Java dependency (Ranger + Ranger PG) is the only new infrastructure beyond Keycloak.
-
-4. **Per-user audit across the board.** Every query — including portal queries — runs under the user's JWT-authenticated identity, so StarRocks and Ranger audit logs record the individual user. The Go API can forward the Bearer JWT through `mysql-proxy` without refactoring GORM to per-request DB handles.
-
-5. **Fine-grained PII control via actions.** `can_read_pii` is a data action, mapped to specific roles per tenant. A geneticist at CHOP sees CHOP PHI; the same geneticist elsewhere does not. Tenant admins do not inherit PHI automatically (explicit rule).
-
-6. **Dynamic permission changes.** Granting/revoking a role is a single `INSERT`/`DELETE` in `auth_db`. No Ranger admin call, no sync lag, effective on the next policy-cache poll (~10 s).
-
-7. **Built and tested.** The POC is a working reference implementation — init scripts, Keycloak configuration, mysql-proxy, Radiant portal UI, full test matrix. Reading the POC is faster than prototyping the architecture from scratch.
-
-### Why Not the Alternative
-
-The closest credible alternative — **views + per-user JWT** — is described in the [Alternative Solutions](#alternative-solutions) subsection of Section 3. It is rejected here because it adds a major GORM refactor (per-request DB injection across all 61 repositories), forces per-tenant + per-group view-database proliferation, and carries unvalidated performance risks (view predicate pushdown, colocate-join preservation through pass-through views) that the recommended architecture avoids entirely. Two other shapes (API-only enforcement; views with per-tenant pools) were also explored and rejected — see the Alternative Solutions subsection for why.
-
-### Risk Mitigation
-
-| Risk | Mitigation |
-|------|-----------|
-| Ranger + Ranger PG add Java infrastructure | Bundle in Docker; Ranger policies are nearly static (no ops burden after initial setup) |
-| StarRocks OIDC plugin requires TLS | Generate JKS keystore; enable `ssl_keystore_location` in `fe.conf`. Documented in [TLS requirement for OIDC](#tls-requirement-for-oidc) |
-| Go clients (`go-sql-driver/mysql`) can't speak OIDC plugin | Deploy `mysql-proxy` (TCP-level, ~400 LOC, Go stdlib only). Documented in [MySQL proxy for Go clients](#mysql-proxy-for-go-clients) |
-| Keycloak JWT expires on long BI connections | Configure token lifetime per client (interactive session ≈ 8h). Alternative: gateway with refresh-token rotation |
-| Ranger column masking on JDBC catalog tables | For PostgreSQL-sourced data through `radiant_jdbc`, materialize into native StarRocks tables or mask at API layer as a fallback |
-| `auth_db` becomes a hot spot | Primary-key lookups; subqueries include user predicates and run on tablets distributed by `username` / `tenant_id`. No observed overhead in the POC |
-| Policy change latency (~10 s) | Acceptable for admin operations. If lower is required, reduce `ranger.plugin.starrocks.policy.pollIntervalMs` (trade-off: Ranger load) |
-| `current_user()` cleanup expression fragility | Documented in the POC README; verified with a startup check during init |
-
 ---
 
-## 7. Migration Strategy
-
-The POC at [`docs/adr/ranger-poc/`](./ranger-poc/README.md) is the reference implementation of Phases 2 and 3 below. Every step is already demonstrated in a running system.
-
-### Migration Phases Overview
-
-```mermaid
-gantt
-    title Migration to Multi-Tenant Architecture (Ranger + auth_db)
-    dateFormat YYYY-MM-DD
-    axisFormat %b %d
-
-    section Phase 1 — API-Layer (transitional)
-    PG schema + tenant tables           :p1a, 2026-05-01, 1w
-    Tenant-path middleware              :p1b, after p1a, 2w
-    Wire project filtering to repos     :p1c, after p1b, 3w
-    PII masking in handlers             :p1d, after p1b, 2w
-    Frontend tenant switcher            :p1e, 2026-05-15, 4w
-
-    section Phase 2 — Ranger + auth_db
-    Deploy Keycloak + realm/client      :p2a, after p1c, 1w
-    Deploy Ranger + Ranger PG           :p2b, after p1c, 1w
-    Create auth_db schema + seed roles  :p2c, after p2a, 1w
-    StarRocks TLS (JKS keystore)        :p2d, after p2c, 1w
-    Per-tenant DBs + Ranger roles + policies :p2e, after p2d, 1w
-    mysql-proxy (Go)                    :p2f, after p2e, 1w
-    Go API: Bearer JWT via proxy        :p2g, after p2f, 2w
-
-    section Phase 3 — Portal UI + Direct Access
-    Radiant admin UI                    :p3a, after p2g, 2w
-    Onboard direct analysts (Python)    :p3b, after p2g, 1w
-    BI / MCP integration                :p3c, after p3a, 2w
-
-    section Phase 4 — Hardening (optional)
-    PostgreSQL RLS                      :p4a, after p3c, 2w
-    Structured audit logging            :p4b, after p3c, 2w
-    Resource group isolation            :p4c, after p3c, 1w
-```
-
-```mermaid
-graph LR
-    subgraph "Phase 1 (4–8 wks)"
-        P1["API-Layer<br/>Enforcement"]
-        P1A["Tenant path prefix /{tenant}/"]
-        P1B["Repos: project filtering"]
-        P1C["PII masking in handlers"]
-    end
-
-    subgraph "Phase 2 (6–8 wks)"
-        P2["Ranger + auth_db<br/>Defense-in-Depth"]
-        P2A["Keycloak JWT + TLS"]
-        P2B["auth_db tables"]
-        P2C["Generic Ranger policies"]
-        P2D["mysql-proxy for Go"]
-    end
-
-    subgraph "Phase 3 (2–3 wks)"
-        P3["Portal UI +<br/>Direct Access"]
-        P3A["Radiant admin UI"]
-        P3B["Jupyter / BI / MCP"]
-    end
-
-    subgraph "Phase 4 (optional)"
-        P4["Hardening"]
-        P4A["PG RLS, audit log,<br/>resource groups"]
-    end
-
-    P1 -- "portal works<br/>single defense layer" --> P2
-    P2 -- "all access paths<br/>subject to Ranger" --> P3
-    P3 -- "users onboarded" --> P4
-
-    style P1 fill:#fff3cd,stroke:#856404
-    style P2 fill:#d4edda,stroke:#155724
-    style P3 fill:#cce5ff,stroke:#004085
-    style P4 fill:#f0f0f0,stroke:#999
-```
-
-### Phase 1: API-Layer Multi-Tenancy (transitional)
-
-**Goal:** Unblock multi-tenant portal usage while Phase 2 infrastructure is being stood up. Portal-only — direct access is unprotected in this phase and must be blocked by network policy (e.g., StarRocks accessible only from the Go API subnet).
-
-**Scope:**
-- Add `tenant` and `organization` tables to PostgreSQL.
-- Add `tenant_id` column to tenant-scoped domain tables (`project`, `case`, etc.) and backfill existing rows to a default tenant.
-- Introduce a tenant-path middleware in the Go API that enforces `/{tenant}/…` and validates membership via `auth_db.user_tenant_role` (either directly, or by deriving membership from a provisional `user.tenants` table if `auth_db` isn't ready).
-- Repository-level `WHERE project_id IN (...)` filtering, sourced from the same membership view.
-- API-layer PII masking utility.
-- Frontend tenant switcher.
-
-**Exit criteria:** Portal users are multi-tenant-safe. StarRocks is still accessed via a shared service account.
-
-### Phase 2: Ranger + `auth_db` (core of the recommendation)
-
-**Goal:** Defense-in-depth at the StarRocks layer; direct-access users become safe to enable.
-
-**Scope (each step references the POC artifact):**
-
-| Step | Deliverable | POC reference |
-|------|-------------|---------------|
-| 2.1 Deploy Keycloak | Realm `starrocks`, public client with direct-access grants + OIDC audience mapper | `init/init-keycloak.sh` |
-| 2.2 Deploy Ranger | Ranger Admin + Ranger PG | `docker-compose.yml` (services `ranger`, `ranger-db`) |
-| 2.3 Create `auth_db` | Tables from Section 5.1; seed domain roles + global action catalog | `init/init-starrocks.sql` |
-| 2.4 Enable StarRocks TLS | Generate JKS keystore; set `ssl_keystore_location`, `ssl_keystore_password`, `ssl_key_password` in `fe.conf` | `starrocks-conf/starrocks-keystore.jks` + `docker-compose.yml` |
-| 2.5 Create JWT users | `CREATE USER ... IDENTIFIED WITH authentication_jwt AS '{...}'` per user | `init/init-starrocks.sql` |
-| 2.6 Register Ranger service + policies | `access_control = ranger`; per-tenant Ranger roles + access policies (`sr_select_<tenant>`); auth_db row-filter; PHI column-mask | `init/init-all.sh` |
-| 2.7 Build & deploy mysql-proxy | Go TCP-level proxy: `mysql_clear_password` → TLS + OIDC (capability flag `0x01` + lenenc JWT) | `proxy/main.go` |
-| 2.8 Update Go API | Bearer JWT validation; action checks via `auth_db.role_action`; data queries via `mysql-proxy` | `api/main.go` |
-
-**Exit criteria:**
-- All users authenticate to StarRocks with JWT.
-- Row-filter and column-mask policies enforce tenant isolation and PII rules.
-- The Go API has no privileged service account for data reads — every portal query is attributed to the end user.
-
-### Phase 3: Portal UI + Direct Access Enablement
-
-**Goal:** Give tenant admins self-service tools and open up direct-access paths for analysts and BI tools.
-
-**Scope:**
-- **Radiant admin UI** (`admin-ui/`): React + Vite + Tailwind + Keycloak-js. Tenant switcher; roles CRUD; user assignments (grant/revoke tenant + org roles). Admin tab visible only when current tenant is in `/admin/my-tenants`.
-- **Onboard Python analysts:** install `mysql-connector-python ≥ 9.1.0`; document Keycloak token retrieval; publish example notebooks.
-- **BI integration:** configure Tableau / Power BI JDBC/ODBC drivers with JWT. Where the tool lacks OIDC, stand up a gateway that exchanges a session cookie for a JWT.
-- **MCP:** forward the user's JWT from the agent session to StarRocks.
-
-**Exit criteria:** Analysts and BI tools query StarRocks directly; every row/column policy applies uniformly across all access paths.
-
-### Phase 4: Hardening & Compliance (optional, post-launch)
-
-- PostgreSQL RLS on the operational tables (case, interpretation, etc.) for defense-in-depth on the PG side.
-- Structured audit log sink (e.g. Kafka/OpenSearch) that correlates StarRocks query IDs with Ranger decisions and API request IDs.
-- StarRocks resource groups per tenant (CPU/memory isolation to prevent noisy-neighbor effects).
-- Keycloak hardening: short-lived access tokens + refresh rotation for BI tools; step-up auth for admin actions.
-
----
-
-## 8. POC-validated details
+## 6. POC-validated details
 
 This section collects findings from the POC ([`docs/adr/ranger-poc/`](./ranger-poc/README.md)) that are too operational to sit inside the main options discussion but are required to reproduce the recommended architecture.
 
@@ -1275,35 +1009,6 @@ WHERE uor.username = <current_user>
 ```
 
 The Go API uses the same pattern (`OR uor.org_id = '*'` in action checks).
-
-### POC validation summary
-
-What the POC proved, and how it shaped this proposal:
-
-| Pre-POC hypothesis | POC finding | Impact on this ADR |
-|--------------------|-------------|---------------------|
-| Ranger requires user stubs + role management, sync daemon | Ranger users + per-tenant Ranger roles are needed *for DB visibility*, but `{USER}` still works for auth_db row-filter / PHI mask. Membership is a derived projection of `auth_db`, maintained by the admin API inline with each grant/revoke — no external sync daemon | Confirms Ranger + `auth_db` as the recommendation; documents the Ranger-roles-for-visibility pattern |
-| An OpenFGA-style authz service is needed alongside Ranger | `auth_db` tables are sufficient; no separate service needed | OpenFGA dropped from the design; Section 5 schema |
-| Flat tiers (admin/member, identified/deidentified) | Domain roles (geneticist, …) with explicit actions are clearer and closer to job titles | Domain-roles + actions model adopted |
-| Views deliver 90% of Ranger's benefit with less ops cost | Views bring own risks (pushdown, colocation, proliferation) that POC didn't exercise; Ranger's ops cost collapses once policies are generic | Views-based shape kept brief in §3 as alternative |
-| Tenant routing via `X-Active-Tenant` header | Path prefix better (logs, caching, REST, CORS); matches Atlassian/GitHub/Twilio | Routing decision documented (§8.3) |
-| JWT auth works out of the box | TLS is a hard prerequisite; Go clients need a proxy | §8.1, §8.2 |
-| Admin tooling needed: "tenant switcher component + provisioning API" | Full React portal with role CRUD + users + tenants implemented | §8.4 documents the implementation |
-
-Open questions that the architecture decision resolves:
-
-| Open question | Status |
-|---------------|--------|
-| StarRocks view predicate push-down & partition pruning | Moot (no views in recommended path) |
-| Pass-through views & colocation preservation | Moot |
-| OpenFGA schema 1.2 maturity | Moot (OpenFGA not in design) |
-| StarRocks view complex JOINs | Moot |
-| GORM table name qualification with per-tenant pools | Moot (single shared pool; Ranger filters rows) |
-| OpenFGA-to-Ranger sync lag | Moot (no sync — `auth_db` is shared source of truth) |
-| BI tool OAuth configuration | Still open for each BI tool; mitigation patterns documented |
-| MCP server JWT passthrough | Validated (POC MCP pattern) |
-| Keycloak JWT token lifetime | Configuration choice; noted in §6 Risk Mitigation |
-| User provisioning sync lag | Moot (`auth_db` is the store of record; Ranger polls every ~10 s) |
 
 ---
 
