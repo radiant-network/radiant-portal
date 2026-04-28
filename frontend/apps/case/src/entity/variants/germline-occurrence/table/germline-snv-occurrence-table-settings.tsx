@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
-import { GermlineSNVOccurrence } from '@/api/api';
+import { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
@@ -27,7 +27,11 @@ import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
-function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretationSaved: () => void) {
+function getSNVOccurrenceColumns(
+  t: TFunction<string, undefined>,
+  caseEntity: CaseEntity,
+  onInterpretationSaved: () => void,
+) {
   return [
     // TODO: To be enabled when row selection function are implemented
     // {
@@ -248,7 +252,9 @@ function getSNVOccurrenceColumns(t: TFunction<string, undefined>, onInterpretati
     // Actions Buttons
     {
       id: 'actions',
-      cell: info => <OccurrenceActionsMenu row={info.row} onInterpretationSaved={onInterpretationSaved} />,
+      cell: info => (
+        <OccurrenceActionsMenu row={info.row} caseEntity={caseEntity} onInterpretationSaved={onInterpretationSaved} />
+      ),
       size: 86,
       enableResizing: false,
       enablePinning: true,

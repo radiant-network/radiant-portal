@@ -940,6 +940,7 @@
     "actions": {
       "preview": "Preview",
       "open_in_igv": "Open in IGV ",
+      "open_in_igv_disabled_tooltip": "No alignment file available for this case",
       "ucsc": "UCSC",
       "litvar": "LitVar",
       "view_variant": "View variant"

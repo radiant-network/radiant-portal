@@ -253,7 +253,7 @@ export function SomaticOccurrenceSheetContent({
           ad_alt={expandResult.data.ad_alt}
           ad_total={expandResult.data.ad_total}
           locus={expandResult.data.locus}
-          enableIGV
+          has_igv_files={caseEntity.data?.has_igv_files}
         />
       )}
       <SliderVariantDetailsCard

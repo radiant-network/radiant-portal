@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import useSWR from 'swr';
 
 import {
+  CaseEntity,
   CaseSequencingExperiment,
   Count,
   CountBodyWithSqon,
@@ -62,6 +63,7 @@ type SnvOccurrenceCountInput = {
 type SNVTabProps = {
   seqId: number;
   patientSelected?: CaseSequencingExperiment;
+  caseEntity?: CaseEntity;
 };
 
 async function fetchQueryCount(input: SnvOccurrenceCountInput) {
@@ -69,7 +71,7 @@ async function fetchQueryCount(input: SnvOccurrenceCountInput) {
   return response.data;
 }
 
-function SNVTab({ seqId, patientSelected }: SNVTabProps) {
+function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
   const { t } = useI18n();
   const config = useConfig();
   const caseId = useCaseIdFromParam();
@@ -328,7 +330,7 @@ function SNVTab({ seqId, patientSelected }: SNVTabProps) {
               <CardContent>
                 <DataTable
                   id={appId}
-                  columns={getSNVOccurrenceColumns(t, onInterpretationSaved)}
+                  columns={getSNVOccurrenceColumns(t, caseEntity, onInterpretationSaved)}
                   data={fetchOccurrencesList.data ?? []}
                   defaultColumnSettings={defaultSNVSettings}
                   loadingStates={{

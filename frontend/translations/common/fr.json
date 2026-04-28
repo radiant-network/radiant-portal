@@ -941,6 +941,7 @@
     "actions": {
       "preview": "Aperçu",
       "open_in_igv": "Ouvrir dans IGV ",
+      "open_in_igv_disabled_tooltip": "Aucun fichier d'alignement disponible pour ce cas",
       "ucsc": "UCSC",
       "litvar": "LitVar",
       "view_variant": "Voir variant"

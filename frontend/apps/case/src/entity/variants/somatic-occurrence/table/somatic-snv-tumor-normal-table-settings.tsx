@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
-import { GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
+import { CaseEntity, GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
 import GeneCell from '@/components/base/data-table/cells/gene-cell';
@@ -27,7 +27,7 @@ import SomaticInterpretationCell from './cells/somatic-interpretation-cell';
 
 const columnHelper = createColumnHelper<SomaticSNVOccurrence>();
 
-function getSomaticSNVTumorNormalColumns(t: TFunction<string, undefined>) {
+function getSomaticSNVTumorNormalColumns(t: TFunction<string, undefined>, caseEntity?: CaseEntity) {
   return [
     // interpretation and note cell
     columnHelper.accessor(row => row, {
@@ -227,7 +227,7 @@ function getSomaticSNVTumorNormalColumns(t: TFunction<string, undefined>) {
     // Actions Buttons
     {
       id: 'actions',
-      cell: info => <SomaticActionsCell row={info.row} />,
+      cell: info => <SomaticActionsCell row={info.row} caseEntity={caseEntity} />,
       size: 86,
       enableResizing: false,
       enablePinning: true,
