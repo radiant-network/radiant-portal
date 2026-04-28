@@ -178,7 +178,9 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
   }')
 echo "  sr_select_auth: HTTP ${HTTP_CODE}"
 
-# Policy: SELECT + INSERT on cbtn_db (members of Ranger role cbtn_member)
+# Policy: SELECT on cbtn_db (members of Ranger role cbtn_member).
+# Writes are not granted to end users — ETL runs as a service account and
+# API writes go to PostgreSQL; for the POC, all StarRocks writes use root.
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
   -H "Content-Type: application/json" -H "Accept: application/json" \
   "${RANGER_URL}/service/plugins/policies" \
@@ -193,15 +195,12 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
     },
     "policyItems": [{
       "roles": ["cbtn_member"],
-      "accesses": [
-        {"type": "select", "isAllowed": true},
-        {"type": "insert", "isAllowed": true}
-      ]
+      "accesses": [{"type": "select", "isAllowed": true}]
     }]
   }')
 echo "  sr_select_cbtn: HTTP ${HTTP_CODE}"
 
-# Policy: SELECT + INSERT on udn_db (members of Ranger role udn_member)
+# Policy: SELECT on udn_db (members of Ranger role udn_member).
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
   -H "Content-Type: application/json" -H "Accept: application/json" \
   "${RANGER_URL}/service/plugins/policies" \
@@ -216,10 +215,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${RANGER_AUTH}" -X POST \
     },
     "policyItems": [{
       "roles": ["udn_member"],
-      "accesses": [
-        {"type": "select", "isAllowed": true},
-        {"type": "insert", "isAllowed": true}
-      ]
+      "accesses": [{"type": "select", "isAllowed": true}]
     }]
   }')
 echo "  sr_select_udn: HTTP ${HTTP_CODE}"

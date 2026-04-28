@@ -145,8 +145,10 @@ Three layers, each with a distinct shape:
 
 **Database visibility (access policies bound to Ranger roles)** — one per tenant DB:
 - `sr_select_auth` → role `authenticated`, SELECT on `auth_db.*`
-- `sr_select_cbtn` → role `cbtn_member`, SELECT+INSERT on `cbtn_db.*`
-- `sr_select_udn`  → role `udn_member`,  SELECT+INSERT on `udn_db.*`
+- `sr_select_cbtn` → role `cbtn_member`, SELECT on `cbtn_db.*`
+- `sr_select_udn`  → role `udn_member`,  SELECT on `udn_db.*`
+
+End users have read-only access. Writes happen out-of-band: ETL runs as a service account, API write paths (case creation, etc.) target PostgreSQL, and POC seed data is loaded as root.
 
 A user not in `cbtn_member` sees no `cbtn_db` in `SHOW DATABASES` and `SELECT FROM cbtn_db.*` is denied at the engine level. Ranger role membership is maintained by the admin API; auth_db is the source of truth.
 

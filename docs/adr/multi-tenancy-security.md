@@ -375,13 +375,12 @@ Each access policy resembles:
   },
   "policyItems": [{
     "roles": ["cbtn_member"],
-    "accesses": [
-      { "type": "select", "isAllowed": true },
-      { "type": "insert", "isAllowed": true }
-    ]
+    "accesses": [{ "type": "select", "isAllowed": true }]
   }]
 }
 ```
+
+End users get **SELECT only** — writes never run as the authenticated user. ETL is performed by a service account, and API write paths (e.g. case creation) target PostgreSQL rather than StarRocks. The few StarRocks writes that do happen in the POC (seeding, case-create test endpoint) run as root, which Ranger bypasses.
 
 > **Why Ranger roles, not StarRocks native `GRANT … TO ROLE`?** With `access_control = ranger`, Ranger is the *sole* authority — its plugin throws `AccessDeniedException` when no policy matches and never falls through to native StarRocks RBAC ([`RangerAccessController.hasPermission`](https://github.com/StarRocks/starrocks/blob/main/fe/fe-core/src/main/java/com/starrocks/authorization/ranger/RangerAccessController.java)). Native GRANT therefore cannot be combined with Ranger row-filter / column-mask. Ranger roles deliver the same end-user behavior — `SHOW DATABASES` hides the wrong tenant, cross-DB queries are denied at the engine — through Ranger's own role primitive.
 
@@ -676,7 +675,7 @@ This lets root run cross-tenant analytics directly on `base.*`, while tenant use
 | Policy | Type | Resource | Subjects | Notes |
 |--------|------|----------|----------|-------|
 | `sr_select_auth` | access | `auth_db.*` | role `authenticated` | Everyone with any tenant assignment |
-| `sr_select_<tenant>` | access | `<tenant>_db.*` | role `<tenant>_member` | One per tenant DB; SELECT + INSERT |
+| `sr_select_<tenant>` | access | `<tenant>_db.*` | role `<tenant>_member` | One per tenant DB; **SELECT only** — ETL runs as a service account, API writes go to PostgreSQL, and POC seeding runs as root |
 | _(no policy)_ | — | `base.*` | — | Absent ⇒ Ranger denies all non-root |
 | `sr_rowfilter_user_tenant_role` | row-filter | `auth_db.user_tenant_role` | `{USER}` | `username = current_user()` |
 | `sr_rowfilter_user_org_role` | row-filter | `auth_db.user_org_role` | `{USER}` | `username = current_user()` |
