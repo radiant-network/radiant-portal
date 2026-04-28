@@ -51,9 +51,13 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: 
   useSavedFilterGetPreferenceEffect({ savedFilterType, setPreference: setSavedFilterPreference });
 
   // Fetch saved filters
-  const savedFilterFetcher = useSWR<SavedFilter[]>('fetch-saved-filters', () => fetchSavedFilters(savedFilterType), {
-    revalidateOnFocus: false,
-  });
+  const savedFilterFetcher = useSWR<SavedFilter[]>(
+    `fetch-saved-filters-${savedFilterType}`,
+    () => fetchSavedFilters(savedFilterType),
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   if (!qbPreference || !savedFilterPreference || savedFilterFetcher.isLoading) {
     return <QueryBuilderSkeleton defaultSidebarOpen={defaultSidebarOpen} aggregations={aggregations} />;
