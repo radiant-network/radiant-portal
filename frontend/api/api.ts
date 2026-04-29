@@ -4532,6 +4532,12 @@ export interface SomaticSNVOccurrence {
      * @type {string}
      * @memberof SomaticSNVOccurrence
      */
+    'transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticSNVOccurrence
+     */
     'variant_class': string;
     /**
      * 

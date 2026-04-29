@@ -45,6 +45,7 @@ func Test_Germline_SNV_GetOccurrences(t *testing.T) {
 			assert.Equal(t, "class1", occurrences[0].VariantClass)
 			assert.True(t, occurrences[0].HasInterpretation)
 			assert.True(t, occurrences[0].HasNote)
+			assert.Equal(t, "T001", occurrences[0].TranscriptId)
 		}
 	})
 }
