@@ -27,6 +27,7 @@ Name | Type | Description | Notes
 **somatic_pf_tn_wgs** | **float** |  | 
 **symbol** | **str** |  | 
 **task_id** | **int** |  | 
+**transcript_id** | **str** |  | [optional] 
 **variant_class** | **str** |  | 
 **vep_impact** | [**VepImpact**](VepImpact.md) |  | 
 

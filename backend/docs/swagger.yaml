@@ -2175,6 +2175,8 @@ components:
           type: string
         task_id:
           type: integer
+        transcript_id:
+          type: string
         variant_class:
           type: string
         vep_impact:

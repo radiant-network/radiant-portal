@@ -25,6 +25,7 @@ type SomaticSNVOccurrence struct {
 	SomaticPfTnWgs      *float64          `json:"somatic_pf_tn_wgs" validate:"required"`
 	SomaticPcTnWgs      *int              `json:"somatic_pc_tn_wgs" validate:"required"`
 	AdRatio             *float32          `json:"ad_ratio,omitempty"`
+	TranscriptId        string            `json:"transcript_id,omitempty"`
 }
 
 type ExpandedSomaticSNVOccurrence struct {
@@ -169,6 +170,7 @@ var SomaticSNVOccurrencesDefaultFields = []Field{
 	PickedIsCanonicalField,
 	PickedIsManeSelectField,
 	PickedIsManePlusField,
+	PickedTranscriptIdField,
 	RsNumberField,
 	PickedOmimInheritanceCodeField,
 	SomaticSNVInfoHotspotAlleleField,
