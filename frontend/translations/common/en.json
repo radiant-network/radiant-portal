@@ -1423,9 +1423,7 @@
     "variants": {
       "title": "Variants",
       "filters": {
-        "sequencing": "Sequencing",
         "proband": "Proband",
-        "sample_id": "Sample ID",
         "affected_status_code": {
           "affected": "Affected",
           "non_affected": "Unaffected",
@@ -1438,7 +1436,8 @@
         },
         "cnv_to": "CNV (TO)",
         "sequencing_id": "Seq. ID",
-        "sample_submitter_id": "Submitter Sample ID",
+        "sample_submitter_id": "Submitter Sample ID:",
+        "sample_submitter_id_tooltip": "Submitter Sample ID",
         "snv": "SNV",
         "cnv": "CNV",
         "snv_tn": "SNV (TN)",

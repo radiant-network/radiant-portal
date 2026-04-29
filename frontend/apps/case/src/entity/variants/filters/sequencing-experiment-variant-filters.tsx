@@ -9,7 +9,6 @@ import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import { cn } from '@/components/lib/utils';
 
 function SequencingVariantFiltersSelectValue({ relationship_to_proband, seq_id }: CaseSequencingExperiment) {
   const { t } = useI18n();
@@ -32,13 +31,11 @@ function SequencingVariantFiltersSelectItem(caseSeqExp: CaseSequencingExperiment
     <div>
       <SequencingVariantFiltersSelectValue {...caseSeqExp} />
       <div className="flex items-center text-muted-foreground color-muted text-xs">
-        {t('case_entity.variants.filters.sample_id')} {caseSeqExp.sample_id}
+        {t('case_entity.variants.filters.sample_submitter_id')} {caseSeqExp.sample_submitter_id}
         {caseSeqExp.affected_status_code && (
           <>
             <DotIcon />
-            <span className={cn({ 'text-red': caseSeqExp.affected_status_code === 'affected' })}>
-              {t(`case_entity.variants.filters.affected_status_code.${caseSeqExp.affected_status_code}`)}
-            </span>
+            <AffectedStatusBadge status={caseSeqExp.affected_status_code as AffectedStatusProps} />
           </>
         )}
       </div>
@@ -58,7 +55,6 @@ type SequencingVariantFiltersProps = {
   isLoading: boolean;
   activeInterface: string;
   onActiveInterfaceChange: (value: string) => void;
-  showAffectedStatusBadge?: boolean;
 };
 
 /**
@@ -77,7 +73,6 @@ function SequencingVariantFilters({
   onActiveInterfaceChange,
   handleChange,
   isLoading,
-  showAffectedStatusBadge = false,
 }: SequencingVariantFiltersProps) {
   const { t } = useI18n();
 
@@ -97,8 +92,7 @@ function SequencingVariantFilters({
   }
 
   return (
-    <div className="inline-flex gap-4 items-center border-b px-3 py-4">
-      <span>{t('case_entity.variants.filters.sequencing')}</span>
+    <div className="inline-flex gap-4 items-center border-b px-6 py-2.5">
       <Select
         value={`${selectedSeqId}`}
         onValueChange={value => {
@@ -118,9 +112,6 @@ function SequencingVariantFilters({
           ))}
         </SelectContent>
       </Select>
-      {showAffectedStatusBadge && selectedSequencingExperiment?.affected_status_code && (
-        <AffectedStatusBadge status={selectedSequencingExperiment.affected_status_code as AffectedStatusProps} />
-      )}
       {selectedSequencingExperiment?.sample_submitter_id && (
         <Tooltip>
           <TooltipTrigger>
@@ -130,12 +121,11 @@ function SequencingVariantFilters({
             </Badge>
           </TooltipTrigger>
           <TooltipContent>
-            <>{t('case_entity.variants.filters.sample_submitter_id')}</>
+            <>{t('case_entity.variants.filters.sample_submitter_id_tooltip')}</>
           </TooltipContent>
         </Tooltip>
       )}
       <Separator className="h-6" orientation="vertical" />
-
       <Tabs value={activeInterface}>
         <TabsList className="w-full">
           {options.map(({ tooltip, value }: SequencingVariantFiltersOption) => (

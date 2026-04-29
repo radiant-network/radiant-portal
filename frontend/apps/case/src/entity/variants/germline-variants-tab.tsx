@@ -50,9 +50,7 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
         onActiveInterfaceChange={value => {
           setActiveInterface(value as GermlineVariantInterface);
         }}
-        showAffectedStatusBadge
       />
-
       {activeInterface == GermlineVariantInterface.SNV && (
         <SNVTab seqId={seqId} patientSelected={patientSelected} caseEntity={caseEntity} />
       )}
