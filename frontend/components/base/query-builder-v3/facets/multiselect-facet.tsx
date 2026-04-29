@@ -1,6 +1,5 @@
 /* eslint-disable complexity */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { TFunction } from 'i18next';
 import isEqual from 'lodash/isEqual';
 import { SearchIcon } from 'lucide-react';
 
@@ -43,23 +42,6 @@ type MultiSelectAggregation = {
   count: number;
   label: string;
 };
-
-/**
- * Add label to aggregations
- */
-export function getAggregatesWithLabel(
-  aggregations: Aggregation[],
-  t: TFunction<string, undefined>,
-  sanitize: Function,
-  lazyTranslate: Function,
-) {
-  return aggregations.map(aggregation => ({
-    ...aggregation,
-    label: t(`common.filters.values.${aggregation.key}.${sanitize(aggregation.key)}`, {
-      defaultValue: lazyTranslate(aggregation.key),
-    }),
-  }));
-}
 
 /**
  * Handle search through aggregates
@@ -133,7 +115,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
   const aggregates = useMemo(() => {
     const multiAggregates = (apiAggregates ?? []).map((aggregate: Aggregation) => ({
       ...aggregate,
-      label: t(`common.filters.values.${aggregate.key}.${sanitize(aggregate.key)}`, {
+      label: t(`common.filters.values.${field.key}.${sanitize(aggregate.key)}`, {
         defaultValue: lazyTranslate(aggregate.key),
       }),
     })) as MultiSelectAggregation[];
