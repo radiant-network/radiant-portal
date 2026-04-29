@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, MessageSquareDot } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
@@ -31,13 +31,11 @@ function NotesPopover({ hasNotes, ...props }: NotesPopoverProps) {
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
-              <Button className="relative size-6" iconOnly variant="ghost">
-                <MessageSquare
-                  className={hasNotes ? 'text-primary fill-primary/20' : 'text-muted-foreground/40'}
-                  size={16}
-                />
-                {hasNotes && (
-                  <span className="absolute top-0.5 right-0.5 size-1.5 rounded-full bg-primary pointer-events-none" />
+              <Button className="size-6" iconOnly variant="ghost">
+                {hasNotes ? (
+                  <MessageSquareDot className="text-primary fill-primary/20" size={16} />
+                ) : (
+                  <MessageSquare className="text-muted-foreground/40" size={16} />
                 )}
               </Button>
             </PopoverTrigger>
