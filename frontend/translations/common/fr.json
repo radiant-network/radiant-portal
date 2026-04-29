@@ -1416,8 +1416,8 @@
         "snv": "SNV",
         "cnv": "CNV",
         "sequencing_id": "ID Séq.",
-        "show_only_interpreted": "Afficher seulement les interprétés",
-        "show_only_commented": "Afficher seulement les commentés",
+        "show_only_interpreted": "Afficher les variants interprétés",
+        "show_only_commented": "Afficher les variants commentés",
         "filter_by_flag": "Filtrer par drapeau"
       },
       "dialog": {
