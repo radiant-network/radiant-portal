@@ -325,7 +325,7 @@
     "aggregations": {
       "variant": {
         "items": [
-          { "key": "variant_class", "translation_key": "variant_class", "type": "multiple", "withDictionary": true },
+          { "key": "type", "translation_key": "type", "type": "multiple", "withDictionary": true },
           {
             "key": "cn",
             "translation_key": "cn",
