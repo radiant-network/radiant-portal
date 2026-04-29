@@ -495,6 +495,7 @@
         "transmission": "Transmission",
         "transmission_mode": "Transmission",
         "transmission_mode_tooltip": "Indicator of the possible relationship between the genetics dominance of the variant and its parental origin.",
+        "type": "Variant Type",
         "unit": "Unit",
         "variant_class": "Variant Type",
         "variant_type": "Variant Type",

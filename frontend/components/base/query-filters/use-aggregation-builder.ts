@@ -21,7 +21,7 @@ type OccurrenceAggregationInput = {
 
 const fetcher = (appId: ApplicationId) => {
   switch (appId) {
-    case ApplicationId.cnv_occurrence:
+    case ApplicationId.germline_cnv_occurrence:
       return (input: OccurrenceAggregationInput): Promise<Aggregation[]> =>
         occurrencesApi
           .aggregateGermlineCNVOccurrences(input.caseId, input.seqId, input.aggregationBody)
