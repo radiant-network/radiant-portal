@@ -10,7 +10,7 @@ import {
 
 import { type FlagType, useVariantFlag } from '../../hooks/use-variant-flags';
 
-const FLAG_CONFIG = {
+export const FLAG_CONFIG = {
   flag: {
     icon: Flag,
     triggerClass: 'text-indicator-red fill-indicator-red',

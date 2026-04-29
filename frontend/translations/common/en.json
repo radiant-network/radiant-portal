@@ -339,6 +339,7 @@
       },
       "reset": "Reset",
       "results": "Results",
+      "results_filtered": "{{shown}} shown of {{total}}",
       "no_result": "No results",
       "no_result_description": "Adjust your filters and try again.",
       "has_error": "Error loading this content",
@@ -1410,7 +1411,10 @@
         },
         "snv": "SNV",
         "cnv": "CNV",
-        "sequencing_id": "Seq. ID"
+        "sequencing_id": "Seq. ID",
+        "show_only_interpreted": "Show only interpreted",
+        "show_only_commented": "Show only commented",
+        "filter_by_flag": "Filter by flag"
       },
       "dialog": {
         "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
