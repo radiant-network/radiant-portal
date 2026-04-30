@@ -102,25 +102,29 @@ const SliderVariantDetailsCard = ({
       title={t('preview_sheet.variant_details.title')}
       actions={
         <div className="flex gap-2">
-          <Button variant="outline" size="xs" asChild>
-            <a
-              href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${end}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t('preview_sheet.variant_details.actions.ucsc')}
-              <ArrowUpRight />
-            </a>
-          </Button>
-          <Button variant="outline" size="xs" asChild>
-            <a
-              href={`https://www.ncbi.nlm.nih.gov/research/litvar2/docsum?text=${rsnumber}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t('preview_sheet.variant_details.actions.litvar')} <ArrowUpRight />
-            </a>
-          </Button>
+          {chromosome && start && end && (
+            <Button variant="outline" size="xs" asChild>
+              <a
+                href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${end}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t('preview_sheet.variant_details.actions.ucsc')}
+                <ArrowUpRight />
+              </a>
+            </Button>
+          )}
+          {rsnumber !== undefined && rsnumber.length > 0 && (
+            <Button variant="outline" size="xs" asChild>
+              <a
+                href={`https://www.ncbi.nlm.nih.gov/research/litvar2/docsum?text=${rsnumber}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t('preview_sheet.variant_details.actions.litvar')} <ArrowUpRight />
+              </a>
+            </Button>
+          )}
         </div>
       }
     >
