@@ -527,7 +527,8 @@
           "tr_v_gene": "TR V Gene",
           "tr_v_pseudogene": "TR V Pseudogene",
           "unitary_pseudogene": "Unitary Pseudogene",
-          "unprocessed_pseudogene": "Unprocessed Pseudogene"
+          "unprocessed_pseudogene": "Unprocessed Pseudogene",
+          "": "No Gene Type"
         },
         "consequence": {
           "3_prime_utr": "3 Prime UTR",

@@ -528,7 +528,8 @@
           "tr_v_gene": "Gène TR V",
           "tr_v_pseudogene": "Pseudogène TR V",
           "unitary_pseudogene": "Pseudogène unitaire",
-          "unprocessed_pseudogene": "Pseudogène non traité"
+          "unprocessed_pseudogene": "Pseudogène non traité",
+          "": "Aucun type de gène"
         },
         "consequence": {
           "3_prime_utr": "Région UTR 3′",

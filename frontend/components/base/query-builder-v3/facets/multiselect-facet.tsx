@@ -79,8 +79,8 @@ function getVisibleItemsCount(itemLength: number, maxVisibleItems: number) {
  */
 function sortAggregates(qbValues: string[]) {
   return (a: Aggregation, b: Aggregation) => {
-    const aApplied = a.key && qbValues.includes(a.key);
-    const bApplied = b.key && qbValues.includes(b.key);
+    const aApplied = qbValues.includes(a.key);
+    const bApplied = qbValues.includes(b.key);
 
     if (aApplied === bApplied) {
       return b.count! - a.count!;
