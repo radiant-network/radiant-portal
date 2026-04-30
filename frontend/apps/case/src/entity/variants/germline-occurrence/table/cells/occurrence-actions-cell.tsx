@@ -29,6 +29,23 @@ function OccurrenceActionsMenu({ row, caseEntity, onInterpretationSaved }: Occur
     window.open(`/variants/entity/${locus_id}`, '_blank');
   }, [locus_id]);
 
+  // @TODO: add end when available in api
+  const handleUcsclick = useCallback(() => {
+    window.open(
+      `https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${start}`,
+      '_blank',
+      'noopener noreferrer',
+    );
+  }, [chromosome, start]);
+
+  const handleLitvarClick = useCallback(() => {
+    window.open(
+      `https://www.ncbi.nlm.nih.gov/research/litvar2/docsum?text=${rsnumber}`,
+      '_blank',
+      'noopener noreferrer',
+    );
+  }, [rsnumber]);
+
   return (
     <>
       <OccurrenceSliderSheet
@@ -76,24 +93,14 @@ function OccurrenceActionsMenu({ row, caseEntity, onInterpretationSaved }: Occur
           {
             icon: <ArrowUpRight />,
             label: t('variant.actions.ucsc'),
-            onClick: () => {
-              window.open(
-                `https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${start}`,
-                '_blank',
-                'noopener noreferrer',
-              );
-            },
+            disabled: chromosome === undefined && start === undefined,
+            onClick: handleUcsclick,
           },
           {
             icon: <ArrowUpRight />,
             label: t('variant.actions.litvar'),
-            onClick: () => {
-              window.open(
-                `https://www.ncbi.nlm.nih.gov/research/litvar2/docsum?text=${rsnumber}`,
-                '_blank',
-                'noopener noreferrer',
-              );
-            },
+            disabled: rsnumber === undefined || rsnumber?.length === 0,
+            onClick: handleLitvarClick,
           },
         ]}
         onDefaultAction={onNavigateToVariantPage}

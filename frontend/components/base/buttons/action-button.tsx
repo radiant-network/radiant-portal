@@ -79,7 +79,10 @@ function ActionButton({
                 {action.tooltip ? (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <DropdownMenuItem disabled={action.disabled ?? false}>
+                      <DropdownMenuItem
+                        disabled={action.disabled ?? false}
+                        onClick={action.disabled ? undefined : action.onClick}
+                      >
                         {action.icon}
                         {action.label}
                       </DropdownMenuItem>
@@ -87,7 +90,10 @@ function ActionButton({
                     <TooltipContent>{action.tooltip}</TooltipContent>
                   </Tooltip>
                 ) : (
-                  <DropdownMenuItem onClick={action.onClick}>
+                  <DropdownMenuItem
+                    disabled={action.disabled ?? false}
+                    onClick={action.disabled ? undefined : action.onClick}
+                  >
                     {action.icon}
                     {action.label}
                   </DropdownMenuItem>
