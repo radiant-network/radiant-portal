@@ -180,7 +180,10 @@ type RemoveFacetPillAction = {
 };
 type RemoveCombinedPillAction = {
   type: QBActionType.REMOVE_COMBINED_PILL;
-  payload: IValueFacet;
+  payload: {
+    uuid: string;
+    sqon: IValueFacet;
+  };
 };
 // Settings
 type SetLabelsEnabledAction = {
@@ -609,24 +612,22 @@ export function qBReducer(context: IQBContext, action: ActionType) {
      * Must have their own logic to be removed
      */
     case QBActionType.REMOVE_COMBINED_PILL: {
-      const { activeQueryId } = context;
-
-      // verify active query exists
-      if (!context.sqons.some(sqon => sqon.id === activeQueryId)) {
-        throw new Error(`Cannot remove combined pill: ${action.type} ${activeQueryId} ${action.payload}`);
-      }
-
-      const index = context.sqons.findIndex(sqon => sqon.id === activeQueryId);
+      const combinedQueryUUID = action.payload.uuid;
+      const index = context.sqons.findIndex(sqon => sqon.id === action.payload.uuid);
       const combinedQueries = { ...context.settings.combinedQueries };
-      combinedQueries[activeQueryId] = combinedQueries[activeQueryId].filter(id => id !== action.payload.id);
+      combinedQueries[combinedQueryUUID] = combinedQueries[combinedQueryUUID].filter(
+        id => id !== action.payload.sqon.id,
+      );
 
       // Remove sqon from combined sqons
       let isQueryNowEmpty = false;
       const sqons = context.sqons
         .map(sqon => {
-          if (sqon.id === activeQueryId) {
+          if (sqon.id === combinedQueryUUID) {
             // remove sqon from combined pill
-            const content = (sqon.content ?? []).filter(content => (content as IValueFacet).id !== action.payload.id);
+            const content = (sqon.content ?? []).filter(
+              content => (content as IValueFacet).id !== action.payload.sqon.id,
+            );
 
             if (content.length > 0) {
               return {
@@ -643,7 +644,7 @@ export function qBReducer(context: IQBContext, action: ActionType) {
 
       return {
         ...context,
-        activeQueryId: isQueryNowEmpty ? context.sqons[index - 1].id : activeQueryId,
+        activeQueryId: isQueryNowEmpty ? context.sqons[index - 1].id : combinedQueryUUID,
         sqons,
         settings: {
           ...context.settings,
