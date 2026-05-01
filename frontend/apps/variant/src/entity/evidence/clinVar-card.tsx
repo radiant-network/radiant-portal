@@ -54,9 +54,21 @@ function ClinVarCard() {
         <CardTitle className="text-xl font-semibold">{t('variant_entity.evidence.clin_var.title')}</CardTitle>
         <CardDescription>{t('variant_entity.evidence.clin_var.description')}</CardDescription>
         <CardAction>
-          <Button variant="outline">
-            ClinVar <ExternalLink />
-          </Button>
+          {/* TODO update with clinvar id of variant after back fix */}
+          {data?.[0]?.clinvar_id && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                window.open(
+                  `https://www.ncbi.nlm.nih.gov/clinvar/variation/${data?.[0]?.clinvar_id}`,
+                  '_blank',
+                  'noopener,noreferrer',
+                );
+              }}
+            >
+              {t('variant_entity.overview.clin_var')} <ExternalLink />
+            </Button>
+          )}
         </CardAction>
       </CardHeader>
       <CardContent className="space-y-4">
