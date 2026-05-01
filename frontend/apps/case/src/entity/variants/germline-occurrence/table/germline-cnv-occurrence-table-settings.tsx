@@ -64,7 +64,8 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
       header: t('variant.headers.name'),
       size: 148,
       minSize: 40,
-      enableSorting: true,
+      // If we want a sort, back changes needed to have CanBeSorted: true
+      enableSorting: false,
     }),
     // ClinGen
     columnHelper.accessor(row => row, {
@@ -86,7 +87,8 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
       ),
       size: 96,
       minSize: 40,
-      enableSorting: true,
+      // If we want a sort, back changes needed to have CanBeSorted: true
+      enableSorting: false,
     }),
     // Start
     columnHelper.accessor(row => row.start, {
