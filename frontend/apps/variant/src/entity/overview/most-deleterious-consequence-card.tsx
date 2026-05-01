@@ -66,7 +66,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                   {(data?.clinvar ?? []).map(clinvar => (
                     <Link
                       key={clinvar}
-                      to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
+                      to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
                     >
                       <ClassificationBadge key={clinvar} value={clinvar} />
                     </Link>
