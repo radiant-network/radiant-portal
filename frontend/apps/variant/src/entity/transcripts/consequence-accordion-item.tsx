@@ -30,7 +30,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
         <CardHeader>
           <AccordionTrigger className="hover:cursor-pointer">
             <div className="flex flex-1 ml-4 items-center gap-2">
-              <span className="font-semibold text-base">{data.symbol || t('common.no_gene')}</span>
+              <span className="font-semibold text-base">{data.symbol || t('common.no_gene_sentence_case')}</span>
               {/* ref: https://d3b.atlassian.net/browse/SJRA-146 */}
               {/* TODO when vep_impact is added to the api if data.is_picked == true */}
               {/* <ImpactIndicator value="HIGH" size={16} /> */}
