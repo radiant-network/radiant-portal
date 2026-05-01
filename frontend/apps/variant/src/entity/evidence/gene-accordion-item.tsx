@@ -54,9 +54,6 @@ function GeneAccordionItem({ symbol, panelType, conditions }: GeneAccordionItemP
             }}
             pagination={{ type: 'hidden' }}
             tableIndexResultPosition="bottom"
-            serverOptions={{
-              onSortingChange: () => {},
-            }}
           />
         )}
       </AccordionContent>
