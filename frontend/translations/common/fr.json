@@ -1031,7 +1031,7 @@
       "header": {
         "germline": "Germinal",
         "germline_family": "Germinal",
-        "somatic": "Somatic"
+        "somatic": "Somatique"
       },
       "transcript": {
         "exon": "Exon"
