@@ -247,10 +247,21 @@ export function qBReducer(context: IQBContext, action: ActionType) {
     case QBActionType.DUPLICATE_QUERY: {
       const uuid = v4();
       const { sqons } = context;
+      const combinedQueries = { ...context.settings.combinedQueries };
+
+      // duplicated query is a combined queries
+      if (combinedQueries[action.payload.id]) {
+        combinedQueries[uuid] = combinedQueries[action.payload.id];
+      }
+
       return {
         ...context,
         activeQueryId: uuid,
         sqons: [...cloneDeep(sqons), { ...cloneDeep(action.payload), id: uuid }],
+        settings: {
+          ...context.settings,
+          combinedQueries,
+        },
       };
     }
     /**
