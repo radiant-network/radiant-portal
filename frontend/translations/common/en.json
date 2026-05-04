@@ -1109,7 +1109,8 @@
           "annotations_gene": {
             "title": "Gene annotations"
           }
-        }
+        },
+        "no_results": "No results found"
       }
     }
   },

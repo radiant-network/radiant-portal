@@ -1114,7 +1114,8 @@
             "title": "Annotations gène"
           }
         }
-      }
+      },
+      "no_results": "Aucun résultat trouvé"
     }
   },
   "preview_sheet": {

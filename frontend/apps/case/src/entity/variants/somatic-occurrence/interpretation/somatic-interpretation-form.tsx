@@ -195,7 +195,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
                   <MultipleSelector
                     defaultOptions={oncogenicityClassificationCriterias}
                     placeholder={t('variant.interpretation_form.somatic.classification_criteria_placeholder')}
-                    emptyIndicator={<>no results found.</>}
+                    emptyIndicator={t('variant.interpretation_form.somatic.no_results')}
                     renderBadge={({ option, onRemove }) => (
                       <Badge
                         key={option.value}
@@ -206,6 +206,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
                         {option.label}
                       </Badge>
                     )}
+                    openOnFocus
                     {...field}
                   />
                 </FormControl>
