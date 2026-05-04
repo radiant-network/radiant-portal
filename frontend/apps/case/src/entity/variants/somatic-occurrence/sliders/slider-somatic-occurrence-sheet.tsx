@@ -205,6 +205,7 @@ export function SomaticOccurrenceSheetContent({
                 locusId={occurrence.locus_id}
                 handleSaveCallback={handleInterpretationSaveCallback}
                 transcriptId={expandResult.data.transcript_id}
+                patientId={patient?.patient_id}
                 renderTrigger={handleOpen => (
                   <Button size="sm" onClick={handleOpen}>
                     <SquarePen />
@@ -232,6 +233,7 @@ export function SomaticOccurrenceSheetContent({
               locusId={occurrence.locus_id}
               transcriptId={expandResult.data.transcript_id}
               handleSaveCallback={handleInterpretationSaveCallback}
+              patientId={patient?.patient_id}
               renderTrigger={handleOpen => (
                 <Button size="sm" onClick={handleOpen}>
                   <SquarePen />

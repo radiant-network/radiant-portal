@@ -186,6 +186,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
           />
           <FormField
             control={form.control}
+            schema={somaticInterpretationFormSchema}
             name="oncogenicity_classification_criterias"
             render={({ field }) => (
               <FormItem>
@@ -214,6 +215,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
           />
           <FormField
             control={form.control}
+            schema={somaticInterpretationFormSchema}
             name="clinical_utility"
             render={({ field }) => (
               <FormItem>
