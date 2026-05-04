@@ -36,7 +36,7 @@ function InterpretationVariantHeader({
       <Separator className="h-6" orientation="vertical" />
       <span className="capitalize">
         {relationship_to_proband ?? t('case_entity.patient_information.proband')}
-        {patientId ? ` (${patientId})` : ''}
+        {patientId && ` (${patientId})`}
       </span>
       <Tooltip>
         <TooltipTrigger asChild>
