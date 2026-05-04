@@ -3,7 +3,13 @@ import { useParams, useSearchParams } from 'react-router';
 import { PaginationState } from '@tanstack/table-core';
 import useSWR from 'swr';
 
-import { ApiError, ListBodyWithCriteria, SearchCriterion, VariantInterpretedCasesSearchResponse } from '@/api/api';
+import {
+  ApiError,
+  ListBodyWithCriteria,
+  SearchCriterion,
+  SortBody,
+  VariantInterpretedCasesSearchResponse,
+} from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import { variantsApi } from '@/utils/api';
@@ -34,6 +40,7 @@ function InterpretedCasesTable() {
     pageIndex: 0,
     pageSize: 10,
   });
+  const [sorting, setSorting] = useState<SortBody[]>([{ field: 'interpretation_updated_on', order: 'desc' }]);
 
   const [initialFilters, setInitialFilters] = useState<InterpretedCasesFiltersState>({
     mondo: '',
@@ -83,12 +90,7 @@ function InterpretedCasesTable() {
       locusId: params.locusId!,
       criteria: {
         search_criteria: searchCriteria,
-        sort: [
-          {
-            field: 'updated_on',
-            order: 'desc',
-          },
-        ],
+        sort: sorting,
         limit: pagination.pageSize,
         offset: pagination.pageIndex * pagination.pageSize,
         page_index: pagination.pageIndex,
@@ -130,7 +132,8 @@ function InterpretedCasesTable() {
         rowSelection={rowSelection}
         onRowSelectionChange={setRowSelection}
         serverOptions={{
-          onSortingChange: () => {},
+          onSortingChange: setSorting,
+          defaultSorting: [{ field: 'interpretation_updated_on', order: 'desc' }],
         }}
       />
       <SliderInterpretedCaseSheet

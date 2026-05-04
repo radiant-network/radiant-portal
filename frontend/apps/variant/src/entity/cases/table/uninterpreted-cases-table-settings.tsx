@@ -46,7 +46,7 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
     }),
     // Relationship
     columnHelper.accessor(row => row.relationship_to_proband, {
-      id: 'relationship_to_proband',
+      id: 'relationship_to_proband_code',
       cell: info => <RelationshipToProbandCell relationship={info.getValue()} />,
       header: t('variant_entity.cases.other_table.headers.relationship_to_proband'),
       minSize: 80,
@@ -166,6 +166,7 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       minSize: 80,
       maxSize: 150,
+      enableSorting: false,
     }),
     // Primary condition
     columnHelper.accessor(row => row.primary_condition_id, {
@@ -274,11 +275,14 @@ function getUninterpretedCasesColumns(t: TFunction<string, undefined>) {
     // Sex
     columnHelper.accessor(row => row.sex_code, {
       id: 'sex_code',
-      cell: info => (
-        <BadgeCell variant="secondary" className="self-start">
-          {t(`common.sex.${info.getValue()}`)}
-        </BadgeCell>
-      ),
+      cell: info =>
+        info.getValue() ? (
+          <BadgeCell variant="secondary" className="self-start">
+            {t(`common.sex.${info.getValue()}`)}
+          </BadgeCell>
+        ) : (
+          <EmptyCell />
+        ),
       header: t('variant_entity.cases.other_table.headers.sex'),
       minSize: 80,
       maxSize: 150,
@@ -304,7 +308,7 @@ const uninterpretedCasesDefaultSettings = createColumnSettings([
     label: 'variant_entity.cases.other_table.headers.case',
   },
   {
-    id: 'relationship_to_proband',
+    id: 'relationship_to_proband_code',
     visible: true,
     label: 'variant_entity.cases.other_table.headers.relationship_to_proband',
   },

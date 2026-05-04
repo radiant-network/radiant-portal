@@ -139,13 +139,14 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     }),
     // Primary Condition
     columnHelper.accessor(row => row.primary_condition_id, {
-      id: 'primary_condition',
+      id: 'primary_condition_id',
       cell: info => (
         <PhenotypeConditionLinkCell code={info.getValue()} name={info.row.original.primary_condition_name} />
       ),
       header: t('case_exploration.case.headers.primary_condition'),
       size: 208,
       minSize: 40,
+      enableSorting: false,
     }),
     // Panel
     columnHelper.accessor(row => row.panel_code, {
@@ -215,7 +216,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     }),
     // Diagnostic lab
     columnHelper.accessor(row => row.diagnosis_lab_code, {
-      id: 'diagnostic_lab',
+      id: 'diagnosis_lab_code',
       cell: info => (
         <TextTooltipCell tooltipText={info.row.original.diagnosis_lab_name}>{info.getValue()}</TextTooltipCell>
       ),
@@ -229,7 +230,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
     }),
     // Patient managing organization
     columnHelper.accessor(row => row.organization_code, {
-      id: 'managing_organization',
+      id: 'organization_code',
       cell: info => (
         <TextTooltipCell tooltipText={info.row.original.organization_name}>{info.getValue()}</TextTooltipCell>
       ),
@@ -240,6 +241,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>) {
       ),
       size: 124,
       minSize: 40,
+      // Sort disabled: backend fix needed
+      enableSorting: false,
     }),
     // Actions Buttons
     {
@@ -327,7 +330,7 @@ const defaultSettings = createColumnSettings([
     label: 'case_exploration.case.headers.analysis_catalog_code',
   },
   {
-    id: 'primary_condition',
+    id: 'primary_condition_id',
     visible: false,
     label: 'case_exploration.case.headers.primary_condition',
     additionalFields: ['primary_condition_id', 'primary_condition_name'],
@@ -365,13 +368,13 @@ const defaultSettings = createColumnSettings([
     additionalFields: ['prescriber'],
   },
   {
-    id: 'diagnostic_lab',
+    id: 'diagnosis_lab_code',
     visible: false,
     label: 'case_exploration.case.headers.diagnostic_lab',
     additionalFields: ['diagnosis_lab_code', 'diagnosis_lab_name'],
   },
   {
-    id: 'managing_organization',
+    id: 'organization_code',
     visible: false,
     label: 'case_exploration.case.headers.managing_organization',
     additionalFields: ['organization_code', 'organization_name'],
