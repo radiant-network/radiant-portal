@@ -128,6 +128,7 @@ function GermlineOccurrenceSheetContent({
                 isCreation
                 locusId={occurrence.locus_id}
                 transcriptId={occurrence.transcript_id}
+                patientId={patient?.patient_id}
                 handleSaveCallback={onInterpretationSaved}
                 renderTrigger={handleOpen => (
                   <Button size="sm" onClick={handleOpen}>
@@ -154,6 +155,7 @@ function GermlineOccurrenceSheetContent({
             <GermlineInterpretationDialog
               locusId={occurrence.locus_id}
               transcriptId={expandResult.data.transcript_id}
+              patientId={patient?.patient_id}
               handleSaveCallback={onInterpretationSaved}
               renderTrigger={handleOpen => (
                 <Button size="sm" onClick={handleOpen}>

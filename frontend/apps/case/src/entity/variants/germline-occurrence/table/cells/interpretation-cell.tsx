@@ -12,9 +12,10 @@ import GermlineInterpretationDialog from '../../interpretation/germline-interpre
 
 type InterpretationCellProps = {
   occurrence: GermlineSNVOccurrence;
+  patientId?: number;
 };
 
-function InterpretationCell({ occurrence }: InterpretationCellProps) {
+function InterpretationCell({ occurrence, patientId }: InterpretationCellProps) {
   const { t } = useI18n();
   const { mutate, loading } = useOccurrenceListContext();
 
@@ -33,6 +34,7 @@ function InterpretationCell({ occurrence }: InterpretationCellProps) {
         isCreation
         locusId={occurrence.locus_id}
         transcriptId={occurrence.transcript_id}
+        patientId={patientId}
         handleSaveCallback={mutate}
         renderTrigger={handleOpen => (
           <Tooltip>

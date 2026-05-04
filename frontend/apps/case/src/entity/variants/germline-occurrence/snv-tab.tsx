@@ -23,6 +23,7 @@ import { useSliderOccurrenceNavigation } from '@/components/base/slider/hooks/us
 import { useConfig } from '@/components/cores/applications-config';
 import { ISyntheticSqon } from '@/components/cores/sqon';
 import { useI18n } from '@/components/hooks/i18n';
+import { getPatientClinicalInformation } from '@/components/lib/case-entity';
 import { cn } from '@/components/lib/utils';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
@@ -99,6 +100,7 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
   const appId = config.germline_snv_occurrence.app_id;
   const aggregations = config.germline_snv_occurrence.aggregations;
   const visibleAggregations = getVisibleAggregations(aggregations);
+  const patient = getPatientClinicalInformation(caseEntity, patientSelected);
 
   function getAggregationFromConfig(key: string) {
     return Object.values(config.germline_snv_occurrence.aggregations)
@@ -330,7 +332,7 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
               <CardContent>
                 <DataTable
                   id={appId}
-                  columns={getSNVOccurrenceColumns(t, caseEntity, onInterpretationSaved)}
+                  columns={getSNVOccurrenceColumns(t, caseEntity, onInterpretationSaved, patient?.patient_id)}
                   data={fetchOccurrencesList.data ?? []}
                   defaultColumnSettings={defaultSNVSettings}
                   loadingStates={{
