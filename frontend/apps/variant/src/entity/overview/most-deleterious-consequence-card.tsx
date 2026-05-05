@@ -5,7 +5,6 @@ import { VariantOverview } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import ConditionalField from '@/components/base/information/conditional-field';
-import EmptyField from '@/components/base/information/empty-field';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, CardProps } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
@@ -39,12 +38,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                   {data.symbol}
                 </a>
               )}
-              {!data.symbol &&
-                (['intergenic', 'intergenic_variant'].includes(pickedConsequence) ? (
-                  t('common.no_gene')
-                ) : (
-                  <EmptyField />
-                ))}
+              {!data.symbol && t('common.no_gene')}
             </div>
             <div className="text-xs font-mono">
               <ConditionalField condition={!!data.aa_change}>{data.aa_change}</ConditionalField>
