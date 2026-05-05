@@ -438,7 +438,7 @@ export const tableCNVFacets = [
         position: 0,
         tooltip: null,
         defaultOperator: null,
-        hasDictionary: false,
+        hasDictionary: true,
       },
       {
         id: 'copy_number',
@@ -465,7 +465,7 @@ export const tableCNVFacets = [
         position: 3,
         tooltip: null,
         defaultOperator: null,
-        hasDictionary: false,
+        hasDictionary: true,
       },
       {
         id: 'start',

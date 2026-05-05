@@ -1,8 +1,8 @@
 /// <reference types="cypress"/>
 
-// Simple environment variable getter
-const getEnv = (key: string): string => {
-  return Cypress.env(key) || '';
+// Public configuration getter (non-sensitive values)
+const getExpose = (key: string): string => {
+  return Cypress.expose(key) || '';
 };
 
 /**
@@ -15,28 +15,30 @@ const getEnv = (key: string): string => {
  * @param retries The number of retry attempts on 500 errors (default: 3).
  */
 Cypress.Commands.add('apiCall', (method: string, query: string, body: string, token: string, retries: number = 3) => {
-  const apiUrl = Cypress.env('api_base_url');
+  const apiUrl = Cypress.expose('api_base_url');
 
-  if (Cypress.env('debug')) {
+  if (Cypress.expose('debug')) {
     cy.log('with body: ' + body);
   }
 
   const makeRequest = (attemptsLeft: number): Cypress.Chainable => {
-    return cy.request({
-      method: method,
-      url: `${apiUrl}${query}`,
-      headers: { Authorization: `Bearer ${token}` },
-      body: body,
-      failOnStatusCode: false,
-      timeout: 60000,
-    }).then(res => {
-      if (res.status === 500 && attemptsLeft > 0) {
-        cy.log(`Retrying API call, remaining retries: ${attemptsLeft - 1}`);
-        return makeRequest(attemptsLeft - 1);
-      } else {
-        return res;
-      }
-    });
+    return cy
+      .request({
+        method: method,
+        url: `${apiUrl}${query}`,
+        headers: { Authorization: `Bearer ${token}` },
+        body: body,
+        failOnStatusCode: false,
+        timeout: 60000,
+      })
+      .then(res => {
+        if (res.status === 500 && attemptsLeft > 0) {
+          cy.log(`Retrying API call, remaining retries: ${attemptsLeft - 1}`);
+          return makeRequest(attemptsLeft - 1);
+        } else {
+          return res;
+        }
+      });
   };
 
   return makeRequest(retries);
@@ -49,18 +51,21 @@ Cypress.Commands.add('apiCall', (method: string, query: string, body: string, to
  */
 Cypress.Commands.add('getToken', () => {
   return cy
-    .request({
-      method: 'POST',
-      url: `${getEnv('keycloak_host')}/realms/${getEnv('keycloak_realm')}/protocol/openid-connect/token`,
-      form: true,
-      body: {
-        client_id: getEnv('api_client'),
-        client_role: getEnv('api_client'),
-        client_secret: getEnv('keycloak_client_secret'),
-        username: getEnv('user_username'),
-        password: getEnv('user_password'),
-        grant_type: 'password',
-      },
+    .env(['user_username', 'user_password', 'keycloak_client_secret'])
+    .then(({ user_username, user_password, keycloak_client_secret }) => {
+      return cy.request({
+        method: 'POST',
+        url: `${getExpose('keycloak_host')}/realms/${getExpose('keycloak_realm')}/protocol/openid-connect/token`,
+        form: true,
+        body: {
+          client_id: getExpose('api_client'),
+          client_role: getExpose('api_client'),
+          client_secret: keycloak_client_secret,
+          username: user_username,
+          password: user_password,
+          grant_type: 'password',
+        },
+      });
     })
     .then(response => {
       expect(response.status).to.eq(200);
@@ -101,8 +106,7 @@ Cypress.Commands.add('validateAcceptedBatchResponse', (response: any, batch_type
 Cypress.Commands.add('validateItemCount', (response: any, count: number, field?: string) => {
   if (field == undefined) {
     expect(response.body).to.have.lengthOf(count);
-  }
-  else {
+  } else {
     expect(response.body[field]).to.have.lengthOf(count);
   }
 });
@@ -183,4 +187,30 @@ Cypress.Commands.add('validateSummary', (response: any, created: number, updated
     skipped: skipped,
     errors: errors,
   });
+});
+
+/**
+ * Polls a batch until it reaches the expected status or fails.
+ * Uses a polling mechanism with configurable retry attempts and wait intervals.
+ * Automatically stops if the status is ERROR or the maximum retries are reached.
+ * @param batchId The unique identifier of the batch to monitor.
+ * @param token The Bearer authentication token.
+ * @param expectedStatus The target status to wait for (default: 'SUCCESS').
+ * @param maxRetries The maximum number of polling attempts (default: 10).
+ * @returns A Cypress chain containing the final batch status response.
+ */
+Cypress.Commands.add('waitForBatchStatus', (batchId: string, token: string, expectedStatus: string = 'SUCCESS', maxRetries: number = 10) => {
+  const poll = (attempt: number): Cypress.Chainable => {
+    return cy.apiCall('GET', `batches/${batchId}`, '', token).then((res: any) => {
+      if (res.body.status === expectedStatus || res.body.status === 'ERROR') {
+        return res;
+      }
+      if (attempt >= maxRetries) {
+        throw new Error(`Batch ${batchId} did not reach status "${expectedStatus}" after ${maxRetries} attempts`);
+      }
+      cy.wait(500);
+      return poll(attempt + 1);
+    });
+  };
+  return poll(0);
 });

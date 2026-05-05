@@ -336,8 +336,8 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
 
     // Sort and translate
     augmentedData?.sort((a, b) => {
-      const aApplied = a.key && queryBuilderItems.includes(a.key);
-      const bApplied = b.key && queryBuilderItems.includes(b.key);
+      const aApplied = queryBuilderItems.includes(a.key);
+      const bApplied = queryBuilderItems.includes(b.key);
 
       if (aApplied === bApplied) {
         return b.count! - a.count!;
@@ -572,7 +572,7 @@ export function MultiSelectFilter({ field, maxVisibleItems = 5 }: IProps) {
               <Switch
                 id="with-dictionary-switch"
                 checked={withDictionaryToggle}
-                size="xs"
+                size="sm"
                 onCheckedChange={() => setWithDictionaryToggle(!withDictionaryToggle)}
               />
             </>

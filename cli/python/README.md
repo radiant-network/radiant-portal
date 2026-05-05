@@ -135,6 +135,7 @@ Class | Method | HTTP request | Description
 *OccurrencesApi* | [**count_germline_snv_occurrences**](docs/OccurrencesApi.md#count_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/count | Count germline SNV occurrences
 *OccurrencesApi* | [**count_somatic_snv_occurrences**](docs/OccurrencesApi.md#count_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/count | Count somatic SNV occurrences
 *OccurrencesApi* | [**get_expanded_germline_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /occurrences/germline/snv/{case_id}/{seq_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
+*OccurrencesApi* | [**get_expanded_somatic_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /occurrences/somatic/snv/{case_id}/{seq_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
 *OccurrencesApi* | [**get_germline_snv_dictionary**](docs/OccurrencesApi.md#get_germline_snv_dictionary) | **GET** /occurrences/germline/snv/dictionary | Get germline SNV facets dictionary
 *OccurrencesApi* | [**list_germline_cnv_genes_overlap**](docs/OccurrencesApi.md#list_germline_cnv_genes_overlap) | **GET** /occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap | List genes overlapping a CNV with a given ID
 *OccurrencesApi* | [**list_germline_cnv_occurrences**](docs/OccurrencesApi.md#list_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/list | List germline CNV occurrences
@@ -207,6 +208,7 @@ Class | Method | HTTP request | Description
  - [DocumentResult](docs/DocumentResult.md)
  - [DocumentsSearchResponse](docs/DocumentsSearchResponse.md)
  - [ExpandedGermlineSNVOccurrence](docs/ExpandedGermlineSNVOccurrence.md)
+ - [ExpandedSomaticSNVOccurrence](docs/ExpandedSomaticSNVOccurrence.md)
  - [ExternalFrequencies](docs/ExternalFrequencies.md)
  - [Facet](docs/Facet.md)
  - [FamilyHistoryBatch](docs/FamilyHistoryBatch.md)

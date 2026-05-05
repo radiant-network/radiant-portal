@@ -9,6 +9,8 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
 
+import EmptyField from '../information/empty-field';
+
 import SliderCard from './slider-card';
 
 const PHENOTYPES_VISIBLE_COUNT = 6;
@@ -63,7 +65,7 @@ function FamilyMemberCard({ member }: { member: CasePatientClinicalInformation }
               {t(`common.sex.${member.sex_code}`)}
             </Badge>
             <span className="font-mono">26/12/2018</span>
-            <span>{member.ethnicity_codes ? member.ethnicity_codes.join('/') : '-'}</span>
+            <span>{member.ethnicity_codes ? member.ethnicity_codes.join('/') : <EmptyField />}</span>
           </div>
         </div>
         {isProband && (

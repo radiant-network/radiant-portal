@@ -17,7 +17,7 @@ import (
 )
 
 func Test_SecureRoutes(t *testing.T) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
@@ -59,6 +59,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"interpretations/somatic/1/1/1",
 			"mondo/autocomplete",
 			"occurrences/germline/snv/1/1/1/expanded",
+			"occurrences/somatic/snv/1/1/1/expanded",
 			"sequencing/1",
 			"users/preferences/table_1",
 			"users/sets/1",
@@ -106,7 +107,7 @@ func Test_SecureRoutes(t *testing.T) {
 }
 
 func Test_OpenFGA_Authorization(t *testing.T) {
-	testutils.ParallelTestWithOpenFGAAndPostgresAndStarrocks(t, "simple",
+	testutils.SequentialTestWithOpenFGAAndPostgresAndStarrocks(t, "simple",
 		func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB) {
 			token, err := jwt.GenerateMockJWT("radiant", []string{"data_manager"})
 			assert.NoError(t, err)
@@ -145,6 +146,7 @@ func Test_OpenFGA_Authorization(t *testing.T) {
 				{"interpretations/pubmed/1", 500},
 				{"mondo/autocomplete", 200},
 				{"occurrences/germline/snv/1/1/1000/expanded", 200},
+				{"occurrences/somatic/snv/71/74/1000/expanded", 200},
 				{"sequencing/1", 200},
 				{"users/sets/1", 500},
 				{"variants/germline/1000/header", 200},

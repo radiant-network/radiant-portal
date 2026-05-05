@@ -6,12 +6,12 @@ import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV
 describe('Case Entity - Variants - CNV - Table - Sort', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage(data.case.case, 'CNV');
+    cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV');
   };
 
-  it('Alphanumeric [SJRA-1168]', () => {
+  it('Alphanumeric', () => {
     setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldSortColumn('cnv_variant', false /*hasUniqueValues*/, false /*isReverseSorting*/);
+    CaseEntity_Variants_CNV_Table.validations.shouldSortColumn('type', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Number', () => {

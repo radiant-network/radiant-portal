@@ -39,7 +39,6 @@ Name | Type | Description | Notes
 **gnomad_pli** | **float** |  | [optional] 
 **gnomad_v3_af** | **float** |  | 
 **hgvsg** | **str** |  | 
-**interpretation_classification** | **str** |  | [optional] 
 **interpretation_classification_counts** | **Dict[str, int]** |  | [optional] 
 **is_canonical** | **bool** |  | [optional] 
 **is_mane_plus** | **bool** |  | [optional] 

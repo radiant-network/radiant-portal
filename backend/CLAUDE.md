@@ -118,7 +118,29 @@ fga model test --tests ./scripts/init-openfga/tests.fga.yaml
 
 Test utilities in `test/testutils/`: DB container setup, fixtures, JWT generation, mock auth, object store setup.
 
-Parallel test helper: `testutils.ParallelTestWithPostgresAndStarrocks()`.
+**Prefer `testutils.RunTest`** (in `test/testutils/fixtures.go`) for new tests. Declare what you need via `Need`; the framework derives parallel vs serial and cleanup behavior:
+
+```go
+testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+    repo := NewGenesRepository(env.Starrocks)
+    ...
+})
+```
+
+PostgresMode controls both cleanup and isolation:
+- `ReadPostgres` — read-only, no cleanup, parallel.
+- `WritePostgres` — writes with unique keys, cleanup after test, parallel.
+- `ExclusivePostgres` — writes to shared state (seed data, count assertions on shared keys), cleanup after test, forces serial. Use only when the test can't use unique keys.
+
+Serial is also forced when `MinIO: true` (t.Setenv incompatibility) or `OpenFGA: true` (process env mutation).
+
+Legacy shims (`ParallelTestWithStarrocks`, `ParallelTestWithPostgres`, `SequentialTestWithPostgres`, etc.) still exist and route through `RunTest`. New tests should use `RunTest` directly.
+
+To make a Postgres write test parallel-safe (`WritePostgres` instead of `ExclusivePostgres`):
+- Use IDs/keys that `cleanUp` preserves (e.g., `case_id=1` or `case_id=71` for `occurrence_note`). Check `test/testutils/setup_postgres.go:cleanUp` for the full list of preserved ranges.
+- Use a unique identifier per test (e.g., a distinct `occurrence_id`) so count/list assertions don't see rows from other tests.
+
+StarRocks fixtures (`test/data/<folder>/*.tsv`) are loaded once per process per folder and shared across tests; the StarRocks test database is treated as read-only. This invariant is enforced at runtime by a GORM read-only guard (`test/testutils/setup_starrocks.go`): any attempt to INSERT, UPDATE, DELETE, DROP, ALTER, or TRUNCATE through a test StarRocks connection will fail immediately with `testutils.ErrStarrocksReadOnly`. This applies to both ORM operations (`db.Create`, `db.Save`, `db.Delete`) and raw SQL (`db.Exec`).
 
 ## Adding a New API Endpoint
 

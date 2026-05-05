@@ -21,7 +21,7 @@ import (
 )
 
 func assertDocumentsSearchHandler(t *testing.T, data string, body string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
 		router.POST("/documents/search", server.SearchDocumentsHandler(repo))
@@ -165,7 +165,7 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 }
 
 func assertDocumentIdsAutoComplete(t *testing.T, data string, prefix string, limit int, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
 		router.GET("/documents/autocomplete", server.DocumentsAutocompleteHandler(repo))
@@ -185,7 +185,7 @@ func Test_DocumentIdsAutoComplete(t *testing.T) {
 }
 
 func assertGetDocumentsFilters(t *testing.T, data string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
 		router.GET("/documents/filters", server.DocumentsFiltersHandler(repo))
@@ -253,7 +253,7 @@ func Test_GetDocumentsFilters(t *testing.T) {
 }
 
 func Test_GetDocumentsDownloadUrl(t *testing.T) {
-	testutils.ParallelTestWithAll(t, "simple", func(t *testing.T, client *minio.Client, endpoint string, postgres *gorm.DB, starrocks *gorm.DB) {
+	testutils.SequentialTestWithMinIOPostgresStarrocks(t, "simple", func(t *testing.T, client *minio.Client, endpoint string, postgres *gorm.DB, starrocks *gorm.DB) {
 		_ = os.Setenv("AWS_REGION", "us-east-1")
 		_ = os.Setenv("AWS_ENDPOINT_URL", client.EndpointURL().String())
 		_ = os.Setenv("AWS_ACCESS_KEY_ID", "access")

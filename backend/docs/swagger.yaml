@@ -225,6 +225,8 @@ components:
           type: string
         diagnosis_lab_name:
           type: string
+        has_igv_files:
+          type: boolean
         members:
           items:
             $ref: '#/components/schemas/CasePatientClinicalInformation'
@@ -271,6 +273,7 @@ components:
       - case_category_name
       - case_id
       - created_on
+      - has_igv_files
       - members
       - sequencing_experiments
       - status_code
@@ -940,8 +943,6 @@ components:
           type: number
         hgvsg:
           type: string
-        interpretation_classification:
-          type: string
         interpretation_classification_counts:
           $ref: '#/components/schemas/JsonMap-string-int'
         is_canonical:
@@ -1017,6 +1018,122 @@ components:
       - locus
       - locus_id
       - picked_consequences
+      type: object
+    ExpandedSomaticSNVOccurrence:
+      properties:
+        aa_change:
+          type: string
+        ad_alt:
+          type: integer
+        ad_ratio:
+          type: number
+        ad_total:
+          type: integer
+        cadd_phred:
+          type: number
+        cadd_score:
+          type: number
+        chromosome:
+          type: string
+        clinvar:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        dann_score:
+          type: number
+        dna_change:
+          type: string
+        end:
+          type: integer
+        ensembl_gene_id:
+          type: string
+        exon_rank:
+          type: integer
+        exon_total:
+          type: integer
+        fathmm_pred:
+          type: string
+        fathmm_score:
+          type: number
+        filter:
+          type: string
+        gnomad_loeuf:
+          type: number
+        gnomad_pli:
+          type: number
+        gnomad_v3_af:
+          type: number
+        hgvsg:
+          type: string
+        interpretation_classification_counts:
+          $ref: '#/components/schemas/JsonMap-string-int'
+        is_canonical:
+          type: boolean
+        is_mane_plus:
+          type: boolean
+        is_mane_select:
+          type: boolean
+        locus:
+          type: string
+        locus_id:
+          type: string
+        lrt_pred:
+          type: string
+        lrt_score:
+          type: number
+        omim_conditions:
+          items:
+            $ref: '#/components/schemas/OmimGenePanel'
+          type: array
+          uniqueItems: false
+        picked_consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        polyphen2_hvar_pred:
+          type: string
+        polyphen2_hvar_score:
+          type: number
+        qd:
+          type: number
+        revel_score:
+          type: number
+        rsnumber:
+          type: string
+        sift_pred:
+          type: string
+        sift_score:
+          type: number
+        somatic_pc_tn_wgs:
+          type: integer
+        somatic_pf_tn_wgs:
+          type: number
+        somatic_pn_tn_wgs:
+          type: integer
+        spliceai_ds:
+          type: number
+        spliceai_type:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        start:
+          type: integer
+        symbol:
+          type: string
+        transcript_id:
+          type: string
+        vep_impact:
+          $ref: '#/components/schemas/VepImpact'
+      required:
+      - chromosome
+      - end
+      - hgvsg
+      - locus
+      - locus_id
+      - start
       type: object
     ExternalFrequencies:
       properties:
@@ -1520,6 +1637,8 @@ components:
         sequencing_id:
           type: string
         transcript_id:
+          type: string
+        tumoral_name:
           type: string
         tumoral_type:
           type: string
@@ -2052,18 +2171,16 @@ components:
           type: integer
         somatic_pf_tn_wgs:
           type: number
-        somatic_quality:
-          type: integer
         symbol:
           type: string
         task_id:
           type: integer
+        transcript_id:
+          type: string
         variant_class:
           type: string
         vep_impact:
           $ref: '#/components/schemas/VepImpact'
-        zygosity:
-          type: string
       required:
       - aa_change
       - clinvar
@@ -2084,7 +2201,6 @@ components:
       - seq_id
       - somatic_pc_tn_wgs
       - somatic_pf_tn_wgs
-      - somatic_quality
       - symbol
       - task_id
       - variant_class
@@ -4615,6 +4731,53 @@ paths:
       security:
       - bearerauth: []
       summary: Get germline SNV facets dictionary
+      tags:
+      - occurrences
+  /occurrences/somatic/snv/{case_id}/{seq_id}/{locus_id}/expanded:
+    get:
+      description: Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+      operationId: getExpandedSomaticSNVOccurrence
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpandedSomaticSNVOccurrence'
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get a somatic ExpandedSomaticSNVOccurrence
       tags:
       - occurrences
   /occurrences/somatic/snv/{case_id}/{seq_id}/aggregate:

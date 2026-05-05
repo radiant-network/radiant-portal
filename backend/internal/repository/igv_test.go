@@ -11,7 +11,7 @@ import (
 )
 
 func Test_IGVInternal_GetIGV(t *testing.T) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB) {
 		repo := NewIGVRepository(starrocks)
 		igvInternal, err := repo.GetIGV(70)
 		assert.NoError(t, err)

@@ -36,6 +36,7 @@ func (m *MockRepository) GetOccurrences(int, int, types.ListQuery) ([]types.Germ
 			HasInterpretation:  true,
 			HasNote:            true,
 			MaxImpactScore:     4,
+			TranscriptId:      "T001",
 		},
 	}, nil
 }
@@ -87,8 +88,6 @@ func (m *MockRepository) GetExpandedOccurrence(int, int, int) (*types.ExpandedGe
 		Gq:                               100,
 		Consequences:                     []string{"splice acceptor"},
 		TranscriptId:                     "T001",
-		InterpretationClassificationCode: "LA6668-3",
-		InterpretationClassification:     "pathogenic",
 		Symbol:                           "BRAF",
 		EnsemblGeneId:                    "ENSG00000157764",
 	}, nil
@@ -137,7 +136,8 @@ func Test_OccurrencesListHandler(t *testing.T) {
 		"exomiser_acmg_classification": "",
 		"exomiser_acmg_evidence": null,
 		"exomiser_gene_combined_score": 0,
-        "exomiser_variant_score": 0
+        "exomiser_variant_score": 0,
+		"transcript_id": "T001"
     }]`, w.Body.String())
 }
 
@@ -250,7 +250,6 @@ func Test_GetExpandedOccurrenceHandler_withExomiserACMGCounts(t *testing.T) {
 		"gnomad_pli":0.1,
 		"gnomad_v3_af":0.01,
 		"hgvsg":"hgvsg1",
-		"interpretation_classification": "pathogenic",
 		"interpretation_classification_counts":{"benign":2, "pathogenic":1},
 		"is_canonical":false,
 		"is_mane_plus":false,
@@ -299,7 +298,6 @@ func Test_GetExpandedOccurrenceHandler_emptyExomiserACMGCounts(t *testing.T) {
 		"gnomad_pli":0.1,
 		"gnomad_v3_af":0.01,
 		"hgvsg":"hgvsg1",
-		"interpretation_classification": "pathogenic",
 		"interpretation_classification_counts":{"benign":2, "pathogenic":1},
 		"is_canonical":false,
 		"is_mane_plus":false,

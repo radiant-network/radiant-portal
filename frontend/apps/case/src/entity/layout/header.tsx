@@ -1,4 +1,4 @@
-import { Users } from 'lucide-react';
+import { Biohazard, Users } from 'lucide-react';
 
 import { CaseEntity } from '@/api/api';
 import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
@@ -21,7 +21,7 @@ export default function Header({ data, isLoading }: { data?: CaseEntity | null; 
           className: 'h-5',
           children: (
             <>
-              <Users />
+              {data?.case_type === 'somatic' ? <Biohazard /> : <Users />}
               {t(`case_entity.header.${data?.case_type ?? 'unknown'}`)}
             </>
           ),

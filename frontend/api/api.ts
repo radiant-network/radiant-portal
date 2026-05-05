@@ -482,6 +482,12 @@ export interface CaseEntity {
     'diagnosis_lab_name'?: string;
     /**
      * 
+     * @type {boolean}
+     * @memberof CaseEntity
+     */
+    'has_igv_files': boolean;
+    /**
+     * 
      * @type {Array<CasePatientClinicalInformation>}
      * @memberof CaseEntity
      */
@@ -1813,12 +1819,6 @@ export interface ExpandedGermlineSNVOccurrence {
     'hgvsg': string;
     /**
      * 
-     * @type {string}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'interpretation_classification'?: string;
-    /**
-     * 
      * @type {{ [key: string]: number; }}
      * @memberof ExpandedGermlineSNVOccurrence
      */
@@ -1979,6 +1979,297 @@ export interface ExpandedGermlineSNVOccurrence {
      * @memberof ExpandedGermlineSNVOccurrence
      */
     'zygosity'?: string;
+}
+
+
+/**
+ * 
+ * @export
+ * @interface ExpandedSomaticSNVOccurrence
+ */
+export interface ExpandedSomaticSNVOccurrence {
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'aa_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'ad_alt'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'ad_ratio'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'ad_total'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cadd_phred'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cadd_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'chromosome': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'clinvar'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'dann_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'dna_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'end': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'ensembl_gene_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'exon_rank'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'exon_total'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'fathmm_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'fathmm_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'filter'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'gnomad_loeuf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'gnomad_pli'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'gnomad_v3_af'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'hgvsg': string;
+    /**
+     * 
+     * @type {{ [key: string]: number; }}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'interpretation_classification_counts'?: { [key: string]: number; };
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'is_canonical'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'is_mane_plus'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'is_mane_select'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'locus': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'locus_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'lrt_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'lrt_score'?: number;
+    /**
+     * 
+     * @type {Array<OmimGenePanel>}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'omim_conditions'?: Array<OmimGenePanel>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'picked_consequences'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'polyphen2_hvar_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'polyphen2_hvar_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'qd'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'revel_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'rsnumber'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'sift_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'sift_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pc_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pf_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pn_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'spliceai_ds'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'spliceai_type'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'start': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'symbol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'transcript_id'?: string;
+    /**
+     * 
+     * @type {VepImpact}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'vep_impact'?: VepImpact;
 }
 
 
@@ -3089,6 +3380,12 @@ export interface InterpretationSomatic {
      * @memberof InterpretationSomatic
      */
     'transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
+    'tumoral_name'?: string;
     /**
      * 
      * @type {string}
@@ -4220,12 +4517,6 @@ export interface SomaticSNVOccurrence {
     'somatic_pf_tn_wgs': number;
     /**
      * 
-     * @type {number}
-     * @memberof SomaticSNVOccurrence
-     */
-    'somatic_quality': number;
-    /**
-     * 
      * @type {string}
      * @memberof SomaticSNVOccurrence
      */
@@ -4241,6 +4532,12 @@ export interface SomaticSNVOccurrence {
      * @type {string}
      * @memberof SomaticSNVOccurrence
      */
+    'transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticSNVOccurrence
+     */
     'variant_class': string;
     /**
      * 
@@ -4248,12 +4545,6 @@ export interface SomaticSNVOccurrence {
      * @memberof SomaticSNVOccurrence
      */
     'vep_impact': VepImpact;
-    /**
-     * 
-     * @type {string}
-     * @memberof SomaticSNVOccurrence
-     */
-    'zygosity'?: string;
 }
 
 
@@ -8801,6 +9092,52 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+         * @summary Get a somatic ExpandedSomaticSNVOccurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExpandedSomaticSNVOccurrence: async (caseId: number, seqId: number, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('getExpandedSomaticSNVOccurrence', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getExpandedSomaticSNVOccurrence', 'seqId', seqId)
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getExpandedSomaticSNVOccurrence', 'locusId', locusId)
+            const localVarPath = `/occurrences/somatic/snv/{case_id}/{seq_id}/{locus_id}/expanded`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve germline SNV facets
          * @summary Get germline SNV facets dictionary
          * @param {Array<string>} [facets] One or more facets to retrieve
@@ -9291,6 +9628,21 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+         * @summary Get a somatic ExpandedSomaticSNVOccurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getExpandedSomaticSNVOccurrence(caseId: number, seqId: number, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpandedSomaticSNVOccurrence>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedSomaticSNVOccurrence(caseId, seqId, locusId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpandedSomaticSNVOccurrence']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve germline SNV facets
          * @summary Get germline SNV facets dictionary
          * @param {Array<string>} [facets] One or more facets to retrieve
@@ -9505,6 +9857,18 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.getExpandedGermlineSNVOccurrence(caseId, seqId, locusId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+         * @summary Get a somatic ExpandedSomaticSNVOccurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExpandedSomaticSNVOccurrence(caseId: number, seqId: number, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedSomaticSNVOccurrence> {
+            return localVarFp.getExpandedSomaticSNVOccurrence(caseId, seqId, locusId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve germline SNV facets
          * @summary Get germline SNV facets dictionary
          * @param {Array<string>} [facets] One or more facets to retrieve
@@ -9706,6 +10070,20 @@ export class OccurrencesApi extends BaseAPI {
      */
     public getExpandedGermlineSNVOccurrence(caseId: number, seqId: number, locusId: string, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).getExpandedGermlineSNVOccurrence(caseId, seqId, locusId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+     * @summary Get a somatic ExpandedSomaticSNVOccurrence
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
+     * @param {string} locusId Locus ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public getExpandedSomaticSNVOccurrence(caseId: number, seqId: number, locusId: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getExpandedSomaticSNVOccurrence(caseId, seqId, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

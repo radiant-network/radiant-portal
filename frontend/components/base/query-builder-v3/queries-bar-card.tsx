@@ -6,6 +6,7 @@ import { ActionButton } from '@/components/base/buttons';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import {
   QBActionType,
+  useQBCache,
   useQBContext,
   useQBDispatch,
   useQBSettings,
@@ -16,31 +17,45 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Button } from '@/components/base/shadcn/button';
 import { Card } from '@/components/base/shadcn/card';
 import { Switch } from '@/components/base/shadcn/switch';
+import { ApplicationId } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
+import { useSqonsQBUpdatePreferenceEffect } from './hooks/use-query-builder-preference';
+import QueryBuilderSavedFilters from './saved-filter/query-builder-saved-filters';
 import { BooleanOperators } from './type';
+
+type QueriesBarCardProps = {
+  appId: ApplicationId;
+};
 
 /**
  * Card that display all queries for query-builder
  *
  * ┌─────────────────────────────────────────────────────────────────────────┐
- * | Title                                                                   |
+ * | Title [edit] [discard]        [new] [save] [duplicate] [delete] [manage]|
  * |─────────────────────────────────────────────────────────────────────────|
  * |  ┌───────┌──────────────────────────────────────────┐─────────────────┐ |
  * |  | [] Q1 | Loremp Ipsum = [1,2, 3 >][X]      | 389K | [copy] [trash]  | |
  * |  └───────└──────────────────────────────────────────┘─────────────────┘ |
  * |  ┌───────┌──────────────────────────────────────────┐─────────────────┐ |
- * |  | [] Q2 | Ipsum > 60 [X]                  | 389K | [copy] [trash]  | |
+ * |  | [] Q2 | Ipsum > 60 [X]                    | 389K | [copy] [trash]  | |
  * |  └───────└──────────────────────────────────────────┘─────────────────┘ |
  * |  [New Query] (*) Label                                                  |
  * └─────────────────────────────────────────────────────────────────────────┘
  */
-function QueriesBarCard() {
+function QueriesBarCard({ appId }: QueriesBarCardProps) {
   const { t } = useI18n();
   const settings = useQBSettings();
-  const { sqons } = useQBContext();
-  const { labelsEnabled } = useQBSettings();
+  const cache = useQBCache();
   const dispatch = useQBDispatch();
+  const { sqons } = useQBContext();
+
+  // Sync sqons changes with user preference
+  useSqonsQBUpdatePreferenceEffect({
+    appId,
+    sqons,
+    settings,
+  });
 
   /**
    * Add and active a new query
@@ -107,8 +122,11 @@ function QueriesBarCard() {
     <Card className="py-0">
       <Accordion type="multiple" defaultValue={['query-builder']}>
         <AccordionItem value="query-builder" className="border-none">
-          <AccordionTrigger className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none hover:cursor-pointer">
-            TODO
+          <AccordionTrigger
+            className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none hover:cursor-pointer"
+            asChild
+          >
+            <QueryBuilderSavedFilters />
           </AccordionTrigger>
           <AccordionContent className="py-4 px-6 space-y-4">
             <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">
@@ -120,7 +138,7 @@ function QueriesBarCard() {
             {/* Actions */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                {settings.selectedQueries.length > 1 ? (
+                {cache.selectedQueries.length > 1 ? (
                   <>
                     {/* Combine Queries */}
                     <ActionButton
@@ -150,7 +168,7 @@ function QueriesBarCard() {
 
                     {/* Toggle labelsEnabled Settings */}
                     <div className="flex items-center gap-1.5">
-                      <Switch size="xs" checked={labelsEnabled} onCheckedChange={handleLabelsCheckedChange} />
+                      <Switch size="sm" checked={settings.labelsEnabled} onCheckedChange={handleLabelsCheckedChange} />
                       {t('common.toolbar.labels')}
                     </div>
                   </>

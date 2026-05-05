@@ -57,6 +57,9 @@
       "likely_benign": "Probablement bénigne",
       "likely_benign.abbrev": "LB",
       "likely_benign.tooltip": "Probablement bénigne",
+      "likely_oncogenic": "Prob. oncogénique",
+      "likely_oncogenic.abbrev": "LO",
+      "likely_oncogenic.tooltip": "Probablement oncogénique",
       "likely_pathogenic": "Probablement pathogénique",
       "likely_pathogenic.abbrev": "LP",
       "likely_pathogenic.tooltip": "Probablement pathogénique",
@@ -75,6 +78,9 @@
       "no_data": "Aucune donnée",
       "no_data.abbrev": "ND",
       "no_data.tooltip": "Aucune donnée",
+      "oncogenic": "Oncogénique",
+      "oncogenic.abbrev": "O",
+      "oncogenic.tooltip": "Oncogénique",
       "pathogenic": "Pathogénique",
       "pathogenic.abbrev": "P",
       "pathogenic.tooltip": "Pathogénique",
@@ -225,6 +231,7 @@
     },
     "saved_filter": {
       "delete_tooltip": "Supprimer le filtre",
+      "no_filter_selected": "Aucun filtre sélectionné",
       "delete_dialog": {
         "title": "Supprimer définitivement ce filtre ?",
         "description": "Vous êtes sur le point de supprimer définitivement ce filtre et toutes ses requêtes.",
@@ -239,12 +246,11 @@
         "ok": "Créer"
       },
       "edit_dialog": {
-        "title": "Modifier le filtre",
-        "cancel": "Annuler",
-        "ok": "Enregistrer",
+        "edit_title": "Modifier le filtre",
+        "save_title": "Enregistrer le filtre",
         "fields": {
           "title": {
-            "label": "Titre",
+            "label": "Nom",
             "placeholder": "Requête sans titre"
           }
         }
@@ -254,7 +260,7 @@
       "manage_dialog": {
         "title": "Gérer les filtres",
         "close": "Fermer",
-        "last_save_at": "Dernière sauvegarde il y a : {lastSaveAt}"
+        "last_save_at": "Dernière sauvegarde il y a : {{lastSaveAt}}"
       },
       "new_filter": "Nouveau filtre",
       "save_tooltip": {
@@ -271,6 +277,7 @@
         "unset": "Retirer comme filtre par défaut"
       },
       "discard_tooltip": "Annuler les modifications non enregistrées",
+      "no_discard_tooltip": "Aucune modification à annuler",
       "no_saved_filters": "Vous n'avez aucun filtre enregistré",
       "untitled_filter": "Filtre sans titre",
       "notifications": {
@@ -368,8 +375,8 @@
     },
     "actions": {
       "select_language": "Choisir une langue",
-      "collapse_all": "Réduire tout",
-      "expand_all": "Développer tout",
+      "collapse_all": "Tout fermer",
+      "expand_all": "Tout ouvrir",
       "see_less": "Moins",
       "see_more": "Plus",
       "clear": "Effacer",
@@ -438,6 +445,7 @@
         "gnomad_sf": "gnomAD 4.1.0",
         "gnomad_sc": "gnomAD 4.1.0 ALT",
         "gnomad_v3_af": "gnomAD Genome 3.1.2",
+        "hotspot": "Hotspot",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
         "impact_score": "Score d'Impact",
@@ -450,7 +458,7 @@
         "no_data": "Pas de données",
         "omim_gene_panel": "OMIM",
         "omim_gene_panel_tooltip": "Online Mendelian Inheritance in Man",
-        "omim_inheritance": "Hérédité OMIM",
+        "omim_inheritance": "OMIM hérédité",
         "ordering_organization": "Établissement prescripteur",
         "orphanet_gene_panel": "Orphanet",
         "parental_origin": "Origine parentale",
@@ -478,6 +486,8 @@
         "spliceai_ds": "SpliceAI",
         "sm": "SM",
         "sm_tooltip": "Taux de copie linéaire de la moyenne du segment",
+        "somatic_pf_tn_wgs": "Fréq. TN tous les patients",
+        "somatic_pf_tn_wgs_tooltip": "Fréquence sur l’ensemble des patients du réseau ayant eu une analyse tumeur-normal (WGS)",
         "start": "Position",
         "study_code": "Code d'étude",
         "study_id": "ID de l'étude",
@@ -487,8 +497,9 @@
         "transmission": "Transmission",
         "transmission_mode": "Transmission",
         "transmission_mode_tooltip": "Interprétation potentielle de la dominance génique d’un variant en fonction de son origine parentale et du statut pathologique du patient.",
+        "type": "Type de variant",
         "unit": "Unité",
-        "variant_class": "Type de Variant",
+        "variant_class": "Type de variant",
         "variant_type": "Type de variant",
         "variantexternal_reference": "Référence externe du variant",
         "vep_impact": "VEP",
@@ -518,7 +529,8 @@
           "tr_v_gene": "Gène TR V",
           "tr_v_pseudogene": "Pseudogène TR V",
           "unitary_pseudogene": "Pseudogène unitaire",
-          "unprocessed_pseudogene": "Pseudogène non traité"
+          "unprocessed_pseudogene": "Pseudogène non traité",
+          "": "Aucun type de gène"
         },
         "consequence": {
           "3_prime_utr": "Région UTR 3′",
@@ -587,22 +599,22 @@
           "uncertain_significance": "Signification incertaine"
         },
         "fathmm_pred": {
-          "T": "Toléré",
-          "D": "Délétère"
+          "t": "Toléré",
+          "d": "Délétère"
         },
         "lrt_pred": {
-          "N": "Neutre",
-          "D": "Délétère",
-          "U": "Inconnu"
+          "n": "Neutre",
+          "d": "Délétère",
+          "u": "Inconnu"
         },
         "polyphen2_hvar_pred": {
-          "B": "Bénin",
-          "D": "Délétère",
-          "P": "Potentiellement délétère"
+          "b": "Bénin",
+          "d": "Délétère",
+          "p": "Potentiellement délétère"
         },
         "sift_pred": {
-          "T": "Toléré",
-          "D": "Délétère"
+          "t": "Toléré",
+          "d": "Délétère"
         },
         "transmission_mode": {
           "autosomal_dominant": "Dominant autosomique",
@@ -681,6 +693,7 @@
       "gene_divider": "Panels de gènes",
       "pathogenicity_exomiser_divider": "Exomiser",
       "pathogenicity_predictions_divider": "Prédictions",
+      "pathogenicity_oncology_divider": "Oncologie",
       "occurrence_metrics_divider": "Métriques",
       "occurrence_parental_divider": "Analyse parentale",
       "frequency_divider_my_organization": "Mon organisation",
@@ -854,7 +867,7 @@
       "aa_change": "AA",
       "aa_change_tooltip": "Substitution acide aminé",
       "ad_ratio": "Ratio PA",
-      "ad_ratio_tooltip": "Ratio profondeur allélique",
+      "ad_ratio_tooltip": "Ratio profondeur allélique ALT/(ALT+REF)",
       "bc": "BC",
       "bc_tooltip": "Nombre de bins dans la région",
       "calls": "GT",
@@ -873,6 +886,10 @@
       "exomiser_acmg_classification_tooltip": "ACMG de Exomiser",
       "exomiser_gene_combined_score": "Exo.",
       "exomiser_gene_combined_score_tooltip": "Score Exomiser calculé en fonction des caractéristiques du variant et des phénotypes du patient",
+      "freq_tn": "Fréq. TN",
+      "freq_tn_tooltip": "Nombre de génomes tumeur-normal comportant ce variant. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
+      "freq_g": "Fréq. G",
+      "freq_g_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
       "filter": "Filtre",
       "gene_length": "Longueur du gène",
       "gene_length_tooltip": "Longueur du gène en bases",
@@ -883,6 +900,8 @@
       "gnomad_v3_af": "gnomAD",
       "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (fréquence allélique)",
       "hgvsg": "Variant",
+      "hotspot": "Hotspot",
+      "hotspot_tooltip": "Hotspot Cancer",
       "is_mane_select": "MANE",
       "length": "Longueur",
       "length_tooltip": "Longueur du CNV en bases",
@@ -896,7 +915,7 @@
       "nb_snv": "# SNVs",
       "nb_snv_tooltip": "Nombre de SNVs inclus par le CNV",
       "omim_inheritance_code": "OMIM",
-      "omim_inheritance_code_tooltip": "Modes d”hérédité MIM pour le gène de la conséquence la plus délétère",
+      "omim_inheritance_code_tooltip": "Modes d'hérédité MIM pour le gène de la conséquence la plus délétère",
       "overlapping_gene_percent": "% Gène",
       "overlapping_gene_percent_tooltip": "% de la longueur du gène chevauché",
       "overlapping_cnv_percent": "% CNV",
@@ -925,6 +944,7 @@
     "actions": {
       "preview": "Aperçu",
       "open_in_igv": "Ouvrir dans IGV ",
+      "open_in_igv_disabled_tooltip": "Aucun fichier d'alignement disponible pour ce cas",
       "ucsc": "UCSC",
       "litvar": "LitVar",
       "view_variant": "Voir variant"
@@ -990,7 +1010,8 @@
       "insertion": "Insertion",
       "snv": "SNV",
       "deletion": "Délétion",
-      "sequence_alteration": "Séquence Altération"
+      "sequence_alteration": "Séquence Altération",
+      "substitution": "Substitution"
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
@@ -1006,10 +1027,11 @@
       "title": "Interprétation clinique",
       "cancel_text": "Annuler",
       "ok_text": "Sauvegarder l'interprétation",
-      "last_update": "Dernière mise à jour : <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
+      "last_update": "Dernière mise à jour :",
       "header": {
         "germline": "Germinal",
-        "somatic": "Somatic"
+        "germline_family": "Germinal",
+        "somatic": "Somatique"
       },
       "transcript": {
         "exon": "Exon"
@@ -1092,12 +1114,15 @@
             "title": "Annotations gène"
           }
         }
-      }
+      },
+      "no_results": "Aucun résultat trouvé"
     }
   },
   "preview_sheet": {
     "header": {
-      "germline": "Germinal"
+      "germline": "Germinal",
+      "germline_family": "Germline",
+      "somatic": "Somatique"
     },
     "actions": {
       "download_report": "Télécharger le rapport",
@@ -1115,8 +1140,10 @@
         "classification": "Classification",
         "primary_condition": "Condition principale",
         "classification_criteria": "Critères de classification",
+        "clinical_utility": "Utilité clinique",
         "interpretation": "Interprétation",
         "references": "{{count}} références",
+        "tumoral_type": "Type tumoral",
         "updated_at_tooltip": "Dernière date d'interprétation",
         "updated_by_name_tooltip": "Rédigé par"
       }
@@ -1145,11 +1172,13 @@
           "title": "Classification",
           "exomiser": "Exomiser",
           "clinvar": "ClinVar",
+          "hotspot": "Hotspot",
           "no_data": "Aucune donnée de classification rapportée"
         },
         "frequencies": {
           "title": "Fréquences",
           "affected": "Affectés",
+          "tn": "Tumor-normal",
           "gnomad": "gnomAD"
         },
         "functional_scores": {
@@ -1301,6 +1330,7 @@
       "cases": "Cas",
       "germline": "Germinal",
       "germline_family": "Germinal familial",
+      "somatic": "Somatique",
       "priority_tooltip": "Priorité",
       "status_tooltip": "Statut",
       "unknown": "Inconnu"
@@ -1400,9 +1430,7 @@
     "variants": {
       "title": "Variants",
       "filters": {
-        "sequencing": "Séquençage",
         "proband": "Proband",
-        "sample_id": "ID Échantillon",
         "affected_status_code": {
           "affected": "Affecté",
           "non_affected": "Non-affecté",
@@ -1413,9 +1441,15 @@
           "partial": "Gène recoupe le CNV à une de ses extrémités",
           "full_cnv": "Gène contient entièrement le CNV"
         },
-        "snv": "SNV",
         "cnv": "CNV",
+        "cnv_to": "CNV (TO)",
+        "sample_submitter_id": "ID soumissionnaire :",
+        "sample_submitter_id_tooltip": "ID soumissionnaire",
         "sequencing_id": "ID Séq.",
+        "snv": "SNV",
+        "snv_tn": "SNV (TN)",
+        "snv_tn_tooltip": "SNV (tumor-normal)",
+        "snv_to": "SNV (TO)",
         "show_only_interpreted": "Afficher les variants interprétés",
         "show_only_commented": "Afficher les variants commentés",
         "filter_by_flag": "Filtrer par drapeau"

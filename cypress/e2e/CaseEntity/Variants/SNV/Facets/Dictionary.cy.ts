@@ -6,7 +6,7 @@ import { CaseEntity_Variants_Facets } from 'pom/pages/CaseEntity_Variants_Facets
 describe('Case Entity - Variants - SNV - Facets - Dictionary', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage(data.case.case, 'SNV');
+    cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV');
   };
 
   it('Non zero values', () => {

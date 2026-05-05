@@ -17,11 +17,10 @@ import { useCaseIdFromParam } from '@/utils/helper';
 import DetailsTab from './details/details-tab';
 import FilesTab from './files/files-tab';
 import Header from './layout/header';
-import VariantsTab from './variants/variants-tab';
+import GermlineVariantsTab from './variants/germline-variants-tab';
+import SomaticVariantsTab from './variants/somatic-variants-tab';
 
 export const CaseEntityContext = createContext<CaseEntity | undefined>(undefined);
-
-const TAB_SEARCH_PARAM = 'tab';
 
 type CaseEntityInput = {
   key: string;
@@ -39,8 +38,9 @@ export default function App() {
   const mainRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<CaseEntityTabs>(
-    (searchParams.get(TAB_SEARCH_PARAM) as CaseEntityTabs) ?? CaseEntityTabs.Details,
+    (searchParams.get('tab') as CaseEntityTabs) ?? CaseEntityTabs.Details,
   );
+
   const { data, error, isLoading } = useSWR<CaseEntity, ApiError, CaseEntityInput>(
     {
       key: 'case-entity',
@@ -53,12 +53,35 @@ export default function App() {
     },
   );
 
+  const hasVariants = (data?.sequencing_experiments ?? []).some(seqExp => seqExp.has_variants);
+  const handleOnTabChange = useCallback(
+    (value: CaseEntityTabs) => {
+      if (value == CaseEntityTabs.Variants) {
+        const defaultSeqId = (data?.sequencing_experiments ?? []).filter(seqExp => seqExp.has_variants)[0].seq_id ?? -1;
+        setSearchParams({
+          tab: value,
+          seq_id: defaultSeqId.toString(),
+        });
+      } else {
+        setSearchParams({ tab: value });
+      }
+      setActiveTab(value);
+    },
+    [data],
+  );
+
   /**
    * Set active tab by searchParams (from urls)
    */
   useEffect(() => {
-    setActiveTab((searchParams.get(TAB_SEARCH_PARAM) as CaseEntityTabs) ?? CaseEntityTabs.Details);
-  }, [searchParams]);
+    if (searchParams.get('tab') != null) {
+      setActiveTab(searchParams.get('tab') as CaseEntityTabs);
+      return;
+    }
+
+    setActiveTab(CaseEntityTabs.Details);
+    setSearchParams({ tab: CaseEntityTabs.Details });
+  }, []);
 
   /**
    * Reset scroll position when changing tab
@@ -68,11 +91,6 @@ export default function App() {
       mainRef.current.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [activeTab]);
-
-  const handleOnTabChange = useCallback((value: CaseEntityTabs) => {
-    setSearchParams({ tab: value });
-    setActiveTab(value);
-  }, []);
 
   if (!isLoading && error?.status === 404) {
     return (
@@ -93,8 +111,6 @@ export default function App() {
   if (!activeTab) {
     return null;
   }
-
-  const hasVariants = (data?.sequencing_experiments ?? []).some(seqExp => seqExp.has_variants);
   return (
     <CaseEntityContext value={data}>
       <main ref={mainRef} className="bg-muted h-screen overflow-auto">
@@ -132,7 +148,12 @@ export default function App() {
             </TabsContent>
           </Container>
           <TabsContent value={CaseEntityTabs.Variants} className="py-0">
-            <VariantsTab isLoading={isLoading} caseEntity={data} />
+            {data &&
+              (data.case_type === 'somatic' ? (
+                <SomaticVariantsTab isLoading={isLoading} caseEntity={data} />
+              ) : (
+                <GermlineVariantsTab isLoading={isLoading} caseEntity={data} />
+              ))}
           </TabsContent>
           <TabsContent value={CaseEntityTabs.Files} className="p-0 md:p-3">
             <FilesTab />

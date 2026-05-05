@@ -5,6 +5,7 @@ import { VariantOverview } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import ConditionalField from '@/components/base/information/conditional-field';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, CardProps } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -37,8 +38,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                   {data.symbol}
                 </a>
               )}
-              {!data.symbol &&
-                (['intergenic', 'intergenic_variant'].includes(pickedConsequence) ? t('common.no_gene') : '-')}
+              {!data.symbol && t('common.no_gene')}
             </div>
             <div className="text-xs font-mono">
               <ConditionalField condition={!!data.aa_change}>{data.aa_change}</ConditionalField>
@@ -60,7 +60,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                   {(data?.clinvar ?? []).map(clinvar => (
                     <Link
                       key={clinvar}
-                      to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
+                      to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
                     >
                       <ClassificationBadge key={clinvar} value={clinvar} />
                     </Link>
@@ -81,7 +81,10 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             </div>
             <div className="font-semibold font-mono">
               <ConditionalField condition={!!data?.germline_pc_wgs}>
-                <Link to={`/variants/entity/${params.locusId}#${VariantEntityTabs.Cases}`} className="hover:underline">
+                <Link
+                  to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`}
+                  className="hover:underline"
+                >
                   {`${data.germline_pc_wgs} (${data.germline_pf_wgs.toExponential(2)})`}
                 </Link>
               </ConditionalField>
@@ -128,6 +131,17 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             </div>
           )}
           {data?.dna_change && <div className="font-mono">{data?.dna_change}</div>}
+          {data?.rsnumber && (
+            <AnchorLink
+              size="sm"
+              href={`https://www.ncbi.nlm.nih.gov/snp/${data.rsnumber}`}
+              className={'hover:underline font-mono'}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {data.rsnumber}
+            </AnchorLink>
+          )}
         </div>
       </CardContent>
     </Card>

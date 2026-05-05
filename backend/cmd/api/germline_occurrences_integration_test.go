@@ -17,7 +17,7 @@ import (
 )
 
 func testList(t *testing.T, data string, body string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/germline/snv/:case_id/:seq_id/list", server.OccurrencesGermlineSNVListHandler(repo))
@@ -31,7 +31,7 @@ func testList(t *testing.T, data string, body string, expected string) {
 	})
 }
 func testCount(t *testing.T, data string, body string, expected int) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/germline/snv/:case_id/:seq_id/count", server.OccurrencesGermlineSNVCountHandler(repo))
@@ -45,7 +45,7 @@ func testCount(t *testing.T, data string, body string, expected int) {
 	})
 }
 func testAggregation(t *testing.T, data string, body string, queryParams []string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		facetsRepo := repository.NewFacetsRepository()
 		router := gin.Default()
@@ -63,7 +63,7 @@ func testAggregation(t *testing.T, data string, body string, queryParams []strin
 	})
 }
 func testStatistics(t *testing.T, data string, body string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/germline/snv/:case_id/:seq_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repo))
@@ -78,7 +78,7 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 }
 
 func Test_SNVOccurrences_List(t *testing.T) {
-	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "has_note": true, "hgvsg":"hgvsg1", "locus":"locus1", "locus_id":"1000", "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "max_impact_score":4, "germline_pf_wgs":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":1, "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"MODIFIER", "zygosity":"HET"}]`)
+	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "has_note": true, "hgvsg":"hgvsg1", "locus":"locus1", "locus_id":"1000", "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "max_impact_score":4, "germline_pf_wgs":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":1, "transcript_id":"T001", "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"MODIFIER", "zygosity":"HET"}]`)
 }
 
 func Test_SNVOccurrences_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
@@ -266,7 +266,7 @@ func Test_SNVOccurrence_List_Filter_On_Consequence_Column(t *testing.T) {
 }
 
 func Test_CNVOccurrence_List(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineCNVOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/germline/cnv/:case_id/:seq_id/list", server.OccurrencesGermlineCNVListHandler(repo))
@@ -287,7 +287,7 @@ func Test_CNVOccurrence_List(t *testing.T) {
 }
 
 func Test_CNVOccurrence_List_Filter_On_Chromosome(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineCNVOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/germline/cnv/:case_id/:seq_id/list", server.OccurrencesGermlineCNVListHandler(repo))
@@ -333,7 +333,7 @@ func Test_CNVOccurrence_List_Filter_On_Chromosome(t *testing.T) {
 }
 
 func Test_CNVOccurrence_Count(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineCNVOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/germline/cnv/:case_id/:seq_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
@@ -351,7 +351,7 @@ func Test_CNVOccurrence_Count(t *testing.T) {
 }
 
 func Test_CNVOccurrence_Count_Filter_On_Quality(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "multiple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineCNVOccurrencesRepository(db)
 		router := gin.Default()
 		router.POST("/occurrences/germline/cnv/:case_id/:seq_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
@@ -382,7 +382,7 @@ func Test_CNVOccurrence_Count_Filter_On_Quality(t *testing.T) {
 }
 
 func assertGetExpandedOccurrence(t *testing.T, data string, caseId int, seqId int, locusId int, expected string) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		repo := repository.NewGermlineSNVOccurrencesRepository(starrocks)
 		exomiserRepo := repository.NewExomiserRepository(starrocks)
 		pubmedClient := &MockExternalClient{}
@@ -420,8 +420,7 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		"gnomad_pli":0.1, 
 		"gnomad_v3_af":0.001, 
 		"hgvsg":"hgvsg1", 
-		"interpretation_classification": "pathogenic",
-		"interpretation_classification_counts":{"benign":1, "likelyPathogenic":1, "pathogenic":1}, 
+		"interpretation_classification_counts":{"benign":1, "likelyPathogenic":1, "pathogenic":1},
 		"is_canonical":true, 
 		"is_mane_plus":false, 
 		"is_mane_select":true, 
@@ -493,7 +492,7 @@ func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
 			"symbol": "TNMD"
 		  }
 		]`
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineCNVOccurrencesRepository(db)
 		router := gin.Default()
 		router.GET("/occurrences/germline/cnv/:case_id/:seq_id/:cnv_id/genes_overlap", server.OccurrencesGermlineCNVGenesOverlapHandler(repo))

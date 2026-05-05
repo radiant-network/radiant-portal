@@ -34,7 +34,6 @@
     "@vitejs/plugin-react": "^4.3.4",
     "@tailwindcss/postcss": "^4",
     "globals": "^15.12.0",
-    "shadcn-ui": "^0.9.4",
     "tailwindcss": "^4.1.8",
     "vite": "^6.2.2",
     "tw-animate-css": "^1.3.4",

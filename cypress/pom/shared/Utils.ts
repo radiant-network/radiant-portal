@@ -43,11 +43,13 @@ export const getColumnName = (columns: any, columnID: string) => {
  * @param tableHead The table head.
  * @param columns The array of column objects.
  * @param columnID The ID of the column.
+ * @param headRowSelector Optional selector to scope the lookup to a specific header row (e.g. `'tr:eq(1)'`) for tables with multi-level headers.
  * @returns A Cypress chain containing the column position (0-based) or -1 if not found
  */
-export const getColumnPosition = (tableHead: string, columns: any, columnID: string) => {
+export const getColumnPosition = (tableHead: string, columns: any, columnID: string, headRowSelector?: string) => {
   const columnName = getColumnName(columns, columnID);
-  return cy.get(`${tableHead} ${CommonSelectors.tableCellHead}`).then($cells => {
+  const baseSelector = headRowSelector ? `${tableHead} ${headRowSelector} ${CommonSelectors.tableCellHead}` : `${tableHead} ${CommonSelectors.tableCellHead}`;
+  return cy.get(baseSelector).then($cells => {
     $cells.css('width', '125px'); // Widen columns for full name access
     let position;
     if (columnName.startsWith('[')) {

@@ -18,6 +18,7 @@ import { cn } from '@/components/lib/utils';
 import {
   QBActionType,
   useQBAggregations,
+  useQBCache,
   useQBContext,
   useQBDispatch,
   useQBSettings,
@@ -57,9 +58,9 @@ type QueryBarProps = {
 /**
  * Simple factory design pattern to create the correct query-pill
  */
-function factory(content: TSyntheticSqonContentValue, aggregations: AggregationConfig) {
+function factory(uuid: string, content: TSyntheticSqonContentValue, aggregations: AggregationConfig) {
   if (isCombinedQuery(content as ISqonGroupFacet)) {
-    return <CombinedQueryPill sqon={content as ISyntheticSqon} />;
+    return <CombinedQueryPill uuid={uuid} sqon={content as ISyntheticSqon} />;
   }
 
   if (isSearchField(content as IValueFacet, aggregations)) {
@@ -92,7 +93,7 @@ function QueryBar({ index, sqon }: QueryBarProps) {
   const { activeQueryId } = useQBContext();
   const { combinedQueries } = useQBSettings();
   const { fetcher } = useQBContext();
-  const { selectedQueries } = useQBSettings();
+  const { selectedQueries } = useQBCache();
   const aggregations = useQBAggregations();
   const active = useMemo(() => activeQueryId === sqon.id, [activeQueryId]);
   const backgroundColor = useMemo(
@@ -228,7 +229,7 @@ function QueryBar({ index, sqon }: QueryBarProps) {
             <div className="flex flex-1 flex-wrap max-h-[30vh]">
               {sqon.content.map((content, index) => (
                 <div key={index} className="flex mt-1">
-                  {factory(content, aggregations)}
+                  {factory(sqon.id, content, aggregations)}
                   {index < sqon.content.length - 1 && <CombinerOperator sqon={sqon} />}
                 </div>
               ))}

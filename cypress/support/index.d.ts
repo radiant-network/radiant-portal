@@ -12,6 +12,7 @@ declare namespace Cypress {
     validateReport(response: any, level: string, code: string, message: string, path: string): cy & CyEventEmitter;
     validateSuccessBatchProcessed(response: any, batch_type: string, batch_id: string): cy & CyEventEmitter;
     validateSummary(response: any, created: number, updated: number, skipped: number, errors: number): cy & CyEventEmitter;
+    waitForBatchStatus(batchId: string, token: string, expectedStatus: string = 'SUCCESS', maxRetries: number = 10): Cypress.Chainable;
 
     // commands
     clickAndWait(options?: Partial<ClickOptions>): Chainable<Element>;
@@ -28,7 +29,7 @@ declare namespace Cypress {
     shouldBePinned(position: 'left' | 'right' | null): Chainable<JQuery<HTMLElement>>;
     shouldBeSortable(isSortable: boolean): Chainable<Element>;
     shouldHaveTooltip(column: any): cy & CyEventEmitter;
-    showColumn(column: string|RegExp): cy & CyEventEmitter;
+    showColumn(column: string | RegExp): cy & CyEventEmitter;
     sortTableAndIntercept(position: number, routeMatcher: string, nbCalls: number, tableId: string = ''): cy & CyEventEmitter;
     sortTableAndWait(position: number, tableId: string = ''): cy & CyEventEmitter;
     unpinColumn(position: number, tableId: string = ''): cy & CyEventEmitter;
@@ -41,7 +42,7 @@ declare namespace Cypress {
     visitFilesPage(search_criteria?: string): cy & CyEventEmitter;
     visitCaseDetailsPage(caseID: string): cy & CyEventEmitter;
     visitCaseFilesPage(caseID: string, searchCriteria?: string): cy & CyEventEmitter;
-    visitCaseVariantsPage(caseID: string, type: string, sqon?: string): cy & CyEventEmitter;
+    visitCaseVariantsPage(caseID: string, seqId: string, type: string, sqon?: string): cy & CyEventEmitter;
     visitVariantEvidCondPage(locusID: string): cy & CyEventEmitter;
     visitVariantFrequencyPage(locusID: string): cy & CyEventEmitter;
     visitVariantPatientsPage(locusID: string): cy & CyEventEmitter;

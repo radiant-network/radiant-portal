@@ -13,7 +13,7 @@ import (
 )
 
 func Test_Process_Unexpected_Errors(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewBatchRepository(db)
 
 		var id string

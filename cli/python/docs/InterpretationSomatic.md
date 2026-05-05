@@ -19,6 +19,7 @@ Name | Type | Description | Notes
 **pubmed** | [**List[InterpretationPubmed]**](InterpretationPubmed.md) |  | [optional] 
 **sequencing_id** | **str** |  | [optional] 
 **transcript_id** | **str** |  | [optional] 
+**tumoral_name** | **str** |  | [optional] 
 **tumoral_type** | **str** |  | [optional] 
 **updated_at** | **str** |  | [optional] 
 **updated_by** | **str** |  | [optional] 

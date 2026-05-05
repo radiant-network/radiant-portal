@@ -9,7 +9,7 @@ import (
 )
 
 func Test_GetClinvarRCV(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewClinvarRCVRepository(db)
 		clinvarRcv, err := repo.GetVariantClinvarConditions(1000)
 		assert.NoError(t, err)
@@ -25,7 +25,7 @@ func Test_GetClinvarRCV(t *testing.T) {
 }
 
 func Test_GetClinvarRCV_Empty(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewClinvarRCVRepository(db)
 		clinvarRcv, err := repo.GetVariantClinvarConditions(42)
 		assert.NoError(t, err)

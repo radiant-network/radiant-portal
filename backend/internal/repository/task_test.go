@@ -10,7 +10,7 @@ import (
 )
 
 func Test_CreateAndGetTask_OK(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
 
 		newTask := &types.Task{
@@ -56,7 +56,7 @@ func Test_GetTaskById_NotFound(t *testing.T) {
 }
 
 func Test_CreateAndGetTaskContext_OK(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
 
 		se := 72
@@ -99,7 +99,7 @@ func Test_GetTaskContextByTaskId_NotFound(t *testing.T) {
 }
 
 func Test_CreateAndGetTaskHasDocument_OK(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
 
 		doc := &types.TaskHasDocument{

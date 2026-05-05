@@ -17,7 +17,7 @@ import (
 )
 
 func assertGetVariantHeader(t *testing.T, data string, locusId int, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
 		router.GET("/variants/germline/:locus_id/header", server.GetGermlineVariantHeader(repo))
@@ -37,7 +37,7 @@ func Test_GetVariantHeader(t *testing.T) {
 }
 
 func assertGetVariantOverview(t *testing.T, data string, locusId int, expected string) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		repo := repository.NewVariantsRepository(starrocks)
 		exomiserRepository := repository.NewExomiserRepository(starrocks)
 		pubmedClient := &MockExternalClient{}
@@ -65,7 +65,7 @@ func Test_GetVariantOverview_With_ExomiserACMGClassificationCounts(t *testing.T)
 }
 
 func assertGetVariantConsequences(t *testing.T, data string, locusId int, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
 		router.GET("/variants/germline/:locus_id/consequences", server.GetGermlineVariantConsequences(repo))
@@ -85,7 +85,7 @@ func Test_GetVariantConsequences(t *testing.T) {
 }
 
 func assertGetVariantInterpretedCases(t *testing.T, data string, locusId int, body string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
 		router.POST("/variants/germline/:locus_id/cases/interpreted", server.GetGermlineVariantInterpretedCases(repo))
@@ -130,7 +130,7 @@ func Test_GetVariantInterpretedCases(t *testing.T) {
 	assertGetVariantInterpretedCases(t, "simple", 1000, body, expected)
 }
 func assertGetVariantUninterpretedCases(t *testing.T, data string, locusId int, body string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
 		router.POST("/variants/germline/:locus_id/cases/uninterpreted", server.GetGermlineVariantUninterpretedCases(repo))
@@ -187,7 +187,7 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 }
 
 func assertGetVariantCasesCount(t *testing.T, data string, locusId int, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
 		router.GET("/variants/germline/:locus_id/cases/count", server.GetGermlineVariantCasesCount(repo))
@@ -207,7 +207,7 @@ func Test_GetVariantCasesCount(t *testing.T) {
 }
 
 func assertGetVariantCasesFilters(t *testing.T, data string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
 		router := gin.Default()
 		router.GET("/variants/germline/cases/filters", server.GetGermlineVariantCasesFilters(repo))
@@ -270,7 +270,7 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 }
 
 func assertGetGermlineVariantConditions(t *testing.T, data string, locusId int, panelType string, filter string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGenePanelsRepository(db)
 		router := gin.Default()
 		router.GET("/variants/germline/:locus_id/conditions/:panel_type", server.GetGermlineVariantConditions(repo))
@@ -351,7 +351,7 @@ func Test_GetGermlineVariantConditions_Orphanet(t *testing.T) {
 }
 
 func Test_GetGermlineVariantConditions_Clinvar(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewClinvarRCVRepository(db)
 		router := gin.Default()
 		router.GET("/variants/germline/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repo))
@@ -367,7 +367,7 @@ func Test_GetGermlineVariantConditions_Clinvar(t *testing.T) {
 }
 
 func assertGetGermlineVariantExternalFrequencies(t *testing.T, data string, locusId int, expected string) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB) {
 		repo := repository.NewVariantsRepository(starrocks)
 		router := gin.Default()
 		router.GET("/variants/germline/:locus_id/external_frequencies", server.GetGermlineVariantExternalFrequenciesHandler(repo))
@@ -394,7 +394,7 @@ func Test_GetGermlineVariantExternalFrequenciesHandler(t *testing.T) {
 }
 
 func assertGetGermlineVariantGlobalInternalFrequencies(t *testing.T, data string, locusId int, status int, expected string) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB) {
 		repo := repository.NewVariantsRepository(starrocks)
 		router := gin.Default()
 		router.GET("/variants/germline/:locus_id/internal_frequencies/global", server.GetGermlineVariantGlobalInternalFrequenciesHandler(repo))
@@ -424,7 +424,7 @@ func Test_GetGermlineVariantGlobalInternalFrequenciesHandler_NotFound(t *testing
 }
 
 func assertGetGermlineVariantInternalFrequencies(t *testing.T, data string, locusId int, split string, status int, expected string) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB) {
 		repo := repository.NewVariantsRepository(starrocks)
 		router := gin.Default()
 		router.GET("/variants/germline/:locus_id/internal_frequencies", server.GetGermlineVariantInternalFrequenciesHandler(repo))

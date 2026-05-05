@@ -3,7 +3,7 @@
     "target": "es2018",
     "lib": ["es2018", "dom"],
     "types": ["cypress", "node"],
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

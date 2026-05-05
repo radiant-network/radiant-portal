@@ -4,7 +4,7 @@ describe('Sequencing - Batch - Missing fields - Optional fields', () => {
   let response: any;
 
   before(() => {
-    const Auth = Cypress.env('globalData').Authorization;
+    const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
       "sequencing_experiments": [
         {

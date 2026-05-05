@@ -19,7 +19,7 @@ import FrequencyTab from './frequency/frequency-tab';
 import OverviewTab from './overview/overview-tab';
 import TranscriptsTab from './transcripts/transcripts-tab';
 
-const TAB_SEARCH_PARAM = 'tab';
+export const VARIANT_ENTITY_TAB_PARAM = 'tab';
 
 type VariantHeaderInput = {
   key: string;
@@ -36,7 +36,7 @@ export default function App() {
   const params = useParams<{ locusId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<VariantEntityTabs>(
-    (searchParams.get(TAB_SEARCH_PARAM) as VariantEntityTabs) ?? VariantEntityTabs.Overview,
+    (searchParams.get(VARIANT_ENTITY_TAB_PARAM) as VariantEntityTabs) ?? VariantEntityTabs.Overview,
   );
 
   const { data, error, isLoading } = useSWR<VariantHeader, ApiError, VariantHeaderInput>(
@@ -55,7 +55,7 @@ export default function App() {
    * Set active tab by searchParams (from urls)
    */
   useEffect(() => {
-    setActiveTab((searchParams.get(TAB_SEARCH_PARAM) as VariantEntityTabs) ?? VariantEntityTabs.Overview);
+    setActiveTab((searchParams.get(VARIANT_ENTITY_TAB_PARAM) as VariantEntityTabs) ?? VariantEntityTabs.Overview);
   }, [searchParams]);
 
   const handleOnTabChange = useCallback(

@@ -14,7 +14,7 @@ type FacetListContextProps = {
 };
 
 export const FacetConfigContext = createContext<FacetListContextProps>({
-  appId: ApplicationId.snv_occurrence,
+  appId: ApplicationId.germline_snv_occurrence,
   builderFetcher: _params => undefined,
   statisticFetcher: _params => undefined,
 });

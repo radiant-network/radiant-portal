@@ -92,7 +92,7 @@ const tableColumns = [
     apiField: 'primary_condition_id',
     isVisibleByDefault: false,
     pinByDefault: null,
-    isSortable: true,
+    isSortable: false,
     isPinnable: true,
     position: 7,
     tooltip: null,
@@ -169,7 +169,7 @@ const tableColumns = [
     apiField: 'organization_code',
     isVisibleByDefault: false,
     pinByDefault: null,
-    isSortable: true,
+    isSortable: false,
     isPinnable: true,
     position: 14,
     tooltip: 'Organization managing the patient’s file',
@@ -194,7 +194,7 @@ export const CasesTable = {
      * @param buttonName The button name to click (First | Last | Previous | Next | Select)
      */
     clickPaginationButton(buttonName: string) {
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
       cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
     },
     /**
@@ -429,7 +429,7 @@ export const CasesTable = {
       }).as('searchRequest1');
       cy.visitCasesPage();
       cy.wait('@searchRequest1');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
         expect(req.body.limit).to.deep.equal(20);
@@ -438,7 +438,7 @@ export const CasesTable = {
       }).as('searchRequest2');
       CasesTable.actions.clickPaginationButton('Next');
       cy.wait('@searchRequest2');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
         expect(req.body.limit).to.deep.equal(20);
@@ -447,7 +447,7 @@ export const CasesTable = {
       }).as('searchRequest3');
       CasesTable.actions.clickPaginationButton('Previous');
       cy.wait('@searchRequest3');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
         expect(req.body.limit).to.deep.equal(20);
@@ -456,7 +456,7 @@ export const CasesTable = {
       }).as('searchRequest4');
       CasesTable.actions.clickPaginationButton('Next');
       cy.wait('@searchRequest4');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/search', req => {
         expect(req.body.limit).to.deep.equal(20);
@@ -655,7 +655,7 @@ export const CasesTable = {
                         throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
                       }
                     } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
-                        throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                      throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
                     } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
                       throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
                     }

@@ -15,7 +15,6 @@ const DEFAULT_VISIBLE_FILTERS = ['format_code', 'data_type_code', 'relationship_
 
 type FilesTableFilters = {
   caseId: number;
-  loading: boolean;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
 };
 
@@ -36,14 +35,14 @@ async function fetchFilters(caseId: number) {
   return response.data;
 }
 
-function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFilters) {
+function FilesTableFilters({ caseId, setSearchCriteria }: FilesTableFilters) {
   const { t } = useI18n();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-files-filters', {
     ...FILTER_DEFAULTS,
   });
-  const { data: apiFilters } = useSWR<DocumentFilters>('document-filters', () => fetchFilters(caseId), {
+  const { data: apiFilters, isLoading } = useSWR<DocumentFilters>('document-filters', () => fetchFilters(caseId), {
     revalidateOnFocus: false,
     revalidateOnMount: true,
     revalidateIfStale: false,
@@ -100,7 +99,7 @@ function FilesTableFilters({ caseId, setSearchCriteria, loading }: FilesTableFil
       setFilters={setFilters}
       openFilters={openFilters}
       setOpenFilters={setOpenFilters}
-      loading={loading}
+      loading={isLoading}
       setSearchCriteria={setSearchCriteria}
       criterias={CRITERIAS}
       defaultFilters={FILTER_DEFAULTS}

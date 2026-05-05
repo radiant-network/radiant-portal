@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { useState } from 'react';
 import { FlipVertical2, Triangle, Users } from 'lucide-react';
 
@@ -20,19 +21,20 @@ type SliderOccurrenceDetailsCardProps = {
   caseId: number;
   seqId: number;
   locus: string;
-  start: number;
-  chromosome: string;
+  start?: number;
+  chromosome?: string;
   zygosity?: string;
   transmission?: string;
   parental_origin?: string;
   genotype_quality?: number;
   filter?: string;
+  quality_depth?: number;
   relationshipToProband?: string;
   father_calls?: number[];
   mother_calls?: number[];
   ad_alt?: number;
   ad_total?: number;
-  enableIGV?: boolean;
+  has_igv_files?: boolean;
 };
 
 function getFilterValue(filter: string | undefined, t: (key: string) => string): React.ReactNode {
@@ -69,13 +71,14 @@ const SliderOccurrenceDetailsCard = ({
   transmission,
   parental_origin,
   genotype_quality,
+  quality_depth,
   relationshipToProband,
   filter,
   father_calls,
   mother_calls,
   ad_alt,
   ad_total,
-  enableIGV = false,
+  has_igv_files = false,
 }: SliderOccurrenceDetailsCardProps) => {
   const { t } = useI18n();
   const [igvOpen, setIGVOpen] = useState<boolean>(false);
@@ -83,7 +86,7 @@ const SliderOccurrenceDetailsCard = ({
   const filterValue = getFilterValue(filter, t);
 
   let actions = undefined;
-  if (enableIGV) {
+  if (has_igv_files && start && chromosome) {
     actions = (
       <IGVDialog
         open={igvOpen}
@@ -100,6 +103,18 @@ const SliderOccurrenceDetailsCard = ({
           </Button>
         )}
       />
+    );
+  } else {
+    actions = (
+      <Tooltip>
+        <TooltipTrigger>
+          <Button variant="outline" size="xs" disabled>
+            <FlipVertical2 />
+            {t('preview_sheet.occurrence_details.actions.view_in_igv')}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{t('variant.actions.open_in_igv_disabled_tooltip')}</TooltipContent>
+      </Tooltip>
     );
   }
 
@@ -187,17 +202,24 @@ const SliderOccurrenceDetailsCard = ({
             <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
               <DescriptionSection title="Metrics" values={[ad_alt, ad_total, genotype_quality, filter]}>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.quality_depth')}>
-                  <EmptyField />
+                  {quality_depth ? (
+                    <span className="font-mono">{thousandNumberFormat(quality_depth)}</span>
+                  ) : (
+                    <EmptyField />
+                  )}
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.allele_depth_alt')}>
-                  <span className="font-mono">{ad_alt ? thousandNumberFormat(ad_alt) : <EmptyField />}</span>
+                  {ad_alt ? <span className="font-mono">{thousandNumberFormat(ad_alt)}</span> : <EmptyField />}
                 </DescriptionRow>
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.total_depth_alt_ref')}>
-                  <span className="font-mono">{ad_total ? thousandNumberFormat(ad_total) : <EmptyField />}</span>
+                  {ad_total ? <span className="font-mono">{thousandNumberFormat(ad_total)}</span> : <EmptyField />}
                 </DescriptionRow>
-                <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.genotype_quality')}>
-                  {getGenotypeQuality(genotype_quality)}
-                </DescriptionRow>
+                {/* Optional display */}
+                {genotype_quality && (
+                  <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.genotype_quality')}>
+                    {getGenotypeQuality(genotype_quality)}
+                  </DescriptionRow>
+                )}
                 <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.filter')}>
                   {filterValue}
                 </DescriptionRow>

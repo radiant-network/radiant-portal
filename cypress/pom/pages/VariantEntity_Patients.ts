@@ -222,7 +222,7 @@ const tableColumns = {
       apiField: 'updated_on',
       isVisibleByDefault: true,
       pinByDefault: null,
-      isSortable: true,
+      isSortable: false,
       isPinnable: true,
       position: 9,
       tooltip: 'Date of last case modification (yyyy-mm-dd)',
@@ -373,7 +373,7 @@ const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
    * Shows all columns in the table.
    */
   showAllColumns() {
-    columns.forEach((column) => {
+    columns.forEach(column => {
       if (!column.isVisibleByDefault) {
         cy.showColumn(stringToRegExp(column.name, true /*exact*/));
       }
@@ -477,13 +477,13 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    * @param columnID The ID of the column to validate.
    * @param data The data object containing the expected values.
    */
-  shouldShowColumnContent(columnID: string, data: any) {
+  shouldShowColumnContent(columnID: string, data: any, showColumnsAction: () => void) {
+    showColumnsAction();
     getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
       if (position !== -1) {
         if (customColumnContent) {
           customColumnContent(columnID, data, position);
         } else {
-          // Comportement par défaut
           cy.validateTableFirstRowContent(data[columnID], position, tableId);
         }
       } else {
@@ -579,8 +579,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
             .find(CommonSelectors.tableCellData)
             .eq(position)
             .invoke('text')
-            .then(biggestValue => {
-              const biggest = biggestValue.trim();
+            .then(smallestValue => {
+              const smallest = smallestValue.trim();
 
               sortAction();
               cy.get(CommonSelectors.tableRow(tableId))
@@ -588,8 +588,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
                 .find(CommonSelectors.tableCellData)
                 .eq(position)
                 .invoke('text')
-                .then(smallestValue => {
-                  const smallest = smallestValue.trim();
+                .then(biggestValue => {
+                  const biggest = biggestValue.trim();
                   if (hasUniqueValues) {
                     if (biggest.localeCompare(smallest) !== 0) {
                       throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
@@ -646,8 +646,7 @@ const uninterpretedColumnContentHandler = (columnID: string, dataUninterpreted: 
   switch (columnID) {
     case 'case':
       cy.validateTableFirstRowContent(dataUninterpreted[columnID], position, tableId);
-      cy.validateTableFirstRowContent(dataUninterpreted.relationship, position, tableId);
-      cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position, tableId);
+      cy.validateTableFirstRowContent(dataUninterpreted.sequencing, position, tableId);
       break;
     case 'aff_status':
       cy.validateTableFirstRowContent(dataUninterpreted[columnID], position, tableId);
@@ -698,6 +697,9 @@ export const VariantEntity_Patients = {
         shouldShowAllColumns() {
           baseValidations.shouldShowAllColumns(() => actions.showAllColumns());
         },
+        shouldShowColumnContent(columnID: string, data: any) {
+          baseValidations.shouldShowColumnContent(columnID, data, () => actions.showAllColumns());
+        },
         shouldShowColumnTooltips() {
           baseValidations.shouldShowColumnTooltips(() => actions.showAllColumns());
         },
@@ -736,6 +738,9 @@ export const VariantEntity_Patients = {
         },
         shouldShowAllColumns() {
           baseValidations.shouldShowAllColumns(() => actions.showAllColumns());
+        },
+        shouldShowColumnContent(columnID: string, data: any) {
+          baseValidations.shouldShowColumnContent(columnID, data, () => actions.showAllColumns());
         },
         shouldShowColumnTooltips() {
           baseValidations.shouldShowColumnTooltips(() => actions.showAllColumns());

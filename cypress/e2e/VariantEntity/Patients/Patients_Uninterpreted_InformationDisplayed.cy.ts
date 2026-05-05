@@ -8,29 +8,16 @@ describe('VariantEntity - Patients - Uninterpreted - Information displayed', () 
     cy.login();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
     VariantEntity_Patients.uninterpreted.actions.selectTab();
+    VariantEntity_Patients.uninterpreted.actions.sortColumn('case');
+    VariantEntity_Patients.uninterpreted.actions.sortColumn('case');
   };
 
-  it('Case [SJRA-1168]', () => {
+  it('Case', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('case', data.variantGermline.uninterpreted);
   });
 
-  it('Sequencing [SJRA-1168]', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('sequencing', data.variantGermline.uninterpreted);
-  });
-
-  it('Patient [SJRA-1168]', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('patient', data.variantGermline.uninterpreted);
-  });
-
-  it('Sample [SJRA-1168]', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('sample', data.variantGermline.uninterpreted);
-  });
-
-  it('Aff. Status [SJRA-1205]', () => {
+  it('Aff. Status', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('aff_status', data.variantGermline.uninterpreted);
   });
@@ -45,23 +32,28 @@ describe('VariantEntity - Patients - Uninterpreted - Information displayed', () 
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('zygosity', data.variantGermline.uninterpreted);
   });
 
-  it('Diagnostic Lab [SJRA-1168]', () => {
+  it('Diagnostic Lab', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('diag_lab', data.variantGermline.uninterpreted);
   });
 
-  it('Analysis [SJRA-1205]', () => {
+  it('Sample', () => {
     setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('analysis', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('sample', data.variantGermline.uninterpreted);
   });
 
-  it('Date [SJRA-1168]', () => {
+  it('Date', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('date', data.variantGermline.uninterpreted);
   });
 
-  it('Status [SJRA-1205]', () => {
+  it('Analysis', () => {
     setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('status', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('analysis', data.variantGermline.uninterpreted);
+  });
+
+  it('Patient', () => {
+    setupTest();
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('patient', data.variantGermline.uninterpreted);
   });
 });

@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
 
 import { VariantConsequence } from '@/api/api';
+import EmptyField from '@/components/base/information/empty-field';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
@@ -29,7 +30,7 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
         <CardHeader>
           <AccordionTrigger className="hover:cursor-pointer">
             <div className="flex flex-1 ml-4 items-center gap-2">
-              <span className="font-semibold text-base">{data.symbol || '-'}</span>
+              <span className="font-semibold text-base">{data.symbol || t('common.no_gene')}</span>
               {/* ref: https://d3b.atlassian.net/browse/SJRA-146 */}
               {/* TODO when vep_impact is added to the api if data.is_picked == true */}
               {/* <ImpactIndicator value="HIGH" size={16} /> */}
@@ -44,25 +45,25 @@ function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps
             <div className="flex flex-1">
               <Badge variant="neutral" className="capitalize">
                 {t(`variant.biotype`, {
-                  defaultValue: data.biotype ? replaceUnderscore(data.biotype) : '-',
+                  defaultValue: data.biotype ? replaceUnderscore(data.biotype) : <EmptyField />,
                 })}
               </Badge>
             </div>
             <div className="flex flex-1 justify-end items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">{t('variant.predictions.pli')}:</span>
-                <span>{data?.gnomad_pli?.toExponential(2) ?? '-'}</span>
+                <span>{data?.gnomad_pli?.toExponential(2) ?? <EmptyField />}</span>
               </div>
               <Separator orientation="vertical" className="h-4" />
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">{t('variant.predictions.loeuf')}:</span>
-                <span>{data.gnomad_loeuf || '-'}</span>
+                <span>{data.gnomad_loeuf || <EmptyField />}</span>
               </div>
               <Separator orientation="vertical" className="h-4" />
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">{t('variant.predictions.splice_ai')}:</span>
                 <div className="flex items-center gap-2">
-                  <span>{data?.spliceai_ds ? data.spliceai_ds : '-'}</span>
+                  <span>{data?.spliceai_ds ? data.spliceai_ds : <EmptyField />}</span>
                   {data?.spliceai_type?.length && (
                     <div className="space-x-1">
                       {data.spliceai_type.map(type => (

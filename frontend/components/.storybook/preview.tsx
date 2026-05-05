@@ -95,7 +95,7 @@ const preview: Preview = {
     Story => (
       <I18nextProvider i18n={i18n}>
         <ThemeProvider>
-          <TooltipProvider delayDuration={0}>
+          <TooltipProvider>
             <AlertDialogProvider>
               <Story />
             </AlertDialogProvider>

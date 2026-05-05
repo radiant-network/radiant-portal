@@ -26,7 +26,7 @@ var DocumentsQueryConfigForTest = types.QueryConfig{
 }
 
 func Test_SearchDocumentsNoFilters(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, nil, nil, nil)
 		documents, count, err := repo.SearchDocuments(query)
@@ -55,7 +55,7 @@ func Test_SearchDocumentsNoFilters(t *testing.T) {
 }
 
 func Test_SearchDocumentsCustomSort(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, nil, nil, []types.SortBody{{Field: types.DocumentNameField.Name, Order: "asc"}})
 		documents, count, err := repo.SearchDocuments(query)
@@ -69,7 +69,7 @@ func Test_SearchDocumentsCustomSort(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnDocumentId(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -89,7 +89,7 @@ func Test_SearchDocumentsFilterOnDocumentId(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnDocumentName(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -109,7 +109,7 @@ func Test_SearchDocumentsFilterOnDocumentName(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnRunName(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -129,7 +129,7 @@ func Test_SearchDocumentsFilterOnRunName(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnSampleId(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -149,7 +149,7 @@ func Test_SearchDocumentsFilterOnSampleId(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnPatientId(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -169,7 +169,7 @@ func Test_SearchDocumentsFilterOnPatientId(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnCaseId(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -189,7 +189,7 @@ func Test_SearchDocumentsFilterOnCaseId(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnSeqId(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -209,7 +209,7 @@ func Test_SearchDocumentsFilterOnSeqId(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnTaskId(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -229,7 +229,7 @@ func Test_SearchDocumentsFilterOnTaskId(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnProjectCode(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -249,7 +249,7 @@ func Test_SearchDocumentsFilterOnProjectCode(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnDiagnosisLabCode(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -269,7 +269,7 @@ func Test_SearchDocumentsFilterOnDiagnosisLabCode(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnRelationshipToProbandMother(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -289,7 +289,7 @@ func Test_SearchDocumentsFilterOnRelationshipToProbandMother(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnRelationshipToProbandFather(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -309,7 +309,7 @@ func Test_SearchDocumentsFilterOnRelationshipToProbandFather(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnRelationshipToProbandProband(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -329,7 +329,7 @@ func Test_SearchDocumentsFilterOnRelationshipToProbandProband(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnFormatCode(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -349,7 +349,7 @@ func Test_SearchDocumentsFilterOnFormatCode(t *testing.T) {
 }
 
 func Test_SearchDocumentsFilterOnDataTypeCode(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -369,7 +369,7 @@ func Test_SearchDocumentsFilterOnDataTypeCode(t *testing.T) {
 }
 
 func Test_Documents_SearchById(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		autocompleteResult, err := repo.SearchById("1", 10)
 		assert.NoError(t, err)
@@ -398,7 +398,7 @@ func Test_Documents_SearchById(t *testing.T) {
 }
 
 func Test_GetDocumentsFilters_WithLabAndProject(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		filters, err := repo.GetDocumentsFilters(true)
 		assert.NoError(t, err)
@@ -411,7 +411,7 @@ func Test_GetDocumentsFilters_WithLabAndProject(t *testing.T) {
 }
 
 func Test_GetDocumentsFilters_WithoutLabAndProject(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		filters, err := repo.GetDocumentsFilters(false)
 		assert.NoError(t, err)
@@ -424,7 +424,7 @@ func Test_GetDocumentsFilters_WithoutLabAndProject(t *testing.T) {
 }
 
 func Test_GetById_Success(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		document, err := repo.GetById(264)
 		assert.NoError(t, err)
@@ -436,7 +436,7 @@ func Test_GetById_Success(t *testing.T) {
 }
 
 func Test_GetById_NotFound(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		document, err := repo.GetById(999999)
 		assert.NoError(t, err)
@@ -445,7 +445,7 @@ func Test_GetById_NotFound(t *testing.T) {
 }
 
 func Test_GetById_FilteredIndexFile(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewDocumentsRepository(db)
 		var indexDoc Document
 		db.Table("document doc").Where("doc.format_code IN ('crai', 'tbi')").First(&indexDoc)

@@ -5,9 +5,9 @@ import { getSettingsCheckbox, oneMinute } from 'pom/shared/Utils';
 import 'cypress-real-events';
 import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
 
-// Simple environment variable getter
-const getEnv = (key: string): string => {
-  return Cypress.env(key) || '';
+// Public configuration getter (non-sensitive values)
+const getExpose = (key: string): string => {
+  return Cypress.expose(key) || '';
 };
 
 /**
@@ -47,37 +47,39 @@ Cypress.Commands.add('login', () => {
   cy.session(
     ['user'],
     () => {
-      cy.request({
-        url: `${getEnv('keycloak_host')}/realms/${getEnv('keycloak_realm')}/protocol/openid-connect/auth`,
-        qs: {
-          client_id: getEnv('keycloak_client'), // Now uses the working cqdg-client from config
-          redirect_uri: Cypress.config('baseUrl'),
-          kc_idp_hint: null,
-          scope: 'openid',
-          state: createUUID(),
-          nonce: createUUID(),
-          response_type: 'code',
-          response_mode: 'fragment',
-        },
-      }).then(response => {
-        const html: HTMLElement = document.createElement('html');
-        html.innerHTML = response.body;
-
-        const script = html.getElementsByTagName('script')[0] as HTMLScriptElement;
-
-        eval(script.textContent ?? '');
-
-        const loginUrl: string = (window as any).kcContext.url.loginAction;
-
-        return cy.request({
-          form: true,
-          method: 'POST',
-          url: loginUrl,
-          followRedirect: false,
-          body: {
-            username: getEnv('user_username'),
-            password: getEnv('user_password'),
+      cy.env(['user_username', 'user_password']).then(({ user_username, user_password }) => {
+        cy.request({
+          url: `${getExpose('keycloak_host')}/realms/${getExpose('keycloak_realm')}/protocol/openid-connect/auth`,
+          qs: {
+            client_id: getExpose('keycloak_client'),
+            redirect_uri: Cypress.config('baseUrl'),
+            kc_idp_hint: null,
+            scope: 'openid',
+            state: createUUID(),
+            nonce: createUUID(),
+            response_type: 'code',
+            response_mode: 'fragment',
           },
+        }).then(response => {
+          const html: HTMLElement = document.createElement('html');
+          html.innerHTML = response.body;
+
+          const script = html.getElementsByTagName('script')[0] as HTMLScriptElement;
+
+          eval(script.textContent ?? '');
+
+          const loginUrl: string = (window as any).kcContext.url.loginAction;
+
+          return cy.request({
+            form: true,
+            method: 'POST',
+            url: loginUrl,
+            followRedirect: false,
+            body: {
+              username: user_username,
+              password: user_password,
+            },
+          });
         });
       });
     },
@@ -97,11 +99,10 @@ Cypress.Commands.add('login', () => {
  */
 Cypress.Commands.add('logout', () => {
   cy.visit('/');
-  cy.wait(2000);
-
-  cy.get(CommonSelectors.userIcon).eq(0).click();
+  cy.waitWhileLoad(oneMinute);
+  cy.get(CommonSelectors.userIcon).eq(0).should('be.visible').click();
   cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.logoutIcon}`).click();
-  cy.wait(2000);
+  cy.url().should('include', '/realms/');
 });
 
 /**
@@ -115,7 +116,7 @@ Cypress.Commands.add('pinColumn', (position: number, tableId: string = '') => {
     .find(CommonSelectors.pinIcon)
     .click({ force: true });
   cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.pinLeftIcon}`).click({ force: true });
-  cy.wait(1000);
+  cy.get(CommonSelectors.menuPopper).should('not.exist');
 });
 
 /**
@@ -213,11 +214,10 @@ Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, 
       .scrollIntoView({ offset: { top: -300, left: -300 } })
       .should('be.visible');
   } else {
-    scrollIntoSubject = cy.wrap(subject).scrollIntoView().wait(1000).should('be.visible');
+    scrollIntoSubject = cy.wrap(subject).scrollIntoView().should('be.visible');
   }
   if (object.tooltip) {
-    cy.wait(6000);
-    scrollIntoSubject.find(`${CommonSelectors.underlineHeader}, ${CommonSelectors.facetTriggerTooltip}`).realHover();
+    scrollIntoSubject.find(`${CommonSelectors.underlineHeader}, ${CommonSelectors.facetTriggerTooltip}`).should('be.visible').realHover();
     cy.get(CommonSelectors.tooltipPopper).invoke('css', { position: 'fixed', left: '20px' } /*Avoid hiding the logo*/).contains(object.tooltip).first().should('exist');
     cy.get(CommonSelectors.logo).click(); // Close the popper
     cy.get(CommonSelectors.tooltipPopper).should('not.exist');
@@ -231,7 +231,7 @@ Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, 
  * Shows a column in the table by checking it in the column selector.
  * @param column The column name to show.
  */
-Cypress.Commands.add('showColumn', (column: string|RegExp) => {
+Cypress.Commands.add('showColumn', (column: string | RegExp) => {
   cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
   getSettingsCheckbox(column).click({ force: true });
   cy.get(CommonSelectors.logo).clickAndWait({ force: true }); // Close the popper
@@ -271,7 +271,10 @@ Cypress.Commands.add('sortTableAndWait', (position: number, tableId: string = ''
     .eq(position)
     .find(CommonSelectors.sortIcon)
     .click({ force: true });
-  cy.wait(1000);
+  cy.get(`${CommonSelectors.tableHeadCell(tableId)}`)
+    .eq(position)
+    .find(CommonSelectors.sortIcon)
+    .should('exist');
 });
 
 /**
@@ -285,7 +288,7 @@ Cypress.Commands.add('unpinColumn', (position: number, tableId: string = '') => 
     .find(CommonSelectors.pinIcon)
     .click({ force: true });
   cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.unpinIcon}`).click({ force: true });
-  cy.wait(1000);
+  cy.get(CommonSelectors.menuPopper).should('not.exist');
 });
 
 /**
@@ -314,7 +317,7 @@ Cypress.Commands.add('validatePillSelectedQuery', (facetTitle: string | RegExp, 
  * @param tableId The table ID to check (default: '').
  */
 Cypress.Commands.add('validateTableFirstRowAttr', (expectedAttr: string, expectedValue: string, columnIndex: number, tableId: string = '') => {
-  cy.wait(2000);
+  cy.get(CommonSelectors.tableRow(tableId)).should('have.length.gte', 1);
   cy.get(CommonSelectors.tableRow(tableId))
     .eq(0)
     .find(CommonSelectors.tableCellData)
@@ -330,7 +333,7 @@ Cypress.Commands.add('validateTableFirstRowAttr', (expectedAttr: string, expecte
  * @param tableId The table ID to check (default: '').
  */
 Cypress.Commands.add('validateTableFirstRowClass', (expectedClass: string, columnIndex: number, tableId: string = '') => {
-  cy.wait(2000);
+  cy.get(CommonSelectors.tableRow(tableId)).should('have.length.gte', 1);
   cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(columnIndex).find(expectedClass).should('exist');
 });
 
@@ -341,7 +344,7 @@ Cypress.Commands.add('validateTableFirstRowClass', (expectedClass: string, colum
  * @param tableId The table ID to check (default: '').
  */
 Cypress.Commands.add('validateTableFirstRowContent', (expectedValue: string | RegExp, columnIndex: number, tableId: string = '') => {
-  cy.wait(2000);
+  cy.get(CommonSelectors.tableRow(tableId)).should('have.length.gte', 1);
   cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(columnIndex).contains(expectedValue).should('exist');
 });
 
@@ -443,13 +446,14 @@ Cypress.Commands.add('visitCaseFilesPage', (caseId: string, searchCriteria?: str
 /**
  * Visits the case variants page for a specific case.
  * @param caseId The case ID to visit.
+ * @param seqId The seq ID to visit.
  * @param type The type of variants (SNV | CNV).
  * @param sqon Optional query filter to apply (JSON string).
  */
-Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, type: string, sqon?: string) => {
+Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, seqId: string, type: string, sqon?: string) => {
   if (type === 'SNV') {
     if (sqon == undefined) {
-      cy.visitAndIntercept(`/case/entity/${caseId}?tab=variants`, 'POST', '**/list', 1);
+      cy.visitAndIntercept(`/case/entity/${caseId}?tab=variants&seq_id=${seqId}`, 'POST', '**/list', 1);
     } else {
       cy.intercept('POST', '**/list', interception => {
         const mockBody = { ...interception.body };
@@ -457,11 +461,11 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, type: string, sqo
         interception.alias = 'postListSNV';
         interception.body = mockBody;
       });
-      cy.visit(`/case/entity/${caseId}?tab=variants`, { failOnStatusCode: false });
+      cy.visit(`/case/entity/${caseId}?tab=variants&seq_id=${seqId}`, { failOnStatusCode: false });
       cy.wait('@postListSNV');
     }
   } else if (type === 'CNV') {
-    cy.visitAndIntercept(`/case/entity/${caseId}?tab=variants`, 'POST', '**/list', 1);
+    cy.visitAndIntercept(`/case/entity/${caseId}?tab=variants&seq_id=${seqId}`, 'POST', '**/list', 1);
 
     if (sqon == undefined) {
       cy.intercept('POST', '**/list').as('postListCNV');

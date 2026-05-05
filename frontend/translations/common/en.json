@@ -11,7 +11,7 @@
     "unspecified": "Unspecified",
     "no_data_available": "No data available",
     "not_available_yet": "Not available yet",
-    "no_gene": "No Gene",
+    "no_gene": "No gene",
     "save": "Save",
     "close": "Close",
     "view_all": "View all",
@@ -57,6 +57,9 @@
       "likely_benign": "Likely Benign",
       "likely_benign.abbrev": "LB",
       "likely_benign.tooltip": "Likely Benign",
+      "likely_oncogenic": "Likely Oncogenic",
+      "likely_oncogenic.abbrev": "LO",
+      "likely_oncogenic.tooltip": "Likely Oncogenic",
       "likely_pathogenic": "Likely Patho.",
       "likely_pathogenic.abbrev": "LP",
       "likely_pathogenic.tooltip": "Likely Pathogenic",
@@ -75,6 +78,9 @@
       "no_data": "No Data",
       "no_data.abbrev": "ND",
       "no_data.tooltip": "No Data",
+      "oncogenic": "Oncogenic",
+      "oncogenic.abbrev": "O",
+      "oncogenic.tooltip": "Oncogenic",
       "pathogenic": "Pathogenic",
       "pathogenic.abbrev": "P",
       "pathogenic.tooltip": "Pathogenic",
@@ -225,6 +231,7 @@
     },
     "saved_filter": {
       "delete_tooltip": "Delete filter",
+      "no_filter_selected": "No filter selected",
       "delete_dialog": {
         "title": "Permanently delete this filter?",
         "description": "You are about to permanently delete this filter and all of its queries.",
@@ -239,12 +246,11 @@
         "ok": "Create"
       },
       "edit_dialog": {
-        "title": "Edit filter",
-        "cancel": "Cancel",
-        "ok": "Save",
+        "edit_title": "Edit filter",
+        "save_title": "Save filter",
         "fields": {
           "title": {
-            "label": "Title",
+            "label": "Name",
             "placeholder": "Untitled query"
           }
         }
@@ -254,7 +260,7 @@
       "manage_dialog": {
         "title": "Manage filters",
         "close": "Close",
-        "last_save_at": "Last saved at: {lastSaveAt} ago"
+        "last_save_at": "Last saved at: {{lastSaveAt}} ago"
       },
       "new_filter": "New filter",
       "save_tooltip": {
@@ -271,6 +277,7 @@
         "unset": "Unset default filter"
       },
       "discard_tooltip": "Discard unsaved changes",
+      "no_discard_tooltip": "No changes to discard",
       "no_saved_filters": "You have no saved filters",
       "untitled_filter": "Untitled filter",
       "notifications": {
@@ -437,6 +444,7 @@
         "gnomad_sf": "gnomAD 4.1.0",
         "gnomad_sc": "gnomAD 4.1.0 ALT",
         "gnomad_v3_af": "gnomAD Genome 3.1.2",
+        "hotspot": "Hotspot",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
         "impact_score": "Impact Score",
@@ -461,7 +469,7 @@
         "germline_pf_wgs_affected": "Affected Patient Freq.",
         "germline_pf_wgs_affected_tooltip": "Frequency across affected patients of the network (WGS)",
         "germline_pf_wgs_not_affected": "Non-Affected Patient Freq.",
-        "germline_pf_wgs_not_affected_tooltip": "Frequency across non-affected patients of the network (WGS) ",
+        "germline_pf_wgs_not_affected_tooltip": "Frequency across non-affected patients of the network (WGS)",
         "germline_pf_wgs_tooltip": "Frequency across all patients of the network (WGS)",
         "polyphen2_hvar_pred": "PolyPhen-2 HVAR",
         "polyphen2_hvar_pred_tooltip": "Polymorphism Phenotyping v2 HumVar",
@@ -477,6 +485,8 @@
         "spliceai_ds": "SpliceAI",
         "sm": "SM",
         "sm_tooltip": "Linear copy ratio of the segment mean",
+        "somatic_pf_tn_wgs": "Freq. TN All Patients",
+        "somatic_pf_tn_wgs_tooltip": "Frequency across all patients of the network who had a tumor-normal analysis (WGS)",
         "start": "Position",
         "study_code": "Study Code",
         "study_id": "Study ID",
@@ -486,6 +496,7 @@
         "transmission": "Transmission",
         "transmission_mode": "Transmission",
         "transmission_mode_tooltip": "Indicator of the possible relationship between the genetics dominance of the variant and its parental origin.",
+        "type": "Variant Type",
         "unit": "Unit",
         "variant_class": "Variant Type",
         "variant_type": "Variant Type",
@@ -517,7 +528,8 @@
           "tr_v_gene": "TR V Gene",
           "tr_v_pseudogene": "TR V Pseudogene",
           "unitary_pseudogene": "Unitary Pseudogene",
-          "unprocessed_pseudogene": "Unprocessed Pseudogene"
+          "unprocessed_pseudogene": "Unprocessed Pseudogene",
+          "": "No Gene Type"
         },
         "consequence": {
           "3_prime_utr": "3 Prime UTR",
@@ -586,22 +598,22 @@
           "uncertain_significance": "Uncertain Significance"
         },
         "fathmm_pred": {
-          "T": "Tolerated",
-          "D": "Damaging"
+          "t": "Tolerated",
+          "d": "Damaging"
         },
         "lrt_pred": {
-          "N": "Neutral",
-          "D": "Deleterious",
-          "U": "Unknown"
+          "n": "Neutral",
+          "d": "Deleterious",
+          "u": "Unknown"
         },
         "polyphen2_hvar_pred": {
-          "B": "Benign",
-          "D": "Damaging",
-          "P": "Possibly Damaging"
+          "b": "Benign",
+          "d": "Damaging",
+          "p": "Possibly Damaging"
         },
         "sift_pred": {
-          "T": "Tolerated",
-          "D": "Damaging"
+          "t": "Tolerated",
+          "d": "Damaging"
         },
         "transmission_mode": {
           "autosomal_dominant": "Autosomal Dominant",
@@ -680,6 +692,7 @@
       "gene_divider": "Gene Panels",
       "pathogenicity_exomiser_divider": "Exomiser",
       "pathogenicity_predictions_divider": "Predictions",
+      "pathogenicity_oncology_divider": "Oncology",
       "occurrence_metrics_divider": "Metrics",
       "occurrence_parental_divider": "Parental Analysis",
       "frequency_divider_my_organization": "My Organization",
@@ -853,7 +866,7 @@
       "aa_change": "AA",
       "aa_change_tooltip": "Amino acid change",
       "ad_ratio": "AD Ratio",
-      "ad_ratio_tooltip": "Allele depth ratio",
+      "ad_ratio_tooltip": "Allele depth ratio ALT/(ALT+REF)",
       "bc": "BC",
       "bc_tooltip": "Number of bins in the region",
       "calls": "GT",
@@ -873,6 +886,10 @@
       "exomiser_gene_combined_score": "Exo.",
       "exomiser_gene_combined_score_tooltip": "Exomiser score based on variant properties and patient phenotypes",
       "filter": "Filter",
+      "freq_tn": "Freq. TN",
+      "freq_tn_tooltip": "Number of tumor-normal genomes containing this variant. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.",
+      "freq_g": "Freq. G",
+      "freq_g_tooltip": "Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
       "gene_length": "Length",
       "gene_length_tooltip": "Gene base length",
       "genotype_quality": "GQ",
@@ -880,8 +897,10 @@
       "gnomad_sf": "gnomAD",
       "gnomad_sf_tooltip": "gnomAD 4.1.0 (Allele Frequency)",
       "gnomad_v3_af": "gnomAD",
-      "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (allele Frequency)",
+      "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (Allele Frequency)",
       "hgvsg": "Variant",
+      "hotspot": "Hotspot",
+      "hotspot_tooltip": "Hotspot Cancer",
       "is_mane_select": "MANE",
       "length": "Length",
       "length_tooltip": "CNV bases length",
@@ -924,6 +943,7 @@
     "actions": {
       "preview": "Preview",
       "open_in_igv": "Open in IGV ",
+      "open_in_igv_disabled_tooltip": "No alignment file available for this case",
       "ucsc": "UCSC",
       "litvar": "LitVar",
       "view_variant": "View variant"
@@ -989,7 +1009,8 @@
       "insertion": "Insertion",
       "snv": "SNV",
       "deletion": "Deletion",
-      "sequence_alteration": "Sequence Alteration"
+      "sequence_alteration": "Sequence Alteration",
+      "substitution": "Substitution"
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
@@ -1005,9 +1026,10 @@
       "title": "Clinical Interpretation",
       "cancel_text": "Cancel",
       "ok_text": "Save interpretation",
-      "last_update": "Last update: <span style='font-weight:500;'>{name}</span> ({date, date, long}, {updatedAtTime})",
+      "last_update": "Last update:",
       "header": {
         "germline": "Germline",
+        "germline_family": "Germline",
         "somatic": "Somatic"
       },
       "transcript": {
@@ -1087,13 +1109,16 @@
           "annotations_gene": {
             "title": "Gene annotations"
           }
-        }
+        },
+        "no_results": "No results found"
       }
     }
   },
   "preview_sheet": {
     "header": {
-      "germline": "Germline"
+      "germline": "Germline",
+      "germline_family": "Germline",
+      "somatic": "Somatic"
     },
     "actions": {
       "download_report": "Download report",
@@ -1111,8 +1136,10 @@
         "classification": "Classification",
         "primary_condition": "Primary Condition",
         "classification_criteria": "Classification criteria",
+        "clinical_utility": "Clinical utility",
         "interpretation": "Interpretation",
         "references": "{{count}} references",
+        "tumoral_type": "Tumor Type",
         "updated_at_tooltip": "Last interpretation date",
         "updated_by_name_tooltip": "Authored by"
       }
@@ -1141,11 +1168,13 @@
           "title": "Classification",
           "exomiser": "Exomiser",
           "clinvar": "ClinVar",
+          "hotspot": "Hotspot",
           "no_data": "No classification data reported"
         },
         "frequencies": {
           "title": "Frequencies",
           "affected": "Affected",
+          "tn": "Tumor-normal",
           "gnomad": "gnomAD"
         },
         "functional_scores": {
@@ -1297,6 +1326,7 @@
       "cases": "Cases",
       "germline": "Germline Solo",
       "germline_family": "Germline Family",
+      "somatic": "Somatic",
       "priority_tooltip": "Priority",
       "status_tooltip": "Status",
       "unknown": "Unknown"
@@ -1396,9 +1426,7 @@
     "variants": {
       "title": "Variants",
       "filters": {
-        "sequencing": "Sequencing",
         "proband": "Proband",
-        "sample_id": "Sample ID",
         "affected_status_code": {
           "affected": "Affected",
           "non_affected": "Unaffected",
@@ -1409,12 +1437,18 @@
           "partial": "Gene overlaps the CNV",
           "full_cnv": "Gene contains the CNV entirely"
         },
+        "cnv_to": "CNV (TO)",
+        "sequencing_id": "Seq. ID",
+        "sample_submitter_id": "Submitter sample ID:",
+        "sample_submitter_id_tooltip": "Submitter sample ID",
         "snv": "SNV",
         "cnv": "CNV",
-        "sequencing_id": "Seq. ID",
         "show_only_interpreted": "Show only interpreted",
         "show_only_commented": "Show only commented",
-        "filter_by_flag": "Filter by flag"
+        "filter_by_flag": "Filter by flag",
+        "snv_tn": "SNV (TN)",
+        "snv_tn_tooltip": "SNV (tumor-normal)",
+        "snv_to": "SNV (TO)"
       },
       "dialog": {
         "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"

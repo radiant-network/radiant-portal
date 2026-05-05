@@ -320,7 +320,7 @@ func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
 }
 
 func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		/* This test verifies that rollback occurs when there is an error inserting patient records. */
 		var id string
 		initErr := db.Raw(`

@@ -1,7 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { formatDistance } from 'date-fns';
-import { enCA } from 'date-fns/locale/en-CA';
-import { frCA } from 'date-fns/locale/fr-CA';
 
 import List from '@/components/base/list/list';
 import ListItemAction from '@/components/base/list/list-item-with-action';
@@ -18,6 +15,7 @@ import {
 import { SavedFilterInstance } from '@/components/cores/query-builder';
 import { ISavedFilter } from '@/components/cores/saved-filter';
 import { useI18n } from '@/components/hooks/i18n';
+import { formatDistanceDate } from '@/components/lib/date';
 
 import { openDeleteSavedFilterAlert } from '../alerts';
 import { useQueryBuilderContext, useQueryBuilderDictContext } from '../query-builder-context';
@@ -52,7 +50,7 @@ function SavedFiltersManageDialog({ open, onOpenChange }: { open: boolean; onOpe
           </DialogBody>
           <DialogFooter>
             <DialogClose asChild>
-              <Button>{dict.savedFilter.manageDialog.close}</Button>
+              <Button data-cy="CloseButton">{dict.savedFilter.manageDialog.close}</Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>
@@ -72,14 +70,12 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilterInstance
     };
 
     if (!savedFilterObj.updated_on) {
-      return dict.savedFilter.manageDialog.lastSaveAt.replace('{lastSaveAt}', 'n/a');
+      return dict.savedFilter.manageDialog.lastSaveAt.replace('{{lastSaveAt}}', 'n/a');
     }
 
-    const lastSaveAt = formatDistance(new Date(), new Date(savedFilterObj.updated_on), {
-      locale: currentLanguage === 'fr' ? frCA : enCA,
-    });
+    const lastSaveAt = formatDistanceDate(savedFilterObj.updated_on, currentLanguage);
 
-    return dict.savedFilter.manageDialog.lastSaveAt.replace('{lastSaveAt}', lastSaveAt);
+    return dict.savedFilter.manageDialog.lastSaveAt.replace('{{lastSaveAt}}', lastSaveAt);
   }, [savedFilter.raw()]);
 
   return (

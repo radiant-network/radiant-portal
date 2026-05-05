@@ -1,9 +1,9 @@
 /* eslint-disable complexity */
 import { ReactNode, useCallback } from 'react';
 import { Link } from 'react-router';
-import { ArrowUpRight, AudioLines, Diamond } from 'lucide-react';
+import { ArrowUpRight, AudioLines, Diamond, Flame } from 'lucide-react';
 
-import { ExpandedGermlineSNVOccurrence } from '@/api/api';
+import { OmimGenePanel, VepImpact } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ShapeDiamondIcon from '@/components/base/icons/shape-diamond-icon';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
@@ -18,14 +18,82 @@ import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
-import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
+import { toExponentialNotation, toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
 
-type SliderVariantDetailsCardProps = {
-  data: ExpandedGermlineSNVOccurrence;
+const MAX_CLINICAL_ASSOCIATION = 3;
+
+type SliderVariantType = {
+  type: 'somatic' | 'germline';
 };
 
-const SliderVariantDetailsCard = ({ data }: SliderVariantDetailsCardProps) => {
+type SliderVariantDetailsCardProps = ClinicalAssociationCardProps &
+  PredictionCardProps &
+  SliderVariantType &
+  GeneCardProps & {
+    chromosome?: string;
+    start?: number;
+    end?: number;
+  };
+
+/**
+ * Props are volontary used instead of GermlineSnvOccurrence and SomaticSnvOccurrence.
+ * To prevent relentless type checking in the code. It lead to more props but it's still easier
+ * to read.
+ */
+const SliderVariantDetailsCard = ({
+  type,
+  chromosome,
+  start,
+  end,
+  symbol,
+  aa_change,
+  vep_impact,
+  picked_consequences,
+  dna_change,
+  transcript_id,
+  is_mane_select,
+  is_canonical,
+  exon_rank,
+  exon_total,
+  rsnumber,
+  omim_conditions,
+  locus_id,
+  germline_pc_wgs_affected,
+  germline_pn_wgs_affected,
+  germline_pf_wgs_affected,
+  germline_pc_wgs_not_affected,
+  germline_pn_wgs_not_affected,
+  germline_pf_wgs_not_affected,
+  somatic_pc_tn_wgs,
+  somatic_pn_tn_wgs,
+  somatic_pf_tn_wgs,
+  cadd_phred,
+  cadd_score,
+  lrt_pred,
+  dann_score,
+  lrt_score,
+  sift_pred,
+  sift_score,
+  fathmm_pred,
+  fathmm_score,
+  revel_score,
+  polyphen2_hvar_pred,
+  polyphen2_hvar_score,
+  clinvar,
+  exomiser_acmg_classification_counts,
+  interpretation_classification_counts,
+  gnomad_pli,
+  gnomad_loeuf,
+  ensembl_gene_id,
+  spliceai_type,
+  spliceai_ds,
+  hgvsg,
+  gnomad_v3_af,
+  locus,
+  locusId,
+  hotspot,
+}: SliderVariantDetailsCardProps) => {
   const { t } = useI18n();
 
   return (
@@ -34,40 +102,95 @@ const SliderVariantDetailsCard = ({ data }: SliderVariantDetailsCardProps) => {
       title={t('preview_sheet.variant_details.title')}
       actions={
         <div className="flex gap-2">
-          <Button variant="outline" size="xs" asChild>
-            <a
-              href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${data.chromosome}%3A${data.start}-${data.start}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t('preview_sheet.variant_details.actions.ucsc')}
-              <ArrowUpRight />
-            </a>
-          </Button>
-          <Button variant="outline" size="xs" asChild>
-            <a
-              href={`https://www.ncbi.nlm.nih.gov/research/litvar2/docsum?text=${data.rsnumber}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t('preview_sheet.variant_details.actions.litvar')} <ArrowUpRight />
-            </a>
-          </Button>
+          {chromosome && start && end && (
+            <Button variant="outline" size="xs" asChild>
+              <a
+                href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${end}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t('preview_sheet.variant_details.actions.ucsc')}
+                <ArrowUpRight />
+              </a>
+            </Button>
+          )}
+          {rsnumber !== undefined && rsnumber.length > 0 && (
+            <Button variant="outline" size="xs" asChild>
+              <a
+                href={`https://www.ncbi.nlm.nih.gov/research/litvar2/docsum?text=${rsnumber}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t('preview_sheet.variant_details.actions.litvar')} <ArrowUpRight />
+              </a>
+            </Button>
+          )}
         </div>
       }
     >
       <div className="flex flex-col gap-3">
-        <GeneCard data={data} />
-        <PredictionCard data={data} />
-        <ClinicalAssociationCard data={data} />
+        <GeneCard
+          symbol={symbol}
+          aa_change={aa_change}
+          ensembl_gene_id={ensembl_gene_id}
+          vep_impact={vep_impact}
+          picked_consequences={picked_consequences}
+          dna_change={dna_change}
+          transcript_id={transcript_id}
+          is_mane_select={is_mane_select}
+          is_canonical={is_canonical}
+          exon_rank={exon_rank}
+          exon_total={exon_total}
+          rsnumber={rsnumber}
+        />
+        <PredictionCard
+          type={type}
+          germline_pc_wgs_affected={germline_pc_wgs_affected}
+          germline_pn_wgs_affected={germline_pn_wgs_affected}
+          germline_pf_wgs_affected={germline_pf_wgs_affected}
+          germline_pc_wgs_not_affected={germline_pc_wgs_not_affected}
+          germline_pn_wgs_not_affected={germline_pn_wgs_not_affected}
+          germline_pf_wgs_not_affected={germline_pf_wgs_not_affected}
+          somatic_pc_tn_wgs={somatic_pc_tn_wgs}
+          somatic_pn_tn_wgs={somatic_pn_tn_wgs}
+          somatic_pf_tn_wgs={somatic_pf_tn_wgs}
+          cadd_phred={cadd_phred}
+          cadd_score={cadd_score}
+          dann_score={dann_score}
+          lrt_pred={lrt_pred}
+          lrt_score={lrt_score}
+          sift_pred={sift_pred}
+          sift_score={sift_score}
+          fathmm_pred={fathmm_pred}
+          fathmm_score={fathmm_score}
+          revel_score={revel_score}
+          polyphen2_hvar_pred={polyphen2_hvar_pred}
+          polyphen2_hvar_score={polyphen2_hvar_score}
+          clinvar={clinvar}
+          exomiser_acmg_classification_counts={exomiser_acmg_classification_counts}
+          interpretation_classification_counts={interpretation_classification_counts}
+          gnomad_pli={gnomad_pli}
+          gnomad_loeuf={gnomad_loeuf}
+          ensembl_gene_id={ensembl_gene_id}
+          spliceai_type={spliceai_type}
+          spliceai_ds={spliceai_ds}
+          hgvsg={hgvsg}
+          gnomad_v3_af={gnomad_v3_af}
+          locus={locus}
+          locusId={locusId}
+          hotspot={hotspot}
+        />
+        <ClinicalAssociationCard omim_conditions={omim_conditions} locus_id={locus_id} />
       </div>
     </SliderCard>
   );
 };
 
-const MAX_CLINICAL_ASSOCIATION = 3;
-
-const ClinicalAssociationCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
+type ClinicalAssociationCardProps = {
+  locus_id?: string;
+  omim_conditions?: OmimGenePanel[];
+};
+const ClinicalAssociationCard = ({ omim_conditions, locus_id }: ClinicalAssociationCardProps) => {
   const { t } = useI18n();
 
   const clinicalAssociationTitle = t('common.no_data_available');
@@ -83,20 +206,20 @@ const ClinicalAssociationCard = ({ data }: { data: ExpandedGermlineSNVOccurrence
   );
 
   const clinicalAssociationValue: ReactNode[] = [];
-  data.omim_conditions?.forEach((oc, index) => {
+  omim_conditions?.forEach((oc, index) => {
+    if (index > MAX_CLINICAL_ASSOCIATION) return;
+
     if (index === MAX_CLINICAL_ASSOCIATION) {
       clinicalAssociationValue.push(
         <AnchorLink
           component={Link}
-          to={`/variants/entity/${data.locus_id}#evidenceAndConditions`}
+          to={`/variants/entity/${locus_id}?tab=evidenceAndConditions`}
           className="justify-start"
           size="sm"
         >
           <span className="max-w-72 overflow-hidden text-ellipsis">{t('common.actions.see_more')}</span>
         </AnchorLink>,
       );
-      return;
-    } else if (index > MAX_CLINICAL_ASSOCIATION) {
       return;
     }
 
@@ -139,124 +262,253 @@ const ClinicalAssociationCard = ({ data }: { data: ExpandedGermlineSNVOccurrence
   );
 };
 
-const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
+type PredictionCardProps = SliderVariantType & {
+  germline_pc_wgs_affected?: number;
+  germline_pn_wgs_affected?: number;
+  germline_pf_wgs_affected?: number;
+  germline_pc_wgs_not_affected?: number;
+  germline_pn_wgs_not_affected?: number;
+  germline_pf_wgs_not_affected?: number;
+  somatic_pc_tn_wgs?: number;
+  somatic_pn_tn_wgs?: number;
+  somatic_pf_tn_wgs?: number;
+  cadd_phred?: number;
+  cadd_score?: number;
+  dann_score?: number;
+  lrt_pred?: string;
+  lrt_score?: number;
+  sift_pred?: string;
+  sift_score?: number;
+  fathmm_pred?: string;
+  fathmm_score?: number;
+  revel_score?: number;
+  polyphen2_hvar_pred?: string;
+  polyphen2_hvar_score?: number;
+  clinvar?: string[];
+  exomiser_acmg_classification_counts?: Record<string, number>;
+  interpretation_classification_counts?: Record<string, number>;
+  gnomad_pli?: number;
+  gnomad_loeuf?: number;
+  ensembl_gene_id?: string;
+  spliceai_type?: string[];
+  spliceai_ds?: number;
+  hgvsg?: string;
+  gnomad_v3_af?: number;
+  locus?: string;
+  locusId?: string;
+  hotspot?: boolean;
+};
+const PredictionCard = ({
+  type,
+  germline_pc_wgs_affected,
+  germline_pn_wgs_affected,
+  germline_pf_wgs_affected,
+  germline_pc_wgs_not_affected,
+  germline_pn_wgs_not_affected,
+  germline_pf_wgs_not_affected,
+  somatic_pc_tn_wgs,
+  somatic_pn_tn_wgs,
+  somatic_pf_tn_wgs,
+  cadd_phred,
+  cadd_score,
+  lrt_pred,
+  dann_score,
+  lrt_score,
+  sift_pred,
+  sift_score,
+  fathmm_pred,
+  fathmm_score,
+  revel_score,
+  polyphen2_hvar_pred,
+  polyphen2_hvar_score,
+  clinvar,
+  exomiser_acmg_classification_counts,
+  interpretation_classification_counts,
+  gnomad_pli,
+  gnomad_loeuf,
+  ensembl_gene_id,
+  spliceai_type,
+  spliceai_ds,
+  hgvsg,
+  gnomad_v3_af,
+  locus,
+  locusId,
+  hotspot,
+}: PredictionCardProps) => {
   const { t } = useI18n();
 
-  const affectedValue =
-    data.germline_pc_wgs_affected && data.germline_pn_wgs_affected && data.germline_pf_wgs_affected?.toExponential(2)
-      ? `${data.germline_pc_wgs_affected} / ${data.germline_pn_wgs_affected} (${data.germline_pf_wgs_affected?.toExponential(2)})`
-      : '-';
-  const affectedTitle = (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="inline-flex gap-1 items-center">
-          {t('preview_sheet.variant_details.sections.frequencies.affected')}
-          <ShapeDiamondIcon className="size-[13px] text-red-500" />
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>{t('occurrence_expand.frequencies.affected_tooltip')}</TooltipContent>
-    </Tooltip>
-  );
+  // Frequencies differ from somatic to germline
+  const frequencies = [];
+  if (type == 'somatic') {
+    // Tumor-Normal
+    frequencies.push(
+      <DescriptionRow
+        label={
+          <span className="inline-flex gap-1 items-center">
+            {t('preview_sheet.variant_details.sections.frequencies.tn')}
+          </span>
+        }
+      >
+        {somatic_pc_tn_wgs && somatic_pn_tn_wgs && somatic_pf_tn_wgs?.toExponential(2) ? (
+          <AnchorLink size="sm" href={`/variants/entity/${locusId}?tab=patients&cases=OtherCases`} target="_blank">
+            {somatic_pc_tn_wgs} / {somatic_pn_tn_wgs} ({somatic_pf_tn_wgs?.toExponential(2)})
+          </AnchorLink>
+        ) : (
+          <EmptyField />
+        )}
+      </DescriptionRow>,
+    );
+  } else {
+    // Germline Affected
+    frequencies.push(
+      <DescriptionRow
+        label={
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex gap-1 items-center">
+                {t('preview_sheet.variant_details.sections.frequencies.affected')}
+                <ShapeDiamondIcon className="size-[13px] text-red-500" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t('occurrence_expand.frequencies.affected_tooltip')}</TooltipContent>
+          </Tooltip>
+        }
+      >
+        {germline_pc_wgs_affected && germline_pn_wgs_affected && germline_pf_wgs_affected?.toExponential(2) ? (
+          `${germline_pc_wgs_affected} / ${germline_pn_wgs_affected} (${germline_pf_wgs_affected?.toExponential(2)})`
+        ) : (
+          <EmptyField />
+        )}
+      </DescriptionRow>,
+    );
 
-  const nonAffectedValue =
-    data.germline_pc_wgs_not_affected &&
-    data.germline_pn_wgs_not_affected &&
-    data.germline_pf_wgs_not_affected?.toExponential(2)
-      ? `${data.germline_pc_wgs_not_affected} / ${data.germline_pn_wgs_not_affected} (${data.germline_pf_wgs_not_affected?.toExponential(2)})`
-      : '-';
-  const nonAffectedTitle = (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="inline-flex gap-1 items-center">
-          {t('occurrence_expand.frequencies.non_affected')}
-          <Diamond className="size-[13px] text-green-500" />
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>{t('occurrence_expand.frequencies.non_affected_tooltip')}</TooltipContent>
-    </Tooltip>
-  );
+    // Germline Non Affected
+    frequencies.push(
+      <DescriptionRow
+        label={
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex gap-1 items-center">
+                {t('occurrence_expand.frequencies.non_affected')}
+                <Diamond className="size-[13px] text-green-500" />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t('occurrence_expand.frequencies.non_affected_tooltip')}</TooltipContent>
+          </Tooltip>
+        }
+      >
+        {germline_pc_wgs_not_affected &&
+        germline_pn_wgs_not_affected &&
+        germline_pf_wgs_not_affected?.toExponential(2) ? (
+          `${germline_pc_wgs_not_affected} / ${germline_pn_wgs_not_affected} (${germline_pf_wgs_not_affected?.toExponential(2)})`
+        ) : (
+          <EmptyField />
+        )}
+      </DescriptionRow>,
+    );
 
+    // GnomAD
+    frequencies.push(
+      <DescriptionRow label={t('preview_sheet.variant_details.sections.frequencies.gnomad')}>
+        {gnomad_v3_af ? (
+          <AnchorLink
+            size="sm"
+            href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r3`}
+            target="_blank"
+          >
+            {toExponentialNotation(gnomad_v3_af)}
+          </AnchorLink>
+        ) : (
+          <EmptyField />
+        )}
+      </DescriptionRow>,
+    );
+  }
+
+  // functional scores
   const functionalScores = [];
 
   // cadd phred
-  if (data.cadd_phred) {
+  if (cadd_phred) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.cadd_phred')}>
-        {data.cadd_phred.toExponential(2)}
+        {cadd_phred.toExponential(2)}
       </DescriptionRow>,
     );
   }
 
   // cadd score
-  if (data.cadd_score) {
+  if (cadd_score) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.cadd_raw')}>
-        {data.cadd_score.toExponential(2)}
+        {cadd_score.toExponential(2)}
       </DescriptionRow>,
     );
   }
 
   // DANN score
-  if (data.dann_score) {
+  if (dann_score) {
     functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.dann')}>{data.dann_score}</DescriptionRow>,
+      <DescriptionRow label={t('occurrence_expand.functional_scores.dann')}>{dann_score}</DescriptionRow>,
     );
   }
 
   // LRT score
-  if (data.lrt_score) {
+  if (lrt_score) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.lrt')}>
-        {data.lrt_pred}
-        {data.lrt_score && ` (${data.lrt_score})`}
+        {t(`common.filters.values.lrt_pred.${lrt_pred?.toLowerCase()}`) || lrt_pred}
+        {lrt_score && ` (${lrt_score})`}
       </DescriptionRow>,
     );
   }
 
   // sift
-  if (data.sift_pred) {
+  if (sift_pred) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.sift')}>
-        {data.sift_pred}
-        {data.sift_score && ` (${data.sift_score})`}
+        {t(`common.filters.values.sift_pred.${sift_pred?.toLowerCase()}`) || sift_pred}
+        {sift_score && ` (${sift_score})`}
       </DescriptionRow>,
     );
   }
 
   // fathmm
-  if (data.fathmm_pred) {
+  if (fathmm_pred) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.fathmm')}>
-        {data.fathmm_pred}
-        {data.fathmm_score && ` (${data.fathmm_score})`}
+        {t(`common.filters.values.fathmm_pred.${fathmm_pred?.toLowerCase()}`) || fathmm_pred}
+        {fathmm_score && ` (${fathmm_score})`}
       </DescriptionRow>,
     );
   }
 
   // revel score
-  if (data.revel_score) {
+  if (revel_score) {
     functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.revel')}>{data.revel_score}</DescriptionRow>,
+      <DescriptionRow label={t('occurrence_expand.functional_scores.revel')}>{revel_score}</DescriptionRow>,
     );
   }
 
   // PolyPhen-2 HVAR
-  if (data.polyphen2_hvar_pred) {
+  if (polyphen2_hvar_pred) {
     functionalScores.push(
       <DescriptionRow label={t('occurrence_expand.functional_scores.polyphen2_hvar')}>
-        {data.polyphen2_hvar_pred}
-        {data.polyphen2_hvar_score && ` (${data.polyphen2_hvar_score})`}
+        {t(`common.filters.values.polyphen2_hvar_pred.${polyphen2_hvar_pred?.toLowerCase()}`) || polyphen2_hvar_pred}
+        {polyphen2_hvar_score && ` (${polyphen2_hvar_score})`}
       </DescriptionRow>,
     );
   }
 
+  // Classification
   const classification = [];
 
-  if ((data.clinvar ?? []).length) {
+  // clinvar
+  if ((clinvar ?? []).length) {
     classification.push(
       <DescriptionRow label={t('preview_sheet.variant_details.sections.classification.clinvar')}>
         <div className="flex gap-1">
-          {(data.clinvar ?? []).map(key => (
+          {(clinvar ?? []).map(key => (
             <ClassificationBadge key={key} value={key} abbreviated />
           ))}
         </div>
@@ -264,10 +516,24 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
     );
   }
 
-  if (Object.keys(data.exomiser_acmg_classification_counts ?? {}).length) {
+  // hotspot
+  if (hotspot) {
+    classification.push(
+      <DescriptionRow label={t('preview_sheet.variant_details.sections.classification.hotspot')}>
+        <div className="flex gap-1">
+          <Flame
+            className={cn({ 'text-indicator-red fill-indicator-red': hotspot, 'text-muted-foreground/40': !hotspot })}
+            size={16}
+          />
+        </div>
+      </DescriptionRow>,
+    );
+  }
+
+  if (Object.keys(exomiser_acmg_classification_counts ?? {}).length) {
     classification.push(
       <DescriptionRow label={t('preview_sheet.variant_details.sections.classification.exomiser')}>
-        {Object.entries(data.exomiser_acmg_classification_counts ?? {}).map(([key, count]) => (
+        {Object.entries(exomiser_acmg_classification_counts ?? {}).map(([key, count]) => (
           <ClassificationBadge key={key} value={key} count={count} abbreviated />
         ))}
       </DescriptionRow>,
@@ -278,9 +544,9 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
     <div className="flex flex-wrap gap-4 rounded-md border border-border p-3 sm:gap-20 w-full">
       <div className="flex flex-1 flex-col gap-4">
         <DescriptionSection title={t('preview_sheet.variant_details.sections.interpretations.title')}>
-          {Object.keys(data.interpretation_classification_counts ?? {}).length ? (
+          {Object.keys(interpretation_classification_counts ?? {}).length ? (
             <DescriptionRow label={t('preview_sheet.variant_details.sections.interpretations.my_network')}>
-              {Object.entries(data.interpretation_classification_counts ?? {}).map(([key, count]) => (
+              {Object.entries(interpretation_classification_counts ?? {}).map(([key, count]) => (
                 <ClassificationBadge key={key} value={key} count={count} abbreviated />
               ))}
             </DescriptionRow>
@@ -301,45 +567,46 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
         </DescriptionSection>
         <DescriptionSection title={t('preview_sheet.variant_details.sections.gene.title')}>
           <DescriptionRow label={t('occurrence_expand.gene.pli')}>
-            {data.gnomad_pli ? (
+            {gnomad_pli ? (
               <AnchorLink
-                href={`https://gnomad.broadinstitute.org/gene/${data.ensembl_gene_id}?dataset=gnomad_r2_1`}
+                href={`https://gnomad.broadinstitute.org/gene/${ensembl_gene_id}?dataset=gnomad_r2_1`}
                 target="_blank"
                 size="sm"
               >
-                {toExponentialNotationAtThreshold(data.gnomad_pli)}
+                {toExponentialNotationAtThreshold(gnomad_pli)}
               </AnchorLink>
             ) : (
               <EmptyField />
             )}
           </DescriptionRow>
           <DescriptionRow label={t('occurrence_expand.gene.loeuf')}>
-            {data.gnomad_loeuf ? (
+            {gnomad_loeuf ? (
               <AnchorLink
-                href={`https://gnomad.broadinstitute.org/gene/${data.ensembl_gene_id}?dataset=gnomad_r2_1`}
+                href={`https://gnomad.broadinstitute.org/gene/${ensembl_gene_id}?dataset=gnomad_r2_1`}
                 target="_blank"
                 size="sm"
               >
-                {toExponentialNotationAtThreshold(data.gnomad_loeuf)}
+                {toExponentialNotationAtThreshold(gnomad_loeuf)}
               </AnchorLink>
             ) : (
               <EmptyField />
             )}
           </DescriptionRow>
           <DescriptionRow label={t('occurrence_expand.gene.splice_ai')}>
-            {data.spliceai_type ? (
-              <AnchorLink
-                href={`https://spliceailookup.broadinstitute.org/#variant=${data.hgvsg}&hg=38`}
-                target="_blank"
-                size="sm"
-              >
-                <span className="text-xs text-muted-foreground">
-                  {data.spliceai_ds}{' '}
-                  {data.spliceai_type.map(v => (
-                    <Badge key={v}>{v}</Badge>
-                  ))}
-                </span>
-              </AnchorLink>
+            {spliceai_type ? (
+              <div className="flex gap-1">
+                <AnchorLink
+                  href={`https://spliceailookup.broadinstitute.org/#variant=${hgvsg}&hg=38`}
+                  target="_blank"
+                  size="sm"
+                >
+                  {spliceai_ds}
+                </AnchorLink>
+
+                {spliceai_type.map(v => (
+                  <Badge key={v}>{v}</Badge>
+                ))}
+              </div>
             ) : (
               <EmptyField />
             )}
@@ -348,21 +615,7 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
       </div>
       <div className="flex flex-1 flex-col gap-4">
         <DescriptionSection title={t('preview_sheet.variant_details.sections.frequencies.title')}>
-          <DescriptionRow label={affectedTitle}>{affectedValue}</DescriptionRow>
-          <DescriptionRow label={nonAffectedTitle}>{nonAffectedValue}</DescriptionRow>
-          <DescriptionRow label={t('preview_sheet.variant_details.sections.frequencies.gnomad')}>
-            {data.gnomad_v3_af ? (
-              <AnchorLink
-                size="sm"
-                href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`}
-                target="_blank"
-              >
-                {toExponentialNotationAtThreshold(data.gnomad_v3_af)}
-              </AnchorLink>
-            ) : (
-              <EmptyField />
-            )}
-          </DescriptionRow>
+          {frequencies.map(element => element)}
         </DescriptionSection>
         <DescriptionSection title={t('preview_sheet.variant_details.sections.functional_scores.title')}>
           <ExpandableList
@@ -381,61 +634,88 @@ const PredictionCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
     </div>
   );
 };
-const GeneCard = ({ data }: { data: ExpandedGermlineSNVOccurrence }) => {
-  const { t } = useI18n();
 
-  const pickedConsequence = data?.picked_consequences?.[0];
-  const hasGene = !!data.symbol;
+type GeneCardProps = {
+  symbol?: string;
+  aa_change?: string;
+  ensembl_gene_id?: string;
+  vep_impact?: VepImpact;
+  picked_consequences?: string[];
+  dna_change?: string;
+  transcript_id?: string;
+  is_mane_select?: boolean;
+  is_canonical?: boolean;
+  exon_rank?: number;
+  exon_total?: number;
+  rsnumber?: string;
+};
+const GeneCard = ({
+  symbol,
+  aa_change,
+  ensembl_gene_id,
+  vep_impact,
+  picked_consequences,
+  dna_change,
+  transcript_id,
+  is_mane_select,
+  is_canonical,
+  exon_rank,
+  exon_total,
+  rsnumber,
+}: GeneCardProps) => {
+  const { t } = useI18n();
+  const pickedConsequence = picked_consequences?.[0];
+  const hasGene = !!symbol;
 
   return (
     <div className="rounded-md border border-border p-3">
       <div className="flex flex-wrap gap-4 sm:gap-20 w-full">
         {hasGene && (
           <div className="flex flex-1 flex-col grow gap-2">
-            <AnchorLink className="font-semibold text-lg" external href={getOmimOrgUrl({ symbol: data.symbol! })}>
-              {data.symbol}
+            <AnchorLink className="font-semibold text-lg" external href={getOmimOrgUrl({ symbol: symbol! })}>
+              {symbol}
             </AnchorLink>
-            {data.aa_change && <div className="font-mono font-semibold text-sm">{data.aa_change}</div>}
-            {data.ensembl_gene_id && (
-              <AnchorLink target="_blank" className="text-sm" external href={getEnsemblUrl(data.ensembl_gene_id)}>
+            {aa_change && <div className="font-mono font-semibold text-sm">{aa_change}</div>}
+            {ensembl_gene_id && (
+              <AnchorLink target="_blank" className="text-sm" external href={getEnsemblUrl(ensembl_gene_id)}>
                 {t('preview_sheet.variant_details.actions.ensembl')}
               </AnchorLink>
             )}
           </div>
         )}
         <div className={cn('flex flex-col gap-2', { 'flex-1 grow': hasGene })}>
-          {data.vep_impact && pickedConsequence && (
+          {vep_impact && pickedConsequence && (
             <DescriptionRow label={t('preview_sheet.variant_details.sections.gene_card.consequence')}>
-              <ConsequenceIndicator vepImpact={data.vep_impact} consequence={pickedConsequence} size="sm" />
+              <ConsequenceIndicator vepImpact={vep_impact} consequence={pickedConsequence} size="sm" />
             </DescriptionRow>
           )}
-          {data.dna_change && (
+          {dna_change && (
             <DescriptionRow label={t('preview_sheet.variant_details.sections.gene_card.cdna_change')}>
-              <div className="font-mono">{data.dna_change}</div>
+              <div className="font-mono">{dna_change}</div>
             </DescriptionRow>
           )}
-          {data.transcript_id && (
+          {transcript_id && (
             <DescriptionRow label={t('preview_sheet.variant_details.sections.gene_card.transcript_id')}>
               <TranscriptIdLink
-                transcriptId={data.transcript_id}
-                isManeSelect={data.is_mane_select}
+                transcriptId={transcript_id}
+                isManeSelect={is_mane_select}
                 isManePlus={false}
-                isCanonical={data.is_canonical}
+                isCanonical={is_canonical}
                 linkClassName="text-primary"
               />
             </DescriptionRow>
           )}
-          {data.exon_rank && data.exon_total && (
+          {exon_rank && exon_total && (
             <DescriptionRow label={t('preview_sheet.variant_details.sections.gene_card.exon')}>
               <div className="font-mono">
-                {data.exon_rank}/{data.exon_total}
+                {exon_rank}/{exon_total}
               </div>
             </DescriptionRow>
           )}
-          {data.rsnumber && (
+          {rsnumber && (
             <DescriptionRow label={t('preview_sheet.variant_details.sections.gene_card.dbsnp_id')}>
-              <AnchorLink href={getDbSnpUrl(data.rsnumber)} mono size="sm" target="_blank" rel="noreferrer">
-                {data.rsnumber}
+              <AnchorLink href={getDbSnpUrl(rsnumber)} mono size="sm" target="_blank" rel="noreferrer">
+                {rsnumber}
               </AnchorLink>
             </DescriptionRow>
           )}

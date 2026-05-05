@@ -95,7 +95,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))
 	casesGroup.GET("/autocomplete", server.CasesAutocompleteHandler(repoCases))
 	casesGroup.GET("/filters", server.CasesFiltersHandler(repoCases))
-	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases))
+	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases, repoIGV))
 	casesGroup.POST("/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repoDocuments))
 	casesGroup.GET("/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repoDocuments))
 
@@ -125,7 +125,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	interpretationsSomaticGroupDeprecated.GET("", server.GetInterpretationSomaticDeprecated(repoPostgres.Interpretations))
 	interpretationsSomaticGroupDeprecated.POST("", server.PostInterpretationSomaticDeprecated(repoPostgres.Interpretations))
 	interpretationsSomaticGroup := interpretationsGroup.Group("/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id")
-	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations))
+	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations, repoTerms))
 	interpretationsSomaticGroup.POST("", server.PostInterpretationSomatic(repoPostgres.Interpretations))
 
 	mondoGroup := privateRoutes.Group("/mondo")
@@ -162,6 +162,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/list", server.OccurrencesSomaticSNVListHandler(repoSomaticSNVOccurrences))
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/aggregate", server.OccurrencesSomaticSNVAggregateHandler(repoSomaticSNVOccurrences, repoFacets))
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/statistics", server.OccurrencesSomaticSNVStatisticsHandler(repoSomaticSNVOccurrences))
+	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:locus_id/expanded", server.GetExpandedSomaticSNVOccurrence(repoSomaticSNVOccurrences, repoPostgres.Interpretations))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoStagingSeq))

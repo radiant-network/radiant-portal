@@ -6,7 +6,7 @@ import { getColumnName, getColumnPosition } from '../shared/Utils';
 const selectors = {
   tableCell: (dataCNV: any) => `${CommonSelectors.tableRow()}:contains("${dataCNV.cnv_variant}") ${CommonSelectors.tableCellData}`,
   tab: '[data-cy="variants-tab"]',
-  toggle: '[data-cy="tabs-trigger-cnv"]',
+  toggle: '[data-cy="tabs-trigger-CNV"]',
 };
 
 const tableColumns = [
@@ -49,7 +49,7 @@ const tableColumns = [
     apiField: 'name',
     isVisibleByDefault: true,
     pinByDefault: null,
-    isSortable: true,
+    isSortable: false,
     isPinnable: true,
     position: 3,
     tooltip: null,
@@ -71,7 +71,7 @@ const tableColumns = [
     apiField: 'chromosome',
     isVisibleByDefault: true,
     pinByDefault: null,
-    isSortable: true,
+    isSortable: false,
     isPinnable: true,
     position: 5,
     tooltip: 'Chromosome',
@@ -217,7 +217,7 @@ export const CaseEntity_Variants_CNV_Table = {
      * @param buttonName The button name to click (First | Last | Previous | Next | Select)
      */
     clickPaginationButton(buttonName: string) {
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
       cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
     },
     /**
@@ -476,43 +476,43 @@ export const CaseEntity_Variants_CNV_Table = {
      */
     shouldRequestOnPageChange(dataCase: any) {
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest1');
-      cy.visitCaseVariantsPage(dataCase.case, 'CNV');
+      cy.visitCaseVariantsPage(dataCase.case, dataCase.seq.seq_id, 'CNV');
       cy.wait('@listRequest1');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest2');
       CaseEntity_Variants_CNV_Table.actions.clickPaginationButton('Next');
       cy.wait('@listRequest2');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(2);
         req.continue();
       }).as('listRequest3');
       CaseEntity_Variants_CNV_Table.actions.clickPaginationButton('Next');
       cy.wait('@listRequest3');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest4');
       CaseEntity_Variants_CNV_Table.actions.clickPaginationButton('Previous');
       cy.wait('@listRequest4');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest5');
@@ -656,7 +656,7 @@ export const CaseEntity_Variants_CNV_Table = {
                         throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
                       }
                     } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
-                        throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                      throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
                     } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
                       throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
                     }

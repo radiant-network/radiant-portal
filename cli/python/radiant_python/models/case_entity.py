@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
 from radiant_python.models.case_sequencing_experiment import CaseSequencingExperiment
@@ -38,6 +38,7 @@ class CaseEntity(BaseModel):
     created_on: StrictStr
     diagnosis_lab_code: Optional[StrictStr] = None
     diagnosis_lab_name: Optional[StrictStr] = None
+    has_igv_files: StrictBool
     members: List[CasePatientClinicalInformation]
     note: Optional[StrictStr] = None
     ordering_organization_code: Optional[StrictStr] = None
@@ -54,7 +55,7 @@ class CaseEntity(BaseModel):
     status_code: StrictStr
     tasks: List[CaseTask]
     updated_on: StrictStr
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "case_category_code", "case_category_name", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "members", "note", "ordering_organization_code", "ordering_organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "sequencing_experiments", "status_code", "tasks", "updated_on"]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "analysis_catalog_name", "case_category_code", "case_category_name", "case_id", "case_type", "created_on", "diagnosis_lab_code", "diagnosis_lab_name", "has_igv_files", "members", "note", "ordering_organization_code", "ordering_organization_name", "panel_code", "panel_name", "prescriber", "primary_condition_id", "primary_condition_name", "priority_code", "project_code", "project_name", "sequencing_experiments", "status_code", "tasks", "updated_on"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -137,6 +138,7 @@ class CaseEntity(BaseModel):
             "created_on": obj.get("created_on"),
             "diagnosis_lab_code": obj.get("diagnosis_lab_code"),
             "diagnosis_lab_name": obj.get("diagnosis_lab_name"),
+            "has_igv_files": obj.get("has_igv_files"),
             "members": [CasePatientClinicalInformation.from_dict(_item) for _item in obj["members"]] if obj.get("members") is not None else None,
             "note": obj.get("note"),
             "ordering_organization_code": obj.get("ordering_organization_code"),

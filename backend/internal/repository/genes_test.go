@@ -9,7 +9,7 @@ import (
 )
 
 func Test_GetGeneAutoComplete(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGenesRepository(db)
 		genes, err := repo.GetGeneAutoComplete("F", 10)
 		assert.NoError(t, err)
@@ -25,7 +25,7 @@ func Test_GetGeneAutoComplete(t *testing.T) {
 }
 
 func Test_GetGeneAutoComplete_FindOnGeneId(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGenesRepository(db)
 		genes, err := repo.GetGeneAutoComplete("ENSG000000004", 10)
 		assert.NoError(t, err)
@@ -37,7 +37,7 @@ func Test_GetGeneAutoComplete_FindOnGeneId(t *testing.T) {
 }
 
 func Test_GetGeneAutoComplete_FindOnNameFirst(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGenesRepository(db)
 		genes, err := repo.GetGeneAutoComplete("ENS", 10)
 		assert.NoError(t, err)
@@ -49,7 +49,7 @@ func Test_GetGeneAutoComplete_FindOnNameFirst(t *testing.T) {
 }
 
 func Test_GetGeneAutoComplete_FindOnAlias(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGenesRepository(db)
 		genes, err := repo.GetGeneAutoComplete("HF", 10)
 		assert.NoError(t, err)
@@ -59,7 +59,7 @@ func Test_GetGeneAutoComplete_FindOnAlias(t *testing.T) {
 }
 
 func Test_GetGeneAutoComplete_WithLimit(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGenesRepository(db)
 		genes, err := repo.GetGeneAutoComplete("F", 1)
 		assert.NoError(t, err)
@@ -72,7 +72,7 @@ func Test_GetGeneAutoComplete_WithLimit(t *testing.T) {
 }
 
 func Test_GetGeneAutoComplete_NoResult(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGenesRepository(db)
 		genes, err := repo.GetGeneAutoComplete("not_here", 20)
 		assert.NoError(t, err)
@@ -81,7 +81,7 @@ func Test_GetGeneAutoComplete_NoResult(t *testing.T) {
 }
 
 func Test_SearchGenes(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGenesRepository(db)
 		genes, err := repo.SearchGenes([]string{"ENSG00000000003", "TNMD", "ensg00000157764", "ensa", "ENSG000000011671111", "BAD_SYMBOL"})
 		assert.NoError(t, err)
@@ -94,7 +94,7 @@ func Test_SearchGenes(t *testing.T) {
 }
 
 func Test_SearchGenes_NoResult(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGenesRepository(db)
 		genes, err := repo.SearchGenes([]string{"ENSG000000011671111", "BAD_SYMBOL"})
 		assert.NoError(t, err)
@@ -103,7 +103,7 @@ func Test_SearchGenes_NoResult(t *testing.T) {
 }
 
 func Test_SearchGenes_NoInput(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGenesRepository(db)
 		genes, err := repo.SearchGenes([]string{})
 		assert.NoError(t, err)

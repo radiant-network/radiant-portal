@@ -174,7 +174,7 @@
           "response": []
         },
         {
-          "name": "Expended",
+          "name": "Expanded",
           "request": {
             "auth": {
               "type": "bearer",
@@ -2448,6 +2448,39 @@
                 "71",
                 "74",
                 "statistics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Expanded",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/-8318226658347712512/expanded",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "somatic",
+                "snv",
+                "71",
+                "74",
+                "-8318226658347712512",
+                "expanded"
               ]
             }
           },

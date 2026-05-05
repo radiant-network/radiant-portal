@@ -9,7 +9,7 @@ describe('Occurrences - Germline - CNV - Count - Frequency', () => {
   let globalData: any;
 
   before(() => {
-    globalData = Cypress.env('globalData');
+    globalData = Cypress.expose('globalData');
     Auth = globalData.Authorization;
     case_id = globalData.Count.case_id;
     seq_id = globalData.Count.seq_id;

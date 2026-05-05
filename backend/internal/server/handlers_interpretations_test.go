@@ -57,6 +57,7 @@ func (m *MockRepository) FirstSomatic(caseId string, sequencingId string, locusI
 	var uniqueId = fmt.Sprintf("%s-%s-%s-%s", caseId, sequencingId, locusId, transcriptId)
 	if uniqueId == "11-seq1-locus1-trans1" {
 		return &types.InterpretationSomatic{
+			TumoralType: "MONDO:0000002",
 			InterpretationCommon: types.InterpretationCommon{
 				ID:           uniqueId,
 				CaseId:       caseId,
@@ -89,6 +90,13 @@ func (m *MockRepository) RetrieveGermlineInterpretationClassificationCounts(locu
 	return types.JsonMap[string, int]{
 		"benign":     2,
 		"pathogenic": 1,
+	}, nil
+}
+
+func (m *MockRepository) RetrieveSomaticInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error) {
+	return types.JsonMap[string, int]{
+		"Oncogenic":        2,
+		"Likely Oncogenic": 1,
 	}, nil
 }
 
@@ -153,7 +161,7 @@ func Test_PostInterpretationGermline_error(t *testing.T) {
 func assertGetInterpretationSomatic(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationSomatic(repo))
+	router.GET("/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationSomatic(repo, repo))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/interpretations/v2/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -164,7 +172,7 @@ func assertGetInterpretationSomatic(t *testing.T, caseId string, sequencingId st
 }
 
 func Test_GetInterpretationSomatic_ok(t *testing.T) {
-	assertGetInterpretationSomatic(t, "11", "seq1", "locus1", "trans1", http.StatusOK, `{"case_id":"11", "created_at":"0001-01-01T00:00:00Z", "id":"11-seq1-locus1-trans1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
+	assertGetInterpretationSomatic(t, "11", "seq1", "locus1", "trans1", http.StatusOK, `{"case_id":"11", "tumoral_type":"MONDO:0000002", "tumoral_name":"blood vessel neoplasm", "created_at":"0001-01-01T00:00:00Z", "id":"11-seq1-locus1-trans1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
 }
 
 func Test_GetInterpretationSomatic_error(t *testing.T) {

@@ -37,6 +37,7 @@ docs/DocumentResult.md
 docs/DocumentsApi.md
 docs/DocumentsSearchResponse.md
 docs/ExpandedGermlineSNVOccurrence.md
+docs/ExpandedSomaticSNVOccurrence.md
 docs/ExternalFrequencies.md
 docs/Facet.md
 docs/FamilyHistoryBatch.md
@@ -175,6 +176,7 @@ radiant_python/models/document_filters.py
 radiant_python/models/document_result.py
 radiant_python/models/documents_search_response.py
 radiant_python/models/expanded_germline_snv_occurrence.py
+radiant_python/models/expanded_somatic_snv_occurrence.py
 radiant_python/models/external_frequencies.py
 radiant_python/models/facet.py
 radiant_python/models/family_history_batch.py
