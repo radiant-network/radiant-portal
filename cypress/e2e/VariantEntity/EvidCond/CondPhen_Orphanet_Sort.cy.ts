@@ -10,8 +10,8 @@ describe('VariantEntity - CondPhen - Orphanet - Sort', () => {
     VariantEntity_EvidCond.condPhenCard.orphanet.actions.selectTab();
   };
 
-  it('Alphanumeric [SJRA-1168]', () => {
+  it('Alphanumeric', () => {
     setupTest();
-    VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldSortColumn('condition', false /*hasUniqueValues*/, true /*isReverseSorting*/);
+    VariantEntity_EvidCond.condPhenCard.orphanet.validations.shouldSortColumn('condition', true /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 });

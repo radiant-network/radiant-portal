@@ -10,13 +10,13 @@ describe('VariantEntity - Patients - Uninterpreted - Sort', () => {
     VariantEntity_Patients.uninterpreted.actions.selectTab();
   };
 
-  it('Date [SJRA-1168]', () => {
+  it('Alphanumeric', () => {
     setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldSortColumn('date', false /*hasUniqueValues*/);
+    VariantEntity_Patients.uninterpreted.validations.shouldSortColumn('case', false /*hasUniqueValues*/);
   });
 
   it('Tag', () => {
     setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldSortColumn('status', true /*hasUniqueValues*/);
+    VariantEntity_Patients.uninterpreted.validations.shouldSortColumn('relationship', false /*hasUniqueValues*/);
   });
 });
