@@ -80,13 +80,12 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
                       <Trans
                         i18nKey="variant.interpretation_form.germline.classification_popover.full_text"
                         components={{
-                          link: (
+                          guides: (
                             <AnchorLink
-                              className="inline-flex"
+                              className="inline-flex no-underline hover:underline"
                               href="https://pubmed.ncbi.nlm.nih.gov/25741868/"
                               target="_blank"
                               size="sm"
-                              external
                             />
                           ),
                         }}

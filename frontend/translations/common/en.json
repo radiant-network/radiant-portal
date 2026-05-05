@@ -1049,7 +1049,7 @@
           "pmid": "PMID"
         },
         "pub_med_id_not_found": "Invalid or unknown PMID",
-        "citation_placeholder": "Ex : 25741868",
+        "citation_placeholder": "e.g. 25741868",
         "add_citation": "Add a publication"
       },
       "germline": {
@@ -1064,7 +1064,7 @@
           "consult": "Consult",
           "standards_and_guidelines": "standards and guidelines",
           "variant_interpretation": "for variant interpretation",
-          "full_text": "Consult <link>standards and guidelines</link> for variant interpretation"
+          "full_text": "Consult <guides>standards and guidelines</guides> for variant interpretation"
         },
         "classification_criteria": "Classification criteria",
         "classification_criteria_placeholder": "e.g. PM1, PS2",
@@ -1073,9 +1073,9 @@
         "no_results": "No results found"
       },
       "somatic": {
-        "tumoral_type": "Tumor type",
+        "tumoral_type": "Tumor Type",
         "tumoral_type_placeholder": "e.g. colon sarcoma",
-        "oncogenicity": "Oncogenicity",
+        "oncogenicity": "Oncogenicity ClinGen/CGC/VICC",
         "oncogenicity_options": {
           "oncogenic": "Oncogenic",
           "likely_oncogenic": "Likely Oncogenic",
@@ -1086,9 +1086,12 @@
           "likely_benign_tooltip": "Probably benign",
           "benign": "Benign"
         },
-        "classification_criteria": "Classification criteria",
+        "oncogenicity_popover": {
+          "full_text": "Consult <guides>standards and guidelines</guides> for variant interpretation"
+        },
+        "classification_criteria": "Classification Criteria",
         "classification_criteria_placeholder": "e.g. OS1, OM2",
-        "clinical_utility": "Clinical utility",
+        "clinical_utility": "Clinical Utility",
         "clinical_utility_placeholder": "Select",
         "clinical_utility_options": {
           "category_ia": "Tier IA",

@@ -45,8 +45,8 @@ export const somaticInterpretationFormSchema = (
   z.object({
     tumoral_type: z.string().min(1, 'This field is required'),
     clinical_utility: z.string().min(1, 'This field is required'),
-    oncogenicity: z.string().min(1, 'This field is required'),
-    oncogenicity_classification_criterias: z.string().array().min(1, 'This field is required'),
+    oncogenicity: z.string().optional(),
+    oncogenicity_classification_criterias: z.string().array().optional(),
   }) satisfies ZodSchema<InterpretationSomatic>
 ).merge(genericInterpretationFormSchema);
 

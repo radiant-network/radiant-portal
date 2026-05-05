@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { InterpretationSomatic } from '@/api/api';
@@ -8,6 +9,7 @@ import {
   oncogenicityClassificationCriterias,
 } from '@/components/base/classifications/oncogenicity';
 import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/base/shadcn/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
@@ -98,19 +100,26 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
             name="oncogenicity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <span>
-                    {t('variant.interpretation_form.somatic.oncogenicity')} (
-                    <a
-                      href="https://pubmed.ncbi.nlm.nih.gov/35101336/"
-                      target="_blank"
-                      className="text-primary underline hover:no-underline outline-none"
-                      rel="noreferrer"
-                    >
-                      PMID: 35101336
-                    </a>
-                    )
-                  </span>
+                <FormLabel
+                  infoCardContent={
+                    <div className="leading-6">
+                      <Trans
+                        i18nKey="variant.interpretation_form.somatic.oncogenicity_popover.full_text"
+                        components={{
+                          guides: (
+                            <AnchorLink
+                              className="inline-flex no-underline hover:underline"
+                              href="https://pubmed.ncbi.nlm.nih.gov/35101336/"
+                              target="_blank"
+                              size="sm"
+                            />
+                          ),
+                        }}
+                      />
+                    </div>
+                  }
+                >
+                  {t('variant.interpretation_form.somatic.oncogenicity')}
                 </FormLabel>
                 <FormControl>
                   <ToggleGroup

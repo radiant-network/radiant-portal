@@ -1068,7 +1068,7 @@
           "consult": "Consulter les ",
           "standards_and_guidelines": "normes et les lignes directrices",
           "variant_interpretation": "pour l'interprétation des variantes",
-          "full_text": "Consulter les <link>normes et les lignes directrices</link> pour l'interprétation des variantes"
+          "full_text": "Consulter les <guides>normes et les lignes directrices</guides> pour l'interprétation des variantes"
         },
         "classification_criteria": "Critères de classification",
         "classification_criteria_placeholder": "Ex : PM1, PS2",
@@ -1079,7 +1079,7 @@
       "somatic": {
         "tumoral_type": "Type tumoral",
         "tumoral_type_placeholder": "Ex : colon sarcoma",
-        "oncogenicity": "Oncogénicité",
+        "oncogenicity": "Oncogénicité ClinGen/CGC/VICC",
         "oncogenicity_options": {
           "oncogenic": "Oncogénique",
           "likely_oncogenic": "Prob. oncogénique",
@@ -1089,6 +1089,9 @@
           "likely_benign": "Prob. bénigne",
           "likely_benign_tooltip": "Probablement bénigne",
           "benign": "Bénigne"
+        },
+        "oncogenicity_popover": {
+          "full_text": "Consulter les <guides>normes et lignes directrices</guides> pour l'interprétation des variants"
         },
         "classification_criteria": "Critères de classification",
         "classification_criteria_placeholder": "Ex : OS1, OM2",
