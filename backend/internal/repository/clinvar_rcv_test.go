@@ -1,11 +1,12 @@
 package repository
 
 import (
+	"testing"
+
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
-	"testing"
 )
 
 func Test_GetClinvarRCV(t *testing.T) {
@@ -20,6 +21,8 @@ func Test_GetClinvarRCV(t *testing.T) {
 			assert.Equal(t, types.JsonArray[string]{"Likely Pathogenic"}, clinvarRcv[1].ClinicalSignificance)
 			assert.Equal(t, 1, clinvarRcv[0].SubmissionCount)
 			assert.Equal(t, 3, clinvarRcv[1].SubmissionCount)
+			assert.Equal(t, "111111", clinvarRcv[0].ClinvarName)
+			assert.Equal(t, "111111", clinvarRcv[1].ClinvarName)
 		}
 	})
 }

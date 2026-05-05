@@ -42,4 +42,4 @@ test-requirements.txt
 # Lib files (we don't want to overwrite any manual changes)
 radiant_python/lib/*
 test/lib/*
-test-sandbox/*
+test_sandbox/*

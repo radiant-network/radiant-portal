@@ -169,7 +169,7 @@ Click on Register to create a user, then you're all set
 
 # Sandbox End-to-End Tests
 
-Pytest suites in [`cli/python/test-sandbox/`](./cli/python/test-sandbox/) validate API endpoints against a **running sandbox** through the generated Python client. Use them to smoke-test new/changed endpoints after backend changes.
+Pytest suites in [`cli/python/test_sandbox/`](./cli/python/test_sandbox/) validate API endpoints against a **running sandbox** through the generated Python client. Use them to smoke-test new/changed endpoints after backend changes.
 
 ## Prereqs
 
@@ -204,11 +204,11 @@ Export the env vars, then:
 
 ```bash
 cd cli/python
-python -m pytest test-sandbox/.
+python -m pytest test_sandbox/.
 ```
 
 Or via the root Makefile target (env must be exported in the same shell):
 
 ```bash
-make test-sandbox-python
+make test_sandbox-python
 ```
