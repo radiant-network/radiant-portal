@@ -205,6 +205,16 @@ var StartField = Field{
 	Table:           VariantTable,
 }
 
+var EndField = Field{
+	Name:            "end",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Type:            IntegerType,
+	Table:           VariantTable,
+}
+
 var GermlinePfWgsField = Field{
 	Name:          "germline_pf_wgs",
 	CanBeSelected: true,

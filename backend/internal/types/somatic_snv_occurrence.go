@@ -7,6 +7,9 @@ type SomaticSNVOccurrence struct {
 	HasInterpretation   bool              `json:"has_interpretation" validate:"required"`
 	HasNote             bool              `json:"has_note" validate:"required"`
 	Hgvsg               string            `json:"hgvsg" validate:"required"`
+	Chromosome          string            `json:"chromosome" validate:"required"`
+	Start               int64             `json:"start" validate:"required"`
+	End                 int64             `json:"end" validate:"required"`
 	Symbol              string            `json:"symbol" validate:"required"`
 	AaChange            string            `json:"aa_change" validate:"required"`
 	VariantClass        string            `json:"variant_class" validate:"required"`
@@ -159,6 +162,9 @@ var SomaticSNVInfoHotspotAlleleField = Field{
 
 var SomaticSNVOccurrencesDefaultFields = []Field{
 	SomaticSNVLocusIdField,
+	ChromosomeField,
+	StartField,
+	EndField,
 	SomaticSNVTumorSeqIdField,
 	SomaticSNVTaskIdField,
 	HgvsgField,
@@ -185,8 +191,6 @@ var SomaticSNVOccurrencesDefaultFields = []Field{
 var SomaticSNVOccurrencesFields = append(SomaticSNVOccurrencesDefaultFields,
 	// Variant facets
 	ConsequenceField,
-	ChromosomeField,
-	StartField,
 
 	// Gene facets
 	SymbolField,

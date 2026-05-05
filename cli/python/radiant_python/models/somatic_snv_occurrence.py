@@ -29,7 +29,9 @@ class SomaticSNVOccurrence(BaseModel):
     """ # noqa: E501
     aa_change: StrictStr
     ad_ratio: Optional[Union[StrictFloat, StrictInt]] = None
+    chromosome: StrictStr
     clinvar: List[StrictStr]
+    end: StrictInt
     germline_pc_wgs: StrictInt
     germline_pf_wgs: Union[StrictFloat, StrictInt]
     gnomad_v3_af: Union[StrictFloat, StrictInt]
@@ -47,12 +49,13 @@ class SomaticSNVOccurrence(BaseModel):
     seq_id: StrictInt
     somatic_pc_tn_wgs: StrictInt
     somatic_pf_tn_wgs: Union[StrictFloat, StrictInt]
+    start: StrictInt
     symbol: StrictStr
     task_id: StrictInt
     transcript_id: Optional[StrictStr] = None
     variant_class: StrictStr
     vep_impact: VepImpact
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "clinvar", "germline_pc_wgs", "germline_pf_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "hotspot", "is_canonical", "is_mane_plus", "is_mane_select", "locus_id", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_pc_tn_wgs", "somatic_pf_tn_wgs", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "end", "germline_pc_wgs", "germline_pf_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "hotspot", "is_canonical", "is_mane_plus", "is_mane_select", "locus_id", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_pc_tn_wgs", "somatic_pf_tn_wgs", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -107,7 +110,9 @@ class SomaticSNVOccurrence(BaseModel):
         _obj = cls.model_validate({
             "aa_change": obj.get("aa_change"),
             "ad_ratio": obj.get("ad_ratio"),
+            "chromosome": obj.get("chromosome"),
             "clinvar": obj.get("clinvar"),
+            "end": obj.get("end"),
             "germline_pc_wgs": obj.get("germline_pc_wgs"),
             "germline_pf_wgs": obj.get("germline_pf_wgs"),
             "gnomad_v3_af": obj.get("gnomad_v3_af"),
@@ -125,6 +130,7 @@ class SomaticSNVOccurrence(BaseModel):
             "seq_id": obj.get("seq_id"),
             "somatic_pc_tn_wgs": obj.get("somatic_pc_tn_wgs"),
             "somatic_pf_tn_wgs": obj.get("somatic_pf_tn_wgs"),
+            "start": obj.get("start"),
             "symbol": obj.get("symbol"),
             "task_id": obj.get("task_id"),
             "transcript_id": obj.get("transcript_id"),

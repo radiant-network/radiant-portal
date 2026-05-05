@@ -1338,6 +1338,8 @@ components:
             type: string
           type: array
           uniqueItems: false
+        end:
+          type: integer
         exomiser_acmg_classification:
           type: string
         exomiser_acmg_evidence:
@@ -1412,6 +1414,7 @@ components:
       required:
       - ad_ratio
       - chromosome
+      - end
       - exomiser_acmg_classification
       - exomiser_acmg_evidence
       - exomiser_gene_combined_score
@@ -2126,11 +2129,15 @@ components:
           type: string
         ad_ratio:
           type: number
+        chromosome:
+          type: string
         clinvar:
           items:
             type: string
           type: array
           uniqueItems: false
+        end:
+          type: integer
         germline_pc_wgs:
           type: integer
         germline_pf_wgs:
@@ -2171,6 +2178,8 @@ components:
           type: integer
         somatic_pf_tn_wgs:
           type: number
+        start:
+          type: integer
         symbol:
           type: string
         task_id:
@@ -2183,7 +2192,9 @@ components:
           $ref: '#/components/schemas/VepImpact'
       required:
       - aa_change
+      - chromosome
       - clinvar
+      - end
       - germline_pc_wgs
       - germline_pf_wgs
       - gnomad_v3_af
@@ -2201,6 +2212,7 @@ components:
       - seq_id
       - somatic_pc_tn_wgs
       - somatic_pf_tn_wgs
+      - start
       - symbol
       - task_id
       - variant_class
