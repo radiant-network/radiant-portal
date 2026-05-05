@@ -206,9 +206,3 @@ Export the env vars, then:
 cd cli/python
 python -m pytest test_sandbox/.
 ```
-
-Or via the root Makefile target (env must be exported in the same shell):
-
-```bash
-make test_sandbox-python
-```
