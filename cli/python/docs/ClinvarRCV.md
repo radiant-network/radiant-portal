@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **accession** | **str** |  | [optional] 
 **clinical_significance** | **List[str]** |  | [optional] 
 **clinvar_id** | **str** |  | 
+**clinvar_name** | **str** |  | [optional] 
 **date_last_evaluated** | **str** |  | [optional] 
 **locus_id** | **str** |  | 
 **origins** | **List[str]** |  | [optional] 

@@ -18,6 +18,7 @@ type ClinvarRCV struct {
 	Version              int               `json:"version,omitempty"`
 	Traits               JsonArray[string] `json:"traits,omitempty" gorm:"type:json"`
 	Origins              JsonArray[string] `json:"origins,omitempty" gorm:"type:json"`
+	ClinvarName          string            `json:"clinvar_name,omitempty"`
 }
 
 var ClinvarRCVTable = Table{

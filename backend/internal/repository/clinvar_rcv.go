@@ -3,9 +3,10 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"log"
+
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
-	"log"
 )
 
 type ClinvarRCV = types.ClinvarRCV
@@ -28,9 +29,10 @@ func NewClinvarRCVRepository(db *gorm.DB) *ClinvarRCVRepository {
 
 func (r *ClinvarRCVRepository) GetVariantClinvarConditions(locusId int) ([]ClinvarRCV, error) {
 	var clinvarRCV []ClinvarRCV
-	tx := r.db.Table(types.ClinvarRCVTable.Name)
-	tx = tx.Select("locus_id, clinvar_id, accession, clinical_significance, date_last_evaluated, submission_count, review_status, review_status_stars, version, traits, origins")
-	tx = tx.Where("locus_id = ?", locusId)
+	tx := r.db.Table(fmt.Sprintf("%s r", types.ClinvarRCVTable.Name))
+	tx = tx.Select("r.locus_id, r.clinvar_id, r.accession, r.clinical_significance, r.date_last_evaluated, r.submission_count, r.review_status, r.review_status_stars, r.version, r.traits, r.origins, c.name as clinvar_name")
+	tx = tx.Joins("LEFT JOIN clinvar c ON c.locus_id=r.locus_id")
+	tx = tx.Where("r.locus_id = ?", locusId)
 
 	if err := tx.Find(&clinvarRCV).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

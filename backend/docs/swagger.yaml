@@ -642,6 +642,8 @@ components:
           uniqueItems: false
         clinvar_id:
           type: string
+        clinvar_name:
+          type: string
         date_last_evaluated:
           type: string
         locus_id:

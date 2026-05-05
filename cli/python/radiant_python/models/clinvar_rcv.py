@@ -29,6 +29,7 @@ class ClinvarRCV(BaseModel):
     accession: Optional[StrictStr] = None
     clinical_significance: Optional[List[StrictStr]] = None
     clinvar_id: StrictStr
+    clinvar_name: Optional[StrictStr] = None
     date_last_evaluated: Optional[StrictStr] = None
     locus_id: StrictStr
     origins: Optional[List[StrictStr]] = None
@@ -37,7 +38,7 @@ class ClinvarRCV(BaseModel):
     submission_count: Optional[StrictInt] = None
     traits: Optional[List[StrictStr]] = None
     version: Optional[StrictInt] = None
-    __properties: ClassVar[List[str]] = ["accession", "clinical_significance", "clinvar_id", "date_last_evaluated", "locus_id", "origins", "review_status", "review_status_stars", "submission_count", "traits", "version"]
+    __properties: ClassVar[List[str]] = ["accession", "clinical_significance", "clinvar_id", "clinvar_name", "date_last_evaluated", "locus_id", "origins", "review_status", "review_status_stars", "submission_count", "traits", "version"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -93,6 +94,7 @@ class ClinvarRCV(BaseModel):
             "accession": obj.get("accession"),
             "clinical_significance": obj.get("clinical_significance"),
             "clinvar_id": obj.get("clinvar_id"),
+            "clinvar_name": obj.get("clinvar_name"),
             "date_last_evaluated": obj.get("date_last_evaluated"),
             "locus_id": obj.get("locus_id"),
             "origins": obj.get("origins"),

@@ -165,3 +165,50 @@ PORT=3000
 Start the radiant portal and open your browser on http://localhost:3000
 
 Click on Register to create a user, then you're all set
+
+
+# Sandbox End-to-End Tests
+
+Pytest suites in [`cli/python/test-sandbox/`](./cli/python/test-sandbox/) validate API endpoints against a **running sandbox** through the generated Python client. Use them to smoke-test new/changed endpoints after backend changes.
+
+## Prereqs
+
+- Sandbox up: `cd backend && make docker-run && make run` (API on `:8090`, Keycloak on `:8282`).
+- Python venv with the generated client + pytest:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ./cli/python pytest requests
+```
+
+## Required environment variables
+
+**No defaults — all values must be set to match your sandbox before running.** Tests fail fast if any are missing.
+
+| Var | Purpose |
+|---|---|
+| `RADIANT_API_HOST` | API base URL (e.g. `http://localhost:8090`) |
+| `RADIANT_KEYCLOAK_URL` | Keycloak base URL (e.g. `http://localhost:8282`) |
+| `RADIANT_REALM` | Keycloak realm (e.g. `Radiant`) |
+| `RADIANT_CLIENT_ID` | OAuth client_id, client-credentials grant |
+| `RADIANT_CLIENT_SECRET` | OAuth client secret (pull from your local Keycloak; never commit) |
+| `RADIANT_LOCUS_ID` | Locus under test (must exist in your sandbox data) |
+| `RADIANT_EXPECTED_CLINVAR_NAME` | Expected `clinvar_name` for `RADIANT_LOCUS_ID` |
+
+Some tests require additional vars; see each `test_*.py` for specifics.
+
+## Run
+
+Export the env vars, then:
+
+```bash
+cd cli/python
+python -m pytest test-sandbox/.
+```
+
+Or via the root Makefile target (env must be exported in the same shell):
+
+```bash
+make test-sandbox-python
+```

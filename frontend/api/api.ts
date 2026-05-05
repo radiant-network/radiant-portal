@@ -1246,6 +1246,12 @@ export interface ClinvarRCV {
      * @type {string}
      * @memberof ClinvarRCV
      */
+    'clinvar_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarRCV
+     */
     'date_last_evaluated'?: string;
     /**
      * 
