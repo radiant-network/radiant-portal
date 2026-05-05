@@ -93,6 +93,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
             name="tumoral_type"
             label={t('variant.interpretation_form.somatic.tumoral_type')}
             placeholder={t('variant.interpretation_form.somatic.tumoral_type_placeholder')}
+            schema={somaticInterpretationFormSchema}
           />
           <FormField
             control={form.control}

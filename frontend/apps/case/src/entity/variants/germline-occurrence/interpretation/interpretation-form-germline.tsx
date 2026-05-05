@@ -67,6 +67,7 @@ const InterpretationFormGermline = forwardRef<InterpretationFormRef, Interpretat
             name="condition"
             label={t('variant.interpretation_form.germline.condition')}
             placeholder={t('variant.interpretation_form.germline.condition_placeholder')}
+            schema={germlineInterpretationFormSchema}
           />
           <FormField
             schema={germlineInterpretationFormSchema}
