@@ -4,6 +4,7 @@ import QueryBuilder from '@/components/base/query-builder-v3/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder-v3/query-builder-data-table';
 import { useConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
+import { getPatientClinicalInformation } from '@/components/lib/case-entity';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
@@ -26,6 +27,7 @@ function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurr
   const config = useConfig();
   const caseId = useCaseIdFromParam();
   const appId = config.somatic_snv_to_occurrence.app_id;
+  const patient = getPatientClinicalInformation(caseEntity, patientSelected);
 
   if (!isValidSeqId(seqId)) {
     return null;
@@ -43,7 +45,7 @@ function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurr
     >
       <QueryBuilderDataTable
         id={appId}
-        columns={getSomaticSNVTumorNormalColumns(t, caseEntity)}
+        columns={getSomaticSNVTumorNormalColumns(t, caseEntity, patient?.patient_id)}
         defaultColumnSettings={defaultSomaticSNVSettings}
         enableColumnOrdering
         enableFullscreen

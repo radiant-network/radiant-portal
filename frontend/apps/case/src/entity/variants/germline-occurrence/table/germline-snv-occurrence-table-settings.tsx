@@ -29,8 +29,9 @@ const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
 function getSNVOccurrenceColumns(
   t: TFunction<string, undefined>,
-  caseEntity: CaseEntity,
   onInterpretationSaved: () => void,
+  caseEntity?: CaseEntity,
+  patientId?: number,
 ) {
   return [
     // TODO: To be enabled when row selection function are implemented
@@ -47,7 +48,7 @@ function getSNVOccurrenceColumns(
       id: 'row-info',
       cell: info => (
         <div className="flex items-center gap-1">
-          <InterpretationCell occurrence={info.getValue()} />
+          <InterpretationCell occurrence={info.getValue()} patientId={patientId} />
           <VariantNoteCell occurrence={info.getValue()} />
         </div>
       ),

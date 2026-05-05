@@ -186,6 +186,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
           />
           <FormField
             control={form.control}
+            schema={somaticInterpretationFormSchema}
             name="oncogenicity_classification_criterias"
             render={({ field }) => (
               <FormItem>
@@ -194,7 +195,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
                   <MultipleSelector
                     defaultOptions={oncogenicityClassificationCriterias}
                     placeholder={t('variant.interpretation_form.somatic.classification_criteria_placeholder')}
-                    emptyIndicator={<>no results found.</>}
+                    emptyIndicator={t('variant.interpretation_form.somatic.no_results')}
                     renderBadge={({ option, onRemove }) => (
                       <Badge
                         key={option.value}
@@ -205,6 +206,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
                         {option.label}
                       </Badge>
                     )}
+                    openOnFocus
                     {...field}
                   />
                 </FormControl>
@@ -214,6 +216,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
           />
           <FormField
             control={form.control}
+            schema={somaticInterpretationFormSchema}
             name="clinical_utility"
             render={({ field }) => (
               <FormItem>

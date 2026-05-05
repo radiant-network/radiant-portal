@@ -35,6 +35,7 @@ import InterpretationFormSomatic from './somatic-interpretation-form';
 type SomaticInterpretationDialogProps = {
   locusId: string;
   transcriptId?: string;
+  patientId?: number;
   handleSaveCallback?: () => void;
   renderTrigger: (handleOpen: () => void) => ReactNode;
   isCreation?: boolean;
@@ -100,6 +101,7 @@ async function saveSomaticInterpretation(_url: string, { arg }: { arg: SomaticIn
 function SomaticInterpretationDialog({
   locusId,
   transcriptId,
+  patientId,
   handleSaveCallback,
   renderTrigger,
   isCreation = false,
@@ -214,7 +216,7 @@ function SomaticInterpretationDialog({
               />
               <InterpretationVariantHeader
                 case_type={caseEntity.data?.case_type}
-                seq_id={seqId}
+                patientId={patientId}
                 locus_id={occurrenceExpand?.data?.locus_id}
                 hgvsg={occurrenceExpand?.data?.hgvsg}
                 relationship_to_proband={relationshipToProband}

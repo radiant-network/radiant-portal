@@ -1031,7 +1031,7 @@
       "header": {
         "germline": "Germinal",
         "germline_family": "Germinal",
-        "somatic": "Somatic"
+        "somatic": "Somatique"
       },
       "transcript": {
         "exon": "Exon"
@@ -1114,7 +1114,8 @@
             "title": "Annotations gène"
           }
         }
-      }
+      },
+      "no_results": "Aucun résultat trouvé"
     }
   },
   "preview_sheet": {

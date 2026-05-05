@@ -12,9 +12,10 @@ import SomaticInterpretationDialog from '../../interpretation/somatic-interpreta
 
 type InterpretationCellProps = {
   occurrence: GermlineSNVOccurrence;
+  patientId?: number;
 };
 
-function SomaticInterpretationCell({ occurrence }: InterpretationCellProps) {
+function SomaticInterpretationCell({ occurrence, patientId }: InterpretationCellProps) {
   const { t } = useI18n();
   const [_, setSearchParams] = useSearchParams();
   const { list } = useDataTable();
@@ -31,6 +32,7 @@ function SomaticInterpretationCell({ occurrence }: InterpretationCellProps) {
       <SomaticInterpretationDialog
         locusId={occurrence.locus_id}
         transcriptId={occurrence.transcript_id}
+        patientId={patientId}
         handleSaveCallback={list?.mutate}
         renderTrigger={handleOpen => (
           <Tooltip>

@@ -6,17 +6,17 @@ import { useI18n } from '@/components/hooks/i18n';
 
 type InterpretationVariantHeaderProps = {
   case_type?: string;
-  seq_id: number;
   locus_id?: string;
   hgvsg?: string;
   relationship_to_proband?: string;
   analysis_catalog_code?: string;
   analysis_catalog_name?: string;
+  patientId?: number;
 };
 
 function InterpretationVariantHeader({
   case_type,
-  seq_id,
+  patientId,
   locus_id,
   hgvsg,
   relationship_to_proband,
@@ -35,7 +35,8 @@ function InterpretationVariantHeader({
       <Badge>{t(`variant.interpretation_form.header.${case_type}`)}</Badge>
       <Separator className="h-6" orientation="vertical" />
       <span className="capitalize">
-        {relationship_to_proband ?? t('case_entity.patient_information.proband')} ({seq_id})
+        {relationship_to_proband ?? t('case_entity.patient_information.proband')}
+        {patientId && ` (${patientId})`}
       </span>
       <Tooltip>
         <TooltipTrigger asChild>

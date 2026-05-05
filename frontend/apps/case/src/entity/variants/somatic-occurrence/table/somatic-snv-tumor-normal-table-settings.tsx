@@ -27,14 +27,14 @@ import SomaticInterpretationCell from './cells/somatic-interpretation-cell';
 
 const columnHelper = createColumnHelper<SomaticSNVOccurrence>();
 
-function getSomaticSNVTumorNormalColumns(t: TFunction<string, undefined>, caseEntity?: CaseEntity) {
+function getSomaticSNVTumorNormalColumns(t: TFunction<string, undefined>, caseEntity?: CaseEntity, patientId?: number) {
   return [
     // interpretation and note cell
     columnHelper.accessor(row => row, {
       id: 'row-info',
       cell: info => (
         <div className="flex items-center gap-1">
-          <SomaticInterpretationCell occurrence={info.getValue()} />
+          <SomaticInterpretationCell occurrence={info.getValue()} patientId={patientId} />
           <VariantNoteCell occurrence={info.getValue()} />
         </div>
       ),
