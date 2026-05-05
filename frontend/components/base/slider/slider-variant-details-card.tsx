@@ -213,7 +213,7 @@ const ClinicalAssociationCard = ({ omim_conditions, locus_id }: ClinicalAssociat
       clinicalAssociationValue.push(
         <AnchorLink
           component={Link}
-          to={`/variants/entity/${locus_id}#evidenceAndConditions`}
+          to={`/variants/entity/${locus_id}?tab=evidenceAndConditions`}
           className="justify-start"
           size="sm"
         >

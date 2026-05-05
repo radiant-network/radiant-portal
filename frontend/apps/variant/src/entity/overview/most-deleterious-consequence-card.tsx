@@ -87,7 +87,10 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             </div>
             <div className="font-semibold font-mono">
               <ConditionalField condition={!!data?.germline_pc_wgs}>
-                <Link to={`/variants/entity/${params.locusId}#${VariantEntityTabs.Cases}`} className="hover:underline">
+                <Link
+                  to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`}
+                  className="hover:underline"
+                >
                   {`${data.germline_pc_wgs} (${data.germline_pf_wgs.toExponential(2)})`}
                 </Link>
               </ConditionalField>
