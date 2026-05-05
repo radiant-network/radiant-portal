@@ -28,13 +28,13 @@ export function useAnnotationFilter() {
     () => (rows: GermlineSNVOccurrence[]) => {
       if (!isActive) return rows;
       return rows.filter(row => {
-        if (filter.hasInterpretation && !row.has_interpretation) return false;
-        if (filter.hasNote && !row.has_note) return false;
+        if (filter.hasInterpretation && row.has_interpretation) return true;
+        if (filter.hasNote && row.has_note) return true;
         if (filter.flags.size > 0) {
           const flag = flagStore.get(row.locus_id);
-          if (!flag || !filter.flags.has(flag)) return false;
+          if (flag && filter.flags.has(flag)) return true;
         }
-        return true;
+        return false;
       });
     },
     [filter, isActive],
