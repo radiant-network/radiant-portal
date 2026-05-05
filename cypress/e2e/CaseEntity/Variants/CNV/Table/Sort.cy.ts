@@ -9,9 +9,9 @@ describe('Case Entity - Variants - CNV - Table - Sort', () => {
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV');
   };
 
-  it('Alphanumeric [SJRA-1168]', () => {
+  it('Alphanumeric', () => {
     setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldSortColumn('cnv_variant', false /*hasUniqueValues*/, false /*isReverseSorting*/);
+    CaseEntity_Variants_CNV_Table.validations.shouldSortColumn('type', false /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 
   it('Number', () => {

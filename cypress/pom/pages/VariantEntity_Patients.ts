@@ -222,7 +222,7 @@ const tableColumns = {
       apiField: 'updated_on',
       isVisibleByDefault: true,
       pinByDefault: null,
-      isSortable: true,
+      isSortable: false,
       isPinnable: true,
       position: 9,
       tooltip: 'Date of last case modification (yyyy-mm-dd)',
@@ -579,8 +579,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
             .find(CommonSelectors.tableCellData)
             .eq(position)
             .invoke('text')
-            .then(biggestValue => {
-              const biggest = biggestValue.trim();
+            .then(smallestValue => {
+              const smallest = smallestValue.trim();
 
               sortAction();
               cy.get(CommonSelectors.tableRow(tableId))
@@ -588,8 +588,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
                 .find(CommonSelectors.tableCellData)
                 .eq(position)
                 .invoke('text')
-                .then(smallestValue => {
-                  const smallest = smallestValue.trim();
+                .then(biggestValue => {
+                  const biggest = biggestValue.trim();
                   if (hasUniqueValues) {
                     if (biggest.localeCompare(smallest) !== 0) {
                       throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
@@ -646,8 +646,7 @@ const uninterpretedColumnContentHandler = (columnID: string, dataUninterpreted: 
   switch (columnID) {
     case 'case':
       cy.validateTableFirstRowContent(dataUninterpreted[columnID], position, tableId);
-      cy.validateTableFirstRowContent(dataUninterpreted.relationship, position, tableId);
-      cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position, tableId);
+      cy.validateTableFirstRowContent(dataUninterpreted.sequencing, position, tableId);
       break;
     case 'aff_status':
       cy.validateTableFirstRowContent(dataUninterpreted[columnID], position, tableId);

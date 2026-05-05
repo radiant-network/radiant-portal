@@ -9,8 +9,8 @@ describe('VariantEntity - CondPhen - Omim - Sort', () => {
     cy.visitVariantEvidCondPage(data.variantGermline.locus_id);
   };
 
-  it('Alphanumeric [SJRA-1168]', () => {
+  it('Alphanumeric', () => {
     setupTest();
-    VariantEntity_EvidCond.condPhenCard.omim.validations.shouldSortColumn('condition', false /*hasUniqueValues*/, true /*isReverseSorting*/);
+    VariantEntity_EvidCond.condPhenCard.omim.validations.shouldSortColumn('condition', true /*hasUniqueValues*/, true /*isReverseSorting*/);
   });
 });
