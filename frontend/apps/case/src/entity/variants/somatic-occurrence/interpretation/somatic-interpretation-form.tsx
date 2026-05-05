@@ -11,7 +11,7 @@ import {
 import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/base/shadcn/form';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/shadcn/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/base/shadcn/toggle-group';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -32,11 +32,11 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
     const form = useForm<SomaticInterpretationSchemaType>({
       resolver: zodResolver(somaticInterpretationFormSchema),
       defaultValues: {
-        tumoral_type: interpretation?.tumoral_type,
+        tumoral_type: interpretation?.tumoral_type ?? '',
         oncogenicity: interpretation?.oncogenicity,
         oncogenicity_classification_criterias: interpretation?.oncogenicity_classification_criterias,
-        clinical_utility: interpretation?.clinical_utility,
-        interpretation: interpretation?.interpretation,
+        clinical_utility: interpretation?.clinical_utility ?? '',
+        interpretation: interpretation?.interpretation ?? '',
         pubmed: interpretation?.pubmed,
       },
       reValidateMode: 'onChange',
@@ -190,7 +190,6 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
                     </ToggleGroupItem>
                   </ToggleGroup>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -220,7 +219,6 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -249,7 +247,6 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />

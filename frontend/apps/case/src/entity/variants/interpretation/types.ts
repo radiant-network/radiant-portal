@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { InterpretationGermline, InterpretationPubmed, InterpretationSomatic } from '@/api/api';
+import { isEditorHasEmptyContent } from '@/components/base/data-entry/rich-text-editor/rich-text-editor';
 import { ZodSchema } from '@/components/lib/zod';
 
 export interface InterpretationFormRef {
@@ -17,7 +18,7 @@ export type InterpretationFormProps<T> = {
 };
 
 export const genericInterpretationFormSchema = z.object({
-  interpretation: z.string().min(1, 'This field is required'),
+  interpretation: z.string().refine(val => !isEditorHasEmptyContent(val), { message: 'This field is required' }),
   pubmed: (
     z.object({
       citation: z.string(),
