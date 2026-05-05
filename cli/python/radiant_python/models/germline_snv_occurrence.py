@@ -31,6 +31,7 @@ class GermlineSNVOccurrence(BaseModel):
     ad_ratio: Union[StrictFloat, StrictInt]
     chromosome: StrictStr
     clinvar: Optional[List[StrictStr]] = None
+    end: StrictInt
     exomiser_acmg_classification: StrictStr
     exomiser_acmg_evidence: List[StrictStr]
     exomiser_gene_combined_score: Union[StrictFloat, StrictInt]
@@ -62,7 +63,7 @@ class GermlineSNVOccurrence(BaseModel):
     variant_class: StrictStr
     vep_impact: Optional[VepImpact] = None
     zygosity: StrictStr
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "genotype_quality", "germline_pc_wgs", "germline_pf_wgs", "germline_pn_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "end", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "genotype_quality", "germline_pc_wgs", "germline_pf_wgs", "germline_pn_wgs", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -119,6 +120,7 @@ class GermlineSNVOccurrence(BaseModel):
             "ad_ratio": obj.get("ad_ratio"),
             "chromosome": obj.get("chromosome"),
             "clinvar": obj.get("clinvar"),
+            "end": obj.get("end"),
             "exomiser_acmg_classification": obj.get("exomiser_acmg_classification"),
             "exomiser_acmg_evidence": obj.get("exomiser_acmg_evidence"),
             "exomiser_gene_combined_score": obj.get("exomiser_gene_combined_score"),

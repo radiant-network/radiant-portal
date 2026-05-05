@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **ad_ratio** | **float** |  | 
 **chromosome** | **str** |  | 
 **clinvar** | **List[str]** |  | [optional] 
+**end** | **int** |  | 
 **exomiser_acmg_classification** | **str** |  | 
 **exomiser_acmg_evidence** | **List[str]** |  | 
 **exomiser_gene_combined_score** | **float** |  | 

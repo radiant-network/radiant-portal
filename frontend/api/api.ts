@@ -2674,6 +2674,12 @@ export interface GermlineSNVOccurrence {
     'clinvar'?: Array<string>;
     /**
      * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'end': number;
+    /**
+     * 
      * @type {string}
      * @memberof GermlineSNVOccurrence
      */
@@ -4409,10 +4415,22 @@ export interface SomaticSNVOccurrence {
     'ad_ratio'?: number;
     /**
      * 
+     * @type {string}
+     * @memberof SomaticSNVOccurrence
+     */
+    'chromosome': string;
+    /**
+     * 
      * @type {Array<string>}
      * @memberof SomaticSNVOccurrence
      */
     'clinvar': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'end': number;
     /**
      * 
      * @type {number}
@@ -4515,6 +4533,12 @@ export interface SomaticSNVOccurrence {
      * @memberof SomaticSNVOccurrence
      */
     'somatic_pf_tn_wgs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'start': number;
     /**
      * 
      * @type {string}
