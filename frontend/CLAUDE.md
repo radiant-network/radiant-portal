@@ -121,6 +121,14 @@ npx shadcn@latest add accordion
 ```
 They land in `components/base/shadcn/` (lowercase folder names). Never re-run the CLI on an existing component — modify it directly instead.
 
+### Component Selection Order
+
+When suggesting UI components, follow this priority:
+
+1. **Storybook stories** (`frontend/`) — check here first; these reflect our actual design system
+2. **Existing wrappers** in `frontend/components/` — a wrapper may exist even without a story
+3. **shadcn/ui primitives** — last resort; flag explicitly when falling back here so gaps in the design system stay visible; always apply our design tokens and Tailwind config, never shadcn defaults
+
 ## Conventions
 
 - **Files/folders**: kebab-case everywhere (`user-profile.tsx`, `all-profiles/`)
