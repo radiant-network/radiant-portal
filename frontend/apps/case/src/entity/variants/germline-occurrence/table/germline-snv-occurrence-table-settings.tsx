@@ -27,12 +27,19 @@ import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
-function getSNVOccurrenceColumns(
-  t: TFunction<string, undefined>,
-  onInterpretationSaved: () => void,
-  caseEntity?: CaseEntity,
-  patientId?: number,
-) {
+type GermlineSNVOccurrenceTableSettingsProps = {
+  caseEntity?: CaseEntity;
+  patientId?: number;
+  onInterpretationSaved: () => void;
+  t: TFunction<string, undefined>;
+};
+
+function getSNVOccurrenceColumns({
+  t,
+  onInterpretationSaved,
+  caseEntity,
+  patientId,
+}: GermlineSNVOccurrenceTableSettingsProps) {
   return [
     // TODO: To be enabled when row selection function are implemented
     // {
