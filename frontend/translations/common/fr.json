@@ -1067,8 +1067,8 @@
         "classification_popover": {
           "consult": "Consulter les ",
           "standards_and_guidelines": "normes et les lignes directrices",
-          "variant_interpretation": "pour l'interprétation des variantes",
-          "full_text": "Consulter les <guides>normes et les lignes directrices</guides> pour l'interprétation des variantes"
+          "variant_interpretation": "pour l'interprétation des variants",
+          "full_text": "Consulter les <guides>normes et les lignes directrices</guides> pour l'interprétation des variants"
         },
         "classification_criteria": "Critères de classification",
         "classification_criteria_placeholder": "Ex : PM1, PS2",
@@ -1767,7 +1767,7 @@
       "dashboard": "Tableau de bord",
       "data_exploration": "Exploration des données",
       "studies": "Études",
-      "variants": "Variantes"
+      "variants": "Variants"
     },
     "actions": {
       "community": "Communauté",
