@@ -27,7 +27,13 @@ import SomaticInterpretationCell from './cells/somatic-interpretation-cell';
 
 const columnHelper = createColumnHelper<SomaticSNVOccurrence>();
 
-function getSomaticSNVTumorNormalColumns(t: TFunction<string, undefined>, caseEntity?: CaseEntity, patientId?: number) {
+type SomaticSNVOccurrenceTableSettingsProps = {
+  caseEntity?: CaseEntity;
+  patientId?: number;
+  t: TFunction<string, undefined>;
+};
+
+function getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId }: SomaticSNVOccurrenceTableSettingsProps) {
   return [
     // interpretation and note cell
     columnHelper.accessor(row => row, {
