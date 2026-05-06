@@ -196,6 +196,7 @@ Class | Method | HTTP request | Description
  - [CaseTaskBatch](docs/CaseTaskBatch.md)
  - [CasesSearchResponse](docs/CasesSearchResponse.md)
  - [ClinvarRCV](docs/ClinvarRCV.md)
+ - [ClinvarVariantConditions](docs/ClinvarVariantConditions.md)
  - [Count](docs/Count.md)
  - [CountBodyWithSqon](docs/CountBodyWithSqon.md)
  - [CreateBatchResponse](docs/CreateBatchResponse.md)
