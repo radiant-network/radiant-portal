@@ -20,6 +20,11 @@ type ClinvarRCV struct {
 	Origins              JsonArray[string] `json:"origins,omitempty" gorm:"type:json"`
 }
 
+type ClinvarVariantConditions struct {
+	ClinvarId  string       `json:"clinvar_id"`
+	Conditions []ClinvarRCV `json:"conditions"`
+}
+
 var ClinvarRCVTable = Table{
 	Name:  "clinvar_rcv_summary",
 	Alias: "crs",

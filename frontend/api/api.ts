@@ -1291,6 +1291,25 @@ export interface ClinvarRCV {
     'version'?: number;
 }
 /**
+ * 
+ * @export
+ * @interface ClinvarVariantConditions
+ */
+export interface ClinvarVariantConditions {
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarVariantConditions
+     */
+    'clinvar_id'?: string;
+    /**
+     * 
+     * @type {Array<ClinvarRCV>}
+     * @memberof ClinvarVariantConditions
+     */
+    'conditions'?: Array<ClinvarRCV>;
+}
+/**
  * Count represents count result
  * @export
  * @interface Count
@@ -12101,7 +12120,7 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ClinvarRCV>>> {
+        async getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ClinvarVariantConditions>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConditionsClinvar(locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantConditionsClinvar']?.[localVarOperationServerIndex]?.url;
@@ -12262,7 +12281,7 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ClinvarRCV>> {
+        getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ClinvarVariantConditions> {
             return localVarFp.getGermlineVariantConditionsClinvar(locusId, options).then((request) => request(axios, basePath));
         },
         /**

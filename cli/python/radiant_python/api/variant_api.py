@@ -19,7 +19,7 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictStr, field_validator
 from typing import List, Optional
 from typing_extensions import Annotated
-from radiant_python.models.clinvar_rcv import ClinvarRCV
+from radiant_python.models.clinvar_variant_conditions import ClinvarVariantConditions
 from radiant_python.models.gene_panel_conditions import GenePanelConditions
 from radiant_python.models.internal_frequencies import InternalFrequencies
 from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
@@ -885,7 +885,7 @@ class VariantApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[ClinvarRCV]:
+    ) -> ClinvarVariantConditions:
         """Get ClinVar conditions for germline variant entity
 
         Retrieve ClinVar conditions for germline variant entity
@@ -923,7 +923,7 @@ class VariantApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ClinvarRCV]",
+            '200': "ClinvarVariantConditions",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -954,7 +954,7 @@ class VariantApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[ClinvarRCV]]:
+    ) -> ApiResponse[ClinvarVariantConditions]:
         """Get ClinVar conditions for germline variant entity
 
         Retrieve ClinVar conditions for germline variant entity
@@ -992,7 +992,7 @@ class VariantApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ClinvarRCV]",
+            '200': "ClinvarVariantConditions",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1061,7 +1061,7 @@ class VariantApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ClinvarRCV]",
+            '200': "ClinvarVariantConditions",
             '404': "ApiError",
             '500': "ApiError",
         }

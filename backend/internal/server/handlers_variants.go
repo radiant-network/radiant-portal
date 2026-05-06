@@ -320,7 +320,7 @@ func GetGermlineVariantConditions(repo repository.GenePanelsDAO) gin.HandlerFunc
 // @Security bearerauth
 // @Param locus_id path string true "Locus ID"
 // @Produce json
-// @Success 200 {array} types.ClinvarRCV
+// @Success 200 {object} types.ClinvarVariantConditions
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /variants/germline/{locus_id}/conditions/clinvar [get]
@@ -336,7 +336,18 @@ func GetGermlineVariantConditionsClinvar(repo repository.ClinvarRCVDAO) gin.Hand
 			HandleError(c, err)
 			return
 		}
-		c.JSON(http.StatusOK, clinvarConditions)
+
+		var clinvarId string
+		if len(clinvarConditions) > 0 {
+			clinvarId = clinvarConditions[0].ClinvarId
+		}
+
+		returnPayload := types.ClinvarVariantConditions{
+			ClinvarId:  clinvarId,
+			Conditions: clinvarConditions,
+		}
+
+		c.JSON(http.StatusOK, returnPayload)
 	}
 }
 

@@ -668,6 +668,16 @@ components:
       - clinvar_id
       - locus_id
       type: object
+    ClinvarVariantConditions:
+      properties:
+        clinvar_id:
+          type: string
+        conditions:
+          items:
+            $ref: '#/components/schemas/ClinvarRCV'
+          type: array
+          uniqueItems: false
+      type: object
     Count:
       description: Count represents count result
       properties:
@@ -5744,9 +5754,7 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/ClinvarRCV'
-                type: array
+                $ref: '#/components/schemas/ClinvarVariantConditions'
           description: OK
         "404":
           content:
