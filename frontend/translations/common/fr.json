@@ -346,6 +346,7 @@
       },
       "reset": "Réinitialiser",
       "results": "Résultats",
+      "results_filtered": "{{shown}} affichés sur {{total}}",
       "no_result": "Aucun résultat",
       "no_result_description": "Ajuster vos filtres et essayer à nouveau.",
       "has_error": "Erreur lors du chargement du contenu",
@@ -1451,7 +1452,10 @@
         "snv": "SNV",
         "snv_tn": "SNV (TN)",
         "snv_tn_tooltip": "SNV (tumor-normal)",
-        "snv_to": "SNV (TO)"
+        "snv_to": "SNV (TO)",
+        "show_only_interpreted": "Afficher les variants interprétés",
+        "show_only_commented": "Afficher les variants commentés",
+        "filter_by_flag": "Filtrer par drapeau"
       },
       "dialog": {
         "overlapping_gene": "Liste des gènes chevauchants le CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"

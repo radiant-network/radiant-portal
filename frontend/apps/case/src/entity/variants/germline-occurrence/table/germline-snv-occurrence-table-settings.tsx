@@ -24,6 +24,7 @@ import VariantNoteCell from '../../table/cells/variant-note-cell';
 
 import InterpretationCell from './cells/interpretation-cell';
 import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
+import VariantFlagCell from './cells/variant-flag-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
@@ -50,10 +51,11 @@ function getSNVOccurrenceColumns(
         <div className="flex items-center gap-1">
           <InterpretationCell occurrence={info.getValue()} patientId={patientId} />
           <VariantNoteCell occurrence={info.getValue()} />
+          <VariantFlagCell locusId={info.getValue().locus_id} />
         </div>
       ),
       header: () => null,
-      size: 68,
+      size: 100,
       enablePinning: false,
       enableResizing: false,
       enableSorting: false,

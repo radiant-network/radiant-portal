@@ -346,6 +346,7 @@
       },
       "reset": "Reset",
       "results": "Results",
+      "results_filtered": "{{shown}} shown of {{total}}",
       "no_result": "No results",
       "no_result_description": "Adjust your filters and try again.",
       "has_error": "Error loading this content",
@@ -1445,6 +1446,9 @@
         "sample_submitter_id_tooltip": "Submitter sample ID",
         "snv": "SNV",
         "cnv": "CNV",
+        "show_only_interpreted": "Show only interpreted",
+        "show_only_commented": "Show only commented",
+        "filter_by_flag": "Filter by flag",
         "snv_tn": "SNV (TN)",
         "snv_tn_tooltip": "SNV (tumor-normal)",
         "snv_to": "SNV (TO)"

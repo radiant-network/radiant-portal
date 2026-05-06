@@ -112,6 +112,8 @@ export type TableProps<TData> = {
   loadingStates?: LoadingStates;
   subComponent?: SubComponentProps<TData>;
   TableFilters?: React.JSX.Element;
+  tableFiltersInline?: boolean;
+  filteredCount?: number;
   total?: number;
   enableColumnOrdering?: boolean;
   enableFullscreen?: boolean;
@@ -593,6 +595,8 @@ function DataTable<T>({
   data,
   defaultColumnSettings,
   TableFilters,
+  tableFiltersInline = false,
+  filteredCount,
   loadingStates = {
     total: true,
     list: true,
@@ -898,21 +902,33 @@ function DataTable<T>({
         'absolute top-0 right-0 bottom-0 left-0 bg-background z-50 p-4 overflow-y-scroll': isFullscreen,
       })}
     >
+      {tableFiltersInline && tableIndexResultPosition === 'top' && (
+        <div className={cn('w-full mb-2', { invisible: pagination.type === 'hidden' })}>
+          <TableIndexResult
+            loading={loadingStates?.total}
+            pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
+            pageSize={table.getState().pagination?.pageSize ?? 20}
+            total={total}
+            filteredCount={filteredCount}
+          />
+        </div>
+      )}
+
       <div className={cn('w-full flex text-left justify-between items-end', { 'mb-4': hasUpperSettings })}>
-        {/* Total */}
-        {tableIndexResultPosition === 'top' && (
+        {!tableFiltersInline && tableIndexResultPosition === 'top' && (
           <div className={cn('flex-1', { invisible: pagination.type === 'hidden' })}>
             <TableIndexResult
               loading={loadingStates?.total}
               pageIndex={(table.getState().pagination?.pageIndex ?? 0) + 1}
               pageSize={table.getState().pagination?.pageSize ?? 20}
               total={total}
+              filteredCount={filteredCount}
             />
           </div>
         )}
 
         {/* FiltersGroup */}
-        {TableFilters}
+        {tableFiltersInline ? <div className="flex-1">{TableFilters}</div> : TableFilters}
 
         {/* Right Menu Options */}
         <div className="flex justify-end">

@@ -39,6 +39,8 @@ import { queryBuilderRemote } from 'components/cores/query-builder/query-builder
 import { SELECTED_VARIANT_PARAM } from '../constants';
 import { getVisibleAggregations } from '../utils';
 
+import AnnotationFilter from './filters/annotation-filter';
+import { useAnnotationFilter } from './filters/use-annotation-filter';
 import { isValidSeqId } from './libs/seq-id';
 import SliderGermlineOccurrenceSheet from './sliders/slider-germline-occurrence-sheet';
 import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/germline-snv-occurrence-table-settings';
@@ -149,7 +151,13 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
     },
   );
 
-  const occurrencesData = useMemo(() => fetchOccurrencesList.data ?? [], [fetchOccurrencesList.data]);
+  const rawOccurrencesData = useMemo(() => fetchOccurrencesList.data ?? [], [fetchOccurrencesList.data]);
+
+  const annotationFilter = useAnnotationFilter();
+  const occurrencesData = useMemo(
+    () => annotationFilter.applyFilter(rawOccurrencesData),
+    [rawOccurrencesData, annotationFilter.applyFilter],
+  );
 
   const {
     selectedOccurrence,
@@ -333,8 +341,11 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
                 <DataTable
                   id={appId}
                   columns={getSNVOccurrenceColumns(t, caseEntity, onInterpretationSaved, patient?.patient_id)}
-                  data={fetchOccurrencesList.data ?? []}
+                  data={occurrencesData}
                   defaultColumnSettings={defaultSNVSettings}
+                  TableFilters={<AnnotationFilter controller={annotationFilter} />}
+                  tableFiltersInline
+                  filteredCount={annotationFilter.isActive ? occurrencesData.length : undefined}
                   loadingStates={{
                     total: fetchOccurrencesCount.isLoading,
                     list: fetchOccurrencesList.isLoading,

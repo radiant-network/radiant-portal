@@ -11,29 +11,39 @@ type TableIndexResultProp = {
   loading?: boolean;
   pageIndex: number;
   pageSize: number;
+  filteredCount?: number;
 };
 
-function TableIndexResult({ loading, pageIndex, pageSize, total }: TableIndexResultProp) {
+function TableIndexResult({ loading, pageIndex, pageSize, total, filteredCount }: TableIndexResultProp) {
   const { t } = useI18n();
   if (loading) return <Skeleton className="h-[24px] w-[250px]" />;
 
-  let to = pageSize * pageIndex;
-  const from = to - pageSize + 1;
+  const wrapperClass = 'text-xs text-muted-foreground';
 
-  if (to > total) {
-    to = total;
+  if (total === 0) {
+    return <span className={wrapperClass}>{t('common.table.no_result')}</span>;
   }
 
+  if (filteredCount !== undefined) {
+    return (
+      <span className={wrapperClass}>
+        {t('common.table.results_filtered', {
+          defaultValue: '{{shown}} shown of {{total}}',
+          shown: thousandNumberFormat(filteredCount),
+          total: thousandNumberFormat(total),
+        })}
+      </span>
+    );
+  }
+
+  let to = pageSize * pageIndex;
+  const from = to - pageSize + 1;
+  if (to > total) to = total;
+
   return (
-    <span className="text-xs text-muted-foreground">
-      {total > 0 ? (
-        <>
-          {t('common.table.results')} {thousandNumberFormat(from)} - {thousandNumberFormat(to)} of{' '}
-          {thousandNumberFormat(total)}
-        </>
-      ) : (
-        t('common.table.no_result')
-      )}
+    <span className={wrapperClass}>
+      {t('common.table.results')} {thousandNumberFormat(from)} - {thousandNumberFormat(to)} of{' '}
+      {thousandNumberFormat(total)}
     </span>
   );
 }

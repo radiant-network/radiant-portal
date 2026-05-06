@@ -18,6 +18,8 @@ import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-de
 import { useI18n } from '@/components/hooks/i18n';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
+import VariantFlagCell from '../table/cells/variant-flag-cell';
+
 import GermlineInterpretationDialog from '../interpretation/germline-interpretation-form';
 
 type GermlineOccurrenceSliderSheetProps = {
@@ -115,6 +117,7 @@ function GermlineOccurrenceSheetContent({
         hgvsg={occurrence.hgvsg}
         actions={
           <div className="flex gap-2">
+            <VariantFlagCell locusId={occurrence.locus_id} variant="outline" size="sm" />
             <NotesProvider value={{ onChangeCallback: listFetcher }}>
               <NotesSliderSheet
                 caseId={caseId}
