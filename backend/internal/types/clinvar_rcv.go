@@ -21,8 +21,8 @@ type ClinvarRCV struct {
 }
 
 type ClinvarVariantConditions struct {
-	ClinvarId  string       `json:"clinvar_id,omitempty"`
-	Conditions []ClinvarRCV `json:"conditions"`
+	ClinvarId  string                `json:"clinvar_id,omitempty"`
+	Conditions JsonArray[ClinvarRCV] `json:"conditions"`
 }
 
 var ClinvarRCVTable = Table{
