@@ -1,11 +1,13 @@
 package repository
 
 import (
-	"errors"
 	"fmt"
-	"github.com/radiant-network/radiant-api/internal/types"
-	"gorm.io/gorm"
 	"log"
+	"strings"
+
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
+	"gorm.io/gorm"
 )
 
 type ClinvarRCV = types.ClinvarRCV
@@ -28,17 +30,30 @@ func NewClinvarRCVRepository(db *gorm.DB) *ClinvarRCVRepository {
 
 func (r *ClinvarRCVRepository) GetVariantClinvarConditions(locusId int) ([]ClinvarRCV, error) {
 	var clinvarRCV []ClinvarRCV
-	tx := r.db.Table(types.ClinvarRCVTable.Name)
-	tx = tx.Select("locus_id, clinvar_id, accession, clinical_significance, date_last_evaluated, submission_count, review_status, review_status_stars, version, traits, origins")
-	tx = tx.Where("locus_id = ?", locusId)
 
-	if err := tx.Find(&clinvarRCV).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil // No record found
-		} else {
-			return nil, fmt.Errorf("error while fetching clinvar RCV: %w", err)
-		}
+	columns := utils.PrefixColumns(types.ClinvarRCVTable.Alias, []string{
+		"locus_id",
+		"clinvar_id",
+		"accession",
+		"clinical_significance",
+		"date_last_evaluated",
+		"submission_count",
+		"review_status",
+		"review_status_stars",
+		"version",
+		"traits",
+		"origins",
+	})
+
+	err := r.db.
+		Table(fmt.Sprintf("%s %s", types.VariantTable.Name, types.VariantTable.Alias)).
+		Select(strings.Join(columns, ",")).
+		Joins(fmt.Sprintf("JOIN %s %s ON %s.clinvar_name = %s.clinvar_id", types.ClinvarRCVTable.Name, types.ClinvarRCVTable.Alias, types.VariantTable.Alias, types.ClinvarRCVTable.Alias)).
+		Where(fmt.Sprintf("%s.locus_id = ?", types.VariantTable.Alias), locusId).
+		Find(&clinvarRCV).Error
+	if err != nil {
+		return nil, fmt.Errorf("error while fetching clinvar RCV: %w", err)
 	}
 
-	return clinvarRCV, nil // Return the found records
+	return clinvarRCV, nil
 }
