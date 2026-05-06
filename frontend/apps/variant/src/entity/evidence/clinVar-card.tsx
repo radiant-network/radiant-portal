@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 import { ExternalLink, Search } from 'lucide-react';
 import useSWR from 'swr';
 
-import { ApiError, ClinvarRCV } from '@/api/api';
+import { ApiError, ClinvarVariantConditions } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
@@ -28,7 +28,7 @@ function ClinVarCard() {
   const params = useParams<{ locusId: string }>();
   const [search, setSearch] = useState('');
 
-  const { data, isLoading } = useSWR<ClinvarRCV[], ApiError, ClinVarConditionsSearchInput>(
+  const { data, isLoading } = useSWR<ClinvarVariantConditions, ApiError, ClinVarConditionsSearchInput>(
     {
       key: 'interpreted-cases',
       locusId: params.locusId!,
@@ -41,7 +41,7 @@ function ClinVarCard() {
   );
 
   const filteredData =
-    data?.filter(item => {
+    data?.conditions?.filter(item => {
       if (!search.trim()) return true;
 
       const traits = item.traits || [];
@@ -54,13 +54,12 @@ function ClinVarCard() {
         <CardTitle className="text-xl font-semibold">{t('variant_entity.evidence.clin_var.title')}</CardTitle>
         <CardDescription>{t('variant_entity.evidence.clin_var.description')}</CardDescription>
         <CardAction>
-          {/* TODO update with clinvar id of variant after back fix */}
-          {data?.[0]?.clinvar_id && (
+          {data?.clinvar_id && (
             <Button
               variant="outline"
               onClick={() => {
                 window.open(
-                  `https://www.ncbi.nlm.nih.gov/clinvar/variation/${data?.[0]?.clinvar_id}`,
+                  `https://www.ncbi.nlm.nih.gov/clinvar/variation/${data?.clinvar_id}`,
                   '_blank',
                   'noopener,noreferrer',
                 );
