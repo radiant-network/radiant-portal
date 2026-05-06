@@ -1,7 +1,7 @@
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { useI18n } from '@/components/hooks/i18n';
-import { toExponentialNotationAtThreshold } from '@/components/lib/number-format';
+import { toExponentialNotation } from '@/components/lib/number-format';
 
 import EmptyField from '../information/empty-field';
 
@@ -38,7 +38,7 @@ export default function GeneSection({
               target="_blank"
               size="sm"
             >
-              {toExponentialNotationAtThreshold(gnomad_pli)}
+              {toExponentialNotation(gnomad_pli)}
             </AnchorLink>
           ) : (
             <EmptyField />
@@ -54,7 +54,7 @@ export default function GeneSection({
               target="_blank"
               size="sm"
             >
-              {toExponentialNotationAtThreshold(gnomad_loeuf)}
+              {toExponentialNotation(gnomad_loeuf)}
             </AnchorLink>
           ) : (
             <EmptyField />
