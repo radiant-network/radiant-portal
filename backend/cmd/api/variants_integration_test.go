@@ -366,6 +366,22 @@ func Test_GetGermlineVariantConditions_Clinvar(t *testing.T) {
 	})
 }
 
+func Test_GetGermlineVariantConditions_Clinvar_Empty(t *testing.T) {
+	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewClinvarRCVRepository(db)
+		router := gin.Default()
+		router.GET("/variants/germline/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/conditions/clinvar", 9999), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		expected := `{"conditions":[]}`
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
 func assertGetGermlineVariantExternalFrequencies(t *testing.T, data string, locusId int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB) {
 		repo := repository.NewVariantsRepository(starrocks)

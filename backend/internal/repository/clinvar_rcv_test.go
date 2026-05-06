@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -14,6 +15,12 @@ func Test_GetClinvarRCV(t *testing.T) {
 		repo := NewClinvarRCVRepository(db)
 		clinvarRcv, err := repo.GetVariantClinvarConditions(1000)
 		assert.NoError(t, err)
+
+		// Sort result by DateLastEvaluated descending
+		sort.Slice(clinvarRcv, func(i, j int) bool {
+			return clinvarRcv[i].DateLastEvaluated.After(clinvarRcv[j].DateLastEvaluated)
+		})
+
 		if assert.Len(t, clinvarRcv, 2) {
 			assert.Equal(t, "123456", clinvarRcv[0].ClinvarId)
 			assert.Equal(t, types.JsonArray[string]{"Pathogenic"}, clinvarRcv[0].ClinicalSignificance)

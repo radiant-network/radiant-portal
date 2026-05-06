@@ -337,13 +337,15 @@ func GetGermlineVariantConditionsClinvar(repo repository.ClinvarRCVDAO) gin.Hand
 			return
 		}
 
-		var clinvarId string
-		if len(clinvarConditions) > 0 {
-			clinvarId = clinvarConditions[0].ClinvarId
+		if len(clinvarConditions) == 0 {
+			c.JSON(http.StatusOK, types.ClinvarVariantConditions{
+				Conditions: []types.ClinvarRCV{},
+			})
+			return
 		}
 
 		returnPayload := types.ClinvarVariantConditions{
-			ClinvarId:  clinvarId,
+			ClinvarId:  clinvarConditions[0].ClinvarId,
 			Conditions: clinvarConditions,
 		}
 
