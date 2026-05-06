@@ -267,7 +267,8 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 				"patient_organization_code": "CHOP",
 				"sex_code": "female",
 				"life_status_code": "alive",
-				"date_of_birth": "2010-05-15"	
+				"date_of_birth": "2010-05-15",
+				"last_name": "(D)o-e"
 			}	
 		]
 		`
