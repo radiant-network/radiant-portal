@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { InterpretationSomatic } from '@/api/api';
@@ -8,8 +9,9 @@ import {
   oncogenicityClassificationCriterias,
 } from '@/components/base/classifications/oncogenicity';
 import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/base/shadcn/form';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/shadcn/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/base/shadcn/toggle-group';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -30,11 +32,11 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
     const form = useForm<SomaticInterpretationSchemaType>({
       resolver: zodResolver(somaticInterpretationFormSchema),
       defaultValues: {
-        tumoral_type: interpretation?.tumoral_type,
+        tumoral_type: interpretation?.tumoral_type ?? '',
         oncogenicity: interpretation?.oncogenicity,
         oncogenicity_classification_criterias: interpretation?.oncogenicity_classification_criterias,
-        clinical_utility: interpretation?.clinical_utility,
-        interpretation: interpretation?.interpretation,
+        clinical_utility: interpretation?.clinical_utility ?? '',
+        interpretation: interpretation?.interpretation ?? '',
         pubmed: interpretation?.pubmed,
       },
       reValidateMode: 'onChange',
@@ -91,6 +93,7 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
             name="tumoral_type"
             label={t('variant.interpretation_form.somatic.tumoral_type')}
             placeholder={t('variant.interpretation_form.somatic.tumoral_type_placeholder')}
+            schema={somaticInterpretationFormSchema}
           />
           <FormField
             control={form.control}
@@ -98,19 +101,26 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
             name="oncogenicity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <span>
-                    {t('variant.interpretation_form.somatic.oncogenicity')} (
-                    <a
-                      href="https://pubmed.ncbi.nlm.nih.gov/35101336/"
-                      target="_blank"
-                      className="text-primary underline hover:no-underline outline-none"
-                      rel="noreferrer"
-                    >
-                      PMID: 35101336
-                    </a>
-                    )
-                  </span>
+                <FormLabel
+                  infoCardContent={
+                    <div className="leading-6">
+                      <Trans
+                        i18nKey="variant.interpretation_form.somatic.oncogenicity_popover.full_text"
+                        components={{
+                          guides: (
+                            <AnchorLink
+                              className="inline-flex no-underline hover:underline"
+                              href="https://pubmed.ncbi.nlm.nih.gov/35101336/"
+                              target="_blank"
+                              size="sm"
+                            />
+                          ),
+                        }}
+                      />
+                    </div>
+                  }
+                >
+                  {t('variant.interpretation_form.somatic.oncogenicity')}
                 </FormLabel>
                 <FormControl>
                   <ToggleGroup
@@ -180,7 +190,6 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
                     </ToggleGroupItem>
                   </ToggleGroup>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -210,7 +219,6 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -239,7 +247,6 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
