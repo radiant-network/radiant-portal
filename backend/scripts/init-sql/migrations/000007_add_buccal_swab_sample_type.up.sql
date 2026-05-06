@@ -1,0 +1,1 @@
+INSERT INTO public.sample_type (code, name_en) VALUES ('buccal_swab', 'Buccal Swab') ON CONFLICT (code) DO NOTHING;
