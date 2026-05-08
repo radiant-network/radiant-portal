@@ -1,7 +1,5 @@
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
-import { Separator } from '@/components/base/shadcn/separator';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 
 type InterpretationVariantHeaderProps = {
@@ -9,8 +7,7 @@ type InterpretationVariantHeaderProps = {
   locus_id?: string;
   hgvsg?: string;
   relationship_to_proband?: string;
-  analysis_catalog_code?: string;
-  analysis_catalog_name?: string;
+  seqId: number;
   patientId?: number;
 };
 
@@ -20,30 +17,36 @@ function InterpretationVariantHeader({
   locus_id,
   hgvsg,
   relationship_to_proband,
-  analysis_catalog_code,
-  analysis_catalog_name,
+  seqId,
 }: InterpretationVariantHeaderProps) {
   const { t } = useI18n();
 
-  if (!locus_id || !hgvsg) return null;
-
   return (
-    <div className="flex items-center gap-4">
-      <AnchorLink href={`/variants/entity/${locus_id}`} size="lg" external>
-        <span className="max-w-72 overflow-hidden text-ellipsis">{hgvsg}</span>
-      </AnchorLink>
-      <Badge>{t(`variant.interpretation_form.header.${case_type}`)}</Badge>
-      <Separator className="h-6" orientation="vertical" />
-      <span className="capitalize">
-        {relationship_to_proband ?? t('case_entity.patient_information.proband')}
-        {patientId && ` (${patientId})`}
-      </span>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Badge variant="blue">{analysis_catalog_code}</Badge>
-        </TooltipTrigger>
-        <TooltipContent>{analysis_catalog_name}</TooltipContent>
-      </Tooltip>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2 self-stretch">
+        {t('variant.interpretation_form.title')}
+        <AnchorLink href={`/variants/entity/${locus_id}`} size="lg">
+          <span className="min-w-28 max-w-56 overflow-hidden text-ellipsis">{hgvsg}</span>
+        </AnchorLink>
+        <Badge>{t(`variant.interpretation_form.header.${case_type}`)}</Badge>
+      </div>
+      <div className="flex items-center gap-4 self-stretch text-xs">
+        <div className="flex items-center gap-2">
+          <span>
+            {t('variant.interpretation_form.header.patient')}
+            <span className="font-normal ml-1">{patientId}</span>
+          </span>
+          <Badge variant="outline">
+            {relationship_to_proband
+              ? t(`common.relationships.${relationship_to_proband}`)
+              : t('case_entity.patient_information.proband')}
+          </Badge>
+        </div>
+        <span>
+          {t('variant.interpretation_form.header.sequencing')}
+          <span className="font-normal ml-1">{seqId}</span>
+        </span>
+      </div>
     </div>
   );
 }

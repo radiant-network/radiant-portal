@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
 
-import { CaseEntity, CaseSequencingExperiment, ExpandedSomaticSNVOccurrence, InterpretationSomatic } from '@/api/api';
+import { CaseEntity, CaseSequencingExperiment, ExpandedGermlineSNVOccurrence, InterpretationGermline } from '@/api/api';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import { Button } from '@/components/base/shadcn/button';
 import {
@@ -30,9 +30,9 @@ import InterpretationVariantHeader from '../../interpretation/header';
 import InterpretationLastUpdatedBanner from '../../interpretation/last-updated-banner';
 import { Interpretation, InterpretationFormRef } from '../../interpretation/types';
 
-import SomaticInterpretationForm from './somatic-interpretation-form';
+import GermlineInterpretationForm from './germline-interpretation-form';
 
-type SomaticInterpretationDialogProps = {
+type GermlineInterpretationDialogProps = {
   locusId: string;
   transcriptId?: string;
   patientId?: number;
@@ -46,25 +46,25 @@ type CaseEntityInput = {
   caseId: number;
 };
 
-type InterpretationSomaticInput = {
+type InterpretationGermlineInput = {
   caseId: string;
   seqId: string;
   locusId: string;
   transcriptId: string;
 };
 
-type ExpandSomaticInput = {
+type ExpandGermlineInput = {
   caseId: number;
   seqId: number;
   locusId: string;
 };
 
-type SomaticInterpretationFormInput = {
+type GermlineInterpretationFormInput = {
   caseId: string;
   seqId: string;
   locusId: string;
   transcriptId: string;
-  interpretationSomatic: InterpretationSomatic;
+  interpretationGermline: InterpretationGermline;
 };
 
 async function fetchCaseEntity(_url: string, { arg }: { arg: CaseEntityInput }) {
@@ -72,8 +72,8 @@ async function fetchCaseEntity(_url: string, { arg }: { arg: CaseEntityInput }) 
   return response.data;
 }
 
-async function fetchInterpretationSomatic(_url: string, { arg }: { arg: InterpretationSomaticInput }) {
-  const response = await interpretationApi.getInterpretationSomatic(
+async function fetchInterpretationGermline(_url: string, { arg }: { arg: InterpretationGermlineInput }) {
+  const response = await interpretationApi.getInterpretationGermline(
     arg.caseId,
     arg.seqId,
     arg.locusId,
@@ -82,53 +82,53 @@ async function fetchInterpretationSomatic(_url: string, { arg }: { arg: Interpre
   return response.data;
 }
 
-async function fetchExpandedSomaticSNVOccurrence(_url: string, { arg }: { arg: ExpandSomaticInput }) {
-  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(arg.caseId, arg.seqId, arg.locusId);
+async function fetchExpandedGermlineSNVOccurrence(_url: string, { arg }: { arg: ExpandGermlineInput }) {
+  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(arg.caseId, arg.seqId, arg.locusId);
   return response.data;
 }
 
-async function saveSomaticInterpretation(_url: string, { arg }: { arg: SomaticInterpretationFormInput }) {
-  const response = await interpretationApi.postInterpretationSomatic(
+async function saveGermlineInterpretation(_url: string, { arg }: { arg: GermlineInterpretationFormInput }) {
+  const response = await interpretationApi.postInterpretationGermline(
     arg.caseId,
     arg.seqId,
     arg.locusId,
     arg.transcriptId,
-    arg.interpretationSomatic,
+    arg.interpretationGermline,
   );
   return response.data;
 }
 
-function SomaticInterpretationDialog({
+function GermlineInterpretationDialog({
   locusId,
   transcriptId,
   patientId,
   handleSaveCallback,
   renderTrigger,
   isCreation = false,
-}: SomaticInterpretationDialogProps) {
+}: GermlineInterpretationDialogProps) {
   const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
-  const somaticFormRef = useRef<InterpretationFormRef>(null);
+  const germlineFormRef = useRef<InterpretationFormRef>(null);
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
 
   const caseEntity = useSWRMutation<CaseEntity, any, string, CaseEntityInput>('case-entity', fetchCaseEntity);
 
-  const occurrenceExpand = useSWRMutation<ExpandedSomaticSNVOccurrence, any, string, ExpandSomaticInput>(
+  const occurrenceExpand = useSWRMutation<ExpandedGermlineSNVOccurrence, any, string, ExpandGermlineInput>(
     `form-somatic-expand-${caseId}-${locusId}-${seqId}`,
-    fetchExpandedSomaticSNVOccurrence,
+    fetchExpandedGermlineSNVOccurrence,
   );
 
-  const interpretation = useSWRMutation<Interpretation, any, string, InterpretationSomaticInput>(
+  const interpretation = useSWRMutation<Interpretation, any, string, InterpretationGermlineInput>(
     `form-somatic-interpretation-${seqId}-${locusId}-${transcriptId}`,
-    fetchInterpretationSomatic,
+    fetchInterpretationGermline,
   );
 
   const saveInterpretation = useSWRMutation(
-    `save-somatic-interpretation-${seqId}-${locusId}-${transcriptId}`,
-    saveSomaticInterpretation,
+    `save-germline-interpretation-${seqId}-${locusId}-${transcriptId}`,
+    saveGermlineInterpretation,
     {
       onSuccess: () => {
         setOpen(false);
@@ -172,8 +172,8 @@ function SomaticInterpretationDialog({
   );
 
   const handleSave = useCallback(() => {
-    somaticFormRef.current?.submit();
-  }, [somaticFormRef]);
+    germlineFormRef.current?.submit();
+  }, [germlineFormRef]);
 
   const handleOpen = useCallback(async () => {
     setOpen(true);
@@ -226,8 +226,8 @@ function SomaticInterpretationDialog({
               />
               <div className="grid gap-6 grid-cols-12">
                 <div className="rounded-sm col-span-7 border p-6 bg-muted">
-                  <SomaticInterpretationForm
-                    ref={somaticFormRef}
+                  <GermlineInterpretationForm
+                    ref={germlineFormRef}
                     interpretation={interpretation.data}
                     saveInterpretation={interpretation =>
                       saveInterpretation.trigger({
@@ -235,7 +235,7 @@ function SomaticInterpretationDialog({
                         seqId: seqId.toString(),
                         locusId,
                         transcriptId: transcriptId ?? '',
-                        interpretationSomatic: interpretation,
+                        interpretationGermline: interpretation,
                       })
                     }
                     onDirtyChange={setIsDirty}
@@ -257,10 +257,13 @@ function SomaticInterpretationDialog({
                     rsnumber={occurrenceExpand?.data?.rsnumber}
                   />
                   <PredictionCard
-                    type="somatic"
-                    somatic_pc_tn_wgs={occurrenceExpand?.data?.somatic_pc_tn_wgs}
-                    somatic_pn_tn_wgs={occurrenceExpand?.data?.somatic_pn_tn_wgs}
-                    somatic_pf_tn_wgs={occurrenceExpand?.data?.somatic_pf_tn_wgs}
+                    type="germline"
+                    germline_pc_wgs_affected={occurrenceExpand?.data?.germline_pc_wgs_affected}
+                    germline_pn_wgs_affected={occurrenceExpand?.data?.germline_pn_wgs_affected}
+                    germline_pf_wgs_affected={occurrenceExpand?.data?.germline_pf_wgs_affected}
+                    germline_pc_wgs_not_affected={occurrenceExpand?.data?.germline_pc_wgs_not_affected}
+                    germline_pn_wgs_not_affected={occurrenceExpand?.data?.germline_pn_wgs_not_affected}
+                    germline_pf_wgs_not_affected={occurrenceExpand?.data?.germline_pf_wgs_not_affected}
                     cadd_phred={occurrenceExpand?.data?.cadd_phred}
                     cadd_score={occurrenceExpand?.data?.cadd_score}
                     dann_score={occurrenceExpand?.data?.dann_score}
@@ -274,6 +277,7 @@ function SomaticInterpretationDialog({
                     polyphen2_hvar_pred={occurrenceExpand?.data?.polyphen2_hvar_pred}
                     polyphen2_hvar_score={occurrenceExpand?.data?.polyphen2_hvar_score}
                     clinvar={occurrenceExpand?.data?.clinvar}
+                    exomiser_acmg_classification_counts={occurrenceExpand?.data?.exomiser_acmg_classification_counts}
                     interpretation_classification_counts={occurrenceExpand?.data?.interpretation_classification_counts}
                     gnomad_pli={occurrenceExpand?.data?.gnomad_pli}
                     gnomad_loeuf={occurrenceExpand?.data?.gnomad_loeuf}
@@ -333,4 +337,4 @@ function SomaticInterpretationDialog({
     </Dialog>
   );
 }
-export default SomaticInterpretationDialog;
+export default GermlineInterpretationDialog;
