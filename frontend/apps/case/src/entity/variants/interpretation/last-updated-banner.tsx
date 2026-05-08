@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { InfoIcon } from 'lucide-react';
+import { History } from 'lucide-react';
 
 import { Alert, AlertDescription } from '@/components/base/shadcn/alert';
 import { useI18n } from '@/components/hooks/i18n';
@@ -16,7 +16,7 @@ function InterpretationLastUpdatedBanner({ updated_by_name, updated_at }: Interp
   return (
     <Alert className="flex gap-2 items-center mb-3">
       <div>
-        <InfoIcon size={16} />
+        <History size={20} />
       </div>
       <AlertDescription className="text-foreground">
         <span className="flex gap-1">
