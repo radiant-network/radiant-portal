@@ -1,339 +1,223 @@
-import { ReactNode, useCallback, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router';
-import { toast } from 'sonner';
-import useSWRMutation from 'swr/mutation';
+import { forwardRef, useEffect, useImperativeHandle } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { Trans } from 'react-i18next';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { CaseEntity, CaseSequencingExperiment, ExpandedGermlineSNVOccurrence, InterpretationGermline } from '@/api/api';
-import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
-import ClassificationSection from '@/components/base/occurrence/classification-section';
-import ClinicalAssociationSection from '@/components/base/occurrence/clinical-association-section';
-import GeneSection from '@/components/base/occurrence/gene-section';
-import GermlineFrequencySection from '@/components/base/occurrence/germline-frequency-section';
-import PredictionSection from '@/components/base/occurrence/prediction-section';
-import ZygositySection from '@/components/base/occurrence/zygosity-section';
-import { Button } from '@/components/base/shadcn/button';
+import { InterpretationGermline, InterpretationPubmed } from '@/api/api';
+import { getTransmissionModeList } from '@/components/base/badges/transmission-mode-badge';
 import {
-  Dialog,
-  DialogBody,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/base/shadcn/dialog';
-import { Spinner } from '@/components/base/spinner';
+  classificationCriterias,
+  getClassificationCriteriaColor,
+} from '@/components/base/classifications/interpretation';
+import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
+import AnchorLink from '@/components/base/navigation/anchor-link';
+import { Badge } from '@/components/base/shadcn/badge';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/shadcn/form';
+import { ToggleGroup, ToggleGroupItem } from '@/components/base/shadcn/toggle-group';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import { caseApi, interpretationApi, occurrencesApi } from '@/utils/api';
-import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
-import { SELECTED_VARIANT_PARAM } from '../../constants';
-import InterpretationVariantHeader from '../../interpretation/header';
-import InterpretationLastUpdatedBanner from '../../interpretation/last-updated-banner';
-import InterpretationTranscript from '../../interpretation/transcript';
-import { Interpretation, InterpretationFormRef } from '../../interpretation/types';
+import InterpretationFormGeneric from '../../interpretation/interpretation-form-generic';
+import MondoAutoCompleteFormField from '../../interpretation/mondo-auto-complete-form-field';
+import {
+  germlineInterpretationFormSchema,
+  GermlineInterpretationSchemaType,
+  InterpretationFormProps,
+  InterpretationFormRef,
+} from '../../interpretation/types';
 
-import InterpretationFormGermline from './interpretation-form-germline';
-
-type GermlineInterpretationDialogProps = {
-  locusId: string;
-  transcriptId?: string;
-  patientId?: number;
-  handleSaveCallback?: () => void;
-  renderTrigger: (handleOpen: () => void) => ReactNode;
-  isCreation?: boolean;
-};
-
-type CaseEntityInput = {
-  key: string;
-  caseId: number;
-};
-
-type InterpretationGermlineInput = {
-  caseId: string;
-  seqId: string;
-  locusId: string;
-  transcriptId: string;
-};
-
-type ExpandGermlineInput = {
-  caseId: number;
-  seqId: number;
-  locusId: string;
-};
-
-type GermlineInterpretationFormInput = {
-  caseId: string;
-  seqId: string;
-  locusId: string;
-  transcriptId: string;
-  interpretationGermline: InterpretationGermline;
-};
-
-async function fetchCaseEntity(_url: string, { arg }: { arg: CaseEntityInput }) {
-  const response = await caseApi.caseEntity(arg.caseId);
-  return response.data;
-}
-
-async function fetchInterpretationGermline(_url: string, { arg }: { arg: InterpretationGermlineInput }) {
-  const response = await interpretationApi.getInterpretationGermline(
-    arg.caseId,
-    arg.seqId,
-    arg.locusId,
-    arg.transcriptId,
-  );
-  return response.data;
-}
-
-async function fetchExpandedGermlineSNVOccurrence(_url: string, { arg }: { arg: ExpandGermlineInput }) {
-  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(arg.caseId, arg.seqId, arg.locusId);
-  return response.data;
-}
-
-async function saveGermlineInterpretation(_url: string, { arg }: { arg: GermlineInterpretationFormInput }) {
-  const response = await interpretationApi.postInterpretationGermline(
-    arg.caseId,
-    arg.seqId,
-    arg.locusId,
-    arg.transcriptId,
-    arg.interpretationGermline,
-  );
-  return response.data;
-}
-
-function GermlineInterpretationDialog({
-  locusId,
-  transcriptId,
-  patientId,
-  handleSaveCallback,
-  renderTrigger,
-  isCreation = false,
-}: GermlineInterpretationDialogProps) {
-  const { t } = useI18n();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [open, setOpen] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-  const germlineFormRef = useRef<InterpretationFormRef>(null);
-  const caseId = useCaseIdFromParam();
-  const seqId = useSeqIdFromSearchParam();
-
-  const caseEntity = useSWRMutation<CaseEntity, any, string, CaseEntityInput>('case-entity', fetchCaseEntity);
-
-  const occurrenceExpand = useSWRMutation<ExpandedGermlineSNVOccurrence, any, string, ExpandGermlineInput>(
-    `form-somatic-expand-${caseId}-${locusId}-${seqId}`,
-    fetchExpandedGermlineSNVOccurrence,
-  );
-
-  const interpretation = useSWRMutation<Interpretation, any, string, InterpretationGermlineInput>(
-    `form-somatic-interpretation-${seqId}-${locusId}-${transcriptId}`,
-    fetchInterpretationGermline,
-  );
-
-  const saveInterpretation = useSWRMutation(
-    `save-germline-interpretation-${seqId}-${locusId}-${transcriptId}`,
-    saveGermlineInterpretation,
-    {
-      onSuccess: () => {
-        setOpen(false);
-        handleSaveCallback && handleSaveCallback();
-
-        if (isCreation) {
-          toast.success(t('variant.interpretation_form.notification.success.title'), {
-            action: {
-              label: t('variant.interpretation_form.notification.success.button'),
-              onClick: () => {
-                searchParams.set(SELECTED_VARIANT_PARAM, locusId);
-                setSearchParams(searchParams);
-              },
-            },
-            closeButton: true,
-          });
-          return;
-        }
-        toast.success(t('variant.interpretation_form.notification.success.title'));
+const GermlineInterpretationForm = forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationGermline>>(
+  ({ interpretation, saveInterpretation, onDirtyChange }, ref) => {
+    const { t } = useI18n();
+    const form = useForm<GermlineInterpretationSchemaType>({
+      resolver: zodResolver(germlineInterpretationFormSchema),
+      values: {
+        classification: interpretation?.classification || '',
+        classification_criterias: interpretation?.classification_criterias || [],
+        condition: interpretation?.condition || '',
+        transmission_modes: interpretation?.transmission_modes || [],
+        interpretation: interpretation?.interpretation || '',
+        pubmed: (interpretation?.pubmed || []) as Required<InterpretationPubmed>[],
       },
-      onError: () => {
-        setOpen(false);
-        toast.error(t('variant.interpretation_form.notification.error.title'), {
-          description: t('variant.interpretation_form.notification.error.text'),
-          closeButton: true,
-        });
-      },
-    },
-  );
-
-  const relationshipToProband = useMemo(
-    () =>
-      caseEntity.data?.sequencing_experiments.find((caseSeqEx: CaseSequencingExperiment) => caseSeqEx.seq_id === seqId)
-        ?.relationship_to_proband,
-    [caseEntity.data],
-  );
-
-  const isLoading = useMemo(
-    () => interpretation.isMutating || occurrenceExpand?.isMutating,
-    [interpretation.isMutating, occurrenceExpand?.isMutating],
-  );
-
-  const handleSave = useCallback(() => {
-    germlineFormRef.current?.submit();
-  }, [germlineFormRef]);
-
-  const handleOpen = useCallback(async () => {
-    setOpen(true);
-    caseEntity.trigger({ key: 'case-entity', caseId });
-    interpretation.trigger({
-      caseId: caseId.toString(),
-      seqId: seqId.toString(),
-      locusId,
-      transcriptId: transcriptId ?? '',
+      reValidateMode: 'onChange',
+      shouldFocusError: false,
     });
-    occurrenceExpand.trigger({
-      caseId,
-      seqId,
-      locusId,
-    });
-  }, []);
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {renderTrigger(handleOpen)}
-      <DialogContent
-        size="lg"
-        onEscapeKeyDown={e => e.preventDefault()}
-        variant="stickyBoth"
-        className="overflow-hidden"
-      >
-        <DialogHeader>
-          <DialogTitle>{t('variant.interpretation_form.title')}</DialogTitle>
-        </DialogHeader>
-        {isLoading ? (
-          <DialogBody className="flex items-center justify-center">
-            <Spinner size={32} />
-          </DialogBody>
-        ) : (
-          <>
-            <DialogBody className="overflow-scroll space-y-6">
-              <InterpretationLastUpdatedBanner
-                updated_by_name={interpretation.data?.updated_by_name}
-                updated_at={interpretation.data?.updated_at}
-              />
-              <InterpretationVariantHeader
-                case_type={caseEntity.data?.case_type}
-                patientId={patientId}
-                locus_id={occurrenceExpand?.data?.locus_id}
-                hgvsg={occurrenceExpand?.data?.hgvsg}
-                relationship_to_proband={relationshipToProband}
-                analysis_catalog_code={caseEntity.data?.analysis_catalog_code}
-                analysis_catalog_name={caseEntity.data?.analysis_catalog_name}
-              />
-              <InterpretationTranscript
-                symbol={occurrenceExpand?.data?.symbol}
-                picked_consequences={occurrenceExpand?.data?.picked_consequences}
-                vep_impact={occurrenceExpand?.data?.vep_impact}
-                aa_change={occurrenceExpand?.data?.aa_change}
-                transcript_id={occurrenceExpand?.data?.transcript_id}
-                is_canonical={occurrenceExpand?.data?.is_canonical}
-                is_mane_select={occurrenceExpand?.data?.is_mane_select}
-                is_mane_plus={occurrenceExpand?.data?.is_mane_plus}
-                exon_rank={occurrenceExpand?.data?.exon_rank}
-                exon_total={occurrenceExpand?.data?.exon_total}
-                dna_change={occurrenceExpand?.data?.dna_change}
-                rsnumber={occurrenceExpand?.data?.rsnumber}
-              />
-              <div className="grid gap-6 grid-cols-12">
-                <div className="rounded-sm col-span-7 border p-6 bg-muted">
-                  <InterpretationFormGermline
-                    ref={germlineFormRef}
-                    interpretation={interpretation.data}
-                    saveInterpretation={interpretation =>
-                      saveInterpretation.trigger({
-                        caseId: caseId.toString(),
-                        seqId: seqId.toString(),
-                        locusId,
-                        transcriptId: transcriptId ?? '',
-                        interpretationGermline: interpretation,
-                      })
-                    }
-                    onDirtyChange={setIsDirty}
-                  />
-                </div>
-                <div className="rounded-sm col-span-5 border py-4 px-6">
-                  <div className="space-y-4">
-                    <ClassificationSection clinvar={occurrenceExpand.data?.clinvar} />
-                    <PredictionSection
-                      exomiser_acmg_classification={occurrenceExpand.data?.exomiser_acmg_classification}
-                      exomiser_acmg_evidence={occurrenceExpand.data?.exomiser_acmg_evidence}
-                    />
-                    <GermlineFrequencySection
-                      germline_pc_wgs_affected={occurrenceExpand.data?.germline_pc_wgs_affected}
-                      germline_pn_wgs_affected={occurrenceExpand.data?.germline_pn_wgs_affected}
-                      germline_pf_wgs_affected={occurrenceExpand.data?.germline_pf_wgs_affected}
-                      germline_pc_wgs_not_affected={occurrenceExpand.data?.germline_pc_wgs_not_affected}
-                      germline_pn_wgs_not_affected={occurrenceExpand.data?.germline_pn_wgs_not_affected}
-                      germline_pf_wgs_not_affected={occurrenceExpand.data?.germline_pf_wgs_not_affected}
-                      gnomad_v3_af={occurrenceExpand.data?.gnomad_v3_af}
-                      locus={occurrenceExpand.data?.locus}
-                    />
-                    <ZygositySection
-                      zygosity={occurrenceExpand.data?.zygosity}
-                      transmission={occurrenceExpand.data?.transmission}
-                      parental_origin={occurrenceExpand.data?.parental_origin}
-                    />
-                    <GeneSection
-                      gnomad_pli={occurrenceExpand.data?.gnomad_pli}
-                      gnomad_loeuf={occurrenceExpand.data?.gnomad_loeuf}
-                      revel_score={occurrenceExpand.data?.revel_score}
-                      spliceai_type={occurrenceExpand.data?.spliceai_type}
-                      spliceai_ds={occurrenceExpand.data?.spliceai_ds}
-                      hgvsg={occurrenceExpand.data?.hgvsg}
-                      transcript_id={occurrenceExpand.data?.transcript_id}
-                    />
-                    <ClinicalAssociationSection
-                      omim_conditions={occurrenceExpand.data?.omim_conditions}
-                      locus_id={locusId}
-                    />
-                  </div>
-                </div>
-              </div>
-            </DialogBody>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">{t('variant.interpretation_form.cancel_text')}</Button>
-              </DialogClose>
-              <Button
-                type="submit"
-                color="primary"
-                loading={saveInterpretation.isMutating}
-                onClick={() => {
-                  // Do not warn use if the interpretation is created. Only show if edited
-                  if (isCreation) {
-                    handleSave();
-                    return;
+    function onSubmit(values: GermlineInterpretationSchemaType) {
+      saveInterpretation(values);
+    }
+
+    useEffect(() => {
+      onDirtyChange(form.formState.isDirty);
+    }, [form.formState.isDirty]);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        submit: () => form.handleSubmit(onSubmit)(),
+        isDirty: form.formState.isDirty,
+      }),
+      [form, onSubmit, form.formState.isDirty],
+    );
+
+    return (
+      <FormProvider {...form}>
+        <div className="space-y-6">
+          <MondoAutoCompleteFormField
+            name="condition"
+            label={t('variant.interpretation_form.germline.condition')}
+            placeholder={t('variant.interpretation_form.germline.condition_placeholder')}
+            schema={germlineInterpretationFormSchema}
+          />
+          <FormField
+            schema={germlineInterpretationFormSchema}
+            control={form.control}
+            name="classification"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel
+                  infoCardContent={
+                    <div className="leading-6">
+                      <Trans
+                        i18nKey="variant.interpretation_form.germline.classification_popover.full_text"
+                        components={{
+                          guides: (
+                            <AnchorLink
+                              className="inline-flex no-underline hover:underline"
+                              href="https://pubmed.ncbi.nlm.nih.gov/25741868/"
+                              target="_blank"
+                              size="sm"
+                            />
+                          ),
+                        }}
+                      />
+                    </div>
                   }
-                  alertDialog.open({
-                    type: 'warning',
-                    title: t('variant.interpretation_form.alert.title'),
-                    description: t('variant.interpretation_form.alert.description'),
-                    actionProps: {
-                      children: t('variant.interpretation_form.alert.save'),
-                      onClick: e => {
-                        e.preventDefault();
-                        handleSave();
-                      },
-                    },
-                    cancelProps: {
-                      children: t('variant.interpretation_form.alert.cancel'),
-                    },
-                  });
-                }}
-                disabled={!isDirty}
-              >
-                {t('variant.interpretation_form.ok_text')}
-              </Button>
-            </DialogFooter>
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
-export default GermlineInterpretationDialog;
+                >
+                  {t('variant.interpretation_form.germline.classification')}
+                </FormLabel>
+                <FormControl>
+                  <ToggleGroup
+                    type="single"
+                    size="default"
+                    variant="outline"
+                    className="flex-wrap justify-start"
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <ToggleGroupItem
+                      value="LA6668-3"
+                      className="data-[state=on]:bg-red/20 data-[state=on]:text-red-foreground border data-[state=on]:border-red-foreground data-[state=on]:hover:text-red-foreground"
+                    >
+                      {t('variant.interpretation.classifications.pathogenic')}
+                    </ToggleGroupItem>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <ToggleGroupItem
+                            value="LA26332-9"
+                            className="data-[state=on]:bg-orange/20 data-[state=on]:text-orange-foreground border data-[state=on]:border-orange-foreground data-[state=on]:hover:text-orange-foreground"
+                          >
+                            {t('variant.interpretation.classifications.likelyPathogenic')}
+                          </ToggleGroupItem>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t('variant.interpretation.classifications.likelyPathogenic_tooltip')}
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <ToggleGroupItem
+                            value="LA26333-7"
+                            className="data-[state=on]:bg-yellow/20 data-[state=on]:text-yellow-foreground border data-[state=on]:border-yellow-foreground data-[state=on]:hover:text-yellow-foreground"
+                          >
+                            {t('variant.interpretation.classifications.vus')}
+                          </ToggleGroupItem>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>{t('variant.interpretation.classifications.vus_tooltip')}</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <ToggleGroupItem
+                            value="LA26334-5"
+                            className="data-[state=on]:bg-lime/20 data-[state=on]:text-lime-foreground border data-[state=on]:border-lime-foreground data-[state=on]:hover:text-lime-foreground"
+                          >
+                            {t('variant.interpretation.classifications.likelyBenign')}
+                          </ToggleGroupItem>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {t('variant.interpretation.classifications.likelyBenign_tooltip')}
+                      </TooltipContent>
+                    </Tooltip>
+                    <ToggleGroupItem
+                      value="LA6675-8"
+                      className="data-[state=on]:bg-green/20 data-[state=on]:text-green-foreground border data-[state=on]:border-green-foreground data-[state=on]:hover:text-green-foreground"
+                    >
+                      {t('variant.interpretation.classifications.benign')}
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            schema={germlineInterpretationFormSchema}
+            name="classification_criterias"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('variant.interpretation_form.germline.classification_criteria')}</FormLabel>
+                <FormControl>
+                  <MultipleSelector
+                    defaultOptions={classificationCriterias}
+                    placeholder={t('variant.interpretation_form.germline.classification_criteria_placeholder')}
+                    emptyIndicator={<>{t('variant.interpretation_form.germline.no_results')}</>}
+                    renderBadge={({ option, onRemove }) => (
+                      <Badge
+                        key={option.value}
+                        data-fixed={option.fixed}
+                        onClose={onRemove}
+                        variant={getClassificationCriteriaColor(option.value)}
+                      >
+                        {option.label}
+                      </Badge>
+                    )}
+                    openOnFocus
+                    {...field}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            schema={germlineInterpretationFormSchema}
+            name="transmission_modes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('variant.interpretation_form.germline.mode_of_transmission')}</FormLabel>
+                <FormControl>
+                  <MultipleSelector
+                    defaultOptions={getTransmissionModeList(t)}
+                    placeholder={t('variant.interpretation_form.germline.mode_of_transmission_placeholder')}
+                    emptyIndicator={<p>{t('variant.interpretation_form.germline.no_results')}</p>}
+                    openOnFocus
+                    {...field}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <InterpretationFormGeneric />
+        </div>
+      </FormProvider>
+    );
+  },
+);
+
+export default GermlineInterpretationForm;

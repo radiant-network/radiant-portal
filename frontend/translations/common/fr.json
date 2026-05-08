@@ -1030,6 +1030,8 @@
       "header": {
         "germline": "Germinal",
         "germline_family": "Germinal",
+        "patient": "Patient",
+        "sequencing": "Séquençage",
         "somatic": "Somatique"
       },
       "transcript": {
@@ -1054,7 +1056,9 @@
         },
         "pub_med_id_not_found": "PMID invalide ou inconnu",
         "citation_placeholder": "Ex : 25741868",
-        "add_citation": "Ajouter une publication"
+        "add_citation": "Ajouter une publication",
+        "ensembl_gene_id": "Ensembl",
+        "transcript_id": "ID Transcrit"
       },
       "germline": {
         "condition": "Condition MONDO",
