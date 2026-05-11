@@ -1198,7 +1198,7 @@
         "gene_card": {
           "consequence": "Conséquence",
           "cdna_change": "Changement cDNA",
-          "transcript_id": "ID Transcrit",
+          "transcript_id": "ID du transcrit",
           "exon": "Exon",
           "dbsnp_id": "ID dbSNP"
         }

@@ -1193,7 +1193,7 @@
         },
         "gene_card": {
           "consequence": "Consequence",
-          "cdna_change": "cDNA change",
+          "cdna_change": "cDNA Change",
           "transcript_id": "Transcript ID",
           "exon": "Exon",
           "dbsnp_id": "dbSNP ID"
