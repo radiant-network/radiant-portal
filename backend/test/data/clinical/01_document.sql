@@ -548,7 +548,15 @@ VALUES (1, 'FI0037662.S13230.cram', 'genomic', 'alignment', 'cram', 110187385978
        (266, 'variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz', 'genomic', 'snv', 'vcf', 2411725,
         's3://cqdg-qa-file-import/radiant/postprocessing/TCRB/TN_WGS/ensemblvep/SRX1091647-T_vs_SRX1091646-N/variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz', '5d41402abc4b2a76b9719d911017c857', '2026-03-09T13:08:00-04:00'),
        (267, 'variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz.tbi', 'genomic', 'snv', 'tbi', 2411724,
-        's3://cqdg-qa-file-import/radiant/postprocessing/TCRB/TN_WGS/ensemblvep/SRX1091647-T_vs_SRX1091646-N/variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz.tbi', '5d41402abc4b2a76b9719d911017c858', '2026-03-09T13:08:00-04:00')
+        's3://cqdg-qa-file-import/radiant/postprocessing/TCRB/TN_WGS/ensemblvep/SRX1091647-T_vs_SRX1091646-N/variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz.tbi', '5d41402abc4b2a76b9719d911017c858', '2026-03-09T13:08:00-04:00'),
+       (268, 'SRX1091646-N.recal.cram', 'genomic', 'alignment', 'cram', 50243021081,
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram', '9d7fa39c3ab46a21c649e057482b8910-9584', '2026-03-09T13:08:00-04:00'),
+       (269, 'SRX1091646-N.recal.cram.crai', 'genomic', 'alignment', 'crai', 1971347,
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram.crai', '37b443e867ae59a043e5aaa7ca706852', '2026-03-09T13:08:00-04:00'),
+       (270, 'SRX1091647-T.recal.cram', 'genomic', 'alignment', 'cram', 49126489623,
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram', '72a59834feee767b29f6279562f164b5-9371', '2026-03-09T13:08:00-04:00'),
+       (271, 'SRX1091647-T.recal.cram.crai', 'genomic', 'alignment', 'crai', 2030639,
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram.crai', 'a5a1e735ac4344019bd81c05f273877e', '2026-03-09T13:08:00-04:00')
 ON CONFLICT(id) DO NOTHING;
 
 ALTER TABLE document ALTER COLUMN id RESTART WITH 1000;

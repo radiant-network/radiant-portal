@@ -3800,6 +3800,34 @@ func Test_validateTaskAliquot_ErrorAlignmentGermlineVariantCallingNotExactly1Ali
 	assert.Equal(t, expected, record.Errors[0])
 }
 
+func Test_validateTaskAliquot_ErrorAlignmentSomaticVariantCallingNotExactly1Aliquot(t *testing.T) {
+    record := CaseValidationRecord{
+        Case: types.CaseBatch{
+            SequencingExperiments: []*types.CaseSequencingExperimentBatch{
+                {Aliquot: "ALIQUOT-1"},
+                {Aliquot: "ALIQUOT-2"},
+            },
+            Tasks: []*types.CaseTaskBatch{
+                {
+                    TypeCode: AlignmentSomaticVariantCallingTaskTypeCode,
+                    Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
+                },
+            },
+        },
+    }
+    record.validateTaskAliquot(0)
+
+    expected := types.BatchMessage{
+        Code:    "TASK-007",
+        Message: "Task type alignment_somatic_variant_calling doesn't support being associated with more than 1 aliquot value.",
+        Path:    "case[0].tasks[0]",
+    }
+
+    assert.Len(t, record.Infos, 0)
+    assert.Len(t, record.Warnings, 0)
+    assert.Equal(t, expected, record.Errors[0])
+}
+
 func Test_validateTaskDocuments_OK(t *testing.T) {
 	record := CaseValidationRecord{
 		Documents: map[string]*types.Document{

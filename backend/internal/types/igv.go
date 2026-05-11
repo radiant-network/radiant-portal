@@ -3,12 +3,14 @@ package types
 type IGVTrack struct {
 	SequencingExperimentId int    `json:"sequencing_experiment_id"`
 	SampleId               string `json:"sample_id"`
+	HistologyCode          string `json:"histology_code"`
 	PatientId              int    `json:"patient_id"`
 	FamilyRole             string `json:"family_role"`
 	SexCode                string `json:"sexcode"`
 	DataTypeCode           string `json:"datatype_code"`
 	FormatCode             string `json:"format_code"`
 	URL                    string `json:"url" gorm:"column:url"`
+	CaseTypeCode		   string `json:"case_type_code"`
 }
 
 type IGVTrackEnriched struct {

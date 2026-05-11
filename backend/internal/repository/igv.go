@@ -37,6 +37,7 @@ func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.TaskContextTable.FederationName, types.TaskContextTable.Alias, types.TaskContextTable.Alias, types.SequencingExperimentTable.Alias))
+	tx = utils.JoinCaseHasSeqExpWithCase(tx)
 	tx = utils.JoinTaskContextWithTaskHasDoc(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
 	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
@@ -48,11 +49,13 @@ func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 		"s.id AS sequencing_experiment_id",
 		"p.id as patient_id",
 		"spl.submitter_sample_id AS sample_id",
+		"spl.histology_code AS histology_code",
 		"f.relationship_to_proband_code AS family_role",
 		"p.sex_code",
 		"doc.data_type_code",
 		"doc.format_code",
 		"doc.url",
+		"c.case_type_code",
 	}
 
 	tx.Select(columns)
@@ -64,25 +67,52 @@ func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 	return igvInternal, nil
 }
 
+func trackSuffix(t IGVTrack) string {
+	if t.CaseTypeCode == "somatic" {
+		switch t.HistologyCode {
+		case "tumoral":
+			return "Tumor"
+		case "normal":
+			return "Normal"
+		}
+	}
+	// default (germline)
+	return t.FamilyRole
+}
+
+func isLeadingTrack(t IGVTrack) bool {
+	if t.CaseTypeCode == "somatic" {
+		return t.HistologyCode == "tumoral"
+	}
+	return t.FamilyRole == "proband"
+}
+
 func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner) (*types.IGVTracks, error) {
-	result := types.IGVTracks{}
+	type mergedTrack struct {
+		enriched  types.IGVTrackEnriched
+		isLeading bool
+	}
+	merged := map[string]*mergedTrack{}
 
-	grouped := map[string]types.IGVTrackEnriched{}
-
+	// Loop through tracks and merge pairs of cram/crai
 	for _, r := range internalTracks {
 		key := strings.Join([]string{
 			r.DataTypeCode,
-			strconv.Itoa(r.PatientId),
+			strconv.Itoa(r.SequencingExperimentId),
 		}, "|")
 
-		enriched, exists := grouped[key]
+		m, exists := merged[key]
 		if !exists {
-			enriched = types.IGVTrackEnriched{
-				PatientId:  r.PatientId,
-				Type:       r.DataTypeCode,
-				Sex:        r.SexCode,
-				FamilyRole: r.FamilyRole,
+			m = &mergedTrack{
+				enriched: types.IGVTrackEnriched{
+					PatientId:  r.PatientId,
+					Type:       r.DataTypeCode,
+					Sex:        r.SexCode,
+					FamilyRole: r.FamilyRole,
+				},
+				isLeading: isLeadingTrack(r),
 			}
+			merged[key] = m
 		}
 
 		presigned, err := presigner.GeneratePreSignedURL(r.URL)
@@ -90,28 +120,27 @@ func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner) (*ty
 			return nil, err
 		}
 
-		if r.FormatCode == "cram" {
-			enriched.Name = fmt.Sprintf("Reads: %s %s", r.SampleId, r.FamilyRole)
-			enriched.Format = r.FormatCode
-			enriched.URL = presigned.URL
-			enriched.URLExpireAt = presigned.URLExpireAt
-		} else if r.FormatCode == "crai" {
-			enriched.IndexURL = presigned.URL
-			enriched.IndexURLExpireAt = presigned.URLExpireAt
+		switch r.FormatCode {
+		case "cram":
+			m.enriched.Name = fmt.Sprintf("Reads: %s %s", r.SampleId, trackSuffix(r))
+			m.enriched.Format = r.FormatCode
+			m.enriched.URL = presigned.URL
+			m.enriched.URLExpireAt = presigned.URLExpireAt
+		case "crai":
+			m.enriched.IndexURL = presigned.URL
+			m.enriched.IndexURLExpireAt = presigned.URLExpireAt
 		}
-
-		grouped[key] = enriched
 	}
 
-	for _, track := range grouped {
-		switch track.Type {
-		case "alignment":
-			// Ensure the proband is always first in the alignment list
-			if track.FamilyRole == "proband" {
-				result.Alignment = append([]types.IGVTrackEnriched{track}, result.Alignment...)
-			} else {
-				result.Alignment = append(result.Alignment, track)
-			}
+	result := types.IGVTracks{}
+	for _, m := range merged {
+		if m.enriched.Type != "alignment" {
+			continue
+		}
+		if m.isLeading {
+			result.Alignment = append([]types.IGVTrackEnriched{m.enriched}, result.Alignment...)
+		} else {
+			result.Alignment = append(result.Alignment, m.enriched)
 		}
 	}
 
