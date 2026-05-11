@@ -674,7 +674,12 @@ export const GeneCard = ({
       <div className="flex flex-col @md/gene-card:flex-row @md/gene-card:flex-wrap gap-4 @md/gene-card:gap-20 w-full">
         {hasGene && (
           <div className="flex flex-1 flex-col grow gap-2">
-            <AnchorLink className="font-semibold text-lg" external href={getOmimOrgUrl({ symbol: symbol! })}>
+            <AnchorLink
+              className="font-semibold text-lg"
+              external
+              href={getOmimOrgUrl({ symbol: symbol! })}
+              target="_blank"
+            >
               {symbol}
             </AnchorLink>
             {aa_change && <div className="font-mono font-semibold text-sm">{aa_change}</div>}
