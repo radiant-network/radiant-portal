@@ -457,8 +457,22 @@ export function qBReducer(context: IQBContext, action: ActionType) {
         return {
           ...context,
           sqons: context.sqons.map(sqon => {
-            if (sqon.id !== activeQueryId) return sqon;
-            return { ...sqon, content: [...sqon.content, action.payload] };
+            if (sqon.id === activeQueryId) {
+              return { ...sqon, content: [...sqon.content, action.payload] };
+            }
+            if (combinedQueryReferences.includes(sqon.id)) {
+              return {
+                ...sqon,
+                content: ((sqon.content as ISqonGroupFacet[]) ?? []).map(content => {
+                  if (content.id !== activeQueryId) return content;
+                  return {
+                    ...content,
+                    content: [...content.content, action.payload],
+                  };
+                }),
+              };
+            }
+            return sqon;
           }),
           history: { uuid: v4(), type: PillUserAction.ADD, target: field },
         };
@@ -507,11 +521,25 @@ export function qBReducer(context: IQBContext, action: ActionType) {
       return {
         ...context,
         sqons: context.sqons.map(sqon => {
-          if (sqon.id !== activeQueryId) return sqon;
-          return {
-            ...sqon,
-            content: sqon.content.filter((_, j) => j !== fieldIndex),
-          };
+          if (sqon.id === activeQueryId) {
+            return {
+              ...sqon,
+              content: sqon.content.filter((_, j) => j !== fieldIndex),
+            };
+          }
+          if (combinedQueryReferences.includes(sqon.id)) {
+            return {
+              ...sqon,
+              content: ((sqon.content as ISqonGroupFacet[]) ?? []).map(content => {
+                if (content.id !== activeQueryId) return content;
+                return {
+                  ...content,
+                  content: content.content.filter(c => !isEqualToField(c, field)),
+                };
+              }),
+            };
+          }
+          return sqon;
         }),
         history: { uuid: v4(), type: PillUserAction.UPDATE, target: field },
       };
