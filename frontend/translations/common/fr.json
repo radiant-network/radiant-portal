@@ -1218,21 +1218,21 @@
           "compound_het": "Hétérozygote Composite",
           "potential_compound_het": "Hétérozygote Composite Potentiel",
           "inheritance": "Héritabilité",
-          "parental_origin": "Origine Parentale"
+          "parental_origin": "Origine parentale"
         },
         "family": {
           "title": "Famille",
-          "mother_genotype": "Génotype de la Mère",
-          "father_genotype": "Génotype du Père",
+          "mother_genotype": "Génotype de la mère",
+          "father_genotype": "Génotype du père",
           "affected_tooltip": "Affecté",
           "not_affected_tooltip": "Non affecté"
         },
         "metrics": {
           "title": "Métriques",
-          "quality_depth": "Profondeur Qualité",
+          "quality_depth": "Profondeur qualité",
           "allele_depth_alt": "Profondeur allélique ALT",
-          "total_depth_alt_ref": "Profondeur Totale ALT + REF",
-          "genotype_quality": "Qualité de Génotype",
+          "total_depth_alt_ref": "Profondeur totale ALT + REF",
+          "genotype_quality": "Qualité de génotype",
           "filter": "Filtre",
           "pass": "Pass",
           "fail": "Fail"
@@ -1303,7 +1303,7 @@
       "compound_het": "Hétérozygote Composite",
       "potential_compound_het": "Hétérozygote Composite Potentiel",
       "inheritance": "Héritabilité",
-      "parental_origin": "Origine Parentale"
+      "parental_origin": "Origine parentale"
     },
     "inheritance": {
       "title": "Héritabilité",
@@ -1311,15 +1311,15 @@
       "compound_het": "Hétérozygote Composite",
       "potential_compound_het": "Hétérozygote Composite Potentiel",
       "inheritance": "Héritabilité",
-      "parental_origin": "Origine Parentale"
+      "parental_origin": "Origine parentale"
     },
     "clinical_association": {
       "title": "Associations Cliniques (OMIM)"
     },
     "family": {
       "title": "Famille",
-      "mother_genotype": "Génotype de la Mère",
-      "father_genotype": "Génotype du Père",
+      "mother_genotype": "Génotype de la mère",
+      "father_genotype": "Génotype du père",
       "affected_tooltip": "Affecté",
       "not_affected_tooltip": "Non affecté"
     },

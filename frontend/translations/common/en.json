@@ -962,11 +962,11 @@
         "all_classifications": "All Classifications",
         "pathogenic": "Pathogenic",
         "likelyPathogenic": "Likely Pathogenic",
-        "likelyPathogenic_tooltip": "Probably pathogenic",
+        "likelyPathogenic_tooltip": "Probably Pathogenic",
         "vus": "VUS",
         "vus_tooltip": "Variant of Uncertain Significance",
         "likelyBenign": "Likely Benign",
-        "likelyBenign_tooltip": "Probably benign",
+        "likelyBenign_tooltip": "Probably Benign",
         "benign": "Benign"
       }
     },
@@ -1057,20 +1057,20 @@
         "transcript_id": "Transcript ID"
       },
       "germline": {
-        "condition": "MONDO condition",
+        "condition": "MONDO Condition",
         "condition_placeholder": "e.g. muscular dystrophy",
         "condition_popover": "Search for a medical condition in",
-        "condition_popover_link": "MONDO ontology",
+        "condition_popover_link": "MONDO Ontology",
         "condition_empty_indicator": "No results found",
         "condition_no_search_indicator": "Minimum 3 characters",
-        "classification": "ACMG/AMP classification",
+        "classification": "ACMG/AMP Classification",
         "classification_popover": {
           "consult": "Consult",
           "standards_and_guidelines": "standards and guidelines",
           "variant_interpretation": "for variant interpretation",
           "full_text": "Consult <guides>standards and guidelines</guides> for variant interpretation"
         },
-        "classification_criteria": "Classification criteria",
+        "classification_criteria": "Classification Criteria",
         "classification_criteria_placeholder": "e.g. PM1, PS2",
         "mode_of_transmission": "Mode of inheritance",
         "mode_of_transmission_placeholder": "e.g. Autosomal dominant de novo",
@@ -1083,11 +1083,11 @@
         "oncogenicity_options": {
           "oncogenic": "Oncogenic",
           "likely_oncogenic": "Likely Oncogenic",
-          "likely_oncogenic_tooltip": "Probably oncogenic",
+          "likely_oncogenic_tooltip": "Probably Oncogenic",
           "vus": "VUS",
           "vus_tooltip": "Variant of Uncertain Significance",
           "likely_benign": "Likely Benign",
-          "likely_benign_tooltip": "Probably benign",
+          "likely_benign_tooltip": "Probably Benign",
           "benign": "Benign"
         },
         "oncogenicity_popover": {
@@ -1130,7 +1130,7 @@
       "download_report": "Download report",
       "open_igv": "Open IGV",
       "interpret": "Interpret",
-      "interpretation": "Interpret variant",
+      "interpretation": "Interpret Variant",
       "view_all_variants": "View all variants",
       "view_in_case": "View in case"
     },
@@ -1141,8 +1141,8 @@
         "transcript": "Transcript",
         "classification": "Classification",
         "primary_condition": "Primary Condition",
-        "classification_criteria": "Classification criteria",
-        "clinical_utility": "Clinical utility",
+        "classification_criteria": "Classification Criteria",
+        "clinical_utility": "Clinical Utility",
         "interpretation": "Interpretation",
         "references": "{{count}} references",
         "tumoral_type": "Tumor Type",
