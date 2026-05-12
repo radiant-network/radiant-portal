@@ -24,7 +24,8 @@ import (
 
 // assertGetIGV calls GET /igv/{caseID} and asserts the response matches expected.
 // Both actual and expected slices are compared after sorting by (PatientId, Name)
-// to neutralize the map-iteration order in PrepareIgvTracks.
+// to neutralize the map-iteration order in PrepareIgvTracks. However, we check that
+// the first track is the expected one before sorting.
 func assertGetIGV(t *testing.T, router *gin.Engine, caseID int, expected []types.IGVTrackEnriched) {
 	t.Helper()
 
@@ -36,6 +37,11 @@ func assertGetIGV(t *testing.T, router *gin.Engine, caseID int, expected []types
 	var actual types.IGVTracks
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &actual))
 
+	// check that the right track comes first
+	assert.Equal(t, expected[0].PatientId, actual.Alignment[0].PatientId)
+	assert.Equal(t, expected[0].Name, actual.Alignment[0].Name)
+
+	// sort both actual and expected to check the other tracks
 	sortKey := func(a, b types.IGVTrackEnriched) int {
 		if c := a.PatientId - b.PatientId; c != 0 {
 			return c
@@ -43,6 +49,7 @@ func assertGetIGV(t *testing.T, router *gin.Engine, caseID int, expected []types
 		return strings.Compare(a.Name, b.Name)
 	}
 	slices.SortFunc(actual.Alignment, sortKey)
+	slices.SortFunc(expected, sortKey)
 
 	assert.Equal(t, len(expected), len(actual.Alignment))
 	for i := range actual.Alignment {
@@ -73,6 +80,16 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 		t.Run("germline trio (case 70)", func(t *testing.T) {
 			assertGetIGV(t, router, 70, []types.IGVTrackEnriched{
 				{
+					PatientId:  3,
+					FamilyRole: "proband",
+					Sex:        "male",
+					Type:       "alignment",
+					Format:     "cram",
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram", endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai", endpoint),
+					Name:       "Reads: S13224 proband",
+				},
+				{
 					PatientId:  1,
 					FamilyRole: "mother",
 					Sex:        "female",
@@ -92,16 +109,6 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12878/NA12878.recal.crai", endpoint),
 					Name:       "Reads: S13226 father",
 				},
-				{
-					PatientId:  3,
-					FamilyRole: "proband",
-					Sex:        "male",
-					Type:       "alignment",
-					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram", endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai", endpoint),
-					Name:       "Reads: S13224 proband",
-				},
 			})
 		})
 
@@ -113,9 +120,9 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "female",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram", endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram.crai", endpoint),
-					Name:       "Reads: SRX1091646 Normal",
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram", endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram.crai", endpoint),
+					Name:       "Reads: SRX1091647 Tumor",
 				},
 				{
 					PatientId:  62,
@@ -123,9 +130,9 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Sex:        "female",
 					Type:       "alignment",
 					Format:     "cram",
-					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram", endpoint),
-					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram.crai", endpoint),
-					Name:       "Reads: SRX1091647 Tumor",
+					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram", endpoint),
+					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram.crai", endpoint),
+					Name:       "Reads: SRX1091646 Normal",
 				},
 			})
 		})
