@@ -886,7 +886,7 @@
       "exomiser_gene_combined_score_tooltip": "Exomiser score based on variant properties and patient phenotypes",
       "filter": "Filter",
       "freq_tn": "Freq. TN",
-      "freq_tn_tooltip": "Number of tumor-normal genomes containing this variant. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.",
+      "freq_tn_tooltip": "Number of tumor-normal genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.",
       "freq_g": "Freq. G",
       "freq_g_tooltip": "Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
       "gene_length": "Length",

@@ -886,7 +886,7 @@
       "exomiser_gene_combined_score": "Exo.",
       "exomiser_gene_combined_score_tooltip": "Score Exomiser calculé en fonction des caractéristiques du variant et des phénotypes du patient",
       "freq_tn": "Fréq. TN",
-      "freq_tn_tooltip": "Nombre de génomes tumeur-normal comportant ce variant. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
+      "freq_tn_tooltip": "Nombre de génomes tumeur-normal comportant ce variant et la fréquence sur l'ensemble du réseau. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
       "freq_g": "Fréq. G",
       "freq_g_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
       "filter": "Filtre",
