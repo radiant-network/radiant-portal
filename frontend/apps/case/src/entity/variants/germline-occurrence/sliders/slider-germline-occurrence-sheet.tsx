@@ -18,9 +18,8 @@ import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-de
 import { useI18n } from '@/components/hooks/i18n';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
+import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
 import VariantFlagCell from '../table/cells/variant-flag-cell';
-
-import GermlineInterpretationDialog from '../interpretation/germline-interpretation-form';
 
 type GermlineOccurrenceSliderSheetProps = {
   occurrence?: GermlineSNVOccurrence;

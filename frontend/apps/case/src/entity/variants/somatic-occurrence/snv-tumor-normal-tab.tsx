@@ -45,7 +45,7 @@ function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurr
     >
       <QueryBuilderDataTable
         id={appId}
-        columns={getSomaticSNVTumorNormalColumns(t, caseEntity, patient?.patient_id)}
+        columns={getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId: patient?.patient_id })}
         defaultColumnSettings={defaultSomaticSNVSettings}
         enableColumnOrdering
         enableFullscreen

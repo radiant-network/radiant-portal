@@ -34,6 +34,9 @@ func Test_Somatic_SNV_GetOccurrences(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+			assert.Equal(t, "1", occurrences[0].Chromosome)
+			assert.Equal(t, int64(1111), occurrences[0].Start)
+			assert.Equal(t, int64(0), occurrences[0].End)
 			assert.Equal(t, 74, occurrences[0].SeqId)
 			assert.Equal(t, 74, occurrences[0].TaskId)
 			assert.False(t, occurrences[0].HasInterpretation)

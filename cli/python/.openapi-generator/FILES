@@ -24,6 +24,7 @@ docs/CaseTaskBatch.md
 docs/CasesApi.md
 docs/CasesSearchResponse.md
 docs/ClinvarRCV.md
+docs/ClinvarVariantConditions.md
 docs/Count.md
 docs/CountBodyWithSqon.md
 docs/CreateBatchResponse.md
@@ -163,6 +164,7 @@ radiant_python/models/case_task.py
 radiant_python/models/case_task_batch.py
 radiant_python/models/cases_search_response.py
 radiant_python/models/clinvar_rcv.py
+radiant_python/models/clinvar_variant_conditions.py
 radiant_python/models/cnv_gene_overlap.py
 radiant_python/models/count.py
 radiant_python/models/count_body_with_sqon.py

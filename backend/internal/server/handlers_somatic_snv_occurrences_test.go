@@ -63,6 +63,9 @@ func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(int, int, types.Lis
 			HasInterpretation:   false,
 			HasNote:             false,
 			Hgvsg:               "hgvsg1",
+			Chromosome:          "1",
+			Start:               int64(1000),
+			End:                 int64(1001),
 			Symbol:              "BRAF",
 			AaChange:            "p.Arg19His",
 			VariantClass:        "class1",
@@ -80,7 +83,7 @@ func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(int, int, types.Lis
 			SomaticPfTnWgs:      &somaticPfTn,
 			SomaticPcTnWgs:      &somaticPcTn,
 			AdRatio:             &adRatio,
-			TranscriptId: 	     "T001",
+			TranscriptId:        "T001",
 		},
 	}, nil
 }
@@ -102,7 +105,9 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 	assert.JSONEq(t, `[{
 		"aa_change":"p.Arg19His", 
 		"ad_ratio":1, 
+		"chromosome": "1",
 		"clinvar":["splice acceptor"], 
+		"end": 1001,
 		"germline_pc_wgs":3, 
 		"germline_pf_wgs":0.99, 
 		"gnomad_v3_af":0.1, 
@@ -120,6 +125,7 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 		"seq_id":74, 
 		"somatic_pc_tn_wgs":6, 
 		"somatic_pf_tn_wgs":0.55, 
+		"start": 1000,
 		"symbol":"BRAF", 
 		"task_id":74,
 		"transcript_id":"T001",

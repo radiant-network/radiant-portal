@@ -7,6 +7,7 @@ type GermlineSNVOccurrence struct {
 	TaskId                     int               `json:"task_id" validate:"required"`
 	Chromosome                 string            `json:"chromosome" validate:"required"`
 	Start                      int64             `json:"start" validate:"required"`
+	End                        int64             `json:"end" validate:"required"`
 	LocusId                    string            `json:"locus_id" validate:"required"`
 	Locus                      string            `json:"locus" validate:"required"`
 	GenotypeQuality            int32             `json:"genotype_quality" validate:"required"`
@@ -301,6 +302,7 @@ var GermlineSNVOccurrencesFields = []Field{
 	VariantClassField,
 	ChromosomeField,
 	StartField,
+	EndField,
 	GermlineSNVZygosityField,
 
 	// Genes
@@ -357,6 +359,7 @@ var GermlineSNVOccurrencesDefaultFields = []Field{
 	PickedTranscriptIdField,
 	ChromosomeField,
 	StartField,
+	EndField,
 	GermlineSNVExomiserMoiField,
 	GermlineSNVExomiserAcmgClassificationField,
 	GermlineSNVExomiserAcmgEvidenceField,

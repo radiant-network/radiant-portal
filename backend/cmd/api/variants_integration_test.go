@@ -360,7 +360,23 @@ func Test_GetGermlineVariantConditions_Clinvar(t *testing.T) {
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		expected := `[{"locus_id":"1000","clinvar_id":"123456","accession":"RCV000001","clinical_significance":["Pathogenic"],"date_last_evaluated":"2025-01-01T00:00:00Z","submission_count":1,"review_status":"criteria_provided","review_status_stars":4,"version":1,"traits":["Trait1","Trait2"]},{"locus_id":"1000","clinvar_id":"123457","accession":"RCV000002","clinical_significance":["Likely Pathogenic"],"date_last_evaluated":"2025-01-01T00:00:00Z","submission_count":3,"review_status":"criteria_provided","review_status_stars":3,"version":2,"traits":["Trait3"]}]`
+		expected := `{"clinvar_id":"123456","conditions":[{"locus_id":"1000","clinvar_id":"123456","accession":"RCV000001","clinical_significance":["Pathogenic"],"date_last_evaluated":"2025-01-01T00:00:00Z","submission_count":1,"review_status":"criteria_provided","review_status_stars":4,"version":1,"traits":["Trait1","Trait2"]},{"locus_id":"1000","clinvar_id":"123456","accession":"RCV000001","clinical_significance":["Pathogenic"],"date_last_evaluated":"2024-01-01T00:00:00Z","submission_count":1,"review_status":"criteria_provided","review_status_stars":4,"version":1,"traits":["Trait1"]}]}`
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetGermlineVariantConditions_Clinvar_Empty(t *testing.T) {
+	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
+		repo := repository.NewClinvarRCVRepository(db)
+		router := gin.Default()
+		router.GET("/variants/germline/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/variants/germline/%d/conditions/clinvar", 9999), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		expected := `{"conditions":[]}`
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, expected, w.Body.String())
 	})

@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import capitalize from 'lodash/capitalize';
 import useSWR from 'swr';
+import { ZodObject } from 'zod';
 
 import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
 import AnchorLink from '@/components/base/navigation/anchor-link';
@@ -11,19 +12,16 @@ import { debounce } from '@/components/hooks/useDebounce';
 import { mondoApi } from '@/utils/api';
 import MondoOptionItemLabel from 'components/base/variant/mondo-option-item-label';
 
-import {
-  germlineInterpretationFormSchema,
-  GermlineInterpretationSchemaType,
-  SomaticInterpretationSchemaType,
-} from './types';
+import { GermlineInterpretationSchemaType, SomaticInterpretationSchemaType } from './types';
 
 type MondoAutoCompleteFormFieldProps = {
   name: keyof GermlineInterpretationSchemaType | keyof SomaticInterpretationSchemaType;
   label: string;
   placeholder: string;
+  schema: ZodObject<any>;
 };
 
-function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompleteFormFieldProps) {
+function MondoAutoCompleteFormField({ name, label, placeholder, schema }: MondoAutoCompleteFormFieldProps) {
   const { t } = useI18n();
   const form = useFormContext();
   const [options, setOptions] = useState<Option[]>([]);
@@ -55,7 +53,7 @@ function MondoAutoCompleteFormField({ name, label, placeholder }: MondoAutoCompl
 
   return (
     <FormField
-      schema={germlineInterpretationFormSchema}
+      schema={schema}
       control={form.control}
       name={name}
       render={({ field }) => (

@@ -106,6 +106,20 @@ func Test_ValidateLastName(t *testing.T) {
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateLastName()
 	assert.Nil(t, rec.Errors)
+
+	// Valid last name with parenthesis
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id5", LastName: "Smith (Jones)"}
+	rec = PatientValidationRecord{Patient: patient}
+	rec.validateLastName()
+	assert.Nil(t, rec.Errors)
+
+	// Invalid last name with parenthesis
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id5", LastName: "<(-_-)>"}
+	rec = PatientValidationRecord{Patient: patient}
+	rec.validateLastName()
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "patient[0].last_name", rec.Errors[0].Path)
 }
 
 func Test_ValidateFirstName(t *testing.T) {
@@ -152,6 +166,20 @@ func Test_ValidateFirstName(t *testing.T) {
 	rec = PatientValidationRecord{Patient: patient}
 	rec.validateFirstName()
 	assert.Nil(t, rec.Errors)
+
+	// Valid first name with parenthesis
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id5", FirstName: "John (Paul)"}
+	rec = PatientValidationRecord{Patient: patient}
+	rec.validateFirstName()
+	assert.Nil(t, rec.Errors)
+
+	// Invalid first name with parenthesis
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id5", FirstName: "<(-_-)>"}
+	rec = PatientValidationRecord{Patient: patient}
+	rec.validateFirstName()
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "patient[0].first_name", rec.Errors[0].Path)
 }
 
 func Test_ValidateJhn(t *testing.T) {

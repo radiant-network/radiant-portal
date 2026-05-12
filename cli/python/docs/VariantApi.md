@@ -259,7 +259,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_germline_variant_conditions_clinvar**
-> List[ClinvarRCV] get_germline_variant_conditions_clinvar(locus_id)
+> ClinvarVariantConditions get_germline_variant_conditions_clinvar(locus_id)
 
 Get ClinVar conditions for germline variant entity
 
@@ -271,7 +271,7 @@ Retrieve ClinVar conditions for germline variant entity
 
 ```python
 import radiant_python
-from radiant_python.models.clinvar_rcv import ClinvarRCV
+from radiant_python.models.clinvar_variant_conditions import ClinvarVariantConditions
 from radiant_python.rest import ApiException
 from pprint import pprint
 
@@ -317,7 +317,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**List[ClinvarRCV]**](ClinvarRCV.md)
+[**ClinvarVariantConditions**](ClinvarVariantConditions.md)
 
 ### Authorization
 

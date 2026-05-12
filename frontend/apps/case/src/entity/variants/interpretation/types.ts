@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { InterpretationGermline, InterpretationPubmed, InterpretationSomatic } from '@/api/api';
+import { isEditorHasEmptyContent } from '@/components/base/data-entry/rich-text-editor/rich-text-editor';
 import { ZodSchema } from '@/components/lib/zod';
 
 export interface InterpretationFormRef {
@@ -17,7 +18,7 @@ export type InterpretationFormProps<T> = {
 };
 
 export const genericInterpretationFormSchema = z.object({
-  interpretation: z.string().min(1, 'This field is required'),
+  interpretation: z.string().refine(val => !isEditorHasEmptyContent(val), { message: 'This field is required' }),
   pubmed: (
     z.object({
       citation: z.string(),
@@ -45,8 +46,8 @@ export const somaticInterpretationFormSchema = (
   z.object({
     tumoral_type: z.string().min(1, 'This field is required'),
     clinical_utility: z.string().min(1, 'This field is required'),
-    oncogenicity: z.string().min(1, 'This field is required'),
-    oncogenicity_classification_criterias: z.string().array().min(1, 'This field is required'),
+    oncogenicity: z.string().optional(),
+    oncogenicity_classification_criterias: z.string().array().optional(),
   }) satisfies ZodSchema<InterpretationSomatic>
 ).merge(genericInterpretationFormSchema);
 

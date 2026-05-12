@@ -887,7 +887,7 @@
       "exomiser_gene_combined_score": "Exo.",
       "exomiser_gene_combined_score_tooltip": "Score Exomiser calculé en fonction des caractéristiques du variant et des phénotypes du patient",
       "freq_tn": "Fréq. TN",
-      "freq_tn_tooltip": "Nombre de génomes tumeur-normal comportant ce variant. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
+      "freq_tn_tooltip": "Nombre de génomes tumeur-normal comportant ce variant et la fréquence sur l'ensemble du réseau. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
       "freq_g": "Fréq. G",
       "freq_g_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
       "filter": "Filtre",
@@ -1031,6 +1031,8 @@
       "header": {
         "germline": "Germinal",
         "germline_family": "Germinal",
+        "patient": "Patient",
+        "sequencing": "Séquençage",
         "somatic": "Somatique"
       },
       "transcript": {
@@ -1055,7 +1057,9 @@
         },
         "pub_med_id_not_found": "PMID invalide ou inconnu",
         "citation_placeholder": "Ex : 25741868",
-        "add_citation": "Ajouter une publication"
+        "add_citation": "Ajouter une publication",
+        "ensembl_gene_id": "Ensembl",
+        "transcript_id": "ID Transcrit"
       },
       "germline": {
         "condition": "Condition MONDO",
@@ -1068,8 +1072,8 @@
         "classification_popover": {
           "consult": "Consulter les ",
           "standards_and_guidelines": "normes et les lignes directrices",
-          "variant_interpretation": "pour l'interprétation des variantes",
-          "full_text": "Consulter les <link>normes et les lignes directrices</link> pour l'interprétation des variantes"
+          "variant_interpretation": "pour l'interprétation des variants",
+          "full_text": "Consulter les <guides>normes et les lignes directrices</guides> pour l'interprétation des variants"
         },
         "classification_criteria": "Critères de classification",
         "classification_criteria_placeholder": "Ex : PM1, PS2",
@@ -1080,7 +1084,7 @@
       "somatic": {
         "tumoral_type": "Type tumoral",
         "tumoral_type_placeholder": "Ex : colon sarcoma",
-        "oncogenicity": "Oncogénicité",
+        "oncogenicity": "Oncogénicité ClinGen/CGC/VICC",
         "oncogenicity_options": {
           "oncogenic": "Oncogénique",
           "likely_oncogenic": "Prob. oncogénique",
@@ -1090,6 +1094,9 @@
           "likely_benign": "Prob. bénigne",
           "likely_benign_tooltip": "Probablement bénigne",
           "benign": "Bénigne"
+        },
+        "oncogenicity_popover": {
+          "full_text": "Consulter les <guides>normes et lignes directrices</guides> pour l'interprétation des variants"
         },
         "classification_criteria": "Critères de classification",
         "classification_criteria_placeholder": "Ex : OS1, OM2",
@@ -1192,7 +1199,7 @@
         "gene_card": {
           "consequence": "Conséquence",
           "cdna_change": "Changement cDNA",
-          "transcript_id": "ID Transcrit",
+          "transcript_id": "ID du transcrit",
           "exon": "Exon",
           "dbsnp_id": "ID dbSNP"
         }
@@ -1212,21 +1219,21 @@
           "compound_het": "Hétérozygote Composite",
           "potential_compound_het": "Hétérozygote Composite Potentiel",
           "inheritance": "Héritabilité",
-          "parental_origin": "Origine Parentale"
+          "parental_origin": "Origine parentale"
         },
         "family": {
           "title": "Famille",
-          "mother_genotype": "Génotype de la Mère",
-          "father_genotype": "Génotype du Père",
+          "mother_genotype": "Génotype de la mère",
+          "father_genotype": "Génotype du père",
           "affected_tooltip": "Affecté",
           "not_affected_tooltip": "Non affecté"
         },
         "metrics": {
           "title": "Métriques",
-          "quality_depth": "Profondeur Qualité",
+          "quality_depth": "Profondeur qualité",
           "allele_depth_alt": "Profondeur allélique ALT",
-          "total_depth_alt_ref": "Profondeur Totale ALT + REF",
-          "genotype_quality": "Qualité de Génotype",
+          "total_depth_alt_ref": "Profondeur totale ALT + REF",
+          "genotype_quality": "Qualité de génotype",
           "filter": "Filtre",
           "pass": "Pass",
           "fail": "Fail"
@@ -1297,7 +1304,7 @@
       "compound_het": "Hétérozygote Composite",
       "potential_compound_het": "Hétérozygote Composite Potentiel",
       "inheritance": "Héritabilité",
-      "parental_origin": "Origine Parentale"
+      "parental_origin": "Origine parentale"
     },
     "inheritance": {
       "title": "Héritabilité",
@@ -1305,15 +1312,15 @@
       "compound_het": "Hétérozygote Composite",
       "potential_compound_het": "Hétérozygote Composite Potentiel",
       "inheritance": "Héritabilité",
-      "parental_origin": "Origine Parentale"
+      "parental_origin": "Origine parentale"
     },
     "clinical_association": {
       "title": "Associations Cliniques (OMIM)"
     },
     "family": {
       "title": "Famille",
-      "mother_genotype": "Génotype de la Mère",
-      "father_genotype": "Génotype du Père",
+      "mother_genotype": "Génotype de la mère",
+      "father_genotype": "Génotype du père",
       "affected_tooltip": "Affecté",
       "not_affected_tooltip": "Non affecté"
     },
@@ -1768,7 +1775,7 @@
       "dashboard": "Tableau de bord",
       "data_exploration": "Exploration des données",
       "studies": "Études",
-      "variants": "Variantes"
+      "variants": "Variants"
     },
     "actions": {
       "community": "Communauté",

@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const NameRegExp = `^[a-zA-Z0-9\- .'À-ÿ]*$`
+const NameRegExp = `^[a-zA-Z0-9()\- .'À-ÿ]*$`
 
 var NameRegExpCompiled = regexp.MustCompile(NameRegExp)
 

@@ -887,7 +887,7 @@
       "exomiser_gene_combined_score_tooltip": "Exomiser score based on variant properties and patient phenotypes",
       "filter": "Filter",
       "freq_tn": "Freq. TN",
-      "freq_tn_tooltip": "Number of tumor-normal genomes containing this variant. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.",
+      "freq_tn_tooltip": "Number of tumor-normal genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.",
       "freq_g": "Freq. G",
       "freq_g_tooltip": "Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
       "gene_length": "Length",
@@ -963,11 +963,11 @@
         "all_classifications": "All Classifications",
         "pathogenic": "Pathogenic",
         "likelyPathogenic": "Likely Pathogenic",
-        "likelyPathogenic_tooltip": "Probably pathogenic",
+        "likelyPathogenic_tooltip": "Probably Pathogenic",
         "vus": "VUS",
         "vus_tooltip": "Variant of Uncertain Significance",
         "likelyBenign": "Likely Benign",
-        "likelyBenign_tooltip": "Probably benign",
+        "likelyBenign_tooltip": "Probably Benign",
         "benign": "Benign"
       }
     },
@@ -1030,6 +1030,8 @@
       "header": {
         "germline": "Germline",
         "germline_family": "Germline",
+        "patient": "Patient",
+        "sequencing": "Sequencing",
         "somatic": "Somatic"
       },
       "transcript": {
@@ -1050,46 +1052,51 @@
           "pmid": "PMID"
         },
         "pub_med_id_not_found": "Invalid or unknown PMID",
-        "citation_placeholder": "Ex : 25741868",
-        "add_citation": "Add a publication"
+        "citation_placeholder": "e.g. 25741868",
+        "add_citation": "Add a publication",
+        "ensembl_gene_id": "Ensembl",
+        "transcript_id": "Transcript ID"
       },
       "germline": {
-        "condition": "MONDO condition",
+        "condition": "MONDO Condition",
         "condition_placeholder": "e.g. muscular dystrophy",
         "condition_popover": "Search for a medical condition in",
-        "condition_popover_link": "MONDO ontology",
+        "condition_popover_link": "MONDO Ontology",
         "condition_empty_indicator": "No results found",
         "condition_no_search_indicator": "Minimum 3 characters",
-        "classification": "ACMG/AMP classification",
+        "classification": "ACMG/AMP Classification",
         "classification_popover": {
           "consult": "Consult",
           "standards_and_guidelines": "standards and guidelines",
           "variant_interpretation": "for variant interpretation",
-          "full_text": "Consult <link>standards and guidelines</link> for variant interpretation"
+          "full_text": "Consult <guides>standards and guidelines</guides> for variant interpretation"
         },
-        "classification_criteria": "Classification criteria",
+        "classification_criteria": "Classification Criteria",
         "classification_criteria_placeholder": "e.g. PM1, PS2",
         "mode_of_transmission": "Mode of inheritance",
         "mode_of_transmission_placeholder": "e.g. Autosomal dominant de novo",
         "no_results": "No results found"
       },
       "somatic": {
-        "tumoral_type": "Tumor type",
+        "tumoral_type": "Tumor Type",
         "tumoral_type_placeholder": "e.g. colon sarcoma",
-        "oncogenicity": "Oncogenicity",
+        "oncogenicity": "Oncogenicity ClinGen/CGC/VICC",
         "oncogenicity_options": {
           "oncogenic": "Oncogenic",
           "likely_oncogenic": "Likely Oncogenic",
-          "likely_oncogenic_tooltip": "Probably oncogenic",
+          "likely_oncogenic_tooltip": "Probably Oncogenic",
           "vus": "VUS",
           "vus_tooltip": "Variant of Uncertain Significance",
           "likely_benign": "Likely Benign",
-          "likely_benign_tooltip": "Probably benign",
+          "likely_benign_tooltip": "Probably Benign",
           "benign": "Benign"
         },
-        "classification_criteria": "Classification criteria",
+        "oncogenicity_popover": {
+          "full_text": "Consult <guides>standards and guidelines</guides> for variant interpretation"
+        },
+        "classification_criteria": "Classification Criteria",
         "classification_criteria_placeholder": "e.g. OS1, OM2",
-        "clinical_utility": "Clinical utility",
+        "clinical_utility": "Clinical Utility",
         "clinical_utility_placeholder": "Select",
         "clinical_utility_options": {
           "category_ia": "Tier IA",
@@ -1124,7 +1131,7 @@
       "download_report": "Download report",
       "open_igv": "Open IGV",
       "interpret": "Interpret",
-      "interpretation": "Interpret variant",
+      "interpretation": "Interpret Variant",
       "view_all_variants": "View all variants",
       "view_in_case": "View in case"
     },
@@ -1135,8 +1142,8 @@
         "transcript": "Transcript",
         "classification": "Classification",
         "primary_condition": "Primary Condition",
-        "classification_criteria": "Classification criteria",
-        "clinical_utility": "Clinical utility",
+        "classification_criteria": "Classification Criteria",
+        "clinical_utility": "Clinical Utility",
         "interpretation": "Interpretation",
         "references": "{{count}} references",
         "tumoral_type": "Tumor Type",
@@ -1187,7 +1194,7 @@
         },
         "gene_card": {
           "consequence": "Consequence",
-          "cdna_change": "cDNA change",
+          "cdna_change": "cDNA Change",
           "transcript_id": "Transcript ID",
           "exon": "Exon",
           "dbsnp_id": "dbSNP ID"

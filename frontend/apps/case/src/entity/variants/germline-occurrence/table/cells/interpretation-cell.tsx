@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { useI18n } from '@/components/hooks/i18n';
 import { SELECTED_VARIANT_PARAM } from '@/entity/variants/constants';
 
-import GermlineInterpretationDialog from '../../interpretation/germline-interpretation-form';
+import GermlineInterpretationDialog from '../../interpretation/germline-interpretation-dialog';
 
 type InterpretationCellProps = {
   occurrence: GermlineSNVOccurrence;

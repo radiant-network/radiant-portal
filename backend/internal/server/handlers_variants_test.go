@@ -677,7 +677,7 @@ func Test_GetGermlineVariantConditionsClinvar(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	expected := `[{"locus_id":"1000","clinvar_id":"123456","accession":"RCV000123456","clinical_significance":["Pathogenic"],"date_last_evaluated":"2023-01-01T00:00:00Z","submission_count":1,"review_status":"criteria_provided","review_status_stars":3,"version":1,"traits":["Trait1","Trait2"],"origins":["somatic"]}]`
+	expected := `{"clinvar_id":"123456","conditions":[{"locus_id":"1000","clinvar_id":"123456","accession":"RCV000123456","clinical_significance":["Pathogenic"],"date_last_evaluated":"2023-01-01T00:00:00Z","submission_count":1,"review_status":"criteria_provided","review_status_stars":3,"version":1,"traits":["Trait1","Trait2"],"origins":["somatic"]}]}`
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
