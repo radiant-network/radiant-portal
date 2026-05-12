@@ -69,12 +69,7 @@ func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 
 func trackSuffix(t IGVTrack) string {
 	if t.CaseTypeCode == "somatic" {
-		switch t.HistologyCode {
-		case "tumoral":
-			return "Tumor"
-		case "normal":
-			return "Normal"
-		}
+		return t.HistologyCode
 	}
 	// default (germline)
 	return t.FamilyRole

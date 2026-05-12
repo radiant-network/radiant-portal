@@ -122,7 +122,7 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Format:     "cram",
 					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram", endpoint),
 					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram.crai", endpoint),
-					Name:       "Reads: SRX1091647 Tumor",
+					Name:       "Reads: SRX1091647 tumoral",
 				},
 				{
 					PatientId:  62,
@@ -132,7 +132,7 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 					Format:     "cram",
 					URL:        fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram", endpoint),
 					IndexURL:   fmt.Sprintf("http://%s/cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram.crai", endpoint),
-					Name:       "Reads: SRX1091646 Normal",
+					Name:       "Reads: SRX1091646 normal",
 				},
 			})
 		})

@@ -115,7 +115,7 @@ func Test_IGV_PrepareTracks_somaticMergesPairsAndOrdersTumorFirst(t *testing.T) 
 			URLExpireAt:      1234567890,
 			IndexURL:         "presigned.s3://example.com/tumor.crai",
 			IndexURLExpireAt: 1234567890,
-			Name:             "Reads: S0002 Tumor",
+			Name:             "Reads: S0002 tumoral",
 		},
 		{
 			PatientId:        1,
@@ -126,7 +126,7 @@ func Test_IGV_PrepareTracks_somaticMergesPairsAndOrdersTumorFirst(t *testing.T) 
 			URLExpireAt:      1234567890,
 			IndexURL:         "presigned.s3://example.com/normal.crai",
 			IndexURLExpireAt: 1234567890,
-			Name:             "Reads: S0001 Normal",
+			Name:             "Reads: S0001 normal",
 		},
 	})
 }
