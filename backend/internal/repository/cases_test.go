@@ -84,6 +84,20 @@ func Test_GetCaseAnalysisCatalogIdByCode_NotFound(t *testing.T) {
 	})
 }
 
+func Test_GetCaseType(t *testing.T) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+
+		caseType, err := repo.GetCaseType(70)
+		assert.NoError(t, err)
+		assert.Equal(t, "germline", caseType)
+
+		caseType, err = repo.GetCaseType(71)
+		assert.NoError(t, err)
+		assert.Equal(t, "somatic", caseType)
+	})
+}
+
 func Test_SearchCasesNoFilters(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)

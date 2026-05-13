@@ -26,7 +26,6 @@ func Test_IGVInternal_GetIGV(t *testing.T) {
 			DataTypeCode:           "alignment",
 			FormatCode:             "crai",
 			URL:                    "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.crai",
-			CaseTypeCode:		    "germline",
 		}, igvInternal[0])
 		assert.Equal(t, IGVTrack{
 			SequencingExperimentId: 70,
@@ -38,29 +37,32 @@ func Test_IGVInternal_GetIGV(t *testing.T) {
 			DataTypeCode:           "alignment",
 			FormatCode:             "cram",
 			URL:                    "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram",
-			CaseTypeCode:		    "germline",
 		}, igvInternal[1])
 	})
 }
 
-func Test_IGV_PrepareTracks_handlesEmptyInputTracks(t *testing.T) {
+// Test_prepareIgvTracks_* exercise the shared prepareIgvTracks helper. They
+// run through the germline entry point arbitrarily — the behaviour is
+// identical for somatic since neither suffix nor isLeading is exercised by
+// these corner cases.
+func Test_prepareIgvTracks_handlesEmptyInputTracks(t *testing.T) {
 	var internalTracks []IGVTrack
 
-	result, err := PrepareIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
+	result, err := PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
 	assert.Empty(t, result.Alignment)
 }
 
-func Test_IGV_PrepareTracks_germlineMergesPairsAndOrdersProbandFirst(t *testing.T) {
+func Test_PrepareGermlineIgvTracks_mergesPairsAndOrdersProbandFirst(t *testing.T) {
 	internalTracks := []IGVTrack{
-		{PatientId: 1, SequencingExperimentId: 1,SampleId: "S0001", FamilyRole: "proband", SexCode: "male", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file1.cram", CaseTypeCode: "germline"},
-		{PatientId: 1, SequencingExperimentId: 1, SampleId: "S0001", FamilyRole: "proband", SexCode: "male", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file1.crai", CaseTypeCode: "germline"},
-		{PatientId: 2, SequencingExperimentId: 2, SampleId: "S0002", FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file2.cram", CaseTypeCode: "germline"},
-		{PatientId: 2, SequencingExperimentId: 2, SampleId: "S0002", FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file2.crai", CaseTypeCode: "germline"},
+		{PatientId: 1, SequencingExperimentId: 1, SampleId: "S0001", FamilyRole: "proband", SexCode: "male", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file1.cram"},
+		{PatientId: 1, SequencingExperimentId: 1, SampleId: "S0001", FamilyRole: "proband", SexCode: "male", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file1.crai"},
+		{PatientId: 2, SequencingExperimentId: 2, SampleId: "S0002", FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file2.cram"},
+		{PatientId: 2, SequencingExperimentId: 2, SampleId: "S0002", FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file2.crai"},
 	}
-	result, err := PrepareIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
+	result, err := PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -93,14 +95,14 @@ func Test_IGV_PrepareTracks_germlineMergesPairsAndOrdersProbandFirst(t *testing.
 	})
 }
 
-func Test_IGV_PrepareTracks_somaticMergesPairsAndOrdersTumorFirst(t *testing.T) {
+func Test_PrepareSomaticIgvTracks_mergesPairsAndOrdersTumorFirst(t *testing.T) {
 	internalTracks := []IGVTrack{
-		{PatientId: 1, SequencingExperimentId: 1, SampleId: "S0001", HistologyCode: "normal", SexCode: "male", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/normal.cram", CaseTypeCode: "somatic"},
-		{PatientId: 1, SequencingExperimentId: 1, SampleId: "S0001", HistologyCode: "normal", SexCode: "male", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/normal.crai", CaseTypeCode: "somatic"},
-		{PatientId: 1, SequencingExperimentId: 2, SampleId: "S0002", HistologyCode: "tumoral", SexCode: "male", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/tumor.cram", CaseTypeCode: "somatic"},
-		{PatientId: 1, SequencingExperimentId: 2, SampleId: "S0002", HistologyCode: "tumoral", SexCode: "male", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/tumor.crai", CaseTypeCode: "somatic"},
+		{PatientId: 1, SequencingExperimentId: 1, SampleId: "S0001", HistologyCode: "normal", SexCode: "male", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/normal.cram"},
+		{PatientId: 1, SequencingExperimentId: 1, SampleId: "S0001", HistologyCode: "normal", SexCode: "male", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/normal.crai"},
+		{PatientId: 1, SequencingExperimentId: 2, SampleId: "S0002", HistologyCode: "tumoral", SexCode: "male", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/tumor.cram"},
+		{PatientId: 1, SequencingExperimentId: 2, SampleId: "S0002", HistologyCode: "tumoral", SexCode: "male", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/tumor.crai"},
 	}
-	result, err := PrepareIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
+	result, err := PrepareSomaticIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -131,11 +133,11 @@ func Test_IGV_PrepareTracks_somaticMergesPairsAndOrdersTumorFirst(t *testing.T) 
 	})
 }
 
-func Test_IGV_PrepareTracks_enrichesTracksWithPreSignedURLs(t *testing.T) {
+func Test_prepareIgvTracks_enrichesTracksWithPreSignedURLs(t *testing.T) {
 	internalTracks := []IGVTrack{
-		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file1.cram", CaseTypeCode: "germline"},
+		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file1.cram"},
 	}
-	result, err := PrepareIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
+	result, err := PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
@@ -143,11 +145,11 @@ func Test_IGV_PrepareTracks_enrichesTracksWithPreSignedURLs(t *testing.T) {
 	assert.NotZero(t, result.Alignment[0].URLExpireAt)
 }
 
-func Test_IGV_PrepareTracks_returnsErrorOnInvalidPreSignedURL(t *testing.T) {
+func Test_prepareIgvTracks_returnsErrorOnInvalidPreSignedURL(t *testing.T) {
 	internalTracks := []IGVTrack{
-		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "invalid-url", CaseTypeCode: "germline"},
+		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "invalid-url"},
 	}
-	result, err := PrepareIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
+	result, err := PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
@@ -155,7 +157,7 @@ func Test_IGV_PrepareTracks_returnsErrorOnInvalidPreSignedURL(t *testing.T) {
 	internalTracks = []IGVTrack{
 		{PatientId: 1, DataTypeCode: "alignment", FormatCode: "cram", URL: "http://not-an-s3.url"},
 	}
-	result, err = PrepareIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
+	result, err = PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.Error(t, err)
 	assert.Nil(t, result)

@@ -94,6 +94,10 @@ func (m *CaseValidationMockRepo) GetCaseEntity(caseId int) (*repository.CaseEnti
 	return nil, nil
 }
 
+func (m *CaseValidationMockRepo) GetCaseType(caseID int) (string, error) {
+	return "", nil
+}
+
 func (m *CaseValidationMockRepo) GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*repository.Case, error) {
 	if m.GetCaseBySubmitterCaseIdAndProjectIdFunc != nil {
 		return m.GetCaseBySubmitterCaseIdAndProjectIdFunc(submitterCaseId, projectId)

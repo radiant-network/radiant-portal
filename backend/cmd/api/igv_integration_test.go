@@ -57,9 +57,10 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 		_ = os.Setenv("AWS_SECRET_ACCESS_KEY", "secret")
 		_ = os.Setenv("AWS_USE_SSL", "false")
 
-		repo := repository.NewIGVRepository(starrocks)
+		igvRepo := repository.NewIGVRepository(starrocks)
+		casesRepo := repository.NewCasesRepository(starrocks)
 		router := gin.Default()
-		router.GET("/igv/:case_id", server.GetIGVHandler(repo, nil))
+		router.GET("/igv/:case_id", server.GetIGVHandler(igvRepo, casesRepo, nil))
 
 		t.Run("germline trio (case 70)", func(t *testing.T) {
 			assertGetIGV(t, router, 70, []types.IGVTrackEnriched{

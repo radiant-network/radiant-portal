@@ -32,6 +32,7 @@ type CasesDAO interface {
 	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
 	GetCasesFilters() (*CaseFilters, error)
 	GetCaseEntity(caseId int) (*CaseEntity, error)
+	GetCaseType(caseID int) (string, error)
 	CreateCase(*Case) error
 	CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error
 	GetCaseAnalysisCatalogIdByCode(code string) (*AnalysisCatalog, error)
@@ -64,6 +65,17 @@ func (r *CasesRepository) GetCaseAnalysisCatalogIdByCode(code string) (*Analysis
 		return nil, err
 	}
 	return &analysisCatalog, nil
+}
+
+// GetCaseType returns the case_type_code (e.g., "germline" or "somatic") for a
+// case. Used by handlers that need to dispatch to type-specific logic without
+// duplicating the lookup.
+func (r *CasesRepository) GetCaseType(caseID int) (string, error) {
+	var caseType string
+	tx := r.db.Table(types.CaseTable.FederationName)
+	tx = tx.Select("case_type_code").Where("id = ?", caseID)
+	err := tx.Scan(&caseType).Error
+	return caseType, err
 }
 
 func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult, *int64, error) {

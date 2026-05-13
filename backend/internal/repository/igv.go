@@ -30,15 +30,17 @@ func NewIGVRepository(db *gorm.DB) *IGVRepository {
 	return &IGVRepository{db: db}
 }
 
+// GetIGV returns the IGV tracks for a case. The caller is responsible for
+// determining the case type (germline vs somatic) and dispatching to the
+// appropriate preparation function.
 func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
-	var igvInternal []IGVTrack
+	var tracks []IGVTrack
 
 	alignmentFilter := fmt.Sprintf("%s.case_id=%d AND thd.type='output' AND (doc.data_type_code IN ('alignment', 'alignment_variant_calling') AND doc.format_code in ('cram', 'crai'))", types.CaseHasSequencingExperimentTable.Alias, caseID)
 
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
 	tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.id", types.TaskContextTable.FederationName, types.TaskContextTable.Alias, types.TaskContextTable.Alias, types.SequencingExperimentTable.Alias))
-	tx = utils.JoinCaseHasSeqExpWithCase(tx)
 	tx = utils.JoinTaskContextWithTaskHasDoc(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
 	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
@@ -56,47 +58,55 @@ func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 		"doc.data_type_code",
 		"doc.format_code",
 		"doc.url",
-		"c.case_type_code",
 	}
 
 	tx.Select(columns)
 	tx.Order("s.id, doc.data_type_code, doc.format_code")
-	if err := tx.Find(&igvInternal).Error; err != nil {
-		return []IGVTrack{}, err
+	if err := tx.Find(&tracks).Error; err != nil {
+		return nil, err
 	}
-
-	return igvInternal, nil
+	return tracks, nil
 }
 
-func trackSuffix(t IGVTrack) string {
-	if t.CaseTypeCode == "somatic" {
-		return t.HistologyCode
-	}
-	// default (germline)
-	return t.FamilyRole
+// Transforms internal IGVTrack records to "IGVTracks" which match the IGV specification format.
+// For germline, the tracks are labelled by family role (e.g. "proband", "mother", "father") and the 
+// proband track is listed first.
+func PrepareGermlineIgvTracks(tracks []IGVTrack, presigner utils.PreSigner) (*types.IGVTracks, error) {
+	return prepareIgvTracks(tracks, presigner,
+		func(t IGVTrack) string { return t.FamilyRole }, // track suffix
+		func(t IGVTrack) bool { return t.FamilyRole == "proband" }, // is leading track?
+	)
 }
 
-func isLeadingTrack(t IGVTrack) bool {
-	if t.CaseTypeCode == "somatic" {
-		return t.HistologyCode == "tumoral"
-	}
-	return t.FamilyRole == "proband"
+// Transforms internal IGVTrack records to "IGVTracks" which match the IGV specification format.
+// For somatic, the tracks are labelled by histology code (e.g. "tumoral", "normal") and the 
+// tumoral track is listed first.
+func PrepareSomaticIgvTracks(tracks []IGVTrack, presigner utils.PreSigner) (*types.IGVTracks, error) {
+	return prepareIgvTracks(tracks, presigner,
+		func(t IGVTrack) string { return t.HistologyCode }, // track suffix
+		func(t IGVTrack) bool { return t.HistologyCode == "tumoral" }, // is leading track?
+	)
 }
 
-func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner) (*types.IGVTracks, error) {
+func prepareIgvTracks(
+	internalTracks []IGVTrack, presigner utils.PreSigner,
+	suffix func(IGVTrack) string, isLeading func(IGVTrack) bool,
+) (*types.IGVTracks, error) {
 	type mergedTrack struct {
 		enriched  types.IGVTrackEnriched
 		isLeading bool
 	}
 	merged := map[string]*mergedTrack{}
+	var alignments []*mergedTrack
 
-	// Loop through tracks and merge pairs of cram/crai
+	// Transform to enriched tracks, merging cram/crai pairs together
 	for _, r := range internalTracks {
-		key := strings.Join([]string{
-			r.DataTypeCode,
-			strconv.Itoa(r.SequencingExperimentId),
-		}, "|")
+		// we only support alignment tracks for now
+		if r.DataTypeCode != "alignment" {
+			continue
+		}
 
+		key := strconv.Itoa(r.SequencingExperimentId)
 		m, exists := merged[key]
 		if !exists {
 			m = &mergedTrack{
@@ -106,9 +116,10 @@ func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner) (*ty
 					Sex:        r.SexCode,
 					FamilyRole: r.FamilyRole,
 				},
-				isLeading: isLeadingTrack(r),
+				isLeading: isLeading(r),
 			}
 			merged[key] = m
+			alignments = append(alignments, m)
 		}
 
 		presigned, err := presigner.GeneratePreSignedURL(r.URL)
@@ -118,7 +129,7 @@ func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner) (*ty
 
 		switch r.FormatCode {
 		case "cram":
-			m.enriched.Name = fmt.Sprintf("Reads: %s %s", r.SampleId, trackSuffix(r))
+			m.enriched.Name = fmt.Sprintf("Reads: %s %s", r.SampleId, suffix(r))
 			m.enriched.Format = r.FormatCode
 			m.enriched.URL = presigned.URL
 			m.enriched.URLExpireAt = presigned.URLExpireAt
@@ -128,15 +139,7 @@ func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner) (*ty
 		}
 	}
 
-	// Collect alignment tracks and sort deterministically:
-	// leading track first (proband for germline, tumoral for somatic),
-	// then by Name.
-	alignments := make([]*mergedTrack, 0, len(merged))
-	for _, m := range merged {
-		if m.enriched.Type == "alignment" {
-			alignments = append(alignments, m)
-		}
-	}
+	// Sort: leading track first, then by Name.
 	slices.SortFunc(alignments, func(a, b *mergedTrack) int {
 		if a.isLeading != b.isLeading {
 			if a.isLeading {

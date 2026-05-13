@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_IGVGetHandler(t *testing.T) {
-	repo := &MockIGVRepository{
+func Test_IGVGetHandler_germline(t *testing.T) {
+	igvRepo := &MockIGVRepository{
 		// Return no IGV tracks to test that has_igv_files is set to false
 		igvTracks: []types.IGVTrack{{
 			SequencingExperimentId: 1,
@@ -35,9 +35,10 @@ func Test_IGVGetHandler(t *testing.T) {
 			URL:                    "s3://example.com/file.crai",
 		}},
 	}
+	casesRepo := &MockRepository{caseType: "germline"}
 
 	router := gin.Default()
-	router.GET("/igv/:case_id", GetIGVHandler(repo, testutils.NewMockS3PreSigner()))
+	router.GET("/igv/:case_id", GetIGVHandler(igvRepo, casesRepo, testutils.NewMockS3PreSigner()))
 
 	req, _ := http.NewRequest("GET", "/igv/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -45,4 +46,41 @@ func Test_IGVGetHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{"alignment":[{"patient_id":1,"family_role":"proband","sex":"male","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"presigned.s3://example.com/file.crai","indexURLExpireAt":1234567890,"name":"Reads: sample_123 proband"}]}`, w.Body.String())
+}
+
+func Test_IGVGetHandler_somatic(t *testing.T) {
+	igvRepo := &MockIGVRepository{
+		igvTracks: []types.IGVTrack{{
+			SequencingExperimentId: 1,
+			SampleId:               "sample_123",
+			HistologyCode:          "tumoral",
+			PatientId:              1,
+			FamilyRole:             "proband",
+			SexCode:                "female",
+			DataTypeCode:           "alignment",
+			FormatCode:             "cram",
+			URL:                    "s3://example.com/file.cram",
+		}, {
+			SequencingExperimentId: 1,
+			SampleId:               "sample_123",
+			HistologyCode:          "tumoral",
+			PatientId:              1,
+			FamilyRole:             "proband",
+			SexCode:                "female",
+			DataTypeCode:           "alignment",
+			FormatCode:             "crai",
+			URL:                    "s3://example.com/file.crai",
+		}},
+	}
+	casesRepo := &MockRepository{caseType: "somatic"}
+
+	router := gin.Default()
+	router.GET("/igv/:case_id", GetIGVHandler(igvRepo, casesRepo, testutils.NewMockS3PreSigner()))
+
+	req, _ := http.NewRequest("GET", "/igv/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"alignment":[{"patient_id":1,"family_role":"proband","sex":"female","type":"alignment","format":"cram","url":"presigned.s3://example.com/file.cram","urlExpireAt":1234567890,"indexURL":"presigned.s3://example.com/file.crai","indexURLExpireAt":1234567890,"name":"Reads: sample_123 tumoral"}]}`, w.Body.String())
 }
