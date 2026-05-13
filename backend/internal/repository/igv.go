@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"log"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -127,16 +128,28 @@ func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner) (*ty
 		}
 	}
 
-	result := types.IGVTracks{}
+	// Collect alignment tracks and sort deterministically:
+	// leading track first (proband for germline, tumoral for somatic),
+	// then by Name.
+	alignments := make([]*mergedTrack, 0, len(merged))
 	for _, m := range merged {
-		if m.enriched.Type != "alignment" {
-			continue
+		if m.enriched.Type == "alignment" {
+			alignments = append(alignments, m)
 		}
-		if m.isLeading {
-			result.Alignment = append([]types.IGVTrackEnriched{m.enriched}, result.Alignment...)
-		} else {
-			result.Alignment = append(result.Alignment, m.enriched)
+	}
+	slices.SortFunc(alignments, func(a, b *mergedTrack) int {
+		if a.isLeading != b.isLeading {
+			if a.isLeading {
+				return -1
+			}
+			return 1
 		}
+		return strings.Compare(a.enriched.Name, b.enriched.Name)
+	})
+
+	result := types.IGVTracks{Alignment: make([]types.IGVTrackEnriched, len(alignments))}
+	for i, m := range alignments {
+		result.Alignment[i] = m.enriched
 	}
 
 	return &result, nil

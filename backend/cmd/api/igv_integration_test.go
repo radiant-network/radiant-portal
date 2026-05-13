@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"slices"
 	"strings"
 	"testing"
 
@@ -23,9 +22,8 @@ import (
 )
 
 // assertGetIGV calls GET /igv/{caseID} and asserts the response matches expected.
-// Both actual and expected slices are compared after sorting by (PatientId, Name)
-// to neutralize the map-iteration order in PrepareIgvTracks. However, we check that
-// the first track is the expected one before sorting.
+// PrepareIgvTracks returns tracks in a deterministic order (leading track first,
+// then by PatientId, then by Name), so we can compare positionally.
 func assertGetIGV(t *testing.T, router *gin.Engine, caseID int, expected []types.IGVTrackEnriched) {
 	t.Helper()
 
@@ -36,20 +34,6 @@ func assertGetIGV(t *testing.T, router *gin.Engine, caseID int, expected []types
 
 	var actual types.IGVTracks
 	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &actual))
-
-	// check that the right track comes first
-	assert.Equal(t, expected[0].PatientId, actual.Alignment[0].PatientId)
-	assert.Equal(t, expected[0].Name, actual.Alignment[0].Name)
-
-	// sort both actual and expected to check the other tracks
-	sortKey := func(a, b types.IGVTrackEnriched) int {
-		if c := a.PatientId - b.PatientId; c != 0 {
-			return c
-		}
-		return strings.Compare(a.Name, b.Name)
-	}
-	slices.SortFunc(actual.Alignment, sortKey)
-	slices.SortFunc(expected, sortKey)
 
 	assert.Equal(t, len(expected), len(actual.Alignment))
 	for i := range actual.Alignment {
