@@ -33,6 +33,7 @@ type GermlineCNVOccurrence struct {
 	GnomadSN   int               `json:"gnomad_sn,omitempty" gorm:"column:gnomad_sn"`
 	GnomadSF   float32           `json:"gnomad_sf,omitempty" gorm:"column:gnomad_sf"`
 	HasNote    bool              `json:"has_note" validate:"required"`
+	FlagType   string            `json:"flag_type,omitempty" enums:"flag,pin,star"`
 }
 
 var GermlineCNVOccurrenceTable = Table{

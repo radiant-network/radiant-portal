@@ -41,6 +41,7 @@ func Test_Somatic_SNV_GetOccurrences(t *testing.T) {
 			assert.Equal(t, 74, occurrences[0].TaskId)
 			assert.False(t, occurrences[0].HasInterpretation)
 			assert.True(t, occurrences[0].HasNote)
+			assert.Empty(t, occurrences[0].FlagType)
 			assert.Equal(t, "hgvsg1", occurrences[0].Hgvsg)
 			assert.Equal(t, "BRAF", occurrences[0].Symbol)
 			assert.Equal(t, "p.Arg19His", occurrences[0].AaChange)
@@ -222,5 +223,46 @@ func Test_Somatic_SNV_GetExpandedOccurrence(t *testing.T) {
 		assert.Equal(t, float64(0.001), *expandedOccurrence.GnomadV3Af)
 		assert.Equal(t, float32(0.66), *expandedOccurrence.AdRatio)
 		assert.Equal(t, "ENSG00000157764", expandedOccurrence.EnsemblGeneId)
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_FlagType_Reflects_Flag_State(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+		repo := NewSomaticSNVOccurrencesRepository(starrocks)
+		flagsRepo := NewVariantFlagsRepository(postgres)
+
+		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+
+		// Initially no flag → FlagType is empty.
+		occurrences, err := repo.GetOccurrences(70, 74, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Empty(t, occurrences[0].FlagType)
+		}
+
+		_, err = flagsRepo.Upsert(types.VariantFlag{
+			CaseID:       70,
+			OccurrenceID: "1000",
+			FlagType:     "star",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "Test User",
+		})
+		assert.NoError(t, err)
+
+		occurrences, err = repo.GetOccurrences(70, 74, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "star", occurrences[0].FlagType)
+		}
+
+		err = flagsRepo.Delete(70, "1000")
+		assert.NoError(t, err)
+
+		occurrences, err = repo.GetOccurrences(70, 74, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Empty(t, occurrences[0].FlagType)
+		}
 	})
 }

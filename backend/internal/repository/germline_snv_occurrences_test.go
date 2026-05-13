@@ -45,6 +45,7 @@ func Test_Germline_SNV_GetOccurrences(t *testing.T) {
 			assert.Equal(t, "class1", occurrences[0].VariantClass)
 			assert.True(t, occurrences[0].HasInterpretation)
 			assert.True(t, occurrences[0].HasNote)
+			assert.Empty(t, occurrences[0].FlagType)
 			assert.Equal(t, "T001", occurrences[0].TranscriptId)
 		}
 	})
@@ -721,6 +722,47 @@ func Test_Germline_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *test
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.False(t, occurrences[0].HasNote)
+		}
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_FlagType_Reflects_Flag_State(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+		repo := NewGermlineSNVOccurrencesRepository(starrocks)
+		flagsRepo := NewVariantFlagsRepository(postgres)
+
+		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+
+		// Initially no flag → FlagType is empty.
+		occurrences, err := repo.GetOccurrences(2, 1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Empty(t, occurrences[0].FlagType)
+		}
+
+		_, err = flagsRepo.Upsert(types.VariantFlag{
+			CaseID:       2,
+			OccurrenceID: "1000",
+			FlagType:     "pin",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "Test User",
+		})
+		assert.NoError(t, err)
+
+		occurrences, err = repo.GetOccurrences(2, 1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "pin", occurrences[0].FlagType)
+		}
+
+		err = flagsRepo.Delete(2, "1000")
+		assert.NoError(t, err)
+
+		occurrences, err = repo.GetOccurrences(2, 1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Empty(t, occurrences[0].FlagType)
 		}
 	})
 }

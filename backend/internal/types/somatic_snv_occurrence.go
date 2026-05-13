@@ -6,6 +6,7 @@ type SomaticSNVOccurrence struct {
 	TaskId              int               `json:"task_id" validate:"required"`
 	HasInterpretation   bool              `json:"has_interpretation" validate:"required"`
 	HasNote             bool              `json:"has_note" validate:"required"`
+	FlagType            string            `json:"flag_type,omitempty" enums:"flag,pin,star"`
 	Hgvsg               string            `json:"hgvsg" validate:"required"`
 	Chromosome          string            `json:"chromosome" validate:"required"`
 	Start               int64             `json:"start" validate:"required"`

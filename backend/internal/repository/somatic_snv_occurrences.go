@@ -47,6 +47,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, 
 	})
 	columns = append(columns, "i.locus_id IS NOT NULL AS has_interpretation")
 	columns = append(columns, "note.occurrence_id IS NOT NULL AS has_note")
+	columns = append(columns, "flag.flag_type")
 	columns = append(columns, "v.locus")
 
 	utils.AddLimitAndSort(tx, userQuery)
@@ -62,6 +63,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, 
 	tx = r.db.Table("(somatic__snv__occurrence s_snv_o, snv__variant v)").
 		Joins("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM radiant_jdbc.public.interpretation_somatic) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
 		Joins("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM radiant_jdbc.public.occurrence_note WHERE deleted = false) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?", seqId, caseId).
+		Joins("LEFT JOIN (SELECT occurrence_id, flag_type FROM radiant_jdbc.public.variant_flag WHERE case_id = ?) flag ON flag.occurrence_id = s_snv_o.locus_id", caseId).
 		Select(columns).
 		Where("s_snv_o.tumor_seq_id = ? and part=? and v.locus_id = s_snv_o.locus_id and s_snv_o.locus_id in (?)", seqId, part, tx)
 

@@ -34,6 +34,7 @@ type GermlineSNVOccurrence struct {
 	MaxImpactScore             int               `json:"max_impact_score" validate:"required"`
 	HasInterpretation          bool              `json:"has_interpretation" validate:"required"`
 	HasNote                    bool              `json:"has_note" validate:"required"`
+	FlagType                   string            `json:"flag_type,omitempty" enums:"flag,pin,star"`
 	ExomiserMoi                string            `json:"exomiser_moi" validate:"required"`
 	ExomiserAcmgClassification string            `json:"exomiser_acmg_classification" validate:"required"`
 	ExomiserAcmgEvidence       JsonArray[string] `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`

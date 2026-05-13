@@ -58,6 +58,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoIGV := repository.NewIGVRepository(dbStarrocks)
 	repoDocuments := repository.NewDocumentsRepository(dbStarrocks)
 	repoOccurrenceNotes := repository.NewOccurrenceNotesRepository(dbPostgres)
+	repoVariantFlags := repository.NewVariantFlagsRepository(dbPostgres)
 	repoSavedFilters := repository.NewSavedFiltersRepository(dbPostgres)
 	repoUserPreferences := repository.NewUserPreferencesRepository(dbPostgres)
 	repoFacets := repository.NewFacetsRepository()
@@ -73,7 +74,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     corsAllowedOrigins,
-		AllowMethods:     []string{"GET", "POST", "PUT", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true, // Enable cookies/auth
 	}))
@@ -177,6 +178,12 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	usersGroup.GET("/sets/:user_set_id", server.GetUserSet(repoPostgres.UserSets))
 	usersGroup.GET("/preferences/:key", server.GetUserPreferencesHandler(repoUserPreferences, auth))
 	usersGroup.POST("/preferences/:key", server.UpdateUserPreferencesHandler(repoUserPreferences, auth))
+
+	variantFlagsGroup := privateRoutes.Group("/variant-flags")
+	variantFlagsGroup.PUT("/:case_id/:occurrence_id", server.PutVariantFlagHandler(repoVariantFlags, auth))
+	variantFlagsGroup.DELETE("/:case_id/:occurrence_id", server.DeleteVariantFlagHandler(repoVariantFlags))
+	variantFlagsGroup.GET("/:case_id", server.GetVariantFlagsByCaseHandler(repoVariantFlags))
+	variantFlagsGroup.GET("/:case_id/:occurrence_id", server.GetVariantFlagHandler(repoVariantFlags))
 
 	variantsGroup := privateRoutes.Group("/variants")
 	variantsGermlineGroup := variantsGroup.Group("/germline")

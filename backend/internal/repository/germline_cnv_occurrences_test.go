@@ -37,6 +37,7 @@ func Test_GermlineCNV_GetOccurrences(t *testing.T) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
 			assert.Equal(t, 1, occurrences[0].TaskID)
 			assert.True(t, occurrences[0].HasNote)
+			assert.Empty(t, occurrences[0].FlagType)
 		}
 	})
 }
@@ -340,6 +341,47 @@ func Test_GermlineCNV_GetGenesOverlap(t *testing.T) {
 				assert.ElementsMatch(t, types.JsonArray[string]{"p1.1", "p1.2"}, fullCnvOverlap.Cytoband)
 
 			}
+		}
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_FlagType_Reflects_Flag_State(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+		repo := NewGermlineCNVOccurrencesRepository(starrocks)
+		flagsRepo := NewVariantFlagsRepository(postgres)
+
+		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
+		assert.NoError(t, err)
+
+		// Initially no flag → FlagType is empty.
+		occurrences, err := repo.GetOccurrences(2, 1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Empty(t, occurrences[0].FlagType)
+		}
+
+		_, err = flagsRepo.Upsert(types.VariantFlag{
+			CaseID:       2,
+			OccurrenceID: "1",
+			FlagType:     "flag",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "Test User",
+		})
+		assert.NoError(t, err)
+
+		occurrences, err = repo.GetOccurrences(2, 1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "flag", occurrences[0].FlagType)
+		}
+
+		err = flagsRepo.Delete(2, "1")
+		assert.NoError(t, err)
+
+		occurrences, err = repo.GetOccurrences(2, 1, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Empty(t, occurrences[0].FlagType)
 		}
 	})
 }
