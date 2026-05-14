@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>5.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>4.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -7776,12 +7776,12 @@ import { X } from "lucide-react";</code></pre>
   no-story-error
   no-doc-error"
   role="listitem"
-  aria-label="GermlineOccurrenceSheet">
+  aria-label="GermlineOccurrenceSheetContent">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> GermlineOccurrenceSheet</h2>
+      <h2><span class="status-dot dot-ok"></span> GermlineOccurrenceSheetContent</h2>
       <div class="badges">
-        <label for="c-38-sliders-occurrences-germline-props" class="badge ok as-toggle">10 prop types</label>
+        <label for="c-38-sliders-occurrences-germline-props" class="badge ok as-toggle">6 prop types</label>
         <label for="c-38-sliders-occurrences-germline-info" class="badge info as-toggle">1 info</label>
         <label for="c-38-sliders-occurrences-germline-stories" class="badge ok as-toggle">3 stories</label>
         
@@ -7815,29 +7815,21 @@ import { X } from "lucide-react";</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">10 prop types</span>
+              <span class="badge ok">6 prop types</span>
             </div>
-            <pre><code>Component: ../apps/case/src/entity/variants/germline-occurrence/sliders/slider-germline-occurrence-sheet.tsx::default</code></pre>
+            <pre><code>Component: ../apps/case/src/entity/variants/germline-occurrence/sliders/slider-germline-occurrence-sheet.tsx::GermlineOccurrenceSheetContent</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>children?: React.ReactElement
-
-hasNext?: boolean
+            <pre><code>hasNext?: boolean
 
 hasPrevious?: boolean
 
-occurrence?: GermlineSNVOccurrence
-
-onInterpretationSaved: () =&gt; void
+occurrence: GermlineSNVOccurrence
 
 onNext?: () =&gt; void
 
 onPrevious?: () =&gt; void
 
-open: boolean
-
-patientSelected?: CaseSequencingExperiment
-
-setOpen: (open: boolean) =&gt; void</code></pre>
+patientSelected?: CaseSequencingExperiment</code></pre>
           </div>
         </div>
     
@@ -7850,7 +7842,7 @@ setOpen: (open: boolean) =&gt; void</code></pre>
                   <span class="ex-name">Imports</span>
                 </div>
                 <pre><code>import { BrowserRouter } from "react-router-dom";
-import { ConfigProvider, FetchOccurrencesListContext, GermlineOccurrenceSheet } from "case";</code></pre>
+import { ConfigProvider, GermlineOccurrenceSheetContent, SliderSheet } from "case";</code></pre>
               </div>
           
           
@@ -7861,37 +7853,32 @@ import { ConfigProvider, FetchOccurrencesListContext, GermlineOccurrenceSheet } 
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;GermlineOccurrenceSheet
-    occurrence={occurrenceMock}
-    open
-    setOpen={() =&gt; {
-      console.warn(&#39;setOpen&#39;);
-    }}
-    onPrevious={() =&gt; {
-      console.warn(&#39;onPrevious&#39;);
-    }}
-    onNext={() =&gt; {
-      console.warn(&#39;onNext&#39;);
-    }}
-    hasPrevious={false}
-    hasNext={false}
-    patientSelected={{
-      seq_id: 1,
-      patient_id: 3,
-      relationship_to_proband: &#39;proband&#39;,
-      sample_id: 1,
-      sample_submitter_id: &#39;S13224&#39;,
-      sample_type_code: &#39;dna&#39;,
-      affected_status_code: &#39;affected&#39;,
-      histology_code: &#39;normal&#39;,
-      experimental_strategy_code: &#39;wgs&#39;,
-      status_code: &#39;completed&#39;,
-      updated_on: &#39;2021-10-12T13:08:00Z&#39;,
-      has_variants: true,
-    }}
-    onInterpretationSaved={() =&gt; {
-      console.warn(&#39;onInterpretationSaved&#39;);
-    }} /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;SliderSheet open&gt;
+    &lt;GermlineOccurrenceSheetContent
+        occurrence={occurrenceMock}
+        onPrevious={() =&gt; {
+          console.warn(&#39;onPrevious&#39;);
+        }}
+        onNext={() =&gt; {
+          console.warn(&#39;onNext&#39;);
+        }}
+        hasPrevious={false}
+        hasNext={false}
+        patientSelected={{
+          seq_id: 1,
+          patient_id: 3,
+          relationship_to_proband: &#39;proband&#39;,
+          sample_id: 1,
+          sample_submitter_id: &#39;S13224&#39;,
+          sample_type_code: &#39;dna&#39;,
+          affected_status_code: &#39;affected&#39;,
+          histology_code: &#39;normal&#39;,
+          experimental_strategy_code: &#39;wgs&#39;,
+          status_code: &#39;completed&#39;,
+          updated_on: &#39;2021-10-12T13:08:00Z&#39;,
+          has_variants: true,
+        }} /&gt;
+&lt;/SliderSheet&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -7900,37 +7887,32 @@ import { ConfigProvider, FetchOccurrencesListContext, GermlineOccurrenceSheet } 
               </div>
               
               
-              <pre><code>const Interpretation = () =&gt; &lt;GermlineOccurrenceSheet
-    occurrence={{ ...occurrenceMock, has_interpretation: true }}
-    open
-    setOpen={() =&gt; {
-      console.warn(&#39;setOpen&#39;);
-    }}
-    onPrevious={() =&gt; {
-      console.warn(&#39;onPrevious&#39;);
-    }}
-    onNext={() =&gt; {
-      console.warn(&#39;onNext&#39;);
-    }}
-    hasPrevious={false}
-    hasNext={false}
-    patientSelected={{
-      seq_id: 1,
-      patient_id: 3,
-      relationship_to_proband: &#39;proband&#39;,
-      sample_id: 1,
-      sample_submitter_id: &#39;S13224&#39;,
-      sample_type_code: &#39;dna&#39;,
-      affected_status_code: &#39;affected&#39;,
-      histology_code: &#39;normal&#39;,
-      experimental_strategy_code: &#39;wgs&#39;,
-      status_code: &#39;completed&#39;,
-      updated_on: &#39;2021-10-12T13:08:00Z&#39;,
-      has_variants: true,
-    }}
-    onInterpretationSaved={() =&gt; {
-      console.warn(&#39;onInterpretationSaved&#39;);
-    }} /&gt;;</code></pre>
+              <pre><code>const Interpretation = () =&gt; &lt;SliderSheet open&gt;
+    &lt;GermlineOccurrenceSheetContent
+        occurrence={{ ...occurrenceMock, has_interpretation: true }}
+        onPrevious={() =&gt; {
+          console.warn(&#39;onPrevious&#39;);
+        }}
+        onNext={() =&gt; {
+          console.warn(&#39;onNext&#39;);
+        }}
+        hasPrevious={false}
+        hasNext={false}
+        patientSelected={{
+          seq_id: 1,
+          patient_id: 3,
+          relationship_to_proband: &#39;proband&#39;,
+          sample_id: 1,
+          sample_submitter_id: &#39;S13224&#39;,
+          sample_type_code: &#39;dna&#39;,
+          affected_status_code: &#39;affected&#39;,
+          histology_code: &#39;normal&#39;,
+          experimental_strategy_code: &#39;wgs&#39;,
+          status_code: &#39;completed&#39;,
+          updated_on: &#39;2021-10-12T13:08:00Z&#39;,
+          has_variants: true,
+        }} /&gt;
+&lt;/SliderSheet&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -7939,37 +7921,32 @@ import { ConfigProvider, FetchOccurrencesListContext, GermlineOccurrenceSheet } 
               </div>
               
               
-              <pre><code>const RelationshipToProband = () =&gt; &lt;GermlineOccurrenceSheet
-    occurrence={occurrenceMock}
-    open
-    setOpen={() =&gt; {
-      console.warn(&#39;setOpen&#39;);
-    }}
-    onPrevious={() =&gt; {
-      console.warn(&#39;onPrevious&#39;);
-    }}
-    onNext={() =&gt; {
-      console.warn(&#39;onNext&#39;);
-    }}
-    hasPrevious={false}
-    hasNext={false}
-    patientSelected={{
-      seq_id: 1,
-      patient_id: 1,
-      relationship_to_proband: &#39;mother&#39;,
-      affected_status_code: &#39;affected&#39;,
-      sample_id: 1,
-      sample_submitter_id: &#39;S13224&#39;,
-      sample_type_code: &#39;dna&#39;,
-      histology_code: &#39;normal&#39;,
-      experimental_strategy_code: &#39;wgs&#39;,
-      status_code: &#39;completed&#39;,
-      updated_on: &#39;2021-10-12T13:08:00Z&#39;,
-      has_variants: true,
-    }}
-    onInterpretationSaved={() =&gt; {
-      console.warn(&#39;onInterpretationSaved&#39;);
-    }} /&gt;;</code></pre>
+              <pre><code>const RelationshipToProband = () =&gt; &lt;SliderSheet open&gt;
+    &lt;GermlineOccurrenceSheetContent
+        occurrence={occurrenceMock}
+        onPrevious={() =&gt; {
+          console.warn(&#39;onPrevious&#39;);
+        }}
+        onNext={() =&gt; {
+          console.warn(&#39;onNext&#39;);
+        }}
+        hasPrevious={false}
+        hasNext={false}
+        patientSelected={{
+          seq_id: 1,
+          patient_id: 1,
+          relationship_to_proband: &#39;mother&#39;,
+          affected_status_code: &#39;affected&#39;,
+          sample_id: 1,
+          sample_submitter_id: &#39;S13224&#39;,
+          sample_type_code: &#39;dna&#39;,
+          histology_code: &#39;normal&#39;,
+          experimental_strategy_code: &#39;wgs&#39;,
+          status_code: &#39;completed&#39;,
+          updated_on: &#39;2021-10-12T13:08:00Z&#39;,
+          has_variants: true,
+        }} /&gt;
+&lt;/SliderSheet&gt;;</code></pre>
             </div>
         </div>
     
