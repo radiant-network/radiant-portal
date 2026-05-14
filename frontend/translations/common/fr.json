@@ -109,16 +109,6 @@
       "confers_sensitivity.abbrev": "CS",
       "confers_sensitivity.tooltip": "Confère une sensibilité"
     },
-    "custom_pill_filter": {
-      "info": "Vous pouvez créer des requêtes personnalisées en ajoutant des critères à la barre de requêtes et en cliquant sur le bouton sauvegarder.",
-      "delete_dialog": {
-        "title": "Supprimer cette requête ?",
-        "description": "Vous êtes sur le point de supprimer la requête personnalisée « {{title}} », ce qui pourrait avoir un impact sur vos résultats.",
-        "cancel": "Annuler",
-        "ok": "Supprimer"
-      },
-      "learn_more": "En savoir plus"
-    },
     "file_format": {
       "cram": "Fichier CRAM",
       "crai": "Fichier d’index CRAI",
@@ -160,53 +150,6 @@
         "title": "Supprimer cette requête ?",
         "cancel": "Annuler",
         "ok": "Supprimer"
-      },
-      "custom_pill": {
-        "create_tooltip": "Créer une requête personnalisée",
-        "cannot_save_as_custom_pill": "Les requêtes personnalisées ne peuvent pas inclure d'autres requêtes personnalisées"
-      },
-      "save_dialog": {
-        "title": "Enregistrer cette requête",
-        "fields": {
-          "title": {
-            "label": "Nom de la requête",
-            "placeholder": "Requête sans titre"
-          }
-        },
-        "notice": "Vous trouverez vos requêtes enregistrées dans la barre latérale sous la rubrique « Requêtes ».",
-        "cancel": "Annuler",
-        "ok": "Enregistrer"
-      }
-    },
-    "query_pill": {
-      "operator": {
-        "change_operator_to": "Changer l'opérateur en",
-        "and": "et",
-        "or": "ou"
-      },
-      "custom_pill": {
-        "edit_dialog": {
-          "title": "Modifier la requête personnalisée",
-          "cancel": "Annuler",
-          "ok": "Enregistrer"
-        },
-        "cant_be_empty_dialog": {
-          "title": "La requête ne peut pas être vide",
-          "description": "Votre requête personnalisée doit contenir au moins un critère.",
-          "ok": "Fermer"
-        },
-        "title_exists_dialog": {
-          "title": "Nom déjà utilisé",
-          "description": "Une requête personnalisée avec ce nom existe déjà. Veuillez choisir un nom unique.",
-          "ok": "Fermer"
-        },
-        "save_dialog": {
-          "title": "Modifier cette requête ?",
-          "confirmation_message": "Vous êtes sur le point de modifier la requête personnalisée \"{title}\", ce qui peut affecter vos résultats.",
-          "affected_filters": "Filtres enregistrés affectés :",
-          "cancel": "Annuler",
-          "ok": "Enregistrer"
-        }
       }
     },
     "relationships": {
@@ -235,7 +178,6 @@
       "delete_dialog": {
         "title": "Supprimer définitivement ce filtre ?",
         "description": "Vous êtes sur le point de supprimer définitivement ce filtre et toutes ses requêtes.",
-        "cancel": "Annuler",
         "ok": "Supprimer le filtre"
       },
       "duplicate_tooltip": "Dupliquer le filtre",
@@ -259,22 +201,12 @@
       "manage_filters": "Gérer les filtres",
       "manage_dialog": {
         "title": "Gérer les filtres",
-        "close": "Fermer",
         "last_save_at": "Dernière sauvegarde il y a : {{lastSaveAt}}"
       },
       "new_filter": "Nouveau filtre",
       "save_tooltip": {
         "when_empty": "Ajoutez une requête pour enregistrer",
-        "when_dirty": "Enregistrer les modifications",
         "default": "Enregistrer le filtre"
-      },
-      "share_tooltip": {
-        "when_not_saved": "Enregistrez le filtre pour le partager",
-        "default": "Partager (Copier l'URL)"
-      },
-      "favorite_tooltip": {
-        "set": "Définir comme filtre par défaut",
-        "unset": "Retirer comme filtre par défaut"
       },
       "discard_tooltip": "Annuler les modifications non enregistrées",
       "no_discard_tooltip": "Aucune modification à annuler",
@@ -285,7 +217,6 @@
         "deleted": "Filtre supprimé",
         "updated": "Filtre mis à jour",
         "errors": {
-          "fetching": "Impossible de récupérer les filtres",
           "duplicated": "Un filtre avec ce nom existe déjà",
           "created": "Impossible de créer le filtre",
           "updated": "Impossible de mettre à jour le filtre",
@@ -294,7 +225,6 @@
       }
     },
     "components": {
-      "query_pill_remote": "Composant Query Pill Remote",
       "empty_cell": "-"
     },
     "table": {
