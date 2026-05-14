@@ -144,12 +144,9 @@ StarRocks fixtures (`test/data/<folder>/*.tsv`) are loaded once per process per 
 
 ## Adding a New API Endpoint
 
-1. Add type definitions in `internal/types/`.
-2. Add repository method in `internal/repository/` (target the correct DB).
-3. Add handler in `internal/server/` (follow existing resource grouping).
-4. Register route in `cmd/api/main.go` under the appropriate group.
-5. Add Swagger annotations and run `make doc` to regenerate the spec.
-6. Add handler unit test in `internal/server/` and integration test in `cmd/api/`.
+Follow the [add-endpoint skill](.claude/skills/add-endpoint/SKILL.md). It covers DB schema, types, repository + tests, handler + tests, route + integration test, swagger + client regeneration, Postman, and updating this file when patterns change.
+
+Universal coding/testing rules that apply to every backend change live in [.claude/rules/universal.md](.claude/rules/universal.md).
 
 ## Adding a DB Migration
 

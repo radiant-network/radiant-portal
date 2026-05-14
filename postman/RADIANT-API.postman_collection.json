@@ -1141,6 +1141,42 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Tasks With Occurrences",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/cases/1/1/tasks_with_occurrences?data_type=germline_snv",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "cases",
+                "1",
+                "1",
+                "tasks_with_occurrences"
+              ],
+              "query": [
+                {
+                  "key": "data_type",
+                  "value": "germline_snv"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },

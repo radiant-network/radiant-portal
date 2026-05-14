@@ -96,6 +96,6 @@ VALUES (1, 1, NULL),
        (72, 71, NULL),
        (73, 72, NULL),
 
-       (74, 73, NULL),
-       (74, 74, NULL)
+       (74, 73, 71),
+       (74, 74, 71)
 ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;

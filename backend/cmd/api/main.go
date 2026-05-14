@@ -62,6 +62,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoUserPreferences := repository.NewUserPreferencesRepository(dbPostgres)
 	repoFacets := repository.NewFacetsRepository()
 	repoBatches := repository.NewBatchRepository(dbPostgres)
+	repoTasks := repository.NewTaskRepository(dbPostgres)
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -98,6 +99,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases, repoIGV))
 	casesGroup.POST("/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repoDocuments))
 	casesGroup.GET("/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repoDocuments))
+	casesGroup.GET("/:case_id/:seq_id/tasks_with_occurrences", server.CaseOccurrenceTasksHandler(repoTasks))
 
 	geneGroup := privateRoutes.Group("/genes")
 	geneGroup.GET("/autocomplete", server.GetGeneAutoCompleteHandler(repoGenes))

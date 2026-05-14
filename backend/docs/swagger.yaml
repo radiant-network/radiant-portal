@@ -2283,6 +2283,31 @@ components:
         sqon:
           $ref: '#/components/schemas/Sqon'
       type: object
+    TaskOccurrenceType:
+      description: Task attached to a (case, sequencing) pair, used by the Variants
+        tab task dropdown.
+      properties:
+        created_on:
+          type: string
+        genome_build:
+          type: string
+        id:
+          type: integer
+        pipeline_name:
+          type: string
+        pipeline_version:
+          type: string
+        task_type_code:
+          type: string
+        task_type_name:
+          type: string
+      required:
+      - created_on
+      - id
+      - pipeline_version
+      - task_type_code
+      - task_type_name
+      type: object
     Term:
       properties:
         id:
@@ -2867,6 +2892,68 @@ paths:
       security:
       - bearerauth: []
       summary: Get CaseEntity case entity
+      tags:
+      - cases
+  /cases/{case_id}/{seq_id}/tasks_with_occurrences:
+    get:
+      description: Return tasks attached to the given case and sequencing experiment
+        whose task type produces occurrences of the requested occurrence type. Sorted
+        by created_on DESC. Returns an empty list (200) when no task matches.
+      operationId: caseTasksWithOccurrences
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequencing Experiment ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Occurrence type
+        in: query
+        name: data_type
+        required: true
+        schema:
+          enum:
+          - germline_snv
+          - germline_cnv
+          - somatic_snv
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TaskOccurrenceType'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: List tasks producing occurrences of a given type for a (case, sequencing)
+        pair
       tags:
       - cases
   /cases/{case_id}/documents/filters:

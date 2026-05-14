@@ -97,6 +97,7 @@ docs/SqonContent.md
 docs/Statistics.md
 docs/StatisticsBodyWithSqon.md
 docs/StatusApi.md
+docs/TaskOccurrenceType.md
 docs/Term.md
 docs/Transcript.md
 docs/UpdateOccurrenceNoteInput.md
@@ -225,6 +226,7 @@ radiant_python/models/sqon.py
 radiant_python/models/sqon_content.py
 radiant_python/models/statistics.py
 radiant_python/models/statistics_body_with_sqon.py
+radiant_python/models/task_occurrence_type.py
 radiant_python/models/term.py
 radiant_python/models/transcript.py
 radiant_python/models/update_occurrence_note_input.py

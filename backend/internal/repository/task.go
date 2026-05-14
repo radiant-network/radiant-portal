@@ -29,6 +29,8 @@ type TaskDAO interface {
 	GetTaskHasDocumentByTaskId(taskId int) ([]*TaskHasDocument, error)
 	GetTaskHasDocumentByDocumentId(documentId int) ([]*TaskHasDocument, error)
 	GetTaskContextBySequencingExperimentId(seqExpId int) ([]*TaskContext, error)
+
+	ListTasksByCaseSeqAndTaskType(caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error)
 }
 
 func NewTaskRepository(db *gorm.DB) *TaskRepository {
@@ -113,4 +115,40 @@ func (r *TaskRepository) GetTaskHasDocumentByDocumentId(documentId int) ([]*Task
 		return nil, nil
 	}
 	return thd, nil
+}
+
+func joinTaskContextWithTask(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_id = %s.id",
+		types.TaskTable.Name, types.TaskTable.Alias,
+		types.TaskContextTable.Alias, types.TaskTable.Alias))
+}
+
+func joinTaskWithTaskType(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("JOIN %s %s ON %s.task_type_code = %s.code",
+		types.TaskTypeTable.Name, types.TaskTypeTable.Alias,
+		types.TaskTable.Alias, types.TaskTypeTable.Alias))
+}
+
+// ListTasksByCaseSeqAndTaskType returns the tasks attached to the given
+// (case, sequencing) pair whose task_type matches taskTypeCode, sorted by
+// created_on DESC.
+//
+// A task_context row counts as "attached to this case" when its case_id equals
+// caseId OR is NULL. NULL case_id is how per-sequencing tasks (e.g.
+// alignment_germline_variant_calling) are modeled in the ETL: they belong to
+// the sequencing experiment itself and are shared across every case that
+// reuses that sequencing.
+func (r *TaskRepository) ListTasksByCaseSeqAndTaskType(caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error) {
+	var tasks []types.TaskOccurrenceType
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.TaskContextTable.Name, types.TaskContextTable.Alias))
+	tx = joinTaskContextWithTask(tx)
+	tx = joinTaskWithTaskType(tx)
+	tx = tx.Select("id, task_type_code, name_en AS task_type_name, pipeline_name, pipeline_version, genome_build, created_on")
+	tx = tx.Where("sequencing_experiment_id = ? AND (case_id = ? OR case_id IS NULL) AND task_type_code = ?", seqId, caseId, taskTypeCode)
+	tx = tx.Order("created_on DESC, id DESC")
+
+	if err := tx.Find(&tasks).Error; err != nil {
+		return nil, fmt.Errorf("error listing tasks for case %d / seq %d / type %s: %w", caseId, seqId, taskTypeCode, err)
+	}
+	return tasks, nil
 }
