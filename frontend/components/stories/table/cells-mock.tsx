@@ -173,6 +173,8 @@ export type BaseCellMockData = {
   length?: number;
   cnv_id?: string;
   seq_id?: string;
+  transcript_id?: string;
+  has_interpretation?: boolean;
 };
 
 const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
@@ -856,7 +858,13 @@ export const applicationFirstSetCellColumns = [
   baseCellColumnHelper.accessor(row => row, {
     id: 'clinical_interpretation',
     cell: info => (
-      <InterpretationCell occurrence={info.getValue() as any} InterpretationDialog={GermlineInterpretationDialog} />
+      <InterpretationCell
+        locusId={info.getValue().locus_id ?? ''}
+        transcriptId={info.getValue().transcript_id}
+        hasInterpretation={info.getValue().has_interpretation ?? false}
+        patientId={info.getValue().patient_id}
+        InterpretationDialog={GermlineInterpretationDialog}
+      />
     ),
     header: 'InterpretationCell (Variant-Entity)',
     size: 40,
@@ -997,6 +1005,8 @@ export const applicationCellData = [
     patient_id: 1,
     cnv_id: 'cnv-1',
     seq_id: 'seq-1',
+    transcript_id: 'NM_000000.1',
+    has_interpretation: true,
   },
   {
     locus_id: '-7485572602358923261',
@@ -1023,6 +1033,8 @@ export const applicationCellData = [
     patient_id: 2,
     cnv_id: 'cnv-2',
     seq_id: 'seq-2',
+    transcript_id: 'NM_000000.1',
+    has_interpretation: false,
   },
   {
     locus_id: '-7485572602358923261',

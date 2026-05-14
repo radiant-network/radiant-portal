@@ -2,7 +2,6 @@ import { ComponentType, ReactNode } from 'react';
 import { useSearchParams } from 'react-router';
 import { ClipboardList } from 'lucide-react';
 
-import { GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
 import { useDataTable } from '@/components/base/data-table/hooks/use-data-table';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -20,29 +19,37 @@ type InterpretationDialogProps = {
 };
 
 type InterpretationCellProps = {
-  occurrence: GermlineSNVOccurrence | SomaticSNVOccurrence;
+  locusId: string;
+  transcriptId?: string;
+  hasInterpretation: boolean;
   patientId?: number;
   InterpretationDialog: ComponentType<InterpretationDialogProps>;
 };
 
-function InterpretationCell({ occurrence, patientId, InterpretationDialog }: InterpretationCellProps) {
+function InterpretationCell({
+  locusId,
+  transcriptId,
+  hasInterpretation,
+  patientId,
+  InterpretationDialog,
+}: InterpretationCellProps) {
   const { t } = useI18n();
   const [_, setSearchParams] = useSearchParams();
   const { list } = useDataTable();
 
   const handleClick = () => {
     setSearchParams(prev => {
-      prev.set(SELECTED_VARIANT_PARAM, occurrence.locus_id);
+      prev.set(SELECTED_VARIANT_PARAM, locusId);
       return prev;
     });
   };
 
-  if (!occurrence.has_interpretation) {
+  if (!hasInterpretation) {
     return (
       <InterpretationDialog
         isCreation
-        locusId={occurrence.locus_id}
-        transcriptId={occurrence.transcript_id}
+        locusId={locusId}
+        transcriptId={transcriptId}
         patientId={patientId}
         handleSaveCallback={list?.mutate}
         renderTrigger={handleOpen => (

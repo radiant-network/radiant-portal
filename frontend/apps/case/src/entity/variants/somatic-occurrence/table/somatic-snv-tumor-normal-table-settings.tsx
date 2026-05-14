@@ -42,7 +42,9 @@ function getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId }: SomaticSN
       cell: info => (
         <div className="flex items-center gap-1">
           <InterpretationCell
-            occurrence={info.getValue()}
+            locusId={info.getValue().locus_id}
+            transcriptId={info.getValue().transcript_id}
+            hasInterpretation={info.getValue().has_interpretation}
             patientId={patientId}
             InterpretationDialog={SomaticInterpretationDialog}
           />
