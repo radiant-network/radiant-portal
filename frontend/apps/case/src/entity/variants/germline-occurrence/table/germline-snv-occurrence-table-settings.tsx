@@ -5,7 +5,7 @@ import { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
-import DepreciatedGeneCell from '@/components/base/data-table/cells/depreciated-gene-cell';
+import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
 import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
@@ -70,7 +70,7 @@ function getSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurr
     // Gene
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
-      cell: info => <DepreciatedGeneCell symbol={info.getValue()} />,
+      cell: info => <GeneCell symbol={info.getValue()} />,
       header: t('variant.headers.symbol'),
       size: 124,
       minSize: 40,
