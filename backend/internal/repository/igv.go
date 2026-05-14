@@ -96,7 +96,6 @@ func PrepareSomaticIgvTracks(tracks []IGVTrack, presigner utils.PreSigner) (*typ
 
 func prepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner, suffix func(IGVTrack) string) (*types.IGVTracks, error) {
 	merged := map[int]*types.IGVTrackEnriched{}
-	var alignments []*types.IGVTrackEnriched
 
 	// Transform to enriched tracks, merging cram/crai pairs together.
 	for _, r := range internalTracks {
@@ -115,7 +114,6 @@ func prepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner, suff
 				Name:       fmt.Sprintf("Reads: %s %s", r.SampleId, suffix(r)),
 			}
 			merged[r.SequencingExperimentId] = m
-			alignments = append(alignments, m)
 		}
 
 		presigned, err := presigner.GeneratePreSignedURL(r.URL)
@@ -134,9 +132,9 @@ func prepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner, suff
 		}
 	}
 
-	result := types.IGVTracks{Alignment: make([]types.IGVTrackEnriched, len(alignments))}
-	for i, m := range alignments {
-		result.Alignment[i] = *m
+	result := types.IGVTracks{Alignment: make([]types.IGVTrackEnriched, 0, len(merged))}
+	for _, m := range merged {
+		result.Alignment = append(result.Alignment, *m)
 	}
 	return &result, nil
 }
