@@ -10,26 +10,29 @@ import { Card, CardContent } from '../shadcn/card';
 
 import { useQBActiveQuery, useQBContext } from './hooks/use-query-builder';
 
-type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'>;
+type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'> & {
+  defaultPageSize?: number;
+};
 
 /**
  * Wrapper for data-table
  * Used to access QBContext and create list and count query
  */
-function QueryBuilderDataTable<T>({ ...props }: QueryBuilderDataTableProps<T>) {
+function QueryBuilderDataTable<T>({ defaultPageSize = 10, ...props }: QueryBuilderDataTableProps<T>) {
   const activeQuery = useQBActiveQuery();
   const { fetcher } = useQBContext();
 
   const [additionalFields, setAdditionalFields] = useState<string[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: defaultPageSize,
   });
 
   const [sorting, setSorting] = useState<SortBody[]>([]);
 
   const fetchList = useSWR<any[]>(
     {
+      id: props.id,
       listBody: {
         additional_fields: additionalFields,
         limit: pagination.pageSize,
@@ -51,6 +54,7 @@ function QueryBuilderDataTable<T>({ ...props }: QueryBuilderDataTableProps<T>) {
 
   const fetchCount = useSWR<Count>(
     {
+      id: props.id,
       countBody: {
         sqon: {
           content: activeQuery.content as SqonContent,

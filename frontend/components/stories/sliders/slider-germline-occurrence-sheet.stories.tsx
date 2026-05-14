@@ -3,15 +3,15 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { http } from 'msw';
 import { mocked } from 'storybook/test';
 
-import GermlineOccurrenceSheet from '@/apps/case/src/entity/variants/germline-occurrence/sliders/slider-germline-occurrence-sheet';
-import { FetchOccurrencesListContext } from '@/components/base/occurrence/hooks/use-occurrences-list';
+import { GermlineSNVOccurrence } from '@/api/api';
+import { GermlineOccurrenceSheetContent } from '@/apps/case/src/entity/variants/germline-occurrence/sliders/slider-germline-occurrence-sheet';
+import SliderSheet from '@/components/base/slider/slider-sheet';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
 import { caseEntityApi, httpCaseGermlineEntityApi } from '../api/api-case';
-import { httpGermlineOccurrenceExpandResponse, occurrenceGermlineExpandApi } from '../api/api-occurrence';
-import { GermlineSNVOccurrence } from '@/api/api';
 import { httpInterpretationGermlineOccurrenceResponse, interpretationsGermlineApi } from '../api/api-interpretations';
+import { httpGermlineOccurrenceExpandResponse, occurrenceGermlineExpandApi } from '../api/api-occurrence';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -87,17 +87,13 @@ const occurrenceMock = {
 
 const meta = {
   title: 'Sliders/Occurrences/Germline',
-  component: GermlineOccurrenceSheet,
+  component: GermlineOccurrenceSheetContent,
   beforeEach: async () => {
     mocked(useCaseIdFromParam).mockReturnValue(1);
     mocked(useSeqIdFromSearchParam).mockReturnValue(1);
   },
   args: {
     occurrence: occurrenceMock,
-    open: true,
-    setOpen: () => {
-      console.warn('setOpen');
-    },
     onPrevious: () => {
       console.warn('onPrevious');
     },
@@ -120,29 +116,17 @@ const meta = {
       updated_on: '2021-10-12T13:08:00Z',
       has_variants: true,
     },
-    onInterpretationSaved: () => {
-      console.warn('onInterpretationSaved');
-    },
   },
   decorators: [
     Story => (
       <BrowserRouter>
         <ConfigProvider config={config}>
-          <FetchOccurrencesListContext
-            value={{
-              mutate: () => {
-                console.warn('mutate');
-              },
-              loading: false,
-            }}
-          >
-            <Story />
-          </FetchOccurrencesListContext>
+          <Story />
         </ConfigProvider>
       </BrowserRouter>
     ),
   ],
-} satisfies Meta<typeof GermlineOccurrenceSheet>;
+} satisfies Meta<typeof GermlineOccurrenceSheetContent>;
 
 export default meta;
 
@@ -158,7 +142,11 @@ export const Default: Story = {
     },
   },
   args: {},
-  render: args => <GermlineOccurrenceSheet {...args} />,
+  render: args => (
+    <SliderSheet open>
+      <GermlineOccurrenceSheetContent {...args} />
+    </SliderSheet>
+  ),
 };
 
 export const Interpretation: Story = {
@@ -174,7 +162,11 @@ export const Interpretation: Story = {
   args: {
     occurrence: { ...occurrenceMock, has_interpretation: true },
   },
-  render: args => <GermlineOccurrenceSheet {...args} />,
+  render: args => (
+    <SliderSheet open>
+      <GermlineOccurrenceSheetContent {...args} />
+    </SliderSheet>
+  ),
 };
 
 export const RelationshipToProband: Story = {
@@ -202,5 +194,9 @@ export const RelationshipToProband: Story = {
       has_variants: true,
     },
   },
-  render: args => <GermlineOccurrenceSheet {...args} />,
+  render: args => (
+    <SliderSheet open>
+      <GermlineOccurrenceSheetContent {...args} />
+    </SliderSheet>
+  ),
 };
