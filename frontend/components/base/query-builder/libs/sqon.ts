@@ -8,7 +8,7 @@ import {
   RangeOperators,
   SET_ID_PREFIX,
   TSyntheticSqonContentValue,
-} from '@/components/base/query-builder-v3/type';
+} from '@/components/base/query-builder/type';
 import { AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 
 export const isSet = (value: IValueFacet): boolean =>

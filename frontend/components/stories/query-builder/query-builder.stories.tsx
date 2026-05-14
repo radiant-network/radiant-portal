@@ -7,13 +7,9 @@ import { mocked } from 'storybook/test';
 
 import { SavedFilterType } from '@/api/index';
 import { TableColumnDef } from '@/components/base/data-table/data-table';
-import {
-  getDefaultQBContext,
-  ICountInput,
-  IListInput,
-} from '@/components/base/query-builder-v3/hooks/use-query-builder';
-import QueryBuilder from '@/components/base/query-builder-v3/query-builder';
-import QueryBuilderDataTable from '@/components/base/query-builder-v3/query-builder-data-table';
+import { getDefaultQBContext, ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
+import QueryBuilder from '@/components/base/query-builder/query-builder';
+import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
 import { ApplicationId, ConfigProvider, FilterTypes, PortalConfig } from '@/components/cores/applications-config';
 import { RangeOperators } from '@/components/cores/sqon';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
@@ -251,7 +247,7 @@ const facetListConfig: PortalConfig = {
 };
 
 const meta = {
-  title: 'QueryBuilder/QueryBuilderV3',
+  title: 'Query Builder/Query Builder',
   component: QueryBuilder,
   beforeEach: async () => {
     mocked(useCaseIdFromParam).mockReturnValue(1);

@@ -7,7 +7,7 @@ import GreaterThanOperatorIcon from '@/components/base/icons/greater-than-operat
 import GreaterThanOrEqualOperatorIcon from '@/components/base/icons/greater-than-or-equal-operator-icon';
 import LessThanOperatorIcon from '@/components/base/icons/less-than-operator-icon';
 import LessThanOrEqualOperatorIcon from '@/components/base/icons/less-than-or-equal-operator-icon';
-import { useFacetConfig } from '@/components/base/query-builder-v3/facets/hooks/use-facet-config';
+import { useFacetConfig } from '@/components/base/query-builder/facets/hooks/use-facet-config';
 import { Button } from '@/components/base/shadcn/button';
 import { CardContent, CardFooter } from '@/components/base/shadcn/card';
 import { Input } from '@/components/base/shadcn/input';

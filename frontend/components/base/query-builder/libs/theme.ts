@@ -14,7 +14,7 @@ const theme: string[] = [
   '#9F1239',
   '#2D7D9A',
   '#847545',
-]
+];
 
 export function getColorByIndex(index: number): string {
   return theme[index % theme.length];

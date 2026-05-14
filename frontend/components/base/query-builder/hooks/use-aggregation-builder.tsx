@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 
 import { type Aggregation, AggregationBodyWithSqon, Statistics, StatisticsBodyWithSqon } from '@/api/api';
-import { useQBActiveSqon } from '@/components/base/query-builder-v3/hooks/use-query-builder';
+import { useQBActiveSqon } from '@/components/base/query-builder/hooks/use-query-builder';
 import { ApplicationId } from '@/components/cores/applications-config';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';

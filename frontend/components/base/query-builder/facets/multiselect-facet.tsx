@@ -6,7 +6,7 @@ import { SearchIcon } from 'lucide-react';
 import { Aggregation } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import CheckboxFilter from '@/components/base/checkboxes/checkbox-filter';
-import { useFacetConfig } from '@/components/base/query-builder-v3/facets/hooks/use-facet-config';
+import { useFacetConfig } from '@/components/base/query-builder/facets/hooks/use-facet-config';
 import { Button } from '@/components/base/shadcn/button';
 import { CardContent, CardFooter } from '@/components/base/shadcn/card';
 import { Input } from '@/components/base/shadcn/input';

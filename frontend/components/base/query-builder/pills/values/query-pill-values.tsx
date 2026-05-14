@@ -5,8 +5,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { SqonOpEnum } from '@/api/api';
 import QueryPillValuesContainer, {
   QueryPillValuesContainerProps,
-} from '@/components/base/query-builder-v3/pills/containers/query-pill-values-container';
-import { IValueFacet } from '@/components/base/query-builder-v3/type';
+} from '@/components/base/query-builder/pills/containers/query-pill-values-container';
+import { IValueFacet } from '@/components/base/query-builder/type';
 import { useI18n } from '@/components/hooks/i18n';
 
 const MAX_VALUES = 3;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { FacetContainer } from '@/components/base/query-builder-v3/facets/facet-container';
-import { SearchFacet } from '@/components/base/query-builder-v3/facets/search-facet';
+import { FacetContainer } from '@/components/base/query-builder/facets/facet-container';
+import { SearchFacet } from '@/components/base/query-builder/facets/search-facet';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
 import { AggregationConfig, FilterTypes } from '@/components/cores/applications-config';

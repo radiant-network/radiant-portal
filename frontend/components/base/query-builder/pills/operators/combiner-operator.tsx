@@ -1,6 +1,6 @@
 import { MouseEvent, useCallback } from 'react';
 
-import { QBActionType, useQBDispatch } from '@/components/base/query-builder-v3/hooks/use-query-builder';
+import { QBActionType, useQBDispatch } from '@/components/base/query-builder/hooks/use-query-builder';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
