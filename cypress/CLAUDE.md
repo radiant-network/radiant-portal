@@ -286,6 +286,14 @@ shouldShowField(fieldId: string, dataVariant: any) {
 
 When the existing components don't expose enough `data-cy` to target every field/link reliably, add them in the source as part of the test PR. Keep them kebab-case and aligned with the data key (e.g. data field `aa_change` → `data-cy="aa-change"`). For nested shared components (e.g. `ClassificationSection`), expose an optional `dataCy` prop and let the parent pass it.
 
+**Never introduce new DOM (no wrapper `<span>` / `<div>`) just to host a `data-cy`.** Always attach the attribute to an element that's already in the tree:
+
+1. The existing labelled element (`<div>`, `<a>`, `<Link>`, `<Button>`, …) — preferred.
+2. The custom component that already renders the target DOM node. Shared components that spread `...props` to their root element (e.g. anything extending `React.HTMLAttributes<HTMLDivElement>` like `TranscriptIdLink`, `ConsequenceIndicator`) accept `data-cy` directly: `<TranscriptIdLink data-cy="transcript-id" … />`.
+3. If the existing element is rendered unconditionally but the test expects `not.exist` when empty, gate the attribute with the same condition: `data-cy={value ? 'aa-change' : undefined}` (React omits `undefined` attributes). Do **not** wrap the children in a span just to make the attribute disappear.
+
+Wrapping with an extra `<span>` (or any layout-irrelevant element) pollutes the DOM, can break flex/grid layouts, and makes the snapshot harder to read.
+
 ## Conventions
 
 - **File naming**: PascalCase for page objects (`CasesTable.ts`), PascalCase for specs (`Columns.cy.ts`)
