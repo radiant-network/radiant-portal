@@ -21,6 +21,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
         )}
         {data?.clinvar_name && (
           <AnchorLink
+            data-cy="clinvar"
             size="sm"
             href={`https://www.ncbi.nlm.nih.gov/clinvar/variation/${data?.clinvar_name}`}
             variant="secondary"
@@ -34,6 +35,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
         )}
         {data?.locus && (
           <AnchorLink
+            data-cy="gnomad"
             size="sm"
             href={`https://gnomad.broadinstitute.org/variant/${data?.locus}?dataset=gnomad_r3`}
             variant="secondary"
@@ -46,6 +48,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
         )}
         {data?.rsnumber && (
           <AnchorLink
+            data-cy="dbsnp"
             size="sm"
             href={getDbSnpUrl(data.rsnumber)}
             variant="secondary"

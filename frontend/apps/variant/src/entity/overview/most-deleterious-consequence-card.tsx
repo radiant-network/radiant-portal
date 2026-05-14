@@ -28,6 +28,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="text-2xl font-semibold">
               {data.symbol && (
                 <a
+                  data-cy="gene"
                   href={getOmimOrgUrl({
                     symbol: data.symbol,
                   })}
@@ -41,14 +42,18 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               {!data.symbol && t('common.no_gene')}
             </div>
             <div className="text-xs font-mono">
-              <ConditionalField condition={!!data.aa_change}>{data.aa_change}</ConditionalField>
+              <ConditionalField condition={!!data.aa_change}>
+                <span data-cy="aa-change">{data.aa_change}</span>
+              </ConditionalField>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.consequence')}</div>
             <div className="flex items-center gap-2">
               <ConditionalField condition={!!pickedConsequence && !!data.vep_impact}>
-                <ConsequenceIndicator vepImpact={data.vep_impact!} consequence={pickedConsequence} />
+                <span data-cy="consequence">
+                  <ConsequenceIndicator vepImpact={data.vep_impact!} consequence={pickedConsequence} />
+                </span>
               </ConditionalField>
             </div>
           </div>
@@ -56,16 +61,17 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.clin_var')}</div>
             <div className="flex flex-wrap items-start gap-1">
               <ConditionalField condition={data?.clinvar ? data?.clinvar?.length > 0 : false}>
-                <>
+                <span data-cy="clinvar-classifications" className="flex flex-wrap items-start gap-1">
                   {(data?.clinvar ?? []).map(clinvar => (
                     <Link
                       key={clinvar}
+                      data-cy={clinvar.replace(/_/g, '-')}
                       to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
                     >
                       <ClassificationBadge key={clinvar} value={clinvar} />
                     </Link>
                   ))}
-                </>
+                </span>
               </ConditionalField>
             </div>
           </div>
@@ -82,6 +88,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="font-semibold font-mono">
               <ConditionalField condition={!!data?.germline_pc_wgs}>
                 <Link
+                  data-cy="patients"
                   to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`}
                   className="hover:underline"
                 >
@@ -103,6 +110,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="font-semibold font-mono">
               <ConditionalField condition={!!data?.gnomad_v3_af}>
                 <a
+                  data-cy="gnomad"
                   href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`}
                   target="_blank"
                   rel="noreferrer"
@@ -117,22 +125,29 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
         <Separator className="my-6" />
         <div className="flex items-center gap-6 text-sm">
           {data?.transcript_id && (
-            <TranscriptIdLink
-              transcriptId={data.transcript_id}
-              isManeSelect={data.is_mane_select}
-              isManePlus={false}
-              isCanonical={data.is_canonical}
-              linkClassName="text-foreground"
-            />
+            <span data-cy="transcript-id">
+              <TranscriptIdLink
+                transcriptId={data.transcript_id}
+                isManeSelect={data.is_mane_select}
+                isManePlus={false}
+                isCanonical={data.is_canonical}
+                linkClassName="text-foreground"
+              />
+            </span>
           )}
           {data?.exon_rank && data?.exon_total && (
-            <div className="font-mono">
+            <div data-cy="exon" className="font-mono">
               {t('variant_entity.overview.exon')}: {data?.exon_rank} / {data?.exon_total}
             </div>
           )}
-          {data?.dna_change && <div className="font-mono">{data?.dna_change}</div>}
+          {data?.dna_change && (
+            <div data-cy="dna-change" className="font-mono">
+              {data?.dna_change}
+            </div>
+          )}
           {data?.rsnumber && (
             <AnchorLink
+              data-cy="dbsnp"
               size="sm"
               href={`https://www.ncbi.nlm.nih.gov/snp/${data.rsnumber}`}
               className={'hover:underline font-mono'}

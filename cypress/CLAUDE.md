@@ -204,10 +204,92 @@ Avoid using hardcoded `cy.wait(ms)`. Use `cy.waitWhileLoad()` which polls for th
 3. **New API spec** — Place in `api/{Resource}/`. Use `cy.getToken()` + `cy.apiCall()`.
 4. **New custom command** — Add to `support/commands.ts` (UI) or `support/apiCommands.ts` (API), and update type definitions in `support/index.d.ts`.
 
+## Entity Page Validation Tests
+
+Pattern for tests that validate an entity-detail page (one tab = one set of cards/sections, e.g. `VariantEntity/Overview`). Reference implementation: `e2e/VariantEntity/Overview/` + `pom/pages/VariantEntity_Overview.ts`.
+
+### Folder & file naming
+
+```
+e2e/<Entity>/<Tab>/
+├── <Card>_InformationDisplayed.cy.ts   # text/value content per field
+├── <Card>_Hyperlinks.cy.ts              # href assertions
+└── …                                    # one spec file per (Card × Concern)
+```
+
+- One `describe` per file, one `it` per field/link.
+- `setupTest()` local helper does `cy.login()` + visit. Each `it` calls `setupTest()` (clean state per test).
+
+### POM organisation
+
+One file per tab: `pom/pages/<Entity>_<Tab>.ts`. Top-level shape:
+
+```ts
+const selectors = {
+  tab: '[data-cy="<tab>-tab"]',
+  <card>: {
+    card: '[data-cy="<card>-card"]',
+    // …card-specific function selectors (badge(key), row(id), …)
+  },
+};
+
+export const <Entity>_<Tab> = {
+  validations: { shouldHaveActiveTab, shouldHaveTitle },
+  <card>: {
+    actions:     { … },                  // user-triggered behaviours (clicks, dialog opens)
+    validations: { shouldShowField, shouldHaveLink, … },
+  },
+};
+```
+
+`shouldShowField(fieldId, dataVariant)` pattern:
+
+```ts
+shouldShowField(fieldId: string, dataVariant: any) {
+  if (isEmpty(dataVariant[fieldId])) {
+    cy.get(`${selectors.<card>.card} ${CommonSelectors.datacy(fieldId)}`).should('not.exist');
+  } else {
+    switch (fieldId) {
+      case '<special>': … break;        // e.g. list of badges, value with extra indicator
+      default:
+        cy.get(`${selectors.<card>.card} ${CommonSelectors.datacy(fieldId)}`).should('contain', dataVariant[fieldId]);
+        break;
+    }
+  }
+},
+```
+
+`shouldHaveLink(fieldId, dataVariant)` follows the same switch pattern and reads the URL from `getUrlLink(fieldId, dataVariant)`.
+
+### Selectors
+
+- Source code: add `data-cy` in **kebab-case** to each labelled field/link (e.g. `data-cy="gene-symbol"`, `data-cy="aa-change"`).
+- POM lookups: use `CommonSelectors.datacy(fieldId)` — the helper converts the snake_case `fieldId` from `Data.ts`/API to kebab-case automatically, so the same key drives the data, the selector, and the test name.
+- Compound queries: `${card} ${CommonSelectors.datacy(fieldId)}` (scoping to the card avoids accidental matches elsewhere on the page).
+
+### Test data (`pom/shared/Data.ts`)
+
+- **Reuse top-level fields first.** Add new fields directly under `variantGermline` (or the relevant entity object) when they map to API/variant data, not under a tab-specific sub-object.
+- Only create `<entity>.overview = { … }` (or similar) for values that are **genuinely page-specific** and don't exist elsewhere (e.g. aggregated classification counts).
+- **`null` means hidden.** A field set to `null` (or `[]`/`{}`) signals the helper that the DOM element should not exist. The convention is enforced symmetrically:
+  - `shouldShowField` short-circuits to `should('not.exist')` when `isEmpty(value)` is true.
+  - `validateTableFirstRowContent(null, …)` converts `null` to `'-'` to match the `EmptyField` fallback in tables.
+- Type the new sub-objects (`as Type` or `satisfies Type`) so empty placeholders (`null`, `[]`) don't bake narrow types and break user-filled values later.
+
+### Hyperlinks
+
+- Build hrefs via `getUrlLink(fieldId, data)` in `pom/shared/Utils.ts` rather than hardcoding URLs in the POM. Add a new `case` to `getUrlLink` for any new link source — keep all variant-URL construction in one switch.
+- Same `fieldId` convention as `shouldShowField`: snake_case key that matches the data field.
+- Internal app routes (e.g. `/variants/entity/{locus_id}?tab=…`) are valid `getUrlLink` cases too — keeps everything URL-related in one place.
+
+### Source code instrumentation
+
+When the existing components don't expose enough `data-cy` to target every field/link reliably, add them in the source as part of the test PR. Keep them kebab-case and aligned with the data key (e.g. data field `aa_change` → `data-cy="aa-change"`). For nested shared components (e.g. `ClassificationSection`), expose an optional `dataCy` prop and let the parent pass it.
+
 ## Conventions
 
 - **File naming**: PascalCase for page objects (`CasesTable.ts`), PascalCase for specs (`Columns.cy.ts`)
-- **Selectors**: Prefer `data-cy` attributes. Centralize reusable selectors in `CommonSelectors`.
+- **Selectors**: Prefer `data-cy` attributes. `data-cy` values must be kebab-case (e.g. `data-cy="case-id-cell"`). Centralize reusable selectors in `CommonSelectors`.
 - **Bilingual tests**: Use `buildBilingualRegExp()` from Utils when validating text that could be EN or FR.
 - **Column testing**: Define column metadata in the POM (`tableColumns[]`), use `getColumnPosition()` to find columns dynamically rather than hardcoding indices.
 - **API retries**: `cy.apiCall()` auto-retries 500 errors (3 attempts). For async batch operations, poll until processed.

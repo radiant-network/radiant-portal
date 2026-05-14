@@ -11,6 +11,7 @@ export const CommonSelectors = {
   colorIndicator: (color: string) => `[class*="text-indicator-${color}"]`,
   detailsButton: 'button:contains("Details")',
   comboboxButton: 'button[role="combobox"]',
+  datacy: (field: string) => `[data-cy="${field.replace(/_/g, '-')}"]`,
   deleteIcon: '[class*="lucide-trash"]',
   destructiveButton: 'button[color="destructive"]',
   dirtyClass: 'text-yellow-500',

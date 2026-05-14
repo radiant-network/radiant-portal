@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { getColumnPosition, getStatusColor, getStatusIcon, stringToRegExp } from 'pom/shared/Utils';
+import { getClass, getColumnPosition, getStatusColor, getStatusIcon, stringToRegExp } from 'pom/shared/Utils';
 
 const selectors = {
   tab: '[data-cy="cases-tab"]',
@@ -623,7 +623,7 @@ const interpretedColumnContentHandler = (columnID: string, dataInterpreted: any,
       cy.validateTableFirstRowContent(dataInterpreted.mondo_id, position, tableId);
       break;
     case 'classification':
-      cy.validateTableFirstRowContent(dataInterpreted[columnID], position, tableId);
+      cy.validateTableFirstRowContent(getClass(dataInterpreted[columnID]).abbrev, position, tableId);
       cy.validateTableFirstRowClass(CommonSelectors.tag('orange'), position, tableId);
       break;
     case 'zygosity':
