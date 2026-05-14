@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router';
 import { ClipboardList } from 'lucide-react';
 
 import { GermlineSNVOccurrence } from '@/api/api';
-import { useOccurrenceListContext } from '@/components/base/occurrence/hooks/use-occurrences-list';
+import { useDataTable } from '@/components/base/data-table/hooks/use-data-table';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
@@ -17,9 +17,8 @@ type InterpretationCellProps = {
 
 function InterpretationCell({ occurrence, patientId }: InterpretationCellProps) {
   const { t } = useI18n();
-  const { mutate, loading } = useOccurrenceListContext();
-
   const [_, setSearchParams] = useSearchParams();
+  const { list } = useDataTable();
 
   const handleClick = () => {
     setSearchParams(prev => {
@@ -35,11 +34,17 @@ function InterpretationCell({ occurrence, patientId }: InterpretationCellProps) 
         locusId={occurrence.locus_id}
         transcriptId={occurrence.transcript_id}
         patientId={patientId}
-        handleSaveCallback={mutate}
+        handleSaveCallback={list?.mutate}
         renderTrigger={handleOpen => (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button loading={loading} className="size-6" iconOnly variant="ghost" onClick={handleOpen}>
+              <Button
+                loading={list?.isLoading ?? false}
+                className="size-6"
+                iconOnly
+                variant="ghost"
+                onClick={handleOpen}
+              >
                 <ClipboardList className="text-muted-foreground/40" size={16} />
               </Button>
             </TooltipTrigger>

@@ -30,16 +30,10 @@ const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 type GermlineSNVOccurrenceTableSettingsProps = {
   caseEntity?: CaseEntity;
   patientId?: number;
-  onInterpretationSaved: () => void;
   t: TFunction<string, undefined>;
 };
 
-function getSNVOccurrenceColumns({
-  t,
-  onInterpretationSaved,
-  caseEntity,
-  patientId,
-}: GermlineSNVOccurrenceTableSettingsProps) {
+function getSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurrenceTableSettingsProps) {
   return [
     // TODO: To be enabled when row selection function are implemented
     // {
@@ -260,9 +254,7 @@ function getSNVOccurrenceColumns({
     // Actions Buttons
     {
       id: 'actions',
-      cell: info => (
-        <OccurrenceActionsMenu row={info.row} caseEntity={caseEntity} onInterpretationSaved={onInterpretationSaved} />
-      ),
+      cell: info => <OccurrenceActionsMenu row={info.row} caseEntity={caseEntity} />,
       size: 86,
       enableResizing: false,
       enablePinning: true,
