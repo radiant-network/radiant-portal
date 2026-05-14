@@ -10,7 +10,6 @@ import { Checkbox } from '@/components/base/shadcn/checkbox';
 import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 import { Spinner } from '@/components/base/shadcn/spinner';
 import { AggregationConfig } from '@/components/cores/applications-config';
-import { isEmptySqon } from '@/components/cores/query-builder';
 import { useI18n } from '@/components/hooks/i18n';
 import { numberFormatWithAbbrv } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
@@ -24,7 +23,7 @@ import {
   useQBSettings,
   useQBSqonsCount,
 } from './hooks/use-query-builder';
-import { isBoolean, isCombinedQuery, isRange, isSearchField } from './libs/sqon';
+import { isBoolean, isCombinedQuery, isRange, isSearchField, isSqonEmpty } from './libs/sqon';
 import { getColorByIndex } from './libs/theme';
 import BooleanQueryPill from './pills/boolean-query-pill';
 import CombinedQueryPill from './pills/combined-query-pill';
@@ -204,10 +203,10 @@ function QueryBar({ index, sqon }: QueryBarProps) {
       />
 
       {/* Empty query */}
-      {isEmptySqon(sqon) && <div className={queryBar({ active })}>{t('common.query_bar.empty')}</div>}
+      {isSqonEmpty(sqon) && <div className={queryBar({ active })}>{t('common.query_bar.empty')}</div>}
 
       {/* Query with pills */}
-      {!isEmptySqon(sqon) && (
+      {!isSqonEmpty(sqon) && (
         <>
           {/* selector */}
           <div

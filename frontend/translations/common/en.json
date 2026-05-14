@@ -109,16 +109,6 @@
       "confers_sensitivity.abbrev": "CS",
       "confers_sensitivity.tooltip": "Confers Sensitivity"
     },
-    "custom_pill_filter": {
-      "info": "You can create custom queries by adding criteria to the query bar and clicking the save button.",
-      "delete_dialog": {
-        "title": "Delete this query?",
-        "description": "You are about to delete this custom query \"{{title}}\". which may affect your results.",
-        "cancel": "Cancel",
-        "ok": "Delete"
-      },
-      "learn_more": "Learn more"
-    },
     "file_format": {
       "cram": "CRAM File",
       "crai": "CRAI Index File",
@@ -160,22 +150,6 @@
         "title": "Delete this query?",
         "cancel": "Cancel",
         "ok": "Delete"
-      },
-      "custom_pill": {
-        "create_tooltip": "Create a custom query",
-        "cannot_save_as_custom_pill": "Custom queries cannot include other custom queries"
-      },
-      "save_dialog": {
-        "title": "Save this query",
-        "fields": {
-          "title": {
-            "label": "Query name",
-            "placeholder": "Untitled query"
-          }
-        },
-        "notice": "You will find your saved queries in the sidebar under the \"Queries\" heading.",
-        "cancel": "Cancel",
-        "ok": "Save"
       }
     },
     "query_pill": {
@@ -183,30 +157,6 @@
         "change_operator_to": "Change operator to",
         "and": "and",
         "or": "or"
-      },
-      "custom_pill": {
-        "edit_dialog": {
-          "title": "Edit custom query",
-          "cancel": "Cancel",
-          "ok": "Save"
-        },
-        "cant_be_empty_dialog": {
-          "title": "Query cannot be empty",
-          "description": "Your custom query must contain at least one criteria.",
-          "ok": "Close"
-        },
-        "title_exists_dialog": {
-          "title": "Name already in use",
-          "description": "A custom query with this name already exists. Please assign a unique name.",
-          "ok": "Close"
-        },
-        "save_dialog": {
-          "title": "Edit this query?",
-          "confirmation_message": "You are about to edit the custom query \"{title}\", which may affect your results.",
-          "affected_filters": "Affected saved filters:",
-          "cancel": "Cancel",
-          "ok": "Save"
-        }
       }
     },
     "relationships": {
@@ -235,7 +185,6 @@
       "delete_dialog": {
         "title": "Permanently delete this filter?",
         "description": "You are about to permanently delete this filter and all of its queries.",
-        "cancel": "Cancel",
         "ok": "Delete filter"
       },
       "duplicate_tooltip": "Duplicate filter",
@@ -259,22 +208,12 @@
       "manage_filters": "Manage filters",
       "manage_dialog": {
         "title": "Manage filters",
-        "close": "Close",
         "last_save_at": "Last saved at: {{lastSaveAt}} ago"
       },
       "new_filter": "New filter",
       "save_tooltip": {
         "when_empty": "Add a query to save",
-        "when_dirty": "Save changes",
         "default": "Save filter"
-      },
-      "share_tooltip": {
-        "when_not_saved": "Save filter to share",
-        "default": "Share (Copy url)"
-      },
-      "favorite_tooltip": {
-        "set": "Set as default filter",
-        "unset": "Unset default filter"
       },
       "discard_tooltip": "Discard unsaved changes",
       "no_discard_tooltip": "No changes to discard",
@@ -285,7 +224,6 @@
         "deleted": "Filter deleted",
         "updated": "Filter updated",
         "errors": {
-          "fetching": "Unable to fetch filters",
           "duplicated": "A filter with this name already exists",
           "created": "Unable to create filter",
           "updated": "Unable to update filter",
@@ -294,7 +232,6 @@
       }
     },
     "components": {
-      "query_pill_remote": "Composant Query Pill Remote",
       "empty_cell": "-"
     },
     "table": {

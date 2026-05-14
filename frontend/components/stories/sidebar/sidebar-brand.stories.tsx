@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { SidebarGroups } from '@/components/base/query-filters/sidebar-groups';
+import { SidebarGroups } from '@/components/base/query-builder-v3/facets/sidebar-groups';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';
 import { FilterTypes } from '@/components/cores/applications-config';
 import { RangeOperators } from '@/components/cores/sqon';

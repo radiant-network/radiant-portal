@@ -1,4 +1,3 @@
-// import { SqonOpEnum } from "@/api/api";
 import { SqonOpEnum } from '../../api/api';
 
 export const RangeOperators = {
