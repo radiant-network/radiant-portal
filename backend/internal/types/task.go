@@ -4,6 +4,30 @@ import (
 	"time"
 )
 
+// Task type codes (values found in the task_type table).
+const (
+	RadiantGermlineAnnotationTask               = "radiant_germline_annotation"
+	RadiantSomaticAnnotationTask                = "radiant_somatic_annotation"
+	ExomiserTaskTypeCode                        = "exomiser"
+	AlignmentGermlineVariantCallingTaskTypeCode = "alignment_germline_variant_calling"
+	AlignmentSomaticVariantCallingTaskTypeCode  = "alignment_somatic_variant_calling"
+)
+
+// TaskOccurrenceType is a row of GET /cases/{case_id}/{seq_id}/tasks_with_occurrences —
+// a task attached to the (case, sequencing) pair that produces occurrences of the
+// requested OccurrenceType.
+// @Description Task attached to a (case, sequencing) pair, used by the Variants tab task dropdown.
+// @Name TaskOccurrenceType
+type TaskOccurrenceType struct {
+	ID              int       `json:"id" validate:"required"`
+	TaskTypeCode    string    `json:"task_type_code" validate:"required"`
+	TaskTypeName    string    `json:"task_type_name" validate:"required"`
+	PipelineName    string    `json:"pipeline_name,omitempty"`
+	PipelineVersion string    `json:"pipeline_version" validate:"required"`
+	GenomeBuild     string    `json:"genome_build,omitempty"`
+	CreatedOn       time.Time `json:"created_on" validate:"required"`
+}
+
 type Task struct {
 	ID              int `gorm:"unique;primaryKey;autoIncrement"`
 	TaskTypeCode    string

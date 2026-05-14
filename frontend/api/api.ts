@@ -4711,6 +4711,55 @@ export interface StatisticsBodyWithSqon {
     'sqon'?: Sqon;
 }
 /**
+ * Task attached to a (case, sequencing) pair, used by the Variants tab task dropdown.
+ * @export
+ * @interface TaskOccurrenceType
+ */
+export interface TaskOccurrenceType {
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'created_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'genome_build'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof TaskOccurrenceType
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'pipeline_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'pipeline_version': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'task_type_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'task_type_name': string;
+}
+/**
  * 
  * @export
  * @interface Term
@@ -6012,6 +6061,55 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+         * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        caseTasksWithOccurrences: async (caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('caseTasksWithOccurrences', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('caseTasksWithOccurrences', 'seqId', seqId)
+            // verify required parameter 'dataType' is not null or undefined
+            assertParamExists('caseTasksWithOccurrences', 'dataType', dataType)
+            const localVarPath = `/cases/{case_id}/{seq_id}/tasks_with_occurrences`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (dataType !== undefined) {
+                localVarQueryParameter['data_type'] = dataType;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
          * @param {*} [options] Override http request option.
@@ -6195,6 +6293,21 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+         * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async caseTasksWithOccurrences(caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TaskOccurrenceType>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.caseTasksWithOccurrences(caseId, seqId, dataType, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.caseTasksWithOccurrences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
          * @param {*} [options] Override http request option.
@@ -6284,6 +6397,18 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          */
         caseEntityDocumentsSearch(caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentsSearchResponse> {
             return localVarFp.caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+         * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        caseTasksWithOccurrences(caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig): AxiosPromise<Array<TaskOccurrenceType>> {
+            return localVarFp.caseTasksWithOccurrences(caseId, seqId, dataType, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve CaseFilters cases filters
@@ -6376,6 +6501,20 @@ export class CasesApi extends BaseAPI {
     }
 
     /**
+     * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+     * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequencing Experiment ID
+     * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public caseTasksWithOccurrences(caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).caseTasksWithOccurrences(caseId, seqId, dataType, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Retrieve CaseFilters cases filters
      * @summary Get CaseFilters cases filters
      * @param {*} [options] Override http request option.
@@ -6412,6 +6551,15 @@ export class CasesApi extends BaseAPI {
     }
 }
 
+/**
+ * @export
+ */
+export const CaseTasksWithOccurrencesDataTypeEnum = {
+    GermlineSnv: 'germline_snv',
+    GermlineCnv: 'germline_cnv',
+    SomaticSnv: 'somatic_snv'
+} as const;
+export type CaseTasksWithOccurrencesDataTypeEnum = typeof CaseTasksWithOccurrencesDataTypeEnum[keyof typeof CaseTasksWithOccurrencesDataTypeEnum];
 
 
 /**

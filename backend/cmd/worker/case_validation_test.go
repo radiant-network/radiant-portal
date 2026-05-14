@@ -57,6 +57,10 @@ func (m *CaseValidationMockRepo) GetTaskHasDocumentByTaskId(taskId int) ([]*repo
 	return nil, nil
 }
 
+func (m *CaseValidationMockRepo) ListTasksByCaseSeqAndTaskType(caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error) {
+	return nil, nil
+}
+
 func (m *CaseValidationMockRepo) CreateCase(c *repository.Case) error {
 	return nil
 }
@@ -3749,7 +3753,7 @@ func Test_validateTaskAliquot_ErrorExomiserNotExactly1Aliquot(t *testing.T) {
 			},
 			Tasks: []*types.CaseTaskBatch{
 				{
-					TypeCode: ExomiserTaskTypeCode,
+					TypeCode: types.ExomiserTaskTypeCode,
 					Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
 				},
 			},
@@ -3781,7 +3785,7 @@ func Test_validateTaskAliquot_ErrorAlignmentGermlineVariantCallingNotExactly1Ali
 			},
 			Tasks: []*types.CaseTaskBatch{
 				{
-					TypeCode: AlignmentGermlineVariantCallingTaskTypeCode,
+					TypeCode: types.AlignmentGermlineVariantCallingTaskTypeCode,
 					Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
 				},
 			},

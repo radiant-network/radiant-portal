@@ -73,6 +73,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"variants/germline/1/external_frequencies",
 			"variants/germline/1/internal_frequencies",
 			"notes/1/1/1/10000",
+			"cases/1/1/tasks_with_occurrences?data_type=germline_snv",
 		} {
 			resp, err = http.Get(fmt.Sprintf("http://localhost:%d/%s", randomPort, route))
 			assert.NoError(t, err)
@@ -152,6 +153,7 @@ func Test_OpenFGA_Authorization(t *testing.T) {
 				{"variants/germline/1000/header", 200},
 				{"variants/germline/1000/external_frequencies", 200},
 				{"variants/germline/1000/internal_frequencies?split=project", 200},
+				{"cases/1/1/tasks_with_occurrences?data_type=germline_snv", 200},
 			}
 
 			for _, tc := range getTests {
