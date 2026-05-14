@@ -41,37 +41,37 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               )}
               {!data.symbol && t('common.no_gene')}
             </div>
-            <div className="text-xs font-mono">
-              <ConditionalField condition={!!data.aa_change}>
-                <span data-cy="aa-change">{data.aa_change}</span>
-              </ConditionalField>
+            <div data-cy={data.aa_change ? 'aa-change' : undefined} className="text-xs font-mono">
+              <ConditionalField condition={!!data.aa_change}>{data.aa_change}</ConditionalField>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.consequence')}</div>
-            <div className="flex items-center gap-2">
+            <div
+              data-cy={pickedConsequence && data.vep_impact ? 'consequence' : undefined}
+              className="flex items-center gap-2"
+            >
               <ConditionalField condition={!!pickedConsequence && !!data.vep_impact}>
-                <span data-cy="consequence">
-                  <ConsequenceIndicator vepImpact={data.vep_impact!} consequence={pickedConsequence} />
-                </span>
+                <ConsequenceIndicator vepImpact={data.vep_impact!} consequence={pickedConsequence} />
               </ConditionalField>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.clin_var')}</div>
-            <div className="flex flex-wrap items-start gap-1">
+            <div
+              data-cy={data?.clinvar?.length ? 'clinvar-classifications' : undefined}
+              className="flex flex-wrap items-start gap-1"
+            >
               <ConditionalField condition={data?.clinvar ? data?.clinvar?.length > 0 : false}>
-                <span data-cy="clinvar-classifications" className="flex flex-wrap items-start gap-1">
-                  {(data?.clinvar ?? []).map(clinvar => (
-                    <Link
-                      key={clinvar}
-                      data-cy={clinvar.replace(/_/g, '-')}
-                      to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
-                    >
-                      <ClassificationBadge key={clinvar} value={clinvar} />
-                    </Link>
-                  ))}
-                </span>
+                {(data?.clinvar ?? []).map(clinvar => (
+                  <Link
+                    key={clinvar}
+                    data-cy={clinvar.replace(/_/g, '-')}
+                    to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
+                  >
+                    <ClassificationBadge key={clinvar} value={clinvar} />
+                  </Link>
+                ))}
               </ConditionalField>
             </div>
           </div>
@@ -125,15 +125,14 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
         <Separator className="my-6" />
         <div className="flex items-center gap-6 text-sm">
           {data?.transcript_id && (
-            <span data-cy="transcript-id">
-              <TranscriptIdLink
-                transcriptId={data.transcript_id}
-                isManeSelect={data.is_mane_select}
-                isManePlus={false}
-                isCanonical={data.is_canonical}
-                linkClassName="text-foreground"
-              />
-            </span>
+            <TranscriptIdLink
+              data-cy="transcript-id"
+              transcriptId={data.transcript_id}
+              isManeSelect={data.is_mane_select}
+              isManePlus={false}
+              isCanonical={data.is_canonical}
+              linkClassName="text-foreground"
+            />
           )}
           {data?.exon_rank && data?.exon_total && (
             <div data-cy="exon" className="font-mono">
