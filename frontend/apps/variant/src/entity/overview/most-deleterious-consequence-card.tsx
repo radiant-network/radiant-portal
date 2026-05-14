@@ -63,15 +63,17 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               className="flex flex-wrap items-start gap-1"
             >
               <ConditionalField condition={data?.clinvar ? data?.clinvar?.length > 0 : false}>
-                {(data?.clinvar ?? []).map(clinvar => (
-                  <Link
-                    key={clinvar}
-                    data-cy={clinvar.replace(/_/g, '-')}
-                    to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
-                  >
-                    <ClassificationBadge key={clinvar} value={clinvar} />
-                  </Link>
-                ))}
+                <>
+                  {(data?.clinvar ?? []).map(clinvar => (
+                    <Link
+                      key={clinvar}
+                      data-cy={clinvar.replace(/_/g, '-')}
+                      to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
+                    >
+                      <ClassificationBadge key={clinvar} value={clinvar} />
+                    </Link>
+                  ))}
+                </>
               </ConditionalField>
             </div>
           </div>
