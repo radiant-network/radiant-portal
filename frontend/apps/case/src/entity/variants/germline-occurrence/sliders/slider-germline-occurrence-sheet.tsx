@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
 import { SquarePen } from 'lucide-react';
+import useSWR from 'swr';
 
-import { CaseSequencingExperiment, GermlineSNVOccurrence } from '@/api/api';
+import { CaseSequencingExperiment, GermlineSNVOccurrence, InterpretationGermline } from '@/api/api';
 import { useDataTable, useDataTableRowNavigation } from '@/components/base/data-table/hooks/use-data-table';
 import { NotesProvider } from '@/components/base/notes/hooks/use-notes';
 import NotesSliderSheet from '@/components/base/notes/notes-slider-sheet';
@@ -17,10 +18,28 @@ import SliderSheet from '@/components/base/slider/slider-sheet';
 import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
 import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
 import { useI18n } from '@/components/hooks/i18n';
+import { interpretationApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
 import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
+
+type InterpretationInput = {
+  caseId: string;
+  seqId: string;
+  locusId: string;
+  transcriptId: string;
+};
+
+async function fetchInterpretation(input: InterpretationInput) {
+  const response = await interpretationApi.getInterpretationGermline(
+    input.caseId,
+    input.seqId,
+    input.locusId,
+    input.transcriptId,
+  );
+  return response.data;
+}
 
 type GermlineOccurrenceSliderSheetProps = {
   children?: React.ReactElement;
@@ -81,9 +100,25 @@ export function GermlineOccurrenceSheetContent({
     patientSelected,
   );
 
+  const interpretation = useSWR<InterpretationGermline>(
+    {
+      caseId,
+      seqId: occurrence.seq_id,
+      locusId: occurrence.locus_id,
+      transcriptId: expandResult.data?.transcript_id,
+    },
+    fetchInterpretation,
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+      shouldRetryOnError: false,
+    },
+  );
+
   const handleInterpretationSaved = useCallback(() => {
     list?.mutate();
-  }, [list]);
+    interpretation.mutate();
+  }, [list, interpretation]);
 
   if (isLoading || !expandResult.data) {
     return <SliderSheetSkeleton />;
