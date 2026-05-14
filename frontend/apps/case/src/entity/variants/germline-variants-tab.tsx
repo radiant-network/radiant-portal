@@ -54,7 +54,7 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
       {activeInterface == GermlineVariantInterface.SNV && (
         <SNVTab seqId={seqId} patientSelected={patientSelected} caseEntity={caseEntity} />
       )}
-      {activeInterface == GermlineVariantInterface.CNV && <CNVTab seqId={seqId} />}
+      {activeInterface == GermlineVariantInterface.CNV && <CNVTab seqId={seqId} caseEntity={caseEntity} />}
     </div>
   );
 }

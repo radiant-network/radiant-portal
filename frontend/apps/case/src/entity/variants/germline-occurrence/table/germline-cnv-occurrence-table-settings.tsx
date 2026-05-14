@@ -1,7 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
-import { GermlineCNVOccurrence } from '@/api/api';
+import { CaseEntity, GermlineCNVOccurrence } from '@/api/api';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import NumberListCell from '@/components/base/data-table/cells/number-list-cell';
@@ -10,14 +10,40 @@ import { createColumnSettings, TableColumnDef } from '@/components/base/data-tab
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
 
+import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
+
 import ClingenCell from './cells/clingen-cell';
 import CNVNameCell from './cells/cnv-name-cell';
 import OverlappingGeneLinkCell from './cells/overlapping-gene-link-cell';
 
 const columnHelper = createColumnHelper<GermlineCNVOccurrence>();
 
-function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
+type GermlineCNVOccurrenceTableSettingsProps = {
+  caseEntity?: CaseEntity;
+  t: TFunction<string, undefined>;
+};
+
+function getCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenceTableSettingsProps) {
   return [
+    columnHelper.accessor(row => row, {
+      id: 'row-info',
+      cell: info => (
+        <div className="flex items-center gap-1">
+          <OccurrenceFlagCell
+            caseId={caseEntity?.case_id}
+            taskId={info.row.original.task_id}
+            seqId={info.row.original.seq_id}
+            occurrenceId={info.row.original.cnv_id}
+            flag={info.row.original.flag_type}
+          />
+        </div>
+      ),
+      header: () => null,
+      size: 32,
+      enablePinning: false,
+      enableResizing: false,
+      enableSorting: false,
+    }),
     // Genes
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
@@ -217,6 +243,12 @@ function getCNVOccurrenceColumns(t: TFunction<string, undefined>) {
 }
 
 const defaultCNVSettings = createColumnSettings([
+  {
+    id: 'row-info',
+    visible: true,
+    fixed: true,
+    pinningPosition: 'left',
+  },
   {
     id: 'symbol',
     visible: true,

@@ -21,6 +21,7 @@ import { Badge } from '@/components/base/shadcn/badge';
 
 import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
+import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import VariantNoteCell from '../../table/cells/variant-note-cell';
 import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
 
@@ -36,15 +37,6 @@ type GermlineSNVOccurrenceTableSettingsProps = {
 
 function getSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurrenceTableSettingsProps) {
   return [
-    // TODO: To be enabled when row selection function are implemented
-    // {
-    //   id: 'row_selection',
-    //   header: (header: HeaderContext<any, Occurrence>) => <RowSelectionHeader table={header.table} />,
-    //   cell: info => <RowSelectionCell row={info.row} />,
-    //   size: 40,
-    //   enablePinning: false,
-    //   enableResizing: false,
-    // },
     // interpretation and note cell
     columnHelper.accessor(row => row, {
       id: 'row-info',
@@ -58,10 +50,17 @@ function getSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurr
             InterpretationDialog={GermlineInterpretationDialog}
           />
           <VariantNoteCell occurrence={info.getValue()} />
+          <OccurrenceFlagCell
+            caseId={caseEntity?.case_id}
+            taskId={info.row.original.task_id}
+            seqId={info.row.original.seq_id}
+            occurrenceId={info.row.original.locus_id}
+            flag={info.row.original.flag_type}
+          />
         </div>
       ),
       header: () => null,
-      size: 68,
+      size: 84,
       enablePinning: false,
       enableResizing: false,
       enableSorting: false,

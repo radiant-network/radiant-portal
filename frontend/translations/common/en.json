@@ -1693,6 +1693,11 @@
       }
     }
   },
+  "occurrence_flag": {
+    "flag": "Flag",
+    "pin": "Pin",
+    "star": "Star"
+  },
   "notes": {
     "variant": {
       "title": "Variant Comments",
