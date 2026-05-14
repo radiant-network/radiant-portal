@@ -2049,6 +2049,11 @@ VALUES ('1', '1', '1000', 'T001', 'MONDO:0000001', 'LA6668-3', 'PM1', 'autosomal
        ('2', '1', '1000', 'T001', 'MONDO:0000001', 'LA26332-9', 'PS1,PM1,PP2', 'autosomal_dominant_de_novo,x_linked_dominant_de_novo', '2025-06-27 19:51:00.0')
 ON CONFLICT (sequencing_id, case_id, locus_id, transcript_id) DO NOTHING;
 
+INSERT INTO "occurrence_flag" (case_id, occurrence_id, seq_id, task_id, flag_type)
+VALUES (1, '1000', 1, 1, 'flag'),
+       (7, '2000', 19, 19, 'pin')
+ON CONFLICT (case_id, occurrence_id, seq_id, task_id) DO NOTHING;
+
 -- Reset sequences to prevent duplicate key errors when inserting new records
 SELECT setval('document_id_seq', (SELECT MAX(id) FROM document));
 SELECT setval('organization_id_seq', (SELECT MAX(id) FROM organization));
