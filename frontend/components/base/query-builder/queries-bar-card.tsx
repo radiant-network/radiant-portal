@@ -10,9 +10,9 @@ import {
   useQBContext,
   useQBDispatch,
   useQBSettings,
-} from '@/components/base/query-builder-v3/hooks/use-query-builder';
-import { hasEmptyQuery } from '@/components/base/query-builder-v3/libs/sqon';
-import QueryBar from '@/components/base/query-builder-v3/query-bar';
+} from '@/components/base/query-builder/hooks/use-query-builder';
+import { hasEmptyQuery } from '@/components/base/query-builder/libs/sqon';
+import QueryBar from '@/components/base/query-builder/query-bar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
 import { Card } from '@/components/base/shadcn/card';

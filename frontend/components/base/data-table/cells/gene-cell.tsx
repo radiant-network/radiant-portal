@@ -7,7 +7,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { BooleanOperators } from '@/components/cores/sqon';
 
-import { QBActionType, useQBDispatch, useQBMultiselectValue } from '../../query-builder-v3/hooks/use-query-builder';
+import { QBActionType, useQBDispatch, useQBMultiselectValue } from '../../query-builder/hooks/use-query-builder';
 
 type GeneCellProps = {
   className?: string;

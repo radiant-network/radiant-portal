@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { BooleanFacet } from '@/components/base/query-builder-v3/facets/boolean-facet';
-import { MultiSelectFacet } from '@/components/base/query-builder-v3/facets/multiselect-facet';
-import { NumericalFacet } from '@/components/base/query-builder-v3/facets/numerical-facet';
+import { BooleanFacet } from '@/components/base/query-builder/facets/boolean-facet';
+import { MultiSelectFacet } from '@/components/base/query-builder/facets/multiselect-facet';
+import { NumericalFacet } from '@/components/base/query-builder/facets/numerical-facet';
 import {
   AccordionContent,
   AccordionItem,

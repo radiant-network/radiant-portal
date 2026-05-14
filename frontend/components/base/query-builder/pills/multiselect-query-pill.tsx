@@ -1,13 +1,13 @@
 import { useCallback } from 'react';
 
-import { FacetComponent } from '@/components/base/query-builder-v3/facets/facet-container';
-import { QBActionType, useQBContext, useQBDispatch } from '@/components/base/query-builder-v3/hooks/use-query-builder';
-import { getAggregationByField } from '@/components/base/query-builder-v3/libs/aggregations';
-import QueryPillContainer from '@/components/base/query-builder-v3/pills/containers/query-pill-container';
-import LabelOperator from '@/components/base/query-builder-v3/pills/operators/label-operator';
-import Operator from '@/components/base/query-builder-v3/pills/operators/operator';
-import QueryPillValues from '@/components/base/query-builder-v3/pills/values/query-pill-values';
-import { IValueFacet } from '@/components/base/query-builder-v3/type';
+import { FacetComponent } from '@/components/base/query-builder/facets/facet-container';
+import { QBActionType, useQBContext, useQBDispatch } from '@/components/base/query-builder/hooks/use-query-builder';
+import { getAggregationByField } from '@/components/base/query-builder/libs/aggregations';
+import QueryPillContainer from '@/components/base/query-builder/pills/containers/query-pill-container';
+import LabelOperator from '@/components/base/query-builder/pills/operators/label-operator';
+import Operator from '@/components/base/query-builder/pills/operators/operator';
+import QueryPillValues from '@/components/base/query-builder/pills/values/query-pill-values';
+import { IValueFacet } from '@/components/base/query-builder/type';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 
 type MultiSelectPillProps = {
