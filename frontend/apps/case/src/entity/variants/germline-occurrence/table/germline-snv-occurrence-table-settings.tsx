@@ -19,10 +19,11 @@ import { createColumnSettings, TableColumnDef } from '@/components/base/data-tab
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
 
+import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
 import VariantNoteCell from '../../table/cells/variant-note-cell';
+import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
 
-import InterpretationCell from './cells/interpretation-cell';
 import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
@@ -49,7 +50,13 @@ function getSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurr
       id: 'row-info',
       cell: info => (
         <div className="flex items-center gap-1">
-          <InterpretationCell occurrence={info.getValue()} patientId={patientId} />
+          <InterpretationCell
+            locusId={info.getValue().locus_id}
+            transcriptId={info.getValue().transcript_id}
+            hasInterpretation={info.getValue().has_interpretation}
+            patientId={patientId}
+            InterpretationDialog={GermlineInterpretationDialog}
+          />
           <VariantNoteCell occurrence={info.getValue()} />
         </div>
       ),

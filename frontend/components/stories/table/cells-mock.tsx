@@ -1,13 +1,14 @@
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { Term, VepImpact } from '@/api/api';
+import GermlineInterpretationDialog from '@/apps/case/src/entity/variants/germline-occurrence/interpretation/germline-interpretation-dialog';
 import ClingenCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/clingen-cell';
 import CNVNameCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/cnv-name-cell';
-import HgvsgCell from '@/apps/case/src/entity/variants/table/cells/hgvsg-cell';
-import InterpretationCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/interpretation-cell';
 import OccurrenceActionsMenu from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/occurrence-actions-cell';
 import OverlapTypeGeneCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/overlap-type-gene-cell';
 import OverlappingGeneLinkCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/overlapping-gene-link-cell';
+import InterpretationCell from '@/apps/case/src/entity/variants/interpretation/interpretation-cell';
+import HgvsgCell from '@/apps/case/src/entity/variants/table/cells/hgvsg-cell';
 import CaseActionsMenuCell from '@/apps/case/src/exploration/table/cells/case-actions-menu-cell';
 import UninterpretedCasePreviewCell from '@/apps/variant/src/entity/cases/table/cells/uninterpreted-case-preview-cell';
 import { Status } from '@/components/base/badges/status-badge';
@@ -172,6 +173,8 @@ export type BaseCellMockData = {
   length?: number;
   cnv_id?: string;
   seq_id?: string;
+  transcript_id?: string;
+  has_interpretation?: boolean;
 };
 
 const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
@@ -846,12 +849,23 @@ export const thirdSetCellData = [
 export const applicationFirstSetCellColumns = [
   baseCellColumnHelper.accessor(row => row, {
     id: 'hgvsg',
-    cell: info => <HgvsgCell occurrence={info.row.original as any} />,
+    cell: info => {
+      const row = info.row.original as any;
+      return <HgvsgCell locusId={row.locus_id} hgvsg={row.hgvsg} />;
+    },
     header: 'HgvsgCell',
   }),
   baseCellColumnHelper.accessor(row => row, {
     id: 'clinical_interpretation',
-    cell: info => <InterpretationCell occurrence={info.getValue() as any} />,
+    cell: info => (
+      <InterpretationCell
+        locusId={info.getValue().locus_id ?? ''}
+        transcriptId={info.getValue().transcript_id}
+        hasInterpretation={info.getValue().has_interpretation ?? false}
+        patientId={info.getValue().patient_id}
+        InterpretationDialog={GermlineInterpretationDialog}
+      />
+    ),
     header: 'InterpretationCell (Variant-Entity)',
     size: 40,
     enablePinning: false,
@@ -991,6 +1005,8 @@ export const applicationCellData = [
     patient_id: 1,
     cnv_id: 'cnv-1',
     seq_id: 'seq-1',
+    transcript_id: 'NM_000000.1',
+    has_interpretation: true,
   },
   {
     locus_id: '-7485572602358923261',
@@ -1017,6 +1033,8 @@ export const applicationCellData = [
     patient_id: 2,
     cnv_id: 'cnv-2',
     seq_id: 'seq-2',
+    transcript_id: 'NM_000000.1',
+    has_interpretation: false,
   },
   {
     locus_id: '-7485572602358923261',

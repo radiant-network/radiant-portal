@@ -18,12 +18,13 @@ import { createColumnSettings, TableColumnDef } from '@/components/base/data-tab
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
 
+import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
 import VariantNoteCell from '../../table/cells/variant-note-cell';
+import SomaticInterpretationDialog from '../interpretation/somatic-interpretation-dialog';
 
 import SomaticActionsCell from './cells/somatic-actions-cell';
 import SomaticHotspotCell from './cells/somatic-hotspot-cell';
-import SomaticInterpretationCell from './cells/somatic-interpretation-cell';
 
 const columnHelper = createColumnHelper<SomaticSNVOccurrence>();
 
@@ -40,7 +41,13 @@ function getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId }: SomaticSN
       id: 'row-info',
       cell: info => (
         <div className="flex items-center gap-1">
-          <SomaticInterpretationCell occurrence={info.getValue()} patientId={patientId} />
+          <InterpretationCell
+            locusId={info.getValue().locus_id}
+            transcriptId={info.getValue().transcript_id}
+            hasInterpretation={info.getValue().has_interpretation}
+            patientId={patientId}
+            InterpretationDialog={SomaticInterpretationDialog}
+          />
           <VariantNoteCell occurrence={info.getValue()} />
         </div>
       ),
