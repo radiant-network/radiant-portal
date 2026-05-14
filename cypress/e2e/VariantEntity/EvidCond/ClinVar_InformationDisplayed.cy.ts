@@ -13,36 +13,36 @@ describe('VariantEntity - EvidCond - ClinVar - Information displayed', () => {
 
   it('Evaluated', () => {
     setupTest();
-    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('evaluated', data.variantGermline.clinvar);
+    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('evaluated', data.variantGermline.clinvar_evidence);
   });
 
   it('Condition', () => {
     setupTest();
-    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('condition', data.variantGermline.clinvar);
+    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('condition', data.variantGermline.clinvar_evidence);
   });
 
   it('Classification', () => {
     setupTest();
-    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('classification', data.variantGermline.clinvar);
+    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('classification', data.variantGermline.clinvar_evidence);
   });
 
   it('Submissions', () => {
     setupTest();
-    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('submission_count', data.variantGermline.clinvar);
+    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('submission_count', data.variantGermline.clinvar_evidence);
   });
 
   it('Status', () => {
     setupTest();
-    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('status', data.variantGermline.clinvar);
+    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('status', data.variantGermline.clinvar_evidence);
   });
 
   it('Origin', () => {
     setupTest();
-    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('origin', data.variantGermline.clinvar);
+    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('origin', data.variantGermline.clinvar_evidence);
   });
 
   it('RCV Link', () => {
     setupTest();
-    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('rcv_link', data.variantGermline.clinvar);
+    VariantEntity_EvidCond.clinvarCard.validations.shouldShowColumnContent('rcv_link', data.variantGermline.clinvar_evidence);
   });
 });

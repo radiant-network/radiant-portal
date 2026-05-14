@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from '../shared/Selectors';
-import { getUrlLink, stringToRegExp } from '../shared/Utils';
+import { getClass, getUrlLink, stringToRegExp } from '../shared/Utils';
 import { getColumnName, getColumnPosition } from '../shared/Utils';
 
 const selectors = {
@@ -610,12 +610,12 @@ export const CaseEntity_Variants_SNV_Table = {
               cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
               break;
             case 'clinvar':
-              cy.validateTableFirstRowContent(dataVariant.clinvar.classification, position);
+              cy.validateTableFirstRowContent(dataVariant.clinvar_evidence.classification, position);
               cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
               break;
             case 'acmg_exomiser':
-              dataVariant[columnID].forEach((value: string | RegExp) => {
-                cy.validateTableFirstRowContent(value, position);
+              dataVariant[columnID].forEach((value: string) => {
+                cy.validateTableFirstRowContent(getClass(value).abbrev, position);
               });
               cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
               break;

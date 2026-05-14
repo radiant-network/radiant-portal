@@ -207,13 +207,13 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   return [
     ...predictions.map(({ key, label, value }) => (
-      <div key={`psl-${key}`} className="flex items-center justify-between">
+      <div key={`psl-${key}`} data-cy={key.replace(/_/g, '-')} className="flex items-center justify-between">
         <span className="text-muted-foreground">{label}:</span>
         <span>{value}</span>
       </div>
     )),
     ...empties.map(({ key, label }) => (
-      <div key={`psl-${key}`} className="flex items-center justify-between">
+      <div key={`psl-${key}`} data-cy={`${key.replace(/_/g, '-')}-empty`} className="flex items-center justify-between">
         <span className="text-muted-foreground">{label}:</span>-
       </div>
     )),
@@ -253,11 +253,11 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
           {hasAnyPredictionScores && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="xs">
+                <Button data-cy="view-all" variant="outline" size="xs">
                   {t('common.view_all')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent data-cy="prediction-scores-dialog" className="sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle>{t('variant_entity.overview.prediction_scores')}</DialogTitle>
                 </DialogHeader>

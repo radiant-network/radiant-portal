@@ -23,6 +23,7 @@ function ClassificationCard({ data, ...props }: ClassificationCardProps) {
       </CardHeader>
       <CardContent>
         <ClassificationSection
+          dataCy="exomiser"
           title={t('variant_entity.overview.exomiser')}
           counts={data.exomiser_acmg_classification_counts ?? {}}
           emptyText={t('variant_entity.overview.no_exomiser_score')}

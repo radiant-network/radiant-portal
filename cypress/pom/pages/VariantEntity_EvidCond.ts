@@ -445,7 +445,7 @@ const clinvarColumnContentHandler = (columnID: string, dataClinVar: any, positio
   const tableId = selectors.clinvarCard.tableId;
   switch (columnID) {
     case 'classification':
-      cy.validateTableFirstRowContent(dataClinVar.classification, position, tableId);
+      cy.validateTableFirstRowContent(dataClinVar[columnID], position, tableId);
       cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position, tableId);
       break;
     case 'status':

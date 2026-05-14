@@ -20,9 +20,14 @@ function AssociatedConditionsCard({ data, ...props }: { data: VariantOverview } 
           <Empty bordered showIcon={false} description={t('variant.no_data_for_variant')} className="py-6 h-full" />
         )}
         {data?.omim_conditions?.map(condition => (
-          <div key={`${condition.panel}${condition.omim_phenotype_id}`} className="flex items-center justify-between">
+          <div
+            key={`${condition.panel}${condition.omim_phenotype_id}`}
+            data-cy={condition.omim_phenotype_id}
+            className="flex items-center justify-between"
+          >
             <span>
               <a
+                data-cy={`${condition.omim_phenotype_id}-link`}
                 href={`https://www.omim.org/entry/${condition.omim_phenotype_id}`}
                 target="_blank"
                 rel="noreferrer"
