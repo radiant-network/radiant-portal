@@ -3,8 +3,6 @@ package repository
 import (
 	"fmt"
 	"log"
-	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -69,56 +67,54 @@ func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 }
 
 // Transforms internal IGVTrack records to "IGVTracks" which match the IGV specification format.
-// For germline, the tracks are labelled by family role (e.g. "proband", "mother", "father") and the 
+// For germline, the tracks are labelled by family role (e.g. "proband", "mother", "father") and the
 // proband track is listed first.
 func PrepareGermlineIgvTracks(tracks []IGVTrack, presigner utils.PreSigner) (*types.IGVTracks, error) {
-	return prepareIgvTracks(tracks, presigner,
-		func(t IGVTrack) string { return t.FamilyRole }, // track suffix
-		func(t IGVTrack) bool { return t.FamilyRole == "proband" }, // is leading track?
-	)
+	result, err := prepareIgvTracks(tracks, presigner, func(t IGVTrack) string { return t.FamilyRole })
+	if err != nil {
+		return nil, err
+	}
+	utils.SortIgvTracksByLeadingThenName(result.Alignment, func(t types.IGVTrackEnriched) bool {
+		return t.FamilyRole == "proband"
+	})
+	return result, nil
 }
 
 // Transforms internal IGVTrack records to "IGVTracks" which match the IGV specification format.
-// For somatic, the tracks are labelled by histology code (e.g. "tumoral", "normal") and the 
+// For somatic, the tracks are labelled by histology code (e.g. "tumoral", "normal") and the
 // tumoral track is listed first.
 func PrepareSomaticIgvTracks(tracks []IGVTrack, presigner utils.PreSigner) (*types.IGVTracks, error) {
-	return prepareIgvTracks(tracks, presigner,
-		func(t IGVTrack) string { return t.HistologyCode }, // track suffix
-		func(t IGVTrack) bool { return t.HistologyCode == "tumoral" }, // is leading track?
-	)
+	result, err := prepareIgvTracks(tracks, presigner, func(t IGVTrack) string { return t.HistologyCode })
+	if err != nil {
+		return nil, err
+	}
+	utils.SortIgvTracksByLeadingThenName(result.Alignment, func(t types.IGVTrackEnriched) bool {
+		return strings.HasSuffix(t.Name, " tumoral")
+	})
+	return result, nil
 }
 
-func prepareIgvTracks(
-	internalTracks []IGVTrack, presigner utils.PreSigner,
-	suffix func(IGVTrack) string, isLeading func(IGVTrack) bool,
-) (*types.IGVTracks, error) {
-	type mergedTrack struct {
-		enriched  types.IGVTrackEnriched
-		isLeading bool
-	}
-	merged := map[string]*mergedTrack{}
-	var alignments []*mergedTrack
+func prepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner, suffix func(IGVTrack) string) (*types.IGVTracks, error) {
+	merged := map[int]*types.IGVTrackEnriched{}
+	var alignments []*types.IGVTrackEnriched
 
-	// Transform to enriched tracks, merging cram/crai pairs together
+	// Transform to enriched tracks, merging cram/crai pairs together.
 	for _, r := range internalTracks {
 		// we only support alignment tracks for now
 		if r.DataTypeCode != "alignment" {
 			continue
 		}
 
-		key := strconv.Itoa(r.SequencingExperimentId)
-		m, exists := merged[key]
+		m, exists := merged[r.SequencingExperimentId]
 		if !exists {
-			m = &mergedTrack{
-				enriched: types.IGVTrackEnriched{
-					PatientId:  r.PatientId,
-					Type:       r.DataTypeCode,
-					Sex:        r.SexCode,
-					FamilyRole: r.FamilyRole,
-				},
-				isLeading: isLeading(r),
+			m = &types.IGVTrackEnriched{
+				PatientId:  r.PatientId,
+				Type:       r.DataTypeCode,
+				Sex:        r.SexCode,
+				FamilyRole: r.FamilyRole,
+				Name:       fmt.Sprintf("Reads: %s %s", r.SampleId, suffix(r)),
 			}
-			merged[key] = m
+			merged[r.SequencingExperimentId] = m
 			alignments = append(alignments, m)
 		}
 
@@ -129,31 +125,18 @@ func prepareIgvTracks(
 
 		switch r.FormatCode {
 		case "cram":
-			m.enriched.Name = fmt.Sprintf("Reads: %s %s", r.SampleId, suffix(r))
-			m.enriched.Format = r.FormatCode
-			m.enriched.URL = presigned.URL
-			m.enriched.URLExpireAt = presigned.URLExpireAt
+			m.Format = r.FormatCode
+			m.URL = presigned.URL
+			m.URLExpireAt = presigned.URLExpireAt
 		case "crai":
-			m.enriched.IndexURL = presigned.URL
-			m.enriched.IndexURLExpireAt = presigned.URLExpireAt
+			m.IndexURL = presigned.URL
+			m.IndexURLExpireAt = presigned.URLExpireAt
 		}
 	}
-
-	// Sort: leading track first, then by Name.
-	slices.SortFunc(alignments, func(a, b *mergedTrack) int {
-		if a.isLeading != b.isLeading {
-			if a.isLeading {
-				return -1
-			}
-			return 1
-		}
-		return strings.Compare(a.enriched.Name, b.enriched.Name)
-	})
 
 	result := types.IGVTracks{Alignment: make([]types.IGVTrackEnriched, len(alignments))}
 	for i, m := range alignments {
-		result.Alignment[i] = m.enriched
+		result.Alignment[i] = *m
 	}
-
 	return &result, nil
 }

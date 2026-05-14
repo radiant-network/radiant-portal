@@ -31,6 +31,24 @@ func Test_GroupByProperty(t *testing.T) {
 	assert.Equal(t, 1, len(groupedByCity["Los Angeles"]))
 }
 
+func Test_SortIgvTracksByLeadingThenName(t *testing.T) {
+	tracks := []types.IGVTrackEnriched{
+		{Name: "Reads: S0003 mother", FamilyRole: "mother"},
+		{Name: "Reads: S0001 proband", FamilyRole: "proband"},
+		{Name: "Reads: S0002 father", FamilyRole: "father"},
+	}
+
+	SortIgvTracksByLeadingThenName(tracks, func(t types.IGVTrackEnriched) bool {
+		return t.FamilyRole == "proband"
+	})
+
+	assert.Equal(t, []types.IGVTrackEnriched{
+		{Name: "Reads: S0001 proband", FamilyRole: "proband"},
+		{Name: "Reads: S0002 father", FamilyRole: "father"},
+		{Name: "Reads: S0003 mother", FamilyRole: "mother"},
+	}, tracks)
+}
+
 func Test_SortConsequences(t *testing.T) {
 	variantsConsequences := []types.VariantConsequence{
 		{IsPicked: false, Symbol: "CCC"},
