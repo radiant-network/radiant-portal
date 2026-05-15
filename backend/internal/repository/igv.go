@@ -28,9 +28,6 @@ func NewIGVRepository(db *gorm.DB) *IGVRepository {
 	return &IGVRepository{db: db}
 }
 
-// GetIGV returns the IGV tracks for a case. The caller is responsible for
-// determining the case type (germline vs somatic) and dispatching to the
-// appropriate preparation function.
 func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 	var tracks []IGVTrack
 
