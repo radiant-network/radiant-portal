@@ -813,6 +813,11 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
     if (!facetData.defaultOperator) {
       cy.get(CommonSelectors.facetHeader).contains(facetData.name).parents(CommonSelectors.facet).find(CommonSelectors.facetCheckbox('')).eq(0).click({ force: true });
       opWithData = 'in';
+    } else if (facetData.defaultOperator === 'between') {
+      cy.get(CommonSelectors.facetMinInput(facetData.apiField)).clear({ force: true }).type('1', { force: true });
+      cy.get(CommonSelectors.facetMaxInput(facetData.apiField)).clear({ force: true }).type('1', { force: true });
+    } else {
+      cy.get(CommonSelectors.facetValueInput(facetData.apiField)).clear({ force: true }).type('1', { force: true });
     }
 
     cy.intercept('POST', '**/count').as('postCount');

@@ -8,7 +8,7 @@ interface OpenAlertDialogBaseProps {
   title: string;
   description: ReactNode;
   type?: AlertDialogType;
-  actionProps: AlertDialogActionProps;
+  actionProps: AlertDialogActionProps & { 'data-cy'?: string };
   className?: string;
 }
 
