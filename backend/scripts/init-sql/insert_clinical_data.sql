@@ -2077,10 +2077,10 @@ VALUES (1, 1, NULL),
        (72, 71, 70),
        (73, 72, 70),
 
-       (74, 62, NULL),
-       (74, 63, NULL),
-       (75, 62, 22),
-       (76, 63, 22)
+       (74, 62, 22),
+       (74, 63, 22),
+       (75, 62, NULL),
+       (76, 63, NULL)
 ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;
 
 INSERT INTO "interpretation_germline" (sequencing_id, case_id, locus_id, transcript_id, condition, classification, classification_criterias, transmission_modes, updated_at)

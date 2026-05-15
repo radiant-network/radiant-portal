@@ -61,12 +61,14 @@ func Test_PrepareGermlineIgvTracks_mergesPairsAndOrdersProbandFirst(t *testing.T
 		{PatientId: 1, SequencingExperimentId: 1, SampleId: "S0001", FamilyRole: "proband", SexCode: "male", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file1.crai"},
 		{PatientId: 2, SequencingExperimentId: 2, SampleId: "S0002", FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file2.cram"},
 		{PatientId: 2, SequencingExperimentId: 2, SampleId: "S0002", FamilyRole: "mother", SexCode: "female", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file2.crai"},
+		{PatientId: 3, SequencingExperimentId: 3, SampleId: "S0003", FamilyRole: "father", SexCode: "male", DataTypeCode: "alignment", FormatCode: "cram", URL: "s3://example.com/file3.cram"},
+		{PatientId: 3, SequencingExperimentId: 3, SampleId: "S0003", FamilyRole: "father", SexCode: "male", DataTypeCode: "alignment", FormatCode: "crai", URL: "s3://example.com/file3.crai"},
 	}
 	result, err := PrepareGermlineIgvTracks(internalTracks, testutils.NewMockS3PreSigner())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Len(t, result.Alignment, 2)
+	assert.Len(t, result.Alignment, 3)
 	assert.Equal(t, result.Alignment, []types.IGVTrackEnriched{
 		{
 			PatientId:        1,
@@ -91,6 +93,18 @@ func Test_PrepareGermlineIgvTracks_mergesPairsAndOrdersProbandFirst(t *testing.T
 			IndexURL:         "presigned.s3://example.com/file2.crai",
 			IndexURLExpireAt: 1234567890,
 			Name:             "Reads: S0002 mother",
+		},
+		{
+			PatientId:        3,
+			FamilyRole:       "father",
+			Sex:              "male",
+			Type:             "alignment",
+			Format:           "cram",
+			URL:              "presigned.s3://example.com/file3.cram",
+			URLExpireAt:      1234567890,
+			IndexURL:         "presigned.s3://example.com/file3.crai",
+			IndexURLExpireAt: 1234567890,
+			Name:             "Reads: S0003 father",
 		},
 	})
 }
