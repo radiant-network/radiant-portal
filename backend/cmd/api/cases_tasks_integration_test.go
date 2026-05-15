@@ -53,7 +53,7 @@ func Test_CaseOccurrenceTasksEndpoint_GermlineCNV_ReturnsAlignmentTaskFromCaseAg
 func Test_CaseOccurrenceTasksEndpoint_SomaticSNV_ReturnsSomaticAnnotationTask(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		// Seeded: task 74 (radiant_somatic_annotation) attached to case 71 / seq 73.
-		expected := `[{"id":74,"task_type_code":"radiant_somatic_annotation","task_type_name":"RADIANT Somatic Annotation","pipeline_version":"1.0.0","genome_build":"GRch38","created_on":"2026-03-09T13:08:00Z"}]`
+		expected := `[{"id":74,"task_type_code":"radiant_somatic_annotation","task_type_name":"RADIANT Somatic Annotation","pipeline_name":"Dragen","pipeline_version":"4.4.4","genome_build":"GRch38","created_on":"2026-03-09T13:08:00Z"}]`
 		code, body := getCaseOccurrenceTasks(t, env.Postgres, 71, 73, "somatic_snv")
 
 		assert.Equal(t, http.StatusOK, code)

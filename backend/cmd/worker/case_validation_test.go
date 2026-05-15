@@ -3817,7 +3817,7 @@ func Test_validateTaskAliquot_ErrorAlignmentSomaticVariantCallingNotExactly1Aliq
             },
             Tasks: []*types.CaseTaskBatch{
                 {
-                    TypeCode: AlignmentSomaticVariantCallingTaskTypeCode,
+                    TypeCode: types.AlignmentSomaticVariantCallingTaskTypeCode,
                     Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
                 },
             },
