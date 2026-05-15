@@ -13,11 +13,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type MockRepository struct{}
+type MockRepository struct {
+	caseType string
+}
 
 type MockIGVRepository struct {
 	igvTracks []types.IGVTrack
-	err error
+	err       error
 }
 
 func (m *MockRepository) GetDocumentByUrl(url string) (*repository.Document, error) {
@@ -79,6 +81,10 @@ func (m *MockRepository) GetOrganizations() (*[]string, error) {
 
 func (r *MockIGVRepository) GetIGV(caseID int) ([]types.IGVTrack, error) {
 	return r.igvTracks, r.err
+}
+
+func (m *MockRepository) GetCaseType(caseID int) (string, error) {
+	return m.caseType, nil
 }
 
 func Test_StatusHandler(t *testing.T) {
