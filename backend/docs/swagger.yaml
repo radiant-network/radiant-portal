@@ -4256,6 +4256,68 @@ paths:
       summary: Update a note on an occurrence
       tags:
       - occurrence_notes
+  /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}:
+    post:
+      description: Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id).
+        An occurrence has at most one flag per case.
+      operationId: upsertOccurrenceFlag
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Seq ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Occurrence ID
+        in: path
+        name: occurrence_id
+        required: true
+        schema:
+          type: string
+      - description: Flag to set
+        in: query
+        name: flag_type
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Set or change the flag on an occurrence
+      tags:
+      - occurrence_flags
   /occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap:
     get:
       description: List genes overlapping a CNV with a given ID
