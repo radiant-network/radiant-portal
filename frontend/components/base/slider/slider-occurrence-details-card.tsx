@@ -35,6 +35,7 @@ type SliderOccurrenceDetailsCardProps = {
   ad_alt?: number;
   ad_total?: number;
   has_igv_files?: boolean;
+  somatic?: boolean;
 };
 
 function getFilterValue(filter: string | undefined, t: (key: string) => string): React.ReactNode {
@@ -79,6 +80,7 @@ const SliderOccurrenceDetailsCard = ({
   ad_alt,
   ad_total,
   has_igv_files = false,
+  somatic = false,
 }: SliderOccurrenceDetailsCardProps) => {
   const { t } = useI18n();
   const [igvOpen, setIGVOpen] = useState<boolean>(false);
@@ -118,114 +120,114 @@ const SliderOccurrenceDetailsCard = ({
     );
   }
 
+  const inheritanceSection = (
+    <DescriptionSection
+      title={t('preview_sheet.occurrence_details.sections.inheritance.title')}
+      values={[zygosity, transmission, parental_origin]}
+    >
+      <DescriptionRow label={t('preview_sheet.occurrence_details.sections.inheritance.zygosity')}>
+        {zygosity ? <Badge variant="outline">{zygosity}</Badge> : <EmptyField />}
+      </DescriptionRow>
+      <DescriptionRow label={t('preview_sheet.occurrence_details.sections.inheritance.inheritance')}>
+        {transmission ? <Badge variant="outline">{titleCase(replaceUnderscore(transmission))}</Badge> : <EmptyField />}
+      </DescriptionRow>
+      <DescriptionRow label={t('preview_sheet.occurrence_details.sections.inheritance.parental_origin')}>
+        {parental_origin ? (
+          <Badge variant="outline">{titleCase(replaceUnderscore(parental_origin))}</Badge>
+        ) : (
+          <EmptyField />
+        )}
+      </DescriptionRow>
+    </DescriptionSection>
+  );
+
+  // only proband has father and mother call
+  const familySection = relationshipToProband === 'proband' && (
+    <DescriptionSection title="Family">
+      <DescriptionRow
+        label={
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex gap-1 items-center">
+                {t('preview_sheet.occurrence_details.sections.family.father_genotype')}{' '}
+                <PedigreeMaleNotAffectedIcon size={13} />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              {father_calls && father_calls[0] > 0
+                ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
+                : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
+            </TooltipContent>
+          </Tooltip>
+        }
+      >
+        {father_calls ? <span className="font-mono">{`${father_calls[0]}/${father_calls[1]}`}</span> : <EmptyField />}
+      </DescriptionRow>
+      <DescriptionRow
+        label={
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex gap-1 items-center">
+                {t('preview_sheet.occurrence_details.sections.family.mother_genotype')}{' '}
+                <PedigreeFemaleNotAffectedIcon size={13} />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              {mother_calls && mother_calls[0] > 0
+                ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
+                : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
+            </TooltipContent>
+          </Tooltip>
+        }
+      >
+        {mother_calls ? <span className="font-mono">{`${mother_calls[0]}/${mother_calls[1]}`}</span> : <EmptyField />}
+      </DescriptionRow>
+    </DescriptionSection>
+  );
+
+  const metricsSection = (
+    <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
+      <DescriptionSection title="Metrics" values={[ad_alt, ad_total, genotype_quality, filter]}>
+        <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.quality_depth')}>
+          {quality_depth ? <span className="font-mono">{thousandNumberFormat(quality_depth)}</span> : <EmptyField />}
+        </DescriptionRow>
+        <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.allele_depth_alt')}>
+          {ad_alt ? <span className="font-mono">{thousandNumberFormat(ad_alt)}</span> : <EmptyField />}
+        </DescriptionRow>
+        <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.total_depth_alt_ref')}>
+          {ad_total ? <span className="font-mono">{thousandNumberFormat(ad_total)}</span> : <EmptyField />}
+        </DescriptionRow>
+        {genotype_quality && (
+          <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.genotype_quality')}>
+            {getGenotypeQuality(genotype_quality)}
+          </DescriptionRow>
+        )}
+        <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.filter')}>
+          {filterValue}
+        </DescriptionRow>
+      </DescriptionSection>
+    </div>
+  );
+
   return (
     <SliderCard icon={Users} title={t('preview_sheet.occurrence_details.title')} actions={actions}>
       <div className="rounded-md w-full border">
         <div className="size-full">
-          <div className="flex flex-wrap gap-4 sm:gap-20 items-start p-3 w-full">
-            <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
-              <DescriptionSection
-                title={t('preview_sheet.occurrence_details.sections.inheritance.title')}
-                values={[zygosity, transmission, parental_origin]}
-              >
-                <DescriptionRow label={t('preview_sheet.occurrence_details.sections.inheritance.zygosity')}>
-                  {zygosity ? <Badge variant="outline">{zygosity}</Badge> : <EmptyField />}
-                </DescriptionRow>
-                <DescriptionRow label={t('preview_sheet.occurrence_details.sections.inheritance.inheritance')}>
-                  {transmission ? (
-                    <Badge variant="outline">{titleCase(replaceUnderscore(transmission))}</Badge>
-                  ) : (
-                    <EmptyField />
-                  )}
-                </DescriptionRow>
-                <DescriptionRow label={t('preview_sheet.occurrence_details.sections.inheritance.parental_origin')}>
-                  {parental_origin ? (
-                    <Badge variant="outline">{titleCase(replaceUnderscore(parental_origin))}</Badge>
-                  ) : (
-                    <EmptyField />
-                  )}
-                </DescriptionRow>
-              </DescriptionSection>
-              {/* only proband has father and mother call */}
-              {relationshipToProband === 'proband' && (
-                <DescriptionSection title="Family">
-                  <DescriptionRow
-                    label={
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="inline-flex gap-1 items-center">
-                            {t('preview_sheet.occurrence_details.sections.family.father_genotype')}{' '}
-                            <PedigreeMaleNotAffectedIcon size={13} />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {father_calls && father_calls[0] > 0
-                            ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
-                            : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
-                        </TooltipContent>
-                      </Tooltip>
-                    }
-                  >
-                    {father_calls ? (
-                      <span className="font-mono">{`${father_calls[0]}/${father_calls[1]}`}</span>
-                    ) : (
-                      <EmptyField />
-                    )}
-                  </DescriptionRow>
-                  <DescriptionRow
-                    label={
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="inline-flex gap-1 items-center">
-                            {t('preview_sheet.occurrence_details.sections.family.mother_genotype')}{' '}
-                            <PedigreeFemaleNotAffectedIcon size={13} />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {mother_calls && mother_calls[0] > 0
-                            ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
-                            : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
-                        </TooltipContent>
-                      </Tooltip>
-                    }
-                  >
-                    {mother_calls ? (
-                      <span className="font-mono">{`${mother_calls[0]}/${mother_calls[1]}`}</span>
-                    ) : (
-                      <EmptyField />
-                    )}
-                  </DescriptionRow>
-                </DescriptionSection>
-              )}
+          {!somatic && (
+            <div className="flex flex-wrap gap-4 sm:gap-20 items-start p-3 w-full">
+              <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
+                {inheritanceSection}
+                {familySection}
+              </div>
+              {metricsSection}
             </div>
-
-            <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">
-              <DescriptionSection title="Metrics" values={[ad_alt, ad_total, genotype_quality, filter]}>
-                <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.quality_depth')}>
-                  {quality_depth ? (
-                    <span className="font-mono">{thousandNumberFormat(quality_depth)}</span>
-                  ) : (
-                    <EmptyField />
-                  )}
-                </DescriptionRow>
-                <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.allele_depth_alt')}>
-                  {ad_alt ? <span className="font-mono">{thousandNumberFormat(ad_alt)}</span> : <EmptyField />}
-                </DescriptionRow>
-                <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.total_depth_alt_ref')}>
-                  {ad_total ? <span className="font-mono">{thousandNumberFormat(ad_total)}</span> : <EmptyField />}
-                </DescriptionRow>
-                {/* Optional display */}
-                {genotype_quality && (
-                  <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.genotype_quality')}>
-                    {getGenotypeQuality(genotype_quality)}
-                  </DescriptionRow>
-                )}
-                <DescriptionRow label={t('preview_sheet.occurrence_details.sections.metrics.filter')}>
-                  {filterValue}
-                </DescriptionRow>
-              </DescriptionSection>
+          )}
+          {somatic && (
+            <div className="flex flex-wrap gap-4 sm:gap-20 items-start p-3 w-full">
+              {metricsSection}
+              <div className="flex flex-col gap-4 grow max-w-full sm:max-w-72 min-w-56">{inheritanceSection}</div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </SliderCard>
