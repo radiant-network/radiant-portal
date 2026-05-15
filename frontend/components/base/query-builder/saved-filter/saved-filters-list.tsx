@@ -56,7 +56,7 @@ function SavedFiltersList() {
           </TooltipTrigger>
           <TooltipContent>{t('common.saved_filter.no_saved_filters')}</TooltipContent>
         </Tooltip>
-        <SelectContent>
+        <SelectContent data-cy="saved-filter-content">
           {savedFilters.map(filter => (
             <SelectItem key={filter.id} value={filter.id}>
               {filter.name}

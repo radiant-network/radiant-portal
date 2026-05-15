@@ -28,6 +28,7 @@ export function openDeleteSavedFilterAlert(
     },
     actionProps: {
       color: 'destructive',
+      'data-cy': 'delete-filter-confirm-button',
       onClick: async () => {
         try {
           if (selectedSavedFilter) {
