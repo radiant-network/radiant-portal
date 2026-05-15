@@ -255,6 +255,7 @@ export function SomaticOccurrenceSheetContent({
           ad_total={expandResult.data.ad_total}
           locus={expandResult.data.locus}
           has_igv_files={caseEntity.data?.has_igv_files}
+          somatic={true}
         />
       )}
       <SliderVariantDetailsCard
