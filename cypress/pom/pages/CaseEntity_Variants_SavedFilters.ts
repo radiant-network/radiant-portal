@@ -75,25 +75,25 @@ const generateSavedFiltersFunctions = () => {
      */
     deleteFilter(name: string) {
       actions.openMyFiltersDropdown();
-      cy.get('body')
+      cy.get(CommonSelectors.savedListDropdown)
         .invoke('text')
         .then(invokeText => {
           if (invokeText.includes(name)) {
-            cy.get('body').contains(name).clickAndWait({ force: true });
+            cy.get(CommonSelectors.savedListDropdown).contains(name).clickAndWait({ force: true });
             validations.shouldDisplayFilterName(name);
             actions.clickDeleteButton();
 
             cy.intercept('**/saved_filters{,/**}').as('deleteSavedFilters');
-            cy.get(`${CommonSelectors.alert} ${CommonSelectors.destructiveButton}`).click({ force: true });
+            cy.get(CommonSelectors.deleteFilterButton).click({ force: true });
             cy.wait('@deleteSavedFilters');
-
+/*
             // Prevents a race condition bug that only occurs with automated tests. Allows you to obtain the correct localStorage.
             cy.url().then(currentUrl => {
               cy.visit(currentUrl);
-            });
+            });*/
 
             actions.openMyFiltersDropdown();
-            cy.get('body').contains(name).should('not.exist');
+            cy.get(CommonSelectors.savedListDropdown).contains(name).should('not.exist');
           }
         });
     },
@@ -132,7 +132,7 @@ const generateSavedFiltersFunctions = () => {
      */
     selectFilterInDropdown(name: string | RegExp) {
       actions.openMyFiltersDropdown();
-      cy.get('body').contains(name).clickAndWait({ force: true });
+      cy.get(CommonSelectors.savedListDropdown).contains(name).clickAndWait({ force: true });
     },
   };
 
@@ -143,7 +143,7 @@ const generateSavedFiltersFunctions = () => {
      */
     shouldBeSelectedInDropdown(name: string) {
       actions.openMyFiltersDropdown();
-      cy.get('body span').filter(`:contains("${name}")`).parent().find(CommonSelectors.checkIcon).should('exist');
+      cy.get(CommonSelectors.savedListDropdown).filter(`:contains("${name}")`).parent().find(CommonSelectors.checkIcon).should('exist');
     },
     /**
      * Checks that the filter name is displayed in the query builder.
@@ -162,7 +162,7 @@ const generateSavedFiltersFunctions = () => {
     shouldDisplayInDropdown(name: string | RegExp, shouldExist: boolean = true) {
       const strExist = shouldExist ? 'exist' : 'not.exist';
       actions.openMyFiltersDropdown();
-      cy.get(CommonSelectors.menuPopper).contains(name).should(strExist);
+      cy.get(CommonSelectors.savedListDropdown).contains(name).should(strExist);
     },
     /**
      * Checks that the icon have the expected enabled/disabled and dirty states.

@@ -5,7 +5,7 @@ import { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
-import DepreciatedGeneCell from '@/components/base/data-table/cells/depreciated-gene-cell';
+import GeneCell from '@/components/base/data-table/cells/gene-cell';
 import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
 import ManeCell from '@/components/base/data-table/cells/mane-cell';
 import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
@@ -19,10 +19,11 @@ import { createColumnSettings, TableColumnDef } from '@/components/base/data-tab
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
 
+import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
 import VariantNoteCell from '../../table/cells/variant-note-cell';
+import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
 
-import InterpretationCell from './cells/interpretation-cell';
 import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
@@ -30,16 +31,10 @@ const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 type GermlineSNVOccurrenceTableSettingsProps = {
   caseEntity?: CaseEntity;
   patientId?: number;
-  onInterpretationSaved: () => void;
   t: TFunction<string, undefined>;
 };
 
-function getSNVOccurrenceColumns({
-  t,
-  onInterpretationSaved,
-  caseEntity,
-  patientId,
-}: GermlineSNVOccurrenceTableSettingsProps) {
+function getSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurrenceTableSettingsProps) {
   return [
     // TODO: To be enabled when row selection function are implemented
     // {
@@ -55,7 +50,13 @@ function getSNVOccurrenceColumns({
       id: 'row-info',
       cell: info => (
         <div className="flex items-center gap-1">
-          <InterpretationCell occurrence={info.getValue()} patientId={patientId} />
+          <InterpretationCell
+            locusId={info.getValue().locus_id}
+            transcriptId={info.getValue().transcript_id}
+            hasInterpretation={info.getValue().has_interpretation}
+            patientId={patientId}
+            InterpretationDialog={GermlineInterpretationDialog}
+          />
           <VariantNoteCell occurrence={info.getValue()} />
         </div>
       ),
@@ -76,7 +77,7 @@ function getSNVOccurrenceColumns({
     // Gene
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
-      cell: info => <DepreciatedGeneCell symbol={info.getValue()} />,
+      cell: info => <GeneCell symbol={info.getValue()} />,
       header: t('variant.headers.symbol'),
       size: 124,
       minSize: 40,
@@ -260,9 +261,7 @@ function getSNVOccurrenceColumns({
     // Actions Buttons
     {
       id: 'actions',
-      cell: info => (
-        <OccurrenceActionsMenu row={info.row} caseEntity={caseEntity} onInterpretationSaved={onInterpretationSaved} />
-      ),
+      cell: info => <OccurrenceActionsMenu row={info.row} caseEntity={caseEntity} />,
       size: 86,
       enableResizing: false,
       enablePinning: true,

@@ -1,149 +1,123 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
+import { X } from 'lucide-react';
+import useSWR from 'swr';
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
-import { Card } from '@/components/base/shadcn/card';
-import { Separator } from '@/components/base/shadcn/separator';
-import { Skeleton } from '@/components/base/shadcn/skeleton';
-import { useQueryBuilder } from '@/components/cores/query-builder';
-import { deepMerge } from '@/components/lib/merge';
+import { SavedFilter, SavedFilterType } from '@/api/index';
+import { SidebarGroups } from '@/components/base/query-builder//facets/sidebar-groups';
+import { FacetList } from '@/components/base/query-builder/facets/facet-list';
+import { FacetConfigContext } from '@/components/base/query-builder/facets/hooks/use-facet-config';
+import { getAggregationsFetcher } from '@/components/base/query-builder/hooks/use-aggregation-builder';
+import { IQBContext, IQBFetcher, QBProvider } from '@/components/base/query-builder/hooks/use-query-builder';
+import { useQueryBuilderGetPreferenceEffect } from '@/components/base/query-builder/hooks/use-query-builder-preference';
+import { getVisibleAggregations } from '@/components/base/query-builder/libs/aggregations';
+import QueriesBarCard from '@/components/base/query-builder/queries-bar-card';
+import { QueryBuilderSkeleton } from '@/components/base/query-builder/query-builder-skeleton';
+import { SidebarProvider } from '@/components/base/shadcn/sidebar';
+import { AggregationConfig, ApplicationId, AppsConfig, useConfig } from '@/components/cores/applications-config';
+import { cn } from '@/components/lib/utils';
+import { savedFiltersApi } from '@/utils/api';
 
-import QueryBar from './query-bar/query-bar';
-import QueryToolbar from './query-toolbar/query-toolbar';
-import SavedFiltersLeftActions from './saved-filter/saved-filter-left-actions';
-import SavedFiltersRightActions from './saved-filter/saved-filter-right-actions';
-import { defaultQueryReferenceColors, useQueryBuilderDictionary } from './data';
-import { QueryBuilderContext, QueryBuilderDictContext } from './query-builder-context';
-import { QueryBuilderContextType, QueryBuilderProps } from './types';
+import { ISavedFilterContextProps, SavedFiltersProvider } from './saved-filter/hooks/use-saved-filter';
+import { useSavedFilterGetPreferenceEffect } from './saved-filter/hooks/use-saved-filters-preference';
+import { SavedFilterInitializer } from './saved-filter/saved-filter-initializer';
 
-function QueryBuilder({
-  enableCombine = true,
-  enableFavorite = false,
-  enableShowHideLabels,
-  initialShowHideLabels = true,
-  queryReferenceColors = defaultQueryReferenceColors,
-  queryCountIcon,
-  fetchQueryCount,
-  dictionary,
-  customPillConfig,
-  queryPillFacetFilterConfig,
-  resolveSyntheticSqon,
-  loading,
-  ...hookProps
-}: QueryBuilderProps) {
-  const queryBuilder = useQueryBuilder(hookProps);
-  const defaultDictionary = useQueryBuilderDictionary();
+type QueryBuilderLayoutProps = {
+  appId: ApplicationId;
+  children: React.ReactElement;
+  defaultSidebarOpen?: boolean;
+  fetcher: IQBFetcher;
+};
 
-  const mergeDictionary = useMemo(
-    () => deepMerge(defaultDictionary, dictionary || {}),
-    [dictionary, defaultDictionary],
-  );
-  const [showLabels, toggleLabels] = useState(initialShowHideLabels);
+export async function fetchSavedFilters(savedFilterType: SavedFilterType) {
+  const response = await savedFiltersApi.getSavedFilters(savedFilterType);
+  return response.data;
+}
 
-  const getQueryReferenceColor = useCallback(
-    (refIndex: number) => queryReferenceColors[refIndex % queryReferenceColors.length],
-    [queryReferenceColors],
-  );
+/**
+ * Query-Builder (facets + query-bar)
+ */
+function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: QueryBuilderLayoutProps) {
+  const [open, setOpen] = useState(defaultSidebarOpen);
+  const config = useConfig();
+  const aggregations: AggregationConfig = (config[appId] as AppsConfig).aggregations;
+  const visibleAggregations = getVisibleAggregations(aggregations);
+  const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
+  const [qbPreference, setQbPreference] = useState<IQBContext | undefined>();
+  const [savedFilterPreference, setSavedFilterPreference] = useState<ISavedFilterContextProps | undefined>();
+  const facetFetchers = getAggregationsFetcher(appId);
+  const savedFilterType = (config[appId] as AppsConfig).saved_filter_type;
 
-  const memoedContextValue = useMemo<QueryBuilderContextType>(
-    () => ({
-      queryBuilder,
-      enableCombine,
-      enableFavorite,
-      enableShowHideLabels,
-      showLabels,
-      toggleLabels,
-      queryCountIcon,
-      getQueryReferenceColor,
-      fetchQueryCount,
-      dictionary,
-      customPillConfig,
-      queryPillFacetFilterConfig,
-      resolveSyntheticSqon,
-      loading,
-    }),
-    [
-      queryBuilder,
-      enableCombine,
-      enableFavorite,
-      enableShowHideLabels,
-      showLabels,
-      toggleLabels,
-      queryCountIcon,
-      getQueryReferenceColor,
-      fetchQueryCount,
-      dictionary,
-      customPillConfig,
-      queryPillFacetFilterConfig,
-      resolveSyntheticSqon,
-      loading,
-    ],
+  useQueryBuilderGetPreferenceEffect({ appId, setPreference: setQbPreference });
+  useSavedFilterGetPreferenceEffect({ savedFilterType, setPreference: setSavedFilterPreference });
+
+  // Fetch saved filters
+  const savedFilterFetcher = useSWR<SavedFilter[]>(
+    `fetch-saved-filters-${savedFilterType}`,
+    () => fetchSavedFilters(savedFilterType),
+    {
+      revalidateOnFocus: false,
+    },
   );
 
-  if (loading) {
-    return <QueryBuilderSkeleton />;
+  if (!qbPreference || !savedFilterPreference || savedFilterFetcher.isLoading) {
+    return <QueryBuilderSkeleton defaultSidebarOpen={defaultSidebarOpen} aggregations={aggregations} />;
   }
 
   return (
-    <QueryBuilderDictContext.Provider value={mergeDictionary}>
-      <QueryBuilderContext.Provider value={memoedContextValue}>
-        <Card className="py-0">
-          <Accordion type="multiple" defaultValue={['query-builder']}>
-            <AccordionItem value="query-builder" className="border-none">
-              <AccordionTrigger
-                className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none hover:cursor-pointer"
-                asChild
-              >
-                <SavedFiltersLeftActions className="py-4 pr-4" />
-                <SavedFiltersRightActions className="ml-auto py-4" />
-              </AccordionTrigger>
-              <AccordionContent className="py-4 px-6 space-y-4">
-                <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-scroll">
-                  {queryBuilder.getQueries().map(query => (
-                    <QueryBar key={query.id} query={query} />
-                  ))}
-                </div>
-                <QueryToolbar />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </Card>
-      </QueryBuilderContext.Provider>
-    </QueryBuilderDictContext.Provider>
+    <QBProvider {...qbPreference} aggregations={aggregations} fetcher={fetcher}>
+      <SavedFilterInitializer
+        selectedSavedFilter={savedFilterPreference?.selectedSavedFilter}
+        userPrefSqons={qbPreference?.sqons}
+      >
+        <FacetConfigContext value={{ appId, ...facetFetchers }}>
+          <SavedFiltersProvider
+            savedFilters={savedFilterFetcher.data || []}
+            selectedSavedFilter={savedFilterPreference.selectedSavedFilter || undefined}
+            savedFilterType={savedFilterType}
+          >
+            <div className="bg-muted w-full">
+              <div className="flex flex-1 h-screen overflow-hidden">
+                <aside className="w-auto min-w-fit h-full shrink-0">
+                  <SidebarProvider open={open} onOpenChange={setOpen} className="h-full flex flex-row">
+                    <div className="z-10">
+                      <SidebarGroups
+                        aggregationGroups={visibleAggregations}
+                        selectedItemId={selectedSidebarItem}
+                        onItemSelect={setSelectedSidebarItem}
+                      />
+                    </div>
+                    <div
+                      className={cn('overflow-auto mb-16 border-r transition-[width] duration-300 ease-in-out', {
+                        'w-[280px] p-4 opacity-100 relative': selectedSidebarItem,
+                        'w-0 opacity-0': !selectedSidebarItem,
+                      })}
+                    >
+                      <div className="whitespace-nowrap">
+                        <div className="flex justify-end mb-4">
+                          <button
+                            onClick={() => setSelectedSidebarItem(null)}
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                        <FacetList aggregations={visibleAggregations} groupKey={selectedSidebarItem} />
+                      </div>
+                    </div>
+                  </SidebarProvider>
+                </aside>
+                <main className="flex-1 shrink px-3 pb-3 overflow-auto">
+                  <div className="py-3 space-y-2">
+                    <QueriesBarCard appId={appId} />
+                  </div>
+                  {children}
+                </main>
+              </div>
+            </div>
+          </SavedFiltersProvider>
+        </FacetConfigContext>
+      </SavedFilterInitializer>
+    </QBProvider>
   );
 }
-
-function QueryBuilderSkeleton() {
-  return (
-    <Card className="py-0">
-      <div className="flex flex-col">
-        <div className="py-4 px-6 flex justify-between">
-          <div className="flex gap-4">
-            <Skeleton className="h-8 w-32" />
-            {new Array(2).fill(0).map((_, index) => (
-              <Skeleton key={index} className="size-8" />
-            ))}
-          </div>
-          <div className="flex gap-2">
-            {new Array(5).fill(0).map((_, index) => (
-              <Skeleton key={index} className="size-8" />
-            ))}
-            <Skeleton className="h-8 w-36" />
-          </div>
-        </div>
-        <Separator />
-        <div className="flex flex-col py-4 gap-4">
-          <div className="px-6 flex flex-col gap-2">
-            <Skeleton className="h-[50px] w-full" />
-            <Skeleton className="h-[50px] w-full" />
-          </div>
-          <div className="px-6 flex gap-3">
-            <Skeleton className="h-7 w-26" />
-            <Skeleton className="h-7 w-16" />
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
 export default QueryBuilder;

@@ -100,6 +100,7 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**case_entity**](docs/CasesApi.md#case_entity) | **GET** /cases/{case_id} | Get CaseEntity case entity
 *CasesApi* | [**case_entity_documents_filters**](docs/CasesApi.md#case_entity_documents_filters) | **GET** /cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
 *CasesApi* | [**case_entity_documents_search**](docs/CasesApi.md#case_entity_documents_search) | **POST** /cases/{case_id}/documents/search | Search DocumentResult list for a case entity
+*CasesApi* | [**case_tasks_with_occurrences**](docs/CasesApi.md#case_tasks_with_occurrences) | **GET** /cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
 *CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **GET** /cases/filters | Get CaseFilters cases filters
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /cases/batch | Create a new case batch
 *CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /cases/search | Search cases
@@ -256,6 +257,7 @@ Class | Method | HTTP request | Description
  - [SqonContent](docs/SqonContent.md)
  - [Statistics](docs/Statistics.md)
  - [StatisticsBodyWithSqon](docs/StatisticsBodyWithSqon.md)
+ - [TaskOccurrenceType](docs/TaskOccurrenceType.md)
  - [Term](docs/Term.md)
  - [Transcript](docs/Transcript.md)
  - [UpdateOccurrenceNoteInput](docs/UpdateOccurrenceNoteInput.md)

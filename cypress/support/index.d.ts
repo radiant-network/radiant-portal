@@ -36,7 +36,7 @@ declare namespace Cypress {
     validatePillSelectedQuery(facetTitle: string | RegExp, values: (string | RegExp)[], eq?: number): cy & CyEventEmitter;
     validateTableFirstRowAttr(expectedAttr: string, expectedValue: string, columnIndex: number, tableId: string = ''): cy & CyEventEmitter;
     validateTableFirstRowClass(expectedClass: string, columnIndex: number, tableId: string = ''): cy & CyEventEmitter;
-    validateTableFirstRowContent(expectedValue: string | RegExp, columnIndex: number, tableId: string = ''): cy & CyEventEmitter;
+    validateTableFirstRowContent(expectedValue: string | RegExp | null, columnIndex: number, tableId: string = ''): cy & CyEventEmitter;
     visitAndIntercept(url: string, methodHTTP: string, routeMatcher: string, nbCalls: number): cy & CyEventEmitter;
     visitCasesPage(search_criteria?: string): cy & CyEventEmitter;
     visitFilesPage(search_criteria?: string): cy & CyEventEmitter;
@@ -45,6 +45,7 @@ declare namespace Cypress {
     visitCaseVariantsPage(caseID: string, seqId: string, type: string, sqon?: string): cy & CyEventEmitter;
     visitVariantEvidCondPage(locusID: string): cy & CyEventEmitter;
     visitVariantFrequencyPage(locusID: string): cy & CyEventEmitter;
+    visitVariantOverviewPage(locusID: string): cy & CyEventEmitter;
     visitVariantPatientsPage(locusID: string): cy & CyEventEmitter;
     waitWhileLoad(ms: number): cy & CyEventEmitter;
   }

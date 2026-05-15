@@ -1,29 +1,31 @@
 import { useCallback, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { Row } from '@tanstack/react-table';
 import { ArrowUpRight, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
 
 import { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
 import { ActionButton } from '@/components/base/buttons';
 import { useI18n } from '@/components/hooks/i18n';
+import { SELECTED_VARIANT_PARAM } from '@/entity/variants/constants';
 import { useCaseIdFromParam } from '@/utils/helper';
 import IGVDialog from 'components/base/igv/igv-dialog';
-
-import OccurrenceSliderSheet from '../../sliders/slider-germline-occurrence-sheet';
 
 type OccurrenceActionsMenuProps = {
   row: Row<GermlineSNVOccurrence>;
   caseEntity?: CaseEntity;
-  onInterpretationSaved: () => void;
 };
 
-function OccurrenceActionsMenu({ row, caseEntity, onInterpretationSaved }: OccurrenceActionsMenuProps) {
+function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) {
   const { t } = useI18n();
-  const [sheetOpen, setSheetOpen] = useState<boolean>(false);
   const [igvOpen, setIgvOpen] = useState<boolean>(false);
-
   const caseId = useCaseIdFromParam();
-
   const { locus_id, chromosome, start, rsnumber, seq_id, locus } = row.original;
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handlePreview = useCallback(() => {
+    searchParams.set(SELECTED_VARIANT_PARAM, locus_id);
+    setSearchParams(searchParams, { replace: true });
+  }, []);
 
   const onNavigateToVariantPage = useCallback(() => {
     window.open(`/variants/entity/${locus_id}`, '_blank');
@@ -48,12 +50,6 @@ function OccurrenceActionsMenu({ row, caseEntity, onInterpretationSaved }: Occur
 
   return (
     <>
-      <OccurrenceSliderSheet
-        open={sheetOpen}
-        setOpen={setSheetOpen}
-        occurrence={row.original as GermlineSNVOccurrence}
-        onInterpretationSaved={onInterpretationSaved}
-      />
       {caseEntity?.has_igv_files && (
         <IGVDialog
           open={igvOpen}
@@ -75,7 +71,7 @@ function OccurrenceActionsMenu({ row, caseEntity, onInterpretationSaved }: Occur
           {
             icon: <EyeIcon />,
             label: t('variant.actions.preview'),
-            onClick: () => setSheetOpen(true),
+            onClick: handlePreview,
           },
           {
             icon: <ArrowUpRight />,

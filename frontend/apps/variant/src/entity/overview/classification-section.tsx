@@ -9,15 +9,16 @@ type ClassificationSectionProps = {
   counts: Record<string, number>;
   emptyText: string;
   href?: string;
+  dataCy?: string;
 };
 
-function ClassificationSection({ title, counts, emptyText, href }: ClassificationSectionProps) {
+function ClassificationSection({ title, counts, emptyText, href, dataCy }: ClassificationSectionProps) {
   return (
-    <div className="space-y-3">
+    <div data-cy={dataCy} className="space-y-3">
       <div className="flex items-center gap-1">
         <span className="font-semibold text-sm">{title}</span>
         {href && (
-          <Link to={href}>
+          <Link data-cy={`${dataCy}-link`} to={href}>
             <Button iconOnly size="xs" variant="ghost">
               <ArrowUpRight className="size-4!" />
             </Button>
@@ -27,7 +28,7 @@ function ClassificationSection({ title, counts, emptyText, href }: Classificatio
       <div className="flex flex-wrap gap-2">
         {Object.keys(counts).length ? (
           Object.entries(counts).map(([key, count]) => (
-            <ClassificationBadge key={key} value={key} count={count > 1 ? count : undefined} />
+            <ClassificationBadge key={key} data-cy={key} value={key} count={count > 1 ? count : undefined} />
           ))
         ) : (
           <span className="text-muted-foreground text-xs">{emptyText}</span>

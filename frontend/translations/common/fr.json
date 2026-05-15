@@ -109,16 +109,6 @@
       "confers_sensitivity.abbrev": "CS",
       "confers_sensitivity.tooltip": "Confère une sensibilité"
     },
-    "custom_pill_filter": {
-      "info": "Vous pouvez créer des requêtes personnalisées en ajoutant des critères à la barre de requêtes et en cliquant sur le bouton sauvegarder.",
-      "delete_dialog": {
-        "title": "Supprimer cette requête ?",
-        "description": "Vous êtes sur le point de supprimer la requête personnalisée « {{title}} », ce qui pourrait avoir un impact sur vos résultats.",
-        "cancel": "Annuler",
-        "ok": "Supprimer"
-      },
-      "learn_more": "En savoir plus"
-    },
     "file_format": {
       "cram": "Fichier CRAM",
       "crai": "Fichier d’index CRAI",
@@ -160,53 +150,6 @@
         "title": "Supprimer cette requête ?",
         "cancel": "Annuler",
         "ok": "Supprimer"
-      },
-      "custom_pill": {
-        "create_tooltip": "Créer une requête personnalisée",
-        "cannot_save_as_custom_pill": "Les requêtes personnalisées ne peuvent pas inclure d'autres requêtes personnalisées"
-      },
-      "save_dialog": {
-        "title": "Enregistrer cette requête",
-        "fields": {
-          "title": {
-            "label": "Nom de la requête",
-            "placeholder": "Requête sans titre"
-          }
-        },
-        "notice": "Vous trouverez vos requêtes enregistrées dans la barre latérale sous la rubrique « Requêtes ».",
-        "cancel": "Annuler",
-        "ok": "Enregistrer"
-      }
-    },
-    "query_pill": {
-      "operator": {
-        "change_operator_to": "Changer l'opérateur en",
-        "and": "et",
-        "or": "ou"
-      },
-      "custom_pill": {
-        "edit_dialog": {
-          "title": "Modifier la requête personnalisée",
-          "cancel": "Annuler",
-          "ok": "Enregistrer"
-        },
-        "cant_be_empty_dialog": {
-          "title": "La requête ne peut pas être vide",
-          "description": "Votre requête personnalisée doit contenir au moins un critère.",
-          "ok": "Fermer"
-        },
-        "title_exists_dialog": {
-          "title": "Nom déjà utilisé",
-          "description": "Une requête personnalisée avec ce nom existe déjà. Veuillez choisir un nom unique.",
-          "ok": "Fermer"
-        },
-        "save_dialog": {
-          "title": "Modifier cette requête ?",
-          "confirmation_message": "Vous êtes sur le point de modifier la requête personnalisée \"{title}\", ce qui peut affecter vos résultats.",
-          "affected_filters": "Filtres enregistrés affectés :",
-          "cancel": "Annuler",
-          "ok": "Enregistrer"
-        }
       }
     },
     "relationships": {
@@ -235,7 +178,6 @@
       "delete_dialog": {
         "title": "Supprimer définitivement ce filtre ?",
         "description": "Vous êtes sur le point de supprimer définitivement ce filtre et toutes ses requêtes.",
-        "cancel": "Annuler",
         "ok": "Supprimer le filtre"
       },
       "duplicate_tooltip": "Dupliquer le filtre",
@@ -259,22 +201,12 @@
       "manage_filters": "Gérer les filtres",
       "manage_dialog": {
         "title": "Gérer les filtres",
-        "close": "Fermer",
         "last_save_at": "Dernière sauvegarde il y a : {{lastSaveAt}}"
       },
       "new_filter": "Nouveau filtre",
       "save_tooltip": {
         "when_empty": "Ajoutez une requête pour enregistrer",
-        "when_dirty": "Enregistrer les modifications",
         "default": "Enregistrer le filtre"
-      },
-      "share_tooltip": {
-        "when_not_saved": "Enregistrez le filtre pour le partager",
-        "default": "Partager (Copier l'URL)"
-      },
-      "favorite_tooltip": {
-        "set": "Définir comme filtre par défaut",
-        "unset": "Retirer comme filtre par défaut"
       },
       "discard_tooltip": "Annuler les modifications non enregistrées",
       "no_discard_tooltip": "Aucune modification à annuler",
@@ -285,7 +217,6 @@
         "deleted": "Filtre supprimé",
         "updated": "Filtre mis à jour",
         "errors": {
-          "fetching": "Impossible de récupérer les filtres",
           "duplicated": "Un filtre avec ce nom existe déjà",
           "created": "Impossible de créer le filtre",
           "updated": "Impossible de mettre à jour le filtre",
@@ -294,7 +225,6 @@
       }
     },
     "components": {
-      "query_pill_remote": "Composant Query Pill Remote",
       "empty_cell": "-"
     },
     "table": {
@@ -886,7 +816,7 @@
       "exomiser_gene_combined_score": "Exo.",
       "exomiser_gene_combined_score_tooltip": "Score Exomiser calculé en fonction des caractéristiques du variant et des phénotypes du patient",
       "freq_tn": "Fréq. TN",
-      "freq_tn_tooltip": "Nombre de génomes tumeur-normal comportant ce variant. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
+      "freq_tn_tooltip": "Nombre de génomes tumeur-normal comportant ce variant et la fréquence sur l'ensemble du réseau. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
       "freq_g": "Fréq. G",
       "freq_g_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
       "filter": "Filtre",
@@ -1030,6 +960,8 @@
       "header": {
         "germline": "Germinal",
         "germline_family": "Germinal",
+        "patient": "Patient",
+        "sequencing": "Séquençage",
         "somatic": "Somatique"
       },
       "transcript": {
@@ -1054,7 +986,9 @@
         },
         "pub_med_id_not_found": "PMID invalide ou inconnu",
         "citation_placeholder": "Ex : 25741868",
-        "add_citation": "Ajouter une publication"
+        "add_citation": "Ajouter une publication",
+        "ensembl_gene_id": "Ensembl",
+        "transcript_id": "ID Transcrit"
       },
       "germline": {
         "condition": "Condition MONDO",
@@ -1194,7 +1128,7 @@
         "gene_card": {
           "consequence": "Conséquence",
           "cdna_change": "Changement cDNA",
-          "transcript_id": "ID Transcrit",
+          "transcript_id": "ID du transcrit",
           "exon": "Exon",
           "dbsnp_id": "ID dbSNP"
         }
@@ -1214,21 +1148,21 @@
           "compound_het": "Hétérozygote Composite",
           "potential_compound_het": "Hétérozygote Composite Potentiel",
           "inheritance": "Héritabilité",
-          "parental_origin": "Origine Parentale"
+          "parental_origin": "Origine parentale"
         },
         "family": {
           "title": "Famille",
-          "mother_genotype": "Génotype de la Mère",
-          "father_genotype": "Génotype du Père",
+          "mother_genotype": "Génotype de la mère",
+          "father_genotype": "Génotype du père",
           "affected_tooltip": "Affecté",
           "not_affected_tooltip": "Non affecté"
         },
         "metrics": {
           "title": "Métriques",
-          "quality_depth": "Profondeur Qualité",
+          "quality_depth": "Profondeur qualité",
           "allele_depth_alt": "Profondeur allélique ALT",
-          "total_depth_alt_ref": "Profondeur Totale ALT + REF",
-          "genotype_quality": "Qualité de Génotype",
+          "total_depth_alt_ref": "Profondeur totale ALT + REF",
+          "genotype_quality": "Qualité de génotype",
           "filter": "Filtre",
           "pass": "Pass",
           "fail": "Fail"
@@ -1299,7 +1233,7 @@
       "compound_het": "Hétérozygote Composite",
       "potential_compound_het": "Hétérozygote Composite Potentiel",
       "inheritance": "Héritabilité",
-      "parental_origin": "Origine Parentale"
+      "parental_origin": "Origine parentale"
     },
     "inheritance": {
       "title": "Héritabilité",
@@ -1307,15 +1241,15 @@
       "compound_het": "Hétérozygote Composite",
       "potential_compound_het": "Hétérozygote Composite Potentiel",
       "inheritance": "Héritabilité",
-      "parental_origin": "Origine Parentale"
+      "parental_origin": "Origine parentale"
     },
     "clinical_association": {
       "title": "Associations Cliniques (OMIM)"
     },
     "family": {
       "title": "Famille",
-      "mother_genotype": "Génotype de la Mère",
-      "father_genotype": "Génotype du Père",
+      "mother_genotype": "Génotype de la mère",
+      "father_genotype": "Génotype du père",
       "affected_tooltip": "Affecté",
       "not_affected_tooltip": "Non affecté"
     },

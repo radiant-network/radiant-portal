@@ -26,7 +26,7 @@ import {
   SomaticInterpretationSchemaType,
 } from '../../interpretation/types';
 
-const InterpretationFormSomatic = forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationSomatic>>(
+const SomaticInterpretationForm = forwardRef<InterpretationFormRef, InterpretationFormProps<InterpretationSomatic>>(
   ({ interpretation, saveInterpretation, onDirtyChange }, ref) => {
     const { t } = useI18n();
     const form = useForm<SomaticInterpretationSchemaType>({
@@ -257,4 +257,4 @@ const InterpretationFormSomatic = forwardRef<InterpretationFormRef, Interpretati
   },
 );
 
-export default InterpretationFormSomatic;
+export default SomaticInterpretationForm;

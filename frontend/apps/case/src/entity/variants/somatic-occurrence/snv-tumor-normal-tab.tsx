@@ -1,7 +1,7 @@
 import { CaseEntity, CaseSequencingExperiment } from '@/api/api';
-import { ICountInput, IListInput } from '@/components/base/query-builder-v3/hooks/use-query-builder';
-import QueryBuilder from '@/components/base/query-builder-v3/query-builder';
-import QueryBuilderDataTable from '@/components/base/query-builder-v3/query-builder-data-table';
+import { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
+import QueryBuilder from '@/components/base/query-builder/query-builder';
+import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
 import { useConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 import { getPatientClinicalInformation } from '@/components/lib/case-entity';

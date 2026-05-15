@@ -50,12 +50,6 @@ const defaultFeatureDefinitions: FeatureDefinitions = {
     description: 'Change the position of the main navigation menu',
   },
   // Add more feature definitions here
-  query_builder: {
-    type: 'link',
-    link: '/query-builder-v3/1?seq_id=1',
-    label: 'Query Builder V3',
-    description: 'Preview of the new Query Builder',
-  },
 };
 
 const BetaFeatureContext = createContext<BetaFeatureContextType | undefined>(undefined);

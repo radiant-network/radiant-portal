@@ -5,10 +5,6 @@ import useSWRMutation from 'swr/mutation';
 
 import { CaseEntity, CaseSequencingExperiment, ExpandedSomaticSNVOccurrence, InterpretationSomatic } from '@/api/api';
 import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
-import ClassificationSection from '@/components/base/occurrence/classification-section';
-import ClinicalAssociationSection from '@/components/base/occurrence/clinical-association-section';
-import GeneSection from '@/components/base/occurrence/gene-section';
-import SomaticFrequencySection from '@/components/base/occurrence/somatic-frequency-section';
 import { Button } from '@/components/base/shadcn/button';
 import {
   Dialog,
@@ -19,6 +15,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/base/shadcn/dialog';
+import {
+  ClinicalAssociationCard,
+  GeneCard,
+  PredictionCard,
+} from '@/components/base/slider/slider-variant-details-card';
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
 import { caseApi, interpretationApi, occurrencesApi } from '@/utils/api';
@@ -27,10 +28,9 @@ import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 import { SELECTED_VARIANT_PARAM } from '../../constants';
 import InterpretationVariantHeader from '../../interpretation/header';
 import InterpretationLastUpdatedBanner from '../../interpretation/last-updated-banner';
-import InterpretationTranscript from '../../interpretation/transcript';
 import { Interpretation, InterpretationFormRef } from '../../interpretation/types';
 
-import InterpretationFormSomatic from './somatic-interpretation-form';
+import SomaticInterpretationForm from './somatic-interpretation-form';
 
 type SomaticInterpretationDialogProps = {
   locusId: string;
@@ -198,48 +198,35 @@ function SomaticInterpretationDialog({
         size="lg"
         onEscapeKeyDown={e => e.preventDefault()}
         variant="stickyBoth"
-        className="overflow-hidden"
+        className="overflow-hidden flex flex-col"
       >
         <DialogHeader>
-          <DialogTitle>{t('variant.interpretation_form.title')}</DialogTitle>
+          <DialogTitle>
+            <InterpretationVariantHeader
+              case_type={caseEntity.data?.case_type}
+              patientId={patientId}
+              locus_id={occurrenceExpand?.data?.locus_id}
+              hgvsg={occurrenceExpand?.data?.hgvsg}
+              relationship_to_proband={relationshipToProband}
+              seqId={seqId}
+            />
+          </DialogTitle>
         </DialogHeader>
+
         {isLoading ? (
           <DialogBody className="flex items-center justify-center">
             <Spinner size={32} />
           </DialogBody>
         ) : (
           <>
-            <DialogBody className="overflow-scroll space-y-6">
+            <DialogBody className="flex-1 min-h-0 overflow-y-auto space-y-6 max-h-none">
               <InterpretationLastUpdatedBanner
                 updated_by_name={interpretation.data?.updated_by_name}
                 updated_at={interpretation.data?.updated_at}
               />
-              <InterpretationVariantHeader
-                case_type={caseEntity.data?.case_type}
-                patientId={patientId}
-                locus_id={occurrenceExpand?.data?.locus_id}
-                hgvsg={occurrenceExpand?.data?.hgvsg}
-                relationship_to_proband={relationshipToProband}
-                analysis_catalog_code={caseEntity.data?.analysis_catalog_code}
-                analysis_catalog_name={caseEntity.data?.analysis_catalog_name}
-              />
-              <InterpretationTranscript
-                symbol={occurrenceExpand?.data?.symbol}
-                picked_consequences={occurrenceExpand?.data?.picked_consequences}
-                vep_impact={occurrenceExpand?.data?.vep_impact}
-                aa_change={occurrenceExpand?.data?.aa_change}
-                transcript_id={occurrenceExpand?.data?.transcript_id}
-                is_canonical={occurrenceExpand?.data?.is_canonical}
-                is_mane_select={occurrenceExpand?.data?.is_mane_select}
-                is_mane_plus={occurrenceExpand?.data?.is_mane_plus}
-                exon_rank={occurrenceExpand?.data?.exon_rank}
-                exon_total={occurrenceExpand?.data?.exon_total}
-                dna_change={occurrenceExpand?.data?.dna_change}
-                rsnumber={occurrenceExpand?.data?.rsnumber}
-              />
               <div className="grid gap-6 grid-cols-12">
                 <div className="rounded-sm col-span-7 border p-6 bg-muted">
-                  <InterpretationFormSomatic
+                  <SomaticInterpretationForm
                     ref={somaticFormRef}
                     interpretation={interpretation.data}
                     saveInterpretation={interpretation =>
@@ -254,29 +241,54 @@ function SomaticInterpretationDialog({
                     onDirtyChange={setIsDirty}
                   />
                 </div>
-                <div className="rounded-sm col-span-5 border py-4 px-6">
-                  <div className="space-y-4">
-                    <ClassificationSection clinvar={occurrenceExpand.data?.clinvar} />
-                    <SomaticFrequencySection
-                      somatic_pc_tn_wgs={occurrenceExpand.data?.somatic_pc_tn_wgs}
-                      somatic_pn_tn_wgs={occurrenceExpand.data?.somatic_pn_tn_wgs}
-                      somatic_pf_tn_wgs={occurrenceExpand.data?.somatic_pf_tn_wgs}
-                      locusId={occurrenceExpand.data?.locus_id}
-                    />
-                    <GeneSection
-                      gnomad_pli={occurrenceExpand.data?.gnomad_pli}
-                      gnomad_loeuf={occurrenceExpand.data?.gnomad_loeuf}
-                      revel_score={occurrenceExpand.data?.revel_score}
-                      spliceai_type={occurrenceExpand.data?.spliceai_type}
-                      spliceai_ds={occurrenceExpand.data?.spliceai_ds}
-                      hgvsg={occurrenceExpand.data?.hgvsg}
-                      transcript_id={occurrenceExpand.data?.transcript_id}
-                    />
-                    <ClinicalAssociationSection
-                      omim_conditions={occurrenceExpand.data?.omim_conditions}
-                      locus_id={locusId}
-                    />
-                  </div>
+                <div className="col-span-5 flex flex-col gap-3">
+                  <GeneCard
+                    symbol={occurrenceExpand?.data?.symbol}
+                    aa_change={occurrenceExpand?.data?.aa_change}
+                    ensembl_gene_id={occurrenceExpand?.data?.ensembl_gene_id}
+                    vep_impact={occurrenceExpand?.data?.vep_impact}
+                    picked_consequences={occurrenceExpand?.data?.picked_consequences}
+                    dna_change={occurrenceExpand?.data?.dna_change}
+                    transcript_id={occurrenceExpand?.data?.transcript_id}
+                    is_mane_select={occurrenceExpand?.data?.is_mane_select}
+                    is_canonical={occurrenceExpand?.data?.is_canonical}
+                    exon_rank={occurrenceExpand?.data?.exon_rank}
+                    exon_total={occurrenceExpand?.data?.exon_total}
+                    rsnumber={occurrenceExpand?.data?.rsnumber}
+                  />
+                  <PredictionCard
+                    type="somatic"
+                    somatic_pc_tn_wgs={occurrenceExpand?.data?.somatic_pc_tn_wgs}
+                    somatic_pn_tn_wgs={occurrenceExpand?.data?.somatic_pn_tn_wgs}
+                    somatic_pf_tn_wgs={occurrenceExpand?.data?.somatic_pf_tn_wgs}
+                    cadd_phred={occurrenceExpand?.data?.cadd_phred}
+                    cadd_score={occurrenceExpand?.data?.cadd_score}
+                    dann_score={occurrenceExpand?.data?.dann_score}
+                    lrt_pred={occurrenceExpand?.data?.lrt_pred}
+                    lrt_score={occurrenceExpand?.data?.lrt_score}
+                    sift_pred={occurrenceExpand?.data?.sift_pred}
+                    sift_score={occurrenceExpand?.data?.sift_score}
+                    fathmm_pred={occurrenceExpand?.data?.fathmm_pred}
+                    fathmm_score={occurrenceExpand?.data?.fathmm_score}
+                    revel_score={occurrenceExpand?.data?.revel_score}
+                    polyphen2_hvar_pred={occurrenceExpand?.data?.polyphen2_hvar_pred}
+                    polyphen2_hvar_score={occurrenceExpand?.data?.polyphen2_hvar_score}
+                    clinvar={occurrenceExpand?.data?.clinvar}
+                    interpretation_classification_counts={occurrenceExpand?.data?.interpretation_classification_counts}
+                    gnomad_pli={occurrenceExpand?.data?.gnomad_pli}
+                    gnomad_loeuf={occurrenceExpand?.data?.gnomad_loeuf}
+                    ensembl_gene_id={occurrenceExpand?.data?.ensembl_gene_id}
+                    spliceai_type={occurrenceExpand?.data?.spliceai_type}
+                    spliceai_ds={occurrenceExpand?.data?.spliceai_ds}
+                    hgvsg={occurrenceExpand?.data?.hgvsg}
+                    gnomad_v3_af={occurrenceExpand?.data?.gnomad_v3_af}
+                    locus={occurrenceExpand?.data?.locus}
+                    locusId={locusId}
+                  />
+                  <ClinicalAssociationCard
+                    omim_conditions={occurrenceExpand?.data?.omim_conditions}
+                    locus_id={locusId}
+                  />
                 </div>
               </div>
             </DialogBody>

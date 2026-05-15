@@ -26,6 +26,7 @@ function InterpretationCard({ data, ...props }: InterpretationCardProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <ClassificationSection
+          dataCy="my-network"
           href={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`}
           title={t('variant_entity.overview.my_network')}
           counts={data.interpretation_classification_counts ?? {}}

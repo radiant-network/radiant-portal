@@ -1,9 +1,11 @@
+import { useCallback } from 'react';
 import { SquarePen } from 'lucide-react';
+import useSWR from 'swr';
 
-import { CaseSequencingExperiment, GermlineSNVOccurrence } from '@/api/api';
+import { CaseSequencingExperiment, GermlineSNVOccurrence, InterpretationGermline } from '@/api/api';
+import { useDataTable, useDataTableRowNavigation } from '@/components/base/data-table/hooks/use-data-table';
 import { NotesProvider } from '@/components/base/notes/hooks/use-notes';
 import NotesSliderSheet from '@/components/base/notes/notes-slider-sheet';
-import { useOccurrenceListContext } from '@/components/base/occurrence/hooks/use-occurrences-list';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
 import GermlineSliderInterpretationDetailsCard from '@/components/base/slider/germline-slider-interpretation-details-card';
@@ -16,45 +18,53 @@ import SliderSheet from '@/components/base/slider/slider-sheet';
 import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
 import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
 import { useI18n } from '@/components/hooks/i18n';
-import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
+import { interpretationApi } from '@/utils/api';
+import { useCaseIdFromParam } from '@/utils/helper';
 
-import GermlineInterpretationDialog from '../interpretation/germline-interpretation-form';
+import { SELECTED_VARIANT_PARAM } from '../../constants';
+import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
 
-type GermlineOccurrenceSliderSheetProps = {
-  occurrence?: GermlineSNVOccurrence;
-  children?: React.ReactElement;
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  onPrevious?: () => void;
-  onNext?: () => void;
-  hasPrevious?: boolean;
-  hasNext?: boolean;
-  patientSelected?: CaseSequencingExperiment;
-  onInterpretationSaved: () => void;
+type InterpretationInput = {
+  caseId: string;
+  seqId: string;
+  locusId: string;
+  transcriptId: string;
 };
 
-function SliderGermlineOccurrenceSheet({
-  occurrence,
-  children,
-  open,
-  setOpen,
-  onPrevious,
-  onNext,
-  hasPrevious,
-  hasNext,
-  patientSelected,
-  onInterpretationSaved,
-}: GermlineOccurrenceSliderSheetProps) {
+async function fetchInterpretation(input: InterpretationInput) {
+  const response = await interpretationApi.getInterpretationGermline(
+    input.caseId,
+    input.seqId,
+    input.locusId,
+    input.transcriptId,
+  );
+  return response.data;
+}
+
+type GermlineOccurrenceSliderSheetProps = {
+  children?: React.ReactElement;
+  patientSelected?: CaseSequencingExperiment;
+};
+
+function SliderGermlineOccurrenceSheet({ patientSelected, children }: GermlineOccurrenceSliderSheetProps) {
+  const { list } = useDataTable();
+
+  const rowNavigation = useDataTableRowNavigation<GermlineSNVOccurrence>({
+    data: list?.data ?? [],
+    paramsKey: SELECTED_VARIANT_PARAM,
+    targetKey: 'locus_id',
+    find: target => (value: GermlineSNVOccurrence) => value.locus_id === target,
+  });
+
   return (
-    <SliderSheet trigger={children} open={open} setOpen={setOpen}>
-      {occurrence && (
+    <SliderSheet trigger={children} open={!!rowNavigation.selected} setOpen={rowNavigation.handleClose}>
+      {rowNavigation.selected && (
         <GermlineOccurrenceSheetContent
-          onInterpretationSaved={onInterpretationSaved}
-          occurrence={occurrence}
-          onPrevious={onPrevious}
-          onNext={onNext}
-          hasPrevious={hasPrevious}
-          hasNext={hasNext}
+          occurrence={rowNavigation.selected}
+          onPrevious={rowNavigation.handlePrevious}
+          onNext={rowNavigation.handleNext}
+          hasPrevious={rowNavigation.hasPrevious}
+          hasNext={rowNavigation.hasNext}
           patientSelected={patientSelected}
         />
       )}
@@ -64,7 +74,6 @@ function SliderGermlineOccurrenceSheet({
 
 type OccurrenceSheetContentProps = {
   occurrence: GermlineSNVOccurrence;
-  onInterpretationSaved: () => void;
   onPrevious?: () => void;
   onNext?: () => void;
   hasPrevious?: boolean;
@@ -72,28 +81,44 @@ type OccurrenceSheetContentProps = {
   patientSelected?: CaseSequencingExperiment;
 };
 
-function GermlineOccurrenceSheetContent({
+export function GermlineOccurrenceSheetContent({
   occurrence,
   onPrevious,
   onNext,
   hasPrevious,
   hasNext,
   patientSelected,
-  onInterpretationSaved,
 }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
   const caseId = useCaseIdFromParam();
-  // seqId is to fetch the occurrence
-  const seqId = useSeqIdFromSearchParam();
+  const { list } = useDataTable();
 
-  // @TODO: To remove when using query-buidler v3, see somatic slider for reference
-  const { mutate: listFetcher } = useOccurrenceListContext();
   const { patient, caseResult, caseSequencing, expandResult, isLoading } = useGermlineOccurrenceAndCase(
     caseId,
-    seqId,
+    occurrence.seq_id,
     occurrence.locus_id.toString(),
     patientSelected,
   );
+
+  const interpretation = useSWR<InterpretationGermline>(
+    {
+      caseId,
+      seqId: occurrence.seq_id,
+      locusId: occurrence.locus_id,
+      transcriptId: expandResult.data?.transcript_id,
+    },
+    fetchInterpretation,
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+      shouldRetryOnError: false,
+    },
+  );
+
+  const handleInterpretationSaved = useCallback(() => {
+    list?.mutate();
+    interpretation.mutate();
+  }, [list, interpretation]);
 
   if (isLoading || !expandResult.data) {
     return <SliderSheetSkeleton />;
@@ -115,7 +140,7 @@ function GermlineOccurrenceSheetContent({
         hgvsg={occurrence.hgvsg}
         actions={
           <div className="flex gap-2">
-            <NotesProvider value={{ onChangeCallback: listFetcher }}>
+            <NotesProvider value={{ onChangeCallback: () => list?.mutate() }}>
               <NotesSliderSheet
                 caseId={caseId}
                 seqId={occurrence.seq_id}
@@ -129,7 +154,7 @@ function GermlineOccurrenceSheetContent({
                 locusId={occurrence.locus_id}
                 transcriptId={occurrence.transcript_id}
                 patientId={patient?.patient_id}
-                handleSaveCallback={onInterpretationSaved}
+                handleSaveCallback={handleInterpretationSaved}
                 renderTrigger={handleOpen => (
                   <Button size="sm" onClick={handleOpen}>
                     <SquarePen />
@@ -143,7 +168,7 @@ function GermlineOccurrenceSheetContent({
       />
       {occurrence.has_interpretation && (
         <GermlineSliderInterpretationDetailsCard
-          seqId={seqId}
+          seqId={occurrence.seq_id}
           caseId={caseId}
           symbol={occurrence?.symbol}
           locusId={occurrence?.locus_id}
@@ -156,7 +181,7 @@ function GermlineOccurrenceSheetContent({
               locusId={occurrence.locus_id}
               transcriptId={expandResult.data.transcript_id}
               patientId={patient?.patient_id}
-              handleSaveCallback={onInterpretationSaved}
+              handleSaveCallback={handleInterpretationSaved}
               renderTrigger={handleOpen => (
                 <Button size="sm" onClick={handleOpen}>
                   <SquarePen />

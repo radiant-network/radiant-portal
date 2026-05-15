@@ -339,13 +339,14 @@ Cypress.Commands.add('validateTableFirstRowClass', (expectedClass: string, colum
 
 /**
  * Validates that the first table row contains the expected content.
- * @param expectedValue The expected value (string or RegExp).
+ * @param expectedValue The expected value (string or RegExp). `null` is converted to '-' to match the EmptyField fallback rendered when API data is absent.
  * @param columnIndex The column index to check.
  * @param tableId The table ID to check (default: '').
  */
-Cypress.Commands.add('validateTableFirstRowContent', (expectedValue: string | RegExp, columnIndex: number, tableId: string = '') => {
+Cypress.Commands.add('validateTableFirstRowContent', (expectedValue: string | RegExp | null, columnIndex: number, tableId: string = '') => {
+  const value = expectedValue === null ? '-' : expectedValue;
   cy.get(CommonSelectors.tableRow(tableId)).should('have.length.gte', 1);
-  cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(columnIndex).contains(expectedValue).should('exist');
+  cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(columnIndex).contains(value).should('exist');
 });
 
 /**
@@ -502,6 +503,15 @@ Cypress.Commands.add('visitVariantEvidCondPage', (locusID: string) => {
  */
 Cypress.Commands.add('visitVariantFrequencyPage', (locusID: string) => {
   cy.visitAndIntercept(`/variants/entity/${locusID}?tab=frequency`, 'GET', `**/external_frequencies`, 1);
+  cy.setLang('EN');
+});
+
+/**
+ * Visits the variant overview page for a specific variant.
+ * @param locusID The locus ID to visit.
+ */
+Cypress.Commands.add('visitVariantOverviewPage', (locusID: string) => {
+  cy.visitAndIntercept(`/variants/entity/${locusID}?tab=overview`, 'GET', `**/variants/germline/*/overview`, 1);
   cy.setLang('EN');
 });
 

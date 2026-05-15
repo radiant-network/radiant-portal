@@ -23,7 +23,7 @@ import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton'
 import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
 import SomaticSliderInterpretationDetailsCard from '@/components/base/slider/somatic-slider-interpretation-details-card';
 import { useI18n } from '@/components/hooks/i18n';
-import { getCaseSequencingExperimentByPatient, getPatientClinicalInformation } from '@/components/lib/case-entity';
+import { getPatientClinicalInformation } from '@/components/lib/case-entity';
 import { caseApi, interpretationApi, occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
@@ -164,7 +164,6 @@ export function SomaticOccurrenceSheetContent({
   );
 
   const patient = getPatientClinicalInformation(caseEntity.data, patientSelected);
-  const caseSequencing = getCaseSequencingExperimentByPatient(caseEntity.data, patientSelected);
 
   const handleInterpretationSaveCallback = useCallback(() => {
     list?.mutate();
@@ -181,7 +180,7 @@ export function SomaticOccurrenceSheetContent({
         <SliderPatientRow
           patientId={patient?.patient_id}
           relationshipToProband={patient?.relationship_to_proband}
-          seqId={caseSequencing?.seq_id}
+          seqId={occurrence.seq_id}
         />
       </SliderHeader>
       <Separator />
@@ -256,6 +255,7 @@ export function SomaticOccurrenceSheetContent({
           ad_total={expandResult.data.ad_total}
           locus={expandResult.data.locus}
           has_igv_files={caseEntity.data?.has_igv_files}
+          somatic={true}
         />
       )}
       <SliderVariantDetailsCard

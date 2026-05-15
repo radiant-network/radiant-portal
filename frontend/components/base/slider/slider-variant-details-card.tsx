@@ -190,7 +190,7 @@ type ClinicalAssociationCardProps = {
   locus_id?: string;
   omim_conditions?: OmimGenePanel[];
 };
-const ClinicalAssociationCard = ({ omim_conditions, locus_id }: ClinicalAssociationCardProps) => {
+export const ClinicalAssociationCard = ({ omim_conditions, locus_id }: ClinicalAssociationCardProps) => {
   const { t } = useI18n();
 
   const clinicalAssociationTitle = t('common.no_data_available');
@@ -298,7 +298,7 @@ type PredictionCardProps = SliderVariantType & {
   locusId?: string;
   hotspot?: boolean;
 };
-const PredictionCard = ({
+export const PredictionCard = ({
   type,
   germline_pc_wgs_affected,
   germline_pn_wgs_affected,
@@ -541,95 +541,97 @@ const PredictionCard = ({
   }
 
   return (
-    <div className="flex flex-wrap gap-4 rounded-md border border-border p-3 sm:gap-20 w-full">
-      <div className="flex flex-1 flex-col gap-4">
-        <DescriptionSection title={t('preview_sheet.variant_details.sections.interpretations.title')}>
-          {Object.keys(interpretation_classification_counts ?? {}).length ? (
-            <DescriptionRow label={t('preview_sheet.variant_details.sections.interpretations.my_network')}>
-              {Object.entries(interpretation_classification_counts ?? {}).map(([key, count]) => (
-                <ClassificationBadge key={key} value={key} count={count} abbreviated />
-              ))}
-            </DescriptionRow>
-          ) : (
-            <span className="text-muted-foreground text-xs">
-              {t('preview_sheet.variant_details.sections.interpretations.no_data')}
-            </span>
-          )}
-        </DescriptionSection>
-        <DescriptionSection title={t('preview_sheet.variant_details.sections.classification.title')}>
-          {classification.length > 0 ? (
-            classification.map(element => element)
-          ) : (
-            <span className="text-muted-foreground text-xs">
-              {t('preview_sheet.variant_details.sections.classification.no_data')}
-            </span>
-          )}
-        </DescriptionSection>
-        <DescriptionSection title={t('preview_sheet.variant_details.sections.gene.title')}>
-          <DescriptionRow label={t('occurrence_expand.gene.pli')}>
-            {gnomad_pli ? (
-              <AnchorLink
-                href={`https://gnomad.broadinstitute.org/gene/${ensembl_gene_id}?dataset=gnomad_r2_1`}
-                target="_blank"
-                size="sm"
-              >
-                {toExponentialNotationAtThreshold(gnomad_pli)}
-              </AnchorLink>
+    <div className="@container/prediction-card rounded-md border border-border p-3 w-full">
+      <div className="flex flex-col @md/prediction-card:flex-row @md/prediction-card:flex-wrap gap-4 @md/prediction-card:gap-20">
+        <div className="flex flex-1 flex-col gap-4">
+          <DescriptionSection title={t('preview_sheet.variant_details.sections.interpretations.title')}>
+            {Object.keys(interpretation_classification_counts ?? {}).length ? (
+              <DescriptionRow label={t('preview_sheet.variant_details.sections.interpretations.my_network')}>
+                {Object.entries(interpretation_classification_counts ?? {}).map(([key, count]) => (
+                  <ClassificationBadge key={key} value={key} count={count} abbreviated />
+                ))}
+              </DescriptionRow>
             ) : (
-              <EmptyField />
+              <span className="text-muted-foreground text-xs">
+                {t('preview_sheet.variant_details.sections.interpretations.no_data')}
+              </span>
             )}
-          </DescriptionRow>
-          <DescriptionRow label={t('occurrence_expand.gene.loeuf')}>
-            {gnomad_loeuf ? (
-              <AnchorLink
-                href={`https://gnomad.broadinstitute.org/gene/${ensembl_gene_id}?dataset=gnomad_r2_1`}
-                target="_blank"
-                size="sm"
-              >
-                {toExponentialNotationAtThreshold(gnomad_loeuf)}
-              </AnchorLink>
+          </DescriptionSection>
+          <DescriptionSection title={t('preview_sheet.variant_details.sections.classification.title')}>
+            {classification.length > 0 ? (
+              classification.map(element => element)
             ) : (
-              <EmptyField />
+              <span className="text-muted-foreground text-xs">
+                {t('preview_sheet.variant_details.sections.classification.no_data')}
+              </span>
             )}
-          </DescriptionRow>
-          <DescriptionRow label={t('occurrence_expand.gene.splice_ai')}>
-            {spliceai_type ? (
-              <div className="flex gap-1">
+          </DescriptionSection>
+          <DescriptionSection title={t('preview_sheet.variant_details.sections.gene.title')}>
+            <DescriptionRow label={t('occurrence_expand.gene.pli')}>
+              {gnomad_pli ? (
                 <AnchorLink
-                  href={`https://spliceailookup.broadinstitute.org/#variant=${hgvsg}&hg=38`}
+                  href={`https://gnomad.broadinstitute.org/gene/${ensembl_gene_id}?dataset=gnomad_r2_1`}
                   target="_blank"
                   size="sm"
                 >
-                  {spliceai_ds}
+                  {toExponentialNotationAtThreshold(gnomad_pli)}
                 </AnchorLink>
+              ) : (
+                <EmptyField />
+              )}
+            </DescriptionRow>
+            <DescriptionRow label={t('occurrence_expand.gene.loeuf')}>
+              {gnomad_loeuf ? (
+                <AnchorLink
+                  href={`https://gnomad.broadinstitute.org/gene/${ensembl_gene_id}?dataset=gnomad_r2_1`}
+                  target="_blank"
+                  size="sm"
+                >
+                  {toExponentialNotationAtThreshold(gnomad_loeuf)}
+                </AnchorLink>
+              ) : (
+                <EmptyField />
+              )}
+            </DescriptionRow>
+            <DescriptionRow label={t('occurrence_expand.gene.splice_ai')}>
+              {spliceai_type ? (
+                <div className="flex gap-1">
+                  <AnchorLink
+                    href={`https://spliceailookup.broadinstitute.org/#variant=${hgvsg}&hg=38`}
+                    target="_blank"
+                    size="sm"
+                  >
+                    {spliceai_ds}
+                  </AnchorLink>
 
-                {spliceai_type.map(v => (
-                  <Badge key={v}>{v}</Badge>
-                ))}
-              </div>
-            ) : (
-              <EmptyField />
-            )}
-          </DescriptionRow>
-        </DescriptionSection>
-      </div>
-      <div className="flex flex-1 flex-col gap-4">
-        <DescriptionSection title={t('preview_sheet.variant_details.sections.frequencies.title')}>
-          {frequencies.map(element => element)}
-        </DescriptionSection>
-        <DescriptionSection title={t('preview_sheet.variant_details.sections.functional_scores.title')}>
-          <ExpandableList
-            className="w-full"
-            items={functionalScores}
-            visibleCount={4}
-            size="lg"
-            emptyMessage={
-              <div className="text-muted-foreground text-xs">
-                {t('preview_sheet.variant_details.sections.functional_scores.no_data')}
-              </div>
-            }
-          />
-        </DescriptionSection>
+                  {spliceai_type.map(v => (
+                    <Badge key={v}>{v}</Badge>
+                  ))}
+                </div>
+              ) : (
+                <EmptyField />
+              )}
+            </DescriptionRow>
+          </DescriptionSection>
+        </div>
+        <div className="flex flex-1 flex-col gap-4">
+          <DescriptionSection title={t('preview_sheet.variant_details.sections.frequencies.title')}>
+            {frequencies.map(element => element)}
+          </DescriptionSection>
+          <DescriptionSection title={t('preview_sheet.variant_details.sections.functional_scores.title')}>
+            <ExpandableList
+              className="w-full"
+              items={functionalScores}
+              visibleCount={4}
+              size="lg"
+              emptyMessage={
+                <div className="text-muted-foreground text-xs">
+                  {t('preview_sheet.variant_details.sections.functional_scores.no_data')}
+                </div>
+              }
+            />
+          </DescriptionSection>
+        </div>
       </div>
     </div>
   );
@@ -649,7 +651,7 @@ type GeneCardProps = {
   exon_total?: number;
   rsnumber?: string;
 };
-const GeneCard = ({
+export const GeneCard = ({
   symbol,
   aa_change,
   ensembl_gene_id,
@@ -668,11 +670,16 @@ const GeneCard = ({
   const hasGene = !!symbol;
 
   return (
-    <div className="rounded-md border border-border p-3">
-      <div className="flex flex-wrap gap-4 sm:gap-20 w-full">
+    <div className="@container/gene-card rounded-md border border-border p-3">
+      <div className="flex flex-col @md/gene-card:flex-row @md/gene-card:flex-wrap gap-4 @md/gene-card:gap-20 w-full">
         {hasGene && (
           <div className="flex flex-1 flex-col grow gap-2">
-            <AnchorLink className="font-semibold text-lg" external href={getOmimOrgUrl({ symbol: symbol! })}>
+            <AnchorLink
+              className="font-semibold text-lg"
+              external
+              href={getOmimOrgUrl({ symbol: symbol! })}
+              target="_blank"
+            >
               {symbol}
             </AnchorLink>
             {aa_change && <div className="font-mono font-semibold text-sm">{aa_change}</div>}

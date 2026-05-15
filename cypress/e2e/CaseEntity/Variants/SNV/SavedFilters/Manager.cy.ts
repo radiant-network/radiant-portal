@@ -8,7 +8,8 @@ describe('Case Entity - Variants - SNV - Saved filters - Manager', () => {
   const setupTest = () => {
     cy.login();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV', data.variantGermline.sqon);
-    CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton();
+    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Clean Query Builder
+    CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
   };
 
   it('Rename', () => {
@@ -46,6 +47,5 @@ describe('Case Entity - Variants - SNV - Saved filters - Manager', () => {
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('duplicate', true /*isDisable*/, false /*isDirty*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('delete', true /*isDisable*/, false /*isDirty*/);
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('share', true /*isDisable*/, false /*isDirty*/);
   });
 });
