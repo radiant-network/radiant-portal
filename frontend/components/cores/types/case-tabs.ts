@@ -8,3 +8,8 @@ export enum CaseEntityTabs {
   Variants = 'variants',
   Files = 'files',
 }
+
+export enum CaseEntityCasesTabs {
+  InterpretedCases = 'InterpretedCases',
+  OtherCases = 'OtherCases',
+}
