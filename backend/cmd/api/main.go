@@ -58,6 +58,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoIGV := repository.NewIGVRepository(dbStarrocks)
 	repoDocuments := repository.NewDocumentsRepository(dbStarrocks)
 	repoOccurrenceNotes := repository.NewOccurrenceNotesRepository(dbPostgres)
+	repoOccurrenceFlags := repository.NewOccurrenceFlagsRepository(dbPostgres)
 	repoSavedFilters := repository.NewSavedFiltersRepository(dbPostgres)
 	repoUserPreferences := repository.NewUserPreferencesRepository(dbPostgres)
 	repoFacets := repository.NewFacetsRepository()
@@ -143,6 +144,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGroup := privateRoutes.Group("/occurrences")
 	occurrencesGermlineGroup := occurrencesGroup.Group("/germline")
 	occurrencesSomaticGroup := occurrencesGroup.Group("/somatic")
+
+	occurrenceFlagsGroup := occurrencesGroup.Group("/flags")
+	occurrenceFlagsGroup.POST("/:case_id/:seq_id/:task_id/:occurrence_id", server.UpsertOccurrenceFlagHandler(repoOccurrenceFlags))
 
 	occurrencesGermlineCNVGroup := occurrencesGermlineGroup.Group("/cnv")
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/count", server.OccurrencesGermlineCNVCountHandler(repoGermlineCNVOccurrences))

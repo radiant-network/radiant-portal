@@ -2845,6 +2845,49 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Occurrence Flags",
+      "item": [
+        {
+          "name": "Upsert Flag",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/flags/1/1/1/10000?flag_type=flag",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "flags",
+                "1",
+                "1",
+                "1",
+                "10000"
+              ],
+              "query": [
+                {
+                  "key": "flag_type",
+                  "value": "flag"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

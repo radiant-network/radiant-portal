@@ -69,6 +69,7 @@ docs/ListBodyWithSqon.md
 docs/MondoApi.md
 docs/ObservationCategoricalBatch.md
 docs/ObservationTextBatch.md
+docs/OccurrenceFlagsApi.md
 docs/OccurrenceNote.md
 docs/OccurrenceNotesApi.md
 docs/OccurrencesApi.md
@@ -129,6 +130,7 @@ radiant_python/api/hpo_api.py
 radiant_python/api/igv_api.py
 radiant_python/api/interpretations_api.py
 radiant_python/api/mondo_api.py
+radiant_python/api/occurrence_flags_api.py
 radiant_python/api/occurrence_notes_api.py
 radiant_python/api/occurrences_api.py
 radiant_python/api/patients_api.py
@@ -248,3 +250,4 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
+test/test_occurrence_flags_api.py

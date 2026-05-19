@@ -95,6 +95,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"occurrences/somatic/snv/1/1/aggregate",
 			"occurrences/somatic/snv/1/1/statistics",
 			"occurrences/germline/cnv/1/1/list",
+			"occurrences/flags/1/1/1/10000",
 			"users/preferences/table_1",
 			"variants/germline/1/cases/interpreted",
 			"variants/germline/1/cases/uninterpreted",
@@ -175,6 +176,7 @@ func Test_OpenFGA_Authorization(t *testing.T) {
 			}{
 				{"cases/search", 400},
 				{"interpretations/germline/1/1000/T001", 400},
+				{"occurrences/flags/1/1/1/10000", 400},
 				{"occurrences/germline/snv/1/1/count", 400},
 				{"occurrences/somatic/snv/1/1/count", 400},
 				{"variants/germline/1000/cases/interpreted", 400},
