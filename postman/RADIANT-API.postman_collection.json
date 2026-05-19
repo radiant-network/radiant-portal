@@ -34,7 +34,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/count",
+              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/1/count",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -42,6 +42,7 @@
                 "occurrences",
                 "germline",
                 "snv",
+                "1",
                 "1",
                 "1",
                 "count"
@@ -75,7 +76,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/list",
+              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/1/list",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -83,6 +84,7 @@
                 "occurrences",
                 "germline",
                 "snv",
+                "1",
                 "1",
                 "1",
                 "list"
@@ -116,7 +118,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/aggregate",
+              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/1/aggregate",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -124,6 +126,7 @@
                 "occurrences",
                 "germline",
                 "snv",
+                "1",
                 "1",
                 "1",
                 "aggregate"
@@ -157,7 +160,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/statistics",
+              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/1/statistics",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -165,6 +168,7 @@
                 "occurrences",
                 "germline",
                 "snv",
+                "1",
                 "1",
                 "1",
                 "statistics"
@@ -189,7 +193,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/-8318226658347712512/expanded",
+              "raw": "{{radiant-api-url}}/occurrences/germline/snv/1/1/1/-8318226658347712512/expanded",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -197,6 +201,7 @@
                 "occurrences",
                 "germline",
                 "snv",
+                "1",
                 "1",
                 "1",
                 "-8318226658347712512",
@@ -236,7 +241,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/count",
+              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/1/count",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -244,6 +249,7 @@
                 "occurrences",
                 "germline",
                 "cnv",
+                "1",
                 "1",
                 "1",
                 "count"
@@ -277,7 +283,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/list",
+              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/1/list",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -285,6 +291,7 @@
                 "occurrences",
                 "germline",
                 "cnv",
+                "1",
                 "1",
                 "1",
                 "list"
@@ -318,7 +325,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/aggregate",
+              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/1/aggregate",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -326,6 +333,7 @@
                 "occurrences",
                 "germline",
                 "cnv",
+                "1",
                 "1",
                 "1",
                 "aggregate"
@@ -359,7 +367,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/statistics",
+              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/1/statistics",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -367,6 +375,7 @@
                 "occurrences",
                 "germline",
                 "cnv",
+                "1",
                 "1",
                 "1",
                 "statistics"
@@ -391,7 +400,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/2916096452801350323/genes_overlap",
+              "raw": "{{radiant-api-url}}/occurrences/germline/cnv/1/1/1/2916096452801350323/genes_overlap",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -399,6 +408,7 @@
                 "occurrences",
                 "germline",
                 "cnv",
+                "1",
                 "1",
                 "1",
                 "2916096452801350323",
@@ -2350,7 +2360,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/list",
+              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/74/list",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -2359,6 +2369,7 @@
                 "somatic",
                 "snv",
                 "71",
+                "74",
                 "74",
                 "list"
               ]
@@ -2391,7 +2402,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/count",
+              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/74/count",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -2400,6 +2411,7 @@
                 "somatic",
                 "snv",
                 "71",
+                "74",
                 "74",
                 "count"
               ]
@@ -2432,7 +2444,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/aggregate",
+              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/74/aggregate",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -2441,6 +2453,7 @@
                 "somatic",
                 "snv",
                 "71",
+                "74",
                 "74",
                 "aggregate"
               ]
@@ -2473,7 +2486,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/statistics",
+              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/74/statistics",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -2482,6 +2495,7 @@
                 "somatic",
                 "snv",
                 "71",
+                "74",
                 "74",
                 "statistics"
               ]
@@ -2505,7 +2519,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/-8318226658347712512/expanded",
+              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/74/-8318226658347712512/expanded",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -2514,6 +2528,7 @@
                 "somatic",
                 "snv",
                 "71",
+                "74",
                 "74",
                 "-8318226658347712512",
                 "expanded"

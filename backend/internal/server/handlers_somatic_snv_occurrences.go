@@ -17,6 +17,7 @@ import (
 // @Security bearerauth
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
+// @Param task_id path int true "Task ID"
 // @Param			message	body		types.ListBodyWithSqon	true	"List Body"
 // @Accept json
 // @Produce json
@@ -24,7 +25,7 @@ import (
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/list [post]
+// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list [post]
 func OccurrencesSomaticSNVListHandler(repo repository.SomaticSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -54,8 +55,13 @@ func OccurrencesSomaticSNVListHandler(repo repository.SomaticSNVOccurrencesDAO) 
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
+		taskID, err := strconv.Atoi(c.Param("task_id"))
+		if err != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
 
-		occurrences, err := repo.GetOccurrences(caseID, seqID, query)
+		occurrences, err := repo.GetOccurrences(caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -73,6 +79,7 @@ func OccurrencesSomaticSNVListHandler(repo repository.SomaticSNVOccurrencesDAO) 
 // @Security bearerauth
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
+// @Param task_id path int true "Task ID"
 // @Param			message	body		types.CountBodyWithSqon	true	"Count Body"
 // @Accept json
 // @Produce json
@@ -80,7 +87,7 @@ func OccurrencesSomaticSNVListHandler(repo repository.SomaticSNVOccurrencesDAO) 
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/count [post]
+// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count [post]
 func OccurrencesSomaticSNVCountHandler(repo repository.SomaticSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -109,7 +116,12 @@ func OccurrencesSomaticSNVCountHandler(repo repository.SomaticSNVOccurrencesDAO)
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
-		count, err := repo.CountOccurrences(caseID, seqID, query)
+		taskID, err := strconv.Atoi(c.Param("task_id"))
+		if err != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
+		count, err := repo.CountOccurrences(caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -127,6 +139,7 @@ func OccurrencesSomaticSNVCountHandler(repo repository.SomaticSNVOccurrencesDAO)
 // @Security bearerauth
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
+// @Param task_id path int true "Task ID"
 // @Param with_dictionary query bool false "Whether to include all possible facet values" default(false)
 // @Param			message	body		types.AggregationBodyWithSqon	true	"Aggregation Body"
 // @Accept json
@@ -135,7 +148,7 @@ func OccurrencesSomaticSNVCountHandler(repo repository.SomaticSNVOccurrencesDAO)
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/aggregate [post]
+// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate [post]
 func OccurrencesSomaticSNVAggregateHandler(repo repository.SomaticSNVOccurrencesDAO, facetsRepo repository.FacetsRepositoryDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -166,7 +179,12 @@ func OccurrencesSomaticSNVAggregateHandler(repo repository.SomaticSNVOccurrences
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
-		aggregation, err := repo.AggregateOccurrences(caseID, seqID, query)
+		taskID, err := strconv.Atoi(c.Param("task_id"))
+		if err != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
+		aggregation, err := repo.AggregateOccurrences(caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -217,6 +235,7 @@ func OccurrencesSomaticSNVAggregateHandler(repo repository.SomaticSNVOccurrences
 // @Security bearerauth
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
+// @Param task_id path int true "Task ID"
 // @Param			message	body		types.StatisticsBodyWithSqon	true	"Statistics Body"
 // @Accept json
 // @Produce json
@@ -224,7 +243,7 @@ func OccurrencesSomaticSNVAggregateHandler(repo repository.SomaticSNVOccurrences
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/statistics [post]
+// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics [post]
 func OccurrencesSomaticSNVStatisticsHandler(repo repository.SomaticSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -254,7 +273,12 @@ func OccurrencesSomaticSNVStatisticsHandler(repo repository.SomaticSNVOccurrence
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
-		statistics, err := repo.GetStatisticsOccurrences(caseID, seqID, query)
+		taskID, err := strconv.Atoi(c.Param("task_id"))
+		if err != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
+		statistics, err := repo.GetStatisticsOccurrences(caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -271,12 +295,13 @@ func OccurrencesSomaticSNVStatisticsHandler(repo repository.SomaticSNVOccurrence
 // @Security bearerauth
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
+// @Param task_id path int true "Task ID"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.ExpandedSomaticSNVOccurrence
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{locus_id}/expanded [get]
+// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded [get]
 func GetExpandedSomaticSNVOccurrence(repo repository.SomaticSNVOccurrencesDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errSeq := strconv.Atoi(c.Param("case_id"))
@@ -289,12 +314,17 @@ func GetExpandedSomaticSNVOccurrence(repo repository.SomaticSNVOccurrencesDAO, i
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
+		taskId, errTask := strconv.Atoi(c.Param("task_id"))
+		if errTask != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
 		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
 		if errLocus != nil {
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		expandedOccurrence, err := repo.GetExpandedOccurrence(caseId, seqId, locusId)
+		expandedOccurrence, err := repo.GetExpandedOccurrence(caseId, seqId, taskId, locusId)
 		if err != nil {
 			HandleError(c, err)
 			return

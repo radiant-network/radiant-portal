@@ -4,26 +4,26 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**aggregate_germline_cnv_occurrences**](OccurrencesApi.md#aggregate_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/aggregate | Aggregate germline CNV occurrences
-[**aggregate_germline_snv_occurrences**](OccurrencesApi.md#aggregate_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/aggregate | Aggregate germline SNV occurrences
-[**aggregate_somatic_snv_occurrences**](OccurrencesApi.md#aggregate_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/aggregate | Aggregate somatic SNV occurrences
-[**count_germline_cnv_occurrences**](OccurrencesApi.md#count_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/count | Count germline CNV occurrences
-[**count_germline_snv_occurrences**](OccurrencesApi.md#count_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/count | Count germline SNV occurrences
-[**count_somatic_snv_occurrences**](OccurrencesApi.md#count_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/count | Count somatic SNV occurrences
-[**get_expanded_germline_snv_occurrence**](OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /occurrences/germline/snv/{case_id}/{seq_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
-[**get_expanded_somatic_snv_occurrence**](OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /occurrences/somatic/snv/{case_id}/{seq_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
+[**aggregate_germline_cnv_occurrences**](OccurrencesApi.md#aggregate_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate germline CNV occurrences
+[**aggregate_germline_snv_occurrences**](OccurrencesApi.md#aggregate_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate germline SNV occurrences
+[**aggregate_somatic_snv_occurrences**](OccurrencesApi.md#aggregate_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate somatic SNV occurrences
+[**count_germline_cnv_occurrences**](OccurrencesApi.md#count_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count | Count germline CNV occurrences
+[**count_germline_snv_occurrences**](OccurrencesApi.md#count_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count | Count germline SNV occurrences
+[**count_somatic_snv_occurrences**](OccurrencesApi.md#count_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count | Count somatic SNV occurrences
+[**get_expanded_germline_snv_occurrence**](OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
+[**get_expanded_somatic_snv_occurrence**](OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
 [**get_germline_snv_dictionary**](OccurrencesApi.md#get_germline_snv_dictionary) | **GET** /occurrences/germline/snv/dictionary | Get germline SNV facets dictionary
-[**list_germline_cnv_genes_overlap**](OccurrencesApi.md#list_germline_cnv_genes_overlap) | **GET** /occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap | List genes overlapping a CNV with a given ID
-[**list_germline_cnv_occurrences**](OccurrencesApi.md#list_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/list | List germline CNV occurrences
-[**list_germline_snv_occurrences**](OccurrencesApi.md#list_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/list | List germline SNV occurrences
-[**list_somatic_snv_occurrences**](OccurrencesApi.md#list_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/list | List somatic SNV occurrences
-[**statistics_germline_cnv_occurrences**](OccurrencesApi.md#statistics_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/statistics | Statistics of germline CNV occurrences
-[**statistics_germline_snv_occurrences**](OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/statistics | Statistics of germline SNV occurrences
-[**statistics_somatic_snv_occurrences**](OccurrencesApi.md#statistics_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/statistics | Statistics of somatic SNV occurrences
+[**list_germline_cnv_genes_overlap**](OccurrencesApi.md#list_germline_cnv_genes_overlap) | **GET** /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap | List genes overlapping a CNV with a given ID
+[**list_germline_cnv_occurrences**](OccurrencesApi.md#list_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list | List germline CNV occurrences
+[**list_germline_snv_occurrences**](OccurrencesApi.md#list_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list | List germline SNV occurrences
+[**list_somatic_snv_occurrences**](OccurrencesApi.md#list_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list | List somatic SNV occurrences
+[**statistics_germline_cnv_occurrences**](OccurrencesApi.md#statistics_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline CNV occurrences
+[**statistics_germline_snv_occurrences**](OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline SNV occurrences
+[**statistics_somatic_snv_occurrences**](OccurrencesApi.md#statistics_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic SNV occurrences
 
 
 # **aggregate_germline_cnv_occurrences**
-> List[Aggregation] aggregate_germline_cnv_occurrences(case_id, seq_id, aggregation_body_with_sqon)
+> List[Aggregation] aggregate_germline_cnv_occurrences(case_id, seq_id, task_id, aggregation_body_with_sqon)
 
 Aggregate germline CNV occurrences
 
@@ -62,11 +62,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     aggregation_body_with_sqon = radiant_python.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
 
     try:
         # Aggregate germline CNV occurrences
-        api_response = api_instance.aggregate_germline_cnv_occurrences(case_id, seq_id, aggregation_body_with_sqon)
+        api_response = api_instance.aggregate_germline_cnv_occurrences(case_id, seq_id, task_id, aggregation_body_with_sqon)
         print("The response of OccurrencesApi->aggregate_germline_cnv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -82,6 +83,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **aggregation_body_with_sqon** | [**AggregationBodyWithSqon**](AggregationBodyWithSqon.md)| Aggregation Body | 
 
 ### Return type
@@ -109,7 +111,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **aggregate_germline_snv_occurrences**
-> List[Aggregation] aggregate_germline_snv_occurrences(case_id, seq_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+> List[Aggregation] aggregate_germline_snv_occurrences(case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
 
 Aggregate germline SNV occurrences
 
@@ -148,12 +150,13 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     aggregation_body_with_sqon = radiant_python.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
     with_dictionary = False # bool | Whether to include all possible facet values (optional) (default to False)
 
     try:
         # Aggregate germline SNV occurrences
-        api_response = api_instance.aggregate_germline_snv_occurrences(case_id, seq_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+        api_response = api_instance.aggregate_germline_snv_occurrences(case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
         print("The response of OccurrencesApi->aggregate_germline_snv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -169,6 +172,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **aggregation_body_with_sqon** | [**AggregationBodyWithSqon**](AggregationBodyWithSqon.md)| Aggregation Body | 
  **with_dictionary** | **bool**| Whether to include all possible facet values | [optional] [default to False]
 
@@ -197,7 +201,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **aggregate_somatic_snv_occurrences**
-> List[Aggregation] aggregate_somatic_snv_occurrences(case_id, seq_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+> List[Aggregation] aggregate_somatic_snv_occurrences(case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
 
 Aggregate somatic SNV occurrences
 
@@ -236,12 +240,13 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     aggregation_body_with_sqon = radiant_python.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
     with_dictionary = False # bool | Whether to include all possible facet values (optional) (default to False)
 
     try:
         # Aggregate somatic SNV occurrences
-        api_response = api_instance.aggregate_somatic_snv_occurrences(case_id, seq_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+        api_response = api_instance.aggregate_somatic_snv_occurrences(case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
         print("The response of OccurrencesApi->aggregate_somatic_snv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -257,6 +262,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **aggregation_body_with_sqon** | [**AggregationBodyWithSqon**](AggregationBodyWithSqon.md)| Aggregation Body | 
  **with_dictionary** | **bool**| Whether to include all possible facet values | [optional] [default to False]
 
@@ -285,7 +291,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **count_germline_cnv_occurrences**
-> Count count_germline_cnv_occurrences(case_id, seq_id, count_body_with_sqon)
+> Count count_germline_cnv_occurrences(case_id, seq_id, task_id, count_body_with_sqon)
 
 Count germline CNV occurrences
 
@@ -324,11 +330,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     count_body_with_sqon = radiant_python.CountBodyWithSqon() # CountBodyWithSqon | Count Body
 
     try:
         # Count germline CNV occurrences
-        api_response = api_instance.count_germline_cnv_occurrences(case_id, seq_id, count_body_with_sqon)
+        api_response = api_instance.count_germline_cnv_occurrences(case_id, seq_id, task_id, count_body_with_sqon)
         print("The response of OccurrencesApi->count_germline_cnv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -344,6 +351,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **count_body_with_sqon** | [**CountBodyWithSqon**](CountBodyWithSqon.md)| Count Body | 
 
 ### Return type
@@ -371,7 +379,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **count_germline_snv_occurrences**
-> Count count_germline_snv_occurrences(case_id, seq_id, count_body_with_sqon)
+> Count count_germline_snv_occurrences(case_id, seq_id, task_id, count_body_with_sqon)
 
 Count germline SNV occurrences
 
@@ -410,11 +418,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     count_body_with_sqon = radiant_python.CountBodyWithSqon() # CountBodyWithSqon | Count Body
 
     try:
         # Count germline SNV occurrences
-        api_response = api_instance.count_germline_snv_occurrences(case_id, seq_id, count_body_with_sqon)
+        api_response = api_instance.count_germline_snv_occurrences(case_id, seq_id, task_id, count_body_with_sqon)
         print("The response of OccurrencesApi->count_germline_snv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -430,6 +439,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **count_body_with_sqon** | [**CountBodyWithSqon**](CountBodyWithSqon.md)| Count Body | 
 
 ### Return type
@@ -457,7 +467,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **count_somatic_snv_occurrences**
-> Count count_somatic_snv_occurrences(case_id, seq_id, count_body_with_sqon)
+> Count count_somatic_snv_occurrences(case_id, seq_id, task_id, count_body_with_sqon)
 
 Count somatic SNV occurrences
 
@@ -496,11 +506,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     count_body_with_sqon = radiant_python.CountBodyWithSqon() # CountBodyWithSqon | Count Body
 
     try:
         # Count somatic SNV occurrences
-        api_response = api_instance.count_somatic_snv_occurrences(case_id, seq_id, count_body_with_sqon)
+        api_response = api_instance.count_somatic_snv_occurrences(case_id, seq_id, task_id, count_body_with_sqon)
         print("The response of OccurrencesApi->count_somatic_snv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -516,6 +527,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **count_body_with_sqon** | [**CountBodyWithSqon**](CountBodyWithSqon.md)| Count Body | 
 
 ### Return type
@@ -543,7 +555,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_expanded_germline_snv_occurrence**
-> ExpandedGermlineSNVOccurrence get_expanded_germline_snv_occurrence(case_id, seq_id, locus_id)
+> ExpandedGermlineSNVOccurrence get_expanded_germline_snv_occurrence(case_id, seq_id, task_id, locus_id)
 
 Get a germline ExpandedGermlineSNVOccurrence
 
@@ -581,11 +593,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     locus_id = 'locus_id_example' # str | Locus ID
 
     try:
         # Get a germline ExpandedGermlineSNVOccurrence
-        api_response = api_instance.get_expanded_germline_snv_occurrence(case_id, seq_id, locus_id)
+        api_response = api_instance.get_expanded_germline_snv_occurrence(case_id, seq_id, task_id, locus_id)
         print("The response of OccurrencesApi->get_expanded_germline_snv_occurrence:\n")
         pprint(api_response)
     except Exception as e:
@@ -601,6 +614,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **locus_id** | **str**| Locus ID | 
 
 ### Return type
@@ -627,7 +641,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_expanded_somatic_snv_occurrence**
-> ExpandedSomaticSNVOccurrence get_expanded_somatic_snv_occurrence(case_id, seq_id, locus_id)
+> ExpandedSomaticSNVOccurrence get_expanded_somatic_snv_occurrence(case_id, seq_id, task_id, locus_id)
 
 Get a somatic ExpandedSomaticSNVOccurrence
 
@@ -665,11 +679,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     locus_id = 'locus_id_example' # str | Locus ID
 
     try:
         # Get a somatic ExpandedSomaticSNVOccurrence
-        api_response = api_instance.get_expanded_somatic_snv_occurrence(case_id, seq_id, locus_id)
+        api_response = api_instance.get_expanded_somatic_snv_occurrence(case_id, seq_id, task_id, locus_id)
         print("The response of OccurrencesApi->get_expanded_somatic_snv_occurrence:\n")
         pprint(api_response)
     except Exception as e:
@@ -685,6 +700,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **locus_id** | **str**| Locus ID | 
 
 ### Return type
@@ -792,7 +808,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_germline_cnv_genes_overlap**
-> List[CNVGeneOverlap] list_germline_cnv_genes_overlap(case_id, seq_id, cnv_id)
+> List[CNVGeneOverlap] list_germline_cnv_genes_overlap(case_id, seq_id, task_id, cnv_id)
 
 List genes overlapping a CNV with a given ID
 
@@ -830,11 +846,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     cnv_id = 'cnv_id_example' # str | Locus ID
 
     try:
         # List genes overlapping a CNV with a given ID
-        api_response = api_instance.list_germline_cnv_genes_overlap(case_id, seq_id, cnv_id)
+        api_response = api_instance.list_germline_cnv_genes_overlap(case_id, seq_id, task_id, cnv_id)
         print("The response of OccurrencesApi->list_germline_cnv_genes_overlap:\n")
         pprint(api_response)
     except Exception as e:
@@ -850,6 +867,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **cnv_id** | **str**| Locus ID | 
 
 ### Return type
@@ -876,7 +894,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_germline_cnv_occurrences**
-> List[GermlineCNVOccurrence] list_germline_cnv_occurrences(case_id, seq_id, list_body_with_sqon)
+> List[GermlineCNVOccurrence] list_germline_cnv_occurrences(case_id, seq_id, task_id, list_body_with_sqon)
 
 List germline CNV occurrences
 
@@ -915,11 +933,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     list_body_with_sqon = radiant_python.ListBodyWithSqon() # ListBodyWithSqon | List Body
 
     try:
         # List germline CNV occurrences
-        api_response = api_instance.list_germline_cnv_occurrences(case_id, seq_id, list_body_with_sqon)
+        api_response = api_instance.list_germline_cnv_occurrences(case_id, seq_id, task_id, list_body_with_sqon)
         print("The response of OccurrencesApi->list_germline_cnv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -935,6 +954,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **list_body_with_sqon** | [**ListBodyWithSqon**](ListBodyWithSqon.md)| List Body | 
 
 ### Return type
@@ -962,7 +982,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_germline_snv_occurrences**
-> List[GermlineSNVOccurrence] list_germline_snv_occurrences(case_id, seq_id, list_body_with_sqon)
+> List[GermlineSNVOccurrence] list_germline_snv_occurrences(case_id, seq_id, task_id, list_body_with_sqon)
 
 List germline SNV occurrences
 
@@ -1001,11 +1021,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     list_body_with_sqon = radiant_python.ListBodyWithSqon() # ListBodyWithSqon | List Body
 
     try:
         # List germline SNV occurrences
-        api_response = api_instance.list_germline_snv_occurrences(case_id, seq_id, list_body_with_sqon)
+        api_response = api_instance.list_germline_snv_occurrences(case_id, seq_id, task_id, list_body_with_sqon)
         print("The response of OccurrencesApi->list_germline_snv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -1021,6 +1042,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **list_body_with_sqon** | [**ListBodyWithSqon**](ListBodyWithSqon.md)| List Body | 
 
 ### Return type
@@ -1048,7 +1070,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_somatic_snv_occurrences**
-> List[SomaticSNVOccurrence] list_somatic_snv_occurrences(case_id, seq_id, list_body_with_sqon)
+> List[SomaticSNVOccurrence] list_somatic_snv_occurrences(case_id, seq_id, task_id, list_body_with_sqon)
 
 List somatic SNV occurrences
 
@@ -1087,11 +1109,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     list_body_with_sqon = radiant_python.ListBodyWithSqon() # ListBodyWithSqon | List Body
 
     try:
         # List somatic SNV occurrences
-        api_response = api_instance.list_somatic_snv_occurrences(case_id, seq_id, list_body_with_sqon)
+        api_response = api_instance.list_somatic_snv_occurrences(case_id, seq_id, task_id, list_body_with_sqon)
         print("The response of OccurrencesApi->list_somatic_snv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -1107,6 +1130,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **list_body_with_sqon** | [**ListBodyWithSqon**](ListBodyWithSqon.md)| List Body | 
 
 ### Return type
@@ -1134,7 +1158,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **statistics_germline_cnv_occurrences**
-> Statistics statistics_germline_cnv_occurrences(case_id, seq_id, statistics_body_with_sqon)
+> Statistics statistics_germline_cnv_occurrences(case_id, seq_id, task_id, statistics_body_with_sqon)
 
 Statistics of germline CNV occurrences
 
@@ -1173,11 +1197,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     statistics_body_with_sqon = radiant_python.StatisticsBodyWithSqon() # StatisticsBodyWithSqon | Statistics Body
 
     try:
         # Statistics of germline CNV occurrences
-        api_response = api_instance.statistics_germline_cnv_occurrences(case_id, seq_id, statistics_body_with_sqon)
+        api_response = api_instance.statistics_germline_cnv_occurrences(case_id, seq_id, task_id, statistics_body_with_sqon)
         print("The response of OccurrencesApi->statistics_germline_cnv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -1193,6 +1218,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **statistics_body_with_sqon** | [**StatisticsBodyWithSqon**](StatisticsBodyWithSqon.md)| Statistics Body | 
 
 ### Return type
@@ -1220,7 +1246,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **statistics_germline_snv_occurrences**
-> Statistics statistics_germline_snv_occurrences(case_id, seq_id, statistics_body_with_sqon)
+> Statistics statistics_germline_snv_occurrences(case_id, seq_id, task_id, statistics_body_with_sqon)
 
 Statistics of germline SNV occurrences
 
@@ -1259,11 +1285,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     statistics_body_with_sqon = radiant_python.StatisticsBodyWithSqon() # StatisticsBodyWithSqon | Statistics Body
 
     try:
         # Statistics of germline SNV occurrences
-        api_response = api_instance.statistics_germline_snv_occurrences(case_id, seq_id, statistics_body_with_sqon)
+        api_response = api_instance.statistics_germline_snv_occurrences(case_id, seq_id, task_id, statistics_body_with_sqon)
         print("The response of OccurrencesApi->statistics_germline_snv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -1279,6 +1306,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **statistics_body_with_sqon** | [**StatisticsBodyWithSqon**](StatisticsBodyWithSqon.md)| Statistics Body | 
 
 ### Return type
@@ -1306,7 +1334,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **statistics_somatic_snv_occurrences**
-> Statistics statistics_somatic_snv_occurrences(case_id, seq_id, statistics_body_with_sqon)
+> Statistics statistics_somatic_snv_occurrences(case_id, seq_id, task_id, statistics_body_with_sqon)
 
 Statistics of somatic SNV occurrences
 
@@ -1345,11 +1373,12 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.OccurrencesApi(api_client)
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
     statistics_body_with_sqon = radiant_python.StatisticsBodyWithSqon() # StatisticsBodyWithSqon | Statistics Body
 
     try:
         # Statistics of somatic SNV occurrences
-        api_response = api_instance.statistics_somatic_snv_occurrences(case_id, seq_id, statistics_body_with_sqon)
+        api_response = api_instance.statistics_somatic_snv_occurrences(case_id, seq_id, task_id, statistics_body_with_sqon)
         print("The response of OccurrencesApi->statistics_somatic_snv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -1365,6 +1394,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
  **statistics_body_with_sqon** | [**StatisticsBodyWithSqon**](StatisticsBodyWithSqon.md)| Statistics Body | 
 
 ### Return type

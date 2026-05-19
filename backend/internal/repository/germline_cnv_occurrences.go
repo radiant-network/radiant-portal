@@ -18,11 +18,11 @@ type GermlineCNVOccurrencesRepository struct {
 }
 
 type GermlineCNVOccurrencesDAO interface {
-	GetOccurrences(caseId int, seqId int, userFilter types.ListQuery) ([]GermlineCNVOccurrence, error)
-	CountOccurrences(caseId int, seqId int, userFilter types.CountQuery) (int64, error)
-	AggregateOccurrences(caseId int, seqId int, userQuery types.AggQuery) ([]Aggregation, error)
-	GetStatisticsOccurrences(caseId int, seqId int, query types.StatisticsQuery) (*Statistics, error)
-	GetGenesOverlap(caseId int, seqId int, cnvId int) ([]types.CNVGeneOverlap, error)
+	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]GermlineCNVOccurrence, error)
+	CountOccurrences(caseId int, seqId int, taskId int, userFilter types.CountQuery) (int64, error)
+	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error)
+	GetStatisticsOccurrences(caseId int, seqId int, taskId int, query types.StatisticsQuery) (*Statistics, error)
+	GetGenesOverlap(caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error)
 }
 
 func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRepository {
@@ -33,9 +33,9 @@ func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRep
 	return &GermlineCNVOccurrencesRepository{db: db}
 }
 
-func (r *GermlineCNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, userQuery types.ListQuery) ([]GermlineCNVOccurrence, error) {
+func (r *GermlineCNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]GermlineCNVOccurrence, error) {
 	var occurrences []GermlineCNVOccurrence
-	tx, err := r.prepareQuery(seqId, userQuery)
+	tx, err := r.prepareQuery(seqId, taskId, userQuery)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -83,8 +83,8 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 	return occurrences, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) CountOccurrences(_ int, seqId int, userQuery types.CountQuery) (int64, error) {
-	tx, err := r.prepareQuery(seqId, userQuery)
+func (r *GermlineCNVOccurrencesRepository) CountOccurrences(_ int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+	tx, err := r.prepareQuery(seqId, taskId, userQuery)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -99,7 +99,7 @@ func (r *GermlineCNVOccurrencesRepository) CountOccurrences(_ int, seqId int, us
 	return count, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) prepareQuery(seqId int, userQuery types.Query) (*gorm.DB, error) {
+func (r *GermlineCNVOccurrencesRepository) prepareQuery(seqId int, taskId int, userQuery types.Query) (*gorm.DB, error) {
 	part, err := utils.GetSequencingPart(seqId, r.db)
 	if err != nil {
 		return nil, fmt.Errorf("error during partition fetch %w", err)
@@ -107,7 +107,7 @@ func (r *GermlineCNVOccurrencesRepository) prepareQuery(seqId int, userQuery typ
 
 	tx := r.db.Table(
 		fmt.Sprintf("%s %s", types.GermlineCNVOccurrenceTable.Name, types.GermlineCNVOccurrenceTable.Alias),
-	).Where("cnvo.seq_id = ? and cnvo.part=?", seqId, part)
+	).Where("cnvo.seq_id = ? AND cnvo.task_id = ? AND cnvo.part=?", seqId, taskId, part)
 
 	if userQuery != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 		selectedPanelsField := userQuery.GetFieldsFromTables(types.GenePanelsTables...)
@@ -121,8 +121,8 @@ func (r *GermlineCNVOccurrencesRepository) prepareQuery(seqId int, userQuery typ
 	return tx, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	tx, err := r.prepareQuery(seqId, userQuery)
+func (r *GermlineCNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {
+	tx, err := r.prepareQuery(seqId, taskId, userQuery)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -150,8 +150,8 @@ func (r *GermlineCNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int
 	return aggregation, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
-	tx, err := r.prepareQuery(seqId, userQuery)
+func (r *GermlineCNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
+	tx, err := r.prepareQuery(seqId, taskId, userQuery)
 	var statistics types.Statistics
 	if err != nil {
 		return &statistics, fmt.Errorf("error during query preparation %w", err)
@@ -171,7 +171,7 @@ func (r *GermlineCNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId
 	return &statistics, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(_ int, seqId int, cnvId int) ([]types.CNVGeneOverlap, error) {
+func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(_ int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error) {
 	part, err := utils.GetSequencingPart(seqId, r.db)
 	if err != nil {
 		return nil, fmt.Errorf("error during partition fetch %w", err)
@@ -180,7 +180,7 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(_ int, seqId int, cnv
 	var start, end, length int
 
 	err = r.db.Table(types.GermlineCNVOccurrenceTable.Name).
-		Where("seq_id = ? AND part = ? AND cnv_id = ?", seqId, part, cnvId).
+		Where("seq_id = ? AND task_id = ? AND part = ? AND cnv_id = ?", seqId, taskId, part, cnvId).
 		Select("chromosome, start, end, length").
 		Row().
 		Scan(&chromosome, &start, &end, &length)
