@@ -9,8 +9,8 @@ import PageError from '@/components/base/page/page-error';
 import PageHeader from '@/components/base/page/page-header';
 import { BadgeProps } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
+import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { VariantEntityTabs } from '@/types';
 import { variantsApi } from '@/utils/api';
 
 import CasesTab from './cases/cases-tab';

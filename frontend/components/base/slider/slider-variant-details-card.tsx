@@ -17,6 +17,7 @@ import { DescriptionRow, DescriptionSection } from '@/components/base/slider/des
 import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
+import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { toExponentialNotation, toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
@@ -213,7 +214,7 @@ export const ClinicalAssociationCard = ({ omim_conditions, locus_id }: ClinicalA
       clinicalAssociationValue.push(
         <AnchorLink
           component={Link}
-          to={`/variants/entity/${locus_id}?tab=evidenceAndConditions`}
+          to={`/variants/entity/${locus_id}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
           className="justify-start"
           size="sm"
         >
@@ -350,7 +351,11 @@ export const PredictionCard = ({
         }
       >
         {somatic_pc_tn_wgs && somatic_pn_tn_wgs && somatic_pf_tn_wgs?.toExponential(2) ? (
-          <AnchorLink size="sm" href={`/variants/entity/${locusId}?tab=patients&cases=OtherCases`} target="_blank">
+          <AnchorLink
+            size="sm"
+            href={`/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}&cases=OtherCases`}
+            target="_blank"
+          >
             {somatic_pc_tn_wgs} / {somatic_pn_tn_wgs} ({somatic_pf_tn_wgs?.toExponential(2)})
           </AnchorLink>
         ) : (
