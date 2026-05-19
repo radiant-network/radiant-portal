@@ -13,9 +13,9 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/shadcn/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
-import { ToggleGroup, ToggleGroupItem } from '@/components/base/shadcn/toggle-group';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { ToggleGroup, ToggleGroupItem } from 'components/base/shadcn/toggle-group';
 
 import InterpretationFormGeneric from '../../interpretation/interpretation-form-generic';
 import MondoAutoCompleteFormField from '../../interpretation/mondo-auto-complete-form-field';
@@ -127,6 +127,7 @@ const SomaticInterpretationForm = forwardRef<InterpretationFormRef, Interpretati
                     type="single"
                     size="default"
                     variant="outline"
+                    spacing={1}
                     className="flex-wrap justify-start"
                     onValueChange={field.onChange}
                     defaultValue={field.value}
