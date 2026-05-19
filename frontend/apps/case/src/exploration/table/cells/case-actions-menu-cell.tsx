@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/base/shadcn/dropdown-menu';
+import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 
 function CaseActionsMenuCell({ row }: CellContext<CaseResult, any>) {
@@ -35,7 +36,7 @@ function CaseActionsMenuCell({ row }: CellContext<CaseResult, any>) {
           <DropdownMenuItem
             disabled={!row.original.has_variants}
             onClick={() => {
-              navigate(`/case/entity/${row.original.case_id}?tab=variants`);
+              navigate(`/case/entity/${row.original.case_id}?tab=${CaseEntityTabs.Variants}`);
             }}
           >
             <ExternalLink />

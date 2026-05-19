@@ -9,9 +9,9 @@ import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phen
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardHeader, CardSeparator, CardTitle } from '@/components/base/shadcn/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
-import { CaseEntityTabs } from '@/types';
 import { PROBAND } from 'components/base/constants';
 
 const PHENOTYPES_VISIBLE_COUNT = 6;

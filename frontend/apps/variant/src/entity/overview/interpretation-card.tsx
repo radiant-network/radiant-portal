@@ -3,8 +3,8 @@ import { HospitalIcon } from 'lucide-react';
 
 import { VariantOverview } from '@/api/api';
 import { Card, CardContent, CardHeader, CardProps } from '@/components/base/shadcn/card';
+import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { VariantEntityTabs } from '@/types';
 
 import ClassificationSection from './classification-section';
 

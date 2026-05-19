@@ -9,8 +9,8 @@ import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/
 import PageError from '@/components/base/page/page-error';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { CaseEntityTabs } from '@/types';
 import { caseApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 

@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/base/shadcn/dropdown-menu';
+import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 
 function UninterpretedCaseActionsCell({ row }: CellContext<VariantUninterpretedCase, any>) {
@@ -34,7 +35,9 @@ function UninterpretedCaseActionsCell({ row }: CellContext<VariantUninterpretedC
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => {
-              navigate(`/case/entity/${row.original.case_id}?tab=variants&seq_id=${row.original.seq_id}`);
+              navigate(
+                `/case/entity/${row.original.case_id}?tab=${CaseEntityTabs.Variants}&seq_id=${row.original.seq_id}`,
+              );
             }}
           >
             <ExternalLink />
