@@ -27,6 +27,26 @@
         "h4": "Titre 4",
         "h5": "Titre 5",
         "h6": "Titre 6"
+      },
+      "toolbar": {
+        "link": {
+          "label": "Lien"
+        }
+      },
+      "link": {
+        "popover": {
+          "title": "Lien",
+          "subtitle": "Attacher un lien au texte sélectionné",
+          "url": {
+            "placeholder": "https://example.com"
+          },
+          "confirm": "Confirmer",
+          "update": "Mettre à jour",
+          "remove": "Supprimer",
+          "close": {
+            "ariaLabel": "Fermer"
+          }
+        }
       }
     },
     "auto_complete": {
