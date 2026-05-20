@@ -137,6 +137,58 @@ func Test_UpsertOccurrenceFlag_RejectsNonExistentTaskID(t *testing.T) {
 	})
 }
 
+func Test_DeleteOccurrenceFlag_RemovesRow(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewOccurrenceFlagsRepository(db)
+
+		_, err := repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "10000", SeqID: 1, TaskID: 1, FlagType: "flag"})
+		assert.NoError(t, err)
+
+		affected, err := repo.Delete(2, 1, 1, "10000")
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), affected)
+
+		var count int64
+		db.Model(&types.OccurrenceFlag{}).
+			Where("case_id = ? AND occurrence_id = ? AND seq_id = ? AND task_id = ?", 2, "10000", 1, 1).
+			Count(&count)
+		assert.Equal(t, int64(0), count)
+	})
+}
+
+func Test_DeleteOccurrenceFlag_NotFoundReturnsZero(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewOccurrenceFlagsRepository(env.Postgres)
+
+		affected, err := repo.Delete(2, 1, 1, "does-not-exist")
+		assert.NoError(t, err)
+		assert.Equal(t, int64(0), affected)
+	})
+}
+
+func Test_DeleteOccurrenceFlag_OnlyDeletesMatchingCompositeKey(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewOccurrenceFlagsRepository(db)
+
+		_, err := repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "10000", SeqID: 1, TaskID: 1, FlagType: "flag"})
+		assert.NoError(t, err)
+		_, err = repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "20000", SeqID: 1, TaskID: 1, FlagType: "pin"})
+		assert.NoError(t, err)
+
+		affected, err := repo.Delete(2, 1, 1, "10000")
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), affected)
+
+		var remaining types.OccurrenceFlag
+		err = db.Where("case_id = ? AND occurrence_id = ? AND seq_id = ? AND task_id = ?", 2, "20000", 1, 1).
+			First(&remaining).Error
+		assert.NoError(t, err)
+		assert.Equal(t, "pin", remaining.FlagType)
+	})
+}
+
 func Test_UpsertOccurrenceFlag_RejectsInvalidFlagType(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres

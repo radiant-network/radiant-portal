@@ -105,6 +105,17 @@ func Test_SecureRoutes(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, 401, resp.StatusCode)
 		}
+
+		// DELETE requests
+		for _, route := range []string{
+			"occurrences/flags/1/1/1/10000",
+		} {
+			req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://localhost:%d/%s", randomPort, route), nil)
+			assert.NoError(t, err)
+			resp, err = http.DefaultClient.Do(req)
+			assert.NoError(t, err)
+			assert.Equal(t, 401, resp.StatusCode)
+		}
 	})
 }
 
@@ -185,6 +196,26 @@ func Test_OpenFGA_Authorization(t *testing.T) {
 			for _, tc := range postTests {
 				t.Run("POST_"+tc.route, func(t *testing.T) {
 					req, err := http.NewRequest(http.MethodPost, server.URL+"/"+tc.route, nil)
+					assert.NoError(t, err)
+					req.Header.Set("Authorization", "Bearer "+token)
+
+					res, err := client.Do(req)
+					assert.NoError(t, err)
+					defer res.Body.Close()
+					assert.Equal(t, tc.code, res.StatusCode)
+				})
+			}
+
+			deleteTests := []struct {
+				route string
+				code  int
+			}{
+				{"occurrences/flags/1/1/1/90130", 404},
+			}
+
+			for _, tc := range deleteTests {
+				t.Run("DELETE_"+tc.route, func(t *testing.T) {
+					req, err := http.NewRequest(http.MethodDelete, server.URL+"/"+tc.route, nil)
 					assert.NoError(t, err)
 					req.Header.Set("Authorization", "Bearer "+token)
 
