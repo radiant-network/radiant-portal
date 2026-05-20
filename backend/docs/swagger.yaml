@@ -4257,6 +4257,55 @@ paths:
       tags:
       - occurrence_notes
   /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}:
+    delete:
+      description: Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id).
+        Returns 404 if no flag exists.
+      operationId: deleteOccurrenceFlag
+      parameters:
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Seq ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Occurrence ID
+        in: path
+        name: occurrence_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Delete the flag on an occurrence
+      tags:
+      - occurrence_flags
     post:
       description: Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id).
         An occurrence has at most one flag per case.

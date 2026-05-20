@@ -35,6 +35,24 @@ func assertUpsertOccurrenceFlag(
 	assert.Equal(t, expectedStatus, w.Code)
 }
 
+func assertDeleteOccurrenceFlag(
+	t *testing.T,
+	repo repository.OccurrenceFlagsDAO,
+	caseID, seqID, taskID, occurrenceID string,
+	expectedStatus int,
+) {
+	t.Helper()
+	router := gin.Default()
+	router.DELETE("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", server.DeleteOccurrenceFlagHandler(repo))
+
+	url := fmt.Sprintf("/occurrences/flags/%s/%s/%s/%s", caseID, seqID, taskID, occurrenceID)
+	req, _ := http.NewRequest("DELETE", url, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, expectedStatus, w.Code)
+}
+
 func Test_UpsertOccurrenceFlag_Integration(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
@@ -141,5 +159,52 @@ func Test_UpsertOccurrenceFlag_Integration_NonExistentTaskID(t *testing.T) {
 		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
 
 		assertUpsertOccurrenceFlag(t, repo, "1", "1", "99999", "90107", "flag", http.StatusInternalServerError)
+	})
+}
+
+func Test_DeleteOccurrenceFlag_Integration(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+
+		assertUpsertOccurrenceFlag(t, repo, "1", "1", "1", "90120", "flag", http.StatusNoContent)
+		assertDeleteOccurrenceFlag(t, repo, "1", "1", "1", "90120", http.StatusNoContent)
+
+		var count int64
+		env.Postgres.Model(&types.OccurrenceFlag{}).
+			Where("case_id = ? AND seq_id = ? AND task_id = ? AND occurrence_id = ?", 1, 1, 1, "90120").
+			Count(&count)
+		assert.Equal(t, int64(0), count)
+	})
+}
+
+func Test_DeleteOccurrenceFlag_Integration_NotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+
+		assertDeleteOccurrenceFlag(t, repo, "1", "1", "1", "90121", http.StatusNotFound)
+	})
+}
+
+func Test_DeleteOccurrenceFlag_Integration_InvalidCaseID(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+
+		assertDeleteOccurrenceFlag(t, repo, "not-a-number", "1", "1", "90122", http.StatusNotFound)
+	})
+}
+
+func Test_DeleteOccurrenceFlag_Integration_InvalidSeqID(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+
+		assertDeleteOccurrenceFlag(t, repo, "1", "not-a-number", "1", "90123", http.StatusNotFound)
+	})
+}
+
+func Test_DeleteOccurrenceFlag_Integration_InvalidTaskID(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := repository.NewOccurrenceFlagsRepository(env.Postgres)
+
+		assertDeleteOccurrenceFlag(t, repo, "1", "1", "not-a-number", "90124", http.StatusNotFound)
 	})
 }
