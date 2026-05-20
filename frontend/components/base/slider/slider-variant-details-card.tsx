@@ -17,6 +17,7 @@ import { DescriptionRow, DescriptionSection } from '@/components/base/slider/des
 import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getDbSnpUrl, getEnsemblUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
+import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { toExponentialNotation, toExponentialNotationAtThreshold } from '@/components/lib/number-format';
@@ -353,7 +354,7 @@ export const PredictionCard = ({
         {somatic_pc_tn_wgs && somatic_pn_tn_wgs && somatic_pf_tn_wgs?.toExponential(2) ? (
           <AnchorLink
             size="sm"
-            href={`/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}&cases=OtherCases`}
+            href={`/variants/entity/${locusId}?tab=${VariantEntityTabs.Cases}&cases=${CaseEntityCasesTabs.OtherCases}`}
             target="_blank"
           >
             {somatic_pc_tn_wgs} / {somatic_pn_tn_wgs} ({somatic_pf_tn_wgs?.toExponential(2)})
