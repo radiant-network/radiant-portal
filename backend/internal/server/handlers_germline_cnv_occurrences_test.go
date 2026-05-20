@@ -33,6 +33,13 @@ func (m *MockCNVRepository) GetStatisticsOccurrences(int, int, types.StatisticsQ
 }
 
 func (m *MockCNVRepository) GetOccurrences(int, int, types.ListQuery) ([]types.GermlineCNVOccurrence, error) {
+	quality := float32(99.5)
+	bc :=10
+	cn := 2
+	sm := float32(0.95)
+	svLen := 4000
+	refLen := 4000
+	nbSNV := 0
 	return []types.GermlineCNVOccurrence{
 		{
 			SeqID:      1,
@@ -45,19 +52,46 @@ func (m *MockCNVRepository) GetOccurrences(int, int, types.ListQuery) ([]types.G
 			Type:       "deletion",
 			Length:     4000,
 			Name:       "CNV_1",
-			Quality:    99.5,
+			Quality:    &quality,
 			Calls:      types.JsonArray[int]{1, 0, 1},
 			Filter:     "PASS",
-			BC:         10,
-			CN:         2,
+			BC:         &bc,
+			CN:         &cn,
 			PE:         types.JsonArray[int]{5, 3},
-			SM:         0.95,
+			SM:         &sm,
 			SVType:     "DEL",
-			SVLen:      4000,
-			RefLen:     4000,
+			SVLen:      &svLen,
+			RefLen:     &refLen,
 			CIEnd:      types.JsonArray[int]{-50, 50},
 			CIPos:      types.JsonArray[int]{-100, 100},
 			HasNote:    true,
+			FlagType:   "star",
+		},
+		{
+			SeqID:      1,
+			TaskID:     1,
+			CnvID:      "2",
+			Aliquot:    "A1",
+			Chromosome: "chr1",
+			Start:      6000,
+			End:        10000,
+			Type:       "deletion",
+			Length:     4000,
+			Name:       "CNV_2",
+			Quality:    &quality,
+			Calls:      types.JsonArray[int]{1, 0, 1},
+			Filter:     "PASS",
+			BC:         &bc,
+			CN:         &cn,
+			PE:         types.JsonArray[int]{5, 3},
+			SM:         &sm,
+			SVType:     "DEL",
+			SVLen:      &svLen,
+			RefLen:     &refLen,
+			CIEnd:      types.JsonArray[int]{-50, 50},
+			CIPos:      types.JsonArray[int]{-100, 100},
+			HasNote:    true,
+			NbSNV: &nbSNV,
 			FlagType:   "star",
 		},
 	}, nil
@@ -118,6 +152,32 @@ func Test_CNVOccurrencesListHandler(t *testing.T) {
 		"cipos":[-100,100],
 		"has_note": true,
 		"flag_type": "star"
+	},{
+		"seq_id":1,
+		"task_id":1,
+		"cnv_id":"2",
+		"aliquot":"A1",
+		"chromosome":"chr1",
+		"start":6000,
+		"end":10000,
+		"type":"deletion",
+		"length":4000,
+		"name":"CNV_2",
+		"quality":99.5,
+		"calls":[1,0,1],
+		"filter":"PASS",
+		"bc":10,
+		"cn":2,
+		"pe":[5,3],
+		"sm":0.95,
+		"svtype":"DEL",
+		"svlen":4000,
+		"reflen":4000,
+		"ciend":[-50,50],
+		"cipos":[-100,100],
+		"has_note": true,
+		"flag_type": "star",
+		"nb_snv": 0
 	}]`, w.Body.String())
 }
 
