@@ -1278,6 +1278,8 @@ components:
           type: integer
         filter:
           type: string
+        flag_type:
+          $ref: '#/components/schemas/OccurrenceFlagType'
         gnomad_sc:
           type: integer
         gnomad_sf:
@@ -1365,6 +1367,8 @@ components:
           type: number
         filter:
           type: string
+        flag_type:
+          $ref: '#/components/schemas/OccurrenceFlagType'
         genotype_quality:
           type: integer
         germline_pc_wgs:
@@ -1755,6 +1759,16 @@ components:
       - code
       - value
       type: object
+    OccurrenceFlagType:
+      enum:
+      - flag
+      - pin
+      - star
+      type: string
+      x-enum-varnames:
+      - OccurrenceFlagTypeFlag
+      - OccurrenceFlagTypePin
+      - OccurrenceFlagTypeStar
     OccurrenceNote:
       properties:
         case_id:
@@ -2148,6 +2162,8 @@ components:
           uniqueItems: false
         end:
           type: integer
+        flag_type:
+          $ref: '#/components/schemas/OccurrenceFlagType'
         germline_pc_wgs:
           type: integer
         germline_pf_wgs:

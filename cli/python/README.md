@@ -238,6 +238,7 @@ Class | Method | HTTP request | Description
  - [ListBodyWithSqon](docs/ListBodyWithSqon.md)
  - [ObservationCategoricalBatch](docs/ObservationCategoricalBatch.md)
  - [ObservationTextBatch](docs/ObservationTextBatch.md)
+ - [OccurrenceFlagType](docs/OccurrenceFlagType.md)
  - [OccurrenceNote](docs/OccurrenceNote.md)
  - [OmimGenePanel](docs/OmimGenePanel.md)
  - [OutputDocumentBatch](docs/OutputDocumentBatch.md)
