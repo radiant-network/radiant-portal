@@ -27,6 +27,26 @@
         "h4": "Heading 4",
         "h5": "Heading 5",
         "h6": "Heading 6"
+      },
+      "toolbar": {
+        "link": {
+          "label": "Link"
+        }
+      },
+      "link": {
+        "popover": {
+          "title": "Link",
+          "subtitle": "Attach a link to the selected text",
+          "url": {
+            "placeholder": "https://example.com"
+          },
+          "confirm": "Confirm",
+          "update": "Update",
+          "remove": "Remove",
+          "close": {
+            "ariaLabel": "Close"
+          }
+        }
       }
     },
     "auto_complete": {
