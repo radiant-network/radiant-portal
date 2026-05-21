@@ -412,46 +412,46 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
 
 const bioinformaticsColumnContentHandler = (columnID: string, data: any, position: number) => {
   const tableId = selectors.bioinformaticsCard.tableId;
-    switch (columnID) {
-      case 'patient':
-        cy.validateTableFirstRowContent(data[columnID], position, tableId);
-        cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
-        break;
-      case 'type':
-        cy.validateTableFirstRowContent(data[columnID], position, tableId);
-        cy.validateTableFirstRowClass(CommonSelectors.tagLevel('secondary'), position, tableId);
-        break;
-      default:
-        cy.validateTableFirstRowContent(data[columnID], position, tableId);
-        break;
-    }
+  switch (columnID) {
+    case 'patient':
+      cy.validateTableFirstRowContent(data[columnID], position, tableId);
+      cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
+      break;
+    case 'type':
+      cy.validateTableFirstRowContent(data[columnID], position, tableId);
+      cy.validateTableFirstRowClass(CommonSelectors.tagLevel('secondary'), position, tableId);
+      break;
+    default:
+      cy.validateTableFirstRowContent(data[columnID], position, tableId);
+      break;
+  }
 };
 
 const sequencingColumnContentHandler = (columnID: string, data: any, position: number) => {
   const tableId = selectors.sequencingCard.tableId;
-    switch (columnID) {
-      case 'relationship':
-      case 'histology':
-        cy.validateTableFirstRowContent(data[columnID], position, tableId);
-        cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
-        break;
-      case 'sample_type':
-      case 'exp_strat':
-        cy.validateTableFirstRowContent(data[columnID], position, tableId);
-        cy.validateTableFirstRowClass(CommonSelectors.tagLevel('secondary'), position, tableId);
-        break;
-      case 'seq_status':
-        cy.validateTableFirstRowContent(data[columnID], position, tableId);
-        cy.validateTableFirstRowClass(CommonSelectors.statusIcon(getStatusIcon(data[columnID])), position, tableId);
-        cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(data[columnID])), position, tableId);
-        break;
-      case 'actions':
-        cy.validateTableFirstRowClass(CommonSelectors.detailsButton, position, tableId);
-        break;
-      default:
-        cy.validateTableFirstRowContent(data[columnID], position, tableId);
-        break;
-    }
+  switch (columnID) {
+    case 'relationship':
+    case 'histology':
+      cy.validateTableFirstRowContent(data[columnID], position, tableId);
+      cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
+      break;
+    case 'sample_type':
+    case 'exp_strat':
+      cy.validateTableFirstRowContent(data[columnID], position, tableId);
+      cy.validateTableFirstRowClass(CommonSelectors.tagLevel('secondary'), position, tableId);
+      break;
+    case 'seq_status':
+      cy.validateTableFirstRowContent(data[columnID], position, tableId);
+      cy.validateTableFirstRowClass(CommonSelectors.statusIcon(getStatusIcon(data[columnID])), position, tableId);
+      cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(data[columnID])), position, tableId);
+      break;
+    case 'actions':
+      cy.validateTableFirstRowClass(CommonSelectors.detailsButton, position, tableId);
+      break;
+    default:
+      cy.validateTableFirstRowContent(data[columnID], position, tableId);
+      break;
+  }
 };
 
 export const CaseEntity_Details = {
@@ -472,14 +472,13 @@ export const CaseEntity_Details = {
     },
   },
 
-
   bioinformaticsCard: {
     actions: (() => {
       const baseActions = generateTableActionsFunctions(selectors.bioinformaticsCard.tableId, tableColumns.bioinformaticsCard);
       return {
         ...baseActions,
         clickDetailsButton(data: any) {
-          baseActions.clickDetailsButton(data, (data) => selectors.bioinformaticsCard.tableCell(data));
+          baseActions.clickDetailsButton(data, data => selectors.bioinformaticsCard.tableCell(data));
         },
       };
     })(),
@@ -503,7 +502,7 @@ export const CaseEntity_Details = {
       return {
         ...baseActions,
         clickDetailsButton(data: any) {
-          baseActions.clickDetailsButton(data, (data) => selectors.sequencingCard.tableCell(data));
+          baseActions.clickDetailsButton(data, data => selectors.sequencingCard.tableCell(data));
         },
       };
     })(),

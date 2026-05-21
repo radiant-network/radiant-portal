@@ -24,7 +24,7 @@ describe('Cases - Request Validation', () => {
     cy.visitCasesPage();
     CasesTable.validations.shouldRequestOnSort('case');
   });
-      
+
   it('Paging', () => {
     setupTest();
     CasesTable.validations.shouldRequestOnPageChange();

@@ -8,6 +8,7 @@ Method | HTTP request | Description
 [**case_entity**](CasesApi.md#case_entity) | **GET** /cases/{case_id} | Get CaseEntity case entity
 [**case_entity_documents_filters**](CasesApi.md#case_entity_documents_filters) | **GET** /cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
 [**case_entity_documents_search**](CasesApi.md#case_entity_documents_search) | **POST** /cases/{case_id}/documents/search | Search DocumentResult list for a case entity
+[**case_tasks_with_occurrences**](CasesApi.md#case_tasks_with_occurrences) | **GET** /cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
 [**cases_filters**](CasesApi.md#cases_filters) | **GET** /cases/filters | Get CaseFilters cases filters
 [**post_case_batch**](CasesApi.md#post_case_batch) | **POST** /cases/batch | Create a new case batch
 [**search_cases**](CasesApi.md#search_cases) | **POST** /cases/search | Search cases
@@ -331,6 +332,91 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **case_tasks_with_occurrences**
+> List[TaskOccurrenceType] case_tasks_with_occurrences(case_id, seq_id, data_type)
+
+List tasks producing occurrences of a given type for a (case, sequencing) pair
+
+Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.task_occurrence_type import TaskOccurrenceType
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.CasesApi(api_client)
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequencing Experiment ID
+    data_type = 'data_type_example' # str | Occurrence type
+
+    try:
+        # List tasks producing occurrences of a given type for a (case, sequencing) pair
+        api_response = api_instance.case_tasks_with_occurrences(case_id, seq_id, data_type)
+        print("The response of CasesApi->case_tasks_with_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling CasesApi->case_tasks_with_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequencing Experiment ID | 
+ **data_type** | **str**| Occurrence type | 
+
+### Return type
+
+[**List[TaskOccurrenceType]**](TaskOccurrenceType.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 

@@ -7,10 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import { cn } from '@/components/lib/utils';
-
-import { VariantInterface } from '../variants-tab';
 
 function SequencingVariantFiltersSelectValue({ relationship_to_proband, seq_id }: CaseSequencingExperiment) {
   const { t } = useI18n();
@@ -33,13 +31,11 @@ function SequencingVariantFiltersSelectItem(caseSeqExp: CaseSequencingExperiment
     <div>
       <SequencingVariantFiltersSelectValue {...caseSeqExp} />
       <div className="flex items-center text-muted-foreground color-muted text-xs">
-        {t('case_entity.variants.filters.sample_id')} {caseSeqExp.sample_id}
+        {t('case_entity.variants.filters.sample_submitter_id')} {caseSeqExp.sample_submitter_id}
         {caseSeqExp.affected_status_code && (
           <>
             <DotIcon />
-            <span className={cn({ 'text-red': caseSeqExp.affected_status_code === 'affected' })}>
-              {t(`case_entity.variants.filters.affected_status_code.${caseSeqExp.affected_status_code}`)}
-            </span>
+            <AffectedStatusBadge status={caseSeqExp.affected_status_code as AffectedStatusProps} />
           </>
         )}
       </div>
@@ -47,13 +43,18 @@ function SequencingVariantFiltersSelectItem(caseSeqExp: CaseSequencingExperiment
   );
 }
 
+type SequencingVariantFiltersOption = {
+  value: string;
+  tooltip?: string;
+};
 type SequencingVariantFiltersProps = {
   sequencingExperiments?: CaseSequencingExperiment[];
-  value?: number;
+  selectedSeqId?: number;
   handleChange: (value: number) => void;
+  options: SequencingVariantFiltersOption[];
   isLoading: boolean;
-  activeInterface: VariantInterface;
-  onActiveInterfaceChange: (value: VariantInterface) => void;
+  activeInterface: string;
+  onActiveInterfaceChange: (value: string) => void;
 };
 
 /**
@@ -66,7 +67,8 @@ type SequencingVariantFiltersProps = {
  */
 function SequencingVariantFilters({
   sequencingExperiments = [],
-  value,
+  options,
+  selectedSeqId,
   activeInterface,
   onActiveInterfaceChange,
   handleChange,
@@ -74,7 +76,7 @@ function SequencingVariantFilters({
 }: SequencingVariantFiltersProps) {
   const { t } = useI18n();
 
-  const selectedSequencingExperiment = sequencingExperiments.find(seqExp => seqExp.seq_id === value);
+  const selectedSequencingExperiment = sequencingExperiments.find(seqExp => seqExp.seq_id === selectedSeqId);
 
   if (isLoading || sequencingExperiments.length === 0) {
     return (
@@ -90,10 +92,9 @@ function SequencingVariantFilters({
   }
 
   return (
-    <div className="inline-flex gap-4 items-center border-b px-3 py-4">
-      <span>{t('case_entity.variants.filters.sequencing')}</span>
+    <div className="inline-flex gap-4 items-center border-b px-6 py-2.5">
       <Select
-        value={`${value}`}
+        value={`${selectedSeqId}`}
         onValueChange={value => {
           handleChange(Number(value));
         }}
@@ -111,28 +112,44 @@ function SequencingVariantFilters({
           ))}
         </SelectContent>
       </Select>
-      {selectedSequencingExperiment?.affected_status_code && (
-        <AffectedStatusBadge status={selectedSequencingExperiment.affected_status_code as AffectedStatusProps} />
-      )}
-      {selectedSequencingExperiment?.sample_id && (
-        <Badge variant="outline">
-          <FlaskConical />
-          {selectedSequencingExperiment.sample_id}
-        </Badge>
+      {selectedSequencingExperiment?.sample_submitter_id && (
+        <Tooltip>
+          <TooltipTrigger>
+            <Badge variant="outline">
+              <FlaskConical />
+              {selectedSequencingExperiment.sample_submitter_id}
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            <>{t('case_entity.variants.filters.sample_submitter_id_tooltip')}</>
+          </TooltipContent>
+        </Tooltip>
       )}
       <Separator className="h-6" orientation="vertical" />
-
       <Tabs value={activeInterface}>
         <TabsList className="w-full">
-          {Object.values(VariantInterface).map(variant => (
+          {options.map(({ tooltip, value }: SequencingVariantFiltersOption) => (
             <TabsTrigger
-              key={variant}
-              value={variant}
+              key={value}
+              value={value}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
-              data-cy={`tabs-trigger-${variant}`}
-              onClick={() => onActiveInterfaceChange(variant)}
+              data-cy={`tabs-trigger-${value}`}
+              onClick={() => {
+                onActiveInterfaceChange(value);
+              }}
             >
-              {t(`case_entity.variants.filters.${variant.toLowerCase()}`)}
+              {tooltip ? (
+                <Tooltip>
+                  <TooltipTrigger>
+                    <span>{t(`case_entity.variants.filters.${value.toLowerCase()}`)}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <>{tooltip}</>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <>{t(`case_entity.variants.filters.${value.toLowerCase()}`)}</>
+              )}
             </TabsTrigger>
           ))}
         </TabsList>

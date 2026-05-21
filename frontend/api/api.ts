@@ -482,6 +482,12 @@ export interface CaseEntity {
     'diagnosis_lab_name'?: string;
     /**
      * 
+     * @type {boolean}
+     * @memberof CaseEntity
+     */
+    'has_igv_files': boolean;
+    /**
+     * 
      * @type {Array<CasePatientClinicalInformation>}
      * @memberof CaseEntity
      */
@@ -1285,6 +1291,25 @@ export interface ClinvarRCV {
     'version'?: number;
 }
 /**
+ * 
+ * @export
+ * @interface ClinvarVariantConditions
+ */
+export interface ClinvarVariantConditions {
+    /**
+     * 
+     * @type {string}
+     * @memberof ClinvarVariantConditions
+     */
+    'clinvar_id'?: string;
+    /**
+     * 
+     * @type {Array<ClinvarRCV>}
+     * @memberof ClinvarVariantConditions
+     */
+    'conditions'?: Array<ClinvarRCV>;
+}
+/**
  * Count represents count result
  * @export
  * @interface Count
@@ -1813,12 +1838,6 @@ export interface ExpandedGermlineSNVOccurrence {
     'hgvsg': string;
     /**
      * 
-     * @type {string}
-     * @memberof ExpandedGermlineSNVOccurrence
-     */
-    'interpretation_classification'?: string;
-    /**
-     * 
      * @type {{ [key: string]: number; }}
      * @memberof ExpandedGermlineSNVOccurrence
      */
@@ -1979,6 +1998,297 @@ export interface ExpandedGermlineSNVOccurrence {
      * @memberof ExpandedGermlineSNVOccurrence
      */
     'zygosity'?: string;
+}
+
+
+/**
+ * 
+ * @export
+ * @interface ExpandedSomaticSNVOccurrence
+ */
+export interface ExpandedSomaticSNVOccurrence {
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'aa_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'ad_alt'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'ad_ratio'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'ad_total'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cadd_phred'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'cadd_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'chromosome': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'clinvar'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'dann_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'dna_change'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'end': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'ensembl_gene_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'exon_rank'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'exon_total'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'fathmm_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'fathmm_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'filter'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'gnomad_loeuf'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'gnomad_pli'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'gnomad_v3_af'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'hgvsg': string;
+    /**
+     * 
+     * @type {{ [key: string]: number; }}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'interpretation_classification_counts'?: { [key: string]: number; };
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'is_canonical'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'is_mane_plus'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'is_mane_select'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'locus': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'locus_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'lrt_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'lrt_score'?: number;
+    /**
+     * 
+     * @type {Array<OmimGenePanel>}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'omim_conditions'?: Array<OmimGenePanel>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'picked_consequences'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'polyphen2_hvar_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'polyphen2_hvar_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'qd'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'revel_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'rsnumber'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'sift_pred'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'sift_score'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pc_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pf_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'somatic_pn_tn_wgs'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'spliceai_ds'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'spliceai_type'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'start': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'symbol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'transcript_id'?: string;
+    /**
+     * 
+     * @type {VepImpact}
+     * @memberof ExpandedSomaticSNVOccurrence
+     */
+    'vep_impact'?: VepImpact;
 }
 
 
@@ -2238,6 +2548,12 @@ export interface GermlineCNVOccurrence {
     'filter'?: string;
     /**
      * 
+     * @type {OccurrenceFlagType}
+     * @memberof GermlineCNVOccurrence
+     */
+    'flag_type'?: OccurrenceFlagType;
+    /**
+     * 
      * @type {number}
      * @memberof GermlineCNVOccurrence
      */
@@ -2351,6 +2667,8 @@ export interface GermlineCNVOccurrence {
      */
     'type': string;
 }
+
+
 /**
  * GermlineSNVOccurrence represents a germline SNV occurrence
  * @export
@@ -2381,6 +2699,12 @@ export interface GermlineSNVOccurrence {
      * @memberof GermlineSNVOccurrence
      */
     'clinvar'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineSNVOccurrence
+     */
+    'end': number;
     /**
      * 
      * @type {string}
@@ -2417,6 +2741,12 @@ export interface GermlineSNVOccurrence {
      * @memberof GermlineSNVOccurrence
      */
     'filter'?: string;
+    /**
+     * 
+     * @type {OccurrenceFlagType}
+     * @memberof GermlineSNVOccurrence
+     */
+    'flag_type'?: OccurrenceFlagType;
     /**
      * 
      * @type {number}
@@ -3094,6 +3424,12 @@ export interface InterpretationSomatic {
      * @type {string}
      * @memberof InterpretationSomatic
      */
+    'tumoral_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof InterpretationSomatic
+     */
     'tumoral_type'?: string;
     /**
      * 
@@ -3289,6 +3625,21 @@ export interface ObservationTextBatch {
      */
     'value': string;
 }
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const OccurrenceFlagType = {
+    OccurrenceFlagTypeFlag: 'flag',
+    OccurrenceFlagTypePin: 'pin',
+    OccurrenceFlagTypeStar: 'star'
+} as const;
+
+export type OccurrenceFlagType = typeof OccurrenceFlagType[keyof typeof OccurrenceFlagType];
+
+
 /**
  * 
  * @export
@@ -4112,10 +4463,28 @@ export interface SomaticSNVOccurrence {
     'ad_ratio'?: number;
     /**
      * 
+     * @type {string}
+     * @memberof SomaticSNVOccurrence
+     */
+    'chromosome': string;
+    /**
+     * 
      * @type {Array<string>}
      * @memberof SomaticSNVOccurrence
      */
     'clinvar': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'end': number;
+    /**
+     * 
+     * @type {OccurrenceFlagType}
+     * @memberof SomaticSNVOccurrence
+     */
+    'flag_type'?: OccurrenceFlagType;
     /**
      * 
      * @type {number}
@@ -4220,6 +4589,12 @@ export interface SomaticSNVOccurrence {
     'somatic_pf_tn_wgs': number;
     /**
      * 
+     * @type {number}
+     * @memberof SomaticSNVOccurrence
+     */
+    'start': number;
+    /**
+     * 
      * @type {string}
      * @memberof SomaticSNVOccurrence
      */
@@ -4230,6 +4605,12 @@ export interface SomaticSNVOccurrence {
      * @memberof SomaticSNVOccurrence
      */
     'task_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SomaticSNVOccurrence
+     */
+    'transcript_id'?: string;
     /**
      * 
      * @type {string}
@@ -4363,6 +4744,55 @@ export interface StatisticsBodyWithSqon {
      * @memberof StatisticsBodyWithSqon
      */
     'sqon'?: Sqon;
+}
+/**
+ * Task attached to a (case, sequencing) pair, used by the Variants tab task dropdown.
+ * @export
+ * @interface TaskOccurrenceType
+ */
+export interface TaskOccurrenceType {
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'created_on': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'genome_build'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof TaskOccurrenceType
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'pipeline_name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'pipeline_version': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'task_type_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TaskOccurrenceType
+     */
+    'task_type_name': string;
 }
 /**
  * 
@@ -5666,6 +6096,55 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+         * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        caseTasksWithOccurrences: async (caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('caseTasksWithOccurrences', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('caseTasksWithOccurrences', 'seqId', seqId)
+            // verify required parameter 'dataType' is not null or undefined
+            assertParamExists('caseTasksWithOccurrences', 'dataType', dataType)
+            const localVarPath = `/cases/{case_id}/{seq_id}/tasks_with_occurrences`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (dataType !== undefined) {
+                localVarQueryParameter['data_type'] = dataType;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
          * @param {*} [options] Override http request option.
@@ -5849,6 +6328,21 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+         * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async caseTasksWithOccurrences(caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TaskOccurrenceType>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.caseTasksWithOccurrences(caseId, seqId, dataType, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.caseTasksWithOccurrences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
          * @param {*} [options] Override http request option.
@@ -5938,6 +6432,18 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          */
         caseEntityDocumentsSearch(caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentsSearchResponse> {
             return localVarFp.caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+         * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequencing Experiment ID
+         * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        caseTasksWithOccurrences(caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig): AxiosPromise<Array<TaskOccurrenceType>> {
+            return localVarFp.caseTasksWithOccurrences(caseId, seqId, dataType, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve CaseFilters cases filters
@@ -6030,6 +6536,20 @@ export class CasesApi extends BaseAPI {
     }
 
     /**
+     * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+     * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequencing Experiment ID
+     * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public caseTasksWithOccurrences(caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).caseTasksWithOccurrences(caseId, seqId, dataType, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Retrieve CaseFilters cases filters
      * @summary Get CaseFilters cases filters
      * @param {*} [options] Override http request option.
@@ -6066,6 +6586,15 @@ export class CasesApi extends BaseAPI {
     }
 }
 
+/**
+ * @export
+ */
+export const CaseTasksWithOccurrencesDataTypeEnum = {
+    GermlineSnv: 'germline_snv',
+    GermlineCnv: 'germline_cnv',
+    SomaticSnv: 'somatic_snv'
+} as const;
+export type CaseTasksWithOccurrencesDataTypeEnum = typeof CaseTasksWithOccurrencesDataTypeEnum[keyof typeof CaseTasksWithOccurrencesDataTypeEnum];
 
 
 /**
@@ -7982,6 +8511,243 @@ export class MondoApi extends BaseAPI {
 
 
 /**
+ * OccurrenceFlagsApi - axios parameter creator
+ * @export
+ */
+export const OccurrenceFlagsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
+         * @summary Delete the flag on an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Seq ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOccurrenceFlag: async (caseId: number, seqId: number, taskId: number, occurrenceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('deleteOccurrenceFlag', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('deleteOccurrenceFlag', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('deleteOccurrenceFlag', 'taskId', taskId)
+            // verify required parameter 'occurrenceId' is not null or undefined
+            assertParamExists('deleteOccurrenceFlag', 'occurrenceId', occurrenceId)
+            const localVarPath = `/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
+                .replace(`{${"occurrence_id"}}`, encodeURIComponent(String(occurrenceId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
+         * @summary Set or change the flag on an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Seq ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {string} flagType Flag to set
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        upsertOccurrenceFlag: async (caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('upsertOccurrenceFlag', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('upsertOccurrenceFlag', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('upsertOccurrenceFlag', 'taskId', taskId)
+            // verify required parameter 'occurrenceId' is not null or undefined
+            assertParamExists('upsertOccurrenceFlag', 'occurrenceId', occurrenceId)
+            // verify required parameter 'flagType' is not null or undefined
+            assertParamExists('upsertOccurrenceFlag', 'flagType', flagType)
+            const localVarPath = `/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
+                .replace(`{${"occurrence_id"}}`, encodeURIComponent(String(occurrenceId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (flagType !== undefined) {
+                localVarQueryParameter['flag_type'] = flagType;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * OccurrenceFlagsApi - functional programming interface
+ * @export
+ */
+export const OccurrenceFlagsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = OccurrenceFlagsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
+         * @summary Delete the flag on an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Seq ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOccurrenceFlag(caseId, seqId, taskId, occurrenceId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrenceFlagsApi.deleteOccurrenceFlag']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
+         * @summary Set or change the flag on an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Seq ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {string} flagType Flag to set
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async upsertOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.upsertOccurrenceFlag(caseId, seqId, taskId, occurrenceId, flagType, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrenceFlagsApi.upsertOccurrenceFlag']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * OccurrenceFlagsApi - factory interface
+ * @export
+ */
+export const OccurrenceFlagsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = OccurrenceFlagsApiFp(configuration)
+    return {
+        /**
+         * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
+         * @summary Delete the flag on an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Seq ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteOccurrenceFlag(caseId, seqId, taskId, occurrenceId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
+         * @summary Set or change the flag on an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Seq ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {string} flagType Flag to set
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        upsertOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.upsertOccurrenceFlag(caseId, seqId, taskId, occurrenceId, flagType, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * OccurrenceFlagsApi - object-oriented interface
+ * @export
+ * @class OccurrenceFlagsApi
+ * @extends {BaseAPI}
+ */
+export class OccurrenceFlagsApi extends BaseAPI {
+    /**
+     * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
+     * @summary Delete the flag on an occurrence
+     * @param {number} caseId Case ID
+     * @param {number} seqId Seq ID
+     * @param {number} taskId Task ID
+     * @param {string} occurrenceId Occurrence ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrenceFlagsApi
+     */
+    public deleteOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceFlagsApiFp(this.configuration).deleteOccurrenceFlag(caseId, seqId, taskId, occurrenceId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
+     * @summary Set or change the flag on an occurrence
+     * @param {number} caseId Case ID
+     * @param {number} seqId Seq ID
+     * @param {number} taskId Task ID
+     * @param {string} occurrenceId Occurrence ID
+     * @param {string} flagType Flag to set
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrenceFlagsApi
+     */
+    public upsertOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceFlagsApiFp(this.configuration).upsertOccurrenceFlag(caseId, seqId, taskId, occurrenceId, flagType, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * OccurrenceNotesApi - axios parameter creator
  * @export
  */
@@ -8789,6 +9555,52 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+         * @summary Get a somatic ExpandedSomaticSNVOccurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExpandedSomaticSNVOccurrence: async (caseId: number, seqId: number, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('getExpandedSomaticSNVOccurrence', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('getExpandedSomaticSNVOccurrence', 'seqId', seqId)
+            // verify required parameter 'locusId' is not null or undefined
+            assertParamExists('getExpandedSomaticSNVOccurrence', 'locusId', locusId)
+            const localVarPath = `/occurrences/somatic/snv/{case_id}/{seq_id}/{locus_id}/expanded`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve germline SNV facets
          * @summary Get germline SNV facets dictionary
          * @param {Array<string>} [facets] One or more facets to retrieve
@@ -9279,6 +10091,21 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+         * @summary Get a somatic ExpandedSomaticSNVOccurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getExpandedSomaticSNVOccurrence(caseId: number, seqId: number, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpandedSomaticSNVOccurrence>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedSomaticSNVOccurrence(caseId, seqId, locusId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpandedSomaticSNVOccurrence']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve germline SNV facets
          * @summary Get germline SNV facets dictionary
          * @param {Array<string>} [facets] One or more facets to retrieve
@@ -9493,6 +10320,18 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.getExpandedGermlineSNVOccurrence(caseId, seqId, locusId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+         * @summary Get a somatic ExpandedSomaticSNVOccurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {string} locusId Locus ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExpandedSomaticSNVOccurrence(caseId: number, seqId: number, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedSomaticSNVOccurrence> {
+            return localVarFp.getExpandedSomaticSNVOccurrence(caseId, seqId, locusId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve germline SNV facets
          * @summary Get germline SNV facets dictionary
          * @param {Array<string>} [facets] One or more facets to retrieve
@@ -9694,6 +10533,20 @@ export class OccurrencesApi extends BaseAPI {
      */
     public getExpandedGermlineSNVOccurrence(caseId: number, seqId: number, locusId: string, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).getExpandedGermlineSNVOccurrence(caseId, seqId, locusId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+     * @summary Get a somatic ExpandedSomaticSNVOccurrence
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
+     * @param {string} locusId Locus ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public getExpandedSomaticSNVOccurrence(caseId: number, seqId: number, locusId: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getExpandedSomaticSNVOccurrence(caseId, seqId, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -11687,7 +12540,7 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ClinvarRCV>>> {
+        async getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ClinvarVariantConditions>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConditionsClinvar(locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantConditionsClinvar']?.[localVarOperationServerIndex]?.url;
@@ -11848,7 +12701,7 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ClinvarRCV>> {
+        getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ClinvarVariantConditions> {
             return localVarFp.getGermlineVariantConditionsClinvar(locusId, options).then((request) => request(axios, basePath));
         },
         /**

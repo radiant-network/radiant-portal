@@ -5,7 +5,7 @@ describe('Batches / Patient success', () => {
   let batchId: any;
 
   before(() => {
-    const globalData = Cypress.env('globalData');
+    const globalData = Cypress.expose('globalData');
     const Auth = globalData.Authorization;
     batchId = globalData.BatchesId.patientSuccess;
 

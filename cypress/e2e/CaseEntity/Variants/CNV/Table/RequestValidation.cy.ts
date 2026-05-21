@@ -10,10 +10,10 @@ describe('Case Entity - Variants - CNV - Table - Request Validation', () => {
 
   it('Sort', () => {
     setupTest();
-    cy.visitCaseVariantsPage(data.case.case, 'CNV');
+    cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV');
     CaseEntity_Variants_CNV_Table.validations.shouldRequestOnSort('start');
   });
-  
+
   it('Paging', () => {
     setupTest();
     CaseEntity_Variants_CNV_Table.validations.shouldRequestOnPageChange(data.case);

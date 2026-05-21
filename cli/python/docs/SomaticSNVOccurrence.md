@@ -7,7 +7,10 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **aa_change** | **str** |  | 
 **ad_ratio** | **float** |  | [optional] 
+**chromosome** | **str** |  | 
 **clinvar** | **List[str]** |  | 
+**end** | **int** |  | 
+**flag_type** | [**OccurrenceFlagType**](OccurrenceFlagType.md) |  | [optional] 
 **germline_pc_wgs** | **int** |  | 
 **germline_pf_wgs** | **float** |  | 
 **gnomad_v3_af** | **float** |  | 
@@ -25,8 +28,10 @@ Name | Type | Description | Notes
 **seq_id** | **int** |  | 
 **somatic_pc_tn_wgs** | **int** |  | 
 **somatic_pf_tn_wgs** | **float** |  | 
+**start** | **int** |  | 
 **symbol** | **str** |  | 
 **task_id** | **int** |  | 
+**transcript_id** | **str** |  | [optional] 
 **variant_class** | **str** |  | 
 **vep_impact** | [**VepImpact**](VepImpact.md) |  | 
 

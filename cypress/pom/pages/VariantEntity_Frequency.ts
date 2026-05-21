@@ -8,6 +8,10 @@ const selectors = {
   publicCohorts: {
     tableId: '[data-cy="public-cohorts-table"]',
   },
+  myNetwork: {
+    tableId: '[id="primary_condition_tab"]',
+    tableHeadRow: 'tr:eq(1)',
+  },
 };
 
 const tableColumns = {
@@ -68,16 +72,101 @@ const tableColumns = {
       tooltip: 'Allele Frequency',
     },
   ],
-}
+  myNetwork: [
+    {
+      id: 'primary_condition',
+      name: 'Primary Condition',
+      apiField: 'split_value_code',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: true,
+      isPinnable: true,
+      position: 0,
+      tooltip: null,
+    },
+    {
+      id: 'freq_all',
+      name: '', // Frequency (headers à 2 niveaux avec labels dupliqués)
+      apiField: 'frequencies.pc_all',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: true,
+      isPinnable: true,
+      position: 1,
+      tooltip: null,
+    },
+    {
+      id: 'homo_all',
+      name: '', // Homozygotes (headers à 2 niveaux avec labels dupliqués)
+      apiField: 'frequencies.hom_all',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: true,
+      isPinnable: true,
+      position: 2,
+      tooltip: null,
+    },
+    {
+      id: 'freq_affected',
+      name: '', // Frequency (headers à 2 niveaux avec labels dupliqués)
+      apiField: 'frequencies.pc_affected',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: true,
+      isPinnable: true,
+      position: 3,
+      tooltip: null,
+    },
+    {
+      id: 'homo_affected',
+      name: '', // Homozygotes (headers à 2 niveaux avec labels dupliqués)
+      apiField: 'frequencies.hom_affected',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: true,
+      isPinnable: true,
+      position: 4,
+      tooltip: null,
+    },
+    {
+      id: 'freq_non_affected',
+      name: '', // Frequency (headers à 2 niveaux avec labels dupliqués)
+      apiField: 'frequencies.pc_non_affected',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: true,
+      isPinnable: true,
+      position: 5,
+      tooltip: null,
+    },
+    {
+      id: 'homo_non_affected',
+      name: '', // Homozygotes (headers à 2 niveaux avec labels dupliqués)
+      apiField: 'frequencies.hom_non_affected',
+      isVisibleByDefault: true,
+      pinByDefault: null,
+      isSortable: true,
+      isPinnable: true,
+      position: 6,
+      tooltip: null,
+    },
+  ],
+};
 
-const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
+/**
+ * Generates the set of table action functions (pin, sort, unpin) for a given table.
+ * @param tableId The table selector.
+ * @param columns The array of column objects.
+ * @param headRowSelector Optional selector to scope header lookups to a specific row (e.g. `'tr:eq(1)'`) for tables with multi-level headers.
+ */
+const generateTableActionsFunctions = (tableId: string, columns: any[], headRowSelector?: string) => ({
   /**
    * Pins a column in the table by its ID.
    * @param columnID The ID of the column to pin.
    */
   pinColumn(columnID: string) {
     cy.then(() =>
-      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
         cy.pinColumn(position, tableId);
       })
     );
@@ -88,7 +177,7 @@ const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
    */
   sortColumn(columnID: string) {
     cy.then(() =>
-      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
         if (position !== -1) {
           cy.sortTableAndWait(position, tableId);
         } else {
@@ -103,14 +192,21 @@ const generateTableActionsFunctions = (tableId: string, columns: any[]) => ({
    */
   unpinColumn(columnID: string) {
     cy.then(() =>
-      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
         cy.unpinColumn(position, tableId);
       })
     );
   },
 });
 
-const generateTableValidationsFunctions = (tableId: string, columns: any[], customColumnContent?: (columnID: string, data: any, position: number) => void) => ({
+/**
+ * Generates the set of table validation functions (visibility, pin, sort, column content, etc.) for a given table.
+ * @param tableId The table selector.
+ * @param columns The array of column objects.
+ * @param customColumnContent Optional handler to customize how each column's content is validated.
+ * @param headRowSelector Optional selector to scope header lookups to a specific row (e.g. `'tr:eq(1)'`) for tables with multi-level headers.
+ */
+const generateTableValidationsFunctions = (tableId: string, columns: any[], customColumnContent?: (columnID: string, data: any, position: number) => void, headRowSelector?: string) => ({
   /**
    * Validates the value of the first row for a given column.
    * @param value The expected value (string or RegExp).
@@ -118,7 +214,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    */
   shouldHaveFirstRowValue(value: string | RegExp, columnID: string) {
     cy.then(() =>
-      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
         cy.validateTableFirstRowContent(value, position);
       })
     );
@@ -130,7 +226,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    */
   shouldHaveTableCellLink(dataVariant: any, columnID: string) {
     cy.then(() =>
-      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
         if (position !== -1) {
           cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataVariant));
         } else {
@@ -174,11 +270,12 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    * Validates that all columns are displayed in the correct order in the table.
    */
   shouldShowAllColumns() {
+    const baseSelector = headRowSelector ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}` : `${CommonSelectors.tableHead(tableId)} ${CommonSelectors.tableCellHead}`;
     columns.forEach(column => {
       if (column.name.startsWith('[')) {
-        cy.get(CommonSelectors.tableHeadCell(tableId)).eq(column.position).find(column.name).should('exist');
+        cy.get(baseSelector).eq(column.position).find(column.name).should('exist');
       } else {
-        cy.get(CommonSelectors.tableHeadCell(tableId)).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
+        cy.get(baseSelector).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
       }
     });
   },
@@ -188,7 +285,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    * @param data The data object containing the expected values.
    */
   shouldShowColumnContent(columnID: string, data: any) {
-    getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+    getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
       if (position !== -1) {
         if (customColumnContent) {
           customColumnContent(columnID, data, position);
@@ -225,7 +322,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
           if (position !== -1) {
-            cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinnable(column.isPinnable);
+            const baseSelector = headRowSelector ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}` : `${CommonSelectors.tableHead(tableId)} ${CommonSelectors.tableCellHead}`;
+            cy.get(baseSelector).eq(position).shouldBePinnable(column.isPinnable);
           } else {
             cy.handleColumnNotFound(column.id);
           }
@@ -239,7 +337,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    */
   shouldPinnedColumn(columnID: string) {
     cy.then(() =>
-      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
         cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinned('left');
       })
     );
@@ -252,7 +350,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
           if (position !== -1) {
-            cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBeSortable(column.isSortable);
+            const baseSelector = headRowSelector ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}` : `${CommonSelectors.tableHead(tableId)} ${CommonSelectors.tableCellHead}`;
+            cy.get(baseSelector).eq(position).shouldBeSortable(column.isSortable);
           } else {
             cy.handleColumnNotFound(column.id);
           }
@@ -266,7 +365,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    */
   shouldUnpinnedColumn(columnID: string) {
     cy.then(() =>
-      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
         cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinned(null);
       })
     );
@@ -279,7 +378,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    */
   shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean, sortAction: () => void) {
     cy.then(() =>
-      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
         if (position !== -1) {
           sortAction();
           cy.get(CommonSelectors.tableRow(tableId))
@@ -303,7 +402,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
                       throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
                     }
                   } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
-                      throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                    throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                    throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
                   } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
                     throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
                   }
@@ -320,6 +420,18 @@ const publicCohortsColumnContentHandler = (columnID: string, datapublicCohorts: 
   switch (columnID) {
     default:
       cy.validateTableFirstRowContent(datapublicCohorts[columnID], position, tableId);
+      break;
+  }
+};
+
+const myNetworkColumnContentHandler = (columnID: string, dataMyNetwork: any, position: number) => {
+  const tableId = selectors.myNetwork.tableId;
+  switch (columnID) {
+    case 'primary_condition':
+      cy.validateTableFirstRowContent(dataMyNetwork.primary_condition_name, position);
+      break;
+    default:
+      cy.validateTableFirstRowContent(dataMyNetwork[columnID], position, tableId);
       break;
   }
 };
@@ -351,7 +463,24 @@ export const VariantEntity_Frequency = {
         shouldShowColumnContent(columnID: string, data: any) {
           baseValidations.shouldShowColumnContent(columnID, data);
         },
-        shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting:boolean) {
+        shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean) {
+          baseValidations.shouldSortColumn(columnID, hasUniqueValues, isReverseSorting, () => actions.sortColumn(columnID));
+        },
+      };
+    })(),
+  },
+
+  myNetwork: {
+    actions: generateTableActionsFunctions(selectors.myNetwork.tableId, tableColumns.myNetwork, selectors.myNetwork.tableHeadRow),
+    validations: (() => {
+      const actions = generateTableActionsFunctions(selectors.myNetwork.tableId, tableColumns.myNetwork, selectors.myNetwork.tableHeadRow);
+      const baseValidations = generateTableValidationsFunctions(selectors.myNetwork.tableId, tableColumns.myNetwork, myNetworkColumnContentHandler, selectors.myNetwork.tableHeadRow);
+      return {
+        ...baseValidations,
+        shouldShowColumnContent(columnID: string, data: any) {
+          baseValidations.shouldShowColumnContent(columnID, data);
+        },
+        shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean) {
           baseValidations.shouldSortColumn(columnID, hasUniqueValues, isReverseSorting, () => actions.sortColumn(columnID));
         },
       };

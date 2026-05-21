@@ -5,7 +5,7 @@ describe('Batches / Invalid UUID', () => {
   let response: any;
 
   before(() => {
-    const globalData = Cypress.env('globalData');
+    const globalData = Cypress.expose('globalData');
     const Auth = globalData.Authorization;
 
     cy.apiCall('GET', `batches/InvalidUUID`, '', Auth.token).then(res => {

@@ -16,7 +16,7 @@ import (
 )
 
 func assertGetSequencing(t *testing.T, data string, seqId int, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSequencingRepository(db)
 		router := gin.Default()
 		router.GET("/sequencing/:seq_id", server.GetSequencing(repo))
@@ -36,7 +36,7 @@ func Test_GetSequencing(t *testing.T) {
 }
 
 func assertGetSequencingExperimentDetailByIdHandler(t *testing.T, data string, seqId int, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSequencingExperimentRepository(db)
 		router := gin.Default()
 		router.GET("/sequencing/:seq_id/details", server.GetSequencingExperimentDetailByIdHandler(repo))

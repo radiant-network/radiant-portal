@@ -20,6 +20,8 @@ import { Separator } from '@/components/base/shadcn/separator';
 import { useI18n } from '@/components/hooks/i18n';
 import { sequencingApi } from '@/utils/api';
 
+import EmptyField from '../information/empty-field';
+
 type SequencingInput = {
   seqId: string;
 };
@@ -148,7 +150,7 @@ function SequencingInformationsDialog({ open, seqId, onClose }: SequencingInform
           <Separator className="block my-8 md:hidden" />
           <div className="flex flex-col gap-2 flex-1">
             <h2 className="text-sm font-semibold">
-              {t('case_entity.details.sample')} {data?.sample_id ?? '-'}
+              {t('case_entity.details.sample')} {data?.sample_id ?? <EmptyField />}
             </h2>
 
             {/* Type */}

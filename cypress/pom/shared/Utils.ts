@@ -43,11 +43,13 @@ export const getColumnName = (columns: any, columnID: string) => {
  * @param tableHead The table head.
  * @param columns The array of column objects.
  * @param columnID The ID of the column.
+ * @param headRowSelector Optional selector to scope the lookup to a specific header row (e.g. `'tr:eq(1)'`) for tables with multi-level headers.
  * @returns A Cypress chain containing the column position (0-based) or -1 if not found
  */
-export const getColumnPosition = (tableHead: string, columns: any, columnID: string) => {
+export const getColumnPosition = (tableHead: string, columns: any, columnID: string, headRowSelector?: string) => {
   const columnName = getColumnName(columns, columnID);
-  return cy.get(`${tableHead} ${CommonSelectors.tableCellHead}`).then($cells => {
+  const baseSelector = headRowSelector ? `${tableHead} ${headRowSelector} ${CommonSelectors.tableCellHead}` : `${tableHead} ${CommonSelectors.tableCellHead}`;
+  return cy.get(baseSelector).then($cells => {
     $cells.css('width', '125px'); // Widen columns for full name access
     let position;
     if (columnName.startsWith('[')) {
@@ -77,6 +79,79 @@ export const getDateTime = () => {
   const strTime = joinWithPadding([date.getHours(), date.getMinutes()]);
 
   return { strDate, strTime };
+};
+
+/**
+ * Gets the color, display string and abbreviation associated with a classification.
+ * @param classification The classification key (e.g., 'Benign', 'Likely_pathogenic', etc.).
+ * @returns An object containing { color, display, abbrev } for the classification.
+ */
+export const getClass = (classification: string) => {
+  const mapping: Record<string, { color: string; display: string; abbrev: string }> = {
+    association: { color: 'neutral', display: 'Association', abbrev: 'AS' },
+    association_not_found: { color: 'neutral', display: 'Association Not Found', abbrev: 'ANF' },
+    Benign: { color: 'green', display: 'Benign', abbrev: 'B' },
+    confers_sensitivity: { color: 'neutral', display: 'Confers Sensitivity', abbrev: 'CS' },
+    Conflicting_classifications_of_pathogenicity: { color: 'orange', display: 'Conflict. Class. of Patho.', abbrev: 'CC' },
+    Conflicting_interpretations_of_pathogenicity: { color: 'yellow', display: 'Conflict. Interpretat. of Patho.', abbrev: 'CI' },
+    drug_response: { color: 'neutral', display: 'Drug Response', abbrev: 'DR' },
+    established_risk_allele: { color: 'neutral', display: 'Established Risk Allele', abbrev: 'ERA' },
+    Likely_benign: { color: 'lime', display: 'Likely Benign', abbrev: 'LB' },
+    likely_oncogenic: { color: 'violet', display: 'Likely Oncogenic', abbrev: 'LO' },
+    Likely_pathogenic: { color: 'orange', display: 'Likely Patho.', abbrev: 'LP' },
+    Likely_risk_allele: { color: 'neutral', display: 'Likely Risk Allele', abbrev: 'LRA' },
+    low_penetrance: { color: 'neutral', display: 'Low Penetrance', abbrev: 'LPN' },
+    no_data: { color: 'neutral', display: 'No Data', abbrev: 'ND' },
+    not_provided: { color: 'neutral', display: 'Not Provided', abbrev: 'NP' },
+    oncogenic: { color: 'red', display: 'Oncogenic', abbrev: 'O' },
+    other: { color: 'neutral', display: 'Other', abbrev: 'O' },
+    Pathogenic: { color: 'red', display: 'Pathogenic', abbrev: 'P' },
+    protective: { color: 'neutral', display: 'Protective', abbrev: 'PV' },
+    risk_factor: { color: 'neutral', display: 'Risk Factor', abbrev: 'RF' },
+    Uncertain_risk_allele: { color: 'neutral', display: 'Uncertain Risk Allele', abbrev: 'URA' },
+    Uncertain_significance: { color: 'yellow', display: 'VUS', abbrev: 'VUS' },
+  };
+
+  return mapping[classification];
+};
+
+/**
+ * Gets the display label associated with an external reference link.
+ * @param ref The external reference key (e.g., 'clinvar', 'gnomad', 'dbsnp').
+ * @returns The display label.
+ */
+export const getExternalRefDisplay = (ref: string) => {
+  const mapping: Record<string, string> = {
+    clinvar: 'ClinVar',
+    dbsnp: 'dbSNP',
+    gnomad: 'gnomAD',
+  };
+
+  return mapping[ref];
+};
+
+/**
+ * Gets the display string associated with a prediction score.
+ * @param prediction The prediction score (e.g., 'loeuf', 'revel', etc.).
+ * @returns The display string.
+ */
+export const getPredictionDisplay = (prediction: string) => {
+  const mapping: Record<string, string> = {
+    caddphred: 'CADD (Phred)',
+    caddraw: 'CADD (Raw)',
+    dann: 'DANN',
+    fathmm: 'FATHMM',
+    loeuf: 'LOEUF',
+    lrt: 'LRT',
+    phylop17way: 'PhyloP17Way',
+    pli: 'pLI',
+    polyphen2_hvar: 'PolyPhen-2 HVAR',
+    revel: 'REVEL',
+    sift: 'SIFT',
+    spliceai: 'SpliceAI',
+  };
+
+  return mapping[prediction];
 };
 
 /**
@@ -180,6 +255,8 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
   switch (columnID) {
     case 'clingen':
       return data.cnv_variant ? `https://search.clinicalgenome.org/kb/regions?page=1&type=GRCh38&region=chr${data.chromosome}%3A${strStart}-${strEnd}&size=25&search=` : undefined;
+    case 'clinvar':
+      return data.clinvar_name ? `https://www.ncbi.nlm.nih.gov/clinvar/variation/${data.clinvar_name}` : undefined;
     case 'cnv_variant':
       const DupDel = data.type == 'GAIN' ? 'DUP' : 'DEL';
       return data.cnv_variant ? `https://franklin.genoox.com/clinical-db/variant/sv/chr${data.chromosome}-${strStart}-${strEnd}-${DupDel}-HG38` : undefined;
@@ -189,12 +266,30 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
       return data.dbsnp ? `https://www.ncbi.nlm.nih.gov/snp/${data.dbsnp}` : undefined;
     case 'gene':
       return data.gene ? `https://www.omim.org/search?index=entry&start=1&limit=10&sort=score+desc%2C+prefix_sort+desc&search=${data.gene}` : undefined;
+    case 'gnomad':
+      return data.locus ? `https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3` : undefined;
+    case 'omim_phenotype':
+      return data.omim_id ? `https://www.omim.org/entry/${data.omim_id}` : undefined;
     case 'primary_condition':
       const conditionId = data.primary_condition_id.replace(/:/g, '_');
       return `http://purl.obolibrary.org/obo/${conditionId}`;
+    case 'transcript_id':
+      return data.transcript_id ? `https://www.ensembl.org/id/${data.transcript_id}` : undefined;
     default:
       return undefined;
   }
+};
+
+/**
+ * Returns true if a value is considered "empty" (null, undefined, '', [], {}).
+ * @param value The value to check.
+ * @returns true if empty, false otherwise.
+ */
+export const isEmpty = (value: unknown): boolean => {
+  if (value === null || value === undefined || value === '') return true;
+  if (Array.isArray(value)) return value.length === 0;
+  if (typeof value === 'object') return Object.keys(value as object).length === 0;
+  return false;
 };
 
 /**

@@ -3,7 +3,6 @@ package repository
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -30,7 +29,7 @@ func NewIGVRepository(db *gorm.DB) *IGVRepository {
 }
 
 func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
-	var igvInternal []IGVTrack
+	var tracks []IGVTrack
 
 	alignmentFilter := fmt.Sprintf("%s.case_id=%d AND thd.type='output' AND (doc.data_type_code IN ('alignment', 'alignment_variant_calling') AND doc.format_code in ('cram', 'crai'))", types.CaseHasSequencingExperimentTable.Alias, caseID)
 
@@ -48,6 +47,7 @@ func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 		"s.id AS sequencing_experiment_id",
 		"p.id as patient_id",
 		"spl.submitter_sample_id AS sample_id",
+		"spl.histology_code AS histology_code",
 		"f.relationship_to_proband_code AS family_role",
 		"p.sex_code",
 		"doc.data_type_code",
@@ -57,32 +57,60 @@ func (r *IGVRepository) GetIGV(caseID int) ([]IGVTrack, error) {
 
 	tx.Select(columns)
 	tx.Order("s.id, doc.data_type_code, doc.format_code")
-	if err := tx.Find(&igvInternal).Error; err != nil {
-		return []IGVTrack{}, err
+	if err := tx.Find(&tracks).Error; err != nil {
+		return nil, err
 	}
-
-	return igvInternal, nil
+	return tracks, nil
 }
 
-func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner) (*types.IGVTracks, error) {
-	result := types.IGVTracks{}
+// Transforms internal IGVTrack records to "IGVTracks" which match the IGV specification format.
+// For germline, the tracks are labelled by family role (e.g. "proband", "mother", "father") and the
+// proband track is listed first.
+func PrepareGermlineIgvTracks(tracks []IGVTrack, presigner utils.PreSigner) (*types.IGVTracks, error) {
+	result, err := prepareIgvTracks(tracks, presigner, func(t IGVTrack) string { return t.FamilyRole })
+	if err != nil {
+		return nil, err
+	}
+	utils.SortIgvTracksByLeadingThenName(result.Alignment, func(t types.IGVTrackEnriched) bool {
+		return t.FamilyRole == "proband"
+	})
+	return result, nil
+}
 
-	grouped := map[string]types.IGVTrackEnriched{}
+// Transforms internal IGVTrack records to "IGVTracks" which match the IGV specification format.
+// For somatic, the tracks are labelled by histology code (e.g. "tumoral", "normal") and the
+// tumoral track is listed first.
+func PrepareSomaticIgvTracks(tracks []IGVTrack, presigner utils.PreSigner) (*types.IGVTracks, error) {
+	result, err := prepareIgvTracks(tracks, presigner, func(t IGVTrack) string { return t.HistologyCode })
+	if err != nil {
+		return nil, err
+	}
+	utils.SortIgvTracksByLeadingThenName(result.Alignment, func(t types.IGVTrackEnriched) bool {
+		return strings.HasSuffix(t.Name, " tumoral")
+	})
+	return result, nil
+}
 
+func prepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner, suffix func(IGVTrack) string) (*types.IGVTracks, error) {
+	merged := map[int]*types.IGVTrackEnriched{}
+
+	// Transform to enriched tracks, merging cram/crai pairs together.
 	for _, r := range internalTracks {
-		key := strings.Join([]string{
-			r.DataTypeCode,
-			strconv.Itoa(r.PatientId),
-		}, "|")
+		// we only support alignment tracks for now
+		if r.DataTypeCode != "alignment" {
+			continue
+		}
 
-		enriched, exists := grouped[key]
+		m, exists := merged[r.SequencingExperimentId]
 		if !exists {
-			enriched = types.IGVTrackEnriched{
+			m = &types.IGVTrackEnriched{
 				PatientId:  r.PatientId,
 				Type:       r.DataTypeCode,
 				Sex:        r.SexCode,
 				FamilyRole: r.FamilyRole,
+				Name:       fmt.Sprintf("Reads: %s %s", r.SampleId, suffix(r)),
 			}
+			merged[r.SequencingExperimentId] = m
 		}
 
 		presigned, err := presigner.GeneratePreSignedURL(r.URL)
@@ -90,30 +118,20 @@ func PrepareIgvTracks(internalTracks []IGVTrack, presigner utils.PreSigner) (*ty
 			return nil, err
 		}
 
-		if r.FormatCode == "cram" {
-			enriched.Name = fmt.Sprintf("Reads: %s %s", r.SampleId, r.FamilyRole)
-			enriched.Format = r.FormatCode
-			enriched.URL = presigned.URL
-			enriched.URLExpireAt = presigned.URLExpireAt
-		} else if r.FormatCode == "crai" {
-			enriched.IndexURL = presigned.URL
-			enriched.IndexURLExpireAt = presigned.URLExpireAt
-		}
-
-		grouped[key] = enriched
-	}
-
-	for _, track := range grouped {
-		switch track.Type {
-		case "alignment":
-			// Ensure the proband is always first in the alignment list
-			if track.FamilyRole == "proband" {
-				result.Alignment = append([]types.IGVTrackEnriched{track}, result.Alignment...)
-			} else {
-				result.Alignment = append(result.Alignment, track)
-			}
+		switch r.FormatCode {
+		case "cram":
+			m.Format = r.FormatCode
+			m.URL = presigned.URL
+			m.URLExpireAt = presigned.URLExpireAt
+		case "crai":
+			m.IndexURL = presigned.URL
+			m.IndexURLExpireAt = presigned.URLExpireAt
 		}
 	}
 
+	result := types.IGVTracks{Alignment: make([]types.IGVTrackEnriched, 0, len(merged))}
+	for _, m := range merged {
+		result.Alignment = append(result.Alignment, *m)
+	}
 	return &result, nil
 }

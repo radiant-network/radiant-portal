@@ -12,7 +12,7 @@ import (
 )
 
 func Test_CreateBatch_Valid(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 		type samplePayload struct {
 			Message string `json:"message"`
@@ -40,7 +40,7 @@ func Test_CreateBatch_Valid(t *testing.T) {
 }
 
 func Test_GetBatchByID_Success(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 		batchId := uuid.NewString()
 		initErr := db.Exec(`
@@ -91,7 +91,7 @@ func Test_ClaimNextBatch_Without_Pending(t *testing.T) {
 }
 
 func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 		// Add two pending batches
 		initErr := db.Exec(`
@@ -118,7 +118,7 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 }
 
 func Test_UpdateBatch(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 
 		var id string
@@ -147,7 +147,7 @@ func Test_UpdateBatch(t *testing.T) {
 }
 
 func Test_UpdateStuckBatch(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 
 		timeMoreThan24hAgo := time.Now().Add(-48 * time.Hour).Format("2006-01-02")

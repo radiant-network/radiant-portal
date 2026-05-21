@@ -1,3 +1,4 @@
+
 INSERT INTO "document" (id, name, data_category_code, data_type_code, format_code, size, url, hash, created_on)
 VALUES (1, 'FI0037662.S13230.cram', 'genomic', 'alignment', 'cram', 110187385978,
         's3://cqdg-prod-file-workspace/sarek/preprocessing/', '5d41402abc4b2a76b9719d911017c592', '2021-09-12T13:08:00-04:00'),
@@ -544,7 +545,19 @@ VALUES (1, 'FI0037662.S13230.cram', 'genomic', 'alignment', 'cram', 110187385978
        (264, 'FI0005568.S14359.vcf.gz', 'genomic', 'snv', 'vcf', 2411725,
         's3://cqdg-prod-file-workspace/sarek/preprocessing/', '5d41402abc4b2a76b9719d911017c855', '2021-09-12T13:08:00-04:00'),
        (265, 'FI0005568.S14359.vcf.gz.tbi', 'genomic', 'snv', 'tbi', 2411724,
-        's3://cqdg-prod-file-workspace/sarek/preprocessing/', '5d41402abc4b2a76b9719d911017c856', '2021-09-12T13:08:00-04:00')
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/', '5d41402abc4b2a76b9719d911017c856', '2021-09-12T13:08:00-04:00'),
+       (266, 'variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz', 'genomic', 'snv', 'vcf', 34095067,
+        's3://cqdg-prod-file-workspace/Postprocessing/variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz', '103f65eeff69dae290c90d2a4ad3fea2-3', '2021-09-12T13:08:00-04:00'),
+       (267, 'variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz.tbi', 'genomic', 'snv', 'tbi', 933443,
+        's3://cqdg-prod-file-workspace/Postprocessing/variants.SRX1091647-T_vs_SRX1091646-N.snv.vep.vcf.gz.tbi', '5d7f43f74fd1ea4af83b87e727799ec2', '2021-09-12T13:08:00-04:00'),
+       (268, 'SRX1091647-T.recal.cram', 'genomic', 'alignment', 'cram', 49126489623,
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram', '72a59834feee767b29f6279562f164b5-9371', '2021-09-12T13:08:00-04:00'),
+       (269, 'SRX1091647-T.recal.cram.crai', 'genomic', 'alignment', 'crai', 2030639,
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/SRX1091647-T.recal.cram.crai', 'a5a1e735ac4344019bd81c05f273877e', '2021-09-12T13:08:00-04:00'),
+       (270, 'SRX1091646-N.recal.cram', 'genomic', 'alignment', 'cram', 50243021081,
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram', '9d7fa39c3ab46a21c649e057482b8910-9584', '2021-09-12T13:08:00-04:00'),
+       (271, 'SRX1091646-N.recal.cram.crai', 'genomic', 'alignment', 'crai', 1971347,
+        's3://cqdg-prod-file-workspace/sarek/preprocessing/SRX1091646-N.recal.cram.crai', '37b443e867ae59a043e5aaa7ca706852', '2021-09-12T13:08:00-04:00')
 ON CONFLICT(id) DO NOTHING;
 
 INSERT INTO organization (id, code, name, category_code)
@@ -747,7 +760,9 @@ VALUES (1, 'dna', 62, NULL, 'normal', 'S13224', 3, 6),
        (119,  'blood', NULL, NULL, 'normal', 'B-958.3',56,6),
        (120,  'blood', NULL, NULL, 'normal', 'B-990.1',60,6),
        (121,  'blood', NULL, NULL, 'normal', 'B-990.2',61,6),
-       (122,  'blood', NULL, NULL, 'normal', 'B-990.3',59,6)
+       (122,  'blood', NULL, NULL, 'normal', 'B-990.3',59,6),
+       (123,  'blood', NULL, NULL, 'tumoral', 'B-990.3',3,6),
+       (124,  'blood', NULL, NULL, 'normal', 'B-990.3',3,6)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "task" (id, task_type_code, pipeline_name, pipeline_version, genome_build, created_on)
@@ -821,7 +836,10 @@ VALUES (1, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2
        (70, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
        (71, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
        (72, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
-       (73, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00')
+       (73, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
+       (74, 'radiant_somatic_annotation', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
+       (75, 'alignment_somatic_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
+       (76, 'alignment_somatic_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "task_has_document" (task_id, document_id, type)
@@ -1136,7 +1154,14 @@ VALUES (1, 27, 'output'),
        (72, 85, 'output'),
        (72, 86, 'output'),
        (73, 27, 'output'),
-       (73, 28, 'output')
+       (73, 28, 'output'),
+
+       (74, 266, 'output'),
+       (74, 267, 'output'),
+       (75, 268, 'output'),
+       (75, 269, 'output'),
+       (76, 270, 'output'),
+       (76, 271, 'output')
 ON CONFLICT(task_id, document_id, type) DO NOTHING;
 
 INSERT INTO "cases" (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_id, primary_condition, note, created_on, updated_on, priority_code, case_type_code, case_category_code, condition_code_system, resolution_status_code, ordering_physician, ordering_organization_id, submitter_case_id)
@@ -1162,6 +1187,7 @@ VALUES
     (19, 55, 2, 2, 'completed', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Fadi Hamdan', 3, '2:19'),
     (20, 58, 2, 2, 'completed', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Melissa Lopez', 3, '2:20'),
     (21, 60, 2, 2, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'asap',  'germline', 'postnatal', 'mondo', 'unsolved', 'Victoria Breton', 3, '2:21'),
+    (22, 3, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12 13:08:00', '2021-09-12 13:08:00', 'routine', 'somatic', 'postnatal', 'MONDO', 'unsolved', 'Felix Laflamme', 3, '1:22'),
     (70, 3, 1, 1, 'in_progress', 6, 'MONDO:0700092', 'Administrative comment', '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'routine',  'germline', 'postnatal', 'mondo', 'unsolved', 'Isabella Murphy', 1, '1:70')
 ON CONFLICT (id) DO NOTHING;
 
@@ -1226,7 +1252,8 @@ VALUES (1, 1, 1, 'mother', 'affected'),
        (58, 18, 50, 'proband', 'affected'),
        (59, 19, 55, 'proband', 'affected'),
        (60, 20, 58, 'proband', 'affected'),
-       (61, 21, 60, 'proband', 'affected')
+       (61, 21, 60, 'proband', 'affected'),
+       (62, 22, 3, 'proband', 'affected')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "obs_categorical" (id,
@@ -1869,6 +1896,12 @@ VALUES (1, 1, 'completed', 'NA12892', 6, 1617, 'A00516_0169', '2021-08-17', 'Sur
        (61, 61, 'submitted', 'S14859', 6, 1677, 'A00516_0229', '2021-08-31',
         'SureSelect Custom DNA Target', '2020-09-12T13:08:00-04:00', '2020-09-12T13:08:00-04:00', 'wgs', 'short_read',
         'illumina'),
+       (62, 123, 'incomplete', 'TCR002361_SRX1091647-T', 6, 1677, 'TCR002361_SRX1091647-Tumor', '2021-08-31',
+        'SureSelect Custom DNA Target', '2021-10-12 13:08:00', '2021-10-12 13:08:00', 'wgs', 'short_read',
+        'illumina'),
+       (63, 124, 'incomplete', 'TCR002361_SRX1091646-N', 6, 1677, 'TCR002361_SRX1091646-Normal', '2021-08-31',
+        'SureSelect Custom DNA Target', '2021-10-12 13:08:00', '2021-10-12 13:08:00', 'wgs', 'short_read',
+        'illumina'),
        (70, 1, 'completed', 'NA12892', 6, 1617, 'A00516_0169', '2021-08-17', 'SureSelect Custom DNA Target',
         '2021-09-12T13:08:00-04:00', '2021-09-12T13:08:00-04:00', 'wgs', 'short_read', 'illumina'),
        (71, 2, 'completed', 'NA12891', 6, 1618, 'A00516_0170', '2021-08-17', 'SureSelect Custom DNA Target',
@@ -1939,6 +1972,8 @@ VALUES (1, 1),
        (59, 21),
        (60, 21),
        (61, 21),
+       (62, 22),
+       (63, 22),
        (70, 70),
        (71, 70),
        (72, 70)
@@ -2040,7 +2075,12 @@ VALUES (1, 1, NULL),
 
        (71, 70, 70),
        (72, 71, 70),
-       (73, 72, 70)
+       (73, 72, 70),
+
+       (74, 62, 22),
+       (74, 63, 22),
+       (75, 62, NULL),
+       (76, 63, NULL)
 ON CONFLICT(task_id, sequencing_experiment_id, case_id) DO NOTHING;
 
 INSERT INTO "interpretation_germline" (sequencing_id, case_id, locus_id, transcript_id, condition, classification, classification_criterias, transmission_modes, updated_at)
@@ -2048,6 +2088,11 @@ VALUES ('1', '1', '1000', 'T001', 'MONDO:0000001', 'LA6668-3', 'PM1', 'autosomal
        ('1', '1', '1000', 'T002', 'MONDO:0000002', 'LA6675-8', 'PM1,PM2', 'autosomal_dominant_de_novo', '2025-06-30 15:51:29.0'),
        ('2', '1', '1000', 'T001', 'MONDO:0000001', 'LA26332-9', 'PS1,PM1,PP2', 'autosomal_dominant_de_novo,x_linked_dominant_de_novo', '2025-06-27 19:51:00.0')
 ON CONFLICT (sequencing_id, case_id, locus_id, transcript_id) DO NOTHING;
+
+INSERT INTO "occurrence_flag" (case_id, occurrence_id, seq_id, task_id, flag_type)
+VALUES (1, '1000', 1, 1, 'flag'),
+       (7, '2000', 19, 19, 'pin')
+ON CONFLICT (case_id, occurrence_id, seq_id, task_id) DO NOTHING;
 
 -- Reset sequences to prevent duplicate key errors when inserting new records
 SELECT setval('document_id_seq', (SELECT MAX(id) FROM document));

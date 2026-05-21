@@ -18,7 +18,7 @@ export const ManagerFilterModal = {
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.deleteIcon}:visible`).clickAndWait({ force: true });
 
       cy.intercept('**/saved_filters{,/**}').as('deleteSavedFilters');
-      cy.get(`${CommonSelectors.alert} ${CommonSelectors.destructiveButton}`).click({ force: true });
+      cy.get(CommonSelectors.deleteFilterButton).click({ force: true });
       cy.wait('@deleteSavedFilters');
 
       ManagerFilterModal.actions.closeManager();
@@ -50,7 +50,7 @@ export const ManagerFilterModal = {
      */
     shouldDisplayInManager(name: string, shouldExist: boolean = true) {
       const strExist = shouldExist ? 'exist' : 'not.exist';
-      cy.get(CommonSelectors.modal).contains(name).should(strExist);
+      cy.get(`${CommonSelectors.modal}:contains("${name}")`).should(strExist);
     },
   },
 };

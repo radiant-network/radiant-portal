@@ -28,7 +28,7 @@ func assertGetUserSet(t *testing.T, repo repository.UserSetsDAO, userSetId strin
 }
 
 func Test_GetUserSet(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		pubmedService := &MockExternalClient{}
 		repo := repository.NewPostgresRepository(db, pubmedService)
 		// not found

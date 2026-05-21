@@ -85,7 +85,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <I18nProvider initialLanguage={loaderData?.language}>
           <ConfigProvider config={__PROJECT__}>
             <ThemeProvider>
-              <TooltipProvider delayDuration={0}>
+              <TooltipProvider>
                 <AlertDialogProvider>
                   <BetaFeatureProvider>{children}</BetaFeatureProvider>
                 </AlertDialogProvider>

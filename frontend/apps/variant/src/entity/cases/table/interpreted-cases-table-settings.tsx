@@ -46,6 +46,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       size: 120,
       minSize: 80,
       maxSize: 150,
+      enableSorting: true,
     }),
     interpretedCasesColumnHelper.accessor(row => row.condition_name, {
       id: 'condition_name',
@@ -61,6 +62,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       header: t('variant_entity.cases.interpreted_table.headers.classification'),
       minSize: 150,
       maxSize: 250,
+      enableSorting: true,
     }),
     interpretedCasesColumnHelper.accessor(row => row.zygosity, {
       id: 'zygosity',
@@ -113,6 +115,7 @@ function getInterpretedCasesColumns(t: TFunction<string, undefined>) {
       minSize: 100,
       maxSize: 150,
       size: 120,
+      enableSorting: true,
     }),
     interpretedCasesColumnHelper.accessor(row => row, {
       id: 'action',

@@ -11,7 +11,7 @@ import (
 )
 
 func Test_GetTermAutoComplete(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewTermsRepository(db)
 		terms, err := repo.GetTermAutoComplete(types.MondoTable.Name, "blood", 20)
 		assert.NoError(t, err)
@@ -25,7 +25,7 @@ func Test_GetTermAutoComplete(t *testing.T) {
 }
 
 func Test_GetTermAutoCompleteWithLimit(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewTermsRepository(db)
 		terms, err := repo.GetTermAutoComplete(types.MondoTable.Name, "blood", 1)
 		assert.NoError(t, err)
@@ -38,7 +38,7 @@ func Test_GetTermAutoCompleteWithLimit(t *testing.T) {
 }
 
 func Test_GetTermAutoCompleteNoResult(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewTermsRepository(db)
 		terms, err := repo.GetTermAutoComplete(types.MondoTable.Name, "not_here", 20)
 		assert.NoError(t, err)
@@ -47,7 +47,7 @@ func Test_GetTermAutoCompleteNoResult(t *testing.T) {
 }
 
 func Test_GetTermNameById(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewTermsRepository(db)
 		term, err := repo.GetTermNameById(types.MondoTable.Name, "MONDO:0000003")
 		assert.NoError(t, err)
@@ -56,7 +56,7 @@ func Test_GetTermNameById(t *testing.T) {
 }
 
 func Test_GetTermNameByIdNoResult(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewTermsRepository(db)
 		term, err := repo.GetTermNameById(types.MondoTable.Name, "MONDO:not_existing")
 		assert.NoError(t, err)

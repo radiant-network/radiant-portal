@@ -5,13 +5,14 @@ import { VariantOverview } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import ConditionalField from '@/components/base/information/conditional-field';
+import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, CardProps } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
+import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { VariantEntityTabs } from '@/types';
 
 function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverview } & CardProps) {
   const { t } = useI18n();
@@ -27,6 +28,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="text-2xl font-semibold">
               {data.symbol && (
                 <a
+                  data-cy="gene"
                   href={getOmimOrgUrl({
                     symbol: data.symbol,
                   })}
@@ -37,16 +39,18 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
                   {data.symbol}
                 </a>
               )}
-              {!data.symbol &&
-                (['intergenic', 'intergenic_variant'].includes(pickedConsequence) ? t('common.no_gene') : '-')}
+              {!data.symbol && t('common.no_gene')}
             </div>
-            <div className="text-xs font-mono">
+            <div data-cy={data.aa_change ? 'aa-change' : undefined} className="text-xs font-mono">
               <ConditionalField condition={!!data.aa_change}>{data.aa_change}</ConditionalField>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.consequence')}</div>
-            <div className="flex items-center gap-2">
+            <div
+              data-cy={pickedConsequence && data.vep_impact ? 'consequence' : undefined}
+              className="flex items-center gap-2"
+            >
               <ConditionalField condition={!!pickedConsequence && !!data.vep_impact}>
                 <ConsequenceIndicator vepImpact={data.vep_impact!} consequence={pickedConsequence} />
               </ConditionalField>
@@ -54,13 +58,17 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
           </div>
           <div className="flex flex-col gap-2">
             <div className="text-sm text-muted-foreground">{t('variant_entity.overview.clin_var')}</div>
-            <div className="flex flex-wrap items-start gap-1">
+            <div
+              data-cy={data?.clinvar?.length ? 'clinvar-classifications' : undefined}
+              className="flex flex-wrap items-start gap-1"
+            >
               <ConditionalField condition={data?.clinvar ? data?.clinvar?.length > 0 : false}>
                 <>
                   {(data?.clinvar ?? []).map(clinvar => (
                     <Link
                       key={clinvar}
-                      to={`/variants/entity/${params.locusId}#${VariantEntityTabs.EvidenceAndConditions}`}
+                      data-cy={clinvar.replace(/_/g, '-')}
+                      to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
                     >
                       <ClassificationBadge key={clinvar} value={clinvar} />
                     </Link>
@@ -81,7 +89,11 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             </div>
             <div className="font-semibold font-mono">
               <ConditionalField condition={!!data?.germline_pc_wgs}>
-                <Link to={`/variants/entity/${params.locusId}#${VariantEntityTabs.Cases}`} className="hover:underline">
+                <Link
+                  data-cy="patients"
+                  to={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`}
+                  className="hover:underline"
+                >
                   {`${data.germline_pc_wgs} (${data.germline_pf_wgs.toExponential(2)})`}
                 </Link>
               </ConditionalField>
@@ -100,6 +112,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <div className="font-semibold font-mono">
               <ConditionalField condition={!!data?.gnomad_v3_af}>
                 <a
+                  data-cy="gnomad"
                   href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`}
                   target="_blank"
                   rel="noreferrer"
@@ -115,6 +128,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
         <div className="flex items-center gap-6 text-sm">
           {data?.transcript_id && (
             <TranscriptIdLink
+              data-cy="transcript-id"
               transcriptId={data.transcript_id}
               isManeSelect={data.is_mane_select}
               isManePlus={false}
@@ -123,11 +137,27 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             />
           )}
           {data?.exon_rank && data?.exon_total && (
-            <div className="font-mono">
+            <div data-cy="exon" className="font-mono">
               {t('variant_entity.overview.exon')}: {data?.exon_rank} / {data?.exon_total}
             </div>
           )}
-          {data?.dna_change && <div className="font-mono">{data?.dna_change}</div>}
+          {data?.dna_change && (
+            <div data-cy="dna-change" className="font-mono">
+              {data?.dna_change}
+            </div>
+          )}
+          {data?.rsnumber && (
+            <AnchorLink
+              data-cy="dbsnp"
+              size="sm"
+              href={`https://www.ncbi.nlm.nih.gov/snp/${data.rsnumber}`}
+              className={'hover:underline font-mono'}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {data.rsnumber}
+            </AnchorLink>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -13,7 +13,7 @@ Cypress.Commands.add('setToken', () => {
 });
 
 Cypress.Commands.add('isValidToken', token => {
-  const apiUrl = Cypress.env('api_base_url');
+  const apiUrl = Cypress.expose('api_base_url');
 
   return cy
     .request({
@@ -29,7 +29,7 @@ Cypress.Commands.add('isValidToken', token => {
 
 Cypress.Commands.add('initializeGlobalData', () => {
   return cy.setToken().then(() => {
-    Cypress.env('globalData', globalData);
+    Cypress.expose('globalData', globalData);
     cy.task('saveCachedData', globalData);
   });
 });
@@ -40,7 +40,8 @@ before(() => {
       return cy.task('loadCachedData').then(cachedData => {
         return cy.isValidToken(cachedData.Authorization.token).then(isValid => {
           if (isValid) {
-            Cypress.env('globalData', cachedData);
+            globalData.Authorization.token = cachedData.Authorization.token;
+            Cypress.expose('globalData', globalData);
           } else {
             return cy.initializeGlobalData();
           }

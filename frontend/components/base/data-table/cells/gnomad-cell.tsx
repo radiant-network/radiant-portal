@@ -14,7 +14,7 @@ type NumberCellProps = {
  * Indicator: Red circle when values are < 1%
  */
 function GnomadCell({ value }: NumberCellProps) {
-  if (value === undefined) return <EmptyCell />;
+  if (value === undefined || value == null) return <EmptyCell />;
   const scientificNotation = toExponentialNotation(value);
 
   return (

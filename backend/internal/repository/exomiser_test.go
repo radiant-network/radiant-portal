@@ -9,7 +9,7 @@ import (
 )
 
 func Test_GetExomiser(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "exomiser", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "exomiser", func(t *testing.T, db *gorm.DB) {
 		repo := NewExomiserRepository(db)
 		expected := []types.Exomiser{
 			{
@@ -66,7 +66,7 @@ func Test_GetExomiser(t *testing.T) {
 }
 
 func Test_GetExomiser_Empty(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "exomiser", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "exomiser", func(t *testing.T, db *gorm.DB) {
 		repo := NewExomiserRepository(db)
 		exomiser, err := repo.GetExomiser(42)
 		assert.NoError(t, err)
@@ -75,7 +75,7 @@ func Test_GetExomiser_Empty(t *testing.T) {
 }
 
 func Test_GetExomiserACMGClassificationCounts(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "exomiser", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "exomiser", func(t *testing.T, db *gorm.DB) {
 		repo := NewExomiserRepository(db)
 		expected := map[string]int{"Pathogenic": 2, "VUS": 1}
 
@@ -86,7 +86,7 @@ func Test_GetExomiserACMGClassificationCounts(t *testing.T) {
 }
 
 func Test_GetExomiserACMGClassificationCounts_Empty(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "exomiser", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "exomiser", func(t *testing.T, db *gorm.DB) {
 		repo := NewExomiserRepository(db)
 		exomiser, err := repo.GetExomiserACMGClassificationCounts(42)
 		assert.NoError(t, err)

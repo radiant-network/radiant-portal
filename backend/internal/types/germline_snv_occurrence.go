@@ -7,6 +7,7 @@ type GermlineSNVOccurrence struct {
 	TaskId                     int               `json:"task_id" validate:"required"`
 	Chromosome                 string            `json:"chromosome" validate:"required"`
 	Start                      int64             `json:"start" validate:"required"`
+	End                        int64             `json:"end" validate:"required"`
 	LocusId                    string            `json:"locus_id" validate:"required"`
 	Locus                      string            `json:"locus" validate:"required"`
 	GenotypeQuality            int32             `json:"genotype_quality" validate:"required"`
@@ -33,6 +34,7 @@ type GermlineSNVOccurrence struct {
 	MaxImpactScore             int               `json:"max_impact_score" validate:"required"`
 	HasInterpretation          bool              `json:"has_interpretation" validate:"required"`
 	HasNote                    bool              `json:"has_note" validate:"required"`
+	FlagType                   OccurrenceFlagType `json:"flag_type,omitempty" enums:"flag,pin,star"`
 	ExomiserMoi                string            `json:"exomiser_moi" validate:"required"`
 	ExomiserAcmgClassification string            `json:"exomiser_acmg_classification" validate:"required"`
 	ExomiserAcmgEvidence       JsonArray[string] `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`
@@ -101,8 +103,6 @@ type ExpandedGermlineSNVOccurrence = struct {
 	ExomiserAcmgClassification         string                   `json:"exomiser_acmg_classification,omitempty"`
 	ExomiserACMGClassificationCounts   JsonMap[string, int]     `gorm:"type:json" json:"exomiser_acmg_classification_counts,omitempty"`
 	InterpretationClassificationCounts JsonMap[string, int]     `gorm:"type:json" json:"interpretation_classification_counts,omitempty"`
-	InterpretationClassificationCode   string                   `json:"-"`
-	InterpretationClassification       string                   `json:"interpretation_classification,omitempty"`
 	EnsemblGeneId                      string                   `json:"ensembl_gene_id,omitempty"`
 } // @name ExpandedGermlineSNVOccurrence
 
@@ -118,6 +118,7 @@ var GermlineSNVFilterField = Field{
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVFilterIsPassField = Field{
 	Name:          "filter = 'PASS'",
 	Alias:         "filter_is_pass",
@@ -125,18 +126,21 @@ var GermlineSNVFilterIsPassField = Field{
 	CanBeFiltered: true,
 	Table:         GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVSeqIdField = Field{
 	Name:          "seq_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	Table:         GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVTaskIdField = Field{
 	Name:          "task_id",
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	Table:         GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVLocusIdField = Field{
 	Name:          "locus_id",
 	CanBeSelected: true,
@@ -144,6 +148,7 @@ var GermlineSNVLocusIdField = Field{
 	CanBeSorted:   true,
 	Table:         GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVZygosityField = Field{
 	Name:            "zygosity",
 	CanBeSelected:   true,
@@ -152,30 +157,35 @@ var GermlineSNVZygosityField = Field{
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVTransmissionModeField = Field{
 	Name:            "transmission_mode",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVParentalOriginField = Field{
 	Name:            "parental_origin",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVMotherZygosityField = Field{
 	Name:            "mother_zygosity",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVFatherZygosityField = Field{
 	Name:            "father_zygosity",
 	CanBeFiltered:   true,
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVGenotypeQualityField = Field{
 	Name:          "gq",
 	Alias:         "genotype_quality",
@@ -185,6 +195,7 @@ var GermlineSNVGenotypeQualityField = Field{
 	Type:          IntegerType,
 	Table:         GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVAdRatioField = Field{
 	Name:          "ad_ratio",
 	CanBeSelected: true,
@@ -193,6 +204,7 @@ var GermlineSNVAdRatioField = Field{
 	Type:          DecimalType,
 	Table:         GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVAdAltField = Field{
 	Name:          "ad_alt",
 	CanBeSelected: true,
@@ -201,6 +213,7 @@ var GermlineSNVAdAltField = Field{
 	Type:          IntegerType,
 	Table:         GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVAdTotalField = Field{
 	Name:          "ad_total",
 	CanBeSelected: true,
@@ -209,6 +222,7 @@ var GermlineSNVAdTotalField = Field{
 	Type:          IntegerType,
 	Table:         GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVInfoQdField = Field{
 	Name:          "info_qd",
 	CanBeSelected: true,
@@ -217,6 +231,7 @@ var GermlineSNVInfoQdField = Field{
 	Type:          DecimalType,
 	Table:         GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVExomiserMoiField = Field{
 	Name:            "exomiser_moi",
 	CanBeSelected:   true,
@@ -225,6 +240,7 @@ var GermlineSNVExomiserMoiField = Field{
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVExomiserAcmgClassificationField = Field{
 	Name:            "exomiser_acmg_classification",
 	CanBeSelected:   true,
@@ -233,6 +249,7 @@ var GermlineSNVExomiserAcmgClassificationField = Field{
 	CanBeAggregated: true,
 	Table:           GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVExomiserAcmgEvidenceField = Field{
 	Name:            "exomiser_acmg_evidence",
 	CanBeSelected:   true,
@@ -242,6 +259,7 @@ var GermlineSNVExomiserAcmgEvidenceField = Field{
 	IsArray:         true,
 	Table:           GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVExomiserVariantScoreField = Field{
 	Name:          "exomiser_variant_score",
 	CanBeSelected: true,
@@ -250,6 +268,7 @@ var GermlineSNVExomiserVariantScoreField = Field{
 	Type:          DecimalType,
 	Table:         GermlineSNVOccurrenceTable,
 }
+
 var GermlineSNVExomiserGeneCombinedScoreField = Field{
 	Name:          "exomiser_gene_combined_score",
 	CanBeSelected: true,
@@ -303,6 +322,7 @@ var GermlineSNVOccurrencesFields = []Field{
 	VariantClassField,
 	ChromosomeField,
 	StartField,
+	EndField,
 	GermlineSNVZygosityField,
 
 	// Genes
@@ -356,8 +376,10 @@ var GermlineSNVOccurrencesDefaultFields = []Field{
 	PickedVepImpactField,
 	PickedImpactScoreField,
 	PickedSymbolField,
+	PickedTranscriptIdField,
 	ChromosomeField,
 	StartField,
+	EndField,
 	GermlineSNVExomiserMoiField,
 	GermlineSNVExomiserAcmgClassificationField,
 	GermlineSNVExomiserAcmgEvidenceField,

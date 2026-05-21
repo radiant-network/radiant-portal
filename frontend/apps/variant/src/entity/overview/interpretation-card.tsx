@@ -3,8 +3,8 @@ import { HospitalIcon } from 'lucide-react';
 
 import { VariantOverview } from '@/api/api';
 import { Card, CardContent, CardHeader, CardProps } from '@/components/base/shadcn/card';
+import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { VariantEntityTabs } from '@/types';
 
 import ClassificationSection from './classification-section';
 
@@ -26,6 +26,7 @@ function InterpretationCard({ data, ...props }: InterpretationCardProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <ClassificationSection
+          dataCy="my-network"
           href={`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`}
           title={t('variant_entity.overview.my_network')}
           counts={data.interpretation_classification_counts ?? {}}

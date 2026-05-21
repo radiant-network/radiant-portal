@@ -112,7 +112,7 @@ func CasesFiltersHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /cases/{case_id} [get]
-func CaseEntityHandler(repo repository.CasesDAO) gin.HandlerFunc {
+func CaseEntityHandler(repo repository.CasesDAO, igvRepo repository.IGVRepositoryDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errCaseId := strconv.Atoi(c.Param("case_id"))
 		if errCaseId != nil {
@@ -128,6 +128,12 @@ func CaseEntityHandler(repo repository.CasesDAO) gin.HandlerFunc {
 			HandleNotFoundError(c, "case")
 			return
 		}
+		igvTracks, err := igvRepo.GetIGV(caseId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		caseEntity.HasIGVFiles = len(igvTracks) > 0
 		c.JSON(http.StatusOK, caseEntity)
 	}
 }
@@ -178,6 +184,56 @@ func CaseEntityDocumentsSearchHandler(repo repository.DocumentsDAO) gin.HandlerF
 
 		searchResponse := types.DocumentsSearchResponse{List: *documents, Count: *count}
 		c.JSON(http.StatusOK, searchResponse)
+	}
+}
+
+// CaseOccurrenceTasksHandler returns the tasks attached to a (case, sequencing) pair
+// whose task type produces occurrences of the requested OccurrenceType. Used to
+// populate the task dropdown of the Variants tab header.
+//
+// The task_type that produces each occurrence type is resolved server-side; clients
+// only need to pass the occurrence type (germline_snv, germline_cnv, somatic_snv).
+// @Summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+// @Id caseTasksWithOccurrences
+// @Description Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+// @Tags cases
+// @Security bearerauth
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequencing Experiment ID"
+// @Param data_type query string true "Occurrence type" Enums(germline_snv, germline_cnv, somatic_snv)
+// @Produce json
+// @Success 200 {array} types.TaskOccurrenceType
+// @Failure 400 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /cases/{case_id}/{seq_id}/tasks_with_occurrences [get]
+func CaseOccurrenceTasksHandler(repo repository.TaskDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseId, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		seqId, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		taskTypeCode, err := types.OccurrenceType(c.Query("data_type")).TaskTypeCode()
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		tasks, err := repo.ListTasksByCaseSeqAndTaskType(caseId, seqId, *taskTypeCode)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if tasks == nil {
+			tasks = []types.TaskOccurrenceType{}
+		}
+		c.JSON(http.StatusOK, tasks)
 	}
 }
 

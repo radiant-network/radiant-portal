@@ -16,7 +16,7 @@ import (
 )
 
 func assertGeneAutoComplete(t *testing.T, data string, prefix string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGenesRepository(db)
 		router := gin.Default()
 		router.GET("/genes/autocomplete", server.GetGeneAutoCompleteHandler(repo))
@@ -41,7 +41,7 @@ func Test_GeneAutoComplete(t *testing.T) {
 }
 
 func assertSearchGenes(t *testing.T, data string, body string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGenesRepository(db)
 		router := gin.Default()
 		router.POST("/genes/search", server.SearchGenesHandler(repo))

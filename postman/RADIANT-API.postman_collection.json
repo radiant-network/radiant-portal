@@ -174,7 +174,7 @@
           "response": []
         },
         {
-          "name": "Expended",
+          "name": "Expanded",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1137,6 +1137,42 @@
                 "1",
                 "documents",
                 "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tasks With Occurrences",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/cases/1/1/tasks_with_occurrences?data_type=germline_snv",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "cases",
+                "1",
+                "1",
+                "tasks_with_occurrences"
+              ],
+              "query": [
+                {
+                  "key": "data_type",
+                  "value": "germline_snv"
+                }
               ]
             }
           },
@@ -2452,6 +2488,39 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Expanded",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/somatic/snv/71/74/-8318226658347712512/expanded",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "somatic",
+                "snv",
+                "71",
+                "74",
+                "-8318226658347712512",
+                "expanded"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -2770,6 +2839,81 @@
                   "key": "id",
                   "value": ""
                 }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Occurrence Flags",
+      "item": [
+        {
+          "name": "Upsert Flag",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/flags/1/1/1/10000?flag_type=flag",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "flags",
+                "1",
+                "1",
+                "1",
+                "10000"
+              ],
+              "query": [
+                {
+                  "key": "flag_type",
+                  "value": "flag"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Flag",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/occurrences/flags/1/1/1/10000",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "occurrences",
+                "flags",
+                "1",
+                "1",
+                "1",
+                "10000"
               ]
             }
           },

@@ -101,6 +101,7 @@ type CaseEntity struct {
 	SequencingExperiments    JsonArray[CaseSequencingExperiment]       `json:"sequencing_experiments" validate:"required"`
 	Members                  JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
 	Tasks                    JsonArray[CaseTask]                       `json:"tasks" validate:"required"`
+	HasIGVFiles              bool                                      `json:"has_igv_files" validate:"required"`
 }
 
 // CaseSequencingExperiment - Sequencing experiment to display in a Case

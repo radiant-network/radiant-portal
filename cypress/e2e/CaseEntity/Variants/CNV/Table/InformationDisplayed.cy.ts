@@ -2,11 +2,13 @@
 import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
+import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_SavedFilters';
 
 describe('Case Entity - Variants - CNV - Table - Information displayed', () => {
   const setupTest = () => {
     cy.login();
-    cy.visitCaseVariantsPage(data.case.case, 'CNV', data.cnvGermline.sqon);
+    cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV', data.cnvGermline.sqon);
+    CaseEntity_Variants_SavedFilters.cnv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Clean Query Builder
   };
 
   it('Genes', () => {

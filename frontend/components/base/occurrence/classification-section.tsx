@@ -1,19 +1,20 @@
-import { ExpandedGermlineSNVOccurrence } from '@/api/api';
 import ClassificationBadge from '@/components/base/badges/classification-badge';
 import { useI18n } from '@/components/hooks/i18n';
 
+import EmptyField from '../information/empty-field';
+
 import DetailSection, { DetailItem } from './detail-section';
 
-type ClassificationSectionProps = {
-  data: ExpandedGermlineSNVOccurrence;
+export type ClassificationSectionProps = {
+  clinvar?: string[];
 };
 
-export default function ClassificationSection({ data }: ClassificationSectionProps) {
+export default function ClassificationSection({ clinvar }: ClassificationSectionProps) {
   const { t } = useI18n();
 
-  const clinvar = data.clinvar?.map(clinvar => (
-    <ClassificationBadge key={clinvar} abbreviated value={clinvar}>
-      {clinvar}
+  const badges = clinvar?.map(c => (
+    <ClassificationBadge key={c} abbreviated value={c}>
+      {c}
     </ClassificationBadge>
   ));
 
@@ -21,7 +22,7 @@ export default function ClassificationSection({ data }: ClassificationSectionPro
     <DetailSection title={t('occurrence_expand.classifications.title')}>
       <DetailItem
         title={t('occurrence_expand.classifications.clinvar')}
-        value={clinvar?.length ? <div className="flex items-center gap-1">{clinvar}</div> : '-'}
+        value={badges?.length ? <div className="flex items-center gap-1">{badges}</div> : <EmptyField />}
       />
     </DetailSection>
   );

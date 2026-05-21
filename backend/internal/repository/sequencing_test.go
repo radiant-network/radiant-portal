@@ -10,7 +10,7 @@ import (
 )
 
 func Test_GetSequencing(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewSequencingRepository(db)
 		sequencing, err := repo.GetSequencing(1)
 		assert.NoError(t, err)
@@ -20,7 +20,7 @@ func Test_GetSequencing(t *testing.T) {
 }
 
 func Test_GetSequencingNotFound(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewSequencingRepository(db)
 		sequencing, err := repo.GetSequencing(11)
 		assert.NoError(t, err)

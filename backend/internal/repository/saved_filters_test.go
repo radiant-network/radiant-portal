@@ -79,7 +79,7 @@ func Test_GetSavedFiltersByUserID_NotFound(t *testing.T) {
 }
 
 func Test_CreateSavedFilter(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilterInput := types.SavedFilterCreationInput{
 			Name: "new_saved_filter_somatic_snv_occurrence",
@@ -115,7 +115,7 @@ func Test_CreateSavedFilter(t *testing.T) {
 }
 
 func Test_CreateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilterInput := types.SavedFilterCreationInput{
 			Name: "new_saved_filter_somatic_snv_occurrence_1",
@@ -147,7 +147,7 @@ func Test_CreateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 }
 
 func Test_UpdateSavedFilter(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilterCreationInput := types.SavedFilterCreationInput{
 			Name: "new_saved_filter_somatic_snv_occurrence_2",
@@ -203,7 +203,7 @@ func Test_UpdateSavedFilter(t *testing.T) {
 }
 
 func Test_UpdateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilterCreationInput := types.SavedFilterCreationInput{
 			Name:    "new_saved_filter_somatic_snv_occurrence",
@@ -236,7 +236,7 @@ func Test_UpdateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 }
 
 func Test_DeleteSavedFilter(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
 		savedFilterCreationInput := types.SavedFilterCreationInput{
 			Name:    "new_saved_filter_somatic_snv_occurrence",

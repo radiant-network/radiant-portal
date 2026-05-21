@@ -4,7 +4,7 @@ describe('Cases - Batch - Valid', () => {
   let response: any;
 
   before(() => {
-    const Auth = Cypress.env('globalData').Authorization;
+    const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
       "cases": [
         {

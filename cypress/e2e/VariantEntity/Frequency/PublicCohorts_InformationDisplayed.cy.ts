@@ -8,7 +8,7 @@ describe('VariantEntity - Frequency - PublicCohorts - Information displayed', ()
     cy.login();
     cy.visitVariantFrequencyPage(data.variantGermline.locus_id);
   };
-  
+
   it('Cohort', () => {
     setupTest();
     VariantEntity_Frequency.publicCohorts.validations.shouldShowColumnContent('cohort', data.variantGermline.publicCohorts);

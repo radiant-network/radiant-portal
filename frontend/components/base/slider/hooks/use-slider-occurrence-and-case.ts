@@ -5,6 +5,7 @@ import {
   CasePatientClinicalInformation,
   CaseSequencingExperiment,
   ExpandedGermlineSNVOccurrence,
+  ExpandedSomaticSNVOccurrence,
 } from '@/api/api';
 import { PROBAND } from '@/components/base/constants';
 import { caseApi, occurrencesApi } from '@/utils/api';
@@ -20,8 +21,13 @@ export type CaseInput = {
   caseId: number;
 };
 
-export async function fetchOccurrenceExpand(input: OccurrenceExpandInput) {
+export async function fetchGermlineOccurrenceExpand(input: OccurrenceExpandInput) {
   const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(input.caseId, input.seqId, input.locusId);
+  return response.data;
+}
+
+export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput) {
+  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(input.caseId, input.seqId, input.locusId);
   return response.data;
 }
 
@@ -35,9 +41,9 @@ export async function fetchCase(input: CaseInput) {
 }
 
 /**
- * Hook to fetch occurrence and case data for preview sheets
+ * Hook to fetch germline occurrence and case data for preview sheets
  */
-export function useOccurrenceAndCase(
+export function useGermlineOccurrenceAndCase(
   caseId: number,
   seqId: number,
   locusId: string,
@@ -49,7 +55,62 @@ export function useOccurrenceAndCase(
       locusId: locusId,
       seqId: seqId,
     },
-    fetchOccurrenceExpand,
+    fetchGermlineOccurrenceExpand,
+    {
+      shouldRetryOnError: false,
+      revalidateOnFocus: false,
+    },
+  );
+
+  const caseResult = useSWR<CaseEntity | null, any, CaseInput>(
+    {
+      key: 'case-entity',
+      caseId: caseId,
+    },
+    fetchCase,
+    {
+      shouldRetryOnError: false,
+      revalidateOnFocus: false,
+    },
+  );
+
+  let patient: CasePatientClinicalInformation | undefined;
+  let caseSequencing: CaseSequencingExperiment | undefined;
+  if (patientSelected) {
+    patient = caseResult.data?.members.find(member => member.patient_id === patientSelected.patient_id);
+    caseSequencing = caseResult.data?.sequencing_experiments.find(
+      seqExp => seqExp.patient_id === patientSelected.patient_id,
+    );
+  } else {
+    patient = caseResult.data?.members.find(member => member.relationship_to_proband === PROBAND);
+    caseSequencing = caseResult.data?.sequencing_experiments.find(seqExp => seqExp.patient_id === patient?.patient_id);
+  }
+
+  return {
+    expandResult,
+    caseResult,
+    patient,
+    caseSequencing,
+    isLoading: expandResult.isLoading || !expandResult.data || caseResult.isLoading || !caseResult.data,
+  };
+}
+
+/**
+ * Hook to fetch germline occurrence and case data for preview sheets
+ */
+export function useSomaticOccurrenceAndCase(
+  caseId: number,
+  seqId: number,
+  locusId: string,
+  patientSelected?: CaseSequencingExperiment,
+) {
+  const expandResult = useSWR<ExpandedSomaticSNVOccurrence, any, OccurrenceExpandInput>(
+    {
+      caseId: caseId,
+      locusId: locusId,
+      seqId: seqId,
+    },
+    fetchSomaticOccurrenceExpand,
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,
@@ -99,7 +160,7 @@ export function useCase(caseId: number, seqId: number, locusId: string) {
       locusId: locusId,
       seqId: seqId,
     },
-    fetchOccurrenceExpand,
+    fetchGermlineOccurrenceExpand,
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,

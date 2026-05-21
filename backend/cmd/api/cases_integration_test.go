@@ -16,7 +16,7 @@ import (
 )
 
 func assertSearchCasesHandler(t *testing.T, data string, body string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
 		router := gin.Default()
 		router.POST("/cases/search", server.SearchCasesHandler(repo))
@@ -69,7 +69,7 @@ func Test_SearchCasesHandler_WithVariants(t *testing.T) {
 }
 
 func assertCaseIdsAutoComplete(t *testing.T, data string, prefix string, limit int, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
 		router := gin.Default()
 		router.GET("/cases/autocomplete", server.CasesAutocompleteHandler(repo))
@@ -89,7 +89,7 @@ func Test_CaseIdsAutoComplete(t *testing.T) {
 }
 
 func assertGetCasesFilters(t *testing.T, data string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
 		router := gin.Default()
 		router.GET("/cases/filters", server.CasesFiltersHandler(repo))
@@ -158,10 +158,11 @@ func Test_GetCasesFilters(t *testing.T) {
 }
 
 func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
+		igvRepo := repository.NewIGVRepository(db)
 		router := gin.Default()
-		router.GET("/cases/:case_id", server.CaseEntityHandler(repo))
+		router.GET("/cases/:case_id", server.CaseEntityHandler(repo, igvRepo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/cases/%d", caseId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
@@ -234,6 +235,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 		"note": "Administrative comment",
 		"diagnosis_lab_code": "CQGC",
 		"diagnosis_lab_name": "Quebec Clinical Genomic Center",
+		"has_igv_files": true,
 		"panel_code": "EPILEP",
 		"panel_name": "Epilepsy",		
 		"prescriber": "Felix Laflamme",
@@ -261,7 +263,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 }
 
 func assertCaseEntityDocumentsSearchHandler(t *testing.T, data string, caseId int, body string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
 		router.POST("/cases/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repo))
@@ -318,7 +320,7 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 }
 
 func assertCaseEntityDocumentsFiltersHandler(t *testing.T, data string, caseId int, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
 		router.GET("/cases/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repo))

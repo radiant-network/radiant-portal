@@ -6,7 +6,7 @@ describe('Cases - Search - Patient', () => {
   let response: any;
 
   before(() => {
-    const Auth = Cypress.env('globalData').Authorization;
+    const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
       "additional_fields": [
         "case_type"

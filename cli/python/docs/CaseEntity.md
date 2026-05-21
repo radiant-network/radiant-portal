@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **created_on** | **str** |  | 
 **diagnosis_lab_code** | **str** |  | [optional] 
 **diagnosis_lab_name** | **str** |  | [optional] 
+**has_igv_files** | **bool** |  | 
 **members** | [**List[CasePatientClinicalInformation]**](CasePatientClinicalInformation.md) |  | 
 **note** | **str** |  | [optional] 
 **ordering_organization_code** | **str** |  | [optional] 

@@ -5,7 +5,7 @@ describe('Occurrences - Germline - CNV - List - Paging', () => {
   const dataCase = data.case;
 
   it('First 10 items', () => {
-    const Auth = Cypress.env('globalData').Authorization;
+    const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
       "limit": 10,
       "page_index": 0
@@ -18,7 +18,7 @@ describe('Occurrences - Germline - CNV - List - Paging', () => {
   });
 
   it('First 20 items', () => {
-    const Auth = Cypress.env('globalData').Authorization;
+    const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
       "limit": 20,
       "page_index": 0
@@ -31,7 +31,7 @@ describe('Occurrences - Germline - CNV - List - Paging', () => {
   });
 
   it('Second 10 items', () => {
-    const Auth = Cypress.env('globalData').Authorization;
+    const Auth = Cypress.expose('globalData').Authorization;
     const firstBody: string = `{
       "limit": 10,
       "page_index": 0
@@ -42,19 +42,22 @@ describe('Occurrences - Germline - CNV - List - Paging', () => {
     }`;
     let firstItemOfAll: any;
 
-    cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case}/${dataCase.seq.seq_id}/list`, firstBody, Auth.token).then(firstRes => {
-      firstItemOfAll = firstRes.body[0].name;
-    }).then(() => {
-      cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case}/${dataCase.seq.seq_id}/list`, secondBody, Auth.token);
-    }).then((secondRes: any) => {
-      expect(secondRes.status).to.eq(200);
-      cy.validateItemCount(secondRes, 10);
-      expect(secondRes.body[0].name).to.not.eq(firstItemOfAll);
-    });
+    cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case}/${dataCase.seq.seq_id}/list`, firstBody, Auth.token)
+      .then(firstRes => {
+        firstItemOfAll = firstRes.body[0].name;
+      })
+      .then(() => {
+        cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case}/${dataCase.seq.seq_id}/list`, secondBody, Auth.token);
+      })
+      .then((secondRes: any) => {
+        expect(secondRes.status).to.eq(200);
+        cy.validateItemCount(secondRes, 10);
+        expect(secondRes.body[0].name).to.not.eq(firstItemOfAll);
+      });
   });
 
   it('No more items', () => {
-    const Auth = Cypress.env('globalData').Authorization;
+    const Auth = Cypress.expose('globalData').Authorization;
     const body: string = `{
       "limit": 1000000,
       "page_index": 100000000

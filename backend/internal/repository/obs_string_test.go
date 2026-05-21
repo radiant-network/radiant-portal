@@ -32,7 +32,7 @@ func Test_GetObservationStringById_NotFound(t *testing.T) {
 }
 
 func Test_CreateObservationString_OK(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		newObs := &types.ObsString{
 			ID:              9999,
 			CaseID:          1,

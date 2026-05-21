@@ -10,12 +10,14 @@ Name | Type | Description | Notes
 **ad_ratio** | **float** |  | 
 **chromosome** | **str** |  | 
 **clinvar** | **List[str]** |  | [optional] 
+**end** | **int** |  | 
 **exomiser_acmg_classification** | **str** |  | 
 **exomiser_acmg_evidence** | **List[str]** |  | 
 **exomiser_gene_combined_score** | **float** |  | 
 **exomiser_moi** | **str** |  | 
 **exomiser_variant_score** | **float** |  | 
 **filter** | **str** |  | [optional] 
+**flag_type** | [**OccurrenceFlagType**](OccurrenceFlagType.md) |  | [optional] 
 **genotype_quality** | **int** |  | 
 **germline_pc_wgs** | **int** |  | [optional] 
 **germline_pf_wgs** | **float** |  | 

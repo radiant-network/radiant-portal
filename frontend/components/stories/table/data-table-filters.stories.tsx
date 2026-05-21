@@ -10,7 +10,7 @@ import DataTable, { createColumnSettings, TableColumnDef } from '@/components/ba
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 import {
-  caseAutocomplete,
+  caseAutocompleteApi,
   caseFiltersApi,
   caseSearchApi,
   httpCaseAutocompleteResponse,
@@ -26,12 +26,12 @@ const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
   },
-  snv_occurrence: {
-    app_id: ApplicationId.snv_occurrence,
+  germline_snv_occurrence: {
+    app_id: ApplicationId.germline_snv_occurrence,
     aggregations: [] as any,
   },
-  cnv_occurrence: {
-    app_id: ApplicationId.cnv_occurrence,
+  germline_cnv_occurrence: {
+    app_id: ApplicationId.germline_cnv_occurrence,
     aggregations: [] as any,
   },
   admin: {
@@ -165,7 +165,7 @@ export const Default: Story = {
       handlers: [
         http.post(caseSearchApi, httpCaseSearchApiResponse),
         http.post(caseFiltersApi, httpCaseFiltersApiResponse),
-        http.get(caseAutocomplete, httpCaseAutocompleteResponse),
+        http.get(caseAutocompleteApi, httpCaseAutocompleteResponse),
       ],
     },
   },

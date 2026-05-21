@@ -29,7 +29,7 @@ var CasesQueryConfigForTest = types.QueryConfig{
 }
 
 func Test_CreateCases(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		orgId := 1
 		labId := 6
@@ -84,8 +84,22 @@ func Test_GetCaseAnalysisCatalogIdByCode_NotFound(t *testing.T) {
 	})
 }
 
+func Test_GetCaseType(t *testing.T) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewCasesRepository(db)
+
+		caseType, err := repo.GetCaseType(70)
+		assert.NoError(t, err)
+		assert.Equal(t, "germline", caseType)
+
+		caseType, err = repo.GetCaseType(71)
+		assert.NoError(t, err)
+		assert.Equal(t, "somatic", caseType)
+	})
+}
+
 func Test_SearchCasesNoFilters(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, nil, nil, nil)
 		cases, count, err := repo.SearchCases(query)
@@ -115,7 +129,7 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 }
 
 func Test_SearchCasesNoResult(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -132,7 +146,7 @@ func Test_SearchCasesNoResult(t *testing.T) {
 }
 
 func Test_SearchCases(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -149,7 +163,7 @@ func Test_SearchCases(t *testing.T) {
 }
 
 func Test_SearchCases_OnProbandOrganizationID(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -168,7 +182,7 @@ func Test_SearchCases_OnProbandOrganizationID(t *testing.T) {
 }
 
 func Test_SearchCases_OnPatientMRN(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -187,7 +201,7 @@ func Test_SearchCases_OnPatientMRN(t *testing.T) {
 }
 
 func Test_SearchCases_OnProbandID(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -206,7 +220,7 @@ func Test_SearchCases_OnProbandID(t *testing.T) {
 }
 
 func Test_SearchCases_OnPatientID(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -225,7 +239,7 @@ func Test_SearchCases_OnPatientID(t *testing.T) {
 }
 
 func Test_SearchCases_OnSequencingExperimentID(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -243,7 +257,7 @@ func Test_SearchCases_OnSequencingExperimentID(t *testing.T) {
 }
 
 func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -270,7 +284,7 @@ func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
 }
 
 func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -297,7 +311,7 @@ func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
 }
 
 func Test_SearchCases_OnPanelCode(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -313,7 +327,7 @@ func Test_SearchCases_OnPanelCode(t *testing.T) {
 }
 
 func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -340,7 +354,7 @@ func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
 }
 
 func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -367,7 +381,7 @@ func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
 }
 
 func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		searchCriteria := []types.SearchCriterion{
 			{
@@ -394,7 +408,7 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 }
 
 func Test_Cases_SearchById(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		autocompleteResult, err := repo.SearchById("1", 5)
 		assert.NoError(t, err)
@@ -408,7 +422,7 @@ func Test_Cases_SearchById(t *testing.T) {
 }
 
 func Test_SearchById_CaseInsensitive(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		autocompleteResultLower, errLower := repo.SearchById("mrn", 5)
 		autocompleteResultUpper, errUpper := repo.SearchById("MRN", 5)
@@ -424,7 +438,7 @@ func Test_SearchById_CaseInsensitive(t *testing.T) {
 }
 
 func Test_GetCasesFilters(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		filters, err := repo.GetCasesFilters()
 		assert.NoError(t, err)
@@ -443,7 +457,7 @@ func Test_GetCasesFilters(t *testing.T) {
 }
 
 func Test_GetCaseEntity(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		caseEntity, err := repo.GetCaseEntity(1)
 		assert.NoError(t, err)
@@ -456,7 +470,7 @@ func Test_GetCaseEntity(t *testing.T) {
 }
 
 func Test_RetrieveCaseLevelData(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		caseEntity, err := repo.retrieveCaseLevelData(1)
 		assert.NoError(t, err)
@@ -487,7 +501,7 @@ func Test_RetrieveCaseLevelData(t *testing.T) {
 }
 
 func Test_RetrieveCaseSequencingExperiments_Germline(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(1)
 		assert.NoError(t, err)
@@ -528,7 +542,7 @@ func Test_RetrieveCaseSequencingExperiments_Germline(t *testing.T) {
 }
 
 func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(71)
 		assert.NoError(t, err)
@@ -555,7 +569,7 @@ func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
 }
 
 func Test_RetrieveCasePatients(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		members, err := repo.retrieveCasePatients(1)
 		assert.NoError(t, err)
@@ -617,7 +631,7 @@ func Test_RetrieveCasePatients(t *testing.T) {
 }
 
 func Test_RetrieveCaseTasks(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		tasks, err := repo.retrieveCaseTasks(1)
 		assert.NoError(t, err)
@@ -641,11 +655,11 @@ func Test_RetrieveCaseTasks(t *testing.T) {
 }
 
 func Test_RetrieveCaseTasks_DeduplicatePatients(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		tasks, err := repo.retrieveCaseTasks(71)
 		assert.NoError(t, err)
-		assert.Equal(t, 1, len(*tasks))
+		assert.Equal(t, 3, len(*tasks))
 
 		assert.Equal(t, 74, (*tasks)[0].ID)
 		assert.Equal(t, "radiant_somatic_annotation", (*tasks)[0].TypeCode)
@@ -655,7 +669,7 @@ func Test_RetrieveCaseTasks_DeduplicatePatients(t *testing.T) {
 }
 
 func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 
 		diagLab := 6
@@ -690,7 +704,7 @@ func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
 }
 
 func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 
 		diagLab := 6

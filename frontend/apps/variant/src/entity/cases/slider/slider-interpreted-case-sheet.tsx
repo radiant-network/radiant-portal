@@ -5,15 +5,16 @@ import { VariantInterpretedCase } from '@/api/api';
 import Empty from '@/components/base/empty';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
+import GermlineSliderInterpretationDetailsCard from '@/components/base/slider/germline-slider-interpretation-details-card';
 import { useCase } from '@/components/base/slider/hooks/use-slider-occurrence-and-case';
 import SliderCaseDetailsCard from '@/components/base/slider/slider-case-details-card';
 import SliderHeader from '@/components/base/slider/slider-header';
-import SliderInterpretationDetailsCard from '@/components/base/slider/slider-interpretation-details-card';
 import OccurrenceSheetDetailsCard from '@/components/base/slider/slider-occurrence-details-card';
 import SliderOccurrenceSubHeader from '@/components/base/slider/slider-occurrence-sub-header';
 import SliderPatientRow from '@/components/base/slider/slider-patient-row';
 import SliderSheet from '@/components/base/slider/slider-sheet';
 import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
+import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 
 type CaseSliderSheetProps = {
@@ -87,13 +88,17 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
       </SliderHeader>
       <Separator />
       <SliderOccurrenceSubHeader
+        type="germline"
         hgvsg={expandResult.data.hgvsg}
         locusId={expandResult.data.locus_id}
         actions={
           <Button
             variant="outline"
             onClick={() => {
-              window.open(`/case/entity/${caseResult.data?.case_id}?tab=variants&seq_id=${caseData.seq_id}`, '_blank');
+              window.open(
+                `/case/entity/${caseResult.data?.case_id}?tab=${CaseEntityTabs.Variants}&seq_id=${caseData.seq_id}`,
+                '_blank',
+              );
             }}
             size="sm"
           >
@@ -102,7 +107,7 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
           </Button>
         }
       />
-      <SliderInterpretationDetailsCard
+      <GermlineSliderInterpretationDetailsCard
         seqId={caseData.seq_id}
         caseId={caseData.case_id}
         symbol={expandResult.data.symbol}

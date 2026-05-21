@@ -13,6 +13,7 @@ import SliderOccurrenceSubHeader from '@/components/base/slider/slider-occurrenc
 import SliderPatientRow from '@/components/base/slider/slider-patient-row';
 import SliderSheet from '@/components/base/slider/slider-sheet';
 import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
+import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 
 type CaseSliderSheetProps = {
@@ -86,13 +87,17 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
       </SliderHeader>
       <Separator />
       <SliderOccurrenceSubHeader
+        type={caseResult.data.case_type}
         hgvsg={expandResult.data.hgvsg}
         locusId={expandResult.data.locus_id}
         actions={
           <Button
             variant="outline"
             onClick={() => {
-              window.open(`/case/entity/${caseResult.data?.case_id}?tab=variants&seq_id=${caseData.seq_id}`, '_blank');
+              window.open(
+                `/case/entity/${caseResult.data?.case_id}?tab=${CaseEntityTabs.Variants}&seq_id=${caseData.seq_id}`,
+                '_blank',
+              );
             }}
             size="sm"
           >

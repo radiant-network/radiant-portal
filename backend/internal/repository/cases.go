@@ -32,6 +32,7 @@ type CasesDAO interface {
 	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
 	GetCasesFilters() (*CaseFilters, error)
 	GetCaseEntity(caseId int) (*CaseEntity, error)
+	GetCaseType(caseID int) (string, error)
 	CreateCase(*Case) error
 	CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error
 	GetCaseAnalysisCatalogIdByCode(code string) (*AnalysisCatalog, error)
@@ -66,6 +67,17 @@ func (r *CasesRepository) GetCaseAnalysisCatalogIdByCode(code string) (*Analysis
 	return &analysisCatalog, nil
 }
 
+// GetCaseType returns the case_type_code (e.g., "germline" or "somatic") for a
+// case. Used by handlers that need to dispatch to type-specific logic without
+// duplicating the lookup.
+func (r *CasesRepository) GetCaseType(caseID int) (string, error) {
+	var caseType string
+	tx := r.db.Table(types.CaseTable.FederationName)
+	tx = tx.Select("case_type_code").Where("id = ?", caseID)
+	err := tx.Scan(&caseType).Error
+	return caseType, err
+}
+
 func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult, *int64, error) {
 	var cases []CaseResult
 	var count int64
@@ -87,7 +99,7 @@ func (r *CasesRepository) SearchCases(userQuery types.ListQuery) (*[]CaseResult,
 	txStg := r.db.Table(fmt.Sprintf("%s chse", types.CaseHasSequencingExperimentTable.FederationName))
 	txStg = txStg.Select("DISTINCT(chse.case_id)")
 	txStg = txStg.Where("se.ingested_at IS NOT NULL AND (se.task_type = 'radiant_germline_annotation' OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral'))")
-	txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.Name))
+	txStg = txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.Name))
 
 	txMembersCount := r.db.Table(types.FamilyTable.FederationName).Select("case_id, count(distinct family_member_id) as distinct_members_count").Group("case_id")
 
@@ -376,7 +388,7 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 	tx = utils.JoinTaskContextWithSeqExp(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
 	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
-	tx = tx.Where("(tctx.case_id = ? OR tctx.case_id IS NULL) AND chseq.case_id = ?", caseId, caseId)
+	tx = tx.Where("chseq.case_id = ?", caseId)
 	tx = tx.Select("task.id, task.task_type_code as type_code, task.created_on, task_type.name_en as type_name, group_concat(f.relationship_to_proband_code) as patients_unparsed, count(distinct spl.patient_id) as patient_count")
 	tx = tx.Group("task.id, task.task_type_code, task.created_on, task_type.name_en")
 	tx = tx.Order("task.id asc")

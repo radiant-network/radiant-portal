@@ -10,7 +10,7 @@ import (
 )
 
 func Test_CreateOccurrenceNote(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 		note := types.OccurrenceNote{
 			CaseID:       2,
@@ -41,7 +41,7 @@ func Test_CreateOccurrenceNote(t *testing.T) {
 }
 
 func Test_GetByOccurrence(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 
 		note1 := types.OccurrenceNote{
@@ -79,7 +79,7 @@ func Test_GetByOccurrence(t *testing.T) {
 }
 
 func Test_GetByOccurrence_EmptyResult(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 
 		notes, err := repo.GetByOccurrence(1, 1, 1, "99999")
@@ -90,7 +90,7 @@ func Test_GetByOccurrence_EmptyResult(t *testing.T) {
 }
 
 func Test_GetByID(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 		note := types.OccurrenceNote{
 			CaseID:       2,
@@ -115,7 +115,7 @@ func Test_GetByID(t *testing.T) {
 }
 
 func Test_GetByID_NotFound(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 
 		found, err := repo.GetByID("00000000-0000-0000-0000-000000000000")
@@ -126,7 +126,7 @@ func Test_GetByID_NotFound(t *testing.T) {
 }
 
 func Test_UpdateOccurrenceNote(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 		note := types.OccurrenceNote{
 			CaseID:       2,
@@ -152,7 +152,7 @@ func Test_UpdateOccurrenceNote(t *testing.T) {
 }
 
 func Test_DeleteOccurrenceNote(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 		note := types.OccurrenceNote{
 			CaseID:       2,
@@ -176,7 +176,7 @@ func Test_DeleteOccurrenceNote(t *testing.T) {
 }
 
 func Test_CountByOccurrence(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 
 		_, err := repo.Create(types.OccurrenceNote{CaseID: 2, SeqID: 1, TaskID: 1, OccurrenceID: "10000", UserID: "11111111-1111-1111-1111-111111111111", UserName: "John Doe", Content: "Note 1"})
@@ -192,7 +192,7 @@ func Test_CountByOccurrence(t *testing.T) {
 }
 
 func Test_CountByOccurrence_IgnoresDeletedNotes(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 
 		created, err := repo.Create(types.OccurrenceNote{CaseID: 2, SeqID: 1, TaskID: 1, OccurrenceID: "10000", UserID: "11111111-1111-1111-1111-111111111111", UserName: "John Doe", Content: "Deleted note"})
@@ -207,7 +207,7 @@ func Test_CountByOccurrence_IgnoresDeletedNotes(t *testing.T) {
 }
 
 func Test_GetByOccurrence_IgnoresDeletedNotes(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewOccurrenceNotesRepository(db)
 
 		note := types.OccurrenceNote{

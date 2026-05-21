@@ -25,6 +25,7 @@ from radiant_python.models.cnv_gene_overlap import CNVGeneOverlap
 from radiant_python.models.count import Count
 from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
 from radiant_python.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
+from radiant_python.models.expanded_somatic_snv_occurrence import ExpandedSomaticSNVOccurrence
 from radiant_python.models.facet import Facet
 from radiant_python.models.germline_cnv_occurrence import GermlineCNVOccurrence
 from radiant_python.models.germline_snv_occurrence import GermlineSNVOccurrence
@@ -2245,6 +2246,303 @@ class OccurrencesApi:
         return self.api_client.param_serialize(
             method='GET',
             resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{locus_id}/expanded',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def get_expanded_somatic_snv_occurrence(
+        self,
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        locus_id: Annotated[StrictStr, Field(description="Locus ID")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ExpandedSomaticSNVOccurrence:
+        """Get a somatic ExpandedSomaticSNVOccurrence
+
+        Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+
+        :param case_id: Case ID (required)
+        :type case_id: int
+        :param seq_id: Sequence ID (required)
+        :type seq_id: int
+        :param locus_id: Locus ID (required)
+        :type locus_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_expanded_somatic_snv_occurrence_serialize(
+            case_id=case_id,
+            seq_id=seq_id,
+            locus_id=locus_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ExpandedSomaticSNVOccurrence",
+            '404': "ApiError",
+            '500': "ApiError",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def get_expanded_somatic_snv_occurrence_with_http_info(
+        self,
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        locus_id: Annotated[StrictStr, Field(description="Locus ID")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[ExpandedSomaticSNVOccurrence]:
+        """Get a somatic ExpandedSomaticSNVOccurrence
+
+        Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+
+        :param case_id: Case ID (required)
+        :type case_id: int
+        :param seq_id: Sequence ID (required)
+        :type seq_id: int
+        :param locus_id: Locus ID (required)
+        :type locus_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_expanded_somatic_snv_occurrence_serialize(
+            case_id=case_id,
+            seq_id=seq_id,
+            locus_id=locus_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ExpandedSomaticSNVOccurrence",
+            '404': "ApiError",
+            '500': "ApiError",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def get_expanded_somatic_snv_occurrence_without_preload_content(
+        self,
+        case_id: Annotated[StrictInt, Field(description="Case ID")],
+        seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        locus_id: Annotated[StrictStr, Field(description="Locus ID")],
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Get a somatic ExpandedSomaticSNVOccurrence
+
+        Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+
+        :param case_id: Case ID (required)
+        :type case_id: int
+        :param seq_id: Sequence ID (required)
+        :type seq_id: int
+        :param locus_id: Locus ID (required)
+        :type locus_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_expanded_somatic_snv_occurrence_serialize(
+            case_id=case_id,
+            seq_id=seq_id,
+            locus_id=locus_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ExpandedSomaticSNVOccurrence",
+            '404': "ApiError",
+            '500': "ApiError",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _get_expanded_somatic_snv_occurrence_serialize(
+        self,
+        case_id,
+        seq_id,
+        locus_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if case_id is not None:
+            _path_params['case_id'] = case_id
+        if seq_id is not None:
+            _path_params['seq_id'] = seq_id
+        if locus_id is not None:
+            _path_params['locus_id'] = locus_id
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearerauth'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{locus_id}/expanded',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

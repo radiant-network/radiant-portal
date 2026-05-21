@@ -2,6 +2,7 @@ import { TFunction } from 'i18next';
 
 import { Transcript } from '@/api/api';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
+import EmptyField from '@/components/base/information/empty-field';
 import ExpandableList from '@/components/base/list/expandable-list';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
@@ -26,7 +27,9 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
           />
         )}
         <div className="flex flex-col gap-2 text-muted-foreground text-xs font-mono">
-          <span>Exon: {data.exon_rank && data.exon_total ? `${data.exon_rank} / ${data.exon_total}` : '-'}</span>
+          <span>
+            Exon: {data.exon_rank && data.exon_total ? `${data.exon_rank} / ${data.exon_total}` : <EmptyField />}
+          </span>
           {data.dna_change && <span>{data.dna_change}</span>}
           <div>
             <Tooltip>
@@ -57,7 +60,7 @@ function TranscriptDetails({ data }: TranscriptDetailsProps) {
             {data.phyloP17way_primate}
           </>
         ) : (
-          '-'
+          <EmptyField />
         )}
       </div>
     </div>
@@ -70,7 +73,7 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
 
   // sift
   if (data.sift_pred && data.sift_score !== undefined) {
-    const siftPref = t(`common.filters.values.sift_pred.${data.sift_pred}`);
+    const siftPref = t(`common.filters.values.sift_pred.${data.sift_pred.toLowerCase()}`);
     predictions.push({
       key: 'sift',
       label: t('variant.predictions.sift'),
@@ -85,7 +88,7 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
 
   // fathmm
   if (data.fathmm_pred && data.fathmm_score !== undefined) {
-    const fatmmPref = t(`common.filters.values.fathmm_pred.${data.fathmm_pred}`);
+    const fatmmPref = t(`common.filters.values.fathmm_pred.${data.fathmm_pred.toLowerCase()}`);
     predictions.push({
       key: 'fathmm',
       label: t('variant.predictions.fathmm'),
@@ -142,7 +145,7 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
 
   // lrt
   if (data?.lrt_pred && data.lrt_score !== undefined) {
-    const lrtPred = t(`common.filters.values.lrt_pred.${data.lrt_pred}`);
+    const lrtPred = t(`common.filters.values.lrt_pred.${data.lrt_pred.toLowerCase()}`);
     predictions.push({
       key: 'lrt',
       label: t('variant.predictions.lrt'),
@@ -171,7 +174,7 @@ const getPredictionList = (data: Transcript, t: TFunction<string, undefined>) =>
 
   // polyphen2_hvar
   if (data.polyphen2_hvar_pred && data.polyphen2_hvar_score !== undefined) {
-    const hvarPred = t(`common.filters.values.polyphen2_hvar_pred.${data.polyphen2_hvar_pred}`);
+    const hvarPred = t(`common.filters.values.polyphen2_hvar_pred.${data.polyphen2_hvar_pred.toLowerCase()}`);
     predictions.push({
       key: 'polyphen2_hvar',
       label: t('variant.predictions.polyphen2hvar'),

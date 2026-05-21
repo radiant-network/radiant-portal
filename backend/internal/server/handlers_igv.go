@@ -1,11 +1,13 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
@@ -21,7 +23,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /igv/{case_id} [get]
-func GetIGVHandler(repo repository.IGVRepositoryDAO, presigner utils.PreSigner) gin.HandlerFunc {
+func GetIGVHandler(igvRepo repository.IGVRepositoryDAO, casesRepo repository.CasesDAO, presigner utils.PreSigner) gin.HandlerFunc {
 	if presigner == nil {
 		presigner = utils.NewS3PreSigner()
 	}
@@ -32,7 +34,14 @@ func GetIGVHandler(repo repository.IGVRepositoryDAO, presigner utils.PreSigner) 
 			HandleError(c, err)
 			return
 		}
-		internalIgvTracks, err := repo.GetIGV(caseID)
+
+		caseType, err := casesRepo.GetCaseType(caseID)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		internalIgvTracks, err := igvRepo.GetIGV(caseID)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -43,7 +52,16 @@ func GetIGVHandler(repo repository.IGVRepositoryDAO, presigner utils.PreSigner) 
 			return
 		}
 
-		igvEnrichedTracks, err := repository.PrepareIgvTracks(internalIgvTracks, presigner)
+		var igvEnrichedTracks *types.IGVTracks
+		switch caseType {
+		case "germline":
+			igvEnrichedTracks, err = repository.PrepareGermlineIgvTracks(internalIgvTracks, presigner)
+		case "somatic":
+			igvEnrichedTracks, err = repository.PrepareSomaticIgvTracks(internalIgvTracks, presigner)
+		default:
+			HandleError(c, fmt.Errorf("unsupported case type: %s", caseType))
+			return
+		}
 		if err != nil {
 			HandleError(c, err)
 			return

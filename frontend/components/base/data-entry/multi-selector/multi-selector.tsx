@@ -25,7 +25,6 @@ function MultiSelector({
   emptyIndicator,
   maxSelected = Number.MAX_SAFE_INTEGER,
   onMaxSelected,
-  hidePlaceholderWhenSelected,
   disabled,
   groupBy,
   className,
@@ -411,13 +410,12 @@ function MultiSelector({
               }
               inputProps?.onFocus?.(event);
             }}
-            placeholder={hidePlaceholderWhenSelected && selected.length !== 0 ? '' : placeholder}
+            placeholder={selected.length !== 0 ? '' : placeholder}
             className={cn(
-              'flex-1 bg-transparent outline-none placeholder:text-muted-foreground',
+              'flex-1 bg-transparent w-full outline-none placeholder:text-muted-foreground',
               {
-                'w-full': hidePlaceholderWhenSelected,
                 'px-3 py-2': selected.length === 0,
-                'ml-1': selected.length !== 0,
+                'ml-1 w-full': selected.length !== 0,
               },
               inputProps?.className,
             )}

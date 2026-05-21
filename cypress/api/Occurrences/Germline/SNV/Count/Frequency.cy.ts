@@ -9,7 +9,7 @@ describe('Occurrences - Germline - SNV - Count - Frequency', () => {
   let globalData: any;
 
   before(() => {
-    globalData = Cypress.env('globalData');
+    globalData = Cypress.expose('globalData');
     Auth = globalData.Authorization;
     case_id = globalData.Count.case_id;
     seq_id = globalData.Count.seq_id;
@@ -37,7 +37,11 @@ describe('Occurrences - Germline - SNV - Count - Frequency', () => {
         cy.apiCall('POST', `occurrences/germline/snv/${case_id}/${seq_id}/count`, body, Auth.token).then(res => {
           response = res;
           expect(response.status).to.eq(200);
-          expect(response.body.count).to.eq(facetData.count);
+          if (facetData.count instanceof RegExp) {
+            expect(response.body.count.toString()).to.match(facetData.count);
+          } else {
+            expect(response.body.count).to.eq(facetData.count);
+          }
         });
       });
     });

@@ -62,3 +62,6 @@ openapitools.json
 
 .nvmrc
 node_modules
+
+# Manual smoke-tests
+cli/python/test_sandbox/*

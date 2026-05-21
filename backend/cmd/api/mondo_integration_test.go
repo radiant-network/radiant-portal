@@ -16,7 +16,7 @@ import (
 )
 
 func assertMondoTermAutoComplete(t *testing.T, data string, prefix string, expected string) {
-	testutils.ParallelTestWithDb(t, data, func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewTermsRepository(db)
 		router := gin.Default()
 		router.GET("/mondo/autocomplete", server.GetMondoTermAutoComplete(repo))

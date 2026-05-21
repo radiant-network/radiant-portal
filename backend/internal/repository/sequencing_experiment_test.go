@@ -10,7 +10,7 @@ import (
 )
 
 func Test_GetSequencingExperimentDetailById(t *testing.T) {
-	testutils.ParallelTestWithDb(t, "simple", func(t *testing.T, db *gorm.DB) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewSequencingExperimentRepository(db)
 		sequencingExperiment, err := repo.GetSequencingExperimentDetailById(1)
 		assert.NoError(t, err)

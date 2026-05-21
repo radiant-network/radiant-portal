@@ -13,7 +13,7 @@ type OmimCellProps = {
  */
 function OmimCell({ codes = [] }: OmimCellProps) {
   const { t } = useI18n();
-  if (codes.length === 0) return <EmptyCell />;
+  if (codes === null || codes.length === 0) return <EmptyCell />;
 
   return (
     <>

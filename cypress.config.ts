@@ -32,16 +32,18 @@ export default defineConfig({
   screenshotOnRunFailure: true,
   viewportWidth: 1920,
   viewportHeight: 1080,
-  experimentalStudio: true,
   experimentalWebKitSupport: false,
-  env: {
-    user_username: process.env.CYPRESS_USER_USERNAME,
-    user_password: process.env.CYPRESS_USER_PASSWORD,
+  allowCypressEnv: false,
+  expose: {
     keycloak_host: "https://auth.qa.juno.cqdg.ferlab.bio",
     keycloak_realm: "CQDG",
     keycloak_client: "cqdg-client",
     api_client: 'radiant',
     api_base_url: "https://radiant-api.qa.juno.cqdg.ferlab.bio/",
+  },
+  env: {
+    user_username: process.env.CYPRESS_USER_USERNAME,
+    user_password: process.env.CYPRESS_USER_PASSWORD,
   },
 
   e2e: {
@@ -86,7 +88,7 @@ export default defineConfig({
     runMode: 2,
     openMode: 0,
   },
-  reporter: "junit",
+  reporter: "mocha-junit-reporter",
   reporterOptions: {
     mochaFile:
       "cypress/results/" +

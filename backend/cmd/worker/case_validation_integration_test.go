@@ -851,6 +851,16 @@ func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
 				Message: "Missing output documents for case 0 - task 5 of type alignment_germline_variant_calling.",
 				Path:    "case[0].tasks[5]",
 			},
+			{
+				Code:    "TASK-007",
+				Message: "Task type alignment_somatic_variant_calling doesn't support being associated with more than 1 aliquot value.",
+				Path:    "case[0].tasks[6]",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 6 of type alignment_somatic_variant_calling.",
+				Path:    "case[0].tasks[6]",
+			},
 		}
 		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
 	})
@@ -1097,7 +1107,7 @@ func Test_ProcessBatch_Case_Exomiser_TaskContext(t *testing.T) {
 }
 
 func Test_ProcessBatch_Case_Template(t *testing.T) {
-	testutils.SequentialPostgresTestWithDb(t, func(t *testing.T, db *gorm.DB) {
+	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		t.Skip("Template test - implement specific error case tests as needed")
 
 		//// FIXME: The following test is for example purposes only.

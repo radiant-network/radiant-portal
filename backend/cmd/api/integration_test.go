@@ -17,7 +17,7 @@ import (
 )
 
 func Test_SecureRoutes(t *testing.T) {
-	testutils.ParallelTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
+	testutils.ParallelTestWithReadOnlyPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 
 		os.Setenv("CORS_ALLOWED_ORIGINS", "*")
 		defer os.Unsetenv("CORS_ALLOWED_ORIGINS")
@@ -59,6 +59,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"interpretations/somatic/1/1/1",
 			"mondo/autocomplete",
 			"occurrences/germline/snv/1/1/1/expanded",
+			"occurrences/somatic/snv/1/1/1/expanded",
 			"sequencing/1",
 			"users/preferences/table_1",
 			"users/sets/1",
@@ -72,6 +73,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"variants/germline/1/external_frequencies",
 			"variants/germline/1/internal_frequencies",
 			"notes/1/1/1/10000",
+			"cases/1/1/tasks_with_occurrences?data_type=germline_snv",
 		} {
 			resp, err = http.Get(fmt.Sprintf("http://localhost:%d/%s", randomPort, route))
 			assert.NoError(t, err)
@@ -93,6 +95,7 @@ func Test_SecureRoutes(t *testing.T) {
 			"occurrences/somatic/snv/1/1/aggregate",
 			"occurrences/somatic/snv/1/1/statistics",
 			"occurrences/germline/cnv/1/1/list",
+			"occurrences/flags/1/1/1/10000",
 			"users/preferences/table_1",
 			"variants/germline/1/cases/interpreted",
 			"variants/germline/1/cases/uninterpreted",
@@ -102,11 +105,22 @@ func Test_SecureRoutes(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, 401, resp.StatusCode)
 		}
+
+		// DELETE requests
+		for _, route := range []string{
+			"occurrences/flags/1/1/1/10000",
+		} {
+			req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://localhost:%d/%s", randomPort, route), nil)
+			assert.NoError(t, err)
+			resp, err = http.DefaultClient.Do(req)
+			assert.NoError(t, err)
+			assert.Equal(t, 401, resp.StatusCode)
+		}
 	})
 }
 
 func Test_OpenFGA_Authorization(t *testing.T) {
-	testutils.ParallelTestWithOpenFGAAndPostgresAndStarrocks(t, "simple",
+	testutils.SequentialTestWithOpenFGAAndPostgresAndStarrocks(t, "simple",
 		func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB) {
 			token, err := jwt.GenerateMockJWT("radiant", []string{"data_manager"})
 			assert.NoError(t, err)
@@ -145,11 +159,13 @@ func Test_OpenFGA_Authorization(t *testing.T) {
 				{"interpretations/pubmed/1", 500},
 				{"mondo/autocomplete", 200},
 				{"occurrences/germline/snv/1/1/1000/expanded", 200},
+				{"occurrences/somatic/snv/71/74/1000/expanded", 200},
 				{"sequencing/1", 200},
 				{"users/sets/1", 500},
 				{"variants/germline/1000/header", 200},
 				{"variants/germline/1000/external_frequencies", 200},
 				{"variants/germline/1000/internal_frequencies?split=project", 200},
+				{"cases/1/1/tasks_with_occurrences?data_type=germline_snv", 200},
 			}
 
 			for _, tc := range getTests {
@@ -171,6 +187,7 @@ func Test_OpenFGA_Authorization(t *testing.T) {
 			}{
 				{"cases/search", 400},
 				{"interpretations/germline/1/1000/T001", 400},
+				{"occurrences/flags/1/1/1/10000", 400},
 				{"occurrences/germline/snv/1/1/count", 400},
 				{"occurrences/somatic/snv/1/1/count", 400},
 				{"variants/germline/1000/cases/interpreted", 400},
@@ -179,6 +196,26 @@ func Test_OpenFGA_Authorization(t *testing.T) {
 			for _, tc := range postTests {
 				t.Run("POST_"+tc.route, func(t *testing.T) {
 					req, err := http.NewRequest(http.MethodPost, server.URL+"/"+tc.route, nil)
+					assert.NoError(t, err)
+					req.Header.Set("Authorization", "Bearer "+token)
+
+					res, err := client.Do(req)
+					assert.NoError(t, err)
+					defer res.Body.Close()
+					assert.Equal(t, tc.code, res.StatusCode)
+				})
+			}
+
+			deleteTests := []struct {
+				route string
+				code  int
+			}{
+				{"occurrences/flags/1/1/1/90130", 404},
+			}
+
+			for _, tc := range deleteTests {
+				t.Run("DELETE_"+tc.route, func(t *testing.T) {
+					req, err := http.NewRequest(http.MethodDelete, server.URL+"/"+tc.route, nil)
 					assert.NoError(t, err)
 					req.Header.Set("Authorization", "Bearer "+token)
 

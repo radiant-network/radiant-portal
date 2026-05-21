@@ -273,7 +273,7 @@ func GetInterpretationSomaticDeprecated(repo repository.InterpretationsDAO) gin.
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
-func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
+func GetInterpretationSomatic(repo repository.InterpretationsDAO, termsRepo repository.TermsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
 		interpretation, err := repo.FirstSomatic(caseId, sequencingId, locusId, transcriptId)
@@ -285,6 +285,16 @@ func GetInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFun
 			HandleNotFoundError(c, "interpretation")
 			return
 		}
+
+		conditionName, err := termsRepo.GetTermNameById(types.MondoTable.Name, interpretation.TumoralType)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if conditionName != nil {
+			interpretation.TumoralName = *conditionName
+		}
+
 		c.JSON(getInterpretationStatus(&interpretation.InterpretationCommon), interpretation)
 	}
 }

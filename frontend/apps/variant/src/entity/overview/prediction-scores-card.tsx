@@ -38,7 +38,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   // sift
   if (data.sift_pred && data.sift_score !== undefined) {
-    const siftPref = t(`common.filters.values.sift_pred.${data.sift_pred}`);
+    const siftPref = t(`common.filters.values.sift_pred.${data.sift_pred.toLowerCase()}`);
     predictions.push({
       key: 'sift',
       label: t('variant.predictions.sift'),
@@ -92,7 +92,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   // fathmm
   if (data.fathmm_pred && data.fathmm_score !== undefined) {
-    const fatmmPref = t(`common.filters.values.fathmm_pred.${data.fathmm_pred}`);
+    const fatmmPref = t(`common.filters.values.fathmm_pred.${data.fathmm_pred.toLowerCase()}`);
     predictions.push({
       key: 'fathmm',
       label: t('variant.predictions.fathmm'),
@@ -149,7 +149,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   // lrt
   if (data?.lrt_pred && data.lrt_score !== undefined) {
-    const lrtPred = t(`common.filters.values.lrt_pred.${data.lrt_pred}`);
+    const lrtPred = t(`common.filters.values.lrt_pred.${data.lrt_pred.toLowerCase()}`);
     predictions.push({
       key: 'lrt',
       label: t('variant.predictions.lrt'),
@@ -164,7 +164,7 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   // polyphen2_hvar
   if (data.polyphen2_hvar_pred && data.polyphen2_hvar_score !== undefined) {
-    const hvarPred = t(`common.filters.values.polyphen2_hvar_pred.${data.polyphen2_hvar_pred}`);
+    const hvarPred = t(`common.filters.values.polyphen2_hvar_pred.${data.polyphen2_hvar_pred.toLowerCase()}`);
     predictions.push({
       key: 'polyphen2_hvar',
       label: t('variant.predictions.polyphen2hvar'),
@@ -207,13 +207,13 @@ const getPredictionList = (data: VariantOverview, t: TFunction<string, undefined
 
   return [
     ...predictions.map(({ key, label, value }) => (
-      <div key={`psl-${key}`} className="flex items-center justify-between">
+      <div key={`psl-${key}`} data-cy={key.replace(/_/g, '-')} className="flex items-center justify-between">
         <span className="text-muted-foreground">{label}:</span>
         <span>{value}</span>
       </div>
     )),
     ...empties.map(({ key, label }) => (
-      <div key={`psl-${key}`} className="flex items-center justify-between">
+      <div key={`psl-${key}`} data-cy={`${key.replace(/_/g, '-')}-empty`} className="flex items-center justify-between">
         <span className="text-muted-foreground">{label}:</span>-
       </div>
     )),
@@ -253,11 +253,11 @@ function PredictionScoresCard({ data, ...props }: { data: VariantOverview } & Ca
           {hasAnyPredictionScores && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="xs">
+                <Button data-cy="view-all" variant="outline" size="xs">
                   {t('common.view_all')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent data-cy="prediction-scores-dialog" className="sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle>{t('variant_entity.overview.prediction_scores')}</DialogTitle>
                 </DialogHeader>

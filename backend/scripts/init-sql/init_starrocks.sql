@@ -469,8 +469,8 @@ VALUES
     (1, 1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
     (2, 1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
     (19, 19, 7,'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
-    (73, 74, 71,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'normal'),
-    (74, 74, 71,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'tumoral');
+    (62, 74, 22,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'tumoral'),
+    (63, 74, 22,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'normal');
 
 INSERT INTO omim_gene_panel (symbol, panel, omim_gene_id, omim_phenotype_id, inheritance_code, inheritance)
 VALUES
@@ -548,11 +548,11 @@ INSERT INTO test_db.somatic__snv__occurrence (
     info_hotspotallele,tumor_ad_ratio
 )
 VALUES
-    (1, 74, 74, 1000, 73, 31.63, 'None', 'T', 0.41),
-    (1, 74, 74, 1001, 73, 43.43, 'PASS', 'F', 0.09),
-    (1, 74, 74, 1002, 73, 99.82, 'LowQual', 'T', 0.67),
-    (1, 74, 74, 2000, 73, 55.61, 'None', 'F', 0.72),
-    (1, 74, 74, 2001, 73, 41.56, 'LowQual', 'T', 0.65);
+    (1, 74, 62, 1000, 63, 31.63, 'None', 'T', 0.41),
+    (1, 74, 62, 1001, 63, 43.43, 'PASS', 'F', 0.09),
+    (1, 74, 62, 1002, 63, 99.82, 'LowQual', 'T', 0.67),
+    (1, 74, 62, 2000, 63, 55.61, 'None', 'F', 0.72),
+    (1, 74, 62, 2001, 63, 41.56, 'LowQual', 'T', 0.65);
 
 
 CREATE TABLE IF NOT EXISTS `ensembl_gene` (

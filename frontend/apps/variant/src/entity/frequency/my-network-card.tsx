@@ -77,7 +77,7 @@ function MyNetworkCard() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="sm:gap-x-20">
         <CardTitle>{t('variant_entity.frequency.my_network.title')}</CardTitle>
         <CardDescription>{t('variant_entity.frequency.my_network.description')}</CardDescription>
         {!isGlobalLoading && (
@@ -93,7 +93,7 @@ function MyNetworkCard() {
                   {t('variant_entity.frequency.my_network.global_frequencies.all_patients_tooltip')}
                 </TooltipContent>
               </Tooltip>
-              <span>
+              <span className="font-mono">
                 {globalFrequencies?.pc_all}/{globalFrequencies?.pn_all}
                 {` (${toPercentage(globalFrequencies?.pf_all, 0)})`}
               </span>
@@ -109,7 +109,7 @@ function MyNetworkCard() {
                   {t('variant_entity.frequency.my_network.global_frequencies.affected_tooltip')}
                 </TooltipContent>
               </Tooltip>
-              <span>
+              <span className="font-mono">
                 {globalFrequencies?.pc_affected}/{globalFrequencies?.pn_affected}
                 {` (${toPercentage(globalFrequencies?.pf_affected, 0)})`}
               </span>
@@ -125,7 +125,7 @@ function MyNetworkCard() {
                   {t('variant_entity.frequency.my_network.global_frequencies.non_affected_tooltip')}
                 </TooltipContent>
               </Tooltip>
-              <span>
+              <span className="font-mono">
                 {globalFrequencies?.pc_non_affected}/{globalFrequencies?.pn_non_affected}
                 {` (${toPercentage(globalFrequencies?.pf_non_affected, 0)})`}
               </span>

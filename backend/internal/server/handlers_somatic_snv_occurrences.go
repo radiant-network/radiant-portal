@@ -262,3 +262,58 @@ func OccurrencesSomaticSNVStatisticsHandler(repo repository.SomaticSNVOccurrence
 		c.JSON(http.StatusOK, statistics)
 	}
 }
+
+// GetExpandedSomaticSNVOccurrence handles retrieving expanded information about somatic SNV occurrence
+// @Summary Get a somatic ExpandedSomaticSNVOccurrence
+// @Id getExpandedSomaticSNVOccurrence
+// @Description Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+// @Tags occurrences
+// @Security bearerauth
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequence ID"
+// @Param locus_id path string true "Locus ID"
+// @Produce json
+// @Success 200 {object} types.ExpandedSomaticSNVOccurrence
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{locus_id}/expanded [get]
+func GetExpandedSomaticSNVOccurrence(repo repository.SomaticSNVOccurrencesDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseId, errSeq := strconv.Atoi(c.Param("case_id"))
+		if errSeq != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		seqId, errSeq := strconv.Atoi(c.Param("seq_id"))
+		if errSeq != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
+		if errLocus != nil {
+			HandleNotFoundError(c, "locus_id")
+			return
+		}
+		expandedOccurrence, err := repo.GetExpandedOccurrence(caseId, seqId, locusId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if expandedOccurrence == nil {
+			HandleNotFoundError(c, "occurrence")
+			return
+		}
+
+		interpretationClassificationCounts, err := interpretationRepo.RetrieveSomaticInterpretationClassificationCounts(locusId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		if interpretationClassificationCounts != nil {
+			expandedOccurrence.InterpretationClassificationCounts = interpretationClassificationCounts
+		}
+
+		c.JSON(http.StatusOK, expandedOccurrence)
+	}
+}

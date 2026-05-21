@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,6 +12,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 )
+
 
 func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseResult, *int64, error) {
 	var count = int64(1)
@@ -265,8 +267,24 @@ func Test_CasesFiltersHandler(t *testing.T) {
 
 func Test_CaseEntityHandler(t *testing.T) {
 	repo := &MockRepository{}
+
+	igvRepo := &MockIGVRepository{
+		// Return one IGV track to test that has_igv_files is set to true
+		igvTracks: []types.IGVTrack{{
+			SequencingExperimentId: 1,
+			SampleId:               "sample_123",
+			PatientId:              1,
+			FamilyRole:             "proband",
+			SexCode:                "male",
+			DataTypeCode:           "alignment",
+			FormatCode:             "cram",
+			URL:                    "s3://example.com/file.cram",
+			},
+		},
+	}
+
 	router := gin.Default()
-	router.GET("/cases/:case_id", CaseEntityHandler(repo))
+	router.GET("/cases/:case_id", CaseEntityHandler(repo, igvRepo))
 
 	req, _ := http.NewRequest("GET", "/cases/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -332,7 +350,8 @@ func Test_CaseEntityHandler(t *testing.T) {
 			}
 		], 
 		"diagnosis_lab_code":"CQGC", 
-		"diagnosis_lab_name":"Quebec Clinical Genomic Center", 
+		"diagnosis_lab_name":"Quebec Clinical Genomic Center",
+		"has_igv_files":true,
 		"panel_code": "EPILEP",
 		"panel_name": "Epilepsy",		
 		"prescriber":"Felix Laflamme", 
@@ -348,6 +367,46 @@ func Test_CaseEntityHandler(t *testing.T) {
 		],
 		"updated_on":"2000-02-02T00:00:00Z"
 	}`, w.Body.String())
+}
+
+func Test_CaseEntityHandler_NoIGVTracks(t *testing.T) {
+	repo := &MockRepository{}
+
+	// will return nil IGV tracks
+	igvRepo := &MockIGVRepository{}
+
+	router := gin.Default()
+	router.GET("/cases/:case_id", CaseEntityHandler(repo, igvRepo))
+
+	req, _ := http.NewRequest("GET", "/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resp map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+	assert.False(t, resp["has_igv_files"].(bool))
+}
+
+func Test_CaseEntityHandler_IGVRepositoryError(t *testing.T) {
+	repo := &MockRepository{}
+
+	igvRepo := &MockIGVRepository{
+		err: assert.AnError,
+	}
+
+	router := gin.Default()
+	router.GET("/cases/:case_id", CaseEntityHandler(repo, igvRepo))
+
+	req, _ := http.NewRequest("GET", "/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {

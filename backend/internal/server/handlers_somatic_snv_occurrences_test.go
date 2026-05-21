@@ -35,6 +35,16 @@ func (m *MockSomaticSNVOccurrencesRepository) GetStatisticsOccurrences(caseId in
 		nil
 }
 
+func (m *MockSomaticSNVOccurrencesRepository) GetExpandedOccurrence(int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
+	return &types.ExpandedSomaticSNVOccurrence{
+		LocusId:    "1000",
+		Locus:      "locus1",
+		Chromosome: "1",
+		Hgvsg:      "hgvsg1",
+		Symbol:     "BRAF",
+	}, nil
+}
+
 func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(int, int, types.ListQuery) ([]types.SomaticSNVOccurrence, error) {
 	somaticPfTn := 0.55
 	somaticPcTn := 6
@@ -52,7 +62,11 @@ func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(int, int, types.Lis
 			TaskId:              74,
 			HasInterpretation:   false,
 			HasNote:             false,
+			FlagType:            "",
 			Hgvsg:               "hgvsg1",
+			Chromosome:          "1",
+			Start:               int64(1000),
+			End:                 int64(1001),
 			Symbol:              "BRAF",
 			AaChange:            "p.Arg19His",
 			VariantClass:        "class1",
@@ -70,6 +84,7 @@ func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(int, int, types.Lis
 			SomaticPfTnWgs:      &somaticPfTn,
 			SomaticPcTnWgs:      &somaticPcTn,
 			AdRatio:             &adRatio,
+			TranscriptId:        "T001",
 		},
 	}, nil
 }
@@ -91,13 +106,15 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 	assert.JSONEq(t, `[{
 		"aa_change":"p.Arg19His", 
 		"ad_ratio":1, 
+		"chromosome": "1",
 		"clinvar":["splice acceptor"], 
+		"end": 1001,
 		"germline_pc_wgs":3, 
 		"germline_pf_wgs":0.99, 
 		"gnomad_v3_af":0.1, 
-		"has_interpretation":false, 
-		"has_note":false, 
-		"hgvsg":"hgvsg1", 
+		"has_interpretation":false,
+		"has_note":false,
+		"hgvsg":"hgvsg1",
 		"hotspot": true, 
 		"is_canonical":true, 
 		"is_mane_plus": null, 
@@ -109,8 +126,10 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 		"seq_id":74, 
 		"somatic_pc_tn_wgs":6, 
 		"somatic_pf_tn_wgs":0.55, 
+		"start": 1000,
 		"symbol":"BRAF", 
-		"task_id":74, 
+		"task_id":74,
+		"transcript_id":"T001",
 		"variant_class":"class1", 
 		"vep_impact":"MODIFIER"
 	}]`, w.Body.String())
@@ -173,6 +192,95 @@ func Test_SomaticSNVAggregateHandler_withDictionary(t *testing.T) {
 	expected := `[{"key": "insertion", "count": 479564}, {"key": "deletion", "count": 495942}, {"key": "SNV", "count": 0}, {"key": "indel", "count": 0}, {"key": "substitution", "count": 0}, {"key": "sequence_alteration", "count": 0}]`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
+}
+
+type MockNotFoundSomaticSNVOccurrencesRepository struct {
+	MockSomaticSNVOccurrencesRepository
+}
+
+func (m *MockNotFoundSomaticSNVOccurrencesRepository) GetExpandedOccurrence(int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
+	return nil, nil
+}
+
+type MockEmptyInterpretationsRepository struct {
+	MockRepository
+}
+
+func (m *MockEmptyInterpretationsRepository) RetrieveSomaticInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error) {
+	return nil, nil
+}
+
+func Test_GetExpandedSomaticSNVOccurrenceHandler_withInterpretationCounts(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	interpretationRepo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+
+	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/1000/expanded", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"chromosome":"1",
+		"end":0,
+		"hgvsg":"hgvsg1",
+		"interpretation_classification_counts":{"Oncogenic":2, "Likely Oncogenic":1},
+		"locus":"locus1",
+		"locus_id":"1000",
+		"start":0,
+		"symbol":"BRAF"
+	}`, w.Body.String())
+}
+
+func Test_GetExpandedSomaticSNVOccurrenceHandler_emptyInterpretationCounts(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	interpretationRepo := &MockEmptyInterpretationsRepository{}
+	router := gin.Default()
+	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+
+	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/1000/expanded", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"chromosome":"1",
+		"end":0,
+		"hgvsg":"hgvsg1",
+		"locus":"locus1",
+		"locus_id":"1000",
+		"start":0,
+		"symbol":"BRAF"
+	}`, w.Body.String())
+}
+
+func Test_GetExpandedSomaticSNVOccurrenceHandler_notFound(t *testing.T) {
+	repo := &MockNotFoundSomaticSNVOccurrencesRepository{}
+	interpretationRepo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+
+	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/9999/expanded", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404, "message":"occurrence not found"}`, w.Body.String())
+}
+
+func Test_GetExpandedSomaticSNVOccurrenceHandler_invalidLocusId(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	interpretationRepo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+
+	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/abc/expanded", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404, "message":"locus_id not found"}`, w.Body.String())
 }
 
 func Test_SomaticSNVStatisticsHandler(t *testing.T) {

@@ -14,6 +14,7 @@ func Test_IGVTrack_ToJSON(t *testing.T) {
 	var igvInternal = IGVTrack{
 		SequencingExperimentId: 0,
 		SampleId:               "sample_123",
+		HistologyCode:          "normal",
 		PatientId:              123,
 		FamilyRole:             "proband",
 		SexCode:                "male",
@@ -22,7 +23,7 @@ func Test_IGVTrack_ToJSON(t *testing.T) {
 		URL:                    "s3://foo/bar/file.cram",
 	}
 
-	var expected = []byte(`{"sequencing_experiment_id":0,"sample_id":"sample_123","patient_id":123,"family_role":"proband","sexcode":"male","datatype_code":"alignment","format_code":"cram","url":"s3://foo/bar/file.cram"}`)
+	var expected = []byte(`{"sequencing_experiment_id":0,"sample_id":"sample_123","histology_code":"normal","patient_id":123,"family_role":"proband","sexcode":"male","datatype_code":"alignment","format_code":"cram","url":"s3://foo/bar/file.cram"}`)
 	jsonData, err := json.Marshal(igvInternal)
 	assert.Nil(t, err, "Failed to marshal IGVTrack to JSON")
 
@@ -33,10 +34,11 @@ func Test_IGVTrack_ToJSON(t *testing.T) {
 func Test_IGVTrack_FromJSON(t *testing.T) {
 	t.Parallel()
 
-	var jsonData = []byte(`{"sequencing_experiment_id":0,"sample_id":"sample_123","patient_id":123,"family_role":"proband","sexcode":"male","datatype_code":"alignment","format_code":"cram","url":"s3://foo/bar/file.cram"}`)
+	var jsonData = []byte(`{"sequencing_experiment_id":0,"sample_id":"sample_123","histology_code":"normal","patient_id":123,"family_role":"proband","sexcode":"male","datatype_code":"alignment","format_code":"cram","url":"s3://foo/bar/file.cram"}`)
 	var expected = IGVTrack{
 		SequencingExperimentId: 0,
 		SampleId:               "sample_123",
+		HistologyCode:          "normal",
 		PatientId:              123,
 		FamilyRole:             "proband",
 		SexCode:                "male",

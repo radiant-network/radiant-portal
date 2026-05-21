@@ -100,6 +100,7 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**case_entity**](docs/CasesApi.md#case_entity) | **GET** /cases/{case_id} | Get CaseEntity case entity
 *CasesApi* | [**case_entity_documents_filters**](docs/CasesApi.md#case_entity_documents_filters) | **GET** /cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
 *CasesApi* | [**case_entity_documents_search**](docs/CasesApi.md#case_entity_documents_search) | **POST** /cases/{case_id}/documents/search | Search DocumentResult list for a case entity
+*CasesApi* | [**case_tasks_with_occurrences**](docs/CasesApi.md#case_tasks_with_occurrences) | **GET** /cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
 *CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **GET** /cases/filters | Get CaseFilters cases filters
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /cases/batch | Create a new case batch
 *CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /cases/search | Search cases
@@ -123,6 +124,8 @@ Class | Method | HTTP request | Description
 *InterpretationsApi* | [**search_interpretation_germline**](docs/InterpretationsApi.md#search_interpretation_germline) | **GET** /interpretations/germline | Search interpretation germline
 *InterpretationsApi* | [**search_interpretation_somatic**](docs/InterpretationsApi.md#search_interpretation_somatic) | **GET** /interpretations/somatic | Search interpretation somatic
 *MondoApi* | [**mondo_term_auto_complete**](docs/MondoApi.md#mondo_term_auto_complete) | **GET** /mondo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
+*OccurrenceFlagsApi* | [**delete_occurrence_flag**](docs/OccurrenceFlagsApi.md#delete_occurrence_flag) | **DELETE** /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Delete the flag on an occurrence
+*OccurrenceFlagsApi* | [**upsert_occurrence_flag**](docs/OccurrenceFlagsApi.md#upsert_occurrence_flag) | **POST** /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Set or change the flag on an occurrence
 *OccurrenceNotesApi* | [**count_occurrence_notes**](docs/OccurrenceNotesApi.md#count_occurrence_notes) | **GET** /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count | Count notes for an occurrence
 *OccurrenceNotesApi* | [**delete_occurrence_note**](docs/OccurrenceNotesApi.md#delete_occurrence_note) | **DELETE** /notes/{id} | Delete a note on an occurrence
 *OccurrenceNotesApi* | [**get_occurrence_notes**](docs/OccurrenceNotesApi.md#get_occurrence_notes) | **GET** /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Get notes for an occurrence
@@ -135,6 +138,7 @@ Class | Method | HTTP request | Description
 *OccurrencesApi* | [**count_germline_snv_occurrences**](docs/OccurrencesApi.md#count_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/count | Count germline SNV occurrences
 *OccurrencesApi* | [**count_somatic_snv_occurrences**](docs/OccurrencesApi.md#count_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/count | Count somatic SNV occurrences
 *OccurrencesApi* | [**get_expanded_germline_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /occurrences/germline/snv/{case_id}/{seq_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
+*OccurrencesApi* | [**get_expanded_somatic_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /occurrences/somatic/snv/{case_id}/{seq_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
 *OccurrencesApi* | [**get_germline_snv_dictionary**](docs/OccurrencesApi.md#get_germline_snv_dictionary) | **GET** /occurrences/germline/snv/dictionary | Get germline SNV facets dictionary
 *OccurrencesApi* | [**list_germline_cnv_genes_overlap**](docs/OccurrencesApi.md#list_germline_cnv_genes_overlap) | **GET** /occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap | List genes overlapping a CNV with a given ID
 *OccurrencesApi* | [**list_germline_cnv_occurrences**](docs/OccurrencesApi.md#list_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/list | List germline CNV occurrences
@@ -195,6 +199,7 @@ Class | Method | HTTP request | Description
  - [CaseTaskBatch](docs/CaseTaskBatch.md)
  - [CasesSearchResponse](docs/CasesSearchResponse.md)
  - [ClinvarRCV](docs/ClinvarRCV.md)
+ - [ClinvarVariantConditions](docs/ClinvarVariantConditions.md)
  - [Count](docs/Count.md)
  - [CountBodyWithSqon](docs/CountBodyWithSqon.md)
  - [CreateBatchResponse](docs/CreateBatchResponse.md)
@@ -207,6 +212,7 @@ Class | Method | HTTP request | Description
  - [DocumentResult](docs/DocumentResult.md)
  - [DocumentsSearchResponse](docs/DocumentsSearchResponse.md)
  - [ExpandedGermlineSNVOccurrence](docs/ExpandedGermlineSNVOccurrence.md)
+ - [ExpandedSomaticSNVOccurrence](docs/ExpandedSomaticSNVOccurrence.md)
  - [ExternalFrequencies](docs/ExternalFrequencies.md)
  - [Facet](docs/Facet.md)
  - [FamilyHistoryBatch](docs/FamilyHistoryBatch.md)
@@ -232,6 +238,7 @@ Class | Method | HTTP request | Description
  - [ListBodyWithSqon](docs/ListBodyWithSqon.md)
  - [ObservationCategoricalBatch](docs/ObservationCategoricalBatch.md)
  - [ObservationTextBatch](docs/ObservationTextBatch.md)
+ - [OccurrenceFlagType](docs/OccurrenceFlagType.md)
  - [OccurrenceNote](docs/OccurrenceNote.md)
  - [OmimGenePanel](docs/OmimGenePanel.md)
  - [OutputDocumentBatch](docs/OutputDocumentBatch.md)
@@ -253,6 +260,7 @@ Class | Method | HTTP request | Description
  - [SqonContent](docs/SqonContent.md)
  - [Statistics](docs/Statistics.md)
  - [StatisticsBodyWithSqon](docs/StatisticsBodyWithSqon.md)
+ - [TaskOccurrenceType](docs/TaskOccurrenceType.md)
  - [Term](docs/Term.md)
  - [Transcript](docs/Transcript.md)
  - [UpdateOccurrenceNoteInput](docs/UpdateOccurrenceNoteInput.md)

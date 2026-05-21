@@ -18,12 +18,12 @@ const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
   },
-  snv_occurrence: {
-    app_id: ApplicationId.snv_occurrence,
+  germline_snv_occurrence: {
+    app_id: ApplicationId.germline_snv_occurrence,
     aggregations: [] as any,
   },
-  cnv_occurrence: {
-    app_id: ApplicationId.cnv_occurrence,
+  germline_cnv_occurrence: {
+    app_id: ApplicationId.germline_cnv_occurrence,
     aggregations: [] as any,
   },
   admin: {

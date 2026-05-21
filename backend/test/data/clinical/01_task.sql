@@ -70,7 +70,9 @@ VALUES (1, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2
        (71, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
        (72, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
        (73, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2021-10-12 13:08:00'),
-       (74, 'radiant_somatic_annotation', NULL, '1.0.0', 'GRch38', '2026-03-09 13:08:00')
+       (74, 'radiant_somatic_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-03-09 13:08:00'),
+       (75, 'alignment_somatic_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-03-09 13:08:00'),
+       (76, 'alignment_somatic_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-03-09 13:08:00')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE task ALTER COLUMN id RESTART WITH 1000;

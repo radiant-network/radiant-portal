@@ -58,6 +58,7 @@ func (m *MockCNVRepository) GetOccurrences(int, int, types.ListQuery) ([]types.G
 			CIEnd:      types.JsonArray[int]{-50, 50},
 			CIPos:      types.JsonArray[int]{-100, 100},
 			HasNote:    true,
+			FlagType:   "star",
 		},
 	}, nil
 }
@@ -115,7 +116,8 @@ func Test_CNVOccurrencesListHandler(t *testing.T) {
 		"reflen":4000,
 		"ciend":[-50,50],
 		"cipos":[-100,100],
-		"has_note": true
+		"has_note": true,
+		"flag_type": "star"
 	}]`, w.Body.String())
 }
 

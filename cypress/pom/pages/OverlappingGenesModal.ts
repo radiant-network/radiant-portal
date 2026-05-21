@@ -1,12 +1,10 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
 
-const selectors = {
-};
+const selectors = {};
 
 export const OverlappingGenesModal = {
   actions: {},
 
-  validations: {
-  },
+  validations: {},
 };

@@ -1,12 +1,12 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from '../shared/Selectors';
-import { getUrlLink, stringToRegExp } from '../shared/Utils';
+import { getClass, getUrlLink, stringToRegExp } from '../shared/Utils';
 import { getColumnName, getColumnPosition } from '../shared/Utils';
 
 const selectors = {
   tableCell: (dataVariant: any) => `${CommonSelectors.tableRow()}:contains("${dataVariant.variant}") ${CommonSelectors.tableCellData}`,
   tab: '[data-cy="variants-tab"]',
-  toggle: '[data-cy="tabs-trigger-snv"]',
+  toggle: '[data-cy="tabs-trigger-SNV"]',
 };
 
 const tableColumns = [
@@ -151,7 +151,7 @@ const tableColumns = [
     isSortable: true,
     isPinnable: true,
     position: 12,
-    tooltip: 'gnomAD Genome 3.1.2 (allele Frequency)',
+    tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
   },
   {
     id: 'freq',
@@ -217,7 +217,7 @@ export const CaseEntity_Variants_SNV_Table = {
      * @param buttonName The button name to click (First | Last | Previous | Next | Select)
      */
     clickPaginationButton(buttonName: string) {
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
       cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
     },
     /**
@@ -491,43 +491,43 @@ export const CaseEntity_Variants_SNV_Table = {
      */
     shouldRequestOnPageChange(dataCase: any) {
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest1');
-      cy.visitCaseVariantsPage(dataCase.case, 'SNV');
+      cy.visitCaseVariantsPage(dataCase.case, dataCase.seq.seq_id, 'SNV');
       cy.wait('@listRequest1');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest2');
       CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Next');
       cy.wait('@listRequest2');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(2);
         req.continue();
       }).as('listRequest3');
       CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Next');
       cy.wait('@listRequest3');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest4');
       CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Previous');
       cy.wait('@listRequest4');
-      cy.waitWhileLoad(60*1000);
+      cy.waitWhileLoad(60 * 1000);
 
       cy.intercept('POST', '**/list', req => {
-        expect(req.body.limit).to.deep.equal(10);
+        expect(req.body.limit).to.deep.equal(30);
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest5');
@@ -610,12 +610,12 @@ export const CaseEntity_Variants_SNV_Table = {
               cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
               break;
             case 'clinvar':
-              cy.validateTableFirstRowContent(dataVariant.clinvar.classification, position);
+              cy.validateTableFirstRowContent(dataVariant.clinvar_evidence.classification, position);
               cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
               break;
             case 'acmg_exomiser':
-              dataVariant[columnID].forEach((value: string | RegExp) => {
-                cy.validateTableFirstRowContent(value, position);
+              dataVariant[columnID].forEach((value: string) => {
+                cy.validateTableFirstRowContent(getClass(value).abbrev, position);
               });
               cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
               break;
@@ -721,7 +721,7 @@ export const CaseEntity_Variants_SNV_Table = {
                         throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
                       }
                     } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
-                        throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
+                      throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
                     } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
                       throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
                     }

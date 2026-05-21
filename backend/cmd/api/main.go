@@ -58,10 +58,12 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoIGV := repository.NewIGVRepository(dbStarrocks)
 	repoDocuments := repository.NewDocumentsRepository(dbStarrocks)
 	repoOccurrenceNotes := repository.NewOccurrenceNotesRepository(dbPostgres)
+	repoOccurrenceFlags := repository.NewOccurrenceFlagsRepository(dbPostgres)
 	repoSavedFilters := repository.NewSavedFiltersRepository(dbPostgres)
 	repoUserPreferences := repository.NewUserPreferencesRepository(dbPostgres)
 	repoFacets := repository.NewFacetsRepository()
 	repoBatches := repository.NewBatchRepository(dbPostgres)
+	repoTasks := repository.NewTaskRepository(dbPostgres)
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -95,9 +97,10 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))
 	casesGroup.GET("/autocomplete", server.CasesAutocompleteHandler(repoCases))
 	casesGroup.GET("/filters", server.CasesFiltersHandler(repoCases))
-	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases))
+	casesGroup.GET("/:case_id", server.CaseEntityHandler(repoCases, repoIGV))
 	casesGroup.POST("/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repoDocuments))
 	casesGroup.GET("/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repoDocuments))
+	casesGroup.GET("/:case_id/:seq_id/tasks_with_occurrences", server.CaseOccurrenceTasksHandler(repoTasks))
 
 	geneGroup := privateRoutes.Group("/genes")
 	geneGroup.GET("/autocomplete", server.GetGeneAutoCompleteHandler(repoGenes))
@@ -107,7 +110,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))
 
 	igvGroup := privateRoutes.Group("/igv")
-	igvGroup.GET("/:case_id", server.GetIGVHandler(repoIGV, s3Presigner))
+	igvGroup.GET("/:case_id", server.GetIGVHandler(repoIGV, repoCases, s3Presigner))
 
 	interpretationsGroup := privateRoutes.Group("/interpretations")
 	interpretationsGroup.GET("/pubmed/:citation_id", server.GetPubmedCitation(pubmedClient))
@@ -125,7 +128,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	interpretationsSomaticGroupDeprecated.GET("", server.GetInterpretationSomaticDeprecated(repoPostgres.Interpretations))
 	interpretationsSomaticGroupDeprecated.POST("", server.PostInterpretationSomaticDeprecated(repoPostgres.Interpretations))
 	interpretationsSomaticGroup := interpretationsGroup.Group("/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id")
-	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations))
+	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations, repoTerms))
 	interpretationsSomaticGroup.POST("", server.PostInterpretationSomatic(repoPostgres.Interpretations))
 
 	mondoGroup := privateRoutes.Group("/mondo")
@@ -141,6 +144,10 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGroup := privateRoutes.Group("/occurrences")
 	occurrencesGermlineGroup := occurrencesGroup.Group("/germline")
 	occurrencesSomaticGroup := occurrencesGroup.Group("/somatic")
+
+	occurrenceFlagsGroup := occurrencesGroup.Group("/flags")
+	occurrenceFlagsGroup.POST("/:case_id/:seq_id/:task_id/:occurrence_id", server.UpsertOccurrenceFlagHandler(repoOccurrenceFlags))
+	occurrenceFlagsGroup.DELETE("/:case_id/:seq_id/:task_id/:occurrence_id", server.DeleteOccurrenceFlagHandler(repoOccurrenceFlags))
 
 	occurrencesGermlineCNVGroup := occurrencesGermlineGroup.Group("/cnv")
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/count", server.OccurrencesGermlineCNVCountHandler(repoGermlineCNVOccurrences))
@@ -162,6 +169,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/list", server.OccurrencesSomaticSNVListHandler(repoSomaticSNVOccurrences))
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/aggregate", server.OccurrencesSomaticSNVAggregateHandler(repoSomaticSNVOccurrences, repoFacets))
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/statistics", server.OccurrencesSomaticSNVStatisticsHandler(repoSomaticSNVOccurrences))
+	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:locus_id/expanded", server.GetExpandedSomaticSNVOccurrence(repoSomaticSNVOccurrences, repoPostgres.Interpretations))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoStagingSeq))

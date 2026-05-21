@@ -67,6 +67,7 @@ import {
 import { getFlatSubheaders } from './libs/header-group';
 import DataTableGroupBy from './data-table-group-by';
 import { getFilteredAdditionalFields, updateAdditionalField } from './utils';
+import { useDataTable } from './hooks/use-data-table';
 
 /**
  * Static value for header and row height
@@ -119,6 +120,7 @@ export type TableProps<TData> = {
   onRowSelectionChange?: OnChangeFn<Record<string, boolean>>;
   pagination: PaginationSettings;
   serverOptions?: ServerOptions;
+  extras?: React.ReactElement[];
 };
 
 export interface BaseColumnSettings {
@@ -605,8 +607,11 @@ function DataTable<T>({
   rowSelection,
   onRowSelectionChange,
   serverOptions,
+  extras,
 }: TableProps<T>) {
   const { t } = useI18n();
+
+  const context = useDataTable();
 
   // default values
   const defaultColumnTableState = useMemo<DefaultColumnTableState>(
@@ -881,6 +886,12 @@ function DataTable<T>({
     }
   }, [rowSelection, onRowSelectionChange]);
 
+  useEffect(() => {
+    if (context.rowSelection) {
+      setInternalRowSelection(context.rowSelection);
+    }
+  }, [context.rowSelection]);
+
   return (
     <div
       className={cn('w-full', className, {
@@ -1096,6 +1107,8 @@ function DataTable<T>({
           </div>
         </div>
       )}
+
+      {(extras ?? []).map(extra => extra)}
     </div>
   );
 }
