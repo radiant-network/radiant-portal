@@ -1400,7 +1400,7 @@
         "cnv": "CNV",
         "cnv_to": "CNV (TO)",
         "sample_submitter_id": "ID soumissionnaire :",
-        "sample_submitter_id_tooltip": "ID soumissionnaire",
+        "sample_id": "ID échantillon",
         "sequencing_id": "ID Séq.",
         "snv": "SNV",
         "snv_tn": "SNV (TN)",

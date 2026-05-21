@@ -1403,7 +1403,7 @@
         "cnv_to": "CNV (TO)",
         "sequencing_id": "Seq. ID",
         "sample_submitter_id": "Submitter sample ID:",
-        "sample_submitter_id_tooltip": "Submitter sample ID",
+        "sample_id": "Sample ID",
         "snv": "SNV",
         "cnv": "CNV",
         "snv_tn": "SNV (TN)",
