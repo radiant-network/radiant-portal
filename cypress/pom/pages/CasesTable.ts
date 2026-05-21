@@ -242,7 +242,7 @@ export const CasesTable = {
     /**
      * Select an object view with the table action button.
      * @param dataCase The case object.
-     * @param object The object to view (Case | Variants).
+     * @param object The object to view (case | variants).
      */
     selectAction(dataCase: any, object: string) {
       cy.then(() =>

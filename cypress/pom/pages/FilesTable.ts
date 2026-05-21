@@ -219,7 +219,7 @@ export const FilesTable = {
     /**
      * Select an object view with the table action button.
      * @param dataFile The file object.
-     * @param object The object to view (File | Variants).
+     * @param object The object to view (file | variants).
      */
     selectAction(dataFile: any, object: string) {
       cy.then(() =>

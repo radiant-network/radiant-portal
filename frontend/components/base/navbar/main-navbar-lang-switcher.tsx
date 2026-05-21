@@ -33,6 +33,7 @@ function NavbarLangSwitcher({ className }: NavbarLangSwitcherProps) {
 
   return (
     <Button
+      data-cy="lang-button"
       variant="ghost"
       iconOnly
       className={cn('text-muted-foreground px-3 text-base md:text-sm', className)}

@@ -193,7 +193,12 @@ function QueryBar({ index, sqon }: QueryBarProps) {
   );
 
   return (
-    <div className="flex flex-1 group/query" data-query-active={active} onClick={handleActive}>
+    <div
+      className="flex flex-1 group/query"
+      data-query-active={active}
+      data-cy={active ? 'query-active' : undefined}
+      onClick={handleActive}
+    >
       {/* Identifier: color for combined query quick identification */}
       <div
         className={cn('w-1 rounded-s-sm bg-muted-foreground', {

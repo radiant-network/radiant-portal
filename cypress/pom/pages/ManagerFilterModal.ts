@@ -14,7 +14,7 @@ export const ManagerFilterModal = {
      * @param name The filter name.
      */
     deleteFilter(name: string) {
-      cy.get(`${CommonSelectors.modal} ${CommonSelectors.listItemAction(name)}`).realHover();
+      cy.get(CommonSelectors.listItemAction(name)).realHover();
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.deleteIcon}:visible`).clickAndWait({ force: true });
 
       cy.intercept('**/saved_filters{,/**}').as('deleteSavedFilters');
@@ -29,7 +29,7 @@ export const ManagerFilterModal = {
      * @param newName The new filter name.
      */
     editFilterName(oldName: string, newName: string) {
-      cy.get(`${CommonSelectors.modal} ${CommonSelectors.listItemAction(oldName)}`).realHover();
+      cy.get(CommonSelectors.listItemAction(oldName)).realHover();
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.editIcon}:visible`).clickAndWait({ force: true });
 
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.input}`).clear();

@@ -35,7 +35,12 @@ const ListItemAction = ({
           </div>
         )}
       >
-        <div className="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis">{title}</div>
+        <div
+          data-cy={typeof title === 'string' ? `list-item-action-${title}` : 'list-item-action'}
+          className="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis"
+        >
+          {title}
+        </div>
       </ConditionalWrapper>
       <div className="text-xs">{description}</div>
     </div>

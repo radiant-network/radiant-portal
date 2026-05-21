@@ -57,6 +57,7 @@ import { cn } from '@/lib/utils';
 
 import Empty from '../empty';
 
+import { useDataTable } from './hooks/use-data-table';
 import {
   DataTableState,
   useTableGetPreferenceEffect,
@@ -67,7 +68,6 @@ import {
 import { getFlatSubheaders } from './libs/header-group';
 import DataTableGroupBy from './data-table-group-by';
 import { getFilteredAdditionalFields, updateAdditionalField } from './utils';
-import { useDataTable } from './hooks/use-data-table';
 
 /**
  * Static value for header and row height
@@ -1018,6 +1018,7 @@ function DataTable<T>({
                   {headerGroup.headers.map(header => (
                     <TableHead
                       key={header.id}
+                      data-cy={header.column.getIsPinned() ? `pinned-${header.column.getIsPinned()}` : undefined}
                       className={cn('group/header', getColumnHeaderPinningExtraCN(header), {
                         'text-center': header.subHeaders.length > 0, // center header group with subheader
                       })}

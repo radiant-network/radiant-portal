@@ -26,6 +26,7 @@ function CaseActionsMenuCell({ row }: CellContext<CaseResult, any>) {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem
+            data-cy="menu-item-case"
             onClick={() => {
               navigate(`/case/entity/${row.original.case_id}`);
             }}
@@ -34,6 +35,7 @@ function CaseActionsMenuCell({ row }: CellContext<CaseResult, any>) {
             {t('case_exploration.case.actions.view_case')}
           </DropdownMenuItem>
           <DropdownMenuItem
+            data-cy="menu-item-variants"
             disabled={!row.original.has_variants}
             onClick={() => {
               navigate(`/case/entity/${row.original.case_id}?tab=${CaseEntityTabs.Variants}`);

@@ -48,6 +48,7 @@ function MainSidebar({
     <Sidebar side={placement} collapsible="icon">
       <SidebarHeader>
         <div
+          data-cy="logo-desktop"
           className="h-12 [&_img]:w-auto [&_img]:h-full"
           onClick={e => {
             if (e.metaKey && e.altKey) {

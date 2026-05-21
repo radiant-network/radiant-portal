@@ -123,6 +123,7 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
       <Accordion type="multiple" defaultValue={['query-builder']}>
         <AccordionItem value="query-builder" className="border-none">
           <AccordionTrigger
+            data-cy="query-builder-header"
             className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none hover:cursor-pointer"
             asChild
           >

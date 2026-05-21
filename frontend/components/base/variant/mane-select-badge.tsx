@@ -10,7 +10,7 @@ function ManeSelectBadge({ size = 18 }: ManeSelectBadgeProps) {
   const { t } = useI18n();
   return (
     <Tooltip>
-      <TooltipTrigger className="flex">
+      <TooltipTrigger className="flex" data-cy="mane-m">
         <TranscriptManeSelectIcon className="text-primary" size={size} />
       </TooltipTrigger>
       <TooltipContent>{t('occurrence.mane_select')}</TooltipContent>

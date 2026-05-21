@@ -81,6 +81,7 @@ function ActionButton({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <DropdownMenuItem
+                        data-cy={`menu-item-${action.label.trim()}`}
                         disabled={action.disabled ?? false}
                         onClick={action.disabled ? undefined : action.onClick}
                       >
@@ -92,6 +93,7 @@ function ActionButton({
                   </Tooltip>
                 ) : (
                   <DropdownMenuItem
+                    data-cy={`menu-item-${action.label.trim()}`}
                     disabled={action.disabled ?? false}
                     onClick={action.disabled ? undefined : action.onClick}
                   >

@@ -14,13 +14,13 @@ describe('Cases - Action Buttons', () => {
 
   it('View Case', () => {
     setupTest();
-    CasesTable.actions.selectAction(data.case, 'Case');
+    CasesTable.actions.selectAction(data.case, 'case');
     CaseEntity_Details.validations.shouldHaveTitle(data.case);
   });
 
   it('View Variants', () => {
     setupTest();
-    CasesTable.actions.selectAction(data.case, 'Variants');
+    CasesTable.actions.selectAction(data.case, 'variants');
     CaseEntity_Variants_SNV_Table.validations.shouldHaveTitle(data.case);
     CaseEntity_Variants_SNV_Table.validations.shouldHaveActiveTabAndToggle();
   });
