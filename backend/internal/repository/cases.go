@@ -388,7 +388,7 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 	tx = utils.JoinTaskContextWithSeqExp(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
 	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
-	tx = tx.Where("(tctx.case_id = ? OR tctx.case_id IS NULL) AND chseq.case_id = ?", caseId, caseId)
+	tx = tx.Where("chseq.case_id = ?", caseId)
 	tx = tx.Select("task.id, task.task_type_code as type_code, task.created_on, task_type.name_en as type_name, group_concat(f.relationship_to_proband_code) as patients_unparsed, count(distinct spl.patient_id) as patient_count")
 	tx = tx.Group("task.id, task.task_type_code, task.created_on, task_type.name_en")
 	tx = tx.Order("task.id asc")

@@ -177,7 +177,7 @@ func JoinTaskContextWithTaskHasDoc(tx *gorm.DB) *gorm.DB {
 }
 
 func JoinTaskContextWithCaseHasSeqExp(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.sequencing_experiment_id", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.TaskContextTable.Alias))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_experiment_id=%s.sequencing_experiment_id AND (%s.case_id = %s.case_id OR %s.case_id IS NULL)", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.TaskContextTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.TaskContextTable.Alias, types.TaskContextTable.Alias))
 }
 
 func JoinTaskContextWithSeqExp(tx *gorm.DB) *gorm.DB {
