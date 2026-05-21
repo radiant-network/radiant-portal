@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from radiant_python.models.occurrence_flag_type import OccurrenceFlagType
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -37,6 +38,7 @@ class GermlineCNVOccurrence(BaseModel):
     cytoband: Optional[List[StrictStr]] = None
     end: StrictInt
     filter: Optional[StrictStr] = None
+    flag_type: Optional[OccurrenceFlagType] = None
     gnomad_sc: Optional[StrictInt] = None
     gnomad_sf: Optional[Union[StrictFloat, StrictInt]] = None
     gnomad_sn: Optional[StrictInt] = None
@@ -56,7 +58,7 @@ class GermlineCNVOccurrence(BaseModel):
     symbol: Optional[List[StrictStr]] = None
     task_id: StrictInt
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "filter", "gnomad_sc", "gnomad_sf", "gnomad_sn", "has_note", "length", "name", "nb_genes", "nb_snv", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "type"]
+    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "filter", "flag_type", "gnomad_sc", "gnomad_sf", "gnomad_sn", "has_note", "length", "name", "nb_genes", "nb_snv", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -120,6 +122,7 @@ class GermlineCNVOccurrence(BaseModel):
             "cytoband": obj.get("cytoband"),
             "end": obj.get("end"),
             "filter": obj.get("filter"),
+            "flag_type": obj.get("flag_type"),
             "gnomad_sc": obj.get("gnomad_sc"),
             "gnomad_sf": obj.get("gnomad_sf"),
             "gnomad_sn": obj.get("gnomad_sn"),

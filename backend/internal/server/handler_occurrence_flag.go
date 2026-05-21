@@ -50,8 +50,8 @@ func UpsertOccurrenceFlagHandler(repo repository.OccurrenceFlagsDAO) gin.Handler
 		occurrenceID := c.Param("occurrence_id")
 		flagType := c.Query("flag_type")
 
-		if !slices.Contains(types.ValidFlagTypes, flagType) {
-			HandleValidationError(c, fmt.Errorf("invalid type %q; must be one of %v", flagType, types.ValidFlagTypes))
+		if !slices.Contains(types.ValidOccurrenceFlagTypes, flagType) {
+			HandleValidationError(c, fmt.Errorf("invalid type %q; must be one of %v", flagType, types.ValidOccurrenceFlagTypes))
 			return
 		}
 

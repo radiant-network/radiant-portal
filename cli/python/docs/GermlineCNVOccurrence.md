@@ -17,6 +17,7 @@ Name | Type | Description | Notes
 **cytoband** | **List[str]** |  | [optional] 
 **end** | **int** |  | 
 **filter** | **str** |  | [optional] 
+**flag_type** | [**OccurrenceFlagType**](OccurrenceFlagType.md) |  | [optional] 
 **gnomad_sc** | **int** |  | [optional] 
 **gnomad_sf** | **float** |  | [optional] 
 **gnomad_sn** | **int** |  | [optional] 

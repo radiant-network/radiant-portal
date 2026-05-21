@@ -2548,6 +2548,12 @@ export interface GermlineCNVOccurrence {
     'filter'?: string;
     /**
      * 
+     * @type {OccurrenceFlagType}
+     * @memberof GermlineCNVOccurrence
+     */
+    'flag_type'?: OccurrenceFlagType;
+    /**
+     * 
      * @type {number}
      * @memberof GermlineCNVOccurrence
      */
@@ -2661,6 +2667,8 @@ export interface GermlineCNVOccurrence {
      */
     'type': string;
 }
+
+
 /**
  * GermlineSNVOccurrence represents a germline SNV occurrence
  * @export
@@ -2733,6 +2741,12 @@ export interface GermlineSNVOccurrence {
      * @memberof GermlineSNVOccurrence
      */
     'filter'?: string;
+    /**
+     * 
+     * @type {OccurrenceFlagType}
+     * @memberof GermlineSNVOccurrence
+     */
+    'flag_type'?: OccurrenceFlagType;
     /**
      * 
      * @type {number}
@@ -3614,6 +3628,21 @@ export interface ObservationTextBatch {
 /**
  * 
  * @export
+ * @enum {string}
+ */
+
+export const OccurrenceFlagType = {
+    OccurrenceFlagTypeFlag: 'flag',
+    OccurrenceFlagTypePin: 'pin',
+    OccurrenceFlagTypeStar: 'star'
+} as const;
+
+export type OccurrenceFlagType = typeof OccurrenceFlagType[keyof typeof OccurrenceFlagType];
+
+
+/**
+ * 
+ * @export
  * @interface OccurrenceNote
  */
 export interface OccurrenceNote {
@@ -4450,6 +4479,12 @@ export interface SomaticSNVOccurrence {
      * @memberof SomaticSNVOccurrence
      */
     'end': number;
+    /**
+     * 
+     * @type {OccurrenceFlagType}
+     * @memberof SomaticSNVOccurrence
+     */
+    'flag_type'?: OccurrenceFlagType;
     /**
      * 
      * @type {number}

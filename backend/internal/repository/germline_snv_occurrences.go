@@ -52,6 +52,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 	})
 	columns = append(columns, "i.locus_id IS NOT NULL AS has_interpretation")
 	columns = append(columns, "note.occurrence_id IS NOT NULL AS has_note")
+	columns = append(columns, "flag.flag_type")
 	columns = append(columns, "v.locus")
 
 	utils.AddLimitAndSort(tx, userQuery)
@@ -60,6 +61,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 	// FROM (germline__snv__occurrence o, snv__variant v)
 	// 		LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM radiant_jdbc.public.interpretation_germline) i ON i.locus_id = g_snv_o.locus_id AND i.sequencing_id = ?
 	// 		LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM radiant_jdbc.public.occurrence_note WHERE deleted = false) note ON note.occurrence_id = g_snv_o.locus_id AND note.task_id = g_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?
+	// 		LEFT JOIN radiant_jdbc.public.occurrence_flag flag ON flag.occurrence_id = g_snv_o.locus_id AND flag.task_id = g_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?
 	// WHERE g_snv_o.locus_id in (
 	//	SELECT g_snv_o.locus_id FROM germline__snv__occurrence JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
 	// ) AND g_snv_o.seq_id=? AND g_snv_o.part=? AND v.locus_id=g_snv_o.locus_id ORDER BY ad_ratio DESC
@@ -67,6 +69,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 	tx = r.db.Table("(germline__snv__occurrence g_snv_o, snv__variant v)").
 		Joins("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM radiant_jdbc.public.interpretation_germline) i ON i.locus_id = g_snv_o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
 		Joins("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM radiant_jdbc.public.occurrence_note WHERE deleted = false) note ON note.occurrence_id = g_snv_o.locus_id AND note.task_id = g_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?", seqId, caseId).
+		Joins("LEFT JOIN radiant_jdbc.public.occurrence_flag flag ON flag.occurrence_id = g_snv_o.locus_id AND flag.task_id = g_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?", seqId, caseId).
 		Select(columns).
 		Where("g_snv_o.seq_id = ? and part=? and v.locus_id = g_snv_o.locus_id and g_snv_o.locus_id in (?)", seqId, part, tx)
 

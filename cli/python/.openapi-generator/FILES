@@ -69,6 +69,7 @@ docs/ListBodyWithSqon.md
 docs/MondoApi.md
 docs/ObservationCategoricalBatch.md
 docs/ObservationTextBatch.md
+docs/OccurrenceFlagType.md
 docs/OccurrenceFlagsApi.md
 docs/OccurrenceNote.md
 docs/OccurrenceNotesApi.md
@@ -207,6 +208,7 @@ radiant_python/models/list_body_with_criteria.py
 radiant_python/models/list_body_with_sqon.py
 radiant_python/models/observation_categorical_batch.py
 radiant_python/models/observation_text_batch.py
+radiant_python/models/occurrence_flag_type.py
 radiant_python/models/occurrence_note.py
 radiant_python/models/omim_gene_panel.py
 radiant_python/models/output_document_batch.py
@@ -250,3 +252,4 @@ radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
+test/test_occurrence_flag_type.py

@@ -17,6 +17,7 @@ Name | Type | Description | Notes
 **exomiser_moi** | **str** |  | 
 **exomiser_variant_score** | **float** |  | 
 **filter** | **str** |  | [optional] 
+**flag_type** | [**OccurrenceFlagType**](OccurrenceFlagType.md) |  | [optional] 
 **genotype_quality** | **int** |  | 
 **germline_pc_wgs** | **int** |  | [optional] 
 **germline_pf_wgs** | **float** |  | 

@@ -75,6 +75,7 @@ from radiant_python.models.list_body_with_criteria import ListBodyWithCriteria
 from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
 from radiant_python.models.observation_categorical_batch import ObservationCategoricalBatch
 from radiant_python.models.observation_text_batch import ObservationTextBatch
+from radiant_python.models.occurrence_flag_type import OccurrenceFlagType
 from radiant_python.models.occurrence_note import OccurrenceNote
 from radiant_python.models.omim_gene_panel import OmimGenePanel
 from radiant_python.models.output_document_batch import OutputDocumentBatch
