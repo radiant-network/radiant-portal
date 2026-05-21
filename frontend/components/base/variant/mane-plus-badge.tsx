@@ -10,7 +10,7 @@ function ManePlusBadge({ size = 18 }: ManePlusBadgeProps) {
   const { t } = useI18n();
   return (
     <Tooltip>
-      <TooltipTrigger className="flex">
+      <TooltipTrigger className="flex" data-cy="mane-p">
         <TranscriptManePlusIcon className="text-primary" size={size} />
       </TooltipTrigger>
       <TooltipContent>{t('occurrence.mane_plus')}</TooltipContent>

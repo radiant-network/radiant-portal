@@ -413,7 +413,7 @@ export const CaseEntity_Variants_SNV_Table = {
      * Checks that custom query is not implemented for this page.
      */
     shouldHaveCustomQuery() {
-      cy.get(`${CommonSelectors.querybarSelected} ${CommonSelectors.saveIcon}`).should('not.exist');
+      cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.saveIcon}`).should('not.exist');
     },
     /**
      * Validates the value of the first row for a given column.
@@ -652,15 +652,15 @@ export const CaseEntity_Variants_SNV_Table = {
             case 'mane':
               cy.get(selectors.tableCell(dataVariant))
                 .eq(position)
-                .find(CommonSelectors.maneCPath)
+                .find(CommonSelectors.maneC)
                 .should(dataVariant.maneC ? 'exist' : 'not.exist');
               cy.get(selectors.tableCell(dataVariant))
                 .eq(position)
-                .find(CommonSelectors.maneMPath)
+                .find(CommonSelectors.maneM)
                 .should(dataVariant.maneM ? 'exist' : 'not.exist');
               cy.get(selectors.tableCell(dataVariant))
                 .eq(position)
-                .find(CommonSelectors.manePPath)
+                .find(CommonSelectors.maneP)
                 .should(dataVariant.maneP ? 'exist' : 'not.exist');
               break;
             case 'omim':

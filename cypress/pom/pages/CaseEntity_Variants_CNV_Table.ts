@@ -369,7 +369,7 @@ export const CaseEntity_Variants_CNV_Table = {
      * Checks that custom query is not implemented for this page.
      */
     shouldHaveCustomQuery() {
-      cy.get(`${CommonSelectors.querybarSelected} ${CommonSelectors.saveIcon}`).should('not.exist');
+      cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.saveIcon}`).should('not.exist');
     },
     /**
      * Validates the value of the first row for a given column.

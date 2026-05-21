@@ -298,14 +298,15 @@ Cypress.Commands.add('unpinColumn', (position: number, tableId: string = '') => 
  * @param eq The index of the pill to validate (default: 0).
  */
 Cypress.Commands.add('validatePillSelectedQuery', (facetTitle: string | RegExp, values: (string | RegExp)[], eq: number = 0) => {
+  const activePillSelector = `${CommonSelectors.queryActive} ${CommonSelectors.queryPill}`;
   if (facetTitle == '') {
-    cy.get(CommonSelectors.pillQueryActive).should('not.exist');
+    cy.get(activePillSelector).should('not.exist');
   } else {
-    cy.get(CommonSelectors.pillQueryActive).eq(eq).contains(facetTitle).should('exist');
+    cy.get(activePillSelector).eq(eq).contains(facetTitle).should('exist');
   }
 
   for (let i = 0; i < values.length; i++) {
-    cy.get(CommonSelectors.pillQueryActive).eq(eq).contains(values[i]).should('exist');
+    cy.get(activePillSelector).eq(eq).contains(values[i]).should('exist');
   }
 });
 

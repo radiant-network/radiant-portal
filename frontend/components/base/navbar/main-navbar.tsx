@@ -91,6 +91,7 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
           {/* Desktop NavBar */}
           <div className={navbarStyles.base()}>
             <div
+              data-cy="logo-desktop"
               className="flex mr-6 h-7 text-primary [&_svg]:h-full [&_img]:h-full"
               onClick={e => {
                 if (e.metaKey && e.altKey) {
@@ -143,7 +144,9 @@ function MobileNavbar({
         as="button"
         responsive={false}
       />
-      <div className="flex flex-1 h-8 justify-center text-primary">{logo}</div>
+      <div data-cy="logo-mobile" className="flex flex-1 h-8 justify-center text-primary">
+        {logo}
+      </div>
       <MainNavbarLangSwitcher />
     </div>
   );

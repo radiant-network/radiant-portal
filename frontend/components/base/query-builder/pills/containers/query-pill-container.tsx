@@ -19,7 +19,10 @@ type QueryPillContainerProps = React.HTMLAttributes<HTMLDivElement> & {
  */
 function QueryPillContainer({ children, onRemovePill }: QueryPillContainerProps) {
   return (
-    <div className="flex items-center rounded-xs p-0.5 bg-muted group-data-[query-active=true]/query:bg-primary/25">
+    <div
+      data-cy="query-pill"
+      className="flex items-center rounded-xs p-0.5 bg-muted group-data-[query-active=true]/query:bg-primary/25"
+    >
       {children}
 
       <Button

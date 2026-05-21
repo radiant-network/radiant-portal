@@ -89,7 +89,7 @@ function DialogContent({ className, children, variant, size = 'md', ...props }: 
     <DialogPortal>
       <DialogOverlay />
       <DialogContext.Provider value={{ variant, size }}>
-        <DialogPrimitive.Content className={style.base({ className })} {...props}>
+        <DialogPrimitive.Content data-cy="modal" className={style.base({ className })} {...props}>
           {children}
           <DialogPrimitive.Close className={style.close()}>
             <X className="bg-background" />

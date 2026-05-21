@@ -10,7 +10,7 @@ function CanonicalBadge({ size = 18 }: CanonicalBadgeProps) {
   const { t } = useI18n();
   return (
     <Tooltip>
-      <TooltipTrigger className="flex">
+      <TooltipTrigger className="flex" data-cy="mane-c">
         <TranscriptCanonicalIcon className="text-primary" size={size} />
       </TooltipTrigger>
       <TooltipContent>{t('occurrence.canonical')}</TooltipContent>
