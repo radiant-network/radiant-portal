@@ -28,11 +28,11 @@ The portal needs to model **Practitioners** — health professionals such as phy
 
 Key requirements:
 
-- A Practitioner **may or may not** be a portal User. External prescribers who never log in must still be representable.
-- The `cases.prescriber_id` column references a Practitioner (not a User), so case creation does not require the prescriber to have a portal account.
+- A Practitioner **may or may not** be a portal User. External practitioners who never log in must still be representable.
+- The `cases.practitioner_id` column references a Practitioner (not a User), so case creation does not require the practitioner to have a portal account.
 - When adding a User who is also a clinician, the admin must be able to **link the User to an existing Practitioner** or **create a new Practitioner inline**.
 - The same real-world clinician can act as a Practitioner at **multiple tenants** (e.g. a geneticist consulting for both CBTN and UDN).
-- Some portal actions are practitioner-specific (be listed as prescriber, be assigned a case, sign reports) and should be controlled by a dedicated role.
+- Some portal actions are practitioner-specific (be listed as practitioner, be assigned a case, sign reports) and should be controlled by a dedicated role.
 
 This concept aligns with FHIR's [`Practitioner`](https://www.hl7.org/fhir/practitioner.html) resource — a domain identity for healthcare professionals, independent of authentication.
 
@@ -42,7 +42,7 @@ This concept aligns with FHIR's [`Practitioner`](https://www.hl7.org/fhir/practi
 
 | Driver | Implication |
 |---|---|
-| **External prescribers exist** | Practitioner cannot be derived from the `users` table — it must stand alone. |
+| **External practitioners exist** | Practitioner cannot be derived from the `users` table — it must stand alone. |
 | **Tenant isolation** | Each tenant owns its own Practitioner catalog. Data hygiene rules vary (license jurisdictions, specialty notation, contact info). |
 | **Same person, multiple tenants** | A single User identity may correspond to one Practitioner row **per tenant** — not a single global record. |
 | **Historical case integrity** | Deleting a User must not orphan or delete the Practitioner record referenced by historical cases. |
@@ -62,7 +62,6 @@ CREATE SEQUENCE public.practitioner_id_seq;
 CREATE TABLE public.practitioner (
     id               integer      NOT NULL DEFAULT nextval('public.practitioner_id_seq'),
     tenant_id        VARCHAR(50)  NOT NULL REFERENCES auth_db.tenant(tenant_id),
-    org_id           VARCHAR(50)  REFERENCES auth_db.organization(org_id),  -- nullable: tenant-wide practitioner
     first_name       VARCHAR(200) NOT NULL,
     last_name        VARCHAR(200) NOT NULL,
     email            VARCHAR(200),
@@ -90,9 +89,9 @@ CREATE INDEX idx_practitioner_username ON public.practitioner(username);
 | Choice | Rationale |
 |---|---|
 | **Per-tenant rows** (composite `UNIQUE(username, tenant_id)`) | A clinician working at two tenants gets two rows. Each tenant's admin owns its catalog. Data may legitimately differ (license per jurisdiction, recorded specialty, contact details). |
-| **`org_id` nullable** | Supports tenant-wide practitioners (consulting across all orgs) while keeping the common case of org-bound practitioners. |
+| **No `org_id` column** | A User who is a Practitioner can serve at multiple orgs within a tenant; their org membership is already captured by `auth_db.user_org_role`. Storing org on the practitioner row would either duplicate that data or force one-row-per-org. External (non-User) practitioners simply have no org granularity recorded — acceptable, since they don't carry portal permissions. |
 | **`username` nullable** | External (non-user) practitioners are first-class. |
-| **`ON DELETE SET NULL`** on `username` FK | Deleting a User de-links but preserves the Practitioner record — historical case prescribers remain valid. |
+| **`ON DELETE SET NULL`** on `username` FK | Deleting a User de-links but preserves the Practitioner record — historical case practitioners remain valid. |
 | **`active` flag instead of hard delete** | Same as above: historical cases keep their reference to deactivated practitioners. |
 | **`integer` primary key with explicit sequence** | Matches the project-wide PostgreSQL convention (all existing tables use `id integer NOT NULL` driven by a `*_id_seq` sequence). |
 | **Composite `UNIQUE (id, tenant_id)`** | Allows other tables (notably `cases`) to reference `(id, tenant_id)` as a composite FK, structurally enforcing same-tenant linkage. Defense-in-depth: cross-tenant references fail at the DB layer, not just in the API. |
@@ -102,35 +101,38 @@ CREATE INDEX idx_practitioner_username ON public.practitioner(username);
 | Scenario | Allowed | Reason |
 |---|---|---|
 | Same user, different tenants (e.g. `alice` at CBTN and UDN) | ✅ | Composite UNIQUE permits two rows |
-| Same user, same tenant, multiple orgs | ✅ — but one row | Use `org_id = NULL` (tenant-wide) or a primary org |
-| Same user, same tenant, same org | ❌ duplicate | UNIQUE catches it |
+| Same user, same tenant, multiple orgs | ✅ — one row covers all orgs | Org membership is captured in `auth_db.user_org_role`, not on the practitioner row |
+| Same user, same tenant | ❌ duplicate | `UNIQUE(username, tenant_id)` catches it |
 | Multiple unlinked practitioners per tenant | ✅ | `username IS NULL` rows coexist (PG treats NULLs as distinct) |
 
-### Cases — prescriber column
+### Cases — practitioner column
 
 ```sql
-ALTER TABLE public.cases ADD COLUMN prescriber_id integer;
-CREATE INDEX idx_cases_prescriber ON public.cases(prescriber_id);
+ALTER TABLE public.cases ADD COLUMN practitioner_id integer;
+CREATE INDEX idx_cases_practitioner ON public.cases(practitioner_id);
 
--- Composite FK against (id, tenant_id) — guarantees the prescriber row and the
+-- Composite FK against (id, tenant_id) — guarantees the practitioner row and the
 -- case row share the same tenant_id at the database level.
 ALTER TABLE public.cases
-    ADD CONSTRAINT cases_prescriber_fk
-    FOREIGN KEY (prescriber_id, tenant_id)
+    ADD CONSTRAINT cases_practitioner_fk
+    FOREIGN KEY (practitioner_id, tenant_id)
     REFERENCES public.practitioner (id, tenant_id);
 ```
 
-`prescriber_id` is the **resolved FK** to a `practitioner` row. It is nullable: cases may be created without a prescriber, and a prescriber can be assigned later through the admin UI.
+`practitioner_id` is the **resolved FK** to a `practitioner` row. It is nullable: cases may be created without a practitioner, and a practitioner can be assigned later through the admin UI.
 
-**At case creation**, the API accepts an optional `prescriber_submitter_id` field in the request payload — an external identifier (license number or equivalent, format TBD; see [Open Questions](#6-open-questions)). The handler resolves it to a `practitioner` row in the active tenant:
+**Eligibility rule for `practitioner_id`** (API-enforced — see [Authorization Model](#authorization-model)): a case may only be linked to a practitioner that is **(a)** linked to a User (`practitioner.username IS NOT NULL`), and **(b)** holds the `practitioner` role at the case's `(tenant_id, org_id)` — i.e. a matching row in `auth_db.user_org_role` with `role_id = 'practitioner'`, either at the case's specific `org_id` or via the `*` wildcard. External (non-User) practitioner records may exist for historical or pending-resolution data but cannot be attached to a case.
 
-- **Field absent** → case created with `prescriber_id = NULL`.
-- **Field present and matches a practitioner** → `prescriber_id` set to the resolved row.
-- **Field present and no match** → the request is rejected with a dedicated error code (e.g. `422 prescriber_not_found`); the case is **not** created. This forces the caller to either correct the identifier or register the practitioner first, rather than silently dropping the reference.
+**At case creation**, the API accepts an optional `practitioner_submitter_id` field in the request payload — an external identifier (license number or equivalent, format TBD; see [Open Questions](#6-open-questions)). The handler resolves it to a `practitioner` row in the active tenant:
 
-**`prescriber_submitter_id` is not persisted on the case** — only the resolved FK is stored. Cases without a prescriber at creation time are attached later through the admin UI (see [Admin Flows](#admin-flows)).
+- **Field absent** → case created with `practitioner_id = NULL`.
+- **Field present and matches an eligible practitioner** → `practitioner_id` set to the resolved row. *Eligible* = User-linked **and** holds the `practitioner` role at the case's `(tenant_id, org_id)` (see [Eligibility rule](#cases--practitioner-column)).
+- **Field present and no match** → rejected with a dedicated error code (e.g. `422 practitioner_not_found`); the case is **not** created.
+- **Field present, practitioner found, but ineligible** (no User link, or User lacks the `practitioner` role at the case's org) → rejected with a distinct error code (e.g. `422 practitioner_not_eligible`); the case is **not** created. This forces the caller to either correct the identifier or grant the missing role, rather than silently dropping the reference or creating a case with an unauthorized practitioner.
 
-The composite FK on `(prescriber_id, tenant_id)` enforces tenant alignment at the database level: any attempt to attach a UDN practitioner to a CBTN case (or vice versa) fails with a constraint violation, regardless of whether the API filtered correctly. This is the same defense-in-depth principle the security ADR applies to row visibility — the database is authoritative, the application is the convenience layer.
+**`practitioner_submitter_id` is not persisted on the case** — only the resolved FK is stored. Cases without a practitioner at creation time are attached later through the admin UI (see [Admin Flows](#admin-flows)).
+
+The composite FK on `(practitioner_id, tenant_id)` enforces tenant alignment at the database level: any attempt to attach a UDN practitioner to a CBTN case (or vice versa) fails with a constraint violation, regardless of whether the API filtered correctly. This is the same defense-in-depth principle the security ADR applies to row visibility — the database is authoritative, the application is the convenience layer.
 
 ### Authorization Model
 
@@ -142,7 +144,7 @@ Granted to Users who act as clinicians in the portal. Default actions:
 
 | Action | Purpose |
 |---|---|
-| `can_be_assigned_as_prescriber` | Appears in the prescriber picker on case create/edit |
+| `can_be_assigned_as_practitioner` | Appears in the practitioner picker on case create/edit |
 | `can_be_assigned_case` | Appears in the case-assignee picker |
 | `can_sign_report` | Sign or approve the final genetic report |
 
@@ -152,9 +154,11 @@ The `practitioner` role is **orthogonal** to clinical-skill roles like `genetici
 
 CRUD authority over the Practitioner catalog. Defaults: `tenant_admin`, `tenant_owner`.
 
-#### Invariant — tenant-scoped role/link consistency
+#### Invariants
 
-**The `practitioner` role at tenant T can only be granted to a User who has a linked Practitioner row at tenant T.** Granting at CBTN does not require a UDN practitioner row. Enforced at the admin API layer.
+**I1 — Tenant-scoped role/link consistency.** The `practitioner` role at tenant T can only be granted to a User who has a linked Practitioner row at tenant T. Granting at CBTN does not require a UDN practitioner row. Enforced at the admin API layer.
+
+**I2 — Case-practitioner eligibility.** A `cases.practitioner_id` may only reference a practitioner that is **(a)** linked to a User (`practitioner.username IS NOT NULL`), and **(b)** holds the `practitioner` role at the case's `(tenant_id, org_id)` — i.e. has a matching `auth_db.user_org_role` row with `role_id = 'practitioner'`, with `org_id` either matching exactly or via the `*` wildcard. Enforced at the API layer on every operation that writes `practitioner_id` (case create, post-creation assignment, bulk import). External practitioners may exist as records but cannot satisfy this invariant.
 
 ### Admin Flows
 
@@ -172,17 +176,17 @@ If the `practitioner` role is granted at the active tenant, the link is required
 
 #### Case creation
 
-Case creation is API-driven (typically from an external submitter or ETL). The request payload optionally includes `prescriber_submitter_id` (an external identifier). The handler resolves it to a `practitioner` row in the active tenant per the rules in [Cases — prescriber column](#cases--prescriber-column):
+Case creation is API-driven (typically from an external submitter or ETL). The request payload optionally includes `practitioner_submitter_id` (an external identifier). The handler resolves it to a `practitioner` row in the active tenant per the rules in [Cases — practitioner column](#cases--practitioner-column):
 
-- Absent → case created with no prescriber.
-- Present and resolved → case created with `prescriber_id` set.
+- Absent → case created with no practitioner.
+- Present and resolved → case created with `practitioner_id` set.
 - Present and unresolved → request rejected with a dedicated error code; no case created.
 
 There is **no inline practitioner-creation step** during case creation. Practitioner records are managed exclusively by holders of `can_manage_practitioner` (see [Practitioner directory](#practitioner-directory-new-admin-page)) — the set of users who submit/assign cases is operationally distinct from the set of users who maintain the practitioner catalog.
 
-#### Prescriber assignment after case creation
+#### Practitioner assignment after case creation
 
-Cases created without a resolved prescriber can have one attached later. An authorized user opens the case, picks a practitioner from a typeahead over `practitioner` (filtered by active tenant, `active = true`, and optionally `can_be_assigned_as_prescriber`), and the handler sets `prescriber_id` after validating the same composite FK. If the desired practitioner does not yet exist in the catalog, the user contacts a `can_manage_practitioner` holder to create the record first — assignment and creation remain separate flows.
+Cases created without a resolved practitioner can have one attached later. An authorized user opens the case, picks a practitioner from a typeahead over `practitioner` filtered to **eligible candidates only** — `active = true`, `username IS NOT NULL`, and holding the `practitioner` role at the case's `(tenant_id, org_id)` (specific match or `*` wildcard). External practitioners and Users without the role at the case org do not appear. The handler re-validates eligibility (invariant **I2**) and the composite FK before writing `practitioner_id`. If the desired practitioner does not yet exist in the catalog, or lacks the role, the user contacts a `can_manage_practitioner` (for the record) or `can_invite_user`/`tenant_admin` (for the role grant) holder first — assignment and provisioning remain separate flows.
 
 #### Practitioner directory (new admin page)
 
@@ -212,17 +216,17 @@ Model Practitioner as tenant-agnostic, with a separate `practitioner_tenant` joi
 
 ### Modeling Practitioner as a role only (no entity table)
 
-Drop the Practitioner table entirely; treat "is a practitioner" as the boolean condition "User holds the `practitioner` role at tenant T". Store prescriber on cases as a `prescriber_username` FK to `users`.
+Drop the Practitioner table entirely; treat "is a practitioner" as the boolean condition "User holds the `practitioner` role at tenant T". Store practitioner on cases as a `practitioner_username` FK to `users`.
 
 **Pros:**
 - Fewer tables.
 
 **Cons:**
-- Cannot represent external (non-User) prescribers — the central requirement.
+- Cannot represent external (non-User) practitioners — the central requirement.
 - Couples domain identity to authentication: an external referring clinician becomes a phantom User with no login.
 - Practitioner-specific fields (license, specialty, NPI) have no natural home.
 
-**Verdict:** rejected. The requirement to represent non-User prescribers is fundamental.
+**Verdict:** rejected. The requirement to represent non-User practitioners is fundamental.
 
 ### `UNIQUE(username)` (single global link per User)
 
@@ -247,7 +251,7 @@ This work slots into the [Security & Multi-Tenancy](./multi-tenancy-security.md)
 | **PR-3** — Practitioner admin API + tenant-scoped invariant | Phase 1 (parallel with A6) | PR-1, PR-2, A6 | CRUD endpoints + grant invariant ("`practitioner` role at T requires practitioner row at T") |
 | **PR-4** — User ↔ practitioner linking in Users admin tab | Phase 1 (after A7) | PR-3, A7 | Per-tenant link/create-inline flow |
 | **PR-5** — Practitioner directory page | Phase 1 (after A8) | PR-3 | New admin page (catalog UI) |
-| **PR-6** — `cases.prescriber_id` + submitter resolution + post-creation picker | Phase 2 (after E1b) | PR-1, E1b | Schema migration (composite FK); case-create handler resolves `prescriber_submitter_id` → returns dedicated error on unresolved; post-creation prescriber picker on the case detail view |
+| **PR-6** — `cases.practitioner_id` + submitter resolution + post-creation picker | Phase 2 (after E1b) | PR-1, E1b | Schema migration (composite FK); case-create handler resolves `practitioner_submitter_id` → returns dedicated error on unresolved; post-creation practitioner picker on the case detail view |
 
 PR-1, PR-2, and PR-3 can run in parallel with the A6/A7 wave. PR-6 piggybacks on E1b.
 
@@ -256,7 +260,5 @@ PR-1, PR-2, and PR-3 can run in parallel with the A6/A7 wave. PR-6 piggybacks on
 ## 6. Open Questions
 
 1. **Identifier fields.** `license_number` + `specialty` is a placeholder. Confirm what identifiers are actually required: US NPI, jurisdiction-specific license code, ORCID, or other.
-2. **`prescriber_submitter_id` format and resolution field.** What is the format of the external identifier supplied at case-create time, and which column on `practitioner` is the resolution target — `license_number`, a new dedicated `submitter_id` column, or something else? Whichever column is chosen must be unique per tenant for unambiguous lookup; add an appropriate UNIQUE constraint once decided.
-3. **`org_id` required vs nullable.** The proposal keeps it nullable to allow tenant-wide practitioners. Confirm this matches operational reality, or tighten to NOT NULL.
-4. **Global identity bridge.** Do we anticipate needing "this CBTN practitioner is the same person as that UDN practitioner" for reporting or de-duplication? If yes, a nullable `external_id` can be added later without schema rework.
-5. **Picker filter on `can_be_assigned_as_prescriber`.** Strict filtering (only show practitioners with the action) is safest but may exclude valid external prescribers. Confirm the picker shows all `active` practitioners by default and uses the action only for User-linked candidates.
+2. **`practitioner_submitter_id` format and resolution field.** What is the format of the external identifier supplied at case-create time, and which column on `practitioner` is the resolution target — `license_number`, a new dedicated `submitter_id` column, or something else? Whichever column is chosen must be unique per tenant for unambiguous lookup; add an appropriate UNIQUE constraint once decided.
+3. **Global identity bridge.** Do we anticipate needing "this CBTN practitioner is the same person as that UDN practitioner" for reporting or de-duplication? If yes, a nullable `external_id` can be added later without schema rework.
