@@ -25,7 +25,7 @@ type NoteContainerBaseProps = {
   caseId: number;
   seqId: number;
   taskId: number;
-  occurenceId: string;
+  occurrenceId: string;
 };
 
 export type NotesContainerProps = NoteContainerBaseProps & {
@@ -39,7 +39,7 @@ async function fetchNotes(input: GetOccurrenceNoteInput) {
     input.caseId,
     input.seqId,
     input.taskId,
-    input.occurenceId,
+    input.occurrenceId,
   );
   return response.data;
 }
@@ -66,7 +66,7 @@ function NotesContainer({ enableEmptyIcon = false, ...props }: NotesContainerPro
       caseId: props.caseId,
       seqId: props.seqId,
       taskId: props.taskId,
-      occurenceId: props.occurenceId,
+      occurrenceId: props.occurrenceId,
     },
     fetchNotes,
     {
@@ -85,7 +85,7 @@ function NotesContainer({ enableEmptyIcon = false, ...props }: NotesContainerPro
         case_id: props.caseId,
         seq_id: props.seqId,
         task_id: props.taskId,
-        occurrence_id: props.occurenceId,
+        occurrence_id: props.occurrenceId,
         content,
       })
       .then(() => {

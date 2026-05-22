@@ -205,7 +205,7 @@ export function SomaticOccurrenceSheetContent({
                 caseId={caseId}
                 seqId={occurrence.seq_id}
                 taskId={occurrence.task_id}
-                occurenceId={occurrence.locus_id}
+                occurrenceId={occurrence.locus_id}
               />
             </NotesProvider>
             {!occurrence.has_interpretation && (

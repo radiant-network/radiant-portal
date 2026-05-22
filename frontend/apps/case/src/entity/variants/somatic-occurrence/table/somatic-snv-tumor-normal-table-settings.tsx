@@ -21,7 +21,7 @@ import { Badge } from '@/components/base/shadcn/badge';
 import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
 import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
-import VariantNoteCell from '../../table/cells/variant-note-cell';
+import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
 import SomaticInterpretationDialog from '../interpretation/somatic-interpretation-dialog';
 
 import SomaticActionsCell from './cells/somatic-actions-cell';
@@ -49,7 +49,12 @@ function getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId }: SomaticSN
             patientId={patientId}
             InterpretationDialog={SomaticInterpretationDialog}
           />
-          <VariantNoteCell occurrence={info.getValue()} />
+          <OccurrenceNoteCell
+            taskId={info.row.original.task_id}
+            seqId={info.row.original.seq_id}
+            occurrenceId={info.row.original.locus_id}
+            hasNote={info.row.original.has_note}
+          />
           <OccurrenceFlagCell
             caseId={caseEntity?.case_id}
             taskId={info.row.original.task_id}
