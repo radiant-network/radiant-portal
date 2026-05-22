@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Flag, LucideIcon, Pin, Star } from 'lucide-react';
+import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
 
 import { OccurrenceFlagType } from '@/api/api';
@@ -133,6 +134,10 @@ function OccurrenceFlagDropdown({
                     })
                     .then(() => {
                       list?.mutate();
+                    })
+                    .catch(() => {
+                      setSelectedFlag(flag ?? null);
+                      toast.error(t('occurrence_flag.error'));
                     });
                   return;
                 }
@@ -147,6 +152,10 @@ function OccurrenceFlagDropdown({
                   })
                   .then(() => {
                     list?.mutate();
+                  })
+                  .catch(() => {
+                    setSelectedFlag(flag ?? null);
+                    toast.error(t('occurrence_flag.error'));
                   });
                 setSelectedFlag(key as OccurrenceFlagType);
               }}

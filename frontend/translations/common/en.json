@@ -1696,7 +1696,8 @@
   "occurrence_flag": {
     "flag": "Flag",
     "pin": "Pin",
-    "star": "Star"
+    "star": "Star",
+    "error": "Update failed. Please try again."
   },
   "notes": {
     "variant": {
