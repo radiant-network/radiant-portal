@@ -223,17 +223,17 @@ const facetListConfig: PortalConfig = {
   },
   somatic_snv_to_occurrence: {
     app_id: ApplicationId.somatic_snv_to_occurrence,
-    saved_filter_type: 'somatic_snv_occurrence',
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
     aggregations: {},
   },
   somatic_snv_tn_occurrence: {
     app_id: ApplicationId.somatic_snv_tn_occurrence,
-    saved_filter_type: 'somatic_snv_occurrence',
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
     aggregations: {},
   },
   somatic_cnv_to_occurrence: {
     app_id: ApplicationId.somatic_cnv_to_occurrence,
-    saved_filter_type: 'somatic_snv_occurrence',
+    saved_filter_type: SavedFilterType.SOMATIC_CNV_OCCURRENCE,
     aggregations: {},
   },
   admin: {
