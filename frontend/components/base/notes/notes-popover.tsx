@@ -10,12 +10,13 @@ import NotesContainer, { NotesContainerProps } from './notes-container';
 
 type NotesPopoverProps = NotesContainerProps & {
   hasNotes: boolean;
+  loading?: boolean;
 };
 
 /**
  * Simple call to see if has comment
  */
-function NotesPopover({ hasNotes, ...props }: NotesPopoverProps) {
+function NotesPopover({ hasNotes, loading = false, ...props }: NotesPopoverProps) {
   const { t } = useI18n();
 
   /*
@@ -31,7 +32,7 @@ function NotesPopover({ hasNotes, ...props }: NotesPopoverProps) {
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
-              <Button className="relative size-6" iconOnly variant="ghost">
+              <Button className="relative size-6" iconOnly variant="ghost" loading={loading}>
                 <MessageSquare
                   className={hasNotes ? 'text-primary fill-primary/20' : 'text-muted-foreground/40'}
                   size={16}

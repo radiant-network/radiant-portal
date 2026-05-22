@@ -37,7 +37,7 @@ const meta = {
     caseId: 1,
     seqId: 1,
     taskId: 1,
-    occurenceId: '1',
+    occurrenceId: '1',
   },
   decorators: [
     Story => (

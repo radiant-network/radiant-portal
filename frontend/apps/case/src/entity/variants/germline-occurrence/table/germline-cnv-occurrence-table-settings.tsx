@@ -11,6 +11,7 @@ import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-he
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
 
 import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
+import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
 
 import ClingenCell from './cells/clingen-cell';
 import CNVNameCell from './cells/cnv-name-cell';
@@ -29,6 +30,12 @@ function getCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenceTableSe
       id: 'row-info',
       cell: info => (
         <div className="flex items-center gap-1">
+          <OccurrenceNoteCell
+            taskId={info.row.original.task_id}
+            occurrenceId={info.row.original.cnv_id}
+            seqId={info.row.original.seq_id}
+            hasNote={info.row.original.has_note}
+          />
           <OccurrenceFlagCell
             caseId={caseEntity?.case_id}
             taskId={info.row.original.task_id}
@@ -39,7 +46,7 @@ function getCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenceTableSe
         </div>
       ),
       header: () => null,
-      size: 32,
+      size: 64,
       enablePinning: false,
       enableResizing: false,
       enableSorting: false,
