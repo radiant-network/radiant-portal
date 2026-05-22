@@ -59,7 +59,7 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
         }}
       />
       {activeInterface == SomaticVariantInterface.SNV_TN && (
-        <SNVTumorNormalTab seqId={seqId} patientSelected={patientSelected} caseEntity={caseEntity} />
+        <SNVTumorNormalTab key={seqId} seqId={seqId} patientSelected={patientSelected} caseEntity={caseEntity} />
       )}
     </div>
   );
