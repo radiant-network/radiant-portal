@@ -667,6 +667,7 @@ components:
       required:
       - clinvar_id
       - locus_id
+      - review_status_stars
       type: object
     ClinvarVariantConditions:
       properties:

@@ -1270,7 +1270,7 @@ export interface ClinvarRCV {
      * @type {number}
      * @memberof ClinvarRCV
      */
-    'review_status_stars'?: number;
+    'review_status_stars': number;
     /**
      * 
      * @type {number}
