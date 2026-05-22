@@ -47,7 +47,7 @@ const config: PortalConfig = {
 const meta = {
   title: 'Indicators/ConsequenceIndicator',
   component: ConsequenceIndicator,
-  args: {},
+  args: { consequence: 'missense_variant', vepImpact: VepImpact.MODERATE },
   decorators: [
     Story => (
       <BrowserRouter>

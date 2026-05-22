@@ -47,7 +47,7 @@ const config: PortalConfig = {
 const meta = {
   title: 'Informations/RelationshipToProbandField',
   component: RelationshipToProbandField,
-  args: {},
+  args: { relationship: 'proband' },
   decorators: [
     Story => (
       <BrowserRouter>
