@@ -9048,7 +9048,7 @@ value?: string[]</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NotesPopover</h2>
       <div class="badges">
-        <label for="c-46-notes-popover-props" class="badge ok as-toggle">6 prop types</label>
+        <label for="c-46-notes-popover-props" class="badge ok as-toggle">7 prop types</label>
         
         <label for="c-46-notes-popover-stories" class="badge ok as-toggle">3 stories</label>
         
@@ -9075,7 +9075,7 @@ value?: string[]</code></pre>
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">6 prop types</span>
+              <span class="badge ok">7 prop types</span>
             </div>
             <pre><code>Component: base/notes/notes-popover.tsx::default</code></pre>
             <pre><code>Props:</code></pre>
@@ -9085,7 +9085,9 @@ enableEmptyIcon?: boolean
 
 hasNotes: boolean
 
-occurenceId: string
+loading?: boolean = false
+
+occurrenceId: string
 
 seqId: number
 
@@ -9113,7 +9115,7 @@ import { ConfigProvider, LoginContext, NotesPopover } from "components";</code><
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;NotesPopover hasNotes caseId={1} seqId={1} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;NotesPopover hasNotes caseId={1} seqId={1} taskId={1} occurrenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -9122,7 +9124,7 @@ import { ConfigProvider, LoginContext, NotesPopover } from "components";</code><
               </div>
               
               
-              <pre><code>const Loading = () =&gt; &lt;NotesPopover hasNotes caseId={1} seqId={2} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Loading = () =&gt; &lt;NotesPopover hasNotes caseId={1} seqId={2} taskId={1} occurrenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -9131,7 +9133,7 @@ import { ConfigProvider, LoginContext, NotesPopover } from "components";</code><
               </div>
               
               
-              <pre><code>const Empty = () =&gt; &lt;NotesPopover hasNotes={false} caseId={1} seqId={3} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Empty = () =&gt; &lt;NotesPopover hasNotes={false} caseId={1} seqId={3} taskId={1} occurrenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
         </div>
     
@@ -9191,7 +9193,7 @@ import { ConfigProvider, LoginContext, NotesPopover } from "components";</code><
 
 enableEmptyIcon?: boolean
 
-occurenceId: string
+occurrenceId: string
 
 seqId: number
 
@@ -9219,7 +9221,7 @@ import { ConfigProvider, LoginContext, NotesSliderSheet } from "components";</co
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;NotesSliderSheet caseId={1} seqId={1} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;NotesSliderSheet caseId={1} seqId={1} taskId={1} occurrenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -9228,7 +9230,7 @@ import { ConfigProvider, LoginContext, NotesSliderSheet } from "components";</co
               </div>
               
               
-              <pre><code>const Loading = () =&gt; &lt;NotesSliderSheet caseId={1} seqId={3} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Loading = () =&gt; &lt;NotesSliderSheet caseId={1} seqId={3} taskId={1} occurrenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -9237,7 +9239,7 @@ import { ConfigProvider, LoginContext, NotesSliderSheet } from "components";</co
               </div>
               
               
-              <pre><code>const Empty = () =&gt; &lt;NotesSliderSheet caseId={1} seqId={4} taskId={1} occurenceId=&quot;1&quot; /&gt;;</code></pre>
+              <pre><code>const Empty = () =&gt; &lt;NotesSliderSheet caseId={1} seqId={4} taskId={1} occurrenceId=&quot;1&quot; /&gt;;</code></pre>
             </div>
         </div>
     
