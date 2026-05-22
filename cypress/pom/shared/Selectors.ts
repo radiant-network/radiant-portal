@@ -81,6 +81,7 @@ export const CommonSelectors = {
   tableCellHead: 'th',
   tableHead: (id?: string) => `table${id || ''} thead`,
   tableHeadCell: (id?: string) => `table${id || ''} thead th`,
+  tableIndexResult: '[data-cy="table-index-result"]',
   tableRow: (id?: string) => `table${id || ''} tbody tr`,
   tag: (color: string) => `[class*="bg-${color}/20 text-${color}-foreground"]`,
   tagBlank: '[class*="text-foreground"]',
