@@ -1690,6 +1690,11 @@
       }
     }
   },
+  "occurrence_flag": {
+    "flag": "Drapeau",
+    "pin": "Épingle",
+    "star": "Étoile"
+  },
   "notes": {
     "variant": {
       "title": "Commentaires sur le variant",

@@ -1,3 +1,4 @@
+import { CaseEntity } from '@/api/api';
 import { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
@@ -11,9 +12,10 @@ import { defaultCNVSettings, getCNVOccurrenceColumns } from './table/germline-cn
 
 type CNVTabProps = {
   seqId: number;
+  caseEntity?: CaseEntity;
 };
 
-function CNVTab({ seqId }: CNVTabProps) {
+function CNVTab({ seqId, caseEntity }: CNVTabProps) {
   const { t } = useI18n();
   const config = useConfig();
   const caseId = useCaseIdFromParam();
@@ -35,7 +37,7 @@ function CNVTab({ seqId }: CNVTabProps) {
     >
       <QueryBuilderDataTable
         id={appId}
-        columns={getCNVOccurrenceColumns(t)}
+        columns={getCNVOccurrenceColumns({ t, caseEntity })}
         defaultColumnSettings={defaultCNVSettings}
         defaultPageSize={30}
         enableColumnOrdering
