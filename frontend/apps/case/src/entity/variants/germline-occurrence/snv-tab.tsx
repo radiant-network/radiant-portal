@@ -44,6 +44,7 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
     >
       <QueryBuilderDataTable
         id={appId}
+        swrId={seqId}
         columns={getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId: patient?.patient_id })}
         defaultColumnSettings={defaultGermlineSNVSettings}
         defaultPageSize={30}

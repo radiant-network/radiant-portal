@@ -1,5 +1,5 @@
 /* eslint-disable complexity */
-import { createContext, Dispatch, useContext, useReducer } from 'react';
+import { createContext, Dispatch, useContext, useMemo, useReducer } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
 import { v4 } from 'uuid';
 
@@ -742,11 +742,13 @@ export function qBReducer(context: IQBContext, action: ActionType) {
 type QBProviderProps = IQBContext & {
   children: React.ReactElement;
 };
-export function QBProvider({ children, ...props }: QBProviderProps) {
-  const [value, dispatch] = useReducer(qBReducer, props);
+export function QBProvider({ children, fetcher, aggregations, ...rest }: QBProviderProps) {
+  const [value, dispatch] = useReducer(qBReducer, { ...rest, fetcher, aggregations });
+
+  const contextValue = useMemo(() => ({ ...value, fetcher, aggregations }), [value, fetcher, aggregations]);
 
   return (
-    <QBContext value={value}>
+    <QBContext value={contextValue}>
       <QBDispatchContext value={dispatch}>{children}</QBDispatchContext>
     </QBContext>
   );

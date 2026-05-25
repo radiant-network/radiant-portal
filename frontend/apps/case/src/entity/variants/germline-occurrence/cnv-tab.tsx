@@ -40,6 +40,7 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
     >
       <QueryBuilderDataTable
         id={appId}
+        swrId={seqId}
         columns={getGermlineCNVOccurrenceColumns({ t, caseEntity })}
         defaultColumnSettings={defaultGermlineCNVSettings}
         defaultPageSize={30}
