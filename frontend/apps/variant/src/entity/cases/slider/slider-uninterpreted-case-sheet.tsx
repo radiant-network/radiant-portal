@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
 
-import { VariantUninterpretedCase } from '@/api/api';
+import { CaseTasksWithOccurrencesDataTypeEnum, VariantUninterpretedCase } from '@/api/api';
 import Empty from '@/components/base/empty';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
@@ -15,6 +15,7 @@ import SliderSheet from '@/components/base/slider/slider-sheet';
 import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { useFirstOccurrenceTaskId } from '@/components/hooks/use-first-occurrence-task-id';
 
 type CaseSliderSheetProps = {
   case?: VariantUninterpretedCase;
@@ -70,9 +71,14 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
   const params = useParams<{ locusId: string }>();
   const locusId = params.locusId!;
 
-  const { expandResult, caseResult, isLoading } = useCase(caseData.case_id, caseData.seq_id, locusId);
+  const { taskId } = useFirstOccurrenceTaskId(
+    caseData.case_id,
+    caseData.seq_id,
+    CaseTasksWithOccurrencesDataTypeEnum.GermlineSnv,
+  );
+  const { expandResult, caseResult, isLoading } = useCase(caseData.case_id, caseData.seq_id, taskId ?? 0, locusId);
 
-  if (isLoading || !expandResult.data || !caseResult.data) {
+  if (taskId === undefined || isLoading || !expandResult.data || !caseResult.data) {
     return <SliderSheetSkeleton />;
   }
 

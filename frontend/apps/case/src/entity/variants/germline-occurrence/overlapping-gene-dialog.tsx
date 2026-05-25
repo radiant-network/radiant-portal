@@ -24,6 +24,7 @@ import {
 type OverlappingGenesInput = {
   caseId: number;
   seqId: number;
+  taskId: number;
   cnvId: string;
 };
 
@@ -36,7 +37,7 @@ export function useCNVOverlappingGenesListHelper(input: OverlappingGenesInput) {
   const fetch = useCallback(
     async () =>
       occurrencesApi
-        .listGermlineCNVGenesOverlap(input.caseId, input.seqId, input.cnvId)
+        .listGermlineCNVGenesOverlap(input.caseId, input.seqId, input.taskId, input.cnvId)
         .then(response => response.data),
     [input],
   );
@@ -55,6 +56,7 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
   const { fetch: fetchCNVOverlappingListHelper } = useCNVOverlappingGenesListHelper({
     caseId,
     seqId,
+    taskId: occurrence.task_id,
     cnvId: occurrence.cnv_id,
   });
 

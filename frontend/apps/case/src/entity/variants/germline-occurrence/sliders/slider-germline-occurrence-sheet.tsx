@@ -97,6 +97,7 @@ export function GermlineOccurrenceSheetContent({
   const { patient, caseResult, caseSequencing, expandResult, isLoading } = useGermlineOccurrenceAndCase(
     caseId,
     occurrence.seq_id,
+    occurrence.task_id,
     occurrence.locus_id.toString(),
     patientSelected,
   );
@@ -162,6 +163,7 @@ export function GermlineOccurrenceSheetContent({
               <GermlineInterpretationDialog
                 isCreation
                 locusId={occurrence.locus_id}
+                taskId={occurrence.task_id}
                 transcriptId={occurrence.transcript_id}
                 patientId={patient?.patient_id}
                 handleSaveCallback={handleInterpretationSaved}
@@ -189,6 +191,7 @@ export function GermlineOccurrenceSheetContent({
           actions={
             <GermlineInterpretationDialog
               locusId={occurrence.locus_id}
+              taskId={occurrence.task_id}
               transcriptId={expandResult.data.transcript_id}
               patientId={patient?.patient_id}
               handleSaveCallback={handleInterpretationSaved}
