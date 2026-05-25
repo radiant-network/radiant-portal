@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import TransmissionModeBadge, { getTransmissionModeList } from '@/components/base/badges/transmission-mode-badge';
+import { useI18n } from '@/components/hooks/i18n';
 
 const meta = {
   title: 'Badges/Transmission Mode Badge',
@@ -17,8 +18,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => {
-    // eslint-disable-next-line prettier/prettier
-    const list = getTransmissionModeList(() => { });
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { t } = useI18n();
+    const list = getTransmissionModeList(t);
     return (
       <div className="flex flex-col gap-2 items-start">
         {list.map(transmission => (

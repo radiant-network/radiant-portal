@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { http } from 'msw';
 import { mocked } from 'storybook/test';
 
-import { GermlineSNVOccurrence } from '@/api/api';
+import { GermlineSNVOccurrence, SavedFilterType } from '@/api/api';
 import { GermlineOccurrenceSheetContent } from '@/apps/case/src/entity/variants/germline-occurrence/sliders/slider-germline-occurrence-sheet';
 import SliderSheet from '@/components/base/slider/slider-sheet';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
@@ -23,27 +23,27 @@ const config: PortalConfig = {
   },
   germline_snv_occurrence: {
     app_id: ApplicationId.germline_snv_occurrence,
-    saved_filter_type: 'germline_snv_occurrence',
+    saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
     aggregations: {},
   },
   germline_cnv_occurrence: {
     app_id: ApplicationId.germline_cnv_occurrence,
-    saved_filter_type: 'germline_cnv_occurrence',
+    saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
     aggregations: {},
   },
   somatic_snv_to_occurrence: {
     app_id: ApplicationId.somatic_snv_to_occurrence,
-    saved_filter_type: 'somatic_snv_occurrence',
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
     aggregations: {},
   },
   somatic_snv_tn_occurrence: {
     app_id: ApplicationId.somatic_snv_tn_occurrence,
-    saved_filter_type: 'somatic_snv_occurrence',
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
     aggregations: {},
   },
   somatic_cnv_to_occurrence: {
     app_id: ApplicationId.somatic_cnv_to_occurrence,
-    saved_filter_type: 'somatic_snv_occurrence',
+    saved_filter_type: SavedFilterType.SOMATIC_CNV_OCCURRENCE,
     aggregations: {},
   },
   portal: {
