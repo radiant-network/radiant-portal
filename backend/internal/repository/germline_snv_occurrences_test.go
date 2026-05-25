@@ -190,6 +190,34 @@ func Test_Germline_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *t
 	})
 }
 
+// Reproduces the cross-case leak scenario: the `multiple` fixture has two rows
+// at seq_id=1 with different task_ids — task_id=1 for case 1's annotation,
+// task_id=200 simulating a second case that reuses the same sequencing. The
+// repository must filter on task_id so each case sees only its own occurrence.
+func Test_Germline_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
+	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineSNVOccurrencesRepository(db)
+		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+
+		// Case 1 (annotation task_id=1) sees its own loci at seq_id=1, not the
+		// row attached to task_id=200.
+		case1Occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		assert.NoError(t, err)
+		for _, occ := range case1Occurrences {
+			assert.NotEqual(t, "5000", occ.LocusId, "task_id=1 query must not return case 2's occurrence (locus 5000)")
+		}
+
+		// Case 2 (annotation task_id=200, reusing seq_id=1) sees only the
+		// task_id=200 row, not case 1's loci 1000/2000.
+		case2Occurrences, err := repo.GetOccurrences(2, 1, 200, query)
+		assert.NoError(t, err)
+		if assert.Len(t, case2Occurrences, 1) {
+			assert.EqualValues(t, "5000", case2Occurrences[0].LocusId)
+		}
+	})
+}
+
 func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_Matching_Array(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)

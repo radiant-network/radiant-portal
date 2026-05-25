@@ -177,6 +177,33 @@ func Test_GermlineCNV_CountOccurrences(t *testing.T) {
 	})
 }
 
+// Reproduces the cross-case leak scenario: the `multiple` fixture has two CNVs
+// at seq_id=1 with different task_ids — task_id=1 for case 1's calling task,
+// task_id=201 simulating a second case that reuses the same sequencing. The
+// repository must filter on task_id so each case sees only its own CNV.
+func Test_GermlineCNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
+	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
+		repo := NewGermlineCNVOccurrencesRepository(db)
+		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
+		assert.NoError(t, err)
+
+		// Case 1 (task_id=1) sees its CNV1/CNV2 at seq_id=1, not the row
+		// attached to task_id=201.
+		case1Occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		assert.NoError(t, err)
+		for _, occ := range case1Occurrences {
+			assert.NotEqual(t, "CNV_SHARED", occ.Name, "task_id=1 query must not return case 2's CNV")
+		}
+
+		// Case 2 (task_id=201, reusing seq_id=1) sees only the task_id=201 row.
+		case2Occurrences, err := repo.GetOccurrences(2, 1, 201, query)
+		assert.NoError(t, err)
+		if assert.Len(t, case2Occurrences, 1) {
+			assert.Equal(t, "CNV_SHARED", case2Occurrences[0].Name)
+		}
+	})
+}
+
 func Test_GermlineCNV_CountOccurrences_With_Filtering(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineCNVOccurrencesRepository(db)

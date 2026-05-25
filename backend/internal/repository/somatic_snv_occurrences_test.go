@@ -137,6 +137,34 @@ func Test_Somatic_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *te
 	})
 }
 
+// Reproduces the cross-case leak scenario: the `multiple` fixture has two
+// rows at tumor_seq_id=74 with different task_ids — task_id=74 for case 71's
+// somatic annotation, task_id=202 simulating a second case (72) that reuses
+// the same sequencing. The repository must filter on task_id so each case
+// sees only its own occurrence.
+func Test_Somatic_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
+	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
+		repo := NewSomaticSNVOccurrencesRepository(db)
+		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+
+		// Case 71 (task_id=74) sees its own loci, not the task_id=202 row.
+		case71Occurrences, err := repo.GetOccurrences(71, 74, 74, query)
+		assert.NoError(t, err)
+		for _, occ := range case71Occurrences {
+			assert.NotEqual(t, "5000", occ.LocusId, "task_id=74 query must not return case 72's occurrence (locus 5000)")
+		}
+
+		// Case 72 (task_id=202, reusing tumor_seq_id=74) sees only the
+		// task_id=202 row, not case 71's loci 1000/2000/3000.
+		case72Occurrences, err := repo.GetOccurrences(72, 74, 202, query)
+		assert.NoError(t, err)
+		if assert.Len(t, case72Occurrences, 1) {
+			assert.EqualValues(t, "5000", case72Occurrences[0].LocusId)
+		}
+	})
+}
+
 func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB) {
 		repo := NewSomaticSNVOccurrencesRepository(starrocks)
