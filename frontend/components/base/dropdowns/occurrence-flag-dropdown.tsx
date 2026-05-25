@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Flag, LucideIcon, Pin, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
@@ -100,6 +100,11 @@ function OccurrenceFlagDropdown({
   );
   const [selectedFlag, setSelectedFlag] = useState<OccurrenceFlagType | null>(flag ?? null);
   const selectedFlagConfig = selectedFlag ? FLAGS[selectedFlag] : null;
+
+  // Prevent data-table cache to reset to previous value
+  useEffect(() => {
+    setSelectedFlag(flag ?? null);
+  }, [flag, caseId, taskId, seqId, occurrenceId]);
 
   return (
     <DropdownMenu>
