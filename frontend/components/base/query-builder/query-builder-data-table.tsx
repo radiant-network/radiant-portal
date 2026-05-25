@@ -12,14 +12,14 @@ import { useQBActiveQuery, useQBContext } from './hooks/use-query-builder';
 
 type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'> & {
   defaultPageSize?: number;
-  scope?: string | number;
+  swrId?: string | number;
 };
 
 /**
  * Wrapper for data-table
  * Used to access QBContext and create list and count query
  */
-function QueryBuilderDataTable<T>({ defaultPageSize = 10, scope, ...props }: QueryBuilderDataTableProps<T>) {
+function QueryBuilderDataTable<T>({ defaultPageSize = 10, swrId, ...props }: QueryBuilderDataTableProps<T>) {
   const activeQuery = useQBActiveQuery();
   const { fetcher } = useQBContext();
 
@@ -31,11 +31,11 @@ function QueryBuilderDataTable<T>({ defaultPageSize = 10, scope, ...props }: Que
 
   const [sorting, setSorting] = useState<SortBody[]>([]);
 
-  const scopedId = scope !== undefined ? `${props.id}:${scope}` : props.id;
+  const swrKey = swrId !== undefined ? `${props.id}:${swrId}` : props.id;
 
   const fetchList = useSWR<any[]>(
     {
-      id: scopedId,
+      id: swrKey,
       listBody: {
         additional_fields: additionalFields,
         limit: pagination.pageSize,
@@ -57,7 +57,7 @@ function QueryBuilderDataTable<T>({ defaultPageSize = 10, scope, ...props }: Que
 
   const fetchCount = useSWR<Count>(
     {
-      id: scopedId,
+      id: swrKey,
       countBody: {
         sqon: {
           content: activeQuery.content as SqonContent,
