@@ -191,7 +191,7 @@ export const CasesTable = {
   actions: {
     /**
      * Click the specific button to change table paging
-     * @param buttonName The button name to click (First | Last | Previous | Next | Select)
+     * @param buttonName The button name to click (first | last | previous | next | select)
      */
     clickPaginationButton(buttonName: string) {
       cy.waitWhileLoad(60 * 1000);
@@ -436,7 +436,7 @@ export const CasesTable = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('searchRequest2');
-      CasesTable.actions.clickPaginationButton('Next');
+      CasesTable.actions.clickPaginationButton('next');
       cy.wait('@searchRequest2');
       cy.waitWhileLoad(60 * 1000);
 
@@ -445,7 +445,7 @@ export const CasesTable = {
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('searchRequest3');
-      CasesTable.actions.clickPaginationButton('Previous');
+      CasesTable.actions.clickPaginationButton('previous');
       cy.wait('@searchRequest3');
       cy.waitWhileLoad(60 * 1000);
 
@@ -454,7 +454,7 @@ export const CasesTable = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('searchRequest4');
-      CasesTable.actions.clickPaginationButton('Next');
+      CasesTable.actions.clickPaginationButton('next');
       cy.wait('@searchRequest4');
       cy.waitWhileLoad(60 * 1000);
 
@@ -463,7 +463,7 @@ export const CasesTable = {
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('searchRequest5');
-      CasesTable.actions.clickPaginationButton('First');
+      CasesTable.actions.clickPaginationButton('first');
       cy.wait('@searchRequest5');
     },
     /**

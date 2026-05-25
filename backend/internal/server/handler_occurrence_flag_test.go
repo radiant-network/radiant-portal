@@ -11,15 +11,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) Upsert(flag types.OccurrenceFlag) (*types.OccurrenceFlag, error) {
-	if flag.OccurrenceID == "trigger-upsert-error" {
-		return nil, fmt.Errorf("mock upsert error")
-	}
-	return &flag, nil
+type mockOccurrenceFlagsRepo struct {
+	upsertErr      error
+	deleteAffected int64
+	deleteErr      error
+}
+
+func (m *mockOccurrenceFlagsRepo) Upsert(flag types.OccurrenceFlag) (*types.OccurrenceFlag, error) {
+	return &flag, m.upsertErr
+}
+
+func (m *mockOccurrenceFlagsRepo) Delete(caseID, seqID, taskID int, occurrenceID string) (int64, error) {
+	return m.deleteAffected, m.deleteErr
 }
 
 func Test_UpsertOccurrenceFlagHandler(t *testing.T) {
-	repo := &MockRepository{}
+	repo := &mockOccurrenceFlagsRepo{}
 	router := gin.Default()
 	router.POST("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
@@ -31,7 +38,7 @@ func Test_UpsertOccurrenceFlagHandler(t *testing.T) {
 }
 
 func Test_UpsertOccurrenceFlagHandler_InvalidCaseID(t *testing.T) {
-	repo := &MockRepository{}
+	repo := &mockOccurrenceFlagsRepo{}
 	router := gin.Default()
 	router.POST("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
@@ -43,7 +50,7 @@ func Test_UpsertOccurrenceFlagHandler_InvalidCaseID(t *testing.T) {
 }
 
 func Test_UpsertOccurrenceFlagHandler_InvalidSeqID(t *testing.T) {
-	repo := &MockRepository{}
+	repo := &mockOccurrenceFlagsRepo{}
 	router := gin.Default()
 	router.POST("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
@@ -55,7 +62,7 @@ func Test_UpsertOccurrenceFlagHandler_InvalidSeqID(t *testing.T) {
 }
 
 func Test_UpsertOccurrenceFlagHandler_InvalidTaskID(t *testing.T) {
-	repo := &MockRepository{}
+	repo := &mockOccurrenceFlagsRepo{}
 	router := gin.Default()
 	router.POST("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
@@ -67,7 +74,7 @@ func Test_UpsertOccurrenceFlagHandler_InvalidTaskID(t *testing.T) {
 }
 
 func Test_UpsertOccurrenceFlagHandler_InvalidFlagType(t *testing.T) {
-	repo := &MockRepository{}
+	repo := &mockOccurrenceFlagsRepo{}
 	router := gin.Default()
 	router.POST("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
@@ -79,7 +86,7 @@ func Test_UpsertOccurrenceFlagHandler_InvalidFlagType(t *testing.T) {
 }
 
 func Test_UpsertOccurrenceFlagHandler_MissingFlagType(t *testing.T) {
-	repo := &MockRepository{}
+	repo := &mockOccurrenceFlagsRepo{}
 	router := gin.Default()
 	router.POST("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
@@ -91,11 +98,83 @@ func Test_UpsertOccurrenceFlagHandler_MissingFlagType(t *testing.T) {
 }
 
 func Test_UpsertOccurrenceFlagHandler_RepositoryError(t *testing.T) {
-	repo := &MockRepository{}
+	repo := &mockOccurrenceFlagsRepo{upsertErr: fmt.Errorf("mock upsert error")}
 	router := gin.Default()
 	router.POST("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
-	req, _ := http.NewRequest("POST", "/occurrences/flags/1/2/3/trigger-upsert-error?flag_type=flag", nil)
+	req, _ := http.NewRequest("POST", "/occurrences/flags/1/2/3/10000?flag_type=flag", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func Test_DeleteOccurrenceFlagHandler(t *testing.T) {
+	repo := &mockOccurrenceFlagsRepo{deleteAffected: 1}
+	router := gin.Default()
+	router.DELETE("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
+
+	req, _ := http.NewRequest("DELETE", "/occurrences/flags/1/2/3/10000", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNoContent, w.Code)
+}
+
+func Test_DeleteOccurrenceFlagHandler_NotFound(t *testing.T) {
+	repo := &mockOccurrenceFlagsRepo{deleteAffected: 0}
+	router := gin.Default()
+	router.DELETE("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
+
+	req, _ := http.NewRequest("DELETE", "/occurrences/flags/1/2/3/10000", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_DeleteOccurrenceFlagHandler_InvalidCaseID(t *testing.T) {
+	repo := &mockOccurrenceFlagsRepo{}
+	router := gin.Default()
+	router.DELETE("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
+
+	req, _ := http.NewRequest("DELETE", "/occurrences/flags/abc/2/3/10000", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_DeleteOccurrenceFlagHandler_InvalidSeqID(t *testing.T) {
+	repo := &mockOccurrenceFlagsRepo{}
+	router := gin.Default()
+	router.DELETE("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
+
+	req, _ := http.NewRequest("DELETE", "/occurrences/flags/1/abc/3/10000", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_DeleteOccurrenceFlagHandler_InvalidTaskID(t *testing.T) {
+	repo := &mockOccurrenceFlagsRepo{}
+	router := gin.Default()
+	router.DELETE("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
+
+	req, _ := http.NewRequest("DELETE", "/occurrences/flags/1/2/abc/10000", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func Test_DeleteOccurrenceFlagHandler_RepositoryError(t *testing.T) {
+	repo := &mockOccurrenceFlagsRepo{deleteErr: fmt.Errorf("mock delete error")}
+	router := gin.Default()
+	router.DELETE("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
+
+	req, _ := http.NewRequest("DELETE", "/occurrences/flags/1/2/3/10000", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

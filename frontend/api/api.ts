@@ -1270,7 +1270,7 @@ export interface ClinvarRCV {
      * @type {number}
      * @memberof ClinvarRCV
      */
-    'review_status_stars'?: number;
+    'review_status_stars': number;
     /**
      * 
      * @type {number}
@@ -2548,6 +2548,12 @@ export interface GermlineCNVOccurrence {
     'filter'?: string;
     /**
      * 
+     * @type {OccurrenceFlagType}
+     * @memberof GermlineCNVOccurrence
+     */
+    'flag_type'?: OccurrenceFlagType;
+    /**
+     * 
      * @type {number}
      * @memberof GermlineCNVOccurrence
      */
@@ -2661,6 +2667,8 @@ export interface GermlineCNVOccurrence {
      */
     'type': string;
 }
+
+
 /**
  * GermlineSNVOccurrence represents a germline SNV occurrence
  * @export
@@ -2733,6 +2741,12 @@ export interface GermlineSNVOccurrence {
      * @memberof GermlineSNVOccurrence
      */
     'filter'?: string;
+    /**
+     * 
+     * @type {OccurrenceFlagType}
+     * @memberof GermlineSNVOccurrence
+     */
+    'flag_type'?: OccurrenceFlagType;
     /**
      * 
      * @type {number}
@@ -3614,6 +3628,21 @@ export interface ObservationTextBatch {
 /**
  * 
  * @export
+ * @enum {string}
+ */
+
+export const OccurrenceFlagType = {
+    OccurrenceFlagTypeFlag: 'flag',
+    OccurrenceFlagTypePin: 'pin',
+    OccurrenceFlagTypeStar: 'star'
+} as const;
+
+export type OccurrenceFlagType = typeof OccurrenceFlagType[keyof typeof OccurrenceFlagType];
+
+
+/**
+ * 
+ * @export
  * @interface OccurrenceNote
  */
 export interface OccurrenceNote {
@@ -4450,6 +4479,12 @@ export interface SomaticSNVOccurrence {
      * @memberof SomaticSNVOccurrence
      */
     'end': number;
+    /**
+     * 
+     * @type {OccurrenceFlagType}
+     * @memberof SomaticSNVOccurrence
+     */
+    'flag_type'?: OccurrenceFlagType;
     /**
      * 
      * @type {number}
@@ -8482,6 +8517,56 @@ export class MondoApi extends BaseAPI {
 export const OccurrenceFlagsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
+         * @summary Delete the flag on an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Seq ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOccurrenceFlag: async (caseId: number, seqId: number, taskId: number, occurrenceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('deleteOccurrenceFlag', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('deleteOccurrenceFlag', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('deleteOccurrenceFlag', 'taskId', taskId)
+            // verify required parameter 'occurrenceId' is not null or undefined
+            assertParamExists('deleteOccurrenceFlag', 'occurrenceId', occurrenceId)
+            const localVarPath = `/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}`
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
+                .replace(`{${"occurrence_id"}}`, encodeURIComponent(String(occurrenceId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
          * @summary Set or change the flag on an occurrence
          * @param {number} caseId Case ID
@@ -8549,6 +8634,22 @@ export const OccurrenceFlagsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = OccurrenceFlagsApiAxiosParamCreator(configuration)
     return {
         /**
+         * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
+         * @summary Delete the flag on an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Seq ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOccurrenceFlag(caseId, seqId, taskId, occurrenceId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrenceFlagsApi.deleteOccurrenceFlag']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
          * @summary Set or change the flag on an occurrence
          * @param {number} caseId Case ID
@@ -8576,6 +8677,19 @@ export const OccurrenceFlagsApiFactory = function (configuration?: Configuration
     const localVarFp = OccurrenceFlagsApiFp(configuration)
     return {
         /**
+         * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
+         * @summary Delete the flag on an occurrence
+         * @param {number} caseId Case ID
+         * @param {number} seqId Seq ID
+         * @param {number} taskId Task ID
+         * @param {string} occurrenceId Occurrence ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteOccurrenceFlag(caseId, seqId, taskId, occurrenceId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
          * @summary Set or change the flag on an occurrence
          * @param {number} caseId Case ID
@@ -8599,6 +8713,21 @@ export const OccurrenceFlagsApiFactory = function (configuration?: Configuration
  * @extends {BaseAPI}
  */
 export class OccurrenceFlagsApi extends BaseAPI {
+    /**
+     * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
+     * @summary Delete the flag on an occurrence
+     * @param {number} caseId Case ID
+     * @param {number} seqId Seq ID
+     * @param {number} taskId Task ID
+     * @param {string} occurrenceId Occurrence ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrenceFlagsApi
+     */
+    public deleteOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceFlagsApiFp(this.configuration).deleteOccurrenceFlag(caseId, seqId, taskId, occurrenceId, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
      * @summary Set or change the flag on an occurrence

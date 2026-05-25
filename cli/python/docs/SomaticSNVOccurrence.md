@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **chromosome** | **str** |  | 
 **clinvar** | **List[str]** |  | 
 **end** | **int** |  | 
+**flag_type** | [**OccurrenceFlagType**](OccurrenceFlagType.md) |  | [optional] 
 **germline_pc_wgs** | **int** |  | 
 **germline_pf_wgs** | **float** |  | 
 **gnomad_v3_af** | **float** |  | 

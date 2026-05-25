@@ -33,7 +33,7 @@ class ClinvarRCV(BaseModel):
     locus_id: StrictStr
     origins: Optional[List[StrictStr]] = None
     review_status: Optional[StrictStr] = None
-    review_status_stars: Optional[StrictInt] = None
+    review_status_stars: StrictInt
     submission_count: Optional[StrictInt] = None
     traits: Optional[List[StrictStr]] = None
     version: Optional[StrictInt] = None

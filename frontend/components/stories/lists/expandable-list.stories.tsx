@@ -20,7 +20,7 @@ export const Default: Story = {
   },
   render: args => (
     <div className="flex flex-col gap-8">
-      {['default', 'md', 'lg'].map(size => (
+      {(['default', 'md', 'lg'] as const).map(size => (
         <div key={size}>
           <span>Size: {size}</span>
           <ExpandableList size={size} {...args} />

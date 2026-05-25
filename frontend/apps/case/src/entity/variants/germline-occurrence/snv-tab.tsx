@@ -10,7 +10,10 @@ import { useCaseIdFromParam } from '@/utils/helper';
 
 import { isValidSeqId } from './libs/seq-id';
 import SliderGermlineOccurrenceSheet from './sliders/slider-germline-occurrence-sheet';
-import { defaultSNVSettings, getSNVOccurrenceColumns } from './table/germline-snv-occurrence-table-settings';
+import {
+  defaultGermlineSNVSettings,
+  getGermlineSNVOccurrenceColumns,
+} from './table/germline-snv-occurrence-table-settings';
 
 type SNVTabProps = {
   seqId: number;
@@ -41,8 +44,8 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
     >
       <QueryBuilderDataTable
         id={appId}
-        columns={getSNVOccurrenceColumns({ t, caseEntity, patientId: patient?.patient_id })}
-        defaultColumnSettings={defaultSNVSettings}
+        columns={getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId: patient?.patient_id })}
+        defaultColumnSettings={defaultGermlineSNVSettings}
         defaultPageSize={30}
         enableColumnOrdering
         enableFullscreen

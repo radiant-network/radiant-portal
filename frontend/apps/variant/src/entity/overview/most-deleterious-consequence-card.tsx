@@ -11,8 +11,8 @@ import { Separator } from '@/components/base/shadcn/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
+import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { VariantEntityTabs } from '@/types';
 
 function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverview } & CardProps) {
   const { t } = useI18n();

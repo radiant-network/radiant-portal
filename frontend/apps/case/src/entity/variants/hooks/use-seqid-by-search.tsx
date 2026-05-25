@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { CaseEntity } from '@/api/api';
-import { CaseEntityTabs } from '@/types';
+import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 
 /**
  * Utils function to setup default seqId value on load

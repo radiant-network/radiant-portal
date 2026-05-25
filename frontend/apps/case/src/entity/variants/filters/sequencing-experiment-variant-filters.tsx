@@ -1,8 +1,7 @@
-import { DotIcon, FlaskConical } from 'lucide-react';
+import { DotIcon } from 'lucide-react';
 
 import { CaseSequencingExperiment } from '@/api/api';
 import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
-import { Badge } from '@/components/base/shadcn/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
@@ -81,53 +80,20 @@ function SequencingVariantFilters({
   if (isLoading || sequencingExperiments.length === 0) {
     return (
       <div className="inline-flex gap-4 items-center border-b px-2 py-4">
-        <Skeleton className="w-[100px] h-[32px]" />
-        <Skeleton className="w-[200px] h-[32px]" />
-        <Skeleton className="w-[60px] h-[32px]" />
-        <Separator className="h-6" orientation="vertical" />
-        <Skeleton className="w-[50px] h-[32px]" />
-        <Skeleton className="w-[50px] h-[32px]" />
+        <Skeleton className="w-[100px] h-[28px]" />
+        <Skeleton className="w-[200px] h-[28px]" />
+        <Skeleton className="w-[60px] h-[28px]" />
+        <Separator className="h-7" orientation="vertical" />
+        <Skeleton className="w-[50px] h-[28px]" />
+        <Skeleton className="w-[50px] h-[28px]" />
       </div>
     );
   }
 
   return (
     <div className="inline-flex gap-4 items-center border-b px-6 py-2.5">
-      <Select
-        value={`${selectedSeqId}`}
-        onValueChange={value => {
-          handleChange(Number(value));
-        }}
-      >
-        <SelectTrigger className="min-w-[125px] max-w-[200px] h-8">
-          <SelectValue>
-            {selectedSequencingExperiment && <SequencingVariantFiltersSelectValue {...selectedSequencingExperiment} />}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {sequencingExperiments.map(seqExp => (
-            <SelectItem key={`case-relation-${seqExp.seq_id}`} value={`${seqExp.seq_id}`}>
-              <SequencingVariantFiltersSelectItem {...seqExp} />
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {selectedSequencingExperiment?.sample_submitter_id && (
-        <Tooltip>
-          <TooltipTrigger>
-            <Badge variant="outline">
-              <FlaskConical />
-              {selectedSequencingExperiment.sample_submitter_id}
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent>
-            <>{t('case_entity.variants.filters.sample_submitter_id_tooltip')}</>
-          </TooltipContent>
-        </Tooltip>
-      )}
-      <Separator className="h-6" orientation="vertical" />
       <Tabs value={activeInterface}>
-        <TabsList className="w-full">
+        <TabsList className="w-full h-7">
           {options.map(({ tooltip, value }: SequencingVariantFiltersOption) => (
             <TabsTrigger
               key={value}
@@ -154,6 +120,35 @@ function SequencingVariantFilters({
           ))}
         </TabsList>
       </Tabs>
+      <Separator className="h-7" orientation="vertical" />
+      <Select
+        value={`${selectedSeqId}`}
+        onValueChange={value => {
+          handleChange(Number(value));
+        }}
+      >
+        <SelectTrigger className="min-w-[125px] max-w-[200px] " size="xs">
+          <SelectValue>
+            {selectedSequencingExperiment && <SequencingVariantFiltersSelectValue {...selectedSequencingExperiment} />}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {sequencingExperiments.map(seqExp => (
+            <SelectItem key={`case-relation-${seqExp.seq_id}`} value={`${seqExp.seq_id}`}>
+              <SequencingVariantFiltersSelectItem {...seqExp} />
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {selectedSequencingExperiment && selectedSequencingExperiment.relationship_to_proband !== 'proband' && (
+        <AffectedStatusBadge status={selectedSequencingExperiment.affected_status_code as AffectedStatusProps} />
+      )}
+      {selectedSequencingExperiment?.sample_submitter_id && (
+        <span className="text-xs">
+          {t('case_entity.variants.filters.sample_id')}
+          <span className="font-mono font-semibold"> {selectedSequencingExperiment.sample_submitter_id}</span>
+        </span>
+      )}
     </div>
   );
 }

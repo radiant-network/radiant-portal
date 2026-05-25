@@ -40,6 +40,7 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
 	tx = tx.Joins("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM radiant_jdbc.public.occurrence_note WHERE deleted = false) note ON note.occurrence_id = cnvo.cnv_id AND note.task_id = cnvo.task_id AND note.seq_id = ? AND note.case_id = ?", seqId, caseId)
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.occurrence_flag flag ON flag.occurrence_id = cnvo.cnv_id AND flag.task_id = cnvo.task_id AND flag.seq_id = ? AND flag.case_id = ?", seqId, caseId)
 	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 		// We group by name to avoid duplicates when joining with gene panels tables
 		// and use any_value for other fields to satisfy sql requirements
@@ -57,6 +58,7 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 			return fmt.Sprintf("any_value(%s.%s) as %s", field.Table.Alias, field.Name, field.GetAlias())
 		})
 		columns = append(columns, "any_value(note.occurrence_id IS NOT NULL) AS has_note")
+		columns = append(columns, "any_value(flag.flag_type) AS flag_type")
 
 		tx = tx.Select(columns)
 		// We dont use AdddSort because we want to sort on aggregated fields
@@ -70,6 +72,7 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 			return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 		})
 		columns = append(columns, "note.occurrence_id IS NOT NULL AS has_note")
+		columns = append(columns, "flag.flag_type")
 		tx = tx.Select(columns)
 		utils.AddSort(tx, userQuery)
 	}

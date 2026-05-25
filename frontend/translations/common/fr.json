@@ -27,6 +27,26 @@
         "h4": "Titre 4",
         "h5": "Titre 5",
         "h6": "Titre 6"
+      },
+      "toolbar": {
+        "link": {
+          "label": "Lien"
+        }
+      },
+      "link": {
+        "popover": {
+          "title": "Lien",
+          "subtitle": "Attacher un lien au texte sélectionné",
+          "url": {
+            "placeholder": "https://example.com"
+          },
+          "confirm": "Confirmer",
+          "update": "Mettre à jour",
+          "remove": "Supprimer",
+          "close": {
+            "ariaLabel": "Fermer"
+          }
+        }
       }
     },
     "auto_complete": {
@@ -1380,7 +1400,7 @@
         "cnv": "CNV",
         "cnv_to": "CNV (TO)",
         "sample_submitter_id": "ID soumissionnaire :",
-        "sample_submitter_id_tooltip": "ID soumissionnaire",
+        "sample_id": "ID échantillon",
         "sequencing_id": "ID Séq.",
         "snv": "SNV",
         "snv_tn": "SNV (TN)",
@@ -1669,6 +1689,12 @@
         "view_variants": "Voir variants"
       }
     }
+  },
+  "occurrence_flag": {
+    "flag": "Drapeau",
+    "pin": "Épingle",
+    "star": "Étoile",
+    "error": "Échec de la mise à jour. Veuillez réessayer."
   },
   "notes": {
     "variant": {

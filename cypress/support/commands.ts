@@ -217,7 +217,7 @@ Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, 
     scrollIntoSubject = cy.wrap(subject).scrollIntoView().should('be.visible');
   }
   if (object.tooltip) {
-    scrollIntoSubject.find(`${CommonSelectors.underlineHeader}, ${CommonSelectors.facetTriggerTooltip}`).should('be.visible').realHover();
+    scrollIntoSubject.find(`${CommonSelectors.underlineHeader}, ${CommonSelectors.facetTooltipTrigger()}`).should('be.visible').realHover();
     cy.get(CommonSelectors.tooltipPopper).invoke('css', { position: 'fixed', left: '20px' } /*Avoid hiding the logo*/).contains(object.tooltip).first().should('exist');
     cy.get(CommonSelectors.logo).click(); // Close the popper
     cy.get(CommonSelectors.tooltipPopper).should('not.exist');

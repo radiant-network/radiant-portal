@@ -124,6 +124,7 @@ Class | Method | HTTP request | Description
 *InterpretationsApi* | [**search_interpretation_germline**](docs/InterpretationsApi.md#search_interpretation_germline) | **GET** /interpretations/germline | Search interpretation germline
 *InterpretationsApi* | [**search_interpretation_somatic**](docs/InterpretationsApi.md#search_interpretation_somatic) | **GET** /interpretations/somatic | Search interpretation somatic
 *MondoApi* | [**mondo_term_auto_complete**](docs/MondoApi.md#mondo_term_auto_complete) | **GET** /mondo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
+*OccurrenceFlagsApi* | [**delete_occurrence_flag**](docs/OccurrenceFlagsApi.md#delete_occurrence_flag) | **DELETE** /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Delete the flag on an occurrence
 *OccurrenceFlagsApi* | [**upsert_occurrence_flag**](docs/OccurrenceFlagsApi.md#upsert_occurrence_flag) | **POST** /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Set or change the flag on an occurrence
 *OccurrenceNotesApi* | [**count_occurrence_notes**](docs/OccurrenceNotesApi.md#count_occurrence_notes) | **GET** /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count | Count notes for an occurrence
 *OccurrenceNotesApi* | [**delete_occurrence_note**](docs/OccurrenceNotesApi.md#delete_occurrence_note) | **DELETE** /notes/{id} | Delete a note on an occurrence
@@ -237,6 +238,7 @@ Class | Method | HTTP request | Description
  - [ListBodyWithSqon](docs/ListBodyWithSqon.md)
  - [ObservationCategoricalBatch](docs/ObservationCategoricalBatch.md)
  - [ObservationTextBatch](docs/ObservationTextBatch.md)
+ - [OccurrenceFlagType](docs/OccurrenceFlagType.md)
  - [OccurrenceNote](docs/OccurrenceNote.md)
  - [OmimGenePanel](docs/OmimGenePanel.md)
  - [OutputDocumentBatch](docs/OutputDocumentBatch.md)

@@ -27,6 +27,26 @@
         "h4": "Heading 4",
         "h5": "Heading 5",
         "h6": "Heading 6"
+      },
+      "toolbar": {
+        "link": {
+          "label": "Link"
+        }
+      },
+      "link": {
+        "popover": {
+          "title": "Link",
+          "subtitle": "Attach a link to the selected text",
+          "url": {
+            "placeholder": "https://example.com"
+          },
+          "confirm": "Confirm",
+          "update": "Update",
+          "remove": "Remove",
+          "close": {
+            "ariaLabel": "Close"
+          }
+        }
       }
     },
     "auto_complete": {
@@ -1383,7 +1403,7 @@
         "cnv_to": "CNV (TO)",
         "sequencing_id": "Seq. ID",
         "sample_submitter_id": "Submitter sample ID:",
-        "sample_submitter_id_tooltip": "Submitter sample ID",
+        "sample_id": "Sample ID",
         "snv": "SNV",
         "cnv": "CNV",
         "snv_tn": "SNV (TN)",
@@ -1672,6 +1692,12 @@
         "view_variants": "View Variants"
       }
     }
+  },
+  "occurrence_flag": {
+    "flag": "Flag",
+    "pin": "Pin",
+    "star": "Star",
+    "error": "Update failed. Please try again."
   },
   "notes": {
     "variant": {

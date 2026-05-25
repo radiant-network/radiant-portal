@@ -7,6 +7,11 @@ import { TableHeaderUserFilter } from '@/components/base/assignation/user-select
 const meta = {
   title: 'Assignation/TableHeaderUserFilter',
   component: TableHeaderUserFilter,
+  args: {
+    availableUsers: [],
+    selectedUsers: [],
+    onUsersChange: () => {},
+  },
   parameters: {
     layout: 'centered',
     docs: {

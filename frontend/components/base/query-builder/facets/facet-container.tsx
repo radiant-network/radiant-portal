@@ -25,7 +25,7 @@ interface AccordionContainerProps extends FacetContainerProps {
   children?: React.ReactNode;
 }
 
-export function AccordionContainer({ field, children }: AccordionContainerProps) {
+export function AccordionContainer({ field, isOpen, children }: AccordionContainerProps) {
   const { t } = useI18n();
   const { history } = useAccordionContext();
 
@@ -43,13 +43,18 @@ export function AccordionContainer({ field, children }: AccordionContainerProps)
 
   return (
     <Card size="sm">
-      <AccordionItem key={field.key} value={field.key} className="border-none">
+      <AccordionItem
+        key={field.key}
+        value={field.key}
+        className="border-none"
+        data-cy={`facet-state-${isOpen ? 'open' : 'closed'}`}
+      >
         <CardHeader size="sm">
-          <AccordionTrigger>
+          <AccordionTrigger data-cy={`facet-header-${field.key}`}>
             {tooltipContent ? (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span>{renderTrigger()}</span>
+                  <span data-cy={`facet-tooltip-trigger-${field.key}`}>{renderTrigger()}</span>
                 </TooltipTrigger>
                 <TooltipContent>
                   <span>{tooltipContent}</span>

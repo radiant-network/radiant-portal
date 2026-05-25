@@ -147,6 +147,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	occurrenceFlagsGroup := occurrencesGroup.Group("/flags")
 	occurrenceFlagsGroup.POST("/:case_id/:seq_id/:task_id/:occurrence_id", server.UpsertOccurrenceFlagHandler(repoOccurrenceFlags))
+	occurrenceFlagsGroup.DELETE("/:case_id/:seq_id/:task_id/:occurrence_id", server.DeleteOccurrenceFlagHandler(repoOccurrenceFlags))
 
 	occurrencesGermlineCNVGroup := occurrencesGermlineGroup.Group("/cnv")
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineCNVCountHandler(repoGermlineCNVOccurrences))
