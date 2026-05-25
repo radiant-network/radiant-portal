@@ -20,11 +20,11 @@ import { Badge } from '@/components/base/shadcn/badge';
 
 import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
+import OccurrenceActionsCell from '../../table/cells/occurrence-actions-cell';
 import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
 import SomaticInterpretationDialog from '../interpretation/somatic-interpretation-dialog';
 
-import SomaticActionsCell from './cells/somatic-actions-cell';
 import SomaticHotspotCell from './cells/somatic-hotspot-cell';
 
 const columnHelper = createColumnHelper<SomaticSNVOccurrence>();
@@ -253,7 +253,7 @@ function getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId }: SomaticSN
     // Actions Buttons
     {
       id: 'actions',
-      cell: info => <SomaticActionsCell row={info.row} caseEntity={caseEntity} />,
+      cell: info => <OccurrenceActionsCell row={info.row} caseEntity={caseEntity} />,
       size: 86,
       enableResizing: false,
       enablePinning: true,
@@ -262,13 +262,6 @@ function getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId }: SomaticSN
 }
 
 const defaultSomaticSNVSettings = createColumnSettings([
-  // TODO: To be enabled when row selection function are implemented
-  // {
-  //   id: 'row_selection',
-  //   visible: true,
-  //   fixed: true,
-  //   pinningPosition: 'left',
-  // },
   {
     id: 'row-info',
     visible: true,

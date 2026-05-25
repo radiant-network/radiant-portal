@@ -8,7 +8,10 @@ import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { isValidSeqId } from './libs/seq-id';
-import { defaultCNVSettings, getCNVOccurrenceColumns } from './table/germline-cnv-occurrence-table-settings';
+import {
+  defaultGermlineCNVSettings,
+  getGermlineCNVOccurrenceColumns,
+} from './table/germline-cnv-occurrence-table-settings';
 
 type CNVTabProps = {
   seqId: number;
@@ -37,8 +40,8 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
     >
       <QueryBuilderDataTable
         id={appId}
-        columns={getCNVOccurrenceColumns({ t, caseEntity })}
-        defaultColumnSettings={defaultCNVSettings}
+        columns={getGermlineCNVOccurrenceColumns({ t, caseEntity })}
+        defaultColumnSettings={defaultGermlineCNVSettings}
         defaultPageSize={30}
         enableColumnOrdering
         enableFullscreen
