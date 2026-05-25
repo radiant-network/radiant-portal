@@ -1,6 +1,3 @@
-import { useEffect } from 'react';
-import { useSWRConfig } from 'swr';
-
 import { CaseEntity, CaseSequencingExperiment } from '@/api/api';
 import { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
@@ -30,13 +27,6 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
   const caseId = useCaseIdFromParam();
   const appId = config.germline_snv_occurrence.app_id;
   const patient = getPatientClinicalInformation(caseEntity, patientSelected);
-  const { mutate } = useSWRConfig();
-
-  // QueryBuilderDataTable's SWR keys are keyed by appId but not seqId, so list/count
-  // cache entries collide across sequencing experiments. Force invalidation on seqId change.
-  useEffect(() => {
-    mutate((key: any) => key && typeof key === 'object' && key.id === appId, undefined, { revalidate: true });
-  }, [seqId, appId, mutate]);
 
   if (!isValidSeqId(seqId)) {
     return null;
@@ -54,6 +44,7 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
     >
       <QueryBuilderDataTable
         id={appId}
+        scope={seqId}
         columns={getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId: patient?.patient_id })}
         defaultColumnSettings={defaultGermlineSNVSettings}
         defaultPageSize={30}

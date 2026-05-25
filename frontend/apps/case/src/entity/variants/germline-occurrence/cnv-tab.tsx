@@ -1,6 +1,3 @@
-import { useEffect } from 'react';
-import { useSWRConfig } from 'swr';
-
 import { CaseEntity } from '@/api/api';
 import { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
@@ -26,13 +23,6 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
   const config = useConfig();
   const caseId = useCaseIdFromParam();
   const appId = config.germline_cnv_occurrence.app_id;
-  const { mutate } = useSWRConfig();
-
-  // QueryBuilderDataTable's SWR keys are keyed by appId but not seqId, so list/count
-  // cache entries collide across sequencing experiments. Force invalidation on seqId change.
-  useEffect(() => {
-    mutate((key: any) => key && typeof key === 'object' && key.id === appId, undefined, { revalidate: true });
-  }, [seqId, appId, mutate]);
 
   if (!isValidSeqId(seqId)) {
     return null;
@@ -50,6 +40,7 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
     >
       <QueryBuilderDataTable
         id={appId}
+        scope={seqId}
         columns={getGermlineCNVOccurrenceColumns({ t, caseEntity })}
         defaultColumnSettings={defaultGermlineCNVSettings}
         defaultPageSize={30}
