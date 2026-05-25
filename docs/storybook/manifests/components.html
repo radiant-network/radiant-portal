@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>6.9s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>4.8s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2822,7 +2822,7 @@ import { FlaskConicalIcon } from "lucide-react";</code></pre>
               
               <pre><code>const Default = () =&gt; (
   &lt;div className=&quot;flex flex-col gap-6&quot;&gt;
-    {[&#39;default&#39;, &#39;sm&#39;].map(size =&gt; (
+    {([&#39;default&#39;, &#39;sm&#39;] as const).map(size =&gt; (
       &lt;Card key={size} size={size} className=&quot;w-[350px]&quot;&gt;
         &lt;CardHeader size={size}&gt;
           &lt;CardTitle&gt;
@@ -3494,16 +3494,16 @@ import { CollapsibleCard, ConfigProvider } from "components";</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;CollapsibleCard title=&quot;Header&quot;&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris egestas ornare diam, sed porttitor augue. Etiam
-          mattis lorem id porta iaculis. Proin ac est sed risus blandit ornare vel in erat. Pellentesque dignissim rhoncus
-          placerat. Fusce vulputate condimentum pretium. In non orci vel turpis facilisis interdum vitae rutrum nulla.
-          Vivamus lacus nulla, consequat tincidunt sapien non, volutpat interdum mi. Duis vestibulum odio in placerat
-          mollis. Aliquam iaculis, ante nec sagittis vestibulum, ipsum est sodales ligula, quis vehicula metus velit a urna.
-          Praesent eget tortor ut nisi tempor blandit a eu est. Sed venenatis risus at odio pharetra, eget tincidunt mauris
-          vulputate. Donec non ante at odio auctor sollicitudin. Phasellus eros est, efficitur quis pharetra id, laoreet ac
-          sem. Aliquam semper rhoncus nisi, at hendrerit elit blandit ut. Maecenas nec suscipit purus, non rhoncus leo.
-          Aliquam bibendum enim sem, sed posuere ipsum porta sed.
-        &lt;/CollapsibleCard&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;CollapsibleCard title=&quot;Header&quot;&gt;&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris egestas ornare diam, sed porttitor augue. Etiam
+                mattis lorem id porta iaculis. Proin ac est sed risus blandit ornare vel in erat. Pellentesque dignissim rhoncus
+                placerat. Fusce vulputate condimentum pretium. In non orci vel turpis facilisis interdum vitae rutrum nulla.
+                Vivamus lacus nulla, consequat tincidunt sapien non, volutpat interdum mi. Duis vestibulum odio in placerat
+                mollis. Aliquam iaculis, ante nec sagittis vestibulum, ipsum est sodales ligula, quis vehicula metus velit a
+                urna. Praesent eget tortor ut nisi tempor blandit a eu est. Sed venenatis risus at odio pharetra, eget tincidunt
+                mauris vulputate. Donec non ante at odio auctor sollicitudin. Phasellus eros est, efficitur quis pharetra id,
+                laoreet ac sem. Aliquam semper rhoncus nisi, at hendrerit elit blandit ut. Maecenas nec suscipit purus, non
+                rhoncus leo. Aliquam bibendum enim sem, sed posuere ipsum porta sed.
+              &lt;/p&gt;&lt;/CollapsibleCard&gt;;</code></pre>
             </div>
         </div>
     
@@ -7378,7 +7378,7 @@ visibleCount?: number = 3</code></pre>
               
               <pre><code>const Default = args =&gt; (
   &lt;div className=&quot;flex flex-col gap-8&quot;&gt;
-    {[&#39;default&#39;, &#39;md&#39;, &#39;lg&#39;].map(size =&gt; (
+    {([&#39;default&#39;, &#39;md&#39;, &#39;lg&#39;] as const).map(size =&gt; (
       &lt;div key={size}&gt;
         &lt;span&gt;Size: {size}&lt;/span&gt;
         &lt;ExpandableList size={size} {...args} /&gt;
@@ -12428,6 +12428,7 @@ import { ToggleGroup, ToggleGroupItem } from "components";</code></pre>
     {sizes.map(size =&gt; (
       &lt;div key={size} className=&quot;flex flex-col items-center gap-3&quot;&gt;
         &lt;div className=&quot;text-sm font-bold text-muted-foreground mb-4&quot;&gt;Size: {size}&lt;/div&gt;
+        &lt;span className=&quot;text-muted-foreground text-sm uppercase&quot;&gt;Single type&lt;/span&gt;
         &lt;ToggleGroup type=&quot;single&quot; size={size} variant=&quot;outline&quot; spacing={2} defaultValue=&quot;bold&quot;&gt;
           &lt;ToggleGroupItem value=&quot;bold&quot; aria-label=&quot;Bold&quot;&gt;
             &lt;Bold /&gt;
@@ -12473,6 +12474,19 @@ import { ToggleGroup, ToggleGroupItem } from "components";</code></pre>
             &lt;ToggleGroupItem value=&quot;missed&quot;&gt;Missed&lt;/ToggleGroupItem&gt;
           &lt;/ToggleGroup&gt;
         &lt;/div&gt;
+
+        &lt;span className=&quot;text-muted-foreground text-sm uppercase&quot;&gt;Multiple type&lt;/span&gt;
+        &lt;ToggleGroup type=&quot;multiple&quot; size={size} variant=&quot;outline&quot; spacing={2} defaultValue={[&#39;bold&#39;, &#39;italic&#39;]}&gt;
+          &lt;ToggleGroupItem value=&quot;bold&quot; aria-label=&quot;Bold&quot;&gt;
+            &lt;Bold /&gt;
+          &lt;/ToggleGroupItem&gt;
+          &lt;ToggleGroupItem value=&quot;italic&quot; aria-label=&quot;Italic&quot;&gt;
+            &lt;Italic /&gt;
+          &lt;/ToggleGroupItem&gt;
+          &lt;ToggleGroupItem value=&quot;underline&quot; aria-label=&quot;Underline&quot;&gt;
+            &lt;Underline /&gt;
+          &lt;/ToggleGroupItem&gt;
+        &lt;/ToggleGroup&gt;
       &lt;/div&gt;
     ))}
   &lt;/div&gt;
@@ -12666,7 +12680,11 @@ transcriptId: string</code></pre>
               </div>
               
               
-              <pre><code>const Default = () =&gt; &lt;TranscriptIdLink transcriptId=&quot;ENST00000367770&quot; isCanonical /&gt;;</code></pre>
+              <pre><code>const Default = () =&gt; &lt;TranscriptIdLink
+    transcriptId=&quot;ENST00000367770&quot;
+    isCanonical
+    isManeSelect={false}
+    isManePlus={false} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -12750,8 +12768,9 @@ value: string</code></pre>
               
               
               <pre><code>const Default = () =&gt; {
-  // eslint-disable-next-line prettier/prettier
-  const list = getTransmissionModeList(() =&gt; { });
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { t } = useI18n();
+  const list = getTransmissionModeList(t);
   return (
     &lt;div className=&quot;flex flex-col gap-2 items-start&quot;&gt;
       {list.map(transmission =&gt; (
