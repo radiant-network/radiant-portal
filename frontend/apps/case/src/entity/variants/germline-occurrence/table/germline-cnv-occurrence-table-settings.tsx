@@ -24,7 +24,7 @@ type GermlineCNVOccurrenceTableSettingsProps = {
   t: TFunction<string, undefined>;
 };
 
-function getCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenceTableSettingsProps) {
+function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenceTableSettingsProps) {
   return [
     columnHelper.accessor(row => row, {
       id: 'row-info',
@@ -249,7 +249,7 @@ function getCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenceTableSe
   ] as TableColumnDef<GermlineCNVOccurrence, any>[];
 }
 
-const defaultCNVSettings = createColumnSettings([
+const defaultGermlineCNVSettings = createColumnSettings([
   {
     id: 'row-info',
     visible: true,
@@ -353,4 +353,4 @@ const defaultCNVSettings = createColumnSettings([
   },
 ]);
 
-export { getCNVOccurrenceColumns, defaultCNVSettings };
+export { getGermlineCNVOccurrenceColumns, defaultGermlineCNVSettings };

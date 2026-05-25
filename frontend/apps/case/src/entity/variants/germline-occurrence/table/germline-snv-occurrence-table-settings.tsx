@@ -21,11 +21,10 @@ import { Badge } from '@/components/base/shadcn/badge';
 
 import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
+import OccurrenceActionsMenu from '../../table/cells/occurrence-actions-cell';
 import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
 import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
-
-import OccurrenceActionsMenu from './cells/occurrence-actions-cell';
 
 const columnHelper = createColumnHelper<GermlineSNVOccurrence>();
 
@@ -35,7 +34,7 @@ type GermlineSNVOccurrenceTableSettingsProps = {
   t: TFunction<string, undefined>;
 };
 
-function getSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurrenceTableSettingsProps) {
+function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurrenceTableSettingsProps) {
   return [
     // interpretation and note cell
     columnHelper.accessor(row => row, {
@@ -273,14 +272,7 @@ function getSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurr
   ] as TableColumnDef<GermlineSNVOccurrence, any>[];
 }
 
-const defaultSNVSettings = createColumnSettings([
-  // TODO: To be enabled when row selection function are implemented
-  // {
-  //   id: 'row_selection',
-  //   visible: true,
-  //   fixed: true,
-  //   pinningPosition: 'left',
-  // },
+const defaultGermlineSNVSettings = createColumnSettings([
   {
     id: 'row-info',
     visible: true,
@@ -386,4 +378,4 @@ const defaultSNVSettings = createColumnSettings([
   },
 ]);
 
-export { defaultSNVSettings, getSNVOccurrenceColumns };
+export { defaultGermlineSNVSettings, getGermlineSNVOccurrenceColumns };
