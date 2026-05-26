@@ -39,7 +39,6 @@ func (m *MockCNVRepository) GetOccurrences(int, int, types.ListQuery) ([]types.G
 	sm := float32(0.95)
 	svLen := 4000
 	refLen := 4000
-	nbSNV := 0
 	return []types.GermlineCNVOccurrence{
 		{
 			SeqID:      1,
@@ -64,6 +63,7 @@ func (m *MockCNVRepository) GetOccurrences(int, int, types.ListQuery) ([]types.G
 			RefLen:     &refLen,
 			CIEnd:      types.JsonArray[int]{-50, 50},
 			CIPos:      types.JsonArray[int]{-100, 100},
+			NbSNV:      1,
 			HasNote:    true,
 			FlagType:   "star",
 		},
@@ -90,8 +90,8 @@ func (m *MockCNVRepository) GetOccurrences(int, int, types.ListQuery) ([]types.G
 			RefLen:     &refLen,
 			CIEnd:      types.JsonArray[int]{-50, 50},
 			CIPos:      types.JsonArray[int]{-100, 100},
+			NbSNV:      0,
 			HasNote:    true,
-			NbSNV: &nbSNV,
 			FlagType:   "star",
 		},
 	}, nil
@@ -150,6 +150,7 @@ func Test_CNVOccurrencesListHandler(t *testing.T) {
 		"reflen":4000,
 		"ciend":[-50,50],
 		"cipos":[-100,100],
+		"nb_snv": 1,
 		"has_note": true,
 		"flag_type": "star"
 	},{
@@ -175,9 +176,9 @@ func Test_CNVOccurrencesListHandler(t *testing.T) {
 		"reflen":4000,
 		"ciend":[-50,50],
 		"cipos":[-100,100],
+		"nb_snv": 0,
 		"has_note": true,
-		"flag_type": "star",
-		"nb_snv": 0
+		"flag_type": "star"
 	}]`, w.Body.String())
 }
 

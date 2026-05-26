@@ -553,9 +553,9 @@ INSERT INTO test_db.germline__cnv__occurrence
 (part, seq_id, task_id, cnv_id, aliquot, chromosome, start, end, type, length, name, quality, calls, filter, bc, cn, pe, sm, svtype,
 svlen, reflen, ciend, cipos, nb_snv)
 VALUES
-    (1, 1, 1, 1, 'aliquot1', '1', 1000, 2000, 'DEL', 1000, 'CNV1', 0.999, [1, 2, 3], 'PASS', 2, 1, [1, 2], 0.5, 'DEL', 1000, 1000, [100, 200], [50, 150], 0),
-    (1, 1, 1, 2, 'aliquot2', '2', 2000, 3000, 'DUP', 1000, 'CNV2', 0.888, [4, 5, 6], 'PASS', 3, 2, [3, 4], 0.6, 'DUP', 1000, 1000, [200, 300], [150, 250], NULL),
-    (1, 2, 2, 3, 'aliquot3', 'X', 3000, 4000, 'INV', 1000, 'CNV3', 0.777, [7, 8, 9], 'PASS', 4, 3, [5, 6], 0.7, 'INV', 1000, 1000, [300, 400], [250, 350], NULL);
+    (1, 1, 1, 1, 'aliquot1', '1', 1000, 2000, 'DEL', 1000, 'CNV1', 0.999, [1, 2, 3], 'PASS', 2, 1, [1, 2], 0.5, 'DEL', 1000, 1000, [100, 200], [50, 150], NULL),
+    (1, 1, 1, 2, 'aliquot2', '2', 2000, 3000, 'DUP', 1000, 'CNV2', 0.888, [4, 5, 6], 'PASS', 3, 2, [3, 4], 0.6, 'DUP', 1000, 1000, [200, 300], [150, 250], 1),
+    (1, 2, 2, 3, 'aliquot3', 'X', 3000, 4000, 'INV', 1000, 'CNV3', 0.777, [7, 8, 9], 'PASS', 4, 3, [5, 6], 0.7, 'INV', 1000, 1000, [300, 400], [250, 350], 1);
 
 INSERT INTO test_db.somatic__snv__occurrence (
     part, task_id, tumor_seq_id, locus_id, normal_seq_id, quality, filter,

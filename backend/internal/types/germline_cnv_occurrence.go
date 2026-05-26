@@ -28,7 +28,7 @@ type GermlineCNVOccurrence struct {
 	CIEnd      JsonArray[int]    `json:"ciend,omitempty" gorm:"column:ciend"`
 	CIPos      JsonArray[int]    `json:"cipos,omitempty" gorm:"column:cipos"`
 	NbGenes    *int              `json:"nb_genes,omitempty" gorm:"column:nb_genes"`
-	NbSNV      *int              `json:"nb_snv,omitempty" gorm:"column:nb_snv"`
+	NbSNV      int              `json:"nb_snv" gorm:"column:nb_snv"`
 	GnomadSC   *int              `json:"gnomad_sc,omitempty" gorm:"column:gnomad_sc"`
 	GnomadSN   *int              `json:"gnomad_sn,omitempty" gorm:"column:gnomad_sn"`
 	GnomadSF   *float32          `json:"gnomad_sf,omitempty" gorm:"column:gnomad_sf"`

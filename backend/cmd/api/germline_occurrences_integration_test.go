@@ -282,7 +282,7 @@ func Test_CNVOccurrence_List(t *testing.T) {
 
 		expected := `[
 			{"chromosome":"1", "cn":2, "end":10500, "length":500, "name":"CNV1", "seq_id":1, "task_id":1, "cnv_id":"1", "start":10000, "type":"DEL", "has_note": true, "nb_snv": 0},
-			{"chromosome":"2", "cn":3, "end":20500, "length":500, "name":"CNV2", "seq_id":1, "task_id":1, "cnv_id":"2", "start":20000, "type":"DUP", "has_note": false}
+			{"chromosome":"2", "cn":3, "end":20500, "length":500, "name":"CNV2", "seq_id":1, "task_id":1, "cnv_id":"2", "start":20000, "type":"DUP", "has_note": false, "nb_snv": 1}
 		]`
 		assert.JSONEq(t, expected, w.Body.String())
 	})
@@ -327,6 +327,7 @@ func Test_CNVOccurrence_List_Filter_On_Chromosome(t *testing.T) {
 				"cnv_id":"2", 
 				"start":20000, 
 				"type":"DUP",
+				"nb_snv": 1,
 				"has_note": false
 			}
 		]`
