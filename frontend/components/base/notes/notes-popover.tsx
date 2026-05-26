@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { MessageSquare } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
@@ -18,8 +19,15 @@ type NotesPopoverProps = NotesContainerProps & {
 function NotesPopover({ hasNotes, loading = false, ...props }: NotesPopoverProps) {
   const { t } = useI18n();
 
+  /*
+   * workaround to prevent popover for closing when deleting a comment
+   */
+  const handlePreventClosing = useCallback((e: { preventDefault: () => void }) => {
+    if (document.querySelector('[role="alertdialog"]')) e.preventDefault();
+  }, []);
+
   return (
-    <Popover modal>
+    <Popover>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -38,8 +46,13 @@ function NotesPopover({ hasNotes, loading = false, ...props }: NotesPopoverProps
           <TooltipContent>{hasNotes ? t('notes.variant.tooltip.view') : t('notes.variant.tooltip.add')}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <PopoverContent align="start" className="w-105 p-0 gap-0 flex flex-col max-h-130">
-        <NotesContainer {...props} />
+      <PopoverContent
+        align="start"
+        className="w-105 p-0 gap-0 flex flex-col max-h-130"
+        onFocusOutside={handlePreventClosing}
+        onInteractOutside={handlePreventClosing}
+      >
+        <NotesContainer {...props} enableSkeletonLoading={false} />
       </PopoverContent>
     </Popover>
   );
