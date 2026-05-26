@@ -22,7 +22,7 @@ function InformationField({
   ) : (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="underline decoration-dotted underline-offset-4 cursor-pointer">{labelOrPlaceholder}</span>
+        <span className="underline decoration-dotted underline-offset-4">{labelOrPlaceholder}</span>
       </TooltipTrigger>
       <TooltipContent>{labelTooltipText}</TooltipContent>
     </Tooltip>
@@ -34,7 +34,7 @@ function InformationField({
   ) : (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="cursor-pointer">{contentOrPlaceholder}</span>
+        <span>{contentOrPlaceholder}</span>
       </TooltipTrigger>
       <TooltipContent>{tooltipText}</TooltipContent>
     </Tooltip>
