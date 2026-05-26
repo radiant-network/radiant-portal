@@ -1,0 +1,166 @@
+services:
+  # =============================================================================
+  # Apache Ranger stack (no audit -- minimal for POC)
+  # =============================================================================
+
+  ranger-db:
+    image: apache/ranger-db:2.7.0
+    container_name: ranger-db
+    hostname: ranger-db
+    healthcheck:
+      test: ["CMD-SHELL", "su -c 'pg_isready -q' postgres"]
+      interval: 10s
+      timeout: 2s
+      retries: 30
+
+  ranger:
+    image: apache/ranger:2.7.0
+    container_name: ranger
+    hostname: ranger
+    depends_on:
+      ranger-db:
+        condition: service_healthy
+    environment:
+      RANGER_VERSION: "2.7.0"
+      RANGER_DB_TYPE: postgres
+    ports:
+      - "6080:6080"
+    command: ["/home/ranger/scripts/ranger.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:6080/login.jsp > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  # =============================================================================
+  # StarRocks 3.5 with Ranger plugin enabled
+  # =============================================================================
+
+  starrocks:
+    image: starrocks/allin1-ubuntu:3.5.0
+    container_name: starrocks-ranger-poc
+    hostname: starrocks
+    ports:
+      - "9030:9030"
+      - "8030:8030"
+      - "8040:8040"
+    volumes:
+      - ./ranger-conf/ranger-starrocks-security.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-security.xml
+      - ./ranger-conf/ranger-starrocks-audit.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-audit.xml
+      - ./starrocks-conf/starrocks-keystore.jks:/data/deploy/starrocks/fe/conf/starrocks-keystore.jks
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        echo 'access_control = ranger' >> /data/deploy/starrocks/fe/conf/fe.conf
+        echo 'ssl_keystore_location = /data/deploy/starrocks/fe/conf/starrocks-keystore.jks' >> /data/deploy/starrocks/fe/conf/fe.conf
+        echo 'ssl_keystore_password = changeit' >> /data/deploy/starrocks/fe/conf/fe.conf
+        echo 'ssl_key_password = changeit' >> /data/deploy/starrocks/fe/conf/fe.conf
+        cd /data/deploy && ./entrypoint.sh
+    healthcheck:
+      test: curl -sf http://localhost:8030/api/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # =============================================================================
+  # Keycloak (OIDC provider for JWT authentication)
+  # =============================================================================
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    hostname: keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8180
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
+    command: start-dev
+    ports:
+      - "8180:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "cat < /dev/null > /dev/tcp/127.0.0.1/8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  # =============================================================================
+  # Admin UI (React app for managing roles and user assignments)
+  # =============================================================================
+
+  admin-ui:
+    build:
+      context: ./admin-ui
+      args:
+        VITE_KC_URL: http://localhost:8180
+    container_name: admin-ui
+    hostname: admin-ui
+    depends_on:
+      poc-api:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+
+  # =============================================================================
+  # MySQL Proxy (translates native_password with JWT → authentication_jwt)
+  # =============================================================================
+
+  mysql-proxy:
+    build: ./proxy
+    container_name: mysql-proxy
+    hostname: mysql-proxy
+    depends_on:
+      starrocks:
+        condition: service_healthy
+    ports:
+      - "9031:9031"
+
+  # =============================================================================
+  # POC API -- Go API that uses Bearer JWT via proxy
+  # =============================================================================
+
+  poc-api:
+    build: ./api
+    container_name: poc-api
+    hostname: poc-api
+    depends_on:
+      ranger:
+        condition: service_healthy
+      starrocks:
+        condition: service_healthy
+      mysql-proxy:
+        condition: service_started
+      init:
+        condition: service_completed_successfully
+    environment:
+      RANGER_URL: http://ranger:6080
+      RANGER_USER: admin
+      RANGER_PASSWORD: rangerR0cks!
+    ports:
+      - "8080:8080"
+
+  # =============================================================================
+  # Init container
+  # =============================================================================
+
+  init:
+    image: starrocks/allin1-ubuntu:3.5.0
+    container_name: init-ranger-poc
+    depends_on:
+      starrocks:
+        condition: service_healthy
+      ranger:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    volumes:
+      - ./init:/init
+    entrypoint: ["/bin/bash", "/init/init-all.sh"]
+    restart: "no"

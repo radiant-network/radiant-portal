@@ -1,0 +1,7 @@
+# Transient build artifacts
+udf/target/
+
+# TLS generation intermediates (only starrocks-keystore.jks is committed)
+starrocks-conf/starrocks-key.pem
+starrocks-conf/starrocks-cert.pem
+starrocks-conf/starrocks.p12
