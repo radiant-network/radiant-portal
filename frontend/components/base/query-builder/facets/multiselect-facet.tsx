@@ -357,10 +357,12 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
               color="primary"
               actions={[
                 {
+                  id: 'some-not-in',
                   label: t('common.filters.buttons.some_not_in'),
                   onClick: applySomeNotIn,
                 },
                 {
+                  id: 'not-in',
                   label: t('common.filters.buttons.not_in'),
                   onClick: applyNotIn,
                 },

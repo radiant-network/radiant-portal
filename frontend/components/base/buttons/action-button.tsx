@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { actionButtonVariants } from './button.variants';
 
 interface Action {
+  id: string;
   label: string;
   icon?: React.ReactElement;
   onClick: () => void;
@@ -81,7 +82,7 @@ function ActionButton({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <DropdownMenuItem
-                        data-cy={`menu-item-${action.label.trim()}`}
+                        data-cy={`menu-item-${action.id}`}
                         disabled={action.disabled ?? false}
                         onClick={action.disabled ? undefined : action.onClick}
                       >
@@ -93,7 +94,7 @@ function ActionButton({
                   </Tooltip>
                 ) : (
                   <DropdownMenuItem
-                    data-cy={`menu-item-${action.label.trim()}`}
+                    data-cy={`menu-item-${action.id}`}
                     disabled={action.disabled ?? false}
                     onClick={action.disabled ? undefined : action.onClick}
                   >

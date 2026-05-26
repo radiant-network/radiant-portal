@@ -309,6 +309,14 @@ function getColumnHeaderPinningExtraStyles(header: Header<any, any>): CSSPropert
 }
 
 /**
+ * Return the data-cy attribute for a pinned column header, undefined otherwise.
+ */
+function getColumnHeaderPinningDataCy(header: Header<any, any>): string | undefined {
+  const isPinned = header.column.getIsPinned();
+  return isPinned ? `pinned-${isPinned}` : undefined;
+}
+
+/**
  * <TableCell /> specific function to return the needed tailwind class when pinned.
  */
 function getColumnRowPinningExtraCN(column: Column<any>): string {
@@ -1018,7 +1026,7 @@ function DataTable<T>({
                   {headerGroup.headers.map(header => (
                     <TableHead
                       key={header.id}
-                      data-cy={header.column.getIsPinned() ? `pinned-${header.column.getIsPinned()}` : undefined}
+                      data-cy={getColumnHeaderPinningDataCy(header)}
                       className={cn('group/header', getColumnHeaderPinningExtraCN(header), {
                         'text-center': header.subHeaders.length > 0, // center header group with subheader
                       })}
