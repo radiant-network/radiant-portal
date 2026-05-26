@@ -173,7 +173,7 @@ func Test_GermlineCNV_GetOccurrences_NbSnv(t *testing.T) {
         assert.NoError(t, err)
 
         // CNV1: nb_snv NULL in DB -> expect 0
-        occurrences, err := repo.GetOccurrences(1, 1, query)
+        occurrences, err := repo.GetOccurrences(1, 1, 1, query)
         assert.NoError(t, err)
         if assert.Len(t, occurrences, 1) {
             assert.Equal(t, "CNV1", occurrences[0].Name)
@@ -181,7 +181,7 @@ func Test_GermlineCNV_GetOccurrences_NbSnv(t *testing.T) {
         }
 
         // CNV2: nb_snv = 0 in DB -> expect 0
-        occurrences, err = repo.GetOccurrences(1, 2, query)
+        occurrences, err = repo.GetOccurrences(1, 2, 2, query)
         assert.NoError(t, err)
         if assert.Len(t, occurrences, 1) {
             assert.Equal(t, "CNV2", occurrences[0].Name)
@@ -189,8 +189,8 @@ func Test_GermlineCNV_GetOccurrences_NbSnv(t *testing.T) {
         }
 
         // CNV3: nb_snv = 1 in DB -> expect 1
-        occurrences, err = repo.GetOccurrences(3, 7, query)
-        occurrences, err = repo.GetOccurrences(3, 7, query)
+        occurrences, err = repo.GetOccurrences(3, 7, 7, query)
+        occurrences, err = repo.GetOccurrences(3, 7, 7, query)
         assert.NoError(t, err)
         if assert.Len(t, occurrences, 1) {
             assert.Equal(t, "CNV3", occurrences[0].Name)
