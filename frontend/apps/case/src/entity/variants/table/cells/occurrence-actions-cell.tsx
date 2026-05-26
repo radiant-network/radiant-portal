@@ -19,7 +19,7 @@ function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) 
   const { t } = useI18n();
   const [igvOpen, setIgvOpen] = useState<boolean>(false);
   const caseId = useCaseIdFromParam();
-  const { locus_id, chromosome, start, rsnumber, seq_id, locus } = row.original;
+  const { locus_id, chromosome, start, end, rsnumber, seq_id, locus } = row.original;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const handlePreview = useCallback(() => {
@@ -31,10 +31,9 @@ function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) 
     window.open(`/variants/entity/${locus_id}`, '_blank');
   }, [locus_id]);
 
-  // @TODO: add end when available in api
   const handleUcsclick = useCallback(() => {
     window.open(
-      `https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${start}`,
+      `https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${end}`,
       '_blank',
       'noopener noreferrer',
     );

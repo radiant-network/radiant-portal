@@ -18,7 +18,7 @@ async function fetchNotesCount(input: NotesContainerProps) {
     input.caseId,
     input.seqId,
     input.taskId,
-    input.occurenceId,
+    input.occurrenceId,
   );
   return response.data;
 }
@@ -28,13 +28,13 @@ function NotesSliderSheet({ ...props }: NotesSliderProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { data, mutate, isLoading } = useSWR(
-    `fetch-note-count-${props.caseId}-${props.seqId}-${props.taskId}-${props.occurenceId}`,
+    `fetch-note-count-${props.caseId}-${props.seqId}-${props.taskId}-${props.occurrenceId}`,
     () =>
       fetchNotesCount({
         seqId: props.seqId,
         caseId: props.caseId,
         taskId: props.taskId,
-        occurenceId: props.occurenceId,
+        occurrenceId: props.occurrenceId,
       }),
     {
       revalidateOnFocus: true,

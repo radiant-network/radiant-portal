@@ -12,13 +12,14 @@ import { useQBActiveQuery, useQBContext } from './hooks/use-query-builder';
 
 type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'> & {
   defaultPageSize?: number;
+  swrId?: string | number;
 };
 
 /**
  * Wrapper for data-table
  * Used to access QBContext and create list and count query
  */
-function QueryBuilderDataTable<T>({ defaultPageSize = 10, ...props }: QueryBuilderDataTableProps<T>) {
+function QueryBuilderDataTable<T>({ defaultPageSize = 10, swrId, ...props }: QueryBuilderDataTableProps<T>) {
   const activeQuery = useQBActiveQuery();
   const { fetcher } = useQBContext();
 
@@ -30,9 +31,11 @@ function QueryBuilderDataTable<T>({ defaultPageSize = 10, ...props }: QueryBuild
 
   const [sorting, setSorting] = useState<SortBody[]>([]);
 
+  const swrKey = swrId !== undefined ? `${props.id}:${swrId}` : props.id;
+
   const fetchList = useSWR<any[]>(
     {
-      id: props.id,
+      id: swrKey,
       listBody: {
         additional_fields: additionalFields,
         limit: pagination.pageSize,
@@ -54,7 +57,7 @@ function QueryBuilderDataTable<T>({ defaultPageSize = 10, ...props }: QueryBuild
 
   const fetchCount = useSWR<Count>(
     {
-      id: props.id,
+      id: swrKey,
       countBody: {
         sqon: {
           content: activeQuery.content as SqonContent,

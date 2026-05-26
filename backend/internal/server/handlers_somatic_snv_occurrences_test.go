@@ -14,11 +14,11 @@ import (
 
 type MockSomaticSNVOccurrencesRepository struct{}
 
-func (m *MockSomaticSNVOccurrencesRepository) CountOccurrences(caseId int, seqId int, userQuery types.CountQuery) (int64, error) {
+func (m *MockSomaticSNVOccurrencesRepository) CountOccurrences(caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
 	return 1111, nil
 }
 
-func (m *MockSomaticSNVOccurrencesRepository) AggregateOccurrences(caseId int, seqId int, userQuery types.AggQuery) ([]repository.Aggregation, error) {
+func (m *MockSomaticSNVOccurrencesRepository) AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]repository.Aggregation, error) {
 	return []types.Aggregation{
 			{Bucket: "insertion", Count: 479564},
 			{Bucket: "deletion", Count: 495942},
@@ -26,7 +26,7 @@ func (m *MockSomaticSNVOccurrencesRepository) AggregateOccurrences(caseId int, s
 		nil
 }
 
-func (m *MockSomaticSNVOccurrencesRepository) GetStatisticsOccurrences(caseId int, seqId int, userQuery types.StatisticsQuery) (*repository.Statistics, error) {
+func (m *MockSomaticSNVOccurrencesRepository) GetStatisticsOccurrences(caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*repository.Statistics, error) {
 	return &types.Statistics{
 			Min:  0,
 			Max:  100,
@@ -35,7 +35,7 @@ func (m *MockSomaticSNVOccurrencesRepository) GetStatisticsOccurrences(caseId in
 		nil
 }
 
-func (m *MockSomaticSNVOccurrencesRepository) GetExpandedOccurrence(int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
+func (m *MockSomaticSNVOccurrencesRepository) GetExpandedOccurrence(int, int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
 	return &types.ExpandedSomaticSNVOccurrence{
 		LocusId:    "1000",
 		Locus:      "locus1",
@@ -45,7 +45,7 @@ func (m *MockSomaticSNVOccurrencesRepository) GetExpandedOccurrence(int, int, in
 	}, nil
 }
 
-func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(int, int, types.ListQuery) ([]types.SomaticSNVOccurrence, error) {
+func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(int, int, int, types.ListQuery) ([]types.SomaticSNVOccurrence, error) {
 	somaticPfTn := 0.55
 	somaticPcTn := 6
 	germlinePf := 0.99
@@ -92,13 +92,13 @@ func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(int, int, types.Lis
 func Test_SomaticSNVListHandler(t *testing.T) {
 	repo := &MockSomaticSNVOccurrencesRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/list", OccurrencesSomaticSNVListHandler(repo))
+	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo))
 	body := `{
 			"additional_fields":[
 				"ad_ratio"
 			]
 	}`
-	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/list", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/1/list", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -138,9 +138,9 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 func Test_SomaticSNVCountHandler(t *testing.T) {
 	repo := &MockSomaticSNVOccurrencesRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/count", OccurrencesSomaticSNVCountHandler(repo))
+	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/count", OccurrencesSomaticSNVCountHandler(repo))
 
-	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/count", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/1/count", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -152,7 +152,7 @@ func Test_SomaticSNVAggregateHandler(t *testing.T) {
 	repo := &MockSomaticSNVOccurrencesRepository{}
 	facetsRepo := &MockFacetsRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/aggregate", OccurrencesSomaticSNVAggregateHandler(repo, facetsRepo))
+	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/aggregate", OccurrencesSomaticSNVAggregateHandler(repo, facetsRepo))
 
 	body := `{
 			"field": "variant_class",
@@ -162,7 +162,7 @@ func Test_SomaticSNVAggregateHandler(t *testing.T) {
 		    },
 			"size": 10
 	}`
-	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/aggregate", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/1/aggregate", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -175,7 +175,7 @@ func Test_SomaticSNVAggregateHandler_withDictionary(t *testing.T) {
 	repo := &MockSomaticSNVOccurrencesRepository{}
 	facetsRepo := &MockFacetsRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/aggregate", OccurrencesSomaticSNVAggregateHandler(repo, facetsRepo))
+	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/aggregate", OccurrencesSomaticSNVAggregateHandler(repo, facetsRepo))
 
 	body := `{
 			"field": "variant_class",
@@ -185,7 +185,7 @@ func Test_SomaticSNVAggregateHandler_withDictionary(t *testing.T) {
 		    },
 			"size": 10
 	}`
-	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/aggregate?with_dictionary=true", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/1/aggregate?with_dictionary=true", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -198,7 +198,7 @@ type MockNotFoundSomaticSNVOccurrencesRepository struct {
 	MockSomaticSNVOccurrencesRepository
 }
 
-func (m *MockNotFoundSomaticSNVOccurrencesRepository) GetExpandedOccurrence(int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
+func (m *MockNotFoundSomaticSNVOccurrencesRepository) GetExpandedOccurrence(int, int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
 	return nil, nil
 }
 
@@ -214,9 +214,9 @@ func Test_GetExpandedSomaticSNVOccurrenceHandler_withInterpretationCounts(t *tes
 	repo := &MockSomaticSNVOccurrencesRepository{}
 	interpretationRepo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/1000/expanded", nil)
+	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/1/1000/expanded", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -237,9 +237,9 @@ func Test_GetExpandedSomaticSNVOccurrenceHandler_emptyInterpretationCounts(t *te
 	repo := &MockSomaticSNVOccurrencesRepository{}
 	interpretationRepo := &MockEmptyInterpretationsRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/1000/expanded", nil)
+	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/1/1000/expanded", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -259,9 +259,9 @@ func Test_GetExpandedSomaticSNVOccurrenceHandler_notFound(t *testing.T) {
 	repo := &MockNotFoundSomaticSNVOccurrencesRepository{}
 	interpretationRepo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/9999/expanded", nil)
+	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/1/9999/expanded", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -273,9 +273,9 @@ func Test_GetExpandedSomaticSNVOccurrenceHandler_invalidLocusId(t *testing.T) {
 	repo := &MockSomaticSNVOccurrencesRepository{}
 	interpretationRepo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+	router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/abc/expanded", nil)
+	req, _ := http.NewRequest("GET", "/occurrences/somatic/snv/1/1/1/abc/expanded", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -286,7 +286,7 @@ func Test_GetExpandedSomaticSNVOccurrenceHandler_invalidLocusId(t *testing.T) {
 func Test_SomaticSNVStatisticsHandler(t *testing.T) {
 	repo := &MockSomaticSNVOccurrencesRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/statistics", OccurrencesSomaticSNVStatisticsHandler(repo))
+	router.POST("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/statistics", OccurrencesSomaticSNVStatisticsHandler(repo))
 
 	body := `{
 			"field": "somatic_pf_tn_wgs",
@@ -298,7 +298,7 @@ func Test_SomaticSNVStatisticsHandler(t *testing.T) {
 				}
 		    }
 	}`
-	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/statistics", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/1/1/1/statistics", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

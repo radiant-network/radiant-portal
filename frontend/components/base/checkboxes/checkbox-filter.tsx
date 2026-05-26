@@ -53,6 +53,7 @@ type CheckboxFilterProps = React.ComponentPropsWithoutRef<typeof CheckboxPrimiti
     icon?: React.ReactElement;
     count?: number;
     description?: string;
+    'data-cy'?: string;
   };
 
 function CheckboxFilter({
@@ -62,6 +63,7 @@ function CheckboxFilter({
   icon,
   count,
   description,
+  'data-cy': dataCy,
   ...props
 }: CheckboxFilterProps) {
   const styles = checkboxFilterVariants({ size });
@@ -77,7 +79,7 @@ function CheckboxFilter({
         }
       }}
     >
-      <Checkbox name={name} size={size} {...props} />
+      <Checkbox name={name} size={size} data-cy={dataCy} {...props} />
 
       {icon && <div className={styles.icon({ size })}>{icon}</div>}
 

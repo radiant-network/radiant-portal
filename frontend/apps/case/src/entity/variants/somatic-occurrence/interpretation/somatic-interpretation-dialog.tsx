@@ -34,6 +34,7 @@ import SomaticInterpretationForm from './somatic-interpretation-form';
 
 type SomaticInterpretationDialogProps = {
   locusId: string;
+  taskId: number;
   transcriptId?: string;
   patientId?: number;
   handleSaveCallback?: () => void;
@@ -56,6 +57,7 @@ type InterpretationSomaticInput = {
 type ExpandSomaticInput = {
   caseId: number;
   seqId: number;
+  taskId: number;
   locusId: string;
 };
 
@@ -83,7 +85,7 @@ async function fetchInterpretationSomatic(_url: string, { arg }: { arg: Interpre
 }
 
 async function fetchExpandedSomaticSNVOccurrence(_url: string, { arg }: { arg: ExpandSomaticInput }) {
-  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(arg.caseId, arg.seqId, arg.locusId);
+  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(arg.caseId, arg.seqId, arg.taskId, arg.locusId);
   return response.data;
 }
 
@@ -100,6 +102,7 @@ async function saveSomaticInterpretation(_url: string, { arg }: { arg: SomaticIn
 
 function SomaticInterpretationDialog({
   locusId,
+  taskId,
   transcriptId,
   patientId,
   handleSaveCallback,
@@ -187,6 +190,7 @@ function SomaticInterpretationDialog({
     occurrenceExpand.trigger({
       caseId,
       seqId,
+      taskId,
       locusId,
     });
   }, []);

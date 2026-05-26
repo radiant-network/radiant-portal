@@ -11,6 +11,11 @@ import {
 const meta = {
   title: 'Assignation/UserSelection',
   component: UserSelection,
+  args: {
+    availableUsers: [],
+    selectedUsers: [],
+    onUsersChange: () => {},
+  },
   parameters: {
     layout: 'padded',
   },

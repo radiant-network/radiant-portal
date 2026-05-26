@@ -14,7 +14,7 @@ type ClinvarRCV struct {
 	DateLastEvaluated    time.Time         `json:"date_last_evaluated,omitempty"`
 	SubmissionCount      int               `json:"submission_count,omitempty"`
 	ReviewStatus         string            `json:"review_status,omitempty"`
-	ReviewStatusStars    int               `json:"review_status_stars,omitempty"`
+	ReviewStatusStars    int               `json:"review_status_stars" validate:"required"`
 	Version              int               `json:"version,omitempty"`
 	Traits               JsonArray[string] `json:"traits,omitempty" gorm:"type:json"`
 	Origins              JsonArray[string] `json:"origins,omitempty" gorm:"type:json"`

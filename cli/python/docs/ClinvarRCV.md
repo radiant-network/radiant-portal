@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 **locus_id** | **str** |  | 
 **origins** | **List[str]** |  | [optional] 
 **review_status** | **str** |  | [optional] 
-**review_status_stars** | **int** |  | [optional] 
+**review_status_stars** | **int** |  | 
 **submission_count** | **int** |  | [optional] 
 **traits** | **List[str]** |  | [optional] 
 **version** | **int** |  | [optional] 

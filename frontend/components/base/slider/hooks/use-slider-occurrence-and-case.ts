@@ -13,6 +13,7 @@ import { caseApi, occurrencesApi } from '@/utils/api';
 export type OccurrenceExpandInput = {
   caseId: number;
   seqId: number;
+  taskId: number;
   locusId: string;
 };
 
@@ -22,12 +23,22 @@ export type CaseInput = {
 };
 
 export async function fetchGermlineOccurrenceExpand(input: OccurrenceExpandInput) {
-  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(input.caseId, input.seqId, input.locusId);
+  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(
+    input.caseId,
+    input.seqId,
+    input.taskId,
+    input.locusId,
+  );
   return response.data;
 }
 
 export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput) {
-  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(input.caseId, input.seqId, input.locusId);
+  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(
+    input.caseId,
+    input.seqId,
+    input.taskId,
+    input.locusId,
+  );
   return response.data;
 }
 
@@ -46,6 +57,7 @@ export async function fetchCase(input: CaseInput) {
 export function useGermlineOccurrenceAndCase(
   caseId: number,
   seqId: number,
+  taskId: number,
   locusId: string,
   patientSelected?: CaseSequencingExperiment,
 ) {
@@ -54,6 +66,7 @@ export function useGermlineOccurrenceAndCase(
       caseId: caseId,
       locusId: locusId,
       seqId: seqId,
+      taskId: taskId,
     },
     fetchGermlineOccurrenceExpand,
     {
@@ -101,6 +114,7 @@ export function useGermlineOccurrenceAndCase(
 export function useSomaticOccurrenceAndCase(
   caseId: number,
   seqId: number,
+  taskId: number,
   locusId: string,
   patientSelected?: CaseSequencingExperiment,
 ) {
@@ -109,6 +123,7 @@ export function useSomaticOccurrenceAndCase(
       caseId: caseId,
       locusId: locusId,
       seqId: seqId,
+      taskId: taskId,
     },
     fetchSomaticOccurrenceExpand,
     {
@@ -153,12 +168,13 @@ export function useSomaticOccurrenceAndCase(
 /**
  * Hook to fetch case data for preview sheets
  */
-export function useCase(caseId: number, seqId: number, locusId: string) {
+export function useCase(caseId: number, seqId: number, taskId: number, locusId: string) {
   const expandResult = useSWR<ExpandedGermlineSNVOccurrence, any, OccurrenceExpandInput>(
     {
       caseId: caseId,
       locusId: locusId,
       seqId: seqId,
+      taskId: taskId,
     },
     fetchGermlineOccurrenceExpand,
     {

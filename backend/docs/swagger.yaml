@@ -667,6 +667,7 @@ components:
       required:
       - clinvar_id
       - locus_id
+      - review_status_stars
       type: object
     ClinvarVariantConditions:
       properties:
@@ -4383,7 +4384,7 @@ paths:
       summary: Set or change the flag on an occurrence
       tags:
       - occurrence_flags
-  /occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap:
+  /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap:
     get:
       description: List genes overlapping a CNV with a given ID
       operationId: listGermlineCNVGenesOverlap
@@ -4397,6 +4398,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -4432,7 +4439,7 @@ paths:
       summary: List genes overlapping a CNV with a given ID
       tags:
       - occurrences
-  /occurrences/germline/cnv/{case_id}/{seq_id}/aggregate:
+  /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate:
     post:
       description: Aggregate germline CNV occurrences for a given sequence ID
       operationId: aggregateGermlineCNVOccurrences
@@ -4446,6 +4453,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -4488,7 +4501,7 @@ paths:
       summary: Aggregate germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/cnv/{case_id}/{seq_id}/count:
+  /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count:
     post:
       description: Counts germline CNV occurrences for a given sequence ID
       operationId: countGermlineCNVOccurrences
@@ -4502,6 +4515,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -4542,7 +4561,7 @@ paths:
       summary: Count germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/cnv/{case_id}/{seq_id}/list:
+  /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list:
     post:
       description: List germline CNV occurrences for a given sequence ID
       operationId: listGermlineCNVOccurrences
@@ -4556,6 +4575,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -4598,7 +4623,7 @@ paths:
       summary: List germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/cnv/{case_id}/{seq_id}/statistics:
+  /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
       operationId: statisticsGermlineCNVOccurrences
@@ -4612,6 +4637,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -4652,7 +4683,7 @@ paths:
       summary: Statistics of germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{case_id}/{seq_id}/{locus_id}/expanded:
+  /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded:
     get:
       description: Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
       operationId: getExpandedGermlineSNVOccurrence
@@ -4666,6 +4697,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -4699,7 +4736,7 @@ paths:
       summary: Get a germline ExpandedGermlineSNVOccurrence
       tags:
       - occurrences
-  /occurrences/germline/snv/{case_id}/{seq_id}/aggregate:
+  /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate:
     post:
       description: Aggregate germline SNV occurrences for a given sequence ID
       operationId: aggregateGermlineSNVOccurrences
@@ -4713,6 +4750,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -4761,7 +4804,7 @@ paths:
       summary: Aggregate germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{case_id}/{seq_id}/count:
+  /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count:
     post:
       description: Counts germline SNV occurrences for a given sequence ID
       operationId: countGermlineSNVOccurrences
@@ -4775,6 +4818,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -4815,7 +4864,7 @@ paths:
       summary: Count germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{case_id}/{seq_id}/list:
+  /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list:
     post:
       description: List germline SNV occurrences for a given sequence ID
       operationId: listGermlineSNVOccurrences
@@ -4829,6 +4878,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -4871,7 +4926,7 @@ paths:
       summary: List germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{case_id}/{seq_id}/statistics:
+  /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
       operationId: statisticsGermlineSNVOccurrences
@@ -4885,6 +4940,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -4969,7 +5030,7 @@ paths:
       summary: Get germline SNV facets dictionary
       tags:
       - occurrences
-  /occurrences/somatic/snv/{case_id}/{seq_id}/{locus_id}/expanded:
+  /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded:
     get:
       description: Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
       operationId: getExpandedSomaticSNVOccurrence
@@ -4983,6 +5044,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -5016,7 +5083,7 @@ paths:
       summary: Get a somatic ExpandedSomaticSNVOccurrence
       tags:
       - occurrences
-  /occurrences/somatic/snv/{case_id}/{seq_id}/aggregate:
+  /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate:
     post:
       description: Aggregate somatic SNV occurrences for a given sequence ID
       operationId: aggregateSomaticSNVOccurrences
@@ -5030,6 +5097,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -5078,7 +5151,7 @@ paths:
       summary: Aggregate somatic SNV occurrences
       tags:
       - occurrences
-  /occurrences/somatic/snv/{case_id}/{seq_id}/count:
+  /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count:
     post:
       description: Counts somatic SNV occurrences for a given sequence ID
       operationId: countSomaticSNVOccurrences
@@ -5092,6 +5165,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -5132,7 +5211,7 @@ paths:
       summary: Count somatic SNV occurrences
       tags:
       - occurrences
-  /occurrences/somatic/snv/{case_id}/{seq_id}/list:
+  /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list:
     post:
       description: List somatic SNV occurrences for a given sequence ID
       operationId: listSomaticSNVOccurrences
@@ -5146,6 +5225,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer
@@ -5188,7 +5273,7 @@ paths:
       summary: List somatic SNV occurrences
       tags:
       - occurrences
-  /occurrences/somatic/snv/{case_id}/{seq_id}/statistics:
+  /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
       operationId: statisticsSomaticSNVOccurrences
@@ -5202,6 +5287,12 @@ paths:
       - description: Sequence ID
         in: path
         name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
         required: true
         schema:
           type: integer

@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
 import { PlusIcon } from 'lucide-react';
 
+import { SqonOpEnum } from '@/api/api';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Button } from '@/components/base/shadcn/button';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
-import { BooleanOperators } from '@/components/cores/sqon';
 
 import { QBActionType, useQBDispatch, useQBMultiselectValue } from '../../query-builder/hooks/use-query-builder';
 
@@ -34,7 +34,7 @@ function GeneCell({ symbol }: GeneCellProps) {
           field: 'symbol',
           value: [...defaultItems, symbol],
         },
-        op: BooleanOperators.And,
+        op: SqonOpEnum.In,
       },
     });
   }, [symbol, dispatch, defaultItems]);

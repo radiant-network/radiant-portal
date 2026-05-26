@@ -49,9 +49,9 @@ const generateSavedFiltersFunctions = () => {
       actions.deleteFilter(name);
 
       CaseEntity_Variants_Facets.snv.actions.clickSidebarSection('Variant'); // Also works for CNV
-      cy.get(CommonSelectors.facetHeader).contains('Chromosome').clickAndWait({ force: true });
-      cy.get(CommonSelectors.facetHeader).contains('Chromosome').parents(CommonSelectors.facet).find(CommonSelectors.facetCheckbox('')).eq(0).click({ force: true });
-      cy.get(CommonSelectors.facetHeader).contains('Chromosome').parents(CommonSelectors.facet).find(CommonSelectors.facetApplyButton).click({ force: true });
+      cy.get(CommonSelectors.facetHeader('chromosome')).clickAndWait({ force: true });
+      cy.get(CommonSelectors.facetCheckbox('chromosome', '1')).click({ force: true });
+      cy.get(CommonSelectors.facetApplyButton('chromosome')).click({ force: true });
 
       actions.clickEditButton();
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.input}`).clear();
@@ -63,11 +63,6 @@ const generateSavedFiltersFunctions = () => {
       cy.wait('@postSavedFilters');
 
       validations.shouldDisplayFilterName(name);
-
-      // Prevents a race condition bug that only occurs with automated tests. Allows you to obtain the correct localStorage.
-      cy.url().then(currentUrl => {
-        cy.visit(currentUrl);
-      });
     },
     /**
      * Deletes a filter.
@@ -84,13 +79,8 @@ const generateSavedFiltersFunctions = () => {
             actions.clickDeleteButton();
 
             cy.intercept('**/saved_filters{,/**}').as('deleteSavedFilters');
-            cy.get(CommonSelectors.deleteFilterButton).click({ force: true });
+            cy.get(CommonSelectors.deleteFilterConfirmButton).click({ force: true });
             cy.wait('@deleteSavedFilters');
-/*
-            // Prevents a race condition bug that only occurs with automated tests. Allows you to obtain the correct localStorage.
-            cy.url().then(currentUrl => {
-              cy.visit(currentUrl);
-            });*/
 
             actions.openMyFiltersDropdown();
             cy.get(CommonSelectors.savedListDropdown).contains(name).should('not.exist');
@@ -124,7 +114,7 @@ const generateSavedFiltersFunctions = () => {
      */
     openMyFiltersDropdown() {
       cy.get(CommonSelectors.logo).clickAndWait({ force: true }); // Close the dropdown if open
-      cy.get(`${CommonSelectors.querybuilderHeader} ${CommonSelectors.comboboxButton}`).clickAndWait({ force: true });
+      cy.get(CommonSelectors.myFiltersButton).clickAndWait({ force: true });
     },
     /**
      * Selects a filter in the dropdown.

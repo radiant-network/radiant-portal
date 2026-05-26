@@ -20,11 +20,11 @@ type SomaticSNVOccurrencesRepository struct {
 }
 
 type SomaticSNVOccurrencesDAO interface {
-	GetOccurrences(caseId int, seqId int, userFilter types.ListQuery) ([]SomaticSNVOccurrence, error)
-	CountOccurrences(caseId int, seqId int, userQuery types.CountQuery) (int64, error)
-	AggregateOccurrences(caseId int, seqId int, userQuery types.AggQuery) ([]Aggregation, error)
-	GetStatisticsOccurrences(caseId int, seqId int, userQuery types.StatisticsQuery) (*Statistics, error)
-	GetExpandedOccurrence(caseId int, seqId int, locusId int) (*ExpandedSomaticSNVOccurrence, error)
+	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]SomaticSNVOccurrence, error)
+	CountOccurrences(caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error)
+	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error)
+	GetStatisticsOccurrences(caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*Statistics, error)
+	GetExpandedOccurrence(caseId int, seqId int, taskId int, locusId int) (*ExpandedSomaticSNVOccurrence, error)
 }
 
 func NewSomaticSNVOccurrencesRepository(db *gorm.DB) *SomaticSNVOccurrencesRepository {
@@ -35,10 +35,10 @@ func NewSomaticSNVOccurrencesRepository(db *gorm.DB) *SomaticSNVOccurrencesRepos
 	return &SomaticSNVOccurrencesRepository{db: db}
 }
 
-func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, userQuery types.ListQuery) ([]SomaticSNVOccurrence, error) {
+func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]SomaticSNVOccurrence, error) {
 	var occurrences []SomaticSNVOccurrence
 
-	tx, part, err := PrepareSNVListOrCountQuery(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
+	tx, part, err := PrepareSNVListOrCountQuery(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -76,21 +76,21 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, 
 	return occurrences, nil
 }
 
-func (r *SomaticSNVOccurrencesRepository) CountOccurrences(_ int, seqId int, userQuery types.CountQuery) (int64, error) {
-	return CountSNV(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
+func (r *SomaticSNVOccurrencesRepository) CountOccurrences(_ int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+	return CountSNV(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
 }
 
-func (r *SomaticSNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	return AggregateSNV(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
+func (r *SomaticSNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {
+	return AggregateSNV(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
 }
 
-func (r *SomaticSNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
-	return StatisticsSNV(types.SomaticSNVOccurrenceTable, seqId, userQuery, r.db)
+func (r *SomaticSNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
+	return StatisticsSNV(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
 }
 
-func (r *SomaticSNVOccurrencesRepository) GetExpandedOccurrence(_ int, seqId int, locusId int) (*ExpandedSomaticSNVOccurrence, error) {
+func (r *SomaticSNVOccurrencesRepository) GetExpandedOccurrence(_ int, seqId int, taskId int, locusId int) (*ExpandedSomaticSNVOccurrence, error) {
 	tx := r.db.Table("somatic__snv__occurrence s_snv_o")
-	tx = tx.Where("s_snv_o.tumor_seq_id = ? AND s_snv_o.locus_id = ?", seqId, locusId)
+	tx = tx.Where("s_snv_o.tumor_seq_id = ? AND s_snv_o.task_id = ? AND s_snv_o.locus_id = ?", seqId, taskId, locusId)
 	tx = tx.Joins("JOIN snv__consequence c ON s_snv_o.locus_id=c.locus_id AND c.is_picked = true")
 	tx = tx.Joins("JOIN snv__variant v ON s_snv_o.locus_id=v.locus_id")
 	tx = tx.Joins("LEFT JOIN ensembl_gene g ON g.name=v.symbol")

@@ -30,7 +30,7 @@ func Test_Somatic_SNV_GetOccurrences(t *testing.T) {
 		repo := NewSomaticSNVOccurrencesRepository(db)
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(71, 74, query)
+		occurrences, err := repo.GetOccurrences(71, 74, 74, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.EqualValues(t, "1000", occurrences[0].LocusId)
@@ -72,7 +72,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) 
 
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, selectedFields, nil, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(71, 74, query)
+		occurrences, err := repo.GetOccurrences(71, 74, 74, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 74, occurrences[0].SeqId)
@@ -89,7 +89,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Default_Column_If_No_One_Specified(t
 		repo := NewSomaticSNVOccurrencesRepository(db)
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, nil, nil, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(71, 74, query)
+		occurrences, err := repo.GetOccurrences(71, 74, 74, query)
 		assert.NoError(t, err)
 		assert.Len(t, occurrences, 1)
 
@@ -106,7 +106,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) 
 		selectedFields := []string{"clinvar"}
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, selectedFields, nil, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(71, 74, query)
+		occurrences, err := repo.GetOccurrences(71, 74, 74, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, types.JsonArray[string]{"Benign", "Pathogenic"}, occurrences[0].Clinvar)
@@ -128,11 +128,39 @@ func Test_Somatic_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *te
 		}
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, sqon, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(71, 74, query)
+		occurrences, err := repo.GetOccurrences(71, 74, 74, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 74, occurrences[0].SeqId)
 			assert.EqualValues(t, "2000", occurrences[0].LocusId)
+		}
+	})
+}
+
+// Reproduces the cross-case leak scenario: the `multiple` fixture has two
+// rows at tumor_seq_id=74 with different task_ids — task_id=74 for case 71's
+// somatic annotation, task_id=202 simulating a second case (72) that reuses
+// the same sequencing. The repository must filter on task_id so each case
+// sees only its own occurrence.
+func Test_Somatic_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
+	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
+		repo := NewSomaticSNVOccurrencesRepository(db)
+		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+
+		// Case 71 (task_id=74) sees its own loci, not the task_id=202 row.
+		case71Occurrences, err := repo.GetOccurrences(71, 74, 74, query)
+		assert.NoError(t, err)
+		for _, occ := range case71Occurrences {
+			assert.NotEqual(t, "5000", occ.LocusId, "task_id=74 query must not return case 72's occurrence (locus 5000)")
+		}
+
+		// Case 72 (task_id=202, reusing tumor_seq_id=74) sees only the
+		// task_id=202 row, not case 71's loci 1000/2000/3000.
+		case72Occurrences, err := repo.GetOccurrences(72, 74, 202, query)
+		assert.NoError(t, err)
+		if assert.Len(t, case72Occurrences, 1) {
+			assert.EqualValues(t, "5000", case72Occurrences[0].LocusId)
 		}
 	})
 }
@@ -156,7 +184,7 @@ func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testi
 		})
 		assert.NoError(t, err)
 
-		occurrences, err := repo.GetOccurrences(70, 74, query)
+		occurrences, err := repo.GetOccurrences(70, 74, 74, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.True(t, occurrences[0].HasNote)
@@ -165,7 +193,7 @@ func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testi
 		err = notesRepo.Delete(note.ID)
 		assert.NoError(t, err)
 
-		occurrences, err = repo.GetOccurrences(70, 74, query)
+		occurrences, err = repo.GetOccurrences(70, 74, 74, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.False(t, occurrences[0].HasNote)
@@ -191,7 +219,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_
 
 		query, err := types.NewListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, pagination, sortedBody)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(71, 74, query)
+		occurrences, err := repo.GetOccurrences(71, 74, 74, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 12) {
 			assert.EqualValues(t, "1023", occurrences[0].LocusId)
@@ -203,7 +231,7 @@ func Test_Somatic_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_
 func Test_Somatic_SNV_GetExpandedOccurrence(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewSomaticSNVOccurrencesRepository(db)
-		expandedOccurrence, err := repo.GetExpandedOccurrence(71, 74, 1000)
+		expandedOccurrence, err := repo.GetExpandedOccurrence(71, 74, 74, 1000)
 		assert.NoError(t, err)
 		assert.Equal(t, "1000", expandedOccurrence.LocusId)
 		assert.Equal(t, "locus1", expandedOccurrence.Locus)

@@ -23,6 +23,7 @@ export const AllVariants: Story = {
       {sizes.map(size => (
         <div key={size} className="flex flex-col items-center gap-3">
           <div className="text-sm font-bold text-muted-foreground mb-4">Size: {size}</div>
+          <span className="text-muted-foreground text-sm uppercase">Single type</span>
           <ToggleGroup type="single" size={size} variant="outline" spacing={2} defaultValue="bold">
             <ToggleGroupItem value="bold" aria-label="Bold">
               <Bold />
@@ -68,6 +69,19 @@ export const AllVariants: Story = {
               <ToggleGroupItem value="missed">Missed</ToggleGroupItem>
             </ToggleGroup>
           </div>
+
+          <span className="text-muted-foreground text-sm uppercase">Multiple type</span>
+          <ToggleGroup type="multiple" size={size} variant="outline" spacing={2} defaultValue={['bold', 'italic']}>
+            <ToggleGroupItem value="bold" aria-label="Bold">
+              <Bold />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="italic" aria-label="Italic">
+              <Italic />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="underline" aria-label="Underline">
+              <Underline />
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
       ))}
     </div>

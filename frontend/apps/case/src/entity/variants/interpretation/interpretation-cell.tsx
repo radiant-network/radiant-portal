@@ -11,6 +11,7 @@ import { SELECTED_VARIANT_PARAM } from '../constants';
 
 type InterpretationDialogProps = {
   locusId: string;
+  taskId: number;
   transcriptId?: string;
   patientId?: number;
   handleSaveCallback?: () => void;
@@ -20,6 +21,7 @@ type InterpretationDialogProps = {
 
 type InterpretationCellProps = {
   locusId: string;
+  taskId: number;
   transcriptId?: string;
   hasInterpretation: boolean;
   patientId?: number;
@@ -28,6 +30,7 @@ type InterpretationCellProps = {
 
 function InterpretationCell({
   locusId,
+  taskId,
   transcriptId,
   hasInterpretation,
   patientId,
@@ -49,6 +52,7 @@ function InterpretationCell({
       <InterpretationDialog
         isCreation
         locusId={locusId}
+        taskId={taskId}
         transcriptId={transcriptId}
         patientId={patientId}
         handleSaveCallback={list?.mutate}

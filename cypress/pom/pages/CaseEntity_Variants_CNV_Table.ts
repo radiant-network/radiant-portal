@@ -11,6 +11,17 @@ const selectors = {
 
 const tableColumns = [
   {
+    id: 'flag',
+    name: '',
+    apiField: 'flag_type',
+    isVisibleByDefault: true,
+    pinByDefault: 'left',
+    isSortable: false,
+    isPinnable: false,
+    position: 0,
+    tooltip: null,
+  },
+  {
     id: 'genes',
     name: 'Genes',
     apiField: 'symbol',
@@ -18,7 +29,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 0,
+    position: 1,
     tooltip: 'List of genes overlapped by CNV',
   },
   {
@@ -29,7 +40,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 1,
+    position: 2,
     tooltip: null,
   },
   {
@@ -40,7 +51,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 2,
+    position: 3,
     tooltip: 'Number of SNVs included in the CNV',
   },
   {
@@ -51,7 +62,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 3,
+    position: 4,
     tooltip: null,
   },
   {
@@ -62,7 +73,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 4,
+    position: 5,
     tooltip: null,
   },
   {
@@ -73,7 +84,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 5,
+    position: 6,
     tooltip: 'Chromosome',
   },
   {
@@ -84,7 +95,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 6,
+    position: 7,
     tooltip: null,
   },
   {
@@ -95,7 +106,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 7,
+    position: 8,
     tooltip: null,
   },
   {
@@ -106,7 +117,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 8,
+    position: 9,
     tooltip: null,
   },
   {
@@ -117,7 +128,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 9,
+    position: 10,
     tooltip: 'CNV bases length',
   },
   {
@@ -128,7 +139,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 10,
+    position: 11,
     tooltip: 'Estimated copy number',
   },
   {
@@ -139,7 +150,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 11,
+    position: 12,
     tooltip: 'gnomAD 4.1.0 (Allele Frequency)',
   },
   {
@@ -150,7 +161,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 12,
+    position: 13,
     tooltip: 'Number of genes overlapped by CNV',
   },
   {
@@ -161,7 +172,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 13,
+    position: 14,
     tooltip: 'Genotype',
   },
   {
@@ -172,7 +183,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 14,
+    position: 15,
     tooltip: null,
   },
   {
@@ -183,7 +194,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 15,
+    position: 16,
     tooltip: 'CNV Quality',
   },
   {
@@ -194,7 +205,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 16,
+    position: 17,
     tooltip: 'Number of bins in the region',
   },
   {
@@ -205,7 +216,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 17,
+    position: 18,
     tooltip: 'Number of improperly paired end reads at start and stop breakpoints',
   },
 ];
@@ -214,7 +225,7 @@ export const CaseEntity_Variants_CNV_Table = {
   actions: {
     /**
      * Click the specific button to change table paging
-     * @param buttonName The button name to click (First | Last | Previous | Next | Select)
+     * @param buttonName The button name to click (first | last | previous | next | select)
      */
     clickPaginationButton(buttonName: string) {
       cy.waitWhileLoad(60 * 1000);
@@ -489,7 +500,7 @@ export const CaseEntity_Variants_CNV_Table = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest2');
-      CaseEntity_Variants_CNV_Table.actions.clickPaginationButton('Next');
+      CaseEntity_Variants_CNV_Table.actions.clickPaginationButton('next');
       cy.wait('@listRequest2');
       cy.waitWhileLoad(60 * 1000);
 
@@ -498,7 +509,7 @@ export const CaseEntity_Variants_CNV_Table = {
         expect(req.body.page_index).to.deep.equal(2);
         req.continue();
       }).as('listRequest3');
-      CaseEntity_Variants_CNV_Table.actions.clickPaginationButton('Next');
+      CaseEntity_Variants_CNV_Table.actions.clickPaginationButton('next');
       cy.wait('@listRequest3');
       cy.waitWhileLoad(60 * 1000);
 
@@ -507,7 +518,7 @@ export const CaseEntity_Variants_CNV_Table = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest4');
-      CaseEntity_Variants_CNV_Table.actions.clickPaginationButton('Previous');
+      CaseEntity_Variants_CNV_Table.actions.clickPaginationButton('previous');
       cy.wait('@listRequest4');
       cy.waitWhileLoad(60 * 1000);
 
@@ -516,7 +527,7 @@ export const CaseEntity_Variants_CNV_Table = {
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest5');
-      CaseEntity_Variants_CNV_Table.actions.clickPaginationButton('First');
+      CaseEntity_Variants_CNV_Table.actions.clickPaginationButton('first');
       cy.wait('@listRequest5');
     },
     /**
