@@ -30,6 +30,7 @@ type NoteContainerBaseProps = {
 
 export type NotesContainerProps = NoteContainerBaseProps & {
   enableEmptyIcon?: boolean;
+  enableSkeletonLoading?: boolean;
 };
 
 export type GetOccurrenceNoteInput = Omit<NotesContainerProps, 'enableEmptyIcon'>;
@@ -54,7 +55,7 @@ async function saveNote(_url: string, { arg }: { arg: CreateOccurrenceNoteInput 
  *
  * - ListFetcher refresh the table list when a note is saved or deleted to update the note's icon state
  */
-function NotesContainer({ enableEmptyIcon = false, ...props }: NotesContainerProps) {
+function NotesContainer({ enableEmptyIcon = false, enableSkeletonLoading = true, ...props }: NotesContainerProps) {
   const { t } = useI18n();
   const { sub } = useLoginContext();
   const { onChangeCallback } = useNotesContext();
@@ -128,7 +129,9 @@ function NotesContainer({ enableEmptyIcon = false, ...props }: NotesContainerPro
       </div>
       <TooltipProvider>
         <div className="flex-1 overflow-y-auto">
-          {fetcher.isLoading && new Array(3).fill(0).map((_, index) => <NoteSkeleton key={index} />)}
+          {enableSkeletonLoading &&
+            fetcher.isLoading &&
+            new Array(3).fill(0).map((_, index) => <NoteSkeleton key={index} />)}
           {enableEmptyIcon && !fetcher.isLoading && fetcher.data?.length === 0 && (
             <div className="flex flex-col items-center justify-center gap-4 py-16 px-6">
               <EmptyNoteIcon />
