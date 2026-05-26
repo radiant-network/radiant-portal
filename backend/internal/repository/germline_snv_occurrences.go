@@ -25,11 +25,11 @@ type GermlineSNVOccurrencesRepository struct {
 }
 
 type GermlineSNVOccurrencesDAO interface {
-	GetOccurrences(caseId int, seqId int, userFilter types.ListQuery) ([]GermlineSNVOccurrence, error)
-	CountOccurrences(caseId int, seqId int, userQuery types.CountQuery) (int64, error)
-	AggregateOccurrences(caseId int, seqId int, userQuery types.AggQuery) ([]Aggregation, error)
-	GetStatisticsOccurrences(caseId int, seqId int, userQuery types.StatisticsQuery) (*Statistics, error)
-	GetExpandedOccurrence(caseId int, seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error)
+	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]GermlineSNVOccurrence, error)
+	CountOccurrences(caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error)
+	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error)
+	GetStatisticsOccurrences(caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*Statistics, error)
+	GetExpandedOccurrence(caseId int, seqId int, taskId int, locusId int) (*ExpandedGermlineSNVOccurrence, error)
 }
 
 func NewGermlineSNVOccurrencesRepository(db *gorm.DB) *GermlineSNVOccurrencesRepository {
@@ -40,10 +40,10 @@ func NewGermlineSNVOccurrencesRepository(db *gorm.DB) *GermlineSNVOccurrencesRep
 	return &GermlineSNVOccurrencesRepository{db: db}
 }
 
-func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, userQuery types.ListQuery) ([]GermlineSNVOccurrence, error) {
+func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]GermlineSNVOccurrence, error) {
 	var occurrences []GermlineSNVOccurrence
 
-	tx, part, err := PrepareSNVListOrCountQuery(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
+	tx, part, err := PrepareSNVListOrCountQuery(types.GermlineSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -81,21 +81,21 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 	return occurrences, nil
 }
 
-func (r *GermlineSNVOccurrencesRepository) CountOccurrences(_ int, seqId int, userQuery types.CountQuery) (int64, error) {
-	return CountSNV(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
+func (r *GermlineSNVOccurrencesRepository) CountOccurrences(_ int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+	return CountSNV(types.GermlineSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
 }
 
-func (r *GermlineSNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	return AggregateSNV(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
+func (r *GermlineSNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {
+	return AggregateSNV(types.GermlineSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
 }
 
-func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
-	return StatisticsSNV(types.GermlineSNVOccurrenceTable, seqId, userQuery, r.db)
+func (r *GermlineSNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
+	return StatisticsSNV(types.GermlineSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
 }
 
-func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(_ int, seqId int, locusId int) (*ExpandedGermlineSNVOccurrence, error) {
+func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(_ int, seqId int, taskId int, locusId int) (*ExpandedGermlineSNVOccurrence, error) {
 	tx := r.db.Table("germline__snv__occurrence g_snv_o")
-	tx = tx.Where("g_snv_o.seq_id = ? AND g_snv_o.locus_id = ?", seqId, locusId)
+	tx = tx.Where("g_snv_o.seq_id = ? AND g_snv_o.task_id = ? AND g_snv_o.locus_id = ?", seqId, taskId, locusId)
 	tx = tx.Joins("JOIN snv__consequence c ON g_snv_o.locus_id=c.locus_id AND c.is_picked = true")
 	tx = tx.Joins("JOIN snv__variant v ON g_snv_o.locus_id=v.locus_id")
 	tx = tx.Joins("LEFT JOIN ensembl_gene g ON g.name=v.symbol")

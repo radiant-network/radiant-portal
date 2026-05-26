@@ -57,6 +57,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         _request_timeout: Union[
             None,
@@ -79,6 +80,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -106,6 +109,7 @@ class OccurrencesApi:
         _param = self._aggregate_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -135,6 +139,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         _request_timeout: Union[
             None,
@@ -157,6 +162,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -184,6 +191,7 @@ class OccurrencesApi:
         _param = self._aggregate_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -213,6 +221,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         _request_timeout: Union[
             None,
@@ -235,6 +244,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -262,6 +273,7 @@ class OccurrencesApi:
         _param = self._aggregate_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -286,6 +298,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         aggregation_body_with_sqon,
         _request_auth,
         _content_type,
@@ -312,6 +325,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -349,7 +364,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/aggregate',
+            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -370,6 +385,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
@@ -393,6 +409,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param with_dictionary: Whether to include all possible facet values
@@ -422,6 +440,7 @@ class OccurrencesApi:
         _param = self._aggregate_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             with_dictionary=with_dictionary,
             _request_auth=_request_auth,
@@ -452,6 +471,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
@@ -475,6 +495,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param with_dictionary: Whether to include all possible facet values
@@ -504,6 +526,7 @@ class OccurrencesApi:
         _param = self._aggregate_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             with_dictionary=with_dictionary,
             _request_auth=_request_auth,
@@ -534,6 +557,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
@@ -557,6 +581,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param with_dictionary: Whether to include all possible facet values
@@ -586,6 +612,7 @@ class OccurrencesApi:
         _param = self._aggregate_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             with_dictionary=with_dictionary,
             _request_auth=_request_auth,
@@ -611,6 +638,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         aggregation_body_with_sqon,
         with_dictionary,
         _request_auth,
@@ -638,6 +666,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         if with_dictionary is not None:
             
@@ -679,7 +709,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/aggregate',
+            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -700,6 +730,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
@@ -723,6 +754,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param with_dictionary: Whether to include all possible facet values
@@ -752,6 +785,7 @@ class OccurrencesApi:
         _param = self._aggregate_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             with_dictionary=with_dictionary,
             _request_auth=_request_auth,
@@ -782,6 +816,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
@@ -805,6 +840,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param with_dictionary: Whether to include all possible facet values
@@ -834,6 +871,7 @@ class OccurrencesApi:
         _param = self._aggregate_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             with_dictionary=with_dictionary,
             _request_auth=_request_auth,
@@ -864,6 +902,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
         with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
@@ -887,6 +926,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
         :param with_dictionary: Whether to include all possible facet values
@@ -916,6 +957,7 @@ class OccurrencesApi:
         _param = self._aggregate_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
             with_dictionary=with_dictionary,
             _request_auth=_request_auth,
@@ -941,6 +983,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         aggregation_body_with_sqon,
         with_dictionary,
         _request_auth,
@@ -968,6 +1011,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         if with_dictionary is not None:
             
@@ -1009,7 +1054,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/aggregate',
+            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1030,6 +1075,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -1052,6 +1098,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1079,6 +1127,7 @@ class OccurrencesApi:
         _param = self._count_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1108,6 +1157,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -1130,6 +1180,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1157,6 +1209,7 @@ class OccurrencesApi:
         _param = self._count_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1186,6 +1239,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -1208,6 +1262,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1235,6 +1291,7 @@ class OccurrencesApi:
         _param = self._count_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1259,6 +1316,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         count_body_with_sqon,
         _request_auth,
         _content_type,
@@ -1285,6 +1343,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1322,7 +1382,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/count',
+            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1343,6 +1403,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -1365,6 +1426,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1392,6 +1455,7 @@ class OccurrencesApi:
         _param = self._count_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1421,6 +1485,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -1443,6 +1508,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1470,6 +1537,7 @@ class OccurrencesApi:
         _param = self._count_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1499,6 +1567,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -1521,6 +1590,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1548,6 +1619,7 @@ class OccurrencesApi:
         _param = self._count_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1572,6 +1644,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         count_body_with_sqon,
         _request_auth,
         _content_type,
@@ -1598,6 +1671,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1635,7 +1710,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/count',
+            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1656,6 +1731,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -1678,6 +1754,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1705,6 +1783,7 @@ class OccurrencesApi:
         _param = self._count_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1734,6 +1813,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -1756,6 +1836,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1783,6 +1865,7 @@ class OccurrencesApi:
         _param = self._count_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1812,6 +1895,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         count_body_with_sqon: Annotated[CountBodyWithSqon, Field(description="Count Body")],
         _request_timeout: Union[
             None,
@@ -1834,6 +1918,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param count_body_with_sqon: Count Body (required)
         :type count_body_with_sqon: CountBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -1861,6 +1947,7 @@ class OccurrencesApi:
         _param = self._count_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             count_body_with_sqon=count_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1885,6 +1972,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         count_body_with_sqon,
         _request_auth,
         _content_type,
@@ -1911,6 +1999,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1948,7 +2038,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/count',
+            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1969,6 +2059,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1991,6 +2082,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2018,6 +2111,7 @@ class OccurrencesApi:
         _param = self._get_expanded_germline_snv_occurrence_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2046,6 +2140,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2068,6 +2163,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2095,6 +2192,7 @@ class OccurrencesApi:
         _param = self._get_expanded_germline_snv_occurrence_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2123,6 +2221,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2145,6 +2244,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2172,6 +2273,7 @@ class OccurrencesApi:
         _param = self._get_expanded_germline_snv_occurrence_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2195,6 +2297,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         locus_id,
         _request_auth,
         _content_type,
@@ -2221,6 +2324,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -2245,7 +2350,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{locus_id}/expanded',
+            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2266,6 +2371,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2288,6 +2394,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2315,6 +2423,7 @@ class OccurrencesApi:
         _param = self._get_expanded_somatic_snv_occurrence_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2343,6 +2452,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2365,6 +2475,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2392,6 +2504,7 @@ class OccurrencesApi:
         _param = self._get_expanded_somatic_snv_occurrence_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2420,6 +2533,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2442,6 +2556,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2469,6 +2585,7 @@ class OccurrencesApi:
         _param = self._get_expanded_somatic_snv_occurrence_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2492,6 +2609,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         locus_id,
         _request_auth,
         _content_type,
@@ -2518,6 +2636,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -2542,7 +2662,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{locus_id}/expanded',
+            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2836,6 +2956,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         cnv_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2858,6 +2979,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param cnv_id: Locus ID (required)
         :type cnv_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2885,6 +3008,7 @@ class OccurrencesApi:
         _param = self._list_germline_cnv_genes_overlap_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             cnv_id=cnv_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2913,6 +3037,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         cnv_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2935,6 +3060,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param cnv_id: Locus ID (required)
         :type cnv_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2962,6 +3089,7 @@ class OccurrencesApi:
         _param = self._list_germline_cnv_genes_overlap_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             cnv_id=cnv_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2990,6 +3118,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         cnv_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -3012,6 +3141,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param cnv_id: Locus ID (required)
         :type cnv_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -3039,6 +3170,7 @@ class OccurrencesApi:
         _param = self._list_germline_cnv_genes_overlap_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             cnv_id=cnv_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3062,6 +3194,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         cnv_id,
         _request_auth,
         _content_type,
@@ -3088,6 +3221,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         if cnv_id is not None:
             _path_params['cnv_id'] = cnv_id
         # process the query parameters
@@ -3112,7 +3247,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{cnv_id}/genes_overlap',
+            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3133,6 +3268,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -3155,6 +3291,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3182,6 +3320,7 @@ class OccurrencesApi:
         _param = self._list_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3211,6 +3350,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -3233,6 +3373,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3260,6 +3402,7 @@ class OccurrencesApi:
         _param = self._list_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3289,6 +3432,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -3311,6 +3455,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3338,6 +3484,7 @@ class OccurrencesApi:
         _param = self._list_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3362,6 +3509,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         list_body_with_sqon,
         _request_auth,
         _content_type,
@@ -3388,6 +3536,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -3425,7 +3575,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/list',
+            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3446,6 +3596,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -3468,6 +3619,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3495,6 +3648,7 @@ class OccurrencesApi:
         _param = self._list_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3524,6 +3678,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -3546,6 +3701,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3573,6 +3730,7 @@ class OccurrencesApi:
         _param = self._list_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3602,6 +3760,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -3624,6 +3783,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3651,6 +3812,7 @@ class OccurrencesApi:
         _param = self._list_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3675,6 +3837,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         list_body_with_sqon,
         _request_auth,
         _content_type,
@@ -3701,6 +3864,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -3738,7 +3903,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/list',
+            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3759,6 +3924,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -3781,6 +3947,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3808,6 +3976,7 @@ class OccurrencesApi:
         _param = self._list_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3837,6 +4006,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -3859,6 +4029,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3886,6 +4058,7 @@ class OccurrencesApi:
         _param = self._list_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3915,6 +4088,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         list_body_with_sqon: Annotated[ListBodyWithSqon, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -3937,6 +4111,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param list_body_with_sqon: List Body (required)
         :type list_body_with_sqon: ListBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -3964,6 +4140,7 @@ class OccurrencesApi:
         _param = self._list_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             list_body_with_sqon=list_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3988,6 +4165,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         list_body_with_sqon,
         _request_auth,
         _content_type,
@@ -4014,6 +4192,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -4051,7 +4231,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/list',
+            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4072,6 +4252,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -4094,6 +4275,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -4121,6 +4304,7 @@ class OccurrencesApi:
         _param = self._statistics_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4150,6 +4334,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -4172,6 +4357,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -4199,6 +4386,7 @@ class OccurrencesApi:
         _param = self._statistics_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4228,6 +4416,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -4250,6 +4439,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -4277,6 +4468,7 @@ class OccurrencesApi:
         _param = self._statistics_germline_cnv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4301,6 +4493,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         statistics_body_with_sqon,
         _request_auth,
         _content_type,
@@ -4327,6 +4520,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -4364,7 +4559,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/statistics',
+            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4385,6 +4580,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -4407,6 +4603,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -4434,6 +4632,7 @@ class OccurrencesApi:
         _param = self._statistics_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4463,6 +4662,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -4485,6 +4685,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -4512,6 +4714,7 @@ class OccurrencesApi:
         _param = self._statistics_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4541,6 +4744,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -4563,6 +4767,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -4590,6 +4796,7 @@ class OccurrencesApi:
         _param = self._statistics_germline_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4614,6 +4821,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         statistics_body_with_sqon,
         _request_auth,
         _content_type,
@@ -4640,6 +4848,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -4677,7 +4887,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/statistics',
+            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4698,6 +4908,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -4720,6 +4931,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -4747,6 +4960,7 @@ class OccurrencesApi:
         _param = self._statistics_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4776,6 +4990,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -4798,6 +5013,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -4825,6 +5042,7 @@ class OccurrencesApi:
         _param = self._statistics_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4854,6 +5072,7 @@ class OccurrencesApi:
         self,
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
+        task_id: Annotated[StrictInt, Field(description="Task ID")],
         statistics_body_with_sqon: Annotated[StatisticsBodyWithSqon, Field(description="Statistics Body")],
         _request_timeout: Union[
             None,
@@ -4876,6 +5095,8 @@ class OccurrencesApi:
         :type case_id: int
         :param seq_id: Sequence ID (required)
         :type seq_id: int
+        :param task_id: Task ID (required)
+        :type task_id: int
         :param statistics_body_with_sqon: Statistics Body (required)
         :type statistics_body_with_sqon: StatisticsBodyWithSqon
         :param _request_timeout: timeout setting for this request. If one
@@ -4903,6 +5124,7 @@ class OccurrencesApi:
         _param = self._statistics_somatic_snv_occurrences_serialize(
             case_id=case_id,
             seq_id=seq_id,
+            task_id=task_id,
             statistics_body_with_sqon=statistics_body_with_sqon,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4927,6 +5149,7 @@ class OccurrencesApi:
         self,
         case_id,
         seq_id,
+        task_id,
         statistics_body_with_sqon,
         _request_auth,
         _content_type,
@@ -4953,6 +5176,8 @@ class OccurrencesApi:
             _path_params['case_id'] = case_id
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
+        if task_id is not None:
+            _path_params['task_id'] = task_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -4990,7 +5215,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/statistics',
+            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
