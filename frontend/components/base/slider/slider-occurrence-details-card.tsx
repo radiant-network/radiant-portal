@@ -109,11 +109,13 @@ const SliderOccurrenceDetailsCard = ({
   } else {
     actions = (
       <Tooltip>
-        <TooltipTrigger>
-          <Button variant="outline" size="xs" disabled>
-            <FlipVertical2 />
-            {t('preview_sheet.occurrence_details.actions.view_in_igv')}
-          </Button>
+        <TooltipTrigger asChild>
+          <span className="inline-block">
+            <Button variant="outline" size="xs" disabled>
+              <FlipVertical2 />
+              {t('preview_sheet.occurrence_details.actions.view_in_igv')}
+            </Button>
+          </span>
         </TooltipTrigger>
         <TooltipContent>{t('variant.actions.open_in_igv_disabled_tooltip')}</TooltipContent>
       </Tooltip>
