@@ -26,7 +26,7 @@ https://github.com/openfga/cli?tab=readme-ov-file#installation
 
 Realm settings are imported at start, still a user needs to be created manually in the UI `http://localhost:8080`.
 
-Once created, assign the role `api` and a password in`credentials` tab.
+Once created, assign the role `radiant` and a password in`credentials` tab.
 
 ## MakeFile
 
