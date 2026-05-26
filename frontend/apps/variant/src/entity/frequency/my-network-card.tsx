@@ -84,7 +84,7 @@ function MyNetworkCard() {
           <CardAction className="flex flex-row items-center gap-10">
             <div className="flex items-center gap-2">
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <span className="font-semibold underline decoration-dotted decoration-auto">
                     {t('variant_entity.frequency.my_network.global_frequencies.all_patients')}
                   </span>
@@ -100,7 +100,7 @@ function MyNetworkCard() {
             </div>
             <div className="flex items-center gap-2">
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <span className="font-semibold underline decoration-dotted decoration-auto">
                     {t('variant_entity.frequency.my_network.global_frequencies.affected')}
                   </span>
@@ -116,7 +116,7 @@ function MyNetworkCard() {
             </div>
             <div className="flex items-center gap-2">
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <span className="font-semibold underline decoration-dotted decoration-auto">
                     {t('variant_entity.frequency.my_network.global_frequencies.non_affected')}
                   </span>

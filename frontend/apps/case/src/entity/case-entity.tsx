@@ -83,6 +83,13 @@ export default function App() {
     setSearchParams({ tab: CaseEntityTabs.Details });
   }, []);
 
+  useEffect(() => {
+    if (searchParams.get('tab') != null) {
+      setActiveTab(searchParams.get('tab') as CaseEntityTabs);
+      return;
+    }
+  }, [searchParams.get('tab')]);
+
   /**
    * Reset scroll position when changing tab
    */
@@ -128,7 +135,7 @@ export default function App() {
               </TabsListItem>
             ) : (
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <TabsListItem disabled value={CaseEntityTabs.Variants}>
                     <AudioWaveform />
                     {t('case_entity.variants.title')}

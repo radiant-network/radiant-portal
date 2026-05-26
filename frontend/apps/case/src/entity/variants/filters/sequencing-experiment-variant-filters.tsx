@@ -94,30 +94,30 @@ function SequencingVariantFilters({
     <div className="inline-flex gap-4 items-center border-b px-6 py-2.5">
       <Tabs value={activeInterface}>
         <TabsList className="w-full h-7">
-          {options.map(({ tooltip, value }: SequencingVariantFiltersOption) => (
-            <TabsTrigger
-              key={value}
-              value={value}
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
-              data-cy={`tabs-trigger-${value}`}
-              onClick={() => {
-                onActiveInterfaceChange(value);
-              }}
-            >
-              {tooltip ? (
-                <Tooltip>
-                  <TooltipTrigger>
-                    <span>{t(`case_entity.variants.filters.${value.toLowerCase()}`)}</span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <>{tooltip}</>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <>{t(`case_entity.variants.filters.${value.toLowerCase()}`)}</>
-              )}
-            </TabsTrigger>
-          ))}
+          {options.map(({ tooltip, value }: SequencingVariantFiltersOption) => {
+            const trigger = (
+              <TabsTrigger
+                key={value}
+                value={value}
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
+                data-cy={`tabs-trigger-${value}`}
+                onClick={() => {
+                  onActiveInterfaceChange(value);
+                }}
+              >
+                {t(`case_entity.variants.filters.${value.toLowerCase()}`)}
+              </TabsTrigger>
+            );
+
+            return tooltip ? (
+              <Tooltip key={value}>
+                <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+                <TooltipContent>{tooltip}</TooltipContent>
+              </Tooltip>
+            ) : (
+              trigger
+            );
+          })}
         </TabsList>
       </Tabs>
       <Separator className="h-7" orientation="vertical" />
