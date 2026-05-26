@@ -214,6 +214,7 @@ export const ClinicalAssociationCard = ({ omim_conditions, locus_id }: ClinicalA
     if (index === MAX_CLINICAL_ASSOCIATION) {
       clinicalAssociationValue.push(
         <AnchorLink
+          key="see-more"
           component={Link}
           to={`/variants/entity/${locus_id}?tab=${VariantEntityTabs.EvidenceAndConditions}`}
           className="justify-start"
@@ -227,6 +228,7 @@ export const ClinicalAssociationCard = ({ omim_conditions, locus_id }: ClinicalA
 
     clinicalAssociationValue.push(
       <DescriptionRow
+        key={oc.omim_phenotype_id}
         label={
           oc.panel ? (
             <AnchorLink href={`https://www.omim.org/entry/${oc.omim_phenotype_id}`} target="_blank" size="sm">
@@ -345,6 +347,7 @@ export const PredictionCard = ({
     // Tumor-Normal
     frequencies.push(
       <DescriptionRow
+        key="tn"
         label={
           <span className="inline-flex gap-1 items-center">
             {t('preview_sheet.variant_details.sections.frequencies.tn')}
@@ -368,6 +371,7 @@ export const PredictionCard = ({
     // Germline Affected
     frequencies.push(
       <DescriptionRow
+        key="affected"
         label={
           <Tooltip>
             <TooltipTrigger asChild>
@@ -391,6 +395,7 @@ export const PredictionCard = ({
     // Germline Non Affected
     frequencies.push(
       <DescriptionRow
+        key="non-affected"
         label={
           <Tooltip>
             <TooltipTrigger asChild>
@@ -415,7 +420,7 @@ export const PredictionCard = ({
 
     // GnomAD
     frequencies.push(
-      <DescriptionRow label={t('preview_sheet.variant_details.sections.frequencies.gnomad')}>
+      <DescriptionRow key="gnomad" label={t('preview_sheet.variant_details.sections.frequencies.gnomad')}>
         {gnomad_v3_af ? (
           <AnchorLink
             size="sm"
@@ -437,7 +442,7 @@ export const PredictionCard = ({
   // cadd phred
   if (cadd_phred) {
     functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.cadd_phred')}>
+      <DescriptionRow key="cadd-phred" label={t('occurrence_expand.functional_scores.cadd_phred')}>
         {cadd_phred.toExponential(2)}
       </DescriptionRow>,
     );
@@ -446,7 +451,7 @@ export const PredictionCard = ({
   // cadd score
   if (cadd_score) {
     functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.cadd_raw')}>
+      <DescriptionRow key="cadd-raw" label={t('occurrence_expand.functional_scores.cadd_raw')}>
         {cadd_score.toExponential(2)}
       </DescriptionRow>,
     );
@@ -455,14 +460,16 @@ export const PredictionCard = ({
   // DANN score
   if (dann_score) {
     functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.dann')}>{dann_score}</DescriptionRow>,
+      <DescriptionRow key="dann" label={t('occurrence_expand.functional_scores.dann')}>
+        {dann_score}
+      </DescriptionRow>,
     );
   }
 
   // LRT score
   if (lrt_score) {
     functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.lrt')}>
+      <DescriptionRow key="lrt" label={t('occurrence_expand.functional_scores.lrt')}>
         {t(`common.filters.values.lrt_pred.${lrt_pred?.toLowerCase()}`) || lrt_pred}
         {lrt_score && ` (${lrt_score})`}
       </DescriptionRow>,
@@ -472,7 +479,7 @@ export const PredictionCard = ({
   // sift
   if (sift_pred) {
     functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.sift')}>
+      <DescriptionRow key="sift" label={t('occurrence_expand.functional_scores.sift')}>
         {t(`common.filters.values.sift_pred.${sift_pred?.toLowerCase()}`) || sift_pred}
         {sift_score && ` (${sift_score})`}
       </DescriptionRow>,
@@ -482,7 +489,7 @@ export const PredictionCard = ({
   // fathmm
   if (fathmm_pred) {
     functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.fathmm')}>
+      <DescriptionRow key="fathmm" label={t('occurrence_expand.functional_scores.fathmm')}>
         {t(`common.filters.values.fathmm_pred.${fathmm_pred?.toLowerCase()}`) || fathmm_pred}
         {fathmm_score && ` (${fathmm_score})`}
       </DescriptionRow>,
@@ -492,14 +499,16 @@ export const PredictionCard = ({
   // revel score
   if (revel_score) {
     functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.revel')}>{revel_score}</DescriptionRow>,
+      <DescriptionRow key="revel" label={t('occurrence_expand.functional_scores.revel')}>
+        {revel_score}
+      </DescriptionRow>,
     );
   }
 
   // PolyPhen-2 HVAR
   if (polyphen2_hvar_pred) {
     functionalScores.push(
-      <DescriptionRow label={t('occurrence_expand.functional_scores.polyphen2_hvar')}>
+      <DescriptionRow key="polyphen2-hvar" label={t('occurrence_expand.functional_scores.polyphen2_hvar')}>
         {t(`common.filters.values.polyphen2_hvar_pred.${polyphen2_hvar_pred?.toLowerCase()}`) || polyphen2_hvar_pred}
         {polyphen2_hvar_score && ` (${polyphen2_hvar_score})`}
       </DescriptionRow>,
@@ -512,7 +521,7 @@ export const PredictionCard = ({
   // clinvar
   if ((clinvar ?? []).length) {
     classification.push(
-      <DescriptionRow label={t('preview_sheet.variant_details.sections.classification.clinvar')}>
+      <DescriptionRow key="clinvar" label={t('preview_sheet.variant_details.sections.classification.clinvar')}>
         <div className="flex gap-1">
           {(clinvar ?? []).map(key => (
             <ClassificationBadge key={key} value={key} abbreviated />
@@ -525,7 +534,7 @@ export const PredictionCard = ({
   // hotspot
   if (hotspot) {
     classification.push(
-      <DescriptionRow label={t('preview_sheet.variant_details.sections.classification.hotspot')}>
+      <DescriptionRow key="hotspot" label={t('preview_sheet.variant_details.sections.classification.hotspot')}>
         <div className="flex gap-1">
           <Flame
             className={cn({ 'text-indicator-red fill-indicator-red': hotspot, 'text-muted-foreground/40': !hotspot })}
@@ -538,7 +547,7 @@ export const PredictionCard = ({
 
   if (Object.keys(exomiser_acmg_classification_counts ?? {}).length) {
     classification.push(
-      <DescriptionRow label={t('preview_sheet.variant_details.sections.classification.exomiser')}>
+      <DescriptionRow key="exomiser" label={t('preview_sheet.variant_details.sections.classification.exomiser')}>
         {Object.entries(exomiser_acmg_classification_counts ?? {}).map(([key, count]) => (
           <ClassificationBadge key={key} value={key} count={count} abbreviated />
         ))}
