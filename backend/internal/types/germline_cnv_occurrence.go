@@ -13,25 +13,25 @@ type GermlineCNVOccurrence struct {
 	Type       string            `json:"type" validate:"required"`
 	Length     int               `json:"length" validate:"required"`
 	Name       string            `json:"name" validate:"required"`
-	Quality    float32           `json:"quality,omitempty"`
+	Quality    *float32          `json:"quality,omitempty"`
 	Calls      JsonArray[int]    `json:"calls,omitempty"`
 	Cytoband   JsonArray[string] `json:"cytoband,omitempty"`
 	Symbol     JsonArray[string] `json:"symbol,omitempty"`
 	Filter     string            `json:"filter,omitempty"`
-	BC         int               `json:"bc,omitempty"`
-	CN         int               `json:"cn,omitempty"`
+	BC         *int              `json:"bc,omitempty"`
+	CN         *int              `json:"cn,omitempty"`
 	PE         JsonArray[int]    `json:"pe,omitempty"`
-	SM         float32           `json:"sm,omitempty"`
+	SM         *float32          `json:"sm,omitempty"`
 	SVType     string            `json:"svtype,omitempty" gorm:"column:svtype"`
-	SVLen      int               `json:"svlen,omitempty" gorm:"column:svlen"`
-	RefLen     int               `json:"reflen,omitempty" gorm:"column:reflen"`
+	SVLen      *int              `json:"svlen,omitempty" gorm:"column:svlen"`
+	RefLen     *int              `json:"reflen,omitempty" gorm:"column:reflen"`
 	CIEnd      JsonArray[int]    `json:"ciend,omitempty" gorm:"column:ciend"`
 	CIPos      JsonArray[int]    `json:"cipos,omitempty" gorm:"column:cipos"`
-	NbGenes    int               `json:"nb_genes,omitempty" gorm:"column:nb_genes"`
-	NbSNV      int               `json:"nb_snv,omitempty" gorm:"column:nb_snv"`
-	GnomadSC   int               `json:"gnomad_sc,omitempty" gorm:"column:gnomad_sc"`
-	GnomadSN   int               `json:"gnomad_sn,omitempty" gorm:"column:gnomad_sn"`
-	GnomadSF   float32           `json:"gnomad_sf,omitempty" gorm:"column:gnomad_sf"`
+	NbGenes    *int              `json:"nb_genes,omitempty" gorm:"column:nb_genes"`
+	NbSNV      int               `json:"nb_snv" gorm:"column:nb_snv"`
+	GnomadSC   *int              `json:"gnomad_sc,omitempty" gorm:"column:gnomad_sc"`
+	GnomadSN   *int              `json:"gnomad_sn,omitempty" gorm:"column:gnomad_sn"`
+	GnomadSF   *float32          `json:"gnomad_sf,omitempty" gorm:"column:gnomad_sf"`
 	HasNote    bool              `json:"has_note" validate:"required"`
 	FlagType   OccurrenceFlagType `json:"flag_type,omitempty" enums:"flag,pin,star"`
 }

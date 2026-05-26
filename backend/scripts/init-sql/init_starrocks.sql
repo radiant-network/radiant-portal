@@ -346,32 +346,46 @@ PARTITION BY (`part`)
 DISTRIBUTED BY HASH(`locus_id`)
 BUCKETS 10;
 
+
 CREATE TABLE IF NOT EXISTS `germline__cnv__occurrence` (
-    `part`         INT NOT NULL,
-    `seq_id`       INT NOT NULL,
-    `id`           VARCHAR(256),
-    `aliquot`      VARCHAR(255) NOT NULL,
-    `chromosome`   VARCHAR(2) NOT NULL,
-    `start`        BIGINT NOT NULL,
-    `end`          BIGINT NOT NULL,
-    `type`         VARCHAR(32) NOT NULL,
-    `length`       BIGINT NOT NULL,
-    `name`         VARCHAR(128) NOT NULL,
-    `quality`      FLOAT,
-    `calls`        ARRAY<INT>,
-    `filter`       VARCHAR(32),
-    `bc`           INT,
-    `cn`           INT,
-    `pe`           ARRAY<INT>,
-    `sm`           FLOAT,
-    `svtype`       VARCHAR(32),
-    `svlen`        INT,
-    `reflen`       INT,
-    `ciend`        ARRAY<INT>,
-    `cipos`        ARRAY<INT>
-)
-ENGINE=OLAP
-DUPLICATE KEY(`part`, `seq_id`, `id`);
+     part int(11) NOT NULL,
+     seq_id int(11) NULL,
+     task_id int(11) NOT NULL,
+     cnv_id bigint(20) NOT NULL,
+     aliquot varchar(50) NULL,
+     chromosome varchar(20) NULL,
+     alternate varchar(20) NULL,
+     start int(11) NULL,
+     end int(11) NULL,
+     type varchar(10) NULL,
+     length int(11) NULL,
+     name varchar(1048576) NULL,
+     quality FLOAT NULL,
+     calls array<int(11)> NULL,
+     filter varchar(255) NULL,
+     bc int(11) NULL,
+     cn int(11) NULL,
+     pe array<int(11)> NULL,
+     sm FLOAT NULL,
+     svtype varchar(20) NULL,
+     svlen int(11) NULL,
+     reflen int(11) NULL,
+     ciend array<int(11)> NULL,
+     cipos array<int(11)> NULL,
+     phased boolean NULL,
+     cytoband array<varchar(10)> NULL,
+     symbol array<varchar(128)> NULL,
+     nb_genes int(11) NULL,
+     nb_snv int(11) NULL,
+     gnomad_af FLOAT NULL,
+     gnomad_sc int(11) NULL,
+     gnomad_sn int(11) NULL,
+     gnomad_sf FLOAT NULL,
+     gnomad_sc_hom int(11) NULL,
+     gnomad_sc_het int(11) NULL
+) ENGINE=OLAP
+DUPLICATE KEY(part, seq_id, task_id, cnv_id)
+PARTITION BY (part);
 
 CREATE TABLE IF NOT EXISTS somatic__snv__occurrence
 (
@@ -536,12 +550,12 @@ VALUES
 
 
 INSERT INTO test_db.germline__cnv__occurrence
-(part, seq_id, id, aliquot, chromosome, start, end, type, length, name, quality, calls, filter, bc, cn, pe, sm, svtype,
-svlen, reflen, ciend, cipos)
+(part, seq_id, task_id, cnv_id, aliquot, chromosome, start, end, type, length, name, quality, calls, filter, bc, cn, pe, sm, svtype,
+svlen, reflen, ciend, cipos, nb_snv)
 VALUES
-    (1, 1, 'CNV1_1', 'aliquot1', '1', 1000, 2000, 'DEL', 1000, 'CNV1', 0.999, [1, 2, 3], 'PASS', 2, 1, [1, 2], 0.5, 'DEL', 1000, 1000, [100, 200], [50, 150]),
-    (1, 1, 'CNV2_1', 'aliquot2', '2', 2000, 3000, 'DUP', 1000, 'CNV2', 0.888, [4, 5, 6], 'PASS', 3, 2, [3, 4], 0.6, 'DUP', 1000, 1000, [200, 300], [150, 250]),
-    (1, 2, 'CNV3_2', 'aliquot3', 'X', 3000, 4000, 'INV', 1000, 'CNV3', 0.777, [7, 8, 9], 'PASS', 4, 3, [5, 6], 0.7, 'INV', 1000, 1000, [300, 400], [250, 350]);
+    (1, 1, 1, 1, 'aliquot1', '1', 1000, 2000, 'DEL', 1000, 'CNV1', 0.999, [1, 2, 3], 'PASS', 2, 1, [1, 2], 0.5, 'DEL', 1000, 1000, [100, 200], [50, 150], NULL),
+    (1, 1, 1, 2, 'aliquot2', '2', 2000, 3000, 'DUP', 1000, 'CNV2', 0.888, [4, 5, 6], 'PASS', 3, 2, [3, 4], 0.6, 'DUP', 1000, 1000, [200, 300], [150, 250], 1),
+    (1, 2, 2, 3, 'aliquot3', 'X', 3000, 4000, 'INV', 1000, 'CNV3', 0.777, [7, 8, 9], 'PASS', 4, 3, [5, 6], 0.7, 'INV', 1000, 1000, [300, 400], [250, 350], 1);
 
 INSERT INTO test_db.somatic__snv__occurrence (
     part, task_id, tumor_seq_id, locus_id, normal_seq_id, quality, filter,

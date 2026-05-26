@@ -15,13 +15,14 @@ import (
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 )
 
 func Test_PostSequencingExperimentBatch_OK(t *testing.T) {
-	testutils.ParallelTestWithPostgres(t, func(t *testing.T, postgres *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+
 		auth := testutils.MockAuth{}
-		repo := repository.NewBatchRepository(postgres)
+		repo := repository.NewBatchRepository(db)
 
 		router := gin.Default()
 		router.POST(
@@ -29,7 +30,7 @@ func Test_PostSequencingExperimentBatch_OK(t *testing.T) {
 			server.PostSequencingExperimentBatchHandler(repo, &auth),
 		)
 
-		runDate := time.Date(2025, 12, 15, 12, 0, 0, 0, time.UTC)
+		runDate := time.Date(2024, 12, 15, 12, 0, 0, 0, time.UTC)
 		reqBody := struct {
 			SequencingExperiments []map[string]interface{} `json:"sequencing_experiments"`
 		}{
@@ -61,19 +62,24 @@ func Test_PostSequencingExperimentBatch_OK(t *testing.T) {
 		assert.Equal(t, http.StatusAccepted, w.Code)
 
 		res := w.Body.String()
-		assert.NotEmpty(t, res, "Response should not be empty")
 
-		var respBody types.CreateBatchResponse
-		err = json.Unmarshal(w.Body.Bytes(), &respBody)
+		if assert.NotEmpty(t, res, "Response should not be empty") {
+			var respBody types.CreateBatchResponse
+			err = json.Unmarshal(w.Body.Bytes(), &respBody)
 
-		assert.Nil(t, err)
-		assert.NotEmpty(t, respBody.ID, "Batch ID should not be empty")
+			assert.Nil(t, err)
 
-		expectedPayload := `[{"aliquot": "ALIQUOT-123", "run_date": "2025-12-15T12:00:00Z", "run_name": "RUN-1", "run_alias": "RUN-ALIAS-1", "capture_kit": "CPT-123", "status_code": "in_progress", "platform_code": "illumina", "sequencing_lab_code": "CHUSJ", "submitter_sample_id": "SAMPLE-123", "sample_organization_code": "ORG-123", "experimental_strategy_code": "wgs", "sequencing_read_technology_code": "short_read"}]`
-		batch, err := repo.ClaimNextBatch()
-		assert.Nil(t, err)
-		assert.NotNil(t, batch)
-		assert.Equal(t, respBody.ID, batch.ID)
-		assert.Equal(t, expectedPayload, batch.Payload)
+			if assert.NotEmpty(t, respBody.ID, "Batch ID should not be empty") {
+
+				expectedPayload := `[{"aliquot": "ALIQUOT-123", "run_date": "2024-12-15T12:00:00Z", "run_name": "RUN-1", "run_alias": "RUN-ALIAS-1", "capture_kit": "CPT-123", "status_code": "in_progress", "platform_code": "illumina", "sequencing_lab_code": "CHUSJ", "submitter_sample_id": "SAMPLE-123", "sample_organization_code": "ORG-123", "experimental_strategy_code": "wgs", "sequencing_read_technology_code": "short_read"}]`
+				batch, err := repo.ClaimNextBatch()
+				assert.Nil(t, err)
+				if assert.NotNil(t, batch) {
+					assert.Equal(t, respBody.ID, batch.ID)
+					assert.Equal(t, expectedPayload, batch.Payload)
+				}
+				db.Exec("DELETE FROM batch WHERE id = ?", respBody.ID)
+			}
+		}
 	})
 }
