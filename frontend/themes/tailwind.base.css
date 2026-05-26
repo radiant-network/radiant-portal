@@ -316,10 +316,6 @@
 }
 
 @layer utilities {
-  .cursor-default {
-    cursor: pointer;
-  }
-
   .max-w-8xl {
     max-width: 1440px;
   }
