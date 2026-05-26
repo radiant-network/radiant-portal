@@ -45,10 +45,12 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
             </Button>
           ) : (
             <Tooltip>
-              <TooltipTrigger>
-                <Button disabled>
-                  <AudioWaveformIcon /> {t('case_entity.details.view_variants')} <ArrowUpRightIcon />
-                </Button>
+              <TooltipTrigger asChild>
+                <span tabIndex={0}>
+                  <Button disabled>
+                    <AudioWaveformIcon /> {t('case_entity.details.view_variants')} <ArrowUpRightIcon />
+                  </Button>
+                </span>
               </TooltipTrigger>
               <TooltipContent>{t('case_entity.details.no_variants')}</TooltipContent>
             </Tooltip>
