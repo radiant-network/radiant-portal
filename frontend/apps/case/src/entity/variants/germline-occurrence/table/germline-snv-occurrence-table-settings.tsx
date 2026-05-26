@@ -43,6 +43,7 @@ function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineS
         <div className="flex items-center gap-1">
           <InterpretationCell
             locusId={info.getValue().locus_id}
+            taskId={info.getValue().task_id}
             transcriptId={info.getValue().transcript_id}
             hasInterpretation={info.getValue().has_interpretation}
             patientId={patientId}

@@ -44,6 +44,7 @@ type CaseInput = {
 type OccurrenceExpandInput = {
   caseId: number;
   seqId: number;
+  taskId: number;
   locusId: string;
 };
 
@@ -55,7 +56,12 @@ type InterpretationInput = {
 };
 
 export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput) {
-  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(input.caseId, input.seqId, input.locusId);
+  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(
+    input.caseId,
+    input.seqId,
+    input.taskId,
+    input.locusId,
+  );
   return response.data;
 }
 
@@ -128,6 +134,7 @@ export function SomaticOccurrenceSheetContent({
       caseId: caseId,
       locusId: occurrence.locus_id.toString(),
       seqId: occurrence.seq_id,
+      taskId: occurrence.task_id,
     },
     fetchSomaticOccurrenceExpand,
     {
@@ -212,6 +219,7 @@ export function SomaticOccurrenceSheetContent({
               <SomaticInterpretationDialog
                 isCreation
                 locusId={occurrence.locus_id}
+                taskId={occurrence.task_id}
                 handleSaveCallback={handleInterpretationSaveCallback}
                 transcriptId={expandResult.data.transcript_id}
                 patientId={patient?.patient_id}
@@ -240,6 +248,7 @@ export function SomaticOccurrenceSheetContent({
           actions={
             <SomaticInterpretationDialog
               locusId={occurrence.locus_id}
+              taskId={occurrence.task_id}
               transcriptId={expandResult.data.transcript_id}
               handleSaveCallback={handleInterpretationSaveCallback}
               patientId={patient?.patient_id}

@@ -1,8 +1,15 @@
 import useSWR from 'swr';
 
-import { type Aggregation, AggregationBodyWithSqon, Statistics, StatisticsBodyWithSqon } from '@/api/api';
+import {
+  type Aggregation,
+  AggregationBodyWithSqon,
+  CaseTasksWithOccurrencesDataTypeEnum,
+  Statistics,
+  StatisticsBodyWithSqon,
+} from '@/api/api';
 import { useQBActiveSqon } from '@/components/base/query-builder/hooks/use-query-builder';
 import { ApplicationId } from '@/components/cores/applications-config';
+import { useFirstOccurrenceTaskId } from '@/components/hooks/use-first-occurrence-task-id';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
@@ -16,6 +23,7 @@ export interface IAggregationBuilder {
 type OccurrenceAggregationInput = {
   caseId: number;
   seqId: number;
+  taskId: number;
   aggregationBody: AggregationBodyWithSqon;
   withDictionary?: boolean;
 };
@@ -23,6 +31,7 @@ type OccurrenceAggregationInput = {
 type OccurrenceStatisticsInput = {
   caseId: number;
   seqId: number;
+  taskId: number;
   statisticsBody: StatisticsBodyWithSqon;
 };
 
@@ -73,23 +82,28 @@ export function useGermlineSNVAggregationBuilder({
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
+  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.GermlineSnv);
 
-  const data: OccurrenceAggregationInput = {
-    caseId,
-    seqId,
-    aggregationBody: {
-      field: field,
-      size: size,
-      sqon: activeSqon,
-    },
-    withDictionary,
-  };
+  const data: OccurrenceAggregationInput | null =
+    taskId === undefined
+      ? null
+      : {
+          caseId,
+          seqId,
+          taskId,
+          aggregationBody: {
+            field: field,
+            size: size,
+            sqon: activeSqon,
+          },
+          withDictionary,
+        };
 
   return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(
     data,
     async () =>
       occurrencesApi
-        .aggregateGermlineSNVOccurrences(data.caseId, data.seqId, data.aggregationBody, data.withDictionary)
+        .aggregateGermlineSNVOccurrences(caseId, seqId, taskId!, data!.aggregationBody, data!.withDictionary)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -101,21 +115,26 @@ export function useGermlineSNVAggregationStatistics({ field }: CNVAggregationBui
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
+  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.GermlineSnv);
 
-  const data: OccurrenceStatisticsInput = {
-    caseId,
-    seqId,
-    statisticsBody: {
-      field: field,
-      sqon: activeSqon,
-    },
-  };
+  const data: OccurrenceStatisticsInput | null =
+    taskId === undefined
+      ? null
+      : {
+          caseId,
+          seqId,
+          taskId,
+          statisticsBody: {
+            field: field,
+            sqon: activeSqon,
+          },
+        };
 
   return useSWR<Statistics, any, OccurrenceStatisticsInput | null>(
     data,
     async () =>
       occurrencesApi
-        .statisticsGermlineSNVOccurrences(data.caseId, data.seqId, data.statisticsBody)
+        .statisticsGermlineSNVOccurrences(caseId, seqId, taskId!, data!.statisticsBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -131,22 +150,27 @@ export function useGermlineCNVAggregationBuilder({ field, size = 30 }: CNVAggreg
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
+  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.GermlineCnv);
 
-  const data: OccurrenceAggregationInput = {
-    caseId,
-    seqId,
-    aggregationBody: {
-      field: field,
-      size: size,
-      sqon: activeSqon,
-    },
-  };
+  const data: OccurrenceAggregationInput | null =
+    taskId === undefined
+      ? null
+      : {
+          caseId,
+          seqId,
+          taskId,
+          aggregationBody: {
+            field: field,
+            size: size,
+            sqon: activeSqon,
+          },
+        };
 
   return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(
     data,
     async () =>
       occurrencesApi
-        .aggregateGermlineCNVOccurrences(data.caseId, data.seqId, data.aggregationBody)
+        .aggregateGermlineCNVOccurrences(caseId, seqId, taskId!, data!.aggregationBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -158,21 +182,26 @@ export function useGermlineCNVAggregationStatistics({ field }: CNVAggregationBui
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
+  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.GermlineCnv);
 
-  const data: OccurrenceStatisticsInput = {
-    caseId,
-    seqId,
-    statisticsBody: {
-      field: field,
-      sqon: activeSqon,
-    },
-  };
+  const data: OccurrenceStatisticsInput | null =
+    taskId === undefined
+      ? null
+      : {
+          caseId,
+          seqId,
+          taskId,
+          statisticsBody: {
+            field: field,
+            sqon: activeSqon,
+          },
+        };
 
   return useSWR<Statistics, any, OccurrenceStatisticsInput | null>(
     data,
     async () =>
       occurrencesApi
-        .statisticsGermlineCNVOccurrences(data.caseId, data.seqId, data.statisticsBody)
+        .statisticsGermlineCNVOccurrences(caseId, seqId, taskId!, data!.statisticsBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -191,23 +220,28 @@ export function useSomaticSNVAggregationBuilder({
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
+  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.SomaticSnv);
 
-  const data: OccurrenceAggregationInput = {
-    caseId,
-    seqId,
-    aggregationBody: {
-      field: field,
-      size: size,
-      sqon: activeSqon,
-    },
-    withDictionary,
-  };
+  const data: OccurrenceAggregationInput | null =
+    taskId === undefined
+      ? null
+      : {
+          caseId,
+          seqId,
+          taskId,
+          aggregationBody: {
+            field: field,
+            size: size,
+            sqon: activeSqon,
+          },
+          withDictionary,
+        };
 
   return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(
     data,
     async () =>
       occurrencesApi
-        .aggregateSomaticSNVOccurrences(data.caseId, data.seqId, data.aggregationBody, data.withDictionary)
+        .aggregateSomaticSNVOccurrences(caseId, seqId, taskId!, data!.aggregationBody, data!.withDictionary)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -219,21 +253,26 @@ export function useSomaticSNVAggregationStatistics({ field }: CNVAggregationBuil
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
+  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.SomaticSnv);
 
-  const data: OccurrenceStatisticsInput = {
-    caseId,
-    seqId,
-    statisticsBody: {
-      field: field,
-      sqon: activeSqon,
-    },
-  };
+  const data: OccurrenceStatisticsInput | null =
+    taskId === undefined
+      ? null
+      : {
+          caseId,
+          seqId,
+          taskId,
+          statisticsBody: {
+            field: field,
+            sqon: activeSqon,
+          },
+        };
 
   return useSWR<Statistics, any, OccurrenceStatisticsInput | null>(
     data,
     async () =>
       occurrencesApi
-        .statisticsSomaticSNVOccurrences(data.caseId, data.seqId, data.statisticsBody)
+        .statisticsSomaticSNVOccurrences(caseId, seqId, taskId!, data!.statisticsBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,

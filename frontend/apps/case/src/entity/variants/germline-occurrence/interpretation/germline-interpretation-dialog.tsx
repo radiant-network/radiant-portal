@@ -34,6 +34,7 @@ import GermlineInterpretationForm from './germline-interpretation-form';
 
 type GermlineInterpretationDialogProps = {
   locusId: string;
+  taskId: number;
   transcriptId?: string;
   patientId?: number;
   handleSaveCallback?: () => void;
@@ -56,6 +57,7 @@ type InterpretationGermlineInput = {
 type ExpandGermlineInput = {
   caseId: number;
   seqId: number;
+  taskId: number;
   locusId: string;
 };
 
@@ -83,7 +85,12 @@ async function fetchInterpretationGermline(_url: string, { arg }: { arg: Interpr
 }
 
 async function fetchExpandedGermlineSNVOccurrence(_url: string, { arg }: { arg: ExpandGermlineInput }) {
-  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(arg.caseId, arg.seqId, arg.locusId);
+  const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(
+    arg.caseId,
+    arg.seqId,
+    arg.taskId,
+    arg.locusId,
+  );
   return response.data;
 }
 
@@ -100,6 +107,7 @@ async function saveGermlineInterpretation(_url: string, { arg }: { arg: Germline
 
 function GermlineInterpretationDialog({
   locusId,
+  taskId,
   transcriptId,
   patientId,
   handleSaveCallback,
@@ -187,6 +195,7 @@ function GermlineInterpretationDialog({
     occurrenceExpand.trigger({
       caseId,
       seqId,
+      taskId,
       locusId,
     });
   }, []);
