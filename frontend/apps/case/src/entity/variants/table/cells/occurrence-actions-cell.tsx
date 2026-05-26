@@ -89,7 +89,7 @@ function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) 
           {
             icon: <ArrowUpRight />,
             label: t('variant.actions.ucsc'),
-            disabled: chromosome === undefined && start === undefined,
+            disabled: chromosome === undefined || start === undefined || end === undefined,
             onClick: handleUcsclick,
           },
           {

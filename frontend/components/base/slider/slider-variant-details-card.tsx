@@ -104,7 +104,7 @@ const SliderVariantDetailsCard = ({
       title={t('preview_sheet.variant_details.title')}
       actions={
         <div className="flex gap-2">
-          {chromosome && start && end && (
+          {chromosome != undefined && start != undefined && end != undefined && (
             <Button variant="outline" size="xs" asChild>
               <a
                 href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${end}`}
