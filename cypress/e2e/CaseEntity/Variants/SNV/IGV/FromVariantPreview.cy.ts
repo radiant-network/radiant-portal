@@ -9,7 +9,7 @@ describe('Case Entity - Variants - SNV - IGV - From variant preview', () => {
   const setupTest = () => {
     cy.login();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV', data.variantGermline.sqon);
-    CaseEntity_Variants_SNV_Table.actions.selectAction(data.variantGermline, 'Preview');
+    CaseEntity_Variants_SNV_Table.actions.selectAction(data.variantGermline, 'preview');
     VariantPreview.actions.clickOpenIGV();
   };
 

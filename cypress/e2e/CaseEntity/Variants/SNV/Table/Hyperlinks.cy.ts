@@ -29,7 +29,7 @@ describe('Case Entity - Variants - SNV - Table - Hyperlinks', () => {
     CaseEntity_Variants_SNV_Table.validations.shouldHaveTableCellLink(data.variantGermline, 'gene');
   });
 
-  it('Gene Plus [SJRA-1506]', () => {
+  it('Gene Plus', () => {
     setupTest();
     CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
     const resultCount = CaseEntity_Variants_SNV_Table.actions.getResultsCount();

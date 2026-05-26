@@ -68,17 +68,20 @@ function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) 
         tooltipSide="top"
         actions={[
           {
+            id: 'preview',
             icon: <EyeIcon />,
             label: t('variant.actions.preview'),
             onClick: handlePreview,
           },
           {
+            id: 'view-variant',
             icon: <ArrowUpRight />,
             label: t('variant.actions.view_variant'),
             onClick: onNavigateToVariantPage,
             hasSeparator: true,
           },
           {
+            id: 'open-in-igv',
             icon: <FlipHorizontal2Icon />,
             label: t('variant.actions.open_in_igv'),
             tooltip:
@@ -87,12 +90,14 @@ function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) 
             onClick: () => setIgvOpen(true),
           },
           {
+            id: 'ucsc',
             icon: <ArrowUpRight />,
             label: t('variant.actions.ucsc'),
             disabled: chromosome === undefined || start === undefined || end === undefined,
             onClick: handleUcsclick,
           },
           {
+            id: 'litvar',
             icon: <ArrowUpRight />,
             label: t('variant.actions.litvar'),
             disabled: rsnumber === undefined || rsnumber?.length === 0,
