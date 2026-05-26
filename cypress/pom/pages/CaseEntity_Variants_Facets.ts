@@ -658,7 +658,7 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
               req.alias = 'postDicFalse';
             }
           });
-          cy.get(CommonSelectors.facetHeader).eq(facet.position).contains(facet.name).click({ force: true });
+          cy.get(CommonSelectors.facetHeader(facet.apiField)).click({ force: true });
           cy.wait('@postDicFalse').then(interceptWithoutDict => {
             const responseWithoutDict = interceptWithoutDict.response?.body;
 
@@ -667,7 +667,7 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
                 req.alias = 'postDicTrue';
               }
             });
-            cy.get(CommonSelectors.facetHeader).contains(facet.name).parents(CommonSelectors.facet).find(CommonSelectors.facetDictionaryButton).click({ force: true });
+            cy.get(CommonSelectors.facetDictionaryButton(facet.apiField)).click({ force: true });
             cy.wait('@postDicTrue').then(interceptWithDict => {
               const responseWithDict = interceptWithDict.response?.body;
 
@@ -697,7 +697,7 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
               req.alias = 'postDicFalse';
             }
           });
-          cy.get(CommonSelectors.facetHeader).eq(facet.position).contains(facet.name).click({ force: true });
+          cy.get(CommonSelectors.facetHeader(facet.apiField)).click({ force: true });
           cy.wait('@postDicFalse').then(interceptWithoutDict => {
             const responseWithoutDict = interceptWithoutDict.response?.body;
 
@@ -706,7 +706,7 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
                 req.alias = 'postDicTrue';
               }
             });
-            cy.get(CommonSelectors.facetHeader).contains(facet.name).parents(CommonSelectors.facet).find(CommonSelectors.facetDictionaryButton).click({ force: true });
+            cy.get(CommonSelectors.facetDictionaryButton(facet.apiField)).click({ force: true });
             cy.wait('@postDicTrue').then(interceptWithDict => {
               const responseWithDict = interceptWithDict.response?.body;
 
@@ -736,7 +736,7 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
 
       section.facets.forEach((facet: any) => {
         const expectedExist = facet.hasDictionary ? 'exist' : 'not.exist';
-        cy.get(CommonSelectors.facetHeader).contains(facet.name).parents(CommonSelectors.facet).find(CommonSelectors.facetDictionaryButton).should(expectedExist);
+        cy.get(CommonSelectors.facetDictionaryButton(facet.apiField)).should(expectedExist);
       });
     });
   },
@@ -750,7 +750,7 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
       cy.get(CommonSelectors.expandCollapseButton(CommonTexts.en.expandAll)).clickAndWait({ force: true });
 
       section.facets.forEach((facet: any) => {
-        cy.get(CommonSelectors.facetHeader).contains(facet.name).shouldHaveTooltip(facet);
+        cy.get(CommonSelectors.facetHeader(facet.apiField)).shouldHaveTooltip(facet);
       });
     });
   },
@@ -779,12 +779,12 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
       clickSidebarSectionAction(section.section);
 
       cy.get(CommonSelectors.expandCollapseButton(CommonTexts.en.expandAll)).clickAndWait({ force: true });
-      cy.get(`${CommonSelectors.facetState('open')} ${CommonSelectors.facetHeader}`).should('exist');
-      cy.get(`${CommonSelectors.facetState('closed')} ${CommonSelectors.facetHeader}`).should('not.exist');
+      cy.get(`${CommonSelectors.facetState('open')} ${CommonSelectors.facetHeader('' /*all facets*/)}`).should('exist');
+      cy.get(`${CommonSelectors.facetState('closed')} ${CommonSelectors.facetHeader('' /*all facets*/)}`).should('not.exist');
 
       cy.get(CommonSelectors.expandCollapseButton(CommonTexts.en.collapseAll)).clickAndWait({ force: true });
-      cy.get(`${CommonSelectors.facetState('closed')} ${CommonSelectors.facetHeader}`).should('exist');
-      cy.get(`${CommonSelectors.facetState('open')} ${CommonSelectors.facetHeader}`).should('not.exist');
+      cy.get(`${CommonSelectors.facetState('closed')} ${CommonSelectors.facetHeader('' /*all facets*/)}`).should('exist');
+      cy.get(`${CommonSelectors.facetState('open')} ${CommonSelectors.facetHeader('' /*all facets*/)}`).should('not.exist');
     });
   },
   /**
@@ -808,10 +808,10 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
     }
 
     let opWithData = facetData.defaultOperator ? facetData.defaultOperator : '';
-    cy.get(CommonSelectors.facetHeader).contains(facetData.name).clickAndWait({ force: true });
+    cy.get(CommonSelectors.facetHeader(facetData.apiField)).clickAndWait({ force: true });
 
     if (!facetData.defaultOperator) {
-      cy.get(CommonSelectors.facetHeader).contains(facetData.name).parents(CommonSelectors.facet).find(CommonSelectors.facetCheckbox('')).eq(0).click({ force: true });
+      cy.get(CommonSelectors.facetCheckbox(facetData.apiField, /*any value*/ '')).eq(0).click({ force: true });
       opWithData = 'in';
     } else if (facetData.defaultOperator === 'between') {
       cy.get(CommonSelectors.facetMinInput(facetData.apiField)).clear({ force: true }).type('1', { force: true });
@@ -821,7 +821,7 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
     }
 
     cy.intercept('POST', '**/count').as('postCount');
-    cy.get(CommonSelectors.facetHeader).contains(facetData.name).parents(CommonSelectors.facet).find(CommonSelectors.facetApplyButton).click({ force: true });
+    cy.get(CommonSelectors.facetApplyButton(facetData.apiField)).click({ force: true });
 
     cy.wait('@postCount').then(interception => {
       cy.fixture('RequestBody/ApplyFacet.json').then(fixture => {
@@ -848,7 +848,7 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
     }
 
     sectionData.facets.forEach((facet: any) => {
-      cy.get(CommonSelectors.facetHeader).eq(facet.position).contains(facet.name).should('exist');
+      cy.get(CommonSelectors.facetHeader('' /*all facets*/)).eq(facet.position).should('match', CommonSelectors.facetHeader(facet.apiField));
     });
   },
 });

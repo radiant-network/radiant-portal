@@ -8,6 +8,8 @@ const meta = {
   args: {
     transcriptId: 'ENST00000367770',
     isCanonical: true,
+    isManeSelect: false,
+    isManePlus: false,
   },
 } satisfies Meta<typeof TranscriptIdLink>;
 

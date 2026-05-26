@@ -22,6 +22,28 @@ const tableColumns = [
     tooltip: null,
   },
   {
+    id: 'note',
+    name: '',
+    apiField: 'has_note',
+    isVisibleByDefault: true,
+    pinByDefault: 'left',
+    isSortable: false,
+    isPinnable: false,
+    position: 0,
+    tooltip: null,
+  },
+  {
+    id: 'flag',
+    name: '',
+    apiField: 'flag_type',
+    isVisibleByDefault: true,
+    pinByDefault: 'left',
+    isSortable: false,
+    isPinnable: false,
+    position: 0,
+    tooltip: null,
+  },
+  {
     id: 'variant',
     name: 'Variant',
     apiField: 'hgvsg',
@@ -214,7 +236,7 @@ export const CaseEntity_Variants_SNV_Table = {
   actions: {
     /**
      * Click the specific button to change table paging
-     * @param buttonName The button name to click (First | Last | Previous | Next | Select)
+     * @param buttonName The button name to click (first | last | previous | next | select)
      */
     clickPaginationButton(buttonName: string) {
       cy.waitWhileLoad(60 * 1000);
@@ -257,6 +279,18 @@ export const CaseEntity_Variants_SNV_Table = {
      */
     clickToggle() {
       cy.get(selectors.toggle).clickAndWait({ force: true });
+    },
+    /**
+     * Returns the total results count displayed in the table index result.
+     * Yields 0 when no results are displayed.
+     */
+    getResultsCount(): Cypress.Chainable<number> {
+      return cy.get(CommonSelectors.tableIndexResult).invoke('text').then(text => {
+        const ofIndex = text.toLowerCase().indexOf(' of ');
+        if (ofIndex === -1) return 0;
+        const digits = text.substring(ofIndex + 4).replace(/\D/g, '');
+        return digits ? parseInt(digits, 10) : 0;
+      });
     },
     /**
      * Hides a specific column in the table.
@@ -504,7 +538,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest2');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Next');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('next');
       cy.wait('@listRequest2');
       cy.waitWhileLoad(60 * 1000);
 
@@ -513,7 +547,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(2);
         req.continue();
       }).as('listRequest3');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Next');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('next');
       cy.wait('@listRequest3');
       cy.waitWhileLoad(60 * 1000);
 
@@ -522,7 +556,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest4');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('Previous');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('previous');
       cy.wait('@listRequest4');
       cy.waitWhileLoad(60 * 1000);
 
@@ -531,7 +565,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest5');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('First');
+      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('first');
       cy.wait('@listRequest5');
     },
     /**
@@ -546,6 +580,30 @@ export const CaseEntity_Variants_SNV_Table = {
       }).as('sortRequest');
       CaseEntity_Variants_SNV_Table.actions.sortColumn(columnID, false /*needIntercept*/);
       cy.wait('@sortRequest');
+    },
+    /**
+     * Checks the total results count displayed in the table index result.
+     * @param count The expected count (number or Cypress.Chainable yielding a number).
+     * @param beEqual Whether the displayed count should be equal to `count` (default: true).
+     */
+    shouldShowResultsCount(count: number | Cypress.Chainable<number>, beEqual: boolean = true) {
+      const compare = (expected: number) => {
+        cy.get(CommonSelectors.tableIndexResult).invoke('text').should(text => {
+          const ofIndex = text.toLowerCase().indexOf(' of ');
+          const digits = ofIndex === -1 ? '' : text.substring(ofIndex + 4).replace(/\D/g, '');
+          const current = digits ? parseInt(digits, 10) : 0;
+          if (beEqual) {
+            expect(current).to.eq(expected);
+          } else {
+            expect(current).to.not.eq(expected);
+          }
+        });
+      };
+      if (typeof count === 'number') {
+        compare(count);
+      } else {
+        count.then(compare);
+      }
     },
     /**
      * Validates that all columns are displayed in the correct order in the table.

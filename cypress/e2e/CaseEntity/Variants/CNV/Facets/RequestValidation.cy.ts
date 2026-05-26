@@ -8,7 +8,8 @@ describe('Case Entity - Variants - CNV - Facets - Request Validation', () => {
   const setupTest = () => {
     cy.login();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV');
-    CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
+    CaseEntity_Variants_SavedFilters.cnv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Clean Query Builder
+    CaseEntity_Variants_SavedFilters.cnv.actions.clickNewFilterButton(); // Clean Query Builder
   };
 
   it('MultiSelect [SJRA-1390]', () => {

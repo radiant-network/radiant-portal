@@ -4,6 +4,7 @@ import useSWR from 'swr';
 
 import { CaseSequencingExperiment, GermlineSNVOccurrence, InterpretationGermline } from '@/api/api';
 import { useDataTable, useDataTableRowNavigation } from '@/components/base/data-table/hooks/use-data-table';
+import OccurrenceFlagDropdown from '@/components/base/dropdowns/occurrence-flag-dropdown';
 import { NotesProvider } from '@/components/base/notes/hooks/use-notes';
 import NotesSliderSheet from '@/components/base/notes/notes-slider-sheet';
 import { Button } from '@/components/base/shadcn/button';
@@ -140,12 +141,21 @@ export function GermlineOccurrenceSheetContent({
         hgvsg={occurrence.hgvsg}
         actions={
           <div className="flex gap-2">
+            <OccurrenceFlagDropdown
+              size="sm"
+              variant="outline"
+              caseId={caseId}
+              taskId={occurrence.task_id}
+              seqId={occurrence.seq_id}
+              occurrenceId={occurrence.locus_id}
+              flag={occurrence.flag_type}
+            />
             <NotesProvider value={{ onChangeCallback: () => list?.mutate() }}>
               <NotesSliderSheet
                 caseId={caseId}
                 seqId={occurrence.seq_id}
                 taskId={occurrence.task_id}
-                occurenceId={occurrence.locus_id}
+                occurrenceId={occurrence.locus_id}
               />
             </NotesProvider>
             {!occurrence.has_interpretation && (

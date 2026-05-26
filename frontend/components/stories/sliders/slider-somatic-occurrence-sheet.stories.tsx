@@ -1,15 +1,16 @@
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react';
+import { http } from 'msw';
 import { mocked } from 'storybook/test';
 
+import { SavedFilterType, SomaticSNVOccurrence } from '@/api/api';
 import { SomaticOccurrenceSheetContent } from '@/apps/case/src/entity/variants/somatic-occurrence/sliders/slider-somatic-occurrence-sheet';
+import SliderSheet from '@/components/base/slider/slider-sheet';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
-import SliderSheet from '@/components/base/slider/slider-sheet';
-import { http } from 'msw';
+
 import { caseEntityApi, httpCaseSomaticEntityApi } from '../api/api-case';
 import { httpSomaticOccurrenceExpandResponse, occurrenceSomaticExpandApi } from '../api/api-occurrence';
-import { SomaticSNVOccurrence } from '@/api/api';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -17,27 +18,27 @@ const config: PortalConfig = {
   },
   germline_snv_occurrence: {
     app_id: ApplicationId.germline_snv_occurrence,
-    saved_filter_type: 'germline_snv_occurrence',
+    saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
     aggregations: {},
   },
   germline_cnv_occurrence: {
     app_id: ApplicationId.germline_cnv_occurrence,
-    saved_filter_type: 'germline_cnv_occurrence',
+    saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
     aggregations: {},
   },
   somatic_snv_to_occurrence: {
     app_id: ApplicationId.somatic_snv_to_occurrence,
-    saved_filter_type: 'somatic_snv_occurrence',
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
     aggregations: {},
   },
   somatic_snv_tn_occurrence: {
     app_id: ApplicationId.somatic_snv_tn_occurrence,
-    saved_filter_type: 'somatic_snv_occurrence',
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
     aggregations: {},
   },
   somatic_cnv_to_occurrence: {
     app_id: ApplicationId.somatic_cnv_to_occurrence,
-    saved_filter_type: 'somatic_cnv_occurrence',
+    saved_filter_type: SavedFilterType.SOMATIC_CNV_OCCURRENCE,
     aggregations: {},
   },
   admin: {
@@ -74,6 +75,9 @@ const occurrenceMock = {
   germline_pc_wgs: 10,
   somatic_pf_tn_wgs: 7,
   somatic_pc_tn_wgs: 11,
+  chromosome: '1',
+  start: 10276319,
+  end: 10276319,
 } as SomaticSNVOccurrence;
 
 const meta = {

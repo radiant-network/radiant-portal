@@ -42,12 +42,13 @@ function ActionButton({
   variant,
   tooltip,
   tooltipSide = 'top',
+  'data-cy': dataCy,
   ...btnProps
 }: ActionButtonProps) {
   const style = actionButtonVariants({ size, variant, disabled: btnProps.disabled });
 
   const defaultButton = (
-    <button onClick={onDefaultAction} className={cn(style.base(), 'rounded-r-none')} {...btnProps}>
+    <button onClick={onDefaultAction} data-cy={dataCy} className={cn(style.base(), 'rounded-r-none')} {...btnProps}>
       {children}
     </button>
   );

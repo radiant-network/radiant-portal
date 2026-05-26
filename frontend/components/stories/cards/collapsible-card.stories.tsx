@@ -1,6 +1,7 @@
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+import { SavedFilterType } from '@/api/api';
 import CollapsibleCard from '@/components/base/cards/collapsible-card';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
@@ -11,10 +12,27 @@ const config: PortalConfig = {
   germline_snv_occurrence: {
     app_id: ApplicationId.germline_snv_occurrence,
     aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
   },
   germline_cnv_occurrence: {
     app_id: ApplicationId.germline_cnv_occurrence,
     aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
+  },
+  somatic_snv_to_occurrence: {
+    app_id: ApplicationId.somatic_snv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_snv_tn_occurrence: {
+    app_id: ApplicationId.somatic_snv_tn_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_cnv_to_occurrence: {
+    app_id: ApplicationId.somatic_cnv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_CNV_OCCURRENCE,
   },
   admin: {
     admin_code: 'admin',
@@ -48,18 +66,21 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: {},
-  render: args => (
-    <CollapsibleCard {...args}>
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris egestas ornare diam, sed porttitor augue. Etiam
-      mattis lorem id porta iaculis. Proin ac est sed risus blandit ornare vel in erat. Pellentesque dignissim rhoncus
-      placerat. Fusce vulputate condimentum pretium. In non orci vel turpis facilisis interdum vitae rutrum nulla.
-      Vivamus lacus nulla, consequat tincidunt sapien non, volutpat interdum mi. Duis vestibulum odio in placerat
-      mollis. Aliquam iaculis, ante nec sagittis vestibulum, ipsum est sodales ligula, quis vehicula metus velit a urna.
-      Praesent eget tortor ut nisi tempor blandit a eu est. Sed venenatis risus at odio pharetra, eget tincidunt mauris
-      vulputate. Donec non ante at odio auctor sollicitudin. Phasellus eros est, efficitur quis pharetra id, laoreet ac
-      sem. Aliquam semper rhoncus nisi, at hendrerit elit blandit ut. Maecenas nec suscipit purus, non rhoncus leo.
-      Aliquam bibendum enim sem, sed posuere ipsum porta sed.
-    </CollapsibleCard>
-  ),
+  args: {
+    title: 'Header',
+    children: (
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris egestas ornare diam, sed porttitor augue. Etiam
+        mattis lorem id porta iaculis. Proin ac est sed risus blandit ornare vel in erat. Pellentesque dignissim rhoncus
+        placerat. Fusce vulputate condimentum pretium. In non orci vel turpis facilisis interdum vitae rutrum nulla.
+        Vivamus lacus nulla, consequat tincidunt sapien non, volutpat interdum mi. Duis vestibulum odio in placerat
+        mollis. Aliquam iaculis, ante nec sagittis vestibulum, ipsum est sodales ligula, quis vehicula metus velit a
+        urna. Praesent eget tortor ut nisi tempor blandit a eu est. Sed venenatis risus at odio pharetra, eget tincidunt
+        mauris vulputate. Donec non ante at odio auctor sollicitudin. Phasellus eros est, efficitur quis pharetra id,
+        laoreet ac sem. Aliquam semper rhoncus nisi, at hendrerit elit blandit ut. Maecenas nec suscipit purus, non
+        rhoncus leo. Aliquam bibendum enim sem, sed posuere ipsum porta sed.
+      </p>
+    ),
+  },
+  render: args => <CollapsibleCard {...args} />,
 };

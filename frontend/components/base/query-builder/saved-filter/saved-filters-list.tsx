@@ -48,7 +48,7 @@ function SavedFiltersList() {
       >
         <Tooltip open={savedFilters.length > 0 ? false : undefined}>
           <TooltipTrigger asChild>
-            <SelectTrigger className="w-[135px] h-7">
+            <SelectTrigger className="w-[135px] h-7" data-cy="my-filters-button">
               <div className="flex items-center gap-2">
                 <FolderIcon size={14} /> {t('common.saved_filter.my_filters')}
               </div>

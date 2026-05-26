@@ -456,6 +456,7 @@ export function NumericalFacet({ field }: NumericalFacetProps) {
           </Button>
           <div className="flex space-x-2">
             <Button
+              data-cy={`facet-apply-button-${field.key}`}
               size="2xs"
               variant="outline"
               onClick={handleApply}
