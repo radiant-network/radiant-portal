@@ -1957,8 +1957,13 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 	assert.Len(t, cr.Infos, 1)
 	assert.Contains(t, cr.Infos[0].Message, "already exists")
 	assert.Equal(t, CaseAlreadyExists, cr.Infos[0].Code)
-	assert.True(t, cr.Skipped)
 	assert.Equal(t, "case[0]", cr.Infos[0].Path)
+	// Validation flags the existing case for the reconcile path (not Skipped) and
+	// captures its ID so persistCaseRecords can update the case_has_sequencing_experiment join.
+	assert.False(t, cr.Skipped)
+	assert.True(t, cr.IsExisting)
+	assert.NotNil(t, cr.CaseID)
+	assert.Equal(t, 100, *cr.CaseID)
 }
 
 func Test_validateCase_MultipleErrors(t *testing.T) {

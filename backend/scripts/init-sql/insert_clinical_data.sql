@@ -575,8 +575,48 @@ ON CONFLICT (code, tenant_code) DO NOTHING;
 
 INSERT INTO project (id, code, name, description)
 VALUES (1, 'N1', 'NeuroDev Phase I', 'Phase one NeuroDev cases'),
-       (2, 'N2', 'NeuroDev Phase II', 'Phase two NeuroDev cases')
+       (2, 'N2', 'NeuroDev Phase II', 'Phase two NeuroDev cases'),
+       (3, 'QLIN', 'QLIN', 'Centre québécois de génomique clinique')
 ON CONFLICT (id) DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('analysis_catalog', 'id'), (SELECT COALESCE(MAX(id), 1) FROM analysis_catalog));
+INSERT INTO analysis_catalog (code, name) VALUES
+  ('MMG',   'Global Muscular Diseases'),
+  ('DYSM',  'Muscular Dystrophies'),
+  ('RHAB',  'Rhabdomyolysis'),
+  ('MITN',  'Nuclear Mitochondriopathies'),
+  ('MYOC',  'Congenital Myopathies'),
+  ('MYAC',  'Congenital Myasthenia'),
+  ('HYPM',  'Malignant Hyperthermia'),
+  ('RGDI',  'Global Developmental Delay / Intellectual Disability (Trio)'),
+  ('POLYM', 'Polymalformation Postnatal Context'),
+  ('TRATU', 'Tumoral Transcriptome'),
+  ('TUHEM', 'Hematological Malignancies Predisposition'),
+  ('TUPED', 'Pediatric Cancer Predisposition'),
+  ('EXTUM', 'Tumoral Analysis'),
+  ('SHEMA', 'Leukemia (Somatic)'),
+  ('SCID',  'Severe Combined Immune Deficiency'),
+  ('STMO',  'Soft Tissue and Bone Sarcoma'),
+  ('FEAN',  'Fetal Anomalies'),
+  ('DPSO',  'Superoxide Production Defect'),
+  ('EIDC',  'Inherited Complement Errors'),
+  ('EIDI',  'Inborn Errors of Immunity'),
+  ('EIII',  'Inherited Errors of Intrinsic Immunity'),
+  ('EPIL',  'Epilepsy Without Intellectual Disability'),
+  ('HDIP',  'Hypogammaglobulinemia and Primary Immune Dysregulation'),
+  ('HLEB',  'Lymphohistiocytic Hemophagocytosis and Chronic Active Epstein-Barr Virus Infection'),
+  ('HLH',   'Hemophagocytic Lymphohistiocytosis'),
+  ('MAI',   'Autoinflammatory Diseases'),
+  ('MSMD',  'Mendelian Susceptibility to Mycobacterial Diseases'),
+  ('NPC',   'Congenital Neutropenia'),
+  ('RETINO','Retinopathy'),
+  ('SHIGE', 'Hyper-IgE Syndrome'),
+  ('SLA',   'Amyotrophic Lateral Sclerosis'),
+  ('SURD',  'Hearing Loss'),
+  ('VEOIB', 'Very Early Onset Intestinal Bowl Disease'),
+  ('GENOR', 'Whole Genome Sequencing - Non-Specific'),
+  ('NEUTP', 'Congenital Neutropenia')
+ON CONFLICT (code) DO NOTHING;
 
 
 INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organization_code, tenant_code, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)

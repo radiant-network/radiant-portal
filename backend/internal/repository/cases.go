@@ -11,6 +11,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Case = types.Case
@@ -52,7 +53,12 @@ func (r *CasesRepository) CreateCase(c *Case) error {
 }
 
 func (r *CasesRepository) CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error {
-	return r.db.Create(caseHasSeqExp).Error
+	return r.db.
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "case_id"}, {Name: "sequencing_experiment_id"}},
+			DoNothing: true,
+		}).
+		Create(caseHasSeqExp).Error
 }
 
 func (r *CasesRepository) GetCaseAnalysisCatalogIdByCode(code string) (*AnalysisCatalog, error) {

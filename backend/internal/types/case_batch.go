@@ -52,9 +52,9 @@ type ObservationTextBatch struct {
 }
 
 type CaseSequencingExperimentBatch struct {
-	Aliquot                string `json:"aliquot" toml:"aliquot" binding:"required"`
+	Aliquot                string `json:"aliquot,omitempty" toml:"aliquot"`
 	SampleOrganizationCode string `json:"sample_organization_code" toml:"sample_organization_code" binding:"required"`
-	SubmitterSampleId      string `json:"submitter_sample_id" toml:"submitter_sample_id" binding:"required"`
+	SubmitterSampleId      string `json:"submitter_sample_id,omitempty" toml:"submitter_sample_id"`
 }
 
 type CaseTaskBatch struct {

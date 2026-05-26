@@ -559,9 +559,7 @@ components:
         submitter_sample_id:
           type: string
       required:
-      - aliquot
       - sample_organization_code
-      - submitter_sample_id
       type: object
     CaseTask:
       properties:

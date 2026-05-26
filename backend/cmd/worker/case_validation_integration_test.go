@@ -593,7 +593,7 @@ func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
 		infos := []types.BatchMessage{
 			{
 				Code:    "CASE-001",
-				Message: "Case (1 / 1:1) already exists, skipped.",
+				Message: "Case (1 / 1:1) already exists, reconciling sequencing experiments.",
 				Path:    "case[0]",
 			},
 		}
@@ -1134,5 +1134,41 @@ func Test_ProcessBatch_Case_Template(t *testing.T) {
 		//
 		//// TODO: Call the assertion function with expected messages
 		//assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+// Reconcile path: a second POST of the same (project, submitter_case_id) flags the case
+// as existing (CASE-001 info) and idempotently no-ops on the case_has_sequencing_experiment
+// rows (UNIQUE constraint + ON CONFLICT DO NOTHING in the repo). This is the mechanism
+// hybrid relies on — case created at /analysis, experiments attached by the /sequencings POST.
+func Test_ProcessBatch_Case_SecondPostReconcilesIdempotently(t *testing.T) {
+	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+		payload := createBaseCasePayload("Reconcile_Idempotent")
+		createDocumentsForBatch(context, client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		// 1) First POST creates the case + initial join rows.
+		insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+
+		var ca *types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Reconcile_Idempotent").First(&ca)
+		assert.NotNil(t, ca)
+
+		var initialJoins []*types.CaseHasSequencingExperiment
+		db.Table("case_has_sequencing_experiment").Where("case_id = ?", ca.ID).Find(&initialJoins)
+		assert.Len(t, initialJoins, 2)
+
+		// 2) Second POST replays the same payload. Validation flags the case as existing
+		//    (CASE-001 info); persistence reconciles the join idempotently (no duplicates).
+		secondBatchId := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+
+		expectedInfo := []types.BatchMessage{
+			{Code: CaseAlreadyExists, Message: "Case (1 / Reconcile_Idempotent) already exists, reconciling sequencing experiments.", Path: "case[0]"},
+		}
+		assertBatchProcessing(t, db, secondBatchId, types.BatchStatusSuccess, false, "user123", expectedInfo, emptyMsgs, emptyMsgs)
+
+		var afterJoins []*types.CaseHasSequencingExperiment
+		db.Table("case_has_sequencing_experiment").Where("case_id = ?", ca.ID).Find(&afterJoins)
+		assert.Len(t, afterJoins, 2, "second POST must not create duplicate case_has_sequencing_experiment rows")
 	})
 }
