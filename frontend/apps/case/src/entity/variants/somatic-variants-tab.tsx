@@ -47,7 +47,7 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
         sequencingExperiments={seqExpVariants}
         options={[
           {
-            value: 'SNV_TN',
+            value: SomaticVariantInterface.SNV_TN,
             tooltip: t(`case_entity.variants.filters.snv_tn_tooltip`),
           },
         ]}
