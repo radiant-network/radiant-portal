@@ -11,7 +11,7 @@ import (
 func Test_GetPatientBySubmitterPatientId_Not_Null(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewPatientsRepository(db)
-		patient, err := repo.GetPatientBySubmitterPatientId(3, "MRN-283773")
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId("CHUSJ", "MRN-283773")
 		assert.NoError(t, err)
 		assert.NotNil(t, patient)
 		assert.Equal(t, 1, patient.ID)
@@ -22,7 +22,7 @@ func Test_GetPatientBySubmitterPatientId_Not_Null(t *testing.T) {
 func Test_GetPatientBySubmitterPatientId_Null_Mrn(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewPatientsRepository(db)
-		patient, err := repo.GetPatientBySubmitterPatientId(3, "MRN-UNKNOWN")
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId("CHUSJ", "MRN-UNKNOWN")
 		assert.NoError(t, err)
 		assert.Nil(t, patient)
 	})
@@ -31,7 +31,7 @@ func Test_GetPatientBySubmitterPatientId_Null_Mrn(t *testing.T) {
 func Test_GetPatientBySubmitterPatientId_Null_OrgId(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewPatientsRepository(db)
-		patient, err := repo.GetPatientBySubmitterPatientId(999999, "MRN-283773")
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId("UNKNOWN-ORG", "MRN-283773")
 		assert.NoError(t, err)
 		assert.Nil(t, patient)
 	})

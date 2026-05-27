@@ -3,34 +3,35 @@ package types
 import "time"
 
 type Case struct {
-	ID                     int `gorm:"unique;primaryKey;autoIncrement"`
-	ProbandID              int
-	Proband                Patient `gorm:"foreignKey:ID;references:ProbandID"`
-	ProjectID              int
-	Project                Project `gorm:"foreignKey:ID;references:ProjectID"`
-	AnalysisCatalogID      int
-	AnalysisCatalog        AnalysisCatalog `gorm:"foreignKey:ID;references:AnalysisCatalogID"`
-	CaseTypeCode           string
-	CaseType               CaseType `gorm:"foreignKey:Code;references:CaseTypeCode"`
-	CaseCategoryCode       string
-	CaseCategory           CaseCategory `gorm:"foreignKey:Code;references:CaseCategoryCode"`
-	PriorityCode           string       `gorm:"default:routine"`
-	Priority               Priority     `gorm:"foreignKey:PriorityCode;references:Code"`
-	StatusCode             string
-	Status                 Status           `gorm:"foreignKey:Code;references:StatusCode"`
-	ResolutionStatusCode   string           `gorm:"default:unsolved"`
-	ResolutionStatus       ResolutionStatus `gorm:"foreignKey:Code;references:ResolutionStatusCode"`
-	PrimaryCondition       string
-	ConditionCodeSystem    string
-	OrderingPhysician      string
-	OrderingOrganizationID *int
-	OrderingOrganization   Organization `gorm:"foreignKey:ID;references:OrderingOrganizationID"`
-	DiagnosisLabID         *int
-	DiagnosisLab           Organization `gorm:"foreignKey:ID;references:DiagnosisLabID"`
-	SubmitterCaseID        string
-	Note                   string
-	CreatedOn              time.Time `gorm:"autoCreateTime"`
-	UpdatedOn              time.Time `gorm:"autoUpdateTime:milli"`
+	ID                       int `gorm:"unique;primaryKey;autoIncrement"`
+	ProbandID                int
+	Proband                  Patient `gorm:"foreignKey:ID;references:ProbandID"`
+	ProjectID                int
+	Project                  Project `gorm:"foreignKey:ID;references:ProjectID"`
+	AnalysisCatalogID        int
+	AnalysisCatalog          AnalysisCatalog `gorm:"foreignKey:ID;references:AnalysisCatalogID"`
+	CaseTypeCode             string
+	CaseType                 CaseType `gorm:"foreignKey:Code;references:CaseTypeCode"`
+	CaseCategoryCode         string
+	CaseCategory             CaseCategory `gorm:"foreignKey:Code;references:CaseCategoryCode"`
+	PriorityCode             string       `gorm:"default:routine"`
+	Priority                 Priority     `gorm:"foreignKey:PriorityCode;references:Code"`
+	StatusCode               string
+	Status                   Status           `gorm:"foreignKey:Code;references:StatusCode"`
+	ResolutionStatusCode     string           `gorm:"default:unsolved"`
+	ResolutionStatus         ResolutionStatus `gorm:"foreignKey:Code;references:ResolutionStatusCode"`
+	PrimaryCondition         string
+	ConditionCodeSystem      string
+	OrderingPhysician        string
+	TenantCode               string
+	OrderingOrganizationCode *string
+	OrderingOrganization     Organization `gorm:"foreignKey:OrderingOrganizationCode,TenantCode;references:Code,TenantCode"`
+	DiagnosisLabCode         *string
+	DiagnosisLab             Organization `gorm:"foreignKey:DiagnosisLabCode,TenantCode;references:Code,TenantCode"`
+	SubmitterCaseID          string
+	Note                     string
+	CreatedOn                time.Time `gorm:"autoCreateTime"`
+	UpdatedOn                time.Time `gorm:"autoUpdateTime:milli"`
 }
 
 // CaseResult - Search cases result

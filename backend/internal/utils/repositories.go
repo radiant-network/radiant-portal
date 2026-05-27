@@ -99,7 +99,7 @@ func GetFilter(db *gorm.DB, filterTable types.Table, filterLabelColumn string, f
 
 func JoinCaseWithProband(tx *gorm.DB, userQuery types.Query) *gorm.DB {
 	joinWithProbandSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.proband_id=%s.id", types.ProbandTable.FederationName, types.ProbandTable.Alias, types.CaseTable.Alias, types.ProbandTable.Alias)
-	joinWithProbandManagingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.organization_id=%s.id", types.ManagingOrganizationTable.FederationName, types.ManagingOrganizationTable.Alias, types.ProbandTable.Alias, types.ManagingOrganizationTable.Alias)
+	joinWithProbandManagingOrganizationSql := fmt.Sprintf("LEFT JOIN %s %s ON %s.organization_code=%s.code AND %s.tenant_code=%s.tenant_code", types.ManagingOrganizationTable.FederationName, types.ManagingOrganizationTable.Alias, types.ProbandTable.Alias, types.ManagingOrganizationTable.Alias, types.ProbandTable.Alias, types.ManagingOrganizationTable.Alias)
 	if userQuery != nil && userQuery.HasFieldFromTables(types.ManagingOrganizationTable) {
 		return tx.Joins(joinWithProbandSql).Joins(joinWithProbandManagingOrganizationSql)
 	}
@@ -129,7 +129,7 @@ func JoinCaseWithProject(tx *gorm.DB) *gorm.DB {
 }
 
 func JoinCaseWithDiagnosisLab(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.diagnosis_lab_id=%s.id", types.SequencingLabTable.FederationName, types.SequencingLabTable.Alias, types.CaseTable.Alias, types.SequencingLabTable.Alias))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.diagnosis_lab_code=%s.code AND %s.tenant_code=%s.tenant_code", types.SequencingLabTable.FederationName, types.SequencingLabTable.Alias, types.CaseTable.Alias, types.SequencingLabTable.Alias, types.CaseTable.Alias, types.SequencingLabTable.Alias))
 }
 
 func JoinCaseWithMondoTerm(tx *gorm.DB) *gorm.DB {
@@ -161,11 +161,11 @@ func JoinSampleAndCaseWithFamily(tx *gorm.DB) *gorm.DB {
 }
 
 func JoinCaseWithOrderingOrganization(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.ordering_organization_id=%s.id", types.OrderingOrganizationTable.FederationName, types.OrderingOrganizationTable.Alias, types.CaseTable.Alias, types.OrderingOrganizationTable.Alias))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.ordering_organization_code=%s.code AND %s.tenant_code=%s.tenant_code", types.OrderingOrganizationTable.FederationName, types.OrderingOrganizationTable.Alias, types.CaseTable.Alias, types.OrderingOrganizationTable.Alias, types.CaseTable.Alias, types.OrderingOrganizationTable.Alias))
 }
 
 func JoinSeqExpWithSequencingLab(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_lab_id=%s.id", types.SequencingLabTable.FederationName, types.SequencingLabTable.Alias, types.SequencingExperimentTable.Alias, types.SequencingLabTable.Alias))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_lab_code=%s.code AND %s.tenant_code=%s.tenant_code", types.SequencingLabTable.FederationName, types.SequencingLabTable.Alias, types.SequencingExperimentTable.Alias, types.SequencingLabTable.Alias, types.SequencingExperimentTable.Alias, types.SequencingLabTable.Alias))
 }
 
 func JoinTaskHasDocWithTaskContext(tx *gorm.DB) *gorm.DB {
@@ -201,7 +201,7 @@ func JoinFamilyWithPatient(tx *gorm.DB) *gorm.DB {
 }
 
 func JoinPatientWithManagingOrg(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.organization_id=%s.id", types.ManagingOrganizationTable.FederationName, types.ManagingOrganizationTable.Alias, types.PatientTable.Alias, types.ManagingOrganizationTable.Alias))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.organization_code=%s.code AND %s.tenant_code=%s.tenant_code", types.ManagingOrganizationTable.FederationName, types.ManagingOrganizationTable.Alias, types.PatientTable.Alias, types.ManagingOrganizationTable.Alias, types.PatientTable.Alias, types.ManagingOrganizationTable.Alias))
 }
 
 func JoinGermlineInterpretationWithSNVOccurrence(tx *gorm.DB) *gorm.DB {

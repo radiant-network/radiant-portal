@@ -34,10 +34,10 @@ type SampleKey struct {
 
 type SampleValidationRecord struct {
 	batchval.BaseValidationRecord
-	Sample         types.SampleBatch
-	PatientId      int
-	OrganizationId int
-	ParentSampleId *int
+	Sample           types.SampleBatch
+	PatientId        int
+	OrganizationCode string
+	ParentSampleId   *int
 }
 
 func (r *SampleValidationRecord) GetBase() *batchval.BaseValidationRecord {
@@ -72,7 +72,7 @@ func (r *SampleValidationRecord) validateOrganization(organization *types.Organi
 		message := fmt.Sprintf("Organization %s for sample %s does not exist.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
 		r.AddErrors(message, SampleOrgNotExistCode, path)
 	} else {
-		r.OrganizationId = organization.ID
+		r.OrganizationCode = organization.Code
 	}
 }
 
@@ -203,7 +203,8 @@ func insertSampleRecords(records []*SampleValidationRecord, repo repository.Samp
 				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
 				TissueSite:        record.Sample.TissueSite.String(),
 				HistologyCode:     record.Sample.HistologyCode,
-				OrganizationId:    record.OrganizationId,
+				OrganizationCode:  record.OrganizationCode,
+				TenantCode:        DefaultTenantCode,
 				PatientID:         record.PatientId,
 				ParentSampleID:    parentSampleId,
 			}
@@ -368,7 +369,7 @@ func validateSamplesBatch(ctx *batchval.BatchValidationContext, cache *batchval.
 
 		// 5. Validate if sample exists in DB
 		if organization != nil {
-			existingSample, sampleErr := cache.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterSampleId.String())
+			existingSample, sampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(organization.Code, sample.SubmitterSampleId.String())
 			if sampleErr != nil {
 				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
 			}
@@ -377,7 +378,7 @@ func validateSamplesBatch(ctx *batchval.BatchValidationContext, cache *batchval.
 
 			// 7. Validate parent sample in DB if provided
 			if sample.SubmitterParentSampleId != "" {
-				existingParentSample, parentSampleErr := cache.GetSampleBySubmitterSampleId(organization.ID, sample.SubmitterParentSampleId.String())
+				existingParentSample, parentSampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(organization.Code, sample.SubmitterParentSampleId.String())
 				if parentSampleErr != nil {
 					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
 				}

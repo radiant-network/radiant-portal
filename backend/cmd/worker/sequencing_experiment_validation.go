@@ -33,10 +33,10 @@ const (
 type SequencingExperimentValidationRecord struct {
 	batchval.BaseValidationRecord
 
-	SequencingExperiment    types.SequencingExperimentBatch
-	SubmitterOrganizationID *int
-	SampleID                *int
-	SequencingLabID         *int
+	SequencingExperiment      types.SequencingExperimentBatch
+	SubmitterOrganizationCode *string
+	SampleID                  *int
+	SequencingLabCode         *string
 
 	PlatformCodes                 []string
 	ExperimentalStrategyCodes     []string
@@ -70,8 +70,8 @@ func (r *SequencingExperimentValidationRecord) preFetchValidationInfo() error {
 		return fmt.Errorf("error fetching sample organization: %w", err)
 	}
 	if soc != nil {
-		r.SubmitterOrganizationID = &soc.ID
-		sample, err := r.Cache.GetSampleBySubmitterSampleId(*r.SubmitterOrganizationID, r.SequencingExperiment.SubmitterSampleId.String())
+		r.SubmitterOrganizationCode = &soc.Code
+		sample, err := r.Cache.GetSampleByOrgCodeAndSubmitterSampleId(*r.SubmitterOrganizationCode, r.SequencingExperiment.SubmitterSampleId.String())
 		if err != nil {
 			return fmt.Errorf("error fetching sample: %w", err)
 		}
@@ -85,7 +85,7 @@ func (r *SequencingExperimentValidationRecord) preFetchValidationInfo() error {
 		return fmt.Errorf("error fetching sequencing lab: %w", err)
 	}
 	if sequencingLab != nil {
-		r.SequencingLabID = &sequencingLab.ID
+		r.SequencingLabCode = &sequencingLab.Code
 	}
 
 	platformCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetPlatform)
@@ -171,7 +171,7 @@ func (r *SequencingExperimentValidationRecord) validateStatusCodeField() error {
 }
 
 func (r *SequencingExperimentValidationRecord) validateSequencingLabCode() error {
-	if r.SequencingLabID == nil {
+	if r.SequencingLabCode == nil {
 		r.AddErrors(
 			fmt.Sprintf("Sequencing lab %s for sequencing %s does not exist.", r.SequencingExperiment.SequencingLabCode, r.SequencingExperiment.Aliquot.String()),
 			UnknownSequencingLabCode,
@@ -189,7 +189,7 @@ func (r *SequencingExperimentValidationRecord) validatePlatformCodeField() error
 }
 
 func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequencingLabCode() error {
-	if r.SequencingLabID == nil || r.SampleID == nil {
+	if r.SequencingLabCode == nil || r.SampleID == nil {
 		return nil
 	}
 
@@ -209,19 +209,10 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 			continue
 		}
 
-		sampleOrg, err := r.Cache.GetOrganizationById(sample.OrganizationId)
-		if err != nil {
-			return fmt.Errorf("error fetching sample organization by id %d: %w", sample.OrganizationId, err)
-		}
-
-		if s.SequencingLabID == *r.SequencingLabID {
+		if s.SequencingLabCode == *r.SequencingLabCode {
 			different := verifyIsDifferentField(sample.SubmitterSampleId, r.SequencingExperiment.SubmitterSampleId.String(), r, key, "submitter_sample_id")
 
-			if sampleOrg != nil {
-				different = verifyIsDifferentField(sampleOrg.Code, r.SequencingExperiment.SampleOrganizationCode, r, key, "sample_organization_code") || different
-			} else {
-				different = verifyIsDifferentField("", r.SequencingExperiment.SampleOrganizationCode, r, key, "sample_organization_code") || different
-			}
+			different = verifyIsDifferentField(sample.OrganizationCode, r.SequencingExperiment.SampleOrganizationCode, r, key, "sample_organization_code") || different
 			different = verifyIsDifferentField(s.StatusCode, r.SequencingExperiment.StatusCode, r, key, "status_code") || different
 			different = verifyIsDifferentField(s.ExperimentalStrategyCode, r.SequencingExperiment.ExperimentalStrategyCode, r, key, "experimental_strategy_code") || different
 			different = verifyIsDifferentField(s.SequencingReadTechnologyCode, r.SequencingExperiment.SequencingReadTechnologyCode, r, key, "sequencing_read_technology_code") || different
@@ -336,11 +327,12 @@ func insertSequencingExperimentRecords(records []*SequencingExperimentValidation
 				ExperimentalStrategyCode:     record.SequencingExperiment.ExperimentalStrategyCode,
 				SequencingReadTechnologyCode: record.SequencingExperiment.SequencingReadTechnologyCode,
 				PlatformCode:                 record.SequencingExperiment.PlatformCode,
+				TenantCode:                   DefaultTenantCode,
 			}
 
 			// nullable fields
 			if record.SequencingExperiment.SequencingLabCode != "" {
-				seqExp.SequencingLabID = *record.SequencingLabID
+				seqExp.SequencingLabCode = *record.SequencingLabCode
 			}
 			if record.SequencingExperiment.RunName != "" {
 				seqExp.RunName = record.SequencingExperiment.RunName.String()

@@ -31,25 +31,26 @@ var CasesQueryConfigForTest = types.QueryConfig{
 func Test_CreateCases(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		orgId := 1
-		labId := 6
+		orgCode := "CHOP"
+		labCode := "CQGC"
 		newCase := &types.Case{
-			ID:                     999,
-			ProbandID:              3,
-			ProjectID:              1,
-			StatusCode:             "in_progress",
-			PrimaryCondition:       "MONDO:0000001",
-			DiagnosisLabID:         &labId,
-			Note:                   "This is a test",
-			AnalysisCatalogID:      1,
-			AnalysisCatalog:        types.AnalysisCatalog{},
-			PriorityCode:           "routine",
-			CaseTypeCode:           "germline",
-			CaseCategoryCode:       "postnatal",
-			ConditionCodeSystem:    "MONDO",
-			ResolutionStatusCode:   "unsolved",
-			OrderingPhysician:      "Dr. Test",
-			OrderingOrganizationID: &orgId,
+			ID:                       999,
+			ProbandID:                3,
+			ProjectID:                1,
+			StatusCode:               "in_progress",
+			PrimaryCondition:         "MONDO:0000001",
+			DiagnosisLabCode:         &labCode,
+			Note:                     "This is a test",
+			AnalysisCatalogID:        1,
+			AnalysisCatalog:          types.AnalysisCatalog{},
+			PriorityCode:             "routine",
+			CaseTypeCode:             "germline",
+			CaseCategoryCode:         "postnatal",
+			ConditionCodeSystem:      "MONDO",
+			ResolutionStatusCode:     "unsolved",
+			OrderingPhysician:        "Dr. Test",
+			OrderingOrganizationCode: &orgCode,
+			TenantCode:               "radiant",
 		}
 		err := repo.CreateCase(newCase)
 		assert.NoError(t, err)
@@ -672,25 +673,26 @@ func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 
-		diagLab := 6
-		orgId := 6
+		diagLab := "CQGC"
+		orgCode := "CQGC"
 		newCase := &types.Case{
-			ID:                     1000,
-			ProbandID:              3,
-			ProjectID:              1,
-			StatusCode:             "in_progress",
-			PrimaryCondition:       "MONDO:0000001",
-			DiagnosisLabID:         &diagLab,
-			Note:                   "This is a test",
-			AnalysisCatalogID:      1,
-			PriorityCode:           "routine",
-			CaseTypeCode:           "germline",
-			CaseCategoryCode:       "postnatal",
-			ConditionCodeSystem:    "MONDO",
-			ResolutionStatusCode:   "unsolved",
-			OrderingPhysician:      "Dr. Test",
-			OrderingOrganizationID: &orgId,
-			SubmitterCaseID:        "1:1", // Duplicate submitter_case_id
+			ID:                       1000,
+			ProbandID:                3,
+			ProjectID:                1,
+			StatusCode:               "in_progress",
+			PrimaryCondition:         "MONDO:0000001",
+			DiagnosisLabCode:         &diagLab,
+			Note:                     "This is a test",
+			AnalysisCatalogID:        1,
+			PriorityCode:             "routine",
+			CaseTypeCode:             "germline",
+			CaseCategoryCode:         "postnatal",
+			ConditionCodeSystem:      "MONDO",
+			ResolutionStatusCode:     "unsolved",
+			OrderingPhysician:        "Dr. Test",
+			OrderingOrganizationCode: &orgCode,
+			TenantCode:               "radiant",
+			SubmitterCaseID:          "1:1", // Duplicate submitter_case_id
 		}
 		err := repo.CreateCase(newCase)
 		assert.Error(t, err)
@@ -707,25 +709,26 @@ func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 
-		diagLab := 6
-		orgId := 6
+		diagLab := "CQGC"
+		orgCode := "CQGC"
 		newCase := &types.Case{
-			ID:                     1000,
-			ProbandID:              3,
-			ProjectID:              1,
-			StatusCode:             "in_progress",
-			PrimaryCondition:       "MONDO:0000001",
-			DiagnosisLabID:         &diagLab,
-			Note:                   "This is a test",
-			AnalysisCatalogID:      1,
-			PriorityCode:           "routine",
-			CaseTypeCode:           "germline",
-			CaseCategoryCode:       "postnatal",
-			ConditionCodeSystem:    "MONDO",
-			ResolutionStatusCode:   "unsolved",
-			OrderingPhysician:      "Dr. Test",
-			OrderingOrganizationID: &orgId,
-			SubmitterCaseID:        "",
+			ID:                       1000,
+			ProbandID:                3,
+			ProjectID:                1,
+			StatusCode:               "in_progress",
+			PrimaryCondition:         "MONDO:0000001",
+			DiagnosisLabCode:         &diagLab,
+			Note:                     "This is a test",
+			AnalysisCatalogID:        1,
+			PriorityCode:             "routine",
+			CaseTypeCode:             "germline",
+			CaseCategoryCode:         "postnatal",
+			ConditionCodeSystem:      "MONDO",
+			ResolutionStatusCode:     "unsolved",
+			OrderingPhysician:        "Dr. Test",
+			OrderingOrganizationCode: &orgCode,
+			TenantCode:               "radiant",
+			SubmitterCaseID:          "",
 		}
 		err := repo.CreateCase(newCase)
 		assert.NoError(t, err)

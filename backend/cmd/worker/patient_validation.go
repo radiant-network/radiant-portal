@@ -32,8 +32,8 @@ const (
 
 type PatientValidationRecord struct {
 	batchval.BaseValidationRecord
-	Patient        types.PatientBatch
-	OrganizationId int
+	Patient          types.PatientBatch
+	OrganizationCode string
 }
 
 func (r *PatientValidationRecord) GetBase() *batchval.BaseValidationRecord {
@@ -103,7 +103,7 @@ func (r *PatientValidationRecord) validateOrganization(organization *types.Organ
 		)
 		r.AddErrors(message, PatientOrganizationTypeCode, path)
 	} else {
-		r.OrganizationId = organization.ID
+		r.OrganizationCode = organization.Code
 	}
 }
 
@@ -229,7 +229,8 @@ func insertPatientRecords(records []*PatientValidationRecord, repo repository.Pa
 		if !record.Skipped {
 			patient := types.Patient{
 				SubmitterPatientId:     record.Patient.SubmitterPatientId.String(),
-				OrganizationId:         record.OrganizationId,
+				OrganizationCode:       record.OrganizationCode,
+				TenantCode:             DefaultTenantCode,
 				SubmitterPatientIdType: record.Patient.SubmitterPatientIdType.String(),
 				FirstName:              record.Patient.FirstName.String(),
 				LastName:               record.Patient.LastName.String(),
@@ -303,7 +304,7 @@ func validatePatientRecord(ctx *batchval.BatchValidationContext, cache *batchval
 		record.validateOrganization(organization)
 	}
 	if organization != nil {
-		existingPatient, patientErr := ctx.PatientRepo.GetPatientBySubmitterPatientId(organization.ID, patient.SubmitterPatientId.String())
+		existingPatient, patientErr := ctx.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(organization.Code, patient.SubmitterPatientId.String())
 		if patientErr != nil {
 			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
 		} else {

@@ -36,7 +36,6 @@ type BatchValidationCache struct {
 
 	// Referenced Entities (Indexed by their natural keys)
 	OrganizationsByCode            map[string]*types.Organization                          // Key: code
-	OrganizationsById              map[int]*types.Organization                             // Key: ID
 	Projects                       map[string]*types.Project                               // Key: code
 	Patients                       map[PatientKey]*types.Patient                           // Key: org_code + submitter_id
 	SamplesById                    map[int]*types.Sample                                   // Key: ID
@@ -55,7 +54,6 @@ func NewBatchValidationCache(context *BatchValidationContext) *BatchValidationCa
 		Context:                        context,
 		ValueSets:                      make(map[repository.ValueSetType][]string),
 		OrganizationsByCode:            make(map[string]*types.Organization),
-		OrganizationsById:              make(map[int]*types.Organization),
 		Projects:                       make(map[string]*types.Project),
 		Patients:                       make(map[PatientKey]*types.Patient),
 		SamplesById:                    make(map[int]*types.Sample),
@@ -137,25 +135,6 @@ func (c *BatchValidationCache) GetOrganizationByCode(code string) (*types.Organi
 
 	if org != nil {
 		c.OrganizationsByCode[code] = org
-		c.OrganizationsById[org.ID] = org
-	}
-
-	return org, nil
-}
-
-func (c *BatchValidationCache) GetOrganizationById(id int) (*types.Organization, error) {
-	if org, ok := c.OrganizationsById[id]; ok {
-		return org, nil
-	}
-
-	org, err := c.Context.OrgRepo.GetOrganizationById(id)
-	if err != nil {
-		return nil, err
-	}
-
-	if org != nil {
-		c.OrganizationsByCode[org.Code] = org
-		c.OrganizationsById[id] = org
 	}
 
 	return org, nil
@@ -230,18 +209,6 @@ func (c *BatchValidationCache) GetSampleByOrgCodeAndSubmitterSampleId(orgCode st
 	}
 
 	return sample, nil
-}
-
-func (c *BatchValidationCache) GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*types.Sample, error) {
-	org, err := c.GetOrganizationById(organizationId)
-	if err != nil {
-		return nil, fmt.Errorf("error retrieving organization for ID %d: %w", organizationId, err)
-	}
-	if org == nil {
-		return nil, fmt.Errorf("no organization found for ID %d", organizationId)
-	}
-
-	return c.GetSampleByOrgCodeAndSubmitterSampleId(org.Code, submitterSampleId)
 }
 
 func (c *BatchValidationCache) GetSequencingExperimentByAliquot(aliquot string) ([]types.SequencingExperiment, error) {

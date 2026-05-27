@@ -12,12 +12,12 @@ func Test_GetSampleBySubmitterSampleId_Found(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleBySubmitterSampleId(6, "S13224")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("CQGC", "S13224")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, sample)
 		assert.Equal(t, "S13224", sample.SubmitterSampleId)
-		assert.Equal(t, 6, sample.OrganizationId)
+		assert.Equal(t, "CQGC", sample.OrganizationCode)
 	})
 }
 
@@ -25,7 +25,7 @@ func Test_GetSampleBySubmitterSampleId_NotFound_InvalidSampleId(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleBySubmitterSampleId(6, "SAMPLE-UNKNOWN")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("CQGC", "SAMPLE-UNKNOWN")
 
 		assert.NoError(t, err)
 		assert.Nil(t, sample)
@@ -36,7 +36,7 @@ func Test_GetSampleBySubmitterSampleId_NotFound_InvalidOrgId(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleBySubmitterSampleId(999999, "S13224")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("UNKNOWN-ORG", "S13224")
 
 		assert.NoError(t, err)
 		assert.Nil(t, sample)
@@ -47,7 +47,7 @@ func Test_GetSampleBySubmitterSampleId_NotFound_BothInvalid(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleBySubmitterSampleId(999999, "SAMPLE-UNKNOWN")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("UNKNOWN-ORG", "SAMPLE-UNKNOWN")
 
 		assert.NoError(t, err)
 		assert.Nil(t, sample)
@@ -75,7 +75,7 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_Found(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, sample)
 		assert.Equal(t, "S13224", sample.SubmitterSampleId)
-		assert.Equal(t, 6, sample.OrganizationId)
+		assert.Equal(t, "CQGC", sample.OrganizationCode)
 	})
 }
 

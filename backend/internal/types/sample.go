@@ -11,7 +11,9 @@ type Sample struct {
 	HistologyType     HistologyType `gorm:"foreignKey:code;references:HistologyCode"`
 	SubmitterSampleId string
 	PatientID         int
-	OrganizationId    int
+	OrganizationCode  string
+	TenantCode        string
+	Organization      Organization `gorm:"foreignKey:OrganizationCode,TenantCode;references:Code,TenantCode"`
 }
 
 var SampleSubmitterSampleIdField = Field{

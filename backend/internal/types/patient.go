@@ -6,8 +6,9 @@ type Patient struct {
 	ID                     int `gorm:"unique;primaryKey;autoIncrement"`
 	SubmitterPatientId     string
 	SubmitterPatientIdType string
-	OrganizationId         int
-	Organization           Organization `gorm:"foreignKey:ID;references:OrganizationId"`
+	OrganizationCode       string
+	TenantCode             string
+	Organization           Organization `gorm:"foreignKey:OrganizationCode,TenantCode;references:Code,TenantCode"`
 	SexCode                string
 	LifeStatusCode         string
 	FirstName              string    `json:"first_name,omitempty"`

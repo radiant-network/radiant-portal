@@ -11,8 +11,9 @@ type SequencingExperiment struct {
 	StatusCode                   string
 	Status                       Status `gorm:"foreignKey:Code;references:StatusCode"`
 	Aliquot                      string
-	SequencingLabID              int
-	SequencingLab                Organization `gorm:"foreignKey:ID;references:SequencingLabID"`
+	SequencingLabCode            string
+	TenantCode                   string
+	SequencingLab                Organization `gorm:"foreignKey:SequencingLabCode,TenantCode;references:Code,TenantCode"`
 	RunName                      string
 	RunAlias                     string
 	RunDate                      time.Time `gorm:"type:timestamptz;default:null"`
