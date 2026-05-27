@@ -74,14 +74,14 @@ function OccurrenceActionsMenu({ row, caseEntity }: OccurrenceActionsMenuProps) 
             onClick: handlePreview,
           },
           {
-            id: 'view-variant',
+            id: 'view_variant',
             icon: <ArrowUpRight />,
             label: t('variant.actions.view_variant'),
             onClick: onNavigateToVariantPage,
             hasSeparator: true,
           },
           {
-            id: 'open-in-igv',
+            id: 'open_in_igv',
             icon: <FlipHorizontal2Icon />,
             label: t('variant.actions.open_in_igv'),
             tooltip:

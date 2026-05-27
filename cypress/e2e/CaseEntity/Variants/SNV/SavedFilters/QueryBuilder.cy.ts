@@ -13,14 +13,14 @@ describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
 
   it('Create', () => {
     setupTest();
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F0');
-    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('Cypress_F0');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressF0');
+    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('CypressF0');
 
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName('Cypress_F0');
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldBeSelectedInDropdown('Cypress_F0');
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName('CypressF0');
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldBeSelectedInDropdown('CypressF0');
     CaseEntity_Variants_SavedFilters.snv.actions.openManager();
 
-    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_F0');
+    ManagerFilterModal.validations.shouldDisplayInManager('CypressF0');
     ManagerFilterModal.actions.closeManager();
 
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', false /*isDisable*/, false /*isDirty*/);
@@ -31,19 +31,19 @@ describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
 
   it('Rename', () => {
     setupTest();
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_FA');
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F1 COPY');
-    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('Cypress_F1');
-    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown(/^Cypress_F1$/);
-    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('Cypress_FA');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressFA');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressF1 COPY');
+    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('CypressF1');
+    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown(/^CypressF1$/);
+    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('CypressFA');
 
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName('Cypress_FA');
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown(/^Cypress_F1$/, false /*shouldExist*/);
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldBeSelectedInDropdown('Cypress_FA');
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName('CypressFA');
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown(/^CypressF1$/, false /*shouldExist*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldBeSelectedInDropdown('CypressFA');
     CaseEntity_Variants_SavedFilters.snv.actions.openManager();
 
-    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_F1', false /*shouldExist*/);
-    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_FA');
+    ManagerFilterModal.validations.shouldDisplayInManager('CypressF1', false /*shouldExist*/);
+    ManagerFilterModal.validations.shouldDisplayInManager('CypressFA');
     ManagerFilterModal.actions.closeManager();
 
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', false /*isDisable*/, false /*isDirty*/);
@@ -54,13 +54,13 @@ describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
 
   it('Select from dropdown', () => {
     setupTest();
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_FA');
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F1 COPY');
-    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('Cypress_F1');
-    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_F1');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressFA');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressF1 COPY');
+    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('CypressF1');
+    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('CypressF1');
 
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName('Cypress_F1');
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldBeSelectedInDropdown('Cypress_F1');
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName('CypressF1');
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldBeSelectedInDropdown('CypressF1');
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', false /*isDisable*/, false /*isDirty*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('duplicate', false /*isDisable*/, false /*isDirty*/);
@@ -69,18 +69,18 @@ describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
 
   it('Duplicate', () => {
     setupTest();
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_FA');
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F1 COPY');
-    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('Cypress_F1');
-    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_F1');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressFA');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressF1 COPY');
+    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('CypressF1');
+    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('CypressF1');
     CaseEntity_Variants_SavedFilters.snv.actions.clickDuplicateButton();
     CaseEntity_Variants_SavedFilters.snv.actions.clickSaveButton();
 
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName(/^Cypress_F1 COPY$/);
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('Cypress_F1 COPY', true /*shouldExist*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName(/^CypressF1 COPY$/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('CypressF1 COPY', true /*shouldExist*/);
     CaseEntity_Variants_SavedFilters.snv.actions.openManager();
 
-    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_F1 COPY', true /*shouldExist*/);
+    ManagerFilterModal.validations.shouldDisplayInManager('CypressF1 COPY', true /*shouldExist*/);
     ManagerFilterModal.actions.closeManager();
 
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', false /*isDisable*/, false /*isDirty*/);
@@ -91,15 +91,15 @@ describe('Case Entity - Variants - SNV - Saved filters - Query builder', () => {
 
   it('Delete', () => {
     setupTest();
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F2');
-    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('Cypress_F2');
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F2');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressF2');
+    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('CypressF2');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressF2');
 
     CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName(/(Filtre sans titre|Untitled filter)/);
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('Cypress_F2', false /*shouldExist*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('CypressF2', false /*shouldExist*/);
     CaseEntity_Variants_SavedFilters.snv.actions.openManager();
 
-    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_F2', false /*shouldExist*/);
+    ManagerFilterModal.validations.shouldDisplayInManager('CypressF2', false /*shouldExist*/);
     ManagerFilterModal.actions.closeManager();
 
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', true /*isDisable*/, false /*isDirty*/);

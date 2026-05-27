@@ -317,7 +317,7 @@ export const CaseEntity_Variants_SNV_Table = {
     /**
      * Select an action with the table action button.
      * @param dataVariant The variant object.
-     * @param action The action id to do (preview | view-variant | open-in-igv | ucsc | litvar).
+     * @param action The action id to do (preview | view_variant | open_in_igv | ucsc | litvar).
      */
     selectAction(dataVariant: any, action: string) {
       cy.then(() =>

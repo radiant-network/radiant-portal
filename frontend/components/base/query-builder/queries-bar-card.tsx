@@ -146,12 +146,12 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
                       size="xs"
                       actions={[
                         {
-                          id: 'combine-and',
+                          id: 'combine_and',
                           label: capitalize(t('common.query_pill.operator.and')),
                           onClick: handleCombineQueriesClick(BooleanOperators.And),
                         },
                         {
-                          id: 'combine-or',
+                          id: 'combine_or',
                           label: capitalize(t('common.query_pill.operator.or')),
                           onClick: handleCombineQueriesClick(BooleanOperators.Or),
                         },
