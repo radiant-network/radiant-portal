@@ -20,17 +20,17 @@ export const Variants: Story = {
     children: 'Button',
     actions: [
       {
-        id: 'action-1',
+        id: 'action_1',
         label: 'action 1',
         onClick: () => {},
       },
       {
-        id: 'action-2',
+        id: 'action_2',
         label: 'action 2',
         onClick: () => {},
       },
       {
-        id: 'action-3',
+        id: 'action_3',
         label: 'action 3',
         onClick: () => {},
       },
