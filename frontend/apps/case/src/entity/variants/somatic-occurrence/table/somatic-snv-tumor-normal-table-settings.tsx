@@ -346,8 +346,9 @@ const defaultSomaticSNVSettings = createColumnSettings([
   },
   {
     id: 'ad_ratio',
-    visible: true,
+    visible: false,
     label: 'variant.headers.ad_ratio',
+    additionalFields: ['ad_ratio'],
   },
   {
     id: 'actions',
