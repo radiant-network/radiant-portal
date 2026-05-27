@@ -187,6 +187,7 @@ var SomaticSNVOccurrencesDefaultFields = []Field{
 	GermlinePcWgsField,
 	SomaticPfTnWgsField,
 	SomaticPcTnWgsField,
+	SomaticSNVTumorAdRatioField,
 }
 
 var SomaticSNVOccurrencesFields = append(SomaticSNVOccurrencesDefaultFields,
@@ -226,7 +227,6 @@ var SomaticSNVOccurrencesFields = append(SomaticSNVOccurrencesDefaultFields,
 	// Occurrence facets
 	SomaticSNVFilterField,
 	SomaticSNVInfoQdField,
-	SomaticSNVTumorAdRatioField,
 	SomaticSNVTumorAdAltField,
 	SomaticSNVTumorAdTotalField,
 )
