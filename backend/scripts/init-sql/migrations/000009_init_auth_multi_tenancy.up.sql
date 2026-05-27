@@ -16,7 +16,8 @@ CREATE TABLE public.tenant (
 );
 
 -- Everything that exists before multi-tenancy belongs to a single default tenant.
-INSERT INTO public.tenant (code, name) VALUES ('radiant', 'Radiant');
+INSERT INTO public.tenant (code, name) VALUES ('radiant', 'Radiant')
+ON CONFLICT (code) DO NOTHING;
 
 -- =============================================================================
 -- 2. Organization: attach to the default tenant (backfill, then NOT NULL)
@@ -184,4 +185,5 @@ INSERT INTO public.action (code, scope, description) VALUES
     ('can_download_file',     'org',    'Generate presigned download URLs for case documents at this org'),
     ('can_ingest_data',       'org',    'Submit batches (cases, patients, samples, sequencing) for this org'),
     ('can_search_case',       'tenant', 'Search and view cases across the tenant (PHI masked per can_read_pii)'),
-    ('can_view_kb',           'tenant', 'View the knowledge base: variants, genes, HPO/MONDO terms, frequencies');
+    ('can_view_kb',           'tenant', 'View the knowledge base: variants, genes, HPO/MONDO terms, frequencies')
+ON CONFLICT (code) DO NOTHING;
