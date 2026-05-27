@@ -18,10 +18,6 @@ go get github.com/swaggo/swag/v2@v2.0.0-rc4
 go install github.com/swaggo/swag/v2/cmd/swag@v2.0.0-rc4
 ```
 
-### Install OpenFGA CLI
-
-https://github.com/openfga/cli?tab=readme-ov-file#installation
-
 ### Create keycloak User
 
 Realm settings are imported at start, still a user needs to be created manually in the UI `http://localhost:8080`.
@@ -127,24 +123,6 @@ make generate-client-all
 ```bash
 docker compose up
 ```
-
-## Creating a user in Keycloak with OpenFGA authorization
-
-(Note: **This section applies only if you are running the API with OpenFGA enabled.**)
-
-OpenFGA creates contextual tuples using the claims in a JWT token generate by Keycloak.
-To make this work, you need to create a user in Keycloak and assign them roles that correspond to the OpenFGA model.
-
-Test clients were created to simulate project scopes with specific roles for each.
-
-![keycloak_client_roles.png](assets/keycloak_client_roles.png)
-
-The only difference is for the KeyCloak client specified in the `azp` claim of the JWT token (in this case `radiant` client).
-It will be treated as the `application` level in the OpenFGA model.
-
-In the example below, `radiant` is `application` scope (because it's client used to generate the JWT) and `CBTN` and `UDN` are `project` scopes.
-
-![keycloak_role_scopes.png](assets/keycloak_role_scopes.png)
 
 ## Run frontend
 

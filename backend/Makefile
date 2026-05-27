@@ -50,8 +50,6 @@ docker-down:
 
 # Test the application
 test:
-	@echo "Testing Authorization model..."
-	@fga model test --tests ./scripts/init-openfga/tests.fga.yaml
 	@echo "Testing..."
 	@go test ./...
 
@@ -85,9 +83,6 @@ watch:
 doc:
 	@echo "Generating OpenAPI v3.1 documentation..."
 	@go run scripts/openapi/generate.go
-	@echo "Generating OpenFGA json model..."
-	@fga model transform --file ./scripts/init-openfga/model.fga > ./scripts/init-openfga/model.json
-	@echo "Model generated at ./scripts/init-openfga/model.json"
 
 .PHONY: all build run test clean watch docker-run docker-down itest
 

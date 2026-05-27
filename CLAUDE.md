@@ -77,9 +77,7 @@ The frontend supports multiple portal builds (e.g., `radiant`, `kf`) from a sing
 
 ### Authorization
 
-The backend supports two authorization providers selected by `RADIANT_AUTHORIZATION_PROVIDER`:
-- `keycloak` (default) — RBAC via JWT claims
-- `openfga` — fine-grained access control
+The backend authorizes requests via Keycloak — RBAC enforced from JWT claims.
 
 Both the frontend (Keycloak OAuth2 via `remix-auth`) and backend must be pointed at the same Keycloak realm.
 

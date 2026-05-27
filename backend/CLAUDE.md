@@ -16,7 +16,7 @@ cmd/
   api/         - API server entry point, router setup, integration tests
   worker/      - Batch validation worker, validation logic per entity type
 internal/
-  authorization/ - Keycloak (default) and OpenFGA authorization providers
+  authorization/ - Keycloak authorization (RBAC middleware)
   batchval/    - Batch validation context, caching, record validation
   client/      - External clients (PubMed)
   database/    - DB connection setup (postgres.go, starrocks.go)
@@ -26,7 +26,6 @@ internal/
   utils/       - Auth, S3, mappers, env helpers, collection utilities
 scripts/
   init-sql/migrations/ - PostgreSQL migrations (golang-migrate)
-  init-openfga/        - OpenFGA authorization model and tests
 test/testutils/        - Shared test infrastructure (containers, fixtures, JWT, mocks)
 ```
 
@@ -34,7 +33,6 @@ test/testutils/        - Shared test infrastructure (containers, fixtures, JWT, 
 - **Gin** v1.10 — HTTP router/framework
 - **GORM** v1.25 — ORM (MySQL driver for StarRocks, postgres driver for PG)
 - **gin-keycloak** — Keycloak RBAC middleware
-- **openfga/go-sdk** — Fine-grained access control (optional)
 - **golang-jwt/jwt/v5** — JWT parsing
 - **aws-sdk-go** + **minio-go** — S3/MinIO file storage
 - **golang-migrate** — DB migrations
@@ -52,9 +50,9 @@ make run-worker    # Run worker
 make watch         # Live reload (air)
 make docker-run    # docker compose up (all dependencies)
 make docker-down   # docker compose down
-make test          # Unit + integration tests + OpenFGA model tests
+make test          # Unit + integration tests
 make itest         # Integration tests only (repository layer)
-make doc           # Generate OpenAPI v3.1 spec + OpenFGA JSON model
+make doc           # Generate OpenAPI v3.1 spec
 make clean         # Remove binaries
 make migrate       # Create new migration file
 ```
@@ -72,10 +70,7 @@ Middleware stack (in order): CORS → Gzip → request logging → Keycloak logg
 
 ## Authorization
 
-Two providers, selected via `RADIANT_AUTHORIZATION_PROVIDER` env var (default: `keycloak`):
-
-- **Keycloak**: RBAC via JWT claims (`sub`, `azp`, `resource_access`). `data_manager` role gates batch endpoints.
-- **OpenFGA**: Fine-grained access control; contextual tuples from JWT. Relations: `reader` (GET) / `writer` (POST/PUT/PATCH/DELETE). Model: `scripts/init-openfga/model.fga`.
+Keycloak is the sole authorization provider: RBAC via JWT claims (`sub`, `azp`, `resource_access`). The `data_manager` role gates batch endpoints.
 
 Auth utilities live in `internal/utils/auth.go` (`KeycloakAuth` interface).
 
@@ -99,7 +94,6 @@ Copy `.env.template` → `.env`. Key variables:
 | `PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD` | PostgreSQL | localhost:5432 |
 | `API_PORT` | API listen port | 8090 |
 | `KEYCLOAK_HOST/REALM/CLIENT` | Keycloak | localhost:8080 |
-| `RADIANT_AUTHORIZATION_PROVIDER` | `keycloak` or `openfga` | keycloak |
 | `AWS_ENDPOINT_URL/REGION/ACCESS_KEY_ID/SECRET_ACCESS_KEY` | S3/MinIO | — |
 | `S3_PRESIGNED_URL_EXPIRE` | URL TTL | 60m |
 | `PUBMED_BASE_URL` | PubMed API | ncbi.nlm.nih.gov |
@@ -112,8 +106,6 @@ Tests use **testcontainers** for isolated DB instances — no manual setup requi
 ```bash
 make test   # all tests
 make itest  # integration tests (repository layer)
-# OpenFGA model tests (requires fga CLI):
-fga model test --tests ./scripts/init-openfga/tests.fga.yaml
 ```
 
 Test utilities in `test/testutils/`: DB container setup, fixtures, JWT generation, mock auth, object store setup.
@@ -132,7 +124,7 @@ PostgresMode controls both cleanup and isolation:
 - `WritePostgres` — writes with unique keys, cleanup after test, parallel.
 - `ExclusivePostgres` — writes to shared state (seed data, count assertions on shared keys), cleanup after test, forces serial. Use only when the test can't use unique keys.
 
-Serial is also forced when `MinIO: true` (t.Setenv incompatibility) or `OpenFGA: true` (process env mutation).
+Serial is also forced when `MinIO: true` (t.Setenv incompatibility).
 
 Legacy shims (`ParallelTestWithStarrocks`, `ParallelTestWithPostgres`, `SequentialTestWithPostgres`, etc.) still exist and route through `RunTest`. New tests should use `RunTest` directly.
 

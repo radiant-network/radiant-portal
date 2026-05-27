@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/minio/minio-go/v7"
-	"github.com/radiant-network/radiant-api/internal/authorization"
 	"gorm.io/gorm"
 )
 
@@ -35,7 +34,6 @@ type Need struct {
 	Starrocks string       // fixture folder name under test/data/; "" = no StarRocks
 	Postgres  PostgresMode // see PostgresMode constants
 	MinIO     bool         // spin up a per-test MinIO container
-	OpenFGA   bool         // initialize a per-test OpenFGA store
 }
 
 // MinIOEnv groups the MinIO connection details exposed to a test.
@@ -49,7 +47,6 @@ type Env struct {
 	Ctx       context.Context
 	Starrocks *gorm.DB
 	Postgres  *gorm.DB
-	OpenFGA   *authorization.OpenFGAModelConfiguration
 	MinIO     *MinIOEnv
 }
 
@@ -60,10 +57,8 @@ type Env struct {
 //     assertions on shared keys) and needs the database to itself.
 //   - MinIO: the helper sets AWS_* env vars via t.Setenv, which is mutually
 //     exclusive with t.Parallel.
-//   - OpenFGA: in this codebase, OpenFGA tests mutate process env via
-//     os.Setenv, which would race with parallel tests.
 func RunTest(t *testing.T, need Need, fn func(t *testing.T, env *Env)) {
-	serial := need.Postgres == ExclusivePostgres || need.MinIO || need.OpenFGA
+	serial := need.Postgres == ExclusivePostgres || need.MinIO
 	if !serial {
 		t.Parallel()
 	}
@@ -91,15 +86,6 @@ func RunTest(t *testing.T, need Need, fn func(t *testing.T, env *Env)) {
 		if need.Postgres == WritePostgres || need.Postgres == ExclusivePostgres {
 			defer cleanUp(pg)
 		}
-	}
-
-	// OpenFGA (per-test store within the shared OpenFGA container).
-	if need.OpenFGA {
-		store, err := initOpenFGA()
-		if err != nil {
-			log.Fatal("Failed to init OpenFGA store: ", err)
-		}
-		env.OpenFGA = store
 	}
 
 	// MinIO (per-test container; AWS_* env vars are exported via t.Setenv).
@@ -169,12 +155,6 @@ func SequentialTestWithPostgresAndMinIO(t *testing.T, testFunc func(t *testing.T
 func SequentialTestWithPostgresAndStarrocks(t *testing.T, dbName string, testFunc func(t *testing.T, starrocks *gorm.DB, postgres *gorm.DB)) {
 	RunTest(t, Need{Starrocks: dbName, Postgres: ExclusivePostgres}, func(t *testing.T, env *Env) {
 		testFunc(t, env.Starrocks, env.Postgres)
-	})
-}
-
-func SequentialTestWithOpenFGAAndPostgresAndStarrocks(t *testing.T, dbName string, testFunc func(t *testing.T, openfga *authorization.OpenFGAModelConfiguration, starrocks *gorm.DB, postgres *gorm.DB)) {
-	RunTest(t, Need{Starrocks: dbName, Postgres: ExclusivePostgres, OpenFGA: true}, func(t *testing.T, env *Env) {
-		testFunc(t, env.OpenFGA, env.Starrocks, env.Postgres)
 	})
 }
 

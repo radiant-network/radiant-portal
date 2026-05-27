@@ -80,7 +80,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 		AllowCredentials: true, // Enable cookies/auth
 	}))
 
-	roleAccessMiddleware, err := authorization.InitAuthorizer(auth)
+	roleAccessMiddleware, err := authorization.InitAuthorizer()
 	if err != nil {
 		log.Fatalf("Failed to initialize authorizer: %v", err)
 	}

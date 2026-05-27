@@ -100,7 +100,6 @@ Goal: the route is reachable end-to-end against a real DB.
    - Cover the cross-cutting concerns that handler unit tests can't: routing wiring, middleware (auth), real query against the test DB.
 3. **Security tests** in [backend/cmd/api/integration_test.go](../../../cmd/api/integration_test.go) — these enumerate every route and assert auth behavior. They will silently pass for missing routes, so adding here is easy to forget:
    - `Test_SecureRoutes`: add the route to the matching `[]string` slice (GET or POST). Asserts a 401 without a token.
-   - `Test_OpenFGA_Authorization`: add an entry to `getTests` or `postTests` with the expected status code when called with a valid `data_manager` JWT against seeded data.
 4. Run: `cd backend && make test` — full suite must be green.
 
 ## Step 5 — Swagger + clients
@@ -177,7 +176,7 @@ Before reporting done:
 - [ ] `backend/CLAUDE.md` and/or `backend/.claude/rules/universal.md` updated if a new pattern/convention was introduced (per Step 7)
 - [ ] Swagger annotations include `@Tags`, `@Security`, all params, success + failure responses
 - [ ] Repository, handler, and integration tests all present
-- [ ] Route added to both `Test_SecureRoutes` and `Test_OpenFGA_Authorization` in `cmd/api/integration_test.go`
+- [ ] Route added to `Test_SecureRoutes` in `cmd/api/integration_test.go`
 - [ ] No new comments explaining the *what* — only non-obvious *why*
 - [ ] No unused fields, imports, or backwards-compat shims
 
