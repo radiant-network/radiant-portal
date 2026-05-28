@@ -1,38 +1,27 @@
-import useSWR from 'swr';
-
 import { CaseTasksWithOccurrencesDataTypeEnum } from '../../api/api';
-import { caseApi } from '../../utils/api';
+
+import { useOccurrenceTasks } from './use-occurrence-tasks';
 
 /**
  * Resolve the first task attached to the given (case, sequencing) pair that
  * produces occurrences of the requested data type.
  *
- * Returns the task id, a loading flag, and a flag indicating that the lookup
- * has resolved but no matching task exists. Callers gate occurrence requests
- * on a defined `taskId`.
- *
- * This is a temporary bridge: the Variants tab UX in the upcoming sub-task 3
- * will let users pick among multiple matching tasks. Until then, defaulting
- * to the first matching task preserves existing behavior.
+ * Used where there is no task picker (e.g. the Variant entity case sliders, which
+ * are bound to a single case row); the Variants tab itself lets the user pick
+ * among multiple matching tasks. Callers gate occurrence requests on a defined
+ * `taskId`.
  */
 export function useFirstOccurrenceTaskId(
   caseId: number,
   seqId: number,
   dataType: CaseTasksWithOccurrencesDataTypeEnum,
 ) {
-  const { data, isLoading, error } = useSWR(
-    ['first-occurrence-task-id', caseId, seqId, dataType],
-    async () => {
-      const response = await caseApi.caseTasksWithOccurrences(caseId, seqId, dataType);
-      return response.data;
-    },
-    { revalidateOnFocus: false },
-  );
+  const { tasks, isLoading, hasNoTask, error } = useOccurrenceTasks(caseId, seqId, dataType);
 
   return {
-    taskId: data && data.length > 0 ? data[0].id : undefined,
+    taskId: tasks.length > 0 ? tasks[0].id : undefined,
     isLoading,
-    hasNoTask: !isLoading && !error && data !== undefined && data.length === 0,
+    hasNoTask,
     error,
   };
 }

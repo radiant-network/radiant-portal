@@ -1,11 +1,14 @@
 import { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
-import { CaseEntity, CaseSequencingExperiment } from '@/api/api';
+import { CaseEntity, CaseSequencingExperiment, CaseTasksWithOccurrencesDataTypeEnum } from '@/api/api';
 import { useI18n } from '@/components/hooks/i18n';
+import { useOccurrenceTasks } from '@/components/hooks/use-occurrence-tasks';
+import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 import SequencingExperimentVariantFilters from './filters/sequencing-experiment-variant-filters';
 import { getDefaultSeqId, useSeqIdSearchParamsEffect } from './hooks/use-seqid-by-search';
+import { useTaskIdSearchParamsEffect } from './hooks/use-taskid-by-search';
 import SNVTumorNormalTab from './somatic-occurrence/snv-tumor-normal-tab';
 
 export enum SomaticVariantInterface {
@@ -21,12 +24,20 @@ type VariantTabProps = {
 
 function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
   const { t } = useI18n();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const caseId = useCaseIdFromParam();
   const [activeInterface, setActiveInterface] = useState<SomaticVariantInterface>(SomaticVariantInterface.SNV_TN);
   const [patientSelected, setPatientSelected] = useState<CaseSequencingExperiment | undefined>(undefined);
 
   const [seqId, setSeqId] = useState<number>(getDefaultSeqId(searchParams.get('seq_id'), caseEntity));
   const seqExpVariants = caseEntity?.sequencing_experiments.filter(seqExp => seqExp.has_variants) ?? [];
+
+  const { tasks, isLoading: isTasksLoading } = useOccurrenceTasks(
+    caseId,
+    seqId,
+    CaseTasksWithOccurrencesDataTypeEnum.SomaticSnv,
+  );
+  const selectedTaskId = useTaskIdFromSearchParam();
 
   const handlechange = useCallback(
     (value: number) => {
@@ -36,7 +47,16 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     [seqExpVariants],
   );
 
+  const handleTaskChange = useCallback(
+    (value: number) => {
+      searchParams.set('task_id', `${value}`);
+      setSearchParams(searchParams, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
+
   useSeqIdSearchParamsEffect({ seqId, setSeqId, caseEntity });
+  useTaskIdSearchParamsEffect({ tasks, isLoading: isTasksLoading });
 
   // @TODO: to be changed when all tabs are implemented
   // options={Object.keys(SomaticVariantInterface)}
@@ -57,6 +77,9 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
         onActiveInterfaceChange={value => {
           setActiveInterface(value as SomaticVariantInterface);
         }}
+        tasks={tasks}
+        selectedTaskId={selectedTaskId}
+        onTaskChange={handleTaskChange}
       />
       {activeInterface == SomaticVariantInterface.SNV_TN && (
         <SNVTumorNormalTab seqId={seqId} patientSelected={patientSelected} caseEntity={caseEntity} />

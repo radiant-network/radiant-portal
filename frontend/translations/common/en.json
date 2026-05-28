@@ -1400,12 +1400,14 @@
           "partial": "Gene overlaps the CNV",
           "full_cnv": "Gene contains the CNV entirely"
         },
+        "cnv": "CNV",
         "cnv_to": "CNV (TO)",
-        "sequencing_id": "Seq. ID",
+        "latest": "Latest",
         "sample_submitter_id": "Submitter sample ID:",
         "sample_id": "Sample ID",
+        "select_task_label": "Pipeline run producing aligned reads and called variants.",
+        "sequencing_id": "Seq. ID",
         "snv": "SNV",
-        "cnv": "CNV",
         "snv_tn": "SNV (TN)",
         "snv_tn_tooltip": "SNV (tumor-normal)",
         "snv_to": "SNV (TO)"
