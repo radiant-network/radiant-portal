@@ -15,7 +15,7 @@ import (
 // already-existing sequencing experiments to an already-existing case.
 type CaseSequencingExperimentValidationRecord struct {
 	batchval.BaseValidationRecord
-	Patch                 types.CaseSequencingExperimentPatch
+	Patch                 types.CaseBatchPatch
 	CaseID                *int
 	SequencingExperiments map[int]*types.SequencingExperiment
 }
@@ -32,7 +32,7 @@ func (r *CaseSequencingExperimentValidationRecord) path() string {
 	return fmt.Sprintf("%s[%d]", r.GetResourceType(), r.Index)
 }
 
-func validateCaseSequencingExperimentRecord(cache *batchval.BatchValidationCache, patch types.CaseSequencingExperimentPatch, index int) (*CaseSequencingExperimentValidationRecord, error) {
+func validateCaseSequencingExperimentRecord(cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int) (*CaseSequencingExperimentValidationRecord, error) {
 	r := &CaseSequencingExperimentValidationRecord{
 		BaseValidationRecord:  batchval.BaseValidationRecord{Cache: cache, Index: index},
 		Patch:                 patch,
@@ -81,7 +81,7 @@ func validateCaseSequencingExperimentRecord(cache *batchval.BatchValidationCache
 // sequencing experiments to an existing case (case_has_sequencing_experiment). It never
 // creates the case — a missing case is CASE-012, a missing experiment is SEQ-007.
 func processCaseSequencingExperimentBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
-	var patches []types.CaseSequencingExperimentPatch
+	var patches []types.CaseBatchPatch
 	if err := json.Unmarshal([]byte(batch.Payload), &patches); err != nil {
 		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling case sequencing experiment batch: %v", err), ctx.BatchRepo)
 		return

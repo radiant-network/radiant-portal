@@ -64,16 +64,15 @@ func PostCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.Handler
 }
 
 // PatchCaseBatchHandler
-// @Summary Attach sequencing experiments to existing cases (batch)
+// @Summary Partially update existing cases (batch)
 // @Id patchCaseBatch
-// @Description Attach already-created sequencing experiments to already-created cases,
-// @Description keyed by (project_code, submitter_case_id). The worker resolves each case and
-// @Description experiment and inserts the case_has_sequencing_experiment links. A missing case
-// @Description surfaces CASE-012; a missing experiment surfaces SEQ-007. It never creates the case.
+// @Description Partially updates existing cases — see the request body for updatable fields.
+// @Description Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found.
+// @Description Array fields are appended, not replaced.
 // @Tags cases
 // @Security bearerauth
 // @Param dry_run query boolean false "Dry Run" default(false)
-// @Param message	body		types.PatchCaseSequencingExperimentBatchBody	true	"Attach Body"
+// @Param message	body		types.PatchCaseBatchBody	true	"Attach Body"
 // @Accept json
 // @Produce json
 // @Success 202 {object} types.CreateBatchResponse
@@ -84,7 +83,7 @@ func PostCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.Handler
 func PatchCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			body       types.PatchCaseSequencingExperimentBatchBody
+			body       types.PatchCaseBatchBody
 			queryParam types.CreateBatchQueryParam
 		)
 		if err := c.ShouldBindJSON(&body); err != nil {

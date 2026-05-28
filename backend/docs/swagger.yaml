@@ -203,6 +203,22 @@ components:
       - tasks
       - type
       type: object
+    CaseBatchPatch:
+      properties:
+        project_code:
+          type: string
+        sequencing_experiments:
+          items:
+            $ref: '#/components/schemas/CaseSequencingExperimentBatch'
+          type: array
+          uniqueItems: false
+        submitter_case_id:
+          type: string
+      required:
+      - project_code
+      - sequencing_experiments
+      - submitter_case_id
+      type: object
     CaseEntity:
       description: Data for Case Entity Page
       properties:
@@ -558,24 +574,9 @@ components:
         submitter_sample_id:
           type: string
       required:
+      - aliquot
       - sample_organization_code
-      type: object
-    CaseSequencingExperimentPatch:
-      properties:
-        project_code:
-          type: string
-        sequencing_experiments:
-          items:
-            $ref: '#/components/schemas/CaseSequencingExperimentBatch'
-          minItems: 1
-          type: array
-          uniqueItems: false
-        submitter_case_id:
-          type: string
-      required:
-      - project_code
-      - sequencing_experiments
-      - submitter_case_id
+      - submitter_sample_id
       type: object
     CaseTask:
       properties:
@@ -1854,11 +1855,11 @@ components:
       - size
       - url
       type: object
-    PatchCaseSequencingExperimentBatchBody:
+    PatchCaseBatchBody:
       properties:
         cases:
           items:
-            $ref: '#/components/schemas/CaseSequencingExperimentPatch'
+            $ref: '#/components/schemas/CaseBatchPatch'
           minItems: 1
           type: array
           uniqueItems: false
@@ -3104,10 +3105,9 @@ paths:
   /cases/batch:
     patch:
       description: |-
-        Attach already-created sequencing experiments to already-created cases,
-        keyed by (project_code, submitter_case_id). The worker resolves each case and
-        experiment and inserts the case_has_sequencing_experiment links. A missing case
-        surfaces CASE-012; a missing experiment surfaces SEQ-007. It never creates the case.
+        Partially updates existing cases — see the request body for updatable fields.
+        Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found.
+        Array fields are appended, not replaced.
       operationId: patchCaseBatch
       parameters:
       - description: Dry Run
@@ -3120,7 +3120,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchCaseSequencingExperimentBatchBody'
+              $ref: '#/components/schemas/PatchCaseBatchBody'
         description: Attach Body
         required: true
       responses:
@@ -3150,7 +3150,7 @@ paths:
           description: Internal Server Error
       security:
       - bearerauth: []
-      summary: Attach sequencing experiments to existing cases (batch)
+      summary: Partially update existing cases (batch)
       tags:
       - cases
     post:

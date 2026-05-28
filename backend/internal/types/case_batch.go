@@ -55,9 +55,9 @@ type ObservationTextBatch struct {
 }
 
 type CaseSequencingExperimentBatch struct {
-	Aliquot                string `json:"aliquot,omitempty" toml:"aliquot"`
+	Aliquot                string `json:"aliquot" toml:"aliquot" binding:"required"`
 	SampleOrganizationCode string `json:"sample_organization_code" toml:"sample_organization_code" binding:"required"`
-	SubmitterSampleId      string `json:"submitter_sample_id,omitempty" toml:"submitter_sample_id"`
+	SubmitterSampleId      string `json:"submitter_sample_id" toml:"submitter_sample_id" binding:"required"`
 }
 
 type CaseTaskBatch struct {
@@ -88,12 +88,12 @@ type CreateCaseBatchBody struct {
 	Cases []*CaseBatch `json:"cases" toml:"cases" binding:"required,min=1,dive,required"`
 }
 
-type CaseSequencingExperimentPatch struct {
+type CaseBatchPatch struct {
 	ProjectCode           string                           `json:"project_code" toml:"project_code" binding:"required"`
 	SubmitterCaseId       string                           `json:"submitter_case_id" toml:"submitter_case_id" binding:"required"`
-	SequencingExperiments []*CaseSequencingExperimentBatch `json:"sequencing_experiments" toml:"sequencing_experiments" binding:"required,min=1,dive,required"`
+	SequencingExperiments []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive,required"`
 }
 
-type PatchCaseSequencingExperimentBatchBody struct {
-	Cases []*CaseSequencingExperimentPatch `json:"cases" toml:"cases" binding:"required,min=1,dive,required"`
+type PatchCaseBatchBody struct {
+	Cases []*CaseBatchPatch `json:"cases" toml:"cases" binding:"required,min=1,dive,required"`
 }

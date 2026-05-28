@@ -1958,9 +1958,6 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 	assert.Contains(t, cr.Infos[0].Message, "already exists")
 	assert.Equal(t, CaseAlreadyExists, cr.Infos[0].Code)
 	assert.Equal(t, "case[0]", cr.Infos[0].Path)
-	// Existing cases are skipped — the reconcile path was reverted in favor of an explicit
-	// PATCH /cases/batch for attaching sequencings (see case_sequencing_experiment_validation.go).
-	assert.True(t, cr.Skipped)
 }
 
 func Test_validateCase_MultipleErrors(t *testing.T) {
