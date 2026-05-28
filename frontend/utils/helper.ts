@@ -68,3 +68,19 @@ export function useSeqIdFromSearchParam(): number {
 
   return seqId;
 }
+
+/**
+ * Retrieve the selected task id from the search params.
+ * @returns the task id, or undefined when absent or not a number.
+ */
+export function useTaskIdFromSearchParam(): number | undefined {
+  const [searchParams] = useSearchParams();
+  const raw = searchParams.get('task_id');
+
+  if (raw == null || raw === '') {
+    return undefined;
+  }
+
+  const taskId = Number(raw);
+  return Number.isNaN(taskId) ? undefined : taskId;
+}

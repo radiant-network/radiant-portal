@@ -1,12 +1,11 @@
-import { CaseEntity, CaseTasksWithOccurrencesDataTypeEnum } from '@/api/api';
+import { CaseEntity } from '@/api/api';
 import { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
 import { useConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
-import { useFirstOccurrenceTaskId } from '@/components/hooks/use-first-occurrence-task-id';
 import { occurrencesApi } from '@/utils/api';
-import { useCaseIdFromParam } from '@/utils/helper';
+import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 import { isValidSeqId } from './libs/seq-id';
 import {
@@ -24,9 +23,9 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
   const config = useConfig();
   const caseId = useCaseIdFromParam();
   const appId = config.germline_cnv_occurrence.app_id;
-  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.GermlineCnv);
+  const taskId = useTaskIdFromSearchParam();
 
-  if (!isValidSeqId(seqId) || taskId === undefined) {
+  if (!isValidSeqId(seqId)) {
     return null;
   }
 
@@ -34,19 +33,23 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
     <QueryBuilder
       appId={appId}
       fetcher={{
-        list: async (params: IListInput) =>
-          occurrencesApi
+        list: async (params: IListInput) => {
+          if (taskId === undefined) return [];
+          return occurrencesApi
             .listGermlineCNVOccurrences(caseId, seqId, taskId, params.listBody)
-            .then(response => response.data),
-        count: async (params: ICountInput) =>
-          occurrencesApi
+            .then(response => response.data);
+        },
+        count: async (params: ICountInput) => {
+          if (taskId === undefined) return { count: 0 };
+          return occurrencesApi
             .countGermlineCNVOccurrences(caseId, seqId, taskId, params.countBody)
-            .then(response => response.data),
+            .then(response => response.data);
+        },
       }}
     >
       <QueryBuilderDataTable
         id={appId}
-        swrId={seqId}
+        swrId={`${seqId}-${taskId}`}
         columns={getGermlineCNVOccurrenceColumns({ t, caseEntity })}
         defaultColumnSettings={defaultGermlineCNVSettings}
         defaultPageSize={30}

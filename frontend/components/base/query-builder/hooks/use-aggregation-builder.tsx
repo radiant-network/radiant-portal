@@ -1,17 +1,10 @@
 import useSWR from 'swr';
 
-import {
-  type Aggregation,
-  AggregationBodyWithSqon,
-  CaseTasksWithOccurrencesDataTypeEnum,
-  Statistics,
-  StatisticsBodyWithSqon,
-} from '@/api/api';
+import { type Aggregation, AggregationBodyWithSqon, Statistics, StatisticsBodyWithSqon } from '@/api/api';
 import { useQBActiveSqon } from '@/components/base/query-builder/hooks/use-query-builder';
 import { ApplicationId } from '@/components/cores/applications-config';
-import { useFirstOccurrenceTaskId } from '@/components/hooks/use-first-occurrence-task-id';
 import { occurrencesApi } from '@/utils/api';
-import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
+import { useCaseIdFromParam, useSeqIdFromSearchParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 export interface IAggregationBuilder {
   aggregationBody?: AggregationBodyWithSqon;
@@ -82,7 +75,7 @@ export function useGermlineSNVAggregationBuilder({
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
-  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.GermlineSnv);
+  const taskId = useTaskIdFromSearchParam();
 
   const data: OccurrenceAggregationInput | null =
     taskId === undefined
@@ -115,7 +108,7 @@ export function useGermlineSNVAggregationStatistics({ field }: CNVAggregationBui
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
-  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.GermlineSnv);
+  const taskId = useTaskIdFromSearchParam();
 
   const data: OccurrenceStatisticsInput | null =
     taskId === undefined
@@ -150,7 +143,7 @@ export function useGermlineCNVAggregationBuilder({ field, size = 30 }: CNVAggreg
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
-  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.GermlineCnv);
+  const taskId = useTaskIdFromSearchParam();
 
   const data: OccurrenceAggregationInput | null =
     taskId === undefined
@@ -182,7 +175,7 @@ export function useGermlineCNVAggregationStatistics({ field }: CNVAggregationBui
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
-  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.GermlineCnv);
+  const taskId = useTaskIdFromSearchParam();
 
   const data: OccurrenceStatisticsInput | null =
     taskId === undefined
@@ -220,7 +213,7 @@ export function useSomaticSNVAggregationBuilder({
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
-  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.SomaticSnv);
+  const taskId = useTaskIdFromSearchParam();
 
   const data: OccurrenceAggregationInput | null =
     taskId === undefined
@@ -253,7 +246,7 @@ export function useSomaticSNVAggregationStatistics({ field }: CNVAggregationBuil
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
-  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.SomaticSnv);
+  const taskId = useTaskIdFromSearchParam();
 
   const data: OccurrenceStatisticsInput | null =
     taskId === undefined

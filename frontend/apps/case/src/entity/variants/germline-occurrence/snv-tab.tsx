@@ -1,13 +1,12 @@
-import { CaseEntity, CaseSequencingExperiment, CaseTasksWithOccurrencesDataTypeEnum } from '@/api/api';
+import { CaseEntity, CaseSequencingExperiment } from '@/api/api';
 import { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
 import { useConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
-import { useFirstOccurrenceTaskId } from '@/components/hooks/use-first-occurrence-task-id';
 import { getPatientClinicalInformation } from '@/components/lib/case-entity';
 import { occurrencesApi } from '@/utils/api';
-import { useCaseIdFromParam } from '@/utils/helper';
+import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 import { isValidSeqId } from './libs/seq-id';
 import SliderGermlineOccurrenceSheet from './sliders/slider-germline-occurrence-sheet';
@@ -28,9 +27,9 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
   const caseId = useCaseIdFromParam();
   const appId = config.germline_snv_occurrence.app_id;
   const patient = getPatientClinicalInformation(caseEntity, patientSelected);
-  const { taskId } = useFirstOccurrenceTaskId(caseId, seqId, CaseTasksWithOccurrencesDataTypeEnum.GermlineSnv);
+  const taskId = useTaskIdFromSearchParam();
 
-  if (!isValidSeqId(seqId) || taskId === undefined) {
+  if (!isValidSeqId(seqId)) {
     return null;
   }
 
@@ -38,19 +37,23 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
     <QueryBuilder
       appId={appId}
       fetcher={{
-        list: async (params: IListInput) =>
-          occurrencesApi
+        list: async (params: IListInput) => {
+          if (taskId === undefined) return [];
+          return occurrencesApi
             .listGermlineSNVOccurrences(caseId, seqId, taskId, params.listBody)
-            .then(response => response.data),
-        count: async (params: ICountInput) =>
-          occurrencesApi
+            .then(response => response.data);
+        },
+        count: async (params: ICountInput) => {
+          if (taskId === undefined) return { count: 0 };
+          return occurrencesApi
             .countGermlineSNVOccurrences(caseId, seqId, taskId, params.countBody)
-            .then(response => response.data),
+            .then(response => response.data);
+        },
       }}
     >
       <QueryBuilderDataTable
         id={appId}
-        swrId={seqId}
+        swrId={`${seqId}-${taskId}`}
         columns={getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId: patient?.patient_id })}
         defaultColumnSettings={defaultGermlineSNVSettings}
         defaultPageSize={30}

@@ -1,8 +1,19 @@
+import { formatDate } from 'date-fns';
 import { DotIcon } from 'lucide-react';
 
-import { CaseSequencingExperiment } from '@/api/api';
+import { CaseSequencingExperiment, TaskOccurrenceType } from '@/api/api';
 import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
+import { Badge } from '@/components/base/shadcn/badge';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/base/shadcn/select';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
@@ -54,6 +65,9 @@ type SequencingVariantFiltersProps = {
   isLoading: boolean;
   activeInterface: string;
   onActiveInterfaceChange: (value: string) => void;
+  tasks?: TaskOccurrenceType[];
+  selectedTaskId?: number;
+  onTaskChange?: (value: number) => void;
 };
 
 /**
@@ -72,10 +86,15 @@ function SequencingVariantFilters({
   onActiveInterfaceChange,
   handleChange,
   isLoading,
+  tasks = [],
+  selectedTaskId,
+  onTaskChange,
 }: SequencingVariantFiltersProps) {
   const { t } = useI18n();
 
   const selectedSequencingExperiment = sequencingExperiments.find(seqExp => seqExp.seq_id === selectedSeqId);
+  const selectedTask = tasks.find(task => task.id === selectedTaskId);
+  const latestTaskId = tasks[0]?.id; // the API returns tasks ordered by created_on DESC
 
   if (isLoading || sequencingExperiments.length === 0) {
     return (
@@ -140,6 +159,37 @@ function SequencingVariantFilters({
           ))}
         </SelectContent>
       </Select>
+      {/* Task select — shown only when multiple tasks are available */}
+      {tasks.length > 1 && (
+        <Select
+          value={selectedTaskId ? `${selectedTaskId}` : undefined}
+          onValueChange={value => onTaskChange?.(Number(value))}
+        >
+          <SelectTrigger className="min-w-[125px] max-w-[150px]" size="xs">
+            <SelectValue>
+              {selectedTask && formatDate(selectedTask.created_on, t('common.date.year_month_day'))}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent className="max-w-[200px]">
+            <SelectGroup>
+              <SelectLabel className="text-muted-foreground text-xs font-medium">
+                {t('case_entity.variants.filters.select_task_label')}
+              </SelectLabel>
+              <SelectSeparator />
+              {tasks.map(task => (
+                <SelectItem key={`task-${task.id}`} value={`${task.id}`}>
+                  <span className="inline-flex items-center gap-2">
+                    {formatDate(task.created_on, t('common.date.year_month_day'))}
+                    {task.id === latestTaskId && (
+                      <Badge variant="outline">{t('case_entity.variants.filters.latest')}</Badge>
+                    )}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      )}
       {selectedSequencingExperiment && selectedSequencingExperiment.relationship_to_proband !== 'proband' && (
         <AffectedStatusBadge status={selectedSequencingExperiment.affected_status_code as AffectedStatusProps} />
       )}
