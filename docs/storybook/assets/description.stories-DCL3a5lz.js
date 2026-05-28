@@ -1,0 +1,9 @@
+import{j as r}from"./iframe-CnZJoeJJ.js";import{S as t}from"./api-ok7Ado9G.js";import{D as s}from"./description-Cy9eDAGL.js";import{C as g,A as e}from"./applications-config-CA5Ya-5E.js";import{B as l}from"./chunk-UVKPFVEO-sCGE3aLV.js";import"./preload-helper-Dp1pzeXC.js";import"./i18n-GxkGN4Zu.js";const u={variant_entity:{app_id:e.variant_entity},germline_snv_occurrence:{app_id:e.germline_snv_occurrence,aggregations:[],saved_filter_type:t.GERMLINE_SNV_OCCURRENCE},germline_cnv_occurrence:{app_id:e.germline_cnv_occurrence,aggregations:[],saved_filter_type:t.GERMLINE_CNV_OCCURRENCE},somatic_snv_to_occurrence:{app_id:e.somatic_snv_to_occurrence,aggregations:[],saved_filter_type:t.SOMATIC_SNV_OCCURRENCE},somatic_snv_tn_occurrence:{app_id:e.somatic_snv_tn_occurrence,aggregations:[],saved_filter_type:t.SOMATIC_SNV_OCCURRENCE},somatic_cnv_to_occurrence:{app_id:e.somatic_cnv_to_occurrence,aggregations:[],saved_filter_type:t.SOMATIC_CNV_OCCURRENCE},admin:{admin_code:"admin",app_id:e.admin},portal:{name:"",navigation:{}}},x={title:"Preview/Description",component:s,args:{title:"Title",children:r.jsx("span",{children:"Children"})},decorators:[a=>r.jsx(l,{children:r.jsx(g,{config:u,children:r.jsx(a,{})})})]},n={args:{},render:a=>r.jsx(s,{...a})},o={args:{values:[]},render:a=>r.jsx(s,{...a})};var i,c,_;n.parameters={...n.parameters,docs:{...(i=n.parameters)==null?void 0:i.docs,source:{originalSource:`{
+  args: {},
+  render: args => <DescriptionSection {...args} />
+}`,...(_=(c=n.parameters)==null?void 0:c.docs)==null?void 0:_.source}}};var p,m,d;o.parameters={...o.parameters,docs:{...(p=o.parameters)==null?void 0:p.docs,source:{originalSource:`{
+  args: {
+    values: []
+  },
+  render: args => <DescriptionSection {...args} />
+}`,...(d=(m=o.parameters)==null?void 0:m.docs)==null?void 0:d.source}}};const y=["Default","Empty"];export{n as Default,o as Empty,y as __namedExportsOrder,x as default};
