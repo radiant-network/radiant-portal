@@ -98,7 +98,8 @@ func Test_GetSequencingExperimentByAliquotAndSubmitterSample(t *testing.T) {
 			ExperimentalStrategyCode:     "wgs",
 			SequencingReadTechnologyCode: "short_read",
 			CaptureKit:                   "SureSelect Custom DNA Target",
-			SequencingLabID:              6,
+			SequencingLabCode:            "CQGC",
+			TenantCode:                   "radiant",
 			RunName:                      "1617",
 			RunAlias:                     "A00516_0169",
 		}
@@ -112,7 +113,7 @@ func Test_GetSequencingExperimentByAliquotAndSubmitterSample(t *testing.T) {
 		assert.Equal(t, seqExp.ExperimentalStrategyCode, expected.ExperimentalStrategyCode)
 		assert.Equal(t, seqExp.SequencingReadTechnologyCode, expected.SequencingReadTechnologyCode)
 		assert.Equal(t, seqExp.CaptureKit, expected.CaptureKit)
-		assert.Equal(t, seqExp.SequencingLabID, expected.SequencingLabID)
+		assert.Equal(t, seqExp.SequencingLabCode, expected.SequencingLabCode)
 		assert.Equal(t, seqExp.RunName, expected.RunName)
 		assert.Equal(t, seqExp.RunAlias, expected.RunAlias)
 	})

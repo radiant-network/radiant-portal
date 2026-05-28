@@ -1,8 +1,8 @@
 package types
 
 type Organization struct {
-	ID           int
-	Code         string
+	Code         string `gorm:"primaryKey"`
+	TenantCode   string `gorm:"primaryKey"`
 	Name         string
 	CategoryCode string
 	Category     OrganizationCategory `gorm:"foreignKey:code;references:CategoryCode"`

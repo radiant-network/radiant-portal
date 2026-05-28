@@ -15,7 +15,6 @@ type PatientsRepository struct {
 }
 
 type PatientsDAO interface {
-	GetPatientBySubmitterPatientId(organizationId int, submitterPatientId string) (*Patient, error)
 	GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*Patient, error)
 	CreatePatient(newPatient *Patient) error
 }
@@ -24,27 +23,11 @@ func NewPatientsRepository(db *gorm.DB) *PatientsRepository {
 	return &PatientsRepository{db: db}
 }
 
-func (r *PatientsRepository) GetPatientBySubmitterPatientId(organizationId int, submitterPatientId string) (*Patient, error) {
-	var patient Patient
-	tx := r.db.
-		Table("patient").
-		Where("submitter_patient_id = ? and organization_id = ?", submitterPatientId, organizationId)
-	if err := tx.First(&patient).Error; err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("error retrieve patient its ID: %w", err)
-		} else {
-			return nil, nil
-		}
-	}
-	return &patient, nil
-}
-
 func (r *PatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*Patient, error) {
 	var patient Patient
 	tx := r.db.
 		Table("patient").
-		Joins("JOIN organization org ON org.id = patient.organization_id").
-		Where("patient.submitter_patient_id = ? AND org.code = ?", submitterPatientId, organizationCode)
+		Where("submitter_patient_id = ? AND organization_code = ?", submitterPatientId, organizationCode)
 	if err := tx.First(&patient).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieve patient its ID: %w", err)

@@ -14,14 +14,6 @@ import (
 
 type mockOrgDAO struct{ mock.Mock }
 
-func (m *mockOrgDAO) GetOrganizationById(id int) (*types.Organization, error) {
-	args := m.Called(id)
-	if s, ok := args.Get(0).(*types.Organization); ok {
-		return s, args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-
 func (m *mockOrgDAO) GetOrganizationByCode(code string) (*types.Organization, error) {
 	args := m.Called(code)
 	if org, ok := args.Get(0).(*types.Organization); ok {
@@ -42,14 +34,6 @@ func (m *mockSampleDAO) GetTypeCodes() ([]string, error) {
 
 func (m *mockSampleDAO) GetSampleById(id int) (*types.Sample, error) {
 	args := m.Called(id)
-	if s, ok := args.Get(0).(*types.Sample); ok {
-		return s, args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-
-func (m *mockSampleDAO) GetSampleBySubmitterSampleId(orgID int, submitterID string) (*types.Sample, error) {
-	args := m.Called(orgID, submitterID)
 	if s, ok := args.Get(0).(*types.Sample); ok {
 		return s, args.Error(1)
 	}
@@ -284,10 +268,10 @@ func Test_ValidateRunDateField_FutureDateAddsError(t *testing.T) {
 
 func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 	r := newBaseRecord()
-	seqExpId := 70
+	seqLab := "LAB"
 	sampleId := 10
 	r.SampleID = &sampleId
-	r.SequencingLabID = &seqExpId
+	r.SequencingLabCode = &seqLab
 	r.SequencingExperiment.SubmitterSampleId = "S1"
 	r.SequencingExperiment.Aliquot = "A1"
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
@@ -296,18 +280,17 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 	seqDAO.On("GetSequencingExperimentByAliquot", "A1").
 		Return([]types.SequencingExperiment{
 			{
-				ID:              70,
-				Aliquot:         "A1",
-				SampleID:        10,
-				SequencingLabID: 70,
+				ID:                70,
+				Aliquot:           "A1",
+				SampleID:          10,
+				SequencingLabCode: "LAB",
 			},
 		}, nil)
 
 	orgDAO := &mockOrgDAO{}
-	orgDAO.On("GetOrganizationById", 70).Return(&types.Organization{Code: "ORG"}, nil)
 
 	sampleDAO := &mockSampleDAO{}
-	sampleDAO.On("GetSampleById", 10).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationId: 70}, nil)
+	sampleDAO.On("GetSampleById", 10).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationCode: "ORG", TenantCode: "radiant"}, nil)
 
 	r.Context = &batchval.BatchValidationContext{
 		SeqExpRepo: seqDAO,
@@ -344,7 +327,7 @@ func Test_ValidateSequencingLabCode_UnknownOrg_AddsError(t *testing.T) {
 }
 
 func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarnings(t *testing.T) {
-	seqLab := 5
+	seqLab := "LAB"
 	sampleId := 99
 	r := newBaseRecord()
 	r.SequencingExperiment.Aliquot = "A1"
@@ -359,14 +342,14 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 	now := time.Now().Add(-time.Hour)
 	r.SequencingExperiment.RunDate = (*types.DateRFC3339)(&now)
 	r.SequencingExperiment.CaptureKit = "CK1"
-	r.SequencingLabID = &seqLab
+	r.SequencingLabCode = &seqLab
 	r.SampleID = &sampleId
 
 	seqDAO := &mockSeqExpDAO{}
 	seqDAO.On("GetSequencingExperimentByAliquot", "A1").
 		Return([]types.SequencingExperiment{
 			{
-				SequencingLabID:              5,
+				SequencingLabCode:            "LAB",
 				SampleID:                     1,
 				StatusCode:                   "draft",
 				ExperimentalStrategyCode:     "wxs",
@@ -380,10 +363,9 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 		}, nil)
 
 	orgDAO := &mockOrgDAO{}
-	orgDAO.On("GetOrganizationById", 70).Return(&types.Organization{Code: "ORG", ID: 70}, nil)
 
 	sampleDAO := &mockSampleDAO{}
-	sampleDAO.On("GetSampleById", 1).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationId: 70}, nil)
+	sampleDAO.On("GetSampleById", 1).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationCode: "ORG", TenantCode: "radiant"}, nil)
 
 	r.Context = &batchval.BatchValidationContext{
 		SeqExpRepo: seqDAO,
@@ -407,15 +389,9 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 }
 
 func Test_ValidateUnknownSampleForOrganizationCode_Nil_AddsError(t *testing.T) {
-	orgId := 1
 	r := newBaseRecord()
-	r.SubmitterOrganizationID = &orgId
 	r.SequencingExperiment.SampleOrganizationCode = "ORG"
 	r.SequencingExperiment.SubmitterSampleId = "S1"
-	sampleDAO := &mockSampleDAO{}
-
-	sampleDAO.On("GetSampleBySubmitterSampleId", 1, "S1").
-		Return((*types.Sample)(nil), nil)
 
 	err := r.validateUnknownSampleForOrganizationCode()
 
@@ -443,11 +419,11 @@ func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
 	}
 
 	orgDAO.On("GetOrganizationByCode", "LAB1").
-		Return(&types.Organization{ID: 2, Code: "LAB1"}, nil)
+		Return(&types.Organization{Code: "LAB1"}, nil)
 	orgDAO.On("GetOrganizationByCode", "ORG").
-		Return(&types.Organization{ID: 1, Code: "ORG"}, nil)
+		Return(&types.Organization{Code: "ORG"}, nil)
 	orgDAO.On("GetOrganizationById", 1).
-		Return(&types.Organization{Code: "ORG", ID: 1}, nil)
+		Return(&types.Organization{Code: "ORG"}, nil)
 
 	sampleDAO.On("GetSampleBySubmitterSampleId", 1, "S1").
 		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
@@ -474,8 +450,8 @@ func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 0, record.Index)
 	assert.Equal(t, 10, *record.SampleID)
-	assert.Equal(t, 1, *record.SubmitterOrganizationID)
-	assert.Equal(t, 2, *record.SequencingLabID)
+	assert.Equal(t, "ORG", *record.SubmitterOrganizationCode)
+	assert.Equal(t, "LAB1", *record.SequencingLabCode)
 	assert.Empty(t, record.Errors)
 }
 
@@ -497,11 +473,11 @@ func Test_ValidateSequencingExperimentBatch_DuplicateInBatch_AddsError(t *testin
 	seq2 := seq1
 
 	orgDAO.On("GetOrganizationByCode", "LAB1").
-		Return(&types.Organization{ID: 2, Code: "LAB1"}, nil).Twice()
+		Return(&types.Organization{Code: "LAB1"}, nil).Twice()
 	orgDAO.On("GetOrganizationByCode", "ORG").
-		Return(&types.Organization{ID: 1, Code: "ORG"}, nil).Twice()
+		Return(&types.Organization{Code: "ORG"}, nil).Twice()
 	orgDAO.On("GetOrganizationById", 1).
-		Return(&types.Organization{Code: "ORG", ID: 1}, nil)
+		Return(&types.Organization{Code: "ORG"}, nil)
 
 	sampleDAO.On("GetSampleBySubmitterSampleId", 1, "S1").
 		Return(&types.Sample{ID: 10}, nil).Twice()
@@ -556,10 +532,10 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 	// Mocked orgs and sample
 	orgDAO.
 		On("GetOrganizationByCode", "ORG").
-		Return(&types.Organization{ID: 1, Code: "ORG"}, nil)
+		Return(&types.Organization{Code: "ORG"}, nil)
 	orgDAO.
 		On("GetOrganizationByCode", "LAB1").
-		Return(&types.Organization{ID: 2, Code: "LAB1"}, nil)
+		Return(&types.Organization{Code: "LAB1"}, nil)
 
 	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
 		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
@@ -567,12 +543,12 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 	err := r.preFetchValidationInfo()
 
 	assert.NoError(t, err)
-	assert.NotNil(t, r.SubmitterOrganizationID)
-	assert.Equal(t, 1, *r.SubmitterOrganizationID)
+	assert.NotNil(t, r.SubmitterOrganizationCode)
+	assert.Equal(t, "ORG", *r.SubmitterOrganizationCode)
 	assert.NotNil(t, r.SampleID)
 	assert.Equal(t, 10, *r.SampleID)
-	assert.NotNil(t, r.SequencingLabID)
-	assert.Equal(t, 2, *r.SequencingLabID)
+	assert.NotNil(t, r.SequencingLabCode)
+	assert.Equal(t, "LAB1", *r.SequencingLabCode)
 
 	orgDAO.AssertExpectations(t)
 	sampleDAO.AssertExpectations(t)
@@ -606,14 +582,14 @@ func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
 		Return(nil, nil)
 	orgDAO.
 		On("GetOrganizationByCode", "LAB1").
-		Return(&types.Organization{ID: 2}, nil)
+		Return(&types.Organization{Code: "LAB1"}, nil)
 
 	err := r.preFetchValidationInfo()
 
 	assert.NoError(t, err)
-	assert.Nil(t, r.SubmitterOrganizationID)
+	assert.Nil(t, r.SubmitterOrganizationCode)
 	assert.Nil(t, r.SampleID)
-	assert.NotNil(t, r.SequencingLabID)
+	assert.NotNil(t, r.SequencingLabCode)
 
 	orgDAO.AssertExpectations(t)
 }
@@ -643,7 +619,7 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 	// Mocked orgs and sample
 	orgDAO.
 		On("GetOrganizationByCode", "ORG").
-		Return(&types.Organization{ID: 1, Code: "ORG"}, nil)
+		Return(&types.Organization{Code: "ORG"}, nil)
 	orgDAO.
 		On("GetOrganizationByCode", "LAB1").
 		Return(nil, nil)
@@ -654,11 +630,11 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 	err := r.preFetchValidationInfo()
 
 	assert.NoError(t, err)
-	assert.NotNil(t, r.SubmitterOrganizationID)
-	assert.Equal(t, 1, *r.SubmitterOrganizationID)
+	assert.NotNil(t, r.SubmitterOrganizationCode)
+	assert.Equal(t, "ORG", *r.SubmitterOrganizationCode)
 	assert.NotNil(t, r.SampleID)
 	assert.Equal(t, 10, *r.SampleID)
-	assert.Nil(t, r.SequencingLabID)
+	assert.Nil(t, r.SequencingLabCode)
 
 	orgDAO.AssertExpectations(t)
 	sampleDAO.AssertExpectations(t)
@@ -679,10 +655,10 @@ func Test_PreFetchValidationInfo_SampleLookupError_Propagates(t *testing.T) {
 
 	orgDAO.
 		On("GetOrganizationByCode", "LAB1").
-		Return(&types.Organization{ID: 1, Code: "LAB1"}, nil)
+		Return(&types.Organization{Code: "LAB1"}, nil)
 	orgDAO.
 		On("GetOrganizationByCode", "ORG").
-		Return(&types.Organization{ID: 2, Code: "ORG"}, nil)
+		Return(&types.Organization{Code: "ORG"}, nil)
 	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
 		Return(nil, errors.New("sample not found"))
 

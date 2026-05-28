@@ -11,14 +11,6 @@ import (
 
 type MockOrganizationRepository struct {
 	GetOrganizationByCodeFunc func(code string) (*types.Organization, error)
-	GetOrganizationByIdFunc   func(id int) (*types.Organization, error)
-}
-
-func (m *MockOrganizationRepository) GetOrganizationById(id int) (*types.Organization, error) {
-	if m.GetOrganizationByIdFunc != nil {
-		return m.GetOrganizationByIdFunc(id)
-	}
-	return nil, nil
 }
 
 func (m *MockOrganizationRepository) GetOrganizationByCode(code string) (*types.Organization, error) {
@@ -39,27 +31,15 @@ func (m *MockPatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(organi
 	return nil, nil
 }
 
-func (m *MockPatientsRepository) GetPatientBySubmitterPatientId(organizationId int, submitterPatientId string) (*types.Patient, error) {
-	return nil, nil
-}
-
 func (m *MockPatientsRepository) CreatePatient(newPatient *types.Patient) error { return nil }
 
 type MockSamplesRepository struct {
-	GetSampleBySubmitterSampleIdFunc           func(organizationId int, submitterSampleId string) (*types.Sample, error)
 	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(organizationCode string, submitterSampleId string) (*types.Sample, error)
 	CreateSampleFunc                           func(newSample *types.Sample) (*types.Sample, error)
 	GetTypeCodesFunc                           func() ([]string, error)
 }
 
 func (m *MockSamplesRepository) GetSampleById(id int) (*types.Sample, error) {
-	return nil, nil
-}
-
-func (m *MockSamplesRepository) GetSampleBySubmitterSampleId(organizationId int, submitterSampleId string) (*types.Sample, error) {
-	if m.GetSampleBySubmitterSampleIdFunc != nil {
-		return m.GetSampleBySubmitterSampleIdFunc(organizationId, submitterSampleId)
-	}
 	return nil, nil
 }
 
@@ -287,7 +267,7 @@ func Test_ValidateParentSample_DifferentPatient(t *testing.T) {
 }
 
 func Test_ValidateSamplesBatch(t *testing.T) {
-	org := &types.Organization{ID: 1, Code: "CHUSJ"}
+	org := &types.Organization{Code: "CHUSJ", TenantCode: "radiant"}
 	patient := &types.Patient{ID: 10, SubmitterPatientId: "P1"}
 	existingSampleInDb := &types.Sample{SubmitterSampleId: "S2", TypeCode: "blood", PatientID: 10, HistologyCode: "normal"}
 	parentInDb := &types.Sample{SubmitterSampleId: "P-DB", PatientID: 10}
@@ -295,12 +275,6 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 	mockOrgRepo := &MockOrganizationRepository{
 		GetOrganizationByCodeFunc: func(code string) (*types.Organization, error) {
 			if code == "CHUSJ" {
-				return org, nil
-			}
-			return nil, nil
-		},
-		GetOrganizationByIdFunc: func(id int) (*types.Organization, error) {
-			if id == org.ID {
 				return org, nil
 			}
 			return nil, nil
@@ -315,17 +289,6 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 		},
 	}
 	mockSampleRepo := &MockSamplesRepository{
-		GetSampleBySubmitterSampleIdFunc: func(orgId int, sampleId string) (*types.Sample, error) {
-			if orgId == org.ID {
-				switch sampleId {
-				case "S2":
-					return existingSampleInDb, nil
-				case "P-DB":
-					return parentInDb, nil
-				}
-			}
-			return nil, nil
-		},
 		GetSampleByOrgCodeAndSubmitterSampleIdFunc: func(orgCode, sampleId string) (*types.Sample, error) {
 			if orgCode == "CHUSJ" {
 				switch sampleId {

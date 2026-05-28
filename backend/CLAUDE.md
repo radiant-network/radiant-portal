@@ -70,9 +70,31 @@ Middleware stack (in order): CORS → Gzip → request logging → Keycloak logg
 
 ## Authorization
 
-Keycloak is the sole authorization provider: RBAC via JWT claims (`sub`, `azp`, `resource_access`). The `data_manager` role gates batch endpoints.
+Keycloak is the sole authentication provider: JWT claims (`sub`, `azp`, `resource_access`). The `data_manager` role gates batch endpoints.
 
 Auth utilities live in `internal/utils/auth.go` (`KeycloakAuth` interface).
+
+### Multi-tenancy authorization model (`auth_db`)
+
+Authorization is **data**, not a separate service. Migration `000009_init_auth_multi_tenancy.up.sql` adds the model as 8 PostgreSQL tables (in `public`; the ADR's `auth_db.*` is the logical name, federated into StarRocks as `radiant_jdbc.public.*`). See `docs/adr/multi-tenancy-security.md` §5.
+
+Identifiers are **varchar `code` natural keys** — no integer surrogate ids — so every reference column is `*_code`. Users are keyed by **`email`** (the one identifier known at invite time, IdP-agnostic); `user_id uuid` (the Keycloak `sub`) is a nullable attribute filled on first login — same column name used by `saved_filter` / `user_preference` / `user_set` / `occurrence_note`.
+
+| Table | Key | Purpose |
+|---|---|---|
+| `tenant` | `code` | Tenant catalog (e.g. `radiant`) |
+| `organization` | `(code, tenant_code)` | Orgs, each belonging to one tenant (pre-existing table; `id` dropped, `tenant_code` added) |
+| `users` | `email` | Identity registry; `user_id uuid` (Keycloak sub) nullable until first login |
+| `role` | `(tenant_code, code)` | Per-tenant role catalog |
+| `action` | `code` | Global action catalog; `scope` ∈ {`org`,`tenant`} |
+| `role_action` | `(tenant_code, role_code, action_code)` | Role → action mapping; FK to `role` `ON DELETE CASCADE` |
+| `user_role` | `(email, tenant_code, org_code, role_code)` | Single grant table; `org_code` is nullable — `NULL` = not org-scoped (tenant-wide grant), `'*'` = all orgs in tenant, specific code = that org. Uniqueness enforced by two partial indexes (one for non-NULL `org_code`, one for NULL). |
+
+The child clinical tables (`cases`, `patient`, `sample`, `sequencing_experiment`) reference `organization(code, tenant_code)` via compound FKs; StarRocks federation joins are `ON x.<>_code = org.code AND x.tenant_code = org.tenant_code`.
+
+**Seeded** (idempotent, `ON CONFLICT DO NOTHING`): the `radiant` default tenant + 8 actions (`can_read_pii`, `can_interpret_variant`, `can_comment_variant`, `can_flag_variant`, `can_download_file`, `can_ingest_data`, `can_search_case`, `can_view_kb`). No default roles — tenants define their own. User backfill is out of scope.
+
+Until per-tenant API routing lands, batch-ingested records are attached to the default tenant via `DefaultTenantCode = "radiant"` in `cmd/worker/case_validation.go` (see its `TODO(multi-tenant)`).
 
 ## Worker
 

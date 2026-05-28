@@ -379,7 +379,7 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 					SexCode:                "male",
 					LifeStatusCode:         "alive",
 				},
-				OrganizationId: 1,
+				OrganizationCode: "CHOP",
 			},
 			{
 				Patient: types.PatientBatch{
@@ -388,7 +388,7 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 					SexCode:                "male",
 					LifeStatusCode:         "alive",
 				},
-				OrganizationId: 99999, // Non-existent organization to trigger foreign key violation
+				OrganizationCode: "UNKNOWN-ORG", // Non-existent organization to trigger foreign key violation
 			},
 		}
 
@@ -399,7 +399,7 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 
 		// Verify that no patient records were inserted due to rollback
 		var countPatient int64
-		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_id = ?", "id2", 1).Count(&countPatient).Error
+		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_code = ?", "id2", "CHOP").Count(&countPatient).Error
 		if countPatientErr != nil {
 			t.Fatal("failed to count patient :", countPatientErr)
 		}

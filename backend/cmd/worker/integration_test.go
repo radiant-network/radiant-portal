@@ -87,7 +87,7 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Errors, 0)
 
 		var countPatient int64
-		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
+		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_code = ?", "MRN-TEST-123", "CHOP").Count(&countPatient).Error
 		if countPatientErr != nil {
 			t.Fatal("failed to count patient :", countPatientErr)
 		}
@@ -187,7 +187,7 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Errors, 1)
 
 		var countPatient int64
-		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
+		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_code = ?", "MRN-TEST-123", "CHOP").Count(&countPatient).Error
 		if countPatientErr != nil {
 			t.Fatal("failed to count patient :", countPatientErr)
 		}
@@ -298,7 +298,7 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Errors, 0)
 
 		var countPatient int64
-		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_id = ?", "MRN-TEST-123", 1).Count(&countPatient).Error
+		countPatientErr := db.Table("patient").Where("submitter_patient_id = ? AND organization_code = ?", "MRN-TEST-123", "CHOP").Count(&countPatient).Error
 		if countPatientErr != nil {
 			t.Fatal("failed to count patient :", countPatientErr)
 		}
@@ -348,7 +348,7 @@ func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Errors, 0)
 
 		var countSample int64
-		countSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_id = ?", "SAMPLE-001", 2).Count(&countSample).Error
+		countSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_code = ?", "SAMPLE-001", "UCSF").Count(&countSample).Error
 		if countSampleErr != nil {
 			t.Fatal("failed to count sample:", countSampleErr)
 		}
@@ -396,7 +396,7 @@ func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Errors, 0)
 
 		var countSample int64
-		countSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_id = 3", "SAMPLE-NEW-001").Count(&countSample).Error
+		countSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_code = 'CHUSJ'", "SAMPLE-NEW-001").Count(&countSample).Error
 		if countSampleErr != nil {
 			t.Fatal("failed to count sample:", countSampleErr)
 		}
@@ -407,8 +407,8 @@ func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
 func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		db.Exec(`
-            INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_id, patient_id)
-            VALUES ('SAMPLE-EXISTS', 'dna', 'blood', 'normal', 3, 1)
+            INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_code, tenant_code, patient_id)
+            VALUES ('SAMPLE-EXISTS', 'dna', 'blood', 'normal', 'CHUSJ', 'radiant', 1)
         `)
 
 		payload := `[
@@ -450,8 +450,8 @@ func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
 func Test_ProcessBatch_Sample_Existing_Different_Field_Warning(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		db.Exec(`
-            INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_id, patient_id)
-            VALUES ('SAMPLE-DIFF', 'dna', 'liver', 'normal', 3, 1)
+            INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_code, tenant_code, patient_id)
+            VALUES ('SAMPLE-DIFF', 'dna', 'liver', 'normal', 'CHUSJ', 'radiant', 1)
         `)
 
 		payload := `[
@@ -606,17 +606,17 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Warnings, 0)
 
 		var childSample repository.Sample
-		childSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_id = ?", "SAMPLE-CHILD", 3).First(&childSample).Error
+		childSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_code = ?", "SAMPLE-CHILD", "CHUSJ").First(&childSample).Error
 		if childSampleErr != nil {
 			t.Fatal("failed to retrieve child sample:", childSampleErr)
 		}
 		assert.Equal(t, "SAMPLE-CHILD", childSample.SubmitterSampleId)
 		assert.Equal(t, 1, childSample.PatientID)
-		assert.Equal(t, 3, childSample.OrganizationId)
+		assert.Equal(t, "CHUSJ", childSample.OrganizationCode)
 		assert.NotNil(t, childSample.ParentSampleID)
 
 		var parentSample repository.Sample
-		parentSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_id = ?", "SAMPLE-PARENT", 3).First(&parentSample).Error
+		parentSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_code = ?", "SAMPLE-PARENT", "CHUSJ").First(&parentSample).Error
 		if parentSampleErr != nil {
 			t.Fatal("failed to retrieve parent sample:", parentSampleErr)
 		}
@@ -665,13 +665,13 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
 		assert.Len(t, resultBatch.Report.Errors, 0)
 
 		var childSample repository.Sample
-		childSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_id = ?", "SAMPLE-CHILD-DB-PARENT", 6).First(&childSample).Error
+		childSampleErr := db.Table("sample").Where("submitter_sample_id = ? AND organization_code = ?", "SAMPLE-CHILD-DB-PARENT", "CQGC").First(&childSample).Error
 		if childSampleErr != nil {
 			t.Fatal("failed to retrieve child sample:", childSampleErr)
 		}
 		assert.Equal(t, "SAMPLE-CHILD-DB-PARENT", childSample.SubmitterSampleId)
 		assert.Equal(t, 1, childSample.PatientID)
-		assert.Equal(t, 6, childSample.OrganizationId)
+		assert.Equal(t, "CQGC", childSample.OrganizationCode)
 		assert.NotNil(t, childSample.ParentSampleID)
 		assert.Equal(t, 63, *childSample.ParentSampleID)
 	})
@@ -719,8 +719,8 @@ func Test_ProcessBatch_Sample_Invalid_Patient_For_Parent_Sample(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		// Insert parent sample for a different patient
 		db.Exec(`
-            INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_id, patient_id)
-            VALUES ('SAMPLE-PARENT-OTHER', 'dna', 'blood', 'normal', 3, 2)
+            INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_code, tenant_code, patient_id)
+            VALUES ('SAMPLE-PARENT-OTHER', 'dna', 'blood', 'normal', 'CHUSJ', 'radiant', 2)
         `)
 
 		payload := `[
@@ -1014,7 +1014,7 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 		assert.Equal(t, "wgs", seqExp.ExperimentalStrategyCode)
 		assert.Equal(t, "short_read", seqExp.SequencingReadTechnologyCode)
 		assert.Equal(t, "illumina", seqExp.PlatformCode)
-		assert.Equal(t, 3, seqExp.SequencingLabID)
+		assert.Equal(t, "CHUSJ", seqExp.SequencingLabCode)
 		assert.Equal(t, "Agilent V6", seqExp.CaptureKit)
 		assert.Equal(t, "RUN-001", seqExp.RunAlias)
 		expectedRunDate, _ := time.Parse(time.RFC3339, "2020-01-01T00:00:00Z")

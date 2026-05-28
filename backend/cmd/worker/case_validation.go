@@ -18,6 +18,11 @@ import (
 const TextMaxLength = 100
 const NoteMaxLength = 1000
 
+// DefaultTenantCode is the single tenant every batch-ingested record is attached to.
+// TODO(multi-tenant): once the REST API is split per tenant (path prefix), derive the
+// tenant from the request context instead of hardcoding it here.
+const DefaultTenantCode = "radiant"
+
 // Regular expressions for external IDs (Ex: SubmitterPatientId, JHN).
 const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
 
@@ -148,13 +153,13 @@ func NewStorageContext(db *gorm.DB) *StorageContext {
 
 type CaseValidationRecord struct {
 	batchval.BaseValidationRecord
-	Case                   types.CaseBatch
-	CaseID                 *int
-	ProjectID              *int
-	SubmitterCaseID        string
-	AnalysisCatalogID      *int
-	OrderingOrganizationID *int
-	DiagnosisLabID         *int
+	Case                       types.CaseBatch
+	CaseID                     *int
+	ProjectID                  *int
+	SubmitterCaseID            string
+	AnalysisCatalogID          *int
+	OrderingOrganizationExists bool
+	DiagnosisLabExists         bool
 
 	// Codes
 	StatusCodes                       []string
@@ -373,21 +378,26 @@ func (r *CaseValidationRecord) fetchAnalysisCatalog() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchOrganizations() error {
-	org, err := r.Cache.GetOrganizationByCode(r.Case.OrderingOrganizationCode)
-	if err != nil {
-		return fmt.Errorf("get organization by code %q: %w", r.Case.OrderingOrganizationCode, err)
-	}
-	if org != nil {
-		r.OrderingOrganizationID = &org.ID
+// resolveOrganizations records whether the case's ordering organization and
+// diagnosis lab codes refer to existing organizations. The codes themselves
+// come straight from the batch payload; this only records existence so
+// validateCase can emit a friendly error before the (code, tenant_code) FK
+// would reject the insert.
+func (r *CaseValidationRecord) resolveOrganizations() error {
+	if r.Case.OrderingOrganizationCode != "" {
+		org, err := r.Cache.GetOrganizationByCode(r.Case.OrderingOrganizationCode)
+		if err != nil {
+			return fmt.Errorf("get organization by code %q: %w", r.Case.OrderingOrganizationCode, err)
+		}
+		r.OrderingOrganizationExists = org != nil
 	}
 
-	diagnosisLabOrg, err := r.Cache.GetOrganizationByCode(r.Case.DiagnosticLabCode)
-	if err != nil {
-		return fmt.Errorf("get organization by code %q: %w", r.Case.DiagnosticLabCode, err)
-	}
-	if diagnosisLabOrg != nil {
-		r.DiagnosisLabID = &diagnosisLabOrg.ID
+	if r.Case.DiagnosticLabCode != "" {
+		diagnosisLabOrg, err := r.Cache.GetOrganizationByCode(r.Case.DiagnosticLabCode)
+		if err != nil {
+			return fmt.Errorf("get organization by code %q: %w", r.Case.DiagnosticLabCode, err)
+		}
+		r.DiagnosisLabExists = diagnosisLabOrg != nil
 	}
 	return nil
 }
@@ -532,7 +542,7 @@ func (cr *CaseValidationRecord) fetchValidationInfos() error {
 	if err := cr.fetchAnalysisCatalog(); err != nil {
 		return fmt.Errorf("failed to resolve analysis catalog: %w", err)
 	}
-	if err := cr.fetchOrganizations(); err != nil {
+	if err := cr.resolveOrganizations(); err != nil {
 		return fmt.Errorf("failed to resolve organizations: %w", err)
 	}
 	if err := cr.fetchPatients(); err != nil {
@@ -888,7 +898,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 		message := fmt.Sprintf("Project %s for case %d does not exist.", cr.Case.ProjectCode, cr.Index)
 		cr.AddErrors(message, CaseUnknownProject, path) // CASE-003
 	}
-	if cr.Case.DiagnosticLabCode != "" && cr.DiagnosisLabID == nil {
+	if !cr.DiagnosisLabExists {
 		message := fmt.Sprintf("Diagnostic lab %q for case %d does not exist.", cr.Case.DiagnosticLabCode, cr.Index)
 		cr.AddErrors(message, CaseUnknownDiagnosticLab, path) // CASE-004
 	}
@@ -896,7 +906,7 @@ func (cr *CaseValidationRecord) validateCase() error {
 		message := fmt.Sprintf("Analysis %q for case %d does not exist.", cr.Case.AnalysisCode, cr.Index)
 		cr.AddErrors(message, CaseUnknownAnalysisCode, path) // CASE-005
 	}
-	if cr.Case.OrderingOrganizationCode != "" && cr.OrderingOrganizationID == nil {
+	if !cr.OrderingOrganizationExists {
 		message := fmt.Sprintf("Ordering organization %q for case %d does not exist.", cr.Case.OrderingOrganizationCode, cr.Index)
 		cr.AddErrors(message, CaseUnknownOrderingOrganization, path) // CASE-006
 	}
@@ -1327,12 +1337,12 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 		return fmt.Errorf("analysis catalog ID is nil for case %q", cr.Case.SubmitterCaseId)
 	}
 
-	if cr.Case.OrderingOrganizationCode != "" && cr.OrderingOrganizationID == nil {
-		return fmt.Errorf("ordering organization ID is nil for case %q", cr.Case.SubmitterCaseId)
+	if !cr.OrderingOrganizationExists {
+		return fmt.Errorf("ordering organization is missing or unknown for case %q", cr.Case.SubmitterCaseId)
 	}
 
-	if cr.Case.DiagnosticLabCode != "" && cr.DiagnosisLabID == nil {
-		return fmt.Errorf("diagnosis lab ID is nil for case %d", cr.Index)
+	if !cr.DiagnosisLabExists {
+		return fmt.Errorf("diagnosis lab is missing or unknown for case %d", cr.Index)
 	}
 
 	proband, err := cr.getProbandFromPatients()
@@ -1344,26 +1354,22 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 	}
 
 	c := types.Case{
-		ProbandID:            proband.ID,
-		ProjectID:            *cr.ProjectID,
-		AnalysisCatalogID:    *cr.AnalysisCatalogID,
-		CaseTypeCode:         cr.Case.Type,
-		CaseCategoryCode:     cr.Case.CategoryCode,
-		PriorityCode:         cr.Case.PriorityCode,
-		StatusCode:           cr.Case.StatusCode,
-		ResolutionStatusCode: cr.Case.ResolutionStatusCode,
-		PrimaryCondition:     cr.Case.PrimaryConditionValue,
-		ConditionCodeSystem:  cr.Case.PrimaryConditionCodeSystem,
-		OrderingPhysician:    cr.Case.OrderingPhysician,
-		SubmitterCaseID:      cr.Case.SubmitterCaseId,
-		Note:                 cr.Case.Note,
-	}
-
-	if cr.OrderingOrganizationID != nil {
-		c.OrderingOrganizationID = cr.OrderingOrganizationID
-	}
-	if cr.DiagnosisLabID != nil {
-		c.DiagnosisLabID = cr.DiagnosisLabID
+		ProbandID:                proband.ID,
+		ProjectID:                *cr.ProjectID,
+		AnalysisCatalogID:        *cr.AnalysisCatalogID,
+		CaseTypeCode:             cr.Case.Type,
+		CaseCategoryCode:         cr.Case.CategoryCode,
+		PriorityCode:             cr.Case.PriorityCode,
+		StatusCode:               cr.Case.StatusCode,
+		ResolutionStatusCode:     cr.Case.ResolutionStatusCode,
+		PrimaryCondition:         cr.Case.PrimaryConditionValue,
+		ConditionCodeSystem:      cr.Case.PrimaryConditionCodeSystem,
+		OrderingPhysician:        cr.Case.OrderingPhysician,
+		SubmitterCaseID:          cr.Case.SubmitterCaseId,
+		Note:                     cr.Case.Note,
+		TenantCode:               DefaultTenantCode,
+		OrderingOrganizationCode: &cr.Case.OrderingOrganizationCode,
+		DiagnosisLabCode:         &cr.Case.DiagnosticLabCode,
 	}
 
 	if err := ctx.CasesRepo.CreateCase(&c); err != nil {

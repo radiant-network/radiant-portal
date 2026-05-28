@@ -130,9 +130,9 @@ func (m *CaseValidationMockRepo) GetDocumentsFilters(withProjectAndLab bool) (*t
 
 func (m *CaseValidationMockRepo) GetOrganizationByCode(organizationCode string) (*types.Organization, error) {
 	if organizationCode == "LAB-1" {
-		return &types.Organization{ID: 10, Code: organizationCode, Name: "Organization 1"}, nil
+		return &types.Organization{Code: organizationCode, TenantCode: "radiant", Name: "Organization 1"}, nil
 	} else if organizationCode == "LAB-2" {
-		return &types.Organization{ID: 20, Code: organizationCode, Name: "Organization 2"}, nil
+		return &types.Organization{Code: organizationCode, TenantCode: "radiant", Name: "Organization 2"}, nil
 	} else if strings.Contains(organizationCode, "ERROR") {
 		return nil, fmt.Errorf("database connection failed")
 	}
@@ -144,15 +144,12 @@ func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(organi
 		return &repository.Patient{
 			ID:                 100,
 			SubmitterPatientId: submitterPatientId,
-			OrganizationId:     10,
+			OrganizationCode:   organizationCode,
+			TenantCode:         "radiant",
 		}, nil
 	} else if strings.Contains(organizationCode, "ERROR") || strings.Contains(submitterPatientId, "ERROR") {
 		return nil, fmt.Errorf("database connection failed")
 	}
-	return nil, nil
-}
-
-func (m *CaseValidationMockRepo) GetPatientBySubmitterPatientId(organizationId int, submitterPatientId string) (*repository.Patient, error) {
 	return nil, nil
 }
 
@@ -934,7 +931,7 @@ func Test_fetchAnalysisCatalog_Error(t *testing.T) {
 	assert.Nil(t, record.AnalysisCatalogID)
 }
 
-func Test_fetchOrganizations_OK(t *testing.T) {
+func Test_ResolveOrganizations_OK(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockContext := batchval.BatchValidationContext{
 		OrgRepo: &mockRepo,
@@ -951,15 +948,13 @@ func Test_fetchOrganizations_OK(t *testing.T) {
 		},
 	}
 
-	err := record.fetchOrganizations()
+	err := record.resolveOrganizations()
 	assert.NoError(t, err)
-	assert.NotNil(t, record.OrderingOrganizationID)
-	assert.Equal(t, 10, *record.OrderingOrganizationID)
-	assert.NotNil(t, record.DiagnosisLabID)
-	assert.Equal(t, 20, *record.DiagnosisLabID)
+	assert.True(t, record.OrderingOrganizationExists)
+	assert.True(t, record.DiagnosisLabExists)
 }
 
-func Test_fetchOrganizations_NotFound(t *testing.T) {
+func Test_ResolveOrganizations_NotFound(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockContext := batchval.BatchValidationContext{
 		OrgRepo: &mockRepo,
@@ -976,14 +971,13 @@ func Test_fetchOrganizations_NotFound(t *testing.T) {
 		},
 	}
 
-	err := record.fetchOrganizations()
+	err := record.resolveOrganizations()
 	assert.NoError(t, err)
-	assert.NotNil(t, record.OrderingOrganizationID)
-	assert.Equal(t, 10, *record.OrderingOrganizationID)
-	assert.Nil(t, record.DiagnosisLabID)
+	assert.True(t, record.OrderingOrganizationExists)
+	assert.False(t, record.DiagnosisLabExists)
 }
 
-func Test_fetchOrganizations_Error(t *testing.T) {
+func Test_ResolveOrganizations_Error(t *testing.T) {
 	mockRepo := CaseValidationMockRepo{}
 	mockContext := batchval.BatchValidationContext{
 		OrgRepo: &mockRepo,
@@ -1000,10 +994,10 @@ func Test_fetchOrganizations_Error(t *testing.T) {
 		},
 	}
 
-	err := record.fetchOrganizations()
+	err := record.resolveOrganizations()
 	assert.Error(t, err)
-	assert.Nil(t, record.OrderingOrganizationID)
-	assert.Nil(t, record.DiagnosisLabID)
+	assert.False(t, record.OrderingOrganizationExists)
+	assert.False(t, record.DiagnosisLabExists)
 
 	record = CaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{
@@ -1016,11 +1010,10 @@ func Test_fetchOrganizations_Error(t *testing.T) {
 		},
 	}
 
-	err = record.fetchOrganizations()
+	err = record.resolveOrganizations()
 	assert.Error(t, err)
-	assert.NotNil(t, record.OrderingOrganizationID)
-	assert.Equal(t, 10, *record.OrderingOrganizationID)
-	assert.Nil(t, record.DiagnosisLabID)
+	assert.True(t, record.OrderingOrganizationExists)
+	assert.False(t, record.DiagnosisLabExists)
 }
 
 func Test_fetchPatients_PartialOK(t *testing.T) {
@@ -1189,8 +1182,8 @@ func Test_fetchValidationInfos_OK(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 42, *record.ProjectID)
 	assert.Equal(t, 1, *record.AnalysisCatalogID)
-	assert.Equal(t, 10, *record.OrderingOrganizationID)
-	assert.Equal(t, 20, *record.DiagnosisLabID)
+	assert.True(t, record.OrderingOrganizationExists)
+	assert.True(t, record.DiagnosisLabExists)
 	assert.Len(t, record.Documents, 0)
 	assert.Len(t, record.SequencingExperiments, 1)
 	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[200].Aliquot)
@@ -1213,8 +1206,8 @@ func Test_fetchValidationInfos_Error(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, record.ProjectID)
 	assert.Nil(t, record.AnalysisCatalogID)
-	assert.Nil(t, record.OrderingOrganizationID)
-	assert.Nil(t, record.DiagnosisLabID)
+	assert.False(t, record.OrderingOrganizationExists)
+	assert.False(t, record.DiagnosisLabExists)
 	assert.Empty(t, record.Documents)
 	assert.Empty(t, record.SequencingExperiments)
 	assert.Empty(t, record.Patients)
@@ -1621,9 +1614,7 @@ func Test_validateResolutionStatusCode_Invalid(t *testing.T) {
 
 func Test_validateCase_Valid(t *testing.T) {
 	projectID := 42
-	diagnosisLabID := 10
 	analysisID := 1
-	orderingOrgID := 20
 
 	ctx := &batchval.BatchValidationContext{}
 	mockRepo := &CaseValidationMockRepo{}
@@ -1635,15 +1626,15 @@ func Test_validateCase_Valid(t *testing.T) {
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
 		},
-		ProjectID:              &projectID,
-		DiagnosisLabID:         &diagnosisLabID,
-		AnalysisCatalogID:      &analysisID,
-		OrderingOrganizationID: &orderingOrgID,
-		SubmitterCaseID:        "CASE-1",
-		StatusCodes:            []string{"completed", "unknown"},
-		ResolutionStatusCodes:  []string{"solved", "unsolved", "unknown"},
-		PriorityCodes:          []string{"routine", "urgent"},
-		CategoryCodes:          []string{"research", "clinical"},
+		ProjectID:                  &projectID,
+		DiagnosisLabExists:         true,
+		AnalysisCatalogID:          &analysisID,
+		OrderingOrganizationExists: true,
+		SubmitterCaseID:            "CASE-1",
+		StatusCodes:                []string{"completed", "unknown"},
+		ResolutionStatusCodes:      []string{"solved", "unsolved", "unknown"},
+		PriorityCodes:              []string{"routine", "urgent"},
+		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:            "CASE-1",
 			StatusCode:                 "completed",
@@ -1668,9 +1659,7 @@ func Test_validateCase_Valid(t *testing.T) {
 }
 
 func Test_validateCase_MissingProject(t *testing.T) {
-	diagnosisLabID := 10
 	analysisID := 1
-	orderingOrgID := 20
 
 	ctx := &batchval.BatchValidationContext{}
 	mockRepo := &CaseValidationMockRepo{}
@@ -1682,15 +1671,15 @@ func Test_validateCase_MissingProject(t *testing.T) {
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
 		},
-		ProjectID:              nil,
-		DiagnosisLabID:         &diagnosisLabID,
-		AnalysisCatalogID:      &analysisID,
-		OrderingOrganizationID: &orderingOrgID,
-		SubmitterCaseID:        "CASE-1",
-		StatusCodes:            []string{"completed"},
-		ResolutionStatusCodes:  []string{"solved"},
-		PriorityCodes:          []string{"routine", "urgent"},
-		CategoryCodes:          []string{"research", "clinical"},
+		ProjectID:                  nil,
+		DiagnosisLabExists:         true,
+		AnalysisCatalogID:          &analysisID,
+		OrderingOrganizationExists: true,
+		SubmitterCaseID:            "CASE-1",
+		StatusCodes:                []string{"completed"},
+		ResolutionStatusCodes:      []string{"solved"},
+		PriorityCodes:              []string{"routine", "urgent"},
+		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:      "CASE-1",
 			StatusCode:           "completed",
@@ -1716,7 +1705,6 @@ func Test_validateCase_MissingProject(t *testing.T) {
 func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 	projectID := 42
 	analysisID := 1
-	orderingOrgID := 20
 
 	ctx := &batchval.BatchValidationContext{}
 	mockRepo := &CaseValidationMockRepo{}
@@ -1728,15 +1716,15 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
 		},
-		ProjectID:              &projectID,
-		DiagnosisLabID:         nil,
-		AnalysisCatalogID:      &analysisID,
-		OrderingOrganizationID: &orderingOrgID,
-		SubmitterCaseID:        "CASE-1",
-		StatusCodes:            []string{"completed"},
-		ResolutionStatusCodes:  []string{"solved"},
-		PriorityCodes:          []string{"routine", "urgent"},
-		CategoryCodes:          []string{"research", "clinical"},
+		ProjectID:                  &projectID,
+		DiagnosisLabExists:         false,
+		AnalysisCatalogID:          &analysisID,
+		OrderingOrganizationExists: true,
+		SubmitterCaseID:            "CASE-1",
+		StatusCodes:                []string{"completed"},
+		ResolutionStatusCodes:      []string{"solved"},
+		PriorityCodes:              []string{"routine", "urgent"},
+		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:      "CASE-1",
 			StatusCode:           "completed",
@@ -1760,8 +1748,6 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 
 func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 	projectID := 42
-	diagnosisLabID := 10
-	orderingOrgID := 20
 
 	ctx := &batchval.BatchValidationContext{}
 	mockRepo := &CaseValidationMockRepo{}
@@ -1773,15 +1759,15 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
 		},
-		ProjectID:              &projectID,
-		DiagnosisLabID:         &diagnosisLabID,
-		AnalysisCatalogID:      nil,
-		OrderingOrganizationID: &orderingOrgID,
-		SubmitterCaseID:        "CASE-1",
-		StatusCodes:            []string{"completed"},
-		ResolutionStatusCodes:  []string{"solved"},
-		PriorityCodes:          []string{"routine", "urgent"},
-		CategoryCodes:          []string{"research", "clinical"},
+		ProjectID:                  &projectID,
+		DiagnosisLabExists:         true,
+		AnalysisCatalogID:          nil,
+		OrderingOrganizationExists: true,
+		SubmitterCaseID:            "CASE-1",
+		StatusCodes:                []string{"completed"},
+		ResolutionStatusCodes:      []string{"solved"},
+		PriorityCodes:              []string{"routine", "urgent"},
+		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:      "CASE-1",
 			StatusCode:           "completed",
@@ -1804,7 +1790,6 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 
 func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 	projectID := 42
-	diagnosisLabID := 10
 	analysisID := 1
 
 	ctx := &batchval.BatchValidationContext{}
@@ -1817,15 +1802,15 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
 		},
-		ProjectID:              &projectID,
-		DiagnosisLabID:         &diagnosisLabID,
-		AnalysisCatalogID:      &analysisID,
-		OrderingOrganizationID: nil,
-		SubmitterCaseID:        "CASE-1",
-		StatusCodes:            []string{"completed"},
-		ResolutionStatusCodes:  []string{"solved"},
-		PriorityCodes:          []string{"routine", "urgent"},
-		CategoryCodes:          []string{"research", "clinical"},
+		ProjectID:                  &projectID,
+		DiagnosisLabExists:         true,
+		AnalysisCatalogID:          &analysisID,
+		OrderingOrganizationExists: false,
+		SubmitterCaseID:            "CASE-1",
+		StatusCodes:                []string{"completed"},
+		ResolutionStatusCodes:      []string{"solved"},
+		PriorityCodes:              []string{"routine", "urgent"},
+		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:          "CASE-1",
 			StatusCode:               "completed",
@@ -1849,9 +1834,7 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 
 func Test_validateCase_InvalidStatusCode(t *testing.T) {
 	projectID := 42
-	diagnosisLabID := 10
 	analysisID := 1
-	orderingOrgID := 20
 
 	ctx := &batchval.BatchValidationContext{}
 	mockRepo := &CaseValidationMockRepo{}
@@ -1863,15 +1846,15 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
 		},
-		ProjectID:              &projectID,
-		DiagnosisLabID:         &diagnosisLabID,
-		AnalysisCatalogID:      &analysisID,
-		OrderingOrganizationID: &orderingOrgID,
-		SubmitterCaseID:        "CASE-1",
-		StatusCodes:            []string{"completed", "pending"},
-		ResolutionStatusCodes:  []string{"solved"},
-		PriorityCodes:          []string{"routine", "urgent"},
-		CategoryCodes:          []string{"research", "clinical"},
+		ProjectID:                  &projectID,
+		DiagnosisLabExists:         true,
+		AnalysisCatalogID:          &analysisID,
+		OrderingOrganizationExists: true,
+		SubmitterCaseID:            "CASE-1",
+		StatusCodes:                []string{"completed", "pending"},
+		ResolutionStatusCodes:      []string{"solved"},
+		PriorityCodes:              []string{"routine", "urgent"},
+		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:      "CASE-1",
 			StatusCode:           "invalid_status",
@@ -1893,9 +1876,7 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 
 func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 	projectID := 42
-	diagnosisLabID := 10
 	analysisID := 1
-	orderingOrgID := 20
 
 	ctx := &batchval.BatchValidationContext{}
 	mockRepo := &CaseValidationMockRepo{}
@@ -1907,15 +1888,15 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
 		},
-		ProjectID:              &projectID,
-		DiagnosisLabID:         &diagnosisLabID,
-		AnalysisCatalogID:      &analysisID,
-		OrderingOrganizationID: &orderingOrgID,
-		SubmitterCaseID:        "CASE-1",
-		StatusCodes:            []string{"completed"},
-		ResolutionStatusCodes:  []string{"solved"},
-		PriorityCodes:          []string{"routine", "urgent"},
-		CategoryCodes:          []string{"research", "clinical"},
+		ProjectID:                  &projectID,
+		DiagnosisLabExists:         true,
+		AnalysisCatalogID:          &analysisID,
+		OrderingOrganizationExists: true,
+		SubmitterCaseID:            "CASE-1",
+		StatusCodes:                []string{"completed"},
+		ResolutionStatusCodes:      []string{"solved"},
+		PriorityCodes:              []string{"routine", "urgent"},
+		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:      "CASE-1",
 			StatusCode:           "completed",
@@ -1938,9 +1919,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 
 func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 	projectID := 42
-	diagnosisLabID := 10
 	analysisID := 1
-	orderingOrgID := 20
 
 	mockRepo := &CaseValidationMockRepo{
 		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
@@ -1960,12 +1939,12 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
 		},
-		ProjectID:              &projectID,
-		DiagnosisLabID:         &diagnosisLabID,
-		AnalysisCatalogID:      &analysisID,
-		OrderingOrganizationID: &orderingOrgID,
-		SubmitterCaseID:        "CASE-1",
-		StatusCodes:            []string{"completed"},
+		ProjectID:                  &projectID,
+		DiagnosisLabExists:         true,
+		AnalysisCatalogID:          &analysisID,
+		OrderingOrganizationExists: true,
+		SubmitterCaseID:            "CASE-1",
+		StatusCodes:                []string{"completed"},
 		Case: types.CaseBatch{
 			SubmitterCaseId: "CASE-1",
 			StatusCode:      "completed",
@@ -1985,7 +1964,6 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 func Test_validateCase_MultipleErrors(t *testing.T) {
 	projectID := 42
 	analysisID := 1
-	orderingOrgID := 20
 
 	ctx := &batchval.BatchValidationContext{}
 	mockRepo := &CaseValidationMockRepo{}
@@ -1997,12 +1975,12 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
 		},
-		ProjectID:              &projectID,
-		DiagnosisLabID:         nil,
-		AnalysisCatalogID:      &analysisID,
-		OrderingOrganizationID: &orderingOrgID,
-		SubmitterCaseID:        "CASE-1",
-		StatusCodes:            []string{"completed"},
+		ProjectID:                  &projectID,
+		DiagnosisLabExists:         false,
+		AnalysisCatalogID:          &analysisID,
+		OrderingOrganizationExists: true,
+		SubmitterCaseID:            "CASE-1",
+		StatusCodes:                []string{"completed"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:   "CASE-1",
 			StatusCode:        "invalid_status",
@@ -2032,9 +2010,7 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 
 func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 	projectID := 42
-	diagnosisLabID := 10
 	analysisID := 1
-	orderingOrgID := 20
 
 	ctx := &batchval.BatchValidationContext{}
 	mockRepo := &CaseValidationMockRepo{}
@@ -2046,15 +2022,15 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 			Cache:   batchval.NewBatchValidationCache(ctx),
 			Index:   0,
 		},
-		ProjectID:              &projectID,
-		DiagnosisLabID:         &diagnosisLabID,
-		AnalysisCatalogID:      &analysisID,
-		OrderingOrganizationID: &orderingOrgID,
-		SubmitterCaseID:        "",
-		StatusCodes:            []string{"completed", "unknown"},
-		ResolutionStatusCodes:  []string{"solved"},
-		PriorityCodes:          []string{"routine", "urgent"},
-		CategoryCodes:          []string{"research", "clinical"},
+		ProjectID:                  &projectID,
+		DiagnosisLabExists:         true,
+		AnalysisCatalogID:          &analysisID,
+		OrderingOrganizationExists: true,
+		SubmitterCaseID:            "",
+		StatusCodes:                []string{"completed", "unknown"},
+		ResolutionStatusCodes:      []string{"solved"},
+		PriorityCodes:              []string{"routine", "urgent"},
+		CategoryCodes:              []string{"research", "clinical"},
 		Case: types.CaseBatch{
 			SubmitterCaseId:            "CASE-1",
 			StatusCode:                 "completed",
@@ -3194,7 +3170,8 @@ func Test_validateSeqExpSample_Valid(t *testing.T) {
 					ID:                1,
 					PatientID:         100,
 					SubmitterSampleId: "SAMPLE-1",
-					OrganizationId:    10,
+					OrganizationCode:  "LAB-1",
+					TenantCode:        "radiant",
 					HistologyCode:     "germline",
 				}, nil
 			}
@@ -3809,31 +3786,31 @@ func Test_validateTaskAliquot_ErrorAlignmentGermlineVariantCallingNotExactly1Ali
 }
 
 func Test_validateTaskAliquot_ErrorAlignmentSomaticVariantCallingNotExactly1Aliquot(t *testing.T) {
-    record := CaseValidationRecord{
-        Case: types.CaseBatch{
-            SequencingExperiments: []*types.CaseSequencingExperimentBatch{
-                {Aliquot: "ALIQUOT-1"},
-                {Aliquot: "ALIQUOT-2"},
-            },
-            Tasks: []*types.CaseTaskBatch{
-                {
-                    TypeCode: types.AlignmentSomaticVariantCallingTaskTypeCode,
-                    Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
-                },
-            },
-        },
-    }
-    record.validateTaskAliquot(0)
+	record := CaseValidationRecord{
+		Case: types.CaseBatch{
+			SequencingExperiments: []*types.CaseSequencingExperimentBatch{
+				{Aliquot: "ALIQUOT-1"},
+				{Aliquot: "ALIQUOT-2"},
+			},
+			Tasks: []*types.CaseTaskBatch{
+				{
+					TypeCode: types.AlignmentSomaticVariantCallingTaskTypeCode,
+					Aliquots: []string{"ALIQUOT-1", "ALIQUOT-2"},
+				},
+			},
+		},
+	}
+	record.validateTaskAliquot(0)
 
-    expected := types.BatchMessage{
-        Code:    "TASK-007",
-        Message: "Task type alignment_somatic_variant_calling doesn't support being associated with more than 1 aliquot value.",
-        Path:    "case[0].tasks[0]",
-    }
+	expected := types.BatchMessage{
+		Code:    "TASK-007",
+		Message: "Task type alignment_somatic_variant_calling doesn't support being associated with more than 1 aliquot value.",
+		Path:    "case[0].tasks[0]",
+	}
 
-    assert.Len(t, record.Infos, 0)
-    assert.Len(t, record.Warnings, 0)
-    assert.Equal(t, expected, record.Errors[0])
+	assert.Len(t, record.Infos, 0)
+	assert.Len(t, record.Warnings, 0)
+	assert.Equal(t, expected, record.Errors[0])
 }
 
 func Test_validateTaskDocuments_OK(t *testing.T) {
