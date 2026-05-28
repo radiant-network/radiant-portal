@@ -770,11 +770,12 @@ function DataTable<T>({
     id,
     setFetched: setIsUserPreferenceFetched,
     defaultColumnSettings,
-    setAdditionalFields: serverOptions?.setAdditionalFields,
     setColumnOrder,
     setColumnVisibility,
     setColumnPinning,
     setColumnSizing,
+    setPagination: pagination.onPaginationChange ?? setInternalPagination,
+    setAdditionalFields: serverOptions?.setAdditionalFields,
   });
 
   /**
@@ -787,6 +788,7 @@ function DataTable<T>({
     columnPinning,
     columnSizing,
     columnVisibility,
+    pagination: internalPagination,
   });
 
   /**
