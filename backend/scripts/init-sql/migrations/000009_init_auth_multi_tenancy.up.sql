@@ -122,7 +122,7 @@ ALTER TABLE public.sequencing_experiment
 -- =============================================================================
 CREATE TABLE public.users (
     email       varchar(255) PRIMARY KEY,
-    user_id     uuid,                       -- Keycloak sub; filled on first login
+    user_id     varchar(255),                       -- Keycloak sub; filled on first login
     first_name  varchar(100),
     last_name   varchar(100),
     created_at  timestamptz  NOT NULL DEFAULT now(),
@@ -152,34 +152,37 @@ CREATE TABLE public.role_action (
         REFERENCES public.role(tenant_code, code) ON DELETE CASCADE
 );
 
-CREATE TABLE public.user_tenant_role (
+-- user_role: single grant table covering both tenant-wide and org-scoped grants.
+-- org_code semantics:
+--   NULL              = grant is not org-scoped (only the role's tenant-scoped actions apply).
+--   '*'               = grant applies to every organization in the tenant.
+--   '<specific code>' = grant applies to that organization only.
+-- No FK on (org_code, tenant_code) because of NULL and the '*' wildcard; the
+-- admin handler validates: org_code IS NULL OR org_code = '*' OR exists in
+-- organization(code, tenant_code).
+CREATE TABLE public.user_role (
     email       varchar(255) NOT NULL REFERENCES public.users(email),
     tenant_code varchar(50)  NOT NULL,
+    org_code    varchar(50),
     role_code   varchar(50)  NOT NULL,
     granted_at  timestamptz  NOT NULL DEFAULT now(),
     granted_by  varchar(255),
-    PRIMARY KEY (email, tenant_code, role_code),
     FOREIGN KEY (tenant_code, role_code)
         REFERENCES public.role(tenant_code, code) ON DELETE CASCADE
 );
 
--- org_code = '*' means "all organizations in this tenant".
--- No FK on (org_code, tenant_code) because of the wildcard; the admin handler
--- validates org_code != '*' ⇒ exists in organization(code, tenant_code).
-CREATE TABLE public.user_org_role (
-    email       varchar(255) NOT NULL REFERENCES public.users(email),
-    tenant_code varchar(50)  NOT NULL,
-    org_code    varchar(50)  NOT NULL,
-    role_code   varchar(50)  NOT NULL,
-    granted_at  timestamptz  NOT NULL DEFAULT now(),
-    granted_by  varchar(255),
-    PRIMARY KEY (email, tenant_code, org_code, role_code),
-    FOREIGN KEY (tenant_code, role_code)
-        REFERENCES public.role(tenant_code, code) ON DELETE CASCADE
-);
+-- Uniqueness across (email, tenant_code, role_code, org_code). PG 14 lacks
+-- NULLS NOT DISTINCT, so use two partial indexes: one for org-scoped grants
+-- (org_code present), one for tenant-wide grants (org_code IS NULL — at most
+-- one such row per (user, tenant, role)).
+CREATE UNIQUE INDEX user_role_unique_org_grant ON public.user_role
+    (email, tenant_code, role_code, org_code) WHERE org_code IS NOT NULL;
+CREATE UNIQUE INDEX user_role_unique_tenant_grant ON public.user_role
+    (email, tenant_code, role_code) WHERE org_code IS NULL;
 
-CREATE INDEX ix_user_tenant_role_tenant ON public.user_tenant_role (tenant_code, role_code);
-CREATE INDEX ix_user_org_role_tenant_org ON public.user_org_role (tenant_code, org_code, role_code);
+-- Admin lookups: "grants of role R in tenant T" and "grants at org X in tenant T".
+CREATE INDEX ix_user_role_tenant_role     ON public.user_role (tenant_code, role_code);
+CREATE INDEX ix_user_role_tenant_org_role ON public.user_role (tenant_code, org_code, role_code);
 
 -- =============================================================================
 -- 7. Default action catalog

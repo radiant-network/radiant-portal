@@ -88,8 +88,7 @@ Identifiers are **varchar `code` natural keys** — no integer surrogate ids —
 | `role` | `(tenant_code, code)` | Per-tenant role catalog |
 | `action` | `code` | Global action catalog; `scope` ∈ {`org`,`tenant`} |
 | `role_action` | `(tenant_code, role_code, action_code)` | Role → action mapping; FK to `role` `ON DELETE CASCADE` |
-| `user_tenant_role` | `(email, tenant_code, role_code)` | Tenant-scoped grants |
-| `user_org_role` | `(email, tenant_code, org_code, role_code)` | Org-scoped grants; `org_code = '*'` = all orgs in tenant |
+| `user_role` | `(email, tenant_code, org_code, role_code)` | Single grant table; `org_code` is nullable — `NULL` = not org-scoped (tenant-wide grant), `'*'` = all orgs in tenant, specific code = that org. Uniqueness enforced by two partial indexes (one for non-NULL `org_code`, one for NULL). |
 
 The child clinical tables (`cases`, `patient`, `sample`, `sequencing_experiment`) reference `organization(code, tenant_code)` via compound FKs; StarRocks federation joins are `ON x.<>_code = org.code AND x.tenant_code = org.tenant_code`.
 
