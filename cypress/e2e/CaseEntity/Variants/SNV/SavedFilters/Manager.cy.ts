@@ -14,33 +14,33 @@ describe('Case Entity - Variants - SNV - Saved filters - Manager', () => {
 
   it('Rename', () => {
     setupTest();
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressFA');
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressF1 COPY');
-    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('CypressF1');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_FA');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F1 COPY');
+    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('Cypress_F1');
     CaseEntity_Variants_SavedFilters.snv.actions.openManager();
-    ManagerFilterModal.actions.editFilterName('CypressF1', 'CypressFA');
+    ManagerFilterModal.actions.editFilterName('Cypress_F1', 'Cypress_FA');
 
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown(/^CypressF1$/, false /*shouldExist*/);
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('CypressFA');
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown(/^Cypress_F1$/, false /*shouldExist*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('Cypress_FA');
     CaseEntity_Variants_SavedFilters.snv.actions.openManager();
 
-    ManagerFilterModal.validations.shouldDisplayInManager('CypressF1', false /*shouldExist*/);
-    ManagerFilterModal.validations.shouldDisplayInManager('CypressFA');
+    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_F1', false /*shouldExist*/);
+    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_FA');
     ManagerFilterModal.actions.closeManager();
   });
 
   it('Delete', () => {
     setupTest();
-    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('CypressF2');
-    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('CypressF2');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F2');
+    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('Cypress_F2');
     CaseEntity_Variants_SavedFilters.snv.actions.openManager();
-    ManagerFilterModal.actions.deleteFilter('CypressF2');
+    ManagerFilterModal.actions.deleteFilter('Cypress_F2');
 
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName('CypressF2', false /*shouldExist*/);
-    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('CypressF2', false /*shouldExist*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName('Cypress_F2', false /*shouldExist*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('Cypress_F2', false /*shouldExist*/);
     CaseEntity_Variants_SavedFilters.snv.actions.openManager();
 
-    ManagerFilterModal.validations.shouldDisplayInManager('CypressF2', false /*shouldExist*/);
+    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_F2', false /*shouldExist*/);
     ManagerFilterModal.actions.closeManager();
 
     CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', true /*isDisable*/, false /*isDirty*/);

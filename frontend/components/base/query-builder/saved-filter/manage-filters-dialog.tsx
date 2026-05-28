@@ -89,7 +89,7 @@ const SavedFilterListItem = ({ savedFilter }: { savedFilter: SavedFilter }) => {
       <ListItemAction
         key={savedFilter.id}
         title={savedFilter.name}
-        data-cy={`list-item-action-${savedFilter.name.replace(/[^A-Za-z0-9 ]/g, '')}`}
+        data-cy={`list-item-action-${savedFilter.id}`}
         description={getLastSaveAtDisplay()}
         className="border-b last:border-b-0 relative px-3 py-2 group"
         onEdit={() => setOpenEdit(true)}

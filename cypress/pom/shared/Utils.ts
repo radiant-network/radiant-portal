@@ -131,6 +131,20 @@ export const getExternalRefDisplay = (ref: string) => {
 };
 
 /**
+ * Resolves a saved filter name to its UUID by reading the matching list item's
+ * `data-cy` attribute in the manage-filters modal. The modal must be open.
+ * @param name The saved filter name to look up.
+ * @returns A Cypress chain yielding the UUID of the matching saved filter.
+ */
+export function getFilterIdByName(name: string): Cypress.Chainable<string> {
+  return cy
+    .get(`${CommonSelectors.modal} [data-cy^="list-item-action-"]`)
+    .filter(`:contains("${name}")`)
+    .invoke('attr', 'data-cy')
+    .then(dataCy => (dataCy as string).replace('list-item-action-', ''));
+}
+
+/**
  * Gets the display string associated with a prediction score.
  * @param prediction The prediction score (e.g., 'loeuf', 'revel', etc.).
  * @returns The display string.
