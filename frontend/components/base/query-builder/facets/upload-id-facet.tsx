@@ -23,11 +23,11 @@ import { useDebounce } from '@/components/hooks/useDebounce';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 import { genesApi } from '@/utils/api';
 
-import CollapsibleCard from '../../../cards/collapsible-card';
-import { TableColumnDef } from '../../../data-table/data-table';
-import DisplayTable from '../../../data-table/display-table';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '../../../shadcn/hover-card';
-import { QBActionType, useQBDispatch } from '../../hooks/use-query-builder';
+import CollapsibleCard from '../../cards/collapsible-card';
+import { TableColumnDef } from '../../data-table/data-table';
+import DisplayTable from '../../data-table/display-table';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '../../shadcn/hover-card';
+import { QBActionType, useQBDispatch } from '../hooks/use-query-builder';
 
 type UploadIdTableEntry = {
   entry: string;

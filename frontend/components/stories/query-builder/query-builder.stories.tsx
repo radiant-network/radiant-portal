@@ -923,7 +923,7 @@ export const SearchFacet: Story = {
   ),
 };
 
-export const UploadIdModal: Story = {
+export const UploadIdFacet: Story = {
   parameters: {
     msw: {
       handlers: [
