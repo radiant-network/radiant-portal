@@ -6,6 +6,7 @@ describe('Occurrences - Germline - CNV - Count - Gene', () => {
   let Auth: any;
   let case_id: string;
   let seq_id: string;
+  let task_id: string;
   let globalData: any;
 
   before(() => {
@@ -13,6 +14,7 @@ describe('Occurrences - Germline - CNV - Count - Gene', () => {
     Auth = globalData.Authorization;
     case_id = globalData.Count.case_id;
     seq_id = globalData.Count.seq_id;
+    task_id = globalData.Count.cnv.task_id;
   });
 
   const sectionData = tableCNVFacets.find(s => s.section === 'Gene');
@@ -34,7 +36,7 @@ describe('Occurrences - Germline - CNV - Count - Gene', () => {
       cy.fixture('RequestBody/ApplyFacet.json').then(fixture => {
         const body = JSON.parse(JSON.stringify(fixture).replace('_FIELD', facet.apiField).replace('_VALUE', facetData.value).replace('_OP', facetData.op));
 
-        cy.apiCall('POST', `occurrences/germline/cnv/${case_id}/${seq_id}/count`, body, Auth.token).then(res => {
+        cy.apiCall('POST', `occurrences/germline/cnv/${case_id}/${seq_id}/${task_id}/count`, body, Auth.token).then(res => {
           response = res;
           expect(response.status).to.eq(200);
           expect(response.body.count).to.eq(facetData.count);

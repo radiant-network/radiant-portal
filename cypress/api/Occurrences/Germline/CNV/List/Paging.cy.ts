@@ -2,7 +2,7 @@
 import { data } from 'pom/shared/Data';
 
 describe('Occurrences - Germline - CNV - List - Paging', () => {
-  const dataCase = data.case;
+  const dataCase = data;
 
   it('First 10 items', () => {
     const Auth = Cypress.expose('globalData').Authorization;
@@ -11,7 +11,7 @@ describe('Occurrences - Germline - CNV - List - Paging', () => {
       "page_index": 0
     }`;
 
-    cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case}/${dataCase.seq.seq_id}/list`, body, Auth.token).then(res => {
+    cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case.case}/${dataCase.case.seq.seq_id}/${dataCase.cnvGermline.task_id}/list`, body, Auth.token).then(res => {
       expect(res.status).to.eq(200);
       cy.validateItemCount(res, 10);
     });
@@ -24,7 +24,7 @@ describe('Occurrences - Germline - CNV - List - Paging', () => {
       "page_index": 0
     }`;
 
-    cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case}/${dataCase.seq.seq_id}/list`, body, Auth.token).then(res => {
+    cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case.case}/${dataCase.case.seq.seq_id}/${dataCase.cnvGermline.task_id}/list`, body, Auth.token).then(res => {
       expect(res.status).to.eq(200);
       cy.validateItemCount(res, 20);
     });
@@ -42,12 +42,12 @@ describe('Occurrences - Germline - CNV - List - Paging', () => {
     }`;
     let firstItemOfAll: any;
 
-    cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case}/${dataCase.seq.seq_id}/list`, firstBody, Auth.token)
+    cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case.case}/${dataCase.case.seq.seq_id}/${dataCase.cnvGermline.task_id}/list`, firstBody, Auth.token)
       .then(firstRes => {
         firstItemOfAll = firstRes.body[0].name;
       })
       .then(() => {
-        cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case}/${dataCase.seq.seq_id}/list`, secondBody, Auth.token);
+        cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case.case}/${dataCase.case.seq.seq_id}/${dataCase.cnvGermline.task_id}/list`, secondBody, Auth.token);
       })
       .then((secondRes: any) => {
         expect(secondRes.status).to.eq(200);
@@ -63,7 +63,7 @@ describe('Occurrences - Germline - CNV - List - Paging', () => {
       "page_index": 100000000
     }`;
 
-    cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case}/${dataCase.seq.seq_id}/list`, body, Auth.token).then(res => {
+    cy.apiCall('POST', `occurrences/germline/cnv/${dataCase.case.case}/${dataCase.case.seq.seq_id}/${dataCase.cnvGermline.task_id}/list`, body, Auth.token).then(res => {
       expect(res.status).to.eq(200);
       cy.validateItemCount(res, 0);
     });

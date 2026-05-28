@@ -176,6 +176,7 @@ export const data = {
     sqon: '{"content":[{"content":{"field":"hgvsg","value":["chr10:g.99235506G>A"]},"op":"in"}],"op":"and"}',
   },
   cnvGermline: {
+    task_id: '1',
     genes: 'GUSBP11, GUSBP11',
     cytoband: 'q11.23',
     nb_snv: '15',

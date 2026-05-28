@@ -13,8 +13,10 @@ describe('Cases - Batch - Null fields - String fields', () => {
         "type": "germline",
         "status_code": null,
         "project_code": null,
+        "diagnostic_lab_code": null,
         "category_code": null,
         "analysis_code": null,
+        "ordering_organization_code": null,
         "patients": [
             {
             "affected_status_code": "affected",
@@ -89,8 +91,10 @@ describe('Cases - Batch - Null fields - String fields', () => {
   it('Message', () => {
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'StatusCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'ProjectCode', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'DiagnosticLabCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'CategoryCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'AnalysisCode', 'required'));
+    cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'OrderingOrganizationCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0].FamilyHistory[0]', 'FamilyMemberCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0].FamilyHistory[0]', 'Condition', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0].Patients[0].ObservationsCategorical[0]', 'Code', 'required'));

@@ -12,11 +12,11 @@ describe('VariantEntity - Patients - Uninterpreted - Sort', () => {
 
   it('Alphanumeric', () => {
     setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldSortColumn('case', false /*hasUniqueValues*/);
+    VariantEntity_Patients.uninterpreted.validations.shouldSortColumn('case', true /*hasUniqueValues*/);
   });
 
   it('Tag', () => {
     setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldSortColumn('relationship', false /*hasUniqueValues*/);
+    VariantEntity_Patients.uninterpreted.validations.shouldSortColumn('relationship', true /*hasUniqueValues*/);
   });
 });
