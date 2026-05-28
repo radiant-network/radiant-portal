@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { ColumnOrderState, ColumnPinningState, TableState } from '@tanstack/react-table';
-import useSWR from 'swr';
+import { ColumnOrderState, ColumnPinningState, PaginationState, TableState } from '@tanstack/react-table';
+import useSWR, { mutate } from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import { UserPreference } from '@/api/api';
@@ -25,6 +25,7 @@ type useTableStateObserverProps = {
   columnPinning: ColumnPinningState;
   columnSizing: Record<string, number>;
   columnVisibility: ColumnVisiblity;
+  pagination: PaginationState;
 };
 
 type useTableStateFetchProps = {
@@ -35,6 +36,7 @@ type useTableStateFetchProps = {
   setColumnPinning: (value: ColumnPinningState) => void;
   setColumnSizing: (value: Record<string, number>) => void;
   setColumnVisibility: (value: ColumnVisiblity) => void;
+  setPagination: (value: PaginationState) => void;
   setAdditionalFields?: (value: string[]) => void;
 };
 
@@ -80,9 +82,15 @@ function getUserPreferenceKey(id: string) {
 }
 
 /**
- * Load user preference
- * Will return an 404 if the config has never been set before
+ * Load user preference.
+ *
+ * If the api will return a 404 if the config has never been set before.
  * In that case, the data table falls back to its default configuration.
+ *
+ * The GET cache is revalidated on unmount so the next mount.
+ * Otherwise, navigating away and back would briefly display the stale cached value
+ * (e.g. pageSize=30) before the refetch arrives with the updated one (e.g. pageSize=10),
+ * causing a visible flash.
  */
 export function useTableGetPreferenceEffect({
   id,
@@ -93,15 +101,21 @@ export function useTableGetPreferenceEffect({
   setColumnSizing,
   setColumnVisibility,
   setAdditionalFields,
+  setPagination,
 }: useTableStateFetchProps) {
-  const tableUserPreference = useSWR(
-    `data-table-get-${id}`,
-    () => fetchUserPreference({ key: getUserPreferenceKey(id) }),
-    {
-      revalidateOnMount: true,
-      revalidateIfStale: false,
-      revalidateOnFocus: false,
+  const cacheId = `data-table-get-${id}`;
+  const fetcher = () => fetchUserPreference({ key: getUserPreferenceKey(id) });
+  const tableUserPreference = useSWR(cacheId, fetcher, {
+    revalidateOnMount: true,
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+  });
+
+  useEffect(
+    () => () => {
+      mutate(cacheId, fetcher, { revalidate: true });
     },
+    [],
   );
 
   useEffect(() => {
@@ -114,6 +128,7 @@ export function useTableGetPreferenceEffect({
       setColumnPinning(tablePreference.columnPinning);
       setColumnSizing(tablePreference.columnSizing);
       setColumnVisibility(tablePreference.columnVisibility);
+      setPagination({ pageSize: tablePreference.pagination?.pageSize ?? 30, pageIndex: 0 });
       setAdditionalFields?.(
         getFilteredAdditionalFields({ columnVisibility: tablePreference.columnVisibility, defaultColumnSettings }),
       );
@@ -132,6 +147,7 @@ export function useTableUpdatePreferenceEffect({
   columnPinning,
   columnSizing,
   columnVisibility,
+  pagination,
 }: useTableStateObserverProps) {
   const { trigger } = useSWRMutation(`data-table-post-${id}`, postUserPreference);
 
@@ -140,13 +156,14 @@ export function useTableUpdatePreferenceEffect({
       trigger({
         key: getUserPreferenceKey(id),
         userPreference: {
+          key: getUserPreferenceKey(id),
           content: {
             columnOrder,
             columnPinning,
             columnSizing,
             columnVisibility,
+            pagination: { pageSize: pagination.pageSize, pageIndex: 0 },
           },
-          key: getUserPreferenceKey(id),
         },
       });
     }, 350);
@@ -154,7 +171,7 @@ export function useTableUpdatePreferenceEffect({
     return () => {
       if (handler) clearTimeout(handler);
     };
-  }, [columnPinning, columnOrder, columnSizing, columnVisibility]);
+  }, [columnPinning, columnOrder, columnSizing, columnVisibility, pagination.pageSize]);
 }
 
 /**

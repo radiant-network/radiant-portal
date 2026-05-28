@@ -57,6 +57,7 @@ import { cn } from '@/lib/utils';
 
 import Empty from '../empty';
 
+import { useDataTable } from './hooks/use-data-table';
 import {
   DataTableState,
   useTableGetPreferenceEffect,
@@ -67,7 +68,6 @@ import {
 import { getFlatSubheaders } from './libs/header-group';
 import DataTableGroupBy from './data-table-group-by';
 import { getFilteredAdditionalFields, updateAdditionalField } from './utils';
-import { useDataTable } from './hooks/use-data-table';
 
 /**
  * Static value for header and row height
@@ -762,11 +762,12 @@ function DataTable<T>({
     id,
     setFetched: setIsUserPreferenceFetched,
     defaultColumnSettings,
-    setAdditionalFields: serverOptions?.setAdditionalFields,
     setColumnOrder,
     setColumnVisibility,
     setColumnPinning,
     setColumnSizing,
+    setPagination: pagination.onPaginationChange ?? setInternalPagination,
+    setAdditionalFields: serverOptions?.setAdditionalFields,
   });
 
   /**
@@ -779,6 +780,7 @@ function DataTable<T>({
     columnPinning,
     columnSizing,
     columnVisibility,
+    pagination: internalPagination,
   });
 
   /**
