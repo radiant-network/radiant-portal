@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { apiMessages } from '@/apiMessages';
 
-describe('Batches / Invalid UUID', () => {
+describe('Batches - Invalid UUID', () => {
   let response: any;
 
   before(() => {

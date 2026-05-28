@@ -3,7 +3,7 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { VariantEntity_EvidCond } from 'pom/pages/VariantEntity_EvidCond';
 
-describe('VariantEntity - CondPhen - Hpo - Sort', () => {
+describe('VariantEntity - EvidCond - CondPhen - Hpo - Sort', () => {
   const setupTest = () => {
     cy.login();
     cy.visitVariantEvidCondPage(data.variantGermline.locus_id);

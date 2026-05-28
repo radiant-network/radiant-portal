@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 
-describe('Batches / Patient success', () => {
+describe('Batches - Patient success', () => {
   let response: any;
   let batchId: any;
 

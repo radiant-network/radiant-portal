@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { apiMessages } from '@/apiMessages';
 
-describe('Batches / Not found batch ID', () => {
+describe('Batches - Not found batch ID', () => {
   let response: any;
   let batchId: any;
 

@@ -11,8 +11,10 @@ describe('Cases - Batch - Missing fields - Optional fields', () => {
         "type": "germline",
         "status_code": "completed",
         "project_code": "Cypress",
+        "diagnostic_lab_code": "CHUSJ",
         "category_code": "postnatal",
         "analysis_code": "Cypress",
+        "ordering_organization_code": "Cypress",
         "patients": [
             {
             "affected_status_code": "affected",

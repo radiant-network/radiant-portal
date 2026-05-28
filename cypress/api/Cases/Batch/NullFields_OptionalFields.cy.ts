@@ -12,7 +12,7 @@ describe('Cases - Batch - Null fields - Optional fields', () => {
         "type": "germline",
         "status_code": "completed",
         "project_code": "Cypress",
-        "diagnostic_lab_code": null,
+        "diagnostic_lab_code": "CHUSJ",
         "primary_condition_code_system": null,
         "primary_condition_value": null,
         "priority_code": null,
@@ -21,7 +21,7 @@ describe('Cases - Batch - Null fields - Optional fields', () => {
         "resolution_status_code": null,
         "note": null,
         "ordering_physician": null,
-        "ordering_organization_code": null,
+        "ordering_organization_code": "Cypress",
         "patients": [
             {
             "affected_status_code": "affected",
