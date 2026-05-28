@@ -1,5 +1,5 @@
 import { Badge } from '@/components/base/shadcn/badge';
-import { Skeleton } from '@/components/base/shadcn/skeleton';
+import EmptyField from '@/components/base/information/empty-field';
 
 import AnchorLink from '../anchor-link';
 
@@ -30,7 +30,7 @@ export type PhenotypeConditionLinkProps = React.ComponentProps<'span'> & {
 };
 function PhenotypeConditionLink({ name, code, onsetCode, showCode = true, ...props }: PhenotypeConditionLinkProps) {
   if (!code) {
-    return <Skeleton />;
+    return <EmptyField />;
   }
 
   return (

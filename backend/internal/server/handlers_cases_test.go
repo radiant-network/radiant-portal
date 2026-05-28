@@ -151,6 +151,8 @@ func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
 
 func (m *MockRepository) CreateCase(*types.Case) error { return nil }
 
+func (m *MockRepository) UpdateCaseDiagnosisLabCode(caseID int, code string) error { return nil }
+
 func (m *MockRepository) GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*types.Case, error) {
 	return nil, nil
 }

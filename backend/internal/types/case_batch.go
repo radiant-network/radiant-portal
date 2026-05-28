@@ -91,6 +91,7 @@ type CreateCaseBatchBody struct {
 type CaseBatchPatch struct {
 	ProjectCode           string                           `json:"project_code" toml:"project_code" binding:"required"`
 	SubmitterCaseId       string                           `json:"submitter_case_id" toml:"submitter_case_id" binding:"required"`
+	DiagnosticLabCode     string                           `json:"diagnostic_lab_code,omitempty" toml:"diagnostic_lab_code"`
 	SequencingExperiments []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive,required"`
 }
 

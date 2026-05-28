@@ -196,6 +196,8 @@ components:
       required:
       - analysis_code
       - category_code
+      - diagnostic_lab_code
+      - ordering_organization_code
       - patients
       - project_code
       - sequencing_experiments
@@ -205,6 +207,8 @@ components:
       type: object
     CaseBatchPatch:
       properties:
+        diagnostic_lab_code:
+          type: string
         project_code:
           type: string
         sequencing_experiments:

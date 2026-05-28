@@ -31,12 +31,14 @@ func Test_PostCaseBatch_OK(t *testing.T) {
 
 		body := types.CreateCaseBatchBody{
 			Cases: []*types.CaseBatch{{
-				SubmitterCaseId: "CASE-IT-1",
-				Type:            "germline",
-				StatusCode:      "submitted",
-				ProjectCode:     "QLIN",
-				CategoryCode:    "postnatal",
-				AnalysisCode:    "WGA",
+				SubmitterCaseId:          "CASE-IT-1",
+				Type:                     "germline",
+				StatusCode:               "submitted",
+				ProjectCode:              "QLIN",
+				CategoryCode:             "postnatal",
+				AnalysisCode:             "WGA",
+				DiagnosticLabCode:        "LDM-CHUSJ",
+				OrderingOrganizationCode: "CHUSJ",
 				Patients: []*types.CasePatientBatch{{
 					AffectedStatusCode:      "affected",
 					SubmitterPatientId:      "PAT-1",

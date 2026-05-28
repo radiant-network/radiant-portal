@@ -366,6 +366,8 @@ func TestPostCaseBatchHandler_MissingSequencingExperiments(t *testing.T) {
 			"project_code": "proj1",
 			"category_code": "postnatal",
 			"analysis_code": "WGA",
+			"diagnostic_lab_code": "lab1",
+			"ordering_organization_code": "org1",
 			"patients": [{
 				"affected_status_code": "affected",
 				"submitter_patient_id": "p1",
@@ -402,6 +404,8 @@ func TestPostCaseBatchHandler_EmptySequencingExperiments(t *testing.T) {
 			"project_code": "proj1",
 			"category_code": "postnatal",
 			"analysis_code": "WGA",
+			"diagnostic_lab_code": "lab1",
+			"ordering_organization_code": "org1",
 			"patients": [{
 				"affected_status_code": "affected",
 				"submitter_patient_id": "p1",

@@ -15,9 +15,10 @@ import (
 // already-existing sequencing experiments to an already-existing case.
 type CaseSequencingExperimentValidationRecord struct {
 	batchval.BaseValidationRecord
-	Patch                 types.CaseBatchPatch
-	CaseID                *int
-	SequencingExperiments map[int]*types.SequencingExperiment
+	Patch                  types.CaseBatchPatch
+	CaseID                 *int
+	SequencingExperiments  map[int]*types.SequencingExperiment
+	DiagnosisLabCodeUpdate string
 }
 
 func (r *CaseSequencingExperimentValidationRecord) GetBase() *batchval.BaseValidationRecord {
@@ -57,6 +58,22 @@ func validateCaseSequencingExperimentRecord(cache *batchval.BatchValidationCache
 		return r, nil
 	}
 	r.CaseID = &c.ID
+
+	if patch.DiagnosticLabCode != "" {
+		lab, err := cache.GetOrganizationByCode(patch.DiagnosticLabCode)
+		if err != nil {
+			return nil, fmt.Errorf("get organization by code %q: %w", patch.DiagnosticLabCode, err)
+		}
+		if lab == nil {
+			r.AddErrors(
+				fmt.Sprintf("Diagnostic lab %q for case (%s / %s) does not exist.", patch.DiagnosticLabCode, patch.ProjectCode, patch.SubmitterCaseId),
+				CaseDiagnosticLabUnknown,
+				fmt.Sprintf("%s.diagnostic_lab_code", r.path()),
+			)
+		} else {
+			r.DiagnosisLabCodeUpdate = patch.DiagnosticLabCode
+		}
+	}
 
 	for j, se := range patch.SequencingExperiments {
 		seqExp, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
@@ -124,6 +141,11 @@ func persistBatchAndCaseSequencingExperimentRecords(db *gorm.DB, batch *types.Ba
 		for _, rec := range records {
 			if rec.CaseID == nil {
 				continue
+			}
+			if rec.DiagnosisLabCodeUpdate != "" {
+				if err := casesRepo.UpdateCaseDiagnosisLabCode(*rec.CaseID, rec.DiagnosisLabCodeUpdate); err != nil {
+					return fmt.Errorf("failed to update diagnosis_lab_code on case %d: %w", *rec.CaseID, err)
+				}
 			}
 			for _, se := range rec.SequencingExperiments {
 				chse := types.CaseHasSequencingExperiment{CaseID: *rec.CaseID, SequencingExperimentID: se.ID}

@@ -38,6 +38,7 @@ type CasesDAO interface {
 	CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error
 	GetCaseAnalysisCatalogIdByCode(code string) (*AnalysisCatalog, error)
 	GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*Case, error)
+	UpdateCaseDiagnosisLabCode(caseID int, code string) error
 }
 
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
@@ -50,6 +51,12 @@ func NewCasesRepository(db *gorm.DB) *CasesRepository {
 
 func (r *CasesRepository) CreateCase(c *Case) error {
 	return r.db.Create(c).Error
+}
+
+func (r *CasesRepository) UpdateCaseDiagnosisLabCode(caseID int, code string) error {
+	return r.db.Table(types.CaseTable.Name).
+		Where("id = ?", caseID).
+		Update("diagnosis_lab_code", code).Error
 }
 
 func (r *CasesRepository) CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error {

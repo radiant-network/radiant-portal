@@ -18,6 +18,7 @@ func newCachePatch(repo *CaseValidationMockRepo) (*batchval.BatchValidationCache
 		ProjectRepo: repo,
 		CasesRepo:   repo,
 		SeqExpRepo:  repo,
+		OrgRepo:     repo,
 	}
 	return batchval.NewBatchValidationCache(ctx), ctx
 }
@@ -117,6 +118,48 @@ func Test_validateCaseSequencingExperimentRecord_CaseNotFound(t *testing.T) {
 	assert.Equal(t, CaseNotFoundForAttach, rec.Errors[0].Code)
 	assert.Nil(t, rec.CaseID)
 	assert.Empty(t, rec.SequencingExperiments)
+}
+
+func Test_validateCaseSequencingExperimentRecord_DiagnosticLabCode_Resolved(t *testing.T) {
+	mockRepo := &CaseValidationMockRepo{
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
+			return &repository.Case{ID: 100}, nil
+		},
+	}
+	cache, _ := newCachePatch(mockRepo)
+
+	patch := types.CaseBatchPatch{
+		ProjectCode:       "PROJ-1",
+		SubmitterCaseId:   "CASE-1",
+		DiagnosticLabCode: "LAB-1", // exists in mock
+	}
+
+	rec, err := validateCaseSequencingExperimentRecord(cache, patch, 0)
+	assert.NoError(t, err)
+	assert.Empty(t, rec.Errors)
+	assert.Equal(t, "LAB-1", rec.DiagnosisLabCodeUpdate)
+}
+
+func Test_validateCaseSequencingExperimentRecord_DiagnosticLabCode_Unknown(t *testing.T) {
+	mockRepo := &CaseValidationMockRepo{
+		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
+			return &repository.Case{ID: 100}, nil
+		},
+	}
+	cache, _ := newCachePatch(mockRepo)
+
+	patch := types.CaseBatchPatch{
+		ProjectCode:       "PROJ-1",
+		SubmitterCaseId:   "CASE-1",
+		DiagnosticLabCode: "LAB-UNKNOWN", // not in mock
+	}
+
+	rec, err := validateCaseSequencingExperimentRecord(cache, patch, 0)
+	assert.NoError(t, err)
+	assert.Len(t, rec.Errors, 1)
+	assert.Equal(t, CaseDiagnosticLabUnknown, rec.Errors[0].Code)
+	assert.Equal(t, "case_sequencing_experiment[0].diagnostic_lab_code", rec.Errors[0].Path)
+	assert.Empty(t, rec.DiagnosisLabCodeUpdate)
 }
 
 func Test_validateCaseSequencingExperimentRecord_SequencingExperimentMissing(t *testing.T) {
