@@ -7,7 +7,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
-import UploadIdModal from './modal/upload-id-modal';
+import UploadIdModal from './upload-id-facet';
 
 /**
  * Create facets
