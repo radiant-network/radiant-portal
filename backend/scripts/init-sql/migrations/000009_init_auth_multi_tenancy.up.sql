@@ -2,7 +2,9 @@
 -- Data-safe: works on a non-empty database (QA) and an empty one (dev).
 -- All identifiers are varchar "code" natural keys (no integer surrogate ids),
 -- so every reference column is named *_code. Users are keyed by email (the one
--- identifier always known at invite time, IdP-agnostic); keycloak_id is a
+-- identifier always known at invite time, IdP-agnostic); user_id is the
+-- Keycloak `sub` (uuid), nullable and filled on first login — matches the
+-- user_id column used by saved_filter / user_preference / user_set / occurrence_note.
 -- nullable attribute filled on first login.
 -- See docs/adr/multi-tenancy-security.md §5.
 
@@ -43,6 +45,8 @@ UPDATE public.cases c SET diagnosis_lab_code = o.code
     FROM public.organization o WHERE c.diagnosis_lab_id = o.id;
 UPDATE public.cases SET tenant_code = 'radiant';
 ALTER TABLE public.cases ALTER COLUMN tenant_code SET NOT NULL;
+ALTER TABLE public.cases ALTER COLUMN ordering_organization_code SET NOT NULL;
+ALTER TABLE public.cases ALTER COLUMN diagnosis_lab_code SET NOT NULL;
 ALTER TABLE public.cases DROP CONSTRAINT cases_ordering_organization_id_fkey;
 ALTER TABLE public.cases DROP CONSTRAINT case_performer_lab_id_fkey;
 ALTER TABLE public.cases DROP COLUMN ordering_organization_id;
@@ -55,6 +59,7 @@ UPDATE public.patient p SET organization_code = o.code
     FROM public.organization o WHERE p.organization_id = o.id;
 UPDATE public.patient SET tenant_code = 'radiant';
 ALTER TABLE public.patient ALTER COLUMN tenant_code SET NOT NULL;
+ALTER TABLE public.patient ALTER COLUMN organization_code SET NOT NULL;
 ALTER TABLE public.patient DROP CONSTRAINT patient_managing_organization_id_fkey;
 ALTER TABLE public.patient DROP COLUMN organization_id;
 
@@ -65,6 +70,7 @@ UPDATE public.sample s SET organization_code = o.code
     FROM public.organization o WHERE s.organization_id = o.id;
 UPDATE public.sample SET tenant_code = 'radiant';
 ALTER TABLE public.sample ALTER COLUMN tenant_code SET NOT NULL;
+ALTER TABLE public.sample ALTER COLUMN organization_code SET NOT NULL;
 ALTER TABLE public.sample DROP CONSTRAINT sample_submitter_organization_id_fkey;
 ALTER TABLE public.sample DROP COLUMN organization_id;
 
@@ -75,6 +81,7 @@ UPDATE public.sequencing_experiment s SET sequencing_lab_code = o.code
     FROM public.organization o WHERE s.sequencing_lab_id = o.id;
 UPDATE public.sequencing_experiment SET tenant_code = 'radiant';
 ALTER TABLE public.sequencing_experiment ALTER COLUMN tenant_code SET NOT NULL;
+ALTER TABLE public.sequencing_experiment ALTER COLUMN sequencing_lab_code SET NOT NULL;
 ALTER TABLE public.sequencing_experiment DROP CONSTRAINT sequencing_experiment_performer_lab_id_fkey;
 ALTER TABLE public.sequencing_experiment DROP COLUMN sequencing_lab_id;
 
@@ -115,7 +122,7 @@ ALTER TABLE public.sequencing_experiment
 -- =============================================================================
 CREATE TABLE public.users (
     email       varchar(255) PRIMARY KEY,
-    keycloak_id uuid,                       -- filled on first login; IdP-agnostic
+    user_id     uuid,                       -- Keycloak sub; filled on first login
     first_name  varchar(100),
     last_name   varchar(100),
     created_at  timestamptz  NOT NULL DEFAULT now(),

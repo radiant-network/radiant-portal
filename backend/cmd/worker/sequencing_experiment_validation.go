@@ -328,12 +328,10 @@ func insertSequencingExperimentRecords(records []*SequencingExperimentValidation
 				SequencingReadTechnologyCode: record.SequencingExperiment.SequencingReadTechnologyCode,
 				PlatformCode:                 record.SequencingExperiment.PlatformCode,
 				TenantCode:                   DefaultTenantCode,
+				SequencingLabCode:            record.SequencingExperiment.SequencingLabCode,
 			}
 
 			// nullable fields
-			if record.SequencingExperiment.SequencingLabCode != "" {
-				seqExp.SequencingLabCode = *record.SequencingLabCode
-			}
 			if record.SequencingExperiment.RunName != "" {
 				seqExp.RunName = record.SequencingExperiment.RunName.String()
 			}

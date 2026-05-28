@@ -7,7 +7,7 @@ type CaseBatch struct {
 	Type                       string                           `json:"type" toml:"type" binding:"required,oneof=germline somatic"`
 	StatusCode                 string                           `json:"status_code" toml:"status_code" binding:"required"`
 	ProjectCode                string                           `json:"project_code" toml:"project_code" binding:"required"`
-	DiagnosticLabCode          string                           `json:"diagnostic_lab_code,omitempty" toml:"diagnostic_lab_code"`
+	DiagnosticLabCode          string                           `json:"diagnostic_lab_code" toml:"diagnostic_lab_code" binding:"required"`
 	PrimaryConditionCodeSystem string                           `json:"primary_condition_code_system,omitempty" toml:"primary_condition_code_system"`
 	PrimaryConditionValue      string                           `json:"primary_condition_value,omitempty" toml:"primary_condition_value"`
 	PriorityCode               string                           `json:"priority_code,omitempty" toml:"priority_code"`
@@ -16,7 +16,7 @@ type CaseBatch struct {
 	ResolutionStatusCode       string                           `json:"resolution_status_code,omitempty" toml:"resolution_status_code"`
 	Note                       string                           `json:"note,omitempty" toml:"note"`
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty" toml:"ordering_physician"`
-	OrderingOrganizationCode   string                           `json:"ordering_organization_code,omitempty" toml:"ordering_organization_code"`
+	OrderingOrganizationCode   string                           `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
 	Patients                   []*CasePatientBatch              `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
 	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments" toml:"sequencing_experiments" binding:"required,min=1,dive,required"`
 	Tasks                      []*CaseTaskBatch                 `json:"tasks" toml:"tasks" binding:"required,dive,required"`

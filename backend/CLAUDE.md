@@ -78,13 +78,13 @@ Auth utilities live in `internal/utils/auth.go` (`KeycloakAuth` interface).
 
 Authorization is **data**, not a separate service. Migration `000009_init_auth_multi_tenancy.up.sql` adds the model as 8 PostgreSQL tables (in `public`; the ADR's `auth_db.*` is the logical name, federated into StarRocks as `radiant_jdbc.public.*`). See `docs/adr/multi-tenancy-security.md` §5.
 
-Identifiers are **varchar `code` natural keys** — no integer surrogate ids — so every reference column is `*_code`. Users are keyed by **`email`** (the one identifier known at invite time, IdP-agnostic); `keycloak_id uuid` is a nullable attribute filled on first login.
+Identifiers are **varchar `code` natural keys** — no integer surrogate ids — so every reference column is `*_code`. Users are keyed by **`email`** (the one identifier known at invite time, IdP-agnostic); `user_id uuid` (the Keycloak `sub`) is a nullable attribute filled on first login — same column name used by `saved_filter` / `user_preference` / `user_set` / `occurrence_note`.
 
 | Table | Key | Purpose |
 |---|---|---|
 | `tenant` | `code` | Tenant catalog (e.g. `radiant`) |
 | `organization` | `(code, tenant_code)` | Orgs, each belonging to one tenant (pre-existing table; `id` dropped, `tenant_code` added) |
-| `users` | `email` | Identity registry; `keycloak_id` nullable |
+| `users` | `email` | Identity registry; `user_id uuid` (Keycloak sub) nullable until first login |
 | `role` | `(tenant_code, code)` | Per-tenant role catalog |
 | `action` | `code` | Global action catalog; `scope` ∈ {`org`,`tenant`} |
 | `role_action` | `(tenant_code, role_code, action_code)` | Role → action mapping; FK to `role` `ON DELETE CASCADE` |
