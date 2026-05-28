@@ -350,7 +350,7 @@ func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinic
 	txObservations = txObservations.Joins("LEFT JOIN hpo_term hpo ON obs.observation_code = 'phenotype' AND hpo.id = obs.code_value")
 	txObservations = txObservations.Where("obs.observation_code = 'phenotype' AND obs.case_id = ?", caseId)
 	txObservations = txObservations.Order("phenotype_name asc")
-	txObservations = txObservations.Select("obs.patient_id, hpo.id as phenotype_id, hpo.name as phenotype_name, obs.onset_code, obs.interpretation_code")
+	txObservations = txObservations.Select("DISTINCT obs.patient_id, COALESCE(hpo.id, obs.code_value) as phenotype_id, hpo.name as phenotype_name, obs.onset_code, obs.interpretation_code")
 	if err := txObservations.Find(&phenotypeObsCategoricals).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving case phenotypes: %w", err)
 	}

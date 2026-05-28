@@ -576,7 +576,7 @@ ON CONFLICT (code, tenant_code) DO NOTHING;
 INSERT INTO project (id, code, name, description)
 VALUES (1, 'N1', 'NeuroDev Phase I', 'Phase one NeuroDev cases'),
        (2, 'N2', 'NeuroDev Phase II', 'Phase two NeuroDev cases'),
-       (3, 'QLIN', 'QLIN', 'Centre québécois de génomique clinique')
+       (3, 'QLIN', 'Quebec Clinical Genomic Center', 'Centre québécois de génomique clinique')
 ON CONFLICT (id) DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('analysis_catalog', 'id'), (SELECT COALESCE(MAX(id), 1) FROM analysis_catalog));

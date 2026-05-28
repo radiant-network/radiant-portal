@@ -177,7 +177,6 @@ components:
         sequencing_experiments:
           items:
             $ref: '#/components/schemas/CaseSequencingExperimentBatch'
-          minItems: 1
           type: array
           uniqueItems: false
         status_code:
@@ -560,6 +559,23 @@ components:
           type: string
       required:
       - sample_organization_code
+      type: object
+    CaseSequencingExperimentPatch:
+      properties:
+        project_code:
+          type: string
+        sequencing_experiments:
+          items:
+            $ref: '#/components/schemas/CaseSequencingExperimentBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+        submitter_case_id:
+          type: string
+      required:
+      - project_code
+      - sequencing_experiments
+      - submitter_case_id
       type: object
     CaseTask:
       properties:
@@ -1838,6 +1854,17 @@ components:
       - size
       - url
       type: object
+    PatchCaseSequencingExperimentBatchBody:
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/CaseSequencingExperimentPatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+      required:
+      - cases
+      type: object
     PatientBatch:
       properties:
         date_of_birth:
@@ -2833,11 +2860,6 @@ paths:
         required: true
         schema:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
       responses:
         "200":
           content:
@@ -3080,6 +3102,57 @@ paths:
       tags:
       - cases
   /cases/batch:
+    patch:
+      description: |-
+        Attach already-created sequencing experiments to already-created cases,
+        keyed by (project_code, submitter_case_id). The worker resolves each case and
+        experiment and inserts the case_has_sequencing_experiment links. A missing case
+        surfaces CASE-012; a missing experiment surfaces SEQ-007. It never creates the case.
+      operationId: patchCaseBatch
+      parameters:
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          default: false
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchCaseSequencingExperimentBatchBody'
+        description: Attach Body
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Attach sequencing experiments to existing cases (batch)
+      tags:
+      - cases
     post:
       description: Create a new case batch
       operationId: postCaseBatch

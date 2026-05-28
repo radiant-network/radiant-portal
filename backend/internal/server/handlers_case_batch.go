@@ -62,3 +62,60 @@ func PostCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.Handler
 		c.JSON(http.StatusAccepted, response)
 	}
 }
+
+// PatchCaseBatchHandler
+// @Summary Attach sequencing experiments to existing cases (batch)
+// @Id patchCaseBatch
+// @Description Attach already-created sequencing experiments to already-created cases,
+// @Description keyed by (project_code, submitter_case_id). The worker resolves each case and
+// @Description experiment and inserts the case_has_sequencing_experiment links. A missing case
+// @Description surfaces CASE-012; a missing experiment surfaces SEQ-007. It never creates the case.
+// @Tags cases
+// @Security bearerauth
+// @Param dry_run query boolean false "Dry Run" default(false)
+// @Param message	body		types.PatchCaseSequencingExperimentBatchBody	true	"Attach Body"
+// @Accept json
+// @Produce json
+// @Success 202 {object} types.CreateBatchResponse
+// @Failure 400 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Router /cases/batch [patch]
+func PatchCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body       types.PatchCaseSequencingExperimentBatchBody
+			queryParam types.CreateBatchQueryParam
+		)
+		if err := c.ShouldBindJSON(&body); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if err := c.ShouldBindQuery(&queryParam); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		username, err := auth.RetrieveUsernameFromToken(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		batch, err := repo.CreateBatch(body.Cases, types.CaseSequencingExperimentBatchType, *username, queryParam.DryRun)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		response := types.CreateBatchResponse{
+			ID:        batch.ID,
+			BatchType: batch.BatchType,
+			Status:    batch.Status,
+			CreatedOn: batch.CreatedOn,
+			Username:  batch.Username,
+			DryRun:    batch.DryRun,
+		}
+		c.JSON(http.StatusAccepted, response)
+	}
+}

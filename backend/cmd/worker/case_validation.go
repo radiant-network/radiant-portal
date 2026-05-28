@@ -52,6 +52,7 @@ const (
 	CaseSeqExpNotFoundForPatient    = "CASE-009"
 	CaseInvalidSeqExpForType        = "CASE-010"
 	CaseIdenticalInBatch            = "CASE-011"
+	CaseNotFoundForAttach           = "CASE-012"
 )
 
 // Patients error codes
@@ -417,15 +418,8 @@ func (r *CaseValidationRecord) fetchPatients() error {
 	return nil
 }
 
-func isIncompleteSeqExp(se *types.CaseSequencingExperimentBatch) bool {
-	return strings.TrimSpace(se.Aliquot) == "" || strings.TrimSpace(se.SubmitterSampleId) == ""
-}
-
 func (r *CaseValidationRecord) fetchFromSequencingExperiments() error {
 	for _, se := range r.Case.SequencingExperiments {
-		if isIncompleteSeqExp(se) {
-			continue
-		}
 		seqExp, err := r.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
 		if err != nil {
 			return fmt.Errorf("failed to get sequencing experiment: %w", err)
@@ -846,9 +840,6 @@ func (cr *CaseValidationRecord) validateSeqExpCaseType(seqExpIndex int, sample *
 
 func (cr *CaseValidationRecord) validateCaseSequencingExperiments() error {
 	for seqExpIndex := range cr.Case.SequencingExperiments {
-		if isIncompleteSeqExp(cr.Case.SequencingExperiments[seqExpIndex]) {
-			continue
-		}
 		err, exists := cr.validateSeqExpExists(seqExpIndex)
 		if err != nil {
 			return fmt.Errorf("error validating sequencing experiment in organization for sequencing experiment index %d: %v", seqExpIndex, err)
@@ -896,9 +887,8 @@ func (cr *CaseValidationRecord) validateCase() error {
 			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.Case.SubmitterCaseId, *cr.ProjectID, err)
 		}
 		if c != nil {
-			cr.IsExisting = true
-			cr.CaseID = &c.ID
-			message := fmt.Sprintf("Case (%d / %s) already exists, reconciling sequencing experiments.", *cr.ProjectID, cr.Case.SubmitterCaseId)
+			cr.Skipped = true
+			message := fmt.Sprintf("Case (%d / %s) already exists, skipped.", *cr.ProjectID, cr.Case.SubmitterCaseId)
 			cr.AddInfos(message, CaseAlreadyExists, path) // CASE-001
 			return nil
 		}
@@ -1268,9 +1258,6 @@ func validateCaseRecord(
 	if cr.Skipped {
 		return cr, nil
 	}
-	if cr.IsExisting {
-		return cr, nil
-	}
 
 	// 2. Validate Case Patients
 	if err := cr.validateCasePatients(); err != nil {
@@ -1418,12 +1405,6 @@ func persistCaseRecords(
 ) error {
 	for _, record := range records {
 		if record.Skipped {
-			continue
-		}
-		if record.IsExisting {
-			if err := persistCaseHasSequencingExperiments(ctx, record); err != nil {
-				return fmt.Errorf("failed to reconcile case_has_sequencing_experiment for case %d: %w", record.Index, err)
-			}
 			continue
 		}
 		if err := persistCase(ctx, record); err != nil {
