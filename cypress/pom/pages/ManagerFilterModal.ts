@@ -1,5 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
+import { getFilterIdByName } from 'pom/shared/Utils';
 
 export const ManagerFilterModal = {
   actions: {
@@ -14,7 +15,9 @@ export const ManagerFilterModal = {
      * @param name The filter name.
      */
     deleteFilter(name: string) {
-      cy.get(CommonSelectors.listItemAction(name)).realHover();
+      getFilterIdByName(name).then(id => {
+        cy.get(CommonSelectors.listItemAction(id)).realHover();
+      });
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.deleteIcon}:visible`).clickAndWait({ force: true });
 
       cy.intercept('**/saved_filters{,/**}').as('deleteSavedFilters');
@@ -29,7 +32,9 @@ export const ManagerFilterModal = {
      * @param newName The new filter name.
      */
     editFilterName(oldName: string, newName: string) {
-      cy.get(CommonSelectors.listItemAction(oldName)).realHover();
+      getFilterIdByName(oldName).then(id => {
+        cy.get(CommonSelectors.listItemAction(id)).realHover();
+      });
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.editIcon}:visible`).clickAndWait({ force: true });
 
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.input}`).clear();
