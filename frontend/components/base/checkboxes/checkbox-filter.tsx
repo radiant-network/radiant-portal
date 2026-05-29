@@ -8,7 +8,7 @@ import { cn } from '@/components/lib/utils';
 
 export const checkboxFilterVariants = tv({
   slots: {
-    base: 'flex gap-2 w-full max-w-[228px] cursor-pointer justify-between',
+    base: 'flex items-start gap-2 w-full max-w-[228px] cursor-pointer justify-between',
     label: 'first-letter:capitalize line-clamp-2 cursor-pointer max-w-[154px] whitespace-normal break-words',
     description: 'w-full',
     icon: '',
@@ -17,28 +17,34 @@ export const checkboxFilterVariants = tv({
     size: {
       default: {
         base: '',
-        label: 'text-xs',
+        label: 'text-xs leading-4',
         icon: '[&_svg]:size-4',
       },
       xs: {
         base: '',
-        label: 'text-xs',
+        label: 'text-xs leading-[14px]',
         icon: '[&_svg]:size-3.5',
       },
       sm: {
         base: '',
-        label: 'text-sm',
+        label: 'text-sm leading-4',
         icon: '[&_svg]:size-4',
       },
       md: {
         base: '',
-        label: 'text-md',
+        label: 'text-md leading-5',
         icon: '[&_svg]:size-4',
       },
       lg: {
         base: 'text-lg',
-        label: 'text-lg',
+        label: 'text-lg leading-6',
         icon: '[&_svg]:size-5',
+      },
+    },
+    fluid: {
+      true: {
+        base: 'max-w-none',
+        label: 'max-w-none',
       },
     },
   },
@@ -49,10 +55,11 @@ export const checkboxFilterVariants = tv({
 
 type CheckboxFilterProps = React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> &
   VariantProps<typeof checkboxVariants> & {
-    label: string;
+    label: React.ReactNode;
     icon?: React.ReactElement;
     count?: number;
     description?: string;
+    fluid?: boolean;
     'data-cy'?: string;
   };
 
@@ -63,11 +70,12 @@ function CheckboxFilter({
   icon,
   count,
   description,
+  fluid,
   'data-cy': dataCy,
   ...props
 }: CheckboxFilterProps) {
-  const styles = checkboxFilterVariants({ size });
-  const name = label.toLowerCase().replaceAll(' ', '-');
+  const styles = checkboxFilterVariants({ size, fluid });
+  const name = typeof label === 'string' ? label.toLowerCase().replaceAll(' ', '-') : undefined;
 
   return (
     <div

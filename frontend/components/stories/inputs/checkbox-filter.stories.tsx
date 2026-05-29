@@ -65,7 +65,7 @@ export const Default: Story = {
 
     return (
       <div className="flex flex-col gap-6">
-        {['xs', 'sm'].map(size => (
+        {['default', 'xs', 'sm', 'md', 'lg'].map(size => (
           <div key={size} className="flex flex-col gap-3">
             <span className="leading-2 font-bold uppercase"> {size} </span>
             <ChecboxFilter
@@ -142,6 +142,51 @@ export const Default: Story = {
             />
           </div>
         ))}
+      </div>
+    );
+  },
+};
+
+export const Fluid: Story = {
+  args: {
+    label: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',
+  },
+  render: args => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [checked, setChecked] = useState<string[]>([]);
+    const handleOnCheckedChange = (id: string) => (value: boolean) => {
+      if (value) {
+        setChecked([...checked, id]);
+        return;
+      }
+      setChecked(checked.filter(c => c !== id));
+    };
+
+    return (
+      <div className="flex w-[480px] flex-col gap-6 rounded-md border p-4">
+        <div className="flex flex-col gap-3">
+          <span className="leading-2 font-bold"> Default (width capped at 228px) </span>
+          <ChecboxFilter
+            {...args}
+            size="sm"
+            count={1234}
+            description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+            checked={checked.includes('capped')}
+            onCheckedChange={handleOnCheckedChange('capped')}
+          />
+        </div>
+        <div className="flex flex-col gap-3">
+          <span className="leading-2 font-bold"> Fluid (fills the container) </span>
+          <ChecboxFilter
+            {...args}
+            fluid
+            size="sm"
+            count={1234}
+            description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+            checked={checked.includes('fluid')}
+            onCheckedChange={handleOnCheckedChange('fluid')}
+          />
+        </div>
       </div>
     );
   },

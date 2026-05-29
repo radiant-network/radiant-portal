@@ -294,6 +294,7 @@ function DataTableFilters({
               selected={filter.selectedItems}
               onSelect={values => handleFilterSelect(filter.key, values)}
               isOpen={filter.isOpen}
+              showKey={filter.showKey}
               withTooltip={filter.withTooltip}
             />
           ))}

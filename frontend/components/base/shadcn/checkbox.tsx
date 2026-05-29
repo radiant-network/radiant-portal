@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 export const checkboxVariants = tv({
   slots: {
-    base: 'peer shrink-0 rounded-xs border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring shadow-sm disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground',
+    base: 'peer shrink-0 rounded-xs border border-primary ring-offset-background transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-1 focus-visible:outline-ring shadow-sm disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground',
     icon: '',
   },
   variants: {

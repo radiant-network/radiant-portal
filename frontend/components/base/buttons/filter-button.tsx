@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { LucideIcon, PlusCircle, Search } from 'lucide-react';
 
+import CheckboxFilter from '@/components/base/checkboxes/checkbox-filter';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
-import { Checkbox } from '@/components/base/shadcn/checkbox';
 import {
   Command,
   CommandEmpty,
@@ -40,6 +40,7 @@ export interface IFilterButton {
   icon?: any;
   count?: number;
   optionRenderer?: (option: IFilterButtonItem) => React.ReactNode;
+  showKey?: boolean;
   withTooltip?: boolean;
 }
 
@@ -56,7 +57,8 @@ type FilterButtonProps = {
   isOpen?: boolean;
   closeOnSelect?: boolean;
   optionRenderer?: (option: IFilterButtonItem) => React.ReactNode;
-  withTooltip?: boolean; // new prop for tooltip functionality
+  showKey?: boolean; // display the option key in front of the label ("key - label")
+  withTooltip?: boolean; // wrap each item in a hover tooltip
 };
 
 const CustomCommandItem = ({
@@ -66,6 +68,7 @@ const CustomCommandItem = ({
   setOpen,
   actionMode,
   selected,
+  showKey,
   withTooltip,
 }: {
   option: IFilterButtonItem;
@@ -74,9 +77,70 @@ const CustomCommandItem = ({
   setOpen: (open: boolean) => void;
   actionMode: boolean;
   selected: string[];
+  showKey: boolean;
   withTooltip: boolean;
 }) => {
   const IconComponent = option.icon;
+  const isSelected = selected.includes(option.key || '');
+  const labelText = typeof option.label === 'string' ? option.label : '';
+
+  // showKey renders the single-line "key - label" display (truncated, muted label).
+  const keyLabelContent = (
+    <>
+      {option.key}
+      <span className="text-muted-foreground"> - {labelText}</span>
+    </>
+  );
+
+  // withTooltip anchors the tooltip on the label itself: the trigger is an inline-block so it
+  // sizes to the text (tooltip centered on the label, not the whole row), with max-w-full +
+  // truncate for long values. Selection is driven solely by CommandItem.onSelect (keyboard +
+  // click bubbling), so onCheckedChange is omitted; onMouseDown preventDefault keeps the
+  // search input focused.
+  let label: React.ReactNode;
+  if (withTooltip) {
+    label = (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-block max-w-full truncate align-middle">
+              {showKey ? keyLabelContent : option.label}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{option.tooltip || option.label}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  } else if (showKey) {
+    label = <span className="block truncate">{keyLabelContent}</span>;
+  } else {
+    label = option.label;
+  }
+
+  const checkboxFilter = (
+    <CheckboxFilter
+      fluid
+      size="sm"
+      className="mx-2 my-1.5"
+      checked={isSelected}
+      label={label}
+      icon={IconComponent ? <IconComponent /> : undefined}
+      count={option.count}
+      onMouseDown={e => e.preventDefault()}
+    />
+  );
+
+  let content: React.ReactNode;
+  if (actionMode) {
+    content = (
+      <Button variant="ghost" className="mx-2 my-1.5 p-0 h-full w-full items-center justify-start font-normal">
+        {option.label}
+      </Button>
+    );
+  } else {
+    content = checkboxFilter;
+  }
+
   return (
     <CommandItem
       key={option.key}
@@ -88,42 +152,7 @@ const CustomCommandItem = ({
       }}
       className="p-0 overflow-hidden hover:bg-accent hover:text-accent-foreground focus:bg-transparent focus:text-foreground"
     >
-      {actionMode ? (
-        <Button variant="ghost" className="mx-2 my-1.5 p-0 h-full w-full items-center justify-start font-normal">
-          {option.label}
-        </Button>
-      ) : (
-        <div className="flex row mx-2 my-1.5 p-0 w-full gap-2 items-center overflow-hidden">
-          <Checkbox
-            className="mr-0"
-            checked={selected.includes(option.key || '')}
-            onCheckedChange={() => {
-              handleSelect(option.key || '');
-            }}
-            onMouseDown={e => {
-              e.preventDefault();
-            }}
-          />
-          <div className="flex w-full items-center gap-1 overflow-hidden min-w-0">
-            {IconComponent && <IconComponent size={20} />}
-            {withTooltip ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="truncate">
-                      <span className="flex-1 min-w-0">{option.key}</span>
-                      <span className="text-muted-foreground"> - {option.label}</span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>{option.tooltip || option.label}</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : (
-              <span className="truncate flex-1 min-w-0">{option.label}</span>
-            )}
-          </div>
-        </div>
-      )}
+      {content}
     </CommandItem>
   );
 };
@@ -147,6 +176,7 @@ export default function FilterButton({
   icon,
   isOpen: openOnAppear = false,
   closeOnSelect = false,
+  showKey = false, // defaults to false
   withTooltip = false, // defaults to false
 }: FilterButtonProps) {
   const { t } = useI18n();
@@ -235,6 +265,7 @@ export default function FilterButton({
                   setOpen={setOpen}
                   actionMode={actionMode}
                   selected={selected}
+                  showKey={showKey}
                   withTooltip={withTooltip}
                 />
               ))}
@@ -250,6 +281,7 @@ export default function FilterButton({
                   setOpen={setOpen}
                   actionMode={actionMode}
                   selected={selected}
+                  showKey={showKey}
                   withTooltip={withTooltip}
                 />
               ))}

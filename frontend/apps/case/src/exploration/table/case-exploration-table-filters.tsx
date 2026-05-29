@@ -111,6 +111,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
             popoverSize: 'lg' as PopoverSize,
             isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
             options: sortOptions(apiFilters[key] || []),
+            showKey: true,
             withTooltip: true,
           };
         case 'life_status_code':
