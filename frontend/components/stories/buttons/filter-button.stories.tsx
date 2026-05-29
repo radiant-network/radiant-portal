@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Calendar, Database, FileText, Filter, Settings, Users } from 'lucide-react';
 
 import FilterButton, { IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
+import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 
 const meta: Meta<typeof FilterButton> = {
   title: 'Buttons/Filter Button',
@@ -62,6 +63,38 @@ const longTextOptions: IFilterButtonItem[] = [
     count: 34,
     icon: Settings,
   },
+];
+
+// Mock data for a standard checkbox list with a per-item icon
+const iconOptions: IFilterButtonItem[] = [
+  { key: 'users', label: 'Users', count: 42, icon: Users },
+  { key: 'database', label: 'Database', count: 28, icon: Database },
+  { key: 'files', label: 'Files', count: 15, icon: FileText },
+  { key: 'calendar', label: 'Calendar', count: 7, icon: Calendar },
+];
+
+// Mock data without counts
+const noCountOptions: IFilterButtonItem[] = [
+  { key: 'option1', label: 'Option 1' },
+  { key: 'option2', label: 'Option 2' },
+  { key: 'option3', label: 'Option 3' },
+];
+
+// Mock data with React node labels (e.g. a PriorityIndicator instead of a plain string)
+const priorityOptions: IFilterButtonItem[] = (['routine', 'urgent', 'asap', 'stat'] as PriorityIndicatorCode[]).map(
+  (code, index) => ({
+    key: code,
+    label: <PriorityIndicator size="sm" code={code} />,
+    count: [42, 28, 15, 7][index],
+  }),
+);
+
+// Mock data for a code-based filter (key shown in front of the label + tooltip)
+const labCodeOptions: IFilterButtonItem[] = [
+  { key: 'EXTUM', label: 'Tumoral Analysis', tooltip: 'External Tumoral Analysis', count: 234 },
+  { key: 'CHUSJ', label: 'CHU Sainte-Justine Laboratory', count: 156 },
+  { key: 'LSPQ', label: 'Laboratoire de santé publique du Québec', count: 89 },
+  { key: 'MUHC', label: 'McGill University Health Centre', count: 42 },
 ];
 
 // Mock data for action mode
@@ -127,6 +160,81 @@ export const WithLongTextAndTooltips: Story = {
   ),
 };
 
+export const WithItemIcons: Story = {
+  render: () => (
+    <div className="p-4">
+      <h3 className="mb-4 text-lg font-semibold">Checkbox list with per-item icons</h3>
+      <InteractiveFilterButton
+        label="Type"
+        options={iconOptions}
+        placeholder="Search type..."
+        icon={<Filter className="size-4" />}
+      />
+    </div>
+  ),
+};
+
+export const WithoutCounts: Story = {
+  render: () => (
+    <div className="p-4">
+      <h3 className="mb-4 text-lg font-semibold">Options without counts</h3>
+      <InteractiveFilterButton
+        label="Status"
+        options={noCountOptions}
+        placeholder="Search status..."
+        icon={<Filter className="size-4" />}
+      />
+    </div>
+  ),
+};
+
+export const WithReactNodeLabels: Story = {
+  render: () => (
+    <div className="p-4">
+      <h3 className="mb-4 text-lg font-semibold">React node labels (PriorityIndicator)</h3>
+      <InteractiveFilterButton
+        label="Priority"
+        options={priorityOptions}
+        placeholder="Search priority..."
+        icon={<Filter className="size-4" />}
+      />
+    </div>
+  ),
+};
+
+export const WithKeyOnly: Story = {
+  render: () => (
+    <div className="p-4">
+      <h3 className="mb-4 text-lg font-semibold">Key display only (no tooltip)</h3>
+      <InteractiveFilterButton
+        label="Lab"
+        options={labCodeOptions}
+        popoverSize="md"
+        placeholder="Search lab..."
+        showKey
+        icon={<Filter className="size-4" />}
+      />
+    </div>
+  ),
+};
+
+export const WithKeyAndTooltip: Story = {
+  render: () => (
+    <div className="p-4">
+      <h3 className="mb-4 text-lg font-semibold">Key display + tooltip (code-based filter)</h3>
+      <InteractiveFilterButton
+        label="Lab"
+        options={labCodeOptions}
+        popoverSize="lg"
+        placeholder="Search lab..."
+        showKey
+        withTooltip
+        icon={<Filter className="size-4" />}
+      />
+    </div>
+  ),
+};
+
 export const ActionMode: Story = {
   render: () => (
     <div className="p-4">
@@ -164,6 +272,61 @@ export const AllVariants: Story = {
           placeholder="Search conditions..."
           withTooltip={true}
           icon={<Users className="size-4" />}
+        />
+      </div>
+
+      <div>
+        <h3 className="mb-4 text-lg font-semibold">Key display only (no tooltip)</h3>
+        <InteractiveFilterButton
+          label="Lab"
+          options={labCodeOptions}
+          popoverSize="md"
+          placeholder="Search lab..."
+          showKey
+          icon={<Filter className="size-4" />}
+        />
+      </div>
+
+      <div>
+        <h3 className="mb-4 text-lg font-semibold">Key display + tooltip (code-based filter)</h3>
+        <InteractiveFilterButton
+          label="Lab"
+          options={labCodeOptions}
+          popoverSize="lg"
+          placeholder="Search lab..."
+          showKey
+          withTooltip
+          icon={<Filter className="size-4" />}
+        />
+      </div>
+
+      <div>
+        <h3 className="mb-4 text-lg font-semibold">Checkbox list with per-item icons</h3>
+        <InteractiveFilterButton
+          label="Type"
+          options={iconOptions}
+          placeholder="Search type..."
+          icon={<Filter className="size-4" />}
+        />
+      </div>
+
+      <div>
+        <h3 className="mb-4 text-lg font-semibold">Options without counts</h3>
+        <InteractiveFilterButton
+          label="Status"
+          options={noCountOptions}
+          placeholder="Search status..."
+          icon={<Filter className="size-4" />}
+        />
+      </div>
+
+      <div>
+        <h3 className="mb-4 text-lg font-semibold">React node labels (PriorityIndicator)</h3>
+        <InteractiveFilterButton
+          label="Priority"
+          options={priorityOptions}
+          placeholder="Search priority..."
+          icon={<Filter className="size-4" />}
         />
       </div>
 

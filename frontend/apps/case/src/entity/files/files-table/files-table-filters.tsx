@@ -83,6 +83,7 @@ function FilesTableFilters({ caseId, setSearchCriteria }: FilesTableFilters) {
         default:
           return {
             ...baseOption,
+            showKey: true,
             withTooltip: true,
             options: sortOptions(apiFilters[key as keyof DocumentFilters] || []),
           };

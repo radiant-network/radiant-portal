@@ -71,6 +71,7 @@ function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
           return {
             ...baseOption,
             popoverSize: 'lg' as PopoverSize,
+            showKey: true,
             withTooltip: true,
             options: sortOptions(apiFilters[key] || []),
           };
@@ -94,6 +95,7 @@ function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
         default:
           return {
             ...baseOption,
+            showKey: true,
             withTooltip: true,
           };
       }
