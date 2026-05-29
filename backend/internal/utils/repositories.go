@@ -212,18 +212,3 @@ func JoinGermlineInterpretationWithCase(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.case_id = %s.id", types.CaseTable.FederationName, types.CaseTable.Alias, types.InterpretationGermlineTable.Alias, types.CaseTable.Alias))
 }
 
-func JoinGermlineSNVOccurrenceWithSeqExp(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.id = %s.seq_id", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
-}
-
-func JoinGermlineSNVOccurrenceWithCaseHasSeqExp(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.sequencing_experiment_id = %s.seq_id", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
-}
-
-func JoinCaseHasSeqExpWithGermlineSNVOccurrence(tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.sequencing_experiment_id = %s.seq_id", types.GermlineSNVOccurrenceTable.Name, types.GermlineSNVOccurrenceTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.GermlineSNVOccurrenceTable.Alias))
-}
-
-func AntiJoinCaseHasSeqExpWithGermlineInterpretationForLocus(tx *gorm.DB, locusIdString string) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT ANTI JOIN %s %s ON %s.locus_id = ? AND %s.sequencing_id = %s.sequencing_experiment_id AND %s.case_id = %s.case_id", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias, types.InterpretationGermlineTable.Alias, types.InterpretationGermlineTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.InterpretationGermlineTable.Alias, types.CaseHasSequencingExperimentTable.Alias), locusIdString)
-}

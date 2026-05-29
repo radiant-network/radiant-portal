@@ -92,3 +92,11 @@ func (TaskContext) TableName() string {
 func (TaskHasDocument) TableName() string {
 	return TaskHasDocumentTable.Name
 }
+
+var TaskContextTaskIdField = Field{
+	Name:          "task_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         TaskContextTable,
+}

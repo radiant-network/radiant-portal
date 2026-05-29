@@ -156,6 +156,7 @@ var VariantUninterpretedCasesDefaultFields = []Field{
 	CaseDiagnosisLabNameField,
 	CaseUpdatedOnField,
 	SamplePatientIdField,
+	TaskContextTaskIdField,
 }
 
 var VariantUninterpretedCasesFields = append(VariantUninterpretedCasesDefaultFields,
@@ -182,7 +183,7 @@ var VariantInterpretedCasesQueryConfig = QueryConfig{
 var VariantUninterpretedCasesQueryConfig = QueryConfig{
 	AllFields:     VariantUninterpretedCasesFields,
 	DefaultFields: VariantUninterpretedCasesDefaultFields,
-	DefaultSort:   append(CasesDefaultSort, SortField{Field: CaseIdField, Order: "asc"}, SortField{Field: SequencingExperimentIdField, Order: "desc"}),
+	DefaultSort:   append(CasesDefaultSort, SortField{Field: CaseIdField, Order: "asc"}, SortField{Field: SequencingExperimentIdField, Order: "desc"}, SortField{Field: TaskContextTaskIdField, Order: "desc"}),
 	IdField:       CaseIdField,
 }
 

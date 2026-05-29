@@ -32,9 +32,9 @@ class CaseBatch(BaseModel):
     """ # noqa: E501
     analysis_code: StrictStr
     category_code: StrictStr
-    diagnostic_lab_code: Optional[StrictStr] = None
+    diagnostic_lab_code: StrictStr
     note: Optional[StrictStr] = None
-    ordering_organization_code: Optional[StrictStr] = None
+    ordering_organization_code: StrictStr
     ordering_physician: Optional[StrictStr] = None
     patients: Annotated[List[CasePatientBatch], Field(min_length=1)]
     primary_condition_code_system: Optional[StrictStr] = None

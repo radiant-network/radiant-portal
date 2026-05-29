@@ -88,7 +88,6 @@ docs/SavedFilterType.md
 docs/SavedFilterUpdateInput.md
 docs/SavedFiltersApi.md
 docs/SearchCriterion.md
-docs/Sequencing.md
 docs/SequencingApi.md
 docs/SequencingExperimentBatch.md
 docs/SequencingExperimentDetail.md
@@ -221,7 +220,6 @@ radiant_python/models/saved_filter_creation_input.py
 radiant_python/models/saved_filter_type.py
 radiant_python/models/saved_filter_update_input.py
 radiant_python/models/search_criterion.py
-radiant_python/models/sequencing.py
 radiant_python/models/sequencing_experiment_batch.py
 radiant_python/models/sequencing_experiment_detail.py
 radiant_python/models/somatic_snv_occurrence.py

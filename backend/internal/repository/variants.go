@@ -130,7 +130,13 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 
 	tx := r.db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias))
 	tx = utils.JoinGermlineInterpretationWithSNVOccurrence(tx)
-	tx = utils.JoinGermlineSNVOccurrenceWithSeqExp(tx)
+	// interpretation_germline has no task_id column, so the snv↔interpretation
+	// join above is on (seq_id, locus_id) alone. Bridge through task_context to
+	// scope the snv occurrence to the interpretation's case — otherwise an
+	// occurrence at the same seq_id but produced by another case's annotation
+	// task would leak into this case's interpreted results.
+	tx = tx.Joins("INNER JOIN radiant_jdbc.public.task_context tctx ON tctx.task_id = g_snv_o.task_id AND tctx.sequencing_experiment_id = g_snv_o.seq_id AND tctx.case_id = ig.case_id")
+	tx = tx.Joins("INNER JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = g_snv_o.seq_id")
 	tx = utils.JoinGermlineInterpretationWithCase(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
 	tx = utils.JoinSampleAndCaseWithFamily(tx)
@@ -193,19 +199,28 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 
 	txAggPhenotypes := utils.GetAggregatedPhenotypes(r.db)
 
+	// interpretation_germline.locus_id is text, so this ANTI JOIN compares strings; g_snv_o.locus_id is int and uses locusId directly.
 	locusIdString := fmt.Sprintf("%d", locusId)
 
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias))
-	tx = utils.JoinCaseHasSeqExpWithGermlineSNVOccurrence(tx)
-	tx = utils.JoinCaseHasSeqExpWithSequencingExperiment(tx)
-	tx = utils.JoinCaseHasSeqExpWithCase(tx)
+	// Drive from task_context — for germline SNV, each (case, seq) pair is
+	// reached via its annotation task (case-scoped row, case_id NOT NULL).
+	// Joining the occurrence on (seq_id, task_id) prevents leaking occurrences
+	// across cases that share a sequencing experiment.
+	tx := r.db.Table(fmt.Sprintf("%s %s", types.TaskContextTable.FederationName, types.TaskContextTable.Alias))
+	tx = tx.Joins("INNER JOIN germline__snv__occurrence g_snv_o ON g_snv_o.seq_id = tctx.sequencing_experiment_id AND g_snv_o.task_id = tctx.task_id")
+	tx = tx.Joins("INNER JOIN radiant_jdbc.public.cases c ON c.id = tctx.case_id")
+	tx = tx.Joins("INNER JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = tctx.sequencing_experiment_id")
 	tx = utils.JoinCaseWithAnalysisCatalog(tx)
 	tx = utils.JoinCaseWithDiagnosisLab(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
-	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)
-	tx = utils.JoinFamilyWithPatient(tx)
+	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.family f ON f.family_member_id = spl.patient_id AND f.case_id = tctx.case_id")
+
+	if userQuery != nil && userQuery.HasFieldFromTables(types.PatientTable) {
+		tx = utils.JoinFamilyWithPatient(tx)
+	}
+
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
-	tx = utils.AntiJoinCaseHasSeqExpWithGermlineInterpretationForLocus(tx, locusIdString)
+	tx = tx.Joins("LEFT ANTI JOIN radiant_jdbc.public.interpretation_germline ig ON ig.locus_id = ? AND ig.sequencing_id = tctx.sequencing_experiment_id AND ig.case_id = tctx.case_id", locusIdString)
 	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = spl.patient_id", txAggPhenotypes)
 	tx = tx.Where("g_snv_o.locus_id = ?", locusId)
 
@@ -251,20 +266,44 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCou
 	var countUnInterpreted int64
 
 	locusIdString := fmt.Sprintf("%d", locusId)
-	txInterpreted := r.db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias))
-	txInterpreted = txInterpreted.Select("COUNT(1)")
-	txInterpreted = txInterpreted.Where("locus_id = ?", locusIdString)
-	if err := txInterpreted.Find(&countInterpreted).Error; err != nil {
+
+	// Count distinct (case_id, seq_id, task_id) triples that have an
+	// interpretation at this locus. interpretation_germline has no task_id, so
+	// bridge through germline_snv_occurrence + task_context to recover it.
+	txInterpreted := r.db.Raw(`
+		SELECT COUNT(DISTINCT CONCAT(tctx.case_id, '-', tctx.sequencing_experiment_id, '-', tctx.task_id))
+		FROM radiant_jdbc.public.interpretation_germline ig
+		INNER JOIN germline__snv__occurrence g_snv_o
+		    ON g_snv_o.seq_id = ig.sequencing_id
+		   AND g_snv_o.locus_id = ig.locus_id
+		INNER JOIN radiant_jdbc.public.task_context tctx
+		    ON tctx.task_id = g_snv_o.task_id
+		   AND tctx.sequencing_experiment_id = g_snv_o.seq_id
+		   AND tctx.case_id = ig.case_id
+		WHERE g_snv_o.locus_id = ?`, locusId)
+
+	if err := txInterpreted.Scan(&countInterpreted).Error; err != nil {
 		return nil, fmt.Errorf("error counting variant interpreted cases: %w", err)
 	}
 
-	txUnInterpreted := r.db.Table(fmt.Sprintf("%s %s", types.GermlineSNVOccurrenceTable.Name, types.GermlineSNVOccurrenceTable.Alias))
-	txUnInterpreted = utils.JoinGermlineSNVOccurrenceWithCaseHasSeqExp(txUnInterpreted)
-	txUnInterpreted = utils.AntiJoinCaseHasSeqExpWithGermlineInterpretationForLocus(txUnInterpreted, locusIdString)
-	txUnInterpreted = txUnInterpreted.Select("COUNT(DISTINCT CONCAT(chseq.case_id, chseq.sequencing_experiment_id))")
-	txUnInterpreted = txUnInterpreted.Where("g_snv_o.locus_id = ?", locusId)
+	// Count distinct (case_id, seq_id, task_id) triples that have an occurrence
+	// at this locus and no interpretation. Driving from task_context (instead
+	// of case_has_sequencing_experiment) ensures the occurrence is attributed
+	// only to the case whose annotation task produced it — preventing a leak
+	// when a sequencing experiment is reused across multiple cases.
+	txUnInterpreted := r.db.Raw(`
+		SELECT COUNT(DISTINCT CONCAT(tctx.case_id, '-', tctx.sequencing_experiment_id, '-', tctx.task_id))
+		FROM radiant_jdbc.public.task_context tctx
+		INNER JOIN germline__snv__occurrence g_snv_o
+		    ON g_snv_o.seq_id = tctx.sequencing_experiment_id
+		   AND g_snv_o.task_id = tctx.task_id
+		LEFT ANTI JOIN radiant_jdbc.public.interpretation_germline ig
+		    ON ig.locus_id = ?
+		   AND ig.sequencing_id = tctx.sequencing_experiment_id
+		   AND ig.case_id = tctx.case_id
+		WHERE g_snv_o.locus_id = ?`, locusIdString, locusId)
 
-	if err := txUnInterpreted.Find(&countUnInterpreted).Error; err != nil {
+	if err := txUnInterpreted.Scan(&countUnInterpreted).Error; err != nil {
 		return nil, fmt.Errorf("error counting variant interpreted cases: %w", err)
 	}
 

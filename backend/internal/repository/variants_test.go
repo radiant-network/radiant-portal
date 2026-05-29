@@ -214,7 +214,7 @@ func Test_GetVariantUninterpretedCases_Add_phenotypes(t *testing.T) {
 		)
 
 		assert.Equal(t, 0, len((*uninterpretedCases)[2].Phenotypes))
-		assert.Equal(t, 0, len((*uninterpretedCases)[3].Phenotypes))
+		assert.Equal(t, 12, len((*uninterpretedCases)[3].Phenotypes))
 
 		assert.Equal(t, 12, len((*uninterpretedCases)[4].Phenotypes))
 	})
@@ -245,7 +245,7 @@ func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_CustomSort(t *t
 		assert.Equal(t, int64(5), *count)
 		assert.Equal(t, 2, len(*uninterpretedCases))
 		assert.Equal(t, 5, (*uninterpretedCases)[0].CaseId)
-		assert.Equal(t, 7, (*uninterpretedCases)[1].CaseId)
+		assert.Equal(t, 3, (*uninterpretedCases)[1].CaseId)
 	})
 }
 
@@ -259,8 +259,8 @@ func Test_GetVariantUninterpretedCases_WithCriteria_NoPagination_DefaultSort(t *
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(2), *count)
-		assert.Equal(t, 2, len(*uninterpretedCases))
+		assert.Equal(t, int64(3), *count)
+		assert.Equal(t, 3, len(*uninterpretedCases))
 		assert.Equal(t, 4, (*uninterpretedCases)[0].CaseId)
 		assert.Equal(t, 7, (*uninterpretedCases)[1].CaseId)
 	})
@@ -275,8 +275,8 @@ func Test_GetVariantUninterpretedCases_WithPhenotypeCriteria_NoPagination_Defaul
 		query, err := types.NewListQueryFromCriteria(types.VariantUninterpretedCasesQueryConfig, []string{}, criteria, nil, nil)
 		uninterpretedCases, count, err := repo.GetVariantUninterpretedCases(1000, query)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(2), *count)
-		assert.Equal(t, 2, len(*uninterpretedCases))
+		assert.Equal(t, int64(3), *count)
+		assert.Equal(t, 3, len(*uninterpretedCases))
 		assert.Equal(t, 4, (*uninterpretedCases)[0].CaseId)
 		assert.Equal(t, 7, (*uninterpretedCases)[1].CaseId)
 	})
@@ -406,8 +406,8 @@ func Test_GetVariantCasesCount(t *testing.T) {
 		repo := NewVariantsRepository(db)
 		counts, err := repo.GetVariantCasesCount(1000)
 		assert.NoError(t, err)
-		assert.Equal(t, int64(3), counts.CountInterpreted)
-		assert.Equal(t, int64(5), counts.CountUninterpreted)
+		assert.Equal(t, int64(2), counts.CountInterpreted)
+		assert.Equal(t, int64(4), counts.CountUninterpreted)
 	})
 }
 

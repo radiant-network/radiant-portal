@@ -2043,38 +2043,6 @@ components:
           type: array
           uniqueItems: false
       type: object
-    Sequencing:
-      description: Sequencing represents a sequencing
-      properties:
-        affected_status:
-          type: string
-        analysis_type:
-          type: string
-        created_at:
-          type: string
-        experimental_strategy:
-          type: string
-        family_role:
-          type: string
-        part:
-          type: integer
-        patient_id:
-          type: integer
-        request_priority:
-          type: string
-        sample_id:
-          type: integer
-        seq_id:
-          type: integer
-        sex:
-          type: string
-        task_id:
-          type: integer
-        updated_at:
-          type: string
-        vcf_filepath:
-          type: string
-      type: object
     SequencingExperimentBatch:
       properties:
         aliquot:
@@ -5504,41 +5472,6 @@ paths:
       summary: Create a new sample batch
       tags:
       - samples
-  /sequencing/{seq_id}:
-    get:
-      description: Retrieve Sequencing data for a given sequence ID
-      operationId: getSequencing
-      parameters:
-      - description: Sequence ID
-        in: path
-        name: seq_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Sequencing'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get a Sequencing
-      tags:
-      - sequencing
   /sequencing/{seq_id}/details:
     get:
       description: Get SequencingExperimentDetail by id

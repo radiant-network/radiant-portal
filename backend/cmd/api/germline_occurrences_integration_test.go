@@ -22,7 +22,7 @@ func testList(t *testing.T, data string, body string, expected string) {
 		router := gin.Default()
 		router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineSNVListHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/1/list", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/5/list", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -36,7 +36,7 @@ func testCount(t *testing.T, data string, body string, expected int) {
 		router := gin.Default()
 		router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineSNVCountHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/1/count", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/5/count", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -50,7 +50,7 @@ func testAggregation(t *testing.T, data string, body string, queryParams []strin
 		facetsRepo := repository.NewFacetsRepository()
 		router := gin.Default()
 		router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
-		path := "/occurrences/germline/snv/1/1/1/aggregate"
+		path := "/occurrences/germline/snv/1/1/5/aggregate"
 		if len(queryParams) > 0 {
 			path += "?" + strings.Join(queryParams, "&")
 		}
@@ -68,7 +68,7 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 		router := gin.Default()
 		router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/1/statistics", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/5/statistics", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -78,7 +78,7 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 }
 
 func Test_SNVOccurrences_List(t *testing.T) {
-	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "end": 0, "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "has_note": true, "hgvsg":"hgvsg1", "locus":"locus1", "locus_id":"1000", "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "max_impact_score":4, "germline_pf_wgs":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":1, "transcript_id":"T001", "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"MODIFIER", "zygosity":"HET"}]`)
+	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "end": 0, "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "has_note": true, "hgvsg":"hgvsg1", "locus":"locus1", "locus_id":"1000", "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "max_impact_score":4, "germline_pf_wgs":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":5, "transcript_id":"T001", "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"MODIFIER", "zygosity":"HET"}]`)
 }
 
 func Test_SNVOccurrences_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
@@ -120,7 +120,7 @@ func Test_SNVOccurrences_List_Return_Filtered_Occurrences_When_Sqon_Specified(t 
 				"germline_pf_wgs": 0.99,
 				"picked_consequences": null,
 				"seq_id": 1,
-				"task_id": 1,
+				"task_id": 5,
 				"start": 1111,
 				"symbol": "BRAF",
 				"variant_class": "class1",
@@ -256,7 +256,7 @@ func Test_SNVOccurrence_List_Filter_On_Consequence_Column(t *testing.T) {
 			"germline_pf_wgs": 0.99,
 			"picked_consequences": null,
 			"seq_id": 1,
-			"task_id": 1,
+			"task_id": 5,
 			"start": 1111,
 			"symbol": "BRAF",
 			"variant_class": "class1",
@@ -281,7 +281,7 @@ func Test_CNVOccurrence_List(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 
 		expected := `[
-			{"chromosome":"1", "cn":2, "end":10500, "length":500, "name":"CNV1", "seq_id":1, "task_id":1, "cnv_id":"1", "start":10000, "type":"DEL", "has_note": true, "nb_snv": 0},
+			{"chromosome":"1", "cn":2, "end":10500, "length":500, "name":"CNV1", "seq_id":1, "task_id":1, "cnv_id":"1", "start":10000, "type":"DEL", "has_note": false, "nb_snv": 0},
 			{"chromosome":"2", "cn":3, "end":20500, "length":500, "name":"CNV2", "seq_id":1, "task_id":1, "cnv_id":"2", "start":20000, "type":"DUP", "has_note": false, "nb_snv": 1}
 		]`
 		assert.JSONEq(t, expected, w.Body.String())
@@ -457,7 +457,7 @@ func Test_GetExpandedOccurrence(t *testing.T) {
 		"vep_impact":"MODIFIER", 
 		"zygosity":"HET"
 	}`
-	assertGetExpandedOccurrence(t, "simple", 1, 1, 1, 1000, expected)
+	assertGetExpandedOccurrence(t, "simple", 1, 1, 5, 1000, expected)
 }
 func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
 	expected := `[

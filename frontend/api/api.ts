@@ -320,7 +320,7 @@ export interface CaseBatch {
      * @type {string}
      * @memberof CaseBatch
      */
-    'diagnostic_lab_code'?: string;
+    'diagnostic_lab_code': string;
     /**
      * 
      * @type {string}
@@ -332,7 +332,7 @@ export interface CaseBatch {
      * @type {string}
      * @memberof CaseBatch
      */
-    'ordering_organization_code'?: string;
+    'ordering_organization_code': string;
     /**
      * 
      * @type {string}
@@ -4106,97 +4106,6 @@ export interface SearchCriterion {
      * @memberof SearchCriterion
      */
     'value'?: Array<any>;
-}
-/**
- * Sequencing represents a sequencing
- * @export
- * @interface Sequencing
- */
-export interface Sequencing {
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'affected_status'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'analysis_type'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'created_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'experimental_strategy'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'family_role'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'part'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'patient_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'request_priority'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'sample_id'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'seq_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'sex'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'task_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'updated_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'vcf_filepath'?: string;
 }
 /**
  * 
@@ -11434,44 +11343,6 @@ export class SavedFiltersApi extends BaseAPI {
 export const SequencingApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Retrieve Sequencing data for a given sequence ID
-         * @summary Get a Sequencing
-         * @param {string} seqId Sequence ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getSequencing: async (seqId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('getSequencing', 'seqId', seqId)
-            const localVarPath = `/sequencing/{seq_id}`
-                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Get SequencingExperimentDetail by id
          * @summary Get SequencingExperimentDetail by id
          * @param {string} seqId Seq ID
@@ -11565,19 +11436,6 @@ export const SequencingApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SequencingApiAxiosParamCreator(configuration)
     return {
         /**
-         * Retrieve Sequencing data for a given sequence ID
-         * @summary Get a Sequencing
-         * @param {string} seqId Sequence ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getSequencing(seqId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sequencing>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getSequencing(seqId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['SequencingApi.getSequencing']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * Get SequencingExperimentDetail by id
          * @summary Get SequencingExperimentDetail by id
          * @param {string} seqId Seq ID
@@ -11615,16 +11473,6 @@ export const SequencingApiFactory = function (configuration?: Configuration, bas
     const localVarFp = SequencingApiFp(configuration)
     return {
         /**
-         * Retrieve Sequencing data for a given sequence ID
-         * @summary Get a Sequencing
-         * @param {string} seqId Sequence ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getSequencing(seqId: string, options?: RawAxiosRequestConfig): AxiosPromise<Sequencing> {
-            return localVarFp.getSequencing(seqId, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Get SequencingExperimentDetail by id
          * @summary Get SequencingExperimentDetail by id
          * @param {string} seqId Seq ID
@@ -11655,18 +11503,6 @@ export const SequencingApiFactory = function (configuration?: Configuration, bas
  * @extends {BaseAPI}
  */
 export class SequencingApi extends BaseAPI {
-    /**
-     * Retrieve Sequencing data for a given sequence ID
-     * @summary Get a Sequencing
-     * @param {string} seqId Sequence ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SequencingApi
-     */
-    public getSequencing(seqId: string, options?: RawAxiosRequestConfig) {
-        return SequencingApiFp(this.configuration).getSequencing(seqId, options).then((request) => request(this.axios, this.basePath));
-    }
-
     /**
      * Get SequencingExperimentDetail by id
      * @summary Get SequencingExperimentDetail by id

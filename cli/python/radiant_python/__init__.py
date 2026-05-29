@@ -123,7 +123,6 @@ from radiant_python.models.saved_filter_creation_input import SavedFilterCreatio
 from radiant_python.models.saved_filter_type import SavedFilterType
 from radiant_python.models.saved_filter_update_input import SavedFilterUpdateInput
 from radiant_python.models.search_criterion import SearchCriterion
-from radiant_python.models.sequencing import Sequencing
 from radiant_python.models.sequencing_experiment_batch import SequencingExperimentBatch
 from radiant_python.models.sequencing_experiment_detail import SequencingExperimentDetail
 from radiant_python.models.somatic_snv_occurrence import SomaticSNVOccurrence

@@ -57,7 +57,6 @@ func Test_SecureRoutes(t *testing.T) {
 			"mondo/autocomplete",
 			"occurrences/germline/snv/1/1/1/1/expanded",
 			"occurrences/somatic/snv/1/1/1/1/expanded",
-			"sequencing/1",
 			"users/preferences/table_1",
 			"users/sets/1",
 			"variants/germline/1/header",

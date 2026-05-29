@@ -7,9 +7,9 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **analysis_code** | **str** |  | 
 **category_code** | **str** |  | 
-**diagnostic_lab_code** | **str** |  | [optional] 
+**diagnostic_lab_code** | **str** |  | 
 **note** | **str** |  | [optional] 
-**ordering_organization_code** | **str** |  | [optional] 
+**ordering_organization_code** | **str** |  | 
 **ordering_physician** | **str** |  | [optional] 
 **patients** | [**List[CasePatientBatch]**](CasePatientBatch.md) |  | 
 **primary_condition_code_system** | **str** |  | [optional] 

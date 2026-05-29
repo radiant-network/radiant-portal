@@ -154,7 +154,6 @@ Class | Method | HTTP request | Description
 *SavedFiltersApi* | [**get_saved_filters**](docs/SavedFiltersApi.md#get_saved_filters) | **GET** /users/saved_filters | Get user saved filters
 *SavedFiltersApi* | [**post_saved_filter**](docs/SavedFiltersApi.md#post_saved_filter) | **POST** /users/saved_filters | Create a new saved filter
 *SavedFiltersApi* | [**put_saved_filter**](docs/SavedFiltersApi.md#put_saved_filter) | **PUT** /users/saved_filters/{saved_filter_id} | Update a saved filter
-*SequencingApi* | [**get_sequencing**](docs/SequencingApi.md#get_sequencing) | **GET** /sequencing/{seq_id} | Get a Sequencing
 *SequencingApi* | [**get_sequencing_experiment_detail_by_id**](docs/SequencingApi.md#get_sequencing_experiment_detail_by_id) | **GET** /sequencing/{seq_id}/details | Get SequencingExperimentDetail by id
 *SequencingApi* | [**post_sequencing_experiment_batch**](docs/SequencingApi.md#post_sequencing_experiment_batch) | **POST** /sequencing/batch | Create a new sequencing experiment batch
 *StatusApi* | [**status_get**](docs/StatusApi.md#status_get) | **GET** /status | Get API status
@@ -251,7 +250,6 @@ Class | Method | HTTP request | Description
  - [SavedFilterType](docs/SavedFilterType.md)
  - [SavedFilterUpdateInput](docs/SavedFilterUpdateInput.md)
  - [SearchCriterion](docs/SearchCriterion.md)
- - [Sequencing](docs/Sequencing.md)
  - [SequencingExperimentBatch](docs/SequencingExperimentBatch.md)
  - [SequencingExperimentDetail](docs/SequencingExperimentDetail.md)
  - [SomaticSNVOccurrence](docs/SomaticSNVOccurrence.md)
