@@ -1,8 +1,8 @@
 package types
 
 const (
-	CaseBatchType                     = "case"
-	CaseSequencingExperimentBatchType = "case_sequencing_experiment"
+	CaseBatchType      = "case"
+	PatchCaseBatchType = "patch_case"
 )
 
 type CaseBatch struct {

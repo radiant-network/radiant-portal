@@ -101,7 +101,7 @@ func PatchCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.Handle
 			return
 		}
 
-		batch, err := repo.CreateBatch(body.Cases, types.CaseSequencingExperimentBatchType, *username, queryParam.DryRun)
+		batch, err := repo.CreateBatch(body.Cases, types.PatchCaseBatchType, *username, queryParam.DryRun)
 		if err != nil {
 			HandleError(c, err)
 			return

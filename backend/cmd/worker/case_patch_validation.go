@@ -11,9 +11,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// CaseSequencingExperimentValidationRecord validates one PATCH entry that attaches
+// PatchCaseValidationRecord validates one PATCH entry that attaches
 // already-existing sequencing experiments to an already-existing case.
-type CaseSequencingExperimentValidationRecord struct {
+type PatchCaseValidationRecord struct {
 	batchval.BaseValidationRecord
 	Patch                  types.CaseBatchPatch
 	CaseID                 *int
@@ -21,20 +21,20 @@ type CaseSequencingExperimentValidationRecord struct {
 	DiagnosisLabCodeUpdate string
 }
 
-func (r *CaseSequencingExperimentValidationRecord) GetBase() *batchval.BaseValidationRecord {
+func (r *PatchCaseValidationRecord) GetBase() *batchval.BaseValidationRecord {
 	return &r.BaseValidationRecord
 }
 
-func (r *CaseSequencingExperimentValidationRecord) GetResourceType() string {
-	return types.CaseSequencingExperimentBatchType
+func (r *PatchCaseValidationRecord) GetResourceType() string {
+	return types.PatchCaseBatchType
 }
 
-func (r *CaseSequencingExperimentValidationRecord) path() string {
+func (r *PatchCaseValidationRecord) path() string {
 	return fmt.Sprintf("%s[%d]", r.GetResourceType(), r.Index)
 }
 
-func validateCaseSequencingExperimentRecord(cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int) (*CaseSequencingExperimentValidationRecord, error) {
-	r := &CaseSequencingExperimentValidationRecord{
+func validatePatchCaseRecord(cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int) (*PatchCaseValidationRecord, error) {
+	r := &PatchCaseValidationRecord{
 		BaseValidationRecord:  batchval.BaseValidationRecord{Cache: cache, Index: index},
 		Patch:                 patch,
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
@@ -45,7 +45,7 @@ func validateCaseSequencingExperimentRecord(cache *batchval.BatchValidationCache
 		return nil, fmt.Errorf("get project by code %q: %w", patch.ProjectCode, err)
 	}
 	if project == nil {
-		r.AddErrors(fmt.Sprintf("Project %s for case sequencing experiment %d does not exist.", patch.ProjectCode, index), CaseUnknownProject, r.path())
+		r.AddErrors(fmt.Sprintf("Project %s for patch case %d does not exist.", patch.ProjectCode, index), CaseUnknownProject, r.path())
 		return r, nil
 	}
 
@@ -67,7 +67,7 @@ func validateCaseSequencingExperimentRecord(cache *batchval.BatchValidationCache
 		if lab == nil {
 			r.AddErrors(
 				fmt.Sprintf("Diagnostic lab %q for case (%s / %s) does not exist.", patch.DiagnosticLabCode, patch.ProjectCode, patch.SubmitterCaseId),
-				CaseDiagnosticLabUnknown,
+				CaseUnknownDiagnosticLab, // CASE-004 — same code the POST path uses for an unknown lab.
 				fmt.Sprintf("%s.diagnostic_lab_code", r.path()),
 			)
 		} else {
@@ -94,36 +94,36 @@ func validateCaseSequencingExperimentRecord(cache *batchval.BatchValidationCache
 	return r, nil
 }
 
-// processCaseSequencingExperimentBatch handles PATCH /cases/batch: it links existing
+// processPatchCaseBatch handles PATCH /cases/batch: it links existing
 // sequencing experiments to an existing case (case_has_sequencing_experiment). It never
 // creates the case — a missing case is CASE-012, a missing experiment is SEQ-007.
-func processCaseSequencingExperimentBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+func processPatchCaseBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
 	var patches []types.CaseBatchPatch
 	if err := json.Unmarshal([]byte(batch.Payload), &patches); err != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling case sequencing experiment batch: %v", err), ctx.BatchRepo)
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling patch_case batch: %v", err), ctx.BatchRepo)
 		return
 	}
 
 	cache := batchval.NewBatchValidationCache(ctx)
-	var records []*CaseSequencingExperimentValidationRecord
+	var records []*PatchCaseValidationRecord
 	for i, p := range patches {
-		rec, err := validateCaseSequencingExperimentRecord(cache, p, i)
+		rec, err := validatePatchCaseRecord(cache, p, i)
 		if err != nil {
-			batchval.ProcessUnexpectedError(batch, fmt.Errorf("error validating case sequencing experiment batch: %v", err), ctx.BatchRepo)
+			batchval.ProcessUnexpectedError(batch, fmt.Errorf("error validating patch_case batch: %v", err), ctx.BatchRepo)
 			return
 		}
 		records = append(records, rec)
 	}
 
-	glog.Infof("Case sequencing experiment batch %v processed with %d records", batch.ID, len(records))
+	glog.Infof("Patch_case batch %v processed with %d records", batch.ID, len(records))
 
-	if err := persistBatchAndCaseSequencingExperimentRecords(db, batch, records); err != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing case sequencing experiment batch records: %v", err), ctx.BatchRepo)
+	if err := persistBatchAndPatchCaseRecords(db, batch, records); err != nil {
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing patch_case batch records: %v", err), ctx.BatchRepo)
 		return
 	}
 }
 
-func persistBatchAndCaseSequencingExperimentRecords(db *gorm.DB, batch *types.Batch, records []*CaseSequencingExperimentValidationRecord) error {
+func persistBatchAndPatchCaseRecords(db *gorm.DB, batch *types.Batch, records []*PatchCaseValidationRecord) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		batchRepo := repository.NewBatchRepository(tx)
 		rowsUpdated, err := batchval.UpdateBatch(batch, records, batchRepo)
@@ -131,7 +131,7 @@ func persistBatchAndCaseSequencingExperimentRecords(db *gorm.DB, batch *types.Ba
 			return err
 		}
 		if rowsUpdated == 0 {
-			return fmt.Errorf("no rows updated when updating case sequencing experiment batch %v", batch.ID)
+			return fmt.Errorf("no rows updated when updating patch_case batch %v", batch.ID)
 		}
 		if batch.DryRun || batch.Status != types.BatchStatusSuccess {
 			return nil

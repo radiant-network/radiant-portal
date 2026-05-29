@@ -21,7 +21,7 @@ var supportedProcessors = map[string]func(*batchval.BatchValidationContext, *typ
 	types.SampleBatchType:               processSampleBatch,
 	types.SequencingExperimentBatchType:     processSequencingExperimentBatch,
 	types.CaseBatchType:                     processCaseBatch,
-	types.CaseSequencingExperimentBatchType: processCaseSequencingExperimentBatch,
+	types.PatchCaseBatchType: processPatchCaseBatch,
 }
 
 func main() {

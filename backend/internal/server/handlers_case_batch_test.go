@@ -456,7 +456,7 @@ func TestPatchCaseBatchHandler_Success(t *testing.T) {
 	assert.Equal(t, http.StatusAccepted, w.Code)
 	var response types.CreateBatchResponse
 	assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
-	assert.Equal(t, types.CaseSequencingExperimentBatchType, response.BatchType)
+	assert.Equal(t, types.PatchCaseBatchType, response.BatchType)
 }
 
 // PATCH requires project_code, submitter_case_id, and at least one sequencing experiment.

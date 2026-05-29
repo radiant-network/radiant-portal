@@ -103,14 +103,14 @@ func Test_PatchCaseBatch_OK(t *testing.T) {
 		var resp types.CreateBatchResponse
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
 		assert.NotEmpty(t, resp.ID)
-		assert.Equal(t, types.CaseSequencingExperimentBatchType, resp.BatchType)
+		assert.Equal(t, types.PatchCaseBatchType, resp.BatchType)
 		assert.Equal(t, types.BatchStatusPending, resp.Status)
 
 		batch, err := repo.ClaimNextBatch()
 		assert.NoError(t, err)
 		if assert.NotNil(t, batch) {
 			assert.Equal(t, resp.ID, batch.ID)
-			assert.Equal(t, types.CaseSequencingExperimentBatchType, batch.BatchType)
+			assert.Equal(t, types.PatchCaseBatchType, batch.BatchType)
 		}
 		db.Exec("DELETE FROM batch WHERE id = ?", resp.ID)
 	})

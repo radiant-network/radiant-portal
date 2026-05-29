@@ -53,7 +53,6 @@ const (
 	CaseInvalidSeqExpForType        = "CASE-010"
 	CaseIdenticalInBatch            = "CASE-011"
 	CaseNotFoundForAttach           = "CASE-012"
-	CaseDiagnosticLabUnknown        = "CASE-013"
 )
 
 // Patients error codes

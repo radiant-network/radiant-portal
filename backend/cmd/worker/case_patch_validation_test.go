@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Unit tests for validateCaseSequencingExperimentRecord — the per-record validator the worker
-// runs when processing a PATCH /cases/batch (case_sequencing_experiment batch type). Mocks reuse
+// Unit tests for validatePatchCaseRecord — the per-record validator the worker
+// runs when processing a PATCH /cases/batch (patch_case batch type). Mocks reuse
 // CaseValidationMockRepo defined in case_validation_test.go.
 
 func newCachePatch(repo *CaseValidationMockRepo) (*batchval.BatchValidationCache, *batchval.BatchValidationContext) {
@@ -23,7 +23,7 @@ func newCachePatch(repo *CaseValidationMockRepo) (*batchval.BatchValidationCache
 	return batchval.NewBatchValidationCache(ctx), ctx
 }
 
-func Test_validateCaseSequencingExperimentRecord_Success(t *testing.T) {
+func Test_validatePatchCaseRecord_Success(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{
 		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
 			if submitterCaseId == "CASE-1" && projectId == 42 {
@@ -43,7 +43,7 @@ func Test_validateCaseSequencingExperimentRecord_Success(t *testing.T) {
 		},
 	}
 
-	rec, err := validateCaseSequencingExperimentRecord(cache, patch, 0)
+	rec, err := validatePatchCaseRecord(cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Empty(t, rec.Errors)
 	assert.NotNil(t, rec.CaseID)
@@ -53,7 +53,7 @@ func Test_validateCaseSequencingExperimentRecord_Success(t *testing.T) {
 	assert.Contains(t, rec.SequencingExperiments, 201)
 }
 
-func Test_validateCaseSequencingExperimentRecord_EmptyExperimentsIsNoOp(t *testing.T) {
+func Test_validatePatchCaseRecord_EmptyExperimentsIsNoOp(t *testing.T) {
 	// An empty sequencing_experiments array is a no-op — the case still resolves, no errors.
 	mockRepo := &CaseValidationMockRepo{
 		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
@@ -68,14 +68,14 @@ func Test_validateCaseSequencingExperimentRecord_EmptyExperimentsIsNoOp(t *testi
 		SequencingExperiments: nil,
 	}
 
-	rec, err := validateCaseSequencingExperimentRecord(cache, patch, 0)
+	rec, err := validatePatchCaseRecord(cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Empty(t, rec.Errors)
 	assert.NotNil(t, rec.CaseID)
 	assert.Empty(t, rec.SequencingExperiments)
 }
 
-func Test_validateCaseSequencingExperimentRecord_UnknownProject(t *testing.T) {
+func Test_validatePatchCaseRecord_UnknownProject(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{}
 	cache, _ := newCachePatch(mockRepo)
 
@@ -87,16 +87,16 @@ func Test_validateCaseSequencingExperimentRecord_UnknownProject(t *testing.T) {
 		},
 	}
 
-	rec, err := validateCaseSequencingExperimentRecord(cache, patch, 0)
+	rec, err := validatePatchCaseRecord(cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, CaseUnknownProject, rec.Errors[0].Code)
-	assert.Equal(t, "case_sequencing_experiment[0]", rec.Errors[0].Path)
+	assert.Equal(t, "patch_case[0]", rec.Errors[0].Path)
 	assert.Nil(t, rec.CaseID)
 	assert.Empty(t, rec.SequencingExperiments)
 }
 
-func Test_validateCaseSequencingExperimentRecord_CaseNotFound(t *testing.T) {
+func Test_validatePatchCaseRecord_CaseNotFound(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{
 		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
 			return nil, nil // case missing
@@ -112,7 +112,7 @@ func Test_validateCaseSequencingExperimentRecord_CaseNotFound(t *testing.T) {
 		},
 	}
 
-	rec, err := validateCaseSequencingExperimentRecord(cache, patch, 0)
+	rec, err := validatePatchCaseRecord(cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, CaseNotFoundForAttach, rec.Errors[0].Code)
@@ -120,7 +120,7 @@ func Test_validateCaseSequencingExperimentRecord_CaseNotFound(t *testing.T) {
 	assert.Empty(t, rec.SequencingExperiments)
 }
 
-func Test_validateCaseSequencingExperimentRecord_DiagnosticLabCode_Resolved(t *testing.T) {
+func Test_validatePatchCaseRecord_DiagnosticLabCode_Resolved(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{
 		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
 			return &repository.Case{ID: 100}, nil
@@ -134,13 +134,13 @@ func Test_validateCaseSequencingExperimentRecord_DiagnosticLabCode_Resolved(t *t
 		DiagnosticLabCode: "LAB-1", // exists in mock
 	}
 
-	rec, err := validateCaseSequencingExperimentRecord(cache, patch, 0)
+	rec, err := validatePatchCaseRecord(cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Empty(t, rec.Errors)
 	assert.Equal(t, "LAB-1", rec.DiagnosisLabCodeUpdate)
 }
 
-func Test_validateCaseSequencingExperimentRecord_DiagnosticLabCode_Unknown(t *testing.T) {
+func Test_validatePatchCaseRecord_DiagnosticLabCode_Unknown(t *testing.T) {
 	mockRepo := &CaseValidationMockRepo{
 		GetCaseBySubmitterCaseIdAndProjectIdFunc: func(submitterCaseId string, projectId int) (*repository.Case, error) {
 			return &repository.Case{ID: 100}, nil
@@ -154,15 +154,15 @@ func Test_validateCaseSequencingExperimentRecord_DiagnosticLabCode_Unknown(t *te
 		DiagnosticLabCode: "LAB-UNKNOWN", // not in mock
 	}
 
-	rec, err := validateCaseSequencingExperimentRecord(cache, patch, 0)
+	rec, err := validatePatchCaseRecord(cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
-	assert.Equal(t, CaseDiagnosticLabUnknown, rec.Errors[0].Code)
-	assert.Equal(t, "case_sequencing_experiment[0].diagnostic_lab_code", rec.Errors[0].Path)
+	assert.Equal(t, CaseUnknownDiagnosticLab, rec.Errors[0].Code)
+	assert.Equal(t, "patch_case[0].diagnostic_lab_code", rec.Errors[0].Path)
 	assert.Empty(t, rec.DiagnosisLabCodeUpdate)
 }
 
-func Test_validateCaseSequencingExperimentRecord_SequencingExperimentMissing(t *testing.T) {
+func Test_validatePatchCaseRecord_SequencingExperimentMissing(t *testing.T) {
 	// Case resolves, one experiment resolves, one doesn't → one SEQ-007 error per missing item;
 	// the resolved experiment is still captured in the record so persistence attaches it.
 	mockRepo := &CaseValidationMockRepo{
@@ -181,11 +181,11 @@ func Test_validateCaseSequencingExperimentRecord_SequencingExperimentMissing(t *
 		},
 	}
 
-	rec, err := validateCaseSequencingExperimentRecord(cache, patch, 0)
+	rec, err := validatePatchCaseRecord(cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SequencingExperimentNotFound, rec.Errors[0].Code)
-	assert.Equal(t, "case_sequencing_experiment[0].sequencing_experiments[1]", rec.Errors[0].Path)
+	assert.Equal(t, "patch_case[0].sequencing_experiments[1]", rec.Errors[0].Path)
 	assert.NotNil(t, rec.CaseID)
 	assert.Len(t, rec.SequencingExperiments, 1)
 	assert.Contains(t, rec.SequencingExperiments, 200)

@@ -1961,6 +1961,7 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 	assert.Len(t, cr.Infos, 1)
 	assert.Contains(t, cr.Infos[0].Message, "already exists")
 	assert.Equal(t, CaseAlreadyExists, cr.Infos[0].Code)
+	assert.True(t, cr.Skipped)
 	assert.Equal(t, "case[0]", cr.Infos[0].Path)
 }
 
