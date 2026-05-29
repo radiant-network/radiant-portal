@@ -113,6 +113,7 @@ Copy `.env.template` → `.env`. Key variables:
 | Variable | Purpose | Default |
 |---|---|---|
 | `DB_HOST/PORT/NAME/USERNAME/PASSWORD` | StarRocks | localhost:9030 |
+| `DB_SSL_CA` | Path to CA bundle to enable TLS to StarRocks; unset = plaintext | — |
 | `PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD` | PostgreSQL | localhost:5432 |
 | `API_PORT` | API listen port | 8090 |
 | `KEYCLOAK_HOST/REALM/CLIENT` | Keycloak | localhost:8080 |
