@@ -1,5 +1,5 @@
 import { Badge } from '@/components/base/shadcn/badge';
-import { Skeleton } from '@/components/base/shadcn/skeleton';
+import EmptyField from '@/components/base/information/empty-field';
 
 import AnchorLink from '../anchor-link';
 
@@ -29,14 +29,14 @@ export type PhenotypeConditionLinkProps = React.ComponentProps<'span'> & {
   showCode?: boolean;
 };
 function PhenotypeConditionLink({ name, code, onsetCode, showCode = true, ...props }: PhenotypeConditionLinkProps) {
-  if (!name || !code) {
-    return <Skeleton />;
+  if (!code) {
+    return <EmptyField />;
   }
 
   return (
     <span className="text-sm flex gap-1 text-foreground truncate" {...props}>
       <AnchorLink className="text-sm truncate" size="sm" href={getBaseUrl(code)} target="_blank">
-        {name} {showCode && `(${code})`}
+        {name || code} {showCode && name && `(${code})`}
       </AnchorLink>
       {onsetCode && <Badge variant="outline">{onsetCode}</Badge>}
     </span>

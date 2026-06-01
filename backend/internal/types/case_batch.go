@@ -1,6 +1,9 @@
 package types
 
-const CaseBatchType = "case"
+const (
+	CaseBatchType      = "case"
+	PatchCaseBatchType = "patch_case"
+)
 
 type CaseBatch struct {
 	SubmitterCaseId            string                           `json:"submitter_case_id,omitempty" toml:"submitter_case_id"`
@@ -18,7 +21,7 @@ type CaseBatch struct {
 	OrderingPhysician          string                           `json:"ordering_physician,omitempty" toml:"ordering_physician"`
 	OrderingOrganizationCode   string                           `json:"ordering_organization_code" toml:"ordering_organization_code" binding:"required"`
 	Patients                   []*CasePatientBatch              `json:"patients" toml:"patients" binding:"required,min=1,dive,required"`
-	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments" toml:"sequencing_experiments" binding:"required,min=1,dive,required"`
+	SequencingExperiments      []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive,required"`
 	Tasks                      []*CaseTaskBatch                 `json:"tasks" toml:"tasks" binding:"required,dive,required"`
 }
 
@@ -83,4 +86,15 @@ type OutputDocumentBatch struct {
 
 type CreateCaseBatchBody struct {
 	Cases []*CaseBatch `json:"cases" toml:"cases" binding:"required,min=1,dive,required"`
+}
+
+type CaseBatchPatch struct {
+	ProjectCode           string                           `json:"project_code" toml:"project_code" binding:"required"`
+	SubmitterCaseId       string                           `json:"submitter_case_id" toml:"submitter_case_id" binding:"required"`
+	DiagnosticLabCode     string                           `json:"diagnostic_lab_code,omitempty" toml:"diagnostic_lab_code"`
+	SequencingExperiments []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive,required"`
+}
+
+type PatchCaseBatchBody struct {
+	Cases []*CaseBatchPatch `json:"cases" toml:"cases" binding:"required,min=1,dive,required"`
 }

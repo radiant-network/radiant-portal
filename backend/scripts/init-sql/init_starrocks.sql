@@ -447,30 +447,30 @@ CREATE TABLE IF NOT EXISTS somatic__snv__occurrence
 ) ENGINE=OLAP
     DUPLICATE KEY(`part`, `task_id`, `tumor_seq_id`, `locus_id`);
 
-INSERT INTO clinvar (locus_id, chromosome, start, reference, alternate, name)
+INSERT OVERWRITE clinvar (locus_id, chromosome, start, reference, alternate, name)
 VALUES
     (1000, '1', '1111', 'A', 'T', '111111'),
     (2000, '2', '2222', 'C', 'G', '222222');
 
-INSERT INTO snv__consequence (locus_id, consequences, is_picked, sift_pred, sift_score, fathmm_score, fathmm_pred, revel_score, cadd_score, cadd_phred, spliceai_ds, spliceai_type, gnomad_pli, gnomad_loeuf, biotype, symbol, transcript_id)
+INSERT OVERWRITE snv__consequence (locus_id, consequences, is_picked, sift_pred, sift_score, fathmm_score, fathmm_pred, revel_score, cadd_score, cadd_phred, spliceai_ds, spliceai_type, gnomad_pli, gnomad_loeuf, biotype, symbol, transcript_id)
 VALUES
     (1000, ['csq10'], true, 'T', 0.1, 0.1, 'T', 0.1, 0.1, 0.1, 0.1, ['AG'], 0.1, 0.1, 'IG_C_gene', 'BRAF', 'T001'),
     (1000, ['csq11'], false, 'T', 0.11, 0.11, 'T', 0.11, 0.11, 0.11, 0.11, ['AT'], 0.11, 0.11, 'IG_C_pseudogene', 'BRAC', 'T011'),
     (2000, ['csq20'], true, 'T', 0.2, 0.2, 'T', 0.2, 0.2, 0.2, 0.2, ['AT'], 0.2, 0.2, 'IG_C_pseudogene', 'BRAC', 'T002');
 
-INSERT INTO snv__consequence_filter_partitioned (part, locus_id, consequence, symbol, impact_score, sift_pred, is_deleterious)
+INSERT OVERWRITE snv__consequence_filter_partitioned (part, locus_id, consequence, symbol, impact_score, sift_pred, is_deleterious)
 VALUES
     (1, 1000, 'csq10', 'BRAF', 3, 'T', true),
     (1, 1000, 'csq11', 'BRAC', 3, 'T', true),
     (1, 2000, 'csq20', 'BRAC', 1, 'T', true);
 
-INSERT INTO germline__snv__occurrence (part, seq_id, task_id, locus_id, gq, filter, zygosity, ad_ratio, exomiser_moi, exomiser_acmg_classification, exomiser_acmg_evidence, exomiser_variant_score, exomiser_gene_combined_score)
+INSERT OVERWRITE germline__snv__occurrence (part, seq_id, task_id, locus_id, gq, filter, zygosity, ad_ratio, exomiser_moi, exomiser_acmg_classification, exomiser_acmg_evidence, exomiser_variant_score, exomiser_gene_combined_score)
 VALUES
     (1, 1, 1, 1000, 100, 'PASS', 'HET', 1.0, 0, 'Pathogenic', ['PVS1', 'PM2'], 0.9, 0.8),
     (1, 1, 1, 1000, 150, 'PASS', 'HOM', 0.5, 0, 'Likely pathogenic', ['PP3'], 0.85, 0.75),
     (1, 19, 19, 2000, 200, 'PASS', 'HET', 1.0, 0, 'Benign', ['BP4'], 0.95, 0.9);
 
-INSERT INTO snv__variant (locus_id, impact_score, germline_pf_wgs, germline_pc_wgs, germline_pn_wgs, germline_pc_wgs_affected, germline_pn_wgs_affected, germline_pf_wgs_affected, germline_pc_wgs_not_affected, germline_pn_wgs_not_affected, germline_pf_wgs_not_affected, somatic_pc_tn_wgs, somatic_pn_tn_wgs, somatic_pf_tn_wgs, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate, transcript_id)
+INSERT OVERWRITE snv__variant (locus_id, impact_score, germline_pf_wgs, germline_pc_wgs, germline_pn_wgs, germline_pc_wgs_affected, germline_pn_wgs_affected, germline_pf_wgs_affected, germline_pc_wgs_not_affected, germline_pn_wgs_not_affected, germline_pf_wgs_not_affected, somatic_pc_tn_wgs, somatic_pn_tn_wgs, somatic_pf_tn_wgs, gnomad_v3_af, hgvsg, omim_inheritance_code, variant_class, vep_impact, symbol, is_mane_select, is_canonical, clinvar_interpretation, rsnumber, aa_change, consequences, locus, chromosome, start, reference, alternate, transcript_id)
 VALUES
     (1000, 3, 0.10, 10, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 10, 50, 0.2, 0.01, 'hgvsg10', 'AD', 'insertion', 'MODIFIER', 'BRAF', true, false, ['Benign', 'Pathogenic'], 'rs111111111', 'p.Arg19His', ['splice acceptor'], 'locus_full_1000', '1', 1111, 'A', 'T', 'T001'),
     (1001, 3, 0.11, 11, 100, 20, 60, 0.333333333333, 10, 40, 0.25, 11, 51, 0.21, 0.01, 'hgvsg11', 'AD', 'deletion', 'LOW', 'BRCA1', false, true, ['Benign', 'Pathogenic'], 'rs111111112', 'p.Arg2019His', ['splice acceptor'], 'locus_full_1001', '1', 1112, 'A', 'T', 'T001'),
@@ -478,7 +478,7 @@ VALUES
     (2000, 1, 0.20, 20, 100, 40, 50, 0.80, 20, 50, 0.4, 20, 60, 0.3, 0.02, 'hgvsg21', 'Smu', 'indel', 'HIGH', 'BRAF', false, true, ['Pathogenic'], 'rs2222221', 'p.Arg29His', ['splice acceptor'], 'locus_full_2000', '2', 2221, 'C', 'G', 'T002'),
     (2001, 1, 0.21, 21, 100, 40, 50, 0.80, 20, 50, 0.4, 21, 61, 0.31, 0.02, 'hgvsg22', 'Smu', 'substitution', 'MODIFIER', 'BRCA1', true, false, ['Pathogenic'], 'rs2222222', 'p.Ar3019His', ['splice acceptor'], 'locus_full_2001', '2', 2222, 'C', 'G', 'T002');
 
-INSERT INTO staging_sequencing_experiment (seq_id, task_id, case_id, task_type, part, analysis_type, ingested_at, histology_type)
+INSERT OVERWRITE staging_sequencing_experiment (seq_id, task_id, case_id, task_type, part, analysis_type, ingested_at, histology_type)
 VALUES
     (1, 1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
     (2, 1, 1, 'radiant_germline_annotation', 1, 'germline', '1970-01-01', 'normal'),
@@ -486,7 +486,7 @@ VALUES
     (62, 74, 22,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'tumoral'),
     (63, 74, 22,'radiant_somatic_annotation', 1, 'somatic', '1970-01-01', 'normal');
 
-INSERT INTO omim_gene_panel (symbol, panel, omim_gene_id, omim_phenotype_id, inheritance_code, inheritance)
+INSERT OVERWRITE omim_gene_panel (symbol, panel, omim_gene_id, omim_phenotype_id, inheritance_code, inheritance)
 VALUES
 ('BRAF', 'Noonan syndrome 7', 164757, 613706, ['AD'], ['Autosomal dominant']),
 ('TP53', 'Basal cell carcinoma 7', 191170,614740, ['AD'], ['Autosomal dominant']),
@@ -494,7 +494,7 @@ VALUES
 ('BRAC', 'Osteosarcoma', 191170, 259500, ['Smu'], ['Somatic mutation']),
 ('TML1', 'Leukemia/lymphoma, T-cell', 603769, 603769, null, null);
 
-INSERT INTO hpo_gene_panel (symbol, panel, hpo_term_name, hpo_term_id)
+INSERT OVERWRITE hpo_gene_panel (symbol, panel, hpo_term_name, hpo_term_id)
 VALUES
     ('TP53', 'Colon cancer(HP:0003003)', 'Colon cancer','HP:0003003'),
     ('BRAF','Acne(HP:0001061)','Acne', 'HP:0001061'),
@@ -502,21 +502,21 @@ VALUES
     ('BRAF','Epicanthus(HP:0000286)','Epicanthus', 'HP:0000286');
 
 
-INSERT INTO orphanet_gene_panel (symbol, panel, disorder_id, type_of_inheritance)
+INSERT OVERWRITE orphanet_gene_panel (symbol, panel, disorder_id, type_of_inheritance)
 VALUES
     ('TP53', 'Familial pancreatic carcinoma', 3708,['Autosomal dominant','Multigenic/multifactorial']),
     ('BRAF','Pilomyxoid astrocytoma',19660, ['Not applicable']),
     ('BRAF','Cardiofaciocutaneous syndrome',1559, ['Autosomal dominant']),
     ('BRAF','Classic hairy cell leukemia',10778, ['Unknown']);
 
-INSERT INTO mondo_term (id, name, term)
+INSERT OVERWRITE mondo_term (id, name, term)
 VALUES
 ('MONDO:0000001', 'blood group incompatibility', 'MONDO:0000001 blood group incompatibility'),
 ('MONDO:0000002', 'blood vessel neoplasm', 'MONDO:0000002 blood vessel neoplasm'),
 ('MONDO:0000003', 'colorblindness, partial', 'MONDO:0000003 colorblindness, partial'),
 ('MONDO:0700092', 'neurodevelopmental disorder', 'MONDO:0700092 neurodevelopmental disorder');
 
-INSERT INTO hpo_term (id, name, term)
+INSERT OVERWRITE hpo_term (id, name, term)
 VALUES
     ('HP:0000001', 'Nocturia', 'HP:0000001 Nocturia'),
     ('HP:0000002', 'Abnormality of body height', 'HP:0000002 Abnormality of body height'),
@@ -534,14 +534,14 @@ VALUES
     ('HP:0001562', 'Oligohydramnios', 'HP:0001562 Oligohydramnios'),
     ('HP:0001561', 'Polyhydramnios', 'HP:0001561 Polyhydramnios');
 
-INSERT INTO test_db.clinvar_rcv_summary
+INSERT OVERWRITE test_db.clinvar_rcv_summary
 (locus_id, clinvar_id, accession, clinical_significance, date_last_evaluated, submission_count, review_status, review_status_stars, version, traits, origins, submissions, clinical_significance_count)
 VALUES
     (1000,'RCV000000001','SCV000000001',['Pathogenic'], DATE('2023-01-01 00:00:00'),10,'reviewed',4,1, ['Trait1'],['somatic'],
         [row('Submitter1', 'SCV000000001', 1, 'reviewed', 4, 'Pathogenic', DATE('2023-01-01 00:00:00'))], map{'Pathogenic': 10});
 
 
-INSERT INTO test_db.exomiser
+INSERT OVERWRITE test_db.exomiser
 (part, seq_id, locus_id, id, locus_hash, moi, variant_score, gene_combined_score, variant_rank, rank, symbol, acmg_classification, acmg_evidence)
 VALUES
     (1, 1, 1000, 'var1', 'hash1', 'AD', 0.9, 0.8, 1, 1, 'BRAF', 'Pathogenic', ['PVS1', 'PM2']),
@@ -549,7 +549,7 @@ VALUES
     (3, 3, 1000, 'var1', 'hash1', 'AD', 0.9, 0.8, 1, 1, 'BRAF', 'Benign', ['PVS1', 'PM2']);
 
 
-INSERT INTO test_db.germline__cnv__occurrence
+INSERT OVERWRITE test_db.germline__cnv__occurrence
 (part, seq_id, task_id, cnv_id, aliquot, chromosome, start, end, type, length, name, quality, calls, filter, bc, cn, pe, sm, svtype,
 svlen, reflen, ciend, cipos, nb_snv)
 VALUES
@@ -557,7 +557,7 @@ VALUES
     (1, 1, 1, 2, 'aliquot2', '2', 2000, 3000, 'DUP', 1000, 'CNV2', 0.888, [4, 5, 6], 'PASS', 3, 2, [3, 4], 0.6, 'DUP', 1000, 1000, [200, 300], [150, 250], 1),
     (1, 2, 2, 3, 'aliquot3', 'X', 3000, 4000, 'INV', 1000, 'CNV3', 0.777, [7, 8, 9], 'PASS', 4, 3, [5, 6], 0.7, 'INV', 1000, 1000, [300, 400], [250, 350], 1);
 
-INSERT INTO test_db.somatic__snv__occurrence (
+INSERT OVERWRITE test_db.somatic__snv__occurrence (
     part, task_id, tumor_seq_id, locus_id, normal_seq_id, quality, filter,
     info_hotspotallele,tumor_ad_ratio
 )
@@ -592,7 +592,7 @@ CREATE TABLE IF NOT EXISTS `ensembl_gene` (
 ) ENGINE=OLAP
     DUPLICATE KEY(`gene_id`, `chromosome`);
 
-INSERT INTO test_db.ensembl_gene(gene_id, name, alias) VALUES
+INSERT OVERWRITE test_db.ensembl_gene(gene_id, name, alias) VALUES
                                                        ('ENSG00000000003', 'TSPAN6', ['T245','TM4SF6','TSPAN-6']),
                                                        ('ENSG00000000005', 'TNMD', ['BRICD4','CHM1L','MYODULIN', 'TEM', 'TENDIN']),
                                                        ('ENSG00000000419', 'DPM1', ['CDGIE','MPDS']),
@@ -629,7 +629,7 @@ CREATE TABLE IF NOT EXISTS `ensembl_exon_by_gene` (
 DUPLICATE KEY(`gene_id`, `exon_id`, `chromosome`);
 
 
-INSERT INTO test_db.ensembl_exon_by_gene (gene_id, exon_id, chromosome, start, end) VALUES
+INSERT OVERWRITE test_db.ensembl_exon_by_gene (gene_id, exon_id, chromosome, start, end) VALUES
       ('ENSG00000000003', 'ENSE00000000001', '1', 1000, 1100),
       ('ENSG00000000003', 'ENSE00000000002', '1', 1200, 1300),
       ('ENSG00000000005', 'ENSE00000000003', '2', 2000, 2100),
@@ -651,7 +651,7 @@ CREATE TABLE IF NOT EXISTS `cytoband` (
 ) ENGINE=OLAP
 DUPLICATE KEY(`chromosome`, `cytoband`);
 
-INSERT INTO test_db.cytoband (chromosome, cytoband, start, end, gie_stain) VALUES
+INSERT OVERWRITE test_db.cytoband (chromosome, cytoband, start, end, gie_stain) VALUES
 ('1', 'p36.33', 0, 2300000, 'gneg'),
 ('1', 'p36.32', 2300000, 5300000, 'gpos25'),
 ('1', 'p36.31', 5300000, 7100000, 'gneg'),
@@ -671,7 +671,7 @@ CREATE TABLE IF NOT EXISTS gnomad_genomes_v3 (
     `hom` INT(11)
 );
 
-INSERT INTO gnomad_genomes_v3 (locus_id, af, ac, an, hom) VALUES
+INSERT OVERWRITE gnomad_genomes_v3 (locus_id, af, ac, an, hom) VALUES
                                                               (1000, 0.01, 1, 100, 0),
                                                               (2000, 0.02, 4, 200, 2);
 
@@ -683,7 +683,7 @@ CREATE TABLE IF NOT EXISTS topmed_bravo (
     `hom` INT(11)
 );
 
-INSERT INTO topmed_bravo (locus_id, af, ac, an, hom) VALUES
+INSERT OVERWRITE topmed_bravo (locus_id, af, ac, an, hom) VALUES
                                                               (1000, 0.001, 1, 1000, 0),
                                                               (2000, 0.002, 4, 2000, 2);
 
@@ -694,7 +694,7 @@ CREATE TABLE IF NOT EXISTS 1000_genomes (
     `an` INT(11)
 );
 
-INSERT INTO 1000_genomes (locus_id, af, ac, an) VALUES
+INSERT OVERWRITE 1000_genomes (locus_id, af, ac, an) VALUES
                                                          (1000, 0.0001, 1, 10000),
                                                          (2000, 0.0002, 4, 20000);
 

@@ -345,9 +345,15 @@ func TestPostCaseBatchHandler_MissingRequiredFieldInSequencingExperiments(t *tes
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
+// A case may be created with no sequencing experiments yet — they are attached later via
+// PATCH /cases/batch. So a missing sequencing_experiments list is accepted.
 func TestPostCaseBatchHandler_MissingSequencingExperiments(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	repo := &MockBatchRepository{}
+	repo := &MockBatchRepository{
+		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+			return &types.Batch{ID: uuid.NewString(), BatchType: batchType, Status: types.BatchStatusPending, CreatedOn: time.Now(), Username: username, DryRun: dryRun}, nil
+		},
+	}
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
@@ -359,12 +365,16 @@ func TestPostCaseBatchHandler_MissingSequencingExperiments(t *testing.T) {
 			"status_code": "active",
 			"project_code": "proj1",
 			"category_code": "postnatal",
+			"analysis_code": "WGA",
+			"diagnostic_lab_code": "lab1",
+			"ordering_organization_code": "org1",
 			"patients": [{
 				"affected_status_code": "affected",
 				"submitter_patient_id": "p1",
 				"patient_organization_code": "org1",
 				"relation_to_proband_code": "proband"
-			}]
+			}],
+			"tasks": []
 		}]
 	}`
 	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
@@ -372,12 +382,16 @@ func TestPostCaseBatchHandler_MissingSequencingExperiments(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, http.StatusAccepted, w.Code)
 }
 
 func TestPostCaseBatchHandler_EmptySequencingExperiments(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	repo := &MockBatchRepository{}
+	repo := &MockBatchRepository{
+		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+			return &types.Batch{ID: uuid.NewString(), BatchType: batchType, Status: types.BatchStatusPending, CreatedOn: time.Now(), Username: username, DryRun: dryRun}, nil
+		},
+	}
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
@@ -389,16 +403,77 @@ func TestPostCaseBatchHandler_EmptySequencingExperiments(t *testing.T) {
 			"status_code": "active",
 			"project_code": "proj1",
 			"category_code": "postnatal",
+			"analysis_code": "WGA",
+			"diagnostic_lab_code": "lab1",
+			"ordering_organization_code": "org1",
 			"patients": [{
 				"affected_status_code": "affected",
 				"submitter_patient_id": "p1",
 				"patient_organization_code": "org1",
 				"relation_to_proband_code": "proband"
 			}],
-			"sequencing_experiments": []
+			"sequencing_experiments": [],
+			"tasks": []
 		}]
 	}`
 	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusAccepted, w.Code)
+}
+
+// PATCH /cases/batch enqueues a case_sequencing_experiment batch to attach experiments
+// to an existing case.
+func TestPatchCaseBatchHandler_Success(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{
+		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+			return &types.Batch{ID: uuid.NewString(), BatchType: batchType, Status: types.BatchStatusPending, CreatedOn: time.Now(), Username: username, DryRun: dryRun}, nil
+		},
+	}
+	auth := &testutils.MockAuth{Username: "testuser"}
+
+	router := gin.Default()
+	router.PATCH("/cases/batch", PatchCaseBatchHandler(repo, auth))
+	body := `{
+		"cases": [{
+			"project_code": "proj1",
+			"submitter_case_id": "case1",
+			"sequencing_experiments": [{
+				"aliquot": "alq1",
+				"sample_organization_code": "org1",
+				"submitter_sample_id": "s1"
+			}]
+		}]
+	}`
+	req, _ := http.NewRequest(http.MethodPatch, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusAccepted, w.Code)
+	var response types.CreateBatchResponse
+	assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
+	assert.Equal(t, types.PatchCaseBatchType, response.BatchType)
+}
+
+// PATCH requires project_code, submitter_case_id, and at least one sequencing experiment.
+func TestPatchCaseBatchHandler_MissingFields(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{}
+	auth := &testutils.MockAuth{}
+
+	router := gin.Default()
+	router.PATCH("/cases/batch", PatchCaseBatchHandler(repo, auth))
+	body := `{
+		"cases": [{
+			"submitter_case_id": "case1",
+			"sequencing_experiments": []
+		}]
+	}`
+	req, _ := http.NewRequest(http.MethodPatch, "/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)

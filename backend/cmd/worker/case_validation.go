@@ -52,6 +52,7 @@ const (
 	CaseSeqExpNotFoundForPatient    = "CASE-009"
 	CaseInvalidSeqExpForType        = "CASE-010"
 	CaseIdenticalInBatch            = "CASE-011"
+	CaseNotFoundForAttach           = "CASE-012"
 )
 
 // Patients error codes
@@ -1378,19 +1379,23 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 
 	cr.CaseID = &c.ID
 
-	// Persist CaseHasSequencingExperiment relationships
+	return persistCaseHasSequencingExperiments(ctx, cr)
+}
+
+func persistCaseHasSequencingExperiments(ctx *StorageContext, cr *CaseValidationRecord) error {
+	if cr.CaseID == nil {
+		return fmt.Errorf("case ID is nil when persisting case_has_sequencing_experiment for case %d", cr.Index)
+	}
 	for _, se := range cr.SequencingExperiments {
 		chse := types.CaseHasSequencingExperiment{
-			CaseID:                 c.ID, // Gorm automatically sets the ID on the struct after creation
+			CaseID:                 *cr.CaseID,
 			SequencingExperimentID: se.ID,
 		}
 
-		err := ctx.CasesRepo.CreateCaseHasSequencingExperiment(&chse)
-		if err != nil {
+		if err := ctx.CasesRepo.CreateCaseHasSequencingExperiment(&chse); err != nil {
 			return fmt.Errorf("failed to persist case has sequencing experiment for case %d and sequencing experiment %q: %w", cr.Index, se.ID, err)
 		}
 	}
-
 	return nil
 }
 

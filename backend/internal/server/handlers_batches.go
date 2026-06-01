@@ -14,7 +14,6 @@ import (
 // @Description Retrieve a batch by ID
 // @Tags batches
 // @Security bearerauth
-// @Accept json
 // @Produce json
 // @Param batchId path string true "Batch ID"
 // @Success 200 {object} types.GetBatchResponse

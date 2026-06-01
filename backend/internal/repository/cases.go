@@ -11,6 +11,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Case = types.Case
@@ -37,6 +38,7 @@ type CasesDAO interface {
 	CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error
 	GetCaseAnalysisCatalogIdByCode(code string) (*AnalysisCatalog, error)
 	GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*Case, error)
+	UpdateCaseDiagnosisLabCode(caseID int, code string) error
 }
 
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
@@ -51,8 +53,19 @@ func (r *CasesRepository) CreateCase(c *Case) error {
 	return r.db.Create(c).Error
 }
 
+func (r *CasesRepository) UpdateCaseDiagnosisLabCode(caseID int, code string) error {
+	return r.db.Table(types.CaseTable.Name).
+		Where("id = ?", caseID).
+		Update("diagnosis_lab_code", code).Error
+}
+
 func (r *CasesRepository) CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error {
-	return r.db.Create(caseHasSeqExp).Error
+	return r.db.
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "case_id"}, {Name: "sequencing_experiment_id"}},
+			DoNothing: true,
+		}).
+		Create(caseHasSeqExp).Error
 }
 
 func (r *CasesRepository) GetCaseAnalysisCatalogIdByCode(code string) (*AnalysisCatalog, error) {
@@ -344,7 +357,7 @@ func (r *CasesRepository) retrieveCasePatients(caseId int) (*[]CasePatientClinic
 	txObservations = txObservations.Joins("LEFT JOIN hpo_term hpo ON obs.observation_code = 'phenotype' AND hpo.id = obs.code_value")
 	txObservations = txObservations.Where("obs.observation_code = 'phenotype' AND obs.case_id = ?", caseId)
 	txObservations = txObservations.Order("phenotype_name asc")
-	txObservations = txObservations.Select("obs.patient_id, hpo.id as phenotype_id, hpo.name as phenotype_name, obs.onset_code, obs.interpretation_code")
+	txObservations = txObservations.Select("obs.patient_id, COALESCE(hpo.id, obs.code_value) as phenotype_id, hpo.name as phenotype_name, obs.onset_code, obs.interpretation_code")
 	if err := txObservations.Find(&phenotypeObsCategoricals).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving case phenotypes: %w", err)
 	}

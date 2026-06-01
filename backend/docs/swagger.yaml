@@ -177,7 +177,6 @@ components:
         sequencing_experiments:
           items:
             $ref: '#/components/schemas/CaseSequencingExperimentBatch'
-          minItems: 1
           type: array
           uniqueItems: false
         status_code:
@@ -197,12 +196,32 @@ components:
       required:
       - analysis_code
       - category_code
+      - diagnostic_lab_code
+      - ordering_organization_code
       - patients
       - project_code
       - sequencing_experiments
       - status_code
       - tasks
       - type
+      type: object
+    CaseBatchPatch:
+      properties:
+        diagnostic_lab_code:
+          type: string
+        project_code:
+          type: string
+        sequencing_experiments:
+          items:
+            $ref: '#/components/schemas/CaseSequencingExperimentBatch'
+          type: array
+          uniqueItems: false
+        submitter_case_id:
+          type: string
+      required:
+      - project_code
+      - sequencing_experiments
+      - submitter_case_id
       type: object
     CaseEntity:
       description: Data for Case Entity Page
@@ -1840,6 +1859,17 @@ components:
       - size
       - url
       type: object
+    PatchCaseBatchBody:
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/CaseBatchPatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+      required:
+      - cases
+      type: object
     PatientBatch:
       properties:
         date_of_birth:
@@ -2835,11 +2865,6 @@ paths:
         required: true
         schema:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
       responses:
         "200":
           content:
@@ -3082,6 +3107,56 @@ paths:
       tags:
       - cases
   /cases/batch:
+    patch:
+      description: |-
+        Partially updates existing cases — see the request body for updatable fields.
+        Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found.
+        Array fields are appended, not replaced.
+      operationId: patchCaseBatch
+      parameters:
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          default: false
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchCaseBatchBody'
+        description: Attach Body
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Partially update existing cases (batch)
+      tags:
+      - cases
     post:
       description: Create a new case batch
       operationId: postCaseBatch

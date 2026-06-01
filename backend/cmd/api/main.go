@@ -224,6 +224,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 		casesGroup := dataManagerRoutes.Group("/cases")
 		casesGroup.POST("/batch", server.PostCaseBatchHandler(repoBatches, auth))
+		casesGroup.PATCH("/batch", server.PatchCaseBatchHandler(repoBatches, auth))
 	}
 
 	r.Use(gin.Recovery())

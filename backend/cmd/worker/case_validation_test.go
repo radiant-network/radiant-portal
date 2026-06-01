@@ -69,6 +69,10 @@ func (m *CaseValidationMockRepo) CreateCaseHasSequencingExperiment(caseHasSeqExp
 	return nil
 }
 
+func (m *CaseValidationMockRepo) UpdateCaseDiagnosisLabCode(caseID int, code string) error {
+	return nil
+}
+
 func (m *CaseValidationMockRepo) CreateDocument(document *repository.Document) error {
 	return nil
 }
