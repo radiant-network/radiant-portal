@@ -10,6 +10,7 @@ Method | HTTP request | Description
 [**case_entity_documents_search**](CasesApi.md#case_entity_documents_search) | **POST** /cases/{case_id}/documents/search | Search DocumentResult list for a case entity
 [**case_tasks_with_occurrences**](CasesApi.md#case_tasks_with_occurrences) | **GET** /cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
 [**cases_filters**](CasesApi.md#cases_filters) | **GET** /cases/filters | Get CaseFilters cases filters
+[**patch_case_batch**](CasesApi.md#patch_case_batch) | **PATCH** /cases/batch | Partially update existing cases (batch)
 [**post_case_batch**](CasesApi.md#post_case_batch) | **POST** /cases/batch | Create a new case batch
 [**search_cases**](CasesApi.md#search_cases) | **POST** /cases/search | Search cases
 
@@ -493,6 +494,92 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **patch_case_batch**
+> CreateBatchResponse patch_case_batch(patch_case_batch_body, dry_run=dry_run)
+
+Partially update existing cases (batch)
+
+Partially updates existing cases — see the request body for updatable fields.
+Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found.
+Array fields are appended, not replaced.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.create_batch_response import CreateBatchResponse
+from radiant_python.models.patch_case_batch_body import PatchCaseBatchBody
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.CasesApi(api_client)
+    patch_case_batch_body = radiant_python.PatchCaseBatchBody() # PatchCaseBatchBody | Attach Body
+    dry_run = False # bool | Dry Run (optional) (default to False)
+
+    try:
+        # Partially update existing cases (batch)
+        api_response = api_instance.patch_case_batch(patch_case_batch_body, dry_run=dry_run)
+        print("The response of CasesApi->patch_case_batch:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling CasesApi->patch_case_batch: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **patch_case_batch_body** | [**PatchCaseBatchBody**](PatchCaseBatchBody.md)| Attach Body | 
+ **dry_run** | **bool**| Dry Run | [optional] [default to False]
+
+### Return type
+
+[**CreateBatchResponse**](CreateBatchResponse.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**202** | Accepted |  -  |
+**400** | Bad Request |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

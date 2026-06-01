@@ -42,7 +42,7 @@ class CaseBatch(BaseModel):
     priority_code: Optional[StrictStr] = None
     project_code: StrictStr
     resolution_status_code: Optional[StrictStr] = None
-    sequencing_experiments: Annotated[List[CaseSequencingExperimentBatch], Field(min_length=1)]
+    sequencing_experiments: List[CaseSequencingExperimentBatch]
     status_code: StrictStr
     submitter_case_id: Optional[StrictStr] = None
     tasks: List[CaseTaskBatch]
