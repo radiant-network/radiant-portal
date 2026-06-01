@@ -1,7 +1,7 @@
 # query-bar
 
 ![query](assets/query.png)
-- Factory for [multiselect-query-pill](pills/multiselect-query-pill.md), [numerial-query-pill](pills/numerial-query-pill.md) and [boolean-query-pill](pills/boolean-query-pill.md)
+- Factory for [multiselect-query-pill](pills/multiselect-query-pill.md), [numerical-query-pill](pills/numerical-query-pill.md) and [boolean-query-pill](pills/boolean-query-pill.md)
 - Active or inactive state, 
 - Dispatch an action to update result of 
 	- `Table`

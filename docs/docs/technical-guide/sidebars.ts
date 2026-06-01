@@ -118,7 +118,7 @@ const sidebars: SidebarsConfig = {
                                 'technical-guide/frontend/query-builder/pills/combiner-operator',
                                 'technical-guide/frontend/query-builder/pills/boolean-query-pill',
                                 'technical-guide/frontend/query-builder/pills/multiselect-query-pill',
-                                'technical-guide/frontend/query-builder/pills/numerial-query-pill',
+                                'technical-guide/frontend/query-builder/pills/numerical-query-pill',
                                 'technical-guide/frontend/query-builder/pills/search-query-pill',
                                 'technical-guide/frontend/query-builder/pills/combined-query-pill',
                             ],
