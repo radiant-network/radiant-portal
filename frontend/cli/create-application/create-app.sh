@@ -4,7 +4,7 @@ echo "Radiant: Check Node version"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 readonly APPLICATION_FOLDER="$SCRIPT_DIR/../../apps"
-readonly MIN_NODE_VERSION="20.18.0"
+readonly MIN_NODE_VERSION="20.19.0"
 
 # Get installed Node.js version
 installed_node_version=$(node -v 2>/dev/null | sed 's/^v//')

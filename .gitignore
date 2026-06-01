@@ -60,7 +60,6 @@ openapitools.json
 
 **/api/git_push.sh
 
-.nvmrc
 node_modules
 
 # Manual smoke-tests
