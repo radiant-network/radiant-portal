@@ -26,6 +26,12 @@ jobs:
             frontend:
               - 'frontend/components/**'
 
+      - name: Setup Node 🟢
+        if: steps.filter.outputs.frontend == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
       - name: Install dependencies and build 🔧
         if: steps.filter.outputs.frontend == 'true'
         run: | # Install npm packages and build the Storybook files
