@@ -3,7 +3,7 @@ import { EllipsisVertical } from 'lucide-react';
 import useSWRMutation from 'swr/mutation';
 
 import { OccurrenceNote, UpdateOccurrenceNoteInput } from '@/api/api';
-import { SingleAvatar } from '@/components/base/assignation/avatar/single-avatar';
+import { SingleAvatar } from '@/components/base/avatar/single-avatar';
 import RichTextEditor, {
   isEditorHasEmptyContent,
 } from '@/components/base/data-entry/rich-text-editor/rich-text-editor';

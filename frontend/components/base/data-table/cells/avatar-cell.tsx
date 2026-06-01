@@ -1,4 +1,4 @@
-import { Avatar, AvatarUser } from '@/components/base/assignation/avatar';
+import { Avatar, AvatarUser } from '@/components/base/avatar';
 
 export interface AvatarCellProps {
   users?: AvatarUser[];

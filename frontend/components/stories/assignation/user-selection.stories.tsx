@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { AvatarUser } from '@/components/base/assignation/avatar';
 import {
   ReadOnlyUserSelection,
   UserSelection,
   UserSelectionPopover,
 } from '@/components/base/assignation/user-selection';
+import { AvatarUser } from '@/components/base/avatar';
 
 const meta = {
   title: 'Assignation/UserSelection',

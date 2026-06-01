@@ -1,4 +1,4 @@
-import { AvatarUser } from './avatar/avatar.types';
+import { AvatarUser } from '@/components/base/avatar/avatar.types';
 
 /**
  * Shared constants for assignation components
@@ -20,9 +20,6 @@ export const ASSIGNATION_CONSTANTS = {
     md: 24,
     lg: 32,
   },
-
-  // Maximum count display for count avatars
-  MAX_COUNT_DISPLAY: 99,
 } as const;
 
 /**
