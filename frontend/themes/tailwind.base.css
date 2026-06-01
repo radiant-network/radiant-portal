@@ -65,6 +65,44 @@
   --color-alert-error: var(--color-red-400);
   --color-alert-warning: var(--color-yellow-400);
   --color-alert-info: var(--color-blue-400);
+
+  /* Avatar Colors (light) */
+  --color-avatar-red: var(--color-red-200);
+  --color-avatar-red-foreground: var(--color-red-800);
+  --color-avatar-orange: var(--color-orange-200);
+  --color-avatar-orange-foreground: var(--color-orange-800);
+  --color-avatar-amber: var(--color-amber-200);
+  --color-avatar-amber-foreground: var(--color-amber-800);
+  --color-avatar-yellow: var(--color-yellow-200);
+  --color-avatar-yellow-foreground: var(--color-yellow-800);
+  --color-avatar-lime: var(--color-lime-200);
+  --color-avatar-lime-foreground: var(--color-lime-800);
+  --color-avatar-green: var(--color-green-200);
+  --color-avatar-green-foreground: var(--color-green-800);
+  --color-avatar-emerald: var(--color-emerald-200);
+  --color-avatar-emerald-foreground: var(--color-emerald-800);
+  --color-avatar-teal: var(--color-teal-200);
+  --color-avatar-teal-foreground: var(--color-teal-800);
+  --color-avatar-cyan: var(--color-cyan-200);
+  --color-avatar-cyan-foreground: var(--color-cyan-800);
+  --color-avatar-sky: var(--color-sky-200);
+  --color-avatar-sky-foreground: var(--color-sky-800);
+  --color-avatar-blue: var(--color-blue-200);
+  --color-avatar-blue-foreground: var(--color-blue-800);
+  --color-avatar-indigo: var(--color-indigo-200);
+  --color-avatar-indigo-foreground: var(--color-indigo-800);
+  --color-avatar-violet: var(--color-violet-200);
+  --color-avatar-violet-foreground: var(--color-violet-800);
+  --color-avatar-purple: var(--color-purple-200);
+  --color-avatar-purple-foreground: var(--color-purple-800);
+  --color-avatar-fuchsia: var(--color-fuchsia-200);
+  --color-avatar-fuchsia-foreground: var(--color-fuchsia-800);
+  --color-avatar-pink: var(--color-pink-200);
+  --color-avatar-pink-foreground: var(--color-pink-800);
+  --color-avatar-rose: var(--color-rose-200);
+  --color-avatar-rose-foreground: var(--color-rose-800);
+  --color-avatar-neutral: var(--color-slate-200);
+  --color-avatar-neutral-foreground: var(--color-slate-700);
 }
 
 .dark {
@@ -126,6 +164,44 @@
   --color-alert-error: var(--color-red-400);
   --color-alert-warning: var(--color-yellow-400);
   --color-alert-info: var(--color-blue-400);
+
+  /* Avatar Colors */
+  --color-avatar-red: var(--color-red-900);
+  --color-avatar-red-foreground: var(--color-red-300);
+  --color-avatar-orange: var(--color-orange-800);
+  --color-avatar-orange-foreground: var(--color-orange-200);
+  --color-avatar-amber: var(--color-amber-900);
+  --color-avatar-amber-foreground: var(--color-amber-200);
+  --color-avatar-yellow: var(--color-yellow-800);
+  --color-avatar-yellow-foreground: var(--color-yellow-400);
+  --color-avatar-lime: var(--color-lime-900);
+  --color-avatar-lime-foreground: var(--color-lime-400);
+  --color-avatar-green: var(--color-green-900);
+  --color-avatar-green-foreground: var(--color-green-400);
+  --color-avatar-emerald: var(--color-emerald-900);
+  --color-avatar-emerald-foreground: var(--color-emerald-200);
+  --color-avatar-teal: var(--color-teal-900);
+  --color-avatar-teal-foreground: var(--color-teal-200);
+  --color-avatar-cyan: var(--color-cyan-900);
+  --color-avatar-cyan-foreground: var(--color-cyan-300);
+  --color-avatar-sky: var(--color-sky-900);
+  --color-avatar-sky-foreground: var(--color-sky-200);
+  --color-avatar-blue: var(--color-blue-900);
+  --color-avatar-blue-foreground: var(--color-blue-300);
+  --color-avatar-indigo: var(--color-indigo-900);
+  --color-avatar-indigo-foreground: var(--color-indigo-200);
+  --color-avatar-violet: var(--color-violet-900);
+  --color-avatar-violet-foreground: var(--color-violet-300);
+  --color-avatar-purple: var(--color-purple-900);
+  --color-avatar-purple-foreground: var(--color-purple-200);
+  --color-avatar-fuchsia: var(--color-fuchsia-900);
+  --color-avatar-fuchsia-foreground: var(--color-fuchsia-300);
+  --color-avatar-pink: var(--color-pink-900);
+  --color-avatar-pink-foreground: var(--color-pink-200);
+  --color-avatar-rose: var(--color-rose-900);
+  --color-avatar-rose-foreground: var(--color-rose-200);
+  --color-avatar-neutral: var(--color-slate-700);
+  --color-avatar-neutral-foreground: var(--color-slate-300);
 }
 
 @theme inline {
@@ -248,6 +324,44 @@
   --color-alert-error-foreground: var(--color-alert-error-foreground);
   --color-alert-success: var(--color-green-400);
   --color-alert-success-foreground: var(--color-alert-success-foreground);
+
+  /* Avatar Colors */
+  --color-avatar-red: var(--color-avatar-red);
+  --color-avatar-red-foreground: var(--color-avatar-red-foreground);
+  --color-avatar-orange: var(--color-avatar-orange);
+  --color-avatar-orange-foreground: var(--color-avatar-orange-foreground);
+  --color-avatar-amber: var(--color-avatar-amber);
+  --color-avatar-amber-foreground: var(--color-avatar-amber-foreground);
+  --color-avatar-yellow: var(--color-avatar-yellow);
+  --color-avatar-yellow-foreground: var(--color-avatar-yellow-foreground);
+  --color-avatar-lime: var(--color-avatar-lime);
+  --color-avatar-lime-foreground: var(--color-avatar-lime-foreground);
+  --color-avatar-green: var(--color-avatar-green);
+  --color-avatar-green-foreground: var(--color-avatar-green-foreground);
+  --color-avatar-emerald: var(--color-avatar-emerald);
+  --color-avatar-emerald-foreground: var(--color-avatar-emerald-foreground);
+  --color-avatar-teal: var(--color-avatar-teal);
+  --color-avatar-teal-foreground: var(--color-avatar-teal-foreground);
+  --color-avatar-cyan: var(--color-avatar-cyan);
+  --color-avatar-cyan-foreground: var(--color-avatar-cyan-foreground);
+  --color-avatar-sky: var(--color-avatar-sky);
+  --color-avatar-sky-foreground: var(--color-avatar-sky-foreground);
+  --color-avatar-blue: var(--color-avatar-blue);
+  --color-avatar-blue-foreground: var(--color-avatar-blue-foreground);
+  --color-avatar-indigo: var(--color-avatar-indigo);
+  --color-avatar-indigo-foreground: var(--color-avatar-indigo-foreground);
+  --color-avatar-violet: var(--color-avatar-violet);
+  --color-avatar-violet-foreground: var(--color-avatar-violet-foreground);
+  --color-avatar-purple: var(--color-avatar-purple);
+  --color-avatar-purple-foreground: var(--color-avatar-purple-foreground);
+  --color-avatar-fuchsia: var(--color-avatar-fuchsia);
+  --color-avatar-fuchsia-foreground: var(--color-avatar-fuchsia-foreground);
+  --color-avatar-pink: var(--color-avatar-pink);
+  --color-avatar-pink-foreground: var(--color-avatar-pink-foreground);
+  --color-avatar-rose: var(--color-avatar-rose);
+  --color-avatar-rose-foreground: var(--color-avatar-rose-foreground);
+  --color-avatar-neutral: var(--color-avatar-neutral);
+  --color-avatar-neutral-foreground: var(--color-avatar-neutral-foreground);
 }
 
 @layer base {

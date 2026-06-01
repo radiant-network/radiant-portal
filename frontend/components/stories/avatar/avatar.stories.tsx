@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { UserIcon } from 'lucide-react';
 
-import type { AvatarUser } from '@/components/base/avatar';
-import { Avatar } from '@/components/base/avatar/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/base/shadcn/avatar';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base/shadcn/hover-card';
+
+import { avatarColors, avatarSizes } from './utils';
 
 const meta = {
-  title: 'Avatar/Avatar',
+  title: 'Avatars/Avatar',
   component: Avatar,
-  parameters: {
-    layout: 'centered',
-  },
   argTypes: {
     size: {
+      options: avatarSizes,
       control: { type: 'select' },
-      options: ['sm', 'md', 'lg'],
     },
   },
 } satisfies Meta<typeof Avatar>;
@@ -21,272 +21,204 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-// Sample users for stories
-const sampleUsers: AvatarUser[] = [
-  {
-    id: 'user-1',
-    name: 'Jean-François Soucy',
-    email: 'jeanfrancois.soucy.med@ssss.gouv.qc.ca',
-    organization: 'LDM-CHUSJ',
-  },
-  {
-    id: 'user-2',
-    name: 'Julie M. Gauthier',
-    email: 'julie.m.gauthier.hsj@ssss.gouv.qc.ca',
-    organization: 'LDM-CHUSJ',
-  },
-  {
-    id: 'user-3',
-    name: 'Jacques Michaud',
-    email: 'jacques.michaud.med@ssss.gouv.qc.ca',
-    organization: 'LDM-CHUSJ',
-  },
-  {
-    id: 'user-4',
-    name: 'Sarah Wilson',
-    email: 'sarah.wilson@hospital.ca',
-    organization: 'Toronto General',
-  },
-  {
-    id: 'user-5',
-    name: 'David Brown',
-    email: 'david.brown@clinic.ca',
-    organization: 'Vancouver Clinic',
-  },
-  {
-    id: 'user-6',
-    name: 'Lisa Garcia',
-    email: 'lisa.garcia@medical.ca',
-    organization: 'Calgary Medical',
-  },
-];
+const IMAGE_SRC = 'https://github.com/shadcn.png';
 
-export const AllStates: Story = {
+// The three render types a fallback can resolve to: an image, initials, or an icon.
+export const RenderTypes: Story = {
   render: () => (
-    <div className="flex flex-col gap-8 p-4">
-      <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-semibold">Avatar States</h3>
-        <div className="flex items-center gap-6">
-          <div className="flex flex-col items-center gap-2">
-            <Avatar users={[]} />
-            <span className="text-sm text-muted-foreground">Unassigned</span>
-          </div>
+    <div className="flex items-center gap-4">
+      <div className="flex flex-col items-center gap-2">
+        <Avatar size="md">
+          <AvatarImage src={IMAGE_SRC} alt="@shadcn" />
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar>
+        <span className="text-sm text-muted-foreground">Image</span>
+      </div>
 
-          <div className="flex flex-col items-center gap-2">
-            <Avatar users={[sampleUsers[0]]} />
-            <span className="text-sm text-muted-foreground">Single User</span>
-          </div>
+      <div className="flex flex-col items-center gap-2">
+        <Avatar size="md">
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar>
+        <span className="text-sm text-muted-foreground">Initials</span>
+      </div>
 
-          <div className="flex flex-col items-center gap-2">
-            <Avatar users={[sampleUsers[0], sampleUsers[1]]} />
-            <span className="text-sm text-muted-foreground">Two Users</span>
-          </div>
-
-          <div className="flex flex-col items-center gap-2">
-            <Avatar users={sampleUsers.slice(0, 3)} />
-            <span className="text-sm text-muted-foreground">Three Users</span>
-          </div>
-
-          <div className="flex flex-col items-center gap-2">
-            <Avatar users={sampleUsers} />
-            <span className="text-sm text-muted-foreground">Six Users</span>
-          </div>
-        </div>
+      <div className="flex flex-col items-center gap-2">
+        <Avatar size="md">
+          <AvatarFallback color="neutral">
+            <UserIcon className="size-4" />
+          </AvatarFallback>
+        </Avatar>
+        <span className="text-sm text-muted-foreground">Icon</span>
       </div>
     </div>
   ),
 };
 
+// All 7 sizes, for both initials and icon render types.
 export const Sizes: Story = {
   render: () => (
-    <div className="flex flex-col gap-8 p-4">
-      <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-semibold">Small Size</h3>
-        <div className="flex items-center gap-4">
-          <Avatar users={[]} size="sm" />
-          <Avatar users={[sampleUsers[0]]} size="sm" />
-          <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="sm" />
-          <Avatar users={sampleUsers.slice(0, 4)} size="sm" />
+    <div className="flex flex-col gap-6">
+      <div className="flex items-end gap-4">
+        <div className="flex flex-col items-center gap-2">
+          <Avatar>
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
+          <span className="text-xs text-muted-foreground">default (xs)</span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <Avatar>
+            <AvatarFallback>
+              <UserIcon className="size-1/2" />
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-xs text-muted-foreground">default (xs)</span>
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-semibold">Medium Size (Default)</h3>
-        <div className="flex items-center gap-4">
-          <Avatar users={[]} size="md" />
-          <Avatar users={[sampleUsers[0]]} size="md" />
-          <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="md" />
-          <Avatar users={sampleUsers.slice(0, 4)} size="md" />
-        </div>
+      <div className="flex items-end gap-4">
+        {avatarSizes.map(size => (
+          <div key={size} className="flex flex-col items-center gap-2">
+            <Avatar size={size}>
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+            <span className="text-xs text-muted-foreground">{size}</span>
+          </div>
+        ))}
       </div>
 
-      <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-semibold">Large Size</h3>
-        <div className="flex items-center gap-4">
-          <Avatar users={[]} size="lg" />
-          <Avatar users={[sampleUsers[0]]} size="lg" />
-          <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="lg" />
-          <Avatar users={sampleUsers.slice(0, 4)} size="lg" />
-        </div>
+      <div className="flex items-end gap-4">
+        {avatarSizes.map(size => (
+          <div key={size} className="flex flex-col items-center gap-2">
+            <Avatar size={size}>
+              <AvatarFallback>
+                <UserIcon className="size-1/2" />
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-xs text-muted-foreground">{size}</span>
+          </div>
+        ))}
       </div>
     </div>
   ),
 };
 
-export const Unassigned: Story = {
-  args: {
-    users: [],
-  },
-};
-
-export const SingleUser: Story = {
-  args: {
-    users: [sampleUsers[0]],
-  },
-};
-
-export const TwoUsers: Story = {
-  args: {
-    users: [sampleUsers[0], sampleUsers[1]],
-  },
-};
-
-export const MultipleUsers: Story = {
-  args: {
-    users: sampleUsers.slice(0, 5),
-  },
-};
-
-export const SingleNameUsers: Story = {
-  args: {
-    users: [
-      {
-        id: 'user-single-1',
-        name: 'Madonna',
-      },
-      {
-        id: 'user-single-2',
-        name: 'Cher',
-      },
-    ],
-  },
-};
-
-export const AssignmentStates: Story = {
+// All 18 colors, for both initials and icon render types.
+export const Colors: Story = {
   render: () => (
-    <div className="flex flex-col gap-8 p-4">
-      <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-semibold">Assignment Interactions</h3>
-        <p className="text-sm text-muted-foreground">
-          Hover over the avatars to see tooltips and user details popover.
-        </p>
-
-        <div className="grid grid-cols-2 gap-6">
-          <div className="flex flex-col gap-4">
-            <h4 className="font-medium">Unassigned States</h4>
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col items-center gap-2">
-                <Avatar users={[]} canAssign={true} onAssignClick={() => alert('Assign clicked!')} />
-                <span className="text-xs text-muted-foreground">Can Assign</span>
-              </div>
-
-              <div className="flex flex-col items-center gap-2">
-                <Avatar users={[]} canAssign={false} />
-                <span className="text-xs text-muted-foreground">Cannot Assign</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <h4 className="font-medium">Assigned States (Hover for Details)</h4>
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col items-center gap-2">
-                <Avatar users={[sampleUsers[0]]} size="md" />
-                <span className="text-xs text-muted-foreground">Single User</span>
-              </div>
-
-              <div className="flex flex-col items-center gap-2">
-                <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="md" />
-                <span className="text-xs text-muted-foreground">Two Users</span>
-              </div>
-
-              <div className="flex flex-col items-center gap-2">
-                <Avatar users={sampleUsers.slice(0, 4)} size="md" />
-                <span className="text-xs text-muted-foreground">Multiple Users</span>
-              </div>
-            </div>
-          </div>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col items-center gap-2">
+          <Avatar size="md">
+            <AvatarFallback>AB</AvatarFallback>
+          </Avatar>
+          <span className="text-xs text-muted-foreground">default (cyan)</span>
         </div>
+        <div className="flex flex-col items-center gap-2">
+          <Avatar size="md">
+            <AvatarFallback>
+              <UserIcon className="size-4" />
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-xs text-muted-foreground">default (cyan)</span>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        {avatarColors.map(color => (
+          <div key={color} className="flex flex-col items-center gap-2">
+            <Avatar size="md">
+              <AvatarFallback color={color}>AB</AvatarFallback>
+            </Avatar>
+            <span className="text-xs text-muted-foreground">{color}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        {avatarColors.map(color => (
+          <div key={color} className="flex flex-col items-center gap-2">
+            <Avatar size="md">
+              <AvatarFallback color={color}>
+                <UserIcon className="size-4" />
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-xs text-muted-foreground">{color}</span>
+          </div>
+        ))}
       </div>
     </div>
   ),
 };
 
-export const TableUsageExample: Story = {
+// The primitive stays purely visual; hover behaviour is composed with shadcn's HoverCard.
+export const WithHoverCard: Story = {
   render: () => (
-    <div className="p-4">
-      <h3 className="text-lg font-semibold mb-4">Table Cell Usage Example</h3>
-      <p className="text-sm text-muted-foreground mb-4">
-        Hover over avatars to see assignment tooltips and user details.
-      </p>
-      <div className="border rounded-lg">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="text-left p-3">Prescription ID</th>
-              <th className="text-left p-3">Assigned Users</th>
-              <th className="text-left p-3">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b">
-              <td className="p-3 font-mono text-sm">666106</td>
-              <td className="p-3">
-                <Avatar users={[]} canAssign={true} onAssignClick={() => alert('Assign to prescription 666106')} />
-              </td>
-              <td className="p-3">
-                <span className="text-muted-foreground">Can Assign</span>
-              </td>
-            </tr>
-            <tr className="border-b">
-              <td className="p-3 font-mono text-sm">658344</td>
-              <td className="p-3">
-                <Avatar users={[]} canAssign={false} />
-              </td>
-              <td className="p-3">
-                <span className="text-muted-foreground">No Assignment</span>
-              </td>
-            </tr>
-            <tr className="border-b">
-              <td className="p-3 font-mono text-sm">658142</td>
-              <td className="p-3">
-                <Avatar users={[sampleUsers[0]]} />
-              </td>
-              <td className="p-3">
-                <span className="text-green-600">Assigned</span>
-              </td>
-            </tr>
-            <tr className="border-b">
-              <td className="p-3 font-mono text-sm">658286</td>
-              <td className="p-3">
-                <Avatar users={[sampleUsers[1], sampleUsers[2]]} />
-              </td>
-              <td className="p-3">
-                <span className="text-blue-600">Collaborative</span>
-              </td>
-            </tr>
-            <tr>
-              <td className="p-3 font-mono text-sm">658290</td>
-              <td className="p-3">
-                <Avatar users={sampleUsers.slice(0, 4)} />
-              </td>
-              <td className="p-3">
-                <span className="text-purple-600">Team Assignment</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div className="flex items-center gap-6">
+      {/* Image */}
+      <HoverCard>
+        <HoverCardTrigger asChild>
+          <Avatar size="lg">
+            <AvatarImage src={IMAGE_SRC} alt="@shadcn" />
+            <AvatarFallback color="violet">CN</AvatarFallback>
+          </Avatar>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-64">
+          <div className="flex items-center gap-3">
+            <Avatar size="md">
+              <AvatarImage src={IMAGE_SRC} alt="@shadcn" />
+              <AvatarFallback color="violet">CN</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold">shadcn</span>
+              <span className="text-xs text-muted-foreground">Image avatar</span>
+            </div>
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+
+      {/* Initials */}
+      <HoverCard>
+        <HoverCardTrigger asChild>
+          <Avatar size="lg">
+            <AvatarFallback color="emerald">AB</AvatarFallback>
+          </Avatar>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-64">
+          <div className="flex items-center gap-3">
+            <Avatar size="md">
+              <AvatarFallback color="emerald">AB</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold">Alex Bernard</span>
+              <span className="text-xs text-muted-foreground">Initials avatar</span>
+            </div>
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+
+      {/* Icon */}
+      <HoverCard>
+        <HoverCardTrigger asChild>
+          <Avatar size="lg">
+            <AvatarFallback color="blue">
+              <UserIcon className="size-1/2" />
+            </AvatarFallback>
+          </Avatar>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-64">
+          <div className="flex items-center gap-3">
+            <Avatar size="md">
+              <AvatarFallback color="blue">
+                <UserIcon className="size-1/2" />
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold">Unknown user</span>
+              <span className="text-xs text-muted-foreground">Icon avatar</span>
+            </div>
+          </div>
+        </HoverCardContent>
+      </HoverCard>
     </div>
   ),
 };
