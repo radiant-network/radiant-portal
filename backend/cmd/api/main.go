@@ -41,7 +41,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	// Create repository
 	repoStarrocks := repository.NewStarrocksRepository(dbStarrocks)
-	repoStagingSeq := repository.NewSequencingRepository(dbStarrocks)
 	repoSeqExp := repository.NewSequencingExperimentRepository(dbStarrocks)
 	repoVariants := repository.NewVariantsRepository(dbStarrocks)
 	repoExomiser := repository.NewExomiserRepository(dbStarrocks)
@@ -172,7 +171,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", server.GetExpandedSomaticSNVOccurrence(repoSomaticSNVOccurrences, repoPostgres.Interpretations))
 
 	sequencingGroup := privateRoutes.Group("/sequencing")
-	sequencingGroup.GET("/:seq_id", server.GetSequencing(repoStagingSeq))
 	sequencingGroup.GET("/:seq_id/details", server.GetSequencingExperimentDetailByIdHandler(repoSeqExp))
 
 	usersGroup := privateRoutes.Group("/users")

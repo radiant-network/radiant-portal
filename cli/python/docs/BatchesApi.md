@@ -8,7 +8,7 @@ Method | HTTP request | Description
 
 
 # **get_batch**
-> GetBatchResponse get_batch(batch_id, body=body)
+> GetBatchResponse get_batch(batch_id)
 
 Retrieve a batch by ID
 
@@ -45,11 +45,10 @@ with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.BatchesApi(api_client)
     batch_id = 'batch_id_example' # str | Batch ID
-    body = None # object |  (optional)
 
     try:
         # Retrieve a batch by ID
-        api_response = api_instance.get_batch(batch_id, body=body)
+        api_response = api_instance.get_batch(batch_id)
         print("The response of BatchesApi->get_batch:\n")
         pprint(api_response)
     except Exception as e:
@@ -64,7 +63,6 @@ with radiant_python.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **batch_id** | **str**| Batch ID | 
- **body** | **object**|  | [optional] 
 
 ### Return type
 
@@ -76,7 +74,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 ### HTTP response details

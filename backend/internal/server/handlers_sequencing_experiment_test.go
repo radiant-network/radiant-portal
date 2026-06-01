@@ -12,15 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetSequencing(int) (*types.Sequencing, error) {
-	return &types.Sequencing{
-		SeqId:                1,
-		ExperimentalStrategy: "WGS",
-		AnalysisType:         "germline",
-		AffectedStatus:       "not_affected",
-	}, nil
-}
-
 func (m *MockRepository) GetSequencingExperimentDetailById(seqId int) (*types.SequencingExperimentDetail, error) {
 	return &types.SequencingExperimentDetail{
 		StatusCode: "completed",
@@ -65,19 +56,6 @@ func (m *MockRepository) GetSequencingExperimentByAliquot(aliquot string) ([]typ
 
 func (m *MockRepository) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, sampleOrganizationCode string) (*types.SequencingExperiment, error) {
 	return nil, nil
-}
-
-func Test_GetSequencingHandler(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.GET("/sequencing/:seq_id", GetSequencing(repo))
-
-	req, _ := http.NewRequest("GET", "/sequencing/1", bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"seq_id":1, "experimental_strategy":"WGS", "affected_status":"not_affected", "analysis_type": "germline"}`, w.Body.String())
 }
 
 func Test_GetSequencingExperimentDetailByIdHandler(t *testing.T) {

@@ -25,6 +25,7 @@ from radiant_python.models.batch_report import BatchReport
 from radiant_python.models.batch_summary import BatchSummary
 from radiant_python.models.cnv_gene_overlap import CNVGeneOverlap
 from radiant_python.models.case_batch import CaseBatch
+from radiant_python.models.case_batch_patch import CaseBatchPatch
 from radiant_python.models.case_entity import CaseEntity
 from radiant_python.models.case_filters import CaseFilters
 from radiant_python.models.case_patient_batch import CasePatientBatch
@@ -79,6 +80,7 @@ from radiant_python.models.occurrence_flag_type import OccurrenceFlagType
 from radiant_python.models.occurrence_note import OccurrenceNote
 from radiant_python.models.omim_gene_panel import OmimGenePanel
 from radiant_python.models.output_document_batch import OutputDocumentBatch
+from radiant_python.models.patch_case_batch_body import PatchCaseBatchBody
 from radiant_python.models.patient_batch import PatientBatch
 from radiant_python.models.pubmed_citation import PubmedCitation
 from radiant_python.models.pubmed_citation_details import PubmedCitationDetails
@@ -88,7 +90,6 @@ from radiant_python.models.saved_filter_creation_input import SavedFilterCreatio
 from radiant_python.models.saved_filter_type import SavedFilterType
 from radiant_python.models.saved_filter_update_input import SavedFilterUpdateInput
 from radiant_python.models.search_criterion import SearchCriterion
-from radiant_python.models.sequencing import Sequencing
 from radiant_python.models.sequencing_experiment_batch import SequencingExperimentBatch
 from radiant_python.models.sequencing_experiment_detail import SequencingExperimentDetail
 from radiant_python.models.somatic_snv_occurrence import SomaticSNVOccurrence

@@ -320,7 +320,7 @@ export interface CaseBatch {
      * @type {string}
      * @memberof CaseBatch
      */
-    'diagnostic_lab_code'?: string;
+    'diagnostic_lab_code': string;
     /**
      * 
      * @type {string}
@@ -332,7 +332,7 @@ export interface CaseBatch {
      * @type {string}
      * @memberof CaseBatch
      */
-    'ordering_organization_code'?: string;
+    'ordering_organization_code': string;
     /**
      * 
      * @type {string}
@@ -420,6 +420,37 @@ export const CaseBatchTypeEnum = {
 
 export type CaseBatchTypeEnum = typeof CaseBatchTypeEnum[keyof typeof CaseBatchTypeEnum];
 
+/**
+ * 
+ * @export
+ * @interface CaseBatchPatch
+ */
+export interface CaseBatchPatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatchPatch
+     */
+    'diagnostic_lab_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatchPatch
+     */
+    'project_code': string;
+    /**
+     * 
+     * @type {Array<CaseSequencingExperimentBatch>}
+     * @memberof CaseBatchPatch
+     */
+    'sequencing_experiments': Array<CaseSequencingExperimentBatch>;
+    /**
+     * 
+     * @type {string}
+     * @memberof CaseBatchPatch
+     */
+    'submitter_case_id': string;
+}
 /**
  * Data for Case Entity Page
  * @export
@@ -3784,6 +3815,19 @@ export interface OutputDocumentBatch {
 /**
  * 
  * @export
+ * @interface PatchCaseBatchBody
+ */
+export interface PatchCaseBatchBody {
+    /**
+     * 
+     * @type {Array<CaseBatchPatch>}
+     * @memberof PatchCaseBatchBody
+     */
+    'cases': Array<CaseBatchPatch>;
+}
+/**
+ * 
+ * @export
  * @interface PatientBatch
  */
 export interface PatientBatch {
@@ -4106,97 +4150,6 @@ export interface SearchCriterion {
      * @memberof SearchCriterion
      */
     'value'?: Array<any>;
-}
-/**
- * Sequencing represents a sequencing
- * @export
- * @interface Sequencing
- */
-export interface Sequencing {
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'affected_status'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'analysis_type'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'created_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'experimental_strategy'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'family_role'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'part'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'patient_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'request_priority'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'sample_id'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'seq_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'sex'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Sequencing
-     */
-    'task_id'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'updated_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Sequencing
-     */
-    'vcf_filepath'?: string;
 }
 /**
  * 
@@ -5814,11 +5767,10 @@ export const BatchesApiAxiosParamCreator = function (configuration?: Configurati
          * Retrieve a batch by ID
          * @summary Retrieve a batch by ID
          * @param {string} batchId Batch ID
-         * @param {object} [body] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getBatch: async (batchId: string, body?: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getBatch: async (batchId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'batchId' is not null or undefined
             assertParamExists('getBatch', 'batchId', batchId)
             const localVarPath = `/batches/{batchId}`
@@ -5840,12 +5792,9 @@ export const BatchesApiAxiosParamCreator = function (configuration?: Configurati
 
 
     
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -5866,12 +5815,11 @@ export const BatchesApiFp = function(configuration?: Configuration) {
          * Retrieve a batch by ID
          * @summary Retrieve a batch by ID
          * @param {string} batchId Batch ID
-         * @param {object} [body] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getBatch(batchId: string, body?: object, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetBatchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getBatch(batchId, body, options);
+        async getBatch(batchId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getBatch(batchId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['BatchesApi.getBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5890,12 +5838,11 @@ export const BatchesApiFactory = function (configuration?: Configuration, basePa
          * Retrieve a batch by ID
          * @summary Retrieve a batch by ID
          * @param {string} batchId Batch ID
-         * @param {object} [body] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getBatch(batchId: string, body?: object, options?: RawAxiosRequestConfig): AxiosPromise<GetBatchResponse> {
-            return localVarFp.getBatch(batchId, body, options).then((request) => request(axios, basePath));
+        getBatch(batchId: string, options?: RawAxiosRequestConfig): AxiosPromise<GetBatchResponse> {
+            return localVarFp.getBatch(batchId, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -5911,13 +5858,12 @@ export class BatchesApi extends BaseAPI {
      * Retrieve a batch by ID
      * @summary Retrieve a batch by ID
      * @param {string} batchId Batch ID
-     * @param {object} [body] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof BatchesApi
      */
-    public getBatch(batchId: string, body?: object, options?: RawAxiosRequestConfig) {
-        return BatchesApiFp(this.configuration).getBatch(batchId, body, options).then((request) => request(this.axios, this.basePath));
+    public getBatch(batchId: string, options?: RawAxiosRequestConfig) {
+        return BatchesApiFp(this.configuration).getBatch(batchId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -6179,6 +6125,51 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
+         * @summary Partially update existing cases (batch)
+         * @param {PatchCaseBatchBody} patchCaseBatchBody Attach Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patchCaseBatch: async (patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'patchCaseBatchBody' is not null or undefined
+            assertParamExists('patchCaseBatch', 'patchCaseBatchBody', patchCaseBatchBody)
+            const localVarPath = `/cases/batch`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (dryRun !== undefined) {
+                localVarQueryParameter['dry_run'] = dryRun;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(patchCaseBatchBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create a new case batch
          * @summary Create a new case batch
          * @param {CreateCaseBatchBody} createCaseBatchBody Create Body
@@ -6355,6 +6346,20 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
+         * @summary Partially update existing cases (batch)
+         * @param {PatchCaseBatchBody} patchCaseBatchBody Attach Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patchCaseBatch(patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patchCaseBatch(patchCaseBatchBody, dryRun, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.patchCaseBatch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Create a new case batch
          * @summary Create a new case batch
          * @param {CreateCaseBatchBody} createCaseBatchBody Create Body
@@ -6453,6 +6458,17 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          */
         casesFilters(options?: RawAxiosRequestConfig): AxiosPromise<CaseFilters> {
             return localVarFp.casesFilters(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
+         * @summary Partially update existing cases (batch)
+         * @param {PatchCaseBatchBody} patchCaseBatchBody Attach Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patchCaseBatch(patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.patchCaseBatch(patchCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new case batch
@@ -6558,6 +6574,19 @@ export class CasesApi extends BaseAPI {
      */
     public casesFilters(options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).casesFilters(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
+     * @summary Partially update existing cases (batch)
+     * @param {PatchCaseBatchBody} patchCaseBatchBody Attach Body
+     * @param {boolean} [dryRun] Dry Run
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public patchCaseBatch(patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).patchCaseBatch(patchCaseBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -11434,44 +11463,6 @@ export class SavedFiltersApi extends BaseAPI {
 export const SequencingApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Retrieve Sequencing data for a given sequence ID
-         * @summary Get a Sequencing
-         * @param {string} seqId Sequence ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getSequencing: async (seqId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'seqId' is not null or undefined
-            assertParamExists('getSequencing', 'seqId', seqId)
-            const localVarPath = `/sequencing/{seq_id}`
-                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Get SequencingExperimentDetail by id
          * @summary Get SequencingExperimentDetail by id
          * @param {string} seqId Seq ID
@@ -11565,19 +11556,6 @@ export const SequencingApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SequencingApiAxiosParamCreator(configuration)
     return {
         /**
-         * Retrieve Sequencing data for a given sequence ID
-         * @summary Get a Sequencing
-         * @param {string} seqId Sequence ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getSequencing(seqId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sequencing>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getSequencing(seqId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['SequencingApi.getSequencing']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * Get SequencingExperimentDetail by id
          * @summary Get SequencingExperimentDetail by id
          * @param {string} seqId Seq ID
@@ -11615,16 +11593,6 @@ export const SequencingApiFactory = function (configuration?: Configuration, bas
     const localVarFp = SequencingApiFp(configuration)
     return {
         /**
-         * Retrieve Sequencing data for a given sequence ID
-         * @summary Get a Sequencing
-         * @param {string} seqId Sequence ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getSequencing(seqId: string, options?: RawAxiosRequestConfig): AxiosPromise<Sequencing> {
-            return localVarFp.getSequencing(seqId, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Get SequencingExperimentDetail by id
          * @summary Get SequencingExperimentDetail by id
          * @param {string} seqId Seq ID
@@ -11655,18 +11623,6 @@ export const SequencingApiFactory = function (configuration?: Configuration, bas
  * @extends {BaseAPI}
  */
 export class SequencingApi extends BaseAPI {
-    /**
-     * Retrieve Sequencing data for a given sequence ID
-     * @summary Get a Sequencing
-     * @param {string} seqId Sequence ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SequencingApi
-     */
-    public getSequencing(seqId: string, options?: RawAxiosRequestConfig) {
-        return SequencingApiFp(this.configuration).getSequencing(seqId, options).then((request) => request(this.axios, this.basePath));
-    }
-
     /**
      * Get SequencingExperimentDetail by id
      * @summary Get SequencingExperimentDetail by id

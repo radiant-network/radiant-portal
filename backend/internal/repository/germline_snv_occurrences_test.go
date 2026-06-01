@@ -31,7 +31,7 @@ func Test_Germline_SNV_GetOccurrences(t *testing.T) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqId)
@@ -57,7 +57,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Selected_Columns_Only(t *testing.T)
 
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, nil, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqId)
@@ -74,7 +74,7 @@ func Test_Germline_SNV_GetOccurrencesReturn_Default_Column_If_No_One_Specified(t
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, nil, nil, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		assert.Len(t, occurrences, 1)
 
@@ -107,7 +107,7 @@ func Test_Germline_SNV_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T)
 func Test_Germline_SNV_CountOccurrences(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
-		count, err := repo.CountOccurrences(1, 1, 1, nil)
+		count, err := repo.CountOccurrences(1, 1, 5, nil)
 		assert.NoError(t, err)
 		assert.EqualValues(t, 1, count)
 	})
@@ -129,7 +129,7 @@ func Test_Germline_SNV_GetOccurrences_Return_List_Occurrences_When_Filter_By_Exo
 
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, selectedFields, sqon, nil, sort)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.EqualValues(t, "1000", occurrences[0].LocusId)
@@ -153,7 +153,7 @@ func Test_Germline_SNV_CountOccurrences_Return_Count_That_Match_Filters(t *testi
 		}
 		query, err := types.NewCountQueryFromSqon(sqon, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
-		c, err2 := repo.CountOccurrences(1, 1, 1, query)
+		c, err2 := repo.CountOccurrences(1, 1, 5, query)
 
 		if assert.NoError(t, err2) {
 			assert.EqualValues(t, 1, c)
@@ -174,7 +174,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *t
 		}
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, sqon, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqId)
@@ -200,12 +200,12 @@ func Test_Germline_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
 
-		// Case 1 (annotation task_id=1) sees its own loci at seq_id=1, not the
+		// Case 1 (annotation task_id=5) sees its own loci at seq_id=1, not the
 		// row attached to task_id=200.
-		case1Occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		case1Occurrences, err := repo.GetOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		for _, occ := range case1Occurrences {
-			assert.NotEqual(t, "5000", occ.LocusId, "task_id=1 query must not return case 2's occurrence (locus 5000)")
+			assert.NotEqual(t, "5000", occ.LocusId, "task_id=5 query must not return case 2's occurrence (locus 5000)")
 		}
 
 		// Case 2 (annotation task_id=200, reusing seq_id=1) sees only the
@@ -289,7 +289,7 @@ func Test_Germline_SNV_GetOccurrences_Return_N_Occurrences_When_Limit_Specified(
 		}
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, nil, nil, pagination, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		assert.Len(t, occurrences, 5)
 	})
@@ -313,7 +313,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And
 
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, pagination, sortedBody)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 12) {
 			assert.EqualValues(t, "1023", occurrences[0].LocusId)
@@ -340,7 +340,7 @@ func Test_Germline_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And
 
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, pagination, sortedBody)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 12) {
 			assert.EqualValues(t, "1016", occurrences[0].LocusId)
@@ -412,7 +412,7 @@ func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_B
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewAggregationQueryFromSqon("zygosity", nil, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
-		aggregate, err := repo.AggregateOccurrences(1, 1, 1, query)
+		aggregate, err := repo.AggregateOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		if assert.Len(t, aggregate, 2) {
 			assert.EqualValues(t, 1, aggregate[0].Count)
@@ -435,7 +435,7 @@ func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_B
 		}
 		query, err := types.NewAggregationQueryFromSqon("zygosity", sqon, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
-		aggregate, err := repo.AggregateOccurrences(1, 1, 1, query)
+		aggregate, err := repo.AggregateOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		if assert.Len(t, aggregate, 2) {
 			assert.EqualValues(t, 1, aggregate[0].Count)
@@ -458,7 +458,7 @@ func Test_Germline_SNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_B
 		}
 		query, err := types.NewAggregationQueryFromSqon("zygosity", sqon, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
-		aggregate, err := repo.AggregateOccurrences(1, 1, 1, query)
+		aggregate, err := repo.AggregateOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		if assert.Len(t, aggregate, 2) {
 			assert.EqualValues(t, 1, aggregate[0].Count)
@@ -661,7 +661,7 @@ func Test_Germline_SNV_GetStatisticsOccurrences_Decimal(t *testing.T) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewStatisticsQueryFromSqon("germline_pf_wgs", nil, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
-		statistics, err := repo.GetStatisticsOccurrences(1, 1, 1, query)
+		statistics, err := repo.GetStatisticsOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		assert.EqualValues(t, 0.01, statistics.Min)
 		assert.EqualValues(t, 0.29, statistics.Max)
@@ -674,7 +674,7 @@ func Test_Germline_SNV_GetStatisticsOccurrences_Integer(t *testing.T) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewStatisticsQueryFromSqon("germline_pc_wgs", nil, types.GermlineSNVOccurrencesFields)
 		assert.NoError(t, err)
-		statistics, err := repo.GetStatisticsOccurrences(1, 1, 1, query)
+		statistics, err := repo.GetStatisticsOccurrences(1, 1, 5, query)
 		assert.NoError(t, err)
 		assert.EqualValues(t, 3, statistics.Min)
 		assert.EqualValues(t, 4, statistics.Max)
@@ -692,7 +692,7 @@ func Test_Germline_SNV_GetStatisticsOccurrences_Non_Numeric_Field(t *testing.T) 
 func Test_Germline_SNV_GetExpandedOccurrence(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
-		expandedOccurrence, err := repo.GetExpandedOccurrence(1, 1, 1, 1000)
+		expandedOccurrence, err := repo.GetExpandedOccurrence(1, 1, 5, 1000)
 		assert.NoError(t, err)
 		assert.Equal(t, "1000", expandedOccurrence.LocusId)
 		assert.Equal(t, "locus1", expandedOccurrence.Locus)
@@ -726,9 +726,9 @@ func Test_Germline_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *test
 		assert.NoError(t, err)
 
 		note, err := notesRepo.Create(types.OccurrenceNote{
-			CaseID:       2,
-			SeqID:        1,
-			TaskID:       1,
+			CaseID:       3,
+			SeqID:        7,
+			TaskID:       77,
 			OccurrenceID: "1000",
 			UserID:       "11111111-1111-1111-1111-111111111111",
 			UserName:     "Test User",
@@ -736,7 +736,7 @@ func Test_Germline_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *test
 		})
 		assert.NoError(t, err)
 
-		occurrences, err := repo.GetOccurrences(2, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(3, 7, 77, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.True(t, occurrences[0].HasNote)
@@ -745,7 +745,7 @@ func Test_Germline_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *test
 		err = notesRepo.Delete(note.ID)
 		assert.NoError(t, err)
 
-		occurrences, err = repo.GetOccurrences(2, 1, 1, query)
+		occurrences, err = repo.GetOccurrences(3, 7, 77, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.False(t, occurrences[0].HasNote)

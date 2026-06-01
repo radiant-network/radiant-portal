@@ -77,11 +77,10 @@ with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.BatchesApi(api_client)
     batch_id = 'batch_id_example' # str | Batch ID
-    body = None # object |  (optional)
 
     try:
         # Retrieve a batch by ID
-        api_response = api_instance.get_batch(batch_id, body=body)
+        api_response = api_instance.get_batch(batch_id)
         print("The response of BatchesApi->get_batch:\n")
         pprint(api_response)
     except ApiException as e:
@@ -102,6 +101,7 @@ Class | Method | HTTP request | Description
 *CasesApi* | [**case_entity_documents_search**](docs/CasesApi.md#case_entity_documents_search) | **POST** /cases/{case_id}/documents/search | Search DocumentResult list for a case entity
 *CasesApi* | [**case_tasks_with_occurrences**](docs/CasesApi.md#case_tasks_with_occurrences) | **GET** /cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
 *CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **GET** /cases/filters | Get CaseFilters cases filters
+*CasesApi* | [**patch_case_batch**](docs/CasesApi.md#patch_case_batch) | **PATCH** /cases/batch | Partially update existing cases (batch)
 *CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /cases/batch | Create a new case batch
 *CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /cases/search | Search cases
 *DocumentsApi* | [**autocomplete_documents**](docs/DocumentsApi.md#autocomplete_documents) | **GET** /documents/autocomplete | Get AutocompleteResult list of matching prefix
@@ -154,7 +154,6 @@ Class | Method | HTTP request | Description
 *SavedFiltersApi* | [**get_saved_filters**](docs/SavedFiltersApi.md#get_saved_filters) | **GET** /users/saved_filters | Get user saved filters
 *SavedFiltersApi* | [**post_saved_filter**](docs/SavedFiltersApi.md#post_saved_filter) | **POST** /users/saved_filters | Create a new saved filter
 *SavedFiltersApi* | [**put_saved_filter**](docs/SavedFiltersApi.md#put_saved_filter) | **PUT** /users/saved_filters/{saved_filter_id} | Update a saved filter
-*SequencingApi* | [**get_sequencing**](docs/SequencingApi.md#get_sequencing) | **GET** /sequencing/{seq_id} | Get a Sequencing
 *SequencingApi* | [**get_sequencing_experiment_detail_by_id**](docs/SequencingApi.md#get_sequencing_experiment_detail_by_id) | **GET** /sequencing/{seq_id}/details | Get SequencingExperimentDetail by id
 *SequencingApi* | [**post_sequencing_experiment_batch**](docs/SequencingApi.md#post_sequencing_experiment_batch) | **POST** /sequencing/batch | Create a new sequencing experiment batch
 *StatusApi* | [**status_get**](docs/StatusApi.md#status_get) | **GET** /status | Get API status
@@ -188,6 +187,7 @@ Class | Method | HTTP request | Description
  - [BatchSummary](docs/BatchSummary.md)
  - [CNVGeneOverlap](docs/CNVGeneOverlap.md)
  - [CaseBatch](docs/CaseBatch.md)
+ - [CaseBatchPatch](docs/CaseBatchPatch.md)
  - [CaseEntity](docs/CaseEntity.md)
  - [CaseFilters](docs/CaseFilters.md)
  - [CasePatientBatch](docs/CasePatientBatch.md)
@@ -242,6 +242,7 @@ Class | Method | HTTP request | Description
  - [OccurrenceNote](docs/OccurrenceNote.md)
  - [OmimGenePanel](docs/OmimGenePanel.md)
  - [OutputDocumentBatch](docs/OutputDocumentBatch.md)
+ - [PatchCaseBatchBody](docs/PatchCaseBatchBody.md)
  - [PatientBatch](docs/PatientBatch.md)
  - [PubmedCitation](docs/PubmedCitation.md)
  - [PubmedCitationDetails](docs/PubmedCitationDetails.md)
@@ -251,7 +252,6 @@ Class | Method | HTTP request | Description
  - [SavedFilterType](docs/SavedFilterType.md)
  - [SavedFilterUpdateInput](docs/SavedFilterUpdateInput.md)
  - [SearchCriterion](docs/SearchCriterion.md)
- - [Sequencing](docs/Sequencing.md)
  - [SequencingExperimentBatch](docs/SequencingExperimentBatch.md)
  - [SequencingExperimentDetail](docs/SequencingExperimentDetail.md)
  - [SomaticSNVOccurrence](docs/SomaticSNVOccurrence.md)
