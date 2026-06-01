@@ -1,12 +1,13 @@
 import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
 import { cn } from '@/components/lib/utils';
 
-import { ASSIGNATION_CONSTANTS } from '../constants';
-
 import { avatarStyles, getOverlapClasses } from './avatar.styles';
 import { CountAvatarProps } from './avatar.types';
 import { getInitials, getUserColor } from './avatar.utils';
 import { AvatarPopover } from './avatar-popover';
+
+// Maximum count display for count avatars
+const MAX_COUNT_DISPLAY = 99;
 
 export function CountAvatar({ firstUser, additionalCount, allUsers, size = 'md', className }: CountAvatarProps) {
   const initials = getInitials(firstUser);
@@ -16,10 +17,7 @@ export function CountAvatar({ firstUser, additionalCount, allUsers, size = 'md',
   const countStyles = avatarStyles({ size, variant: 'count', position: 'second' });
   const overlapClass = getOverlapClasses(size);
 
-  const countText =
-    additionalCount > ASSIGNATION_CONSTANTS.MAX_COUNT_DISPLAY
-      ? `${ASSIGNATION_CONSTANTS.MAX_COUNT_DISPLAY}+`
-      : `+${additionalCount}`;
+  const countText = additionalCount > MAX_COUNT_DISPLAY ? `${MAX_COUNT_DISPLAY}+` : `+${additionalCount}`;
 
   const avatarElement = (
     <div

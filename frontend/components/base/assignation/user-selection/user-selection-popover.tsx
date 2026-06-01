@@ -1,10 +1,9 @@
 import { useState } from 'react';
 
+import { AvatarUser } from '@/components/base/avatar/avatar.types';
 import { Button } from '@/components/base/shadcn/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 import { useI18n } from '@/components/hooks/i18n';
-
-import { AvatarUser } from '../avatar/avatar.types';
 
 import { UserSelection } from './user-selection';
 

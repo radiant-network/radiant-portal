@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import type { AvatarUser } from '@/components/base/assignation/avatar';
-import { Avatar } from '@/components/base/assignation/avatar/avatar';
+import type { AvatarUser } from '@/components/base/avatar';
+import { Avatar } from '@/components/base/avatar/avatar';
 
 const meta = {
-  title: 'Assignation/Avatar',
+  title: 'Avatar/Avatar',
   component: Avatar,
   parameters: {
     layout: 'centered',

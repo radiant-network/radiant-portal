@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 
+import { avatarStyles, getIconSize } from '@/components/base/avatar/avatar.styles';
+import { AvatarUser } from '@/components/base/avatar/avatar.types';
+import { getInitials, getUserColor } from '@/components/base/avatar/avatar.utils';
 import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
 import { Button } from '@/components/base/shadcn/button';
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
-import { avatarStyles, getIconSize } from '../avatar/avatar.styles';
-import { AvatarUser } from '../avatar/avatar.types';
-import { getInitials, getUserColor } from '../avatar/avatar.utils';
 import { isNotAssignedUser } from '../constants';
 import { createFilteredUserList, handleUserToggle } from '../user-filtering';
 
