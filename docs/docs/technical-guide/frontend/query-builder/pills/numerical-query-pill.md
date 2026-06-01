@@ -1,4 +1,4 @@
-# numerial-query-pill
+# numerical-query-pill
 
 Pill rendered for an [IValueFacet](../type/IValueFacet.md) with a numerical operator. Built by [query-bar](../query-bar.md).
 
