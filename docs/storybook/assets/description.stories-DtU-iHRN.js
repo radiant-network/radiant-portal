@@ -1,0 +1,9 @@
+import{j as r}from"./iframe-DaN5ePGy.js";import{S as t}from"./api-CNFUPySA.js";import{D as s}from"./description-Ch2B3Lz1.js";import{C as i,A as e}from"./applications-config-DfTGuYYT.js";import{B as c}from"./chunk-QUQL4437-tiDeZvge.js";import"./preload-helper-PPVm8Dsz.js";import"./i18n-M9kOJp22.js";import"./index-FwWjbq00.js";const _={variant_entity:{app_id:e.variant_entity},germline_snv_occurrence:{app_id:e.germline_snv_occurrence,aggregations:[],saved_filter_type:t.GERMLINE_SNV_OCCURRENCE},germline_cnv_occurrence:{app_id:e.germline_cnv_occurrence,aggregations:[],saved_filter_type:t.GERMLINE_CNV_OCCURRENCE},somatic_snv_to_occurrence:{app_id:e.somatic_snv_to_occurrence,aggregations:[],saved_filter_type:t.SOMATIC_SNV_OCCURRENCE},somatic_snv_tn_occurrence:{app_id:e.somatic_snv_tn_occurrence,aggregations:[],saved_filter_type:t.SOMATIC_SNV_OCCURRENCE},somatic_cnv_to_occurrence:{app_id:e.somatic_cnv_to_occurrence,aggregations:[],saved_filter_type:t.SOMATIC_CNV_OCCURRENCE},admin:{admin_code:"admin",app_id:e.admin},portal:{name:"",navigation:{}}},E={title:"Preview/Description",component:s,args:{title:"Title",children:r.jsx("span",{children:"Children"})},decorators:[a=>r.jsx(c,{children:r.jsx(i,{config:_,children:r.jsx(a,{})})})]},n={args:{},render:a=>r.jsx(s,{...a})},o={args:{values:[]},render:a=>r.jsx(s,{...a})};n.parameters={...n.parameters,docs:{...n.parameters?.docs,source:{originalSource:`{
+  args: {},
+  render: args => <DescriptionSection {...args} />
+}`,...n.parameters?.docs?.source}}};o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:`{
+  args: {
+    values: []
+  },
+  render: args => <DescriptionSection {...args} />
+}`,...o.parameters?.docs?.source}}};const f=["Default","Empty"];export{n as Default,o as Empty,f as __namedExportsOrder,E as default};
