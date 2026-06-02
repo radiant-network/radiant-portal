@@ -1,0 +1,1 @@
+const e=["2xs","xs","sm","md","lg","xl","2xl"],a=["red","orange","amber","yellow","lime","green","emerald","teal","cyan","sky","blue","indigo","violet","purple","fuchsia","pink","rose","neutral"];export{e as a,a as b};
