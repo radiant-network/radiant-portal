@@ -13,7 +13,7 @@ import { UnassignedAvatar } from './unassigned-avatar';
  * - 2 users: DualAvatar (two overlapping colored circles with initials)
  * - 3+ users: CountAvatar (first user avatar + count circle)
  */
-export function Avatar({ users = [], size = 'md', className, canAssign, onAssignClick }: AvatarProps) {
+export function Avatar({ users = [], size = 'sm', className, canAssign, onAssignClick }: AvatarProps) {
   // Filter out any falsy users and ensure we have valid user objects
   const validUsers = users.filter(user => user && user.id && user.name);
   const userCount = validUsers.length;

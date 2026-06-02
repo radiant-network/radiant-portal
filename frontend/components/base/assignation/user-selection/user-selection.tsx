@@ -21,17 +21,15 @@ function SelectedUsersDisplay({
   onRemoveUser?: (user: AvatarUser) => void;
   readOnly?: boolean;
 }) {
-  const avatarStyles24 = avatarStyles({ size: 'md', variant: 'single' });
-  const avatarStylesUnassigned = avatarStyles({ size: 'sm', variant: 'unassigned' });
-  const iconSize = getIconSize('sm');
+  const unassignedStyles = avatarStyles({ variant: 'unassigned' });
+  const iconSize = getIconSize('xs');
 
   return (
     <>
       {selectedUsers.map(user => {
         const isNotAssign = user.id === 'not-assign';
         const initials = isNotAssign ? '' : getInitials(user);
-        const colorClass = isNotAssign ? '' : getUserColor(user.id);
-        const avatarStyle = isNotAssign ? avatarStylesUnassigned : avatarStyles24;
+        const color = isNotAssign ? undefined : getUserColor(user.id);
 
         return (
           <div key={user.id} className="relative inline-flex items-center text-sm flex-shrink-0">
@@ -45,10 +43,21 @@ function SelectedUsersDisplay({
 
             {/* Avatar */}
             <div className="flex items-center z-10">
-              <Avatar className={cn(avatarStyle.container(), 'z-20', isNotAssign && 'bg-background')}>
-                <AvatarFallback className={cn(avatarStyle.fallback(), avatarStyle.text(), !isNotAssign && colorClass)}>
-                  {isNotAssign ? <User className={iconSize} /> : initials}
-                </AvatarFallback>
+              <Avatar
+                size={isNotAssign ? 'xs' : 'sm'}
+                className={cn(
+                  isNotAssign ? unassignedStyles.container() : 'border-2 border-transparent',
+                  'z-20',
+                  isNotAssign && 'bg-background',
+                )}
+              >
+                {isNotAssign ? (
+                  <AvatarFallback className={cn(unassignedStyles.fallback(), unassignedStyles.text())}>
+                    <User className={iconSize} />
+                  </AvatarFallback>
+                ) : (
+                  <AvatarFallback color={color}>{initials}</AvatarFallback>
+                )}
               </Avatar>
             </div>
 
@@ -149,9 +158,8 @@ export function EditableUserSelection({
     onUsersChange(selectedUsers.filter(user => user.id !== userToRemove.id));
   };
 
-  const avatarStyles24 = avatarStyles({ size: 'md', variant: 'single' });
-  const avatarStylesUnassigned = avatarStyles({ size: 'sm', variant: 'unassigned' });
-  const iconSize = getIconSize('sm');
+  const unassignedStyles = avatarStyles({ variant: 'unassigned' });
+  const iconSize = getIconSize('xs');
 
   if (!isOpen) {
     return null;
@@ -201,8 +209,7 @@ export function EditableUserSelection({
           allFilteredUsers.map(user => {
             const isNotAssign = user.id === 'not-assign';
             const initials = isNotAssign ? '' : getInitials(user);
-            const colorClass = isNotAssign ? '' : getUserColor(user.id);
-            const avatarStyle = isNotAssign ? avatarStylesUnassigned : avatarStyles24;
+            const color = isNotAssign ? undefined : getUserColor(user.id);
 
             return (
               <button
@@ -211,12 +218,17 @@ export function EditableUserSelection({
                 className="w-full flex items-center gap-1.5 py-1.5 hover:bg-accent transition-colors text-left"
               >
                 <div className="flex items-center justify-center w-7 h-7">
-                  <Avatar className={avatarStyle.container()}>
-                    <AvatarFallback
-                      className={cn(avatarStyle.fallback(), avatarStyle.text(), !isNotAssign && colorClass)}
-                    >
-                      {isNotAssign ? <User className={iconSize} /> : initials}
-                    </AvatarFallback>
+                  <Avatar
+                    size={isNotAssign ? 'xs' : 'sm'}
+                    className={isNotAssign ? unassignedStyles.container() : 'border-2 border-transparent'}
+                  >
+                    {isNotAssign ? (
+                      <AvatarFallback className={cn(unassignedStyles.fallback(), unassignedStyles.text())}>
+                        <User className={iconSize} />
+                      </AvatarFallback>
+                    ) : (
+                      <AvatarFallback color={color}>{initials}</AvatarFallback>
+                    )}
                   </Avatar>
                 </div>
 

@@ -1,4 +1,4 @@
-import { AvatarUser } from '@/components/base/avatar/avatar.types';
+import type { AvatarUser } from '@/components/base/avatar/avatar.types';
 
 /**
  * Shared constants for assignation components
@@ -6,20 +6,6 @@ import { AvatarUser } from '@/components/base/avatar/avatar.types';
 export const ASSIGNATION_CONSTANTS = {
   // Special user ID for "not assigned" state
   NOT_ASSIGNED_USER_ID: 'not-assign',
-
-  // Default avatar sizes
-  AVATAR_SIZES: {
-    SMALL: 'sm' as const,
-    MEDIUM: 'md' as const,
-    LARGE: 'lg' as const,
-  },
-
-  // Avatar dimensions in pixels (content size, not including borders)
-  AVATAR_DIMENSIONS: {
-    sm: 20,
-    md: 24,
-    lg: 32,
-  },
 } as const;
 
 /**

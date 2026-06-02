@@ -3,13 +3,15 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { AvatarUser } from '@/components/base/avatar';
 import { Avatar } from '@/components/base/avatar/avatar';
 
+import { avatarSizes } from './utils';
+
 const meta = {
   title: 'Avatars/Avatar variants',
   component: Avatar,
   argTypes: {
     size: {
       control: { type: 'select' },
-      options: ['sm', 'md', 'lg'],
+      options: avatarSizes,
     },
   },
 } satisfies Meta<typeof Avatar>;
@@ -94,40 +96,34 @@ export const AllStates: Story = {
   ),
 };
 
+// Every avatar state across all 7 sizes from the primitive.
 export const Sizes: Story = {
-  render: () => (
-    <div className="flex flex-col gap-8 p-4">
-      <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-semibold">Small Size</h3>
-        <div className="flex items-center gap-4">
-          <Avatar users={[]} size="sm" />
-          <Avatar users={[sampleUsers[0]]} size="sm" />
-          <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="sm" />
-          <Avatar users={sampleUsers.slice(0, 4)} size="sm" />
-        </div>
-      </div>
+  render: () => {
+    const states: { label: string; users: AvatarUser[] }[] = [
+      { label: 'Unassigned', users: [] },
+      { label: 'Single User', users: [sampleUsers[0]] },
+      { label: 'Two Users', users: [sampleUsers[0], sampleUsers[1]] },
+      { label: 'Multiple Users', users: sampleUsers.slice(0, 4) },
+    ];
 
-      <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-semibold">Medium Size (Default)</h3>
-        <div className="flex items-center gap-4">
-          <Avatar users={[]} size="md" />
-          <Avatar users={[sampleUsers[0]]} size="md" />
-          <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="md" />
-          <Avatar users={sampleUsers.slice(0, 4)} size="md" />
-        </div>
+    return (
+      <div className="flex flex-col gap-8 p-4">
+        {states.map(state => (
+          <div key={state.label} className="flex flex-col gap-4">
+            <h3 className="text-lg font-semibold">{state.label}</h3>
+            <div className="flex items-end gap-6">
+              {avatarSizes.map(size => (
+                <div key={size} className="flex flex-col items-center gap-2">
+                  <Avatar users={state.users} size={size} />
+                  <span className="text-xs text-muted-foreground">{size}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
-
-      <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-semibold">Large Size</h3>
-        <div className="flex items-center gap-4">
-          <Avatar users={[]} size="lg" />
-          <Avatar users={[sampleUsers[0]]} size="lg" />
-          <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="lg" />
-          <Avatar users={sampleUsers.slice(0, 4)} size="lg" />
-        </div>
-      </div>
-    </div>
-  ),
+    );
+  },
 };
 
 export const Unassigned: Story = {
@@ -136,23 +132,23 @@ export const Unassigned: Story = {
   },
 };
 
-export const SingleUser: Story = {
-  args: {
-    users: [sampleUsers[0]],
-  },
-};
+// export const SingleUser: Story = {
+//   args: {
+//     users: [sampleUsers[0]],
+//   },
+// };
 
-export const TwoUsers: Story = {
-  args: {
-    users: [sampleUsers[0], sampleUsers[1]],
-  },
-};
+// export const TwoUsers: Story = {
+//   args: {
+//     users: [sampleUsers[0], sampleUsers[1]],
+//   },
+// };
 
-export const MultipleUsers: Story = {
-  args: {
-    users: sampleUsers.slice(0, 5),
-  },
-};
+// export const MultipleUsers: Story = {
+//   args: {
+//     users: sampleUsers.slice(0, 5),
+//   },
+// };
 
 export const SingleNameUsers: Story = {
   args: {

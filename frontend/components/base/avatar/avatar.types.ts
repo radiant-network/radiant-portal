@@ -1,3 +1,5 @@
+import type { AvatarSize } from '@/components/base/shadcn/avatar';
+
 export interface AvatarUser {
   id: string;
   name: string;
@@ -8,14 +10,14 @@ export interface AvatarUser {
 
 export interface AvatarProps {
   users?: AvatarUser[];
-  size?: 'sm' | 'md' | 'lg';
+  size?: AvatarSize;
   className?: string;
   canAssign?: boolean;
   onAssignClick?: () => void;
 }
 
 export interface BaseAvatarProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: AvatarSize;
   className?: string;
   canAssign?: boolean;
   onAssignClick?: () => void;

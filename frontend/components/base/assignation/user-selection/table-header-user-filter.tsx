@@ -72,9 +72,8 @@ export function TableHeaderUserFilter({
     setSearchTerm('');
   };
 
-  const avatarStyles24 = avatarStyles({ size: 'md', variant: 'single' });
-  const avatarStylesUnassigned = avatarStyles({ size: 'sm', variant: 'unassigned' });
-  const iconSize = getIconSize('sm');
+  const unassignedStyles = avatarStyles({ variant: 'unassigned' });
+  const iconSize = getIconSize('xs');
 
   if (!isOpen) {
     return null;
@@ -103,8 +102,7 @@ export function TableHeaderUserFilter({
           allFilteredUsers.map(user => {
             const isNotAssign = isNotAssignedUser(user);
             const initials = isNotAssign ? '' : getInitials(user);
-            const colorClass = isNotAssign ? '' : getUserColor(user.id);
-            const avatarStyle = isNotAssign ? avatarStylesUnassigned : avatarStyles24;
+            const color = isNotAssign ? undefined : getUserColor(user.id);
             const isChecked = stagedUsers.some(stagedUser => stagedUser.id === user.id);
 
             return (
@@ -121,12 +119,17 @@ export function TableHeaderUserFilter({
                 />
 
                 <div className="flex items-center justify-center w-7 h-7">
-                  <Avatar className={avatarStyle.container()}>
-                    <AvatarFallback
-                      className={cn(avatarStyle.fallback(), avatarStyle.text(), !isNotAssign && colorClass)}
-                    >
-                      {isNotAssign ? <User className={iconSize} /> : initials}
-                    </AvatarFallback>
+                  <Avatar
+                    size={isNotAssign ? 'xs' : 'sm'}
+                    className={isNotAssign ? unassignedStyles.container() : 'border-2 border-transparent'}
+                  >
+                    {isNotAssign ? (
+                      <AvatarFallback className={cn(unassignedStyles.fallback(), unassignedStyles.text())}>
+                        <User className={iconSize} />
+                      </AvatarFallback>
+                    ) : (
+                      <AvatarFallback color={color}>{initials}</AvatarFallback>
+                    )}
                   </Avatar>
                 </div>
 

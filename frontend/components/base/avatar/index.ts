@@ -12,7 +12,7 @@ export type {
 } from './avatar.types';
 
 // Utilities
-export { getInitials, getUserColor, getSizeClasses } from './avatar.utils';
+export { getInitials, getUserColor } from './avatar.utils';
 
 // Centralized Styles
-export { avatarStyles, getOverlapClasses, getIconSize } from './avatar.styles';
+export { avatarStyles, getIconSize } from './avatar.styles';
