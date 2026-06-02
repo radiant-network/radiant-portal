@@ -28,3 +28,21 @@ func Test_GetOrganizationByCode_Null(t *testing.T) {
 		assert.Nil(t, org)
 	})
 }
+
+func Test_GetOrganizationCodesByTenant(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewOrganizationRepository(db)
+		codes, err := repo.GetOrganizationCodesByTenant("radiant")
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, []string{"CHOP", "UCSF", "CHUSJ", "LDM-CHUSJ", "LDM-CHOP", "CQGC"}, codes)
+	})
+}
+
+func Test_GetOrganizationCodesByTenant_UnknownTenant(t *testing.T) {
+	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
+		repo := NewOrganizationRepository(db)
+		codes, err := repo.GetOrganizationCodesByTenant("does_not_exist")
+		assert.NoError(t, err)
+		assert.Empty(t, codes)
+	})
+}

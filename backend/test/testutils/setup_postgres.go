@@ -97,15 +97,25 @@ func initPostgresDb() (*gorm.DB, error) {
 }
 
 func populateData(db *sql.DB) error {
-	// Read the list of .sql files in the folder
-	files, err := os.ReadDir(filepath.Join(TestResources, "clinical"))
+	// Folders are loaded in order; auth fixtures are independent of clinical.
+	for _, folder := range []string{"clinical", "auth"} {
+		if err := populateFolder(db, folder); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func populateFolder(db *sql.DB, folder string) error {
+	// Read the list of .sql files in the folder (os.ReadDir returns them sorted by name)
+	files, err := os.ReadDir(filepath.Join(TestResources, folder))
 	if err != nil {
-		log.Fatal("failed to read directory test_resoures", err)
+		log.Fatalf("failed to read directory %s: %v", folder, err)
 	}
 
 	for _, file := range files {
 		if filepath.Ext(file.Name()) == ".sql" {
-			sqlFilePath := filepath.Join(TestResources, "clinical", file.Name())
+			sqlFilePath := filepath.Join(TestResources, folder, file.Name())
 
 			// Read the SQL file
 			sqlFile, err := os.ReadFile(sqlFilePath)

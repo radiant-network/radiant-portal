@@ -14,6 +14,7 @@ type OrganizationRepository struct {
 
 type OrganizationDAO interface {
 	GetOrganizationByCode(organizationCode string) (*types.Organization, error)
+	GetOrganizationCodesByTenant(tenantCode string) ([]string, error)
 }
 
 func NewOrganizationRepository(db *gorm.DB) *OrganizationRepository {
@@ -30,4 +31,13 @@ func (r *OrganizationRepository) GetOrganizationByCode(organizationCode string) 
 		return nil, nil
 	}
 	return &organization, nil
+}
+
+func (r *OrganizationRepository) GetOrganizationCodesByTenant(tenantCode string) ([]string, error) {
+	var codes []string
+	if err := r.db.Raw(`SELECT code FROM organization WHERE tenant_code = ? ORDER BY code`, tenantCode).
+		Scan(&codes).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving organization codes by tenant: %w", err)
+	}
+	return codes, nil
 }

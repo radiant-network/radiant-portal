@@ -20,6 +20,10 @@ func (m *MockOrganizationRepository) GetOrganizationByCode(code string) (*types.
 	return nil, nil
 }
 
+func (m *MockOrganizationRepository) GetOrganizationCodesByTenant(tenantCode string) ([]string, error) {
+	return nil, nil
+}
+
 type MockPatientsRepository struct {
 	GetPatientByOrgCodeAndSubmitterPatientIdFunc func(organizationCode string, submitterPatientId string) (*types.Patient, error)
 }
