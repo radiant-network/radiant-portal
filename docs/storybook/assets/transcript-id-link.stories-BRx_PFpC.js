@@ -1,0 +1,3 @@
+import{j as t}from"./iframe-Cmiex3IG.js";import{T as s}from"./transcript-id-link-Cwlh-WRf.js";import"./preload-helper-PPVm8Dsz.js";import"./anchor-link-B_00pVfd.js";import"./transcript-mane-select-icon-GpxARLJs.js";import"./i18n-BtP9BP9x.js";import"./index-QN_ZCD1V.js";const d={title:"Links/Transcript ID Link",component:s,args:{transcriptId:"ENST00000367770",isCanonical:!0,isManeSelect:!1,isManePlus:!1}},r={render:e=>t.jsx(s,{...e})};r.parameters={...r.parameters,docs:{...r.parameters?.docs,source:{originalSource:`{
+  render: args => <TranscriptIdLink {...args} />
+}`,...r.parameters?.docs?.source}}};const l=["Default"];export{r as Default,l as __namedExportsOrder,d as default};
