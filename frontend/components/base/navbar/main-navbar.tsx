@@ -111,7 +111,7 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
               {actions.map(action => (
                 <MainNavbarItem iconOnly key={action.title} {...action} />
               ))}
-              <MainNavbarUserAvatar avatarClassName="size-7" userDetails={userDetails} onLogoutClick={onLogoutClick} />
+              <MainNavbarUserAvatar avatarSize="sm" userDetails={userDetails} onLogoutClick={onLogoutClick} />
               <MainNavbarLangSwitcher className="size-7" />
               <ThemeToggle className="text-muted-foreground size-7 [&_svg]:size-5" />
             </div>

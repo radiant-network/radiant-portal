@@ -1,18 +1,12 @@
-// Main Avatar component
+// Main Avatar components
 export { Avatar } from '@/components/base/avatar/avatar';
+export { UserAvatar } from '@/components/base/avatar/user-avatar';
 
 // Types
-export type {
-  AvatarUser,
-  AvatarProps,
-  BaseAvatarProps,
-  SingleAvatarProps,
-  DualAvatarProps,
-  CountAvatarProps,
-} from './avatar.types';
+export type { AvatarUser, AvatarProps, BaseAvatarProps, UserAvatarProps } from './avatar.types';
 
 // Utilities
-export { getInitials, getUserColor, getSizeClasses } from './avatar.utils';
+export { getInitials, getUserColor } from './avatar.utils';
 
 // Centralized Styles
-export { avatarStyles, getOverlapClasses, getIconSize } from './avatar.styles';
+export { avatarStyles, getIconSize } from './avatar.styles';

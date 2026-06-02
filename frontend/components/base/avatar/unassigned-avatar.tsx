@@ -6,11 +6,10 @@ import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
 import { avatarStyles, getIconSize } from './avatar.styles';
-import { BaseAvatarProps } from './avatar.types';
+import type { BaseAvatarProps } from './avatar.types';
 
-export function UnassignedAvatar({ size = 'md', className, canAssign, onAssignClick }: BaseAvatarProps) {
+export function UnassignedAvatar({ size = 'sm', className, canAssign, onAssignClick }: BaseAvatarProps) {
   const { t } = useI18n();
-  // Get styles without size to avoid conflicting size classes, only get variant and base styles
   const styles = avatarStyles({ variant: 'unassigned' });
   const iconSize = getIconSize(size);
 
@@ -27,20 +26,7 @@ export function UnassignedAvatar({ size = 'md', className, canAssign, onAssignCl
   const handleClick = isClickable ? onAssignClick : undefined;
 
   const avatarElement = (
-    <Avatar
-      className={cn(
-        // Base container styles without size variants
-        'relative flex shrink-0 overflow-hidden rounded-full',
-        // Unassigned variant styles
-        'border-2 border-dashed border-muted-foreground/40 bg-muted/20',
-        // Fixed size - always 24px x 24px
-        'h-6 w-6',
-        // Cursor styling
-        cursorClass,
-        className,
-      )}
-      onClick={handleClick}
-    >
+    <Avatar size={size} className={cn(styles.container(), cursorClass, className)} onClick={handleClick}>
       <AvatarFallback className={cn(styles.fallback(), styles.text())}>
         <User className={iconSize} />
       </AvatarFallback>

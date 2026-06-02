@@ -1,11 +1,12 @@
+import type { AvatarSize } from '@/components/base/shadcn/avatar';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base/shadcn/hover-card';
 
-import { AvatarUser } from './avatar.types';
+import type { AvatarUser } from './avatar.types';
 import { AvatarUserItem } from './avatar-user-item';
 
 interface AvatarPopoverProps {
   users: AvatarUser | AvatarUser[];
-  size?: 'sm' | 'md' | 'lg';
+  size?: AvatarSize;
   className?: string;
   children: React.ReactNode;
 }
@@ -35,7 +36,7 @@ export function AvatarPopover({ users, children }: AvatarPopoverProps) {
       <HoverCardContent className="w-80 max-h-96 overflow-y-auto" side="top">
         <div className={isSingleUser ? '' : 'space-y-3'}>
           {sortedUsers.map(user => (
-            <AvatarUserItem key={user.id} user={user} size="md" />
+            <AvatarUserItem key={user.id} user={user} size="sm" />
           ))}
         </div>
       </HoverCardContent>

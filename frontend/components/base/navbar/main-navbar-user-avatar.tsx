@@ -1,6 +1,9 @@
 import { LogOutIcon } from 'lucide-react';
-import { tv, VariantProps } from 'tailwind-variants';
+import type { VariantProps } from 'tailwind-variants';
+import { tv } from 'tailwind-variants';
 
+import { getInitials } from '@/components/base/avatar';
+import type { AvatarSize } from '@/components/base/shadcn/avatar';
 import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
 import {
   DropdownMenu,
@@ -20,24 +23,24 @@ interface NavbarUserAvatarProps {
     name: string;
     email: string;
   };
-  avatarClassName?: string;
+  avatarSize?: AvatarSize;
   onLogoutClick: () => void;
 }
 
-function NavbarUserAvatar({ userDetails: { name, email }, onLogoutClick, avatarClassName }: NavbarUserAvatarProps) {
+function NavbarUserAvatar({ userDetails: { name, email }, onLogoutClick, avatarSize }: NavbarUserAvatarProps) {
   const { t } = useI18n();
 
   return (
     <>
       <div className="block md:hidden">
-        <AvatarUserDetails name={name} email={email} avatarClassName={avatarClassName} />
+        <AvatarUserDetails name={name} email={email} avatarSize={avatarSize} />
         {/* SJRA-389 <MainNavbarItem title="Profile" as="button" icon={<UserIcon />} className="w-full" onClick={() => {}} /> */}
         <MainNavbarItem title="Sign out" as="button" icon={<LogOutIcon />} className="w-full" onClick={onLogoutClick} />
       </div>
       <div className="hidden md:flex">
         <DropdownMenu>
           <DropdownMenuTrigger className="outline-none">
-            <UserAvatar name={name} className={avatarClassName} />
+            <NavbarAvatar name={name} size={avatarSize} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <div className="py-1.5 px-2">
@@ -105,43 +108,29 @@ export function AvatarUserDetails({
   email,
   size,
   className,
-  avatarClassName,
+  avatarSize,
   detailsClassName,
 }: {
   name: string;
   email: string;
-  avatarClassName?: string;
+  avatarSize?: AvatarSize;
   detailsClassName?: string;
   className?: string;
 } & VariantProps<typeof userDetailsVariant>) {
   return (
     <div className={cn('flex items-center p-2 gap-3', className)}>
-      <UserAvatar name={name} className={avatarClassName} />
+      <NavbarAvatar name={name} size={avatarSize} />
       <UserDetails className={detailsClassName} name={name} email={email} size={size} />
     </div>
   );
 }
 
-function UserAvatar({ name, className }: { className?: string; name?: string }) {
+function NavbarAvatar({ name, size = 'lg' }: { name?: string; size?: AvatarSize }) {
   return (
-    <Avatar className={cn('size-9', className)}>
-      <AvatarFallback className="bg-cyan/20 text-cyan-foreground text-sm">{getInitials(name || '')}</AvatarFallback>
+    <Avatar size={size}>
+      <AvatarFallback>{getInitials({ name: name ?? '' })}</AvatarFallback>
     </Avatar>
   );
-}
-
-function getInitials(name: string): string {
-  if (!name || typeof name !== 'string') {
-    return '';
-  }
-
-  const words = name.trim().split(/\s+/);
-
-  if (words.length >= 2) {
-    return words[0][0] + words[1][0];
-  } else {
-    return words[0].substring(0, 2);
-  }
 }
 
 export default NavbarUserAvatar;

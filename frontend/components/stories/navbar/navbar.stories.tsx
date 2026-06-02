@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
 import {
   AudioWaveformIcon,
   BlendIcon,
@@ -12,6 +11,7 @@ import {
   TelescopeIcon,
   UsersIcon,
 } from 'lucide-react';
+import { fn } from 'storybook/test';
 
 import MainNavbar from '@/components/base/navbar/main-navbar';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';

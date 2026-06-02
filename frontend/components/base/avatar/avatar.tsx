@@ -1,61 +1,60 @@
-import { AvatarProps } from './avatar.types';
-import { CountAvatar } from './count-avatar';
-import { DualAvatar } from './dual-avatar';
-import { SingleAvatar } from './single-avatar';
+import { Avatar as AvatarRoot, AvatarFallback, AvatarGroup, AvatarGroupCount } from '@/components/base/shadcn/avatar';
+
+import type { AvatarProps } from './avatar.types';
+import { getInitials, getUserColor } from './avatar.utils';
+import { AvatarPopover } from './avatar-popover';
 import { UnassignedAvatar } from './unassigned-avatar';
+import { UserAvatar } from './user-avatar';
+
+// Largest count rendered before falling back to "99+"
+const MAX_COUNT_DISPLAY = 99;
 
 /**
- * Avatar component that displays user assignment status
+ * Avatar component that displays user assignment status.
  *
- * Renders different states based on the number of assigned users:
- * - No users: UnassignedAvatar (gray dashed circle with user icon)
- * - 1 user: SingleAvatar (colored circle with initials)
- * - 2 users: DualAvatar (two overlapping colored circles with initials)
- * - 3+ users: CountAvatar (first user avatar + count circle)
+ * - No users: UnassignedAvatar (dashed circle with user icon)
+ * - 1 user: UserAvatar (colored circle with initials)
+ * - 2+ users: an AvatarGroup, collapsing the overflow into a `+N` count chip
+ *   once there are more than `maxAvatars` users.
  */
-export function Avatar({ users = [], size = 'md', className, canAssign, onAssignClick }: AvatarProps) {
+export function Avatar({ users = [], size = 'sm', maxAvatars = 2, className, canAssign, onAssignClick }: AvatarProps) {
   // Filter out any falsy users and ensure we have valid user objects
   const validUsers = users.filter(user => user && user.id && user.name);
-  const userCount = validUsers.length;
 
-  if (userCount === 0) {
+  if (validUsers.length === 0) {
     return <UnassignedAvatar size={size} className={className} canAssign={canAssign} onAssignClick={onAssignClick} />;
   }
 
-  if (userCount === 1) {
-    return (
-      <SingleAvatar
-        user={validUsers[0]}
-        size={size}
-        className={className}
-        canAssign={canAssign}
-        onAssignClick={onAssignClick}
-      />
-    );
+  if (validUsers.length === 1) {
+    return <UserAvatar user={validUsers[0]} size={size} className={className} />;
   }
 
-  if (userCount === 2) {
-    return (
-      <DualAvatar
-        users={[validUsers[0], validUsers[1]]}
-        size={size}
-        className={className}
-        canAssign={canAssign}
-        onAssignClick={onAssignClick}
-      />
-    );
-  }
+  // When there are more users than we can show, keep room for the count chip.
+  const overflow = validUsers.length > maxAvatars;
+  const shownUsers = overflow ? validUsers.slice(0, maxAvatars - 1) : validUsers;
+  const remaining = validUsers.length - shownUsers.length;
+  const countText = remaining > MAX_COUNT_DISPLAY ? `${MAX_COUNT_DISPLAY}+` : `+${remaining}`;
 
-  // 3 or more users
-  return (
-    <CountAvatar
-      firstUser={validUsers[0]}
-      additionalCount={userCount - 1}
-      allUsers={validUsers}
-      size={size}
-      className={className}
-      canAssign={canAssign}
-      onAssignClick={onAssignClick}
-    />
+  const shouldShowPopover = validUsers.some(user => user.email || user.organization);
+
+  const avatarElement = (
+    <AvatarGroup size={size} className={className}>
+      {shownUsers.map(user => (
+        <AvatarRoot key={user.id}>
+          <AvatarFallback color={getUserColor(user.id)}>{getInitials(user)}</AvatarFallback>
+        </AvatarRoot>
+      ))}
+      {overflow && <AvatarGroupCount>{countText}</AvatarGroupCount>}
+    </AvatarGroup>
   );
+
+  if (shouldShowPopover) {
+    return (
+      <AvatarPopover users={validUsers} size={size}>
+        {avatarElement}
+      </AvatarPopover>
+    );
+  }
+
+  return avatarElement;
 }

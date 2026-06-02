@@ -1,27 +1,26 @@
 import { CopyButton } from '@/components/base/buttons/copy-button';
+import type { AvatarSize } from '@/components/base/shadcn/avatar';
 import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
 import { cn } from '@/components/lib/utils';
 
-import { avatarStyles } from './avatar.styles';
-import { AvatarUser } from './avatar.types';
+import type { AvatarUser } from './avatar.types';
 import { getInitials, getUserColor } from './avatar.utils';
 
 interface AvatarUserItemProps {
   user: AvatarUser;
-  size?: 'sm' | 'md' | 'lg';
+  size?: AvatarSize;
   className?: string;
 }
 
-export function AvatarUserItem({ user, size = 'sm', className }: AvatarUserItemProps) {
+export function AvatarUserItem({ user, size = 'xs', className }: AvatarUserItemProps) {
   const initials = getInitials(user);
-  const colorClass = getUserColor(user.id);
-  const styles = avatarStyles({ size, variant: 'single' });
+  const color = getUserColor(user.id);
 
   return (
     <div className={cn('flex space-x-3 items-start', className)}>
       {/* Avatar on the left - aligned with username */}
-      <Avatar className={cn(styles.container(), 'flex-shrink-0')}>
-        <AvatarFallback className={cn(styles.fallback(), styles.text(), colorClass)}>{initials}</AvatarFallback>
+      <Avatar size={size} className="flex-shrink-0">
+        <AvatarFallback color={color}>{initials}</AvatarFallback>
       </Avatar>
 
       {/* User details on the right */}
