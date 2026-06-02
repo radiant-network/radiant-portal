@@ -10,16 +10,18 @@ const avatarVariants = tv({
     fallback: 'flex size-full items-center justify-center rounded-full font-medium',
     badge:
       'absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground ring-2 ring-background select-none',
+    groupCount:
+      'relative flex shrink-0 items-center justify-center rounded-full bg-avatar-neutral text-avatar-neutral-foreground ring-2 ring-background font-medium',
   },
   variants: {
     size: {
-      '2xs': { root: 'size-5', fallback: 'text-xs', badge: 'size-2 [&>svg]:hidden' },
-      xs: { root: 'size-6', fallback: 'text-xs', badge: 'size-2 [&>svg]:hidden' },
-      sm: { root: 'size-7', fallback: 'text-sm', badge: 'size-2.5 [&>svg]:size-2' },
-      md: { root: 'size-8', fallback: 'text-sm', badge: 'size-2.5 [&>svg]:size-2' },
-      lg: { root: 'size-9', fallback: 'text-base', badge: 'size-3 [&>svg]:size-2' },
-      xl: { root: 'size-10', fallback: 'text-base', badge: 'size-3 [&>svg]:size-2.5' },
-      '2xl': { root: 'size-12', fallback: 'text-lg', badge: 'size-3.5 [&>svg]:size-3' },
+      '2xs': { root: 'size-5', fallback: 'text-xs', badge: 'size-2 [&>svg]:hidden', groupCount: 'size-5 text-xs' },
+      xs: { root: 'size-6', fallback: 'text-xs', badge: 'size-2 [&>svg]:hidden', groupCount: 'size-6 text-xs' },
+      sm: { root: 'size-7', fallback: 'text-sm', badge: 'size-2.5 [&>svg]:size-2', groupCount: 'size-7 text-sm' },
+      md: { root: 'size-8', fallback: 'text-sm', badge: 'size-2.5 [&>svg]:size-2', groupCount: 'size-8 text-sm' },
+      lg: { root: 'size-9', fallback: 'text-base', badge: 'size-3 [&>svg]:size-2', groupCount: 'size-9 text-base' },
+      xl: { root: 'size-10', fallback: 'text-base', badge: 'size-3 [&>svg]:size-2.5', groupCount: 'size-10 text-base' },
+      '2xl': { root: 'size-12', fallback: 'text-lg', badge: 'size-3.5 [&>svg]:size-3', groupCount: 'size-12 text-lg' },
     },
     color: {
       red: { fallback: 'bg-avatar-red text-avatar-red-foreground' },
@@ -51,7 +53,7 @@ const avatarVariants = tv({
 type AvatarSize = NonNullable<VariantProps<typeof avatarVariants>['size']>;
 type AvatarColor = NonNullable<VariantProps<typeof avatarVariants>['color']>;
 
-const AvatarContext = React.createContext<{ size?: AvatarSize }>({ size: 'xs' });
+const AvatarContext = React.createContext<{ size?: AvatarSize; inGroup?: boolean }>({});
 
 function Avatar({
   className,
@@ -59,10 +61,14 @@ function Avatar({
   children,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Root> & { size?: AvatarSize }) {
-  const styles = avatarVariants({ size });
+  const { size: contextSize, inGroup } = React.useContext(AvatarContext);
+  // inside an AvatarGroup the group imposes its size on every child (own prop ignored);
+  // standalone, own prop wins; otherwise the tv default (xs) applies.
+  const resolvedSize = inGroup ? contextSize : (size ?? contextSize);
+  const styles = avatarVariants({ size: resolvedSize });
   return (
     <AvatarPrimitive.Root data-slot="avatar" className={styles.root({ className })} {...props}>
-      <AvatarContext.Provider value={{ size }}>{children}</AvatarContext.Provider>
+      <AvatarContext.Provider value={{ size: resolvedSize }}>{children}</AvatarContext.Provider>
     </AvatarPrimitive.Root>
   );
 }
@@ -89,27 +95,22 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<'span'>) {
   return <span data-slot="avatar-badge" className={styles.badge({ className })} {...props} />;
 }
 
-function AvatarGroup({ className, ...props }: React.ComponentProps<'div'>) {
+function AvatarGroup({ className, size, children, ...props }: React.ComponentProps<'div'> & { size?: AvatarSize }) {
   return (
     <div
       data-slot="avatar-group"
       className={cn('flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background', className)}
       {...props}
-    />
+    >
+      <AvatarContext.Provider value={{ size, inGroup: true }}>{children}</AvatarContext.Provider>
+    </div>
   );
 }
 
 function AvatarGroupCount({ className, ...props }: React.ComponentProps<'div'>) {
-  return (
-    <div
-      data-slot="avatar-group-count"
-      className={cn(
-        'relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background [&>svg]:size-4',
-        className,
-      )}
-      {...props}
-    />
-  );
+  const { size } = React.useContext(AvatarContext);
+  const styles = avatarVariants({ size });
+  return <div data-slot="avatar-group-count" className={styles.groupCount({ className })} {...props} />;
 }
 
 export { Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount, avatarVariants };
