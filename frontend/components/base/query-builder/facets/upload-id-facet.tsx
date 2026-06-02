@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { InfoIcon, Paperclip, UploadIcon } from 'lucide-react';
 
@@ -103,6 +103,9 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
   const [matched, setMatched] = useState<UploadIdTableEntry[]>([]);
   const [unmatched, setUnmatched] = useState<UploadIdTableEntry[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  const matchedColumns = useMemo(() => getMatchedColumns(variant, t), [variant, t]);
+  const unmatchedColumns = useMemo(() => getUnmatchedColumns(variant, t), [variant, t]);
 
   const debouncedValue = useDebounce(value, 500);
 
@@ -309,14 +312,10 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
                       </TabsTrigger>
                     </TabsList>
                     <TabsContent value="matched">
-                      <DisplayTable data={matched} columns={getMatchedColumns(variant, t)} dataCy="matched-table" />
+                      <DisplayTable data={matched} columns={matchedColumns} dataCy="matched-table" />
                     </TabsContent>
                     <TabsContent value="unmatched">
-                      <DisplayTable
-                        data={unmatched}
-                        columns={getUnmatchedColumns(variant, t)}
-                        dataCy="unmatched-table"
-                      />
+                      <DisplayTable data={unmatched} columns={unmatchedColumns} dataCy="unmatched-table" />
                     </TabsContent>
                   </Tabs>
                 </div>

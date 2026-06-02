@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
@@ -33,6 +33,8 @@ function FilesTab() {
   });
   const [additionalFields, setAdditionalFields] = useState<string[]>([]);
 
+  const columns = useMemo(() => getCaseEntityDocumentsColumns(t), [t]);
+
   const { data, error, isLoading } = useSWR<DocumentsSearchResponse, ApiError, DocumentInput>(
     {
       caseId,
@@ -57,7 +59,7 @@ function FilesTab() {
         <div className="pt-4">
           <DataTable
             id="case-entity-files"
-            columns={getCaseEntityDocumentsColumns(t)}
+            columns={columns}
             TableFilters={<FilesTableFilters caseId={caseId} setSearchCriteria={setSearchCriteria} />}
             data={data?.list ?? []}
             defaultColumnSettings={defaultSettings}

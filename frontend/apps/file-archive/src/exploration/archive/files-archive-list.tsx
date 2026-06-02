@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
@@ -29,6 +29,8 @@ function FilesArchiveList() {
   });
   const [additionalFields, setAdditionalFields] = useState<string[]>([]);
 
+  const columns = useMemo(() => getFilesArchiveColumns(t), [t]);
+
   const { data, error, isLoading } = useSWR<DocumentsSearchResponse, ApiError, DocumentInput>(
     {
       body: {
@@ -49,7 +51,7 @@ function FilesArchiveList() {
   return (
     <DataTable
       id="files-archive-list"
-      columns={getFilesArchiveColumns(t)}
+      columns={columns}
       TableFilters={<FilesTableFilters setSearchCriteria={setSearchCriteria} loading={false} />}
       data={data?.list ?? []}
       defaultColumnSettings={defaultSettings}

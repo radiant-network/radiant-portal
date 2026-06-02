@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import useSWR from 'swr';
 import useSWRImmutable from 'swr/immutable';
@@ -56,6 +56,7 @@ function MyNetworkCard() {
   const { t } = useI18n();
   const params = useParams<{ locusId: string }>();
   const [activeTab, setActiveTab] = useState<string>(GetGermlineVariantInternalFrequenciesSplitEnum.PrimaryCondition);
+  const columns = useMemo(() => getMyNetworkColumns(t, activeTab), [t, activeTab]);
 
   const { data: globalFrequencies, isLoading: isGlobalLoading } = useSWRImmutable<
     InternalFrequencies,
@@ -154,7 +155,7 @@ function MyNetworkCard() {
             <TabsContent key={tab.key} value={tab.value}>
               <DataTable
                 id={tab.key}
-                columns={getMyNetworkColumns(t, activeTab)}
+                columns={columns}
                 defaultColumnSettings={myNetworkDefaultSettings}
                 data={data?.split_rows || []}
                 loadingStates={{

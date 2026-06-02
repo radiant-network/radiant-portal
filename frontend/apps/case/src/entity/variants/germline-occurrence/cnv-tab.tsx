@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { CaseEntity } from '@/api/api';
 import { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
@@ -25,6 +27,8 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
   const appId = config.germline_cnv_occurrence.app_id;
   const taskId = useTaskIdFromSearchParam();
 
+  const columns = useMemo(() => getGermlineCNVOccurrenceColumns({ t, caseEntity }), [t, caseEntity]);
+
   if (!isValidSeqId(seqId)) {
     return null;
   }
@@ -50,7 +54,7 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
       <QueryBuilderDataTable
         id={appId}
         swrId={`${seqId}-${taskId}`}
-        columns={getGermlineCNVOccurrenceColumns({ t, caseEntity })}
+        columns={columns}
         defaultColumnSettings={defaultGermlineCNVSettings}
         defaultPageSize={30}
         enableColumnOrdering

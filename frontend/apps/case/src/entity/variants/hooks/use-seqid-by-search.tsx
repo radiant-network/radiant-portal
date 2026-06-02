@@ -36,10 +36,9 @@ export function useSeqIdSearchParamsEffect({ seqId, setSeqId, caseEntity }: UseS
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-    if (searchParams.get('tab') == CaseEntityTabs.Variants) {
-      searchParams.set('seq_id', `${seqId}`);
-      setSearchParams(searchParams, { replace: true });
-    }
+    if (searchParams.get('tab') != CaseEntityTabs.Variants) return;
+    searchParams.set('seq_id', `${seqId}`);
+    setSearchParams(searchParams, { replace: true });
   }, [seqId, searchParams.get('tab')]);
 
   useEffect(() => {

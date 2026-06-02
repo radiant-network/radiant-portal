@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import { CNVGeneOverlap, GermlineCNVOccurrence } from '@/api/api';
@@ -74,6 +74,8 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
     if (open) fetchList.mutate();
   }, [open]);
 
+  const columns = useMemo(() => getCNVOverlappingGenesColumns(t), [t]);
+
   return (
     <Dialog onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -94,7 +96,7 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
             <DialogBody className="flex-1 overflow-auto">
               <DataTable
                 id="overlapping-genes-table"
-                columns={getCNVOverlappingGenesColumns(t)}
+                columns={columns}
                 className="h-full"
                 defaultColumnSettings={defaultCNVOverlappingGenesSettings}
                 loadingStates={{

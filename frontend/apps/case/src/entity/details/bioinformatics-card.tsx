@@ -1,4 +1,4 @@
-import { ComponentProps } from 'react';
+import { ComponentProps, useMemo } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { TFunction } from 'i18next';
 
@@ -71,6 +71,7 @@ type BioinformaticsCardProps = ComponentProps<'div'> & {
 
 function BioinformaticsCard({ tasks, ...props }: BioinformaticsCardProps) {
   const { t } = useI18n();
+  const columns = useMemo(() => getColumns(t, tasks, false), [t, tasks]);
 
   return (
     <Card data-cy="bioinformatics-card" {...props}>
@@ -78,7 +79,7 @@ function BioinformaticsCard({ tasks, ...props }: BioinformaticsCardProps) {
         <CardTitle size="xl">{t('case_entity.details.bioinformatics')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <DisplayTable data={tasks} columns={getColumns(t, tasks, false)} dataCy="bioinformatics-table" />
+        <DisplayTable data={tasks} columns={columns} dataCy="bioinformatics-table" />
       </CardContent>
     </Card>
   );
@@ -86,6 +87,7 @@ function BioinformaticsCard({ tasks, ...props }: BioinformaticsCardProps) {
 
 function AlertDialogBioinformaticsCard({ tasks }: BioinformaticsCardProps) {
   const { t } = useI18n();
+  const columns = useMemo(() => getColumns(t, tasks, false), [t, tasks]);
 
   return (
     <AlertDialog>
@@ -97,7 +99,7 @@ function AlertDialogBioinformaticsCard({ tasks }: BioinformaticsCardProps) {
       <AlertDialogContent className="min-w-auto md:min-w-[800px]">
         <AlertDialogHeader>{t('case_entity.details.bioinformatics')}</AlertDialogHeader>
         <AlertDialogDescription>
-          <DisplayTable data={tasks} columns={getColumns(t, tasks, false)} />
+          <DisplayTable data={tasks} columns={columns} />
         </AlertDialogDescription>
         <AlertDialogFooter>
           <AlertDialogCancel>{t('common.close')}</AlertDialogCancel>

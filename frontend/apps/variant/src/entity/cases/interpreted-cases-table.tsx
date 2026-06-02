@@ -104,6 +104,7 @@ function InterpretedCasesTable() {
   );
 
   const casesData = useMemo(() => data?.list || [], [data?.list]);
+  const columns = useMemo(() => getInterpretedCasesColumns(t), [t]);
 
   const { selectedCase, hasPrevious, hasNext, handleClosePreview, handlePreviousCase, handleNextCase } =
     useSliderCasePatientIdNavigation({
@@ -118,7 +119,7 @@ function InterpretedCasesTable() {
     <div className="space-y-6 mt-2">
       <DataTable
         id="interpreted-cases"
-        columns={getInterpretedCasesColumns(t)}
+        columns={columns}
         TableFilters={<InterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />}
         data={casesData}
         defaultColumnSettings={interpretedCasesDefaultSettings}

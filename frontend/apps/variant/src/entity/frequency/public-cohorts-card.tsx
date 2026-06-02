@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useParams } from 'react-router';
 import useSWR from 'swr';
 
@@ -27,17 +28,15 @@ function PublicCohortsCard() {
     },
   );
 
+  const columns = useMemo(() => getPublicCohortsColumns(t, data?.locus), [t, data?.locus]);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>{t('variant_entity.frequency.public_cohorts.title')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <DisplayTable
-          dataCy="public-cohorts-table"
-          columns={getPublicCohortsColumns(t, data?.locus)}
-          data={data?.external_frequencies || []}
-        />
+        <DisplayTable dataCy="public-cohorts-table" columns={columns} data={data?.external_frequencies || []} />
       </CardContent>
     </Card>
   );

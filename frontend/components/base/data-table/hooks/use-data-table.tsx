@@ -107,17 +107,13 @@ export function useDataTableRowNavigation<T extends any>({
 
   const customFind = useCallback(find(target), [target]);
 
-  const selected = data.find(customFind);
-
-  let index = -1;
-  if (target) {
-    index = data.findIndex(customFind);
-  }
+  const index = useMemo(() => data.findIndex(customFind), [data, customFind]);
+  const selected = index === -1 ? undefined : data[index];
 
   /**
    * Clean searchParams when closing external component
    */
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setSearchParams(prev => {
       prev.delete(paramsKey);
       return prev;
@@ -129,12 +125,12 @@ export function useDataTableRowNavigation<T extends any>({
         rowSelection: {},
       },
     });
-  };
+  }, [paramsKey, setSearchParams, dispatch]);
 
   /**
    * Select previous row in data-table
    */
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (index > 0) {
       const previousIndex = index - 1;
       const previous = data[previousIndex];
@@ -150,12 +146,12 @@ export function useDataTableRowNavigation<T extends any>({
         },
       });
     }
-  };
+  }, [index, data, paramsKey, targetKey, setSearchParams, dispatch]);
 
   /**
    * Select next row in data-table
    */
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (index >= 0 && index < data.length - 1) {
       const nextIndex = index + 1;
       const next = data[nextIndex];
@@ -171,7 +167,7 @@ export function useDataTableRowNavigation<T extends any>({
         },
       });
     }
-  };
+  }, [index, data, paramsKey, targetKey, setSearchParams, dispatch]);
 
   const hasPrevious = useMemo(() => index > 0, [index]);
   const hasNext = useMemo(() => index >= 0 && index < data.length - 1, [index, data.length]);
@@ -184,7 +180,7 @@ export function useDataTableRowNavigation<T extends any>({
         rowSelection: { [index]: true },
       },
     });
-  }, [index, searchParams]);
+  }, [index]);
 
   return {
     selected,
