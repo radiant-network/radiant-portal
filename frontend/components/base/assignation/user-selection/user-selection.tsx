@@ -31,6 +31,13 @@ function SelectedUsersDisplay({
         const initials = isNotAssign ? '' : getInitials(user);
         const color = isNotAssign ? undefined : getUserColor(user.id);
 
+        const avatarNotAssignProps = {
+          size: 'xs',
+          className: cn('z-20', unassignedStyles.container(), 'bg-background'),
+        } as const;
+        const avatarAssignedProps = { size: 'sm', className: cn('z-20', 'border-2 border-transparent') } as const;
+        const avatarProps = isNotAssign ? avatarNotAssignProps : avatarAssignedProps;
+
         return (
           <div key={user.id} className="relative inline-flex items-center text-sm flex-shrink-0">
             {/* Background that starts from middle of avatar - adjust for smaller unassigned avatar */}
@@ -43,14 +50,7 @@ function SelectedUsersDisplay({
 
             {/* Avatar */}
             <div className="flex items-center z-10">
-              <Avatar
-                size={isNotAssign ? 'xs' : 'sm'}
-                className={cn(
-                  isNotAssign ? unassignedStyles.container() : 'border-2 border-transparent',
-                  'z-20',
-                  isNotAssign && 'bg-background',
-                )}
-              >
+              <Avatar {...avatarProps}>
                 {isNotAssign ? (
                   <AvatarFallback className={cn(unassignedStyles.fallback(), unassignedStyles.text())}>
                     <User className={iconSize} />
@@ -210,6 +210,9 @@ export function EditableUserSelection({
             const isNotAssign = user.id === 'not-assign';
             const initials = isNotAssign ? '' : getInitials(user);
             const color = isNotAssign ? undefined : getUserColor(user.id);
+            const avatarNotAssignProps = { size: 'xs', className: unassignedStyles.container() } as const;
+            const avatarAssignedProps = { size: 'sm', className: 'border-2 border-transparent' } as const;
+            const avatarProps = isNotAssign ? avatarNotAssignProps : avatarAssignedProps;
 
             return (
               <button
@@ -218,10 +221,7 @@ export function EditableUserSelection({
                 className="w-full flex items-center gap-1.5 py-1.5 hover:bg-accent transition-colors text-left"
               >
                 <div className="flex items-center justify-center w-7 h-7">
-                  <Avatar
-                    size={isNotAssign ? 'xs' : 'sm'}
-                    className={isNotAssign ? unassignedStyles.container() : 'border-2 border-transparent'}
-                  >
+                  <Avatar {...avatarProps}>
                     {isNotAssign ? (
                       <AvatarFallback className={cn(unassignedStyles.fallback(), unassignedStyles.text())}>
                         <User className={iconSize} />

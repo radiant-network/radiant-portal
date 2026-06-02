@@ -48,11 +48,13 @@ export function Avatar({ users = [], size = 'sm', maxAvatars = 2, className, can
     </AvatarGroup>
   );
 
-  return shouldShowPopover ? (
-    <AvatarPopover users={validUsers} size={size}>
-      {avatarElement}
-    </AvatarPopover>
-  ) : (
-    avatarElement
-  );
+  if (shouldShowPopover) {
+    return (
+      <AvatarPopover users={validUsers} size={size}>
+        {avatarElement}
+      </AvatarPopover>
+    );
+  }
+
+  return avatarElement;
 }
