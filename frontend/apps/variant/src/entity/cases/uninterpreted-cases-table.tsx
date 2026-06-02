@@ -71,6 +71,7 @@ function UninterpretedCasesTable() {
   );
 
   const casesData = useMemo(() => data?.list || [], [data?.list]);
+  const columns = useMemo(() => getUninterpretedCasesColumns(t), [t]);
 
   const { selectedCase, hasPrevious, hasNext, handleClosePreview, handlePreviousCase, handleNextCase } =
     useSliderCasePatientIdNavigation({
@@ -85,7 +86,7 @@ function UninterpretedCasesTable() {
     <div className="space-y-6 mt-2">
       <DataTable
         id="uninterpreted-cases"
-        columns={getUninterpretedCasesColumns(t)}
+        columns={columns}
         TableFilters={
           <UninterpretedCasesTableFilters
             loading={isLoading && !isValidating}

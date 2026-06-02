@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PaginationState } from '@tanstack/react-table';
 import useSWR from 'swr';
 
@@ -32,6 +32,8 @@ export default function App() {
 
   const [additionalFields, setAdditionalFields] = useState<string[]>([]);
 
+  const columns = useMemo(() => getCaseExplorationColumns(t), [t]);
+
   const { data, isLoading, isValidating } = useSWR<CasesSearchResponse, any, CaseListInput>(
     {
       listBodyWithCriteria: {
@@ -60,7 +62,7 @@ export default function App() {
             <div className="bg-background pt-4">
               <DataTable
                 id="case-exploration"
-                columns={getCaseExplorationColumns(t)}
+                columns={columns}
                 TableFilters={
                   <TableFilters loading={isLoading && !isValidating} setSearchCriteria={setSearchCriteria} />
                 }

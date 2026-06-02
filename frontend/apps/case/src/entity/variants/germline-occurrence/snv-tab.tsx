@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { CaseEntity, CaseSequencingExperiment } from '@/api/api';
 import { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
@@ -29,6 +31,11 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
   const patient = getPatientClinicalInformation(caseEntity, patientSelected);
   const taskId = useTaskIdFromSearchParam();
 
+  const columns = useMemo(
+    () => getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId: patient?.patient_id }),
+    [t, caseEntity, patient?.patient_id],
+  );
+
   if (!isValidSeqId(seqId)) {
     return null;
   }
@@ -54,7 +61,7 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
       <QueryBuilderDataTable
         id={appId}
         swrId={`${seqId}-${taskId}`}
-        columns={getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId: patient?.patient_id })}
+        columns={columns}
         defaultColumnSettings={defaultGermlineSNVSettings}
         defaultPageSize={30}
         enableColumnOrdering

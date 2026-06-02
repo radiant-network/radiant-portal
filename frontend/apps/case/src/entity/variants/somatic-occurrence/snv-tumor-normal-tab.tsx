@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { CaseEntity, CaseSequencingExperiment } from '@/api/api';
 import { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
@@ -30,6 +32,11 @@ function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurr
   const patient = getPatientClinicalInformation(caseEntity, patientSelected);
   const taskId = useTaskIdFromSearchParam();
 
+  const columns = useMemo(
+    () => getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId: patient?.patient_id }),
+    [t, caseEntity, patient?.patient_id],
+  );
+
   if (!isValidSeqId(seqId)) {
     return null;
   }
@@ -55,7 +62,7 @@ function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurr
       <QueryBuilderDataTable
         id={appId}
         swrId={`${seqId}-${taskId}`}
-        columns={getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId: patient?.patient_id })}
+        columns={columns}
         defaultColumnSettings={defaultSomaticSNVSettings}
         enableColumnOrdering
         enableFullscreen

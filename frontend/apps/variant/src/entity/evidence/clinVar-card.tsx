@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { ExternalLink, Search } from 'lucide-react';
 import useSWR from 'swr';
@@ -27,6 +27,7 @@ function ClinVarCard() {
   const { t } = useI18n();
   const params = useParams<{ locusId: string }>();
   const [search, setSearch] = useState('');
+  const columns = useMemo(() => getPathogenicEvidenceColumns(t), [t]);
 
   const { data, isLoading } = useSWR<ClinvarVariantConditions, ApiError, ClinVarConditionsSearchInput>(
     {
@@ -80,7 +81,7 @@ function ClinVarCard() {
         />
         <DataTable
           id="pathogenic-evidence"
-          columns={getPathogenicEvidenceColumns(t)}
+          columns={columns}
           data={filteredData}
           defaultColumnSettings={pathogenicEvidenceDefaultSettings}
           loadingStates={{

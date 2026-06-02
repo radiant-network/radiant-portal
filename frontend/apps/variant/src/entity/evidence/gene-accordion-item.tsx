@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
 
@@ -19,6 +20,7 @@ export interface GeneAccordionItemProps {
 
 function GeneAccordionItem({ symbol, panelType, conditions }: GeneAccordionItemProps) {
   const { t } = useI18n();
+  const columns = useMemo(() => getConditionPhenotypeColumns(t, panelType), [t, panelType]);
 
   return (
     <AccordionItem value={symbol} className="border rounded">
@@ -45,7 +47,7 @@ function GeneAccordionItem({ symbol, panelType, conditions }: GeneAccordionItemP
         ) : (
           <DataTable
             id={`${symbol}-condition-phenotype-table`}
-            columns={getConditionPhenotypeColumns(t, panelType)}
+            columns={columns}
             data={conditions || []}
             defaultColumnSettings={conditionPhenotypeDefaultSettings}
             loadingStates={{

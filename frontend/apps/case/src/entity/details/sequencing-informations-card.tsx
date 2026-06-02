@@ -1,4 +1,4 @@
-import { ComponentProps } from 'react';
+import { ComponentProps, useMemo } from 'react';
 
 import { CaseEntity } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
@@ -12,6 +12,7 @@ type SequencingExperimentInformationsCardProps = ComponentProps<'div'> & {
 };
 function SequencingExperimentInformationsCard({ data, ...props }: SequencingExperimentInformationsCardProps) {
   const { t } = useI18n();
+  const columns = useMemo(() => getColumns(t), [t]);
 
   return (
     <Card data-cy="sequencing-experiments-card" {...props}>
@@ -21,7 +22,7 @@ function SequencingExperimentInformationsCard({ data, ...props }: SequencingExpe
       <CardContent>
         <DataTable
           id="sequencing-experiments"
-          columns={getColumns(t)}
+          columns={columns}
           defaultColumnSettings={defaultSettings}
           data={data.sequencing_experiments}
           loadingStates={{
