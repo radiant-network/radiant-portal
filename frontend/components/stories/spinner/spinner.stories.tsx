@@ -4,7 +4,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { Spinner } from '@/components/base/shadcn/spinner';
 
 const meta = {
-  title: 'Spinner/Spinner',
+  title: 'Components/Spinners/Spinner',
   component: Spinner,
 } satisfies Meta<typeof Spinner>;
 

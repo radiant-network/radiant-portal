@@ -49,7 +49,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Notes/Popover',
+  title: 'Features/Notes/Notes Popover',
   component: NotesPopover,
   args: {
     hasNotes: true,

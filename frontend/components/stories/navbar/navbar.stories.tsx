@@ -17,7 +17,7 @@ import MainNavbar from '@/components/base/navbar/main-navbar';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';
 
 const meta = {
-  title: 'Navbar/Main Navbar',
+  title: 'Layout/Main Navbar',
   component: MainNavbar,
   args: {},
   decorators: [

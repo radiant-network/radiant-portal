@@ -4,7 +4,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 
 const meta = {
-  title: 'Tooltips/Tooltip',
+  title: 'Components/Tooltips/Tooltip',
   component: TooltipContent,
   args: {
     children: 'Tooltip Content',

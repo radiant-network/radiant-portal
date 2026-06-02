@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/base/shadcn/button';
 
 const meta = {
-  title: 'Alerts/Alert',
+  title: 'Components/Alerts/Alert',
   component: Button,
 } satisfies Meta<typeof Button>;
 

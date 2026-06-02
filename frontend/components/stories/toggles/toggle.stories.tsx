@@ -8,7 +8,7 @@ const toggleSizes: VariantProps<typeof toggleVariants>['size'][] = ['xxs', 'xs',
 const toggleVariantOptions: VariantProps<typeof toggleVariants>['variant'][] = ['default', 'outline'];
 
 const meta = {
-  title: 'Toggle/Toggle',
+  title: 'Components/Toggles/Toggle',
   component: Toggle,
   argTypes: {
     size: {

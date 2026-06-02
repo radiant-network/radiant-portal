@@ -49,7 +49,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Notes/NotesSliderSheet',
+  title: 'Features/Notes/Notes Slider Sheet',
   component: NotesSliderSheet,
   args: {
     caseId: 1,

@@ -112,3 +112,11 @@ Models, types and headless features
 
 **Examples:**
 - `query-builder/` Directory containing components for building complex queries, their types and models.
+
+---
+
+## Storybook Story Titles
+
+Stories follow a `Family/Group/Component` title convention (Title Case + spaces)
+with five top-level families: `Foundations`, `Components`, `Features`, `Layout`,
+`Utils`. See [`docs/storybook.md`](../docs/storybook.md) for the full rules.

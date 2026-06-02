@@ -4,7 +4,7 @@ import { BookDown, KeyRound, User } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 
 const meta = {
-  title: 'Tabs/Tabs',
+  title: 'Components/Tabs/Tabs',
   component: Tabs,
   args: {
     defaultValue: 'account',

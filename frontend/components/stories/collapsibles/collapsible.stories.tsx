@@ -46,7 +46,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Collapsibles/Collapsible',
+  title: 'Components/Collapsibles/Collapsible',
   component: Collapsible,
   args: {},
   decorators: [

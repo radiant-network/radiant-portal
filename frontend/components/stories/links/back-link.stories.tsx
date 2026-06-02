@@ -1,8 +1,9 @@
-import BackLink from '@/components/base/navigation/back-link';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+import BackLink from '@/components/base/navigation/back-link';
+
 const meta = {
-  title: 'Links/BackLink',
+  title: 'Components/Links/Back Link',
   component: BackLink,
   args: {},
 } satisfies Meta<typeof BackLink>;
@@ -13,7 +14,5 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {},
-  render: () => {
-    return <BackLink>Back</BackLink>;
-  },
+  render: () => <BackLink>Back</BackLink>,
 };

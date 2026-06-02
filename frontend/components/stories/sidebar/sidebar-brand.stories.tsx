@@ -6,7 +6,7 @@ import { FilterTypes } from '@/components/cores/applications-config';
 import { RangeOperators } from '@/components/cores/sqon';
 
 const meta = {
-  title: 'Sidebar/Sidebar Brand',
+  title: 'Layout/Sidebar Brand',
   component: SidebarGroups,
   args: {},
   decorators: [

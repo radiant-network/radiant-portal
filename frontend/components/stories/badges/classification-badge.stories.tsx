@@ -6,7 +6,7 @@ import ClassificationBadge, {
 } from '@/components/base/badges/classification-badge';
 
 const meta = {
-  title: 'Badges/Classification Badge',
+  title: 'Components/Badges/Classification Badge',
   component: ClassificationBadge,
   args: {
     value: 'other',

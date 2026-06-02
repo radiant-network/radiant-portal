@@ -7,7 +7,7 @@ import { Label } from '@/components/base/shadcn/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 
 const meta = {
-  title: 'Cards/Card',
+  title: 'Components/Cards/Card',
   component: Card,
   args: {},
 } satisfies Meta<typeof Card>;

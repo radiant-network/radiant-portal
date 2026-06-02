@@ -18,7 +18,7 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 
 const meta = {
-  title: 'Dropdowns/DropDown Menu',
+  title: 'Components/Dropdowns/Dropdown Menu',
   component: DropdownMenu,
   args: {},
 } satisfies Meta<typeof DropdownMenu>;

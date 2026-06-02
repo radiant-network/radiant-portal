@@ -5,7 +5,7 @@ import NumberBadge from '@/components/base/badges/number-badge';
 import { numberBadgeVariants } from './utils';
 
 const meta = {
-  title: 'Badges/Number Badge',
+  title: 'Components/Badges/Number Badge',
   component: NumberBadge,
   args: {
     count: 5,

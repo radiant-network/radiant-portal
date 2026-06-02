@@ -45,7 +45,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Preview/Description',
+  title: 'Components/Preview/Description',
   component: DescriptionSection,
   args: {
     title: 'Title',

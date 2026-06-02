@@ -7,7 +7,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base
 import { avatarSizes } from './utils';
 
 const meta = {
-  title: 'Avatars/AvatarGroup',
+  title: 'Components/Avatars/Avatar Group',
   component: AvatarGroup,
   argTypes: {
     size: {

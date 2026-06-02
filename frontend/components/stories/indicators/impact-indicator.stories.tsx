@@ -4,7 +4,7 @@ import { VepImpact } from '@/api/api';
 import ImpactIndicator from '@/components/base/indicators/impact-indicator';
 
 const meta = {
-  title: 'Indicators/Impact Indicator',
+  title: 'Features/Indicators/Impact Indicator',
   component: ImpactIndicator,
   args: {
     value: 'HIGH',

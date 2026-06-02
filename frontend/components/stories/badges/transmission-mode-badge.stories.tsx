@@ -4,7 +4,7 @@ import TransmissionModeBadge, { getTransmissionModeList } from '@/components/bas
 import { useI18n } from '@/components/hooks/i18n';
 
 const meta = {
-  title: 'Badges/Transmission Mode Badge',
+  title: 'Components/Badges/Transmission Mode Badge',
   component: TransmissionModeBadge,
   args: {
     value: 'other',

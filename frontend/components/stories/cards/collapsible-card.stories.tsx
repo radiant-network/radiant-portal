@@ -45,7 +45,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Cards/CollapsibleCard',
+  title: 'Components/Cards/Collapsible Card',
   component: CollapsibleCard,
   args: {
     title: 'Header',

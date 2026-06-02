@@ -45,7 +45,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Indicators/ConsequenceIndicator',
+  title: 'Features/Indicators/Consequence Indicator',
   component: ConsequenceIndicator,
   args: { consequence: 'missense_variant', vepImpact: VepImpact.MODERATE },
   decorators: [

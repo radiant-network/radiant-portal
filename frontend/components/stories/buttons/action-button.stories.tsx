@@ -6,7 +6,7 @@ import ActionButton from '@/components/base/buttons/action-button';
 import { buttonSizes, buttonVariants } from './utils';
 
 const meta = {
-  title: 'Buttons/Action Button',
+  title: 'Components/Buttons/Action Button',
   component: ActionButton,
   args: { onClick: fn(), size: 'default', disabled: false, actions: [], onDefaultAction: fn() },
 } satisfies Meta<typeof ActionButton>;

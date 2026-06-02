@@ -1,5 +1,5 @@
-import { action } from 'storybook/actions';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { action } from 'storybook/actions';
 import { fn } from 'storybook/test';
 
 import InputSearch from '@/components/base/data-entry/input-search';
@@ -7,7 +7,7 @@ import InputSearch from '@/components/base/data-entry/input-search';
 import { sizes } from './utils';
 
 const meta = {
-  title: 'Inputs/Input Search',
+  title: 'Components/Inputs/Input Search',
   component: InputSearch,
   args: {
     value: 'Search value',

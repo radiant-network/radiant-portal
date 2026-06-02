@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import Empty from '@/components/base/empty';
 import { Dna } from 'lucide-react';
 
+import Empty from '@/components/base/empty';
+
 const meta = {
-  title: 'Empty/Default',
+  title: 'Components/Empty State',
   component: Empty,
   args: {
     showIcon: true,
@@ -32,9 +33,7 @@ export const ChartRow: Story = {
     size: 'default',
     iconType: 'chartRow',
   },
-  render: args => {
-    return <Empty {...args} />;
-  },
+  render: args => <Empty {...args} />,
 };
 
 export const ChartGrid: Story = {
@@ -44,9 +43,7 @@ export const ChartGrid: Story = {
     size: 'default',
     iconType: 'chartGrid',
   },
-  render: args => {
-    return <Empty {...args} />;
-  },
+  render: args => <Empty {...args} />,
 };
 
 export const CustomIcon: Story = {
@@ -57,9 +54,7 @@ export const CustomIcon: Story = {
     iconType: 'custom',
     icon: Dna,
   },
-  render: args => {
-    return <Empty {...args} />;
-  },
+  render: args => <Empty {...args} />,
 };
 
 export const WithBorder: Story = {
@@ -71,7 +66,5 @@ export const WithBorder: Story = {
     icon: Dna,
     bordered: true,
   },
-  render: args => {
-    return <Empty {...args} />;
-  },
+  render: args => <Empty {...args} />,
 };

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 
 const meta = {
-  title: 'Links/Transcript ID Link',
+  title: 'Components/Links/Transcript ID Link',
   component: TranscriptIdLink,
   args: {
     transcriptId: 'ENST00000367770',

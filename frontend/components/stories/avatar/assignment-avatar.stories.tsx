@@ -6,7 +6,7 @@ import { Avatar } from '@/components/base/avatar/avatar';
 import { avatarSizes } from './utils';
 
 const meta = {
-  title: 'Avatars/Assignment Avatar',
+  title: 'Components/Avatars/Assignment Avatar',
   component: Avatar,
   argTypes: {
     size: {

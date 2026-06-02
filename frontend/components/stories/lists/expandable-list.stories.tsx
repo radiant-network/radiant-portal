@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import ExpandableList from '@/components/base/list/expandable-list';
 
 const meta = {
-  title: 'Lists/Expandable List',
+  title: 'Components/Lists/Expandable List',
   component: ExpandableList,
   args: {},
 } satisfies Meta<typeof ExpandableList>;

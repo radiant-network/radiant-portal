@@ -6,7 +6,7 @@ import FilterButton, { IFilterButtonItem, PopoverSize } from '@/components/base/
 import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 
 const meta: Meta<typeof FilterButton> = {
-  title: 'Buttons/Filter Button',
+  title: 'Components/Buttons/Filter Button',
   component: FilterButton,
   args: {
     label: 'Filter',

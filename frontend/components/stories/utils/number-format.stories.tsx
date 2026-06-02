@@ -4,7 +4,7 @@ import TextCell from '@/components/base/data-table/cells/text-cell';
 import { toKiloBases } from '@/components/lib/number-format';
 
 const meta = {
-  title: 'Utils/Number-Format',
+  title: 'Utils/Number Format',
   component: TextCell,
   args: {},
   decorators: [Story => <Story />],

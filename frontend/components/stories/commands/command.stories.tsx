@@ -13,7 +13,7 @@ import {
 } from '@/components/base/shadcn/command';
 
 const meta = {
-  title: 'Commands/Command',
+  title: 'Components/Commands/Command',
   args: {},
   component: CommandPrimitive,
 } satisfies Meta<typeof CommandPrimitive>;

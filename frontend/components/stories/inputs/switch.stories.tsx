@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Switch } from '@/components/base/shadcn/switch';
 
 const meta = {
-  title: 'Inputs/Switch',
+  title: 'Components/Inputs/Switch',
   args: {
     size: 'default',
     checked: false,

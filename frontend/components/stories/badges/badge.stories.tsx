@@ -7,7 +7,7 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { badgeVariants } from './utils';
 
 const meta = {
-  title: 'Badges/Badge',
+  title: 'Components/Badges/Badge',
   component: Badge,
   args: {},
 } satisfies Meta<typeof Badge>;

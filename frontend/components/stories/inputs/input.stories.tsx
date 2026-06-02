@@ -7,7 +7,7 @@ import { Input } from '@/components/base/shadcn/input';
 import { sizes } from './utils';
 
 const meta = {
-  title: 'Inputs/Input',
+  title: 'Components/Inputs/Input',
   component: Input,
   args: {
     value: 'Input value',

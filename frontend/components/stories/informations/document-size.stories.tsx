@@ -45,7 +45,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Informations/DocumentSizeField',
+  title: 'Features/Informations/Document Size Field',
   component: DocumentSize,
   args: {},
   decorators: [

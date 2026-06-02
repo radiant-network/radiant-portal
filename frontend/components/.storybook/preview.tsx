@@ -75,6 +75,11 @@ initialize(options);
 
 const preview: Preview = {
   parameters: {
+    options: {
+      storySort: {
+        order: ['Foundations', 'Components', 'Features', 'Layout', 'Utils', '*'],
+      },
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,

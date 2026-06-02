@@ -45,7 +45,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Informations/InformationField',
+  title: 'Features/Informations/Information Field',
   component: InformationField,
   args: {},
   decorators: [

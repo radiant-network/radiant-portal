@@ -16,7 +16,7 @@ import {
 } from '@/components/base/shadcn/dialog';
 
 const meta = {
-  title: 'Modals/Dialog',
+  title: 'Components/Modals/Dialog',
   component: Dialog,
   args: {},
 } satisfies Meta<typeof Dialog>;

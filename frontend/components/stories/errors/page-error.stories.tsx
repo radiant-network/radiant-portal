@@ -4,7 +4,7 @@ import PageError from '@/components/base/page/page-error';
 import { Button } from '@/components/base/shadcn/button';
 
 const meta = {
-  title: 'Error/Page-Error',
+  title: 'Layout/Page Error',
   component: PageError,
   args: {
     status: '404',

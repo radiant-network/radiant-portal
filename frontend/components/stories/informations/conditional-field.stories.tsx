@@ -45,7 +45,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Informations/ConditionalField',
+  title: 'Features/Informations/Conditional Field',
   component: ConditionalField,
   args: {},
   decorators: [

@@ -3,7 +3,7 @@ import type { StoryObj } from '@storybook/react-vite';
 import { cn } from '../../lib/utils';
 
 const meta = {
-  title: 'Theme/Colors',
+  title: 'Foundations/Colors',
 };
 
 export default meta;

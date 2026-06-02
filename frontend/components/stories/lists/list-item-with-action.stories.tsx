@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { action } from 'storybook/actions';
+
 import List from '@/components/base/list/list';
 import ListItemWithAction from '@/components/base/list/list-item-with-action';
 
 const meta = {
-  title: 'Lists/ListItem with action',
+  title: 'Components/Lists/List Item With Action',
   component: ListItemWithAction,
   args: {
     onEdit: action('onEdit'),

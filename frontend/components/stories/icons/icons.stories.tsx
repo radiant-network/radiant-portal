@@ -36,7 +36,7 @@ import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-se
 import { IconType } from '@/components/base/icons/types';
 
 const meta = {
-  title: 'Icons/Lucide',
+  title: 'Foundations/Icons',
   component: ElementOperatorIcon,
   args: {
     size: 24,

@@ -45,7 +45,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Badges/Affected Status Badge',
+  title: 'Components/Badges/Affected Status Badge',
   component: AffectedStatusBadge,
   args: { status: 'affected' },
   decorators: [

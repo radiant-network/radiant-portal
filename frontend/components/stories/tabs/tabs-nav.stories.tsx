@@ -1,10 +1,12 @@
-import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
+/* eslint-disable react-hooks/rules-of-hooks */
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { User } from 'lucide-react';
-import { useState } from 'react';
+
+import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 
 const meta = {
-  title: 'Tabs/TabsNav',
+  title: 'Components/Tabs/Tabs Nav',
   component: TabsNav,
   args: {},
 } satisfies Meta<typeof TabsNav>;

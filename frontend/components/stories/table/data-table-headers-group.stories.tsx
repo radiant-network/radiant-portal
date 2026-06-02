@@ -216,7 +216,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Tables/Data Table/HeadersGroup',
+  title: 'Features/Data Table/Headers Group',
   component: DataTable,
   args: {
     id: 'storybook',

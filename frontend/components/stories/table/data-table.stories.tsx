@@ -36,7 +36,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Tables/Data Table',
+  title: 'Features/Data Table',
   component: DataTable,
   args: {
     id: 'storybook',

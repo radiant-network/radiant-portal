@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useState } from 'react';
-import { action } from 'storybook/actions';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { action } from 'storybook/actions';
 
 import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
 
@@ -41,7 +41,7 @@ const FRAMEWORKS: Option[] = [
 ];
 
 const meta = {
-  title: 'Inputs/Auto Complete',
+  title: 'Components/Inputs/Auto Complete',
   component: AutoComplete,
   args: {
     value: '',

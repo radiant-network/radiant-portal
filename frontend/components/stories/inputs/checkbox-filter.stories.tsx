@@ -30,7 +30,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Inputs/ChecboxFilter',
+  title: 'Components/Inputs/Checkbox Filter',
   component: ChecboxFilter,
   args: {},
   decorators: [

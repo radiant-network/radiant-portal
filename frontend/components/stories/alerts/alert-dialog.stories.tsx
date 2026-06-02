@@ -4,7 +4,7 @@ import { alertDialog } from '@/components/base/dialog/alert-dialog-store';
 import { Button } from '@/components/base/shadcn/button';
 
 const meta = {
-  title: 'Alerts/Alert Dialog',
+  title: 'Components/Alerts/Alert Dialog',
   component: Button,
 } satisfies Meta<typeof Button>;
 

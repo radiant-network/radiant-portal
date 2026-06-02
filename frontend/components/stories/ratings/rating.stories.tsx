@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+
 import Rating from '@/components/base/rating';
 
 const meta = {
-  title: 'Ratings/Rating',
+  title: 'Components/Ratings/Rating',
   component: Rating,
   args: {
     starSize: 16,

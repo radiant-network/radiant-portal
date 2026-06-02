@@ -9,7 +9,7 @@ import {
 import { AvatarUser } from '@/components/base/avatar';
 
 const meta = {
-  title: 'Assignation/UserSelection',
+  title: 'Features/Assignation/User Selection',
   component: UserSelection,
   args: {
     availableUsers: [],

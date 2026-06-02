@@ -45,7 +45,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Badges/Status Badge',
+  title: 'Components/Badges/Status Badge',
   component: StatusBadge,
   args: {
     status: 'draft',

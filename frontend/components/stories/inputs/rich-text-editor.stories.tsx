@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { Button } from '@/components/base/shadcn/button';
 
 const meta = {
-  title: 'Inputs/RichText Editor',
+  title: 'Components/Inputs/Rich Text Editor',
   component: RichTextEditor,
   args: {
     value: '<h3>Hello</h3>',

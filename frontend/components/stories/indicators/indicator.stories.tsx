@@ -5,7 +5,7 @@ import { Indicator } from '@/components/base/shadcn/indicator';
 import { indicatorVariants } from '../badges/utils';
 
 const meta = {
-  title: 'Indicators/Indicator',
+  title: 'Features/Indicators/Indicator',
   component: Indicator,
   args: {},
 } satisfies Meta<typeof Indicator>;

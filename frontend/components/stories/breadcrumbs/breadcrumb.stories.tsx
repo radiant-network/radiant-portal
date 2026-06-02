@@ -17,7 +17,7 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 
 const meta = {
-  title: 'Breadcrumbs/Breacrumb',
+  title: 'Layout/Breadcrumb',
   component: Breadcrumb,
   args: {},
 } satisfies Meta<typeof Breadcrumb>;

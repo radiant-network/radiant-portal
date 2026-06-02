@@ -55,7 +55,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Inputs/Select',
+  title: 'Components/Inputs/Select',
   component: Select,
   args: {},
   decorators: [

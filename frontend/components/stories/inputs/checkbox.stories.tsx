@@ -6,7 +6,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 
 const meta = {
-  title: 'Inputs/Checkbox',
+  title: 'Components/Inputs/Checkbox',
   args: {
     size: 'default',
     checked: false,

@@ -45,7 +45,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Indicators/PriorityIndicator',
+  title: 'Features/Indicators/Priority Indicator',
   component: PriorityIndicator,
   args: {},
   decorators: [

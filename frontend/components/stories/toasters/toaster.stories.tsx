@@ -7,7 +7,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { Toaster } from '@/components/base/shadcn/sonner';
 
 const meta = {
-  title: 'Toasters/Toaster',
+  title: 'Components/Toasters/Toaster',
   component: Button,
 } satisfies Meta<typeof Button>;
 

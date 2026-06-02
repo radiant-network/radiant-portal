@@ -5,7 +5,7 @@ import { TableHeaderUserFilter } from '@/components/base/assignation/user-select
 import { AvatarUser } from '@/components/base/avatar';
 
 const meta = {
-  title: 'Assignation/TableHeaderUserFilter',
+  title: 'Features/Assignation/Table Header User Filter',
   component: TableHeaderUserFilter,
   args: {
     availableUsers: [],

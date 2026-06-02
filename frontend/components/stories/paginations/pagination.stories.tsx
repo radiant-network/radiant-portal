@@ -57,7 +57,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Paginations/Pagination',
+  title: 'Components/Paginations/Pagination',
   component: Pagination,
   decorators: [
     Story => (

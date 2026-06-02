@@ -86,7 +86,7 @@ const occurrenceMock = {
 } as GermlineSNVOccurrence;
 
 const meta = {
-  title: 'Sliders/Occurrences/Germline',
+  title: 'Features/Sliders/Germline Occurrence',
   component: GermlineOccurrenceSheetContent,
   beforeEach: async () => {
     mocked(useCaseIdFromParam).mockReturnValue(1);

@@ -51,7 +51,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Tables/Display Table',
+  title: 'Features/Display Table',
   component: DisplayTable,
   args: {
     data,

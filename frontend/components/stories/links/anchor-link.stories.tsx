@@ -1,9 +1,11 @@
-import AnchorLink from '@/components/base/navigation/anchor-link';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+
+import AnchorLink from '@/components/base/navigation/anchor-link';
+
 import { anchorLinkSizes, anchorLinkVariants } from './utils';
 
 const meta = {
-  title: 'Links/AnchorLink',
+  title: 'Components/Links/Anchor Link',
   component: AnchorLink,
   argTypes: {
     size: {
@@ -33,25 +35,19 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {},
-  render: args => {
-    return <AnchorLink {...args}>Anchor Link</AnchorLink>;
-  },
+  render: args => <AnchorLink {...args}>Anchor Link</AnchorLink>,
 };
 
 export const Secondary: Story = {
   args: {
     variant: 'secondary',
   },
-  render: args => {
-    return <AnchorLink {...args}>Anchor Link</AnchorLink>;
-  },
+  render: args => <AnchorLink {...args}>Anchor Link</AnchorLink>,
 };
 
 export const Mono: Story = {
   args: {
     mono: true,
   },
-  render: args => {
-    return <AnchorLink {...args}>Anchor Link</AnchorLink>;
-  },
+  render: args => <AnchorLink {...args}>Anchor Link</AnchorLink>,
 };

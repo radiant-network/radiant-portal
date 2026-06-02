@@ -45,7 +45,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Informations/RelationshipToProbandField',
+  title: 'Features/Informations/Relationship To Proband Field',
   component: RelationshipToProbandField,
   args: { relationship: 'proband' },
   decorators: [

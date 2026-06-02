@@ -45,7 +45,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Badges/Analysis Type Code Badge',
+  title: 'Components/Badges/Analysis Type Code Badge',
   component: AnalysisTypeCodeBadge,
   args: {},
   decorators: [

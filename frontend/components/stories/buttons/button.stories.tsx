@@ -8,7 +8,7 @@ import { Separator } from '@/components/base/shadcn/separator';
 import { buttonSizes, buttonVariants } from './utils';
 
 const meta = {
-  title: 'Buttons/Button',
+  title: 'Components/Buttons/Button',
   component: Button,
   argTypes: {
     size: {

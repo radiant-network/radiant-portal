@@ -247,7 +247,7 @@ const facetListConfig: PortalConfig = {
 };
 
 const meta = {
-  title: 'Query Builder/Query Builder',
+  title: 'Features/Query Builder',
   component: QueryBuilder,
   beforeEach: async () => {
     mocked(useCaseIdFromParam).mockReturnValue(1);

@@ -8,7 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/base/shadcn/toggle-gr
 const sizes: NonNullable<VariantProps<typeof toggleVariants>['size']>[] = ['sm', 'default', 'lg'];
 
 const meta = {
-  title: 'Buttons/ToggleGroup',
+  title: 'Components/Buttons/Toggle Group',
   component: ToggleGroup,
   args: { type: 'single' as const },
 } satisfies Meta<typeof ToggleGroup>;
