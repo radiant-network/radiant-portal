@@ -140,7 +140,7 @@ function MainSidebar({
         <AvatarUserDetails
           {...userDetails}
           className="group-data-[collapsible=icon]:p-0!"
-          avatarClassName="size-8"
+          avatarSize="md"
           detailsClassName="group-data-[collapsible=icon]:hidden!"
         />
         <SidebarMenu>

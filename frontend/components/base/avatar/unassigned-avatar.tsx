@@ -6,7 +6,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
 import { avatarStyles, getIconSize } from './avatar.styles';
-import { BaseAvatarProps } from './avatar.types';
+import type { BaseAvatarProps } from './avatar.types';
 
 export function UnassignedAvatar({ size = 'sm', className, canAssign, onAssignClick }: BaseAvatarProps) {
   const { t } = useI18n();

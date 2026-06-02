@@ -6,7 +6,7 @@ import type { AvatarUser } from './avatar.types';
  * Generate initials from a user's name
  * If custom initials are provided, use those instead
  */
-export function getInitials(user: AvatarUser): string {
+export function getInitials(user: Pick<AvatarUser, 'name' | 'initials'>): string {
   if (user.initials) {
     return user.initials.substring(0, 2).toUpperCase();
   }
