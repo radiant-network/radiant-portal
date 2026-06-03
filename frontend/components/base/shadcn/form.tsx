@@ -6,6 +6,7 @@ import { InfoIcon } from 'lucide-react';
 import z from 'zod';
 
 import { Label } from '@/base/shadcn/label';
+import { useI18n } from '@/components/hooks/i18n';
 import { isFieldRequired } from '@/components/lib/zod';
 import { cn } from '@/lib/utils';
 
@@ -143,9 +144,16 @@ function FormDescription({ className, ...props }: React.HTMLAttributes<HTMLParag
 }
 FormDescription.displayName = 'FormDescription';
 
+/**
+ * Translations
+ * Since we cannot pass zod's threshold value
+ * we must use unique translation key
+ * eg. min_2, max_50
+ */
 function FormMessage({ className, children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
+  const { t } = useI18n();
   const { error, formMessageId } = useFormField();
-  const body = error ? String(error?.message) : children;
+  const body = error ? t(`common.form.errors.${String(error?.message)}`) : children;
 
   if (!body) {
     return null;

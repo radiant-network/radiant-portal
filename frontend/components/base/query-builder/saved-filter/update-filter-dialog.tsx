@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../shadcn/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../shadcn/form';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '../../shadcn/form';
 import { Input } from '../../shadcn/input';
 import { useQBContext } from '../hooks/use-query-builder';
 import { fetchSavedFilters } from '../query-builder';
@@ -33,7 +33,7 @@ interface UpdateFilterDialogProps {
 }
 
 const formSchema = z.object({
-  name: z.string().min(2, 'Min 2 characters').max(50, 'Max 50 characters'),
+  name: z.string().min(2, 'min_2').max(50, { message: 'max_50' }),
 });
 
 function UpdateFilterDialog({ open, onOpenChange, savedFilter, isFromManage = false }: UpdateFilterDialogProps) {
@@ -128,7 +128,6 @@ function UpdateFilterDialog({ open, onOpenChange, savedFilter, isFromManage = fa
                     <FormControl>
                       <Input placeholder={t('common.saved_filter.edit_dialog.fields.title.placeholder')} {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
                 schema={formSchema}

@@ -37,7 +37,7 @@ function PubmedFormField() {
         }
       },
       onError: () => {
-        if (pubmedFetchKey?.index) {
+        if (pubmedFetchKey?.index != undefined) {
           setError(`pubmed.${pubmedFetchKey.index}.citation`, {
             message: t('variant.interpretation_form.generic.pub_med_id_not_found'),
           });
