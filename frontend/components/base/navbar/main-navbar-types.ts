@@ -5,6 +5,7 @@ export interface BaseMainNavbarProps {
   links: MainNavbarItemProps[];
   actions: MainNavbarItemProps[];
   userDetails: {
+    id: string;
     name: string;
     email: string;
   };

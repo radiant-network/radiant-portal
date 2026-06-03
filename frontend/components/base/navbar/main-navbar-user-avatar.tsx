@@ -2,9 +2,8 @@ import { LogOutIcon } from 'lucide-react';
 import type { VariantProps } from 'tailwind-variants';
 import { tv } from 'tailwind-variants';
 
-import { getInitials } from '@/components/base/avatar';
+import { UserAvatar } from '@/components/base/avatar';
 import type { AvatarSize } from '@/components/base/shadcn/avatar';
-import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +19,7 @@ import MainNavbarItem from './main-navbar-item';
 
 interface NavbarUserAvatarProps {
   userDetails: {
+    id: string;
     name: string;
     email: string;
   };
@@ -27,20 +27,20 @@ interface NavbarUserAvatarProps {
   onLogoutClick: () => void;
 }
 
-function NavbarUserAvatar({ userDetails: { name, email }, onLogoutClick, avatarSize }: NavbarUserAvatarProps) {
+function NavbarUserAvatar({ userDetails: { id, name, email }, onLogoutClick, avatarSize }: NavbarUserAvatarProps) {
   const { t } = useI18n();
 
   return (
     <>
       <div className="block md:hidden">
-        <AvatarUserDetails name={name} email={email} avatarSize={avatarSize} />
+        <AvatarUserDetails id={id} name={name} email={email} avatarSize={avatarSize} />
         {/* SJRA-389 <MainNavbarItem title="Profile" as="button" icon={<UserIcon />} className="w-full" onClick={() => {}} /> */}
         <MainNavbarItem title="Sign out" as="button" icon={<LogOutIcon />} className="w-full" onClick={onLogoutClick} />
       </div>
       <div className="hidden md:flex">
         <DropdownMenu>
           <DropdownMenuTrigger className="outline-none">
-            <NavbarAvatar name={name} size={avatarSize} />
+            <NavbarAvatar id={id} name={name} size={avatarSize} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <div className="py-1.5 px-2">
@@ -104,6 +104,7 @@ export function UserDetails({
 }
 
 export function AvatarUserDetails({
+  id,
   name,
   email,
   size,
@@ -111,6 +112,7 @@ export function AvatarUserDetails({
   avatarSize,
   detailsClassName,
 }: {
+  id: string;
   name: string;
   email: string;
   avatarSize?: AvatarSize;
@@ -119,18 +121,14 @@ export function AvatarUserDetails({
 } & VariantProps<typeof userDetailsVariant>) {
   return (
     <div className={cn('flex items-center p-2 gap-3', className)}>
-      <NavbarAvatar name={name} size={avatarSize} />
+      <NavbarAvatar id={id} name={name} size={avatarSize} />
       <UserDetails className={detailsClassName} name={name} email={email} size={size} />
     </div>
   );
 }
 
-function NavbarAvatar({ name, size = 'lg' }: { name?: string; size?: AvatarSize }) {
-  return (
-    <Avatar size={size}>
-      <AvatarFallback>{getInitials({ name: name ?? '' })}</AvatarFallback>
-    </Avatar>
-  );
+function NavbarAvatar({ id, name, size = 'lg' }: { id: string; name?: string; size?: AvatarSize }) {
+  return <UserAvatar user={{ id, name: name ?? '' }} size={size} />;
 }
 
 export default NavbarUserAvatar;
