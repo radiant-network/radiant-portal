@@ -142,6 +142,67 @@ func Test_AuthRepository_Memberships_WildcardResolvesToAllTenantOrgs(t *testing.
 	})
 }
 
+// pat holds the mixed-scope practitioner role at a specific org (CHUSJ). The action's
+// own scope must decide placement: tenant-scoped actions go to tenant_actions even
+// though the grant is org-specific, and only org-scoped actions go to orgs_by_action.
+func Test_AuthRepository_Memberships_MixedScopeRole_RoutesByActionScope(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		got, err := repo.Memberships("pat@test.authz")
+		assert.NoError(t, err)
+		assert.Equal(t, []types.TenantMembership{
+			{
+				Code:          "radiant",
+				Name:          "Radiant",
+				TenantActions: []string{"can_search_case", "can_view_kb"},
+				OrgsByAction: map[string][]string{
+					"can_interpret_variant": {"CHUSJ"},
+					"can_read_pii":          {"CHUSJ"},
+				},
+			},
+		}, got)
+	})
+}
+
+// tw holds the mixed-scope practitioner role tenant-wide (org_code NULL). Only its
+// tenant-scoped actions apply; its org-scoped actions have no org and are omitted.
+func Test_AuthRepository_Memberships_OrgActionGrantedTenantWide_OmittedFromOrgsByAction(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		got, err := repo.Memberships("tw@test.authz")
+		assert.NoError(t, err)
+		assert.Equal(t, []types.TenantMembership{
+			{
+				Code:          "radiant",
+				Name:          "Radiant",
+				TenantActions: []string{"can_search_case", "can_view_kb"},
+				OrgsByAction:  map[string][]string{},
+			},
+		}, got)
+	})
+}
+
+func Test_AuthRepository_HasAction_MixedScopeRole(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		// pat's grant is org-specific (CHUSJ), but a tenant-scoped action applies tenant-wide.
+		tenantAction, err := repo.HasAction("pat@test.authz", "radiant", "", "can_search_case")
+		assert.NoError(t, err)
+		assert.True(t, tenantAction, "tenant-scoped action holds even when checked without an org")
+
+		atGrantedOrg, err := repo.HasAction("pat@test.authz", "radiant", "CHUSJ", "can_read_pii")
+		assert.NoError(t, err)
+		assert.True(t, atGrantedOrg)
+
+		atOtherOrg, err := repo.HasAction("pat@test.authz", "radiant", "CHOP", "can_read_pii")
+		assert.NoError(t, err)
+		assert.False(t, atOtherOrg, "org-scoped action stays scoped to the granted org")
+	})
+}
+
 // carol belongs to both tenants; each tenant's wildcard must resolve to its own orgs.
 // radiant's orgs must not bleed into the org-less tenant_b.
 func Test_AuthRepository_Memberships_MultipleTenantsNoCollision(t *testing.T) {
