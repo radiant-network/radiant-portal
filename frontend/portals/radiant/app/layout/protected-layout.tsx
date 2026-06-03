@@ -110,7 +110,7 @@ const _ProtectedLayout = () => {
                 // },
               ]
             }
-            userDetails={data}
+            userDetails={{ id: data.sub, name: data.name, email: data.email }}
             onLogoutClick={() => navigate('/auth/logout')}
           />
           <Outlet />
