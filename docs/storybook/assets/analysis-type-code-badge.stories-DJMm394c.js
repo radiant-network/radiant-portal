@@ -1,0 +1,10 @@
+import{j as r}from"./iframe-ELwkN4WH.js";import{S as a}from"./api-CNFUPySA.js";import{A as t}from"./analysis-type-code-badge-BKQqCV4r.js";import{C as c,A as e}from"./applications-config-DpY0c-HV.js";import{a as _}from"./story-section-BW9mZuMq.js";import{B as m}from"./chunk-QUQL4437-Bw3QsHpJ.js";import"./preload-helper-PPVm8Dsz.js";import"./badge-CITMBpjG.js";import"./separator-DOzexuXx.js";import"./index-Ct7crFnJ.js";import"./x-DqX6VLl3.js";import"./i18n-DRl3AD0J.js";import"./index-BIP8QzMY.js";import"./users-rqqnqZJT.js";import"./user-BdQ5QAja.js";const p={variant_entity:{app_id:e.variant_entity},germline_snv_occurrence:{app_id:e.germline_snv_occurrence,aggregations:[],saved_filter_type:a.GERMLINE_SNV_OCCURRENCE},germline_cnv_occurrence:{app_id:e.germline_cnv_occurrence,aggregations:[],saved_filter_type:a.GERMLINE_CNV_OCCURRENCE},somatic_snv_to_occurrence:{app_id:e.somatic_snv_to_occurrence,aggregations:[],saved_filter_type:a.SOMATIC_SNV_OCCURRENCE},somatic_snv_tn_occurrence:{app_id:e.somatic_snv_tn_occurrence,aggregations:[],saved_filter_type:a.SOMATIC_SNV_OCCURRENCE},somatic_cnv_to_occurrence:{app_id:e.somatic_cnv_to_occurrence,aggregations:[],saved_filter_type:a.SOMATIC_CNV_OCCURRENCE},admin:{admin_code:"admin",app_id:e.admin},portal:{name:"",navigation:{}}},T={title:"Components/Badges/Analysis Type Code Badge",component:t,args:{},decorators:[i=>r.jsx(m,{children:r.jsx(c,{config:p,children:r.jsx(i,{})})})]},o={args:{code:"somatic"},render:i=>r.jsx(_,{title:"Default",children:r.jsx("div",{className:"flex gap-2",children:["somatic","germline","germline_family"].map((s,n)=>r.jsx(t,{code:s},n))})})};o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:`{
+  args: {
+    code: 'somatic' as AnalysisTypeCode
+  },
+  render: _args => <StorySection title="Default">
+      <div className="flex gap-2">
+        {['somatic', 'germline', 'germline_family'].map((code, index) => <AnalysisTypeCodeBadge key={index} code={code as AnalysisTypeCode} />)}
+      </div>
+    </StorySection>
+}`,...o.parameters?.docs?.source}}};const j=["Default"];export{o as Default,j as __namedExportsOrder,T as default};
