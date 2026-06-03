@@ -18,6 +18,13 @@
     "cancel": "Annuler",
     "close": "Fermer",
     "view_all": "Voir tout",
+    "form": {
+      "errors": {
+        "required": "Ce champ est requis",
+        "min_2": "2 caractères minimum",
+        "max_50": "50 caractères maximum"
+      }
+    },
     "editor": {
       "headings": {
         "normal": "Normal",

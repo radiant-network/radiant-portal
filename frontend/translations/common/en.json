@@ -18,6 +18,13 @@
     "edit": "Edit",
     "delete": "Delete",
     "cancel": "Cancel",
+    "form": {
+      "errors": {
+        "required": "This field is required",
+        "min_2": "Min 2 characters",
+        "max_50": "Max 50 characters"
+      }
+    },
     "editor": {
       "headings": {
         "normal": "Normal",
