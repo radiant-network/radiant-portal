@@ -17,6 +17,7 @@ import {
   httpCaseFiltersApiResponse,
   httpCaseSearchApiResponse,
 } from '../api/api-case';
+import { StorySection } from '../story-section';
 
 import { data, TableMockData } from './table-mock';
 
@@ -156,7 +157,11 @@ export const Loading: Story = {
     tableIndexResultPosition: 'hidden',
     TableFilters: <TableFilters loading={true} setSearchCriteria={() => {}} />,
   },
-  render: args => <DataTable {...args} />,
+  render: args => (
+    <StorySection title="Loading">
+      <DataTable {...args} />
+    </StorySection>
+  ),
 };
 
 export const Default: Story = {
@@ -180,5 +185,9 @@ export const Default: Story = {
     tableIndexResultPosition: 'hidden',
     TableFilters: <TableFilters loading={false} setSearchCriteria={() => {}} />,
   },
-  render: args => <DataTable {...args} />,
+  render: args => (
+    <StorySection title="Default">
+      <DataTable {...args} />
+    </StorySection>
+  ),
 };

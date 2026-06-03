@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { CopyButton } from '@/components/base/buttons/copy-button';
 
+import { StorySection } from '../story-section';
+
 const meta = {
   title: 'Components/Buttons/Copy Button',
   component: CopyButton,
@@ -32,13 +34,16 @@ export const Default: Story = {
   args: {
     value: 'Default copy button',
   },
+  render: args => (
+    <StorySection title="Default">
+      <CopyButton {...args} />
+    </StorySection>
+  ),
 };
 
 export const UsageExamples: Story = {
   render: () => (
-    <div className="flex flex-col gap-3">
-      <h3 className="text-lg font-semibold">Usage Examples</h3>
-
+    <StorySection title="Usage examples">
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <span className="font-medium">Patient ID:</span>
@@ -64,6 +69,6 @@ export const UsageExamples: Story = {
           <CopyButton value="Quick copy test" successDuration={1000} />
         </div>
       </div>
-    </div>
+    </StorySection>
   ),
 };

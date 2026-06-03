@@ -5,6 +5,8 @@ import { SavedFilterType, VepImpact } from '@/api/api';
 import ConsequenceIndicator from '@/components/base/indicators/consequence-indicator';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
@@ -65,13 +67,15 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <div className="flex flex-col gap-2">
-      {Object.keys(VepImpact).map(impact => (
-        <>
-          <ConsequenceIndicator size="sm" vepImpact={impact as VepImpact} consequence={`consequence-${impact}`} />
-          <ConsequenceIndicator size="lg" vepImpact={impact as VepImpact} consequence={`consequence-${impact}`} />
-        </>
-      ))}
-    </div>
+    <StorySection title="Consequence indicator">
+      <div className="flex flex-col gap-2">
+        {Object.keys(VepImpact).map(impact => (
+          <div key={impact}>
+            <ConsequenceIndicator size="sm" vepImpact={impact as VepImpact} consequence={`consequence-${impact}`} />
+            <ConsequenceIndicator size="lg" vepImpact={impact as VepImpact} consequence={`consequence-${impact}`} />
+          </div>
+        ))}
+      </div>
+    </StorySection>
   ),
 };

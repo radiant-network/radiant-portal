@@ -5,6 +5,8 @@ import { SavedFilterType } from '@/api/api';
 import DocumentSize from '@/components/base/information/document-size';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
@@ -65,11 +67,13 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <div>
-      {[1, 10, 1000000, 10000000, 1000000000, 10000000000, 1000000000000, 10000000000000].map(value => (
-        <DocumentSize key={value} value={value} />
-      ))}
-      <DocumentSize value={undefined} />
-    </div>
+    <StorySection title="Document size">
+      <div>
+        {[1, 10, 1000000, 10000000, 1000000000, 10000000000, 1000000000000, 10000000000000].map(value => (
+          <DocumentSize key={value} value={value} />
+        ))}
+        <DocumentSize value={undefined} />
+      </div>
+    </StorySection>
   ),
 };

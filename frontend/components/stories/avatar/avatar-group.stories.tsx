@@ -4,6 +4,8 @@ import { UserIcon } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarImage } from '@/components/base/shadcn/avatar';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base/shadcn/hover-card';
 
+import { StoryLabel, StorySection } from '../story-section';
+
 import { avatarSizes } from './utils';
 
 const meta = {
@@ -35,9 +37,9 @@ const people = [
 // Composition examples grouped together — each section keeps its former story title as a label.
 export const Variants: Story = {
   render: () => (
-    <div className="flex flex-col gap-8">
-      <div>
-        <div className="mb-3 text-sm font-semibold">Two avatars</div>
+    <StorySection title="Variants">
+      <div className="space-y-2">
+        <StoryLabel>Two avatars</StoryLabel>
         <AvatarGroup size="md">
           {people.slice(0, 2).map(p => (
             <Avatar key={p.initials}>
@@ -47,8 +49,8 @@ export const Variants: Story = {
         </AvatarGroup>
       </div>
 
-      <div>
-        <div className="mb-3 text-sm font-semibold">With overflow</div>
+      <div className="space-y-2">
+        <StoryLabel>With overflow</StoryLabel>
         <AvatarGroup size="md">
           {people.slice(0, 3).map(p => (
             <Avatar key={p.initials}>
@@ -59,8 +61,8 @@ export const Variants: Story = {
         </AvatarGroup>
       </div>
 
-      <div>
-        <div className="mb-3 text-sm font-semibold">Mixed fallback types</div>
+      <div className="space-y-2">
+        <StoryLabel>Mixed fallback types</StoryLabel>
         <AvatarGroup size="md">
           <Avatar>
             <AvatarImage src={IMAGE_SRC} alt="@shadcn" />
@@ -77,8 +79,8 @@ export const Variants: Story = {
         </AvatarGroup>
       </div>
 
-      <div>
-        <div className="mb-3 text-sm font-semibold">Mixed colors</div>
+      <div className="space-y-2">
+        <StoryLabel>Mixed colors</StoryLabel>
         <AvatarGroup size="md">
           {people.map(p => (
             <Avatar key={p.initials}>
@@ -87,17 +89,19 @@ export const Variants: Story = {
           ))}
         </AvatarGroup>
       </div>
-    </div>
+    </StorySection>
   ),
 };
 
 // All 7 sizes — one row per size. The group propagates size to its avatars and the count.
 export const Sizes: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
+    <StorySection title="Sizes">
       {avatarSizes.map(size => (
         <div key={size} className="flex items-center gap-4">
-          <span className="w-10 text-sm font-semibold">{size}</span>
+          <div className="w-10">
+            <StoryLabel>{size}</StoryLabel>
+          </div>
           <AvatarGroup size={size}>
             {people.slice(0, 3).map(p => (
               <Avatar key={p.initials}>
@@ -108,62 +112,64 @@ export const Sizes: Story = {
           </AvatarGroup>
         </div>
       ))}
-    </div>
+    </StorySection>
   ),
 };
 
 // Hover composition: at the group level, and on an individual avatar inside a group.
 export const WithHoverCard: Story = {
   render: () => (
-    <div className="flex items-center gap-10">
-      {/* Group-level */}
-      <div>
-        <div className="pb-4 text-sm font-semibold">Hover card on group level</div>
-        <HoverCard>
-          <HoverCardTrigger asChild>
-            <AvatarGroup size="md">
-              {people.slice(0, 3).map(p => (
-                <Avatar key={p.initials}>
-                  <AvatarFallback color={p.color}>{p.initials}</AvatarFallback>
-                </Avatar>
-              ))}
-              <AvatarGroupCount>+{people.length - 3}</AvatarGroupCount>
-            </AvatarGroup>
-          </HoverCardTrigger>
-          <HoverCardContent className="w-64">
-            <div className="flex flex-col gap-2">
-              <span className="text-sm font-semibold">{people.length} members</span>
-              {people.map(p => (
-                <div key={p.initials} className="flex items-center gap-2">
-                  <Avatar size="2xs">
+    <StorySection title="With hover card">
+      <div className="flex items-start gap-10">
+        {/* Group-level */}
+        <div className="space-y-2">
+          <StoryLabel>Hover card on group level</StoryLabel>
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <AvatarGroup size="md">
+                {people.slice(0, 3).map(p => (
+                  <Avatar key={p.initials}>
                     <AvatarFallback color={p.color}>{p.initials}</AvatarFallback>
                   </Avatar>
-                  <span className="text-sm">{p.name}</span>
-                </div>
-              ))}
-            </div>
-          </HoverCardContent>
-        </HoverCard>
-      </div>
+                ))}
+                <AvatarGroupCount>+{people.length - 3}</AvatarGroupCount>
+              </AvatarGroup>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-64">
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-semibold">{people.length} members</span>
+                {people.map(p => (
+                  <div key={p.initials} className="flex items-center gap-2">
+                    <Avatar size="2xs">
+                      <AvatarFallback color={p.color}>{p.initials}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">{p.name}</span>
+                  </div>
+                ))}
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+        </div>
 
-      {/* Per-child */}
-      <div>
-        <div className="pb-4 text-sm font-semibold">Hover card per child</div>
-        <AvatarGroup size="md">
-          {people.slice(0, 3).map(p => (
-            <HoverCard key={p.initials}>
-              <HoverCardTrigger asChild>
-                <Avatar>
-                  <AvatarFallback color={p.color}>{p.initials}</AvatarFallback>
-                </Avatar>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-48">
-                <span className="text-sm font-semibold">{p.name}</span>
-              </HoverCardContent>
-            </HoverCard>
-          ))}
-        </AvatarGroup>
+        {/* Per-child */}
+        <div className="space-y-2">
+          <StoryLabel>Hover card per child</StoryLabel>
+          <AvatarGroup size="md">
+            {people.slice(0, 3).map(p => (
+              <HoverCard key={p.initials}>
+                <HoverCardTrigger asChild>
+                  <Avatar>
+                    <AvatarFallback color={p.color}>{p.initials}</AvatarFallback>
+                  </Avatar>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-48">
+                  <span className="text-sm font-semibold">{p.name}</span>
+                </HoverCardContent>
+              </HoverCard>
+            ))}
+          </AvatarGroup>
+        </div>
       </div>
-    </div>
+    </StorySection>
   ),
 };

@@ -12,6 +12,8 @@ import {
   CommandSeparator,
 } from '@/components/base/shadcn/command';
 
+import { StorySection } from '../story-section';
+
 const meta = {
   title: 'Components/Commands/Command',
   args: {},
@@ -24,29 +26,31 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <Command className="rounded-lg border shadow-md md:min-w-[450px]">
-      <CommandInput placeholder="Type a command or search..." />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup>
-          <CommandItem>
-            <User />
-            <span>CommandItem</span>
-          </CommandItem>
-          <CommandItem disabled>
-            <span>CommandItem:Disabled</span>
-          </CommandItem>
-        </CommandGroup>
-        <CommandSeparator />
-        <CommandGroup>
-          <CommandItemCheckbox>
-            <span>CommandItemCheckbox</span>
-          </CommandItemCheckbox>
-          <CommandItemCheckbox disabled>
-            <span>CommandItemCheckbox:disabled</span>
-          </CommandItemCheckbox>
-        </CommandGroup>
-      </CommandList>
-    </Command>
+    <StorySection title="Default">
+      <Command className="rounded-lg border shadow-md md:min-w-[450px]">
+        <CommandInput placeholder="Type a command or search..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup>
+            <CommandItem>
+              <User />
+              <span>CommandItem</span>
+            </CommandItem>
+            <CommandItem disabled>
+              <span>CommandItem:Disabled</span>
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup>
+            <CommandItemCheckbox>
+              <span>CommandItemCheckbox</span>
+            </CommandItemCheckbox>
+            <CommandItemCheckbox disabled>
+              <span>CommandItemCheckbox:disabled</span>
+            </CommandItemCheckbox>
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </StorySection>
   ),
 };

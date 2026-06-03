@@ -5,6 +5,8 @@ import { VariantProps } from 'tailwind-variants';
 import { toggleVariants } from '@/components/base/shadcn/toggle';
 import { ToggleGroup, ToggleGroupItem } from '@/components/base/shadcn/toggle-group';
 
+import { StoryLabel, StorySection, StoryShowcase } from '../story-section';
+
 const sizes: NonNullable<VariantProps<typeof toggleVariants>['size']>[] = ['sm', 'default', 'lg'];
 
 const meta = {
@@ -19,11 +21,10 @@ type Story = StoryObj<typeof meta>;
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex gap-26">
+    <StoryShowcase direction="row">
       {sizes.map(size => (
-        <div key={size} className="flex flex-col items-center gap-3">
-          <div className="text-sm font-bold text-muted-foreground mb-4">Size: {size}</div>
-          <span className="text-muted-foreground text-sm uppercase">Single type</span>
+        <StorySection key={size} title={`Size ${size}`} align="center">
+          <StoryLabel>Single type</StoryLabel>
           <ToggleGroup type="single" size={size} variant="outline" spacing={2} defaultValue="bold">
             <ToggleGroupItem value="bold" aria-label="Bold">
               <Bold />
@@ -70,7 +71,7 @@ export const AllVariants: Story = {
             </ToggleGroup>
           </div>
 
-          <span className="text-muted-foreground text-sm uppercase">Multiple type</span>
+          <StoryLabel>Multiple type</StoryLabel>
           <ToggleGroup type="multiple" size={size} variant="outline" spacing={2} defaultValue={['bold', 'italic']}>
             <ToggleGroupItem value="bold" aria-label="Bold">
               <Bold />
@@ -82,8 +83,8 @@ export const AllVariants: Story = {
               <Underline />
             </ToggleGroupItem>
           </ToggleGroup>
-        </div>
+        </StorySection>
       ))}
-    </div>
+    </StoryShowcase>
   ),
 };

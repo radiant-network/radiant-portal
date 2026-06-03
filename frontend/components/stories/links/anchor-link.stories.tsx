@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
+import { StorySection, StoryShowcase } from '../story-section';
+
 import { anchorLinkSizes, anchorLinkVariants } from './utils';
 
 const meta = {
@@ -33,21 +35,24 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: {},
-  render: args => <AnchorLink {...args}>Anchor Link</AnchorLink>,
-};
+export const AllVariants: Story = {
+  render: () => (
+    <StoryShowcase>
+      <StorySection title="Default">
+        <AnchorLink external>Anchor Link</AnchorLink>
+      </StorySection>
 
-export const Secondary: Story = {
-  args: {
-    variant: 'secondary',
-  },
-  render: args => <AnchorLink {...args}>Anchor Link</AnchorLink>,
-};
+      <StorySection title="Secondary">
+        <AnchorLink external variant="secondary">
+          Anchor Link
+        </AnchorLink>
+      </StorySection>
 
-export const Mono: Story = {
-  args: {
-    mono: true,
-  },
-  render: args => <AnchorLink {...args}>Anchor Link</AnchorLink>,
+      <StorySection title="Mono">
+        <AnchorLink external mono>
+          Anchor Link
+        </AnchorLink>
+      </StorySection>
+    </StoryShowcase>
+  ),
 };

@@ -5,6 +5,8 @@ import { Calendar, Database, FileText, Filter, Settings, Users } from 'lucide-re
 import FilterButton, { IFilterButtonItem, PopoverSize } from '@/components/base/buttons/filter-button';
 import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 
+import { StorySection, StoryShowcase } from '../story-section';
+
 const meta: Meta<typeof FilterButton> = {
   title: 'Components/Buttons/Filter Button',
   component: FilterButton,
@@ -114,41 +116,41 @@ const InteractiveFilterButton = ({ initialSelected = [], ...props }: any) => {
 
 export const PopOverSize: Story = {
   render: () => (
-    <div className="p-4 flex gap-2">
-      {['xs', 'sm', 'md', 'lg'].map(size => (
-        <FilterButton
-          key={size}
-          popoverSize={size as PopoverSize}
-          label={`size ${size}`}
-          options={basicOptions}
-          selected={[]}
-          onSelect={function (_selected: string[]): void {
-            throw new Error('Function not implemented.');
-          }}
-        />
-      ))}
-    </div>
+    <StorySection title="Popover sizes">
+      <div className="flex gap-2">
+        {['xs', 'sm', 'md', 'lg'].map(size => (
+          <FilterButton
+            key={size}
+            popoverSize={size as PopoverSize}
+            label={`size ${size}`}
+            options={basicOptions}
+            selected={[]}
+            onSelect={function (_selected: string[]): void {
+              throw new Error('Function not implemented.');
+            }}
+          />
+        ))}
+      </div>
+    </StorySection>
   ),
 };
 
 export const WithCheckboxList: Story = {
   render: () => (
-    <div className="p-4">
-      <h3 className="mb-4 text-lg font-semibold">Basic Filter with Checkboxes</h3>
+    <StorySection title="Basic filter with checkboxes">
       <InteractiveFilterButton
         label="Status"
         options={basicOptions}
         placeholder="Search status..."
-        icon={<Filter className="w-4 h-4" />}
+        icon={<Filter className="size-4" />}
       />
-    </div>
+    </StorySection>
   ),
 };
 
 export const WithLongTextAndTooltips: Story = {
   render: () => (
-    <div className="p-4">
-      <h3 className="mb-4 text-lg font-semibold">Long Text with Tooltips</h3>
+    <StorySection title="Long text with tooltips">
       <InteractiveFilterButton
         label="Medical Conditions"
         options={longTextOptions}
@@ -156,56 +158,52 @@ export const WithLongTextAndTooltips: Story = {
         withTooltip={true}
         icon={<Users className="size-4" />}
       />
-    </div>
+    </StorySection>
   ),
 };
 
 export const WithItemIcons: Story = {
   render: () => (
-    <div className="p-4">
-      <h3 className="mb-4 text-lg font-semibold">Checkbox list with per-item icons</h3>
+    <StorySection title="Checkbox list with per-item icons">
       <InteractiveFilterButton
         label="Type"
         options={iconOptions}
         placeholder="Search type..."
         icon={<Filter className="size-4" />}
       />
-    </div>
+    </StorySection>
   ),
 };
 
 export const WithoutCounts: Story = {
   render: () => (
-    <div className="p-4">
-      <h3 className="mb-4 text-lg font-semibold">Options without counts</h3>
+    <StorySection title="Options without counts">
       <InteractiveFilterButton
         label="Status"
         options={noCountOptions}
         placeholder="Search status..."
         icon={<Filter className="size-4" />}
       />
-    </div>
+    </StorySection>
   ),
 };
 
 export const WithReactNodeLabels: Story = {
   render: () => (
-    <div className="p-4">
-      <h3 className="mb-4 text-lg font-semibold">React node labels (PriorityIndicator)</h3>
+    <StorySection title="React node labels (PriorityIndicator)">
       <InteractiveFilterButton
         label="Priority"
         options={priorityOptions}
         placeholder="Search priority..."
         icon={<Filter className="size-4" />}
       />
-    </div>
+    </StorySection>
   ),
 };
 
 export const WithKeyOnly: Story = {
   render: () => (
-    <div className="p-4">
-      <h3 className="mb-4 text-lg font-semibold">Key display only (no tooltip)</h3>
+    <StorySection title="Key display only (no tooltip)">
       <InteractiveFilterButton
         label="Lab"
         options={labCodeOptions}
@@ -214,14 +212,13 @@ export const WithKeyOnly: Story = {
         showKey
         icon={<Filter className="size-4" />}
       />
-    </div>
+    </StorySection>
   ),
 };
 
 export const WithKeyAndTooltip: Story = {
   render: () => (
-    <div className="p-4">
-      <h3 className="mb-4 text-lg font-semibold">Key display + tooltip (code-based filter)</h3>
+    <StorySection title="Key display + tooltip (code-based filter)">
       <InteractiveFilterButton
         label="Lab"
         options={labCodeOptions}
@@ -231,14 +228,13 @@ export const WithKeyAndTooltip: Story = {
         withTooltip
         icon={<Filter className="size-4" />}
       />
-    </div>
+    </StorySection>
   ),
 };
 
 export const ActionMode: Story = {
   render: () => (
-    <div className="p-4">
-      <h3 className="mb-4 text-lg font-semibold">Action Mode (No Checkboxes)</h3>
+    <StorySection title="Action mode (no checkboxes)">
       <InteractiveFilterButton
         label="Actions"
         options={actionOptions}
@@ -247,25 +243,51 @@ export const ActionMode: Story = {
         placeholder="Search actions..."
         icon={<Settings className="size-4" />}
       />
-    </div>
+    </StorySection>
+  ),
+};
+
+export const WithPreselectedItems: Story = {
+  render: () => (
+    <StorySection title="With preselected items">
+      <InteractiveFilterButton
+        label="Status"
+        options={basicOptions}
+        initialSelected={['option1', 'option3']}
+        placeholder="Search status..."
+        icon={<Filter className="size-4" />}
+      />
+    </StorySection>
+  ),
+};
+
+export const OpenOnAppear: Story = {
+  render: () => (
+    <StorySection title="Open on appear">
+      <InteractiveFilterButton
+        label="Auto Open"
+        options={basicOptions}
+        isOpen={true}
+        placeholder="Search..."
+        icon={<Filter className="size-4" />}
+      />
+    </StorySection>
   ),
 };
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="p-4 space-y-8">
-      <div>
-        <h3 className="mb-4 text-lg font-semibold">Basic Filter with Checkboxes</h3>
+    <StoryShowcase>
+      <StorySection title="Basic filter with checkboxes">
         <InteractiveFilterButton
           label="Status"
           options={basicOptions}
           placeholder="Search status..."
           icon={<Filter className="size-4" />}
         />
-      </div>
+      </StorySection>
 
-      <div>
-        <h3 className="mb-4 text-lg font-semibold">Long Text with Tooltips</h3>
+      <StorySection title="Long text with tooltips">
         <InteractiveFilterButton
           label="Medical Conditions"
           options={longTextOptions}
@@ -273,10 +295,9 @@ export const AllVariants: Story = {
           withTooltip={true}
           icon={<Users className="size-4" />}
         />
-      </div>
+      </StorySection>
 
-      <div>
-        <h3 className="mb-4 text-lg font-semibold">Key display only (no tooltip)</h3>
+      <StorySection title="Key display only (no tooltip)">
         <InteractiveFilterButton
           label="Lab"
           options={labCodeOptions}
@@ -285,10 +306,9 @@ export const AllVariants: Story = {
           showKey
           icon={<Filter className="size-4" />}
         />
-      </div>
+      </StorySection>
 
-      <div>
-        <h3 className="mb-4 text-lg font-semibold">Key display + tooltip (code-based filter)</h3>
+      <StorySection title="Key display + tooltip (code-based filter)">
         <InteractiveFilterButton
           label="Lab"
           options={labCodeOptions}
@@ -298,79 +318,45 @@ export const AllVariants: Story = {
           withTooltip
           icon={<Filter className="size-4" />}
         />
-      </div>
+      </StorySection>
 
-      <div>
-        <h3 className="mb-4 text-lg font-semibold">Checkbox list with per-item icons</h3>
+      <StorySection title="Checkbox list with per-item icons">
         <InteractiveFilterButton
           label="Type"
           options={iconOptions}
           placeholder="Search type..."
           icon={<Filter className="size-4" />}
         />
-      </div>
+      </StorySection>
 
-      <div>
-        <h3 className="mb-4 text-lg font-semibold">Options without counts</h3>
+      <StorySection title="Options without counts">
         <InteractiveFilterButton
           label="Status"
           options={noCountOptions}
           placeholder="Search status..."
           icon={<Filter className="size-4" />}
         />
-      </div>
+      </StorySection>
 
-      <div>
-        <h3 className="mb-4 text-lg font-semibold">React node labels (PriorityIndicator)</h3>
+      <StorySection title="React node labels (PriorityIndicator)">
         <InteractiveFilterButton
           label="Priority"
           options={priorityOptions}
           placeholder="Search priority..."
           icon={<Filter className="size-4" />}
         />
-      </div>
+      </StorySection>
 
-      <div>
-        <h3 className="mb-4 text-lg font-semibold">Action Mode</h3>
+      <StorySection title="Action mode">
         <InteractiveFilterButton
           label="Actions"
           options={actionOptions}
           actionMode={true}
           closeOnSelect={true}
           placeholder="Search actions..."
-          icon={<Settings className="w-4 h-4" />}
+          icon={<Settings className="size-4" />}
         />
-      </div>
-    </div>
-  ),
-};
-
-export const WithPreselectedItems: Story = {
-  render: () => (
-    <div className="p-4">
-      <h3 className="mb-4 text-lg font-semibold">With Preselected Items</h3>
-      <InteractiveFilterButton
-        label="Status"
-        options={basicOptions}
-        initialSelected={['option1', 'option3']}
-        placeholder="Search status..."
-        icon={<Filter className="size-4" />}
-      />
-    </div>
-  ),
-};
-
-export const OpenOnAppear: Story = {
-  render: () => (
-    <div className="p-4">
-      <h3 className="mb-4 text-lg font-semibold">Open on Appear</h3>
-      <InteractiveFilterButton
-        label="Auto Open"
-        options={basicOptions}
-        isOpen={true}
-        placeholder="Search..."
-        icon={<Filter className="size-4" />}
-      />
-    </div>
+      </StorySection>
+    </StoryShowcase>
   ),
 };

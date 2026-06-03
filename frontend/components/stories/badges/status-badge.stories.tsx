@@ -5,6 +5,8 @@ import { SavedFilterType } from '@/api/api';
 import StatusBadge, { Status } from '@/components/base/badges/status-badge';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
@@ -68,10 +70,12 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {},
   render: _args => (
-    <div className="flex gap-2">
-      {['draft', 'submitted', 'revoke', 'in_progress', 'completed', 'incomplete', 'unknown'].map((status, index) => (
-        <StatusBadge key={index} status={status as Status} />
-      ))}
-    </div>
+    <StorySection title="Default">
+      <div className="flex gap-2">
+        {['draft', 'submitted', 'revoke', 'in_progress', 'completed', 'incomplete', 'unknown'].map((status, index) => (
+          <StatusBadge key={index} status={status as Status} />
+        ))}
+      </div>
+    </StorySection>
   ),
 };

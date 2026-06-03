@@ -5,6 +5,8 @@ import { SavedFilterType } from '@/api/api';
 import CollapsibleCard from '@/components/base/cards/collapsible-card';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
@@ -82,5 +84,11 @@ export const Default: Story = {
       </p>
     ),
   },
-  render: args => <CollapsibleCard {...args} />,
+  render: args => (
+    <StorySection title="Default">
+      <div className="w-full">
+        <CollapsibleCard {...args} />
+      </div>
+    </StorySection>
+  ),
 };

@@ -5,8 +5,8 @@ import { generateBooleanData, generateMultiSelectData, generateSortedAdvancedDat
 export const occurrenceListApi = `api/occurrences/germline/:type/:case_id/:seq_id/list`;
 export const occurrenceAggregateApi = `api/occurrences/germline/:type/:case_id/:seq_id/aggregate`;
 export const occurrenceAggregateStatisticApi = `api/occurrences/germline/:type/:case_id/:seq_id/statistics`;
-export const occurrenceGermlineExpandApi = `api/occurrences/germline/:type/:case_id/:seq_id/:locus_id/expanded`;
-export const occurrenceSomaticExpandApi = `api/occurrences/somatic/:type/:case_id/:seq_id/:locus_id/expanded`;
+export const occurrenceGermlineExpandApi = `api/occurrences/germline/:type/:case_id/:seq_id/:task_id/:locus_id/expanded`;
+export const occurrenceSomaticExpandApi = `api/occurrences/somatic/:type/:case_id/:seq_id/:task_id/:locus_id/expanded`;
 
 export type OccurenceHandler = {
   case_id: string;

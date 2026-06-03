@@ -8,6 +8,7 @@ import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/
 import { LoginContext } from '@/components/hooks/use-login';
 
 import { getHTTPMockNotesList, notesListApi } from '../api/api-notes';
+import { StorySection } from '../story-section';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -86,7 +87,11 @@ export const Default: Story = {
       ],
     },
   },
-  render: args => <NotesPopover {...args} />,
+  render: args => (
+    <StorySection title="Default">
+      <NotesPopover {...args} />
+    </StorySection>
+  ),
 };
 
 export const Loading: Story = {
@@ -103,7 +108,11 @@ export const Loading: Story = {
   args: {
     seqId: 2,
   },
-  render: args => <NotesPopover {...args} />,
+  render: args => (
+    <StorySection title="Loading">
+      <NotesPopover {...args} />
+    </StorySection>
+  ),
 };
 
 export const Empty: Story = {
@@ -121,5 +130,9 @@ export const Empty: Story = {
     hasNotes: false,
     seqId: 3,
   },
-  render: args => <NotesPopover {...args} />,
+  render: args => (
+    <StorySection title="Empty">
+      <NotesPopover {...args} />
+    </StorySection>
+  ),
 };

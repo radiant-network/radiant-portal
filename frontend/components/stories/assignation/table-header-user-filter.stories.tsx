@@ -4,6 +4,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TableHeaderUserFilter } from '@/components/base/assignation/user-selection';
 import { AvatarUser } from '@/components/base/avatar';
 
+import { StorySection, StoryShowcase } from '../story-section';
+
 const meta = {
   title: 'Features/Assignation/Table Header User Filter',
   component: TableHeaderUserFilter,
@@ -13,7 +15,6 @@ const meta = {
     onUsersChange: () => {},
   },
   parameters: {
-    layout: 'centered',
     docs: {
       description: {
         component:
@@ -134,120 +135,11 @@ const DefaultComponent = () => {
 };
 
 export const Default: Story = {
-  render: () => <DefaultComponent />,
-};
-
-// Filter with some users pre-selected
-const WithPreselectedUsersComponent = () => {
-  const [selectedUsers, setSelectedUsers] = useState<AvatarUser[]>([mockUsers[0], mockUsers[2]]);
-
-  return (
-    <div style={{ width: '320px' }}>
-      <TableHeaderUserFilter
-        availableUsers={mockUsers}
-        selectedUsers={selectedUsers}
-        onUsersChange={setSelectedUsers}
-        placeholder="Search users..."
-        isOpen={true}
-      />
-    </div>
-  );
-};
-
-export const WithPreselectedUsers: Story = {
-  render: () => <WithPreselectedUsersComponent />,
-};
-
-// Filter with default/current user option
-const WithDefaultUserComponent = () => {
-  const [selectedUsers, setSelectedUsers] = useState<AvatarUser[]>([]);
-
-  return (
-    <div style={{ width: '320px' }}>
-      <TableHeaderUserFilter
-        availableUsers={mockUsers}
-        selectedUsers={selectedUsers}
-        onUsersChange={setSelectedUsers}
-        defaultUser={defaultUser}
-        placeholder="Search users..."
-        isOpen={true}
-      />
-    </div>
-  );
-};
-
-export const WithDefaultUser: Story = {
-  render: () => <WithDefaultUserComponent />,
-};
-
-// Filter with "Not assigned" selected
-const WithNotAssignedComponent = () => {
-  const [selectedUsers, setSelectedUsers] = useState<AvatarUser[]>([
-    { id: 'not-assign', name: 'Not assigned', organization: '' },
-  ]);
-
-  return (
-    <div style={{ width: '320px' }}>
-      <TableHeaderUserFilter
-        availableUsers={mockUsers}
-        selectedUsers={selectedUsers}
-        onUsersChange={setSelectedUsers}
-        placeholder="Search users..."
-        isOpen={true}
-      />
-    </div>
-  );
-};
-
-export const WithNotAssigned: Story = {
-  render: () => <WithNotAssignedComponent />,
-};
-
-// Filter with many users selected showing the staged selection behavior
-const WithManySelectedComponent = () => {
-  const [selectedUsers, setSelectedUsers] = useState<AvatarUser[]>([
-    mockUsers[0],
-    mockUsers[1],
-    mockUsers[2],
-    mockUsers[3],
-  ]);
-
-  return (
-    <div style={{ width: '320px' }}>
-      <TableHeaderUserFilter
-        availableUsers={mockUsers}
-        selectedUsers={selectedUsers}
-        onUsersChange={setSelectedUsers}
-        placeholder="Search users..."
-        isOpen={true}
-      />
-    </div>
-  );
-};
-
-export const WithManySelected: Story = {
-  render: () => <WithManySelectedComponent />,
-};
-
-// Closed filter state
-const ClosedComponent = () => {
-  const [selectedUsers, setSelectedUsers] = useState<AvatarUser[]>([mockUsers[0]]);
-
-  return (
-    <div style={{ width: '320px' }}>
-      <TableHeaderUserFilter
-        availableUsers={mockUsers}
-        selectedUsers={selectedUsers}
-        onUsersChange={setSelectedUsers}
-        placeholder="Search users..."
-        isOpen={false}
-      />
-    </div>
-  );
-};
-
-export const Closed: Story = {
-  render: () => <ClosedComponent />,
+  render: () => (
+    <StorySection title="Default">
+      <DefaultComponent />
+    </StorySection>
+  ),
 };
 
 // Filter with custom placeholder
@@ -268,7 +160,11 @@ const CustomPlaceholderComponent = () => {
 };
 
 export const CustomPlaceholder: Story = {
-  render: () => <CustomPlaceholderComponent />,
+  render: () => (
+    <StorySection title="Custom placeholder">
+      <CustomPlaceholderComponent />
+    </StorySection>
+  ),
 };
 
 // Filter with fewer users to show different list size
@@ -289,7 +185,11 @@ const SmallUserListComponent = () => {
 };
 
 export const SmallUserList: Story = {
-  render: () => <SmallUserListComponent />,
+  render: () => (
+    <StorySection title="Small user list">
+      <SmallUserListComponent />
+    </StorySection>
+  ),
 };
 
 // Interactive demonstration showing the staged selection workflow
@@ -303,36 +203,34 @@ const InteractiveDemoComponent = () => {
   };
 
   return (
-    <div style={{ width: '400px', padding: '20px' }}>
-      <h3 style={{ marginBottom: '10px', fontSize: '16px', fontWeight: '600' }}>Table Header User Filter Demo</h3>
-      <p style={{ marginBottom: '20px', fontSize: '14px', color: '#666' }}>
-        Select users with checkboxes, then click Filter to apply. The Reset button clears all selections.
-      </p>
+    <StorySection
+      title="Table Header User Filter Demo"
+      description="Select users with checkboxes, then click Filter to apply. The Reset button clears all selections."
+    >
+      <div className="w-[400px] space-y-5">
+        <TableHeaderUserFilter
+          availableUsers={mockUsers}
+          selectedUsers={selectedUsers}
+          onUsersChange={handleUsersChange}
+          defaultUser={defaultUser}
+          placeholder="Filter by user..."
+          isOpen={true}
+        />
 
-      <TableHeaderUserFilter
-        availableUsers={mockUsers}
-        selectedUsers={selectedUsers}
-        onUsersChange={handleUsersChange}
-        defaultUser={defaultUser}
-        placeholder="Filter by user..."
-        isOpen={true}
-      />
-
-      {appliedFilters.length > 0 && (
-        <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '6px' }}>
-          <p style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
-            Applied Filters ({appliedFilters.length}):
-          </p>
-          <ul style={{ fontSize: '12px', margin: 0, paddingLeft: '20px' }}>
-            {appliedFilters.map(user => (
-              <li key={user.id}>
-                {user.name} {user.organization && `(${user.organization})`}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
+        {appliedFilters.length > 0 && (
+          <div className="rounded-md bg-muted p-3">
+            <p className="mb-2 text-sm font-semibold">Applied Filters ({appliedFilters.length}):</p>
+            <ul className="ml-5 list-disc text-xs">
+              {appliedFilters.map(user => (
+                <li key={user.id}>
+                  {user.name} {user.organization && `(${user.organization})`}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </StorySection>
   );
 };
 
@@ -350,38 +248,41 @@ export const InteractiveDemo: Story = {
 
 // Component in different container sizes to show responsiveness
 const ResponsiveSizesComponent = () => (
-  <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-    <div style={{ width: '250px' }}>
-      <h4 style={{ fontSize: '14px', marginBottom: '10px' }}>Narrow (250px)</h4>
-      <TableHeaderUserFilter
-        availableUsers={mockUsers.slice(0, 4)}
-        selectedUsers={[]}
-        onUsersChange={() => {}}
-        placeholder="Search..."
-        isOpen={true}
-      />
-    </div>
-    <div style={{ width: '320px' }}>
-      <h4 style={{ fontSize: '14px', marginBottom: '10px' }}>Standard (320px)</h4>
-      <TableHeaderUserFilter
-        availableUsers={mockUsers}
-        selectedUsers={[mockUsers[0]]}
-        onUsersChange={() => {}}
-        placeholder="Search users..."
-        isOpen={true}
-      />
-    </div>
-    <div style={{ width: '400px' }}>
-      <h4 style={{ fontSize: '14px', marginBottom: '10px' }}>Wide (400px)</h4>
-      <TableHeaderUserFilter
-        availableUsers={mockUsers}
-        selectedUsers={[mockUsers[0], mockUsers[2]]}
-        onUsersChange={() => {}}
-        placeholder="Filter by assignee..."
-        isOpen={true}
-      />
-    </div>
-  </div>
+  <StoryShowcase direction="row">
+    <StorySection title="Narrow (250px)">
+      <div className="w-[250px]">
+        <TableHeaderUserFilter
+          availableUsers={mockUsers.slice(0, 4)}
+          selectedUsers={[]}
+          onUsersChange={() => {}}
+          placeholder="Search..."
+          isOpen={true}
+        />
+      </div>
+    </StorySection>
+    <StorySection title="Standard (320px)">
+      <div className="w-[320px]">
+        <TableHeaderUserFilter
+          availableUsers={mockUsers}
+          selectedUsers={[mockUsers[0]]}
+          onUsersChange={() => {}}
+          placeholder="Search users..."
+          isOpen={true}
+        />
+      </div>
+    </StorySection>
+    <StorySection title="Wide (400px)">
+      <div className="w-[400px]">
+        <TableHeaderUserFilter
+          availableUsers={mockUsers}
+          selectedUsers={[mockUsers[0], mockUsers[2]]}
+          onUsersChange={() => {}}
+          placeholder="Filter by assignee..."
+          isOpen={true}
+        />
+      </div>
+    </StorySection>
+  </StoryShowcase>
 );
 
 export const ResponsiveSizes: Story = {

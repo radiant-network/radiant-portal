@@ -5,6 +5,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Checkbox } from '@/components/base/shadcn/checkbox';
 
+import { StoryLabel, StorySection } from '../story-section';
+
 const meta = {
   title: 'Components/Inputs/Checkbox',
   args: {
@@ -19,29 +21,21 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  render: () => {
-    const [checked, setChecked] = useState<CheckedState>(false);
-
-    return <Checkbox checked={checked} onCheckedChange={setChecked} />;
-  },
-};
-
 export const Sizes: Story = {
   render: () => {
     const [checked, setChecked] = useState<CheckedState>(false);
 
     return (
-      <>
-        <div className="p-4">
-          <h3 className="mb-4 text-lg font-semibold">Size: default</h3>
+      <StorySection title="Sizes">
+        <div className="flex flex-col gap-2">
+          <StoryLabel>default</StoryLabel>
           <Checkbox size="default" checked={checked} onCheckedChange={setChecked} />
         </div>
-        <div className="p-4">
-          <h3 className="mb-4 text-lg font-semibold">Size: xs</h3>
+        <div className="flex flex-col gap-2">
+          <StoryLabel>xs</StoryLabel>
           <Checkbox size="xs" checked={checked} onCheckedChange={setChecked} />
         </div>
-      </>
+      </StorySection>
     );
   },
 };

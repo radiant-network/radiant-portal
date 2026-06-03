@@ -11,6 +11,8 @@ import RowSelectionHeader from '@/components/base/data-table/headers/table-row-s
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 import {
   advancedData,
   AdvancedTableMockData,
@@ -262,6 +264,22 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+// Shared full-page wrapper: every story renders the same DataTable scaffold,
+// differing only by its column config.
+function HeadersGroupStory({ args, title }: { args: any; title: string }) {
+  return (
+    <StorySection title={title}>
+      <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+        <Card className="h-auto size-max w-full">
+          <CardContent>
+            <DataTable {...args} />
+          </CardContent>
+        </Card>
+      </div>
+    </StorySection>
+  );
+}
+
 export const Default: Story = {
   args: {
     enableFullscreen: true,
@@ -326,17 +344,7 @@ export const Default: Story = {
     ] as TableColumnDef<TableMockData, any>[],
     defaultColumnSettings: defaultMockColumnSettings,
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <div className="bg-background pt-4">
-            <DataTable {...args} />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <HeadersGroupStory args={args} title="Default" />,
 };
 
 export const WithSubgroups: Story = {
@@ -415,15 +423,7 @@ export const WithSubgroups: Story = {
     ] as TableColumnDef<TableMockData, any>[],
     defaultColumnSettings: defaultMockColumnSettings,
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <HeadersGroupStory args={args} title="With subgroups" />,
 };
 
 export const Advanced: Story = {
@@ -595,15 +595,7 @@ export const Advanced: Story = {
       },
     },
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <HeadersGroupStory args={args} title="Advanced" />,
 };
 
 export const AdvancedWith50users: Story = {
@@ -775,13 +767,5 @@ export const AdvancedWith50users: Story = {
       },
     },
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <HeadersGroupStory args={args} title="Advanced with 50 users" />,
 };

@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import ExpandableList from '@/components/base/list/expandable-list';
 
+import { StoryLabel, StorySection, StoryShowcase } from '../story-section';
+
 const meta = {
   title: 'Components/Lists/Expandable List',
   component: ExpandableList,
@@ -12,29 +14,34 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+const numberItems = [1, 2, 3, 4, 5, 6].map(item => <span key={item}>{item}</span>);
+
+export const AllVariants: Story = {
   args: {
     visibleCount: 3,
-    items: [1, 2, 3, 4, 5, 6].map(item => <span key={item}>{item}</span>),
+    items: numberItems,
     emptyMessage: <>Empty</>,
   },
   render: args => (
-    <div className="flex flex-col gap-8">
-      {(['default', 'md', 'lg'] as const).map(size => (
-        <div key={size}>
-          <span>Size: {size}</span>
-          <ExpandableList size={size} {...args} />
-        </div>
-      ))}
-    </div>
-  ),
-};
+    <StoryShowcase>
+      <StorySection title="Default" description="Shows visibleCount items, then a “See more / See less” toggle.">
+        <ExpandableList {...args} />
+      </StorySection>
 
-export const Empty: Story = {
-  args: {
-    visibleCount: 3,
-    items: [],
-    emptyMessage: <span>List is Empty</span>,
-  },
-  render: args => <ExpandableList {...args} />,
+      <StorySection title="Sizes" description="Size controls the vertical spacing between items.">
+        <div className="flex gap-12">
+          {(['default', 'md', 'lg'] as const).map(size => (
+            <div key={size} className="flex flex-col gap-2">
+              <StoryLabel>{size}</StoryLabel>
+              <ExpandableList size={size} visibleCount={3} items={numberItems} emptyMessage={<>Empty</>} />
+            </div>
+          ))}
+        </div>
+      </StorySection>
+
+      <StorySection title="Empty">
+        <ExpandableList visibleCount={3} items={[]} emptyMessage={<span>List is Empty</span>} />
+      </StorySection>
+    </StoryShowcase>
+  ),
 };

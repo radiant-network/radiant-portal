@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 
+import { StorySection } from '../story-section';
+
 const meta = {
   title: 'Components/Tooltips/Tooltip',
   component: TooltipContent,
@@ -19,29 +21,31 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: args => (
-    <div className="flex flex-col gap-3 justify-center p-24">
-      <div className="flex justify-center">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button color="primary">Hover Me</Button>
-          </TooltipTrigger>
-          <TooltipContent {...args} />
-        </Tooltip>
+    <StorySection title="Tooltip">
+      <div className="flex flex-col gap-3 justify-center p-24">
+        <div className="flex justify-center">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button color="primary">Hover Me</Button>
+            </TooltipTrigger>
+            <TooltipContent {...args} />
+          </Tooltip>
+        </div>
+        <div className="flex justify-center">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button color="primary">Hover Me (long text)</Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce a dolor nisl. Praesent varius vestibulum
+              dui dui vitae aliquam. Suspendisse ac commodo nisl, non congue diam. Aliquam elementum, lectus sit amet
+              viverra pharetra, leo magna iaculis ex, ut volutpat nulla nisl quis lacus. Phasellus vestibulum sit amet
+              justo non facilisis. Proin suscipit condimentum orci eu eleifend. In porttitor libero sed arcu semper, non
+              neque imperdiet.
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
-      <div className="flex justify-center">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button color="primary">Hover Me (long text)</Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce a dolor nisl. Praesent varius vestibulum dui
-            vitae aliquam. Suspendisse ac commodo nisl, non congue diam. Aliquam elementum, lectus sit amet viverra
-            pharetra, leo magna iaculis ex, ut volutpat nulla nisl quis lacus. Phasellus vestibulum sit amet justo non
-            facilisis. Proin suscipit condimentum orci eu eleifend. In porttitor libero sed arcu semper, non porta neque
-            imperdiet.
-          </TooltipContent>
-        </Tooltip>
-      </div>
-    </div>
+    </StorySection>
   ),
 };

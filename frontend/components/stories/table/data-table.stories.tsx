@@ -9,6 +9,8 @@ import DataTable, { TableColumnDef } from '@/components/base/data-table/data-tab
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 import { data, mockColumns, mockDefaultColumnSettings, TableMockData } from './table-mock';
 
 const columnHelper = createColumnHelper<TableMockData>();
@@ -82,6 +84,22 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+// Shared full-page wrapper: every story renders the same DataTable scaffold,
+// differing only by args / state.
+function DataTableStory({ args, title, description }: { args: any; title: string; description?: string }) {
+  return (
+    <StorySection title={title} description={description}>
+      <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+        <Card className="h-auto size-max w-full">
+          <CardContent>
+            <DataTable {...args} />
+          </CardContent>
+        </Card>
+      </div>
+    </StorySection>
+  );
+}
+
 export const Loading: Story = {
   args: {
     loadingStates: {
@@ -89,15 +107,7 @@ export const Loading: Story = {
       total: true,
     },
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <DataTableStory args={args} title="Loading" />,
 };
 
 export const Empty: Story = {
@@ -108,15 +118,7 @@ export const Empty: Story = {
     },
     data: [],
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <DataTableStory args={args} title="Empty" />,
 };
 
 export const Error: Story = {
@@ -128,15 +130,7 @@ export const Error: Story = {
     data: [],
     hasError: true,
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <DataTableStory args={args} title="Error" />,
 };
 
 export const Default: Story = {
@@ -145,15 +139,7 @@ export const Default: Story = {
     enableFullscreen: true,
     enableColumnOrdering: true,
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <DataTableStory args={args} title="Default" />,
 };
 
 export const Fullscreen: Story = {
@@ -161,16 +147,11 @@ export const Fullscreen: Story = {
     enableFullscreen: true,
   },
   render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <span>
-            <i>Use &quot;Open in new canvas&quot; button at the top right of the screen a better preview</i>
-          </span>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
+    <DataTableStory
+      args={args}
+      title="Fullscreen"
+      description="Use the “Open in new canvas” button at the top right of the screen for a better preview."
+    />
   ),
 };
 
@@ -181,15 +162,7 @@ export const LessThan10Results: Story = {
     enableFullscreen: true,
     enableColumnOrdering: true,
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <DataTableStory args={args} title="Less than 10 results" />,
 };
 
 export const DataTableFiltersAndLessThan10Results: Story = {
@@ -201,45 +174,21 @@ export const DataTableFiltersAndLessThan10Results: Story = {
     enableColumnOrdering: true,
     tableIndexResultPosition: 'bottom',
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <DataTableStory args={args} title="Filters + less than 10 results" />,
 };
 
 export const PaginationHidden: Story = {
   args: {
     pagination: { type: 'hidden' },
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <DataTableStory args={args} title="Pagination hidden" />,
 };
 
 export const PaginationLocale: Story = {
   args: {
     pagination: { type: 'locale', state: { pageIndex: 0, pageSize: 5 } },
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <DataTableStory args={args} title="Pagination locale" />,
 };
 
 export const GroupBy: Story = {
@@ -286,18 +235,7 @@ export const GroupBy: Story = {
       }),
     ] as TableColumnDef<TableMockData, any>[],
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <span>
-            You can group by <b>status</b>
-          </span>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <DataTableStory args={args} title="Group by" description="You can group by status." />,
 };
 
 export const Footer: Story = {
@@ -333,13 +271,5 @@ export const Footer: Story = {
       }),
     ],
   },
-  render: args => (
-    <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
-      <Card className="h-auto size-max w-full">
-        <CardContent>
-          <DataTable {...args} />
-        </CardContent>
-      </Card>
-    </div>
-  ),
+  render: args => <DataTableStory args={args} title="Footer" />,
 };

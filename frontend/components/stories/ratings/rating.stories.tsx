@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import Rating from '@/components/base/rating';
 
+import { StorySection } from '../story-section';
+
 const meta = {
   title: 'Components/Ratings/Rating',
   component: Rating,
@@ -18,5 +20,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {},
-  render: args => <Rating {...args} />,
+  render: args => (
+    <StorySection title="Rating">
+      <Rating {...args} />
+    </StorySection>
+  ),
 };

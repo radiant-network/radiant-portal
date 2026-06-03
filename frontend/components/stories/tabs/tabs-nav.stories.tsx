@@ -5,6 +5,8 @@ import { User } from 'lucide-react';
 
 import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
 
+import { StorySection } from '../story-section';
+
 const meta = {
   title: 'Components/Tabs/Tabs Nav',
   component: TabsNav,
@@ -27,24 +29,28 @@ export const Default: Story = {
     const [value, setValue] = useState<Tabs>(Tabs.Tab1);
 
     return (
-      <TabsNav value={value} onValueChange={setValue}>
-        <TabsList>
-          <TabsListItem value={Tabs.Tab1}>
-            <User /> Tab 1
-          </TabsListItem>
-          <TabsListItem value={Tabs.Tab2}>Tab 2</TabsListItem>
-          <TabsListItem value={Tabs.Tab3}>Tab 3</TabsListItem>
-        </TabsList>
-        <TabsContent value={Tabs.Tab1}>
-          <p>Content for Tab 1</p>
-        </TabsContent>
-        <TabsContent value={Tabs.Tab2}>
-          <p>Content for Tab 2</p>
-        </TabsContent>
-        <TabsContent value={Tabs.Tab3}>
-          <p>Content for Tab 3</p>
-        </TabsContent>
-      </TabsNav>
+      <StorySection title="Default">
+        <div className="w-full">
+          <TabsNav value={value} onValueChange={setValue}>
+            <TabsList>
+              <TabsListItem value={Tabs.Tab1}>
+                <User /> Tab 1
+              </TabsListItem>
+              <TabsListItem value={Tabs.Tab2}>Tab 2</TabsListItem>
+              <TabsListItem value={Tabs.Tab3}>Tab 3</TabsListItem>
+            </TabsList>
+            <TabsContent value={Tabs.Tab1}>
+              <p>Content for Tab 1</p>
+            </TabsContent>
+            <TabsContent value={Tabs.Tab2}>
+              <p>Content for Tab 2</p>
+            </TabsContent>
+            <TabsContent value={Tabs.Tab3}>
+              <p>Content for Tab 3</p>
+            </TabsContent>
+          </TabsNav>
+        </div>
+      </StorySection>
     );
   },
 };
@@ -55,26 +61,30 @@ export const Disabled: Story = {
     const [value, setValue] = useState<Tabs>(Tabs.Tab1);
 
     return (
-      <TabsNav value={value} onValueChange={setValue}>
-        <TabsList>
-          <TabsListItem value={Tabs.Tab1}>Tab 1</TabsListItem>
-          <TabsListItem value={Tabs.Tab2} disabled>
-            Tab 2
-          </TabsListItem>
-          <TabsListItem value={Tabs.Tab3} disabled>
-            Tab 3
-          </TabsListItem>
-        </TabsList>
-        <TabsContent value={Tabs.Tab1}>
-          <p>Content for Tab 1</p>
-        </TabsContent>
-        <TabsContent value={Tabs.Tab2}>
-          <p>Content for Tab 2</p>
-        </TabsContent>
-        <TabsContent value={Tabs.Tab3}>
-          <p>Content for Tab 3</p>
-        </TabsContent>
-      </TabsNav>
+      <StorySection title="Disabled">
+        <div className="w-full">
+          <TabsNav value={value} onValueChange={setValue}>
+            <TabsList>
+              <TabsListItem value={Tabs.Tab1}>Tab 1</TabsListItem>
+              <TabsListItem value={Tabs.Tab2} disabled>
+                Tab 2
+              </TabsListItem>
+              <TabsListItem value={Tabs.Tab3} disabled>
+                Tab 3
+              </TabsListItem>
+            </TabsList>
+            <TabsContent value={Tabs.Tab1}>
+              <p>Content for Tab 1</p>
+            </TabsContent>
+            <TabsContent value={Tabs.Tab2}>
+              <p>Content for Tab 2</p>
+            </TabsContent>
+            <TabsContent value={Tabs.Tab3}>
+              <p>Content for Tab 3</p>
+            </TabsContent>
+          </TabsNav>
+        </div>
+      </StorySection>
     );
   },
 };

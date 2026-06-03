@@ -4,6 +4,8 @@ import { action } from 'storybook/actions';
 import List from '@/components/base/list/list';
 import ListItemWithAction from '@/components/base/list/list-item-with-action';
 
+import { StorySection } from '../story-section';
+
 const meta = {
   title: 'Components/Lists/List Item With Action',
   component: ListItemWithAction,
@@ -25,13 +27,15 @@ export const Default: Story = {
     description: 'Description',
   },
   render: args => (
-    <div className="max-w-[450px]">
-      <List bordered>
-        <ListItemWithAction {...args} />
-        <ListItemWithAction {...args} />
-        <ListItemWithAction {...args} />
-        <ListItemWithAction {...args} />
-      </List>
-    </div>
+    <StorySection title="List item with action">
+      <div className="min-w-[450px]">
+        <List bordered>
+          <ListItemWithAction {...args} />
+          <ListItemWithAction {...args} />
+          <ListItemWithAction {...args} />
+          <ListItemWithAction {...args} />
+        </List>
+      </div>
+    </StorySection>
   ),
 };

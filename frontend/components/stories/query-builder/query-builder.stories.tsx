@@ -22,7 +22,33 @@ import {
 } from '../api/api-occurrence';
 import { userPreferenceApi } from '../api/api-user-preference';
 import { httpMockCountApiResponse, httpMockListApiResponse, mockCountApi, mockListApi } from '../api/mock-api';
+import { StorySection } from '../story-section';
 import { mockColumnHelper, mockColumns, TableMockData } from '../table/table-mock';
+
+// Shared render: every story shows the same QueryBuilder + data table, differing only
+// by the mocked SQON state.
+function QueryBuilderStory({ args, title, description }: { args: any; title: string; description?: string }) {
+  return (
+    <StorySection title={title} description={description}>
+      <div className="w-full">
+        <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
+          <QueryBuilderDataTable
+            id="storybook-query-builder"
+            columns={
+              [
+                ...mockColumns,
+                mockColumnHelper.accessor('isActive', {
+                  header: 'Active',
+                }),
+              ] as TableColumnDef<TableMockData, any>[]
+            }
+            defaultColumnSettings={[]}
+          />
+        </QueryBuilder>
+      </div>
+    </StorySection>
+  );
+}
 
 const facetListConfig: PortalConfig = {
   variant_entity: {
@@ -306,23 +332,7 @@ export const Loading: Story = {
     defaultSidebarOpen: true,
   },
   render: args => (
-    <>
-      <div className="bold font-mono text-red">Do a hard refresh to reset loading state</div>
-      <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
-        <QueryBuilderDataTable
-          id="storybook-query-builder"
-          columns={
-            [
-              ...mockColumns,
-              mockColumnHelper.accessor('isActive', {
-                header: 'Active',
-              }),
-            ] as TableColumnDef<TableMockData, any>[]
-          }
-          defaultColumnSettings={[]}
-        />
-      </QueryBuilder>
-    </>
+    <QueryBuilderStory args={args} title="Loading" description="Do a hard refresh to reset the loading state." />
   ),
 };
 
@@ -343,22 +353,7 @@ export const Default: Story = {
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
-  render: args => (
-    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
-      <QueryBuilderDataTable
-        id="storybook-query-builder"
-        columns={
-          [
-            ...mockColumns,
-            mockColumnHelper.accessor('isActive', {
-              header: 'Active',
-            }),
-          ] as TableColumnDef<TableMockData, any>[]
-        }
-        defaultColumnSettings={[]}
-      />
-    </QueryBuilder>
-  ),
+  render: args => <QueryBuilderStory args={args} title="Default" />,
 };
 
 export const Multiselect: Story = {
@@ -416,22 +411,7 @@ export const Multiselect: Story = {
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
-  render: args => (
-    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
-      <QueryBuilderDataTable
-        id="storybook-query-builder"
-        columns={
-          [
-            ...mockColumns,
-            mockColumnHelper.accessor('isActive', {
-              header: 'Active',
-            }),
-          ] as TableColumnDef<TableMockData, any>[]
-        }
-        defaultColumnSettings={[]}
-      />
-    </QueryBuilder>
-  ),
+  render: args => <QueryBuilderStory args={args} title="Multiselect" />,
 };
 
 export const Boolean: Story = {
@@ -475,22 +455,7 @@ export const Boolean: Story = {
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
-  render: args => (
-    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
-      <QueryBuilderDataTable
-        id="storybook-query-builder"
-        columns={
-          [
-            ...mockColumns,
-            mockColumnHelper.accessor('isActive', {
-              header: 'Active',
-            }),
-          ] as TableColumnDef<TableMockData, any>[]
-        }
-        defaultColumnSettings={[]}
-      />
-    </QueryBuilder>
-  ),
+  render: args => <QueryBuilderStory args={args} title="Boolean" />,
 };
 
 export const Numerical: Story = {
@@ -541,22 +506,7 @@ export const Numerical: Story = {
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
-  render: args => (
-    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
-      <QueryBuilderDataTable
-        id="storybook-query-builder"
-        columns={
-          [
-            ...mockColumns,
-            mockColumnHelper.accessor('isActive', {
-              header: 'Active',
-            }),
-          ] as TableColumnDef<TableMockData, any>[]
-        }
-        defaultColumnSettings={[]}
-      />
-    </QueryBuilder>
-  ),
+  render: args => <QueryBuilderStory args={args} title="Numerical" />,
 };
 
 export const MultiQueries: Story = {
@@ -688,22 +638,7 @@ export const MultiQueries: Story = {
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
-  render: args => (
-    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
-      <QueryBuilderDataTable
-        id="storybook-query-builder"
-        columns={
-          [
-            ...mockColumns,
-            mockColumnHelper.accessor('isActive', {
-              header: 'Active',
-            }),
-          ] as TableColumnDef<TableMockData, any>[]
-        }
-        defaultColumnSettings={[]}
-      />
-    </QueryBuilder>
-  ),
+  render: args => <QueryBuilderStory args={args} title="Multi queries" />,
 };
 
 export const CombinedQueries: Story = {
@@ -814,22 +749,7 @@ export const CombinedQueries: Story = {
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
-  render: args => (
-    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
-      <QueryBuilderDataTable
-        id="storybook-query-builder"
-        columns={
-          [
-            ...mockColumns,
-            mockColumnHelper.accessor('isActive', {
-              header: 'Active',
-            }),
-          ] as TableColumnDef<TableMockData, any>[]
-        }
-        defaultColumnSettings={[]}
-      />
-    </QueryBuilder>
-  ),
+  render: args => <QueryBuilderStory args={args} title="Combined queries" />,
 };
 
 export const SearchFacet: Story = {
@@ -899,27 +819,7 @@ export const SearchFacet: Story = {
     defaultSidebarOpen: true,
   },
   render: args => (
-    <>
-      <div className="flex flex-col gap-2 p-4 mb-4 bg-muted rounded-lg">
-        <div className="font-mono text-sm">
-          <strong>Test genes available:</strong> BRCA1, BRCA2, TP53.
-        </div>
-      </div>
-      <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
-        <QueryBuilderDataTable
-          id="storybook-query-builder"
-          columns={
-            [
-              ...mockColumns,
-              mockColumnHelper.accessor('isActive', {
-                header: 'Active',
-              }),
-            ] as TableColumnDef<TableMockData, any>[]
-          }
-          defaultColumnSettings={[]}
-        />
-      </QueryBuilder>
-    </>
+    <QueryBuilderStory args={args} title="Search facet" description="Test genes available: BRCA1, BRCA2, TP53." />
   ),
 };
 
@@ -999,30 +899,11 @@ export const UploadIdFacet: Story = {
     defaultSidebarOpen: true,
   },
   render: args => (
-    <>
-      <div className="flex flex-col gap-2 p-4 mb-4 bg-muted rounded-lg">
-        <div className="font-mono text-sm">
-          <strong>Test genes available:</strong> BRCA1, BRCA2, TP53, EGFR, PTEN, MYC, KRAS.
-        </div>
-        <div className="text-sm text-muted-foreground">
-          Try uploading a text file with gene names/IDs or paste them in the textarea.
-        </div>
-      </div>
-      <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
-        <QueryBuilderDataTable
-          id="storybook-query-builder"
-          columns={
-            [
-              ...mockColumns,
-              mockColumnHelper.accessor('isActive', {
-                header: 'Active',
-              }),
-            ] as TableColumnDef<TableMockData, any>[]
-          }
-          defaultColumnSettings={[]}
-        />
-      </QueryBuilder>
-    </>
+    <QueryBuilderStory
+      args={args}
+      title="Upload ID facet"
+      description="Test genes available: BRCA1, BRCA2, TP53, EGFR, PTEN, MYC, KRAS. Try uploading a text file with gene names/IDs or paste them in the textarea."
+    />
   ),
 };
 
@@ -1336,20 +1217,5 @@ export const SavedFilters: Story = {
     children: <></>, // unused
     defaultSidebarOpen: true,
   },
-  render: args => (
-    <QueryBuilder appId={args.appId} defaultSidebarOpen={args.defaultSidebarOpen} fetcher={args.fetcher}>
-      <QueryBuilderDataTable
-        id="storybook-query-builder"
-        columns={
-          [
-            ...mockColumns,
-            mockColumnHelper.accessor('isActive', {
-              header: 'Active',
-            }),
-          ] as TableColumnDef<TableMockData, any>[]
-        }
-        defaultColumnSettings={[]}
-      />
-    </QueryBuilder>
-  ),
+  render: args => <QueryBuilderStory args={args} title="Saved filters" />,
 };

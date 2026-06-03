@@ -5,6 +5,8 @@ import { SidebarProvider } from '@/components/base/shadcn/sidebar';
 import { FilterTypes } from '@/components/cores/applications-config';
 import { RangeOperators } from '@/components/cores/sqon';
 
+import { StorySection } from '../story-section';
+
 const meta = {
   title: 'Layout/Sidebar Brand',
   component: SidebarGroups,
@@ -210,5 +212,9 @@ export const Default: Story = {
       },
     },
   },
-  render: args => <SidebarGroups {...args} />,
+  render: args => (
+    <StorySection title="Sidebar brand">
+      <SidebarGroups {...args} />
+    </StorySection>
+  ),
 };
