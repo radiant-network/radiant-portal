@@ -16,8 +16,10 @@ import { fn } from 'storybook/test';
 import MainNavbar from '@/components/base/navbar/main-navbar';
 import { SidebarProvider } from '@/components/base/shadcn/sidebar';
 
+import { StorySection } from '../story-section';
+
 const meta = {
-  title: 'Navbar/Main Navbar',
+  title: 'Layout/Main Navbar',
   component: MainNavbar,
   args: {},
   decorators: [
@@ -111,5 +113,9 @@ export const Default: Story = {
       email: 'olivier.castro-perrier@ssss.gouv.qc.ca',
     },
   },
-  render: args => <MainNavbar {...args} />,
+  render: args => (
+    <StorySection title="Main navbar">
+      <MainNavbar {...args} />
+    </StorySection>
+  ),
 };

@@ -5,6 +5,8 @@ import { SavedFilterType } from '@/api/api';
 import InformationField from '@/components/base/information/information-field';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection, StoryShowcase } from '../story-section';
+
 const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
@@ -45,7 +47,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Informations/InformationField',
+  title: 'Features/Informations/Information Field',
   component: InformationField,
   args: {},
   decorators: [
@@ -63,41 +65,35 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: {
-    label: 'Label',
-  },
-  render: args => <InformationField {...args}>InformationField</InformationField>,
-};
+export const AllVariants: Story = {
+  args: { label: 'Label' },
+  render: () => (
+    <StoryShowcase>
+      <StorySection title="Default">
+        <InformationField label="Label">InformationField</InformationField>
+      </StorySection>
 
-export const WithLabelTooltip: Story = {
-  args: {
-    label: 'Label',
-    labelTooltipText: 'Label Tooltip',
-  },
-  render: args => <InformationField {...args}>InformationField</InformationField>,
-};
+      <StorySection title="With label tooltip">
+        <InformationField label="Label" labelTooltipText="Label Tooltip">
+          InformationField
+        </InformationField>
+      </StorySection>
 
-export const WithTooltipText: Story = {
-  args: {
-    label: 'Label',
-    tooltipText: 'Tooltip Text',
-  },
-  render: args => <InformationField {...args}>InformationField</InformationField>,
-};
+      <StorySection title="With tooltip text">
+        <InformationField label="Label" tooltipText="Tooltip Text">
+          InformationField
+        </InformationField>
+      </StorySection>
 
-export const WithLabelAndTooltipText: Story = {
-  args: {
-    label: 'Label',
-    labelTooltipText: 'Label Tooltip',
-    tooltipText: 'Tooltip Text',
-  },
-  render: args => <InformationField {...args}>InformationField</InformationField>,
-};
+      <StorySection title="With label & tooltip text">
+        <InformationField label="Label" labelTooltipText="Label Tooltip" tooltipText="Tooltip Text">
+          InformationField
+        </InformationField>
+      </StorySection>
 
-export const Empty: Story = {
-  args: {
-    label: 'Label',
-  },
-  render: args => <InformationField {...args}>{undefined}</InformationField>,
+      <StorySection title="Empty">
+        <InformationField label="Label">{undefined}</InformationField>
+      </StorySection>
+    </StoryShowcase>
+  ),
 };

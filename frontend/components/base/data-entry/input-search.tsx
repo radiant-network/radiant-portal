@@ -12,11 +12,20 @@ export type InputSearchProps = InputProps & {
   wrapperClassName?: string;
 };
 
+// Match the search button (height + icon size) to the input height (same scale as inputVariants).
+const buttonClassBySize: Record<string, string> = {
+  default: 'h-9 [&_svg]:size-4',
+  sm: 'h-8 [&_svg]:size-4',
+  xs: 'h-7 [&_svg]:size-3.5',
+  xxs: 'h-6 [&_svg]:size-3',
+};
+
 function InputSearch({
   ref,
   className,
   wrapperClassName,
   type,
+  size,
   onSearch,
   searchButtonProps,
   ...props
@@ -56,6 +65,7 @@ function InputSearch({
     <div className={cn('flex items-center w-full', wrapperClassName)}>
       <Input
         type={type}
+        size={size}
         className={cn('rounded-r-none focus:z-2', className)}
         wrapperClassName="w-full"
         {...props}
@@ -80,7 +90,11 @@ function InputSearch({
         {...searchButtonProps}
         variant="default"
         loading={loading || searchButtonProps?.loading}
-        className={cn('h-9 px-3 shadow-xs rounded-l-none -ml-px hover:z-2', searchButtonProps?.className)}
+        className={cn(
+          'px-3 shadow-xs rounded-l-none -ml-px hover:z-2',
+          buttonClassBySize[size ?? 'default'],
+          searchButtonProps?.className,
+        )}
         onClick={() => handleSearch(value)}
       >
         {!searchButtonProps?.loading && !loading && <SearchIcon />}

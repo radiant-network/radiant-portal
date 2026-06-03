@@ -7,6 +7,8 @@ import { TableColumnDef } from '@/components/base/data-table/data-table';
 import DisplayTable from '@/components/base/data-table/display-table';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 import { data, TableMockData } from './table-mock';
 
 const columnHelper = createColumnHelper<TableMockData>();
@@ -51,7 +53,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Tables/Display Table',
+  title: 'Features/Display Table',
   component: DisplayTable,
   args: {
     data,
@@ -97,21 +99,33 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {},
-  render: args => <DisplayTable {...args} />,
+  render: args => (
+    <StorySection title="Default">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
 };
 
 export const Borderless: Story = {
   args: {
     variant: 'borderless',
   },
-  render: args => <DisplayTable {...args} />,
+  render: args => (
+    <StorySection title="Borderless">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
 };
 
 export const Border: Story = {
   args: {
     variant: 'border',
   },
-  render: args => <DisplayTable {...args} />,
+  render: args => (
+    <StorySection title="Border">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
 };
 
 export const WithHeaderGroups: Story = {
@@ -159,12 +173,20 @@ export const WithHeaderGroups: Story = {
       }),
     ] as TableColumnDef<TableMockData, any>[],
   },
-  render: args => <DisplayTable {...args} />,
+  render: args => (
+    <StorySection title="With header groups">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
 };
 
 export const Empty: Story = {
   args: {
     data: [],
   },
-  render: args => <DisplayTable {...args} />,
+  render: args => (
+    <StorySection title="Empty">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
 };

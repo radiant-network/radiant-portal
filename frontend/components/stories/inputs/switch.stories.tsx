@@ -4,8 +4,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Switch } from '@/components/base/shadcn/switch';
 
+import { StoryLabel, StorySection } from '../story-section';
+
 const meta = {
-  title: 'Inputs/Switch',
+  title: 'Components/Inputs/Switch',
   args: {
     size: 'default',
     checked: false,
@@ -24,16 +26,16 @@ export const Sizes: Story = {
     const [checkedSm, setCheckedSm] = useState(false);
 
     return (
-      <div className="flex flex-col gap-2">
-        <div className="flex gap-2 items-center">
-          <span className="">Default</span>
+      <StorySection title="Sizes">
+        <div className="flex items-center gap-2">
+          <StoryLabel>Default</StoryLabel>
           <Switch size="default" checked={checkedDefault} onCheckedChange={setCheckedDefault} />
         </div>
-        <div className="flex gap-2 items-center">
-          <span className="">Small</span>
+        <div className="flex items-center gap-2">
+          <StoryLabel>Small</StoryLabel>
           <Switch size="sm" checked={checkedSm} onCheckedChange={setCheckedSm} />
         </div>
-      </div>
+      </StorySection>
     );
   },
 };

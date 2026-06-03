@@ -1,13 +1,15 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useState } from 'react';
-import { action } from 'storybook/actions';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { action } from 'storybook/actions';
 
 import MultiSelector from '@/components/base/data-entry/multi-selector/multi-selector';
 import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
 
+import { StorySection } from '../story-section';
+
 const meta = {
-  title: 'Inputs/Multi Selector',
+  title: 'Components/Inputs/Multi Selector',
   component: MultiSelector,
   args: {
     value: [],
@@ -39,20 +41,22 @@ export const Default: Story = {
     const [values, setValues] = useState<string[]>(['Nextjs']);
 
     return (
-      <MultiSelector
-        value={values}
-        onChange={newValues => {
-          setValues(newValues);
-          action('onChange')(newValues);
-        }}
-        className="max-w-[300px]"
-        placeholder="Placeholder"
-        commandProps={{
-          className: 'max-w-[300px]',
-        }}
-        defaultOptions={defaultOptions}
-        hidePlaceholderWhenSelected
-      />
+      <StorySection title="Default">
+        <MultiSelector
+          value={values}
+          onChange={newValues => {
+            setValues(newValues);
+            action('onChange')(newValues);
+          }}
+          className="max-w-[300px]"
+          placeholder="Placeholder"
+          commandProps={{
+            className: 'max-w-[300px]',
+          }}
+          defaultOptions={defaultOptions}
+          hidePlaceholderWhenSelected
+        />
+      </StorySection>
     );
   },
 };
@@ -62,26 +66,28 @@ export const AsyncSearch: Story = {
     const [values, setValues] = useState<string[]>(['Nextjs']);
 
     return (
-      <MultiSelector
-        value={values}
-        onChange={newValues => {
-          setValues(newValues);
-          action('onChange')(newValues);
-        }}
-        onSearch={async searchValue => {
-          action('onSearch')(searchValue);
+      <StorySection title="Async search">
+        <MultiSelector
+          value={values}
+          onChange={newValues => {
+            setValues(newValues);
+            action('onChange')(newValues);
+          }}
+          onSearch={async searchValue => {
+            action('onSearch')(searchValue);
 
-          return new Promise(resolve => {
-            setTimeout(() => resolve(defaultOptions), 1000);
-          });
-        }}
-        debounceDelay={300}
-        className="max-w-[300px]"
-        placeholder="Placeholder"
-        commandProps={{
-          className: 'max-w-[300px]',
-        }}
-      />
+            return new Promise(resolve => {
+              setTimeout(() => resolve(defaultOptions), 1000);
+            });
+          }}
+          debounceDelay={300}
+          className="max-w-[300px]"
+          placeholder="Placeholder"
+          commandProps={{
+            className: 'max-w-[300px]',
+          }}
+        />
+      </StorySection>
     );
   },
 };

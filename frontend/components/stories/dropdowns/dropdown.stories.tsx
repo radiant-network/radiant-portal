@@ -17,8 +17,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/base/shadcn/dropdown-menu';
 
+import { StorySection, StoryShowcase } from '../story-section';
+
 const meta = {
-  title: 'Dropdowns/DropDown Menu',
+  title: 'Components/Dropdowns/Dropdown Menu',
   component: DropdownMenu,
   args: {},
 } satisfies Meta<typeof DropdownMenu>;
@@ -27,83 +29,77 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Defaut: Story = {
-  args: {},
-  render: () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline">
-          Dropdown <ChevronDown />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>Profile</DropdownMenuItem>
-        <DropdownMenuItem>Billing</DropdownMenuItem>
-        <DropdownMenuItem>Team</DropdownMenuItem>
-        <DropdownMenuItem>Subscription</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  ),
-};
-
 type Checked = DropdownMenuCheckboxItemProps['checked'];
 
-export const Checkboxes: Story = {
-  args: {},
+export const AllVariants: Story = {
   render: () => {
     const [showStatusBar, setShowStatusBar] = useState<Checked>(true);
     const [showActivityBar, setShowActivityBar] = useState<Checked>(false);
     const [showPanel, setShowPanel] = useState<Checked>(false);
-
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">
-            Dropdown <ChevronDown />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56">
-          <DropdownMenuLabel>Appearance</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem checked={showStatusBar} onCheckedChange={setShowStatusBar}>
-            Status Bar
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem checked={showActivityBar} onCheckedChange={setShowActivityBar} disabled>
-            Activity Bar
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem checked={showPanel} onCheckedChange={setShowPanel}>
-            Panel
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  },
-};
-
-export const RadioGroup: Story = {
-  args: {},
-  render: () => {
     const [position, setPosition] = useState('bottom');
 
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">
-            Dropdown <ChevronDown />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56">
-          <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-            <DropdownMenuRadioItem value="top">Top</DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="bottom">Bottom</DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="right">Right</DropdownMenuRadioItem>
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <StoryShowcase direction="row">
+        <StorySection title="Default">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Dropdown <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem>Billing</DropdownMenuItem>
+              <DropdownMenuItem>Team</DropdownMenuItem>
+              <DropdownMenuItem>Subscription</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </StorySection>
+
+        <StorySection title="Multiple selection">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Dropdown <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Appearance</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem checked={showStatusBar} onCheckedChange={setShowStatusBar}>
+                Status Bar
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem checked={showActivityBar} onCheckedChange={setShowActivityBar} disabled>
+                Activity Bar
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem checked={showPanel} onCheckedChange={setShowPanel}>
+                Panel
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </StorySection>
+
+        <StorySection title="Single selection">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Dropdown <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                <DropdownMenuRadioItem value="top">Top</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="bottom">Bottom</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="right">Right</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </StorySection>
+      </StoryShowcase>
     );
   },
 };

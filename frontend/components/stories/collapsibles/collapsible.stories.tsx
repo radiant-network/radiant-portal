@@ -6,6 +6,8 @@ import { Button } from '@/components/base/shadcn/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/base/shadcn/collapsible';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
@@ -46,7 +48,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Collapsibles/Collapsible',
+  title: 'Components/Collapsibles/Collapsible',
   component: Collapsible,
   args: {},
   decorators: [
@@ -67,11 +69,13 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {},
   render: args => (
-    <Collapsible {...args}>
-      <CollapsibleTrigger asChild>
-        <Button variant="outline">Trigger</Button>
-      </CollapsibleTrigger>
-      <CollapsibleContent className="flex flex-col gap-2">Content</CollapsibleContent>
-    </Collapsible>
+    <StorySection title="Default">
+      <Collapsible {...args}>
+        <CollapsibleTrigger asChild>
+          <Button variant="outline">Trigger</Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="flex flex-col gap-2">Content</CollapsibleContent>
+      </Collapsible>
+    </StorySection>
   ),
 };

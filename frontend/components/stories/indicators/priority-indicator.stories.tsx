@@ -5,6 +5,8 @@ import { SavedFilterType } from '@/api/api';
 import PriorityIndicator, { PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
@@ -45,7 +47,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Indicators/PriorityIndicator',
+  title: 'Features/Indicators/Priority Indicator',
   component: PriorityIndicator,
   args: {},
   decorators: [
@@ -68,13 +70,15 @@ export const Default: Story = {
     code: 'asap',
   },
   render: () => (
-    <div className="flex flex-col gap-2">
-      {['asap', 'routine', 'stat', 'urgent'].map(code => (
-        <div key={code}>
-          <PriorityIndicator code={code as PriorityIndicatorCode} />
-          <PriorityIndicator code={code as PriorityIndicatorCode} size="sm" />
-        </div>
-      ))}
-    </div>
+    <StorySection title="Priority indicator">
+      <div className="flex flex-col gap-2">
+        {['asap', 'routine', 'stat', 'urgent'].map(code => (
+          <div key={code}>
+            <PriorityIndicator code={code as PriorityIndicatorCode} />
+            <PriorityIndicator code={code as PriorityIndicatorCode} size="sm" />
+          </div>
+        ))}
+      </div>
+    </StorySection>
   ),
 };

@@ -1,10 +1,13 @@
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import PageHeader from '@/components/base/page/page-header';
 import { Users } from 'lucide-react';
 
+import PageHeader from '@/components/base/page/page-header';
+
+import { StorySection } from '../story-section';
+
 const meta = {
-  title: 'Headers/Page-Header',
+  title: 'Layout/Page Header',
   component: PageHeader,
   args: {},
 } satisfies Meta<typeof PageHeader>;
@@ -15,9 +18,13 @@ type Story = StoryObj<typeof meta>;
 
 export const Loading: Story = {
   args: {},
-  render: () => {
-    return <PageHeader />;
-  },
+  render: () => (
+    <StorySection title="Loading">
+      <div className="w-full">
+        <PageHeader />
+      </div>
+    </StorySection>
+  ),
 };
 
 export const Default: Story = {
@@ -50,11 +57,13 @@ export const Default: Story = {
     ],
     description: 'Optional description text…',
   },
-  render: args => {
-    return (
+  render: args => (
+    <StorySection title="Default">
       <BrowserRouter>
-        <PageHeader {...args} />
+        <div className="w-full">
+          <PageHeader {...args} />
+        </div>
       </BrowserRouter>
-    );
-  },
+    </StorySection>
+  ),
 };

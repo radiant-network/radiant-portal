@@ -1,9 +1,11 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useState } from 'react';
-import { action } from 'storybook/actions';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { action } from 'storybook/actions';
 
 import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete';
+
+import { StorySection } from '../story-section';
 
 const FRAMEWORKS: Option[] = [
   {
@@ -41,7 +43,7 @@ const FRAMEWORKS: Option[] = [
 ];
 
 const meta = {
-  title: 'Inputs/Auto Complete',
+  title: 'Components/Inputs/Auto Complete',
   component: AutoComplete,
   args: {
     value: '',
@@ -60,16 +62,18 @@ export const Default: Story = {
     const [value, setValue] = useState<string | undefined>('nest.js');
 
     return (
-      <AutoComplete
-        value={value}
-        onChange={value => {
-          setValue(value);
-          action('onChange')(value);
-        }}
-        className="max-w-[300px]"
-        placeholder="Placeholder"
-        options={FRAMEWORKS}
-      />
+      <StorySection title="Default">
+        <AutoComplete
+          value={value}
+          onChange={value => {
+            setValue(value);
+            action('onChange')(value);
+          }}
+          className="max-w-[300px]"
+          placeholder="Placeholder"
+          options={FRAMEWORKS}
+        />
+      </StorySection>
     );
   },
 };
@@ -92,19 +96,21 @@ export const Async: Story = {
     };
 
     return (
-      <AutoComplete
-        value={value}
-        onChange={value => {
-          setValue(value);
-          action('onChange')(value);
-        }}
-        options={options}
-        loading={loading}
-        onSearch={handleSearch}
-        debounceDelay={300}
-        className="max-w-[300px]"
-        placeholder="Placeholder"
-      />
+      <StorySection title="Async">
+        <AutoComplete
+          value={value}
+          onChange={value => {
+            setValue(value);
+            action('onChange')(value);
+          }}
+          options={options}
+          loading={loading}
+          onSearch={handleSearch}
+          debounceDelay={300}
+          className="max-w-[300px]"
+          placeholder="Placeholder"
+        />
+      </StorySection>
     );
   },
 };

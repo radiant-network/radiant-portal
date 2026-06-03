@@ -8,6 +8,7 @@ import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/
 import { LoginContext } from '@/components/hooks/use-login';
 
 import { getHTTPMockNotesList, notesListApi } from '../api/api-notes';
+import { StorySection } from '../story-section';
 
 const config: PortalConfig = {
   variant_entity: {
@@ -49,7 +50,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Notes/NotesSliderSheet',
+  title: 'Features/Notes/Notes Slider Sheet',
   component: NotesSliderSheet,
   args: {
     caseId: 1,
@@ -85,7 +86,11 @@ export const Default: Story = {
       ],
     },
   },
-  render: args => <NotesSliderSheet {...args} />,
+  render: args => (
+    <StorySection title="Default">
+      <NotesSliderSheet {...args} />
+    </StorySection>
+  ),
 };
 
 export const Loading: Story = {
@@ -102,7 +107,11 @@ export const Loading: Story = {
   args: {
     seqId: 3,
   },
-  render: args => <NotesSliderSheet {...args} />,
+  render: args => (
+    <StorySection title="Loading">
+      <NotesSliderSheet {...args} />
+    </StorySection>
+  ),
 };
 
 export const Empty: Story = {
@@ -119,5 +128,9 @@ export const Empty: Story = {
   args: {
     seqId: 4,
   },
-  render: args => <NotesSliderSheet {...args} />,
+  render: args => (
+    <StorySection title="Empty">
+      <NotesSliderSheet {...args} />
+    </StorySection>
+  ),
 };

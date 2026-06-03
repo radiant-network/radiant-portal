@@ -2,8 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 
+import { StorySection } from '../story-section';
+
 const meta = {
-  title: 'Links/Transcript ID Link',
+  title: 'Components/Links/Transcript ID Link',
   component: TranscriptIdLink,
   args: {
     transcriptId: 'ENST00000367770',
@@ -18,5 +20,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: args => <TranscriptIdLink {...args} />,
+  render: args => (
+    <StorySection title="Transcript ID link">
+      <TranscriptIdLink {...args} />
+    </StorySection>
+  ),
 };

@@ -5,6 +5,8 @@ import { SavedFilterType } from '@/api/api';
 import AnalysisTypeCodeBadge, { AnalysisTypeCode } from '@/components/base/badges/analysis-type-code-badge';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
@@ -45,7 +47,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Badges/Analysis Type Code Badge',
+  title: 'Components/Badges/Analysis Type Code Badge',
   component: AnalysisTypeCodeBadge,
   args: {},
   decorators: [
@@ -66,10 +68,12 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: { code: 'somatic' as AnalysisTypeCode },
   render: _args => (
-    <div className="flex gap-2">
-      {['somatic', 'germline', 'germline_family'].map((code, index) => (
-        <AnalysisTypeCodeBadge key={index} code={code as AnalysisTypeCode} />
-      ))}
-    </div>
+    <StorySection title="Default">
+      <div className="flex gap-2">
+        {['somatic', 'germline', 'germline_family'].map((code, index) => (
+          <AnalysisTypeCodeBadge key={index} code={code as AnalysisTypeCode} />
+        ))}
+      </div>
+    </StorySection>
   ),
 };

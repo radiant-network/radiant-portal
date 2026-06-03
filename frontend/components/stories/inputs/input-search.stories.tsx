@@ -1,13 +1,15 @@
-import { action } from 'storybook/actions';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { action } from 'storybook/actions';
 import { fn } from 'storybook/test';
 
 import InputSearch from '@/components/base/data-entry/input-search';
 
+import { StoryLabel, StorySection } from '../story-section';
+
 import { sizes } from './utils';
 
 const meta = {
-  title: 'Inputs/Input Search',
+  title: 'Components/Inputs/Input Search',
   component: InputSearch,
   args: {
     value: 'Search value',
@@ -22,12 +24,12 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Sizes: Story = {
   render: () => (
-    <div className="flex flex-col gap-2">
+    <StorySection title="Sizes">
       {sizes.map(size => (
-        <div key={size}>
-          <span>{size}</span>
+        <div key={size} className="flex flex-col gap-2">
+          <StoryLabel>{size}</StoryLabel>
           <InputSearch
             size={size}
             onChange={e => action('onChange')(e)}
@@ -44,25 +46,6 @@ export const Default: Story = {
           />
         </div>
       ))}
-    </div>
-  ),
-};
-
-export const Async: Story = {
-  render: () => (
-    <InputSearch
-      onChange={e => action('onChange')(e)}
-      onSearch={value => {
-        action('onSearch')(value);
-        return new Promise(resolve => setTimeout(() => resolve(), 1000));
-      }}
-      className="max-w-[300px]"
-      placeholder="Placeholder"
-      autoFocus
-      searchButtonProps={{
-        color: 'primary',
-        variant: 'default',
-      }}
-    />
+    </StorySection>
   ),
 };

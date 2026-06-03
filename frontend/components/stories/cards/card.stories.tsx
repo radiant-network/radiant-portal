@@ -6,8 +6,10 @@ import { Input } from '@/components/base/shadcn/input';
 import { Label } from '@/components/base/shadcn/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base/shadcn/select';
 
+import { StorySection } from '../story-section';
+
 const meta = {
-  title: 'Cards/Card',
+  title: 'Components/Cards/Card',
   component: Card,
   args: {},
 } satisfies Meta<typeof Card>;
@@ -16,48 +18,50 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Variant: Story = {
   args: {},
   render: () => (
-    <div className="flex flex-col gap-6">
-      {(['default', 'sm'] as const).map(size => (
-        <Card key={size} size={size} className="w-[350px]">
-          <CardHeader size={size}>
-            <CardTitle>
-              Card <span className="bold uppercase">({size})</span>
-            </CardTitle>
-            <CardDescription>Deploy your new project in one-click.</CardDescription>
-          </CardHeader>
-          <CardContent size={size}>
-            <form>
-              <div className="grid w-full items-center gap-4">
-                <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="name">Name</Label>
-                  <Input id="name" placeholder="Name of your project" />
+    <StorySection title="Variant">
+      <div className="flex flex-col gap-6">
+        {(['default', 'sm'] as const).map(size => (
+          <Card key={size} size={size} className="w-[350px]">
+            <CardHeader size={size}>
+              <CardTitle>
+                Card <span className="bold uppercase">({size})</span>
+              </CardTitle>
+              <CardDescription>Deploy your new project in one-click.</CardDescription>
+            </CardHeader>
+            <CardContent size={size}>
+              <form>
+                <div className="grid w-full items-center gap-4">
+                  <div className="flex flex-col space-y-1.5">
+                    <Label htmlFor="name">Name</Label>
+                    <Input id="name" placeholder="Name of your project" />
+                  </div>
+                  <div className="flex flex-col space-y-1.5">
+                    <Label htmlFor="framework">Framework</Label>
+                    <Select>
+                      <SelectTrigger id="framework">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        <SelectItem value="next">Next.js</SelectItem>
+                        <SelectItem value="sveltekit">SvelteKit</SelectItem>
+                        <SelectItem value="astro">Astro</SelectItem>
+                        <SelectItem value="nuxt">Nuxt.js</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="framework">Framework</Label>
-                  <Select>
-                    <SelectTrigger id="framework">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      <SelectItem value="next">Next.js</SelectItem>
-                      <SelectItem value="sveltekit">SvelteKit</SelectItem>
-                      <SelectItem value="astro">Astro</SelectItem>
-                      <SelectItem value="nuxt">Nuxt.js</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </form>
-          </CardContent>
-          <CardFooter size={size}>
-            <Button variant="outline">Cancel</Button>
-            <Button color="primary">Deploy</Button>
-          </CardFooter>
-        </Card>
-      ))}
-    </div>
+              </form>
+            </CardContent>
+            <CardFooter size={size}>
+              <Button variant="outline">Cancel</Button>
+              <Button color="primary">Deploy</Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </StorySection>
   ),
 };

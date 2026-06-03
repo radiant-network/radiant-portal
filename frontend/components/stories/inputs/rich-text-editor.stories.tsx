@@ -9,8 +9,10 @@ import RichTextViewer from '@/components/base/data-entry/rich-text-editor/rich-t
 import { useState } from 'react';
 import { Button } from '@/components/base/shadcn/button';
 
+import { StorySection } from '../story-section';
+
 const meta = {
-  title: 'Inputs/RichText Editor',
+  title: 'Components/Inputs/Rich Text Editor',
   component: RichTextEditor,
   args: {
     value: '<h3>Hello</h3>',
@@ -27,14 +29,16 @@ export const Default: Story = {
   render: args => {
     const { t } = useI18n();
     return (
-      <RichTextEditor
-        value={args.value}
-        onChange={action('onChange')}
-        onBlur={action('onBlur')}
-        placeholder={t('common.editor.placeholder')}
-        wrapperClassName="max-w-[500px]"
-        autoFocus
-      />
+      <StorySection title="Default">
+        <RichTextEditor
+          value={args.value}
+          onChange={action('onChange')}
+          onBlur={action('onBlur')}
+          placeholder={t('common.editor.placeholder')}
+          wrapperClassName="min-w-[500px]"
+          autoFocus
+        />
+      </StorySection>
     );
   },
 };
@@ -43,22 +47,24 @@ export const WithActions: Story = {
   render: args => {
     const { t } = useI18n();
     return (
-      <RichTextEditor
-        value={args.value}
-        onChange={action('onChange')}
-        onBlur={action('onBlur')}
-        placeholder={t('common.editor.placeholder')}
-        wrapperClassName="max-w-[500px]"
-        autoFocus
-        actions={[
-          <Button key="cancel" variant="outline" size="2xs">
-            {t('common.cancel')}
-          </Button>,
-          <Button key="save" size="2xs">
-            {t('common.save')}
-          </Button>,
-        ]}
-      />
+      <StorySection title="With actions">
+        <RichTextEditor
+          value={args.value}
+          onChange={action('onChange')}
+          onBlur={action('onBlur')}
+          placeholder={t('common.editor.placeholder')}
+          wrapperClassName="min-w-[500px]"
+          autoFocus
+          actions={[
+            <Button key="cancel" variant="outline" size="2xs">
+              {t('common.cancel')}
+            </Button>,
+            <Button key="save" size="2xs">
+              {t('common.save')}
+            </Button>,
+          ]}
+        />
+      </StorySection>
     );
   },
 };
@@ -71,10 +77,12 @@ export const Viewer: Story = {
   render: args => {
     const [value, setValue] = useState<string>(args.value ?? '');
     return (
-      <div className="flex w-full gap-6">
-        <RichTextEditor className="w-[800px]" value={value} onChange={value => setValue(value)} />
-        <RichTextViewer value={value} wrapperClassName="max-w-[800px]" autoFocus />
-      </div>
+      <StorySection title="Viewer">
+        <div className="flex w-full gap-6">
+          <RichTextEditor className="w-[800px]" value={value} onChange={value => setValue(value)} />
+          <RichTextViewer value={value} wrapperClassName="max-w-[800px]" autoFocus />
+        </div>
+      </StorySection>
     );
   },
 };

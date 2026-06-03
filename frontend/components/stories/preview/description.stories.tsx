@@ -5,6 +5,8 @@ import { SavedFilterType } from '@/api/api';
 import { DescriptionSection } from '@/components/base/slider/description';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
@@ -45,7 +47,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Preview/Description',
+  title: 'Components/Preview/Description',
   component: DescriptionSection,
   args: {
     title: 'Title',
@@ -68,12 +70,20 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {},
-  render: args => <DescriptionSection {...args} />,
+  render: args => (
+    <StorySection title="Default">
+      <DescriptionSection {...args} />
+    </StorySection>
+  ),
 };
 
 export const Empty: Story = {
   args: {
     values: [],
   },
-  render: args => <DescriptionSection {...args} />,
+  render: args => (
+    <StorySection title="Empty">
+      <DescriptionSection {...args} />
+    </StorySection>
+  ),
 };

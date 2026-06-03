@@ -7,6 +7,8 @@ import { SortBodyOrderEnum } from '@/api/api';
 import DataTable, { createColumnSettings, TableColumnDef } from '@/components/base/data-table/data-table';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 import {
   applicationCellData,
   applicationFirstSetCellColumns,
@@ -45,7 +47,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Tables/Data Table/Cells',
+  title: 'Features/Data Table/Cells',
   component: DataTable,
   args: {
     id: 'storybook',
@@ -157,7 +159,7 @@ export const BaseCell: Story = {
     pagination: { type: 'hidden' },
   },
   render: args => (
-    <>
+    <StorySection title="Base cell">
       <DataTable
         {...args}
         columns={firstSetCellColumns}
@@ -176,7 +178,7 @@ export const BaseCell: Story = {
         data={thirdSetCellData}
         defaultColumnSettings={defaultColumnSettings}
       />
-    </>
+    </StorySection>
   ),
 };
 
@@ -185,11 +187,13 @@ export const ApplicationFeatureCell: Story = {
     pagination: { type: 'hidden' },
   },
   render: args => (
-    <DataTable
-      {...args}
-      columns={applicationFirstSetCellColumns}
-      data={applicationCellData}
-      defaultColumnSettings={defaultColumnSettings}
-    />
+    <StorySection title="Application feature cell">
+      <DataTable
+        {...args}
+        columns={applicationFirstSetCellColumns}
+        data={applicationCellData}
+        defaultColumnSettings={defaultColumnSettings}
+      />
+    </StorySection>
   ),
 };

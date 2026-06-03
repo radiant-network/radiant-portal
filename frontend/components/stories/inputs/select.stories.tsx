@@ -13,6 +13,8 @@ import {
 } from '@/components/base/shadcn/select';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StoryLabel, StorySection } from '../story-section';
+
 import { selectSizes } from './utils';
 
 const config: PortalConfig = {
@@ -55,7 +57,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Inputs/Select',
+  title: 'Components/Inputs/Select',
   component: Select,
   args: {},
   decorators: [
@@ -73,13 +75,13 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Sizes: Story = {
   args: {},
   render: () => (
-    <div className="w-[180px] flex flex-col gap-2">
+    <StorySection title="Sizes">
       {selectSizes.map(size => (
-        <div key={size}>
-          <span>{size}</span>
+        <div key={size} className="flex w-[180px] flex-col gap-2">
+          <StoryLabel>{size}</StoryLabel>
           <Select>
             <SelectTrigger size={size}>
               <SelectValue placeholder="Select a fruit" />
@@ -97,6 +99,6 @@ export const Default: Story = {
           </Select>
         </div>
       ))}
-    </div>
+    </StorySection>
   ),
 };

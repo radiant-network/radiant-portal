@@ -81,7 +81,7 @@ const occurrenceMock = {
 } as SomaticSNVOccurrence;
 
 const meta = {
-  title: 'Sliders/Occurrences/Somatic',
+  title: 'Features/Sliders/Somatic Occurrence',
   component: SomaticOccurrenceSheetContent,
   beforeEach: async () => {
     mocked(useCaseIdFromParam).mockReturnValue(1);

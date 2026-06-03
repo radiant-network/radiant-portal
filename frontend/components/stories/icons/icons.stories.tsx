@@ -35,8 +35,10 @@ import TranscriptManePlusIcon from '@/components/base/icons/transcript-mane-plus
 import TranscriptManeSelectIcon from '@/components/base/icons/transcript-mane-select-icon';
 import { IconType } from '@/components/base/icons/types';
 
+import { StorySection, StoryShowcase } from '../story-section';
+
 const meta = {
-  title: 'Icons/Lucide',
+  title: 'Foundations/Icons',
   component: ElementOperatorIcon,
   args: {
     size: 24,
@@ -52,73 +54,84 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {},
   render: args => (
-    <div className="space-y-3">
-      <div>
-        <h1 className="font-bold text-xl">Icons:</h1>
-        <div>
-          We use Lucide Icons:{' '}
-          <a
-            href="https://lucide.dev/icons/"
-            target="_blank"
-            className="text-primary underline hover:no-underline"
-            rel="noreferrer"
-          >
-            https://lucide.dev/icons/
-          </a>
-        </div>
-      </div>
-      <h1 className="font-bold text-xl">Operators:</h1>
-      <div className="grid grid-cols-12 gap-2">
-        <IconDisplay icon={ElementOperatorIcon} title="Element" args={args} />
-        <IconDisplay icon={EqualOperatorIcon} title="Equal" args={args} />
-        <IconDisplay icon={GreaterThanOperatorIcon} title="Greater Than" args={args} />
-        <IconDisplay icon={GreaterThanOrEqualOperatorIcon} title="Grater Than Or Equal" args={args} />
-        <IconDisplay icon={LessThanOperatorIcon} title="Less Than" args={args} />
-        <IconDisplay icon={LessThanOrEqualOperatorIcon} title="Less Than Or Equal" args={args} />
-        <IconDisplay icon={NotInOperatorIcon} title="Not In" args={args} />
-      </div>
-      <h1 className="font-bold text-xl">Shapes:</h1>
-      <div className="grid grid-cols-12 gap-2">
-        <IconDisplay icon={ShapeTriangleUpIcon} title="Triangle Up" args={args} />
-        <IconDisplay icon={ShapeTriangleDownIcon} title="Triangle Down" args={args} />
-        <IconDisplay icon={ShapeCircleIcon} title="Circle" args={args} />
-        <IconDisplay icon={ShapeDonutIcon} title="Donut" args={args} />
-        <IconDisplay icon={ShapeSquareIcon} title="Square" args={args} />
-      </div>
-      <h1 className="font-bold text-xl">Transcript:</h1>
-      <div className="grid grid-cols-12 gap-2">
-        <IconDisplay icon={TranscriptCanonicalIcon} title="Canonical" args={args} />
-        <IconDisplay icon={TranscriptManePlusIcon} title="Mane Plus" args={args} />
-        <IconDisplay icon={TranscriptManeSelectIcon} title="Mane Select" args={args} />
-      </div>
-      <h1 className="font-bold text-xl">Pedigree:</h1>
-      <div className="grid grid-cols-12 gap-2">
-        <IconDisplay icon={PedigreeMaleAffectedIcon} title="Male Affected" args={args} />
-        <IconDisplay icon={PedigreeMaleNotAffectedIcon} title="Male Not Affected" args={args} />
-        <IconDisplay icon={PedigreeMaleCarrierIcon} title="Male Carrier" args={args} />
-        <IconDisplay icon={PedigreeMaleDeceasedIcon} title="Male Deceased" args={args} />
-        <IconDisplay icon={PedigreeMaleProbandIcon} title="Male Proband" args={args} />
-      </div>
-      <div className="grid grid-cols-12 gap-2">
-        <IconDisplay icon={PedigreeFemaleAffectedIcon} title="Female Affected" args={args} />
-        <IconDisplay icon={PedigreeFemaleNotAffectedIcon} title="Female Not Affected" args={args} />
-        <IconDisplay icon={PedigreeFemaleCarrierIcon} title="Female Carrier" args={args} />
-        <IconDisplay icon={PedigreeFemaleDeceasedIcon} title="Female Deceased" args={args} />
-        <IconDisplay icon={PedigreeFemaleProbandIcon} title="Female Proband" args={args} />
-      </div>
-      <div className="grid grid-cols-12 gap-2">
-        <IconDisplay icon={PedigreeUnknownAffectedIcon} title="Unknown Affected" args={args} />
-        <IconDisplay icon={PedigreeUnknownNotAffectedIcon} title="Unknown Not Affected" args={args} />
-        <IconDisplay icon={PedigreeUnknownCarrierIcon} title="Unknown Carrier" args={args} />
-        <IconDisplay icon={PedigreeUnknownDeceasedIcon} title="Unknown Deceased" args={args} />
-        <IconDisplay icon={PedigreeUnknownProbandIcon} title="Unknown Proband" args={args} />
-      </div>
-      <h1 className="font-bold text-xl">Gene Overlap:</h1>
-      <div className="grid grid-cols-12 gap-2">
-        <IconDisplay icon={GeneOverlapFullGeneIcon} title="Full Gene" args={args} />
-        <IconDisplay icon={GeneOverlapPartialIcon} title="Partial" args={args} />
-        <IconDisplay icon={GeneOverlapFullCNVIcon} title="Full CNV" args={args} />
-      </div>
+    <div className="space-y-6">
+      <p className="text-sm text-muted-foreground">
+        We use Lucide Icons:{' '}
+        <a
+          href="https://lucide.dev/icons/"
+          target="_blank"
+          className="text-primary underline hover:no-underline"
+          rel="noreferrer"
+        >
+          https://lucide.dev/icons/
+        </a>
+      </p>
+
+      <StoryShowcase>
+        <StorySection title="Operators">
+          <div className="grid grid-cols-12 gap-2">
+            <IconDisplay icon={ElementOperatorIcon} title="Element" args={args} />
+            <IconDisplay icon={EqualOperatorIcon} title="Equal" args={args} />
+            <IconDisplay icon={GreaterThanOperatorIcon} title="Greater Than" args={args} />
+            <IconDisplay icon={GreaterThanOrEqualOperatorIcon} title="Greater Than Or Equal" args={args} />
+            <IconDisplay icon={LessThanOperatorIcon} title="Less Than" args={args} />
+            <IconDisplay icon={LessThanOrEqualOperatorIcon} title="Less Than Or Equal" args={args} />
+            <IconDisplay icon={NotInOperatorIcon} title="Not In" args={args} />
+          </div>
+        </StorySection>
+
+        <StorySection title="Shapes">
+          <div className="grid grid-cols-12 gap-2">
+            <IconDisplay icon={ShapeTriangleUpIcon} title="Triangle Up" args={args} />
+            <IconDisplay icon={ShapeTriangleDownIcon} title="Triangle Down" args={args} />
+            <IconDisplay icon={ShapeCircleIcon} title="Circle" args={args} />
+            <IconDisplay icon={ShapeDonutIcon} title="Donut" args={args} />
+            <IconDisplay icon={ShapeSquareIcon} title="Square" args={args} />
+          </div>
+        </StorySection>
+
+        <StorySection title="Transcript">
+          <div className="grid grid-cols-12 gap-2">
+            <IconDisplay icon={TranscriptCanonicalIcon} title="Canonical" args={args} />
+            <IconDisplay icon={TranscriptManePlusIcon} title="Mane Plus" args={args} />
+            <IconDisplay icon={TranscriptManeSelectIcon} title="Mane Select" args={args} />
+          </div>
+        </StorySection>
+
+        <StorySection title="Pedigree">
+          <div className="space-y-2">
+            <div className="grid grid-cols-12 gap-2">
+              <IconDisplay icon={PedigreeMaleAffectedIcon} title="Male Affected" args={args} />
+              <IconDisplay icon={PedigreeMaleNotAffectedIcon} title="Male Not Affected" args={args} />
+              <IconDisplay icon={PedigreeMaleCarrierIcon} title="Male Carrier" args={args} />
+              <IconDisplay icon={PedigreeMaleDeceasedIcon} title="Male Deceased" args={args} />
+              <IconDisplay icon={PedigreeMaleProbandIcon} title="Male Proband" args={args} />
+            </div>
+            <div className="grid grid-cols-12 gap-2">
+              <IconDisplay icon={PedigreeFemaleAffectedIcon} title="Female Affected" args={args} />
+              <IconDisplay icon={PedigreeFemaleNotAffectedIcon} title="Female Not Affected" args={args} />
+              <IconDisplay icon={PedigreeFemaleCarrierIcon} title="Female Carrier" args={args} />
+              <IconDisplay icon={PedigreeFemaleDeceasedIcon} title="Female Deceased" args={args} />
+              <IconDisplay icon={PedigreeFemaleProbandIcon} title="Female Proband" args={args} />
+            </div>
+            <div className="grid grid-cols-12 gap-2">
+              <IconDisplay icon={PedigreeUnknownAffectedIcon} title="Unknown Affected" args={args} />
+              <IconDisplay icon={PedigreeUnknownNotAffectedIcon} title="Unknown Not Affected" args={args} />
+              <IconDisplay icon={PedigreeUnknownCarrierIcon} title="Unknown Carrier" args={args} />
+              <IconDisplay icon={PedigreeUnknownDeceasedIcon} title="Unknown Deceased" args={args} />
+              <IconDisplay icon={PedigreeUnknownProbandIcon} title="Unknown Proband" args={args} />
+            </div>
+          </div>
+        </StorySection>
+
+        <StorySection title="Gene overlap">
+          <div className="grid grid-cols-12 gap-2">
+            <IconDisplay icon={GeneOverlapFullGeneIcon} title="Full Gene" args={args} />
+            <IconDisplay icon={GeneOverlapPartialIcon} title="Partial" args={args} />
+            <IconDisplay icon={GeneOverlapFullCNVIcon} title="Full CNV" args={args} />
+          </div>
+        </StorySection>
+      </StoryShowcase>
     </div>
   ),
 };

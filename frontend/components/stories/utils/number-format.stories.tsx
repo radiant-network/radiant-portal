@@ -3,8 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import { toKiloBases } from '@/components/lib/number-format';
 
+import { StorySection } from '../story-section';
+
 const meta = {
-  title: 'Utils/Number-Format',
+  title: 'Utils/Number Format',
   component: TextCell,
   args: {},
   decorators: [Story => <Story />],
@@ -16,8 +18,7 @@ type Story = StoryObj<typeof meta>;
 
 export const KiloBases: Story = {
   render: () => (
-    <>
-      <span>ToKiloBases</span>
+    <StorySection title="To kilo bases">
       <div className="flex flex-col gap-2">
         <div>{toKiloBases(10)}</div>
         <div>{toKiloBases(100)}</div>
@@ -36,6 +37,6 @@ export const KiloBases: Story = {
         <div>{toKiloBases(1000000.1)}</div>
         <div>{toKiloBases(10000000.1)}</div>
       </div>
-    </>
+    </StorySection>
   ),
 };

@@ -4,10 +4,12 @@ import { fn } from 'storybook/test';
 
 import { Badge } from '@/components/base/shadcn/badge';
 
+import { StorySection } from '../story-section';
+
 import { badgeVariants } from './utils';
 
 const meta = {
-  title: 'Badges/Badge',
+  title: 'Components/Badges/Badge',
   component: Badge,
   args: {},
 } satisfies Meta<typeof Badge>;
@@ -19,13 +21,15 @@ type Story = StoryObj<typeof meta>;
 export const Variants: Story = {
   args: {},
   render: args => (
-    <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map((variant, index) => (
-        <Badge key={index} variant={variant} {...args}>
-          {variant}
-        </Badge>
-      ))}
-    </div>
+    <StorySection title="Variants">
+      <div className="flex flex-col items-start gap-2">
+        {badgeVariants.map((variant, index) => (
+          <Badge key={index} variant={variant} {...args}>
+            {variant}
+          </Badge>
+        ))}
+      </div>
+    </StorySection>
   ),
 };
 
@@ -35,13 +39,15 @@ export const Closable: Story = {
     onClose: fn(),
   },
   render: args => (
-    <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map((variant, index) => (
-        <Badge key={index} variant={variant} {...args}>
-          {variant}
-        </Badge>
-      ))}
-    </div>
+    <StorySection title="Closable">
+      <div className="flex flex-col items-start gap-2">
+        {badgeVariants.map((variant, index) => (
+          <Badge key={index} variant={variant} {...args}>
+            {variant}
+          </Badge>
+        ))}
+      </div>
+    </StorySection>
   ),
 };
 
@@ -51,13 +57,15 @@ export const Clickable: Story = {
     onClick: fn(),
   },
   render: args => (
-    <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map((variant, index) => (
-        <Badge key={index} variant={variant} {...args}>
-          {variant}
-        </Badge>
-      ))}
-    </div>
+    <StorySection title="Clickable">
+      <div className="flex flex-col items-start gap-2">
+        {badgeVariants.map((variant, index) => (
+          <Badge key={index} variant={variant} {...args}>
+            {variant}
+          </Badge>
+        ))}
+      </div>
+    </StorySection>
   ),
 };
 
@@ -66,13 +74,15 @@ export const WithIcon: Story = {
     children: 'Badge',
   },
   render: args => (
-    <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map((variant, index) => (
-        <Badge key={index} variant={variant} {...args}>
-          {variant} <User />
-        </Badge>
-      ))}
-    </div>
+    <StorySection title="With icon">
+      <div className="flex flex-col items-start gap-2">
+        {badgeVariants.map((variant, index) => (
+          <Badge key={index} variant={variant} {...args}>
+            {variant} <User />
+          </Badge>
+        ))}
+      </div>
+    </StorySection>
   ),
 };
 
@@ -82,13 +92,15 @@ export const IconOnly: Story = {
     iconOnly: true,
   },
   render: args => (
-    <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map((variant, index) => (
-        <Badge key={index} variant={variant} {...args}>
-          <User />
-        </Badge>
-      ))}
-    </div>
+    <StorySection title="Icon only">
+      <div className="flex flex-col items-start gap-2">
+        {badgeVariants.map((variant, index) => (
+          <Badge key={index} variant={variant} {...args}>
+            <User />
+          </Badge>
+        ))}
+      </div>
+    </StorySection>
   ),
 };
 
@@ -98,12 +110,14 @@ export const WithCount: Story = {
     count: 10,
   },
   render: args => (
-    <div className="flex flex-col items-start gap-2">
-      {badgeVariants.map((variant, index) => (
-        <Badge key={index} variant={variant} {...args}>
-          {variant}
-        </Badge>
-      ))}
-    </div>
+    <StorySection title="With count">
+      <div className="flex flex-col items-start gap-2">
+        {badgeVariants.map((variant, index) => (
+          <Badge key={index} variant={variant} {...args}>
+            {variant}
+          </Badge>
+        ))}
+      </div>
+    </StorySection>
   ),
 };

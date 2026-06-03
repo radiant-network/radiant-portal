@@ -7,6 +7,8 @@ import { TestTubeDiagonalIcon } from 'lucide-react';
 import ChecboxFilter from '@/components/base/checkboxes/checkbox-filter';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StoryLabel, StorySection } from '../story-section';
+
 const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
@@ -30,7 +32,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Inputs/ChecboxFilter',
+  title: 'Components/Inputs/Checkbox Filter',
   component: ChecboxFilter,
   args: {},
   decorators: [
@@ -48,7 +50,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const Sizes: Story = {
   args: {
     label: 'Loremp ipsum',
   },
@@ -64,10 +66,10 @@ export const Default: Story = {
     };
 
     return (
-      <div className="flex flex-col gap-6">
+      <StorySection title="Sizes">
         {['default', 'xs', 'sm', 'md', 'lg'].map(size => (
           <div key={size} className="flex flex-col gap-3">
-            <span className="leading-2 font-bold uppercase"> {size} </span>
+            <StoryLabel>{size}</StoryLabel>
             <ChecboxFilter
               {...args}
               size={size}
@@ -142,7 +144,7 @@ export const Default: Story = {
             />
           </div>
         ))}
-      </div>
+      </StorySection>
     );
   },
 };
@@ -163,31 +165,33 @@ export const Fluid: Story = {
     };
 
     return (
-      <div className="flex w-[480px] flex-col gap-6 rounded-md border p-4">
-        <div className="flex flex-col gap-3">
-          <span className="leading-2 font-bold"> Default (width capped at 228px) </span>
-          <ChecboxFilter
-            {...args}
-            size="sm"
-            count={1234}
-            description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-            checked={checked.includes('capped')}
-            onCheckedChange={handleOnCheckedChange('capped')}
-          />
+      <StorySection title="Fluid">
+        <div className="flex w-[480px] flex-col gap-6 rounded-md border p-4">
+          <div className="flex flex-col gap-3">
+            <StoryLabel>Default (width capped at 228px)</StoryLabel>
+            <ChecboxFilter
+              {...args}
+              size="sm"
+              count={1234}
+              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+              checked={checked.includes('capped')}
+              onCheckedChange={handleOnCheckedChange('capped')}
+            />
+          </div>
+          <div className="flex flex-col gap-3">
+            <StoryLabel>Fluid (fills the container)</StoryLabel>
+            <ChecboxFilter
+              {...args}
+              fluid
+              size="sm"
+              count={1234}
+              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+              checked={checked.includes('fluid')}
+              onCheckedChange={handleOnCheckedChange('fluid')}
+            />
+          </div>
         </div>
-        <div className="flex flex-col gap-3">
-          <span className="leading-2 font-bold"> Fluid (fills the container) </span>
-          <ChecboxFilter
-            {...args}
-            fluid
-            size="sm"
-            count={1234}
-            description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-            checked={checked.includes('fluid')}
-            onCheckedChange={handleOnCheckedChange('fluid')}
-          />
-        </div>
-      </div>
+      </StorySection>
     );
   },
 };

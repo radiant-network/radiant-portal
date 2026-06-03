@@ -3,10 +3,12 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { AvatarUser } from '@/components/base/avatar';
 import { Avatar } from '@/components/base/avatar/avatar';
 
+import { StoryLabel, StorySection, StoryShowcase } from '../story-section';
+
 import { avatarSizes } from './utils';
 
 const meta = {
-  title: 'Avatars/Assignment Avatar',
+  title: 'Components/Avatars/Assignment Avatar',
   component: Avatar,
   argTypes: {
     size: {
@@ -74,10 +76,9 @@ export const Sizes: Story = {
     ];
 
     return (
-      <div className="flex flex-col gap-8 p-4">
+      <StoryShowcase>
         {states.map(state => (
-          <div key={state.label} className="flex flex-col gap-4">
-            <h3 className="text-lg font-semibold">{state.label}</h3>
+          <StorySection key={state.label} title={state.label}>
             <div className="flex items-end gap-6">
               {avatarSizes.map(size => (
                 <div key={size} className="flex flex-col items-center gap-2">
@@ -86,9 +87,9 @@ export const Sizes: Story = {
                 </div>
               ))}
             </div>
-          </div>
+          </StorySection>
         ))}
-      </div>
+      </StoryShowcase>
     );
   },
 };
@@ -100,10 +101,9 @@ export const MaxAvatars: Story = {
     const counts = [1, 2, 3, 5];
 
     return (
-      <div className="flex flex-col gap-8 p-4">
+      <StoryShowcase>
         {thresholds.map(max => (
-          <div key={max} className="flex flex-col gap-4">
-            <h3 className="text-lg font-semibold">maxAvatars = {max}</h3>
+          <StorySection key={max} title={`maxAvatars = ${max}`}>
             <div className="flex items-center gap-6">
               {counts.map(count => (
                 <div key={count} className="flex flex-col items-center gap-2">
@@ -112,9 +112,9 @@ export const MaxAvatars: Story = {
                 </div>
               ))}
             </div>
-          </div>
+          </StorySection>
         ))}
-      </div>
+      </StoryShowcase>
     );
   },
 };
@@ -131,77 +131,74 @@ export const Initials: Story = {
     ];
 
     return (
-      <div className="flex items-start gap-6 p-4">
-        {examples.map(({ user, note }) => (
-          <div key={user.id} className="flex w-32 flex-col items-center gap-2 text-center">
-            <Avatar users={[user]} />
-            <span className="text-xs font-medium">{user.name}</span>
-            <span className="text-xs text-muted-foreground">{note}</span>
-          </div>
-        ))}
-      </div>
+      <StorySection title="Initials">
+        <div className="flex items-start gap-6">
+          {examples.map(({ user, note }) => (
+            <div key={user.id} className="flex w-32 flex-col items-center gap-2 text-center">
+              <Avatar users={[user]} />
+              <span className="text-xs font-medium">{user.name}</span>
+              <span className="text-xs text-muted-foreground">{note}</span>
+            </div>
+          ))}
+        </div>
+      </StorySection>
     );
   },
 };
 
 export const AssignmentStates: Story = {
   render: () => (
-    <div className="flex flex-col gap-8 p-4">
-      <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-semibold">Assignment Interactions</h3>
-        <p className="text-sm text-muted-foreground">
-          Hover over the avatars to see tooltips and user details popover.
-        </p>
+    <StorySection
+      title="Assignment Interactions"
+      description="Hover over the avatars to see tooltips and user details popover."
+    >
+      <div className="grid grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <StoryLabel>Unassigned States</StoryLabel>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center gap-2">
+              <Avatar users={[]} canAssign={true} onAssignClick={() => alert('Assign clicked!')} />
+              <span className="text-xs text-muted-foreground">Can Assign</span>
+            </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          <div className="flex flex-col gap-4">
-            <h4 className="font-medium">Unassigned States</h4>
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col items-center gap-2">
-                <Avatar users={[]} canAssign={true} onAssignClick={() => alert('Assign clicked!')} />
-                <span className="text-xs text-muted-foreground">Can Assign</span>
-              </div>
-
-              <div className="flex flex-col items-center gap-2">
-                <Avatar users={[]} canAssign={false} />
-                <span className="text-xs text-muted-foreground">Cannot Assign</span>
-              </div>
+            <div className="flex flex-col items-center gap-2">
+              <Avatar users={[]} canAssign={false} />
+              <span className="text-xs text-muted-foreground">Cannot Assign</span>
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-col gap-4">
-            <h4 className="font-medium">Assigned States (Hover for Details)</h4>
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col items-center gap-2">
-                <Avatar users={[sampleUsers[0]]} size="md" />
-                <span className="text-xs text-muted-foreground">Single User</span>
-              </div>
+        <div className="space-y-2">
+          <StoryLabel>Assigned States (Hover for Details)</StoryLabel>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center gap-2">
+              <Avatar users={[sampleUsers[0]]} size="md" />
+              <span className="text-xs text-muted-foreground">Single User</span>
+            </div>
 
-              <div className="flex flex-col items-center gap-2">
-                <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="md" />
-                <span className="text-xs text-muted-foreground">Two Users</span>
-              </div>
+            <div className="flex flex-col items-center gap-2">
+              <Avatar users={[sampleUsers[0], sampleUsers[1]]} size="md" />
+              <span className="text-xs text-muted-foreground">Two Users</span>
+            </div>
 
-              <div className="flex flex-col items-center gap-2">
-                <Avatar users={sampleUsers.slice(0, 4)} size="md" />
-                <span className="text-xs text-muted-foreground">Multiple Users</span>
-              </div>
+            <div className="flex flex-col items-center gap-2">
+              <Avatar users={sampleUsers.slice(0, 4)} size="md" />
+              <span className="text-xs text-muted-foreground">Multiple Users</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </StorySection>
   ),
 };
 
 export const TableUsageExample: Story = {
   render: () => (
-    <div className="p-4">
-      <h3 className="text-lg font-semibold mb-4">Table Cell Usage Example</h3>
-      <p className="text-sm text-muted-foreground mb-4">
-        Hover over avatars to see assignment tooltips and user details.
-      </p>
-      <div className="border rounded-lg">
+    <StorySection
+      title="Table Cell Usage Example"
+      description="Hover over avatars to see assignment tooltips and user details."
+    >
+      <div className="w-full rounded-lg border">
         <table className="w-full">
           <thead>
             <tr className="border-b bg-muted/50">
@@ -259,6 +256,6 @@ export const TableUsageExample: Story = {
           </tbody>
         </table>
       </div>
-    </div>
+    </StorySection>
   ),
 };

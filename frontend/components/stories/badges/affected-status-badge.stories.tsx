@@ -5,6 +5,8 @@ import { SavedFilterType } from '@/api/api';
 import AffectedStatusBadge, { AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
+import { StorySection } from '../story-section';
+
 const config: PortalConfig = {
   variant_entity: {
     app_id: ApplicationId.variant_entity,
@@ -45,7 +47,7 @@ const config: PortalConfig = {
 };
 
 const meta = {
-  title: 'Badges/Affected Status Badge',
+  title: 'Components/Badges/Affected Status Badge',
   component: AffectedStatusBadge,
   args: { status: 'affected' },
   decorators: [
@@ -65,10 +67,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <div className="flex gap-2">
-      {['affected', 'non_affected', 'unknown'].map(status => (
-        <AffectedStatusBadge key={status} status={status as AffectedStatusProps} />
-      ))}
-    </div>
+    <StorySection title="Default">
+      <div className="flex gap-2">
+        {['affected', 'non_affected', 'unknown'].map(status => (
+          <AffectedStatusBadge key={status} status={status as AffectedStatusProps} />
+        ))}
+      </div>
+    </StorySection>
   ),
 };
