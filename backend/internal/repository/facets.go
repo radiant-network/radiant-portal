@@ -79,8 +79,8 @@ func NewFacetsRepository() *FacetsRepository {
 			Name: "clinvar",
 			Values: []string{
 				"Affects", "association", "association_not_found", "Benign", "confers_sensitivity",
-				"Conflicting_classifications_of_pathogenicity", "conflicting_data_from_submitters", "Conflicting_interpretations_of_pathogenicity", "drug_response", "established_risk_allele",
-				"Likely_benign", "Likely_pathogenic", "likely_pathogenic_low_penetrance", "Likely_risk_allele", "low_penetrance",
+				"Conflicting_classifications_of_pathogenicity", "conflicting_data_from_submitters", "Conflicting_interpretations_of_pathogenicity", "drug_response", "Established_risk_allele",
+				"Likely_benign", "Likely_pathogenic", "likely_pathogenic_low_penetrance", "Likely_risk_allele", "_low_penetrance",
 				"no_classification_for_the_single_variant", "not_provided", "other", "Pathogenic", "pathogenic_low_penetrance",
 				"protective", "risk_factor", "Uncertain_risk_allele", "Uncertain_significance",
 			},
