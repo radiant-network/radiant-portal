@@ -87,7 +87,7 @@ func (r *AuthRepository) Memberships(email string) ([]types.TenantMembership, er
 				Code:          grant.TenantCode,
 				Name:          grant.TenantName,
 				TenantActions: []string{},
-				OrgActions:    map[string][]string{},
+				OrgsByAction:  map[string][]string{},
 			})
 		}
 		applyGrant(&memberships[index], grant, tenantOrgs)
@@ -102,9 +102,9 @@ func applyGrant(membership *types.TenantMembership, grant membershipGrant, tenan
 	if grant.OrgCode == nil {
 		membership.TenantActions = appendUnique(membership.TenantActions, grant.ActionCode)
 	} else if *grant.OrgCode == "*" {
-		membership.OrgActions[grant.ActionCode] = tenantOrgs
+		membership.OrgsByAction[grant.ActionCode] = tenantOrgs
 	} else {
-		membership.OrgActions[grant.ActionCode] = appendUnique(membership.OrgActions[grant.ActionCode], *grant.OrgCode)
+		membership.OrgsByAction[grant.ActionCode] = appendUnique(membership.OrgsByAction[grant.ActionCode], *grant.OrgCode)
 	}
 }
 

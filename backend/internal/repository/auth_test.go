@@ -9,7 +9,7 @@ import (
 )
 
 // These tests read the seeded auth fixtures (see test/data/auth/), which reuse the
-// existing radiant orgs (CHOP, CHUSJ, ...) and add an org-less tenant_b:
+// existing radiant orgs (CHOP, CHUSJ, ...) and add a second tenant_b with its own org:
 //
 //	roles (per tenant): geneticist (org)   → can_read_pii, can_interpret_variant
 //	                    researcher (tenant) → can_search_case, can_view_kb
@@ -100,7 +100,7 @@ func Test_AuthRepository_Memberships_SpecificOrgAndTenantGrants(t *testing.T) {
 				Code:          "radiant",
 				Name:          "Radiant",
 				TenantActions: []string{"can_search_case", "can_view_kb"},
-				OrgActions: map[string][]string{
+				OrgsByAction: map[string][]string{
 					"can_interpret_variant": {"CHOP"},
 					"can_read_pii":          {"CHOP"},
 				},
@@ -124,7 +124,7 @@ func Test_AuthRepository_Memberships_WildcardResolvesToAllTenantOrgs(t *testing.
 				Code:          "radiant",
 				Name:          "Radiant",
 				TenantActions: []string{},
-				OrgActions: map[string][]string{
+				OrgsByAction: map[string][]string{
 					"can_interpret_variant": radiantOrgs,
 					"can_read_pii":          radiantOrgs,
 				},
@@ -149,7 +149,7 @@ func Test_AuthRepository_Memberships_MultipleTenantsNoCollision(t *testing.T) {
 				Code:          "radiant",
 				Name:          "Radiant",
 				TenantActions: []string{},
-				OrgActions: map[string][]string{
+				OrgsByAction: map[string][]string{
 					"can_interpret_variant": radiantOrgs,
 					"can_read_pii":          radiantOrgs,
 				},
@@ -160,7 +160,7 @@ func Test_AuthRepository_Memberships_MultipleTenantsNoCollision(t *testing.T) {
 				TenantActions: []string{"can_search_case", "can_view_kb"},
 				// tenant_b's wildcard resolves to tenant_b's own org only —
 				// radiant's orgs do not leak in.
-				OrgActions: map[string][]string{
+				OrgsByAction: map[string][]string{
 					"can_interpret_variant": {"TENANT_B_ORG"},
 					"can_read_pii":          {"TENANT_B_ORG"},
 				},
