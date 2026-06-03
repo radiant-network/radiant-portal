@@ -8,6 +8,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_appendUnique_AddsNewValue(t *testing.T) {
+	assert.Equal(t, []string{"a"}, appendUnique(nil, "a"))
+	assert.Equal(t, []string{"a", "b"}, appendUnique([]string{"a"}, "b"))
+}
+
+func Test_appendUnique_SkipsExistingValue(t *testing.T) {
+	assert.Equal(t, []string{"a", "b"}, appendUnique([]string{"a", "b"}, "a"))
+}
+
 // These tests read the seeded auth fixtures (see test/data/auth/), which reuse the
 // existing radiant orgs (CHOP, CHUSJ, ...) and add a second tenant_b with its own org:
 //

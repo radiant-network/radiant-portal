@@ -2323,6 +2323,25 @@ components:
       - task_type_code
       - task_type_name
       type: object
+    TenantMembership:
+      description: Caller's effective authorization within a single tenant
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        orgs_by_action:
+          additionalProperties:
+            items:
+              type: string
+            type: array
+          type: object
+        tenant_actions:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
     Term:
       properties:
         id:
@@ -2822,6 +2841,39 @@ info:
   version: "1.0"
 openapi: 3.1.0
 paths:
+  /auth/me:
+    get:
+      description: |-
+        Returns the authenticated caller's tenant memberships, each with the
+        tenant-scoped actions they hold and the org-scoped actions mapped to the
+        orgs where they apply.
+      operationId: getMe
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TenantMembership'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get the caller's effective authorization
+      tags:
+      - auth
   /batches/{batchId}:
     get:
       description: Retrieve a batch by ID
