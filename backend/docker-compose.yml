@@ -49,6 +49,49 @@ services:
       - "8080:8080"
       - "9000:9000"
 
+  # Standalone Postgres standing in for the external/managed DB that backs Ranger in production.
+  # In prod this container is dropped and Ranger points at the managed endpoint (see
+  # scripts/ranger/install.properties -> db_host).
+  ranger-db:
+    image: postgres:14
+    container_name: ranger-db
+    hostname: ranger-db
+    environment:
+      POSTGRES_PASSWORD: rangerR0cks!   # superuser "postgres" -- Ranger's bootstrap (db_root) account
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  # Apache Ranger admin. DB connection is externalized via the mounted install.properties so the
+  # same setup mirrors a production install against an external Postgres (edit that file for prod).
+  # No Solr/ZooKeeper: audit shipping is a no-op and the admin still boots.
+  ranger:
+    image: apache/ranger:2.7.0
+    container_name: ranger
+    hostname: ranger
+    depends_on:
+      ranger-db:
+        condition: service_healthy
+    environment:
+      RANGER_VERSION: "2.7.0"
+      RANGER_DB_TYPE: postgres
+    volumes:
+      - ./scripts/ranger/install.properties:/opt/ranger/admin/install.properties
+      # Replaces the stock script (which creates demo dev_* services) -- registers only our StarRocks service.
+      - ./scripts/ranger/create-ranger-services.py:/home/ranger/scripts/create-ranger-services.py
+      - ./scripts/ranger/ranger-servicedef-starrocks.json:/home/ranger/scripts/ranger-servicedef-starrocks.json
+    command: ["/home/ranger/scripts/ranger.sh"]
+    ports:
+      - "6080:6080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:6080/login.jsp > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
   api:
     build:
       context: .
