@@ -4748,6 +4748,37 @@ export interface TaskOccurrenceType {
     'task_type_name': string;
 }
 /**
+ * Caller\'s effective authorization within a single tenant
+ * @export
+ * @interface TenantMembership
+ */
+export interface TenantMembership {
+    /**
+     * 
+     * @type {string}
+     * @memberof TenantMembership
+     */
+    'code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TenantMembership
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {{ [key: string]: Array<string>; }}
+     * @memberof TenantMembership
+     */
+    'orgs_by_action'?: { [key: string]: Array<string>; };
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof TenantMembership
+     */
+    'tenant_actions'?: Array<string>;
+}
+/**
  * 
  * @export
  * @interface Term
@@ -5754,6 +5785,111 @@ export const VepImpact = {
 } as const;
 
 export type VepImpact = typeof VepImpact[keyof typeof VepImpact];
+
+
+
+/**
+ * AuthApi - axios parameter creator
+ * @export
+ */
+export const AuthApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Returns the authenticated caller\'s tenant memberships, each with the tenant-scoped actions they hold and the org-scoped actions mapped to the orgs where they apply.
+         * @summary Get the caller\'s effective authorization
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMe: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/auth/me`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * AuthApi - functional programming interface
+ * @export
+ */
+export const AuthApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AuthApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Returns the authenticated caller\'s tenant memberships, each with the tenant-scoped actions they hold and the org-scoped actions mapped to the orgs where they apply.
+         * @summary Get the caller\'s effective authorization
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getMe(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TenantMembership>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getMe(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AuthApi.getMe']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * AuthApi - factory interface
+ * @export
+ */
+export const AuthApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AuthApiFp(configuration)
+    return {
+        /**
+         * Returns the authenticated caller\'s tenant memberships, each with the tenant-scoped actions they hold and the org-scoped actions mapped to the orgs where they apply.
+         * @summary Get the caller\'s effective authorization
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getMe(options?: RawAxiosRequestConfig): AxiosPromise<Array<TenantMembership>> {
+            return localVarFp.getMe(options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * AuthApi - object-oriented interface
+ * @export
+ * @class AuthApi
+ * @extends {BaseAPI}
+ */
+export class AuthApi extends BaseAPI {
+    /**
+     * Returns the authenticated caller\'s tenant memberships, each with the tenant-scoped actions they hold and the org-scoped actions mapped to the orgs where they apply.
+     * @summary Get the caller\'s effective authorization
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AuthApi
+     */
+    public getMe(options?: RawAxiosRequestConfig) {
+        return AuthApiFp(this.configuration).getMe(options).then((request) => request(this.axios, this.basePath));
+    }
+}
 
 
 

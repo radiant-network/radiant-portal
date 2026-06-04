@@ -1,6 +1,7 @@
 # flake8: noqa
 
 # import apis into api package
+from radiant_python.api.auth_api import AuthApi
 from radiant_python.api.batches_api import BatchesApi
 from radiant_python.api.cases_api import CasesApi
 from radiant_python.api.documents_api import DocumentsApi

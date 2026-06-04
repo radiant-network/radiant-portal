@@ -17,6 +17,7 @@
 __version__ = "0.1.0"
 
 # import apis into sdk package
+from radiant_python.api.auth_api import AuthApi
 from radiant_python.api.batches_api import BatchesApi
 from radiant_python.api.cases_api import CasesApi
 from radiant_python.api.documents_api import DocumentsApi
@@ -134,6 +135,7 @@ from radiant_python.models.sqon_content import SqonContent
 from radiant_python.models.statistics import Statistics
 from radiant_python.models.statistics_body_with_sqon import StatisticsBodyWithSqon
 from radiant_python.models.task_occurrence_type import TaskOccurrenceType
+from radiant_python.models.tenant_membership import TenantMembership
 from radiant_python.models.term import Term
 from radiant_python.models.transcript import Transcript
 from radiant_python.models.update_occurrence_note_input import UpdateOccurrenceNoteInput

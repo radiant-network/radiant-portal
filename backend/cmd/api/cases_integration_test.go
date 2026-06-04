@@ -127,6 +127,7 @@ func Test_GetCasesFilters(t *testing.T) {
 			{"key":"CQGC", "label":"Quebec Clinical Genomic Center"},
 			{"key":"LDM-CHOP", "label":"Molecular Diagnostic Laboratory, CHOP"},
 			{"key":"LDM-CHUSJ", "label":"Laboratoire de diagnostic moléculaire, CHU Sainte-Justine"}, 
+			{"key":"TENANT_B_ORG", "label":"Tenant B Org"},
 			{"key":"UCSF", "label":"University of California San-Francisco"}], 
 		"status_code":[
 			{"key":"completed", "label":"Completed"},

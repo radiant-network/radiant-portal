@@ -63,6 +63,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoFacets := repository.NewFacetsRepository()
 	repoBatches := repository.NewBatchRepository(dbPostgres)
 	repoTasks := repository.NewTaskRepository(dbPostgres)
+	repoAuth := repository.NewAuthRepository(dbPostgres)
 
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -91,6 +92,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	// Use privateRoutes instead of `r` for all private routes to automatically apply the role access middleware
 	privateRoutes := r.Group("/")
 	privateRoutes.Use(roleAccessMiddleware)
+
+	authGroup := privateRoutes.Group("/auth")
+	authGroup.GET("/me", server.GetMeHandler(repoAuth, auth))
 
 	casesGroup := privateRoutes.Group("/cases")
 	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))

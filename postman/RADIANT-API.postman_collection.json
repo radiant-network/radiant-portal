@@ -7,6 +7,166 @@
   },
   "item": [
     {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "GET token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseJson = pm.response.json();",
+                  "var accessToken = responseJson.access_token;",
+                  "pm.environment.set(\"token\", accessToken)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{username}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{password}}",
+                  "type": "text"
+                },
+                {
+                  "key": "grant_type",
+                  "value": "password",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "radiant",
+                  "type": "text"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "{{client-secret}}",
+                  "type": "text",
+                  "uuid": "b56be0b0-01bc-4720-bd1e-fd83b4bcc162"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak-url}}/realms/CQDG/protocol/openid-connect/token",
+              "host": [
+                "{{keycloak-url}}"
+              ],
+              "path": [
+                "realms",
+                "CQDG",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET token data manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const responseJson = pm.response.json();",
+                  "var accessToken = responseJson.access_token;",
+                  "pm.environment.set(\"token\", accessToken)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "client_credentials",
+                  "type": "text"
+                },
+                {
+                  "key": "client_id",
+                  "value": "{{data-manager-client-id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "client_secret",
+                  "value": "{{data-manager-client-secret}}",
+                  "type": "text",
+                  "uuid": "b56be0b0-01bc-4720-bd1e-fd83b4bcc162"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloak-url}}/realms/CQDG/protocol/openid-connect/token",
+              "host": [
+                "{{keycloak-url}}"
+              ],
+              "path": [
+                "realms",
+                "CQDG",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET me",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/auth/me",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Germline SNV Occurrences",
       "item": [
         {
@@ -2523,130 +2683,6 @@
           ],
           "path": [
             "status"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "GET token",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "const responseJson = pm.response.json();",
-              "var accessToken = responseJson.access_token;",
-              "pm.environment.set(\"token\", accessToken)"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "urlencoded",
-          "urlencoded": [
-            {
-              "key": "username",
-              "value": "{{username}}",
-              "type": "text"
-            },
-            {
-              "key": "password",
-              "value": "{{password}}",
-              "type": "text"
-            },
-            {
-              "key": "grant_type",
-              "value": "password",
-              "type": "text"
-            },
-            {
-              "key": "client_id",
-              "value": "radiant",
-              "type": "text"
-            },
-            {
-              "key": "client_secret",
-              "value": "{{client-secret}}",
-              "type": "text",
-              "uuid": "b56be0b0-01bc-4720-bd1e-fd83b4bcc162"
-            }
-          ]
-        },
-        "url": {
-          "raw": "{{keycloak-url}}/realms/CQDG/protocol/openid-connect/token",
-          "host": [
-            "{{keycloak-url}}"
-          ],
-          "path": [
-            "realms",
-            "CQDG",
-            "protocol",
-            "openid-connect",
-            "token"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "GET token data manager",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "const responseJson = pm.response.json();",
-              "var accessToken = responseJson.access_token;",
-              "pm.environment.set(\"token\", accessToken)"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "urlencoded",
-          "urlencoded": [
-            {
-              "key": "grant_type",
-              "value": "client_credentials",
-              "type": "text"
-            },
-            {
-              "key": "client_id",
-              "value": "{{data-manager-client-id}}",
-              "type": "text"
-            },
-            {
-              "key": "client_secret",
-              "value": "{{data-manager-client-secret}}",
-              "type": "text",
-              "uuid": "b56be0b0-01bc-4720-bd1e-fd83b4bcc162"
-            }
-          ]
-        },
-        "url": {
-          "raw": "{{keycloak-url}}/realms/CQDG/protocol/openid-connect/token",
-          "host": [
-            "{{keycloak-url}}"
-          ],
-          "path": [
-            "realms",
-            "CQDG",
-            "protocol",
-            "openid-connect",
-            "token"
           ]
         }
       },
