@@ -27,21 +27,31 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      
+
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
     volumes:
       - ./scripts/init-keycloak:/opt/keycloak/data/import
     environment:
-        KC_LOG_LEVEL: info
-        KC_METRICS_ENABLED: 'true'
-        KC_HEALTH_ENABLED: 'true'
-        KEYCLOAK_ADMIN: admin
-        KEYCLOAK_ADMIN_PASSWORD: admin
-    command: ["start-dev", "--import-realm", "--http-enabled=true", "--hostname-strict=false"]
+      KC_LOG_LEVEL: info
+      KC_METRICS_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command:
+      [
+        "start-dev",
+        "--import-realm",
+        "--http-enabled=true",
+        "--hostname-strict=false",
+      ]
     healthcheck:
-      test: ['CMD-SHELL', '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:9000/health/live']
+      test:
+        [
+          "CMD-SHELL",
+          '[ -f /tmp/HealthCheck.java ] || echo "public class HealthCheck { public static void main(String[] args) throws java.lang.Throwable { System.exit(java.net.HttpURLConnection.HTTP_OK == ((java.net.HttpURLConnection)new java.net.URL(args[0]).openConnection()).getResponseCode() ? 0 : 1); } }" > /tmp/HealthCheck.java && java /tmp/HealthCheck.java http://localhost:9000/health/live',
+        ]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -49,44 +59,69 @@ services:
       - "8080:8080"
       - "9000:9000"
 
-  # Standalone Postgres standing in for the external/managed DB that backs Ranger in production.
-  # In prod this container is dropped and Ranger points at the managed endpoint (see
-  # scripts/ranger/install.properties -> db_host).
+  # Postgres backing Ranger. In production this is an external/managed instance; here it stands in.
+  # It pre-creates the database + the runtime role so the image runs in SeparateDBA mode (no superuser
+  # at runtime). The host is passed to the image via RANGER_DB_HOST, so the name is no longer fixed.
   ranger-db:
     image: postgres:14
     container_name: ranger-db
     hostname: ranger-db
     environment:
-      POSTGRES_PASSWORD: rangerR0cks!   # superuser "postgres" -- Ranger's bootstrap (db_root) account
+      POSTGRES_USER: rangeradmin # runtime DB role Ranger connects as (owns the Ranger tables)
+      POSTGRES_PASSWORD: rangerR0cks!
+      POSTGRES_DB: ranger # database pre-created for SeparateDBA (no create-db at runtime)
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U rangeradmin -d ranger"]
       interval: 10s
       timeout: 5s
       retries: 30
 
-  # Apache Ranger admin. DB connection is externalized via the mounted install.properties so the
-  # same setup mirrors a production install against an external Postgres (edit that file for prod).
-  # No Solr/ZooKeeper: audit shipping is a no-op and the admin still boots.
+  # Self-contained Ranger image (ranger/Dockerfile): dual-mode Ranger admin with the StarRocks plugin
+  # jars + service-def/instance JSON baked in. Default CMD is "serve": render install.properties from
+  # the RANGER_* env -> setup.sh (SeparateDBA) -> start admin -> register the baked service-def +
+  # service instance. No Solr/ZooKeeper: audit is a no-op; the admin still boots.
   ranger:
-    image: apache/ranger:2.7.0
+    build:
+      context: ./ranger
     container_name: ranger
     hostname: ranger
     depends_on:
       ranger-db:
         condition: service_healthy
+      starrocks:
+        condition: service_healthy
     environment:
-      RANGER_VERSION: "2.7.0"
-      RANGER_DB_TYPE: postgres
-    volumes:
-      - ./scripts/ranger/install.properties:/opt/ranger/admin/install.properties
-      # Replaces the stock script (which creates demo dev_* services) -- registers only our StarRocks service.
-      - ./scripts/ranger/create-ranger-services.py:/home/ranger/scripts/create-ranger-services.py
-      - ./scripts/ranger/ranger-servicedef-starrocks.json:/home/ranger/scripts/ranger-servicedef-starrocks.json
-    command: ["/home/ranger/scripts/ranger.sh"]
+      # DB connection (managed-Postgres contract; SeparateDBA -> no runtime superuser)
+      RANGER_DB_HOST: ranger-db
+      RANGER_DB_NAME: ranger
+      RANGER_DB_USER: rangeradmin
+      RANGER_DB_PASSWORD: rangerR0cks!
+      RANGER_DB_ROOT_USER: rangeradmin # unused under SeparateDBA; set = runtime creds
+      RANGER_DB_ROOT_PASSWORD: rangerR0cks!
+      # Independent Ranger account passwords (must be >=8 chars w/ upper+lower+digit)
+      RANGER_ADMIN_PASSWORD: rangerR0cks!
+      RANGER_KEYADMIN_PASSWORD: rangerR0cks!
+      RANGER_TAGSYNC_PASSWORD: rangerR0cks!
+      RANGER_USERSYNC_PASSWORD: rangerR0cks!
+      # StarRocks service-instance connection (injected into starrocks-service.json placeholders).
+      # allin1 root has no password -> empty.
+      RANGER_STARROCKS_USERNAME: root
+      RANGER_STARROCKS_PASSWORD: ""
+      RANGER_STARROCKS_JDBC_URL: jdbc:mysql://starrocks:9030
+      # StarRocks knobs (defaults are baked into the image; set here to document them).
+      # yes -> service-def implClass = RangerServiceStarRocks (UI Test Connection / autocomplete).
+      RANGER_STARROCKS_AUTOCOMPLETE: "yes"
+      RANGER_STARROCKS_SERVICE_NAME: starrocks_test
+      # External admin URL the admin advertises (not the bind address); match the service hostname.
+      RANGER_POLICYMGR_EXTERNAL_URL: http://ranger:6080
     ports:
       - "6080:6080"
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:6080/login.jsp > /dev/null || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -sf http://localhost:6080/login.jsp > /dev/null || exit 1",
+        ]
       interval: 15s
       timeout: 5s
       retries: 30
@@ -111,7 +146,7 @@ services:
       PGHOST: postgres
       PGDATABASE: radiant
       PGSSLMODE: disable
-      CORS_ALLOWED_ORIGINS: '*'
+      CORS_ALLOWED_ORIGINS: "*"
       KEYCLOAK_HOST: http://keycloak:8080
       KEYCLOAK_REALM: CQDG
       KEYCLOAK_CLIENT: radiant
@@ -156,7 +191,7 @@ services:
     volumes:
       - ./scripts/init-sql:/docker-entrypoint-initdb.d
     entrypoint: >
-      /bin/bash -c "sleep 10 && 
+      /bin/bash -c "sleep 10 &&
       mysql -hstarrocks -P9030 -uroot < /docker-entrypoint-initdb.d/init_starrocks.sql;"
 
   postgres-clinical-data:
@@ -166,7 +201,7 @@ services:
         condition: service_started
     volumes:
       - ./scripts/init-sql:/docker-entrypoint-initdb.d
-    entrypoint: [ "sh", "-c" ]
+    entrypoint: ["sh", "-c"]
     command:
       - -c
       - |
