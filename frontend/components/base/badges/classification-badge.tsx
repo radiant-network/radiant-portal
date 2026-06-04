@@ -10,6 +10,7 @@ interface ClassificationBadgeProps extends BadgeProps {
 }
 
 export const ClassificationValueMap: Record<string, BadgeProps['variant']> = {
+  affects: 'neutral',
   other: 'neutral',
   association_not_found: 'neutral',
   uncertain_significance: 'yellow',
