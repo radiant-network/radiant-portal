@@ -114,7 +114,7 @@ func applyGrant(membership *types.TenantMembership, grant membershipGrant, tenan
 	case types.ActionScopeOrg:
 		if grant.OrgCode == nil {
 			// Org-scoped action on a tenant-wide grant (org_code NULL) so this action applies to no specific org and is intentionally dropped.
-			log.Println(fmt.Sprintf("WARN: Org-scoped action %s should not be applied tenant wide (org_code = NULL) - Verify the role %s for tenant %s.", grant.ActionCode, grant.RoleCode, grant.TenantCode))
+			log.Printf("WARN: Org-scoped action %s should not be applied tenant wide (org_code = NULL) - Verify the role %s for tenant %s.", grant.ActionCode, grant.RoleCode, grant.TenantCode)
 			return
 		} else if *grant.OrgCode == "*" {
 			// Wildcard: the action applies at every org in the tenant.
