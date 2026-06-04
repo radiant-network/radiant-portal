@@ -16,7 +16,7 @@ type AuthRepository struct {
 
 type AuthRepositoryDAO interface {
 	HasAction(email, tenantCode, orgCode, actionCode string) (bool, error)
-	Memberships(email string) ([]types.TenantMembership, error)
+	GetMemberships(email string) ([]types.TenantMembership, error)
 }
 
 func NewAuthRepository(db *gorm.DB) *AuthRepository {
@@ -40,8 +40,8 @@ func (r *AuthRepository) HasAction(email, tenantCode, orgCode, actionCode string
 			JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
 			JOIN action a       ON a.code = ra.action_code
 			WHERE ur.email = ? AND ur.tenant_code = ? AND ra.action_code = ?
-			  AND (a.scope = ? OR ur.org_code = ? OR ur.org_code = '*')
-		)`, email, tenantCode, actionCode, types.ActionScopeTenant, orgCode).Scan(&allowed).Error
+			  AND (a.scope = ? OR (a.scope = ? AND (ur.org_code = ? OR ur.org_code = '*')))
+		)`, email, tenantCode, actionCode, types.ActionScopeTenant, types.ActionScopeOrg, orgCode).Scan(&allowed).Error
 	if err != nil {
 		return false, fmt.Errorf("error checking action %q for %q: %w", actionCode, email, err)
 	}
@@ -53,18 +53,19 @@ type membershipGrant struct {
 	TenantName string
 	OrgCode    *string
 	ActionCode string
+	RoleCode   string
 	Scope      string
 }
 
-// Memberships returns the user's effective authorization grouped by tenant.
+// GetMemberships returns the user's effective authorization grouped by tenant.
 //
 // Each action routes by its own scope (a role may map both): tenant-scoped → tenant_actions;
 // org-scoped → orgs_by_action, where a specific org_code maps to that org and '*' expands to
 // every org in the tenant (ADR §5.4).
-func (r *AuthRepository) Memberships(email string) ([]types.TenantMembership, error) {
+func (r *AuthRepository) GetMemberships(email string) ([]types.TenantMembership, error) {
 	var grants []membershipGrant
 	if err := r.db.Raw(`
-		SELECT ur.tenant_code, t.name AS tenant_name, ur.org_code, ra.action_code, a.scope
+		SELECT ur.tenant_code, t.name AS tenant_name, ur.org_code, ra.action_code, a.scope, ra.role_code
 		FROM user_role ur
 		JOIN tenant t       ON t.code = ur.tenant_code
 		JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
@@ -106,18 +107,22 @@ func (r *AuthRepository) Memberships(email string) ([]types.TenantMembership, er
 // applyGrant records one grant's action on the tenant's membership, routed by the
 // action's scope (a role may map both scopes).
 func applyGrant(membership *types.TenantMembership, grant membershipGrant, tenantOrgs []string) {
-	if grant.Scope == types.ActionScopeTenant {
+	switch grant.Scope {
+	case types.ActionScopeTenant:
 		// Tenant-scoped action applies tenant-wide, whatever the grant's org_code is.
 		membership.TenantActions = appendUnique(membership.TenantActions, grant.ActionCode)
-	} else if grant.OrgCode == nil {
-		// Org-scoped action on a tenant-wide grant (org_code NULL) so this action applies to no specific org and is intentionally dropped.
-		return
-	} else if *grant.OrgCode == "*" {
-		// Wildcard: the action applies at every org in the tenant.
-		membership.OrgsByAction[grant.ActionCode] = tenantOrgs
-	} else {
-		// Specific org.
-		membership.OrgsByAction[grant.ActionCode] = appendUnique(membership.OrgsByAction[grant.ActionCode], *grant.OrgCode)
+	case types.ActionScopeOrg:
+		if grant.OrgCode == nil {
+			// Org-scoped action on a tenant-wide grant (org_code NULL) so this action applies to no specific org and is intentionally dropped.
+			log.Println(fmt.Sprintf("WARN: Org-scoped action %s should not be applied tenant wide (org_code = NULL) - Verify the role %s for tenant %s.", grant.ActionCode, grant.RoleCode, grant.TenantCode))
+			return
+		} else if *grant.OrgCode == "*" {
+			// Wildcard: the action applies at every org in the tenant.
+			membership.OrgsByAction[grant.ActionCode] = tenantOrgs
+		} else {
+			// Specific org.
+			membership.OrgsByAction[grant.ActionCode] = appendUnique(membership.OrgsByAction[grant.ActionCode], *grant.OrgCode)
+		}
 	}
 }
 

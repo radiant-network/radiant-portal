@@ -28,7 +28,7 @@ func GetMeHandler(repo repository.AuthRepositoryDAO, auth utils.Auth) gin.Handle
 			HandleUnauthorizedError(c)
 			return
 		}
-		memberships, err := repo.Memberships(*email)
+		memberships, err := repo.GetMemberships(*email)
 		if err != nil {
 			HandleError(c, err)
 			return

@@ -21,7 +21,7 @@ func (m *mockAuthRepository) HasAction(email, tenantCode, orgCode, actionCode st
 	return false, nil
 }
 
-func (m *mockAuthRepository) Memberships(email string) ([]types.TenantMembership, error) {
+func (m *mockAuthRepository) GetMemberships(email string) ([]types.TenantMembership, error) {
 	return m.memberships, m.err
 }
 

@@ -98,11 +98,11 @@ func Test_AuthRepository_HasAction_UnknownActionOrUser(t *testing.T) {
 	})
 }
 
-func Test_AuthRepository_Memberships_SpecificOrgAndTenantGrants(t *testing.T) {
+func Test_AuthRepository_GetMemberships_SpecificOrgAndTenantGrants(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
 
-		got, err := repo.Memberships("alice@test.authz")
+		got, err := repo.GetMemberships("alice@test.authz")
 		assert.NoError(t, err)
 		assert.Equal(t, []types.TenantMembership{
 			{
@@ -118,7 +118,7 @@ func Test_AuthRepository_Memberships_SpecificOrgAndTenantGrants(t *testing.T) {
 	})
 }
 
-func Test_AuthRepository_Memberships_WildcardResolvesToAllTenantOrgs(t *testing.T) {
+func Test_AuthRepository_GetMemberships_WildcardResolvesToAllTenantOrgs(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
 
@@ -126,7 +126,7 @@ func Test_AuthRepository_Memberships_WildcardResolvesToAllTenantOrgs(t *testing.
 		radiantOrgs, err := NewOrganizationRepository(env.Postgres).GetOrganizationCodesByTenant("radiant")
 		assert.NoError(t, err)
 
-		got, err := repo.Memberships("wendy@test.authz")
+		got, err := repo.GetMemberships("wendy@test.authz")
 		assert.NoError(t, err)
 		assert.Equal(t, []types.TenantMembership{
 			{
@@ -145,11 +145,11 @@ func Test_AuthRepository_Memberships_WildcardResolvesToAllTenantOrgs(t *testing.
 // pat holds the mixed-scope practitioner role at a specific org (CHUSJ). The action's
 // own scope must decide placement: tenant-scoped actions go to tenant_actions even
 // though the grant is org-specific, and only org-scoped actions go to orgs_by_action.
-func Test_AuthRepository_Memberships_MixedScopeRole_RoutesByActionScope(t *testing.T) {
+func Test_AuthRepository_GetMemberships_MixedScopeRole_RoutesByActionScope(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
 
-		got, err := repo.Memberships("pat@test.authz")
+		got, err := repo.GetMemberships("pat@test.authz")
 		assert.NoError(t, err)
 		assert.Equal(t, []types.TenantMembership{
 			{
@@ -167,11 +167,11 @@ func Test_AuthRepository_Memberships_MixedScopeRole_RoutesByActionScope(t *testi
 
 // tw holds the mixed-scope practitioner role tenant-wide (org_code NULL). Only its
 // tenant-scoped actions apply; its org-scoped actions have no org and are omitted.
-func Test_AuthRepository_Memberships_OrgActionGrantedTenantWide_OmittedFromOrgsByAction(t *testing.T) {
+func Test_AuthRepository_GetMemberships_OrgActionGrantedTenantWide_OmittedFromOrgsByAction(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
 
-		got, err := repo.Memberships("tw@test.authz")
+		got, err := repo.GetMemberships("tw@test.authz")
 		assert.NoError(t, err)
 		assert.Equal(t, []types.TenantMembership{
 			{
@@ -205,14 +205,14 @@ func Test_AuthRepository_HasAction_MixedScopeRole(t *testing.T) {
 
 // carol belongs to both tenants; each tenant's wildcard must resolve to its own orgs.
 // radiant's orgs must not bleed into the org-less tenant_b.
-func Test_AuthRepository_Memberships_MultipleTenantsNoCollision(t *testing.T) {
+func Test_AuthRepository_GetMemberships_MultipleTenantsNoCollision(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
 
 		radiantOrgs, err := NewOrganizationRepository(env.Postgres).GetOrganizationCodesByTenant("radiant")
 		assert.NoError(t, err)
 
-		got, err := repo.Memberships("carol@test.authz")
+		got, err := repo.GetMemberships("carol@test.authz")
 		assert.NoError(t, err)
 		assert.Equal(t, []types.TenantMembership{
 			{
