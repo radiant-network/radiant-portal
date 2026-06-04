@@ -83,7 +83,10 @@ export function useSqonsQBUpdatePreferenceEffect({ appId, sqons, settings }: use
       revalidateOnFocus: false,
     },
   );
-  const { trigger } = useSWRMutation(`query-builder-post-${appId}`, postUserPreference);
+  // Bind the mutation to the GET key so a successful POST automatically
+  // revalidates the cached preference (keeps it fresh for the next mount, e.g.
+  // navigating to another case).
+  const { trigger } = useSWRMutation(`query-builder-get-${appId}`, postUserPreference);
   const hasBeenMountedOnce = useRef(true);
 
   useEffect(() => {
