@@ -110,6 +110,53 @@ func Test_AuthRepository_HasAction_UnknownActionOrUser(t *testing.T) {
 	})
 }
 
+func Test_AuthRepository_HasTenantAccess_Member(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		// alice holds roles in radiant.
+		allowed, err := repo.HasTenantAccess("alice@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.True(t, allowed)
+	})
+}
+
+func Test_AuthRepository_HasTenantAccess_NonMember(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		// alice has no grant in tenant_b.
+		allowed, err := repo.HasTenantAccess("alice@test.authz", "tenant_b")
+		assert.NoError(t, err)
+		assert.False(t, allowed)
+	})
+}
+
+func Test_AuthRepository_HasTenantAccess_MultiTenantMember(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		// carol belongs to both tenants.
+		inRadiant, err := repo.HasTenantAccess("carol@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.True(t, inRadiant)
+
+		inTenantB, err := repo.HasTenantAccess("carol@test.authz", "tenant_b")
+		assert.NoError(t, err)
+		assert.True(t, inTenantB)
+	})
+}
+
+func Test_AuthRepository_HasTenantAccess_UnknownUser(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		allowed, err := repo.HasTenantAccess("ghost@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.False(t, allowed)
+	})
+}
+
 func Test_AuthRepository_GetMemberships_SpecificOrgAndTenantGrants(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)

@@ -94,12 +94,13 @@ func GetMondoTermAutoComplete(repo repository.TermsDAO) gin.HandlerFunc {
 // @Description Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
 // @Tags hpo
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param prefix query string true "Prefix"
 // @Param limit query string false "Limit"
 // @Produce json
 // @Success 200 {array} types.AutoCompleteTerm
 // @Failure 500 {object} types.ApiError
-// @Router /hpo/autocomplete [get]
+// @Router /{tenant}/hpo/autocomplete [get]
 func GetHPOTermAutoComplete(repo repository.TermsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")

@@ -110,7 +110,7 @@ Class | Method | HTTP request | Description
 *DocumentsApi* | [**search_documents**](docs/DocumentsApi.md#search_documents) | **POST** /documents/search | Search documents
 *GenesApi* | [**gene_auto_complete**](docs/GenesApi.md#gene_auto_complete) | **GET** /genes/autocomplete | Get AutoCompleteGene list of matching input string with highlighted
 *GenesApi* | [**gene_search**](docs/GenesApi.md#gene_search) | **POST** /genes/search | Post search GeneResult list of matching input strings
-*HpoApi* | [**hpo_term_auto_complete**](docs/HpoApi.md#hpo_term_auto_complete) | **GET** /hpo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
+*HpoApi* | [**hpo_term_auto_complete**](docs/HpoApi.md#hpo_term_auto_complete) | **GET** /{tenant}/hpo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
 *IgvApi* | [**get_igv**](docs/IgvApi.md#get_igv) | **GET** /igv/{case_id} | Get IGV
 *InterpretationsApi* | [**get_interpretation_germline**](docs/InterpretationsApi.md#get_interpretation_germline) | **GET** /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
 *InterpretationsApi* | [**get_interpretation_germline_deprecated**](docs/InterpretationsApi.md#get_interpretation_germline_deprecated) | **GET** /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline

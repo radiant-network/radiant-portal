@@ -42,6 +42,7 @@ class HpoApi:
     @validate_call
     def hpo_term_auto_complete(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -61,6 +62,8 @@ class HpoApi:
 
         Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -88,6 +91,7 @@ class HpoApi:
         """ # noqa: E501
 
         _param = self._hpo_term_auto_complete_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -114,6 +118,7 @@ class HpoApi:
     @validate_call
     def hpo_term_auto_complete_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -133,6 +138,8 @@ class HpoApi:
 
         Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -160,6 +167,7 @@ class HpoApi:
         """ # noqa: E501
 
         _param = self._hpo_term_auto_complete_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -186,6 +194,7 @@ class HpoApi:
     @validate_call
     def hpo_term_auto_complete_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -205,6 +214,8 @@ class HpoApi:
 
         Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -232,6 +243,7 @@ class HpoApi:
         """ # noqa: E501
 
         _param = self._hpo_term_auto_complete_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -253,6 +265,7 @@ class HpoApi:
 
     def _hpo_term_auto_complete_serialize(
         self,
+        tenant,
         prefix,
         limit,
         _request_auth,
@@ -276,6 +289,8 @@ class HpoApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         if prefix is not None:
             
@@ -306,7 +321,7 @@ class HpoApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/hpo/autocomplete',
+            resource_path='/{tenant}/hpo/autocomplete',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
