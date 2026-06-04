@@ -1,3 +1,9 @@
+# The Ranger stack (ranger-db + the migrate/serve/register phases) lives in its own file, co-located
+# with the image it builds. `include` merges it into this project, so depends_on / networking across
+# files (e.g. ranger-register -> starrocks below) works transparently.
+include:
+  - ranger/compose.yaml
+
 services:
   starrocks:
     image: starrocks/allin1-ubuntu:3.4.2
@@ -58,74 +64,6 @@ services:
     ports:
       - "8080:8080"
       - "9000:9000"
-
-  # Postgres backing Ranger. In production this is an external/managed instance; here it stands in.
-  # It pre-creates the database + the runtime role so the image runs in SeparateDBA mode (no superuser
-  # at runtime). The host is passed to the image via RANGER_DB_HOST, so the name is no longer fixed.
-  ranger-db:
-    image: postgres:14
-    container_name: ranger-db
-    hostname: ranger-db
-    environment:
-      POSTGRES_USER: rangeradmin # runtime DB role Ranger connects as (owns the Ranger tables)
-      POSTGRES_PASSWORD: rangerR0cks!
-      POSTGRES_DB: ranger # database pre-created for SeparateDBA (no create-db at runtime)
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U rangeradmin -d ranger"]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-
-  # Self-contained Ranger image (ranger/Dockerfile): dual-mode Ranger admin with the StarRocks plugin
-  # jars + service-def/instance JSON baked in. Default CMD is "serve": render install.properties from
-  # the RANGER_* env -> setup.sh (SeparateDBA) -> start admin -> register the baked service-def +
-  # service instance. No Solr/ZooKeeper: audit is a no-op; the admin still boots.
-  ranger:
-    build:
-      context: ./ranger
-    container_name: ranger
-    hostname: ranger
-    depends_on:
-      ranger-db:
-        condition: service_healthy
-      starrocks:
-        condition: service_healthy
-    environment:
-      # DB connection (managed-Postgres contract; SeparateDBA -> no runtime superuser)
-      RANGER_DB_HOST: ranger-db
-      RANGER_DB_NAME: ranger
-      RANGER_DB_USER: rangeradmin
-      RANGER_DB_PASSWORD: rangerR0cks!
-      RANGER_DB_ROOT_USER: rangeradmin # unused under SeparateDBA; set = runtime creds
-      RANGER_DB_ROOT_PASSWORD: rangerR0cks!
-      # Independent Ranger account passwords (must be >=8 chars w/ upper+lower+digit)
-      RANGER_ADMIN_PASSWORD: rangerR0cks!
-      RANGER_KEYADMIN_PASSWORD: rangerR0cks!
-      RANGER_TAGSYNC_PASSWORD: rangerR0cks!
-      RANGER_USERSYNC_PASSWORD: rangerR0cks!
-      # StarRocks service-instance connection (injected into starrocks-service.json placeholders).
-      # allin1 root has no password -> empty.
-      RANGER_STARROCKS_USERNAME: root
-      RANGER_STARROCKS_PASSWORD: ""
-      RANGER_STARROCKS_JDBC_URL: jdbc:mysql://starrocks:9030
-      # StarRocks knobs (defaults are baked into the image; set here to document them).
-      # yes -> service-def implClass = RangerServiceStarRocks (UI Test Connection / autocomplete).
-      RANGER_STARROCKS_AUTOCOMPLETE: "yes"
-      RANGER_STARROCKS_SERVICE_NAME: starrocks_test
-      # External admin URL the admin advertises (not the bind address); match the service hostname.
-      RANGER_POLICYMGR_EXTERNAL_URL: http://ranger:6080
-    ports:
-      - "6080:6080"
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -sf http://localhost:6080/login.jsp > /dev/null || exit 1",
-        ]
-      interval: 15s
-      timeout: 5s
-      retries: 30
-      start_period: 60s
 
   api:
     build:
