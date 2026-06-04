@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"log"
 	"slices"
+	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
 
 type AuthRepository struct {
-	db   *gorm.DB
-	orgs OrganizationDAO
+	db *gorm.DB
 }
 
 type AuthRepositoryDAO interface {
@@ -24,7 +24,7 @@ func NewAuthRepository(db *gorm.DB) *AuthRepository {
 		log.Print("AuthRepository: db is nil")
 		return nil
 	}
-	return &AuthRepository{db: db, orgs: NewOrganizationRepository(db)}
+	return &AuthRepository{db: db}
 }
 
 // HasAction reports whether the user holds an action in the given tenant. Routing is
@@ -49,12 +49,13 @@ func (r *AuthRepository) HasAction(email, tenantCode, orgCode, actionCode string
 }
 
 type membershipGrant struct {
-	TenantCode string
-	TenantName string
-	OrgCode    *string
-	ActionCode string
-	RoleCode   string
-	Scope      string
+	TenantCode     string
+	TenantName     string
+	OrgCode        *string
+	ActionCode     string
+	RoleCode       string
+	Scope          string
+	TenantOrgCodes string
 }
 
 // GetMemberships returns the user's effective authorization grouped by tenant.
@@ -65,18 +66,24 @@ type membershipGrant struct {
 func (r *AuthRepository) GetMemberships(email string) ([]types.TenantMembership, error) {
 	var grants []membershipGrant
 	if err := r.db.Raw(`
-		SELECT ur.tenant_code, t.name AS tenant_name, ur.org_code, ra.action_code, a.scope, ra.role_code
+		SELECT ur.tenant_code, t.name AS tenant_name, ur.org_code, ra.action_code, a.scope, ra.role_code,
+		       o.org_codes AS tenant_org_codes
 		FROM user_role ur
 		JOIN tenant t       ON t.code = ur.tenant_code
 		JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
 		JOIN action a       ON a.code = ra.action_code
+		LEFT JOIN (
+			SELECT tenant_code, string_agg(code, ',' ORDER BY code) AS org_codes
+			FROM organization
+			GROUP BY tenant_code
+		) o ON o.tenant_code = ur.tenant_code
 		WHERE ur.email = ?
 		ORDER BY ur.tenant_code, ra.action_code, ur.org_code`, email).Scan(&grants).Error; err != nil {
 		return nil, fmt.Errorf("error loading grants for %q: %w", email, err)
 	}
 
 	// The ORDER BY is load-bearing twice over:
-	//   - each tenant's grants arrive contiguously, so tenantOrgs (fetched once when the
+	//   - each tenant's grants arrive contiguously, so tenantOrgs (read once when the
 	//     tenant is first seen) stays correct for the rest of that tenant's block;
 	//   - actions and orgs accumulate in sorted order, so no separate sort pass is needed.
 	memberships := []types.TenantMembership{}
@@ -87,11 +94,7 @@ func (r *AuthRepository) GetMemberships(email string) ([]types.TenantMembership,
 		if !exists {
 			index = len(memberships)
 			indexByTenant[grant.TenantCode] = index
-			codes, err := r.orgs.GetOrganizationCodesByTenant(grant.TenantCode)
-			if err != nil {
-				return nil, err
-			}
-			tenantOrgs = codes
+			tenantOrgs = splitOrgCodes(grant.TenantOrgCodes)
 			memberships = append(memberships, types.TenantMembership{
 				Code:          grant.TenantCode,
 				Name:          grant.TenantName,
@@ -124,6 +127,15 @@ func applyGrant(membership *types.TenantMembership, grant membershipGrant, tenan
 			membership.OrgsByAction[grant.ActionCode] = appendUnique(membership.OrgsByAction[grant.ActionCode], *grant.OrgCode)
 		}
 	}
+}
+
+// splitOrgCodes turns the query's string_agg'd "a,b,c" into a slice. An empty string
+// (a tenant with no orgs, where string_agg yields NULL) becomes an empty slice, not [""].
+func splitOrgCodes(aggregated string) []string {
+	if aggregated == "" {
+		return []string{}
+	}
+	return strings.Split(aggregated, ",")
 }
 
 func appendUnique(values []string, value string) []string {

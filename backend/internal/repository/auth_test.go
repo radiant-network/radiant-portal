@@ -8,6 +8,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_splitOrgCodes_Empty(t *testing.T) {
+	assert.Equal(t, []string{}, splitOrgCodes(""))
+}
+
+func Test_splitOrgCodes_Single(t *testing.T) {
+	assert.Equal(t, []string{"CHOP"}, splitOrgCodes("CHOP"))
+}
+
+func Test_splitOrgCodes_Multiple(t *testing.T) {
+	assert.Equal(t, []string{"CHOP", "CQGC", "UCSF"}, splitOrgCodes("CHOP,CQGC,UCSF"))
+}
+
 func Test_appendUnique_AddsNewValue(t *testing.T) {
 	assert.Equal(t, []string{"a"}, appendUnique(nil, "a"))
 	assert.Equal(t, []string{"a", "b"}, appendUnique([]string{"a"}, "b"))
@@ -123,7 +135,8 @@ func Test_AuthRepository_GetMemberships_WildcardResolvesToAllTenantOrgs(t *testi
 		repo := NewAuthRepository(env.Postgres)
 
 		// Expected wildcard expansion is exactly the tenant's full org list.
-		radiantOrgs, err := NewOrganizationRepository(env.Postgres).GetOrganizationCodesByTenant("radiant")
+		var radiantOrgs []string
+		err := env.Postgres.Raw(`SELECT code FROM organization WHERE tenant_code = ? ORDER BY code`, "radiant").Scan(&radiantOrgs).Error
 		assert.NoError(t, err)
 
 		got, err := repo.GetMemberships("wendy@test.authz")
@@ -209,7 +222,8 @@ func Test_AuthRepository_GetMemberships_MultipleTenantsNoCollision(t *testing.T)
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
 
-		radiantOrgs, err := NewOrganizationRepository(env.Postgres).GetOrganizationCodesByTenant("radiant")
+		var radiantOrgs []string
+		err := env.Postgres.Raw(`SELECT code FROM organization WHERE tenant_code = ? ORDER BY code`, "radiant").Scan(&radiantOrgs).Error
 		assert.NoError(t, err)
 
 		got, err := repo.GetMemberships("carol@test.authz")

@@ -22,14 +22,6 @@ func (m *mockOrgDAO) GetOrganizationByCode(code string) (*types.Organization, er
 	return nil, args.Error(1)
 }
 
-func (m *mockOrgDAO) GetOrganizationCodesByTenant(tenantCode string) ([]string, error) {
-	args := m.Called(tenantCode)
-	if codes, ok := args.Get(0).([]string); ok {
-		return codes, args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-
 type mockSampleDAO struct{ mock.Mock }
 
 func (m *mockSampleDAO) CreateSample(*types.Sample) (*types.Sample, error) {

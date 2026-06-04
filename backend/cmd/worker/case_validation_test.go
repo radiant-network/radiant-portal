@@ -143,13 +143,6 @@ func (m *CaseValidationMockRepo) GetOrganizationByCode(organizationCode string) 
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetOrganizationCodesByTenant(tenantCode string) ([]string, error) {
-	if tenantCode == "radiant" {
-		return []string{"LAB-1", "LAB-2"}, nil
-	}
-	return nil, nil
-}
-
 func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*repository.Patient, error) {
 	if organizationCode == "LAB-1" && submitterPatientId == "PAT-1" {
 		return &repository.Patient{
