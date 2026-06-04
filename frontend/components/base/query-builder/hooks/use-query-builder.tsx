@@ -454,6 +454,10 @@ export function qBReducer(context: IQBContext, action: ActionType) {
 
       // field doesn't exist in query, add it
       if (fieldIndex < 0) {
+        // does nothing if added content is empty
+        if (action.payload.content.value.length === 0) {
+          return context;
+        }
         return {
           ...context,
           sqons: context.sqons.map(sqon => {

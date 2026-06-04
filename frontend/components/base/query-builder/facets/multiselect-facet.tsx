@@ -93,7 +93,6 @@ function sortAggregates(qbValues: string[]) {
 /**
  * Multi select facet
  * - Allow to select multi string value
- * @TODO: https://d3b.atlassian.net/browse/SJRA-1241 update aggregate empty check when task is done
  */
 export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps) {
   const { t, sanitize, lazyTranslate } = useI18n();
@@ -124,6 +123,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
 
   const [items, setItems] = useState<MultiSelectAggregation[]>(aggregates);
   const [selectedItems, setSelectedItems] = useState<string[]>(defaultItems);
+  const [searchValue, setSearchValue] = useState<string>('');
   const [visibleItemsCount, setVisibleItemsCount] = useState(
     getVisibleItemsCount((apiAggregates ?? []).length, maxVisibleItems),
   );
@@ -134,12 +134,12 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
   const handleSearch = useCallback(
     (search: string) => {
       if (!search.trim()) {
-        setItems(apiAggregates);
-        setVisibleItemsCount(getVisibleItemsCount(apiAggregates.length, maxVisibleItems));
+        setItems(aggregates);
+        setVisibleItemsCount(getVisibleItemsCount(aggregates.length, maxVisibleItems));
         return;
       }
 
-      const results = searchOptions(search, apiAggregates);
+      const results = searchOptions(search, aggregates);
       setItems(results);
 
       if (maxVisibleItems > results.length) {
@@ -148,7 +148,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
         setVisibleItemsCount(maxVisibleItems);
       }
     },
-    [maxVisibleItems, apiAggregates],
+    [maxVisibleItems, aggregates],
   );
 
   /**
@@ -213,6 +213,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
           op: operator,
         },
       });
+      setSearchValue('');
     },
     [selectedItems, appId, field.key],
   );
@@ -238,6 +239,13 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
       setVisibleItemsCount(getVisibleItemsCount((apiAggregates ?? []).length, maxVisibleItems));
     }
   }, [isLoading, apiAggregates]);
+
+  /**
+   * Search value
+   */
+  useEffect(() => {
+    handleSearch(searchValue);
+  }, [searchValue]);
 
   /**
    * Update only when field has been changed from a remote component
@@ -270,7 +278,8 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
           type="text"
           placeholder={t('common.filters.search.placeholder')}
           className="w-full text-xs mt-3 py-1.5 px-3 mb-4 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-          onChange={e => handleSearch(e.target.value)}
+          onChange={e => setSearchValue(e.target.value)}
+          value={searchValue}
           autoFocus
         />
 
