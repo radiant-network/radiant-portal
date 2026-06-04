@@ -1948,11 +1948,12 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/hpo/autocomplete?prefix=blood&limit=10",
+              "raw": "{{radiant-api-url}}/{{tenant}}/hpo/autocomplete?prefix=blood&limit=10",
               "host": [
                 "{{radiant-api-url}}"
               ],
               "path": [
+                "{{tenant}}",
                 "hpo",
                 "autocomplete"
               ],
@@ -2943,6 +2944,13 @@
           "response": []
         }
       ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "tenant",
+      "value": "radiant",
+      "type": "string"
     }
   ]
 }
