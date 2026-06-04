@@ -21,7 +21,7 @@ type AuthRepositoryDAO interface {
 
 func NewAuthRepository(db *gorm.DB) *AuthRepository {
 	if db == nil {
-		log.Fatal("AuthRepository: db is nil")
+		log.Print("AuthRepository: db is nil")
 		return nil
 	}
 	return &AuthRepository{db: db, orgs: NewOrganizationRepository(db)}
