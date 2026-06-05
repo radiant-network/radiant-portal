@@ -157,6 +157,29 @@ func Test_AuthRepository_HasTenantAccess_UnknownUser(t *testing.T) {
 	})
 }
 
+// HasTenantAccess is org-agnostic: any grant shape makes the caller a member. These guard
+// against a future regression that accidentally filters HasTenantAccess by org_code.
+func Test_AuthRepository_HasTenantAccess_OrgScopeShapesAllCountAsMember(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		// wendy's only grant is a wildcard ('*') org role.
+		wildcardOnly, err := repo.HasTenantAccess("wendy@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.True(t, wildcardOnly, "wildcard-org grant counts as membership")
+
+		// dan's only grant is a single specific-org role (CHUSJ).
+		specificOrgOnly, err := repo.HasTenantAccess("dan@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.True(t, specificOrgOnly, "specific-org grant counts as membership")
+
+		// alice holds a tenant-wide (org_code NULL) grant alongside an org one.
+		tenantWide, err := repo.HasTenantAccess("alice@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.True(t, tenantWide, "tenant-wide (NULL org) grant counts as membership")
+	})
+}
+
 func Test_AuthRepository_GetMemberships_SpecificOrgAndTenantGrants(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)

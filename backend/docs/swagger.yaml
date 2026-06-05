@@ -2873,6 +2873,18 @@ paths:
                   $ref: '#/components/schemas/AutoCompleteTerm'
                 type: array
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "500":
           content:
             application/json:

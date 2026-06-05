@@ -101,7 +101,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	// role in that tenant (cross-tenant access → 403). The resolved tenant is stored in context.
 	// Enforcement is gated by TENANT_ENFORCEMENT_ENABLED (default off) so routing can ship
 	// before users are backfilled into user_role; flip it on once the backfill lands.
-	enforceTenantAccess := utils.GetEnvOrDefault("TENANT_ENFORCEMENT_ENABLED", "false") == "true"
+	enforceTenantAccess := utils.GetBoolEnvOrDefault("TENANT_ENFORCEMENT_ENABLED", false)
 	tenantRoutes := privateRoutes.Group("/:tenant")
 	tenantRoutes.Use(server.RequireTenantAccess(auth, repoAuth, enforceTenantAccess))
 

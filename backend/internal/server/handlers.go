@@ -99,6 +99,8 @@ func GetMondoTermAutoComplete(repo repository.TermsDAO) gin.HandlerFunc {
 // @Param limit query string false "Limit"
 // @Produce json
 // @Success 200 {array} types.AutoCompleteTerm
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/hpo/autocomplete [get]
 func GetHPOTermAutoComplete(repo repository.TermsDAO) gin.HandlerFunc {

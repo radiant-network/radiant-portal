@@ -102,6 +102,8 @@ class HpoApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutoCompleteTerm]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -178,6 +180,8 @@ class HpoApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutoCompleteTerm]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -254,6 +258,8 @@ class HpoApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutoCompleteTerm]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
