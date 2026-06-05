@@ -93,8 +93,17 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	privateRoutes := r.Group("/")
 	privateRoutes.Use(roleAccessMiddleware)
 
+	// Global routes (not tenant-scoped) stay on privateRoutes: /auth/*, /users/*.
 	authGroup := privateRoutes.Group("/auth")
 	authGroup.GET("/me", server.GetMeHandler(repoAuth, auth))
+
+	// Tenant-scoped routes live under /:tenant and require the caller to hold at least one
+	// role in that tenant (cross-tenant access → 403). The resolved tenant is stored in context.
+	// Enforcement is gated by TENANT_ENFORCEMENT_ENABLED (default off) so routing can ship
+	// before users are backfilled into user_role; flip it on once the backfill lands.
+	enforceTenantAccess := utils.GetBoolEnvOrDefault("TENANT_ENFORCEMENT_ENABLED", false)
+	tenantRoutes := privateRoutes.Group("/:tenant")
+	tenantRoutes.Use(server.RequireTenantAccess(auth, repoAuth, enforceTenantAccess))
 
 	casesGroup := privateRoutes.Group("/cases")
 	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))
@@ -109,7 +118,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	geneGroup.GET("/autocomplete", server.GetGeneAutoCompleteHandler(repoGenes))
 	geneGroup.POST("/search", server.SearchGenesHandler(repoGenes))
 
-	hpoGroup := privateRoutes.Group("/hpo")
+	hpoGroup := tenantRoutes.Group("/hpo")
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))
 
 	igvGroup := privateRoutes.Group("/igv")

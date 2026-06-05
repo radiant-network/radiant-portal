@@ -16,6 +16,7 @@ type AuthRepository struct {
 
 type AuthRepositoryDAO interface {
 	HasAction(email, tenantCode, orgCode, actionCode string) (bool, error)
+	HasTenantAccess(email, tenantCode string) (bool, error)
 	GetMemberships(email string) ([]types.TenantMembership, error)
 }
 
@@ -44,6 +45,22 @@ func (r *AuthRepository) HasAction(email, tenantCode, orgCode, actionCode string
 		)`, email, tenantCode, actionCode, types.ActionScopeTenant, types.ActionScopeOrg, orgCode).Scan(&allowed).Error
 	if err != nil {
 		return false, fmt.Errorf("error checking action %q for %q: %w", actionCode, email, err)
+	}
+	return allowed, nil
+}
+
+// HasTenantAccess reports whether the user holds at least one role in the given tenant.
+// It backs the tenant-routing middleware: any grant (org-scoped or tenant-wide) makes the
+// caller a member of the tenant.
+func (r *AuthRepository) HasTenantAccess(email, tenantCode string) (bool, error) {
+	var allowed bool
+	err := r.db.Raw(`
+		SELECT EXISTS (
+			SELECT 1 FROM user_role ur
+			WHERE ur.email = ? AND ur.tenant_code = ?
+		)`, email, tenantCode).Scan(&allowed).Error
+	if err != nil {
+		return false, fmt.Errorf("error checking tenant access for %q in %q: %w", email, tenantCode, err)
 	}
 	return allowed, nil
 }

@@ -38,7 +38,7 @@ type S3Location struct {
 func NewS3PreSigner() *S3PreSigner {
 	endpoint := GetEnvOrDefault("AWS_ENDPOINT_URL", "")
 	region := GetEnvOrDefault("AWS_REGION", DefaultAwsRegion)
-	useSSL := GetEnvOrDefault("AWS_USE_SSL", "true") == "true"
+	useSSL := GetBoolEnvOrDefault("AWS_USE_SSL", true)
 
 	expireStr := GetEnvOrDefault("S3_PRESIGNED_URL_EXPIRE", DefaultS3PresignedUrlExpire)
 	expire, err := time.ParseDuration(expireStr)
@@ -136,7 +136,7 @@ type S3Store struct {
 func NewS3Store() (FileMetadataGetter, error) {
 	endpoint := GetEnvOrDefault("AWS_ENDPOINT_URL", "")
 	region := GetEnvOrDefault("AWS_REGION", DefaultAwsRegion)
-	useSSL := GetEnvOrDefault("AWS_USE_SSL", "true") == "true"
+	useSSL := GetBoolEnvOrDefault("AWS_USE_SSL", true)
 
 	forcePathStyle := endpoint != ""
 	awsConfig := &aws.Config{

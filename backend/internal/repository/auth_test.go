@@ -110,6 +110,76 @@ func Test_AuthRepository_HasAction_UnknownActionOrUser(t *testing.T) {
 	})
 }
 
+func Test_AuthRepository_HasTenantAccess_Member(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		// alice holds roles in radiant.
+		allowed, err := repo.HasTenantAccess("alice@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.True(t, allowed)
+	})
+}
+
+func Test_AuthRepository_HasTenantAccess_NonMember(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		// alice has no grant in tenant_b.
+		allowed, err := repo.HasTenantAccess("alice@test.authz", "tenant_b")
+		assert.NoError(t, err)
+		assert.False(t, allowed)
+	})
+}
+
+func Test_AuthRepository_HasTenantAccess_MultiTenantMember(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		// carol belongs to both tenants.
+		inRadiant, err := repo.HasTenantAccess("carol@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.True(t, inRadiant)
+
+		inTenantB, err := repo.HasTenantAccess("carol@test.authz", "tenant_b")
+		assert.NoError(t, err)
+		assert.True(t, inTenantB)
+	})
+}
+
+func Test_AuthRepository_HasTenantAccess_UnknownUser(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		allowed, err := repo.HasTenantAccess("ghost@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.False(t, allowed)
+	})
+}
+
+// HasTenantAccess is org-agnostic: any grant shape makes the caller a member. These guard
+// against a future regression that accidentally filters HasTenantAccess by org_code.
+func Test_AuthRepository_HasTenantAccess_OrgScopeShapesAllCountAsMember(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		// wendy's only grant is a wildcard ('*') org role.
+		wildcardOnly, err := repo.HasTenantAccess("wendy@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.True(t, wildcardOnly, "wildcard-org grant counts as membership")
+
+		// dan's only grant is a single specific-org role (CHUSJ).
+		specificOrgOnly, err := repo.HasTenantAccess("dan@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.True(t, specificOrgOnly, "specific-org grant counts as membership")
+
+		// alice holds a tenant-wide (org_code NULL) grant alongside an org one.
+		tenantWide, err := repo.HasTenantAccess("alice@test.authz", "radiant")
+		assert.NoError(t, err)
+		assert.True(t, tenantWide, "tenant-wide (NULL org) grant counts as membership")
+	})
+}
+
 func Test_AuthRepository_GetMemberships_SpecificOrgAndTenantGrants(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)

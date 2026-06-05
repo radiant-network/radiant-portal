@@ -7306,15 +7306,19 @@ export const HpoApiAxiosParamCreator = function (configuration?: Configuration) 
         /**
          * Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
          * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        hpoTermAutoComplete: async (prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        hpoTermAutoComplete: async (tenant: string, prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('hpoTermAutoComplete', 'tenant', tenant)
             // verify required parameter 'prefix' is not null or undefined
             assertParamExists('hpoTermAutoComplete', 'prefix', prefix)
-            const localVarPath = `/hpo/autocomplete`;
+            const localVarPath = `/{tenant}/hpo/autocomplete`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -7362,13 +7366,14 @@ export const HpoApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
          * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async hpoTermAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutoCompleteTerm>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.hpoTermAutoComplete(prefix, limit, options);
+        async hpoTermAutoComplete(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutoCompleteTerm>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.hpoTermAutoComplete(tenant, prefix, limit, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['HpoApi.hpoTermAutoComplete']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -7386,13 +7391,14 @@ export const HpoApiFactory = function (configuration?: Configuration, basePath?:
         /**
          * Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
          * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        hpoTermAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutoCompleteTerm>> {
-            return localVarFp.hpoTermAutoComplete(prefix, limit, options).then((request) => request(axios, basePath));
+        hpoTermAutoComplete(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutoCompleteTerm>> {
+            return localVarFp.hpoTermAutoComplete(tenant, prefix, limit, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -7407,14 +7413,15 @@ export class HpoApi extends BaseAPI {
     /**
      * Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
      * @summary Get AutoCompleteTerm list of matching input string with highlighted
+     * @param {string} tenant Tenant code
      * @param {string} prefix Prefix
      * @param {string} [limit] Limit
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HpoApi
      */
-    public hpoTermAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
-        return HpoApiFp(this.configuration).hpoTermAutoComplete(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    public hpoTermAutoComplete(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
+        return HpoApiFp(this.configuration).hpoTermAutoComplete(tenant, prefix, limit, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

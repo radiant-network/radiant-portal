@@ -117,6 +117,7 @@ Copy `.env.template` → `.env`. Key variables:
 | `PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD` | PostgreSQL | localhost:5432 |
 | `API_PORT` | API listen port | 8090 |
 | `KEYCLOAK_HOST/REALM/CLIENT` | Keycloak | localhost:8080 |
+| `TENANT_ENFORCEMENT_ENABLED` | Enforce tenant membership on `/{tenant}/*` routes (403 on cross-tenant). Off by default so routing can ship before `user_role` is backfilled; set `true` once it is. | false |
 | `AWS_ENDPOINT_URL/REGION/ACCESS_KEY_ID/SECRET_ACCESS_KEY` | S3/MinIO | — |
 | `S3_PRESIGNED_URL_EXPIRE` | URL TTL | 60m |
 | `PUBMED_BASE_URL` | PubMed API | ncbi.nlm.nih.gov |

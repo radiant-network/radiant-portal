@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**hpo_term_auto_complete**](HpoApi.md#hpo_term_auto_complete) | **GET** /hpo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
+[**hpo_term_auto_complete**](HpoApi.md#hpo_term_auto_complete) | **GET** /{tenant}/hpo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
 
 
 # **hpo_term_auto_complete**
-> List[AutoCompleteTerm] hpo_term_auto_complete(prefix, limit=limit)
+> List[AutoCompleteTerm] hpo_term_auto_complete(tenant, prefix, limit=limit)
 
 Get AutoCompleteTerm list of matching input string with highlighted
 
@@ -44,12 +44,13 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.HpoApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     prefix = 'prefix_example' # str | Prefix
     limit = 'limit_example' # str | Limit (optional)
 
     try:
         # Get AutoCompleteTerm list of matching input string with highlighted
-        api_response = api_instance.hpo_term_auto_complete(prefix, limit=limit)
+        api_response = api_instance.hpo_term_auto_complete(tenant, prefix, limit=limit)
         print("The response of HpoApi->hpo_term_auto_complete:\n")
         pprint(api_response)
     except Exception as e:
@@ -63,6 +64,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **prefix** | **str**| Prefix | 
  **limit** | **str**| Limit | [optional] 
 
@@ -84,6 +86,8 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
