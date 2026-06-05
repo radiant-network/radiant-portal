@@ -124,6 +124,19 @@ make generate-client-all
 docker compose up
 ```
 
+### Ranger (StarRocks authorization)
+
+The Apache Ranger image and its Helm chart live in their own repository:
+[`radiant-network/ranger-starrocks`](https://github.com/radiant-network/ranger-starrocks).
+
+For local dev you don't need that repo checked out — `backend/ranger-compose.yml` runs the **published**
+image (`ghcr.io/radiant-network/ranger-starrocks`) in its three phases (migrate / serve / register), and
+`backend/docker-compose.yml` includes it so `docker compose up` brings Ranger up with the rest of the
+stack. The admin UI is exposed on http://localhost:6080.
+
+- To test a local or alternate build, override the image: `RANGER_IMAGE=ranger-dual-mode docker compose up`.
+- If you don't need Ranger locally, comment out the `include:` at the top of `backend/docker-compose.yml`.
+
 ## Run frontend
 
 Then use this .env in front-end

@@ -1,0 +1,110 @@
+# Local-dev Ranger stack for the monorepo. The Ranger image + Helm chart now live in their own repo
+# (radiant-network/ranger-starrocks); here we just run the PUBLISHED image in its three phases so
+# `docker compose up` brings Ranger up alongside the rest of the backend stack -- no build, no sibling
+# checkout needed. Included by docker-compose.yml, so depends_on / networking with starrocks (defined
+# there) works transparently. Override the image with RANGER_IMAGE to test a local/other build.
+services:
+  # Postgres backing Ranger. Pre-creates the database + runtime role so the image runs in SeparateDBA
+  # mode (no superuser at runtime). In production this is an external/managed instance.
+  ranger-db:
+    image: postgres:14
+    container_name: ranger-db
+    hostname: ranger-db
+    environment:
+      POSTGRES_USER: rangeradmin # runtime DB role Ranger connects as (owns the Ranger tables)
+      POSTGRES_PASSWORD: rangerR0cks!
+      POSTGRES_DB: ranger # database pre-created for SeparateDBA (no create-db at runtime)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rangeradmin -d ranger"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  # ----------------------------------------------------------------------------------------------------
+  # Apache Ranger in the 3 phases that mirror the production k8s topology, all running the SAME published
+  # image and picking a phase via the mode argument (migrate / serve / register). The split separates
+  # secrets by phase:
+  #   - migrate  : DB creds + ALL Ranger account passwords (writes them into the DB, once).
+  #   - serve    : ONLY DB creds -- NO Ranger user passwords (web-user auth resolves against the DB).
+  #   - register : the admin password + StarRocks connection creds -- NO DB creds.
+  # In k8s: migrate = pre-deploy Job, serve = Deployment, register = post-deploy Job (see the Helm chart).
+  # ----------------------------------------------------------------------------------------------------
+
+  # Phase 1 (run-once): create/patch the Ranger schema (SeparateDBA) and set the account passwords in
+  # the DB, then exit 0.
+  ranger-migrate:
+    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/ranger-starrocks:latest}
+    container_name: ranger-migrate
+    command: ["migrate"]
+    restart: "no"
+    depends_on:
+      ranger-db:
+        condition: service_healthy
+    environment:
+      RANGER_DB_HOST: ranger-db
+      RANGER_DB_NAME: ranger
+      RANGER_DB_USER: rangeradmin
+      RANGER_DB_PASSWORD: rangerR0cks!
+      RANGER_DB_ROOT_USER: rangeradmin # unused under SeparateDBA; set = runtime creds
+      RANGER_DB_ROOT_PASSWORD: rangerR0cks!
+      # Account passwords (>=8 chars, upper+lower+digit) -- written to the DB by setup.sh, once.
+      RANGER_ADMIN_PASSWORD: rangerR0cks!
+      RANGER_KEYADMIN_PASSWORD: rangerR0cks!
+      RANGER_TAGSYNC_PASSWORD: rangerR0cks!
+      RANGER_USERSYNC_PASSWORD: rangerR0cks!
+
+  # Phase 2 (long-running): the admin server. Runs with ONLY DB credentials.
+  # RANGER_REGISTER_ON_SERVE=false delegates service registration to the register phase below.
+  ranger:
+    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/ranger-starrocks:latest}
+    container_name: ranger
+    hostname: ranger
+    command: ["serve"]
+    depends_on:
+      ranger-db:
+        condition: service_healthy
+      ranger-migrate:
+        condition: service_completed_successfully
+    environment:
+      RANGER_DB_HOST: ranger-db
+      RANGER_DB_NAME: ranger
+      RANGER_DB_USER: rangeradmin
+      RANGER_DB_PASSWORD: rangerR0cks!
+      RANGER_REGISTER_ON_SERVE: "false"
+      # External admin URL advertised in config (not the bind address); match the service hostname.
+      RANGER_POLICYMGR_EXTERNAL_URL: http://ranger:6080
+    ports:
+      - "6080:6080"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -sf http://localhost:6080/login.jsp > /dev/null || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  # Phase 3 (run-once, after serve is healthy): register the StarRocks service-def + service against the
+  # running admin via REST. Holds the admin password + StarRocks connection creds; NO DB creds.
+  ranger-register:
+    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/ranger-starrocks:latest}
+    container_name: ranger-register
+    command: ["register"]
+    restart: "no"
+    depends_on:
+      ranger:
+        condition: service_healthy
+    environment:
+      RANGER_ADMIN_URL: http://ranger:6080
+      RANGER_ADMIN_USER: admin
+      RANGER_ADMIN_PASSWORD: rangerR0cks!
+      # StarRocks service-instance connection (substituted into the baked starrocks-service.json).
+      # allin1 root has no password -> empty.
+      RANGER_STARROCKS_USERNAME: root
+      RANGER_STARROCKS_PASSWORD: ""
+      RANGER_STARROCKS_JDBC_URL: jdbc:mysql://starrocks:9030
+      RANGER_STARROCKS_SERVICE_NAME: starrocks_test
+      # yes -> service-def implClass = RangerServiceStarRocks (UI Test Connection / autocomplete).
+      RANGER_STARROCKS_AUTOCOMPLETE: "yes"
