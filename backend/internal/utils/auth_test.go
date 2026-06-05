@@ -202,6 +202,18 @@ func Test_RetrieveEmailFromToken_ValidKeycloakToken(t *testing.T) {
 	assert.Equal(t, "testuser@example.com", *email)
 }
 
+func Test_RetrieveEmailFromToken_LowerCasesEmail(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", ginkeycloak.KeyCloakToken{Email: "TestUser@Example.COM"})
+
+	auth := KeycloakAuth{}
+	email, err := auth.RetrieveEmailFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, email)
+	assert.Equal(t, "testuser@example.com", *email, "email is normalized to lower case")
+}
+
 func Test_RetrieveEmailFromToken_ValidJWT(t *testing.T) {
 	c := gin.Context{}
 

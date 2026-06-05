@@ -77,7 +77,11 @@ func (auth KeycloakAuth) RetrieveEmailFromToken(c *gin.Context) (*string, error)
 	if err != nil {
 		return nil, err
 	}
-	return &token.Email, nil
+	// Normalize to lower case so authz lookups keyed by email (HasAction, HasTenantAccess,
+	// GetMemberships) match regardless of the case the IdP emits. The user backfill must
+	// store emails lower-cased too.
+	email := strings.ToLower(token.Email)
+	return &email, nil
 }
 
 func (auth KeycloakAuth) RetrieveFullNameFromToken(c *gin.Context) (*string, error) {
