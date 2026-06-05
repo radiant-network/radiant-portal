@@ -1,11 +1,11 @@
-# Ranger stack, included by ../docker-compose.yml. Co-located with the image it builds (Dockerfile,
-# entrypoint, scripts, baked StarRocks JSON in this same directory). Paths here are relative to this
-# file, so build.context is "." (backend/ranger). `include` merges these into the same Compose project,
-# so depends_on / networking with the services in the parent file (e.g. starrocks) works transparently.
+# Local-dev Ranger stack for the monorepo. The Ranger image + Helm chart now live in their own repo
+# (radiant-network/ranger-starrocks); here we just run the PUBLISHED image in its three phases so
+# `docker compose up` brings Ranger up alongside the rest of the backend stack -- no build, no sibling
+# checkout needed. Included by docker-compose.yml, so depends_on / networking with starrocks (defined
+# there) works transparently. Override the image with RANGER_IMAGE to test a local/other build.
 services:
-  # Postgres backing Ranger. In production this is an external/managed instance; here it stands in.
-  # It pre-creates the database + the runtime role so the image runs in SeparateDBA mode (no superuser
-  # at runtime). The host is passed to the image via RANGER_DB_HOST, so the name is no longer fixed.
+  # Postgres backing Ranger. Pre-creates the database + runtime role so the image runs in SeparateDBA
+  # mode (no superuser at runtime). In production this is an external/managed instance.
   ranger-db:
     image: postgres:14
     container_name: ranger-db
@@ -21,25 +21,19 @@ services:
       retries: 30
 
   # ----------------------------------------------------------------------------------------------------
-  # Apache Ranger, split into the 3 phases that mirror the production k8s topology. All three run the
-  # SAME self-contained image (./Dockerfile: dual-mode admin + baked StarRocks plugin jars and
-  # service-def/instance JSON), picking a phase via the mode argument (migrate / serve / register). The
-  # image is built once, on ranger-migrate -- the root of the depends_on chain -- and reused by the
-  # other two as `image: ranger-dual-mode`.
-  #
-  # The split exists to separate secrets by phase:
-  #   - migrate  : DB creds + ALL Ranger account passwords (it writes them into the DB, once).
-  #   - serve    : ONLY DB creds -- NO Ranger user passwords (web-user auth is resolved against the DB).
+  # Apache Ranger in the 3 phases that mirror the production k8s topology, all running the SAME published
+  # image and picking a phase via the mode argument (migrate / serve / register). The split separates
+  # secrets by phase:
+  #   - migrate  : DB creds + ALL Ranger account passwords (writes them into the DB, once).
+  #   - serve    : ONLY DB creds -- NO Ranger user passwords (web-user auth resolves against the DB).
   #   - register : the admin password + StarRocks connection creds -- NO DB creds.
-  # In k8s: migrate = pre-deploy Job, serve = Deployment, register = post-deploy Job.
+  # In k8s: migrate = pre-deploy Job, serve = Deployment, register = post-deploy Job (see the Helm chart).
   # ----------------------------------------------------------------------------------------------------
 
   # Phase 1 (run-once): create/patch the Ranger schema (SeparateDBA) and set the account passwords in
-  # the DB, then exit 0. Holds every account password; nothing long-running depends on it staying up.
+  # the DB, then exit 0.
   ranger-migrate:
-    build:
-      context: .
-    image: ranger-dual-mode
+    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/ranger-starrocks:latest}
     container_name: ranger-migrate
     command: ["migrate"]
     restart: "no"
@@ -59,11 +53,10 @@ services:
       RANGER_TAGSYNC_PASSWORD: rangerR0cks!
       RANGER_USERSYNC_PASSWORD: rangerR0cks!
 
-  # Phase 2 (long-running): the admin server. Runs with ONLY DB credentials -- no Ranger user passwords
-  # (auth is resolved against the DB that migrate populated). RANGER_REGISTER_ON_SERVE=false delegates
-  # service registration to the separate register phase below.
+  # Phase 2 (long-running): the admin server. Runs with ONLY DB credentials.
+  # RANGER_REGISTER_ON_SERVE=false delegates service registration to the register phase below.
   ranger:
-    image: ranger-dual-mode
+    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/ranger-starrocks:latest}
     container_name: ranger
     hostname: ranger
     command: ["serve"]
@@ -94,10 +87,9 @@ services:
       start_period: 60s
 
   # Phase 3 (run-once, after serve is healthy): register the StarRocks service-def + service against the
-  # running admin via its REST API. Holds the admin password + StarRocks connection creds; NO DB creds.
-  # Idempotent (service-def create-or-update, service create-only), so it is safe to re-run.
+  # running admin via REST. Holds the admin password + StarRocks connection creds; NO DB creds.
   ranger-register:
-    image: ranger-dual-mode
+    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/ranger-starrocks:latest}
     container_name: ranger-register
     command: ["register"]
     restart: "no"

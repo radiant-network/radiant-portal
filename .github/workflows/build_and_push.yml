@@ -4,7 +4,6 @@ name: Build and Push Docker Image
 env:
   BACKEND_API_IMAGE_NAME: radiant-api
   BACKEND_WORKER_IMAGE_NAME: radiant-worker
-  RANGER_IMAGE_NAME: ranger-starrocks
   FRONTEND_IMAGE_NAME: radiant-portal
   NAMESPACE: radiant-network
   REGISTRY: ghcr.io
@@ -99,38 +98,6 @@ jobs:
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.BACKEND_WORKER_IMAGE_NAME }}
           subject-digest: ${{ steps.push_backend_worker.outputs.digest }}
-          push-to-registry: true
-
-      - name: Extract metadata (tags, labels) for Docker image RANGER
-        id: meta_ranger
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.RANGER_IMAGE_NAME }}
-          tags: |
-            type=semver,pattern={{raw}}
-            type=semver,pattern={{version}}
-            type=sha,format=short
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
-            type=raw,value={{sha}}-{{date 'X'}},enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
-
-          flavor: |
-            latest=auto
-
-      - name: Build and push Docker image RANGER
-        id: push_ranger
-        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
-        with:
-          context: ./backend/ranger
-          file: ./backend/ranger/Dockerfile
-          push: true
-          tags: ${{ steps.meta_ranger.outputs.tags }}
-          labels: ${{ steps.meta_ranger.outputs.labels }}
-
-      - name: Generate artifact attestation RANGER
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.RANGER_IMAGE_NAME }}
-          subject-digest: ${{ steps.push_ranger.outputs.digest }}
           push-to-registry: true
 
       - name: Extract metadata (tags, labels) for Docker image frontend

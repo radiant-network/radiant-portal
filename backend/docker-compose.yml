@@ -1,8 +1,9 @@
-# The Ranger stack (ranger-db + the migrate/serve/register phases) lives in its own file, co-located
-# with the image it builds. `include` merges it into this project, so depends_on / networking across
-# files (e.g. ranger-register -> starrocks below) works transparently.
+# The Ranger image + Helm chart now live in their own repo (radiant-network/ranger-starrocks). The
+# local-dev stack here runs the published image in its 3 phases via ranger-compose.yml. `include`
+# merges it into this project, so cross-file networking (e.g. ranger-register -> starrocks below) works.
+# If you don't need Ranger locally, comment out the include below.
 include:
-  - ranger/compose.yaml
+  - ranger-compose.yml
 
 services:
   starrocks:
