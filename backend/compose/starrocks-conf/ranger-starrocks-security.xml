@@ -1,0 +1,52 @@
+<configuration>
+  <property>
+    <name>ranger.plugin.starrocks.service.name</name>
+    <value>starrocks</value>
+  </property>
+  <property>
+    <name>ranger.plugin.starrocks.policy.source.impl</name>
+    <value>org.apache.ranger.admin.client.RangerAdminRESTClient</value>
+  </property>
+  <property>
+    <name>ranger.plugin.starrocks.policy.rest.url</name>
+    <value>http://ranger:6080</value>
+  </property>
+  <property>
+    <name>ranger.plugin.starrocks.policy.rest.ssl.config.file</name>
+    <value></value>
+  </property>
+  <property>
+    <name>ranger.plugin.starrocks.policy.pollIntervalMs</name>
+    <value>10000</value>
+  </property>
+  <property>
+    <name>ranger.plugin.starrocks.policy.rest.client.connection.timeoutMs</name>
+    <value>30000</value>
+  </property>
+  <property>
+    <name>ranger.plugin.starrocks.policy.rest.client.read.timeoutMs</name>
+    <value>30000</value>
+  </property>
+  <!-- HTTP Basic auth: with credentials set, the plugin authenticates to the Ranger admin and uses
+       the authenticated /service/.../secure/download/* endpoints. The hardened admin image
+       (apache-ranger-starrocks:2.8.0-v0.6.0) requires auth on every download endpoint, and the
+       starrocks service's policy.download.auth.users is set to the rangerusersync built-in account
+       (see RANGER_USERSYNC_USER in ranger-compose.yml). So the plugin authenticates as rangerusersync,
+       the account authorized to download this service's policies.
+       Dev-only plaintext password; rangerusersync's password is set by RANGER_USERSYNC_PASSWORD in
+       ranger-compose.yml (migrate phase). -->
+  <property>
+    <name>ranger.plugin.starrocks.policy.rest.client.username</name>
+    <value>rangerusersync</value>
+  </property>
+  <property>
+    <name>ranger.plugin.starrocks.policy.rest.client.password</name>
+    <value>rangerR0cks!</value>
+  </property>
+  <!-- Authenticate once, then reuse the session cookie instead of sending Basic
+       auth on every poll. -->
+  <property>
+    <name>ranger.plugin.starrocks.policy.rest.client.cookie.enabled</name>
+    <value>true</value>
+  </property>
+</configuration>

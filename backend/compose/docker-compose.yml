@@ -7,12 +7,16 @@ include:
 
 services:
   starrocks:
-    image: starrocks/allin1-ubuntu:3.4.2
+    image: starrocks/allin1-ubuntu:3.5.17
     container_name: starrocks_radiant
     ports:
       - "9030:9030"
       - "8030:8030"
       - "8040:8040"
+    volumes:
+      - ./starrocks-conf/ranger-starrocks-security.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-security.xml
+      - ./starrocks-conf/ranger-starrocks-audit.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-audit.xml
+      - ./starrocks-conf/fe.conf:/data/deploy/starrocks/fe/conf/fe.conf
     healthcheck:
       test: >
         curl -sf http://localhost:8030/api/health || exit 1
@@ -39,7 +43,7 @@ services:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
     volumes:
-      - ./scripts/init-keycloak:/opt/keycloak/data/import
+      - ../scripts/init-keycloak:/opt/keycloak/data/import
     environment:
       KC_LOG_LEVEL: info
       KC_METRICS_ENABLED: "true"
@@ -68,7 +72,7 @@ services:
 
   api:
     build:
-      context: .
+      context: ../
       dockerfile: api.Dockerfile
     container_name: radiant-api
     ports:
@@ -103,7 +107,7 @@ services:
 
   worker:
     build:
-      context: .
+      context: ../
       dockerfile: worker.Dockerfile
     container_name: radiant-worker
     ports:
@@ -128,7 +132,7 @@ services:
       starrocks:
         condition: service_healthy
     volumes:
-      - ./scripts/init-sql:/docker-entrypoint-initdb.d
+      - ../scripts/init-sql:/docker-entrypoint-initdb.d
     entrypoint: >
       /bin/bash -c "sleep 10 &&
       mysql -hstarrocks -P9030 -uroot < /docker-entrypoint-initdb.d/init_starrocks.sql;"
@@ -139,7 +143,7 @@ services:
       api:
         condition: service_started
     volumes:
-      - ./scripts/init-sql:/docker-entrypoint-initdb.d
+      - ../scripts/init-sql:/docker-entrypoint-initdb.d
     entrypoint: ["sh", "-c"]
     command:
       - -c

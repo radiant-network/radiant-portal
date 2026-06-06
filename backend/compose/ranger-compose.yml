@@ -33,7 +33,7 @@ services:
   # Phase 1 (run-once): create/patch the Ranger schema (SeparateDBA) and set the account passwords in
   # the DB, then exit 0.
   ranger-migrate:
-    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/ranger-starrocks:latest}
+    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/apache-ranger-starrocks:2.8.0-v0.7.0}
     container_name: ranger-migrate
     command: ["migrate"]
     restart: "no"
@@ -56,7 +56,7 @@ services:
   # Phase 2 (long-running): the admin server. Runs with ONLY DB credentials.
   # RANGER_REGISTER_ON_SERVE=false delegates service registration to the register phase below.
   ranger:
-    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/ranger-starrocks:latest}
+    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/apache-ranger-starrocks:2.8.0-v0.7.0}
     container_name: ranger
     hostname: ranger
     command: ["serve"]
@@ -89,7 +89,7 @@ services:
   # Phase 3 (run-once, after serve is healthy): register the StarRocks service-def + service against the
   # running admin via REST. Holds the admin password + StarRocks connection creds; NO DB creds.
   ranger-register:
-    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/ranger-starrocks:latest}
+    image: ${RANGER_IMAGE:-ghcr.io/radiant-network/apache-ranger-starrocks:2.8.0-v0.7.0}
     container_name: ranger-register
     command: ["register"]
     restart: "no"
@@ -105,6 +105,14 @@ services:
       RANGER_STARROCKS_USERNAME: root
       RANGER_STARROCKS_PASSWORD: ""
       RANGER_STARROCKS_JDBC_URL: jdbc:mysql://starrocks:9030
-      RANGER_STARROCKS_SERVICE_NAME: starrocks_test
+      RANGER_STARROCKS_SERVICE_NAME: starrocks
       # yes -> service-def implClass = RangerServiceStarRocks (UI Test Connection / autocomplete).
       RANGER_STARROCKS_AUTOCOMPLETE: "yes"
+      # Substituted into the image's baked services/starrocks.json by register-services.py to populate
+      # the starrocks service's per-feed download allowlists. The hardened image (2.8.0-v0.6.0)
+      # requires auth on every download endpoint:
+      #   policy.download.auth.users <- RANGER_USERSYNC_USER  (the StarRocks plugin authenticates as
+      #                                 this account -- see starrocks-conf/ranger-starrocks-security.xml)
+      #   tag.download.auth.users    <- RANGER_TAGSYNC_USER
+      RANGER_USERSYNC_USER: rangerusersync
+      RANGER_TAGSYNC_USER: rangertagsync
