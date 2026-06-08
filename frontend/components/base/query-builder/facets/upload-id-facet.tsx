@@ -21,7 +21,7 @@ import { Textarea } from '@/components/base/shadcn/textarea';
 import { useI18n } from '@/components/hooks/i18n';
 import { useDebounce } from '@/components/hooks/useDebounce';
 import { thousandNumberFormat } from '@/components/lib/number-format';
-import { genesApi } from '@/utils/api';
+import { DEFAULT_TENANT, genesApi } from '@/utils/api';
 
 import CollapsibleCard from '../../cards/collapsible-card';
 import { TableColumnDef } from '../../data-table/data-table';
@@ -161,7 +161,9 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
     if (debouncedValue) {
       (async () => {
         setIsLoading(true);
-        const results = await genesApi.geneSearch({ inputs: debouncedValue.split(/[\n,\r ]/).filter(val => !!val) });
+        const results = await genesApi.geneSearch(DEFAULT_TENANT, {
+          inputs: debouncedValue.split(/[\n,\r ]/).filter(val => !!val),
+        });
         setMatched(getMatchList(results.data));
         setUnmatched(getUnmatchList(results.data));
         setIsLoading(false);

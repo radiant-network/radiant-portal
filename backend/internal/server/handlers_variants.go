@@ -17,12 +17,15 @@ import (
 // @Description Retrieve germline Variant Header data for a given locus
 // @Tags variant
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.VariantHeader
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/header [get]
+// @Router /{tenant}/variants/germline/{locus_id}/header [get]
 func GetGermlineVariantHeader(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
@@ -49,12 +52,15 @@ func GetGermlineVariantHeader(repo repository.VariantsDAO) gin.HandlerFunc {
 // @Description Retrieve germline Variant Overview data for a given locus
 // @Tags variant
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.VariantOverview
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/overview [get]
+// @Router /{tenant}/variants/germline/{locus_id}/overview [get]
 func GetGermlineVariantOverview(repo repository.VariantsDAO, exomiserRepository repository.ExomiserDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
@@ -102,12 +108,15 @@ func GetGermlineVariantOverview(repo repository.VariantsDAO, exomiserRepository 
 // @Description Retrieve germline Variant Consequences for a given locus
 // @Tags variant
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {array} types.VariantConsequence
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/consequences [get]
+// @Router /{tenant}/variants/germline/{locus_id}/consequences [get]
 func GetGermlineVariantConsequences(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
@@ -134,14 +143,17 @@ func GetGermlineVariantConsequences(repo repository.VariantsDAO) gin.HandlerFunc
 // @Description Retrieve Germline Variant interpreted cases for a given locus
 // @Tags variant
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Param			message	body		types.ListBodyWithCriteria	true	"Search Body with criteria"
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.VariantInterpretedCasesSearchResponse
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/cases/interpreted [post]
+// @Router /{tenant}/variants/germline/{locus_id}/cases/interpreted [post]
 func GetGermlineVariantInterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
@@ -185,14 +197,17 @@ func GetGermlineVariantInterpretedCases(repo repository.VariantsDAO) gin.Handler
 // @Description Retrieve Germline Variant uninterpreted cases for a given locus
 // @Tags variant
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Param			message	body		types.ListBodyWithCriteria	true	"Search Body with criteria"
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.VariantUninterpretedCasesSearchResponse
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/cases/uninterpreted [post]
+// @Router /{tenant}/variants/germline/{locus_id}/cases/uninterpreted [post]
 func GetGermlineVariantUninterpretedCases(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
@@ -236,12 +251,15 @@ func GetGermlineVariantUninterpretedCases(repo repository.VariantsDAO) gin.Handl
 // @Description Retrieve cases count for a given locus id
 // @Tags variant
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.VariantCasesCount
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/cases/count [get]
+// @Router /{tenant}/variants/germline/{locus_id}/cases/count [get]
 func GetGermlineVariantCasesCount(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
@@ -266,9 +284,12 @@ func GetGermlineVariantCasesCount(repo repository.VariantsDAO) gin.HandlerFunc {
 // @Security bearerauth
 // @Produce json
 // @Success 200 {object} types.VariantCasesFilters
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/cases/filters [get]
+// @Param tenant path string true "Tenant code"
+// @Router /{tenant}/variants/germline/cases/filters [get]
 func GetGermlineVariantCasesFilters(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		filters, err := repo.GetVariantCasesFilters()
@@ -286,14 +307,17 @@ func GetGermlineVariantCasesFilters(repo repository.VariantsDAO) gin.HandlerFunc
 // @Description Retrieve conditions for germline variant entity for a specific gene panel
 // @Tags variant
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Param panel_type path string true "Gene panel type" Enums(omim, hpo, orphanet)
 // @Param filter query string false "Condition filter"
 // @Produce json
 // @Success 200 {object} types.GenePanelConditions
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/conditions/{panel_type} [get]
+// @Router /{tenant}/variants/germline/{locus_id}/conditions/{panel_type} [get]
 func GetGermlineVariantConditions(repo repository.GenePanelsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
@@ -318,12 +342,15 @@ func GetGermlineVariantConditions(repo repository.GenePanelsDAO) gin.HandlerFunc
 // @Description Retrieve ClinVar conditions for germline variant entity
 // @Tags variant
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.ClinvarVariantConditions
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/conditions/clinvar [get]
+// @Router /{tenant}/variants/germline/{locus_id}/conditions/clinvar [get]
 func GetGermlineVariantConditionsClinvar(repo repository.ClinvarRCVDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
@@ -359,12 +386,15 @@ func GetGermlineVariantConditionsClinvar(repo repository.ClinvarRCVDAO) gin.Hand
 // @Description Retrieve external frequencies for a given locus id
 // @Tags variant
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.VariantExternalFrequencies
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/external_frequencies [get]
+// @Router /{tenant}/variants/germline/{locus_id}/external_frequencies [get]
 func GetGermlineVariantExternalFrequenciesHandler(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
@@ -391,14 +421,17 @@ func GetGermlineVariantExternalFrequenciesHandler(repo repository.VariantsDAO) g
 // @Description Retrieve internal frequencies for a given locus id
 // @Tags variant
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Param split query string true "split type" Enums(project, primary_condition, analysis)
 // @Produce json
 // @Success 200 {object} types.VariantInternalFrequencies
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/internal_frequencies [get]
+// @Router /{tenant}/variants/germline/{locus_id}/internal_frequencies [get]
 func GetGermlineVariantInternalFrequenciesHandler(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var variantInternalFrequencies *types.VariantInternalFrequencies
@@ -436,12 +469,15 @@ func GetGermlineVariantInternalFrequenciesHandler(repo repository.VariantsDAO) g
 // @Description Retrieve global internal frequencies for a given locus id
 // @Tags variant
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.InternalFrequencies
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /variants/germline/{locus_id}/internal_frequencies/global [get]
+// @Router /{tenant}/variants/germline/{locus_id}/internal_frequencies/global [get]
 func GetGermlineVariantGlobalInternalFrequenciesHandler(repo repository.VariantsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var globalFrequencies *types.InternalFrequencies

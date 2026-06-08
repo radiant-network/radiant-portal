@@ -17,7 +17,7 @@ import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
-import { interpretationApi } from '@/utils/api';
+import { DEFAULT_TENANT, interpretationApi } from '@/utils/api';
 
 import ClassificationBadge from '../badges/classification-badge';
 import { getOncogenicityClassificationCriteriaColor } from '../classifications/oncogenicity';
@@ -44,6 +44,7 @@ type InterpretationInput = {
 
 export async function fetchInterpretation(input: InterpretationInput) {
   const response = await interpretationApi.getInterpretationSomatic(
+    DEFAULT_TENANT,
     input.caseId,
     input.seqId,
     input.locusId,

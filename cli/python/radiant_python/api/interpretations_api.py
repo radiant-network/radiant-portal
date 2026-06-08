@@ -44,6 +44,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_germline(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -65,6 +66,8 @@ class InterpretationsApi:
 
         Get interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -96,6 +99,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._get_interpretation_germline_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -109,6 +113,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '206': "InterpretationGermline",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -126,6 +132,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_germline_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -147,6 +154,8 @@ class InterpretationsApi:
 
         Get interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -178,6 +187,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._get_interpretation_germline_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -191,6 +201,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '206': "InterpretationGermline",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -208,6 +220,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_germline_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -229,6 +242,8 @@ class InterpretationsApi:
 
         Get interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -260,6 +275,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._get_interpretation_germline_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -273,6 +289,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '206': "InterpretationGermline",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -285,6 +303,7 @@ class InterpretationsApi:
 
     def _get_interpretation_germline_serialize(
         self,
+        tenant,
         case_id,
         sequencing_id,
         locus_id,
@@ -310,6 +329,8 @@ class InterpretationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if sequencing_id is not None:
@@ -340,7 +361,7 @@ class InterpretationsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}',
+            resource_path='/{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -359,6 +380,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_germline_deprecated(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -379,6 +401,8 @@ class InterpretationsApi:
 
         Get interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -406,9 +430,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("GET /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("GET /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._get_interpretation_germline_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -421,6 +446,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '206': "InterpretationGermline",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -438,6 +465,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_germline_deprecated_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -458,6 +486,8 @@ class InterpretationsApi:
 
         Get interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -485,9 +515,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("GET /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("GET /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._get_interpretation_germline_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -500,6 +531,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '206': "InterpretationGermline",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -517,6 +550,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_germline_deprecated_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -537,6 +571,8 @@ class InterpretationsApi:
 
         Get interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -564,9 +600,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("GET /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("GET /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._get_interpretation_germline_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -579,6 +616,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '206': "InterpretationGermline",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -591,6 +630,7 @@ class InterpretationsApi:
 
     def _get_interpretation_germline_deprecated_serialize(
         self,
+        tenant,
         sequencing_id,
         locus_id,
         transcript_id,
@@ -615,6 +655,8 @@ class InterpretationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if sequencing_id is not None:
             _path_params['sequencing_id'] = sequencing_id
         if locus_id is not None:
@@ -643,7 +685,7 @@ class InterpretationsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}',
+            resource_path='/{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -662,6 +704,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_somatic(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -683,6 +726,8 @@ class InterpretationsApi:
 
         Get interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -714,6 +759,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._get_interpretation_somatic_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -727,6 +773,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '206': "InterpretationSomatic",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -744,6 +792,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_somatic_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -765,6 +814,8 @@ class InterpretationsApi:
 
         Get interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -796,6 +847,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._get_interpretation_somatic_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -809,6 +861,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '206': "InterpretationSomatic",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -826,6 +880,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_somatic_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -847,6 +902,8 @@ class InterpretationsApi:
 
         Get interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -878,6 +935,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._get_interpretation_somatic_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -891,6 +949,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '206': "InterpretationSomatic",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -903,6 +963,7 @@ class InterpretationsApi:
 
     def _get_interpretation_somatic_serialize(
         self,
+        tenant,
         case_id,
         sequencing_id,
         locus_id,
@@ -928,6 +989,8 @@ class InterpretationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if sequencing_id is not None:
@@ -958,7 +1021,7 @@ class InterpretationsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}',
+            resource_path='/{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -977,6 +1040,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_somatic_deprecated(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -997,6 +1061,8 @@ class InterpretationsApi:
 
         Get interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -1024,9 +1090,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("GET /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("GET /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._get_interpretation_somatic_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -1039,6 +1106,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '206': "InterpretationSomatic",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1056,6 +1125,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_somatic_deprecated_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -1076,6 +1146,8 @@ class InterpretationsApi:
 
         Get interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -1103,9 +1175,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("GET /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("GET /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._get_interpretation_somatic_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -1118,6 +1191,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '206': "InterpretationSomatic",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1135,6 +1210,7 @@ class InterpretationsApi:
     @validate_call
     def get_interpretation_somatic_deprecated_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -1155,6 +1231,8 @@ class InterpretationsApi:
 
         Get interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -1182,9 +1260,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("GET /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("GET /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._get_interpretation_somatic_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -1197,6 +1276,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '206': "InterpretationSomatic",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1209,6 +1290,7 @@ class InterpretationsApi:
 
     def _get_interpretation_somatic_deprecated_serialize(
         self,
+        tenant,
         sequencing_id,
         locus_id,
         transcript_id,
@@ -1233,6 +1315,8 @@ class InterpretationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if sequencing_id is not None:
             _path_params['sequencing_id'] = sequencing_id
         if locus_id is not None:
@@ -1261,7 +1345,7 @@ class InterpretationsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}',
+            resource_path='/{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1280,6 +1364,7 @@ class InterpretationsApi:
     @validate_call
     def get_pubmed_citation(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         citation_id: Annotated[StrictStr, Field(description="Citation ID")],
         _request_timeout: Union[
             None,
@@ -1298,6 +1383,8 @@ class InterpretationsApi:
 
         Get pubmed citation by ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param citation_id: Citation ID (required)
         :type citation_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1323,6 +1410,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._get_pubmed_citation_serialize(
+            tenant=tenant,
             citation_id=citation_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1333,6 +1421,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PubmedCitation",
             '206': "PubmedCitation",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1350,6 +1440,7 @@ class InterpretationsApi:
     @validate_call
     def get_pubmed_citation_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         citation_id: Annotated[StrictStr, Field(description="Citation ID")],
         _request_timeout: Union[
             None,
@@ -1368,6 +1459,8 @@ class InterpretationsApi:
 
         Get pubmed citation by ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param citation_id: Citation ID (required)
         :type citation_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1393,6 +1486,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._get_pubmed_citation_serialize(
+            tenant=tenant,
             citation_id=citation_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1403,6 +1497,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PubmedCitation",
             '206': "PubmedCitation",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1420,6 +1516,7 @@ class InterpretationsApi:
     @validate_call
     def get_pubmed_citation_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         citation_id: Annotated[StrictStr, Field(description="Citation ID")],
         _request_timeout: Union[
             None,
@@ -1438,6 +1535,8 @@ class InterpretationsApi:
 
         Get pubmed citation by ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param citation_id: Citation ID (required)
         :type citation_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1463,6 +1562,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._get_pubmed_citation_serialize(
+            tenant=tenant,
             citation_id=citation_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1473,6 +1573,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "PubmedCitation",
             '206': "PubmedCitation",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1485,6 +1587,7 @@ class InterpretationsApi:
 
     def _get_pubmed_citation_serialize(
         self,
+        tenant,
         citation_id,
         _request_auth,
         _content_type,
@@ -1507,6 +1610,8 @@ class InterpretationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if citation_id is not None:
             _path_params['citation_id'] = citation_id
         # process the query parameters
@@ -1531,7 +1636,7 @@ class InterpretationsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/interpretations/pubmed/{citation_id}',
+            resource_path='/{tenant}/interpretations/pubmed/{citation_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1550,6 +1655,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_germline(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -1572,6 +1678,8 @@ class InterpretationsApi:
 
         Create or Update interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -1605,6 +1713,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._post_interpretation_germline_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -1619,6 +1728,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1635,6 +1746,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_germline_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -1657,6 +1769,8 @@ class InterpretationsApi:
 
         Create or Update interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -1690,6 +1804,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._post_interpretation_germline_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -1704,6 +1819,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1720,6 +1837,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_germline_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -1742,6 +1860,8 @@ class InterpretationsApi:
 
         Create or Update interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -1775,6 +1895,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._post_interpretation_germline_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -1789,6 +1910,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1800,6 +1923,7 @@ class InterpretationsApi:
 
     def _post_interpretation_germline_serialize(
         self,
+        tenant,
         case_id,
         sequencing_id,
         locus_id,
@@ -1826,6 +1950,8 @@ class InterpretationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if sequencing_id is not None:
@@ -1871,7 +1997,7 @@ class InterpretationsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}',
+            resource_path='/{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1890,6 +2016,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_germline_deprecated(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -1911,6 +2038,8 @@ class InterpretationsApi:
 
         Create or Update interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -1940,9 +2069,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("POST /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("POST /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._post_interpretation_germline_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -1956,6 +2086,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1972,6 +2104,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_germline_deprecated_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -1993,6 +2126,8 @@ class InterpretationsApi:
 
         Create or Update interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -2022,9 +2157,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("POST /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("POST /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._post_interpretation_germline_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -2038,6 +2174,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2054,6 +2192,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_germline_deprecated_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -2075,6 +2214,8 @@ class InterpretationsApi:
 
         Create or Update interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -2104,9 +2245,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("POST /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("POST /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._post_interpretation_germline_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -2120,6 +2262,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationGermline",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2131,6 +2275,7 @@ class InterpretationsApi:
 
     def _post_interpretation_germline_deprecated_serialize(
         self,
+        tenant,
         sequencing_id,
         locus_id,
         transcript_id,
@@ -2156,6 +2301,8 @@ class InterpretationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if sequencing_id is not None:
             _path_params['sequencing_id'] = sequencing_id
         if locus_id is not None:
@@ -2199,7 +2346,7 @@ class InterpretationsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}',
+            resource_path='/{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2218,6 +2365,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_somatic(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -2240,6 +2388,8 @@ class InterpretationsApi:
 
         Create or Update interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -2273,6 +2423,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._post_interpretation_somatic_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -2287,6 +2438,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2303,6 +2456,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_somatic_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -2325,6 +2479,8 @@ class InterpretationsApi:
 
         Create or Update interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -2358,6 +2514,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._post_interpretation_somatic_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -2372,6 +2529,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2388,6 +2547,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_somatic_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
@@ -2410,6 +2570,8 @@ class InterpretationsApi:
 
         Create or Update interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param sequencing_id: Sequencing ID (required)
@@ -2443,6 +2605,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._post_interpretation_somatic_serialize(
+            tenant=tenant,
             case_id=case_id,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
@@ -2457,6 +2620,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2468,6 +2633,7 @@ class InterpretationsApi:
 
     def _post_interpretation_somatic_serialize(
         self,
+        tenant,
         case_id,
         sequencing_id,
         locus_id,
@@ -2494,6 +2660,8 @@ class InterpretationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if sequencing_id is not None:
@@ -2539,7 +2707,7 @@ class InterpretationsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}',
+            resource_path='/{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2558,6 +2726,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_somatic_deprecated(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -2579,6 +2748,8 @@ class InterpretationsApi:
 
         Create or Update interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -2608,9 +2779,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("POST /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("POST /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._post_interpretation_somatic_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -2624,6 +2796,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2640,6 +2814,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_somatic_deprecated_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -2661,6 +2836,8 @@ class InterpretationsApi:
 
         Create or Update interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -2690,9 +2867,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("POST /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("POST /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._post_interpretation_somatic_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -2706,6 +2884,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2722,6 +2902,7 @@ class InterpretationsApi:
     @validate_call
     def post_interpretation_somatic_deprecated_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         sequencing_id: Annotated[StrictStr, Field(description="Sequencing ID")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         transcript_id: Annotated[StrictStr, Field(description="Transcript ID")],
@@ -2743,6 +2924,8 @@ class InterpretationsApi:
 
         Create or Update interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param sequencing_id: Sequencing ID (required)
         :type sequencing_id: str
         :param locus_id: Locus ID (required)
@@ -2772,9 +2955,10 @@ class InterpretationsApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
-        warnings.warn("POST /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
+        warnings.warn("POST /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} is deprecated.", DeprecationWarning)
 
         _param = self._post_interpretation_somatic_deprecated_serialize(
+            tenant=tenant,
             sequencing_id=sequencing_id,
             locus_id=locus_id,
             transcript_id=transcript_id,
@@ -2788,6 +2972,8 @@ class InterpretationsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InterpretationSomatic",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2799,6 +2985,7 @@ class InterpretationsApi:
 
     def _post_interpretation_somatic_deprecated_serialize(
         self,
+        tenant,
         sequencing_id,
         locus_id,
         transcript_id,
@@ -2824,6 +3011,8 @@ class InterpretationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if sequencing_id is not None:
             _path_params['sequencing_id'] = sequencing_id
         if locus_id is not None:
@@ -2867,7 +3056,7 @@ class InterpretationsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}',
+            resource_path='/{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2886,6 +3075,7 @@ class InterpretationsApi:
     @validate_call
     def search_interpretation_germline(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2903,6 +3093,8 @@ class InterpretationsApi:
 
         Search interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2926,6 +3118,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._search_interpretation_germline_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2934,6 +3127,8 @@ class InterpretationsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[InterpretationGermline]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2950,6 +3145,7 @@ class InterpretationsApi:
     @validate_call
     def search_interpretation_germline_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2967,6 +3163,8 @@ class InterpretationsApi:
 
         Search interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2990,6 +3188,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._search_interpretation_germline_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2998,6 +3197,8 @@ class InterpretationsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[InterpretationGermline]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -3014,6 +3215,7 @@ class InterpretationsApi:
     @validate_call
     def search_interpretation_germline_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3031,6 +3233,8 @@ class InterpretationsApi:
 
         Search interpretation germline
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -3054,6 +3258,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._search_interpretation_germline_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -3062,6 +3267,8 @@ class InterpretationsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[InterpretationGermline]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -3073,6 +3280,7 @@ class InterpretationsApi:
 
     def _search_interpretation_germline_serialize(
         self,
+        tenant,
         _request_auth,
         _content_type,
         _headers,
@@ -3094,6 +3302,8 @@ class InterpretationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -3116,7 +3326,7 @@ class InterpretationsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/interpretations/germline',
+            resource_path='/{tenant}/interpretations/germline',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3135,6 +3345,7 @@ class InterpretationsApi:
     @validate_call
     def search_interpretation_somatic(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3152,6 +3363,8 @@ class InterpretationsApi:
 
         Search interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -3175,6 +3388,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._search_interpretation_somatic_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -3183,6 +3397,8 @@ class InterpretationsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[InterpretationSomatic]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -3199,6 +3415,7 @@ class InterpretationsApi:
     @validate_call
     def search_interpretation_somatic_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3216,6 +3433,8 @@ class InterpretationsApi:
 
         Search interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -3239,6 +3458,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._search_interpretation_somatic_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -3247,6 +3467,8 @@ class InterpretationsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[InterpretationSomatic]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -3263,6 +3485,7 @@ class InterpretationsApi:
     @validate_call
     def search_interpretation_somatic_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3280,6 +3503,8 @@ class InterpretationsApi:
 
         Search interpretation somatic
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -3303,6 +3528,7 @@ class InterpretationsApi:
         """ # noqa: E501
 
         _param = self._search_interpretation_somatic_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -3311,6 +3537,8 @@ class InterpretationsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[InterpretationSomatic]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -3322,6 +3550,7 @@ class InterpretationsApi:
 
     def _search_interpretation_somatic_serialize(
         self,
+        tenant,
         _request_auth,
         _content_type,
         _headers,
@@ -3343,6 +3572,8 @@ class InterpretationsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -3365,7 +3596,7 @@ class InterpretationsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/interpretations/somatic',
+            resource_path='/{tenant}/interpretations/somatic',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

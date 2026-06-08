@@ -11,7 +11,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { TooltipProvider } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { useLoginContext } from '@/components/hooks/use-login';
-import { occurencesNotesApi } from '@/utils/api';
+import { DEFAULT_TENANT, occurencesNotesApi } from '@/utils/api';
 
 import { useNotesContext } from './hooks/use-notes';
 import Note from './note';
@@ -37,6 +37,7 @@ export type GetOccurrenceNoteInput = Omit<NotesContainerProps, 'enableEmptyIcon'
 
 async function fetchNotes(input: GetOccurrenceNoteInput) {
   const response = await occurencesNotesApi.getOccurrenceNotes(
+    DEFAULT_TENANT,
     input.caseId,
     input.seqId,
     input.taskId,
@@ -46,7 +47,7 @@ async function fetchNotes(input: GetOccurrenceNoteInput) {
 }
 
 async function saveNote(_url: string, { arg }: { arg: CreateOccurrenceNoteInput }) {
-  const response = await occurencesNotesApi.postOccurrenceNote(arg);
+  const response = await occurencesNotesApi.postOccurrenceNote(DEFAULT_TENANT, arg);
   return response.data;
 }
 

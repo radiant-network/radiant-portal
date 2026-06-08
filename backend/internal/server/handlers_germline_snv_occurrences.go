@@ -15,6 +15,7 @@ import (
 // @Description List germline SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param task_id path int true "Task ID"
@@ -23,9 +24,11 @@ import (
 // @Produce json
 // @Success 200 {array} types.GermlineSNVOccurrence
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list [post]
+// @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list [post]
 func OccurrencesGermlineSNVListHandler(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -77,6 +80,7 @@ func OccurrencesGermlineSNVListHandler(repo repository.GermlineSNVOccurrencesDAO
 // @Description Counts germline SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param task_id path int true "Task ID"
@@ -85,9 +89,11 @@ func OccurrencesGermlineSNVListHandler(repo repository.GermlineSNVOccurrencesDAO
 // @Produce json
 // @Success 200 {object} types.Count
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count [post]
+// @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count [post]
 func OccurrencesGermlineSNVCountHandler(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -137,6 +143,7 @@ func OccurrencesGermlineSNVCountHandler(repo repository.GermlineSNVOccurrencesDA
 // @Description Aggregate germline SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param task_id path int true "Task ID"
@@ -146,9 +153,11 @@ func OccurrencesGermlineSNVCountHandler(repo repository.GermlineSNVOccurrencesDA
 // @Produce json
 // @Success 200 {array} types.Aggregation
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate [post]
+// @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate [post]
 func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrencesDAO, facetsRepo repository.FacetsRepositoryDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -233,6 +242,7 @@ func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrenc
 // @Description Return statistics about a field for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param task_id path int true "Task ID"
@@ -241,9 +251,11 @@ func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrenc
 // @Produce json
 // @Success 200 {object} types.Statistics
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics [post]
+// @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics [post]
 func OccurrencesGermlineSNVStatisticsHandler(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -293,15 +305,18 @@ func OccurrencesGermlineSNVStatisticsHandler(repo repository.GermlineSNVOccurren
 // @Description Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param task_id path int true "Task ID"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.ExpandedGermlineSNVOccurrence
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded [get]
+// @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded [get]
 func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO, exomiserRepo repository.ExomiserDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errSeq := strconv.Atoi(c.Param("case_id"))
@@ -364,13 +379,16 @@ func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO,
 // @Description Retrieve germline SNV facets
 // @Tags occurrences
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param facets query []string false "One or more facets to retrieve"
 // @Produce json
 // @Success 200 {array} types.Facet
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/germline/snv/dictionary [get]
+// @Router /{tenant}/occurrences/germline/snv/dictionary [get]
 func GetGermlineSNVDictionary(repo repository.FacetsRepositoryDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var queryParam types.FacetsQueryParam

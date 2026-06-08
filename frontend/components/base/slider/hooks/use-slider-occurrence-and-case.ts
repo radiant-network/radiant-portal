@@ -8,7 +8,7 @@ import {
   ExpandedSomaticSNVOccurrence,
 } from '@/api/api';
 import { PROBAND } from '@/components/base/constants';
-import { caseApi, occurrencesApi } from '@/utils/api';
+import { caseApi, DEFAULT_TENANT, occurrencesApi } from '@/utils/api';
 
 export type OccurrenceExpandInput = {
   caseId: number;
@@ -24,6 +24,7 @@ export type CaseInput = {
 
 export async function fetchGermlineOccurrenceExpand(input: OccurrenceExpandInput) {
   const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(
+    DEFAULT_TENANT,
     input.caseId,
     input.seqId,
     input.taskId,
@@ -34,6 +35,7 @@ export async function fetchGermlineOccurrenceExpand(input: OccurrenceExpandInput
 
 export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput) {
   const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(
+    DEFAULT_TENANT,
     input.caseId,
     input.seqId,
     input.taskId,
@@ -47,7 +49,7 @@ export async function fetchCase(input: CaseInput) {
     return null;
   }
 
-  const response = await caseApi.caseEntity(input.caseId);
+  const response = await caseApi.caseEntity(DEFAULT_TENANT, input.caseId);
   return response.data;
 }
 

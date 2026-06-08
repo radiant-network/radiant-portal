@@ -13,7 +13,7 @@ import getItemPriority from '@/components/base/data-table/filters/options/option
 import getItemStatus from '@/components/base/data-table/filters/options/option-status';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
-import { caseApi } from '@/utils/api';
+import { caseApi, DEFAULT_TENANT } from '@/utils/api';
 
 type FiltersGroupFormProps = {
   loading?: boolean;
@@ -49,7 +49,7 @@ export const FILTER_DEFAULTS = {
 };
 
 async function fetchFilters() {
-  const response = await caseApi.casesFilters();
+  const response = await caseApi.casesFilters(DEFAULT_TENANT);
   return response.data;
 }
 

@@ -32,7 +32,7 @@ func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
 	auth := &testutils.MockAuth{Username: "testuser"}
 
 	router := gin.Default()
-	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
+	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `
 		{
 			"sequencing_experiments": [
@@ -49,7 +49,7 @@ func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
 				}
 			]
 		}`
-	req, _ := http.NewRequest(http.MethodPost, "/sequencing/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/sequencing/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -80,7 +80,7 @@ func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 	auth := &testutils.MockAuth{Username: "testuser"}
 
 	router := gin.Default()
-	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
+	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `
 		{
 			"sequencing_experiments": [
@@ -96,7 +96,7 @@ func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 				}
 			]
 		}`
-	req, _ := http.NewRequest(http.MethodPost, "/sequencing/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/sequencing/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -127,7 +127,7 @@ func TestPostSequencingExperimentBatchHandler_ValidationError(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
+	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `
 		{
 			"sequencing_experiments": [
@@ -143,7 +143,7 @@ func TestPostSequencingExperimentBatchHandler_ValidationError(t *testing.T) {
 				}
 			]
 		}`
-	req, _ := http.NewRequest(http.MethodPost, "/sequencing/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/sequencing/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -168,7 +168,7 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Empty(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
+	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `
 		{
 			"sequencing_experiments": [
@@ -185,7 +185,7 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Empty(t *testing.T) {
 				}
 			]
 		}`
-	req, _ := http.NewRequest(http.MethodPost, "/sequencing/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/sequencing/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -210,7 +210,7 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Invalid(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
+	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `
 		{
 			"sequencing_experiments": [
@@ -227,7 +227,7 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Invalid(t *testing.T) {
 				}
 			]
 		}`
-	req, _ := http.NewRequest(http.MethodPost, "/sequencing/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/sequencing/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -252,9 +252,9 @@ func TestPostSequencingExperimentBatchHandler_EmptySequencingExperiments(t *test
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
+	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `{"sequencing_experiments": []}`
-	req, _ := http.NewRequest(http.MethodPost, "/sequencing/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/sequencing/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)

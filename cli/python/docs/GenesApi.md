@@ -4,12 +4,12 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**gene_auto_complete**](GenesApi.md#gene_auto_complete) | **GET** /genes/autocomplete | Get AutoCompleteGene list of matching input string with highlighted
-[**gene_search**](GenesApi.md#gene_search) | **POST** /genes/search | Post search GeneResult list of matching input strings
+[**gene_auto_complete**](GenesApi.md#gene_auto_complete) | **GET** /{tenant}/genes/autocomplete | Get AutoCompleteGene list of matching input string with highlighted
+[**gene_search**](GenesApi.md#gene_search) | **POST** /{tenant}/genes/search | Post search GeneResult list of matching input strings
 
 
 # **gene_auto_complete**
-> List[AutoCompleteGene] gene_auto_complete(prefix, limit=limit)
+> List[AutoCompleteGene] gene_auto_complete(tenant, prefix, limit=limit)
 
 Get AutoCompleteGene list of matching input string with highlighted
 
@@ -45,12 +45,13 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.GenesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     prefix = 'prefix_example' # str | Prefix
     limit = 'limit_example' # str | Limit (optional)
 
     try:
         # Get AutoCompleteGene list of matching input string with highlighted
-        api_response = api_instance.gene_auto_complete(prefix, limit=limit)
+        api_response = api_instance.gene_auto_complete(tenant, prefix, limit=limit)
         print("The response of GenesApi->gene_auto_complete:\n")
         pprint(api_response)
     except Exception as e:
@@ -64,6 +65,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **prefix** | **str**| Prefix | 
  **limit** | **str**| Limit | [optional] 
 
@@ -85,12 +87,14 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **gene_search**
-> List[GeneResult] gene_search(gene_search_body)
+> List[GeneResult] gene_search(tenant, gene_search_body)
 
 Post search GeneResult list of matching input strings
 
@@ -127,11 +131,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.GenesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     gene_search_body = radiant_python.GeneSearchBody() # GeneSearchBody | Search Body
 
     try:
         # Post search GeneResult list of matching input strings
-        api_response = api_instance.gene_search(gene_search_body)
+        api_response = api_instance.gene_search(tenant, gene_search_body)
         print("The response of GenesApi->gene_search:\n")
         pprint(api_response)
     except Exception as e:
@@ -145,6 +150,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **gene_search_body** | [**GeneSearchBody**](GeneSearchBody.md)| Search Body | 
 
 ### Return type
@@ -166,6 +172,8 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

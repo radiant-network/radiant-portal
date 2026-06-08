@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import { ApiError, DocumentsSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
-import { documentApi } from '@/utils/api';
+import { DEFAULT_TENANT, documentApi } from '@/utils/api';
 
 import FilesTableFilters from './files-archive-list-table-filters';
 import { defaultSettings, getFilesArchiveColumns } from './files-archive-table-settings';
@@ -15,7 +15,7 @@ type DocumentInput = {
 };
 
 async function fetchDocuments(input: DocumentInput) {
-  const response = await documentApi.searchDocuments(input.body);
+  const response = await documentApi.searchDocuments(DEFAULT_TENANT, input.body);
   return response.data;
 }
 

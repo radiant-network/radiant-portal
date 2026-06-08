@@ -16,7 +16,7 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool
+from pydantic import Field, StrictBool, StrictStr
 from typing import Optional
 from typing_extensions import Annotated
 from radiant_python.models.create_batch_response import CreateBatchResponse
@@ -43,6 +43,7 @@ class SamplesApi:
     @validate_call
     def post_sample_batch(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_sample_batch_body: Annotated[CreateSampleBatchBody, Field(description="Create Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -62,6 +63,8 @@ class SamplesApi:
 
         Create a new sample batch
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_sample_batch_body: Create Body (required)
         :type create_sample_batch_body: CreateSampleBatchBody
         :param dry_run: Dry Run
@@ -89,6 +92,7 @@ class SamplesApi:
         """ # noqa: E501
 
         _param = self._post_sample_batch_serialize(
+            tenant=tenant,
             create_sample_batch_body=create_sample_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -100,6 +104,7 @@ class SamplesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -117,6 +122,7 @@ class SamplesApi:
     @validate_call
     def post_sample_batch_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_sample_batch_body: Annotated[CreateSampleBatchBody, Field(description="Create Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -136,6 +142,8 @@ class SamplesApi:
 
         Create a new sample batch
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_sample_batch_body: Create Body (required)
         :type create_sample_batch_body: CreateSampleBatchBody
         :param dry_run: Dry Run
@@ -163,6 +171,7 @@ class SamplesApi:
         """ # noqa: E501
 
         _param = self._post_sample_batch_serialize(
+            tenant=tenant,
             create_sample_batch_body=create_sample_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -174,6 +183,7 @@ class SamplesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -191,6 +201,7 @@ class SamplesApi:
     @validate_call
     def post_sample_batch_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_sample_batch_body: Annotated[CreateSampleBatchBody, Field(description="Create Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -210,6 +221,8 @@ class SamplesApi:
 
         Create a new sample batch
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_sample_batch_body: Create Body (required)
         :type create_sample_batch_body: CreateSampleBatchBody
         :param dry_run: Dry Run
@@ -237,6 +250,7 @@ class SamplesApi:
         """ # noqa: E501
 
         _param = self._post_sample_batch_serialize(
+            tenant=tenant,
             create_sample_batch_body=create_sample_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -248,6 +262,7 @@ class SamplesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -260,6 +275,7 @@ class SamplesApi:
 
     def _post_sample_batch_serialize(
         self,
+        tenant,
         create_sample_batch_body,
         dry_run,
         _request_auth,
@@ -283,6 +299,8 @@ class SamplesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         if dry_run is not None:
             
@@ -324,7 +342,7 @@ class SamplesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/samples/batch',
+            resource_path='/{tenant}/samples/batch',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

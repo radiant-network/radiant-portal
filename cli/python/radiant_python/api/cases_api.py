@@ -52,6 +52,7 @@ class CasesApi:
     @validate_call
     def autocomplete_cases(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -71,6 +72,8 @@ class CasesApi:
 
         Retrieve AutocompleteResult list of ids matching prefix
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -98,6 +101,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._autocomplete_cases_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -108,6 +112,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutocompleteResult]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -124,6 +130,7 @@ class CasesApi:
     @validate_call
     def autocomplete_cases_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -143,6 +150,8 @@ class CasesApi:
 
         Retrieve AutocompleteResult list of ids matching prefix
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -170,6 +179,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._autocomplete_cases_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -180,6 +190,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutocompleteResult]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -196,6 +208,7 @@ class CasesApi:
     @validate_call
     def autocomplete_cases_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -215,6 +228,8 @@ class CasesApi:
 
         Retrieve AutocompleteResult list of ids matching prefix
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -242,6 +257,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._autocomplete_cases_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -252,6 +268,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutocompleteResult]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -263,6 +281,7 @@ class CasesApi:
 
     def _autocomplete_cases_serialize(
         self,
+        tenant,
         prefix,
         limit,
         _request_auth,
@@ -286,6 +305,8 @@ class CasesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         if prefix is not None:
             
@@ -316,7 +337,7 @@ class CasesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/cases/autocomplete',
+            resource_path='/{tenant}/cases/autocomplete',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -335,6 +356,7 @@ class CasesApi:
     @validate_call
     def case_entity(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         _request_timeout: Union[
             None,
@@ -353,6 +375,8 @@ class CasesApi:
 
         Retrieve CaseEntity by its ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param _request_timeout: timeout setting for this request. If one
@@ -378,6 +402,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_entity_serialize(
+            tenant=tenant,
             case_id=case_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -387,6 +412,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CaseEntity",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -404,6 +431,7 @@ class CasesApi:
     @validate_call
     def case_entity_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         _request_timeout: Union[
             None,
@@ -422,6 +450,8 @@ class CasesApi:
 
         Retrieve CaseEntity by its ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param _request_timeout: timeout setting for this request. If one
@@ -447,6 +477,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_entity_serialize(
+            tenant=tenant,
             case_id=case_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -456,6 +487,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CaseEntity",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -473,6 +506,7 @@ class CasesApi:
     @validate_call
     def case_entity_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         _request_timeout: Union[
             None,
@@ -491,6 +525,8 @@ class CasesApi:
 
         Retrieve CaseEntity by its ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param _request_timeout: timeout setting for this request. If one
@@ -516,6 +552,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_entity_serialize(
+            tenant=tenant,
             case_id=case_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -525,6 +562,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CaseEntity",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -537,6 +576,7 @@ class CasesApi:
 
     def _case_entity_serialize(
         self,
+        tenant,
         case_id,
         _request_auth,
         _content_type,
@@ -559,6 +599,8 @@ class CasesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         # process the query parameters
@@ -583,7 +625,7 @@ class CasesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/cases/{case_id}',
+            resource_path='/{tenant}/cases/{case_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -602,6 +644,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_filters(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         _request_timeout: Union[
             None,
@@ -620,6 +663,8 @@ class CasesApi:
 
         Retrieve DocumentFilters documents filters for a specific case
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param _request_timeout: timeout setting for this request. If one
@@ -645,6 +690,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_entity_documents_filters_serialize(
+            tenant=tenant,
             case_id=case_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -654,6 +700,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -670,6 +718,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_filters_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         _request_timeout: Union[
             None,
@@ -688,6 +737,8 @@ class CasesApi:
 
         Retrieve DocumentFilters documents filters for a specific case
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param _request_timeout: timeout setting for this request. If one
@@ -713,6 +764,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_entity_documents_filters_serialize(
+            tenant=tenant,
             case_id=case_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -722,6 +774,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -738,6 +792,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_filters_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         _request_timeout: Union[
             None,
@@ -756,6 +811,8 @@ class CasesApi:
 
         Retrieve DocumentFilters documents filters for a specific case
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param _request_timeout: timeout setting for this request. If one
@@ -781,6 +838,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_entity_documents_filters_serialize(
+            tenant=tenant,
             case_id=case_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -790,6 +848,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -801,6 +861,7 @@ class CasesApi:
 
     def _case_entity_documents_filters_serialize(
         self,
+        tenant,
         case_id,
         _request_auth,
         _content_type,
@@ -823,6 +884,8 @@ class CasesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         # process the query parameters
@@ -847,7 +910,7 @@ class CasesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/cases/{case_id}/documents/filters',
+            resource_path='/{tenant}/cases/{case_id}/documents/filters',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -866,6 +929,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_search(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
@@ -885,6 +949,8 @@ class CasesApi:
 
         Search for DocumentResult list for a case entity
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param list_body_with_criteria: List Body (required)
@@ -912,6 +978,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_entity_documents_search_serialize(
+            tenant=tenant,
             case_id=case_id,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
@@ -922,6 +989,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentsSearchResponse",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -939,6 +1008,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_search_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
@@ -958,6 +1028,8 @@ class CasesApi:
 
         Search for DocumentResult list for a case entity
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param list_body_with_criteria: List Body (required)
@@ -985,6 +1057,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_entity_documents_search_serialize(
+            tenant=tenant,
             case_id=case_id,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
@@ -995,6 +1068,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentsSearchResponse",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1012,6 +1087,7 @@ class CasesApi:
     @validate_call
     def case_entity_documents_search_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
@@ -1031,6 +1107,8 @@ class CasesApi:
 
         Search for DocumentResult list for a case entity
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param list_body_with_criteria: List Body (required)
@@ -1058,6 +1136,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_entity_documents_search_serialize(
+            tenant=tenant,
             case_id=case_id,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
@@ -1068,6 +1147,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentsSearchResponse",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1080,6 +1161,7 @@ class CasesApi:
 
     def _case_entity_documents_search_serialize(
         self,
+        tenant,
         case_id,
         list_body_with_criteria,
         _request_auth,
@@ -1103,6 +1185,8 @@ class CasesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         # process the query parameters
@@ -1142,7 +1226,7 @@ class CasesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/cases/{case_id}/documents/search',
+            resource_path='/{tenant}/cases/{case_id}/documents/search',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1161,6 +1245,7 @@ class CasesApi:
     @validate_call
     def case_tasks_with_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         data_type: Annotated[StrictStr, Field(description="Occurrence type")],
@@ -1181,6 +1266,8 @@ class CasesApi:
 
         Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
@@ -1210,6 +1297,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_tasks_with_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             data_type=data_type,
@@ -1222,6 +1310,8 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[TaskOccurrenceType]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1239,6 +1329,7 @@ class CasesApi:
     @validate_call
     def case_tasks_with_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         data_type: Annotated[StrictStr, Field(description="Occurrence type")],
@@ -1259,6 +1350,8 @@ class CasesApi:
 
         Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
@@ -1288,6 +1381,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_tasks_with_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             data_type=data_type,
@@ -1300,6 +1394,8 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[TaskOccurrenceType]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1317,6 +1413,7 @@ class CasesApi:
     @validate_call
     def case_tasks_with_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         data_type: Annotated[StrictStr, Field(description="Occurrence type")],
@@ -1337,6 +1434,8 @@ class CasesApi:
 
         Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
@@ -1366,6 +1465,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._case_tasks_with_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             data_type=data_type,
@@ -1378,6 +1478,8 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[TaskOccurrenceType]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1390,6 +1492,7 @@ class CasesApi:
 
     def _case_tasks_with_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         data_type,
@@ -1414,6 +1517,8 @@ class CasesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -1444,7 +1549,7 @@ class CasesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/cases/{case_id}/{seq_id}/tasks_with_occurrences',
+            resource_path='/{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1463,6 +1568,7 @@ class CasesApi:
     @validate_call
     def cases_filters(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1480,6 +1586,8 @@ class CasesApi:
 
         Retrieve CaseFilters cases filters
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1503,6 +1611,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._cases_filters_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1511,6 +1620,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CaseFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1527,6 +1638,7 @@ class CasesApi:
     @validate_call
     def cases_filters_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1544,6 +1656,8 @@ class CasesApi:
 
         Retrieve CaseFilters cases filters
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1567,6 +1681,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._cases_filters_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1575,6 +1690,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CaseFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1591,6 +1708,7 @@ class CasesApi:
     @validate_call
     def cases_filters_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1608,6 +1726,8 @@ class CasesApi:
 
         Retrieve CaseFilters cases filters
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1631,6 +1751,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._cases_filters_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1639,6 +1760,8 @@ class CasesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CaseFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1650,6 +1773,7 @@ class CasesApi:
 
     def _cases_filters_serialize(
         self,
+        tenant,
         _request_auth,
         _content_type,
         _headers,
@@ -1671,6 +1795,8 @@ class CasesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1693,7 +1819,7 @@ class CasesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/cases/filters',
+            resource_path='/{tenant}/cases/filters',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1712,6 +1838,7 @@ class CasesApi:
     @validate_call
     def patch_case_batch(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         patch_case_batch_body: Annotated[PatchCaseBatchBody, Field(description="Attach Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -1731,6 +1858,8 @@ class CasesApi:
 
         Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param patch_case_batch_body: Attach Body (required)
         :type patch_case_batch_body: PatchCaseBatchBody
         :param dry_run: Dry Run
@@ -1758,6 +1887,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._patch_case_batch_serialize(
+            tenant=tenant,
             patch_case_batch_body=patch_case_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -1769,6 +1899,7 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -1786,6 +1917,7 @@ class CasesApi:
     @validate_call
     def patch_case_batch_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         patch_case_batch_body: Annotated[PatchCaseBatchBody, Field(description="Attach Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -1805,6 +1937,8 @@ class CasesApi:
 
         Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param patch_case_batch_body: Attach Body (required)
         :type patch_case_batch_body: PatchCaseBatchBody
         :param dry_run: Dry Run
@@ -1832,6 +1966,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._patch_case_batch_serialize(
+            tenant=tenant,
             patch_case_batch_body=patch_case_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -1843,6 +1978,7 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -1860,6 +1996,7 @@ class CasesApi:
     @validate_call
     def patch_case_batch_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         patch_case_batch_body: Annotated[PatchCaseBatchBody, Field(description="Attach Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -1879,6 +2016,8 @@ class CasesApi:
 
         Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param patch_case_batch_body: Attach Body (required)
         :type patch_case_batch_body: PatchCaseBatchBody
         :param dry_run: Dry Run
@@ -1906,6 +2045,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._patch_case_batch_serialize(
+            tenant=tenant,
             patch_case_batch_body=patch_case_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -1917,6 +2057,7 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -1929,6 +2070,7 @@ class CasesApi:
 
     def _patch_case_batch_serialize(
         self,
+        tenant,
         patch_case_batch_body,
         dry_run,
         _request_auth,
@@ -1952,6 +2094,8 @@ class CasesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         if dry_run is not None:
             
@@ -1993,7 +2137,7 @@ class CasesApi:
 
         return self.api_client.param_serialize(
             method='PATCH',
-            resource_path='/cases/batch',
+            resource_path='/{tenant}/cases/batch',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2012,6 +2156,7 @@ class CasesApi:
     @validate_call
     def post_case_batch(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_case_batch_body: Annotated[CreateCaseBatchBody, Field(description="Create Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -2031,6 +2176,8 @@ class CasesApi:
 
         Create a new case batch
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_case_batch_body: Create Body (required)
         :type create_case_batch_body: CreateCaseBatchBody
         :param dry_run: Dry Run
@@ -2058,6 +2205,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._post_case_batch_serialize(
+            tenant=tenant,
             create_case_batch_body=create_case_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -2069,6 +2217,7 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -2086,6 +2235,7 @@ class CasesApi:
     @validate_call
     def post_case_batch_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_case_batch_body: Annotated[CreateCaseBatchBody, Field(description="Create Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -2105,6 +2255,8 @@ class CasesApi:
 
         Create a new case batch
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_case_batch_body: Create Body (required)
         :type create_case_batch_body: CreateCaseBatchBody
         :param dry_run: Dry Run
@@ -2132,6 +2284,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._post_case_batch_serialize(
+            tenant=tenant,
             create_case_batch_body=create_case_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -2143,6 +2296,7 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -2160,6 +2314,7 @@ class CasesApi:
     @validate_call
     def post_case_batch_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_case_batch_body: Annotated[CreateCaseBatchBody, Field(description="Create Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -2179,6 +2334,8 @@ class CasesApi:
 
         Create a new case batch
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_case_batch_body: Create Body (required)
         :type create_case_batch_body: CreateCaseBatchBody
         :param dry_run: Dry Run
@@ -2206,6 +2363,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._post_case_batch_serialize(
+            tenant=tenant,
             create_case_batch_body=create_case_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -2217,6 +2375,7 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -2229,6 +2388,7 @@ class CasesApi:
 
     def _post_case_batch_serialize(
         self,
+        tenant,
         create_case_batch_body,
         dry_run,
         _request_auth,
@@ -2252,6 +2412,8 @@ class CasesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         if dry_run is not None:
             
@@ -2293,7 +2455,7 @@ class CasesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/cases/batch',
+            resource_path='/{tenant}/cases/batch',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2312,6 +2474,7 @@ class CasesApi:
     @validate_call
     def search_cases(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -2330,6 +2493,8 @@ class CasesApi:
 
         Search cases
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param list_body_with_criteria: List Body (required)
         :type list_body_with_criteria: ListBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
@@ -2355,6 +2520,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._search_cases_serialize(
+            tenant=tenant,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2365,6 +2531,8 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CasesSearchResponse",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2381,6 +2549,7 @@ class CasesApi:
     @validate_call
     def search_cases_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -2399,6 +2568,8 @@ class CasesApi:
 
         Search cases
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param list_body_with_criteria: List Body (required)
         :type list_body_with_criteria: ListBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
@@ -2424,6 +2595,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._search_cases_serialize(
+            tenant=tenant,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2434,6 +2606,8 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CasesSearchResponse",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2450,6 +2624,7 @@ class CasesApi:
     @validate_call
     def search_cases_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -2468,6 +2643,8 @@ class CasesApi:
 
         Search cases
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param list_body_with_criteria: List Body (required)
         :type list_body_with_criteria: ListBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
@@ -2493,6 +2670,7 @@ class CasesApi:
         """ # noqa: E501
 
         _param = self._search_cases_serialize(
+            tenant=tenant,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2503,6 +2681,8 @@ class CasesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "CasesSearchResponse",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -2514,6 +2694,7 @@ class CasesApi:
 
     def _search_cases_serialize(
         self,
+        tenant,
         list_body_with_criteria,
         _request_auth,
         _content_type,
@@ -2536,6 +2717,8 @@ class CasesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2573,7 +2756,7 @@ class CasesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/cases/search',
+            resource_path='/{tenant}/cases/search',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

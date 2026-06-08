@@ -3,7 +3,7 @@ import useSWR from 'swr';
 import { type Aggregation, AggregationBodyWithSqon, Statistics, StatisticsBodyWithSqon } from '@/api/api';
 import { useQBActiveSqon } from '@/components/base/query-builder/hooks/use-query-builder';
 import { ApplicationId } from '@/components/cores/applications-config';
-import { occurrencesApi } from '@/utils/api';
+import { DEFAULT_TENANT, occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useSeqIdFromSearchParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 export interface IAggregationBuilder {
@@ -127,7 +127,7 @@ export function useGermlineSNVAggregationStatistics({ field }: CNVAggregationBui
     data,
     async () =>
       occurrencesApi
-        .statisticsGermlineSNVOccurrences(caseId, seqId, taskId!, data!.statisticsBody)
+        .statisticsGermlineSNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId!, data!.statisticsBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -163,7 +163,7 @@ export function useGermlineCNVAggregationBuilder({ field, size = 30 }: CNVAggreg
     data,
     async () =>
       occurrencesApi
-        .aggregateGermlineCNVOccurrences(caseId, seqId, taskId!, data!.aggregationBody)
+        .aggregateGermlineCNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId!, data!.aggregationBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -194,7 +194,7 @@ export function useGermlineCNVAggregationStatistics({ field }: CNVAggregationBui
     data,
     async () =>
       occurrencesApi
-        .statisticsGermlineCNVOccurrences(caseId, seqId, taskId!, data!.statisticsBody)
+        .statisticsGermlineCNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId!, data!.statisticsBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -265,7 +265,7 @@ export function useSomaticSNVAggregationStatistics({ field }: CNVAggregationBuil
     data,
     async () =>
       occurrencesApi
-        .statisticsSomaticSNVOccurrences(caseId, seqId, taskId!, data!.statisticsBody)
+        .statisticsSomaticSNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId!, data!.statisticsBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,

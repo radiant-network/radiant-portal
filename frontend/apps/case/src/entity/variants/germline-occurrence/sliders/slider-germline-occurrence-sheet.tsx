@@ -19,7 +19,7 @@ import SliderSheet from '@/components/base/slider/slider-sheet';
 import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
 import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
 import { useI18n } from '@/components/hooks/i18n';
-import { interpretationApi } from '@/utils/api';
+import { DEFAULT_TENANT, interpretationApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
@@ -34,6 +34,7 @@ type InterpretationInput = {
 
 async function fetchInterpretation(input: InterpretationInput) {
   const response = await interpretationApi.getInterpretationGermline(
+    DEFAULT_TENANT,
     input.caseId,
     input.seqId,
     input.locusId,

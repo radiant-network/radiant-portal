@@ -20,9 +20,9 @@ func testSomaticSNVList(t *testing.T, data string, body string, expected string)
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesSomaticSNVListHandler(repo))
+		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesSomaticSNVListHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/71/74/74/list", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/71/74/74/list", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -34,9 +34,9 @@ func testSomaticSNVCount(t *testing.T, data string, body string, expected int) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/count", server.OccurrencesSomaticSNVCountHandler(repo))
+		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/count", server.OccurrencesSomaticSNVCountHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/71/74/74/count", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/71/74/74/count", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -49,8 +49,8 @@ func testSomaticSNVAggregation(t *testing.T, data string, body string, queryPara
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
 		facetsRepo := repository.NewFacetsRepository()
 		router := gin.Default()
-		router.POST("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/aggregate", server.OccurrencesSomaticSNVAggregateHandler(repo, facetsRepo))
-		path := "/occurrences/somatic/snv/71/74/74/aggregate"
+		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/aggregate", server.OccurrencesSomaticSNVAggregateHandler(repo, facetsRepo))
+		path := "/radiant/occurrences/somatic/snv/71/74/74/aggregate"
 		if len(queryParams) > 0 {
 			path += "?" + strings.Join(queryParams, "&")
 		}
@@ -66,9 +66,9 @@ func testSomaticSNVStatistics(t *testing.T, data string, body string, expected s
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/statistics", server.OccurrencesSomaticSNVStatisticsHandler(repo))
+		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/statistics", server.OccurrencesSomaticSNVStatisticsHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/somatic/snv/71/74/74/statistics", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/71/74/74/statistics", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -206,9 +206,9 @@ func assertGetExpandedSomaticOccurrence(t *testing.T, data string, caseId int, s
 		pubmedClient := &MockExternalClient{}
 		interpretationRepo := repository.NewInterpretationsRepository(postgres, pubmedClient)
 		router := gin.Default()
-		router.GET("/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", server.GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+		router.GET("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", server.GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/somatic/snv/%d/%d/%d/%d/expanded", caseId, seqId, taskId, locusId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/occurrences/somatic/snv/%d/%d/%d/%d/expanded", caseId, seqId, taskId, locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 

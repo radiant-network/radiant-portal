@@ -17,6 +17,7 @@ import (
 // @Description Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
 // @Tags occurrence_flags
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Seq ID"
 // @Param task_id path int true "Task ID"
@@ -25,8 +26,9 @@ import (
 // @Success 204
 // @Failure 400 {object} types.ApiError
 // @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} [post]
+// @Router /{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} [post]
 func UpsertOccurrenceFlagHandler(repo repository.OccurrenceFlagsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseID, err := strconv.Atoi(c.Param("case_id"))
@@ -76,14 +78,17 @@ func UpsertOccurrenceFlagHandler(repo repository.OccurrenceFlagsDAO) gin.Handler
 // @Description Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
 // @Tags occurrence_flags
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Seq ID"
 // @Param task_id path int true "Task ID"
 // @Param occurrence_id path string true "Occurrence ID"
 // @Success 204
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} [delete]
+// @Router /{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} [delete]
 func DeleteOccurrenceFlagHandler(repo repository.OccurrenceFlagsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseID, err := strconv.Atoi(c.Param("case_id"))

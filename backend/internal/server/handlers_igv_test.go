@@ -38,9 +38,9 @@ func Test_IGVGetHandler_germline(t *testing.T) {
 	casesRepo := &MockRepository{caseType: "germline"}
 
 	router := gin.Default()
-	router.GET("/igv/:case_id", GetIGVHandler(igvRepo, casesRepo, testutils.NewMockS3PreSigner()))
+	router.GET("/:tenant/igv/:case_id", GetIGVHandler(igvRepo, casesRepo, testutils.NewMockS3PreSigner()))
 
-	req, _ := http.NewRequest("GET", "/igv/1", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/igv/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -75,9 +75,9 @@ func Test_IGVGetHandler_somatic(t *testing.T) {
 	casesRepo := &MockRepository{caseType: "somatic"}
 
 	router := gin.Default()
-	router.GET("/igv/:case_id", GetIGVHandler(igvRepo, casesRepo, testutils.NewMockS3PreSigner()))
+	router.GET("/:tenant/igv/:case_id", GetIGVHandler(igvRepo, casesRepo, testutils.NewMockS3PreSigner()))
 
-	req, _ := http.NewRequest("GET", "/igv/1", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/igv/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

@@ -14,12 +14,15 @@ import (
 // @Description Get types.SequencingExperimentDetail by id
 // @Tags sequencing
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param seq_id path string true "Seq ID"
 // @Produce json
 // @Success 200 {object} types.SequencingExperimentDetail
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /sequencing/{seq_id}/details [get]
+// @Router /{tenant}/sequencing/{seq_id}/details [get]
 func GetSequencingExperimentDetailByIdHandler(repo repository.SequencingExperimentDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeqId := strconv.Atoi(c.Param("seq_id"))

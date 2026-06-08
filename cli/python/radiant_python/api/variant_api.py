@@ -54,6 +54,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_cases_count(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -72,6 +73,8 @@ class VariantApi:
 
         Retrieve cases count for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -97,6 +100,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_cases_count_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -106,6 +110,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantCasesCount",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -123,6 +129,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_cases_count_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -141,6 +148,8 @@ class VariantApi:
 
         Retrieve cases count for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -166,6 +175,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_cases_count_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -175,6 +185,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantCasesCount",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -192,6 +204,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_cases_count_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -210,6 +223,8 @@ class VariantApi:
 
         Retrieve cases count for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -235,6 +250,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_cases_count_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -244,6 +260,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantCasesCount",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -256,6 +274,7 @@ class VariantApi:
 
     def _get_germline_variant_cases_count_serialize(
         self,
+        tenant,
         locus_id,
         _request_auth,
         _content_type,
@@ -278,6 +297,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -302,7 +323,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/variants/germline/{locus_id}/cases/count',
+            resource_path='/{tenant}/variants/germline/{locus_id}/cases/count',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -321,6 +342,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_cases_filters(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -338,6 +360,8 @@ class VariantApi:
 
         Retrieve cases filters for germline variant entity
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -361,6 +385,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_cases_filters_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -369,6 +394,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantCasesFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -386,6 +413,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_cases_filters_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -403,6 +431,8 @@ class VariantApi:
 
         Retrieve cases filters for germline variant entity
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -426,6 +456,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_cases_filters_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -434,6 +465,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantCasesFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -451,6 +484,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_cases_filters_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -468,6 +502,8 @@ class VariantApi:
 
         Retrieve cases filters for germline variant entity
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -491,6 +527,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_cases_filters_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -499,6 +536,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantCasesFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -511,6 +550,7 @@ class VariantApi:
 
     def _get_germline_variant_cases_filters_serialize(
         self,
+        tenant,
         _request_auth,
         _content_type,
         _headers,
@@ -532,6 +572,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -554,7 +596,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/variants/germline/cases/filters',
+            resource_path='/{tenant}/variants/germline/cases/filters',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -573,6 +615,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_conditions(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         panel_type: Annotated[StrictStr, Field(description="Gene panel type")],
         filter: Annotated[Optional[StrictStr], Field(description="Condition filter")] = None,
@@ -593,6 +636,8 @@ class VariantApi:
 
         Retrieve conditions for germline variant entity for a specific gene panel
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param panel_type: Gene panel type (required)
@@ -622,6 +667,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_conditions_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             panel_type=panel_type,
             filter=filter,
@@ -633,6 +679,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "GenePanelConditions",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -650,6 +698,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_conditions_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         panel_type: Annotated[StrictStr, Field(description="Gene panel type")],
         filter: Annotated[Optional[StrictStr], Field(description="Condition filter")] = None,
@@ -670,6 +719,8 @@ class VariantApi:
 
         Retrieve conditions for germline variant entity for a specific gene panel
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param panel_type: Gene panel type (required)
@@ -699,6 +750,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_conditions_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             panel_type=panel_type,
             filter=filter,
@@ -710,6 +762,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "GenePanelConditions",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -727,6 +781,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_conditions_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         panel_type: Annotated[StrictStr, Field(description="Gene panel type")],
         filter: Annotated[Optional[StrictStr], Field(description="Condition filter")] = None,
@@ -747,6 +802,8 @@ class VariantApi:
 
         Retrieve conditions for germline variant entity for a specific gene panel
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param panel_type: Gene panel type (required)
@@ -776,6 +833,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_conditions_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             panel_type=panel_type,
             filter=filter,
@@ -787,6 +845,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "GenePanelConditions",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -799,6 +859,7 @@ class VariantApi:
 
     def _get_germline_variant_conditions_serialize(
         self,
+        tenant,
         locus_id,
         panel_type,
         filter,
@@ -823,6 +884,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         if panel_type is not None:
@@ -853,7 +916,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/variants/germline/{locus_id}/conditions/{panel_type}',
+            resource_path='/{tenant}/variants/germline/{locus_id}/conditions/{panel_type}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -872,6 +935,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_conditions_clinvar(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -890,6 +954,8 @@ class VariantApi:
 
         Retrieve ClinVar conditions for germline variant entity
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -915,6 +981,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_conditions_clinvar_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -924,6 +991,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ClinvarVariantConditions",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -941,6 +1010,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_conditions_clinvar_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -959,6 +1029,8 @@ class VariantApi:
 
         Retrieve ClinVar conditions for germline variant entity
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -984,6 +1056,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_conditions_clinvar_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -993,6 +1066,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ClinvarVariantConditions",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1010,6 +1085,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_conditions_clinvar_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1028,6 +1104,8 @@ class VariantApi:
 
         Retrieve ClinVar conditions for germline variant entity
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1053,6 +1131,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_conditions_clinvar_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1062,6 +1141,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ClinvarVariantConditions",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1074,6 +1155,7 @@ class VariantApi:
 
     def _get_germline_variant_conditions_clinvar_serialize(
         self,
+        tenant,
         locus_id,
         _request_auth,
         _content_type,
@@ -1096,6 +1178,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -1120,7 +1204,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/variants/germline/{locus_id}/conditions/clinvar',
+            resource_path='/{tenant}/variants/germline/{locus_id}/conditions/clinvar',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1139,6 +1223,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_consequences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1157,6 +1242,8 @@ class VariantApi:
 
         Retrieve germline Variant Consequences for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1182,6 +1269,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_consequences_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1191,6 +1279,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[VariantConsequence]",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1208,6 +1298,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_consequences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1226,6 +1317,8 @@ class VariantApi:
 
         Retrieve germline Variant Consequences for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1251,6 +1344,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_consequences_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1260,6 +1354,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[VariantConsequence]",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1277,6 +1373,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_consequences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1295,6 +1392,8 @@ class VariantApi:
 
         Retrieve germline Variant Consequences for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1320,6 +1419,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_consequences_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1329,6 +1429,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[VariantConsequence]",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1341,6 +1443,7 @@ class VariantApi:
 
     def _get_germline_variant_consequences_serialize(
         self,
+        tenant,
         locus_id,
         _request_auth,
         _content_type,
@@ -1363,6 +1466,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -1387,7 +1492,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/variants/germline/{locus_id}/consequences',
+            resource_path='/{tenant}/variants/germline/{locus_id}/consequences',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1406,6 +1511,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_external_frequencies(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1424,6 +1530,8 @@ class VariantApi:
 
         Retrieve external frequencies for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1449,6 +1557,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_external_frequencies_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1458,6 +1567,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantExternalFrequencies",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1475,6 +1586,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_external_frequencies_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1493,6 +1605,8 @@ class VariantApi:
 
         Retrieve external frequencies for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1518,6 +1632,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_external_frequencies_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1527,6 +1642,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantExternalFrequencies",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1544,6 +1661,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_external_frequencies_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1562,6 +1680,8 @@ class VariantApi:
 
         Retrieve external frequencies for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1587,6 +1707,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_external_frequencies_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1596,6 +1717,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantExternalFrequencies",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1608,6 +1731,7 @@ class VariantApi:
 
     def _get_germline_variant_external_frequencies_serialize(
         self,
+        tenant,
         locus_id,
         _request_auth,
         _content_type,
@@ -1630,6 +1754,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -1654,7 +1780,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/variants/germline/{locus_id}/external_frequencies',
+            resource_path='/{tenant}/variants/germline/{locus_id}/external_frequencies',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1673,6 +1799,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_global_internal_frequencies(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1691,6 +1818,8 @@ class VariantApi:
 
         Retrieve global internal frequencies for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1716,6 +1845,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_global_internal_frequencies_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1725,6 +1855,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InternalFrequencies",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1742,6 +1874,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_global_internal_frequencies_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1760,6 +1893,8 @@ class VariantApi:
 
         Retrieve global internal frequencies for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1785,6 +1920,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_global_internal_frequencies_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1794,6 +1930,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InternalFrequencies",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1811,6 +1949,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_global_internal_frequencies_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1829,6 +1968,8 @@ class VariantApi:
 
         Retrieve global internal frequencies for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1854,6 +1995,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_global_internal_frequencies_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1863,6 +2005,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InternalFrequencies",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1875,6 +2019,7 @@ class VariantApi:
 
     def _get_germline_variant_global_internal_frequencies_serialize(
         self,
+        tenant,
         locus_id,
         _request_auth,
         _content_type,
@@ -1897,6 +2042,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -1921,7 +2068,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/variants/germline/{locus_id}/internal_frequencies/global',
+            resource_path='/{tenant}/variants/germline/{locus_id}/internal_frequencies/global',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1940,6 +2087,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_header(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -1958,6 +2106,8 @@ class VariantApi:
 
         Retrieve germline Variant Header data for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1983,6 +2133,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_header_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1992,6 +2143,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantHeader",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2009,6 +2162,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_header_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2027,6 +2181,8 @@ class VariantApi:
 
         Retrieve germline Variant Header data for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2052,6 +2208,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_header_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2061,6 +2218,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantHeader",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2078,6 +2237,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_header_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2096,6 +2256,8 @@ class VariantApi:
 
         Retrieve germline Variant Header data for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2121,6 +2283,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_header_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2130,6 +2293,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantHeader",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2142,6 +2307,7 @@ class VariantApi:
 
     def _get_germline_variant_header_serialize(
         self,
+        tenant,
         locus_id,
         _request_auth,
         _content_type,
@@ -2164,6 +2330,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -2188,7 +2356,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/variants/germline/{locus_id}/header',
+            resource_path='/{tenant}/variants/germline/{locus_id}/header',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2207,6 +2375,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_internal_frequencies(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         split: Annotated[StrictStr, Field(description="split type")],
         _request_timeout: Union[
@@ -2226,6 +2395,8 @@ class VariantApi:
 
         Retrieve internal frequencies for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param split: split type (required)
@@ -2253,6 +2424,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_internal_frequencies_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             split=split,
             _request_auth=_request_auth,
@@ -2264,6 +2436,8 @@ class VariantApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantInternalFrequencies",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2281,6 +2455,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_internal_frequencies_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         split: Annotated[StrictStr, Field(description="split type")],
         _request_timeout: Union[
@@ -2300,6 +2475,8 @@ class VariantApi:
 
         Retrieve internal frequencies for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param split: split type (required)
@@ -2327,6 +2504,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_internal_frequencies_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             split=split,
             _request_auth=_request_auth,
@@ -2338,6 +2516,8 @@ class VariantApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantInternalFrequencies",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2355,6 +2535,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_internal_frequencies_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         split: Annotated[StrictStr, Field(description="split type")],
         _request_timeout: Union[
@@ -2374,6 +2555,8 @@ class VariantApi:
 
         Retrieve internal frequencies for a given locus id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param split: split type (required)
@@ -2401,6 +2584,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_internal_frequencies_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             split=split,
             _request_auth=_request_auth,
@@ -2412,6 +2596,8 @@ class VariantApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantInternalFrequencies",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2424,6 +2610,7 @@ class VariantApi:
 
     def _get_germline_variant_internal_frequencies_serialize(
         self,
+        tenant,
         locus_id,
         split,
         _request_auth,
@@ -2447,6 +2634,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -2475,7 +2664,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/variants/germline/{locus_id}/internal_frequencies',
+            resource_path='/{tenant}/variants/germline/{locus_id}/internal_frequencies',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2494,6 +2683,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_interpreted_cases(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="Search Body with criteria")],
         _request_timeout: Union[
@@ -2513,6 +2703,8 @@ class VariantApi:
 
         Retrieve Germline Variant interpreted cases for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param list_body_with_criteria: Search Body with criteria (required)
@@ -2540,6 +2732,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_interpreted_cases_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
@@ -2550,6 +2743,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantInterpretedCasesSearchResponse",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2567,6 +2762,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_interpreted_cases_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="Search Body with criteria")],
         _request_timeout: Union[
@@ -2586,6 +2782,8 @@ class VariantApi:
 
         Retrieve Germline Variant interpreted cases for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param list_body_with_criteria: Search Body with criteria (required)
@@ -2613,6 +2811,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_interpreted_cases_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
@@ -2623,6 +2822,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantInterpretedCasesSearchResponse",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2640,6 +2841,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_interpreted_cases_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="Search Body with criteria")],
         _request_timeout: Union[
@@ -2659,6 +2861,8 @@ class VariantApi:
 
         Retrieve Germline Variant interpreted cases for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param list_body_with_criteria: Search Body with criteria (required)
@@ -2686,6 +2890,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_interpreted_cases_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
@@ -2696,6 +2901,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantInterpretedCasesSearchResponse",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2708,6 +2915,7 @@ class VariantApi:
 
     def _get_germline_variant_interpreted_cases_serialize(
         self,
+        tenant,
         locus_id,
         list_body_with_criteria,
         _request_auth,
@@ -2731,6 +2939,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -2770,7 +2980,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/variants/germline/{locus_id}/cases/interpreted',
+            resource_path='/{tenant}/variants/germline/{locus_id}/cases/interpreted',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2789,6 +2999,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_overview(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2807,6 +3018,8 @@ class VariantApi:
 
         Retrieve germline Variant Overview data for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2832,6 +3045,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_overview_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2841,6 +3055,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantOverview",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2858,6 +3074,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_overview_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2876,6 +3093,8 @@ class VariantApi:
 
         Retrieve germline Variant Overview data for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2901,6 +3120,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_overview_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2910,6 +3130,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantOverview",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2927,6 +3149,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_overview_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         _request_timeout: Union[
             None,
@@ -2945,6 +3168,8 @@ class VariantApi:
 
         Retrieve germline Variant Overview data for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2970,6 +3195,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_overview_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2979,6 +3205,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantOverview",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2991,6 +3219,7 @@ class VariantApi:
 
     def _get_germline_variant_overview_serialize(
         self,
+        tenant,
         locus_id,
         _request_auth,
         _content_type,
@@ -3013,6 +3242,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -3037,7 +3268,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/variants/germline/{locus_id}/overview',
+            resource_path='/{tenant}/variants/germline/{locus_id}/overview',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3056,6 +3287,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_uninterpreted_cases(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="Search Body with criteria")],
         _request_timeout: Union[
@@ -3075,6 +3307,8 @@ class VariantApi:
 
         Retrieve Germline Variant uninterpreted cases for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param list_body_with_criteria: Search Body with criteria (required)
@@ -3102,6 +3336,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_uninterpreted_cases_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
@@ -3112,6 +3347,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantUninterpretedCasesSearchResponse",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3129,6 +3366,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_uninterpreted_cases_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="Search Body with criteria")],
         _request_timeout: Union[
@@ -3148,6 +3386,8 @@ class VariantApi:
 
         Retrieve Germline Variant uninterpreted cases for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param list_body_with_criteria: Search Body with criteria (required)
@@ -3175,6 +3415,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_uninterpreted_cases_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
@@ -3185,6 +3426,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantUninterpretedCasesSearchResponse",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3202,6 +3445,7 @@ class VariantApi:
     @validate_call
     def get_germline_variant_uninterpreted_cases_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="Search Body with criteria")],
         _request_timeout: Union[
@@ -3221,6 +3465,8 @@ class VariantApi:
 
         Retrieve Germline Variant uninterpreted cases for a given locus
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
         :param list_body_with_criteria: Search Body with criteria (required)
@@ -3248,6 +3494,7 @@ class VariantApi:
         """ # noqa: E501
 
         _param = self._get_germline_variant_uninterpreted_cases_serialize(
+            tenant=tenant,
             locus_id=locus_id,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
@@ -3258,6 +3505,8 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "VariantUninterpretedCasesSearchResponse",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3270,6 +3519,7 @@ class VariantApi:
 
     def _get_germline_variant_uninterpreted_cases_serialize(
         self,
+        tenant,
         locus_id,
         list_body_with_criteria,
         _request_auth,
@@ -3293,6 +3543,8 @@ class VariantApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
@@ -3332,7 +3584,7 @@ class VariantApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/variants/germline/{locus_id}/cases/uninterpreted',
+            resource_path='/{tenant}/variants/germline/{locus_id}/cases/uninterpreted',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

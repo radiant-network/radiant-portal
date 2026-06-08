@@ -4,12 +4,12 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**delete_occurrence_flag**](OccurrenceFlagsApi.md#delete_occurrence_flag) | **DELETE** /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Delete the flag on an occurrence
-[**upsert_occurrence_flag**](OccurrenceFlagsApi.md#upsert_occurrence_flag) | **POST** /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Set or change the flag on an occurrence
+[**delete_occurrence_flag**](OccurrenceFlagsApi.md#delete_occurrence_flag) | **DELETE** /{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Delete the flag on an occurrence
+[**upsert_occurrence_flag**](OccurrenceFlagsApi.md#upsert_occurrence_flag) | **POST** /{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Set or change the flag on an occurrence
 
 
 # **delete_occurrence_flag**
-> delete_occurrence_flag(case_id, seq_id, task_id, occurrence_id)
+> delete_occurrence_flag(tenant, case_id, seq_id, task_id, occurrence_id)
 
 Delete the flag on an occurrence
 
@@ -44,6 +44,7 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.OccurrenceFlagsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Seq ID
     task_id = 56 # int | Task ID
@@ -51,7 +52,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
     try:
         # Delete the flag on an occurrence
-        api_instance.delete_occurrence_flag(case_id, seq_id, task_id, occurrence_id)
+        api_instance.delete_occurrence_flag(tenant, case_id, seq_id, task_id, occurrence_id)
     except Exception as e:
         print("Exception when calling OccurrenceFlagsApi->delete_occurrence_flag: %s\n" % e)
 ```
@@ -63,6 +64,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Seq ID | 
  **task_id** | **int**| Task ID | 
@@ -86,13 +88,15 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **204** | No Content |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **upsert_occurrence_flag**
-> upsert_occurrence_flag(case_id, seq_id, task_id, occurrence_id, flag_type)
+> upsert_occurrence_flag(tenant, case_id, seq_id, task_id, occurrence_id, flag_type)
 
 Set or change the flag on an occurrence
 
@@ -127,6 +131,7 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.OccurrenceFlagsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Seq ID
     task_id = 56 # int | Task ID
@@ -135,7 +140,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
     try:
         # Set or change the flag on an occurrence
-        api_instance.upsert_occurrence_flag(case_id, seq_id, task_id, occurrence_id, flag_type)
+        api_instance.upsert_occurrence_flag(tenant, case_id, seq_id, task_id, occurrence_id, flag_type)
     except Exception as e:
         print("Exception when calling OccurrenceFlagsApi->upsert_occurrence_flag: %s\n" % e)
 ```
@@ -147,6 +152,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Seq ID | 
  **task_id** | **int**| Task ID | 
@@ -173,6 +179,7 @@ void (empty response body)
 **204** | No Content |  -  |
 **400** | Bad Request |  -  |
 **401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

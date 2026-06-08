@@ -104,9 +104,9 @@ func Test_StatusHandler(t *testing.T) {
 func Test_MondoTermAutoCompleteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/mondo/autocomplete", GetMondoTermAutoComplete(repo))
+	router.GET("/:tenant/mondo/autocomplete", GetMondoTermAutoComplete(repo))
 
-	req, _ := http.NewRequest("GET", "/mondo/autocomplete?prefix=blood", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/mondo/autocomplete?prefix=blood", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -117,9 +117,9 @@ func Test_MondoTermAutoCompleteHandler(t *testing.T) {
 func Test_MondoTermAutoCompleteHandlerWithLimit(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/mondo/autocomplete", GetMondoTermAutoComplete(repo))
+	router.GET("/:tenant/mondo/autocomplete", GetMondoTermAutoComplete(repo))
 
-	req, _ := http.NewRequest("GET", "/mondo/autocomplete?prefix=blood&limit=10", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/mondo/autocomplete?prefix=blood&limit=10", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -130,9 +130,9 @@ func Test_MondoTermAutoCompleteHandlerWithLimit(t *testing.T) {
 func Test_MondoTermAutoCompleteHandlerWithInvalidLimit(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/mondo/autocomplete", GetMondoTermAutoComplete(repo))
+	router.GET("/:tenant/mondo/autocomplete", GetMondoTermAutoComplete(repo))
 
-	req, _ := http.NewRequest("GET", "/mondo/autocomplete?prefix=blood&limit=a", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/mondo/autocomplete?prefix=blood&limit=a", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

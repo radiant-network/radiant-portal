@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**post_sample_batch**](SamplesApi.md#post_sample_batch) | **POST** /samples/batch | Create a new sample batch
+[**post_sample_batch**](SamplesApi.md#post_sample_batch) | **POST** /{tenant}/samples/batch | Create a new sample batch
 
 
 # **post_sample_batch**
-> CreateBatchResponse post_sample_batch(create_sample_batch_body, dry_run=dry_run)
+> CreateBatchResponse post_sample_batch(tenant, create_sample_batch_body, dry_run=dry_run)
 
 Create a new sample batch
 
@@ -45,12 +45,13 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.SamplesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     create_sample_batch_body = radiant_python.CreateSampleBatchBody() # CreateSampleBatchBody | Create Body
     dry_run = False # bool | Dry Run (optional) (default to False)
 
     try:
         # Create a new sample batch
-        api_response = api_instance.post_sample_batch(create_sample_batch_body, dry_run=dry_run)
+        api_response = api_instance.post_sample_batch(tenant, create_sample_batch_body, dry_run=dry_run)
         print("The response of SamplesApi->post_sample_batch:\n")
         pprint(api_response)
     except Exception as e:
@@ -64,6 +65,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **create_sample_batch_body** | [**CreateSampleBatchBody**](CreateSampleBatchBody.md)| Create Body | 
  **dry_run** | **bool**| Dry Run | [optional] [default to False]
 
@@ -86,6 +88,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **202** | Accepted |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
 **403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 

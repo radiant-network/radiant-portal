@@ -40,36 +40,38 @@ func Test_SecureRoutes(t *testing.T) {
 
 		// Validate all the other routes are private
 
-		// GET requests
+		// GET requests. Tenant-scoped routes now live under /{tenant}/; a missing token is
+		// still rejected (401) by the Keycloak middleware before tenant resolution, so the
+		// tenant segment value is irrelevant here. Global routes (users/*) stay at root.
 		for _, route := range []string{
-			"sequencing/1/details",
-			"cases/1",
-			"cases/filters",
-			"cases/autocomplete",
-			"genes/autocomplete",
+			"radiant/sequencing/1/details",
+			"radiant/cases/1",
+			"radiant/cases/filters",
+			"radiant/cases/autocomplete",
+			"radiant/genes/autocomplete",
 			"radiant/hpo/autocomplete",
-			"igv/1",
-			"interpretations/pubmed/1",
-			"interpretations/germline",
-			"interpretations/somatic",
-			"interpretations/germline/1/1/1",
-			"interpretations/somatic/1/1/1",
-			"mondo/autocomplete",
-			"occurrences/germline/snv/1/1/1/1/expanded",
-			"occurrences/somatic/snv/1/1/1/1/expanded",
+			"radiant/igv/1",
+			"radiant/interpretations/pubmed/1",
+			"radiant/interpretations/germline",
+			"radiant/interpretations/somatic",
+			"radiant/interpretations/germline/1/1/1",
+			"radiant/interpretations/somatic/1/1/1",
+			"radiant/mondo/autocomplete",
+			"radiant/occurrences/germline/snv/1/1/1/1/expanded",
+			"radiant/occurrences/somatic/snv/1/1/1/1/expanded",
 			"users/preferences/table_1",
 			"users/sets/1",
-			"variants/germline/1/header",
-			"variants/germline/1/overview",
-			"variants/germline/1/consequences",
-			"variants/germline/1/cases/count",
-			"variants/germline/cases/filters",
-			"variants/germline/1/conditions/omim",
-			"variants/germline/1/conditions/clinvar",
-			"variants/germline/1/external_frequencies",
-			"variants/germline/1/internal_frequencies",
-			"notes/1/1/1/10000",
-			"cases/1/1/tasks_with_occurrences?data_type=germline_snv",
+			"radiant/variants/germline/1/header",
+			"radiant/variants/germline/1/overview",
+			"radiant/variants/germline/1/consequences",
+			"radiant/variants/germline/1/cases/count",
+			"radiant/variants/germline/cases/filters",
+			"radiant/variants/germline/1/conditions/omim",
+			"radiant/variants/germline/1/conditions/clinvar",
+			"radiant/variants/germline/1/external_frequencies",
+			"radiant/variants/germline/1/internal_frequencies",
+			"radiant/notes/1/1/1/10000",
+			"radiant/cases/1/1/tasks_with_occurrences?data_type=germline_snv",
 		} {
 			resp, err = http.Get(fmt.Sprintf("http://localhost:%d/%s", randomPort, route))
 			assert.NoError(t, err)
@@ -78,24 +80,24 @@ func Test_SecureRoutes(t *testing.T) {
 
 		// POST requests
 		for _, route := range []string{
-			"cases/search",
-			"genes/search",
-			"interpretations/germline/1/1/1",
-			"interpretations/somatic/1/1/1",
-			"occurrences/germline/snv/1/1/1/count",
-			"occurrences/germline/snv/1/1/1/list",
-			"occurrences/germline/snv/1/1/1/aggregate",
-			"occurrences/germline/snv/1/1/1/statistics",
-			"occurrences/somatic/snv/1/1/1/count",
-			"occurrences/somatic/snv/1/1/1/list",
-			"occurrences/somatic/snv/1/1/1/aggregate",
-			"occurrences/somatic/snv/1/1/1/statistics",
-			"occurrences/germline/cnv/1/1/1/list",
-			"occurrences/flags/1/1/1/10000",
+			"radiant/cases/search",
+			"radiant/genes/search",
+			"radiant/interpretations/germline/1/1/1",
+			"radiant/interpretations/somatic/1/1/1",
+			"radiant/occurrences/germline/snv/1/1/1/count",
+			"radiant/occurrences/germline/snv/1/1/1/list",
+			"radiant/occurrences/germline/snv/1/1/1/aggregate",
+			"radiant/occurrences/germline/snv/1/1/1/statistics",
+			"radiant/occurrences/somatic/snv/1/1/1/count",
+			"radiant/occurrences/somatic/snv/1/1/1/list",
+			"radiant/occurrences/somatic/snv/1/1/1/aggregate",
+			"radiant/occurrences/somatic/snv/1/1/1/statistics",
+			"radiant/occurrences/germline/cnv/1/1/1/list",
+			"radiant/occurrences/flags/1/1/1/10000",
 			"users/preferences/table_1",
-			"variants/germline/1/cases/interpreted",
-			"variants/germline/1/cases/uninterpreted",
-			"notes",
+			"radiant/variants/germline/1/cases/interpreted",
+			"radiant/variants/germline/1/cases/uninterpreted",
+			"radiant/notes",
 		} {
 			resp, err = http.Post(fmt.Sprintf("http://localhost:%d/%s", randomPort, route), "application/json", nil)
 			assert.NoError(t, err)
@@ -104,7 +106,7 @@ func Test_SecureRoutes(t *testing.T) {
 
 		// DELETE requests
 		for _, route := range []string{
-			"occurrences/flags/1/1/1/10000",
+			"radiant/occurrences/flags/1/1/1/10000",
 		} {
 			req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://localhost:%d/%s", randomPort, route), nil)
 			assert.NoError(t, err)

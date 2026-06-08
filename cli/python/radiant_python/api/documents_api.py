@@ -46,6 +46,7 @@ class DocumentsApi:
     @validate_call
     def autocomplete_documents(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -65,6 +66,8 @@ class DocumentsApi:
 
         Retrieve AutocompleteResult list of ids matching prefix
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -92,6 +95,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._autocomplete_documents_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -102,6 +106,8 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutocompleteResult]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -118,6 +124,7 @@ class DocumentsApi:
     @validate_call
     def autocomplete_documents_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -137,6 +144,8 @@ class DocumentsApi:
 
         Retrieve AutocompleteResult list of ids matching prefix
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -164,6 +173,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._autocomplete_documents_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -174,6 +184,8 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutocompleteResult]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -190,6 +202,7 @@ class DocumentsApi:
     @validate_call
     def autocomplete_documents_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -209,6 +222,8 @@ class DocumentsApi:
 
         Retrieve AutocompleteResult list of ids matching prefix
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -236,6 +251,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._autocomplete_documents_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -246,6 +262,8 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutocompleteResult]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -257,6 +275,7 @@ class DocumentsApi:
 
     def _autocomplete_documents_serialize(
         self,
+        tenant,
         prefix,
         limit,
         _request_auth,
@@ -280,6 +299,8 @@ class DocumentsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         if prefix is not None:
             
@@ -310,7 +331,7 @@ class DocumentsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/documents/autocomplete',
+            resource_path='/{tenant}/documents/autocomplete',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -329,6 +350,7 @@ class DocumentsApi:
     @validate_call
     def documents_filters(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -346,6 +368,8 @@ class DocumentsApi:
 
         Retrieve DocumentFilters documents filters
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -369,6 +393,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._documents_filters_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -377,6 +402,8 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -393,6 +420,7 @@ class DocumentsApi:
     @validate_call
     def documents_filters_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -410,6 +438,8 @@ class DocumentsApi:
 
         Retrieve DocumentFilters documents filters
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -433,6 +463,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._documents_filters_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -441,6 +472,8 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -457,6 +490,7 @@ class DocumentsApi:
     @validate_call
     def documents_filters_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -474,6 +508,8 @@ class DocumentsApi:
 
         Retrieve DocumentFilters documents filters
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -497,6 +533,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._documents_filters_serialize(
+            tenant=tenant,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -505,6 +542,8 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentFilters",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -516,6 +555,7 @@ class DocumentsApi:
 
     def _documents_filters_serialize(
         self,
+        tenant,
         _request_auth,
         _content_type,
         _headers,
@@ -537,6 +577,8 @@ class DocumentsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -559,7 +601,7 @@ class DocumentsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/documents/filters',
+            resource_path='/{tenant}/documents/filters',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -578,6 +620,7 @@ class DocumentsApi:
     @validate_call
     def get_document_download_url(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         document_id: Annotated[StrictStr, Field(description="Document ID")],
         _request_timeout: Union[
             None,
@@ -596,6 +639,8 @@ class DocumentsApi:
 
         Generate a pre-signed S3 download URL for a document
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param document_id: Document ID (required)
         :type document_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -621,6 +666,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._get_document_download_url_serialize(
+            tenant=tenant,
             document_id=document_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -630,6 +676,8 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UtilsPreSignedURL",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -647,6 +695,7 @@ class DocumentsApi:
     @validate_call
     def get_document_download_url_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         document_id: Annotated[StrictStr, Field(description="Document ID")],
         _request_timeout: Union[
             None,
@@ -665,6 +714,8 @@ class DocumentsApi:
 
         Generate a pre-signed S3 download URL for a document
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param document_id: Document ID (required)
         :type document_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -690,6 +741,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._get_document_download_url_serialize(
+            tenant=tenant,
             document_id=document_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -699,6 +751,8 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UtilsPreSignedURL",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -716,6 +770,7 @@ class DocumentsApi:
     @validate_call
     def get_document_download_url_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         document_id: Annotated[StrictStr, Field(description="Document ID")],
         _request_timeout: Union[
             None,
@@ -734,6 +789,8 @@ class DocumentsApi:
 
         Generate a pre-signed S3 download URL for a document
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param document_id: Document ID (required)
         :type document_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -759,6 +816,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._get_document_download_url_serialize(
+            tenant=tenant,
             document_id=document_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -768,6 +826,8 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "UtilsPreSignedURL",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -780,6 +840,7 @@ class DocumentsApi:
 
     def _get_document_download_url_serialize(
         self,
+        tenant,
         document_id,
         _request_auth,
         _content_type,
@@ -802,6 +863,8 @@ class DocumentsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if document_id is not None:
             _path_params['document_id'] = document_id
         # process the query parameters
@@ -826,7 +889,7 @@ class DocumentsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/documents/{document_id}/download_url',
+            resource_path='/{tenant}/documents/{document_id}/download_url',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -845,6 +908,7 @@ class DocumentsApi:
     @validate_call
     def search_documents(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -863,6 +927,8 @@ class DocumentsApi:
 
         Search documents
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param list_body_with_criteria: List Body (required)
         :type list_body_with_criteria: ListBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
@@ -888,6 +954,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._search_documents_serialize(
+            tenant=tenant,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -898,6 +965,8 @@ class DocumentsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentsSearchResponse",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -914,6 +983,7 @@ class DocumentsApi:
     @validate_call
     def search_documents_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -932,6 +1002,8 @@ class DocumentsApi:
 
         Search documents
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param list_body_with_criteria: List Body (required)
         :type list_body_with_criteria: ListBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
@@ -957,6 +1029,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._search_documents_serialize(
+            tenant=tenant,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -967,6 +1040,8 @@ class DocumentsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentsSearchResponse",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -983,6 +1058,7 @@ class DocumentsApi:
     @validate_call
     def search_documents_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         list_body_with_criteria: Annotated[ListBodyWithCriteria, Field(description="List Body")],
         _request_timeout: Union[
             None,
@@ -1001,6 +1077,8 @@ class DocumentsApi:
 
         Search documents
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param list_body_with_criteria: List Body (required)
         :type list_body_with_criteria: ListBodyWithCriteria
         :param _request_timeout: timeout setting for this request. If one
@@ -1026,6 +1104,7 @@ class DocumentsApi:
         """ # noqa: E501
 
         _param = self._search_documents_serialize(
+            tenant=tenant,
             list_body_with_criteria=list_body_with_criteria,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1036,6 +1115,8 @@ class DocumentsApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentsSearchResponse",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1047,6 +1128,7 @@ class DocumentsApi:
 
     def _search_documents_serialize(
         self,
+        tenant,
         list_body_with_criteria,
         _request_auth,
         _content_type,
@@ -1069,6 +1151,8 @@ class DocumentsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1106,7 +1190,7 @@ class DocumentsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/documents/search',
+            resource_path='/{tenant}/documents/search',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

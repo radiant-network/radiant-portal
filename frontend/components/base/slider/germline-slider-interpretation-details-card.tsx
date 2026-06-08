@@ -22,7 +22,7 @@ import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
-import { interpretationApi } from '@/utils/api';
+import { DEFAULT_TENANT, interpretationApi } from '@/utils/api';
 
 type GermlineSliderInterpretationDetailsCardProps = {
   seqId: number;
@@ -45,6 +45,7 @@ type InterpretationInput = {
 
 export async function fetchInterpretation(input: InterpretationInput) {
   const response = await interpretationApi.getInterpretationGermline(
+    DEFAULT_TENANT,
     input.caseId,
     input.seqId,
     input.locusId,

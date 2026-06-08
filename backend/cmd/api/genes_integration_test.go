@@ -19,9 +19,9 @@ func assertGeneAutoComplete(t *testing.T, data string, prefix string, expected s
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGenesRepository(db)
 		router := gin.Default()
-		router.GET("/genes/autocomplete", server.GetGeneAutoCompleteHandler(repo))
+		router.GET("/:tenant/genes/autocomplete", server.GetGeneAutoCompleteHandler(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/genes/autocomplete?prefix=%s", prefix), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/genes/autocomplete?prefix=%s", prefix), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -44,9 +44,9 @@ func assertSearchGenes(t *testing.T, data string, body string, expected string) 
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGenesRepository(db)
 		router := gin.Default()
-		router.POST("/genes/search", server.SearchGenesHandler(repo))
+		router.POST("/:tenant/genes/search", server.SearchGenesHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/genes/search", bytes.NewBuffer([]byte(body)))
+		req, _ := http.NewRequest("POST", "/radiant/genes/search", bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 

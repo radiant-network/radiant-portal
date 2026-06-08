@@ -14,7 +14,7 @@ import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
 import SliderUninterpretedCaseSheet from '@/entity/cases/slider/slider-uninterpreted-case-sheet';
 import { useSliderCasePatientIdNavigation } from '@/entity/cases/slider/use-slider-case-navigation';
-import { variantsApi } from '@/utils/api';
+import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
 
 import UninterpretedCasesTableFilters from './table/uninterpreted-cases-table-filters';
 import {
@@ -30,7 +30,11 @@ type UninterpretedCasesSearchInput = {
 };
 
 async function fetchUninterpretedCases(input: UninterpretedCasesSearchInput) {
-  const response = await variantsApi.getGermlineVariantUninterpretedCases(input.locusId, input.listBodyWithCriteria);
+  const response = await variantsApi.getGermlineVariantUninterpretedCases(
+    DEFAULT_TENANT,
+    input.locusId,
+    input.listBodyWithCriteria,
+  );
   return response.data;
 }
 

@@ -55,6 +55,7 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_cnv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -76,6 +77,8 @@ class OccurrencesApi:
 
         Aggregate germline CNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -107,6 +110,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -120,6 +124,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Aggregation]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -137,6 +143,7 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_cnv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -158,6 +165,8 @@ class OccurrencesApi:
 
         Aggregate germline CNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -189,6 +198,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -202,6 +212,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Aggregation]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -219,6 +231,7 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_cnv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -240,6 +253,8 @@ class OccurrencesApi:
 
         Aggregate germline CNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -271,6 +286,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -284,6 +300,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Aggregation]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -296,6 +314,7 @@ class OccurrencesApi:
 
     def _aggregate_germline_cnv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -321,6 +340,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -364,7 +385,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate',
+            resource_path='/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -383,6 +404,7 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_snv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -405,6 +427,8 @@ class OccurrencesApi:
 
         Aggregate germline SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -438,6 +462,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -452,6 +477,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Aggregation]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -469,6 +496,7 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_snv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -491,6 +519,8 @@ class OccurrencesApi:
 
         Aggregate germline SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -524,6 +554,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -538,6 +569,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Aggregation]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -555,6 +588,7 @@ class OccurrencesApi:
     @validate_call
     def aggregate_germline_snv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -577,6 +611,8 @@ class OccurrencesApi:
 
         Aggregate germline SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -610,6 +646,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -624,6 +661,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Aggregation]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -636,6 +675,7 @@ class OccurrencesApi:
 
     def _aggregate_germline_snv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -662,6 +702,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -709,7 +751,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate',
+            resource_path='/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -728,6 +770,7 @@ class OccurrencesApi:
     @validate_call
     def aggregate_somatic_snv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -750,6 +793,8 @@ class OccurrencesApi:
 
         Aggregate somatic SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -783,6 +828,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -797,6 +843,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Aggregation]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -814,6 +862,7 @@ class OccurrencesApi:
     @validate_call
     def aggregate_somatic_snv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -836,6 +885,8 @@ class OccurrencesApi:
 
         Aggregate somatic SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -869,6 +920,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -883,6 +935,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Aggregation]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -900,6 +954,7 @@ class OccurrencesApi:
     @validate_call
     def aggregate_somatic_snv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -922,6 +977,8 @@ class OccurrencesApi:
 
         Aggregate somatic SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -955,6 +1012,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._aggregate_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -969,6 +1027,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Aggregation]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -981,6 +1041,7 @@ class OccurrencesApi:
 
     def _aggregate_somatic_snv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -1007,6 +1068,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -1054,7 +1117,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate',
+            resource_path='/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1073,6 +1136,7 @@ class OccurrencesApi:
     @validate_call
     def count_germline_cnv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -1094,6 +1158,8 @@ class OccurrencesApi:
 
         Counts germline CNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -1125,6 +1191,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -1138,6 +1205,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1155,6 +1224,7 @@ class OccurrencesApi:
     @validate_call
     def count_germline_cnv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -1176,6 +1246,8 @@ class OccurrencesApi:
 
         Counts germline CNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -1207,6 +1279,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -1220,6 +1293,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1237,6 +1312,7 @@ class OccurrencesApi:
     @validate_call
     def count_germline_cnv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -1258,6 +1334,8 @@ class OccurrencesApi:
 
         Counts germline CNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -1289,6 +1367,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -1302,6 +1381,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1314,6 +1395,7 @@ class OccurrencesApi:
 
     def _count_germline_cnv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -1339,6 +1421,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -1382,7 +1466,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count',
+            resource_path='/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1401,6 +1485,7 @@ class OccurrencesApi:
     @validate_call
     def count_germline_snv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -1422,6 +1507,8 @@ class OccurrencesApi:
 
         Counts germline SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -1453,6 +1540,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -1466,6 +1554,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1483,6 +1573,7 @@ class OccurrencesApi:
     @validate_call
     def count_germline_snv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -1504,6 +1595,8 @@ class OccurrencesApi:
 
         Counts germline SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -1535,6 +1628,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -1548,6 +1642,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1565,6 +1661,7 @@ class OccurrencesApi:
     @validate_call
     def count_germline_snv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -1586,6 +1683,8 @@ class OccurrencesApi:
 
         Counts germline SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -1617,6 +1716,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -1630,6 +1730,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1642,6 +1744,7 @@ class OccurrencesApi:
 
     def _count_germline_snv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -1667,6 +1770,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -1710,7 +1815,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count',
+            resource_path='/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1729,6 +1834,7 @@ class OccurrencesApi:
     @validate_call
     def count_somatic_snv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -1750,6 +1856,8 @@ class OccurrencesApi:
 
         Counts somatic SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -1781,6 +1889,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -1794,6 +1903,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1811,6 +1922,7 @@ class OccurrencesApi:
     @validate_call
     def count_somatic_snv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -1832,6 +1944,8 @@ class OccurrencesApi:
 
         Counts somatic SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -1863,6 +1977,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -1876,6 +1991,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1893,6 +2010,7 @@ class OccurrencesApi:
     @validate_call
     def count_somatic_snv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -1914,6 +2032,8 @@ class OccurrencesApi:
 
         Counts somatic SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -1945,6 +2065,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._count_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -1958,6 +2079,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -1970,6 +2093,7 @@ class OccurrencesApi:
 
     def _count_somatic_snv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -1995,6 +2119,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -2038,7 +2164,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count',
+            resource_path='/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2057,6 +2183,7 @@ class OccurrencesApi:
     @validate_call
     def get_expanded_germline_snv_occurrence(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -2078,6 +2205,8 @@ class OccurrencesApi:
 
         Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -2109,6 +2238,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_expanded_germline_snv_occurrence_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -2121,6 +2251,8 @@ class OccurrencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ExpandedGermlineSNVOccurrence",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2138,6 +2270,7 @@ class OccurrencesApi:
     @validate_call
     def get_expanded_germline_snv_occurrence_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -2159,6 +2292,8 @@ class OccurrencesApi:
 
         Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -2190,6 +2325,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_expanded_germline_snv_occurrence_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -2202,6 +2338,8 @@ class OccurrencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ExpandedGermlineSNVOccurrence",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2219,6 +2357,7 @@ class OccurrencesApi:
     @validate_call
     def get_expanded_germline_snv_occurrence_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -2240,6 +2379,8 @@ class OccurrencesApi:
 
         Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -2271,6 +2412,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_expanded_germline_snv_occurrence_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -2283,6 +2425,8 @@ class OccurrencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ExpandedGermlineSNVOccurrence",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2295,6 +2439,7 @@ class OccurrencesApi:
 
     def _get_expanded_germline_snv_occurrence_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -2320,6 +2465,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -2350,7 +2497,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded',
+            resource_path='/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2369,6 +2516,7 @@ class OccurrencesApi:
     @validate_call
     def get_expanded_somatic_snv_occurrence(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -2390,6 +2538,8 @@ class OccurrencesApi:
 
         Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -2421,6 +2571,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_expanded_somatic_snv_occurrence_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -2433,6 +2584,8 @@ class OccurrencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ExpandedSomaticSNVOccurrence",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2450,6 +2603,7 @@ class OccurrencesApi:
     @validate_call
     def get_expanded_somatic_snv_occurrence_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -2471,6 +2625,8 @@ class OccurrencesApi:
 
         Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -2502,6 +2658,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_expanded_somatic_snv_occurrence_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -2514,6 +2671,8 @@ class OccurrencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ExpandedSomaticSNVOccurrence",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2531,6 +2690,7 @@ class OccurrencesApi:
     @validate_call
     def get_expanded_somatic_snv_occurrence_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -2552,6 +2712,8 @@ class OccurrencesApi:
 
         Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -2583,6 +2745,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_expanded_somatic_snv_occurrence_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -2595,6 +2758,8 @@ class OccurrencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ExpandedSomaticSNVOccurrence",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2607,6 +2772,7 @@ class OccurrencesApi:
 
     def _get_expanded_somatic_snv_occurrence_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -2632,6 +2798,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -2662,7 +2830,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded',
+            resource_path='/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2681,6 +2849,7 @@ class OccurrencesApi:
     @validate_call
     def get_germline_snv_dictionary(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         facets: Annotated[Optional[List[StrictStr]], Field(description="One or more facets to retrieve")] = None,
         _request_timeout: Union[
             None,
@@ -2699,6 +2868,8 @@ class OccurrencesApi:
 
         Retrieve germline SNV facets
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param facets: One or more facets to retrieve
         :type facets: List[str]
         :param _request_timeout: timeout setting for this request. If one
@@ -2724,6 +2895,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_germline_snv_dictionary_serialize(
+            tenant=tenant,
             facets=facets,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2734,6 +2906,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Facet]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2751,6 +2925,7 @@ class OccurrencesApi:
     @validate_call
     def get_germline_snv_dictionary_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         facets: Annotated[Optional[List[StrictStr]], Field(description="One or more facets to retrieve")] = None,
         _request_timeout: Union[
             None,
@@ -2769,6 +2944,8 @@ class OccurrencesApi:
 
         Retrieve germline SNV facets
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param facets: One or more facets to retrieve
         :type facets: List[str]
         :param _request_timeout: timeout setting for this request. If one
@@ -2794,6 +2971,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_germline_snv_dictionary_serialize(
+            tenant=tenant,
             facets=facets,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2804,6 +2982,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Facet]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2821,6 +3001,7 @@ class OccurrencesApi:
     @validate_call
     def get_germline_snv_dictionary_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         facets: Annotated[Optional[List[StrictStr]], Field(description="One or more facets to retrieve")] = None,
         _request_timeout: Union[
             None,
@@ -2839,6 +3020,8 @@ class OccurrencesApi:
 
         Retrieve germline SNV facets
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param facets: One or more facets to retrieve
         :type facets: List[str]
         :param _request_timeout: timeout setting for this request. If one
@@ -2864,6 +3047,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._get_germline_snv_dictionary_serialize(
+            tenant=tenant,
             facets=facets,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2874,6 +3058,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[Facet]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -2886,6 +3072,7 @@ class OccurrencesApi:
 
     def _get_germline_snv_dictionary_serialize(
         self,
+        tenant,
         facets,
         _request_auth,
         _content_type,
@@ -2909,6 +3096,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         if facets is not None:
             
@@ -2935,7 +3124,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/occurrences/germline/snv/dictionary',
+            resource_path='/{tenant}/occurrences/germline/snv/dictionary',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2954,6 +3143,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_genes_overlap(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -2975,6 +3165,8 @@ class OccurrencesApi:
 
         List genes overlapping a CNV with a given ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -3006,6 +3198,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_genes_overlap_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -3018,6 +3211,8 @@ class OccurrencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[CNVGeneOverlap]",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3035,6 +3230,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_genes_overlap_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -3056,6 +3252,8 @@ class OccurrencesApi:
 
         List genes overlapping a CNV with a given ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -3087,6 +3285,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_genes_overlap_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -3099,6 +3298,8 @@ class OccurrencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[CNVGeneOverlap]",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3116,6 +3317,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_genes_overlap_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -3137,6 +3339,8 @@ class OccurrencesApi:
 
         List genes overlapping a CNV with a given ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -3168,6 +3372,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_genes_overlap_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -3180,6 +3385,8 @@ class OccurrencesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[CNVGeneOverlap]",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3192,6 +3399,7 @@ class OccurrencesApi:
 
     def _list_germline_cnv_genes_overlap_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -3217,6 +3425,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -3247,7 +3457,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap',
+            resource_path='/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3266,6 +3476,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -3287,6 +3498,8 @@ class OccurrencesApi:
 
         List germline CNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -3318,6 +3531,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -3331,6 +3545,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[GermlineCNVOccurrence]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3348,6 +3564,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -3369,6 +3586,8 @@ class OccurrencesApi:
 
         List germline CNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -3400,6 +3619,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -3413,6 +3633,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[GermlineCNVOccurrence]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3430,6 +3652,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_cnv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -3451,6 +3674,8 @@ class OccurrencesApi:
 
         List germline CNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -3482,6 +3707,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -3495,6 +3721,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[GermlineCNVOccurrence]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3507,6 +3735,7 @@ class OccurrencesApi:
 
     def _list_germline_cnv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -3532,6 +3761,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -3575,7 +3806,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list',
+            resource_path='/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3594,6 +3825,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_snv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -3615,6 +3847,8 @@ class OccurrencesApi:
 
         List germline SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -3646,6 +3880,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -3659,6 +3894,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[GermlineSNVOccurrence]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3676,6 +3913,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_snv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -3697,6 +3935,8 @@ class OccurrencesApi:
 
         List germline SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -3728,6 +3968,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -3741,6 +3982,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[GermlineSNVOccurrence]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3758,6 +4001,7 @@ class OccurrencesApi:
     @validate_call
     def list_germline_snv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -3779,6 +4023,8 @@ class OccurrencesApi:
 
         List germline SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -3810,6 +4056,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -3823,6 +4070,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[GermlineSNVOccurrence]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -3835,6 +4084,7 @@ class OccurrencesApi:
 
     def _list_germline_snv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -3860,6 +4110,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -3903,7 +4155,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list',
+            resource_path='/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3922,6 +4174,7 @@ class OccurrencesApi:
     @validate_call
     def list_somatic_snv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -3943,6 +4196,8 @@ class OccurrencesApi:
 
         List somatic SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -3974,6 +4229,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -3987,6 +4243,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[SomaticSNVOccurrence]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -4004,6 +4262,7 @@ class OccurrencesApi:
     @validate_call
     def list_somatic_snv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -4025,6 +4284,8 @@ class OccurrencesApi:
 
         List somatic SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -4056,6 +4317,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -4069,6 +4331,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[SomaticSNVOccurrence]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -4086,6 +4350,7 @@ class OccurrencesApi:
     @validate_call
     def list_somatic_snv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -4107,6 +4372,8 @@ class OccurrencesApi:
 
         List somatic SNV occurrences for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -4138,6 +4405,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._list_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -4151,6 +4419,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[SomaticSNVOccurrence]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -4163,6 +4433,7 @@ class OccurrencesApi:
 
     def _list_somatic_snv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -4188,6 +4459,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -4231,7 +4504,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list',
+            resource_path='/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4250,6 +4523,7 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_cnv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -4271,6 +4545,8 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -4302,6 +4578,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -4315,6 +4592,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Statistics",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -4332,6 +4611,7 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_cnv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -4353,6 +4633,8 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -4384,6 +4666,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -4397,6 +4680,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Statistics",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -4414,6 +4699,7 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_cnv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -4435,6 +4721,8 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -4466,6 +4754,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_cnv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -4479,6 +4768,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Statistics",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -4491,6 +4782,7 @@ class OccurrencesApi:
 
     def _statistics_germline_cnv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -4516,6 +4808,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -4559,7 +4853,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics',
+            resource_path='/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4578,6 +4872,7 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_snv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -4599,6 +4894,8 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -4630,6 +4927,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -4643,6 +4941,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Statistics",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -4660,6 +4960,7 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_snv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -4681,6 +4982,8 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -4712,6 +5015,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -4725,6 +5029,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Statistics",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -4742,6 +5048,7 @@ class OccurrencesApi:
     @validate_call
     def statistics_germline_snv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -4763,6 +5070,8 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -4794,6 +5103,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_germline_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -4807,6 +5117,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Statistics",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -4819,6 +5131,7 @@ class OccurrencesApi:
 
     def _statistics_germline_snv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -4844,6 +5157,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -4887,7 +5202,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics',
+            resource_path='/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4906,6 +5221,7 @@ class OccurrencesApi:
     @validate_call
     def statistics_somatic_snv_occurrences(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -4927,6 +5243,8 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -4958,6 +5276,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -4971,6 +5290,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Statistics",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -4988,6 +5309,7 @@ class OccurrencesApi:
     @validate_call
     def statistics_somatic_snv_occurrences_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -5009,6 +5331,8 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -5040,6 +5364,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -5053,6 +5378,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Statistics",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -5070,6 +5397,7 @@ class OccurrencesApi:
     @validate_call
     def statistics_somatic_snv_occurrences_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -5091,6 +5419,8 @@ class OccurrencesApi:
 
         Return statistics about a field for a given sequence ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequence ID (required)
@@ -5122,6 +5452,7 @@ class OccurrencesApi:
         """ # noqa: E501
 
         _param = self._statistics_somatic_snv_occurrences_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -5135,6 +5466,8 @@ class OccurrencesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Statistics",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -5147,6 +5480,7 @@ class OccurrencesApi:
 
     def _statistics_somatic_snv_occurrences_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -5172,6 +5506,8 @@ class OccurrencesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -5215,7 +5551,7 @@ class OccurrencesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics',
+            resource_path='/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

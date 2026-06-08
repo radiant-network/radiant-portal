@@ -19,9 +19,9 @@ func assertGetSequencingExperimentDetailByIdHandler(t *testing.T, data string, s
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSequencingExperimentRepository(db)
 		router := gin.Default()
-		router.GET("/sequencing/:seq_id/details", server.GetSequencingExperimentDetailByIdHandler(repo))
+		router.GET("/:tenant/sequencing/:seq_id/details", server.GetSequencingExperimentDetailByIdHandler(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/sequencing/%d/details", seqId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/sequencing/%d/details", seqId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 

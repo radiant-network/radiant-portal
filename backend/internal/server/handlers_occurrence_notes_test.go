@@ -103,10 +103,10 @@ func Test_PostOccurrenceNoteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
+	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "Test note"}`
-	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -129,10 +129,10 @@ func Test_PostOccurrenceNoteHandler_MissingContent(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
+	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000"}`
-	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -143,10 +143,10 @@ func Test_PostOccurrenceNoteHandler_MissingTaskID(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
+	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "occurrence_id": "10000", "content": "Test note"}`
-	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -157,10 +157,10 @@ func Test_PostOccurrenceNoteHandler_MissingCaseID(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
+	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "Test note"}`
-	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -171,10 +171,10 @@ func Test_PostOccurrenceNoteHandler_MissingOccurrenceID(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
+	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "content": "Test note"}`
-	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -185,11 +185,11 @@ func Test_PostOccurrenceNoteHandler_ContentTooLong(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
+	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	longContent := string(make([]byte, 1001))
 	body := fmt.Sprintf(`{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": %q}`, longContent)
-	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -200,10 +200,10 @@ func Test_PostOccurrenceNoteHandler_ContentSanitized(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
+	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "<p>Safe text</p><script>alert('xss')</script><img src=x onerror=alert(1)>"}`
-	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -217,10 +217,10 @@ func Test_PostOccurrenceNoteHandler_ContentWithSafeHTMLPreserved(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.POST("/notes", PostOccurrenceNoteHandler(repo, auth))
+	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "<p>Some <strong>bold</strong> text</p>"}`
-	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/notes", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -231,9 +231,9 @@ func Test_PostOccurrenceNoteHandler_ContentWithSafeHTMLPreserved(t *testing.T) {
 func Test_GetOccurrenceNotesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
+	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/notes/1/2/1/10000", nil)
+	req, _ := http.NewRequest("GET", "/radiant/notes/1/2/1/10000", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -255,9 +255,9 @@ func Test_GetOccurrenceNotesHandler(t *testing.T) {
 func Test_GetOccurrenceNoteCountHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/notes/:case_id/:seq_id/:task_id/:occurrence_id/count", GetOccurrenceNoteCountHandler(repo))
+	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id/count", GetOccurrenceNoteCountHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/notes/1/2/1/10000/count", nil)
+	req, _ := http.NewRequest("GET", "/radiant/notes/1/2/1/10000/count", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -268,9 +268,9 @@ func Test_GetOccurrenceNoteCountHandler(t *testing.T) {
 func Test_GetOccurrenceNotesHandler_EmptyResult(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
+	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/notes/1/2/1/88888", nil)
+	req, _ := http.NewRequest("GET", "/radiant/notes/1/2/1/88888", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -281,9 +281,9 @@ func Test_GetOccurrenceNotesHandler_EmptyResult(t *testing.T) {
 func Test_GetOccurrenceNotesHandler_InvalidCaseID(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
+	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/notes/abc/2/1/10000", nil)
+	req, _ := http.NewRequest("GET", "/radiant/notes/abc/2/1/10000", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -294,10 +294,10 @@ func Test_PutOccurrenceNoteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.PUT("/notes/:id", PutOccurrenceNoteHandler(repo, auth))
+	router.PUT("/:tenant/notes/:id", PutOccurrenceNoteHandler(repo, auth))
 
 	body := `{"content": "Updated content"}`
-	req, _ := http.NewRequest("PUT", "/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("PUT", "/radiant/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -320,10 +320,10 @@ func Test_PutOccurrenceNoteHandler_MissingContent(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.PUT("/notes/:id", PutOccurrenceNoteHandler(repo, auth))
+	router.PUT("/:tenant/notes/:id", PutOccurrenceNoteHandler(repo, auth))
 
 	body := `{}`
-	req, _ := http.NewRequest("PUT", "/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("PUT", "/radiant/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -334,11 +334,11 @@ func Test_PutOccurrenceNoteHandler_ContentTooLong(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.PUT("/notes/:id", PutOccurrenceNoteHandler(repo, auth))
+	router.PUT("/:tenant/notes/:id", PutOccurrenceNoteHandler(repo, auth))
 
 	longContent := string(make([]byte, 1001))
 	body := fmt.Sprintf(`{"content": %q}`, longContent)
-	req, _ := http.NewRequest("PUT", "/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("PUT", "/radiant/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -349,10 +349,10 @@ func Test_PutOccurrenceNoteHandler_NoteNotFound(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.PUT("/notes/:id", PutOccurrenceNoteHandler(repo, auth))
+	router.PUT("/:tenant/notes/:id", PutOccurrenceNoteHandler(repo, auth))
 
 	body := `{"content": "Updated content"}`
-	req, _ := http.NewRequest("PUT", "/notes/not-found-id", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("PUT", "/radiant/notes/not-found-id", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -363,10 +363,10 @@ func Test_PutOccurrenceNoteHandler_Forbidden(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{Id: "other-user-id"}
 	router := gin.Default()
-	router.PUT("/notes/:id", PutOccurrenceNoteHandler(repo, auth))
+	router.PUT("/:tenant/notes/:id", PutOccurrenceNoteHandler(repo, auth))
 
 	body := `{"content": "Updated content"}`
-	req, _ := http.NewRequest("PUT", "/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("PUT", "/radiant/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -377,9 +377,9 @@ func Test_DeleteOccurrenceNoteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.DELETE("/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
+	router.DELETE("/:tenant/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
 
-	req, _ := http.NewRequest("DELETE", "/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", nil)
+	req, _ := http.NewRequest("DELETE", "/radiant/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -390,9 +390,9 @@ func Test_DeleteOccurrenceNoteHandler_NoteNotFound(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.DELETE("/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
+	router.DELETE("/:tenant/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
 
-	req, _ := http.NewRequest("DELETE", "/notes/not-found-id", nil)
+	req, _ := http.NewRequest("DELETE", "/radiant/notes/not-found-id", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -403,9 +403,9 @@ func Test_DeleteOccurrenceNoteHandler_Forbidden(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{Id: "other-user-id"}
 	router := gin.Default()
-	router.DELETE("/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
+	router.DELETE("/:tenant/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
 
-	req, _ := http.NewRequest("DELETE", "/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", nil)
+	req, _ := http.NewRequest("DELETE", "/radiant/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -416,9 +416,9 @@ func Test_DeleteOccurrenceNoteHandler_GetByIDError(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
 	router := gin.Default()
-	router.DELETE("/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
+	router.DELETE("/:tenant/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
 
-	req, _ := http.NewRequest("DELETE", "/notes/error-id", nil)
+	req, _ := http.NewRequest("DELETE", "/radiant/notes/error-id", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

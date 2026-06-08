@@ -5,7 +5,7 @@ import { VariantConsequence } from '@/api/api';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Card, CardContent, CardHeader } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
-import { variantsApi } from '@/utils/api';
+import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
 
 import ConsequenceAccordionItem from './consequence-accordion-item';
 
@@ -15,7 +15,7 @@ type VariantTranscriptsInput = {
 };
 
 async function fetchVariantConsequences(input: VariantTranscriptsInput) {
-  const response = await variantsApi.getGermlineVariantConsequences(input.locusId);
+  const response = await variantsApi.getGermlineVariantConsequences(DEFAULT_TENANT, input.locusId);
   return response.data;
 }
 

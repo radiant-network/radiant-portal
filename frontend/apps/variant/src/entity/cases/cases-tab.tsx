@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { tabContentClassName } from '@/style';
-import { variantsApi } from '@/utils/api';
+import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
 
 import { CasesFiltersProvider } from './table/filters/cases-filters-context';
 import InterpretedCasesTable from './interpreted-cases-table';
@@ -23,12 +23,12 @@ type CasesCountInput = {
 };
 
 async function fetchCasesCount(input: CasesCountInput) {
-  const response = await variantsApi.getGermlineVariantCasesCount(input.locusId);
+  const response = await variantsApi.getGermlineVariantCasesCount(DEFAULT_TENANT, input.locusId);
   return response.data;
 }
 
 async function fetchCasesFilters() {
-  const response = await variantsApi.getGermlineVariantCasesFilters();
+  const response = await variantsApi.getGermlineVariantCasesFilters(DEFAULT_TENANT);
   return response.data;
 }
 

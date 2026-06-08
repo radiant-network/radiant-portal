@@ -5,7 +5,7 @@ import { IGVTracks } from '@/api/api';
 import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from '@/components/base/shadcn/dialog';
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
-import { igvApi } from '@/utils/api';
+import { DEFAULT_TENANT, igvApi } from '@/utils/api';
 
 import IgvContainer from './igv-container';
 
@@ -21,7 +21,7 @@ type IGVDialogProps = {
 };
 
 const fetchIGVForCaseId = async ({ caseId }: { caseId: number }) =>
-  igvApi.getIGV(caseId.toString()).then(response => response.data);
+  igvApi.getIGV(DEFAULT_TENANT, caseId.toString()).then(response => response.data);
 
 const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, renderTrigger }: IGVDialogProps) => {
   const { t } = useI18n();

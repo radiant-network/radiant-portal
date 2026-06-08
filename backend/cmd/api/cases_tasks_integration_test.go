@@ -18,9 +18,9 @@ func getCaseOccurrenceTasks(t *testing.T, db *gorm.DB, caseId int, seqId int, da
 	t.Helper()
 	repo := repository.NewTaskRepository(db)
 	router := gin.Default()
-	router.GET("/cases/:case_id/:seq_id/tasks_with_occurrences", server.CaseOccurrenceTasksHandler(repo))
+	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", server.CaseOccurrenceTasksHandler(repo))
 
-	url := fmt.Sprintf("/cases/%d/%d/tasks_with_occurrences?data_type=%s", caseId, seqId, dataType)
+	url := fmt.Sprintf("/radiant/cases/%d/%d/tasks_with_occurrences?data_type=%s", caseId, seqId, dataType)
 	req, _ := http.NewRequest("GET", url, nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)

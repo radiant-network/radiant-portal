@@ -15,6 +15,7 @@ import (
 // @Description List somatic SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param task_id path int true "Task ID"
@@ -23,9 +24,11 @@ import (
 // @Produce json
 // @Success 200 {array} types.SomaticSNVOccurrence
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list [post]
+// @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list [post]
 func OccurrencesSomaticSNVListHandler(repo repository.SomaticSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -77,6 +80,7 @@ func OccurrencesSomaticSNVListHandler(repo repository.SomaticSNVOccurrencesDAO) 
 // @Description Counts somatic SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param task_id path int true "Task ID"
@@ -85,9 +89,11 @@ func OccurrencesSomaticSNVListHandler(repo repository.SomaticSNVOccurrencesDAO) 
 // @Produce json
 // @Success 200 {object} types.Count
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count [post]
+// @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count [post]
 func OccurrencesSomaticSNVCountHandler(repo repository.SomaticSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -137,6 +143,7 @@ func OccurrencesSomaticSNVCountHandler(repo repository.SomaticSNVOccurrencesDAO)
 // @Description Aggregate somatic SNV occurrences for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param task_id path int true "Task ID"
@@ -146,9 +153,11 @@ func OccurrencesSomaticSNVCountHandler(repo repository.SomaticSNVOccurrencesDAO)
 // @Produce json
 // @Success 200 {array} types.Aggregation
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate [post]
+// @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate [post]
 func OccurrencesSomaticSNVAggregateHandler(repo repository.SomaticSNVOccurrencesDAO, facetsRepo repository.FacetsRepositoryDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -233,6 +242,7 @@ func OccurrencesSomaticSNVAggregateHandler(repo repository.SomaticSNVOccurrences
 // @Description Return statistics about a field for a given sequence ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param task_id path int true "Task ID"
@@ -241,9 +251,11 @@ func OccurrencesSomaticSNVAggregateHandler(repo repository.SomaticSNVOccurrences
 // @Produce json
 // @Success 200 {object} types.Statistics
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics [post]
+// @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics [post]
 func OccurrencesSomaticSNVStatisticsHandler(repo repository.SomaticSNVOccurrencesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -293,15 +305,18 @@ func OccurrencesSomaticSNVStatisticsHandler(repo repository.SomaticSNVOccurrence
 // @Description Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
 // @Tags occurrences
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param task_id path int true "Task ID"
 // @Param locus_id path string true "Locus ID"
 // @Produce json
 // @Success 200 {object} types.ExpandedSomaticSNVOccurrence
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded [get]
+// @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded [get]
 func GetExpandedSomaticSNVOccurrence(repo repository.SomaticSNVOccurrencesDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errSeq := strconv.Atoi(c.Param("case_id"))

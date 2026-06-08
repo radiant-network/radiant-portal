@@ -41,6 +41,7 @@ class IgvApi:
     @validate_call
     def get_igv(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         _request_timeout: Union[
             None,
@@ -59,6 +60,8 @@ class IgvApi:
 
         Get IGV tracks for a case
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -84,6 +87,7 @@ class IgvApi:
         """ # noqa: E501
 
         _param = self._get_igv_serialize(
+            tenant=tenant,
             case_id=case_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -93,6 +97,8 @@ class IgvApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "IGVTracks",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -110,6 +116,7 @@ class IgvApi:
     @validate_call
     def get_igv_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         _request_timeout: Union[
             None,
@@ -128,6 +135,8 @@ class IgvApi:
 
         Get IGV tracks for a case
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -153,6 +162,7 @@ class IgvApi:
         """ # noqa: E501
 
         _param = self._get_igv_serialize(
+            tenant=tenant,
             case_id=case_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -162,6 +172,8 @@ class IgvApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "IGVTracks",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -179,6 +191,7 @@ class IgvApi:
     @validate_call
     def get_igv_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictStr, Field(description="Case ID")],
         _request_timeout: Union[
             None,
@@ -197,6 +210,8 @@ class IgvApi:
 
         Get IGV tracks for a case
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -222,6 +237,7 @@ class IgvApi:
         """ # noqa: E501
 
         _param = self._get_igv_serialize(
+            tenant=tenant,
             case_id=case_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -231,6 +247,8 @@ class IgvApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "IGVTracks",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -243,6 +261,7 @@ class IgvApi:
 
     def _get_igv_serialize(
         self,
+        tenant,
         case_id,
         _request_auth,
         _content_type,
@@ -265,6 +284,8 @@ class IgvApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         # process the query parameters
@@ -289,7 +310,7 @@ class IgvApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/igv/{case_id}',
+            resource_path='/{tenant}/igv/{case_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

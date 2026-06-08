@@ -36,9 +36,9 @@ func (m *MockRepository) SearchGenes([]string) (*[]types.GeneResult, error) {
 func Test_GetGeneAutoCompleteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/genes/autocomplete", GetGeneAutoCompleteHandler(repo))
+	router.GET("/:tenant/genes/autocomplete", GetGeneAutoCompleteHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/genes/autocomplete?prefix=F", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/genes/autocomplete?prefix=F", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -49,7 +49,7 @@ func Test_GetGeneAutoCompleteHandler(t *testing.T) {
 func Test_SearchGenesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/genes/search", SearchGenesHandler(repo))
+	router.POST("/:tenant/genes/search", SearchGenesHandler(repo))
 
 	body := `{"inputs": ["ENSG00000000003", "TNMD", "ensg00000157764", "ensa", "ENSG000000011671111", "BAD_SYMBOL"]}`
 	expected := `[
@@ -58,7 +58,7 @@ func Test_SearchGenesHandler(t *testing.T) {
 		{"ensembl_gene_id": "ENSG00000000005", "symbol": "TNMD"},
 		{"ensembl_gene_id": "ENSG00000000003", "symbol": "TSPAN6"}
 	]`
-	req, _ := http.NewRequest("POST", "/genes/search", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/genes/search", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

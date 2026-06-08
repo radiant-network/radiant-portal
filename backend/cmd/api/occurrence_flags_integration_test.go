@@ -22,9 +22,9 @@ func assertUpsertOccurrenceFlag(
 ) {
 	t.Helper()
 	router := gin.Default()
-	router.POST("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", server.UpsertOccurrenceFlagHandler(repo))
+	router.POST("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", server.UpsertOccurrenceFlagHandler(repo))
 
-	url := fmt.Sprintf("/occurrences/flags/%s/%s/%s/%s", caseID, seqID, taskID, occurrenceID)
+	url := fmt.Sprintf("/radiant/occurrences/flags/%s/%s/%s/%s", caseID, seqID, taskID, occurrenceID)
 	if flagType != "" {
 		url += "?flag_type=" + flagType
 	}
@@ -43,9 +43,9 @@ func assertDeleteOccurrenceFlag(
 ) {
 	t.Helper()
 	router := gin.Default()
-	router.DELETE("/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", server.DeleteOccurrenceFlagHandler(repo))
+	router.DELETE("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", server.DeleteOccurrenceFlagHandler(repo))
 
-	url := fmt.Sprintf("/occurrences/flags/%s/%s/%s/%s", caseID, seqID, taskID, occurrenceID)
+	url := fmt.Sprintf("/radiant/occurrences/flags/%s/%s/%s/%s", caseID, seqID, taskID, occurrenceID)
 	req, _ := http.NewRequest("DELETE", url, nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)

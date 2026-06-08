@@ -345,9 +345,9 @@ func (m *MockEmptyExomiserRepository) GetExomiserACMGClassificationCounts(locusI
 func Test_GetVariantHeaderHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/header", GetGermlineVariantHeader(repo))
+	router.GET("/:tenant/variants/:locus_id/header", GetGermlineVariantHeader(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/1000/header", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/1000/header", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -360,9 +360,9 @@ func Test_GetVariantOverviewHandler(t *testing.T) {
 	exomiserRepository := &MockEmptyExomiserRepository{}
 	interpretationRepository := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/overview", GetGermlineVariantOverview(repo, exomiserRepository, interpretationRepository))
+	router.GET("/:tenant/variants/:locus_id/overview", GetGermlineVariantOverview(repo, exomiserRepository, interpretationRepository))
 
-	req, _ := http.NewRequest("GET", "/variants/1000/overview", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/1000/overview", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -396,9 +396,9 @@ func Test_GetVariantOverviewHandler_With_ExomiserACMGClassificationCounts(t *tes
 	exomiserRepository := &MockExomiserRepository{}
 	interpretationRepository := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/overview", GetGermlineVariantOverview(repo, exomiserRepository, interpretationRepository))
+	router.GET("/:tenant/variants/:locus_id/overview", GetGermlineVariantOverview(repo, exomiserRepository, interpretationRepository))
 
-	req, _ := http.NewRequest("GET", "/variants/1000/overview", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/1000/overview", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -431,9 +431,9 @@ func Test_GetVariantOverviewHandler_With_ExomiserACMGClassificationCounts(t *tes
 func Test_GetVariantConsequencesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/:locus_id/consequences", GetGermlineVariantConsequences(repo))
+	router.GET("/:tenant/variants/:locus_id/consequences", GetGermlineVariantConsequences(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/1000/consequences", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/1000/consequences", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -460,9 +460,9 @@ func Test_GetVariantConsequencesHandler(t *testing.T) {
 func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/variants/germline/:locus_id/cases/interpreted", GetGermlineVariantInterpretedCases(repo))
+	router.POST("/:tenant/variants/germline/:locus_id/cases/interpreted", GetGermlineVariantInterpretedCases(repo))
 	body := `{}`
-	req, _ := http.NewRequest("POST", "/variants/germline/1000/cases/interpreted", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/variants/germline/1000/cases/interpreted", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -526,9 +526,9 @@ func Test_GetGermlineVariantInterpretedCasesHandler(t *testing.T) {
 func Test_GetGermlineVariantUninterpretedCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/variants/germline/:locus_id/cases/uninterpreted", GetGermlineVariantUninterpretedCases(repo))
+	router.POST("/:tenant/variants/germline/:locus_id/cases/uninterpreted", GetGermlineVariantUninterpretedCases(repo))
 	body := `{}`
-	req, _ := http.NewRequest("POST", "/variants/germline/1000/cases/uninterpreted", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/variants/germline/1000/cases/uninterpreted", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -583,9 +583,9 @@ func Test_GetGermlineVariantUninterpretedCasesHandler(t *testing.T) {
 func Test_GetGermlineVariantCasesCountHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/germline/:locus_id/cases/count", GetGermlineVariantCasesCount(repo))
+	router.GET("/:tenant/variants/germline/:locus_id/cases/count", GetGermlineVariantCasesCount(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/germline/1000/cases/count", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/germline/1000/cases/count", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -596,9 +596,9 @@ func Test_GetGermlineVariantCasesCountHandler(t *testing.T) {
 func Test_GetGermlineVariantCasesFiltersHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/germline/cases/filters", GetGermlineVariantCasesFilters(repo))
+	router.GET("/:tenant/variants/germline/cases/filters", GetGermlineVariantCasesFilters(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/germline/cases/filters", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/germline/cases/filters", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -650,9 +650,9 @@ func Test_GetGermlineVariantCasesFiltersHandler(t *testing.T) {
 func Test_GetGermlineVariantConditions(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/germline/:locus_id/conditions/:panel_type", GetGermlineVariantConditions(repo))
+	router.GET("/:tenant/variants/germline/:locus_id/conditions/:panel_type", GetGermlineVariantConditions(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/germline/1000/conditions/omim", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/germline/1000/conditions/omim", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -671,9 +671,9 @@ func Test_GetGermlineVariantConditions(t *testing.T) {
 func Test_GetGermlineVariantConditionsClinvar(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/germline/:locus_id/conditions/clinvar", GetGermlineVariantConditionsClinvar(repo))
+	router.GET("/:tenant/variants/germline/:locus_id/conditions/clinvar", GetGermlineVariantConditionsClinvar(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/germline/1000/conditions/clinvar", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/germline/1000/conditions/clinvar", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -686,9 +686,9 @@ func Test_GetGermlineVariantConditionsClinvar(t *testing.T) {
 func Test_GetGermlineVariantExternalFrequenciesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/germline/:locus_id/external_frequencies", GetGermlineVariantExternalFrequenciesHandler(repo))
+	router.GET("/:tenant/variants/germline/:locus_id/external_frequencies", GetGermlineVariantExternalFrequenciesHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/germline/1000/external_frequencies", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/germline/1000/external_frequencies", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -708,9 +708,9 @@ func Test_GetGermlineVariantExternalFrequenciesHandler(t *testing.T) {
 func Test_GetGermlineVariantGlobalInternalFrequenciesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/germline/:locus_id/internal_frequencies/global", GetGermlineVariantGlobalInternalFrequenciesHandler(repo))
+	router.GET("/:tenant/variants/germline/:locus_id/internal_frequencies/global", GetGermlineVariantGlobalInternalFrequenciesHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/germline/1000/internal_frequencies/global", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/germline/1000/internal_frequencies/global", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -725,9 +725,9 @@ func Test_GetGermlineVariantGlobalInternalFrequenciesHandler(t *testing.T) {
 func Test_GetGermlineVariantInternalFrequenciesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/germline/:locus_id/internal_frequencies", GetGermlineVariantInternalFrequenciesHandler(repo))
+	router.GET("/:tenant/variants/germline/:locus_id/internal_frequencies", GetGermlineVariantInternalFrequenciesHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/germline/1000/internal_frequencies?split=project", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/germline/1000/internal_frequencies?split=project", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -745,9 +745,9 @@ func Test_GetGermlineVariantInternalFrequenciesHandler(t *testing.T) {
 func Test_GetGermlineVariantInternalFrequenciesHandler_BadSplit(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/variants/germline/:locus_id/internal_frequencies", GetGermlineVariantInternalFrequenciesHandler(repo))
+	router.GET("/:tenant/variants/germline/:locus_id/internal_frequencies", GetGermlineVariantInternalFrequenciesHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/variants/germline/1000/internal_frequencies?split=incorrect", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/variants/germline/1000/internal_frequencies?split=incorrect", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

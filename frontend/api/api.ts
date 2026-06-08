@@ -5902,14 +5902,18 @@ export const BatchesApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve a batch by ID
          * @summary Retrieve a batch by ID
+         * @param {string} tenant Tenant code
          * @param {string} batchId Batch ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getBatch: async (batchId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getBatch: async (tenant: string, batchId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getBatch', 'tenant', tenant)
             // verify required parameter 'batchId' is not null or undefined
             assertParamExists('getBatch', 'batchId', batchId)
-            const localVarPath = `/batches/{batchId}`
+            const localVarPath = `/{tenant}/batches/{batchId}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"batchId"}}`, encodeURIComponent(String(batchId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -5950,12 +5954,13 @@ export const BatchesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve a batch by ID
          * @summary Retrieve a batch by ID
+         * @param {string} tenant Tenant code
          * @param {string} batchId Batch ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getBatch(batchId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetBatchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getBatch(batchId, options);
+        async getBatch(tenant: string, batchId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getBatch(tenant, batchId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['BatchesApi.getBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5973,12 +5978,13 @@ export const BatchesApiFactory = function (configuration?: Configuration, basePa
         /**
          * Retrieve a batch by ID
          * @summary Retrieve a batch by ID
+         * @param {string} tenant Tenant code
          * @param {string} batchId Batch ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getBatch(batchId: string, options?: RawAxiosRequestConfig): AxiosPromise<GetBatchResponse> {
-            return localVarFp.getBatch(batchId, options).then((request) => request(axios, basePath));
+        getBatch(tenant: string, batchId: string, options?: RawAxiosRequestConfig): AxiosPromise<GetBatchResponse> {
+            return localVarFp.getBatch(tenant, batchId, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -5993,13 +5999,14 @@ export class BatchesApi extends BaseAPI {
     /**
      * Retrieve a batch by ID
      * @summary Retrieve a batch by ID
+     * @param {string} tenant Tenant code
      * @param {string} batchId Batch ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof BatchesApi
      */
-    public getBatch(batchId: string, options?: RawAxiosRequestConfig) {
-        return BatchesApiFp(this.configuration).getBatch(batchId, options).then((request) => request(this.axios, this.basePath));
+    public getBatch(tenant: string, batchId: string, options?: RawAxiosRequestConfig) {
+        return BatchesApiFp(this.configuration).getBatch(tenant, batchId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -6014,15 +6021,19 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Retrieve AutocompleteResult list of ids matching prefix
          * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        autocompleteCases: async (prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        autocompleteCases: async (tenant: string, prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('autocompleteCases', 'tenant', tenant)
             // verify required parameter 'prefix' is not null or undefined
             assertParamExists('autocompleteCases', 'prefix', prefix)
-            const localVarPath = `/cases/autocomplete`;
+            const localVarPath = `/{tenant}/cases/autocomplete`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6060,14 +6071,18 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Retrieve CaseEntity by its ID
          * @summary Get CaseEntity case entity
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntity: async (caseId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        caseEntity: async (tenant: string, caseId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('caseEntity', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('caseEntity', 'caseId', caseId)
-            const localVarPath = `/cases/{case_id}`
+            const localVarPath = `/{tenant}/cases/{case_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -6098,14 +6113,18 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Retrieve DocumentFilters documents filters for a specific case
          * @summary Get DocumentFilters documents filters for a specific case
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntityDocumentsFilters: async (caseId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        caseEntityDocumentsFilters: async (tenant: string, caseId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('caseEntityDocumentsFilters', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('caseEntityDocumentsFilters', 'caseId', caseId)
-            const localVarPath = `/cases/{case_id}/documents/filters`
+            const localVarPath = `/{tenant}/cases/{case_id}/documents/filters`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -6136,17 +6155,21 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Search for DocumentResult list for a case entity
          * @summary Search DocumentResult list for a case entity
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntityDocumentsSearch: async (caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        caseEntityDocumentsSearch: async (tenant: string, caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('caseEntityDocumentsSearch', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('caseEntityDocumentsSearch', 'caseId', caseId)
             // verify required parameter 'listBodyWithCriteria' is not null or undefined
             assertParamExists('caseEntityDocumentsSearch', 'listBodyWithCriteria', listBodyWithCriteria)
-            const localVarPath = `/cases/{case_id}/documents/search`
+            const localVarPath = `/{tenant}/cases/{case_id}/documents/search`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -6180,20 +6203,24 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
          * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseTasksWithOccurrences: async (caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        caseTasksWithOccurrences: async (tenant: string, caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('caseTasksWithOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('caseTasksWithOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
             assertParamExists('caseTasksWithOccurrences', 'seqId', seqId)
             // verify required parameter 'dataType' is not null or undefined
             assertParamExists('caseTasksWithOccurrences', 'dataType', dataType)
-            const localVarPath = `/cases/{case_id}/{seq_id}/tasks_with_occurrences`
+            const localVarPath = `/{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -6229,11 +6256,15 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        casesFilters: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/cases/filters`;
+        casesFilters: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('casesFilters', 'tenant', tenant)
+            const localVarPath = `/{tenant}/cases/filters`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6263,15 +6294,19 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
          * @summary Partially update existing cases (batch)
+         * @param {string} tenant Tenant code
          * @param {PatchCaseBatchBody} patchCaseBatchBody Attach Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        patchCaseBatch: async (patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        patchCaseBatch: async (tenant: string, patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patchCaseBatch', 'tenant', tenant)
             // verify required parameter 'patchCaseBatchBody' is not null or undefined
             assertParamExists('patchCaseBatch', 'patchCaseBatchBody', patchCaseBatchBody)
-            const localVarPath = `/cases/batch`;
+            const localVarPath = `/{tenant}/cases/batch`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6308,15 +6343,19 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Create a new case batch
          * @summary Create a new case batch
+         * @param {string} tenant Tenant code
          * @param {CreateCaseBatchBody} createCaseBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postCaseBatch: async (createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postCaseBatch: async (tenant: string, createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('postCaseBatch', 'tenant', tenant)
             // verify required parameter 'createCaseBatchBody' is not null or undefined
             assertParamExists('postCaseBatch', 'createCaseBatchBody', createCaseBatchBody)
-            const localVarPath = `/cases/batch`;
+            const localVarPath = `/{tenant}/cases/batch`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6353,14 +6392,18 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Search cases
          * @summary Search cases
+         * @param {string} tenant Tenant code
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchCases: async (listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        searchCases: async (tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('searchCases', 'tenant', tenant)
             // verify required parameter 'listBodyWithCriteria' is not null or undefined
             assertParamExists('searchCases', 'listBodyWithCriteria', listBodyWithCriteria)
-            const localVarPath = `/cases/search`;
+            const localVarPath = `/{tenant}/cases/search`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6403,13 +6446,14 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve AutocompleteResult list of ids matching prefix
          * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async autocompleteCases(prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutocompleteResult>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.autocompleteCases(prefix, limit, options);
+        async autocompleteCases(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutocompleteResult>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.autocompleteCases(tenant, prefix, limit, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.autocompleteCases']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6417,12 +6461,13 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve CaseEntity by its ID
          * @summary Get CaseEntity case entity
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async caseEntity(caseId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseEntity>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntity(caseId, options);
+        async caseEntity(tenant: string, caseId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseEntity>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntity(tenant, caseId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.caseEntity']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6430,12 +6475,13 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve DocumentFilters documents filters for a specific case
          * @summary Get DocumentFilters documents filters for a specific case
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async caseEntityDocumentsFilters(caseId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentFilters>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntityDocumentsFilters(caseId, options);
+        async caseEntityDocumentsFilters(tenant: string, caseId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentFilters>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntityDocumentsFilters(tenant, caseId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.caseEntityDocumentsFilters']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6443,13 +6489,14 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Search for DocumentResult list for a case entity
          * @summary Search DocumentResult list for a case entity
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async caseEntityDocumentsSearch(caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentsSearchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options);
+        async caseEntityDocumentsSearch(tenant: string, caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentsSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntityDocumentsSearch(tenant, caseId, listBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.caseEntityDocumentsSearch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6457,14 +6504,15 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
          * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async caseTasksWithOccurrences(caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TaskOccurrenceType>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.caseTasksWithOccurrences(caseId, seqId, dataType, options);
+        async caseTasksWithOccurrences(tenant: string, caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TaskOccurrenceType>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.caseTasksWithOccurrences(tenant, caseId, seqId, dataType, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.caseTasksWithOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6472,11 +6520,12 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async casesFilters(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseFilters>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.casesFilters(options);
+        async casesFilters(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseFilters>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.casesFilters(tenant, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.casesFilters']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6484,13 +6533,14 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
          * @summary Partially update existing cases (batch)
+         * @param {string} tenant Tenant code
          * @param {PatchCaseBatchBody} patchCaseBatchBody Attach Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async patchCaseBatch(patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.patchCaseBatch(patchCaseBatchBody, dryRun, options);
+        async patchCaseBatch(tenant: string, patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patchCaseBatch(tenant, patchCaseBatchBody, dryRun, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.patchCaseBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6498,13 +6548,14 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Create a new case batch
          * @summary Create a new case batch
+         * @param {string} tenant Tenant code
          * @param {CreateCaseBatchBody} createCaseBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postCaseBatch(createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postCaseBatch(createCaseBatchBody, dryRun, options);
+        async postCaseBatch(tenant: string, createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postCaseBatch(tenant, createCaseBatchBody, dryRun, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.postCaseBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6512,12 +6563,13 @@ export const CasesApiFp = function(configuration?: Configuration) {
         /**
          * Search cases
          * @summary Search cases
+         * @param {string} tenant Tenant code
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async searchCases(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CasesSearchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.searchCases(listBodyWithCriteria, options);
+        async searchCases(tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CasesSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchCases(tenant, listBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.searchCases']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6535,97 +6587,106 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
         /**
          * Retrieve AutocompleteResult list of ids matching prefix
          * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        autocompleteCases(prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutocompleteResult>> {
-            return localVarFp.autocompleteCases(prefix, limit, options).then((request) => request(axios, basePath));
+        autocompleteCases(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutocompleteResult>> {
+            return localVarFp.autocompleteCases(tenant, prefix, limit, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve CaseEntity by its ID
          * @summary Get CaseEntity case entity
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntity(caseId: number, options?: RawAxiosRequestConfig): AxiosPromise<CaseEntity> {
-            return localVarFp.caseEntity(caseId, options).then((request) => request(axios, basePath));
+        caseEntity(tenant: string, caseId: number, options?: RawAxiosRequestConfig): AxiosPromise<CaseEntity> {
+            return localVarFp.caseEntity(tenant, caseId, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve DocumentFilters documents filters for a specific case
          * @summary Get DocumentFilters documents filters for a specific case
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntityDocumentsFilters(caseId: number, options?: RawAxiosRequestConfig): AxiosPromise<DocumentFilters> {
-            return localVarFp.caseEntityDocumentsFilters(caseId, options).then((request) => request(axios, basePath));
+        caseEntityDocumentsFilters(tenant: string, caseId: number, options?: RawAxiosRequestConfig): AxiosPromise<DocumentFilters> {
+            return localVarFp.caseEntityDocumentsFilters(tenant, caseId, options).then((request) => request(axios, basePath));
         },
         /**
          * Search for DocumentResult list for a case entity
          * @summary Search DocumentResult list for a case entity
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntityDocumentsSearch(caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentsSearchResponse> {
-            return localVarFp.caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        caseEntityDocumentsSearch(tenant: string, caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentsSearchResponse> {
+            return localVarFp.caseEntityDocumentsSearch(tenant, caseId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
         /**
          * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
          * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseTasksWithOccurrences(caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig): AxiosPromise<Array<TaskOccurrenceType>> {
-            return localVarFp.caseTasksWithOccurrences(caseId, seqId, dataType, options).then((request) => request(axios, basePath));
+        caseTasksWithOccurrences(tenant: string, caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig): AxiosPromise<Array<TaskOccurrenceType>> {
+            return localVarFp.caseTasksWithOccurrences(tenant, caseId, seqId, dataType, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve CaseFilters cases filters
          * @summary Get CaseFilters cases filters
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        casesFilters(options?: RawAxiosRequestConfig): AxiosPromise<CaseFilters> {
-            return localVarFp.casesFilters(options).then((request) => request(axios, basePath));
+        casesFilters(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<CaseFilters> {
+            return localVarFp.casesFilters(tenant, options).then((request) => request(axios, basePath));
         },
         /**
          * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
          * @summary Partially update existing cases (batch)
+         * @param {string} tenant Tenant code
          * @param {PatchCaseBatchBody} patchCaseBatchBody Attach Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        patchCaseBatch(patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
-            return localVarFp.patchCaseBatch(patchCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        patchCaseBatch(tenant: string, patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.patchCaseBatch(tenant, patchCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new case batch
          * @summary Create a new case batch
+         * @param {string} tenant Tenant code
          * @param {CreateCaseBatchBody} createCaseBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postCaseBatch(createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
-            return localVarFp.postCaseBatch(createCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        postCaseBatch(tenant: string, createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.postCaseBatch(tenant, createCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
         /**
          * Search cases
          * @summary Search cases
+         * @param {string} tenant Tenant code
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchCases(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<CasesSearchResponse> {
-            return localVarFp.searchCases(listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        searchCases(tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<CasesSearchResponse> {
+            return localVarFp.searchCases(tenant, listBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -6640,56 +6701,61 @@ export class CasesApi extends BaseAPI {
     /**
      * Retrieve AutocompleteResult list of ids matching prefix
      * @summary Get AutocompleteResult list of matching prefix
+     * @param {string} tenant Tenant code
      * @param {string} prefix Prefix
      * @param {string} [limit] Limit
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public autocompleteCases(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).autocompleteCases(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    public autocompleteCases(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).autocompleteCases(tenant, prefix, limit, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve CaseEntity by its ID
      * @summary Get CaseEntity case entity
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public caseEntity(caseId: number, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).caseEntity(caseId, options).then((request) => request(this.axios, this.basePath));
+    public caseEntity(tenant: string, caseId: number, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).caseEntity(tenant, caseId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve DocumentFilters documents filters for a specific case
      * @summary Get DocumentFilters documents filters for a specific case
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public caseEntityDocumentsFilters(caseId: number, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).caseEntityDocumentsFilters(caseId, options).then((request) => request(this.axios, this.basePath));
+    public caseEntityDocumentsFilters(tenant: string, caseId: number, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).caseEntityDocumentsFilters(tenant, caseId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Search for DocumentResult list for a case entity
      * @summary Search DocumentResult list for a case entity
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public caseEntityDocumentsSearch(caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).caseEntityDocumentsSearch(caseId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    public caseEntityDocumentsSearch(tenant: string, caseId: number, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).caseEntityDocumentsSearch(tenant, caseId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
      * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequencing Experiment ID
      * @param {CaseTasksWithOccurrencesDataTypeEnum} dataType Occurrence type
@@ -6697,57 +6763,61 @@ export class CasesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public caseTasksWithOccurrences(caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).caseTasksWithOccurrences(caseId, seqId, dataType, options).then((request) => request(this.axios, this.basePath));
+    public caseTasksWithOccurrences(tenant: string, caseId: number, seqId: number, dataType: CaseTasksWithOccurrencesDataTypeEnum, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).caseTasksWithOccurrences(tenant, caseId, seqId, dataType, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve CaseFilters cases filters
      * @summary Get CaseFilters cases filters
+     * @param {string} tenant Tenant code
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public casesFilters(options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).casesFilters(options).then((request) => request(this.axios, this.basePath));
+    public casesFilters(tenant: string, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).casesFilters(tenant, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Partially updates existing cases — see the request body for updatable fields. Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found. Array fields are appended, not replaced.
      * @summary Partially update existing cases (batch)
+     * @param {string} tenant Tenant code
      * @param {PatchCaseBatchBody} patchCaseBatchBody Attach Body
      * @param {boolean} [dryRun] Dry Run
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public patchCaseBatch(patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).patchCaseBatch(patchCaseBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    public patchCaseBatch(tenant: string, patchCaseBatchBody: PatchCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).patchCaseBatch(tenant, patchCaseBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create a new case batch
      * @summary Create a new case batch
+     * @param {string} tenant Tenant code
      * @param {CreateCaseBatchBody} createCaseBatchBody Create Body
      * @param {boolean} [dryRun] Dry Run
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public postCaseBatch(createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).postCaseBatch(createCaseBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    public postCaseBatch(tenant: string, createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).postCaseBatch(tenant, createCaseBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Search cases
      * @summary Search cases
+     * @param {string} tenant Tenant code
      * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public searchCases(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).searchCases(listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    public searchCases(tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).searchCases(tenant, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -6771,15 +6841,19 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
         /**
          * Retrieve AutocompleteResult list of ids matching prefix
          * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        autocompleteDocuments: async (prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        autocompleteDocuments: async (tenant: string, prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('autocompleteDocuments', 'tenant', tenant)
             // verify required parameter 'prefix' is not null or undefined
             assertParamExists('autocompleteDocuments', 'prefix', prefix)
-            const localVarPath = `/documents/autocomplete`;
+            const localVarPath = `/{tenant}/documents/autocomplete`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6817,11 +6891,15 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
         /**
          * Retrieve DocumentFilters documents filters
          * @summary Get DocumentFilters documents filters
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        documentsFilters: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/documents/filters`;
+        documentsFilters: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('documentsFilters', 'tenant', tenant)
+            const localVarPath = `/{tenant}/documents/filters`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6851,14 +6929,18 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
         /**
          * Generate a pre-signed S3 download URL for a document
          * @summary Get pre-signed S3 download URL for a document
+         * @param {string} tenant Tenant code
          * @param {string} documentId Document ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getDocumentDownloadUrl: async (documentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getDocumentDownloadUrl: async (tenant: string, documentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getDocumentDownloadUrl', 'tenant', tenant)
             // verify required parameter 'documentId' is not null or undefined
             assertParamExists('getDocumentDownloadUrl', 'documentId', documentId)
-            const localVarPath = `/documents/{document_id}/download_url`
+            const localVarPath = `/{tenant}/documents/{document_id}/download_url`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"document_id"}}`, encodeURIComponent(String(documentId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -6889,14 +6971,18 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
         /**
          * Search documents
          * @summary Search documents
+         * @param {string} tenant Tenant code
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchDocuments: async (listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        searchDocuments: async (tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('searchDocuments', 'tenant', tenant)
             // verify required parameter 'listBodyWithCriteria' is not null or undefined
             assertParamExists('searchDocuments', 'listBodyWithCriteria', listBodyWithCriteria)
-            const localVarPath = `/documents/search`;
+            const localVarPath = `/{tenant}/documents/search`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -6939,13 +7025,14 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve AutocompleteResult list of ids matching prefix
          * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async autocompleteDocuments(prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutocompleteResult>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.autocompleteDocuments(prefix, limit, options);
+        async autocompleteDocuments(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutocompleteResult>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.autocompleteDocuments(tenant, prefix, limit, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DocumentsApi.autocompleteDocuments']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6953,11 +7040,12 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve DocumentFilters documents filters
          * @summary Get DocumentFilters documents filters
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async documentsFilters(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentFilters>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.documentsFilters(options);
+        async documentsFilters(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentFilters>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.documentsFilters(tenant, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DocumentsApi.documentsFilters']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6965,12 +7053,13 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
         /**
          * Generate a pre-signed S3 download URL for a document
          * @summary Get pre-signed S3 download URL for a document
+         * @param {string} tenant Tenant code
          * @param {string} documentId Document ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getDocumentDownloadUrl(documentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UtilsPreSignedURL>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getDocumentDownloadUrl(documentId, options);
+        async getDocumentDownloadUrl(tenant: string, documentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UtilsPreSignedURL>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getDocumentDownloadUrl(tenant, documentId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DocumentsApi.getDocumentDownloadUrl']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -6978,12 +7067,13 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
         /**
          * Search documents
          * @summary Search documents
+         * @param {string} tenant Tenant code
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async searchDocuments(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentsSearchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.searchDocuments(listBodyWithCriteria, options);
+        async searchDocuments(tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentsSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchDocuments(tenant, listBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DocumentsApi.searchDocuments']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -7001,42 +7091,46 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
         /**
          * Retrieve AutocompleteResult list of ids matching prefix
          * @summary Get AutocompleteResult list of matching prefix
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        autocompleteDocuments(prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutocompleteResult>> {
-            return localVarFp.autocompleteDocuments(prefix, limit, options).then((request) => request(axios, basePath));
+        autocompleteDocuments(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutocompleteResult>> {
+            return localVarFp.autocompleteDocuments(tenant, prefix, limit, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve DocumentFilters documents filters
          * @summary Get DocumentFilters documents filters
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        documentsFilters(options?: RawAxiosRequestConfig): AxiosPromise<DocumentFilters> {
-            return localVarFp.documentsFilters(options).then((request) => request(axios, basePath));
+        documentsFilters(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<DocumentFilters> {
+            return localVarFp.documentsFilters(tenant, options).then((request) => request(axios, basePath));
         },
         /**
          * Generate a pre-signed S3 download URL for a document
          * @summary Get pre-signed S3 download URL for a document
+         * @param {string} tenant Tenant code
          * @param {string} documentId Document ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getDocumentDownloadUrl(documentId: string, options?: RawAxiosRequestConfig): AxiosPromise<UtilsPreSignedURL> {
-            return localVarFp.getDocumentDownloadUrl(documentId, options).then((request) => request(axios, basePath));
+        getDocumentDownloadUrl(tenant: string, documentId: string, options?: RawAxiosRequestConfig): AxiosPromise<UtilsPreSignedURL> {
+            return localVarFp.getDocumentDownloadUrl(tenant, documentId, options).then((request) => request(axios, basePath));
         },
         /**
          * Search documents
          * @summary Search documents
+         * @param {string} tenant Tenant code
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchDocuments(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentsSearchResponse> {
-            return localVarFp.searchDocuments(listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        searchDocuments(tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<DocumentsSearchResponse> {
+            return localVarFp.searchDocuments(tenant, listBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -7051,49 +7145,53 @@ export class DocumentsApi extends BaseAPI {
     /**
      * Retrieve AutocompleteResult list of ids matching prefix
      * @summary Get AutocompleteResult list of matching prefix
+     * @param {string} tenant Tenant code
      * @param {string} prefix Prefix
      * @param {string} [limit] Limit
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApi
      */
-    public autocompleteDocuments(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
-        return DocumentsApiFp(this.configuration).autocompleteDocuments(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    public autocompleteDocuments(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
+        return DocumentsApiFp(this.configuration).autocompleteDocuments(tenant, prefix, limit, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve DocumentFilters documents filters
      * @summary Get DocumentFilters documents filters
+     * @param {string} tenant Tenant code
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApi
      */
-    public documentsFilters(options?: RawAxiosRequestConfig) {
-        return DocumentsApiFp(this.configuration).documentsFilters(options).then((request) => request(this.axios, this.basePath));
+    public documentsFilters(tenant: string, options?: RawAxiosRequestConfig) {
+        return DocumentsApiFp(this.configuration).documentsFilters(tenant, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Generate a pre-signed S3 download URL for a document
      * @summary Get pre-signed S3 download URL for a document
+     * @param {string} tenant Tenant code
      * @param {string} documentId Document ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApi
      */
-    public getDocumentDownloadUrl(documentId: string, options?: RawAxiosRequestConfig) {
-        return DocumentsApiFp(this.configuration).getDocumentDownloadUrl(documentId, options).then((request) => request(this.axios, this.basePath));
+    public getDocumentDownloadUrl(tenant: string, documentId: string, options?: RawAxiosRequestConfig) {
+        return DocumentsApiFp(this.configuration).getDocumentDownloadUrl(tenant, documentId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Search documents
      * @summary Search documents
+     * @param {string} tenant Tenant code
      * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DocumentsApi
      */
-    public searchDocuments(listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
-        return DocumentsApiFp(this.configuration).searchDocuments(listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    public searchDocuments(tenant: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return DocumentsApiFp(this.configuration).searchDocuments(tenant, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -7108,15 +7206,19 @@ export const GenesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Retrieve AutoCompleteGene list of genes matching input string with highlighted
          * @summary Get AutoCompleteGene list of matching input string with highlighted
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        geneAutoComplete: async (prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        geneAutoComplete: async (tenant: string, prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('geneAutoComplete', 'tenant', tenant)
             // verify required parameter 'prefix' is not null or undefined
             assertParamExists('geneAutoComplete', 'prefix', prefix)
-            const localVarPath = `/genes/autocomplete`;
+            const localVarPath = `/{tenant}/genes/autocomplete`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -7154,14 +7256,18 @@ export const GenesApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Retrieve GeneResult list of genes matching input strings
          * @summary Post search GeneResult list of matching input strings
+         * @param {string} tenant Tenant code
          * @param {GeneSearchBody} geneSearchBody Search Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        geneSearch: async (geneSearchBody: GeneSearchBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        geneSearch: async (tenant: string, geneSearchBody: GeneSearchBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('geneSearch', 'tenant', tenant)
             // verify required parameter 'geneSearchBody' is not null or undefined
             assertParamExists('geneSearch', 'geneSearchBody', geneSearchBody)
-            const localVarPath = `/genes/search`;
+            const localVarPath = `/{tenant}/genes/search`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -7204,13 +7310,14 @@ export const GenesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve AutoCompleteGene list of genes matching input string with highlighted
          * @summary Get AutoCompleteGene list of matching input string with highlighted
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async geneAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutoCompleteGene>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.geneAutoComplete(prefix, limit, options);
+        async geneAutoComplete(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutoCompleteGene>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.geneAutoComplete(tenant, prefix, limit, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['GenesApi.geneAutoComplete']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -7218,12 +7325,13 @@ export const GenesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve GeneResult list of genes matching input strings
          * @summary Post search GeneResult list of matching input strings
+         * @param {string} tenant Tenant code
          * @param {GeneSearchBody} geneSearchBody Search Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async geneSearch(geneSearchBody: GeneSearchBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GeneResult>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.geneSearch(geneSearchBody, options);
+        async geneSearch(tenant: string, geneSearchBody: GeneSearchBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GeneResult>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.geneSearch(tenant, geneSearchBody, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['GenesApi.geneSearch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -7241,23 +7349,25 @@ export const GenesApiFactory = function (configuration?: Configuration, basePath
         /**
          * Retrieve AutoCompleteGene list of genes matching input string with highlighted
          * @summary Get AutoCompleteGene list of matching input string with highlighted
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        geneAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutoCompleteGene>> {
-            return localVarFp.geneAutoComplete(prefix, limit, options).then((request) => request(axios, basePath));
+        geneAutoComplete(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutoCompleteGene>> {
+            return localVarFp.geneAutoComplete(tenant, prefix, limit, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve GeneResult list of genes matching input strings
          * @summary Post search GeneResult list of matching input strings
+         * @param {string} tenant Tenant code
          * @param {GeneSearchBody} geneSearchBody Search Body
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        geneSearch(geneSearchBody: GeneSearchBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<GeneResult>> {
-            return localVarFp.geneSearch(geneSearchBody, options).then((request) => request(axios, basePath));
+        geneSearch(tenant: string, geneSearchBody: GeneSearchBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<GeneResult>> {
+            return localVarFp.geneSearch(tenant, geneSearchBody, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -7272,26 +7382,28 @@ export class GenesApi extends BaseAPI {
     /**
      * Retrieve AutoCompleteGene list of genes matching input string with highlighted
      * @summary Get AutoCompleteGene list of matching input string with highlighted
+     * @param {string} tenant Tenant code
      * @param {string} prefix Prefix
      * @param {string} [limit] Limit
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof GenesApi
      */
-    public geneAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
-        return GenesApiFp(this.configuration).geneAutoComplete(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    public geneAutoComplete(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
+        return GenesApiFp(this.configuration).geneAutoComplete(tenant, prefix, limit, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve GeneResult list of genes matching input strings
      * @summary Post search GeneResult list of matching input strings
+     * @param {string} tenant Tenant code
      * @param {GeneSearchBody} geneSearchBody Search Body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof GenesApi
      */
-    public geneSearch(geneSearchBody: GeneSearchBody, options?: RawAxiosRequestConfig) {
-        return GenesApiFp(this.configuration).geneSearch(geneSearchBody, options).then((request) => request(this.axios, this.basePath));
+    public geneSearch(tenant: string, geneSearchBody: GeneSearchBody, options?: RawAxiosRequestConfig) {
+        return GenesApiFp(this.configuration).geneSearch(tenant, geneSearchBody, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -7436,14 +7548,18 @@ export const IgvApiAxiosParamCreator = function (configuration?: Configuration) 
         /**
          * Get IGV tracks for a case
          * @summary Get IGV
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getIGV: async (caseId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getIGV: async (tenant: string, caseId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getIGV', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('getIGV', 'caseId', caseId)
-            const localVarPath = `/igv/{case_id}`
+            const localVarPath = `/{tenant}/igv/{case_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -7484,12 +7600,13 @@ export const IgvApiFp = function(configuration?: Configuration) {
         /**
          * Get IGV tracks for a case
          * @summary Get IGV
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getIGV(caseId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IGVTracks>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getIGV(caseId, options);
+        async getIGV(tenant: string, caseId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IGVTracks>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getIGV(tenant, caseId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['IgvApi.getIGV']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -7507,12 +7624,13 @@ export const IgvApiFactory = function (configuration?: Configuration, basePath?:
         /**
          * Get IGV tracks for a case
          * @summary Get IGV
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getIGV(caseId: string, options?: RawAxiosRequestConfig): AxiosPromise<IGVTracks> {
-            return localVarFp.getIGV(caseId, options).then((request) => request(axios, basePath));
+        getIGV(tenant: string, caseId: string, options?: RawAxiosRequestConfig): AxiosPromise<IGVTracks> {
+            return localVarFp.getIGV(tenant, caseId, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -7527,13 +7645,14 @@ export class IgvApi extends BaseAPI {
     /**
      * Get IGV tracks for a case
      * @summary Get IGV
+     * @param {string} tenant Tenant code
      * @param {string} caseId Case ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof IgvApi
      */
-    public getIGV(caseId: string, options?: RawAxiosRequestConfig) {
-        return IgvApiFp(this.configuration).getIGV(caseId, options).then((request) => request(this.axios, this.basePath));
+    public getIGV(tenant: string, caseId: string, options?: RawAxiosRequestConfig) {
+        return IgvApiFp(this.configuration).getIGV(tenant, caseId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -7548,6 +7667,7 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Get interpretation germline
          * @summary Get interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -7555,7 +7675,9 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInterpretationGermline: async (caseId: string, sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getInterpretationGermline: async (tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getInterpretationGermline', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('getInterpretationGermline', 'caseId', caseId)
             // verify required parameter 'sequencingId' is not null or undefined
@@ -7564,7 +7686,8 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('getInterpretationGermline', 'locusId', locusId)
             // verify required parameter 'transcriptId' is not null or undefined
             assertParamExists('getInterpretationGermline', 'transcriptId', transcriptId)
-            const localVarPath = `/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
@@ -7598,6 +7721,7 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Get interpretation germline
          * @summary Get interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -7605,14 +7729,17 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
          * @deprecated
          * @throws {RequiredError}
          */
-        getInterpretationGermlineDeprecated: async (sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getInterpretationGermlineDeprecated: async (tenant: string, sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getInterpretationGermlineDeprecated', 'tenant', tenant)
             // verify required parameter 'sequencingId' is not null or undefined
             assertParamExists('getInterpretationGermlineDeprecated', 'sequencingId', sequencingId)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getInterpretationGermlineDeprecated', 'locusId', locusId)
             // verify required parameter 'transcriptId' is not null or undefined
             assertParamExists('getInterpretationGermlineDeprecated', 'transcriptId', transcriptId)
-            const localVarPath = `/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
@@ -7645,6 +7772,7 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -7652,7 +7780,9 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInterpretationSomatic: async (caseId: string, sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getInterpretationSomatic: async (tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getInterpretationSomatic', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('getInterpretationSomatic', 'caseId', caseId)
             // verify required parameter 'sequencingId' is not null or undefined
@@ -7661,7 +7791,8 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('getInterpretationSomatic', 'locusId', locusId)
             // verify required parameter 'transcriptId' is not null or undefined
             assertParamExists('getInterpretationSomatic', 'transcriptId', transcriptId)
-            const localVarPath = `/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
@@ -7695,6 +7826,7 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -7702,14 +7834,17 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
          * @deprecated
          * @throws {RequiredError}
          */
-        getInterpretationSomaticDeprecated: async (sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getInterpretationSomaticDeprecated: async (tenant: string, sequencingId: string, locusId: string, transcriptId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getInterpretationSomaticDeprecated', 'tenant', tenant)
             // verify required parameter 'sequencingId' is not null or undefined
             assertParamExists('getInterpretationSomaticDeprecated', 'sequencingId', sequencingId)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getInterpretationSomaticDeprecated', 'locusId', locusId)
             // verify required parameter 'transcriptId' is not null or undefined
             assertParamExists('getInterpretationSomaticDeprecated', 'transcriptId', transcriptId)
-            const localVarPath = `/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
@@ -7742,14 +7877,18 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Get pubmed citation by ID
          * @summary Get pubmed citation by ID
+         * @param {string} tenant Tenant code
          * @param {string} citationId Citation ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getPubmedCitation: async (citationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getPubmedCitation: async (tenant: string, citationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getPubmedCitation', 'tenant', tenant)
             // verify required parameter 'citationId' is not null or undefined
             assertParamExists('getPubmedCitation', 'citationId', citationId)
-            const localVarPath = `/interpretations/pubmed/{citation_id}`
+            const localVarPath = `/{tenant}/interpretations/pubmed/{citation_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"citation_id"}}`, encodeURIComponent(String(citationId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -7780,6 +7919,7 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Create or Update interpretation germline
          * @summary Create or Update interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -7788,7 +7928,9 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postInterpretationGermline: async (caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postInterpretationGermline: async (tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('postInterpretationGermline', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('postInterpretationGermline', 'caseId', caseId)
             // verify required parameter 'sequencingId' is not null or undefined
@@ -7799,7 +7941,8 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('postInterpretationGermline', 'transcriptId', transcriptId)
             // verify required parameter 'interpretationGermline' is not null or undefined
             assertParamExists('postInterpretationGermline', 'interpretationGermline', interpretationGermline)
-            const localVarPath = `/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
@@ -7836,6 +7979,7 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Create or Update interpretation germline
          * @summary Create or Update interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -7844,7 +7988,9 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
          * @deprecated
          * @throws {RequiredError}
          */
-        postInterpretationGermlineDeprecated: async (sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postInterpretationGermlineDeprecated: async (tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('postInterpretationGermlineDeprecated', 'tenant', tenant)
             // verify required parameter 'sequencingId' is not null or undefined
             assertParamExists('postInterpretationGermlineDeprecated', 'sequencingId', sequencingId)
             // verify required parameter 'locusId' is not null or undefined
@@ -7853,7 +7999,8 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('postInterpretationGermlineDeprecated', 'transcriptId', transcriptId)
             // verify required parameter 'interpretationGermline' is not null or undefined
             assertParamExists('postInterpretationGermlineDeprecated', 'interpretationGermline', interpretationGermline)
-            const localVarPath = `/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
@@ -7889,6 +8036,7 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -7897,7 +8045,9 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postInterpretationSomatic: async (caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postInterpretationSomatic: async (tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('postInterpretationSomatic', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('postInterpretationSomatic', 'caseId', caseId)
             // verify required parameter 'sequencingId' is not null or undefined
@@ -7908,7 +8058,8 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('postInterpretationSomatic', 'transcriptId', transcriptId)
             // verify required parameter 'interpretationSomatic' is not null or undefined
             assertParamExists('postInterpretationSomatic', 'interpretationSomatic', interpretationSomatic)
-            const localVarPath = `/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
@@ -7945,6 +8096,7 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -7953,7 +8105,9 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
          * @deprecated
          * @throws {RequiredError}
          */
-        postInterpretationSomaticDeprecated: async (sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postInterpretationSomaticDeprecated: async (tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('postInterpretationSomaticDeprecated', 'tenant', tenant)
             // verify required parameter 'sequencingId' is not null or undefined
             assertParamExists('postInterpretationSomaticDeprecated', 'sequencingId', sequencingId)
             // verify required parameter 'locusId' is not null or undefined
@@ -7962,7 +8116,8 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('postInterpretationSomaticDeprecated', 'transcriptId', transcriptId)
             // verify required parameter 'interpretationSomatic' is not null or undefined
             assertParamExists('postInterpretationSomaticDeprecated', 'interpretationSomatic', interpretationSomatic)
-            const localVarPath = `/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}`
+            const localVarPath = `/{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"sequencing_id"}}`, encodeURIComponent(String(sequencingId)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"transcript_id"}}`, encodeURIComponent(String(transcriptId)));
@@ -7998,11 +8153,15 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Search interpretation germline
          * @summary Search interpretation germline
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchInterpretationGermline: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/interpretations/germline`;
+        searchInterpretationGermline: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('searchInterpretationGermline', 'tenant', tenant)
+            const localVarPath = `/{tenant}/interpretations/germline`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -8032,11 +8191,15 @@ export const InterpretationsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Search interpretation somatic
          * @summary Search interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchInterpretationSomatic: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/interpretations/somatic`;
+        searchInterpretationSomatic: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('searchInterpretationSomatic', 'tenant', tenant)
+            const localVarPath = `/{tenant}/interpretations/somatic`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -8076,6 +8239,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Get interpretation germline
          * @summary Get interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -8083,8 +8247,8 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationGermline(caseId, sequencingId, locusId, transcriptId, options);
+        async getInterpretationGermline(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationGermline(tenant, caseId, sequencingId, locusId, transcriptId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.getInterpretationGermline']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8092,6 +8256,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Get interpretation germline
          * @summary Get interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -8099,8 +8264,8 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @deprecated
          * @throws {RequiredError}
          */
-        async getInterpretationGermlineDeprecated(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationGermlineDeprecated(sequencingId, locusId, transcriptId, options);
+        async getInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.getInterpretationGermlineDeprecated']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8108,6 +8273,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -8115,8 +8281,8 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, options);
+        async getInterpretationSomatic(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.getInterpretationSomatic']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8124,6 +8290,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -8131,8 +8298,8 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @deprecated
          * @throws {RequiredError}
          */
-        async getInterpretationSomaticDeprecated(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationSomaticDeprecated(sequencingId, locusId, transcriptId, options);
+        async getInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.getInterpretationSomaticDeprecated']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8140,12 +8307,13 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Get pubmed citation by ID
          * @summary Get pubmed citation by ID
+         * @param {string} tenant Tenant code
          * @param {string} citationId Citation ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getPubmedCitation(citationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PubmedCitation>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getPubmedCitation(citationId, options);
+        async getPubmedCitation(tenant: string, citationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PubmedCitation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getPubmedCitation(tenant, citationId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.getPubmedCitation']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8153,6 +8321,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Create or Update interpretation germline
          * @summary Create or Update interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -8161,8 +8330,8 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationGermline(caseId, sequencingId, locusId, transcriptId, interpretationGermline, options);
+        async postInterpretationGermline(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationGermline(tenant, caseId, sequencingId, locusId, transcriptId, interpretationGermline, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.postInterpretationGermline']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8170,6 +8339,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Create or Update interpretation germline
          * @summary Create or Update interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -8178,8 +8348,8 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @deprecated
          * @throws {RequiredError}
          */
-        async postInterpretationGermlineDeprecated(sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationGermlineDeprecated(sequencingId, locusId, transcriptId, interpretationGermline, options);
+        async postInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationGermline>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationGermline, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.postInterpretationGermlineDeprecated']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8187,6 +8357,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -8195,8 +8366,8 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options);
+        async postInterpretationSomatic(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.postInterpretationSomatic']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8204,6 +8375,7 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -8212,8 +8384,8 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
          * @deprecated
          * @throws {RequiredError}
          */
-        async postInterpretationSomaticDeprecated(sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationSomaticDeprecated(sequencingId, locusId, transcriptId, interpretationSomatic, options);
+        async postInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InterpretationSomatic>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationSomatic, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.postInterpretationSomaticDeprecated']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8221,11 +8393,12 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Search interpretation germline
          * @summary Search interpretation germline
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async searchInterpretationGermline(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<InterpretationGermline>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.searchInterpretationGermline(options);
+        async searchInterpretationGermline(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<InterpretationGermline>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchInterpretationGermline(tenant, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.searchInterpretationGermline']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8233,11 +8406,12 @@ export const InterpretationsApiFp = function(configuration?: Configuration) {
         /**
          * Search interpretation somatic
          * @summary Search interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async searchInterpretationSomatic(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<InterpretationSomatic>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.searchInterpretationSomatic(options);
+        async searchInterpretationSomatic(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<InterpretationSomatic>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchInterpretationSomatic(tenant, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['InterpretationsApi.searchInterpretationSomatic']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8255,6 +8429,7 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
         /**
          * Get interpretation germline
          * @summary Get interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -8262,12 +8437,13 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
-            return localVarFp.getInterpretationGermline(caseId, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
+        getInterpretationGermline(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
+            return localVarFp.getInterpretationGermline(tenant, caseId, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get interpretation germline
          * @summary Get interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -8275,12 +8451,13 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @deprecated
          * @throws {RequiredError}
          */
-        getInterpretationGermlineDeprecated(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
-            return localVarFp.getInterpretationGermlineDeprecated(sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
+        getInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
+            return localVarFp.getInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -8288,12 +8465,13 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
-            return localVarFp.getInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
+        getInterpretationSomatic(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
+            return localVarFp.getInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get interpretation somatic
          * @summary Get interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -8301,22 +8479,24 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @deprecated
          * @throws {RequiredError}
          */
-        getInterpretationSomaticDeprecated(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
-            return localVarFp.getInterpretationSomaticDeprecated(sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
+        getInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
+            return localVarFp.getInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get pubmed citation by ID
          * @summary Get pubmed citation by ID
+         * @param {string} tenant Tenant code
          * @param {string} citationId Citation ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getPubmedCitation(citationId: string, options?: RawAxiosRequestConfig): AxiosPromise<PubmedCitation> {
-            return localVarFp.getPubmedCitation(citationId, options).then((request) => request(axios, basePath));
+        getPubmedCitation(tenant: string, citationId: string, options?: RawAxiosRequestConfig): AxiosPromise<PubmedCitation> {
+            return localVarFp.getPubmedCitation(tenant, citationId, options).then((request) => request(axios, basePath));
         },
         /**
          * Create or Update interpretation germline
          * @summary Create or Update interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -8325,12 +8505,13 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
-            return localVarFp.postInterpretationGermline(caseId, sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(axios, basePath));
+        postInterpretationGermline(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
+            return localVarFp.postInterpretationGermline(tenant, caseId, sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(axios, basePath));
         },
         /**
          * Create or Update interpretation germline
          * @summary Create or Update interpretation germline
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -8339,12 +8520,13 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @deprecated
          * @throws {RequiredError}
          */
-        postInterpretationGermlineDeprecated(sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
-            return localVarFp.postInterpretationGermlineDeprecated(sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(axios, basePath));
+        postInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationGermline> {
+            return localVarFp.postInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(axios, basePath));
         },
         /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} caseId Case ID
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
@@ -8353,12 +8535,13 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
-            return localVarFp.postInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(axios, basePath));
+        postInterpretationSomatic(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
+            return localVarFp.postInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(axios, basePath));
         },
         /**
          * Create or Update interpretation somatic
          * @summary Create or Update interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {string} sequencingId Sequencing ID
          * @param {string} locusId Locus ID
          * @param {string} transcriptId Transcript ID
@@ -8367,26 +8550,28 @@ export const InterpretationsApiFactory = function (configuration?: Configuration
          * @deprecated
          * @throws {RequiredError}
          */
-        postInterpretationSomaticDeprecated(sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
-            return localVarFp.postInterpretationSomaticDeprecated(sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(axios, basePath));
+        postInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig): AxiosPromise<InterpretationSomatic> {
+            return localVarFp.postInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(axios, basePath));
         },
         /**
          * Search interpretation germline
          * @summary Search interpretation germline
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchInterpretationGermline(options?: RawAxiosRequestConfig): AxiosPromise<Array<InterpretationGermline>> {
-            return localVarFp.searchInterpretationGermline(options).then((request) => request(axios, basePath));
+        searchInterpretationGermline(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<InterpretationGermline>> {
+            return localVarFp.searchInterpretationGermline(tenant, options).then((request) => request(axios, basePath));
         },
         /**
          * Search interpretation somatic
          * @summary Search interpretation somatic
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        searchInterpretationSomatic(options?: RawAxiosRequestConfig): AxiosPromise<Array<InterpretationSomatic>> {
-            return localVarFp.searchInterpretationSomatic(options).then((request) => request(axios, basePath));
+        searchInterpretationSomatic(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<InterpretationSomatic>> {
+            return localVarFp.searchInterpretationSomatic(tenant, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -8401,6 +8586,7 @@ export class InterpretationsApi extends BaseAPI {
     /**
      * Get interpretation germline
      * @summary Get interpretation germline
+     * @param {string} tenant Tenant code
      * @param {string} caseId Case ID
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
@@ -8409,13 +8595,14 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public getInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).getInterpretationGermline(caseId, sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
+    public getInterpretationGermline(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).getInterpretationGermline(tenant, caseId, sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Get interpretation germline
      * @summary Get interpretation germline
+     * @param {string} tenant Tenant code
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
      * @param {string} transcriptId Transcript ID
@@ -8424,13 +8611,14 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public getInterpretationGermlineDeprecated(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).getInterpretationGermlineDeprecated(sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
+    public getInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).getInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Get interpretation somatic
      * @summary Get interpretation somatic
+     * @param {string} tenant Tenant code
      * @param {string} caseId Case ID
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
@@ -8439,13 +8627,14 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public getInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).getInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
+    public getInterpretationSomatic(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).getInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Get interpretation somatic
      * @summary Get interpretation somatic
+     * @param {string} tenant Tenant code
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
      * @param {string} transcriptId Transcript ID
@@ -8454,25 +8643,27 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public getInterpretationSomaticDeprecated(sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).getInterpretationSomaticDeprecated(sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
+    public getInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).getInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Get pubmed citation by ID
      * @summary Get pubmed citation by ID
+     * @param {string} tenant Tenant code
      * @param {string} citationId Citation ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public getPubmedCitation(citationId: string, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).getPubmedCitation(citationId, options).then((request) => request(this.axios, this.basePath));
+    public getPubmedCitation(tenant: string, citationId: string, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).getPubmedCitation(tenant, citationId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create or Update interpretation germline
      * @summary Create or Update interpretation germline
+     * @param {string} tenant Tenant code
      * @param {string} caseId Case ID
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
@@ -8482,13 +8673,14 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public postInterpretationGermline(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).postInterpretationGermline(caseId, sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(this.axios, this.basePath));
+    public postInterpretationGermline(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).postInterpretationGermline(tenant, caseId, sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create or Update interpretation germline
      * @summary Create or Update interpretation germline
+     * @param {string} tenant Tenant code
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
      * @param {string} transcriptId Transcript ID
@@ -8498,13 +8690,14 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public postInterpretationGermlineDeprecated(sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).postInterpretationGermlineDeprecated(sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(this.axios, this.basePath));
+    public postInterpretationGermlineDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationGermline: InterpretationGermline, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).postInterpretationGermlineDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationGermline, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create or Update interpretation somatic
      * @summary Create or Update interpretation somatic
+     * @param {string} tenant Tenant code
      * @param {string} caseId Case ID
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
@@ -8514,13 +8707,14 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public postInterpretationSomatic(caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).postInterpretationSomatic(caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(this.axios, this.basePath));
+    public postInterpretationSomatic(tenant: string, caseId: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).postInterpretationSomatic(tenant, caseId, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create or Update interpretation somatic
      * @summary Create or Update interpretation somatic
+     * @param {string} tenant Tenant code
      * @param {string} sequencingId Sequencing ID
      * @param {string} locusId Locus ID
      * @param {string} transcriptId Transcript ID
@@ -8530,30 +8724,32 @@ export class InterpretationsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public postInterpretationSomaticDeprecated(sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).postInterpretationSomaticDeprecated(sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(this.axios, this.basePath));
+    public postInterpretationSomaticDeprecated(tenant: string, sequencingId: string, locusId: string, transcriptId: string, interpretationSomatic: InterpretationSomatic, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).postInterpretationSomaticDeprecated(tenant, sequencingId, locusId, transcriptId, interpretationSomatic, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Search interpretation germline
      * @summary Search interpretation germline
+     * @param {string} tenant Tenant code
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public searchInterpretationGermline(options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).searchInterpretationGermline(options).then((request) => request(this.axios, this.basePath));
+    public searchInterpretationGermline(tenant: string, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).searchInterpretationGermline(tenant, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Search interpretation somatic
      * @summary Search interpretation somatic
+     * @param {string} tenant Tenant code
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof InterpretationsApi
      */
-    public searchInterpretationSomatic(options?: RawAxiosRequestConfig) {
-        return InterpretationsApiFp(this.configuration).searchInterpretationSomatic(options).then((request) => request(this.axios, this.basePath));
+    public searchInterpretationSomatic(tenant: string, options?: RawAxiosRequestConfig) {
+        return InterpretationsApiFp(this.configuration).searchInterpretationSomatic(tenant, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -8568,15 +8764,19 @@ export const MondoApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
          * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        mondoTermAutoComplete: async (prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        mondoTermAutoComplete: async (tenant: string, prefix: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('mondoTermAutoComplete', 'tenant', tenant)
             // verify required parameter 'prefix' is not null or undefined
             assertParamExists('mondoTermAutoComplete', 'prefix', prefix)
-            const localVarPath = `/mondo/autocomplete`;
+            const localVarPath = `/{tenant}/mondo/autocomplete`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -8624,13 +8824,14 @@ export const MondoApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
          * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async mondoTermAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutoCompleteTerm>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.mondoTermAutoComplete(prefix, limit, options);
+        async mondoTermAutoComplete(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AutoCompleteTerm>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.mondoTermAutoComplete(tenant, prefix, limit, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['MondoApi.mondoTermAutoComplete']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8648,13 +8849,14 @@ export const MondoApiFactory = function (configuration?: Configuration, basePath
         /**
          * Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
          * @summary Get AutoCompleteTerm list of matching input string with highlighted
+         * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
          * @param {string} [limit] Limit
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        mondoTermAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutoCompleteTerm>> {
-            return localVarFp.mondoTermAutoComplete(prefix, limit, options).then((request) => request(axios, basePath));
+        mondoTermAutoComplete(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AutoCompleteTerm>> {
+            return localVarFp.mondoTermAutoComplete(tenant, prefix, limit, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -8669,14 +8871,15 @@ export class MondoApi extends BaseAPI {
     /**
      * Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
      * @summary Get AutoCompleteTerm list of matching input string with highlighted
+     * @param {string} tenant Tenant code
      * @param {string} prefix Prefix
      * @param {string} [limit] Limit
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof MondoApi
      */
-    public mondoTermAutoComplete(prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
-        return MondoApiFp(this.configuration).mondoTermAutoComplete(prefix, limit, options).then((request) => request(this.axios, this.basePath));
+    public mondoTermAutoComplete(tenant: string, prefix: string, limit?: string, options?: RawAxiosRequestConfig) {
+        return MondoApiFp(this.configuration).mondoTermAutoComplete(tenant, prefix, limit, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -8691,6 +8894,7 @@ export const OccurrenceFlagsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
          * @summary Delete the flag on an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Seq ID
          * @param {number} taskId Task ID
@@ -8698,7 +8902,9 @@ export const OccurrenceFlagsApiAxiosParamCreator = function (configuration?: Con
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteOccurrenceFlag: async (caseId: number, seqId: number, taskId: number, occurrenceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        deleteOccurrenceFlag: async (tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('deleteOccurrenceFlag', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('deleteOccurrenceFlag', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -8707,7 +8913,8 @@ export const OccurrenceFlagsApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('deleteOccurrenceFlag', 'taskId', taskId)
             // verify required parameter 'occurrenceId' is not null or undefined
             assertParamExists('deleteOccurrenceFlag', 'occurrenceId', occurrenceId)
-            const localVarPath = `/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}`
+            const localVarPath = `/{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
@@ -8741,6 +8948,7 @@ export const OccurrenceFlagsApiAxiosParamCreator = function (configuration?: Con
         /**
          * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
          * @summary Set or change the flag on an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Seq ID
          * @param {number} taskId Task ID
@@ -8749,7 +8957,9 @@ export const OccurrenceFlagsApiAxiosParamCreator = function (configuration?: Con
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        upsertOccurrenceFlag: async (caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        upsertOccurrenceFlag: async (tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('upsertOccurrenceFlag', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('upsertOccurrenceFlag', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -8760,7 +8970,8 @@ export const OccurrenceFlagsApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('upsertOccurrenceFlag', 'occurrenceId', occurrenceId)
             // verify required parameter 'flagType' is not null or undefined
             assertParamExists('upsertOccurrenceFlag', 'flagType', flagType)
-            const localVarPath = `/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}`
+            const localVarPath = `/{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
@@ -8808,6 +9019,7 @@ export const OccurrenceFlagsApiFp = function(configuration?: Configuration) {
         /**
          * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
          * @summary Delete the flag on an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Seq ID
          * @param {number} taskId Task ID
@@ -8815,8 +9027,8 @@ export const OccurrenceFlagsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOccurrenceFlag(caseId, seqId, taskId, occurrenceId, options);
+        async deleteOccurrenceFlag(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOccurrenceFlag(tenant, caseId, seqId, taskId, occurrenceId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrenceFlagsApi.deleteOccurrenceFlag']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8824,6 +9036,7 @@ export const OccurrenceFlagsApiFp = function(configuration?: Configuration) {
         /**
          * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
          * @summary Set or change the flag on an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Seq ID
          * @param {number} taskId Task ID
@@ -8832,8 +9045,8 @@ export const OccurrenceFlagsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async upsertOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.upsertOccurrenceFlag(caseId, seqId, taskId, occurrenceId, flagType, options);
+        async upsertOccurrenceFlag(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.upsertOccurrenceFlag(tenant, caseId, seqId, taskId, occurrenceId, flagType, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrenceFlagsApi.upsertOccurrenceFlag']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8851,6 +9064,7 @@ export const OccurrenceFlagsApiFactory = function (configuration?: Configuration
         /**
          * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
          * @summary Delete the flag on an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Seq ID
          * @param {number} taskId Task ID
@@ -8858,12 +9072,13 @@ export const OccurrenceFlagsApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.deleteOccurrenceFlag(caseId, seqId, taskId, occurrenceId, options).then((request) => request(axios, basePath));
+        deleteOccurrenceFlag(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteOccurrenceFlag(tenant, caseId, seqId, taskId, occurrenceId, options).then((request) => request(axios, basePath));
         },
         /**
          * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
          * @summary Set or change the flag on an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Seq ID
          * @param {number} taskId Task ID
@@ -8872,8 +9087,8 @@ export const OccurrenceFlagsApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        upsertOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.upsertOccurrenceFlag(caseId, seqId, taskId, occurrenceId, flagType, options).then((request) => request(axios, basePath));
+        upsertOccurrenceFlag(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.upsertOccurrenceFlag(tenant, caseId, seqId, taskId, occurrenceId, flagType, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -8888,6 +9103,7 @@ export class OccurrenceFlagsApi extends BaseAPI {
     /**
      * Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
      * @summary Delete the flag on an occurrence
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Seq ID
      * @param {number} taskId Task ID
@@ -8896,13 +9112,14 @@ export class OccurrenceFlagsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrenceFlagsApi
      */
-    public deleteOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig) {
-        return OccurrenceFlagsApiFp(this.configuration).deleteOccurrenceFlag(caseId, seqId, taskId, occurrenceId, options).then((request) => request(this.axios, this.basePath));
+    public deleteOccurrenceFlag(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceFlagsApiFp(this.configuration).deleteOccurrenceFlag(tenant, caseId, seqId, taskId, occurrenceId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
      * @summary Set or change the flag on an occurrence
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Seq ID
      * @param {number} taskId Task ID
@@ -8912,8 +9129,8 @@ export class OccurrenceFlagsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrenceFlagsApi
      */
-    public upsertOccurrenceFlag(caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options?: RawAxiosRequestConfig) {
-        return OccurrenceFlagsApiFp(this.configuration).upsertOccurrenceFlag(caseId, seqId, taskId, occurrenceId, flagType, options).then((request) => request(this.axios, this.basePath));
+    public upsertOccurrenceFlag(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, flagType: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceFlagsApiFp(this.configuration).upsertOccurrenceFlag(tenant, caseId, seqId, taskId, occurrenceId, flagType, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -8928,6 +9145,7 @@ export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Con
         /**
          * Count all notes associated with an occurrence
          * @summary Count notes for an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {number} taskId Task ID
@@ -8935,7 +9153,9 @@ export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Con
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countOccurrenceNotes: async (caseId: number, seqId: number, taskId: number, occurrenceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        countOccurrenceNotes: async (tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('countOccurrenceNotes', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('countOccurrenceNotes', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -8944,7 +9164,8 @@ export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('countOccurrenceNotes', 'taskId', taskId)
             // verify required parameter 'occurrenceId' is not null or undefined
             assertParamExists('countOccurrenceNotes', 'occurrenceId', occurrenceId)
-            const localVarPath = `/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count`
+            const localVarPath = `/{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
@@ -8978,14 +9199,18 @@ export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Con
         /**
          * Soft-delete a note by ID. Only the owner of the note can delete it.
          * @summary Delete a note on an occurrence
+         * @param {string} tenant Tenant code
          * @param {string} id Note ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteOccurrenceNote: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        deleteOccurrenceNote: async (tenant: string, id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('deleteOccurrenceNote', 'tenant', tenant)
             // verify required parameter 'id' is not null or undefined
             assertParamExists('deleteOccurrenceNote', 'id', id)
-            const localVarPath = `/notes/{id}`
+            const localVarPath = `/{tenant}/notes/{id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -9016,6 +9241,7 @@ export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Con
         /**
          * Get all notes associated with an occurrence
          * @summary Get notes for an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {number} taskId Task ID
@@ -9023,7 +9249,9 @@ export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Con
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getOccurrenceNotes: async (caseId: number, seqId: number, taskId: number, occurrenceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getOccurrenceNotes: async (tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getOccurrenceNotes', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('getOccurrenceNotes', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9032,7 +9260,8 @@ export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Con
             assertParamExists('getOccurrenceNotes', 'taskId', taskId)
             // verify required parameter 'occurrenceId' is not null or undefined
             assertParamExists('getOccurrenceNotes', 'occurrenceId', occurrenceId)
-            const localVarPath = `/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}`
+            const localVarPath = `/{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
@@ -9066,14 +9295,18 @@ export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Con
         /**
          * Create a new note associated with an occurrence (SNV or CNV)
          * @summary Create a note on an occurrence
+         * @param {string} tenant Tenant code
          * @param {CreateOccurrenceNoteInput} createOccurrenceNoteInput Note to create
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postOccurrenceNote: async (createOccurrenceNoteInput: CreateOccurrenceNoteInput, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postOccurrenceNote: async (tenant: string, createOccurrenceNoteInput: CreateOccurrenceNoteInput, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('postOccurrenceNote', 'tenant', tenant)
             // verify required parameter 'createOccurrenceNoteInput' is not null or undefined
             assertParamExists('postOccurrenceNote', 'createOccurrenceNoteInput', createOccurrenceNoteInput)
-            const localVarPath = `/notes`;
+            const localVarPath = `/{tenant}/notes`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -9106,17 +9339,21 @@ export const OccurrenceNotesApiAxiosParamCreator = function (configuration?: Con
         /**
          * Update the content of an existing note. Only the owner of the note can update it.
          * @summary Update a note on an occurrence
+         * @param {string} tenant Tenant code
          * @param {string} id Note ID
          * @param {UpdateOccurrenceNoteInput} updateOccurrenceNoteInput Updated content
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        putOccurrenceNote: async (id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        putOccurrenceNote: async (tenant: string, id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('putOccurrenceNote', 'tenant', tenant)
             // verify required parameter 'id' is not null or undefined
             assertParamExists('putOccurrenceNote', 'id', id)
             // verify required parameter 'updateOccurrenceNoteInput' is not null or undefined
             assertParamExists('putOccurrenceNote', 'updateOccurrenceNoteInput', updateOccurrenceNoteInput)
-            const localVarPath = `/notes/{id}`
+            const localVarPath = `/{tenant}/notes/{id}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -9160,6 +9397,7 @@ export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
         /**
          * Count all notes associated with an occurrence
          * @summary Count notes for an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {number} taskId Task ID
@@ -9167,8 +9405,8 @@ export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.countOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options);
+        async countOccurrenceNotes(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.countOccurrenceNotes(tenant, caseId, seqId, taskId, occurrenceId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.countOccurrenceNotes']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -9176,12 +9414,13 @@ export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
         /**
          * Soft-delete a note by ID. Only the owner of the note can delete it.
          * @summary Delete a note on an occurrence
+         * @param {string} tenant Tenant code
          * @param {string} id Note ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteOccurrenceNote(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOccurrenceNote(id, options);
+        async deleteOccurrenceNote(tenant: string, id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOccurrenceNote(tenant, id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.deleteOccurrenceNote']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -9189,6 +9428,7 @@ export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
         /**
          * Get all notes associated with an occurrence
          * @summary Get notes for an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {number} taskId Task ID
@@ -9196,8 +9436,8 @@ export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OccurrenceNote>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options);
+        async getOccurrenceNotes(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OccurrenceNote>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getOccurrenceNotes(tenant, caseId, seqId, taskId, occurrenceId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.getOccurrenceNotes']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -9205,12 +9445,13 @@ export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
         /**
          * Create a new note associated with an occurrence (SNV or CNV)
          * @summary Create a note on an occurrence
+         * @param {string} tenant Tenant code
          * @param {CreateOccurrenceNoteInput} createOccurrenceNoteInput Note to create
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postOccurrenceNote(createOccurrenceNoteInput: CreateOccurrenceNoteInput, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OccurrenceNote>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postOccurrenceNote(createOccurrenceNoteInput, options);
+        async postOccurrenceNote(tenant: string, createOccurrenceNoteInput: CreateOccurrenceNoteInput, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OccurrenceNote>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postOccurrenceNote(tenant, createOccurrenceNoteInput, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.postOccurrenceNote']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -9218,13 +9459,14 @@ export const OccurrenceNotesApiFp = function(configuration?: Configuration) {
         /**
          * Update the content of an existing note. Only the owner of the note can update it.
          * @summary Update a note on an occurrence
+         * @param {string} tenant Tenant code
          * @param {string} id Note ID
          * @param {UpdateOccurrenceNoteInput} updateOccurrenceNoteInput Updated content
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async putOccurrenceNote(id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OccurrenceNote>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.putOccurrenceNote(id, updateOccurrenceNoteInput, options);
+        async putOccurrenceNote(tenant: string, id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OccurrenceNote>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putOccurrenceNote(tenant, id, updateOccurrenceNoteInput, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrenceNotesApi.putOccurrenceNote']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -9242,6 +9484,7 @@ export const OccurrenceNotesApiFactory = function (configuration?: Configuration
         /**
          * Count all notes associated with an occurrence
          * @summary Count notes for an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {number} taskId Task ID
@@ -9249,22 +9492,24 @@ export const OccurrenceNotesApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
-            return localVarFp.countOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options).then((request) => request(axios, basePath));
+        countOccurrenceNotes(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+            return localVarFp.countOccurrenceNotes(tenant, caseId, seqId, taskId, occurrenceId, options).then((request) => request(axios, basePath));
         },
         /**
          * Soft-delete a note by ID. Only the owner of the note can delete it.
          * @summary Delete a note on an occurrence
+         * @param {string} tenant Tenant code
          * @param {string} id Note ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteOccurrenceNote(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.deleteOccurrenceNote(id, options).then((request) => request(axios, basePath));
+        deleteOccurrenceNote(tenant: string, id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteOccurrenceNote(tenant, id, options).then((request) => request(axios, basePath));
         },
         /**
          * Get all notes associated with an occurrence
          * @summary Get notes for an occurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequencing Experiment ID
          * @param {number} taskId Task ID
@@ -9272,29 +9517,31 @@ export const OccurrenceNotesApiFactory = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<OccurrenceNote>> {
-            return localVarFp.getOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options).then((request) => request(axios, basePath));
+        getOccurrenceNotes(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<OccurrenceNote>> {
+            return localVarFp.getOccurrenceNotes(tenant, caseId, seqId, taskId, occurrenceId, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new note associated with an occurrence (SNV or CNV)
          * @summary Create a note on an occurrence
+         * @param {string} tenant Tenant code
          * @param {CreateOccurrenceNoteInput} createOccurrenceNoteInput Note to create
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postOccurrenceNote(createOccurrenceNoteInput: CreateOccurrenceNoteInput, options?: RawAxiosRequestConfig): AxiosPromise<OccurrenceNote> {
-            return localVarFp.postOccurrenceNote(createOccurrenceNoteInput, options).then((request) => request(axios, basePath));
+        postOccurrenceNote(tenant: string, createOccurrenceNoteInput: CreateOccurrenceNoteInput, options?: RawAxiosRequestConfig): AxiosPromise<OccurrenceNote> {
+            return localVarFp.postOccurrenceNote(tenant, createOccurrenceNoteInput, options).then((request) => request(axios, basePath));
         },
         /**
          * Update the content of an existing note. Only the owner of the note can update it.
          * @summary Update a note on an occurrence
+         * @param {string} tenant Tenant code
          * @param {string} id Note ID
          * @param {UpdateOccurrenceNoteInput} updateOccurrenceNoteInput Updated content
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        putOccurrenceNote(id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options?: RawAxiosRequestConfig): AxiosPromise<OccurrenceNote> {
-            return localVarFp.putOccurrenceNote(id, updateOccurrenceNoteInput, options).then((request) => request(axios, basePath));
+        putOccurrenceNote(tenant: string, id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options?: RawAxiosRequestConfig): AxiosPromise<OccurrenceNote> {
+            return localVarFp.putOccurrenceNote(tenant, id, updateOccurrenceNoteInput, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -9309,6 +9556,7 @@ export class OccurrenceNotesApi extends BaseAPI {
     /**
      * Count all notes associated with an occurrence
      * @summary Count notes for an occurrence
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequencing Experiment ID
      * @param {number} taskId Task ID
@@ -9317,25 +9565,27 @@ export class OccurrenceNotesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrenceNotesApi
      */
-    public countOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig) {
-        return OccurrenceNotesApiFp(this.configuration).countOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options).then((request) => request(this.axios, this.basePath));
+    public countOccurrenceNotes(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceNotesApiFp(this.configuration).countOccurrenceNotes(tenant, caseId, seqId, taskId, occurrenceId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Soft-delete a note by ID. Only the owner of the note can delete it.
      * @summary Delete a note on an occurrence
+     * @param {string} tenant Tenant code
      * @param {string} id Note ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrenceNotesApi
      */
-    public deleteOccurrenceNote(id: string, options?: RawAxiosRequestConfig) {
-        return OccurrenceNotesApiFp(this.configuration).deleteOccurrenceNote(id, options).then((request) => request(this.axios, this.basePath));
+    public deleteOccurrenceNote(tenant: string, id: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceNotesApiFp(this.configuration).deleteOccurrenceNote(tenant, id, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Get all notes associated with an occurrence
      * @summary Get notes for an occurrence
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequencing Experiment ID
      * @param {number} taskId Task ID
@@ -9344,33 +9594,35 @@ export class OccurrenceNotesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrenceNotesApi
      */
-    public getOccurrenceNotes(caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig) {
-        return OccurrenceNotesApiFp(this.configuration).getOccurrenceNotes(caseId, seqId, taskId, occurrenceId, options).then((request) => request(this.axios, this.basePath));
+    public getOccurrenceNotes(tenant: string, caseId: number, seqId: number, taskId: number, occurrenceId: string, options?: RawAxiosRequestConfig) {
+        return OccurrenceNotesApiFp(this.configuration).getOccurrenceNotes(tenant, caseId, seqId, taskId, occurrenceId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create a new note associated with an occurrence (SNV or CNV)
      * @summary Create a note on an occurrence
+     * @param {string} tenant Tenant code
      * @param {CreateOccurrenceNoteInput} createOccurrenceNoteInput Note to create
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrenceNotesApi
      */
-    public postOccurrenceNote(createOccurrenceNoteInput: CreateOccurrenceNoteInput, options?: RawAxiosRequestConfig) {
-        return OccurrenceNotesApiFp(this.configuration).postOccurrenceNote(createOccurrenceNoteInput, options).then((request) => request(this.axios, this.basePath));
+    public postOccurrenceNote(tenant: string, createOccurrenceNoteInput: CreateOccurrenceNoteInput, options?: RawAxiosRequestConfig) {
+        return OccurrenceNotesApiFp(this.configuration).postOccurrenceNote(tenant, createOccurrenceNoteInput, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Update the content of an existing note. Only the owner of the note can update it.
      * @summary Update a note on an occurrence
+     * @param {string} tenant Tenant code
      * @param {string} id Note ID
      * @param {UpdateOccurrenceNoteInput} updateOccurrenceNoteInput Updated content
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrenceNotesApi
      */
-    public putOccurrenceNote(id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options?: RawAxiosRequestConfig) {
-        return OccurrenceNotesApiFp(this.configuration).putOccurrenceNote(id, updateOccurrenceNoteInput, options).then((request) => request(this.axios, this.basePath));
+    public putOccurrenceNote(tenant: string, id: string, updateOccurrenceNoteInput: UpdateOccurrenceNoteInput, options?: RawAxiosRequestConfig) {
+        return OccurrenceNotesApiFp(this.configuration).putOccurrenceNote(tenant, id, updateOccurrenceNoteInput, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -9385,6 +9637,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Aggregate germline CNV occurrences for a given sequence ID
          * @summary Aggregate germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -9392,7 +9645,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineCNVOccurrences: async (caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        aggregateGermlineCNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('aggregateGermlineCNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('aggregateGermlineCNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9401,7 +9656,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('aggregateGermlineCNVOccurrences', 'taskId', taskId)
             // verify required parameter 'aggregationBodyWithSqon' is not null or undefined
             assertParamExists('aggregateGermlineCNVOccurrences', 'aggregationBodyWithSqon', aggregationBodyWithSqon)
-            const localVarPath = `/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate`
+            const localVarPath = `/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -9437,6 +9693,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Aggregate germline SNV occurrences for a given sequence ID
          * @summary Aggregate germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -9445,7 +9702,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineSNVOccurrences: async (caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        aggregateGermlineSNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('aggregateGermlineSNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('aggregateGermlineSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9454,7 +9713,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('aggregateGermlineSNVOccurrences', 'taskId', taskId)
             // verify required parameter 'aggregationBodyWithSqon' is not null or undefined
             assertParamExists('aggregateGermlineSNVOccurrences', 'aggregationBodyWithSqon', aggregationBodyWithSqon)
-            const localVarPath = `/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate`
+            const localVarPath = `/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -9494,6 +9754,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Aggregate somatic SNV occurrences for a given sequence ID
          * @summary Aggregate somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -9502,7 +9763,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateSomaticSNVOccurrences: async (caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        aggregateSomaticSNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('aggregateSomaticSNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('aggregateSomaticSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9511,7 +9774,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('aggregateSomaticSNVOccurrences', 'taskId', taskId)
             // verify required parameter 'aggregationBodyWithSqon' is not null or undefined
             assertParamExists('aggregateSomaticSNVOccurrences', 'aggregationBodyWithSqon', aggregationBodyWithSqon)
-            const localVarPath = `/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate`
+            const localVarPath = `/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -9551,6 +9815,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Counts germline CNV occurrences for a given sequence ID
          * @summary Count germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -9558,7 +9823,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineCNVOccurrences: async (caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        countGermlineCNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('countGermlineCNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('countGermlineCNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9567,7 +9834,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('countGermlineCNVOccurrences', 'taskId', taskId)
             // verify required parameter 'countBodyWithSqon' is not null or undefined
             assertParamExists('countGermlineCNVOccurrences', 'countBodyWithSqon', countBodyWithSqon)
-            const localVarPath = `/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count`
+            const localVarPath = `/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -9603,6 +9871,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Counts germline SNV occurrences for a given sequence ID
          * @summary Count germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -9610,7 +9879,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineSNVOccurrences: async (caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        countGermlineSNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('countGermlineSNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('countGermlineSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9619,7 +9890,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('countGermlineSNVOccurrences', 'taskId', taskId)
             // verify required parameter 'countBodyWithSqon' is not null or undefined
             assertParamExists('countGermlineSNVOccurrences', 'countBodyWithSqon', countBodyWithSqon)
-            const localVarPath = `/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count`
+            const localVarPath = `/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -9655,6 +9927,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Counts somatic SNV occurrences for a given sequence ID
          * @summary Count somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -9662,7 +9935,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countSomaticSNVOccurrences: async (caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        countSomaticSNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('countSomaticSNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('countSomaticSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9671,7 +9946,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('countSomaticSNVOccurrences', 'taskId', taskId)
             // verify required parameter 'countBodyWithSqon' is not null or undefined
             assertParamExists('countSomaticSNVOccurrences', 'countBodyWithSqon', countBodyWithSqon)
-            const localVarPath = `/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count`
+            const localVarPath = `/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -9707,6 +9983,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
          * @summary Get a germline ExpandedGermlineSNVOccurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -9714,7 +9991,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpandedGermlineSNVOccurrence: async (caseId: number, seqId: number, taskId: number, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getExpandedGermlineSNVOccurrence: async (tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getExpandedGermlineSNVOccurrence', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('getExpandedGermlineSNVOccurrence', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9723,7 +10002,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('getExpandedGermlineSNVOccurrence', 'taskId', taskId)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getExpandedGermlineSNVOccurrence', 'locusId', locusId)
-            const localVarPath = `/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded`
+            const localVarPath = `/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
@@ -9757,6 +10037,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
          * @summary Get a somatic ExpandedSomaticSNVOccurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -9764,7 +10045,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpandedSomaticSNVOccurrence: async (caseId: number, seqId: number, taskId: number, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getExpandedSomaticSNVOccurrence: async (tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getExpandedSomaticSNVOccurrence', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('getExpandedSomaticSNVOccurrence', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9773,7 +10056,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('getExpandedSomaticSNVOccurrence', 'taskId', taskId)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getExpandedSomaticSNVOccurrence', 'locusId', locusId)
-            const localVarPath = `/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded`
+            const localVarPath = `/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
@@ -9807,12 +10091,16 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Retrieve germline SNV facets
          * @summary Get germline SNV facets dictionary
+         * @param {string} tenant Tenant code
          * @param {Array<string>} [facets] One or more facets to retrieve
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineSNVDictionary: async (facets?: Array<string>, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/occurrences/germline/snv/dictionary`;
+        getGermlineSNVDictionary: async (tenant: string, facets?: Array<string>, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineSNVDictionary', 'tenant', tenant)
+            const localVarPath = `/{tenant}/occurrences/germline/snv/dictionary`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -9846,6 +10134,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -9853,7 +10142,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineCNVGenesOverlap: async (caseId: number, seqId: number, taskId: number, cnvId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listGermlineCNVGenesOverlap: async (tenant: string, caseId: number, seqId: number, taskId: number, cnvId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('listGermlineCNVGenesOverlap', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('listGermlineCNVGenesOverlap', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9862,7 +10153,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('listGermlineCNVGenesOverlap', 'taskId', taskId)
             // verify required parameter 'cnvId' is not null or undefined
             assertParamExists('listGermlineCNVGenesOverlap', 'cnvId', cnvId)
-            const localVarPath = `/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap`
+            const localVarPath = `/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)))
@@ -9896,6 +10188,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * List germline CNV occurrences for a given sequence ID
          * @summary List germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -9903,7 +10196,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineCNVOccurrences: async (caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listGermlineCNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('listGermlineCNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('listGermlineCNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9912,7 +10207,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('listGermlineCNVOccurrences', 'taskId', taskId)
             // verify required parameter 'listBodyWithSqon' is not null or undefined
             assertParamExists('listGermlineCNVOccurrences', 'listBodyWithSqon', listBodyWithSqon)
-            const localVarPath = `/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list`
+            const localVarPath = `/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -9948,6 +10244,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * List germline SNV occurrences for a given sequence ID
          * @summary List germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -9955,7 +10252,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineSNVOccurrences: async (caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listGermlineSNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('listGermlineSNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('listGermlineSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -9964,7 +10263,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('listGermlineSNVOccurrences', 'taskId', taskId)
             // verify required parameter 'listBodyWithSqon' is not null or undefined
             assertParamExists('listGermlineSNVOccurrences', 'listBodyWithSqon', listBodyWithSqon)
-            const localVarPath = `/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list`
+            const localVarPath = `/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -10000,6 +10300,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * List somatic SNV occurrences for a given sequence ID
          * @summary List somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10007,7 +10308,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listSomaticSNVOccurrences: async (caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listSomaticSNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('listSomaticSNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('listSomaticSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -10016,7 +10319,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('listSomaticSNVOccurrences', 'taskId', taskId)
             // verify required parameter 'listBodyWithSqon' is not null or undefined
             assertParamExists('listSomaticSNVOccurrences', 'listBodyWithSqon', listBodyWithSqon)
-            const localVarPath = `/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list`
+            const localVarPath = `/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -10052,6 +10356,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10059,7 +10364,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsGermlineCNVOccurrences: async (caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        statisticsGermlineCNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('statisticsGermlineCNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('statisticsGermlineCNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -10068,7 +10375,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('statisticsGermlineCNVOccurrences', 'taskId', taskId)
             // verify required parameter 'statisticsBodyWithSqon' is not null or undefined
             assertParamExists('statisticsGermlineCNVOccurrences', 'statisticsBodyWithSqon', statisticsBodyWithSqon)
-            const localVarPath = `/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics`
+            const localVarPath = `/{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -10104,6 +10412,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10111,7 +10420,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsGermlineSNVOccurrences: async (caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        statisticsGermlineSNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('statisticsGermlineSNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('statisticsGermlineSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -10120,7 +10431,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('statisticsGermlineSNVOccurrences', 'taskId', taskId)
             // verify required parameter 'statisticsBodyWithSqon' is not null or undefined
             assertParamExists('statisticsGermlineSNVOccurrences', 'statisticsBodyWithSqon', statisticsBodyWithSqon)
-            const localVarPath = `/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics`
+            const localVarPath = `/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -10156,6 +10468,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10163,7 +10476,9 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsSomaticSNVOccurrences: async (caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        statisticsSomaticSNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('statisticsSomaticSNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
             assertParamExists('statisticsSomaticSNVOccurrences', 'caseId', caseId)
             // verify required parameter 'seqId' is not null or undefined
@@ -10172,7 +10487,8 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             assertParamExists('statisticsSomaticSNVOccurrences', 'taskId', taskId)
             // verify required parameter 'statisticsBodyWithSqon' is not null or undefined
             assertParamExists('statisticsSomaticSNVOccurrences', 'statisticsBodyWithSqon', statisticsBodyWithSqon)
-            const localVarPath = `/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics`
+            const localVarPath = `/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
                 .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
@@ -10218,6 +10534,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Aggregate germline CNV occurrences for a given sequence ID
          * @summary Aggregate germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10225,8 +10542,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aggregateGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineCNVOccurrences(caseId, seqId, taskId, aggregationBodyWithSqon, options);
+        async aggregateGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10234,6 +10551,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Aggregate germline SNV occurrences for a given sequence ID
          * @summary Aggregate germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10242,8 +10560,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aggregateGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineSNVOccurrences(caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options);
+        async aggregateGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineSNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10251,6 +10569,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Aggregate somatic SNV occurrences for a given sequence ID
          * @summary Aggregate somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10259,8 +10578,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aggregateSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateSomaticSNVOccurrences(caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options);
+        async aggregateSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateSomaticSNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateSomaticSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10268,6 +10587,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Counts germline CNV occurrences for a given sequence ID
          * @summary Count germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10275,8 +10595,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineCNVOccurrences(caseId, seqId, taskId, countBodyWithSqon, options);
+        async countGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineCNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10284,6 +10604,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Counts germline SNV occurrences for a given sequence ID
          * @summary Count germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10291,8 +10612,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineSNVOccurrences(caseId, seqId, taskId, countBodyWithSqon, options);
+        async countGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.countGermlineSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10300,6 +10621,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Counts somatic SNV occurrences for a given sequence ID
          * @summary Count somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10307,8 +10629,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async countSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.countSomaticSNVOccurrences(caseId, seqId, taskId, countBodyWithSqon, options);
+        async countSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Count>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.countSomaticSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.countSomaticSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10316,6 +10638,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
          * @summary Get a germline ExpandedGermlineSNVOccurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10323,8 +10646,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getExpandedGermlineSNVOccurrence(caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpandedGermlineSNVOccurrence>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedGermlineSNVOccurrence(caseId, seqId, taskId, locusId, options);
+        async getExpandedGermlineSNVOccurrence(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpandedGermlineSNVOccurrence>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedGermlineSNVOccurrence(tenant, caseId, seqId, taskId, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpandedGermlineSNVOccurrence']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10332,6 +10655,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
          * @summary Get a somatic ExpandedSomaticSNVOccurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10339,8 +10663,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getExpandedSomaticSNVOccurrence(caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpandedSomaticSNVOccurrence>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedSomaticSNVOccurrence(caseId, seqId, taskId, locusId, options);
+        async getExpandedSomaticSNVOccurrence(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExpandedSomaticSNVOccurrence>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExpandedSomaticSNVOccurrence(tenant, caseId, seqId, taskId, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getExpandedSomaticSNVOccurrence']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10348,12 +10672,13 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve germline SNV facets
          * @summary Get germline SNV facets dictionary
+         * @param {string} tenant Tenant code
          * @param {Array<string>} [facets] One or more facets to retrieve
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineSNVDictionary(facets?: Array<string>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Facet>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineSNVDictionary(facets, options);
+        async getGermlineSNVDictionary(tenant: string, facets?: Array<string>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Facet>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineSNVDictionary(tenant, facets, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.getGermlineSNVDictionary']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10361,6 +10686,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10368,8 +10694,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listGermlineCNVGenesOverlap(caseId: number, seqId: number, taskId: number, cnvId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CNVGeneOverlap>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineCNVGenesOverlap(caseId, seqId, taskId, cnvId, options);
+        async listGermlineCNVGenesOverlap(tenant: string, caseId: number, seqId: number, taskId: number, cnvId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<CNVGeneOverlap>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineCNVGenesOverlap(tenant, caseId, seqId, taskId, cnvId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listGermlineCNVGenesOverlap']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10377,6 +10703,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * List germline CNV occurrences for a given sequence ID
          * @summary List germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10384,8 +10711,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GermlineCNVOccurrence>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineCNVOccurrences(caseId, seqId, taskId, listBodyWithSqon, options);
+        async listGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GermlineCNVOccurrence>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineCNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10393,6 +10720,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * List germline SNV occurrences for a given sequence ID
          * @summary List germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10400,8 +10728,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GermlineSNVOccurrence>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineSNVOccurrences(caseId, seqId, taskId, listBodyWithSqon, options);
+        async listGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GermlineSNVOccurrence>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listGermlineSNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10409,6 +10737,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * List somatic SNV occurrences for a given sequence ID
          * @summary List somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10416,8 +10745,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<SomaticSNVOccurrence>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listSomaticSNVOccurrences(caseId, seqId, taskId, listBodyWithSqon, options);
+        async listSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<SomaticSNVOccurrence>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listSomaticSNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.listSomaticSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10425,6 +10754,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10432,8 +10762,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async statisticsGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsGermlineCNVOccurrences(caseId, seqId, taskId, statisticsBodyWithSqon, options);
+        async statisticsGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsGermlineCNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10441,6 +10771,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10448,8 +10779,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async statisticsGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsGermlineSNVOccurrences(caseId, seqId, taskId, statisticsBodyWithSqon, options);
+        async statisticsGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsGermlineSNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10457,6 +10788,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10464,8 +10796,8 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async statisticsSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsSomaticSNVOccurrences(caseId, seqId, taskId, statisticsBodyWithSqon, options);
+        async statisticsSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Statistics>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.statisticsSomaticSNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.statisticsSomaticSNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10483,6 +10815,7 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
         /**
          * Aggregate germline CNV occurrences for a given sequence ID
          * @summary Aggregate germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10490,12 +10823,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
-            return localVarFp.aggregateGermlineCNVOccurrences(caseId, seqId, taskId, aggregationBodyWithSqon, options).then((request) => request(axios, basePath));
+        aggregateGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
+            return localVarFp.aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Aggregate germline SNV occurrences for a given sequence ID
          * @summary Aggregate germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10504,12 +10838,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
-            return localVarFp.aggregateGermlineSNVOccurrences(caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(axios, basePath));
+        aggregateGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
+            return localVarFp.aggregateGermlineSNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(axios, basePath));
         },
         /**
          * Aggregate somatic SNV occurrences for a given sequence ID
          * @summary Aggregate somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10518,12 +10853,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
-            return localVarFp.aggregateSomaticSNVOccurrences(caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(axios, basePath));
+        aggregateSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
+            return localVarFp.aggregateSomaticSNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(axios, basePath));
         },
         /**
          * Counts germline CNV occurrences for a given sequence ID
          * @summary Count germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10531,12 +10867,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
-            return localVarFp.countGermlineCNVOccurrences(caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
+        countGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+            return localVarFp.countGermlineCNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Counts germline SNV occurrences for a given sequence ID
          * @summary Count germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10544,12 +10881,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
-            return localVarFp.countGermlineSNVOccurrences(caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
+        countGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+            return localVarFp.countGermlineSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Counts somatic SNV occurrences for a given sequence ID
          * @summary Count somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10557,12 +10895,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        countSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
-            return localVarFp.countSomaticSNVOccurrences(caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
+        countSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Count> {
+            return localVarFp.countSomaticSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
          * @summary Get a germline ExpandedGermlineSNVOccurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10570,12 +10909,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpandedGermlineSNVOccurrence(caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedGermlineSNVOccurrence> {
-            return localVarFp.getExpandedGermlineSNVOccurrence(caseId, seqId, taskId, locusId, options).then((request) => request(axios, basePath));
+        getExpandedGermlineSNVOccurrence(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedGermlineSNVOccurrence> {
+            return localVarFp.getExpandedGermlineSNVOccurrence(tenant, caseId, seqId, taskId, locusId, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
          * @summary Get a somatic ExpandedSomaticSNVOccurrence
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10583,22 +10923,24 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExpandedSomaticSNVOccurrence(caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedSomaticSNVOccurrence> {
-            return localVarFp.getExpandedSomaticSNVOccurrence(caseId, seqId, taskId, locusId, options).then((request) => request(axios, basePath));
+        getExpandedSomaticSNVOccurrence(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ExpandedSomaticSNVOccurrence> {
+            return localVarFp.getExpandedSomaticSNVOccurrence(tenant, caseId, seqId, taskId, locusId, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve germline SNV facets
          * @summary Get germline SNV facets dictionary
+         * @param {string} tenant Tenant code
          * @param {Array<string>} [facets] One or more facets to retrieve
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineSNVDictionary(facets?: Array<string>, options?: RawAxiosRequestConfig): AxiosPromise<Array<Facet>> {
-            return localVarFp.getGermlineSNVDictionary(facets, options).then((request) => request(axios, basePath));
+        getGermlineSNVDictionary(tenant: string, facets?: Array<string>, options?: RawAxiosRequestConfig): AxiosPromise<Array<Facet>> {
+            return localVarFp.getGermlineSNVDictionary(tenant, facets, options).then((request) => request(axios, basePath));
         },
         /**
          * List genes overlapping a CNV with a given ID
          * @summary List genes overlapping a CNV with a given ID
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10606,12 +10948,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineCNVGenesOverlap(caseId: number, seqId: number, taskId: number, cnvId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CNVGeneOverlap>> {
-            return localVarFp.listGermlineCNVGenesOverlap(caseId, seqId, taskId, cnvId, options).then((request) => request(axios, basePath));
+        listGermlineCNVGenesOverlap(tenant: string, caseId: number, seqId: number, taskId: number, cnvId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<CNVGeneOverlap>> {
+            return localVarFp.listGermlineCNVGenesOverlap(tenant, caseId, seqId, taskId, cnvId, options).then((request) => request(axios, basePath));
         },
         /**
          * List germline CNV occurrences for a given sequence ID
          * @summary List germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10619,12 +10962,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<GermlineCNVOccurrence>> {
-            return localVarFp.listGermlineCNVOccurrences(caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(axios, basePath));
+        listGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<GermlineCNVOccurrence>> {
+            return localVarFp.listGermlineCNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * List germline SNV occurrences for a given sequence ID
          * @summary List germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10632,12 +10976,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<GermlineSNVOccurrence>> {
-            return localVarFp.listGermlineSNVOccurrences(caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(axios, basePath));
+        listGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<GermlineSNVOccurrence>> {
+            return localVarFp.listGermlineSNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * List somatic SNV occurrences for a given sequence ID
          * @summary List somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10645,12 +10990,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<SomaticSNVOccurrence>> {
-            return localVarFp.listSomaticSNVOccurrences(caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(axios, basePath));
+        listSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<SomaticSNVOccurrence>> {
+            return localVarFp.listSomaticSNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline CNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10658,12 +11004,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
-            return localVarFp.statisticsGermlineCNVOccurrences(caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
+        statisticsGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
+            return localVarFp.statisticsGermlineCNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10671,12 +11018,13 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
-            return localVarFp.statisticsGermlineSNVOccurrences(caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
+        statisticsGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
+            return localVarFp.statisticsGermlineSNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
         },
         /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of somatic SNV occurrences
+         * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
@@ -10684,8 +11032,8 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        statisticsSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
-            return localVarFp.statisticsSomaticSNVOccurrences(caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
+        statisticsSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Statistics> {
+            return localVarFp.statisticsSomaticSNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -10700,6 +11048,7 @@ export class OccurrencesApi extends BaseAPI {
     /**
      * Aggregate germline CNV occurrences for a given sequence ID
      * @summary Aggregate germline CNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10708,13 +11057,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public aggregateGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).aggregateGermlineCNVOccurrences(caseId, seqId, taskId, aggregationBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public aggregateGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Aggregate germline SNV occurrences for a given sequence ID
      * @summary Aggregate germline SNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10724,13 +11074,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public aggregateGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).aggregateGermlineSNVOccurrences(caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(this.axios, this.basePath));
+    public aggregateGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).aggregateGermlineSNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Aggregate somatic SNV occurrences for a given sequence ID
      * @summary Aggregate somatic SNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10740,13 +11091,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public aggregateSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).aggregateSomaticSNVOccurrences(caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(this.axios, this.basePath));
+    public aggregateSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).aggregateSomaticSNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Counts germline CNV occurrences for a given sequence ID
      * @summary Count germline CNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10755,13 +11107,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public countGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).countGermlineCNVOccurrences(caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public countGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).countGermlineCNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Counts germline SNV occurrences for a given sequence ID
      * @summary Count germline SNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10770,13 +11123,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public countGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).countGermlineSNVOccurrences(caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public countGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).countGermlineSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Counts somatic SNV occurrences for a given sequence ID
      * @summary Count somatic SNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10785,13 +11139,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public countSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).countSomaticSNVOccurrences(caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public countSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, countBodyWithSqon: CountBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).countSomaticSNVOccurrences(tenant, caseId, seqId, taskId, countBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
      * @summary Get a germline ExpandedGermlineSNVOccurrence
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10800,13 +11155,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public getExpandedGermlineSNVOccurrence(caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).getExpandedGermlineSNVOccurrence(caseId, seqId, taskId, locusId, options).then((request) => request(this.axios, this.basePath));
+    public getExpandedGermlineSNVOccurrence(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getExpandedGermlineSNVOccurrence(tenant, caseId, seqId, taskId, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
      * @summary Get a somatic ExpandedSomaticSNVOccurrence
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10815,25 +11171,27 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public getExpandedSomaticSNVOccurrence(caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).getExpandedSomaticSNVOccurrence(caseId, seqId, taskId, locusId, options).then((request) => request(this.axios, this.basePath));
+    public getExpandedSomaticSNVOccurrence(tenant: string, caseId: number, seqId: number, taskId: number, locusId: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getExpandedSomaticSNVOccurrence(tenant, caseId, seqId, taskId, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve germline SNV facets
      * @summary Get germline SNV facets dictionary
+     * @param {string} tenant Tenant code
      * @param {Array<string>} [facets] One or more facets to retrieve
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public getGermlineSNVDictionary(facets?: Array<string>, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).getGermlineSNVDictionary(facets, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineSNVDictionary(tenant: string, facets?: Array<string>, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).getGermlineSNVDictionary(tenant, facets, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * List genes overlapping a CNV with a given ID
      * @summary List genes overlapping a CNV with a given ID
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10842,13 +11200,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public listGermlineCNVGenesOverlap(caseId: number, seqId: number, taskId: number, cnvId: string, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).listGermlineCNVGenesOverlap(caseId, seqId, taskId, cnvId, options).then((request) => request(this.axios, this.basePath));
+    public listGermlineCNVGenesOverlap(tenant: string, caseId: number, seqId: number, taskId: number, cnvId: string, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).listGermlineCNVGenesOverlap(tenant, caseId, seqId, taskId, cnvId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * List germline CNV occurrences for a given sequence ID
      * @summary List germline CNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10857,13 +11216,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public listGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).listGermlineCNVOccurrences(caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public listGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).listGermlineCNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * List germline SNV occurrences for a given sequence ID
      * @summary List germline SNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10872,13 +11232,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public listGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).listGermlineSNVOccurrences(caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public listGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).listGermlineSNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * List somatic SNV occurrences for a given sequence ID
      * @summary List somatic SNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10887,13 +11248,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public listSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).listSomaticSNVOccurrences(caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public listSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).listSomaticSNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Return statistics about a field for a given sequence ID
      * @summary Statistics of germline CNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10902,13 +11264,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public statisticsGermlineCNVOccurrences(caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).statisticsGermlineCNVOccurrences(caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public statisticsGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).statisticsGermlineCNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Return statistics about a field for a given sequence ID
      * @summary Statistics of germline SNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10917,13 +11280,14 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public statisticsGermlineSNVOccurrences(caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).statisticsGermlineSNVOccurrences(caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public statisticsGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).statisticsGermlineSNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Return statistics about a field for a given sequence ID
      * @summary Statistics of somatic SNV occurrences
+     * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
@@ -10932,8 +11296,8 @@ export class OccurrencesApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public statisticsSomaticSNVOccurrences(caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).statisticsSomaticSNVOccurrences(caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public statisticsSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, statisticsBodyWithSqon: StatisticsBodyWithSqon, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).statisticsSomaticSNVOccurrences(tenant, caseId, seqId, taskId, statisticsBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -10948,15 +11312,19 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Create a new patient batch
          * @summary Create a new patient batch
+         * @param {string} tenant Tenant code
          * @param {CreatePatientBatchBody} createPatientBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postPatientBatch: async (createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postPatientBatch: async (tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('postPatientBatch', 'tenant', tenant)
             // verify required parameter 'createPatientBatchBody' is not null or undefined
             assertParamExists('postPatientBatch', 'createPatientBatchBody', createPatientBatchBody)
-            const localVarPath = `/patients/batch`;
+            const localVarPath = `/{tenant}/patients/batch`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -11003,13 +11371,14 @@ export const PatientsApiFp = function(configuration?: Configuration) {
         /**
          * Create a new patient batch
          * @summary Create a new patient batch
+         * @param {string} tenant Tenant code
          * @param {CreatePatientBatchBody} createPatientBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postPatientBatch(createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postPatientBatch(createPatientBatchBody, dryRun, options);
+        async postPatientBatch(tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postPatientBatch(tenant, createPatientBatchBody, dryRun, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['PatientsApi.postPatientBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -11027,13 +11396,14 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
         /**
          * Create a new patient batch
          * @summary Create a new patient batch
+         * @param {string} tenant Tenant code
          * @param {CreatePatientBatchBody} createPatientBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postPatientBatch(createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
-            return localVarFp.postPatientBatch(createPatientBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        postPatientBatch(tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.postPatientBatch(tenant, createPatientBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -11048,14 +11418,15 @@ export class PatientsApi extends BaseAPI {
     /**
      * Create a new patient batch
      * @summary Create a new patient batch
+     * @param {string} tenant Tenant code
      * @param {CreatePatientBatchBody} createPatientBatchBody Create Body
      * @param {boolean} [dryRun] Dry Run
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PatientsApi
      */
-    public postPatientBatch(createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
-        return PatientsApiFp(this.configuration).postPatientBatch(createPatientBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    public postPatientBatch(tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).postPatientBatch(tenant, createPatientBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -11070,15 +11441,19 @@ export const SamplesApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Create a new sample batch
          * @summary Create a new sample batch
+         * @param {string} tenant Tenant code
          * @param {CreateSampleBatchBody} createSampleBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postSampleBatch: async (createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postSampleBatch: async (tenant: string, createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('postSampleBatch', 'tenant', tenant)
             // verify required parameter 'createSampleBatchBody' is not null or undefined
             assertParamExists('postSampleBatch', 'createSampleBatchBody', createSampleBatchBody)
-            const localVarPath = `/samples/batch`;
+            const localVarPath = `/{tenant}/samples/batch`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -11125,13 +11500,14 @@ export const SamplesApiFp = function(configuration?: Configuration) {
         /**
          * Create a new sample batch
          * @summary Create a new sample batch
+         * @param {string} tenant Tenant code
          * @param {CreateSampleBatchBody} createSampleBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postSampleBatch(createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postSampleBatch(createSampleBatchBody, dryRun, options);
+        async postSampleBatch(tenant: string, createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postSampleBatch(tenant, createSampleBatchBody, dryRun, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SamplesApi.postSampleBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -11149,13 +11525,14 @@ export const SamplesApiFactory = function (configuration?: Configuration, basePa
         /**
          * Create a new sample batch
          * @summary Create a new sample batch
+         * @param {string} tenant Tenant code
          * @param {CreateSampleBatchBody} createSampleBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postSampleBatch(createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
-            return localVarFp.postSampleBatch(createSampleBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        postSampleBatch(tenant: string, createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.postSampleBatch(tenant, createSampleBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -11170,14 +11547,15 @@ export class SamplesApi extends BaseAPI {
     /**
      * Create a new sample batch
      * @summary Create a new sample batch
+     * @param {string} tenant Tenant code
      * @param {CreateSampleBatchBody} createSampleBatchBody Create Body
      * @param {boolean} [dryRun] Dry Run
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SamplesApi
      */
-    public postSampleBatch(createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
-        return SamplesApiFp(this.configuration).postSampleBatch(createSampleBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    public postSampleBatch(tenant: string, createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return SamplesApiFp(this.configuration).postSampleBatch(tenant, createSampleBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -11608,14 +11986,18 @@ export const SequencingApiAxiosParamCreator = function (configuration?: Configur
         /**
          * Get SequencingExperimentDetail by id
          * @summary Get SequencingExperimentDetail by id
+         * @param {string} tenant Tenant code
          * @param {string} seqId Seq ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getSequencingExperimentDetailById: async (seqId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getSequencingExperimentDetailById: async (tenant: string, seqId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getSequencingExperimentDetailById', 'tenant', tenant)
             // verify required parameter 'seqId' is not null or undefined
             assertParamExists('getSequencingExperimentDetailById', 'seqId', seqId)
-            const localVarPath = `/sequencing/{seq_id}/details`
+            const localVarPath = `/{tenant}/sequencing/{seq_id}/details`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -11646,15 +12028,19 @@ export const SequencingApiAxiosParamCreator = function (configuration?: Configur
         /**
          * Create a new sequencing experiment batch
          * @summary Create a new sequencing experiment batch
+         * @param {string} tenant Tenant code
          * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postSequencingExperimentBatch: async (createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        postSequencingExperimentBatch: async (tenant: string, createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('postSequencingExperimentBatch', 'tenant', tenant)
             // verify required parameter 'createSequencingExperimentBatchBody' is not null or undefined
             assertParamExists('postSequencingExperimentBatch', 'createSequencingExperimentBatchBody', createSequencingExperimentBatchBody)
-            const localVarPath = `/sequencing/batch`;
+            const localVarPath = `/{tenant}/sequencing/batch`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -11701,12 +12087,13 @@ export const SequencingApiFp = function(configuration?: Configuration) {
         /**
          * Get SequencingExperimentDetail by id
          * @summary Get SequencingExperimentDetail by id
+         * @param {string} tenant Tenant code
          * @param {string} seqId Seq ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getSequencingExperimentDetailById(seqId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SequencingExperimentDetail>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getSequencingExperimentDetailById(seqId, options);
+        async getSequencingExperimentDetailById(tenant: string, seqId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SequencingExperimentDetail>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSequencingExperimentDetailById(tenant, seqId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SequencingApi.getSequencingExperimentDetailById']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -11714,13 +12101,14 @@ export const SequencingApiFp = function(configuration?: Configuration) {
         /**
          * Create a new sequencing experiment batch
          * @summary Create a new sequencing experiment batch
+         * @param {string} tenant Tenant code
          * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async postSequencingExperimentBatch(createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.postSequencingExperimentBatch(createSequencingExperimentBatchBody, dryRun, options);
+        async postSequencingExperimentBatch(tenant: string, createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.postSequencingExperimentBatch(tenant, createSequencingExperimentBatchBody, dryRun, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SequencingApi.postSequencingExperimentBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -11738,23 +12126,25 @@ export const SequencingApiFactory = function (configuration?: Configuration, bas
         /**
          * Get SequencingExperimentDetail by id
          * @summary Get SequencingExperimentDetail by id
+         * @param {string} tenant Tenant code
          * @param {string} seqId Seq ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getSequencingExperimentDetailById(seqId: string, options?: RawAxiosRequestConfig): AxiosPromise<SequencingExperimentDetail> {
-            return localVarFp.getSequencingExperimentDetailById(seqId, options).then((request) => request(axios, basePath));
+        getSequencingExperimentDetailById(tenant: string, seqId: string, options?: RawAxiosRequestConfig): AxiosPromise<SequencingExperimentDetail> {
+            return localVarFp.getSequencingExperimentDetailById(tenant, seqId, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new sequencing experiment batch
          * @summary Create a new sequencing experiment batch
+         * @param {string} tenant Tenant code
          * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Create Body
          * @param {boolean} [dryRun] Dry Run
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        postSequencingExperimentBatch(createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
-            return localVarFp.postSequencingExperimentBatch(createSequencingExperimentBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        postSequencingExperimentBatch(tenant: string, createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.postSequencingExperimentBatch(tenant, createSequencingExperimentBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -11769,26 +12159,28 @@ export class SequencingApi extends BaseAPI {
     /**
      * Get SequencingExperimentDetail by id
      * @summary Get SequencingExperimentDetail by id
+     * @param {string} tenant Tenant code
      * @param {string} seqId Seq ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SequencingApi
      */
-    public getSequencingExperimentDetailById(seqId: string, options?: RawAxiosRequestConfig) {
-        return SequencingApiFp(this.configuration).getSequencingExperimentDetailById(seqId, options).then((request) => request(this.axios, this.basePath));
+    public getSequencingExperimentDetailById(tenant: string, seqId: string, options?: RawAxiosRequestConfig) {
+        return SequencingApiFp(this.configuration).getSequencingExperimentDetailById(tenant, seqId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create a new sequencing experiment batch
      * @summary Create a new sequencing experiment batch
+     * @param {string} tenant Tenant code
      * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Create Body
      * @param {boolean} [dryRun] Dry Run
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SequencingApi
      */
-    public postSequencingExperimentBatch(createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
-        return SequencingApiFp(this.configuration).postSequencingExperimentBatch(createSequencingExperimentBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    public postSequencingExperimentBatch(tenant: string, createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return SequencingApiFp(this.configuration).postSequencingExperimentBatch(tenant, createSequencingExperimentBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -12210,14 +12602,18 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve cases count for a given locus id
          * @summary Get germline cases count for a given locus
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantCasesCount: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantCasesCount: async (tenant: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantCasesCount', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantCasesCount', 'locusId', locusId)
-            const localVarPath = `/variants/germline/{locus_id}/cases/count`
+            const localVarPath = `/{tenant}/variants/germline/{locus_id}/cases/count`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -12248,11 +12644,15 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve cases filters for germline variant entity
          * @summary Get cases filters for germline variant entity
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantCasesFilters: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/variants/germline/cases/filters`;
+        getGermlineVariantCasesFilters: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantCasesFilters', 'tenant', tenant)
+            const localVarPath = `/{tenant}/variants/germline/cases/filters`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -12282,18 +12682,22 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve conditions for germline variant entity for a specific gene panel
          * @summary Get conditions for germline variant entity for a specific gene panel
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {GetGermlineVariantConditionsPanelTypeEnum} panelType Gene panel type
          * @param {string} [filter] Condition filter
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantConditions: async (locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantConditions: async (tenant: string, locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantConditions', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantConditions', 'locusId', locusId)
             // verify required parameter 'panelType' is not null or undefined
             assertParamExists('getGermlineVariantConditions', 'panelType', panelType)
-            const localVarPath = `/variants/germline/{locus_id}/conditions/{panel_type}`
+            const localVarPath = `/{tenant}/variants/germline/{locus_id}/conditions/{panel_type}`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)))
                 .replace(`{${"panel_type"}}`, encodeURIComponent(String(panelType)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -12329,14 +12733,18 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve ClinVar conditions for germline variant entity
          * @summary Get ClinVar conditions for germline variant entity
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantConditionsClinvar: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantConditionsClinvar: async (tenant: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantConditionsClinvar', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantConditionsClinvar', 'locusId', locusId)
-            const localVarPath = `/variants/germline/{locus_id}/conditions/clinvar`
+            const localVarPath = `/{tenant}/variants/germline/{locus_id}/conditions/clinvar`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -12367,14 +12775,18 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantConsequences: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantConsequences: async (tenant: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantConsequences', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantConsequences', 'locusId', locusId)
-            const localVarPath = `/variants/germline/{locus_id}/consequences`
+            const localVarPath = `/{tenant}/variants/germline/{locus_id}/consequences`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -12405,14 +12817,18 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve external frequencies for a given locus id
          * @summary Get external frequencies
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantExternalFrequencies: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantExternalFrequencies: async (tenant: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantExternalFrequencies', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantExternalFrequencies', 'locusId', locusId)
-            const localVarPath = `/variants/germline/{locus_id}/external_frequencies`
+            const localVarPath = `/{tenant}/variants/germline/{locus_id}/external_frequencies`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -12443,14 +12859,18 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve global internal frequencies for a given locus id
          * @summary Get global internal frequencies
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantGlobalInternalFrequencies: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantGlobalInternalFrequencies: async (tenant: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantGlobalInternalFrequencies', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantGlobalInternalFrequencies', 'locusId', locusId)
-            const localVarPath = `/variants/germline/{locus_id}/internal_frequencies/global`
+            const localVarPath = `/{tenant}/variants/germline/{locus_id}/internal_frequencies/global`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -12481,14 +12901,18 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve germline Variant Header data for a given locus
          * @summary Get a germline VariantHeader
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantHeader: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantHeader: async (tenant: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantHeader', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantHeader', 'locusId', locusId)
-            const localVarPath = `/variants/germline/{locus_id}/header`
+            const localVarPath = `/{tenant}/variants/germline/{locus_id}/header`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -12519,17 +12943,21 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve internal frequencies for a given locus id
          * @summary Get internal frequencies
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantInternalFrequencies: async (locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantInternalFrequencies: async (tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantInternalFrequencies', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantInternalFrequencies', 'locusId', locusId)
             // verify required parameter 'split' is not null or undefined
             assertParamExists('getGermlineVariantInternalFrequencies', 'split', split)
-            const localVarPath = `/variants/germline/{locus_id}/internal_frequencies`
+            const localVarPath = `/{tenant}/variants/germline/{locus_id}/internal_frequencies`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -12564,17 +12992,21 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve Germline Variant interpreted cases for a given locus
          * @summary Get list of interpreted Cases for a germline variant
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantInterpretedCases: async (locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantInterpretedCases: async (tenant: string, locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantInterpretedCases', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantInterpretedCases', 'locusId', locusId)
             // verify required parameter 'listBodyWithCriteria' is not null or undefined
             assertParamExists('getGermlineVariantInterpretedCases', 'listBodyWithCriteria', listBodyWithCriteria)
-            const localVarPath = `/variants/germline/{locus_id}/cases/interpreted`
+            const localVarPath = `/{tenant}/variants/germline/{locus_id}/cases/interpreted`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -12608,14 +13040,18 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve germline Variant Overview data for a given locus
          * @summary Get a germline VariantOverview
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantOverview: async (locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantOverview: async (tenant: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantOverview', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantOverview', 'locusId', locusId)
-            const localVarPath = `/variants/germline/{locus_id}/overview`
+            const localVarPath = `/{tenant}/variants/germline/{locus_id}/overview`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -12646,17 +13082,21 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Retrieve Germline Variant uninterpreted cases for a given locus
          * @summary Get list of uninterpreted Cases for a germline variant
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantUninterpretedCases: async (locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantUninterpretedCases: async (tenant: string, locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('getGermlineVariantUninterpretedCases', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
             assertParamExists('getGermlineVariantUninterpretedCases', 'locusId', locusId)
             // verify required parameter 'listBodyWithCriteria' is not null or undefined
             assertParamExists('getGermlineVariantUninterpretedCases', 'listBodyWithCriteria', listBodyWithCriteria)
-            const localVarPath = `/variants/germline/{locus_id}/cases/uninterpreted`
+            const localVarPath = `/{tenant}/variants/germline/{locus_id}/cases/uninterpreted`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
                 .replace(`{${"locus_id"}}`, encodeURIComponent(String(locusId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -12700,12 +13140,13 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve cases count for a given locus id
          * @summary Get germline cases count for a given locus
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantCasesCount>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantCasesCount(locusId, options);
+        async getGermlineVariantCasesCount(tenant: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantCasesCount>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantCasesCount(tenant, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantCasesCount']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12713,11 +13154,12 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve cases filters for germline variant entity
          * @summary Get cases filters for germline variant entity
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantCasesFilters(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantCasesFilters>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantCasesFilters(options);
+        async getGermlineVariantCasesFilters(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantCasesFilters>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantCasesFilters(tenant, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantCasesFilters']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12725,14 +13167,15 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve conditions for germline variant entity for a specific gene panel
          * @summary Get conditions for germline variant entity for a specific gene panel
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {GetGermlineVariantConditionsPanelTypeEnum} panelType Gene panel type
          * @param {string} [filter] Condition filter
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GenePanelConditions>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConditions(locusId, panelType, filter, options);
+        async getGermlineVariantConditions(tenant: string, locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GenePanelConditions>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConditions(tenant, locusId, panelType, filter, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantConditions']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12740,12 +13183,13 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve ClinVar conditions for germline variant entity
          * @summary Get ClinVar conditions for germline variant entity
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ClinvarVariantConditions>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConditionsClinvar(locusId, options);
+        async getGermlineVariantConditionsClinvar(tenant: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ClinvarVariantConditions>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConditionsClinvar(tenant, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantConditionsClinvar']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12753,12 +13197,13 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VariantConsequence>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConsequences(locusId, options);
+        async getGermlineVariantConsequences(tenant: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VariantConsequence>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantConsequences(tenant, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantConsequences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12766,12 +13211,13 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve external frequencies for a given locus id
          * @summary Get external frequencies
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantExternalFrequencies(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantExternalFrequencies>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantExternalFrequencies(locusId, options);
+        async getGermlineVariantExternalFrequencies(tenant: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantExternalFrequencies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantExternalFrequencies(tenant, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantExternalFrequencies']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12779,12 +13225,13 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve global internal frequencies for a given locus id
          * @summary Get global internal frequencies
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantGlobalInternalFrequencies(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InternalFrequencies>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantGlobalInternalFrequencies(locusId, options);
+        async getGermlineVariantGlobalInternalFrequencies(tenant: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InternalFrequencies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantGlobalInternalFrequencies(tenant, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantGlobalInternalFrequencies']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12792,12 +13239,13 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve germline Variant Header data for a given locus
          * @summary Get a germline VariantHeader
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantHeader(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantHeader>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantHeader(locusId, options);
+        async getGermlineVariantHeader(tenant: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantHeader>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantHeader(tenant, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantHeader']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12805,13 +13253,14 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve internal frequencies for a given locus id
          * @summary Get internal frequencies
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantInternalFrequencies(locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantInternalFrequencies>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantInternalFrequencies(locusId, split, options);
+        async getGermlineVariantInternalFrequencies(tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantInternalFrequencies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantInternalFrequencies(tenant, locusId, split, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantInternalFrequencies']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12819,13 +13268,14 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve Germline Variant interpreted cases for a given locus
          * @summary Get list of interpreted Cases for a germline variant
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantInterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantInterpretedCasesSearchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantInterpretedCases(locusId, listBodyWithCriteria, options);
+        async getGermlineVariantInterpretedCases(tenant: string, locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantInterpretedCasesSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantInterpretedCases(tenant, locusId, listBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantInterpretedCases']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12833,12 +13283,13 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve germline Variant Overview data for a given locus
          * @summary Get a germline VariantOverview
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantOverview(locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantOverview>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantOverview(locusId, options);
+        async getGermlineVariantOverview(tenant: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantOverview>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantOverview(tenant, locusId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantOverview']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12846,13 +13297,14 @@ export const VariantApiFp = function(configuration?: Configuration) {
         /**
          * Retrieve Germline Variant uninterpreted cases for a given locus
          * @summary Get list of uninterpreted Cases for a germline variant
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantUninterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantUninterpretedCasesSearchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantUninterpretedCases(locusId, listBodyWithCriteria, options);
+        async getGermlineVariantUninterpretedCases(tenant: string, locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantUninterpretedCasesSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantUninterpretedCases(tenant, locusId, listBodyWithCriteria, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantUninterpretedCases']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12870,126 +13322,138 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
         /**
          * Retrieve cases count for a given locus id
          * @summary Get germline cases count for a given locus
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantCasesCount> {
-            return localVarFp.getGermlineVariantCasesCount(locusId, options).then((request) => request(axios, basePath));
+        getGermlineVariantCasesCount(tenant: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantCasesCount> {
+            return localVarFp.getGermlineVariantCasesCount(tenant, locusId, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve cases filters for germline variant entity
          * @summary Get cases filters for germline variant entity
+         * @param {string} tenant Tenant code
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantCasesFilters(options?: RawAxiosRequestConfig): AxiosPromise<VariantCasesFilters> {
-            return localVarFp.getGermlineVariantCasesFilters(options).then((request) => request(axios, basePath));
+        getGermlineVariantCasesFilters(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantCasesFilters> {
+            return localVarFp.getGermlineVariantCasesFilters(tenant, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve conditions for germline variant entity for a specific gene panel
          * @summary Get conditions for germline variant entity for a specific gene panel
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {GetGermlineVariantConditionsPanelTypeEnum} panelType Gene panel type
          * @param {string} [filter] Condition filter
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig): AxiosPromise<GenePanelConditions> {
-            return localVarFp.getGermlineVariantConditions(locusId, panelType, filter, options).then((request) => request(axios, basePath));
+        getGermlineVariantConditions(tenant: string, locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig): AxiosPromise<GenePanelConditions> {
+            return localVarFp.getGermlineVariantConditions(tenant, locusId, panelType, filter, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve ClinVar conditions for germline variant entity
          * @summary Get ClinVar conditions for germline variant entity
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ClinvarVariantConditions> {
-            return localVarFp.getGermlineVariantConditionsClinvar(locusId, options).then((request) => request(axios, basePath));
+        getGermlineVariantConditionsClinvar(tenant: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<ClinvarVariantConditions> {
+            return localVarFp.getGermlineVariantConditionsClinvar(tenant, locusId, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve germline Variant Consequences for a given locus
          * @summary Get list of VariantConsequences for a germline variant
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantConsequences(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<VariantConsequence>> {
-            return localVarFp.getGermlineVariantConsequences(locusId, options).then((request) => request(axios, basePath));
+        getGermlineVariantConsequences(tenant: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<VariantConsequence>> {
+            return localVarFp.getGermlineVariantConsequences(tenant, locusId, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve external frequencies for a given locus id
          * @summary Get external frequencies
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantExternalFrequencies(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantExternalFrequencies> {
-            return localVarFp.getGermlineVariantExternalFrequencies(locusId, options).then((request) => request(axios, basePath));
+        getGermlineVariantExternalFrequencies(tenant: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantExternalFrequencies> {
+            return localVarFp.getGermlineVariantExternalFrequencies(tenant, locusId, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve global internal frequencies for a given locus id
          * @summary Get global internal frequencies
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantGlobalInternalFrequencies(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<InternalFrequencies> {
-            return localVarFp.getGermlineVariantGlobalInternalFrequencies(locusId, options).then((request) => request(axios, basePath));
+        getGermlineVariantGlobalInternalFrequencies(tenant: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<InternalFrequencies> {
+            return localVarFp.getGermlineVariantGlobalInternalFrequencies(tenant, locusId, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve germline Variant Header data for a given locus
          * @summary Get a germline VariantHeader
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantHeader(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantHeader> {
-            return localVarFp.getGermlineVariantHeader(locusId, options).then((request) => request(axios, basePath));
+        getGermlineVariantHeader(tenant: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantHeader> {
+            return localVarFp.getGermlineVariantHeader(tenant, locusId, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve internal frequencies for a given locus id
          * @summary Get internal frequencies
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantInternalFrequencies(locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig): AxiosPromise<VariantInternalFrequencies> {
-            return localVarFp.getGermlineVariantInternalFrequencies(locusId, split, options).then((request) => request(axios, basePath));
+        getGermlineVariantInternalFrequencies(tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig): AxiosPromise<VariantInternalFrequencies> {
+            return localVarFp.getGermlineVariantInternalFrequencies(tenant, locusId, split, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve Germline Variant interpreted cases for a given locus
          * @summary Get list of interpreted Cases for a germline variant
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantInterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<VariantInterpretedCasesSearchResponse> {
-            return localVarFp.getGermlineVariantInterpretedCases(locusId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        getGermlineVariantInterpretedCases(tenant: string, locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<VariantInterpretedCasesSearchResponse> {
+            return localVarFp.getGermlineVariantInterpretedCases(tenant, locusId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve germline Variant Overview data for a given locus
          * @summary Get a germline VariantOverview
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantOverview(locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantOverview> {
-            return localVarFp.getGermlineVariantOverview(locusId, options).then((request) => request(axios, basePath));
+        getGermlineVariantOverview(tenant: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<VariantOverview> {
+            return localVarFp.getGermlineVariantOverview(tenant, locusId, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve Germline Variant uninterpreted cases for a given locus
          * @summary Get list of uninterpreted Cases for a germline variant
+         * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantUninterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<VariantUninterpretedCasesSearchResponse> {
-            return localVarFp.getGermlineVariantUninterpretedCases(locusId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
+        getGermlineVariantUninterpretedCases(tenant: string, locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig): AxiosPromise<VariantUninterpretedCasesSearchResponse> {
+            return localVarFp.getGermlineVariantUninterpretedCases(tenant, locusId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -13004,29 +13468,32 @@ export class VariantApi extends BaseAPI {
     /**
      * Retrieve cases count for a given locus id
      * @summary Get germline cases count for a given locus
+     * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantCasesCount(locusId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantCasesCount(locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantCasesCount(tenant: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantCasesCount(tenant, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve cases filters for germline variant entity
      * @summary Get cases filters for germline variant entity
+     * @param {string} tenant Tenant code
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantCasesFilters(options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantCasesFilters(options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantCasesFilters(tenant: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantCasesFilters(tenant, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve conditions for germline variant entity for a specific gene panel
      * @summary Get conditions for germline variant entity for a specific gene panel
+     * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {GetGermlineVariantConditionsPanelTypeEnum} panelType Gene panel type
      * @param {string} [filter] Condition filter
@@ -13034,119 +13501,128 @@ export class VariantApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantConditions(locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantConditions(locusId, panelType, filter, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantConditions(tenant: string, locusId: string, panelType: GetGermlineVariantConditionsPanelTypeEnum, filter?: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantConditions(tenant, locusId, panelType, filter, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve ClinVar conditions for germline variant entity
      * @summary Get ClinVar conditions for germline variant entity
+     * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantConditionsClinvar(locusId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantConditionsClinvar(locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantConditionsClinvar(tenant: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantConditionsClinvar(tenant, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve germline Variant Consequences for a given locus
      * @summary Get list of VariantConsequences for a germline variant
+     * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantConsequences(locusId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantConsequences(locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantConsequences(tenant: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantConsequences(tenant, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve external frequencies for a given locus id
      * @summary Get external frequencies
+     * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantExternalFrequencies(locusId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantExternalFrequencies(locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantExternalFrequencies(tenant: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantExternalFrequencies(tenant, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve global internal frequencies for a given locus id
      * @summary Get global internal frequencies
+     * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantGlobalInternalFrequencies(locusId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantGlobalInternalFrequencies(locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantGlobalInternalFrequencies(tenant: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantGlobalInternalFrequencies(tenant, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve germline Variant Header data for a given locus
      * @summary Get a germline VariantHeader
+     * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantHeader(locusId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantHeader(locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantHeader(tenant: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantHeader(tenant, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve internal frequencies for a given locus id
      * @summary Get internal frequencies
+     * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantInternalFrequencies(locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantInternalFrequencies(locusId, split, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantInternalFrequencies(tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantInternalFrequencies(tenant, locusId, split, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve Germline Variant interpreted cases for a given locus
      * @summary Get list of interpreted Cases for a germline variant
+     * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantInterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantInterpretedCases(locusId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantInterpretedCases(tenant: string, locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantInterpretedCases(tenant, locusId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve germline Variant Overview data for a given locus
      * @summary Get a germline VariantOverview
+     * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantOverview(locusId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantOverview(locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantOverview(tenant: string, locusId: string, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantOverview(tenant, locusId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Retrieve Germline Variant uninterpreted cases for a given locus
      * @summary Get list of uninterpreted Cases for a germline variant
+     * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {ListBodyWithCriteria} listBodyWithCriteria Search Body with criteria
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantUninterpretedCases(locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantUninterpretedCases(locusId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantUninterpretedCases(tenant: string, locusId: string, listBodyWithCriteria: ListBodyWithCriteria, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantUninterpretedCases(tenant, locusId, listBodyWithCriteria, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

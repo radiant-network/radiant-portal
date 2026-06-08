@@ -22,9 +22,9 @@ const mockUserUUID = "11111111-1111-1111-1111-111111111111"
 func assertPostOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, auth *testutils.MockAuth, body string, expectedStatus int) *types.OccurrenceNote {
 	t.Helper()
 	router := gin.Default()
-	router.POST("/notes", server.PostOccurrenceNoteHandler(repo, auth))
+	router.POST("/:tenant/notes", server.PostOccurrenceNoteHandler(repo, auth))
 
-	req, _ := http.NewRequest("POST", "/notes", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/notes", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -42,9 +42,9 @@ func assertPostOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, 
 func assertPutOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, auth *testutils.MockAuth, id string, body string, expectedStatus int) *types.OccurrenceNote {
 	t.Helper()
 	router := gin.Default()
-	router.PUT("/notes/:id", server.PutOccurrenceNoteHandler(repo, auth))
+	router.PUT("/:tenant/notes/:id", server.PutOccurrenceNoteHandler(repo, auth))
 
-	req, _ := http.NewRequest("PUT", fmt.Sprintf("/notes/%s", id), bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/radiant/notes/%s", id), bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -62,9 +62,9 @@ func assertPutOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, a
 func assertGetOccurrenceNotes(t *testing.T, repo repository.OccurrenceNotesDAO, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) []types.OccurrenceNote {
 	t.Helper()
 	router := gin.Default()
-	router.GET("/notes/:case_id/:seq_id/:task_id/:occurrence_id", server.GetOccurrenceNotesHandler(repo))
+	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id", server.GetOccurrenceNotesHandler(repo))
 
-	url := fmt.Sprintf("/notes/%d/%d/%d/%s", caseID, seqID, taskID, occurrenceID)
+	url := fmt.Sprintf("/radiant/notes/%d/%d/%d/%s", caseID, seqID, taskID, occurrenceID)
 	req, _ := http.NewRequest("GET", url, nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -79,9 +79,9 @@ func assertGetOccurrenceNotes(t *testing.T, repo repository.OccurrenceNotesDAO, 
 func assertGetOccurrenceNoteCount(t *testing.T, repo repository.OccurrenceNotesDAO, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) int64 {
 	t.Helper()
 	router := gin.Default()
-	router.GET("/notes/:case_id/:seq_id/:task_id/:occurrence_id/count", server.GetOccurrenceNoteCountHandler(repo))
+	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id/count", server.GetOccurrenceNoteCountHandler(repo))
 
-	url := fmt.Sprintf("/notes/%d/%d/%d/%s/count", caseID, seqID, taskID, occurrenceID)
+	url := fmt.Sprintf("/radiant/notes/%d/%d/%d/%s/count", caseID, seqID, taskID, occurrenceID)
 	req, _ := http.NewRequest("GET", url, nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -96,9 +96,9 @@ func assertGetOccurrenceNoteCount(t *testing.T, repo repository.OccurrenceNotesD
 func assertDeleteOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, auth *testutils.MockAuth, id string, expectedStatus int) {
 	t.Helper()
 	router := gin.Default()
-	router.DELETE("/notes/:id", server.DeleteOccurrenceNoteHandler(repo, auth))
+	router.DELETE("/:tenant/notes/:id", server.DeleteOccurrenceNoteHandler(repo, auth))
 
-	req, _ := http.NewRequest("DELETE", fmt.Sprintf("/notes/%s", id), nil)
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("/radiant/notes/%s", id), nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

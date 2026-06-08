@@ -80,9 +80,9 @@ func (e *emptyTaskRepo) ListTasksByCaseSeqAndTaskType(int, int, string) ([]types
 func caseOccurrenceTasksRequest(caseId string, seqId string, dataType string) *httptest.ResponseRecorder {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(repo))
+	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(repo))
 
-	url := fmt.Sprintf("/cases/%s/%s/tasks_with_occurrences", caseId, seqId)
+	url := fmt.Sprintf("/radiant/cases/%s/%s/tasks_with_occurrences", caseId, seqId)
 	if dataType != "" {
 		url = fmt.Sprintf("%s?data_type=%s", url, dataType)
 	}
@@ -123,9 +123,9 @@ func Test_CaseOccurrenceTasksHandler_SomaticSNV_DispatchesSomaticAnnotationTaskT
 
 func Test_CaseOccurrenceTasksHandler_NilRepoResult_RendersAsEmptyJSONArray(t *testing.T) {
 	router := gin.Default()
-	router.GET("/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(&emptyTaskRepo{}))
+	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(&emptyTaskRepo{}))
 
-	req, _ := http.NewRequest("GET", "/cases/1/1/tasks_with_occurrences?data_type=germline_snv", nil)
+	req, _ := http.NewRequest("GET", "/radiant/cases/1/1/tasks_with_occurrences?data_type=germline_snv", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

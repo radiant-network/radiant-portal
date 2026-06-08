@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**get_igv**](IgvApi.md#get_igv) | **GET** /igv/{case_id} | Get IGV
+[**get_igv**](IgvApi.md#get_igv) | **GET** /{tenant}/igv/{case_id} | Get IGV
 
 
 # **get_igv**
-> IGVTracks get_igv(case_id)
+> IGVTracks get_igv(tenant, case_id)
 
 Get IGV
 
@@ -44,11 +44,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.IgvApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     case_id = 'case_id_example' # str | Case ID
 
     try:
         # Get IGV
-        api_response = api_instance.get_igv(case_id)
+        api_response = api_instance.get_igv(tenant, case_id)
         print("The response of IgvApi->get_igv:\n")
         pprint(api_response)
     except Exception as e:
@@ -62,6 +63,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **case_id** | **str**| Case ID | 
 
 ### Return type
@@ -82,6 +84,8 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 

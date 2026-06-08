@@ -24,9 +24,9 @@ func assertDocumentsSearchHandler(t *testing.T, data string, body string, expect
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
-		router.POST("/documents/search", server.SearchDocumentsHandler(repo))
+		router.POST("/:tenant/documents/search", server.SearchDocumentsHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/documents/search", bytes.NewBuffer([]byte(body)))
+		req, _ := http.NewRequest("POST", "/radiant/documents/search", bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -168,9 +168,9 @@ func assertDocumentIdsAutoComplete(t *testing.T, data string, prefix string, lim
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
-		router.GET("/documents/autocomplete", server.DocumentsAutocompleteHandler(repo))
+		router.GET("/:tenant/documents/autocomplete", server.DocumentsAutocompleteHandler(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/documents/autocomplete?prefix=%s&limit=%d", prefix, limit), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/documents/autocomplete?prefix=%s&limit=%d", prefix, limit), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -188,9 +188,9 @@ func assertGetDocumentsFilters(t *testing.T, data string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
-		router.GET("/documents/filters", server.DocumentsFiltersHandler(repo))
+		router.GET("/:tenant/documents/filters", server.DocumentsFiltersHandler(repo))
 
-		req, _ := http.NewRequest("GET", "/documents/filters", bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", "/radiant/documents/filters", bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -262,9 +262,9 @@ func Test_GetDocumentsDownloadUrl(t *testing.T) {
 
 		repo := repository.NewDocumentsRepository(starrocks)
 		router := gin.Default()
-		router.GET("/documents/:document_id/download_url", server.GetDocumentsDownloadUrlHandler(repo, nil))
+		router.GET("/:tenant/documents/:document_id/download_url", server.GetDocumentsDownloadUrlHandler(repo, nil))
 
-		req, _ := http.NewRequest("GET", "/documents/1/download_url", nil)
+		req, _ := http.NewRequest("GET", "/radiant/documents/1/download_url", nil)
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)

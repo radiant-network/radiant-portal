@@ -25,7 +25,7 @@ import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-de
 import SomaticSliderInterpretationDetailsCard from '@/components/base/slider/somatic-slider-interpretation-details-card';
 import { useI18n } from '@/components/hooks/i18n';
 import { getPatientClinicalInformation } from '@/components/lib/case-entity';
-import { caseApi, interpretationApi, occurrencesApi } from '@/utils/api';
+import { caseApi, DEFAULT_TENANT, interpretationApi, occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
@@ -57,6 +57,7 @@ type InterpretationInput = {
 
 export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput) {
   const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(
+    DEFAULT_TENANT,
     input.caseId,
     input.seqId,
     input.taskId,
@@ -66,12 +67,13 @@ export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput)
 }
 
 export async function fetchCaseEntity(input: CaseInput) {
-  const response = await caseApi.caseEntity(input.caseId);
+  const response = await caseApi.caseEntity(DEFAULT_TENANT, input.caseId);
   return response.data;
 }
 
 export async function fetchInterpretation(input: InterpretationInput) {
   const response = await interpretationApi.getInterpretationSomatic(
+    DEFAULT_TENANT,
     input.caseId,
     input.seqId,
     input.locusId,

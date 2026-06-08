@@ -19,9 +19,9 @@ func assertMondoTermAutoComplete(t *testing.T, data string, prefix string, expec
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewTermsRepository(db)
 		router := gin.Default()
-		router.GET("/mondo/autocomplete", server.GetMondoTermAutoComplete(repo))
+		router.GET("/:tenant/mondo/autocomplete", server.GetMondoTermAutoComplete(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/mondo/autocomplete?prefix=%s", prefix), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/mondo/autocomplete?prefix=%s", prefix), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 

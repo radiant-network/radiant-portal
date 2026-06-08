@@ -4,14 +4,14 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**autocomplete_documents**](DocumentsApi.md#autocomplete_documents) | **GET** /documents/autocomplete | Get AutocompleteResult list of matching prefix
-[**documents_filters**](DocumentsApi.md#documents_filters) | **GET** /documents/filters | Get DocumentFilters documents filters
-[**get_document_download_url**](DocumentsApi.md#get_document_download_url) | **GET** /documents/{document_id}/download_url | Get pre-signed S3 download URL for a document
-[**search_documents**](DocumentsApi.md#search_documents) | **POST** /documents/search | Search documents
+[**autocomplete_documents**](DocumentsApi.md#autocomplete_documents) | **GET** /{tenant}/documents/autocomplete | Get AutocompleteResult list of matching prefix
+[**documents_filters**](DocumentsApi.md#documents_filters) | **GET** /{tenant}/documents/filters | Get DocumentFilters documents filters
+[**get_document_download_url**](DocumentsApi.md#get_document_download_url) | **GET** /{tenant}/documents/{document_id}/download_url | Get pre-signed S3 download URL for a document
+[**search_documents**](DocumentsApi.md#search_documents) | **POST** /{tenant}/documents/search | Search documents
 
 
 # **autocomplete_documents**
-> List[AutocompleteResult] autocomplete_documents(prefix, limit=limit)
+> List[AutocompleteResult] autocomplete_documents(tenant, prefix, limit=limit)
 
 Get AutocompleteResult list of matching prefix
 
@@ -47,12 +47,13 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.DocumentsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     prefix = 'prefix_example' # str | Prefix
     limit = 'limit_example' # str | Limit (optional)
 
     try:
         # Get AutocompleteResult list of matching prefix
-        api_response = api_instance.autocomplete_documents(prefix, limit=limit)
+        api_response = api_instance.autocomplete_documents(tenant, prefix, limit=limit)
         print("The response of DocumentsApi->autocomplete_documents:\n")
         pprint(api_response)
     except Exception as e:
@@ -66,6 +67,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **prefix** | **str**| Prefix | 
  **limit** | **str**| Limit | [optional] 
 
@@ -87,12 +89,14 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **documents_filters**
-> DocumentFilters documents_filters()
+> DocumentFilters documents_filters(tenant)
 
 Get DocumentFilters documents filters
 
@@ -128,10 +132,11 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.DocumentsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
 
     try:
         # Get DocumentFilters documents filters
-        api_response = api_instance.documents_filters()
+        api_response = api_instance.documents_filters(tenant)
         print("The response of DocumentsApi->documents_filters:\n")
         pprint(api_response)
     except Exception as e:
@@ -142,7 +147,10 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
 
 ### Return type
 
@@ -162,12 +170,14 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_document_download_url**
-> UtilsPreSignedURL get_document_download_url(document_id)
+> UtilsPreSignedURL get_document_download_url(tenant, document_id)
 
 Get pre-signed S3 download URL for a document
 
@@ -203,11 +213,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.DocumentsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     document_id = 'document_id_example' # str | Document ID
 
     try:
         # Get pre-signed S3 download URL for a document
-        api_response = api_instance.get_document_download_url(document_id)
+        api_response = api_instance.get_document_download_url(tenant, document_id)
         print("The response of DocumentsApi->get_document_download_url:\n")
         pprint(api_response)
     except Exception as e:
@@ -221,6 +232,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **document_id** | **str**| Document ID | 
 
 ### Return type
@@ -241,13 +253,15 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **search_documents**
-> DocumentsSearchResponse search_documents(list_body_with_criteria)
+> DocumentsSearchResponse search_documents(tenant, list_body_with_criteria)
 
 Search documents
 
@@ -284,11 +298,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.DocumentsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     list_body_with_criteria = radiant_python.ListBodyWithCriteria() # ListBodyWithCriteria | List Body
 
     try:
         # Search documents
-        api_response = api_instance.search_documents(list_body_with_criteria)
+        api_response = api_instance.search_documents(tenant, list_body_with_criteria)
         print("The response of DocumentsApi->search_documents:\n")
         pprint(api_response)
     except Exception as e:
@@ -302,6 +317,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **list_body_with_criteria** | [**ListBodyWithCriteria**](ListBodyWithCriteria.md)| List Body | 
 
 ### Return type
@@ -323,6 +339,8 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

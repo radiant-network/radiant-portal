@@ -4,12 +4,12 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**get_sequencing_experiment_detail_by_id**](SequencingApi.md#get_sequencing_experiment_detail_by_id) | **GET** /sequencing/{seq_id}/details | Get SequencingExperimentDetail by id
-[**post_sequencing_experiment_batch**](SequencingApi.md#post_sequencing_experiment_batch) | **POST** /sequencing/batch | Create a new sequencing experiment batch
+[**get_sequencing_experiment_detail_by_id**](SequencingApi.md#get_sequencing_experiment_detail_by_id) | **GET** /{tenant}/sequencing/{seq_id}/details | Get SequencingExperimentDetail by id
+[**post_sequencing_experiment_batch**](SequencingApi.md#post_sequencing_experiment_batch) | **POST** /{tenant}/sequencing/batch | Create a new sequencing experiment batch
 
 
 # **get_sequencing_experiment_detail_by_id**
-> SequencingExperimentDetail get_sequencing_experiment_detail_by_id(seq_id)
+> SequencingExperimentDetail get_sequencing_experiment_detail_by_id(tenant, seq_id)
 
 Get SequencingExperimentDetail by id
 
@@ -45,11 +45,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.SequencingApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     seq_id = 'seq_id_example' # str | Seq ID
 
     try:
         # Get SequencingExperimentDetail by id
-        api_response = api_instance.get_sequencing_experiment_detail_by_id(seq_id)
+        api_response = api_instance.get_sequencing_experiment_detail_by_id(tenant, seq_id)
         print("The response of SequencingApi->get_sequencing_experiment_detail_by_id:\n")
         pprint(api_response)
     except Exception as e:
@@ -63,6 +64,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **seq_id** | **str**| Seq ID | 
 
 ### Return type
@@ -84,12 +86,14 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **post_sequencing_experiment_batch**
-> CreateBatchResponse post_sequencing_experiment_batch(create_sequencing_experiment_batch_body, dry_run=dry_run)
+> CreateBatchResponse post_sequencing_experiment_batch(tenant, create_sequencing_experiment_batch_body, dry_run=dry_run)
 
 Create a new sequencing experiment batch
 
@@ -126,12 +130,13 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.SequencingApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     create_sequencing_experiment_batch_body = radiant_python.CreateSequencingExperimentBatchBody() # CreateSequencingExperimentBatchBody | Create Body
     dry_run = False # bool | Dry Run (optional) (default to False)
 
     try:
         # Create a new sequencing experiment batch
-        api_response = api_instance.post_sequencing_experiment_batch(create_sequencing_experiment_batch_body, dry_run=dry_run)
+        api_response = api_instance.post_sequencing_experiment_batch(tenant, create_sequencing_experiment_batch_body, dry_run=dry_run)
         print("The response of SequencingApi->post_sequencing_experiment_batch:\n")
         pprint(api_response)
     except Exception as e:
@@ -145,6 +150,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **create_sequencing_experiment_batch_body** | [**CreateSequencingExperimentBatchBody**](CreateSequencingExperimentBatchBody.md)| Create Body | 
  **dry_run** | **bool**| Dry Run | [optional] [default to False]
 
@@ -167,6 +173,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **202** | Accepted |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
 **403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 

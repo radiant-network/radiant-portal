@@ -32,7 +32,7 @@ func TestPostCaseBatchHandler_Success(t *testing.T) {
 	auth := &testutils.MockAuth{Username: "testuser"}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "case1",
@@ -76,7 +76,7 @@ func TestPostCaseBatchHandler_Success(t *testing.T) {
 			}]
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -107,7 +107,7 @@ func TestPostCaseBatchHandler_EmptyTasks(t *testing.T) {
 	auth := &testutils.MockAuth{Username: "testuser"}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "case1",
@@ -132,7 +132,7 @@ func TestPostCaseBatchHandler_EmptyTasks(t *testing.T) {
 			"tasks": []
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -152,7 +152,7 @@ func TestPostCaseBatchHandler_MissingRequiredFields(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "",
@@ -173,7 +173,7 @@ func TestPostCaseBatchHandler_MissingRequiredFields(t *testing.T) {
 			}]
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -187,7 +187,7 @@ func TestPostCaseBatchHandler_InvalidType(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "case1",
@@ -208,7 +208,7 @@ func TestPostCaseBatchHandler_InvalidType(t *testing.T) {
 			}]
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -222,7 +222,7 @@ func TestPostCaseBatchHandler_InvalidCategory(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "case1",
@@ -243,7 +243,7 @@ func TestPostCaseBatchHandler_InvalidCategory(t *testing.T) {
 			}]
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -257,7 +257,7 @@ func TestPostCaseBatchHandler_MissingPatients(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "case1",
@@ -272,7 +272,7 @@ func TestPostCaseBatchHandler_MissingPatients(t *testing.T) {
 			}]
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -286,7 +286,7 @@ func TestPostCaseBatchHandler_EmptyPatients(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "case1",
@@ -302,7 +302,7 @@ func TestPostCaseBatchHandler_EmptyPatients(t *testing.T) {
 			}]
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -316,7 +316,7 @@ func TestPostCaseBatchHandler_MissingRequiredFieldInSequencingExperiments(t *tes
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "asdasd",
@@ -337,7 +337,7 @@ func TestPostCaseBatchHandler_MissingRequiredFieldInSequencingExperiments(t *tes
 			}]
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -357,7 +357,7 @@ func TestPostCaseBatchHandler_MissingSequencingExperiments(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "case1",
@@ -377,7 +377,7 @@ func TestPostCaseBatchHandler_MissingSequencingExperiments(t *testing.T) {
 			"tasks": []
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -395,7 +395,7 @@ func TestPostCaseBatchHandler_EmptySequencingExperiments(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "case1",
@@ -416,7 +416,7 @@ func TestPostCaseBatchHandler_EmptySequencingExperiments(t *testing.T) {
 			"tasks": []
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -436,7 +436,7 @@ func TestPatchCaseBatchHandler_Success(t *testing.T) {
 	auth := &testutils.MockAuth{Username: "testuser"}
 
 	router := gin.Default()
-	router.PATCH("/cases/batch", PatchCaseBatchHandler(repo, auth))
+	router.PATCH("/:tenant/cases/batch", PatchCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"project_code": "proj1",
@@ -448,7 +448,7 @@ func TestPatchCaseBatchHandler_Success(t *testing.T) {
 			}]
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPatch, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPatch, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -466,14 +466,14 @@ func TestPatchCaseBatchHandler_MissingFields(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.PATCH("/cases/batch", PatchCaseBatchHandler(repo, auth))
+	router.PATCH("/:tenant/cases/batch", PatchCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "case1",
 			"sequencing_experiments": []
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPatch, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPatch, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -487,7 +487,7 @@ func TestPostCaseBatchHandler_MissingTasks(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "case1",
@@ -508,7 +508,7 @@ func TestPostCaseBatchHandler_MissingTasks(t *testing.T) {
 			}]
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -522,7 +522,7 @@ func TestPostCaseBatchHandler_NoTasks(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/cases/batch", PostCaseBatchHandler(repo, auth))
+	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
 			"submitter_case_id": "case1",
@@ -543,7 +543,7 @@ func TestPostCaseBatchHandler_NoTasks(t *testing.T) {
 			}]
 		}]
 	}`
-	req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)

@@ -13,7 +13,7 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
-import { occurrenceFlagApi } from '@/utils/api';
+import { DEFAULT_TENANT, occurrenceFlagApi } from '@/utils/api';
 
 import { useDataTable } from '../data-table/hooks/use-data-table';
 
@@ -65,6 +65,7 @@ export const FLAGS = {
 
 async function saveOccurrenceFlag(_url: string, { arg }: { arg: UpsertOccurrenceFlagInput }) {
   const response = await occurrenceFlagApi.upsertOccurrenceFlag(
+    DEFAULT_TENANT,
     arg.caseId,
     arg.seqId,
     arg.taskId,
@@ -75,7 +76,13 @@ async function saveOccurrenceFlag(_url: string, { arg }: { arg: UpsertOccurrence
 }
 
 async function deleteOccurrenceFlag(_url: string, { arg }: { arg: DeleteOccurrenceFlagInput }) {
-  const response = await occurrenceFlagApi.deleteOccurrenceFlag(arg.caseId, arg.seqId, arg.taskId, arg.occurrenceId);
+  const response = await occurrenceFlagApi.deleteOccurrenceFlag(
+    DEFAULT_TENANT,
+    arg.caseId,
+    arg.seqId,
+    arg.taskId,
+    arg.occurrenceId,
+  );
   return response.data;
 }
 

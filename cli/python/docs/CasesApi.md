@@ -4,19 +4,19 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**autocomplete_cases**](CasesApi.md#autocomplete_cases) | **GET** /cases/autocomplete | Get AutocompleteResult list of matching prefix
-[**case_entity**](CasesApi.md#case_entity) | **GET** /cases/{case_id} | Get CaseEntity case entity
-[**case_entity_documents_filters**](CasesApi.md#case_entity_documents_filters) | **GET** /cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
-[**case_entity_documents_search**](CasesApi.md#case_entity_documents_search) | **POST** /cases/{case_id}/documents/search | Search DocumentResult list for a case entity
-[**case_tasks_with_occurrences**](CasesApi.md#case_tasks_with_occurrences) | **GET** /cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
-[**cases_filters**](CasesApi.md#cases_filters) | **GET** /cases/filters | Get CaseFilters cases filters
-[**patch_case_batch**](CasesApi.md#patch_case_batch) | **PATCH** /cases/batch | Partially update existing cases (batch)
-[**post_case_batch**](CasesApi.md#post_case_batch) | **POST** /cases/batch | Create a new case batch
-[**search_cases**](CasesApi.md#search_cases) | **POST** /cases/search | Search cases
+[**autocomplete_cases**](CasesApi.md#autocomplete_cases) | **GET** /{tenant}/cases/autocomplete | Get AutocompleteResult list of matching prefix
+[**case_entity**](CasesApi.md#case_entity) | **GET** /{tenant}/cases/{case_id} | Get CaseEntity case entity
+[**case_entity_documents_filters**](CasesApi.md#case_entity_documents_filters) | **GET** /{tenant}/cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
+[**case_entity_documents_search**](CasesApi.md#case_entity_documents_search) | **POST** /{tenant}/cases/{case_id}/documents/search | Search DocumentResult list for a case entity
+[**case_tasks_with_occurrences**](CasesApi.md#case_tasks_with_occurrences) | **GET** /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
+[**cases_filters**](CasesApi.md#cases_filters) | **GET** /{tenant}/cases/filters | Get CaseFilters cases filters
+[**patch_case_batch**](CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
+[**post_case_batch**](CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
+[**search_cases**](CasesApi.md#search_cases) | **POST** /{tenant}/cases/search | Search cases
 
 
 # **autocomplete_cases**
-> List[AutocompleteResult] autocomplete_cases(prefix, limit=limit)
+> List[AutocompleteResult] autocomplete_cases(tenant, prefix, limit=limit)
 
 Get AutocompleteResult list of matching prefix
 
@@ -52,12 +52,13 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     prefix = 'prefix_example' # str | Prefix
     limit = 'limit_example' # str | Limit (optional)
 
     try:
         # Get AutocompleteResult list of matching prefix
-        api_response = api_instance.autocomplete_cases(prefix, limit=limit)
+        api_response = api_instance.autocomplete_cases(tenant, prefix, limit=limit)
         print("The response of CasesApi->autocomplete_cases:\n")
         pprint(api_response)
     except Exception as e:
@@ -71,6 +72,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **prefix** | **str**| Prefix | 
  **limit** | **str**| Limit | [optional] 
 
@@ -92,12 +94,14 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **case_entity**
-> CaseEntity case_entity(case_id)
+> CaseEntity case_entity(tenant, case_id)
 
 Get CaseEntity case entity
 
@@ -133,11 +137,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     case_id = 56 # int | Case ID
 
     try:
         # Get CaseEntity case entity
-        api_response = api_instance.case_entity(case_id)
+        api_response = api_instance.case_entity(tenant, case_id)
         print("The response of CasesApi->case_entity:\n")
         pprint(api_response)
     except Exception as e:
@@ -151,6 +156,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **case_id** | **int**| Case ID | 
 
 ### Return type
@@ -171,13 +177,15 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **case_entity_documents_filters**
-> DocumentFilters case_entity_documents_filters(case_id)
+> DocumentFilters case_entity_documents_filters(tenant, case_id)
 
 Get DocumentFilters documents filters for a specific case
 
@@ -213,11 +221,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     case_id = 56 # int | Case ID
 
     try:
         # Get DocumentFilters documents filters for a specific case
-        api_response = api_instance.case_entity_documents_filters(case_id)
+        api_response = api_instance.case_entity_documents_filters(tenant, case_id)
         print("The response of CasesApi->case_entity_documents_filters:\n")
         pprint(api_response)
     except Exception as e:
@@ -231,6 +240,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **case_id** | **int**| Case ID | 
 
 ### Return type
@@ -251,12 +261,14 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **case_entity_documents_search**
-> DocumentsSearchResponse case_entity_documents_search(case_id, list_body_with_criteria)
+> DocumentsSearchResponse case_entity_documents_search(tenant, case_id, list_body_with_criteria)
 
 Search DocumentResult list for a case entity
 
@@ -293,12 +305,13 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     case_id = 56 # int | Case ID
     list_body_with_criteria = radiant_python.ListBodyWithCriteria() # ListBodyWithCriteria | List Body
 
     try:
         # Search DocumentResult list for a case entity
-        api_response = api_instance.case_entity_documents_search(case_id, list_body_with_criteria)
+        api_response = api_instance.case_entity_documents_search(tenant, case_id, list_body_with_criteria)
         print("The response of CasesApi->case_entity_documents_search:\n")
         pprint(api_response)
     except Exception as e:
@@ -312,6 +325,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **case_id** | **int**| Case ID | 
  **list_body_with_criteria** | [**ListBodyWithCriteria**](ListBodyWithCriteria.md)| List Body | 
 
@@ -333,13 +347,15 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **case_tasks_with_occurrences**
-> List[TaskOccurrenceType] case_tasks_with_occurrences(case_id, seq_id, data_type)
+> List[TaskOccurrenceType] case_tasks_with_occurrences(tenant, case_id, seq_id, data_type)
 
 List tasks producing occurrences of a given type for a (case, sequencing) pair
 
@@ -375,13 +391,14 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     case_id = 56 # int | Case ID
     seq_id = 56 # int | Sequencing Experiment ID
     data_type = 'data_type_example' # str | Occurrence type
 
     try:
         # List tasks producing occurrences of a given type for a (case, sequencing) pair
-        api_response = api_instance.case_tasks_with_occurrences(case_id, seq_id, data_type)
+        api_response = api_instance.case_tasks_with_occurrences(tenant, case_id, seq_id, data_type)
         print("The response of CasesApi->case_tasks_with_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -395,6 +412,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **case_id** | **int**| Case ID | 
  **seq_id** | **int**| Sequencing Experiment ID | 
  **data_type** | **str**| Occurrence type | 
@@ -418,13 +436,15 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **cases_filters**
-> CaseFilters cases_filters()
+> CaseFilters cases_filters(tenant)
 
 Get CaseFilters cases filters
 
@@ -460,10 +480,11 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
 
     try:
         # Get CaseFilters cases filters
-        api_response = api_instance.cases_filters()
+        api_response = api_instance.cases_filters(tenant)
         print("The response of CasesApi->cases_filters:\n")
         pprint(api_response)
     except Exception as e:
@@ -474,7 +495,10 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
 
 ### Return type
 
@@ -494,12 +518,14 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **patch_case_batch**
-> CreateBatchResponse patch_case_batch(patch_case_batch_body, dry_run=dry_run)
+> CreateBatchResponse patch_case_batch(tenant, patch_case_batch_body, dry_run=dry_run)
 
 Partially update existing cases (batch)
 
@@ -538,12 +564,13 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     patch_case_batch_body = radiant_python.PatchCaseBatchBody() # PatchCaseBatchBody | Attach Body
     dry_run = False # bool | Dry Run (optional) (default to False)
 
     try:
         # Partially update existing cases (batch)
-        api_response = api_instance.patch_case_batch(patch_case_batch_body, dry_run=dry_run)
+        api_response = api_instance.patch_case_batch(tenant, patch_case_batch_body, dry_run=dry_run)
         print("The response of CasesApi->patch_case_batch:\n")
         pprint(api_response)
     except Exception as e:
@@ -557,6 +584,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **patch_case_batch_body** | [**PatchCaseBatchBody**](PatchCaseBatchBody.md)| Attach Body | 
  **dry_run** | **bool**| Dry Run | [optional] [default to False]
 
@@ -579,13 +607,14 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **202** | Accepted |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
 **403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **post_case_batch**
-> CreateBatchResponse post_case_batch(create_case_batch_body, dry_run=dry_run)
+> CreateBatchResponse post_case_batch(tenant, create_case_batch_body, dry_run=dry_run)
 
 Create a new case batch
 
@@ -622,12 +651,13 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     create_case_batch_body = radiant_python.CreateCaseBatchBody() # CreateCaseBatchBody | Create Body
     dry_run = False # bool | Dry Run (optional) (default to False)
 
     try:
         # Create a new case batch
-        api_response = api_instance.post_case_batch(create_case_batch_body, dry_run=dry_run)
+        api_response = api_instance.post_case_batch(tenant, create_case_batch_body, dry_run=dry_run)
         print("The response of CasesApi->post_case_batch:\n")
         pprint(api_response)
     except Exception as e:
@@ -641,6 +671,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **create_case_batch_body** | [**CreateCaseBatchBody**](CreateCaseBatchBody.md)| Create Body | 
  **dry_run** | **bool**| Dry Run | [optional] [default to False]
 
@@ -663,13 +694,14 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **202** | Accepted |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
 **403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **search_cases**
-> CasesSearchResponse search_cases(list_body_with_criteria)
+> CasesSearchResponse search_cases(tenant, list_body_with_criteria)
 
 Search cases
 
@@ -706,11 +738,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     list_body_with_criteria = radiant_python.ListBodyWithCriteria() # ListBodyWithCriteria | List Body
 
     try:
         # Search cases
-        api_response = api_instance.search_cases(list_body_with_criteria)
+        api_response = api_instance.search_cases(tenant, list_body_with_criteria)
         print("The response of CasesApi->search_cases:\n")
         pprint(api_response)
     except Exception as e:
@@ -724,6 +757,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **list_body_with_criteria** | [**ListBodyWithCriteria**](ListBodyWithCriteria.md)| List Body | 
 
 ### Return type
@@ -745,6 +779,8 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

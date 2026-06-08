@@ -76,15 +76,18 @@ func getInterpretationStatus(interpretation *types.InterpretationCommon) int {
 // @Description Get interpretation germline
 // @Tags interpretations
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param sequencing_id path string true "Sequencing ID"
 // @Param locus_id path string true "Locus ID"
 // @Param transcript_id path string true "Transcript ID"
 // @Produce json
 // @Success 200 {object} types.InterpretationGermline
 // @Success 206 {object} types.InterpretationGermline
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [get]
+// @Router /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationGermlineDeprecated(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
@@ -107,6 +110,7 @@ func GetInterpretationGermlineDeprecated(repo repository.InterpretationsDAO) gin
 // @Description Get interpretation germline
 // @Tags interpretations
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path string true "Case ID"
 // @Param sequencing_id path string true "Sequencing ID"
 // @Param locus_id path string true "Locus ID"
@@ -114,9 +118,11 @@ func GetInterpretationGermlineDeprecated(repo repository.InterpretationsDAO) gin
 // @Produce json
 // @Success 200 {object} types.InterpretationGermline
 // @Success 206 {object} types.InterpretationGermline
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
+// @Router /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationGermline(repo repository.InterpretationsDAO, termsRepo repository.TermsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
@@ -150,6 +156,7 @@ func GetInterpretationGermline(repo repository.InterpretationsDAO, termsRepo rep
 // @Description Create or Update interpretation germline
 // @Tags interpretations
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param sequencing_id path string true "Sequencing ID"
 // @Param locus_id path string true "Locus ID"
 // @Param transcript_id path string true "Transcript ID"
@@ -158,8 +165,10 @@ func GetInterpretationGermline(repo repository.InterpretationsDAO, termsRepo rep
 // @Produce json
 // @Success 200 {object} types.InterpretationGermline
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [post]
+// @Router /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationGermlineDeprecated(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -190,6 +199,7 @@ func PostInterpretationGermlineDeprecated(repo repository.InterpretationsDAO) gi
 // @Description Create or Update interpretation germline
 // @Tags interpretations
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path string true "Case ID"
 // @Param sequencing_id path string true "Sequencing ID"
 // @Param locus_id path string true "Locus ID"
@@ -199,8 +209,10 @@ func PostInterpretationGermlineDeprecated(repo repository.InterpretationsDAO) gi
 // @Produce json
 // @Success 200 {object} types.InterpretationGermline
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [post]
+// @Router /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -232,15 +244,18 @@ func PostInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerF
 // @Description Get interpretation somatic
 // @Tags interpretations
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param sequencing_id path string true "Sequencing ID"
 // @Param locus_id path string true "Locus ID"
 // @Param transcript_id path string true "Transcript ID"
 // @Produce json
 // @Success 200 {object} types.InterpretationSomatic
 // @Success 206 {object} types.InterpretationSomatic
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [get]
+// @Router /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationSomaticDeprecated(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
@@ -263,6 +278,7 @@ func GetInterpretationSomaticDeprecated(repo repository.InterpretationsDAO) gin.
 // @Description Get interpretation somatic
 // @Tags interpretations
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path string true "Case ID"
 // @Param sequencing_id path string true "Sequencing ID"
 // @Param locus_id path string true "Locus ID"
@@ -270,9 +286,11 @@ func GetInterpretationSomaticDeprecated(repo repository.InterpretationsDAO) gin.
 // @Produce json
 // @Success 200 {object} types.InterpretationSomatic
 // @Success 206 {object} types.InterpretationSomatic
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
+// @Router /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationSomatic(repo repository.InterpretationsDAO, termsRepo repository.TermsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
@@ -306,6 +324,7 @@ func GetInterpretationSomatic(repo repository.InterpretationsDAO, termsRepo repo
 // @Description Create or Update interpretation somatic
 // @Tags interpretations
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param sequencing_id path string true "Sequencing ID"
 // @Param locus_id path string true "Locus ID"
 // @Param transcript_id path string true "Transcript ID"
@@ -314,8 +333,10 @@ func GetInterpretationSomatic(repo repository.InterpretationsDAO, termsRepo repo
 // @Produce json
 // @Success 200 {object} types.InterpretationSomatic
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [post]
+// @Router /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationSomaticDeprecated(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		interpretation := &types.InterpretationSomatic{}
@@ -345,6 +366,7 @@ func PostInterpretationSomaticDeprecated(repo repository.InterpretationsDAO) gin
 // @Description Create or Update interpretation somatic
 // @Tags interpretations
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path string true "Case ID"
 // @Param sequencing_id path string true "Sequencing ID"
 // @Param locus_id path string true "Locus ID"
@@ -354,8 +376,10 @@ func PostInterpretationSomaticDeprecated(repo repository.InterpretationsDAO) gin
 // @Produce json
 // @Success 200 {object} types.InterpretationSomatic
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [post]
+// @Router /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		interpretation := &types.InterpretationSomatic{}
@@ -385,13 +409,16 @@ func PostInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFu
 // @Description Get pubmed citation by ID
 // @Tags interpretations
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param citation_id path string true "Citation ID"
 // @Produce json
 // @Success 200 {object} types.PubmedCitation
 // @Success 206 {object} types.PubmedCitation
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/pubmed/{citation_id} [get]
+// @Router /{tenant}/interpretations/pubmed/{citation_id} [get]
 func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("citation_id")
@@ -423,8 +450,11 @@ func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc 
 // @Query variant_hash path string true "Variant Hash"
 // @Produce json
 // @Success 200 {object} []types.InterpretationGermline
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/germline [get]
+// @Param tenant path string true "Tenant code"
+// @Router /{tenant}/interpretations/germline [get]
 func SearchInterpretationGermline(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		analysisIds := extractArrayQueryParam(c, "analysis_id")
@@ -450,8 +480,11 @@ func SearchInterpretationGermline(repo repository.InterpretationsDAO) gin.Handle
 // @Query variant_hash path string true "Variant Hash"
 // @Produce json
 // @Success 200 {object} []types.InterpretationSomatic
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /interpretations/somatic [get]
+// @Param tenant path string true "Tenant code"
+// @Router /{tenant}/interpretations/somatic [get]
 func SearchInterpretationSomatic(repo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		analysisIds := extractArrayQueryParam(c, "analysis_id")

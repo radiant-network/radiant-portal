@@ -15,15 +15,17 @@ import (
 // @Description Create a new case batch
 // @Tags cases
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param dry_run query boolean false "Dry Run" default(false)
 // @Param message	body		types.CreateCaseBatchBody	true	"Create Body"
 // @Accept json
 // @Produce json
 // @Success 202 {object} types.CreateBatchResponse
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /cases/batch [post]
+// @Router /{tenant}/cases/batch [post]
 func PostCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -71,15 +73,17 @@ func PostCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.Handler
 // @Description Array fields are appended, not replaced.
 // @Tags cases
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param dry_run query boolean false "Dry Run" default(false)
 // @Param message	body		types.PatchCaseBatchBody	true	"Attach Body"
 // @Accept json
 // @Produce json
 // @Success 202 {object} types.CreateBatchResponse
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /cases/batch [patch]
+// @Router /{tenant}/cases/batch [patch]
 func PatchCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (

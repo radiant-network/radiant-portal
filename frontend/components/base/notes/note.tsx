@@ -19,7 +19,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { formatRelativeByCurrentTime } from '@/components/lib/date';
-import { occurencesNotesApi } from '@/utils/api';
+import { DEFAULT_TENANT, occurencesNotesApi } from '@/utils/api';
 
 import { useNotesContext } from './hooks/use-notes';
 import NoteSkeleton from './note-skeleton';
@@ -34,12 +34,12 @@ type PutOccurrenceNoteInput = UpdateOccurrenceNoteInput & {
 };
 
 async function updateNote(_url: string, { arg }: { arg: PutOccurrenceNoteInput }) {
-  const response = await occurencesNotesApi.putOccurrenceNote(arg.id, { content: arg.content });
+  const response = await occurencesNotesApi.putOccurrenceNote(DEFAULT_TENANT, arg.id, { content: arg.content });
   return response.data;
 }
 
 async function deleteNote(_url: string, { arg }: { arg: string }) {
-  const response = await occurencesNotesApi.deleteOccurrenceNote(arg);
+  const response = await occurencesNotesApi.deleteOccurrenceNote(DEFAULT_TENANT, arg);
   return response.data;
 }
 

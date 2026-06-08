@@ -7,7 +7,7 @@ import DataTable from '@/components/base/data-table/data-table';
 import PageHeader from '@/components/base/page/page-header';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
-import { caseApi } from '@/utils/api';
+import { caseApi, DEFAULT_TENANT } from '@/utils/api';
 
 import TableFilters from './table/case-exploration-table-filters';
 import { defaultSettings, getCaseExplorationColumns } from './table/cases-exploration-table-settings';
@@ -17,7 +17,7 @@ type CaseListInput = {
 };
 
 async function fetchCasesList(input: CaseListInput) {
-  const response = await caseApi.searchCases(input.listBodyWithCriteria);
+  const response = await caseApi.searchCases(DEFAULT_TENANT, input.listBodyWithCriteria);
   return response.data;
 }
 

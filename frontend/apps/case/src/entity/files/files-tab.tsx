@@ -6,7 +6,7 @@ import { ApiError, DocumentsSearchResponse, ListBodyWithCriteria, SearchCriterio
 import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
-import { caseApi } from '@/utils/api';
+import { caseApi, DEFAULT_TENANT } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { defaultSettings, getCaseEntityDocumentsColumns } from './files-table/files-tab-table-settings';
@@ -18,7 +18,7 @@ type DocumentInput = {
 };
 
 async function fetchDocuments(input: DocumentInput) {
-  const response = await caseApi.caseEntityDocumentsSearch(input.caseId, input.body);
+  const response = await caseApi.caseEntityDocumentsSearch(DEFAULT_TENANT, input.caseId, input.body);
   return response.data;
 }
 
