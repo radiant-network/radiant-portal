@@ -9,7 +9,7 @@ import { Label } from '@/components/base/shadcn/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
-import { genesApi } from '@/utils/api';
+import { DEFAULT_TENANT, genesApi } from '@/utils/api';
 
 import {
   QBActionType,
@@ -82,7 +82,7 @@ export function SearchFacet({ search }: SearchFilterProps) {
         // Fetch details for each selected gene
         const optionsPromises = selectedValues.map(async value => {
           try {
-            const response = await genesApi.geneAutoComplete(value);
+            const response = await genesApi.geneAutoComplete(DEFAULT_TENANT, value);
             const geneData = response.data.find(item => item.source?.name === value);
 
             if (geneData) {
@@ -130,7 +130,7 @@ export function SearchFacet({ search }: SearchFilterProps) {
     if (!searchTerm) return [];
 
     try {
-      const response = await genesApi.geneAutoComplete(searchTerm);
+      const response = await genesApi.geneAutoComplete(DEFAULT_TENANT, searchTerm);
       return response.data.map(item => ({
         value: item.source?.name || '',
         label: (

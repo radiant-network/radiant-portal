@@ -15,13 +15,16 @@ import (
 // @Description Search cases
 // @Tags cases
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param			message	body		types.ListBodyWithCriteria	true	"List Body"
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.CasesSearchResponse
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /cases/search [post]
+// @Router /{tenant}/cases/search [post]
 func SearchCasesHandler(repo repository.CasesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -57,12 +60,15 @@ func SearchCasesHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Description Retrieve types.AutocompleteResult list of ids matching prefix
 // @Tags cases
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param prefix query string true "Prefix"
 // @Param limit query string false "Limit"
 // @Produce json
 // @Success 200 {array} types.AutocompleteResult
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /cases/autocomplete [get]
+// @Router /{tenant}/cases/autocomplete [get]
 func CasesAutocompleteHandler(repo repository.CasesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
@@ -87,8 +93,11 @@ func CasesAutocompleteHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Security bearerauth
 // @Produce json
 // @Success 200 {object} types.CaseFilters
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /cases/filters [get]
+// @Param tenant path string true "Tenant code"
+// @Router /{tenant}/cases/filters [get]
 func CasesFiltersHandler(repo repository.CasesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		filters, err := repo.GetCasesFilters()
@@ -106,12 +115,15 @@ func CasesFiltersHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Description Retrieve types.CaseEntity by its ID
 // @Tags cases
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Produce json
 // @Success 200 {object} types.CaseEntity
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /cases/{case_id} [get]
+// @Router /{tenant}/cases/{case_id} [get]
 func CaseEntityHandler(repo repository.CasesDAO, igvRepo repository.IGVRepositoryDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errCaseId := strconv.Atoi(c.Param("case_id"))
@@ -144,14 +156,17 @@ func CaseEntityHandler(repo repository.CasesDAO, igvRepo repository.IGVRepositor
 // @Description Search for types.DocumentResult list for a case entity
 // @Tags cases
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param			message	body		types.ListBodyWithCriteria	true	"List Body"
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.DocumentsSearchResponse
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /cases/{case_id}/documents/search [post]
+// @Router /{tenant}/cases/{case_id}/documents/search [post]
 func CaseEntityDocumentsSearchHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -198,15 +213,18 @@ func CaseEntityDocumentsSearchHandler(repo repository.DocumentsDAO) gin.HandlerF
 // @Description Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
 // @Tags cases
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequencing Experiment ID"
 // @Param data_type query string true "Occurrence type" Enums(germline_snv, germline_cnv, somatic_snv)
 // @Produce json
 // @Success 200 {array} types.TaskOccurrenceType
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /cases/{case_id}/{seq_id}/tasks_with_occurrences [get]
+// @Router /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences [get]
 func CaseOccurrenceTasksHandler(repo repository.TaskDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, err := strconv.Atoi(c.Param("case_id"))
@@ -243,11 +261,14 @@ func CaseOccurrenceTasksHandler(repo repository.TaskDAO) gin.HandlerFunc {
 // @Description Retrieve types.DocumentFilters documents filters for a specific case
 // @Tags cases
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Produce json
 // @Success 200 {object} types.DocumentFilters
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /cases/{case_id}/documents/filters [get]
+// @Router /{tenant}/cases/{case_id}/documents/filters [get]
 func CaseEntityDocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		filters, err := repo.GetDocumentsFilters(false)

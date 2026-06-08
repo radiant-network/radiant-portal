@@ -17,12 +17,15 @@ import (
 // @Description Get IGV tracks for a case
 // @Tags igv
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path string true "Case ID"
 // @Produce json
 // @Success 200 {object} types.IGVTracks
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /igv/{case_id} [get]
+// @Router /{tenant}/igv/{case_id} [get]
 func GetIGVHandler(igvRepo repository.IGVRepositoryDAO, casesRepo repository.CasesDAO, presigner utils.PreSigner) gin.HandlerFunc {
 	if presigner == nil {
 		presigner = utils.NewS3PreSigner()

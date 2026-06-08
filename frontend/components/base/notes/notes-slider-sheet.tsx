@@ -4,7 +4,7 @@ import useSWR from 'swr';
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/base/shadcn/sheet';
 import { useI18n } from '@/components/hooks/i18n';
-import { occurencesNotesApi } from '@/utils/api';
+import { DEFAULT_TENANT, occurencesNotesApi } from '@/utils/api';
 
 import { Button } from '../shadcn/button';
 import { Spinner } from '../shadcn/spinner';
@@ -15,6 +15,7 @@ type NotesSliderProps = NotesContainerProps;
 
 async function fetchNotesCount(input: NotesContainerProps) {
   const response = await occurencesNotesApi.countOccurrenceNotes(
+    DEFAULT_TENANT,
     input.caseId,
     input.seqId,
     input.taskId,

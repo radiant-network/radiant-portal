@@ -27,7 +27,7 @@ import (
 func assertGetIGV(t *testing.T, router *gin.Engine, caseID int, expected []types.IGVTrackEnriched) {
 	t.Helper()
 
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/igv/%d", caseID), bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/igv/%d", caseID), bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -60,7 +60,7 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 		igvRepo := repository.NewIGVRepository(starrocks)
 		casesRepo := repository.NewCasesRepository(starrocks)
 		router := gin.Default()
-		router.GET("/igv/:case_id", server.GetIGVHandler(igvRepo, casesRepo, nil))
+		router.GET("/:tenant/igv/:case_id", server.GetIGVHandler(igvRepo, casesRepo, nil))
 
 		t.Run("germline trio (case 70)", func(t *testing.T) {
 			assertGetIGV(t, router, 70, []types.IGVTrackEnriched{

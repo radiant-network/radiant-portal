@@ -19,9 +19,9 @@ func assertSearchCasesHandler(t *testing.T, data string, body string, expected s
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
 		router := gin.Default()
-		router.POST("/cases/search", server.SearchCasesHandler(repo))
+		router.POST("/:tenant/cases/search", server.SearchCasesHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/cases/search", bytes.NewBuffer([]byte(body)))
+		req, _ := http.NewRequest("POST", "/radiant/cases/search", bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -72,9 +72,9 @@ func assertCaseIdsAutoComplete(t *testing.T, data string, prefix string, limit i
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
 		router := gin.Default()
-		router.GET("/cases/autocomplete", server.CasesAutocompleteHandler(repo))
+		router.GET("/:tenant/cases/autocomplete", server.CasesAutocompleteHandler(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/cases/autocomplete?prefix=%s&limit=%d", prefix, limit), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/cases/autocomplete?prefix=%s&limit=%d", prefix, limit), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -92,9 +92,9 @@ func assertGetCasesFilters(t *testing.T, data string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
 		router := gin.Default()
-		router.GET("/cases/filters", server.CasesFiltersHandler(repo))
+		router.GET("/:tenant/cases/filters", server.CasesFiltersHandler(repo))
 
-		req, _ := http.NewRequest("GET", "/cases/filters", bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", "/radiant/cases/filters", bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -163,9 +163,9 @@ func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected str
 		repo := repository.NewCasesRepository(db)
 		igvRepo := repository.NewIGVRepository(db)
 		router := gin.Default()
-		router.GET("/cases/:case_id", server.CaseEntityHandler(repo, igvRepo))
+		router.GET("/:tenant/cases/:case_id", server.CaseEntityHandler(repo, igvRepo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/cases/%d", caseId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/cases/%d", caseId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -267,9 +267,9 @@ func assertCaseEntityDocumentsSearchHandler(t *testing.T, data string, caseId in
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
-		router.POST("/cases/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repo))
+		router.POST("/:tenant/cases/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repo))
 
-		req, _ := http.NewRequest("POST", fmt.Sprintf("/cases/%d/documents/search", caseId), bytes.NewBuffer([]byte(body)))
+		req, _ := http.NewRequest("POST", fmt.Sprintf("/radiant/cases/%d/documents/search", caseId), bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -324,9 +324,9 @@ func assertCaseEntityDocumentsFiltersHandler(t *testing.T, data string, caseId i
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
 		router := gin.Default()
-		router.GET("/cases/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repo))
+		router.GET("/:tenant/cases/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/cases/%d/documents/filters", caseId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/cases/%d/documents/filters", caseId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 

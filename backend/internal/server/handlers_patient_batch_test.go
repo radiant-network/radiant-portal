@@ -32,9 +32,9 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 	auth := &testutils.MockAuth{Username: "testuser"}
 
 	router := gin.Default()
-	router.POST("/patients/batch", PostPatientBatchHandler(repo, auth))
+	router.POST("/:tenant/patients/batch", PostPatientBatchHandler(repo, auth))
 	body := `{"patients": [{"submitter_patient_id": "p1", "submitter_patient_id_type": "MR", "patient_organization_code": "org1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
-	req, _ := http.NewRequest(http.MethodPost, "/patients/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/patients/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -54,9 +54,9 @@ func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/patients/batch", PostPatientBatchHandler(repo, auth))
+	router.POST("/:tenant/patients/batch", PostPatientBatchHandler(repo, auth))
 	body := `{"patients": [{"submitter_patient_id": "p1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
-	req, _ := http.NewRequest(http.MethodPost, "/patients/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/patients/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -81,9 +81,9 @@ func TestPostPatientBatchHandler_EmptyPatients(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/patients/batch", PostPatientBatchHandler(repo, auth))
+	router.POST("/:tenant/patients/batch", PostPatientBatchHandler(repo, auth))
 	body := `{"patients": []}`
-	req, _ := http.NewRequest(http.MethodPost, "/patients/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/patients/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)

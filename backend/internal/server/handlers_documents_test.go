@@ -86,11 +86,11 @@ func (m *MockRepository) GetById(id int) (*types.Document, error) {
 func Test_SearchDocumentsHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/documents/search", SearchDocumentsHandler(repo))
+	router.POST("/:tenant/documents/search", SearchDocumentsHandler(repo))
 	body := `{
 			"additional_fields":[]
 	}`
-	req, _ := http.NewRequest("POST", "/documents/search", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/documents/search", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -121,9 +121,9 @@ func Test_SearchDocumentsHandler(t *testing.T) {
 func Test_DocumentsAutocompleteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/documents/autocomplete", DocumentsAutocompleteHandler(repo))
+	router.GET("/:tenant/documents/autocomplete", DocumentsAutocompleteHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/documents/autocomplete?prefix=1&limit=5", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/documents/autocomplete?prefix=1&limit=5", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -138,9 +138,9 @@ func Test_DocumentsAutocompleteHandler(t *testing.T) {
 func Test_DocumentsFiltersHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/documents/filters", DocumentsFiltersHandler(repo))
+	router.GET("/:tenant/documents/filters", DocumentsFiltersHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/documents/filters", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/documents/filters", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -174,9 +174,9 @@ func Test_GetDocumentsDownloadUrlHandler_Success(t *testing.T) {
 	repo := &MockRepository{}
 	presigner := testutils.NewMockS3PreSigner()
 	router := gin.Default()
-	router.GET("/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
+	router.GET("/:tenant/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
 
-	req, _ := http.NewRequest("GET", "/documents/203/download_url", nil)
+	req, _ := http.NewRequest("GET", "/radiant/documents/203/download_url", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -191,9 +191,9 @@ func Test_GetDocumentsDownloadUrlHandler_InvalidDocumentId(t *testing.T) {
 	repo := &MockRepository{}
 	presigner := testutils.NewMockS3PreSigner()
 	router := gin.Default()
-	router.GET("/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
+	router.GET("/:tenant/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
 
-	req, _ := http.NewRequest("GET", "/documents/invalid/download_url", nil)
+	req, _ := http.NewRequest("GET", "/radiant/documents/invalid/download_url", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -204,9 +204,9 @@ func Test_GetDocumentsDownloadUrlHandler_DocumentNotFound(t *testing.T) {
 	repo := &MockRepository{}
 	presigner := testutils.NewMockS3PreSigner()
 	router := gin.Default()
-	router.GET("/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
+	router.GET("/:tenant/documents/:document_id/download_url", GetDocumentsDownloadUrlHandler(repo, presigner))
 
-	req, _ := http.NewRequest("GET", "/documents/999999/download_url", nil)
+	req, _ := http.NewRequest("GET", "/radiant/documents/999999/download_url", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

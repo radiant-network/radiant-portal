@@ -160,11 +160,11 @@ func (m *MockRepository) GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId st
 func Test_SearchCasesHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/cases/search", SearchCasesHandler(repo))
+	router.POST("/:tenant/cases/search", SearchCasesHandler(repo))
 	body := `{
 			"additional_fields":[]
 	}`
-	req, _ := http.NewRequest("POST", "/cases/search", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/cases/search", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -201,9 +201,9 @@ func Test_SearchCasesHandler(t *testing.T) {
 func Test_CasesAutocompleteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/cases/autocomplete", CasesAutocompleteHandler(repo))
+	router.GET("/:tenant/cases/autocomplete", CasesAutocompleteHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/cases/autocomplete?prefix=1&limit=5", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/cases/autocomplete?prefix=1&limit=5", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -218,9 +218,9 @@ func Test_CasesAutocompleteHandler(t *testing.T) {
 func Test_CasesFiltersHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/cases/filters", CasesFiltersHandler(repo))
+	router.GET("/:tenant/cases/filters", CasesFiltersHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/cases/filters", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/cases/filters", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -286,9 +286,9 @@ func Test_CaseEntityHandler(t *testing.T) {
 	}
 
 	router := gin.Default()
-	router.GET("/cases/:case_id", CaseEntityHandler(repo, igvRepo))
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo))
 
-	req, _ := http.NewRequest("GET", "/cases/1", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -378,9 +378,9 @@ func Test_CaseEntityHandler_NoIGVTracks(t *testing.T) {
 	igvRepo := &MockIGVRepository{}
 
 	router := gin.Default()
-	router.GET("/cases/:case_id", CaseEntityHandler(repo, igvRepo))
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo))
 
-	req, _ := http.NewRequest("GET", "/cases/1", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -402,9 +402,9 @@ func Test_CaseEntityHandler_IGVRepositoryError(t *testing.T) {
 	}
 
 	router := gin.Default()
-	router.GET("/cases/:case_id", CaseEntityHandler(repo, igvRepo))
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo))
 
-	req, _ := http.NewRequest("GET", "/cases/1", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -414,11 +414,11 @@ func Test_CaseEntityHandler_IGVRepositoryError(t *testing.T) {
 func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/cases/:case_id/documents/search", CaseEntityDocumentsSearchHandler(repo))
+	router.POST("/:tenant/cases/:case_id/documents/search", CaseEntityDocumentsSearchHandler(repo))
 	body := `{
 			"additional_fields":[]
 	}`
-	req, _ := http.NewRequest("POST", "/cases/1/documents/search", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/cases/1/documents/search", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -449,9 +449,9 @@ func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
 func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/cases/:case_id/documents/filters", CaseEntityDocumentsFiltersHandler(repo))
+	router.GET("/:tenant/cases/:case_id/documents/filters", CaseEntityDocumentsFiltersHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/cases/1/documents/filters", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/cases/1/documents/filters", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

@@ -26,7 +26,7 @@ func Test_PostSequencingExperimentBatch_OK(t *testing.T) {
 
 		router := gin.Default()
 		router.POST(
-			"/sequencing/batches",
+			"/:tenant/sequencing/batches",
 			server.PostSequencingExperimentBatchHandler(repo, &auth),
 		)
 
@@ -55,7 +55,7 @@ func Test_PostSequencingExperimentBatch_OK(t *testing.T) {
 		payload, err := json.Marshal(reqBody)
 		require.NoError(t, err, "marshalling request body")
 
-		req, _ := http.NewRequest("POST", "/sequencing/batches", bytes.NewBuffer(payload))
+		req, _ := http.NewRequest("POST", "/radiant/sequencing/batches", bytes.NewBuffer(payload))
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)

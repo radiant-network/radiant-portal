@@ -42,6 +42,7 @@ class MondoApi:
     @validate_call
     def mondo_term_auto_complete(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -61,6 +62,8 @@ class MondoApi:
 
         Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -88,6 +91,7 @@ class MondoApi:
         """ # noqa: E501
 
         _param = self._mondo_term_auto_complete_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -98,6 +102,8 @@ class MondoApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutoCompleteTerm]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -114,6 +120,7 @@ class MondoApi:
     @validate_call
     def mondo_term_auto_complete_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -133,6 +140,8 @@ class MondoApi:
 
         Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -160,6 +169,7 @@ class MondoApi:
         """ # noqa: E501
 
         _param = self._mondo_term_auto_complete_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -170,6 +180,8 @@ class MondoApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutoCompleteTerm]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -186,6 +198,7 @@ class MondoApi:
     @validate_call
     def mondo_term_auto_complete_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -205,6 +218,8 @@ class MondoApi:
 
         Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -232,6 +247,7 @@ class MondoApi:
         """ # noqa: E501
 
         _param = self._mondo_term_auto_complete_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -242,6 +258,8 @@ class MondoApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutoCompleteTerm]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -253,6 +271,7 @@ class MondoApi:
 
     def _mondo_term_auto_complete_serialize(
         self,
+        tenant,
         prefix,
         limit,
         _request_auth,
@@ -276,6 +295,8 @@ class MondoApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         if prefix is not None:
             
@@ -306,7 +327,7 @@ class MondoApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/mondo/autocomplete',
+            resource_path='/{tenant}/mondo/autocomplete',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

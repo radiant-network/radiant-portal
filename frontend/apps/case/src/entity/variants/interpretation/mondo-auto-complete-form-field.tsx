@@ -9,7 +9,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/shadcn/form';
 import { useI18n } from '@/components/hooks/i18n';
 import { debounce } from '@/components/hooks/useDebounce';
-import { mondoApi } from '@/utils/api';
+import { DEFAULT_TENANT, mondoApi } from '@/utils/api';
 import MondoOptionItemLabel from 'components/base/variant/mondo-option-item-label';
 
 import { GermlineInterpretationSchemaType, SomaticInterpretationSchemaType } from './types';
@@ -30,7 +30,7 @@ function MondoAutoCompleteFormField({ name, label, placeholder, schema }: MondoA
 
   const mondoSearch = useSWR(
     searchValue || form.getValues(name),
-    (value: string) => mondoApi.mondoTermAutoComplete(value),
+    (value: string) => mondoApi.mondoTermAutoComplete(DEFAULT_TENANT, value),
     {
       onSuccess: data => {
         setOptions(

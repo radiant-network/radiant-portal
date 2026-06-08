@@ -7,7 +7,7 @@ import QueryBuilderDataTable from '@/components/base/query-builder/query-builder
 import { useConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 import { getPatientClinicalInformation } from '@/components/lib/case-entity';
-import { occurrencesApi } from '@/utils/api';
+import { DEFAULT_TENANT, occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 import { isValidSeqId } from '../germline-occurrence/libs/seq-id';
@@ -48,13 +48,13 @@ function SNVTumorNormalTab({ seqId, patientSelected, caseEntity }: SomaticOccurr
         list: async (params: IListInput) => {
           if (taskId === undefined) return [];
           return occurrencesApi
-            .listSomaticSNVOccurrences(caseId, seqId, taskId, params.listBody)
+            .listSomaticSNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId, params.listBody)
             .then(response => response.data);
         },
         count: async (params: ICountInput) => {
           if (taskId === undefined) return { count: 0 };
           return occurrencesApi
-            .countSomaticSNVOccurrences(caseId, seqId, taskId, params.countBody)
+            .countSomaticSNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId, params.countBody)
             .then(response => response.data);
         },
       }}

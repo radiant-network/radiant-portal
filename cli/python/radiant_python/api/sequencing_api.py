@@ -44,6 +44,7 @@ class SequencingApi:
     @validate_call
     def get_sequencing_experiment_detail_by_id(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         seq_id: Annotated[StrictStr, Field(description="Seq ID")],
         _request_timeout: Union[
             None,
@@ -62,6 +63,8 @@ class SequencingApi:
 
         Get SequencingExperimentDetail by id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param seq_id: Seq ID (required)
         :type seq_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -87,6 +90,7 @@ class SequencingApi:
         """ # noqa: E501
 
         _param = self._get_sequencing_experiment_detail_by_id_serialize(
+            tenant=tenant,
             seq_id=seq_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -97,6 +101,8 @@ class SequencingApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SequencingExperimentDetail",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -113,6 +119,7 @@ class SequencingApi:
     @validate_call
     def get_sequencing_experiment_detail_by_id_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         seq_id: Annotated[StrictStr, Field(description="Seq ID")],
         _request_timeout: Union[
             None,
@@ -131,6 +138,8 @@ class SequencingApi:
 
         Get SequencingExperimentDetail by id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param seq_id: Seq ID (required)
         :type seq_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -156,6 +165,7 @@ class SequencingApi:
         """ # noqa: E501
 
         _param = self._get_sequencing_experiment_detail_by_id_serialize(
+            tenant=tenant,
             seq_id=seq_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -166,6 +176,8 @@ class SequencingApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SequencingExperimentDetail",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -182,6 +194,7 @@ class SequencingApi:
     @validate_call
     def get_sequencing_experiment_detail_by_id_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         seq_id: Annotated[StrictStr, Field(description="Seq ID")],
         _request_timeout: Union[
             None,
@@ -200,6 +213,8 @@ class SequencingApi:
 
         Get SequencingExperimentDetail by id
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param seq_id: Seq ID (required)
         :type seq_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -225,6 +240,7 @@ class SequencingApi:
         """ # noqa: E501
 
         _param = self._get_sequencing_experiment_detail_by_id_serialize(
+            tenant=tenant,
             seq_id=seq_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -235,6 +251,8 @@ class SequencingApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "SequencingExperimentDetail",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -246,6 +264,7 @@ class SequencingApi:
 
     def _get_sequencing_experiment_detail_by_id_serialize(
         self,
+        tenant,
         seq_id,
         _request_auth,
         _content_type,
@@ -268,6 +287,8 @@ class SequencingApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if seq_id is not None:
             _path_params['seq_id'] = seq_id
         # process the query parameters
@@ -292,7 +313,7 @@ class SequencingApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/sequencing/{seq_id}/details',
+            resource_path='/{tenant}/sequencing/{seq_id}/details',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -311,6 +332,7 @@ class SequencingApi:
     @validate_call
     def post_sequencing_experiment_batch(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_sequencing_experiment_batch_body: Annotated[CreateSequencingExperimentBatchBody, Field(description="Create Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -330,6 +352,8 @@ class SequencingApi:
 
         Create a new sequencing experiment batch
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_sequencing_experiment_batch_body: Create Body (required)
         :type create_sequencing_experiment_batch_body: CreateSequencingExperimentBatchBody
         :param dry_run: Dry Run
@@ -357,6 +381,7 @@ class SequencingApi:
         """ # noqa: E501
 
         _param = self._post_sequencing_experiment_batch_serialize(
+            tenant=tenant,
             create_sequencing_experiment_batch_body=create_sequencing_experiment_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -368,6 +393,7 @@ class SequencingApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -385,6 +411,7 @@ class SequencingApi:
     @validate_call
     def post_sequencing_experiment_batch_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_sequencing_experiment_batch_body: Annotated[CreateSequencingExperimentBatchBody, Field(description="Create Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -404,6 +431,8 @@ class SequencingApi:
 
         Create a new sequencing experiment batch
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_sequencing_experiment_batch_body: Create Body (required)
         :type create_sequencing_experiment_batch_body: CreateSequencingExperimentBatchBody
         :param dry_run: Dry Run
@@ -431,6 +460,7 @@ class SequencingApi:
         """ # noqa: E501
 
         _param = self._post_sequencing_experiment_batch_serialize(
+            tenant=tenant,
             create_sequencing_experiment_batch_body=create_sequencing_experiment_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -442,6 +472,7 @@ class SequencingApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -459,6 +490,7 @@ class SequencingApi:
     @validate_call
     def post_sequencing_experiment_batch_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_sequencing_experiment_batch_body: Annotated[CreateSequencingExperimentBatchBody, Field(description="Create Body")],
         dry_run: Annotated[Optional[StrictBool], Field(description="Dry Run")] = None,
         _request_timeout: Union[
@@ -478,6 +510,8 @@ class SequencingApi:
 
         Create a new sequencing experiment batch
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_sequencing_experiment_batch_body: Create Body (required)
         :type create_sequencing_experiment_batch_body: CreateSequencingExperimentBatchBody
         :param dry_run: Dry Run
@@ -505,6 +539,7 @@ class SequencingApi:
         """ # noqa: E501
 
         _param = self._post_sequencing_experiment_batch_serialize(
+            tenant=tenant,
             create_sequencing_experiment_batch_body=create_sequencing_experiment_batch_body,
             dry_run=dry_run,
             _request_auth=_request_auth,
@@ -516,6 +551,7 @@ class SequencingApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '202': "CreateBatchResponse",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '500': "ApiError",
         }
@@ -528,6 +564,7 @@ class SequencingApi:
 
     def _post_sequencing_experiment_batch_serialize(
         self,
+        tenant,
         create_sequencing_experiment_batch_body,
         dry_run,
         _request_auth,
@@ -551,6 +588,8 @@ class SequencingApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         if dry_run is not None:
             
@@ -592,7 +631,7 @@ class SequencingApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/sequencing/batch',
+            resource_path='/{tenant}/sequencing/batch',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

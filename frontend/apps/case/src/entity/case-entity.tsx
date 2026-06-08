@@ -11,7 +11,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { caseApi } from '@/utils/api';
+import { caseApi, DEFAULT_TENANT } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import DetailsTab from './details/details-tab';
@@ -28,7 +28,7 @@ type CaseEntityInput = {
 };
 
 async function fetchCaseEntity(input: CaseEntityInput) {
-  const response = await caseApi.caseEntity(input.caseId);
+  const response = await caseApi.caseEntity(DEFAULT_TENANT, input.caseId);
   return response.data;
 }
 

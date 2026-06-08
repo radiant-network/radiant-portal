@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shad
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { toPercentage } from '@/components/lib/number-format';
-import { variantsApi } from '@/utils/api';
+import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
 
 import { getMyNetworkColumns, myNetworkDefaultSettings } from './table-settings';
 
@@ -25,12 +25,12 @@ type MyNetworkInput = {
 };
 
 async function fetchFrequenciesBySplit(input: MyNetworkInput): Promise<VariantInternalFrequencies> {
-  const response = await variantsApi.getGermlineVariantInternalFrequencies(input.locusId, input.split);
+  const response = await variantsApi.getGermlineVariantInternalFrequencies(DEFAULT_TENANT, input.locusId, input.split);
   return response.data;
 }
 
 async function fetchGlobalFrequencies(locusId: string): Promise<InternalFrequencies> {
-  const response = await variantsApi.getGermlineVariantGlobalInternalFrequencies(locusId);
+  const response = await variantsApi.getGermlineVariantGlobalInternalFrequencies(DEFAULT_TENANT, locusId);
   return response.data;
 }
 

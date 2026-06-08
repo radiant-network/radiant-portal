@@ -105,7 +105,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	tenantRoutes := privateRoutes.Group("/:tenant")
 	tenantRoutes.Use(server.RequireTenantAccess(auth, repoAuth, enforceTenantAccess))
 
-	casesGroup := privateRoutes.Group("/cases")
+	casesGroup := tenantRoutes.Group("/cases")
 	casesGroup.POST("/search", server.SearchCasesHandler(repoCases))
 	casesGroup.GET("/autocomplete", server.CasesAutocompleteHandler(repoCases))
 	casesGroup.GET("/filters", server.CasesFiltersHandler(repoCases))
@@ -114,17 +114,17 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	casesGroup.GET("/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repoDocuments))
 	casesGroup.GET("/:case_id/:seq_id/tasks_with_occurrences", server.CaseOccurrenceTasksHandler(repoTasks))
 
-	geneGroup := privateRoutes.Group("/genes")
+	geneGroup := tenantRoutes.Group("/genes")
 	geneGroup.GET("/autocomplete", server.GetGeneAutoCompleteHandler(repoGenes))
 	geneGroup.POST("/search", server.SearchGenesHandler(repoGenes))
 
 	hpoGroup := tenantRoutes.Group("/hpo")
 	hpoGroup.GET("/autocomplete", server.GetHPOTermAutoComplete(repoTerms))
 
-	igvGroup := privateRoutes.Group("/igv")
+	igvGroup := tenantRoutes.Group("/igv")
 	igvGroup.GET("/:case_id", server.GetIGVHandler(repoIGV, repoCases, s3Presigner))
 
-	interpretationsGroup := privateRoutes.Group("/interpretations")
+	interpretationsGroup := tenantRoutes.Group("/interpretations")
 	interpretationsGroup.GET("/pubmed/:citation_id", server.GetPubmedCitation(pubmedClient))
 	interpretationsGroup.GET("/germline", server.SearchInterpretationGermline(repoPostgres.Interpretations))
 	interpretationsGroup.GET("/somatic", server.SearchInterpretationSomatic(repoPostgres.Interpretations))
@@ -143,17 +143,17 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	interpretationsSomaticGroup.GET("", server.GetInterpretationSomatic(repoPostgres.Interpretations, repoTerms))
 	interpretationsSomaticGroup.POST("", server.PostInterpretationSomatic(repoPostgres.Interpretations))
 
-	mondoGroup := privateRoutes.Group("/mondo")
+	mondoGroup := tenantRoutes.Group("/mondo")
 	mondoGroup.GET("/autocomplete", server.GetMondoTermAutoComplete(repoTerms))
 
-	notesGroup := privateRoutes.Group("/notes")
+	notesGroup := tenantRoutes.Group("/notes")
 	notesGroup.POST("", server.PostOccurrenceNoteHandler(repoOccurrenceNotes, auth))
 	notesGroup.PUT("/:id", server.PutOccurrenceNoteHandler(repoOccurrenceNotes, auth))
 	notesGroup.DELETE("/:id", server.DeleteOccurrenceNoteHandler(repoOccurrenceNotes, auth))
 	notesGroup.GET("/:case_id/:seq_id/:task_id/:occurrence_id", server.GetOccurrenceNotesHandler(repoOccurrenceNotes))
 	notesGroup.GET("/:case_id/:seq_id/:task_id/:occurrence_id/count", server.GetOccurrenceNoteCountHandler(repoOccurrenceNotes))
 
-	occurrencesGroup := privateRoutes.Group("/occurrences")
+	occurrencesGroup := tenantRoutes.Group("/occurrences")
 	occurrencesGermlineGroup := occurrencesGroup.Group("/germline")
 	occurrencesSomaticGroup := occurrencesGroup.Group("/somatic")
 
@@ -183,7 +183,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", server.OccurrencesSomaticSNVStatisticsHandler(repoSomaticSNVOccurrences))
 	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", server.GetExpandedSomaticSNVOccurrence(repoSomaticSNVOccurrences, repoPostgres.Interpretations))
 
-	sequencingGroup := privateRoutes.Group("/sequencing")
+	sequencingGroup := tenantRoutes.Group("/sequencing")
 	sequencingGroup.GET("/:seq_id/details", server.GetSequencingExperimentDetailByIdHandler(repoSeqExp))
 
 	usersGroup := privateRoutes.Group("/users")
@@ -196,7 +196,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	usersGroup.GET("/preferences/:key", server.GetUserPreferencesHandler(repoUserPreferences, auth))
 	usersGroup.POST("/preferences/:key", server.UpdateUserPreferencesHandler(repoUserPreferences, auth))
 
-	variantsGroup := privateRoutes.Group("/variants")
+	variantsGroup := tenantRoutes.Group("/variants")
 	variantsGermlineGroup := variantsGroup.Group("/germline")
 	variantsGermlineGroup.GET("/:locus_id/header", server.GetGermlineVariantHeader(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/overview", server.GetGermlineVariantOverview(repoVariants, repoExomiser, repoPostgres.Interpretations))
@@ -211,14 +211,14 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	variantsGermlineGroup.GET("/:locus_id/internal_frequencies", server.GetGermlineVariantInternalFrequenciesHandler(repoVariants))
 	variantsGermlineGroup.GET("/:locus_id/internal_frequencies/global", server.GetGermlineVariantGlobalInternalFrequenciesHandler(repoVariants))
 
-	documentsGroup := privateRoutes.Group("/documents")
+	documentsGroup := tenantRoutes.Group("/documents")
 	documentsGroup.POST("/search", server.SearchDocumentsHandler(repoDocuments))
 	documentsGroup.GET("/autocomplete", server.DocumentsAutocompleteHandler(repoDocuments))
 	documentsGroup.GET("/filters", server.DocumentsFiltersHandler(repoDocuments))
 	documentsGroup.GET("/:document_id/download_url", server.GetDocumentsDownloadUrlHandler(repoDocuments, s3Presigner))
 
 	dataManagerResourceName := os.Getenv("KEYCLOAK_CLIENT")
-	dataManagerRoutes := privateRoutes.Group("/")
+	dataManagerRoutes := tenantRoutes.Group("/")
 	dataManagerRoutes.Use(server.RequireRole(auth, utils.DataManagerRole, dataManagerResourceName))
 	{
 		batchesGroup := dataManagerRoutes.Group("/batches")

@@ -9,7 +9,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { FormLabel, FormMessage } from '@/components/base/shadcn/form';
 import { Input } from '@/components/base/shadcn/input';
 import { useI18n } from '@/components/hooks/i18n';
-import { interpretationApi } from '@/utils/api';
+import { DEFAULT_TENANT, interpretationApi } from '@/utils/api';
 
 import { GenericInterpretationSchemaType } from './types';
 
@@ -26,7 +26,7 @@ function PubmedFormField() {
 
   const pubmedFetch = useSWR(
     pubmedFetchKey,
-    ({ value }) => interpretationApi.getPubmedCitation(value).then(res => res.data),
+    ({ value }) => interpretationApi.getPubmedCitation(DEFAULT_TENANT, value).then(res => res.data),
     {
       onSuccess: data => {
         if (pubmedFetchKey?.index !== undefined) {

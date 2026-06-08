@@ -40,6 +40,7 @@ class OccurrenceFlagsApi:
     @validate_call
     def delete_occurrence_flag(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Seq ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -61,6 +62,8 @@ class OccurrenceFlagsApi:
 
         Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Seq ID (required)
@@ -92,6 +95,7 @@ class OccurrenceFlagsApi:
         """ # noqa: E501
 
         _param = self._delete_occurrence_flag_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -104,6 +108,8 @@ class OccurrenceFlagsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -121,6 +127,7 @@ class OccurrenceFlagsApi:
     @validate_call
     def delete_occurrence_flag_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Seq ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -142,6 +149,8 @@ class OccurrenceFlagsApi:
 
         Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Seq ID (required)
@@ -173,6 +182,7 @@ class OccurrenceFlagsApi:
         """ # noqa: E501
 
         _param = self._delete_occurrence_flag_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -185,6 +195,8 @@ class OccurrenceFlagsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -202,6 +214,7 @@ class OccurrenceFlagsApi:
     @validate_call
     def delete_occurrence_flag_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Seq ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -223,6 +236,8 @@ class OccurrenceFlagsApi:
 
         Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id). Returns 404 if no flag exists.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Seq ID (required)
@@ -254,6 +269,7 @@ class OccurrenceFlagsApi:
         """ # noqa: E501
 
         _param = self._delete_occurrence_flag_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -266,6 +282,8 @@ class OccurrenceFlagsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -278,6 +296,7 @@ class OccurrenceFlagsApi:
 
     def _delete_occurrence_flag_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -303,6 +322,8 @@ class OccurrenceFlagsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -333,7 +354,7 @@ class OccurrenceFlagsApi:
 
         return self.api_client.param_serialize(
             method='DELETE',
-            resource_path='/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}',
+            resource_path='/{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -352,6 +373,7 @@ class OccurrenceFlagsApi:
     @validate_call
     def upsert_occurrence_flag(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Seq ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -374,6 +396,8 @@ class OccurrenceFlagsApi:
 
         Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Seq ID (required)
@@ -407,6 +431,7 @@ class OccurrenceFlagsApi:
         """ # noqa: E501
 
         _param = self._upsert_occurrence_flag_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -422,6 +447,7 @@ class OccurrenceFlagsApi:
             '204': None,
             '400': "ApiError",
             '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -438,6 +464,7 @@ class OccurrenceFlagsApi:
     @validate_call
     def upsert_occurrence_flag_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Seq ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -460,6 +487,8 @@ class OccurrenceFlagsApi:
 
         Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Seq ID (required)
@@ -493,6 +522,7 @@ class OccurrenceFlagsApi:
         """ # noqa: E501
 
         _param = self._upsert_occurrence_flag_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -508,6 +538,7 @@ class OccurrenceFlagsApi:
             '204': None,
             '400': "ApiError",
             '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -524,6 +555,7 @@ class OccurrenceFlagsApi:
     @validate_call
     def upsert_occurrence_flag_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Seq ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -546,6 +578,8 @@ class OccurrenceFlagsApi:
 
         Upserts the flag for a given (case_id, occurrence_id, seq_id, task_id). An occurrence has at most one flag per case.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Seq ID (required)
@@ -579,6 +613,7 @@ class OccurrenceFlagsApi:
         """ # noqa: E501
 
         _param = self._upsert_occurrence_flag_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -594,6 +629,7 @@ class OccurrenceFlagsApi:
             '204': None,
             '400': "ApiError",
             '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -605,6 +641,7 @@ class OccurrenceFlagsApi:
 
     def _upsert_occurrence_flag_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -631,6 +668,8 @@ class OccurrenceFlagsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -665,7 +704,7 @@ class OccurrenceFlagsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}',
+            resource_path='/{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

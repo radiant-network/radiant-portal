@@ -9,7 +9,7 @@ import getFileFormatOptions from '@/components/base/data-table/filters/options/o
 import getRelationshipOptions from '@/components/base/data-table/filters/options/option-relationship';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
-import { caseApi } from '@/utils/api';
+import { caseApi, DEFAULT_TENANT } from '@/utils/api';
 
 const DEFAULT_VISIBLE_FILTERS = ['format_code', 'data_type_code', 'relationship_to_proband_code'];
 
@@ -31,7 +31,7 @@ const CRITERIAS = {
 };
 
 async function fetchFilters(caseId: number) {
-  const response = await caseApi.caseEntityDocumentsFilters(caseId);
+  const response = await caseApi.caseEntityDocumentsFilters(DEFAULT_TENANT, caseId);
   return response.data;
 }
 

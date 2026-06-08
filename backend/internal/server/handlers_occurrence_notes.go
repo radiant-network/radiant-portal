@@ -28,13 +28,16 @@ func sanitizeNoteContent(content string, userID string) string {
 // @Description Create a new note associated with an occurrence (SNV or CNV)
 // @Tags occurrence_notes
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param message body types.CreateOccurrenceNoteInput true "Note to create"
 // @Accept json
 // @Produce json
 // @Success 201 {object} types.OccurrenceNote
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /notes [post]
+// @Router /{tenant}/notes [post]
 func PostOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body types.CreateOccurrenceNoteInput
@@ -79,16 +82,18 @@ func PostOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Au
 // @Description Update the content of an existing note. Only the owner of the note can update it.
 // @Tags occurrence_notes
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param id path string true "Note ID"
 // @Param message body types.UpdateOccurrenceNoteInput true "Updated content"
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.OccurrenceNote
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /notes/{id} [put]
+// @Router /{tenant}/notes/{id} [put]
 func PutOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
@@ -133,13 +138,15 @@ func PutOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Aut
 // @Description Soft-delete a note by ID. Only the owner of the note can delete it.
 // @Tags occurrence_notes
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param id path string true "Note ID"
 // @Produce json
 // @Success 204
+// @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /notes/{id} [delete]
+// @Router /{tenant}/notes/{id} [delete]
 func DeleteOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
@@ -178,15 +185,18 @@ func DeleteOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.
 // @Description Count all notes associated with an occurrence
 // @Tags occurrence_notes
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequencing Experiment ID"
 // @Param task_id path int true "Task ID"
 // @Param occurrence_id path string true "Occurrence ID"
 // @Produce json
 // @Success 200 {object} types.Count
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count [get]
+// @Router /{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count [get]
 func GetOccurrenceNoteCountHandler(repo repository.OccurrenceNotesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseID, err := strconv.Atoi(c.Param("case_id"))
@@ -224,15 +234,18 @@ func GetOccurrenceNoteCountHandler(repo repository.OccurrenceNotesDAO) gin.Handl
 // @Description Get all notes associated with an occurrence
 // @Tags occurrence_notes
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequencing Experiment ID"
 // @Param task_id path int true "Task ID"
 // @Param occurrence_id path string true "Occurrence ID"
 // @Produce json
 // @Success 200 {array} types.OccurrenceNote
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id} [get]
+// @Router /{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id} [get]
 func GetOccurrenceNotesHandler(repo repository.OccurrenceNotesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseID, err := strconv.Atoi(c.Param("case_id"))

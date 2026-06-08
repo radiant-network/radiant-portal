@@ -44,6 +44,7 @@ class GenesApi:
     @validate_call
     def gene_auto_complete(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -63,6 +64,8 @@ class GenesApi:
 
         Retrieve AutoCompleteGene list of genes matching input string with highlighted
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -90,6 +93,7 @@ class GenesApi:
         """ # noqa: E501
 
         _param = self._gene_auto_complete_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -100,6 +104,8 @@ class GenesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutoCompleteGene]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -116,6 +122,7 @@ class GenesApi:
     @validate_call
     def gene_auto_complete_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -135,6 +142,8 @@ class GenesApi:
 
         Retrieve AutoCompleteGene list of genes matching input string with highlighted
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -162,6 +171,7 @@ class GenesApi:
         """ # noqa: E501
 
         _param = self._gene_auto_complete_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -172,6 +182,8 @@ class GenesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutoCompleteGene]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -188,6 +200,7 @@ class GenesApi:
     @validate_call
     def gene_auto_complete_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         prefix: Annotated[StrictStr, Field(description="Prefix")],
         limit: Annotated[Optional[StrictStr], Field(description="Limit")] = None,
         _request_timeout: Union[
@@ -207,6 +220,8 @@ class GenesApi:
 
         Retrieve AutoCompleteGene list of genes matching input string with highlighted
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param prefix: Prefix (required)
         :type prefix: str
         :param limit: Limit
@@ -234,6 +249,7 @@ class GenesApi:
         """ # noqa: E501
 
         _param = self._gene_auto_complete_serialize(
+            tenant=tenant,
             prefix=prefix,
             limit=limit,
             _request_auth=_request_auth,
@@ -244,6 +260,8 @@ class GenesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[AutoCompleteGene]",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -255,6 +273,7 @@ class GenesApi:
 
     def _gene_auto_complete_serialize(
         self,
+        tenant,
         prefix,
         limit,
         _request_auth,
@@ -278,6 +297,8 @@ class GenesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         if prefix is not None:
             
@@ -308,7 +329,7 @@ class GenesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/genes/autocomplete',
+            resource_path='/{tenant}/genes/autocomplete',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -327,6 +348,7 @@ class GenesApi:
     @validate_call
     def gene_search(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         gene_search_body: Annotated[GeneSearchBody, Field(description="Search Body")],
         _request_timeout: Union[
             None,
@@ -345,6 +367,8 @@ class GenesApi:
 
         Retrieve GeneResult list of genes matching input strings
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param gene_search_body: Search Body (required)
         :type gene_search_body: GeneSearchBody
         :param _request_timeout: timeout setting for this request. If one
@@ -370,6 +394,7 @@ class GenesApi:
         """ # noqa: E501
 
         _param = self._gene_search_serialize(
+            tenant=tenant,
             gene_search_body=gene_search_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -380,6 +405,8 @@ class GenesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[GeneResult]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -396,6 +423,7 @@ class GenesApi:
     @validate_call
     def gene_search_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         gene_search_body: Annotated[GeneSearchBody, Field(description="Search Body")],
         _request_timeout: Union[
             None,
@@ -414,6 +442,8 @@ class GenesApi:
 
         Retrieve GeneResult list of genes matching input strings
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param gene_search_body: Search Body (required)
         :type gene_search_body: GeneSearchBody
         :param _request_timeout: timeout setting for this request. If one
@@ -439,6 +469,7 @@ class GenesApi:
         """ # noqa: E501
 
         _param = self._gene_search_serialize(
+            tenant=tenant,
             gene_search_body=gene_search_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -449,6 +480,8 @@ class GenesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[GeneResult]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -465,6 +498,7 @@ class GenesApi:
     @validate_call
     def gene_search_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         gene_search_body: Annotated[GeneSearchBody, Field(description="Search Body")],
         _request_timeout: Union[
             None,
@@ -483,6 +517,8 @@ class GenesApi:
 
         Retrieve GeneResult list of genes matching input strings
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param gene_search_body: Search Body (required)
         :type gene_search_body: GeneSearchBody
         :param _request_timeout: timeout setting for this request. If one
@@ -508,6 +544,7 @@ class GenesApi:
         """ # noqa: E501
 
         _param = self._gene_search_serialize(
+            tenant=tenant,
             gene_search_body=gene_search_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -518,6 +555,8 @@ class GenesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[GeneResult]",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -529,6 +568,7 @@ class GenesApi:
 
     def _gene_search_serialize(
         self,
+        tenant,
         gene_search_body,
         _request_auth,
         _content_type,
@@ -551,6 +591,8 @@ class GenesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -588,7 +630,7 @@ class GenesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/genes/search',
+            resource_path='/{tenant}/genes/search',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

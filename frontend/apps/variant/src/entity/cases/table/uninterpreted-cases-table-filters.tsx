@@ -12,7 +12,7 @@ import getItemTransmissionMode from '@/components/base/data-table/filters/option
 import getItemZygosity from '@/components/base/data-table/filters/options/option-zygosity';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
-import { variantsApi } from '@/utils/api';
+import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
 
 import PhenotypeCasesFilter from './filters/phenotype-cases-filter';
 
@@ -41,7 +41,7 @@ const CRITERIAS = {
 };
 
 async function fetchFilters() {
-  const response = await variantsApi.getGermlineVariantCasesFilters();
+  const response = await variantsApi.getGermlineVariantCasesFilters(DEFAULT_TENANT);
   return response.data;
 }
 

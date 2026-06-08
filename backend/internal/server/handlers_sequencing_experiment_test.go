@@ -61,9 +61,9 @@ func (m *MockRepository) GetSequencingExperimentByAliquotAndSubmitterSample(aliq
 func Test_GetSequencingExperimentDetailByIdHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/sequencing/:seq_id/details", GetSequencingExperimentDetailByIdHandler(repo))
+	router.GET("/:tenant/sequencing/:seq_id/details", GetSequencingExperimentDetailByIdHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/sequencing/1/details", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/sequencing/1/details", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

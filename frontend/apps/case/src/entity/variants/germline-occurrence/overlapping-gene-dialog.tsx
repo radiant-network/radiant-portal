@@ -13,7 +13,7 @@ import {
 } from '@/components/base/shadcn/dialog';
 import { useI18n } from '@/components/hooks/i18n';
 import { toKiloBases } from '@/components/lib/number-format';
-import { occurrencesApi } from '@/utils/api';
+import { DEFAULT_TENANT, occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
 import {
@@ -37,7 +37,7 @@ export function useCNVOverlappingGenesListHelper(input: OverlappingGenesInput) {
   const fetch = useCallback(
     async () =>
       occurrencesApi
-        .listGermlineCNVGenesOverlap(input.caseId, input.seqId, input.taskId, input.cnvId)
+        .listGermlineCNVGenesOverlap(DEFAULT_TENANT, input.caseId, input.seqId, input.taskId, input.cnvId)
         .then(response => response.data),
     [input],
   );

@@ -20,9 +20,9 @@ func testList(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineSNVListHandler(repo))
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineSNVListHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/5/list", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/5/list", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -34,9 +34,9 @@ func testCount(t *testing.T, data string, body string, expected int) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineSNVCountHandler(repo))
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineSNVCountHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/5/count", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/5/count", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -49,8 +49,8 @@ func testAggregation(t *testing.T, data string, body string, queryParams []strin
 		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		facetsRepo := repository.NewFacetsRepository()
 		router := gin.Default()
-		router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
-		path := "/occurrences/germline/snv/1/1/5/aggregate"
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
+		path := "/radiant/occurrences/germline/snv/1/1/5/aggregate"
 		if len(queryParams) > 0 {
 			path += "?" + strings.Join(queryParams, "&")
 		}
@@ -66,9 +66,9 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineSNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repo))
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repo))
 
-		req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/5/statistics", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/5/statistics", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -271,10 +271,10 @@ func Test_CNVOccurrence_List(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineCNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineCNVListHandler(repo))
+		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineCNVListHandler(repo))
 
 		body := `{}`
-		req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/1/1/list", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/list", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -292,7 +292,7 @@ func Test_CNVOccurrence_List_Filter_On_Chromosome(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineCNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineCNVListHandler(repo))
+		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineCNVListHandler(repo))
 
 		body := `
 		{
@@ -309,7 +309,7 @@ func Test_CNVOccurrence_List_Filter_On_Chromosome(t *testing.T) {
 				]
 			}
 		}`
-		req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/1/1/list", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/list", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -339,10 +339,10 @@ func Test_CNVOccurrence_Count(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineCNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
+		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
 
 		body := `{}`
-		req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/1/1/count", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/count", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -357,7 +357,7 @@ func Test_CNVOccurrence_Count_Filter_On_Quality(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineCNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.POST("/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
+		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
 
 		body := `{
 			"sqon": {
@@ -373,7 +373,7 @@ func Test_CNVOccurrence_Count_Filter_On_Quality(t *testing.T) {
 				]
 			}
 		}`
-		req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/1/1/count", bytes.NewBufferString(body))
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/count", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -391,9 +391,9 @@ func assertGetExpandedOccurrence(t *testing.T, data string, caseId int, seqId in
 		pubmedClient := &MockExternalClient{}
 		interpretationRepo := repository.NewInterpretationsRepository(postgres, pubmedClient)
 		router := gin.Default()
-		router.GET("/occurrences/germline/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
+		router.GET("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/germline/snv/%d/%d/%d/%d/expanded", caseId, seqId, taskId, locusId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/occurrences/germline/snv/%d/%d/%d/%d/expanded", caseId, seqId, taskId, locusId), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -498,9 +498,9 @@ func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGermlineCNVOccurrencesRepository(db)
 		router := gin.Default()
-		router.GET("/occurrences/germline/cnv/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", server.OccurrencesGermlineCNVGenesOverlapHandler(repo))
+		router.GET("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", server.OccurrencesGermlineCNVGenesOverlapHandler(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/occurrences/germline/cnv/%d/%d/%d/%d/genes_overlap", 1, 1, 1, 1), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/occurrences/germline/cnv/%d/%d/%d/%d/genes_overlap", 1, 1, 1, 1), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 

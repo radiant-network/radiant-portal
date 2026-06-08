@@ -11,7 +11,7 @@ import { BadgeProps } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { variantsApi } from '@/utils/api';
+import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
 
 import CasesTab from './cases/cases-tab';
 import EvidenceTab from './evidence/evidence-tab';
@@ -27,7 +27,7 @@ type VariantHeaderInput = {
 };
 
 async function fetchVariantHeader(input: VariantHeaderInput) {
-  const response = await variantsApi.getGermlineVariantHeader(input.locusId);
+  const response = await variantsApi.getGermlineVariantHeader(DEFAULT_TENANT, input.locusId);
   return response.data;
 }
 

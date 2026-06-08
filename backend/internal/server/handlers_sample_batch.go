@@ -15,15 +15,17 @@ import (
 // @Description Create a new sample batch
 // @Tags samples
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param dry_run query boolean false "Dry Run" default(false)
 // @Param message	body		types.CreateSampleBatchBody	true	"Create Body"
 // @Accept json
 // @Produce json
 // @Success 202 {object} types.CreateBatchResponse
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /samples/batch [post]
+// @Router /{tenant}/samples/batch [post]
 func PostSampleBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (

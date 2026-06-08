@@ -9,7 +9,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Input } from '@/components/base/shadcn/input';
 import { useI18n } from '@/components/hooks/i18n';
-import { variantsApi } from '@/utils/api';
+import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
 
 import { getPathogenicEvidenceColumns, pathogenicEvidenceDefaultSettings } from './table-settings';
 
@@ -19,7 +19,7 @@ type ClinVarConditionsSearchInput = {
 };
 
 async function fetchClinVarConditions(input: ClinVarConditionsSearchInput) {
-  const response = await variantsApi.getGermlineVariantConditionsClinvar(input.locusId);
+  const response = await variantsApi.getGermlineVariantConditionsClinvar(DEFAULT_TENANT, input.locusId);
   return response.data;
 }
 

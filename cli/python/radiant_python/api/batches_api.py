@@ -41,6 +41,7 @@ class BatchesApi:
     @validate_call
     def get_batch(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         batch_id: Annotated[StrictStr, Field(description="Batch ID")],
         _request_timeout: Union[
             None,
@@ -59,6 +60,8 @@ class BatchesApi:
 
         Retrieve a batch by ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param batch_id: Batch ID (required)
         :type batch_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -84,6 +87,7 @@ class BatchesApi:
         """ # noqa: E501
 
         _param = self._get_batch_serialize(
+            tenant=tenant,
             batch_id=batch_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -95,6 +99,7 @@ class BatchesApi:
             '200': "GetBatchResponse",
             '400': "ApiError",
             '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -112,6 +117,7 @@ class BatchesApi:
     @validate_call
     def get_batch_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         batch_id: Annotated[StrictStr, Field(description="Batch ID")],
         _request_timeout: Union[
             None,
@@ -130,6 +136,8 @@ class BatchesApi:
 
         Retrieve a batch by ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param batch_id: Batch ID (required)
         :type batch_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -155,6 +163,7 @@ class BatchesApi:
         """ # noqa: E501
 
         _param = self._get_batch_serialize(
+            tenant=tenant,
             batch_id=batch_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -166,6 +175,7 @@ class BatchesApi:
             '200': "GetBatchResponse",
             '400': "ApiError",
             '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -183,6 +193,7 @@ class BatchesApi:
     @validate_call
     def get_batch_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         batch_id: Annotated[StrictStr, Field(description="Batch ID")],
         _request_timeout: Union[
             None,
@@ -201,6 +212,8 @@ class BatchesApi:
 
         Retrieve a batch by ID
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param batch_id: Batch ID (required)
         :type batch_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -226,6 +239,7 @@ class BatchesApi:
         """ # noqa: E501
 
         _param = self._get_batch_serialize(
+            tenant=tenant,
             batch_id=batch_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -237,6 +251,7 @@ class BatchesApi:
             '200': "GetBatchResponse",
             '400': "ApiError",
             '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -249,6 +264,7 @@ class BatchesApi:
 
     def _get_batch_serialize(
         self,
+        tenant,
         batch_id,
         _request_auth,
         _content_type,
@@ -271,6 +287,8 @@ class BatchesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if batch_id is not None:
             _path_params['batchId'] = batch_id
         # process the query parameters
@@ -295,7 +313,7 @@ class BatchesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/batches/{batchId}',
+            resource_path='/{tenant}/batches/{batchId}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

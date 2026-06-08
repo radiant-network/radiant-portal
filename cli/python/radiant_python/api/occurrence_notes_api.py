@@ -45,6 +45,7 @@ class OccurrenceNotesApi:
     @validate_call
     def count_occurrence_notes(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -66,6 +67,8 @@ class OccurrenceNotesApi:
 
         Count all notes associated with an occurrence
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
@@ -97,6 +100,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._count_occurrence_notes_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -109,6 +113,8 @@ class OccurrenceNotesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -126,6 +132,7 @@ class OccurrenceNotesApi:
     @validate_call
     def count_occurrence_notes_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -147,6 +154,8 @@ class OccurrenceNotesApi:
 
         Count all notes associated with an occurrence
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
@@ -178,6 +187,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._count_occurrence_notes_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -190,6 +200,8 @@ class OccurrenceNotesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -207,6 +219,7 @@ class OccurrenceNotesApi:
     @validate_call
     def count_occurrence_notes_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -228,6 +241,8 @@ class OccurrenceNotesApi:
 
         Count all notes associated with an occurrence
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
@@ -259,6 +274,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._count_occurrence_notes_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -271,6 +287,8 @@ class OccurrenceNotesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "Count",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -283,6 +301,7 @@ class OccurrenceNotesApi:
 
     def _count_occurrence_notes_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -308,6 +327,8 @@ class OccurrenceNotesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -338,7 +359,7 @@ class OccurrenceNotesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count',
+            resource_path='/{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -357,6 +378,7 @@ class OccurrenceNotesApi:
     @validate_call
     def delete_occurrence_note(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         id: Annotated[StrictStr, Field(description="Note ID")],
         _request_timeout: Union[
             None,
@@ -375,6 +397,8 @@ class OccurrenceNotesApi:
 
         Soft-delete a note by ID. Only the owner of the note can delete it.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param id: Note ID (required)
         :type id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -400,6 +424,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._delete_occurrence_note_serialize(
+            tenant=tenant,
             id=id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -409,6 +434,7 @@ class OccurrenceNotesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
@@ -427,6 +453,7 @@ class OccurrenceNotesApi:
     @validate_call
     def delete_occurrence_note_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         id: Annotated[StrictStr, Field(description="Note ID")],
         _request_timeout: Union[
             None,
@@ -445,6 +472,8 @@ class OccurrenceNotesApi:
 
         Soft-delete a note by ID. Only the owner of the note can delete it.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param id: Note ID (required)
         :type id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -470,6 +499,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._delete_occurrence_note_serialize(
+            tenant=tenant,
             id=id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -479,6 +509,7 @@ class OccurrenceNotesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
@@ -497,6 +528,7 @@ class OccurrenceNotesApi:
     @validate_call
     def delete_occurrence_note_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         id: Annotated[StrictStr, Field(description="Note ID")],
         _request_timeout: Union[
             None,
@@ -515,6 +547,8 @@ class OccurrenceNotesApi:
 
         Soft-delete a note by ID. Only the owner of the note can delete it.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param id: Note ID (required)
         :type id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -540,6 +574,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._delete_occurrence_note_serialize(
+            tenant=tenant,
             id=id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -549,6 +584,7 @@ class OccurrenceNotesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
+            '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
@@ -562,6 +598,7 @@ class OccurrenceNotesApi:
 
     def _delete_occurrence_note_serialize(
         self,
+        tenant,
         id,
         _request_auth,
         _content_type,
@@ -584,6 +621,8 @@ class OccurrenceNotesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if id is not None:
             _path_params['id'] = id
         # process the query parameters
@@ -608,7 +647,7 @@ class OccurrenceNotesApi:
 
         return self.api_client.param_serialize(
             method='DELETE',
-            resource_path='/notes/{id}',
+            resource_path='/{tenant}/notes/{id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -627,6 +666,7 @@ class OccurrenceNotesApi:
     @validate_call
     def get_occurrence_notes(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -648,6 +688,8 @@ class OccurrenceNotesApi:
 
         Get all notes associated with an occurrence
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
@@ -679,6 +721,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._get_occurrence_notes_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -691,6 +734,8 @@ class OccurrenceNotesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[OccurrenceNote]",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -708,6 +753,7 @@ class OccurrenceNotesApi:
     @validate_call
     def get_occurrence_notes_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -729,6 +775,8 @@ class OccurrenceNotesApi:
 
         Get all notes associated with an occurrence
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
@@ -760,6 +808,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._get_occurrence_notes_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -772,6 +821,8 @@ class OccurrenceNotesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[OccurrenceNote]",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -789,6 +840,7 @@ class OccurrenceNotesApi:
     @validate_call
     def get_occurrence_notes_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
         seq_id: Annotated[StrictInt, Field(description="Sequencing Experiment ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
@@ -810,6 +862,8 @@ class OccurrenceNotesApi:
 
         Get all notes associated with an occurrence
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
         :param seq_id: Sequencing Experiment ID (required)
@@ -841,6 +895,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._get_occurrence_notes_serialize(
+            tenant=tenant,
             case_id=case_id,
             seq_id=seq_id,
             task_id=task_id,
@@ -853,6 +908,8 @@ class OccurrenceNotesApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "List[OccurrenceNote]",
+            '401': "ApiError",
+            '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
         }
@@ -865,6 +922,7 @@ class OccurrenceNotesApi:
 
     def _get_occurrence_notes_serialize(
         self,
+        tenant,
         case_id,
         seq_id,
         task_id,
@@ -890,6 +948,8 @@ class OccurrenceNotesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if case_id is not None:
             _path_params['case_id'] = case_id
         if seq_id is not None:
@@ -920,7 +980,7 @@ class OccurrenceNotesApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}',
+            resource_path='/{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -939,6 +999,7 @@ class OccurrenceNotesApi:
     @validate_call
     def post_occurrence_note(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_occurrence_note_input: Annotated[CreateOccurrenceNoteInput, Field(description="Note to create")],
         _request_timeout: Union[
             None,
@@ -957,6 +1018,8 @@ class OccurrenceNotesApi:
 
         Create a new note associated with an occurrence (SNV or CNV)
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_occurrence_note_input: Note to create (required)
         :type create_occurrence_note_input: CreateOccurrenceNoteInput
         :param _request_timeout: timeout setting for this request. If one
@@ -982,6 +1045,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._post_occurrence_note_serialize(
+            tenant=tenant,
             create_occurrence_note_input=create_occurrence_note_input,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -992,6 +1056,8 @@ class OccurrenceNotesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "OccurrenceNote",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1008,6 +1074,7 @@ class OccurrenceNotesApi:
     @validate_call
     def post_occurrence_note_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_occurrence_note_input: Annotated[CreateOccurrenceNoteInput, Field(description="Note to create")],
         _request_timeout: Union[
             None,
@@ -1026,6 +1093,8 @@ class OccurrenceNotesApi:
 
         Create a new note associated with an occurrence (SNV or CNV)
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_occurrence_note_input: Note to create (required)
         :type create_occurrence_note_input: CreateOccurrenceNoteInput
         :param _request_timeout: timeout setting for this request. If one
@@ -1051,6 +1120,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._post_occurrence_note_serialize(
+            tenant=tenant,
             create_occurrence_note_input=create_occurrence_note_input,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1061,6 +1131,8 @@ class OccurrenceNotesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "OccurrenceNote",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1077,6 +1149,7 @@ class OccurrenceNotesApi:
     @validate_call
     def post_occurrence_note_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         create_occurrence_note_input: Annotated[CreateOccurrenceNoteInput, Field(description="Note to create")],
         _request_timeout: Union[
             None,
@@ -1095,6 +1168,8 @@ class OccurrenceNotesApi:
 
         Create a new note associated with an occurrence (SNV or CNV)
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param create_occurrence_note_input: Note to create (required)
         :type create_occurrence_note_input: CreateOccurrenceNoteInput
         :param _request_timeout: timeout setting for this request. If one
@@ -1120,6 +1195,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._post_occurrence_note_serialize(
+            tenant=tenant,
             create_occurrence_note_input=create_occurrence_note_input,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1130,6 +1206,8 @@ class OccurrenceNotesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "OccurrenceNote",
             '400': "ApiError",
+            '401': "ApiError",
+            '403': "ApiError",
             '500': "ApiError",
         }
         response_data = self.api_client.call_api(
@@ -1141,6 +1219,7 @@ class OccurrenceNotesApi:
 
     def _post_occurrence_note_serialize(
         self,
+        tenant,
         create_occurrence_note_input,
         _request_auth,
         _content_type,
@@ -1163,6 +1242,8 @@ class OccurrenceNotesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1200,7 +1281,7 @@ class OccurrenceNotesApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/notes',
+            resource_path='/{tenant}/notes',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1219,6 +1300,7 @@ class OccurrenceNotesApi:
     @validate_call
     def put_occurrence_note(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         id: Annotated[StrictStr, Field(description="Note ID")],
         update_occurrence_note_input: Annotated[UpdateOccurrenceNoteInput, Field(description="Updated content")],
         _request_timeout: Union[
@@ -1238,6 +1320,8 @@ class OccurrenceNotesApi:
 
         Update the content of an existing note. Only the owner of the note can update it.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param id: Note ID (required)
         :type id: str
         :param update_occurrence_note_input: Updated content (required)
@@ -1265,6 +1349,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._put_occurrence_note_serialize(
+            tenant=tenant,
             id=id,
             update_occurrence_note_input=update_occurrence_note_input,
             _request_auth=_request_auth,
@@ -1276,6 +1361,7 @@ class OccurrenceNotesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "OccurrenceNote",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
@@ -1294,6 +1380,7 @@ class OccurrenceNotesApi:
     @validate_call
     def put_occurrence_note_with_http_info(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         id: Annotated[StrictStr, Field(description="Note ID")],
         update_occurrence_note_input: Annotated[UpdateOccurrenceNoteInput, Field(description="Updated content")],
         _request_timeout: Union[
@@ -1313,6 +1400,8 @@ class OccurrenceNotesApi:
 
         Update the content of an existing note. Only the owner of the note can update it.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param id: Note ID (required)
         :type id: str
         :param update_occurrence_note_input: Updated content (required)
@@ -1340,6 +1429,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._put_occurrence_note_serialize(
+            tenant=tenant,
             id=id,
             update_occurrence_note_input=update_occurrence_note_input,
             _request_auth=_request_auth,
@@ -1351,6 +1441,7 @@ class OccurrenceNotesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "OccurrenceNote",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
@@ -1369,6 +1460,7 @@ class OccurrenceNotesApi:
     @validate_call
     def put_occurrence_note_without_preload_content(
         self,
+        tenant: Annotated[StrictStr, Field(description="Tenant code")],
         id: Annotated[StrictStr, Field(description="Note ID")],
         update_occurrence_note_input: Annotated[UpdateOccurrenceNoteInput, Field(description="Updated content")],
         _request_timeout: Union[
@@ -1388,6 +1480,8 @@ class OccurrenceNotesApi:
 
         Update the content of an existing note. Only the owner of the note can update it.
 
+        :param tenant: Tenant code (required)
+        :type tenant: str
         :param id: Note ID (required)
         :type id: str
         :param update_occurrence_note_input: Updated content (required)
@@ -1415,6 +1509,7 @@ class OccurrenceNotesApi:
         """ # noqa: E501
 
         _param = self._put_occurrence_note_serialize(
+            tenant=tenant,
             id=id,
             update_occurrence_note_input=update_occurrence_note_input,
             _request_auth=_request_auth,
@@ -1426,6 +1521,7 @@ class OccurrenceNotesApi:
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "OccurrenceNote",
             '400': "ApiError",
+            '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
             '500': "ApiError",
@@ -1439,6 +1535,7 @@ class OccurrenceNotesApi:
 
     def _put_occurrence_note_serialize(
         self,
+        tenant,
         id,
         update_occurrence_note_input,
         _request_auth,
@@ -1462,6 +1559,8 @@ class OccurrenceNotesApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if tenant is not None:
+            _path_params['tenant'] = tenant
         if id is not None:
             _path_params['id'] = id
         # process the query parameters
@@ -1501,7 +1600,7 @@ class OccurrenceNotesApi:
 
         return self.api_client.param_serialize(
             method='PUT',
-            resource_path='/notes/{id}',
+            resource_path='/{tenant}/notes/{id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

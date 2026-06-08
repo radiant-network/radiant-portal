@@ -32,9 +32,9 @@ func TestPostSampleBatchHandler_Success(t *testing.T) {
 	auth := &testutils.MockAuth{Username: "testuser"}
 
 	router := gin.Default()
-	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
+	router.POST("/:tenant/samples/batch", PostSampleBatchHandler(repo, auth))
 	body := `{"samples": [{"submitter_patient_id": "p1", "patient_organization_code": "org1", "type_code": "blood", "histology_code": "tumoral", "submitter_sample_id": "s1", "sample_organization_code": "org1"}]}`
-	req, _ := http.NewRequest(http.MethodPost, "/samples/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/samples/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -54,9 +54,9 @@ func TestPostSampleBatchHandler_ValidationError(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
+	router.POST("/:tenant/samples/batch", PostSampleBatchHandler(repo, auth))
 	body := `{"samples": [{"submitter_patient_id": "", "patient_organization_code": "org1", "type_code": "blood", "histology_code": "tumorsal", "submitter_sample_id": "s1", "sample_organization_code": "org1"}]}`
-	req, _ := http.NewRequest(http.MethodPost, "/samples/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/samples/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -81,9 +81,9 @@ func TestPostSampleBatchHandler_EmptySamples(t *testing.T) {
 	auth := &testutils.MockAuth{}
 
 	router := gin.Default()
-	router.POST("/samples/batch", PostSampleBatchHandler(repo, auth))
+	router.POST("/:tenant/samples/batch", PostSampleBatchHandler(repo, auth))
 	body := `{"samples": []}`
-	req, _ := http.NewRequest(http.MethodPost, "/samples/batch", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest(http.MethodPost, "/radiant/samples/batch", bytes.NewBuffer([]byte(body)))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)

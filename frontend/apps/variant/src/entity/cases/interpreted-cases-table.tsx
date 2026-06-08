@@ -12,7 +12,7 @@ import {
 } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
-import { variantsApi } from '@/utils/api';
+import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
 
 import SliderInterpretedCaseSheet from './slider/slider-interpreted-case-sheet';
 import { useSliderCasePatientIdNavigation } from './slider/use-slider-case-navigation';
@@ -27,7 +27,7 @@ type InterpretedCasesSearchInput = {
 };
 
 async function fetchInterpretedCases(input: InterpretedCasesSearchInput) {
-  const response = await variantsApi.getGermlineVariantInterpretedCases(input.locusId, input.criteria);
+  const response = await variantsApi.getGermlineVariantInterpretedCases(DEFAULT_TENANT, input.locusId, input.criteria);
   return response.data;
 }
 

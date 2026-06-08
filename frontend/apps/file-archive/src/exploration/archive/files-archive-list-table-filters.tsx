@@ -12,7 +12,7 @@ import getFileFormatOptions from '@/components/base/data-table/filters/options/o
 import getRelationshipOptions from '@/components/base/data-table/filters/options/option-relationship';
 import { useI18n } from '@/components/hooks/i18n';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
-import { documentApi } from '@/utils/api';
+import { DEFAULT_TENANT, documentApi } from '@/utils/api';
 
 type FilesTableFilters = {
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
@@ -35,7 +35,7 @@ const CRITERIAS = {
 };
 
 async function fetchFilters() {
-  const response = await documentApi.documentsFilters();
+  const response = await documentApi.documentsFilters(DEFAULT_TENANT);
   return response.data;
 }
 

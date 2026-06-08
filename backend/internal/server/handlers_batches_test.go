@@ -65,9 +65,9 @@ func Test_GetBatchHandler_Success(t *testing.T) {
 	}
 
 	router := gin.Default()
-	router.GET("/batches/:batch_id", GetBatchHandler(repo))
+	router.GET("/:tenant/batches/:batch_id", GetBatchHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/batches/test-batch-id", nil)
+	req, _ := http.NewRequest("GET", "/radiant/batches/test-batch-id", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -86,9 +86,9 @@ func Test_GetBatchHandler_NotFound(t *testing.T) {
 	}
 
 	router := gin.Default()
-	router.GET("/batches/:batch_id", GetBatchHandler(repo))
+	router.GET("/:tenant/batches/:batch_id", GetBatchHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/batches/non-existent-id", nil)
+	req, _ := http.NewRequest("GET", "/radiant/batches/non-existent-id", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

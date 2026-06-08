@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**get_batch**](BatchesApi.md#get_batch) | **GET** /batches/{batchId} | Retrieve a batch by ID
+[**get_batch**](BatchesApi.md#get_batch) | **GET** /{tenant}/batches/{batchId} | Retrieve a batch by ID
 
 
 # **get_batch**
-> GetBatchResponse get_batch(batch_id)
+> GetBatchResponse get_batch(tenant, batch_id)
 
 Retrieve a batch by ID
 
@@ -44,11 +44,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.BatchesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     batch_id = 'batch_id_example' # str | Batch ID
 
     try:
         # Retrieve a batch by ID
-        api_response = api_instance.get_batch(batch_id)
+        api_response = api_instance.get_batch(tenant, batch_id)
         print("The response of BatchesApi->get_batch:\n")
         pprint(api_response)
     except Exception as e:
@@ -62,6 +63,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **batch_id** | **str**| Batch ID | 
 
 ### Return type
@@ -84,6 +86,7 @@ Name | Type | Description  | Notes
 **200** | OK |  -  |
 **400** | Bad Request |  -  |
 **401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 

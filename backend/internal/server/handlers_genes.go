@@ -15,12 +15,15 @@ import (
 // @Description Retrieve types.AutoCompleteGene list of genes matching input string with highlighted
 // @Tags genes
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param prefix query string true "Prefix"
 // @Param limit query string false "Limit"
 // @Produce json
 // @Success 200 {array} types.AutoCompleteGene
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /genes/autocomplete [get]
+// @Router /{tenant}/genes/autocomplete [get]
 func GetGeneAutoCompleteHandler(repo repository.GenesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
@@ -43,13 +46,16 @@ func GetGeneAutoCompleteHandler(repo repository.GenesDAO) gin.HandlerFunc {
 // @Description Retrieve types.GeneResult list of genes matching input strings
 // @Tags genes
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param			message	body		types.GeneSearchBody	true	"Search Body"
 // @Accept json
 // @Produce json
 // @Success 200 {array} types.GeneResult
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /genes/search [post]
+// @Router /{tenant}/genes/search [post]
 func SearchGenesHandler(repo repository.GenesDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (

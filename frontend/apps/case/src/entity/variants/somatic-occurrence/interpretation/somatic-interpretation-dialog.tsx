@@ -22,7 +22,7 @@ import {
 } from '@/components/base/slider/slider-variant-details-card';
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
-import { caseApi, interpretationApi, occurrencesApi } from '@/utils/api';
+import { caseApi, DEFAULT_TENANT, interpretationApi, occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
@@ -70,12 +70,13 @@ type SomaticInterpretationFormInput = {
 };
 
 async function fetchCaseEntity(_url: string, { arg }: { arg: CaseEntityInput }) {
-  const response = await caseApi.caseEntity(arg.caseId);
+  const response = await caseApi.caseEntity(DEFAULT_TENANT, arg.caseId);
   return response.data;
 }
 
 async function fetchInterpretationSomatic(_url: string, { arg }: { arg: InterpretationSomaticInput }) {
   const response = await interpretationApi.getInterpretationSomatic(
+    DEFAULT_TENANT,
     arg.caseId,
     arg.seqId,
     arg.locusId,
@@ -85,12 +86,19 @@ async function fetchInterpretationSomatic(_url: string, { arg }: { arg: Interpre
 }
 
 async function fetchExpandedSomaticSNVOccurrence(_url: string, { arg }: { arg: ExpandSomaticInput }) {
-  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(arg.caseId, arg.seqId, arg.taskId, arg.locusId);
+  const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(
+    DEFAULT_TENANT,
+    arg.caseId,
+    arg.seqId,
+    arg.taskId,
+    arg.locusId,
+  );
   return response.data;
 }
 
 async function saveSomaticInterpretation(_url: string, { arg }: { arg: SomaticInterpretationFormInput }) {
   const response = await interpretationApi.postInterpretationSomatic(
+    DEFAULT_TENANT,
     arg.caseId,
     arg.seqId,
     arg.locusId,

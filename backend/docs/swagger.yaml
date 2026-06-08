@@ -2841,6 +2841,890 @@ info:
   version: "1.0"
 openapi: 3.1.0
 paths:
+  /{tenant}/batches/{batchId}:
+    get:
+      description: Retrieve a batch by ID
+      operationId: getBatch
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Batch ID
+        in: path
+        name: batchId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetBatchResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Retrieve a batch by ID
+      tags:
+      - batches
+  /{tenant}/cases/{case_id}:
+    get:
+      description: Retrieve CaseEntity by its ID
+      operationId: caseEntity
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseEntity'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get CaseEntity case entity
+      tags:
+      - cases
+  /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences:
+    get:
+      description: Return tasks attached to the given case and sequencing experiment
+        whose task type produces occurrences of the requested occurrence type. Sorted
+        by created_on DESC. Returns an empty list (200) when no task matches.
+      operationId: caseTasksWithOccurrences
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequencing Experiment ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Occurrence type
+        in: query
+        name: data_type
+        required: true
+        schema:
+          enum:
+          - germline_snv
+          - germline_cnv
+          - somatic_snv
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TaskOccurrenceType'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: List tasks producing occurrences of a given type for a (case, sequencing)
+        pair
+      tags:
+      - cases
+  /{tenant}/cases/{case_id}/documents/filters:
+    get:
+      description: Retrieve DocumentFilters documents filters for a specific
+        case
+      operationId: caseEntityDocumentsFilters
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentFilters'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get DocumentFilters documents filters for a specific case
+      tags:
+      - cases
+  /{tenant}/cases/{case_id}/documents/search:
+    post:
+      description: Search for DocumentResult list for a case entity
+      operationId: caseEntityDocumentsSearch
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithCriteria'
+        description: List Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsSearchResponse'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Search DocumentResult list for a case entity
+      tags:
+      - cases
+  /{tenant}/cases/autocomplete:
+    get:
+      description: Retrieve AutocompleteResult list of ids matching prefix
+      operationId: autocompleteCases
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Prefix
+        in: query
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - description: Limit
+        in: query
+        name: limit
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AutocompleteResult'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get AutocompleteResult list of matching prefix
+      tags:
+      - cases
+  /{tenant}/cases/batch:
+    patch:
+      description: |-
+        Partially updates existing cases — see the request body for updatable fields.
+        Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found.
+        Array fields are appended, not replaced.
+      operationId: patchCaseBatch
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          default: false
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchCaseBatchBody'
+        description: Attach Body
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Partially update existing cases (batch)
+      tags:
+      - cases
+    post:
+      description: Create a new case batch
+      operationId: postCaseBatch
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Dry Run
+        in: query
+        name: dry_run
+        schema:
+          default: false
+          type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCaseBatchBody'
+        description: Create Body
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBatchResponse'
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Create a new case batch
+      tags:
+      - cases
+  /{tenant}/cases/filters:
+    get:
+      description: Retrieve CaseFilters cases filters
+      operationId: casesFilters
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseFilters'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get CaseFilters cases filters
+      tags:
+      - cases
+  /{tenant}/cases/search:
+    post:
+      description: Search cases
+      operationId: searchCases
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithCriteria'
+        description: List Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CasesSearchResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Search cases
+      tags:
+      - cases
+  /{tenant}/documents/{document_id}/download_url:
+    get:
+      description: Generate a pre-signed S3 download URL for a document
+      operationId: getDocumentDownloadUrl
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Document ID
+        in: path
+        name: document_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/utils.PreSignedURL'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get pre-signed S3 download URL for a document
+      tags:
+      - documents
+  /{tenant}/documents/autocomplete:
+    get:
+      description: Retrieve AutocompleteResult list of ids matching prefix
+      operationId: autocompleteDocuments
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Prefix
+        in: query
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - description: Limit
+        in: query
+        name: limit
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AutocompleteResult'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get AutocompleteResult list of matching prefix
+      tags:
+      - documents
+  /{tenant}/documents/filters:
+    get:
+      description: Retrieve DocumentFilters documents filters
+      operationId: documentsFilters
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentFilters'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get DocumentFilters documents filters
+      tags:
+      - documents
+  /{tenant}/documents/search:
+    post:
+      description: Search documents
+      operationId: searchDocuments
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithCriteria'
+        description: List Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsSearchResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Search documents
+      tags:
+      - documents
+  /{tenant}/genes/autocomplete:
+    get:
+      description: Retrieve AutoCompleteGene list of genes matching input string
+        with highlighted
+      operationId: geneAutoComplete
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Prefix
+        in: query
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - description: Limit
+        in: query
+        name: limit
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AutoCompleteGene'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get AutoCompleteGene list of matching input string with highlighted
+      tags:
+      - genes
+  /{tenant}/genes/search:
+    post:
+      description: Retrieve GeneResult list of genes matching input strings
+      operationId: geneSearch
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeneSearchBody'
+        description: Search Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/GeneResult'
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Post search GeneResult list of matching input strings
+      tags:
+      - genes
   /{tenant}/hpo/autocomplete:
     get:
       description: Retrieve AutoCompleteTerm list of HPO terms matching input string
@@ -2896,653 +3780,17 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - hpo
-  /auth/me:
-    get:
-      description: |-
-        Returns the authenticated caller's tenant memberships, each with the
-        tenant-scoped actions they hold and the org-scoped actions mapped to the
-        orgs where they apply.
-      operationId: getMe
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/TenantMembership'
-                type: array
-          description: OK
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Unauthorized
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get the caller's effective authorization
-      tags:
-      - auth
-  /batches/{batchId}:
-    get:
-      description: Retrieve a batch by ID
-      operationId: getBatch
-      parameters:
-      - description: Batch ID
-        in: path
-        name: batchId
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetBatchResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Unauthorized
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Retrieve a batch by ID
-      tags:
-      - batches
-  /cases/{case_id}:
-    get:
-      description: Retrieve CaseEntity by its ID
-      operationId: caseEntity
-      parameters:
-      - description: Case ID
-        in: path
-        name: case_id
-        required: true
-        schema:
-          type: integer
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CaseEntity'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get CaseEntity case entity
-      tags:
-      - cases
-  /cases/{case_id}/{seq_id}/tasks_with_occurrences:
-    get:
-      description: Return tasks attached to the given case and sequencing experiment
-        whose task type produces occurrences of the requested occurrence type. Sorted
-        by created_on DESC. Returns an empty list (200) when no task matches.
-      operationId: caseTasksWithOccurrences
-      parameters:
-      - description: Case ID
-        in: path
-        name: case_id
-        required: true
-        schema:
-          type: integer
-      - description: Sequencing Experiment ID
-        in: path
-        name: seq_id
-        required: true
-        schema:
-          type: integer
-      - description: Occurrence type
-        in: query
-        name: data_type
-        required: true
-        schema:
-          enum:
-          - germline_snv
-          - germline_cnv
-          - somatic_snv
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/TaskOccurrenceType'
-                type: array
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Bad Request
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: List tasks producing occurrences of a given type for a (case, sequencing)
-        pair
-      tags:
-      - cases
-  /cases/{case_id}/documents/filters:
-    get:
-      description: Retrieve DocumentFilters documents filters for a specific
-        case
-      operationId: caseEntityDocumentsFilters
-      parameters:
-      - description: Case ID
-        in: path
-        name: case_id
-        required: true
-        schema:
-          type: integer
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentFilters'
-          description: OK
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get DocumentFilters documents filters for a specific case
-      tags:
-      - cases
-  /cases/{case_id}/documents/search:
-    post:
-      description: Search for DocumentResult list for a case entity
-      operationId: caseEntityDocumentsSearch
-      parameters:
-      - description: Case ID
-        in: path
-        name: case_id
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ListBodyWithCriteria'
-        description: List Body
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentsSearchResponse'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Search DocumentResult list for a case entity
-      tags:
-      - cases
-  /cases/autocomplete:
-    get:
-      description: Retrieve AutocompleteResult list of ids matching prefix
-      operationId: autocompleteCases
-      parameters:
-      - description: Prefix
-        in: query
-        name: prefix
-        required: true
-        schema:
-          type: string
-      - description: Limit
-        in: query
-        name: limit
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/AutocompleteResult'
-                type: array
-          description: OK
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get AutocompleteResult list of matching prefix
-      tags:
-      - cases
-  /cases/batch:
-    patch:
-      description: |-
-        Partially updates existing cases — see the request body for updatable fields.
-        Each case is looked up by (project_code, submitter_case_id); CASE-012 is returned if not found.
-        Array fields are appended, not replaced.
-      operationId: patchCaseBatch
-      parameters:
-      - description: Dry Run
-        in: query
-        name: dry_run
-        schema:
-          default: false
-          type: boolean
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchCaseBatchBody'
-        description: Attach Body
-        required: true
-      responses:
-        "202":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateBatchResponse'
-          description: Accepted
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Bad Request
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Forbidden
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Partially update existing cases (batch)
-      tags:
-      - cases
-    post:
-      description: Create a new case batch
-      operationId: postCaseBatch
-      parameters:
-      - description: Dry Run
-        in: query
-        name: dry_run
-        schema:
-          default: false
-          type: boolean
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateCaseBatchBody'
-        description: Create Body
-        required: true
-      responses:
-        "202":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateBatchResponse'
-          description: Accepted
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Bad Request
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Forbidden
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Create a new case batch
-      tags:
-      - cases
-  /cases/filters:
-    get:
-      description: Retrieve CaseFilters cases filters
-      operationId: casesFilters
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CaseFilters'
-          description: OK
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get CaseFilters cases filters
-      tags:
-      - cases
-  /cases/search:
-    post:
-      description: Search cases
-      operationId: searchCases
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ListBodyWithCriteria'
-        description: List Body
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CasesSearchResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Bad Request
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Search cases
-      tags:
-      - cases
-  /documents/{document_id}/download_url:
-    get:
-      description: Generate a pre-signed S3 download URL for a document
-      operationId: getDocumentDownloadUrl
-      parameters:
-      - description: Document ID
-        in: path
-        name: document_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/utils.PreSignedURL'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get pre-signed S3 download URL for a document
-      tags:
-      - documents
-  /documents/autocomplete:
-    get:
-      description: Retrieve AutocompleteResult list of ids matching prefix
-      operationId: autocompleteDocuments
-      parameters:
-      - description: Prefix
-        in: query
-        name: prefix
-        required: true
-        schema:
-          type: string
-      - description: Limit
-        in: query
-        name: limit
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/AutocompleteResult'
-                type: array
-          description: OK
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get AutocompleteResult list of matching prefix
-      tags:
-      - documents
-  /documents/filters:
-    get:
-      description: Retrieve DocumentFilters documents filters
-      operationId: documentsFilters
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentFilters'
-          description: OK
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get DocumentFilters documents filters
-      tags:
-      - documents
-  /documents/search:
-    post:
-      description: Search documents
-      operationId: searchDocuments
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ListBodyWithCriteria'
-        description: List Body
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentsSearchResponse'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Bad Request
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Search documents
-      tags:
-      - documents
-  /genes/autocomplete:
-    get:
-      description: Retrieve AutoCompleteGene list of genes matching input string
-        with highlighted
-      operationId: geneAutoComplete
-      parameters:
-      - description: Prefix
-        in: query
-        name: prefix
-        required: true
-        schema:
-          type: string
-      - description: Limit
-        in: query
-        name: limit
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/AutoCompleteGene'
-                type: array
-          description: OK
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get AutoCompleteGene list of matching input string with highlighted
-      tags:
-      - genes
-  /genes/search:
-    post:
-      description: Retrieve GeneResult list of genes matching input strings
-      operationId: geneSearch
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GeneSearchBody'
-        description: Search Body
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/GeneResult'
-                type: array
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Bad Request
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Post search GeneResult list of matching input strings
-      tags:
-      - genes
-  /igv/{case_id}:
+  /{tenant}/igv/{case_id}:
     get:
       description: Get IGV tracks for a case
       operationId: getIGV
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -3556,6 +3804,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/IGVTracks'
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -3573,10 +3833,17 @@ paths:
       summary: Get IGV
       tags:
       - igv
-  /interpretations/germline:
+  /{tenant}/interpretations/germline:
     get:
       description: Search interpretation germline
       operationId: SearchInterpretationGermline
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -3586,6 +3853,18 @@ paths:
                   $ref: '#/components/schemas/InterpretationGermline'
                 type: array
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "500":
           content:
             application/json:
@@ -3597,12 +3876,18 @@ paths:
       summary: Search interpretation germline
       tags:
       - interpretations
-  /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}:
+  /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id}:
     get:
       deprecated: true
       description: Get interpretation germline
       operationId: GetInterpretationGermlineDeprecated
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Sequencing ID
         in: path
         name: sequencing_id
@@ -3634,6 +3919,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/InterpretationGermline'
           description: Partial Content
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -3656,6 +3953,12 @@ paths:
       description: Create or Update interpretation germline
       operationId: PostInterpretationGermlineDeprecated
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Sequencing ID
         in: path
         name: sequencing_id
@@ -3694,6 +3997,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "500":
           content:
             application/json:
@@ -3705,11 +4020,17 @@ paths:
       summary: Create or Update interpretation germline
       tags:
       - interpretations
-  /interpretations/pubmed/{citation_id}:
+  /{tenant}/interpretations/pubmed/{citation_id}:
     get:
       description: Get pubmed citation by ID
       operationId: GetPubmedCitation
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Citation ID
         in: path
         name: citation_id
@@ -3729,6 +4050,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/PubmedCitation'
           description: Partial Content
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -3746,10 +4079,17 @@ paths:
       summary: Get pubmed citation by ID
       tags:
       - interpretations
-  /interpretations/somatic:
+  /{tenant}/interpretations/somatic:
     get:
       description: Search interpretation somatic
       operationId: SearchInterpretationSomatic
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -3759,6 +4099,18 @@ paths:
                   $ref: '#/components/schemas/InterpretationSomatic'
                 type: array
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "500":
           content:
             application/json:
@@ -3770,12 +4122,18 @@ paths:
       summary: Search interpretation somatic
       tags:
       - interpretations
-  /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}:
+  /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id}:
     get:
       deprecated: true
       description: Get interpretation somatic
       operationId: GetInterpretationSomaticDeprecated
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Sequencing ID
         in: path
         name: sequencing_id
@@ -3807,6 +4165,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/InterpretationSomatic'
           description: Partial Content
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -3829,6 +4199,12 @@ paths:
       description: Create or Update interpretation somatic
       operationId: PostInterpretationSomaticDeprecated
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Sequencing ID
         in: path
         name: sequencing_id
@@ -3867,6 +4243,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "500":
           content:
             application/json:
@@ -3878,11 +4266,17 @@ paths:
       summary: Create or Update interpretation somatic
       tags:
       - interpretations
-  /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}:
+  /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}:
     get:
       description: Get interpretation germline
       operationId: GetInterpretationGermline
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -3920,6 +4314,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/InterpretationGermline'
           description: Partial Content
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -3941,6 +4347,12 @@ paths:
       description: Create or Update interpretation germline
       operationId: PostInterpretationGermline
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -3985,6 +4397,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "500":
           content:
             application/json:
@@ -3996,11 +4420,17 @@ paths:
       summary: Create or Update interpretation germline
       tags:
       - interpretations
-  /interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}:
+  /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id}:
     get:
       description: Get interpretation somatic
       operationId: GetInterpretationSomatic
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4038,6 +4468,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/InterpretationSomatic'
           description: Partial Content
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4059,6 +4501,12 @@ paths:
       description: Create or Update interpretation somatic
       operationId: PostInterpretationSomatic
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4103,6 +4551,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "500":
           content:
             application/json:
@@ -4114,12 +4574,18 @@ paths:
       summary: Create or Update interpretation somatic
       tags:
       - interpretations
-  /mondo/autocomplete:
+  /{tenant}/mondo/autocomplete:
     get:
       description: Retrieve AutoCompleteTerm list of mondo terms matching input string
         with highlighted
       operationId: mondoTermAutoComplete
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Prefix
         in: query
         name: prefix
@@ -4140,6 +4606,18 @@ paths:
                   $ref: '#/components/schemas/AutoCompleteTerm'
                 type: array
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "500":
           content:
             application/json:
@@ -4151,10 +4629,17 @@ paths:
       summary: Get AutoCompleteTerm list of matching input string with highlighted
       tags:
       - mondo
-  /notes:
+  /{tenant}/notes:
     post:
       description: Create a new note associated with an occurrence (SNV or CNV)
       operationId: postOccurrenceNote
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -4175,6 +4660,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "500":
           content:
             application/json:
@@ -4186,11 +4683,17 @@ paths:
       summary: Create a note on an occurrence
       tags:
       - occurrence_notes
-  /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}:
+  /{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}:
     get:
       description: Get all notes associated with an occurrence
       operationId: getOccurrenceNotes
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4224,6 +4727,18 @@ paths:
                   $ref: '#/components/schemas/OccurrenceNote'
                 type: array
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4241,11 +4756,17 @@ paths:
       summary: Get notes for an occurrence
       tags:
       - occurrence_notes
-  /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count:
+  /{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count:
     get:
       description: Count all notes associated with an occurrence
       operationId: countOccurrenceNotes
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4277,6 +4798,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/Count'
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4294,12 +4827,18 @@ paths:
       summary: Count notes for an occurrence
       tags:
       - occurrence_notes
-  /notes/{id}:
+  /{tenant}/notes/{id}:
     delete:
       description: Soft-delete a note by ID. Only the owner of the note can delete
         it.
       operationId: deleteOccurrenceNote
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Note ID
         in: path
         name: id
@@ -4309,6 +4848,12 @@ paths:
       responses:
         "204":
           description: No Content
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
         "403":
           content:
             application/json:
@@ -4337,6 +4882,12 @@ paths:
         can update it.
       operationId: putOccurrenceNote
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Note ID
         in: path
         name: id
@@ -4363,6 +4914,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
         "403":
           content:
             application/json:
@@ -4386,12 +4943,18 @@ paths:
       summary: Update a note on an occurrence
       tags:
       - occurrence_notes
-  /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}:
+  /{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id}:
     delete:
       description: Deletes the flag for a given (case_id, occurrence_id, seq_id, task_id).
         Returns 404 if no flag exists.
       operationId: deleteOccurrenceFlag
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4419,6 +4982,18 @@ paths:
       responses:
         "204":
           description: No Content
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4441,6 +5016,12 @@ paths:
         An occurrence has at most one flag per case.
       operationId: upsertOccurrenceFlag
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4486,6 +5067,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "500":
           content:
             application/json:
@@ -4497,11 +5084,17 @@ paths:
       summary: Set or change the flag on an occurrence
       tags:
       - occurrence_flags
-  /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap:
+  /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap:
     get:
       description: List genes overlapping a CNV with a given ID
       operationId: listGermlineCNVGenesOverlap
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4535,6 +5128,18 @@ paths:
                   $ref: '#/components/schemas/CNVGeneOverlap'
                 type: array
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4552,11 +5157,17 @@ paths:
       summary: List genes overlapping a CNV with a given ID
       tags:
       - occurrences
-  /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate:
+  /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate:
     post:
       description: Aggregate germline CNV occurrences for a given sequence ID
       operationId: aggregateGermlineCNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4597,6 +5208,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4614,11 +5237,17 @@ paths:
       summary: Aggregate germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count:
+  /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count:
     post:
       description: Counts germline CNV occurrences for a given sequence ID
       operationId: countGermlineCNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4657,6 +5286,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4674,11 +5315,17 @@ paths:
       summary: Count germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list:
+  /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list:
     post:
       description: List germline CNV occurrences for a given sequence ID
       operationId: listGermlineCNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4719,6 +5366,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4736,11 +5395,17 @@ paths:
       summary: List germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics:
+  /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
       operationId: statisticsGermlineCNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4779,6 +5444,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4796,11 +5473,17 @@ paths:
       summary: Statistics of germline CNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded:
+  /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded:
     get:
       description: Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
       operationId: getExpandedGermlineSNVOccurrence
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4832,6 +5515,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ExpandedGermlineSNVOccurrence'
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4849,11 +5544,17 @@ paths:
       summary: Get a germline ExpandedGermlineSNVOccurrence
       tags:
       - occurrences
-  /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate:
+  /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate:
     post:
       description: Aggregate germline SNV occurrences for a given sequence ID
       operationId: aggregateGermlineSNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4900,6 +5601,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4917,11 +5630,17 @@ paths:
       summary: Aggregate germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count:
+  /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count:
     post:
       description: Counts germline SNV occurrences for a given sequence ID
       operationId: countGermlineSNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -4960,6 +5679,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -4977,11 +5708,17 @@ paths:
       summary: Count germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list:
+  /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list:
     post:
       description: List germline SNV occurrences for a given sequence ID
       operationId: listGermlineSNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -5022,6 +5759,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -5039,11 +5788,17 @@ paths:
       summary: List germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics:
+  /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
       operationId: statisticsGermlineSNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -5082,6 +5837,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -5099,11 +5866,17 @@ paths:
       summary: Statistics of germline SNV occurrences
       tags:
       - occurrences
-  /occurrences/germline/snv/dictionary:
+  /{tenant}/occurrences/germline/snv/dictionary:
     get:
       description: Retrieve germline SNV facets
       operationId: getGermlineSNVDictionary
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: One or more facets to retrieve
         in: query
         name: facets
@@ -5126,6 +5899,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -5143,11 +5928,17 @@ paths:
       summary: Get germline SNV facets dictionary
       tags:
       - occurrences
-  /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded:
+  /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded:
     get:
       description: Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
       operationId: getExpandedSomaticSNVOccurrence
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -5179,6 +5970,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ExpandedSomaticSNVOccurrence'
           description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -5196,11 +5999,17 @@ paths:
       summary: Get a somatic ExpandedSomaticSNVOccurrence
       tags:
       - occurrences
-  /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate:
+  /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate:
     post:
       description: Aggregate somatic SNV occurrences for a given sequence ID
       operationId: aggregateSomaticSNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -5247,6 +6056,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -5264,11 +6085,17 @@ paths:
       summary: Aggregate somatic SNV occurrences
       tags:
       - occurrences
-  /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count:
+  /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count:
     post:
       description: Counts somatic SNV occurrences for a given sequence ID
       operationId: countSomaticSNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -5307,6 +6134,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -5324,11 +6163,17 @@ paths:
       summary: Count somatic SNV occurrences
       tags:
       - occurrences
-  /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list:
+  /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list:
     post:
       description: List somatic SNV occurrences for a given sequence ID
       operationId: listSomaticSNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -5369,6 +6214,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -5386,11 +6243,17 @@ paths:
       summary: List somatic SNV occurrences
       tags:
       - occurrences
-  /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics:
+  /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
       operationId: statisticsSomaticSNVOccurrences
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Case ID
         in: path
         name: case_id
@@ -5429,6 +6292,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "404":
           content:
             application/json:
@@ -5446,11 +6321,17 @@ paths:
       summary: Statistics of somatic SNV occurrences
       tags:
       - occurrences
-  /patients/batch:
+  /{tenant}/patients/batch:
     post:
       description: Create a new patient batch
       operationId: postPatientBatch
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Dry Run
         in: query
         name: dry_run
@@ -5477,6 +6358,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
         "403":
           content:
             application/json:
@@ -5494,11 +6381,17 @@ paths:
       summary: Create a new patient batch
       tags:
       - patients
-  /samples/batch:
+  /{tenant}/samples/batch:
     post:
       description: Create a new sample batch
       operationId: postSampleBatch
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Dry Run
         in: query
         name: dry_run
@@ -5525,6 +6418,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
         "403":
           content:
             application/json:
@@ -5542,11 +6441,17 @@ paths:
       summary: Create a new sample batch
       tags:
       - samples
-  /sequencing/{seq_id}/details:
+  /{tenant}/sequencing/{seq_id}/details:
     get:
       description: Get SequencingExperimentDetail by id
       operationId: getSequencingExperimentDetailById
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Seq ID
         in: path
         name: seq_id
@@ -5566,6 +6471,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
         "500":
           content:
             application/json:
@@ -5577,11 +6494,17 @@ paths:
       summary: Get SequencingExperimentDetail by id
       tags:
       - sequencing
-  /sequencing/batch:
+  /{tenant}/sequencing/batch:
     post:
       description: Create a new sequencing experiment batch
       operationId: postSequencingExperimentBatch
       parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
       - description: Dry Run
         in: query
         name: dry_run
@@ -5608,6 +6531,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
         "403":
           content:
             application/json:
@@ -5625,6 +6554,717 @@ paths:
       summary: Create a new sequencing experiment batch
       tags:
       - sequencing
+  /{tenant}/variants/germline/{locus_id}/cases/count:
+    get:
+      description: Retrieve cases count for a given locus id
+      operationId: getGermlineVariantCasesCount
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantCasesCount'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get germline cases count for a given locus
+      tags:
+      - variant
+  /{tenant}/variants/germline/{locus_id}/cases/interpreted:
+    post:
+      description: Retrieve Germline Variant interpreted cases for a given locus
+      operationId: getGermlineVariantInterpretedCases
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithCriteria'
+        description: Search Body with criteria
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantInterpretedCasesSearchResponse'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get list of interpreted Cases for a germline variant
+      tags:
+      - variant
+  /{tenant}/variants/germline/{locus_id}/cases/uninterpreted:
+    post:
+      description: Retrieve Germline Variant uninterpreted cases for a given locus
+      operationId: getGermlineVariantUninterpretedCases
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListBodyWithCriteria'
+        description: Search Body with criteria
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantUninterpretedCasesSearchResponse'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get list of uninterpreted Cases for a germline variant
+      tags:
+      - variant
+  /{tenant}/variants/germline/{locus_id}/conditions/{panel_type}:
+    get:
+      description: Retrieve conditions for germline variant entity for a specific
+        gene panel
+      operationId: getGermlineVariantConditions
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: Gene panel type
+        in: path
+        name: panel_type
+        required: true
+        schema:
+          enum:
+          - omim
+          - hpo
+          - orphanet
+          type: string
+      - description: Condition filter
+        in: query
+        name: filter
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenePanelConditions'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get conditions for germline variant entity for a specific gene panel
+      tags:
+      - variant
+  /{tenant}/variants/germline/{locus_id}/conditions/clinvar:
+    get:
+      description: Retrieve ClinVar conditions for germline variant entity
+      operationId: GetGermlineVariantConditionsClinvar
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinvarVariantConditions'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get ClinVar conditions for germline variant entity
+      tags:
+      - variant
+  /{tenant}/variants/germline/{locus_id}/consequences:
+    get:
+      description: Retrieve germline Variant Consequences for a given locus
+      operationId: getGermlineVariantConsequences
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/VariantConsequence'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get list of VariantConsequences for a germline variant
+      tags:
+      - variant
+  /{tenant}/variants/germline/{locus_id}/external_frequencies:
+    get:
+      description: Retrieve external frequencies for a given locus id
+      operationId: getGermlineVariantExternalFrequencies
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantExternalFrequencies'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get external frequencies
+      tags:
+      - variant
+  /{tenant}/variants/germline/{locus_id}/header:
+    get:
+      description: Retrieve germline Variant Header data for a given locus
+      operationId: getGermlineVariantHeader
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantHeader'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get a germline VariantHeader
+      tags:
+      - variant
+  /{tenant}/variants/germline/{locus_id}/internal_frequencies:
+    get:
+      description: Retrieve internal frequencies for a given locus id
+      operationId: getGermlineVariantInternalFrequencies
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      - description: split type
+        in: query
+        name: split
+        required: true
+        schema:
+          enum:
+          - project
+          - primary_condition
+          - analysis
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantInternalFrequencies'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get internal frequencies
+      tags:
+      - variant
+  /{tenant}/variants/germline/{locus_id}/internal_frequencies/global:
+    get:
+      description: Retrieve global internal frequencies for a given locus id
+      operationId: getGermlineVariantGlobalInternalFrequencies
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalFrequencies'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get global internal frequencies
+      tags:
+      - variant
+  /{tenant}/variants/germline/{locus_id}/overview:
+    get:
+      description: Retrieve germline Variant Overview data for a given locus
+      operationId: getGermlineVariantOverview
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Locus ID
+        in: path
+        name: locus_id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantOverview'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get a germline VariantOverview
+      tags:
+      - variant
+  /{tenant}/variants/germline/cases/filters:
+    get:
+      description: Retrieve cases filters for germline variant entity
+      operationId: getGermlineVariantCasesFilters
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantCasesFilters'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get cases filters for germline variant entity
+      tags:
+      - variant
+  /auth/me:
+    get:
+      description: |-
+        Returns the authenticated caller's tenant memberships, each with the
+        tenant-scoped actions they hold and the org-scoped actions mapped to the
+        orgs where they apply.
+      operationId: getMe
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TenantMembership'
+                type: array
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+      security:
+      - bearerauth: []
+      summary: Get the caller's effective authorization
+      tags:
+      - auth
   /status:
     get:
       description: Returns the current status of the API
@@ -5951,466 +7591,5 @@ paths:
       summary: Get user set by id
       tags:
       - user_sets
-  /variants/germline/{locus_id}/cases/count:
-    get:
-      description: Retrieve cases count for a given locus id
-      operationId: getGermlineVariantCasesCount
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VariantCasesCount'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get germline cases count for a given locus
-      tags:
-      - variant
-  /variants/germline/{locus_id}/cases/interpreted:
-    post:
-      description: Retrieve Germline Variant interpreted cases for a given locus
-      operationId: getGermlineVariantInterpretedCases
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ListBodyWithCriteria'
-        description: Search Body with criteria
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VariantInterpretedCasesSearchResponse'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get list of interpreted Cases for a germline variant
-      tags:
-      - variant
-  /variants/germline/{locus_id}/cases/uninterpreted:
-    post:
-      description: Retrieve Germline Variant uninterpreted cases for a given locus
-      operationId: getGermlineVariantUninterpretedCases
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ListBodyWithCriteria'
-        description: Search Body with criteria
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VariantUninterpretedCasesSearchResponse'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get list of uninterpreted Cases for a germline variant
-      tags:
-      - variant
-  /variants/germline/{locus_id}/conditions/{panel_type}:
-    get:
-      description: Retrieve conditions for germline variant entity for a specific
-        gene panel
-      operationId: getGermlineVariantConditions
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      - description: Gene panel type
-        in: path
-        name: panel_type
-        required: true
-        schema:
-          enum:
-          - omim
-          - hpo
-          - orphanet
-          type: string
-      - description: Condition filter
-        in: query
-        name: filter
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenePanelConditions'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get conditions for germline variant entity for a specific gene panel
-      tags:
-      - variant
-  /variants/germline/{locus_id}/conditions/clinvar:
-    get:
-      description: Retrieve ClinVar conditions for germline variant entity
-      operationId: GetGermlineVariantConditionsClinvar
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ClinvarVariantConditions'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get ClinVar conditions for germline variant entity
-      tags:
-      - variant
-  /variants/germline/{locus_id}/consequences:
-    get:
-      description: Retrieve germline Variant Consequences for a given locus
-      operationId: getGermlineVariantConsequences
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/VariantConsequence'
-                type: array
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get list of VariantConsequences for a germline variant
-      tags:
-      - variant
-  /variants/germline/{locus_id}/external_frequencies:
-    get:
-      description: Retrieve external frequencies for a given locus id
-      operationId: getGermlineVariantExternalFrequencies
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VariantExternalFrequencies'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get external frequencies
-      tags:
-      - variant
-  /variants/germline/{locus_id}/header:
-    get:
-      description: Retrieve germline Variant Header data for a given locus
-      operationId: getGermlineVariantHeader
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VariantHeader'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get a germline VariantHeader
-      tags:
-      - variant
-  /variants/germline/{locus_id}/internal_frequencies:
-    get:
-      description: Retrieve internal frequencies for a given locus id
-      operationId: getGermlineVariantInternalFrequencies
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      - description: split type
-        in: query
-        name: split
-        required: true
-        schema:
-          enum:
-          - project
-          - primary_condition
-          - analysis
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VariantInternalFrequencies'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Bad Request
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get internal frequencies
-      tags:
-      - variant
-  /variants/germline/{locus_id}/internal_frequencies/global:
-    get:
-      description: Retrieve global internal frequencies for a given locus id
-      operationId: getGermlineVariantGlobalInternalFrequencies
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InternalFrequencies'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get global internal frequencies
-      tags:
-      - variant
-  /variants/germline/{locus_id}/overview:
-    get:
-      description: Retrieve germline Variant Overview data for a given locus
-      operationId: getGermlineVariantOverview
-      parameters:
-      - description: Locus ID
-        in: path
-        name: locus_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VariantOverview'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get a germline VariantOverview
-      tags:
-      - variant
-  /variants/germline/cases/filters:
-    get:
-      description: Retrieve cases filters for germline variant entity
-      operationId: getGermlineVariantCasesFilters
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VariantCasesFilters'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-      security:
-      - bearerauth: []
-      summary: Get cases filters for germline variant entity
-      tags:
-      - variant
 servers:
 - url: /

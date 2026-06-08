@@ -4,21 +4,21 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**get_interpretation_germline**](InterpretationsApi.md#get_interpretation_germline) | **GET** /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
-[**get_interpretation_germline_deprecated**](InterpretationsApi.md#get_interpretation_germline_deprecated) | **GET** /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
-[**get_interpretation_somatic**](InterpretationsApi.md#get_interpretation_somatic) | **GET** /interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation somatic
-[**get_interpretation_somatic_deprecated**](InterpretationsApi.md#get_interpretation_somatic_deprecated) | **GET** /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation somatic
-[**get_pubmed_citation**](InterpretationsApi.md#get_pubmed_citation) | **GET** /interpretations/pubmed/{citation_id} | Get pubmed citation by ID
-[**post_interpretation_germline**](InterpretationsApi.md#post_interpretation_germline) | **POST** /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation germline
-[**post_interpretation_germline_deprecated**](InterpretationsApi.md#post_interpretation_germline_deprecated) | **POST** /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation germline
-[**post_interpretation_somatic**](InterpretationsApi.md#post_interpretation_somatic) | **POST** /interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation somatic
-[**post_interpretation_somatic_deprecated**](InterpretationsApi.md#post_interpretation_somatic_deprecated) | **POST** /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation somatic
-[**search_interpretation_germline**](InterpretationsApi.md#search_interpretation_germline) | **GET** /interpretations/germline | Search interpretation germline
-[**search_interpretation_somatic**](InterpretationsApi.md#search_interpretation_somatic) | **GET** /interpretations/somatic | Search interpretation somatic
+[**get_interpretation_germline**](InterpretationsApi.md#get_interpretation_germline) | **GET** /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
+[**get_interpretation_germline_deprecated**](InterpretationsApi.md#get_interpretation_germline_deprecated) | **GET** /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
+[**get_interpretation_somatic**](InterpretationsApi.md#get_interpretation_somatic) | **GET** /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation somatic
+[**get_interpretation_somatic_deprecated**](InterpretationsApi.md#get_interpretation_somatic_deprecated) | **GET** /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation somatic
+[**get_pubmed_citation**](InterpretationsApi.md#get_pubmed_citation) | **GET** /{tenant}/interpretations/pubmed/{citation_id} | Get pubmed citation by ID
+[**post_interpretation_germline**](InterpretationsApi.md#post_interpretation_germline) | **POST** /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation germline
+[**post_interpretation_germline_deprecated**](InterpretationsApi.md#post_interpretation_germline_deprecated) | **POST** /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation germline
+[**post_interpretation_somatic**](InterpretationsApi.md#post_interpretation_somatic) | **POST** /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation somatic
+[**post_interpretation_somatic_deprecated**](InterpretationsApi.md#post_interpretation_somatic_deprecated) | **POST** /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation somatic
+[**search_interpretation_germline**](InterpretationsApi.md#search_interpretation_germline) | **GET** /{tenant}/interpretations/germline | Search interpretation germline
+[**search_interpretation_somatic**](InterpretationsApi.md#search_interpretation_somatic) | **GET** /{tenant}/interpretations/somatic | Search interpretation somatic
 
 
 # **get_interpretation_germline**
-> InterpretationGermline get_interpretation_germline(case_id, sequencing_id, locus_id, transcript_id)
+> InterpretationGermline get_interpretation_germline(tenant, case_id, sequencing_id, locus_id, transcript_id)
 
 Get interpretation germline
 
@@ -54,6 +54,7 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.InterpretationsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     case_id = 'case_id_example' # str | Case ID
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
@@ -61,7 +62,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
     try:
         # Get interpretation germline
-        api_response = api_instance.get_interpretation_germline(case_id, sequencing_id, locus_id, transcript_id)
+        api_response = api_instance.get_interpretation_germline(tenant, case_id, sequencing_id, locus_id, transcript_id)
         print("The response of InterpretationsApi->get_interpretation_germline:\n")
         pprint(api_response)
     except Exception as e:
@@ -75,6 +76,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **case_id** | **str**| Case ID | 
  **sequencing_id** | **str**| Sequencing ID | 
  **locus_id** | **str**| Locus ID | 
@@ -99,13 +101,15 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **206** | Partial Content |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_interpretation_germline_deprecated**
-> InterpretationGermline get_interpretation_germline_deprecated(sequencing_id, locus_id, transcript_id)
+> InterpretationGermline get_interpretation_germline_deprecated(tenant, sequencing_id, locus_id, transcript_id)
 
 Get interpretation germline
 
@@ -141,13 +145,14 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.InterpretationsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
 
     try:
         # Get interpretation germline
-        api_response = api_instance.get_interpretation_germline_deprecated(sequencing_id, locus_id, transcript_id)
+        api_response = api_instance.get_interpretation_germline_deprecated(tenant, sequencing_id, locus_id, transcript_id)
         print("The response of InterpretationsApi->get_interpretation_germline_deprecated:\n")
         pprint(api_response)
     except Exception as e:
@@ -161,6 +166,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **sequencing_id** | **str**| Sequencing ID | 
  **locus_id** | **str**| Locus ID | 
  **transcript_id** | **str**| Transcript ID | 
@@ -184,13 +190,15 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **206** | Partial Content |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_interpretation_somatic**
-> InterpretationSomatic get_interpretation_somatic(case_id, sequencing_id, locus_id, transcript_id)
+> InterpretationSomatic get_interpretation_somatic(tenant, case_id, sequencing_id, locus_id, transcript_id)
 
 Get interpretation somatic
 
@@ -226,6 +234,7 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.InterpretationsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     case_id = 'case_id_example' # str | Case ID
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
@@ -233,7 +242,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
     try:
         # Get interpretation somatic
-        api_response = api_instance.get_interpretation_somatic(case_id, sequencing_id, locus_id, transcript_id)
+        api_response = api_instance.get_interpretation_somatic(tenant, case_id, sequencing_id, locus_id, transcript_id)
         print("The response of InterpretationsApi->get_interpretation_somatic:\n")
         pprint(api_response)
     except Exception as e:
@@ -247,6 +256,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **case_id** | **str**| Case ID | 
  **sequencing_id** | **str**| Sequencing ID | 
  **locus_id** | **str**| Locus ID | 
@@ -271,13 +281,15 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **206** | Partial Content |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_interpretation_somatic_deprecated**
-> InterpretationSomatic get_interpretation_somatic_deprecated(sequencing_id, locus_id, transcript_id)
+> InterpretationSomatic get_interpretation_somatic_deprecated(tenant, sequencing_id, locus_id, transcript_id)
 
 Get interpretation somatic
 
@@ -313,13 +325,14 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.InterpretationsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
 
     try:
         # Get interpretation somatic
-        api_response = api_instance.get_interpretation_somatic_deprecated(sequencing_id, locus_id, transcript_id)
+        api_response = api_instance.get_interpretation_somatic_deprecated(tenant, sequencing_id, locus_id, transcript_id)
         print("The response of InterpretationsApi->get_interpretation_somatic_deprecated:\n")
         pprint(api_response)
     except Exception as e:
@@ -333,6 +346,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **sequencing_id** | **str**| Sequencing ID | 
  **locus_id** | **str**| Locus ID | 
  **transcript_id** | **str**| Transcript ID | 
@@ -356,13 +370,15 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **206** | Partial Content |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_pubmed_citation**
-> PubmedCitation get_pubmed_citation(citation_id)
+> PubmedCitation get_pubmed_citation(tenant, citation_id)
 
 Get pubmed citation by ID
 
@@ -398,11 +414,12 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.InterpretationsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     citation_id = 'citation_id_example' # str | Citation ID
 
     try:
         # Get pubmed citation by ID
-        api_response = api_instance.get_pubmed_citation(citation_id)
+        api_response = api_instance.get_pubmed_citation(tenant, citation_id)
         print("The response of InterpretationsApi->get_pubmed_citation:\n")
         pprint(api_response)
     except Exception as e:
@@ -416,6 +433,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **citation_id** | **str**| Citation ID | 
 
 ### Return type
@@ -437,13 +455,15 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **206** | Partial Content |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **404** | Not Found |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **post_interpretation_germline**
-> InterpretationGermline post_interpretation_germline(case_id, sequencing_id, locus_id, transcript_id, interpretation_germline)
+> InterpretationGermline post_interpretation_germline(tenant, case_id, sequencing_id, locus_id, transcript_id, interpretation_germline)
 
 Create or Update interpretation germline
 
@@ -479,6 +499,7 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.InterpretationsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     case_id = 'case_id_example' # str | Case ID
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
@@ -487,7 +508,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
     try:
         # Create or Update interpretation germline
-        api_response = api_instance.post_interpretation_germline(case_id, sequencing_id, locus_id, transcript_id, interpretation_germline)
+        api_response = api_instance.post_interpretation_germline(tenant, case_id, sequencing_id, locus_id, transcript_id, interpretation_germline)
         print("The response of InterpretationsApi->post_interpretation_germline:\n")
         pprint(api_response)
     except Exception as e:
@@ -501,6 +522,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **case_id** | **str**| Case ID | 
  **sequencing_id** | **str**| Sequencing ID | 
  **locus_id** | **str**| Locus ID | 
@@ -526,12 +548,14 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **post_interpretation_germline_deprecated**
-> InterpretationGermline post_interpretation_germline_deprecated(sequencing_id, locus_id, transcript_id, interpretation_germline)
+> InterpretationGermline post_interpretation_germline_deprecated(tenant, sequencing_id, locus_id, transcript_id, interpretation_germline)
 
 Create or Update interpretation germline
 
@@ -567,6 +591,7 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.InterpretationsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
@@ -574,7 +599,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
     try:
         # Create or Update interpretation germline
-        api_response = api_instance.post_interpretation_germline_deprecated(sequencing_id, locus_id, transcript_id, interpretation_germline)
+        api_response = api_instance.post_interpretation_germline_deprecated(tenant, sequencing_id, locus_id, transcript_id, interpretation_germline)
         print("The response of InterpretationsApi->post_interpretation_germline_deprecated:\n")
         pprint(api_response)
     except Exception as e:
@@ -588,6 +613,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **sequencing_id** | **str**| Sequencing ID | 
  **locus_id** | **str**| Locus ID | 
  **transcript_id** | **str**| Transcript ID | 
@@ -612,12 +638,14 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **post_interpretation_somatic**
-> InterpretationSomatic post_interpretation_somatic(case_id, sequencing_id, locus_id, transcript_id, interpretation_somatic)
+> InterpretationSomatic post_interpretation_somatic(tenant, case_id, sequencing_id, locus_id, transcript_id, interpretation_somatic)
 
 Create or Update interpretation somatic
 
@@ -653,6 +681,7 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.InterpretationsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     case_id = 'case_id_example' # str | Case ID
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
@@ -661,7 +690,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
     try:
         # Create or Update interpretation somatic
-        api_response = api_instance.post_interpretation_somatic(case_id, sequencing_id, locus_id, transcript_id, interpretation_somatic)
+        api_response = api_instance.post_interpretation_somatic(tenant, case_id, sequencing_id, locus_id, transcript_id, interpretation_somatic)
         print("The response of InterpretationsApi->post_interpretation_somatic:\n")
         pprint(api_response)
     except Exception as e:
@@ -675,6 +704,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **case_id** | **str**| Case ID | 
  **sequencing_id** | **str**| Sequencing ID | 
  **locus_id** | **str**| Locus ID | 
@@ -700,12 +730,14 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **post_interpretation_somatic_deprecated**
-> InterpretationSomatic post_interpretation_somatic_deprecated(sequencing_id, locus_id, transcript_id, interpretation_somatic)
+> InterpretationSomatic post_interpretation_somatic_deprecated(tenant, sequencing_id, locus_id, transcript_id, interpretation_somatic)
 
 Create or Update interpretation somatic
 
@@ -741,6 +773,7 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.InterpretationsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
     sequencing_id = 'sequencing_id_example' # str | Sequencing ID
     locus_id = 'locus_id_example' # str | Locus ID
     transcript_id = 'transcript_id_example' # str | Transcript ID
@@ -748,7 +781,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
     try:
         # Create or Update interpretation somatic
-        api_response = api_instance.post_interpretation_somatic_deprecated(sequencing_id, locus_id, transcript_id, interpretation_somatic)
+        api_response = api_instance.post_interpretation_somatic_deprecated(tenant, sequencing_id, locus_id, transcript_id, interpretation_somatic)
         print("The response of InterpretationsApi->post_interpretation_somatic_deprecated:\n")
         pprint(api_response)
     except Exception as e:
@@ -762,6 +795,7 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
  **sequencing_id** | **str**| Sequencing ID | 
  **locus_id** | **str**| Locus ID | 
  **transcript_id** | **str**| Transcript ID | 
@@ -786,12 +820,14 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | OK |  -  |
 **400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **search_interpretation_germline**
-> List[InterpretationGermline] search_interpretation_germline()
+> List[InterpretationGermline] search_interpretation_germline(tenant)
 
 Search interpretation germline
 
@@ -827,10 +863,11 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.InterpretationsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
 
     try:
         # Search interpretation germline
-        api_response = api_instance.search_interpretation_germline()
+        api_response = api_instance.search_interpretation_germline(tenant)
         print("The response of InterpretationsApi->search_interpretation_germline:\n")
         pprint(api_response)
     except Exception as e:
@@ -841,7 +878,10 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
 
 ### Return type
 
@@ -861,12 +901,14 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **search_interpretation_somatic**
-> List[InterpretationSomatic] search_interpretation_somatic()
+> List[InterpretationSomatic] search_interpretation_somatic(tenant)
 
 Search interpretation somatic
 
@@ -902,10 +944,11 @@ configuration = radiant_python.Configuration(
 with radiant_python.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = radiant_python.InterpretationsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
 
     try:
         # Search interpretation somatic
-        api_response = api_instance.search_interpretation_somatic()
+        api_response = api_instance.search_interpretation_somatic(tenant)
         print("The response of InterpretationsApi->search_interpretation_somatic:\n")
         pprint(api_response)
     except Exception as e:
@@ -916,7 +959,10 @@ with radiant_python.ApiClient(configuration) as api_client:
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
 
 ### Return type
 
@@ -936,6 +982,8 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
 **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

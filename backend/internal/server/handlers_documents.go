@@ -16,13 +16,16 @@ import (
 // @Description Search documents
 // @Tags documents
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param			message	body		types.ListBodyWithCriteria	true	"List Body"
 // @Accept json
 // @Produce json
 // @Success 200 {object} types.DocumentsSearchResponse
 // @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /documents/search [post]
+// @Router /{tenant}/documents/search [post]
 func SearchDocumentsHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
@@ -58,12 +61,15 @@ func SearchDocumentsHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 // @Description Retrieve types.AutocompleteResult list of ids matching prefix
 // @Tags documents
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param prefix query string true "Prefix"
 // @Param limit query string false "Limit"
 // @Produce json
 // @Success 200 {array} types.AutocompleteResult
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /documents/autocomplete [get]
+// @Router /{tenant}/documents/autocomplete [get]
 func DocumentsAutocompleteHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
@@ -88,8 +94,11 @@ func DocumentsAutocompleteHandler(repo repository.DocumentsDAO) gin.HandlerFunc 
 // @Security bearerauth
 // @Produce json
 // @Success 200 {object} types.DocumentFilters
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /documents/filters [get]
+// @Param tenant path string true "Tenant code"
+// @Router /{tenant}/documents/filters [get]
 func DocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		filters, err := repo.GetDocumentsFilters(true)
@@ -107,12 +116,15 @@ func DocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 // @Description Generate a pre-signed S3 download URL for a document
 // @Tags documents
 // @Security bearerauth
+// @Param tenant path string true "Tenant code"
 // @Param document_id path string true "Document ID"
 // @Produce json
 // @Success 200 {object} utils.PreSignedURL
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
-// @Router /documents/{document_id}/download_url [get]
+// @Router /{tenant}/documents/{document_id}/download_url [get]
 func GetDocumentsDownloadUrlHandler(repo repository.DocumentsDAO, presigner utils.PreSigner) gin.HandlerFunc {
 	if presigner == nil {
 		presigner = utils.NewS3PreSigner()

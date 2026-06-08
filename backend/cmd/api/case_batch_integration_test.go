@@ -27,7 +27,7 @@ func Test_PostCaseBatch_OK(t *testing.T) {
 		repo := repository.NewBatchRepository(db)
 
 		router := gin.Default()
-		router.POST("/cases/batch", server.PostCaseBatchHandler(repo, &auth))
+		router.POST("/:tenant/cases/batch", server.PostCaseBatchHandler(repo, &auth))
 
 		body := types.CreateCaseBatchBody{
 			Cases: []*types.CaseBatch{{
@@ -51,7 +51,7 @@ func Test_PostCaseBatch_OK(t *testing.T) {
 		payload, err := json.Marshal(body)
 		require.NoError(t, err)
 
-		req, _ := http.NewRequest(http.MethodPost, "/cases/batch", bytes.NewBuffer(payload))
+		req, _ := http.NewRequest(http.MethodPost, "/radiant/cases/batch", bytes.NewBuffer(payload))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -79,7 +79,7 @@ func Test_PatchCaseBatch_OK(t *testing.T) {
 		repo := repository.NewBatchRepository(db)
 
 		router := gin.Default()
-		router.PATCH("/cases/batch", server.PatchCaseBatchHandler(repo, &auth))
+		router.PATCH("/:tenant/cases/batch", server.PatchCaseBatchHandler(repo, &auth))
 
 		body := types.PatchCaseBatchBody{
 			Cases: []*types.CaseBatchPatch{{
@@ -95,7 +95,7 @@ func Test_PatchCaseBatch_OK(t *testing.T) {
 		payload, err := json.Marshal(body)
 		require.NoError(t, err)
 
-		req, _ := http.NewRequest(http.MethodPatch, "/cases/batch", bytes.NewBuffer(payload))
+		req, _ := http.NewRequest(http.MethodPatch, "/radiant/cases/batch", bytes.NewBuffer(payload))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -122,11 +122,11 @@ func Test_PatchCaseBatch_RejectsMissingCaseKeyFields(t *testing.T) {
 		repo := repository.NewBatchRepository(env.Postgres)
 
 		router := gin.Default()
-		router.PATCH("/cases/batch", server.PatchCaseBatchHandler(repo, &auth))
+		router.PATCH("/:tenant/cases/batch", server.PatchCaseBatchHandler(repo, &auth))
 
 		// Missing project_code + submitter_case_id → binding:"required" rejects the request.
 		body := `{"cases":[{"sequencing_experiments":[{"aliquot":"A","submitter_sample_id":"S","sample_organization_code":"LDM"}]}]}`
-		req, _ := http.NewRequest(http.MethodPatch, "/cases/batch", bytes.NewBuffer([]byte(body)))
+		req, _ := http.NewRequest(http.MethodPatch, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 

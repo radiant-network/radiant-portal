@@ -120,9 +120,9 @@ func (m *MockCNVRepository) GetGenesOverlap(caseId int, seqId int, taskId int, c
 func Test_CNVOccurrencesListHandler(t *testing.T) {
 	repo := &MockCNVRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineCNVListHandler(repo))
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineCNVListHandler(repo))
 
-	req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/1/1/list", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/list", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -185,9 +185,9 @@ func Test_CNVOccurrencesListHandler(t *testing.T) {
 func Test_CNVOccurrencesCountHandler(t *testing.T) {
 	repo := &MockCNVRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", OccurrencesGermlineCNVCountHandler(repo))
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", OccurrencesGermlineCNVCountHandler(repo))
 
-	req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/1/1/count", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/count", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -198,7 +198,7 @@ func Test_CNVOccurrencesCountHandler(t *testing.T) {
 func Test_CNVOccurrencesAggregateHandler(t *testing.T) {
 	repo := &MockCNVRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/cnv/:case_id/:seq_id/:task_id/aggregate", OccurrencesGermlineCNVAggregateHandler(repo))
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/aggregate", OccurrencesGermlineCNVAggregateHandler(repo))
 
 	body := `{
 			"field": "cytoband",
@@ -211,7 +211,7 @@ func Test_CNVOccurrencesAggregateHandler(t *testing.T) {
 		    },
 			"size": 10
 	}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/1/1/aggregate", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/aggregate", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -223,7 +223,7 @@ func Test_CNVOccurrencesAggregateHandler(t *testing.T) {
 func Test_CNVOccurrencesStatisticsHandler(t *testing.T) {
 	repo := &MockCNVRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/cnv/:case_id/:seq_id/:task_id/statistics", OccurrencesGermlineCNVStatisticsHandler(repo))
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/statistics", OccurrencesGermlineCNVStatisticsHandler(repo))
 
 	body := `{
 			"field": "length",
@@ -236,7 +236,7 @@ func Test_CNVOccurrencesStatisticsHandler(t *testing.T) {
 		    },
 			"size": 10
 	}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/cnv/1/1/1/statistics", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/statistics", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -248,9 +248,9 @@ func Test_CNVOccurrencesStatisticsHandler(t *testing.T) {
 func Test_CNVOccurrencesGenesOverlapHandler(t *testing.T) {
 	repo := &MockCNVRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/cnv/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", OccurrencesGermlineCNVGenesOverlapHandler(repo))
+	router.GET("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", OccurrencesGermlineCNVGenesOverlapHandler(repo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/cnv/1/1/1/1/genes_overlap", nil)
+	req, _ := http.NewRequest("GET", "/radiant/occurrences/germline/cnv/1/1/1/1/genes_overlap", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

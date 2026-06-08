@@ -17,7 +17,7 @@ import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
-import { variantsApi } from '@/utils/api';
+import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
 
 import GeneAccordionItem from './gene-accordion-item';
 
@@ -28,7 +28,7 @@ type ConditionByPanelTypeInput = {
 };
 
 async function fetchConditionByPanelType(input: ConditionByPanelTypeInput) {
-  const response = await variantsApi.getGermlineVariantConditions(input.locus_id, input.panel_type);
+  const response = await variantsApi.getGermlineVariantConditions(DEFAULT_TENANT, input.locus_id, input.panel_type);
   return response.data;
 }
 

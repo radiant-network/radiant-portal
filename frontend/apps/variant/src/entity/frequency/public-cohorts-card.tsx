@@ -6,12 +6,12 @@ import { ApiError, VariantExternalFrequencies } from '@/api/index';
 import DisplayTable from '@/components/base/data-table/display-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
-import { variantsApi } from '@/utils/api';
+import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
 
 import { getPublicCohortsColumns } from './table-settings';
 
 async function fetchPublicCohorts(locusId: string): Promise<VariantExternalFrequencies> {
-  const response = await variantsApi.getGermlineVariantExternalFrequencies(locusId);
+  const response = await variantsApi.getGermlineVariantExternalFrequencies(DEFAULT_TENANT, locusId);
   return response.data;
 }
 

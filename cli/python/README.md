@@ -94,84 +94,84 @@ All URIs are relative to *http://localhost*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *AuthApi* | [**get_me**](docs/AuthApi.md#get_me) | **GET** /auth/me | Get the caller&#39;s effective authorization
-*BatchesApi* | [**get_batch**](docs/BatchesApi.md#get_batch) | **GET** /batches/{batchId} | Retrieve a batch by ID
-*CasesApi* | [**autocomplete_cases**](docs/CasesApi.md#autocomplete_cases) | **GET** /cases/autocomplete | Get AutocompleteResult list of matching prefix
-*CasesApi* | [**case_entity**](docs/CasesApi.md#case_entity) | **GET** /cases/{case_id} | Get CaseEntity case entity
-*CasesApi* | [**case_entity_documents_filters**](docs/CasesApi.md#case_entity_documents_filters) | **GET** /cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
-*CasesApi* | [**case_entity_documents_search**](docs/CasesApi.md#case_entity_documents_search) | **POST** /cases/{case_id}/documents/search | Search DocumentResult list for a case entity
-*CasesApi* | [**case_tasks_with_occurrences**](docs/CasesApi.md#case_tasks_with_occurrences) | **GET** /cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
-*CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **GET** /cases/filters | Get CaseFilters cases filters
-*CasesApi* | [**patch_case_batch**](docs/CasesApi.md#patch_case_batch) | **PATCH** /cases/batch | Partially update existing cases (batch)
-*CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /cases/batch | Create a new case batch
-*CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /cases/search | Search cases
-*DocumentsApi* | [**autocomplete_documents**](docs/DocumentsApi.md#autocomplete_documents) | **GET** /documents/autocomplete | Get AutocompleteResult list of matching prefix
-*DocumentsApi* | [**documents_filters**](docs/DocumentsApi.md#documents_filters) | **GET** /documents/filters | Get DocumentFilters documents filters
-*DocumentsApi* | [**get_document_download_url**](docs/DocumentsApi.md#get_document_download_url) | **GET** /documents/{document_id}/download_url | Get pre-signed S3 download URL for a document
-*DocumentsApi* | [**search_documents**](docs/DocumentsApi.md#search_documents) | **POST** /documents/search | Search documents
-*GenesApi* | [**gene_auto_complete**](docs/GenesApi.md#gene_auto_complete) | **GET** /genes/autocomplete | Get AutoCompleteGene list of matching input string with highlighted
-*GenesApi* | [**gene_search**](docs/GenesApi.md#gene_search) | **POST** /genes/search | Post search GeneResult list of matching input strings
+*BatchesApi* | [**get_batch**](docs/BatchesApi.md#get_batch) | **GET** /{tenant}/batches/{batchId} | Retrieve a batch by ID
+*CasesApi* | [**autocomplete_cases**](docs/CasesApi.md#autocomplete_cases) | **GET** /{tenant}/cases/autocomplete | Get AutocompleteResult list of matching prefix
+*CasesApi* | [**case_entity**](docs/CasesApi.md#case_entity) | **GET** /{tenant}/cases/{case_id} | Get CaseEntity case entity
+*CasesApi* | [**case_entity_documents_filters**](docs/CasesApi.md#case_entity_documents_filters) | **GET** /{tenant}/cases/{case_id}/documents/filters | Get DocumentFilters documents filters for a specific case
+*CasesApi* | [**case_entity_documents_search**](docs/CasesApi.md#case_entity_documents_search) | **POST** /{tenant}/cases/{case_id}/documents/search | Search DocumentResult list for a case entity
+*CasesApi* | [**case_tasks_with_occurrences**](docs/CasesApi.md#case_tasks_with_occurrences) | **GET** /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences | List tasks producing occurrences of a given type for a (case, sequencing) pair
+*CasesApi* | [**cases_filters**](docs/CasesApi.md#cases_filters) | **GET** /{tenant}/cases/filters | Get CaseFilters cases filters
+*CasesApi* | [**patch_case_batch**](docs/CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
+*CasesApi* | [**post_case_batch**](docs/CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
+*CasesApi* | [**search_cases**](docs/CasesApi.md#search_cases) | **POST** /{tenant}/cases/search | Search cases
+*DocumentsApi* | [**autocomplete_documents**](docs/DocumentsApi.md#autocomplete_documents) | **GET** /{tenant}/documents/autocomplete | Get AutocompleteResult list of matching prefix
+*DocumentsApi* | [**documents_filters**](docs/DocumentsApi.md#documents_filters) | **GET** /{tenant}/documents/filters | Get DocumentFilters documents filters
+*DocumentsApi* | [**get_document_download_url**](docs/DocumentsApi.md#get_document_download_url) | **GET** /{tenant}/documents/{document_id}/download_url | Get pre-signed S3 download URL for a document
+*DocumentsApi* | [**search_documents**](docs/DocumentsApi.md#search_documents) | **POST** /{tenant}/documents/search | Search documents
+*GenesApi* | [**gene_auto_complete**](docs/GenesApi.md#gene_auto_complete) | **GET** /{tenant}/genes/autocomplete | Get AutoCompleteGene list of matching input string with highlighted
+*GenesApi* | [**gene_search**](docs/GenesApi.md#gene_search) | **POST** /{tenant}/genes/search | Post search GeneResult list of matching input strings
 *HpoApi* | [**hpo_term_auto_complete**](docs/HpoApi.md#hpo_term_auto_complete) | **GET** /{tenant}/hpo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
-*IgvApi* | [**get_igv**](docs/IgvApi.md#get_igv) | **GET** /igv/{case_id} | Get IGV
-*InterpretationsApi* | [**get_interpretation_germline**](docs/InterpretationsApi.md#get_interpretation_germline) | **GET** /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
-*InterpretationsApi* | [**get_interpretation_germline_deprecated**](docs/InterpretationsApi.md#get_interpretation_germline_deprecated) | **GET** /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
-*InterpretationsApi* | [**get_interpretation_somatic**](docs/InterpretationsApi.md#get_interpretation_somatic) | **GET** /interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation somatic
-*InterpretationsApi* | [**get_interpretation_somatic_deprecated**](docs/InterpretationsApi.md#get_interpretation_somatic_deprecated) | **GET** /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation somatic
-*InterpretationsApi* | [**get_pubmed_citation**](docs/InterpretationsApi.md#get_pubmed_citation) | **GET** /interpretations/pubmed/{citation_id} | Get pubmed citation by ID
-*InterpretationsApi* | [**post_interpretation_germline**](docs/InterpretationsApi.md#post_interpretation_germline) | **POST** /interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation germline
-*InterpretationsApi* | [**post_interpretation_germline_deprecated**](docs/InterpretationsApi.md#post_interpretation_germline_deprecated) | **POST** /interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation germline
-*InterpretationsApi* | [**post_interpretation_somatic**](docs/InterpretationsApi.md#post_interpretation_somatic) | **POST** /interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation somatic
-*InterpretationsApi* | [**post_interpretation_somatic_deprecated**](docs/InterpretationsApi.md#post_interpretation_somatic_deprecated) | **POST** /interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation somatic
-*InterpretationsApi* | [**search_interpretation_germline**](docs/InterpretationsApi.md#search_interpretation_germline) | **GET** /interpretations/germline | Search interpretation germline
-*InterpretationsApi* | [**search_interpretation_somatic**](docs/InterpretationsApi.md#search_interpretation_somatic) | **GET** /interpretations/somatic | Search interpretation somatic
-*MondoApi* | [**mondo_term_auto_complete**](docs/MondoApi.md#mondo_term_auto_complete) | **GET** /mondo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
-*OccurrenceFlagsApi* | [**delete_occurrence_flag**](docs/OccurrenceFlagsApi.md#delete_occurrence_flag) | **DELETE** /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Delete the flag on an occurrence
-*OccurrenceFlagsApi* | [**upsert_occurrence_flag**](docs/OccurrenceFlagsApi.md#upsert_occurrence_flag) | **POST** /occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Set or change the flag on an occurrence
-*OccurrenceNotesApi* | [**count_occurrence_notes**](docs/OccurrenceNotesApi.md#count_occurrence_notes) | **GET** /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count | Count notes for an occurrence
-*OccurrenceNotesApi* | [**delete_occurrence_note**](docs/OccurrenceNotesApi.md#delete_occurrence_note) | **DELETE** /notes/{id} | Delete a note on an occurrence
-*OccurrenceNotesApi* | [**get_occurrence_notes**](docs/OccurrenceNotesApi.md#get_occurrence_notes) | **GET** /notes/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Get notes for an occurrence
-*OccurrenceNotesApi* | [**post_occurrence_note**](docs/OccurrenceNotesApi.md#post_occurrence_note) | **POST** /notes | Create a note on an occurrence
-*OccurrenceNotesApi* | [**put_occurrence_note**](docs/OccurrenceNotesApi.md#put_occurrence_note) | **PUT** /notes/{id} | Update a note on an occurrence
-*OccurrencesApi* | [**aggregate_germline_cnv_occurrences**](docs/OccurrencesApi.md#aggregate_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate germline CNV occurrences
-*OccurrencesApi* | [**aggregate_germline_snv_occurrences**](docs/OccurrencesApi.md#aggregate_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate germline SNV occurrences
-*OccurrencesApi* | [**aggregate_somatic_snv_occurrences**](docs/OccurrencesApi.md#aggregate_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate somatic SNV occurrences
-*OccurrencesApi* | [**count_germline_cnv_occurrences**](docs/OccurrencesApi.md#count_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count | Count germline CNV occurrences
-*OccurrencesApi* | [**count_germline_snv_occurrences**](docs/OccurrencesApi.md#count_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count | Count germline SNV occurrences
-*OccurrencesApi* | [**count_somatic_snv_occurrences**](docs/OccurrencesApi.md#count_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count | Count somatic SNV occurrences
-*OccurrencesApi* | [**get_expanded_germline_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
-*OccurrencesApi* | [**get_expanded_somatic_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
-*OccurrencesApi* | [**get_germline_snv_dictionary**](docs/OccurrencesApi.md#get_germline_snv_dictionary) | **GET** /occurrences/germline/snv/dictionary | Get germline SNV facets dictionary
-*OccurrencesApi* | [**list_germline_cnv_genes_overlap**](docs/OccurrencesApi.md#list_germline_cnv_genes_overlap) | **GET** /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap | List genes overlapping a CNV with a given ID
-*OccurrencesApi* | [**list_germline_cnv_occurrences**](docs/OccurrencesApi.md#list_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list | List germline CNV occurrences
-*OccurrencesApi* | [**list_germline_snv_occurrences**](docs/OccurrencesApi.md#list_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list | List germline SNV occurrences
-*OccurrencesApi* | [**list_somatic_snv_occurrences**](docs/OccurrencesApi.md#list_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list | List somatic SNV occurrences
-*OccurrencesApi* | [**statistics_germline_cnv_occurrences**](docs/OccurrencesApi.md#statistics_germline_cnv_occurrences) | **POST** /occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline CNV occurrences
-*OccurrencesApi* | [**statistics_germline_snv_occurrences**](docs/OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline SNV occurrences
-*OccurrencesApi* | [**statistics_somatic_snv_occurrences**](docs/OccurrencesApi.md#statistics_somatic_snv_occurrences) | **POST** /occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic SNV occurrences
-*PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /patients/batch | Create a new patient batch
-*SamplesApi* | [**post_sample_batch**](docs/SamplesApi.md#post_sample_batch) | **POST** /samples/batch | Create a new sample batch
+*IgvApi* | [**get_igv**](docs/IgvApi.md#get_igv) | **GET** /{tenant}/igv/{case_id} | Get IGV
+*InterpretationsApi* | [**get_interpretation_germline**](docs/InterpretationsApi.md#get_interpretation_germline) | **GET** /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
+*InterpretationsApi* | [**get_interpretation_germline_deprecated**](docs/InterpretationsApi.md#get_interpretation_germline_deprecated) | **GET** /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
+*InterpretationsApi* | [**get_interpretation_somatic**](docs/InterpretationsApi.md#get_interpretation_somatic) | **GET** /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation somatic
+*InterpretationsApi* | [**get_interpretation_somatic_deprecated**](docs/InterpretationsApi.md#get_interpretation_somatic_deprecated) | **GET** /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation somatic
+*InterpretationsApi* | [**get_pubmed_citation**](docs/InterpretationsApi.md#get_pubmed_citation) | **GET** /{tenant}/interpretations/pubmed/{citation_id} | Get pubmed citation by ID
+*InterpretationsApi* | [**post_interpretation_germline**](docs/InterpretationsApi.md#post_interpretation_germline) | **POST** /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation germline
+*InterpretationsApi* | [**post_interpretation_germline_deprecated**](docs/InterpretationsApi.md#post_interpretation_germline_deprecated) | **POST** /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation germline
+*InterpretationsApi* | [**post_interpretation_somatic**](docs/InterpretationsApi.md#post_interpretation_somatic) | **POST** /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation somatic
+*InterpretationsApi* | [**post_interpretation_somatic_deprecated**](docs/InterpretationsApi.md#post_interpretation_somatic_deprecated) | **POST** /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} | Create or Update interpretation somatic
+*InterpretationsApi* | [**search_interpretation_germline**](docs/InterpretationsApi.md#search_interpretation_germline) | **GET** /{tenant}/interpretations/germline | Search interpretation germline
+*InterpretationsApi* | [**search_interpretation_somatic**](docs/InterpretationsApi.md#search_interpretation_somatic) | **GET** /{tenant}/interpretations/somatic | Search interpretation somatic
+*MondoApi* | [**mondo_term_auto_complete**](docs/MondoApi.md#mondo_term_auto_complete) | **GET** /{tenant}/mondo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
+*OccurrenceFlagsApi* | [**delete_occurrence_flag**](docs/OccurrenceFlagsApi.md#delete_occurrence_flag) | **DELETE** /{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Delete the flag on an occurrence
+*OccurrenceFlagsApi* | [**upsert_occurrence_flag**](docs/OccurrenceFlagsApi.md#upsert_occurrence_flag) | **POST** /{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Set or change the flag on an occurrence
+*OccurrenceNotesApi* | [**count_occurrence_notes**](docs/OccurrenceNotesApi.md#count_occurrence_notes) | **GET** /{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count | Count notes for an occurrence
+*OccurrenceNotesApi* | [**delete_occurrence_note**](docs/OccurrenceNotesApi.md#delete_occurrence_note) | **DELETE** /{tenant}/notes/{id} | Delete a note on an occurrence
+*OccurrenceNotesApi* | [**get_occurrence_notes**](docs/OccurrenceNotesApi.md#get_occurrence_notes) | **GET** /{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id} | Get notes for an occurrence
+*OccurrenceNotesApi* | [**post_occurrence_note**](docs/OccurrenceNotesApi.md#post_occurrence_note) | **POST** /{tenant}/notes | Create a note on an occurrence
+*OccurrenceNotesApi* | [**put_occurrence_note**](docs/OccurrenceNotesApi.md#put_occurrence_note) | **PUT** /{tenant}/notes/{id} | Update a note on an occurrence
+*OccurrencesApi* | [**aggregate_germline_cnv_occurrences**](docs/OccurrencesApi.md#aggregate_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate germline CNV occurrences
+*OccurrencesApi* | [**aggregate_germline_snv_occurrences**](docs/OccurrencesApi.md#aggregate_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate germline SNV occurrences
+*OccurrencesApi* | [**aggregate_somatic_snv_occurrences**](docs/OccurrencesApi.md#aggregate_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate somatic SNV occurrences
+*OccurrencesApi* | [**count_germline_cnv_occurrences**](docs/OccurrencesApi.md#count_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count | Count germline CNV occurrences
+*OccurrencesApi* | [**count_germline_snv_occurrences**](docs/OccurrencesApi.md#count_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count | Count germline SNV occurrences
+*OccurrencesApi* | [**count_somatic_snv_occurrences**](docs/OccurrencesApi.md#count_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count | Count somatic SNV occurrences
+*OccurrencesApi* | [**get_expanded_germline_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
+*OccurrencesApi* | [**get_expanded_somatic_snv_occurrence**](docs/OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
+*OccurrencesApi* | [**get_germline_snv_dictionary**](docs/OccurrencesApi.md#get_germline_snv_dictionary) | **GET** /{tenant}/occurrences/germline/snv/dictionary | Get germline SNV facets dictionary
+*OccurrencesApi* | [**list_germline_cnv_genes_overlap**](docs/OccurrencesApi.md#list_germline_cnv_genes_overlap) | **GET** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap | List genes overlapping a CNV with a given ID
+*OccurrencesApi* | [**list_germline_cnv_occurrences**](docs/OccurrencesApi.md#list_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list | List germline CNV occurrences
+*OccurrencesApi* | [**list_germline_snv_occurrences**](docs/OccurrencesApi.md#list_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list | List germline SNV occurrences
+*OccurrencesApi* | [**list_somatic_snv_occurrences**](docs/OccurrencesApi.md#list_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list | List somatic SNV occurrences
+*OccurrencesApi* | [**statistics_germline_cnv_occurrences**](docs/OccurrencesApi.md#statistics_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline CNV occurrences
+*OccurrencesApi* | [**statistics_germline_snv_occurrences**](docs/OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline SNV occurrences
+*OccurrencesApi* | [**statistics_somatic_snv_occurrences**](docs/OccurrencesApi.md#statistics_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic SNV occurrences
+*PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
+*SamplesApi* | [**post_sample_batch**](docs/SamplesApi.md#post_sample_batch) | **POST** /{tenant}/samples/batch | Create a new sample batch
 *SavedFiltersApi* | [**delete_saved_filter**](docs/SavedFiltersApi.md#delete_saved_filter) | **DELETE** /users/saved_filters/{saved_filter_id} | Delete a saved filter
 *SavedFiltersApi* | [**get_saved_filter_by_id**](docs/SavedFiltersApi.md#get_saved_filter_by_id) | **GET** /users/saved_filters/{saved_filter_id} | Get saved filter by id
 *SavedFiltersApi* | [**get_saved_filters**](docs/SavedFiltersApi.md#get_saved_filters) | **GET** /users/saved_filters | Get user saved filters
 *SavedFiltersApi* | [**post_saved_filter**](docs/SavedFiltersApi.md#post_saved_filter) | **POST** /users/saved_filters | Create a new saved filter
 *SavedFiltersApi* | [**put_saved_filter**](docs/SavedFiltersApi.md#put_saved_filter) | **PUT** /users/saved_filters/{saved_filter_id} | Update a saved filter
-*SequencingApi* | [**get_sequencing_experiment_detail_by_id**](docs/SequencingApi.md#get_sequencing_experiment_detail_by_id) | **GET** /sequencing/{seq_id}/details | Get SequencingExperimentDetail by id
-*SequencingApi* | [**post_sequencing_experiment_batch**](docs/SequencingApi.md#post_sequencing_experiment_batch) | **POST** /sequencing/batch | Create a new sequencing experiment batch
+*SequencingApi* | [**get_sequencing_experiment_detail_by_id**](docs/SequencingApi.md#get_sequencing_experiment_detail_by_id) | **GET** /{tenant}/sequencing/{seq_id}/details | Get SequencingExperimentDetail by id
+*SequencingApi* | [**post_sequencing_experiment_batch**](docs/SequencingApi.md#post_sequencing_experiment_batch) | **POST** /{tenant}/sequencing/batch | Create a new sequencing experiment batch
 *StatusApi* | [**status_get**](docs/StatusApi.md#status_get) | **GET** /status | Get API status
 *UserPreferencesApi* | [**get_user_preferences**](docs/UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences/{key} | Get user preferences
 *UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences/{key} | Create or update user preference
 *UserSetsApi* | [**get_user_set**](docs/UserSetsApi.md#get_user_set) | **GET** /users/sets/{user_set_id} | Get user set by id
-*VariantApi* | [**get_germline_variant_cases_count**](docs/VariantApi.md#get_germline_variant_cases_count) | **GET** /variants/germline/{locus_id}/cases/count | Get germline cases count for a given locus
-*VariantApi* | [**get_germline_variant_cases_filters**](docs/VariantApi.md#get_germline_variant_cases_filters) | **GET** /variants/germline/cases/filters | Get cases filters for germline variant entity
-*VariantApi* | [**get_germline_variant_conditions**](docs/VariantApi.md#get_germline_variant_conditions) | **GET** /variants/germline/{locus_id}/conditions/{panel_type} | Get conditions for germline variant entity for a specific gene panel
-*VariantApi* | [**get_germline_variant_conditions_clinvar**](docs/VariantApi.md#get_germline_variant_conditions_clinvar) | **GET** /variants/germline/{locus_id}/conditions/clinvar | Get ClinVar conditions for germline variant entity
-*VariantApi* | [**get_germline_variant_consequences**](docs/VariantApi.md#get_germline_variant_consequences) | **GET** /variants/germline/{locus_id}/consequences | Get list of VariantConsequences for a germline variant
-*VariantApi* | [**get_germline_variant_external_frequencies**](docs/VariantApi.md#get_germline_variant_external_frequencies) | **GET** /variants/germline/{locus_id}/external_frequencies | Get external frequencies
-*VariantApi* | [**get_germline_variant_global_internal_frequencies**](docs/VariantApi.md#get_germline_variant_global_internal_frequencies) | **GET** /variants/germline/{locus_id}/internal_frequencies/global | Get global internal frequencies
-*VariantApi* | [**get_germline_variant_header**](docs/VariantApi.md#get_germline_variant_header) | **GET** /variants/germline/{locus_id}/header | Get a germline VariantHeader
-*VariantApi* | [**get_germline_variant_internal_frequencies**](docs/VariantApi.md#get_germline_variant_internal_frequencies) | **GET** /variants/germline/{locus_id}/internal_frequencies | Get internal frequencies
-*VariantApi* | [**get_germline_variant_interpreted_cases**](docs/VariantApi.md#get_germline_variant_interpreted_cases) | **POST** /variants/germline/{locus_id}/cases/interpreted | Get list of interpreted Cases for a germline variant
-*VariantApi* | [**get_germline_variant_overview**](docs/VariantApi.md#get_germline_variant_overview) | **GET** /variants/germline/{locus_id}/overview | Get a germline VariantOverview
-*VariantApi* | [**get_germline_variant_uninterpreted_cases**](docs/VariantApi.md#get_germline_variant_uninterpreted_cases) | **POST** /variants/germline/{locus_id}/cases/uninterpreted | Get list of uninterpreted Cases for a germline variant
+*VariantApi* | [**get_germline_variant_cases_count**](docs/VariantApi.md#get_germline_variant_cases_count) | **GET** /{tenant}/variants/germline/{locus_id}/cases/count | Get germline cases count for a given locus
+*VariantApi* | [**get_germline_variant_cases_filters**](docs/VariantApi.md#get_germline_variant_cases_filters) | **GET** /{tenant}/variants/germline/cases/filters | Get cases filters for germline variant entity
+*VariantApi* | [**get_germline_variant_conditions**](docs/VariantApi.md#get_germline_variant_conditions) | **GET** /{tenant}/variants/germline/{locus_id}/conditions/{panel_type} | Get conditions for germline variant entity for a specific gene panel
+*VariantApi* | [**get_germline_variant_conditions_clinvar**](docs/VariantApi.md#get_germline_variant_conditions_clinvar) | **GET** /{tenant}/variants/germline/{locus_id}/conditions/clinvar | Get ClinVar conditions for germline variant entity
+*VariantApi* | [**get_germline_variant_consequences**](docs/VariantApi.md#get_germline_variant_consequences) | **GET** /{tenant}/variants/germline/{locus_id}/consequences | Get list of VariantConsequences for a germline variant
+*VariantApi* | [**get_germline_variant_external_frequencies**](docs/VariantApi.md#get_germline_variant_external_frequencies) | **GET** /{tenant}/variants/germline/{locus_id}/external_frequencies | Get external frequencies
+*VariantApi* | [**get_germline_variant_global_internal_frequencies**](docs/VariantApi.md#get_germline_variant_global_internal_frequencies) | **GET** /{tenant}/variants/germline/{locus_id}/internal_frequencies/global | Get global internal frequencies
+*VariantApi* | [**get_germline_variant_header**](docs/VariantApi.md#get_germline_variant_header) | **GET** /{tenant}/variants/germline/{locus_id}/header | Get a germline VariantHeader
+*VariantApi* | [**get_germline_variant_internal_frequencies**](docs/VariantApi.md#get_germline_variant_internal_frequencies) | **GET** /{tenant}/variants/germline/{locus_id}/internal_frequencies | Get internal frequencies
+*VariantApi* | [**get_germline_variant_interpreted_cases**](docs/VariantApi.md#get_germline_variant_interpreted_cases) | **POST** /{tenant}/variants/germline/{locus_id}/cases/interpreted | Get list of interpreted Cases for a germline variant
+*VariantApi* | [**get_germline_variant_overview**](docs/VariantApi.md#get_germline_variant_overview) | **GET** /{tenant}/variants/germline/{locus_id}/overview | Get a germline VariantOverview
+*VariantApi* | [**get_germline_variant_uninterpreted_cases**](docs/VariantApi.md#get_germline_variant_uninterpreted_cases) | **POST** /{tenant}/variants/germline/{locus_id}/cases/uninterpreted | Get list of uninterpreted Cases for a germline variant
 
 
 ## Documentation For Models

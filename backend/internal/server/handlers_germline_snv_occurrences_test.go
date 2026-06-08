@@ -98,13 +98,13 @@ func (m *MockRepository) GetExpandedOccurrence(int, int, int, int) (*types.Expan
 func Test_OccurrencesListHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo))
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo))
 	body := `{
 			"additional_fields":[
 				"seq_id","task_id","locus_id","filter","zygosity","germline_pf_wgs","germline_pc_wgs","af","hgvsg","ad_ratio","variant_class", "rsnumber", "aa_change", "picked_consequences"
 			]
 	}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/1/list", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/list", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -148,9 +148,9 @@ func Test_OccurrencesListHandler(t *testing.T) {
 func Test_OccurrencesCountHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", OccurrencesGermlineSNVCountHandler(repo))
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", OccurrencesGermlineSNVCountHandler(repo))
 
-	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/1/count", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/count", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -162,7 +162,7 @@ func Test_OccurrencesAggregateHandler(t *testing.T) {
 	repo := &MockRepository{}
 	facetsRepo := &MockFacetsRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate", OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate", OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
 
 	body := `{
 			"field": "variant_class",
@@ -172,7 +172,7 @@ func Test_OccurrencesAggregateHandler(t *testing.T) {
 		    },
 			"size": 10
 	}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/1/aggregate", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/aggregate", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -185,7 +185,7 @@ func Test_OccurrencesAggregateHandler_withDictionary(t *testing.T) {
 	repo := &MockRepository{}
 	facetsRepo := &MockFacetsRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate", OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate", OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
 
 	body := `{
 			"field": "variant_class",
@@ -195,7 +195,7 @@ func Test_OccurrencesAggregateHandler_withDictionary(t *testing.T) {
 		    },
 			"size": 10
 	}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/1/aggregate?with_dictionary=true", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/aggregate?with_dictionary=true", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -207,7 +207,7 @@ func Test_OccurrencesAggregateHandler_withDictionary(t *testing.T) {
 func Test_OccurrencesStatisticsHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.POST("/occurrences/germline/snv/:case_id/:seq_id/:task_id/statistics", OccurrencesGermlineSNVStatisticsHandler(repo))
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/statistics", OccurrencesGermlineSNVStatisticsHandler(repo))
 
 	body := `{
 			"field": "germline_pf_wgs",
@@ -219,7 +219,7 @@ func Test_OccurrencesStatisticsHandler(t *testing.T) {
 				}
 		    }
 	}`
-	req, _ := http.NewRequest("POST", "/occurrences/germline/snv/1/1/1/statistics", bytes.NewBuffer([]byte(body)))
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/statistics", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -233,9 +233,9 @@ func Test_GetExpandedOccurrenceHandler_withExomiserACMGCounts(t *testing.T) {
 	exomiserRepo := &MockExomiserRepository{}
 	interpretationRepo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
+	router.GET("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/1/1/1/1000/expanded", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/occurrences/germline/snv/1/1/1/1000/expanded", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -282,9 +282,9 @@ func Test_GetExpandedOccurrenceHandler_emptyExomiserACMGCounts(t *testing.T) {
 	exomiserRepo := &MockEmptyExomiserRepository{}
 	interpretationRepo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
+	router.GET("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/1/1/1/1000/expanded", bytes.NewBuffer([]byte("{}")))
+	req, _ := http.NewRequest("GET", "/radiant/occurrences/germline/snv/1/1/1/1000/expanded", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -367,9 +367,9 @@ func (m *MockFacetsRepository) GetFacets(facetNames []string) ([]types.Facet, er
 func Test_GetGermlineSNVDictionaryHandler_withFacets(t *testing.T) {
 	repo := &MockFacetsRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/snv/dictionary", GetGermlineSNVDictionary(repo))
+	router.GET("/:tenant/occurrences/germline/snv/dictionary", GetGermlineSNVDictionary(repo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/dictionary?facets=variant_class&facets=lrt_pred", nil)
+	req, _ := http.NewRequest("GET", "/radiant/occurrences/germline/snv/dictionary?facets=variant_class&facets=lrt_pred", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -400,9 +400,9 @@ func Test_GetGermlineSNVDictionaryHandler_withFacets(t *testing.T) {
 func Test_GetGermlineSNVDictionaryHandler_noFacets(t *testing.T) {
 	repo := &MockFacetsRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/snv/dictionary", GetGermlineSNVDictionary(repo))
+	router.GET("/:tenant/occurrences/germline/snv/dictionary", GetGermlineSNVDictionary(repo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/dictionary", nil)
+	req, _ := http.NewRequest("GET", "/radiant/occurrences/germline/snv/dictionary", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -416,9 +416,9 @@ func Test_GetGermlineSNVDictionaryHandler_noFacets(t *testing.T) {
 func Test_GetGermlineSNVDictionaryHandler_facetNotFound(t *testing.T) {
 	repo := &MockFacetsRepository{}
 	router := gin.Default()
-	router.GET("/occurrences/germline/snv/dictionary", GetGermlineSNVDictionary(repo))
+	router.GET("/:tenant/occurrences/germline/snv/dictionary", GetGermlineSNVDictionary(repo))
 
-	req, _ := http.NewRequest("GET", "/occurrences/germline/snv/dictionary?facets=invalid", nil)
+	req, _ := http.NewRequest("GET", "/radiant/occurrences/germline/snv/dictionary?facets=invalid", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
