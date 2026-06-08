@@ -76,19 +76,19 @@ Auth utilities live in `internal/utils/auth.go` (`KeycloakAuth` interface).
 
 ### Multi-tenancy authorization model (`auth_db`)
 
-Authorization is **data**, not a separate service. Migration `000009_init_auth_multi_tenancy.up.sql` adds the model as 8 PostgreSQL tables (in `public`; the ADR's `auth_db.*` is the logical name, federated into StarRocks as `radiant_jdbc.public.*`). See `docs/adr/multi-tenancy-security.md` §5.
+Authorization is **data**, not a separate service. Migration `000009_init_auth_multi_tenancy.up.sql` adds the model as 8 PostgreSQL tables (in `public`; the ADR's `auth_db.*` is the logical name, federated into StarRocks as `radiant_jdbc.public.*`). Migration `000011_rekey_users_by_user_id.up.sql` then re-keys identity to `user_id` (see below). See `docs/adr/multi-tenancy-security.md` §5.
 
-Identifiers are **varchar `code` natural keys** — no integer surrogate ids — so every reference column is `*_code`. Users are keyed by **`email`** (the one identifier known at invite time, IdP-agnostic); `user_id uuid` (the Keycloak `sub`) is a nullable attribute filled on first login — same column name used by `saved_filter` / `user_preference` / `user_set` / `occurrence_note`.
+Identifiers are **varchar `code` natural keys** — no integer surrogate ids — so every reference column is `*_code`. Users are keyed by **`user_id`** (the Keycloak `sub`), which is required and unique; `email` / `first_name` / `last_name` are optional attributes. `user_id` is the same column name used by `saved_filter` / `user_preference` / `user_set` / `occurrence_note`. **Consequence:** a user must exist in Keycloak (have a `sub`) before they can be granted roles — there is no pre-provisioning by email before first login. (Migration 000009 originally keyed users by email; 000011 reversed that.)
 
 | Table | Key | Purpose |
 |---|---|---|
 | `tenant` | `code` | Tenant catalog (e.g. `radiant`) |
 | `organization` | `(code, tenant_code)` | Orgs, each belonging to one tenant (pre-existing table; `id` dropped, `tenant_code` added) |
-| `users` | `email` | Identity registry; `user_id uuid` (Keycloak sub) nullable until first login |
+| `users` | `user_id` | Identity registry, keyed by the Keycloak `sub` (required, unique); `email` / `first_name` / `last_name` are optional attributes |
 | `role` | `(tenant_code, code)` | Per-tenant role catalog |
 | `action` | `code` | Global action catalog; `scope` ∈ {`org`,`tenant`} |
 | `role_action` | `(tenant_code, role_code, action_code)` | Role → action mapping; FK to `role` `ON DELETE CASCADE` |
-| `user_role` | `(email, tenant_code, org_code, role_code)` | Single grant table; `org_code` is nullable — `NULL` = not org-scoped (tenant-wide grant), `'*'` = all orgs in tenant, specific code = that org. Uniqueness enforced by two partial indexes (one for non-NULL `org_code`, one for NULL). |
+| `user_role` | `(user_id, tenant_code, org_code, role_code)` | Single grant table (`user_id` FK → `users`); `org_code` is nullable — `NULL` = not org-scoped (tenant-wide grant), `'*'` = all orgs in tenant, specific code = that org. Uniqueness enforced by two partial indexes (one for non-NULL `org_code`, one for NULL). |
 
 The child clinical tables (`cases`, `patient`, `sample`, `sequencing_experiment`) reference `organization(code, tenant_code)` via compound FKs; StarRocks federation joins are `ON x.<>_code = org.code AND x.tenant_code = org.tenant_code`.
 
