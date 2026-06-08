@@ -1,5 +1,20 @@
 {
   "realm": "master",
   "enabled": true,
-  "sslRequired": "NONE"
+  "sslRequired": "NONE",
+  "users": [
+    {
+      "username": "kcadmin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "kcadmin@demo.org",
+      "firstName": "KC",
+      "lastName": "Admin",
+      "requiredActions": [],
+      "credentials": [
+        { "type": "password", "value": "admin", "temporary": false }
+      ],
+      "realmRoles": ["admin"]
+    }
+  ]
 }

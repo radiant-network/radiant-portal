@@ -13,8 +13,12 @@
 
 set -euo pipefail
 
+# kcadmin is the permanent, fully-set-up admin seeded by master.json. We do NOT
+# use the env-bootstrapped `admin`: recent Keycloak makes it a *temporary* admin
+# with a VERIFY_PROFILE required action, so headless admin-cli ROPC fails with
+# "Account is not fully set up".
 KC_URL="${KC_URL:-http://localhost:8080}"
-KC_ADMIN_USER="${KC_ADMIN_USER:-admin}"
+KC_ADMIN_USER="${KC_ADMIN_USER:-kcadmin}"
 KC_ADMIN_PASS="${KC_ADMIN_PASS:-admin}"
 REALM="${REALM:-CQDG}"
 USER_PASSWORD="${USER_PASSWORD:-radiant123!}"
