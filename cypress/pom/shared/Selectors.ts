@@ -90,6 +90,6 @@ export const CommonSelectors = {
   tooltipPopper: '[class*="radix-tooltip-content"]',
   underlineHeader: '[class*="decoration-dotted"]',
   unpinIcon: '[class*="lucide-pin-off"]',
-  userIcon: 'button[aria-haspopup="menu"] [class*="bg-cyan/20 text-cyan-foreground"]',
+  userIcon: 'button[aria-haspopup="menu"] [data-slot="avatar"]',
   variantPreview: '[role="dialog"][class*="data-[state=open]:slide-in-from-right"]',
 };

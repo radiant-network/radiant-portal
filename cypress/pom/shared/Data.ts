@@ -67,7 +67,7 @@ export const data = {
     type: 'SNV',
     dbsnp: 'rs72840396',
     gene: 'HPSE2',
-    consequence: 'Splice Region Variant',
+    consequence: 'Splice Region',
     aa_change: null,
     consequenceImpact: CommonSelectors.colorIndicator('emerald'),
     maneC: true,
