@@ -6,13 +6,13 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 import { type PortalConfig } from '../../components/cores/applications-config';
 
-import kfConfig from './config/kf.json';
-import radiantConfig from './config/radiant.json';
+import { kfConfig } from './config/kf';
+import { radiantConfig } from './config/radiant';
 import { createMergeTranslationsPlugin } from './merge-translations';
 
 const configs: Record<string, PortalConfig> = {
-  radiant: radiantConfig as PortalConfig,
-  kf: kfConfig as PortalConfig,
+  radiant: radiantConfig,
+  kf: kfConfig,
 };
 
 const project = process.env.THEME || 'radiant';
