@@ -61,14 +61,14 @@ ON CONFLICT (tenant_code, role_code, action_code) DO NOTHING;
 -- readable handle here). StarRocks usernames cannot contain '@', so the bridge
 -- between StarRocks current_user() and the email-keyed auth model is user_id,
 -- not email. ON CONFLICT updates user_id so re-runs converge.
--- dora is a platform admin: she has NO can_read_pii grant anywhere, yet will
--- see all PII because Ranger admin_role bypasses masking (role-based bypass,
--- independent of the action model).
+-- svc_admin_api is a platform/service admin: it has NO can_read_pii grant
+-- anywhere, yet will see all PII because Ranger admin_role bypasses masking
+-- (role-based bypass, independent of the action model).
 INSERT INTO public.users (email, user_id, first_name, last_name) VALUES
     ('alice@demo.org', 'alice', 'Alice', 'Demo'),
     ('bob@demo.org',   'bob',   'Bob',   'Demo'),
     ('wendy@demo.org', 'wendy', 'Wendy', 'Demo'),
-    ('dora@demo.org',  'dora',  'Dora',  'Admin')
+    ('svc_admin_api@demo.org', 'svc_admin_api', 'Service', 'Admin')
 ON CONFLICT (email) DO UPDATE SET user_id = EXCLUDED.user_id;
 
 -- --- Grants -----------------------------------------------------------------

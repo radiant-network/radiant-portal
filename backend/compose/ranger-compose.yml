@@ -73,6 +73,10 @@ services:
       RANGER_REGISTER_ON_SERVE: "false"
       # External admin URL advertised in config (not the bind address); match the service hostname.
       RANGER_POLICYMGR_EXTERNAL_URL: http://ranger:6080
+    volumes:
+      # JDBC truststore for StarRocks resource autocomplete (the registered service's
+      # JDBC URL points at file:/certs/starrocks_truststore.jks).
+      - starrocks-certs:/certs:ro
     ports:
       - "6080:6080"
     healthcheck:
@@ -96,6 +100,9 @@ services:
     depends_on:
       ranger:
         condition: service_healthy
+    volumes:
+      # JDBC truststore used to verify StarRocks' SSL cert on Test Connection.
+      - starrocks-certs:/certs:ro
     environment:
       RANGER_ADMIN_URL: http://ranger:6080
       RANGER_ADMIN_USER: admin
@@ -104,7 +111,11 @@ services:
       # allin1 root has no password -> empty.
       RANGER_STARROCKS_USERNAME: root
       RANGER_STARROCKS_PASSWORD: ""
-      RANGER_STARROCKS_JDBC_URL: jdbc:mysql://starrocks:9030
+      # Connect over SSL, verifying StarRocks' self-signed cert against the mounted
+      # JKS truststore. sslMode=VERIFY_CA checks the CA chain (not the hostname),
+      # which suits the self-signed cert. The truststore is mounted at /certs in
+      # both this phase and the long-running `ranger` (serve) service above.
+      RANGER_STARROCKS_JDBC_URL: "jdbc:mysql://starrocks:9030?sslMode=VERIFY_CA&trustCertificateKeyStoreUrl=file:/certs/starrocks_truststore.jks&trustCertificateKeyStorePassword=changeit"
       RANGER_STARROCKS_SERVICE_NAME: starrocks
       # yes -> service-def implClass = RangerServiceStarRocks (UI Test Connection / autocomplete).
       RANGER_STARROCKS_AUTOCOMPLETE: "yes"

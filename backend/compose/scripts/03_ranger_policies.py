@@ -48,7 +48,7 @@ SERVICE = "starrocks"
 
 # login -> which tenant role they belong to ; plus the admin
 TENANT_MEMBERS = {"tenant_a_user": ["alice", "wendy"], "tenant_b_user": ["bob"]}
-ADMINS = ["dora"]
+ADMINS = ["svc_admin_api"]
 ALL_LOGINS = [u for members in TENANT_MEMBERS.values() for u in members] + ADMINS
 
 _AUTH = "Basic " + base64.b64encode(f"{RANGER_USER}:{RANGER_PASS}".encode()).decode()

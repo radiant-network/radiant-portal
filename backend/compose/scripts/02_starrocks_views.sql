@@ -1,10 +1,13 @@
 /* ============================================================================
-   02_starrocks_views.sql — per-tenant StarRocks DBs/views + auth view + users
+   02_starrocks_views.sql — per-tenant StarRocks DBs/views + auth view
 
    Run against StarRocks (MySQL protocol) as root:
        mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_views.sql
    (StarRocks rejects `--` line comments when piped, so we use C-style comments,
     matching init_starrocks.sql.)
+
+   StarRocks users (JWT for alice/bob/wendy, native for svc_admin_api) live in
+   02_starrocks_users.sql — run it after this file.
 
    Views use the DEFAULT security mode (no SECURITY clause). Note: in StarRocks
    + Ranger, logical views are NOT an access-control boundary at any security
@@ -22,8 +25,8 @@
                         catalog, filtered to its tenant. The tenant column is
                         aliased to row_tenant_code so it can't clash with
                         pii_grant.tenant_code inside the correlated mask subquery.
-     * demo StarRocks users alice/bob/wendy/dora (native auth). current_user()
-                        returns '<login>'@'%'; the mask extracts the login.
+   The mask extracts the login from current_user() ('<login>'@'%'); StarRocks
+   usernames equal users.user_id (= the JWT principal_field, preferred_username).
    Idempotent.
    ============================================================================ */
 
@@ -89,13 +92,6 @@ SELECT id,
                  AND g.org_code = organization_code) AS can_read_pii
 FROM radiant_jdbc.public.patient
 WHERE tenant_code = 'tenant_b';
-
-/* --- Demo users (native auth; password is demo-only) ---------------------
-   Usernames = users.user_id (no '@'); current_user() returns '<login>'@'%'. */
-CREATE USER IF NOT EXISTS 'alice'@'%' IDENTIFIED BY 'Demo12345!';
-CREATE USER IF NOT EXISTS 'bob'@'%'   IDENTIFIED BY 'Demo12345!';
-CREATE USER IF NOT EXISTS 'wendy'@'%' IDENTIFIED BY 'Demo12345!';
-CREATE USER IF NOT EXISTS 'dora'@'%'  IDENTIFIED BY 'Demo12345!';   /* platform admin */
 
 /* --- Sanity (as root) ---------------------------------------------------- */
 SELECT '--- auth.pii_grant ---' AS section;

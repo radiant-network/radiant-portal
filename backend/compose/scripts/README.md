@@ -22,20 +22,30 @@ local `backend/compose` stack (StarRocks + Postgres + Ranger).
 ## Prerequisites
 
 ```bash
-cd backend/compose && docker compose up -d   # StarRocks :9030, Postgres :5432, Ranger :6080
+cd backend/compose && docker compose up -d   # StarRocks :9030, Postgres :5432, Ranger :6080, Keycloak :8080
 ```
-Host needs the `mysql` client and `python3` (stdlib only — no pip installs).
+Host needs `python3` (stdlib only — no pip installs) and an Oracle **MySQL client
+8.4+/9.x** that ships the `authentication_openid_connect_client` plugin (MariaDB's
+client and older mysql clients lack it). The demo users authenticate to StarRocks
+with a Keycloak JWT, so they need that plugin; `root` / `svc_admin_api` use native
+auth and work with any client.
 
 ## Run order
 
 ```bash
 cd backend/compose/scripts
 
+# 0. Keycloak: create demo users alice/bob/wendy in realm CQDG (password radiant123!).
+./00_keycloak_users.sh
+
 # 1. Seed Postgres: 2 tenants, orgs, patients, auth roles/grants/users.
 PGPASSWORD=radiant psql -h localhost -U radiant -d radiant -p 5432 -f 01_seed_postgres.sql
 
-# 2. StarRocks: auth.pii_grant view + per-tenant patient views + demo users.
+# 2. StarRocks: auth.pii_grant view + per-tenant patient views.
 mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_views.sql
+
+# 2b. StarRocks users: JWT for alice/bob/wendy + native svc_admin_api (adminpass1).
+mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_users.sql
 
 # 3. Ranger: roles + access / row-filter / mask policies.
 python3 03_ranger_policies.py
@@ -44,7 +54,24 @@ python3 03_ranger_policies.py
 # 4. Verify masking matrix + can_read_pii flag + #72910 tripwire (18 checks).
 python3 04_verify.py
 ```
-All four are idempotent; re-running converges to the same state.
+All steps are idempotent; re-running converges to the same state.
+
+## Connecting as a user
+
+`starrocks-connect.sh` fetches a JWT from Keycloak (ROPC, password `radiant123!`) and opens
+a StarRocks session as that user via the MySQL OIDC client plugin:
+
+```bash
+./starrocks-connect.sh alice "SELECT id, mrn FROM tenant_a.patient ORDER BY id"   # 1001/1002 clear, 1003 ***
+./starrocks-connect.sh bob   "SELECT id, mrn FROM tenant_b.patient ORDER BY id"   # 2001 clear, 2002 ***
+./starrocks-connect.sh wendy                                                      # interactive shell
+```
+
+The service admin uses native auth (no plugin, no token):
+
+```bash
+mysql -h127.0.0.1 -P9030 -usvc_admin_api -padminpass1 -e "SELECT id, mrn FROM tenant_a.patient"
+```
 
 ## How it fits together
 
@@ -73,7 +100,7 @@ radiant_jdbc (Postgres federation)
 
 | Ranger role | Members | Meaning |
 |---|---|---|
-| `admin_role` | platform admins (`dora`) | full access to every tenant; never masked; sees all `pii_grant` |
+| `admin_role` | platform admins (`svc_admin_api`) | full access to every tenant; never masked; sees all `pii_grant` |
 | `tenant_a_user` / `tenant_b_user` | that tenant's users | access to that tenant DB |
 | `user_role` | *(nested: contains the tenant roles)* | the masking + row-filter subject |
 
@@ -83,20 +110,24 @@ free. Admins are **not** in `user_role`, so they're unmasked and unfiltered by
 the "no matching item → pass through" behavior of Ranger mask/row-filter policies
 (no explicit admin/root item needed).
 
-## Demo users (password `Demo12345!`, except `root`)
+## Demo users
 
-| login | role | can_read_pii grant |
-|---|---|---|
-| `dora`  | admin_role | — (sees all via bypass) |
-| `alice` | tenant_a_user | `ORG_A1` |
-| `wendy` | tenant_a_user | `*` (all tenant_a orgs) |
-| `bob`   | tenant_b_user | `ORG_B1` |
+`alice` / `bob` / `wendy` authenticate with a Keycloak JWT (password
+`radiant123!`); `svc_admin_api` is the platform admin on native auth (password
+`adminpass1`); `root` has no password on the allin1 image.
+
+| login | auth | role | can_read_pii grant |
+|---|---|---|---|
+| `svc_admin_api` | native (`adminpass1`) | admin_role | — (sees all via bypass) |
+| `alice` | JWT (`radiant123!`) | tenant_a_user | `ORG_A1` |
+| `wendy` | JWT (`radiant123!`) | tenant_a_user | `*` (all tenant_a orgs) |
+| `bob`   | JWT (`radiant123!`) | tenant_b_user | `ORG_B1` |
 
 Example — expected masking on `tenant_a.patient` (`1001/1002`=ORG_A1, `1003`=ORG_A2):
 
 | login | 1001 | 1002 | 1003 |
 |---|---|---|---|
-| `dora` / `root` | clear | clear | clear |
+| `svc_admin_api` / `root` | clear | clear | clear |
 | `alice` | clear | clear | **masked** |
 | `wendy` | clear | clear | clear |
 | `bob` | masked | masked | masked |
