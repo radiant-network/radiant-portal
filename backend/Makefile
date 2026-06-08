@@ -32,20 +32,20 @@ run-worker:
 
 # Create DB container
 docker-run:
-	@if docker compose up --build 2>/dev/null; then \
+	@if docker compose -f compose/docker-compose.yml up --build 2>/dev/null; then \
 		: ; \
 	else \
 		echo "Falling back to Docker Compose V1"; \
-		docker-compose up --build; \
+		docker-compose -f compose/docker-compose.yml up --build; \
 	fi
 
 # Shutdown DB container
 docker-down:
-	@if docker compose down 2>/dev/null; then \
+	@if docker compose -f compose/docker-compose.yml down 2>/dev/null; then \
 		: ; \
 	else \
 		echo "Falling back to Docker Compose V1"; \
-		docker-compose down; \
+		docker-compose -f compose/docker-compose.yml down; \
 	fi
 
 # Test the application
