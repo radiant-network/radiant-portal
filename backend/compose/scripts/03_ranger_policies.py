@@ -46,10 +46,12 @@ RANGER_USER = os.environ.get("RANGER_ADMIN_USER", "admin")
 RANGER_PASS = os.environ.get("RANGER_ADMIN_PASSWORD", "rangerR0cks!")
 SERVICE = "starrocks"
 
-# login -> which tenant role they belong to ; plus the admin
-TENANT_MEMBERS = {"tenant_a_user": ["alice", "wendy"], "tenant_b_user": ["bob"]}
+# Regular users are added to these tenant roles by the Go tool `cmd/createuser`
+# (keyed on the Keycloak sub), NOT here. This script only needs the role NAMES to
+# exist and the admin wired up. Tenant roles are created empty + create-if-missing
+# so a re-run never wipes the members cmd/createuser added.
+TENANT_ROLES = ["tenant_a_user", "tenant_b_user"]
 ADMINS = ["svc_admin_api"]
-ALL_LOGINS = [u for members in TENANT_MEMBERS.values() for u in members] + ADMINS
 
 _AUTH = "Basic " + base64.b64encode(f"{RANGER_USER}:{RANGER_PASS}".encode()).decode()
 
@@ -97,6 +99,18 @@ def upsert_role(name, users=None, sub_roles=None):
     ok = status in (200, 201)
     print(f"  role {name}: HTTP {status}" + ("" if ok else f"  {payload[:200]}"))
     return ok
+
+
+# --- tenant roles: create empty only if missing -----------------------------
+# cmd/createuser owns tenant-role membership (it adds each user's sub). So here we
+# only create the role when it's absent; if it already exists we leave its member
+# list untouched, otherwise a re-run of this script would wipe those members.
+def ensure_role_if_missing(name):
+    status, _ = _request("GET", f"/service/roles/roles/name/{name}")
+    if status == 200:
+        print(f"  role {name}: exists (members left intact)")
+        return True
+    return upsert_role(name)
 
 
 # --- policies (delete-by-name then create) ----------------------------------
@@ -161,15 +175,16 @@ def main():
     print(f"Target: service '{SERVICE}' on {RANGER_URL}\n")
 
     print("Ranger users:")
-    for login in ALL_LOGINS:
+    for login in ADMINS:
         ensure_user(login)
 
     print("\nRanger roles:")
-    for role, members in TENANT_MEMBERS.items():
-        upsert_role(role, users=members)
+    # Tenant roles: create empty if missing; cmd/createuser fills them per user.
+    for role in TENANT_ROLES:
+        ensure_role_if_missing(role)
     upsert_role("admin_role", users=ADMINS)
     # user_role contains the tenant roles -> tenant members are masking subjects
-    upsert_role("user_role", sub_roles=list(TENANT_MEMBERS.keys()))
+    upsert_role("user_role", sub_roles=TENANT_ROLES)
 
     # Drop policies that earlier revisions created but we no longer use, so a
     # re-run converges to exactly the current set.

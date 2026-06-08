@@ -29,6 +29,12 @@ build-worker:
 run-worker:
 	@go run ./cmd/worker -stderrthreshold=INFO
 
+# Provision the demo regular users (alice/bob/wendy) across Keycloak, Postgres,
+# Ranger, and StarRocks. Run after the compose/scripts scaffolding (see
+# compose/scripts/README.md). Idempotent.
+seed-users:
+	@go run ./cmd/createuser
+
 
 # Create DB container
 docker-run:
@@ -84,7 +90,7 @@ doc:
 	@echo "Generating OpenAPI v3.1 documentation..."
 	@go run scripts/openapi/generate.go
 
-.PHONY: all build run test clean watch docker-run docker-down itest
+.PHONY: all build run seed-users test clean watch docker-run docker-down itest
 
 migrate:
 	@echo "Create database migration..."

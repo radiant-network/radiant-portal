@@ -56,30 +56,20 @@ INSERT INTO public.role_action (tenant_code, role_code, action_code) VALUES
     ('tenant_b', 'geneticist', 'can_read_pii')
 ON CONFLICT (tenant_code, role_code, action_code) DO NOTHING;
 
--- --- Demo users -------------------------------------------------------------
--- user_id is the StarRocks/IdP login identifier (Keycloak `sub` in prod; a
--- readable handle here). StarRocks usernames cannot contain '@', so the bridge
--- between StarRocks current_user() and the email-keyed auth model is user_id,
--- not email. ON CONFLICT updates user_id so re-runs converge.
--- svc_admin_api is a platform/service admin: it has NO can_read_pii grant
--- anywhere, yet will see all PII because Ranger admin_role bypasses masking
--- (role-based bypass, independent of the action model).
+-- --- Service admin -----------------------------------------------------------
+-- svc_admin_api is a platform/service admin (NOT a regular user): it has NO
+-- can_read_pii grant anywhere, yet will see all PII because Ranger admin_role
+-- bypasses masking (role-based bypass, independent of the action model). It is
+-- scaffolding, so it stays here.
+--
+-- The regular users (alice/bob/wendy) and their grants are NO LONGER seeded
+-- here. They are provisioned end-to-end — Keycloak + Postgres + Ranger +
+-- StarRocks — by the Go tool `cmd/createuser` (run it after this script), which
+-- keys them on the Keycloak `sub` (now stored in users.user_id and used as the
+-- StarRocks username / principal_field).
 INSERT INTO public.users (email, user_id, first_name, last_name) VALUES
-    ('alice@demo.org', 'alice', 'Alice', 'Demo'),
-    ('bob@demo.org',   'bob',   'Bob',   'Demo'),
-    ('wendy@demo.org', 'wendy', 'Wendy', 'Demo'),
     ('svc_admin_api@demo.org', 'svc_admin_api', 'Service', 'Admin')
 ON CONFLICT (email) DO UPDATE SET user_id = EXCLUDED.user_id;
-
--- --- Grants -----------------------------------------------------------------
---   alice → geneticist @ ORG_A1 (tenant_a)  → PII only for ORG_A1
---   bob   → geneticist @ ORG_B1 (tenant_b)  → PII only for ORG_B1
---   wendy → geneticist @ '*'    (tenant_a)  → PII for EVERY tenant_a org
-INSERT INTO public.user_role (email, tenant_code, org_code, role_code, granted_by) VALUES
-    ('alice@demo.org', 'tenant_a', 'ORG_A1', 'geneticist', 'sim'),
-    ('bob@demo.org',   'tenant_b', 'ORG_B1', 'geneticist', 'sim'),
-    ('wendy@demo.org', 'tenant_a', '*',      'geneticist', 'sim')
-ON CONFLICT DO NOTHING;
 
 COMMIT;
 

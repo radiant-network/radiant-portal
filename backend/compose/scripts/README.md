@@ -32,29 +32,43 @@ auth and work with any client.
 
 ## Run order
 
+The scripts now seed only the **scaffolding** (tenants, orgs, patients, role &
+action definitions, Ranger role hierarchy + policies, StarRocks views and the
+service admin). The **regular users** alice/bob/wendy are created end-to-end by
+the Go tool `cmd/createuser`, which provisions each across Keycloak + Postgres +
+Ranger + StarRocks keyed on the Keycloak `sub` (see "Identity bridge" below).
+
 ```bash
 cd backend/compose/scripts
 
-# 0. Keycloak: create demo users alice/bob/wendy in realm CQDG (password radiant123!).
-./00_keycloak_users.sh
-
-# 1. Seed Postgres: 2 tenants, orgs, patients, auth roles/grants/users.
+# 1. Seed Postgres scaffolding: 2 tenants, orgs, patients, roles/actions + svc_admin_api.
 PGPASSWORD=radiant psql -h localhost -U radiant -d radiant -p 5432 -f 01_seed_postgres.sql
 
 # 2. StarRocks: auth.pii_grant view + per-tenant patient views.
 mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_views.sql
 
-# 2b. StarRocks users: JWT for alice/bob/wendy + native svc_admin_api (adminpass1).
+# 2b. StarRocks service admin (native svc_admin_api, adminpass1).
 mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_users.sql
 
-# 3. Ranger: roles + access / row-filter / mask policies.
+# 3. Ranger: roles (empty tenant roles) + access / row-filter / mask policies.
 python3 03_ranger_policies.py
 
+# 4. Provision the regular users alice/bob/wendy across all four systems.
+#    (Keycloak user + Postgres users/grants + Ranger tenant-role membership +
+#     StarRocks JWT user, all keyed on the Keycloak sub.)
+cd ../../ && go run ./cmd/createuser    # from backend/ ; or: make seed-users
+
 # wait ~10s for StarRocks to poll Ranger, then:
-# 4. Verify masking matrix + can_read_pii flag + #72910 tripwire (18 checks).
-python3 04_verify.py
+# 5. Verify masking matrix + can_read_pii flag + #72910 tripwire.
+python3 compose/scripts/04_verify.py
 ```
-All steps are idempotent; re-running converges to the same state.
+All steps are idempotent; re-running converges to the same state. To provision a
+single ad-hoc user instead of the demo set:
+
+```bash
+go run ./cmd/createuser -email carol@demo.org -first Carol -last Demo \
+    -grant tenant_a:ORG_A1:geneticist
+```
 
 ## Connecting as a user
 
@@ -89,9 +103,12 @@ radiant_jdbc (Postgres federation)
                  └─ Ranger mask:  CASE WHEN can_read_pii THEN {col} ELSE '***' END
 ```
 
-- **Identity bridge:** StarRocks usernames can't contain `@`, so they are
-  `users.user_id` (the Keycloak `sub`/login), never the email. The mask/filter
-  extract the login from `current_user()` (`'<login>'@'%'`).
+- **Identity bridge:** the login is the **Keycloak `sub`** (a UUID). StarRocks
+  users authenticate with `"principal_field": "sub"`, so the StarRocks username,
+  `users.user_id`, and the Ranger user name are all the same `sub` — never the
+  email (StarRocks usernames can't contain `@`). The mask/filter extract the
+  login from `current_user()` (`'<sub>'@'%'`). `cmd/createuser` writes the sub to
+  all three systems at provisioning time.
 - **`can_read_pii` column:** doubles as a user-facing flag — `1` = this row is
   visible to me, `0` = masked. (For admins it reads `0` while they still see
   clear data, because the flag tracks the *action*, not the `admin_role` bypass.)
@@ -112,9 +129,11 @@ the "no matching item → pass through" behavior of Ranger mask/row-filter polic
 
 ## Demo users
 
-`alice` / `bob` / `wendy` authenticate with a Keycloak JWT (password
-`radiant123!`); `svc_admin_api` is the platform admin on native auth (password
-`adminpass1`); `root` has no password on the allin1 image.
+`alice` / `bob` / `wendy` are provisioned by `cmd/createuser` and authenticate
+with a Keycloak JWT (password `radiant123!`); `svc_admin_api` is the platform
+admin on native auth (password `adminpass1`); `root` has no password on the
+allin1 image. The table uses the human handles for readability, but the actual
+StarRocks/Ranger/`user_id` login for the JWT users is each one's Keycloak `sub`.
 
 | login | auth | role | can_read_pii grant |
 |---|---|---|---|

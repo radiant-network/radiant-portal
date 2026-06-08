@@ -23,6 +23,7 @@ Exit code 0 = all checks passed, 1 = at least one failed.
 """
 
 import atexit
+import base64
 import json
 import os
 import subprocess
@@ -49,6 +50,8 @@ USER_PASSWORD = os.environ.get("USER_PASSWORD", "radiant123!")
 
 RESULTS = []
 _TOKEN_FILES = {}  # user -> path of a temp file holding their JWT (cached)
+_TOKENS = {}       # user -> raw JWT access token (cached)
+_SUBS = {}         # user -> `sub` claim = the StarRocks username (cached)
 
 
 @atexit.register
@@ -60,11 +63,10 @@ def _cleanup_token_files():
             pass
 
 
-def _token_file(user):
-    """Fetch a Keycloak access token for `user` (ROPC) and cache it in a temp
-    file the mysql OIDC client plugin can read. Returns the file path."""
-    if user in _TOKEN_FILES:
-        return _TOKEN_FILES[user]
+def _token(user):
+    """Fetch and cache a Keycloak access token for `user` (ROPC)."""
+    if user in _TOKENS:
+        return _TOKENS[user]
     body = urllib.parse.urlencode({
         "client_id": CLIENT_ID, "client_secret": CLIENT_SECRET,
         "username": user, "password": USER_PASSWORD, "grant_type": "password",
@@ -76,15 +78,43 @@ def _token_file(user):
     except (urllib.error.URLError, KeyError) as e:
         print(f"  !! token fetch failed for {user}: {e}", file=sys.stderr)
         tok = ""
+    _TOKENS[user] = tok
+    return tok
+
+
+def _token_file(user):
+    """Write the user's cached JWT to a temp file the mysql OIDC client plugin
+    can read. Returns the file path."""
+    if user in _TOKEN_FILES:
+        return _TOKEN_FILES[user]
     fd, path = tempfile.mkstemp(prefix=f"jwt_{user}_")
     with os.fdopen(fd, "w") as f:
-        f.write(tok)
+        f.write(_token(user))
     _TOKEN_FILES[user] = path
     return path
 
 
+def _sub(user):
+    """The StarRocks username for a JWT user is the token's `sub` claim
+    (principal_field=sub now), not the human handle. Falls back to the handle if
+    the token can't be decoded."""
+    if user in _SUBS:
+        return _SUBS[user]
+    tok = _token(user)
+    sub = user
+    if tok:
+        payload = tok.split(".")[1]
+        payload += "=" * (-len(payload) % 4)
+        sub = json.loads(base64.urlsafe_b64decode(payload)).get("sub", user)
+    _SUBS[user] = sub
+    return sub
+
+
 def run_sql(user, sql):
-    cmd = ["mysql", "-h", SR_HOST, "-P", SR_PORT, f"-u{user}", "-N", "-B", "-e", sql]
+    # JWT users authenticate as their `sub` (the StarRocks username); native
+    # users (root/svc_admin_api) keep their handle.
+    login = _sub(user) if user in JWT_USERS else user
+    cmd = ["mysql", "-h", SR_HOST, "-P", SR_PORT, f"-u{login}", "-N", "-B", "-e", sql]
     if user in JWT_USERS:
         cmd[5:5] = [
             "--ssl-mode=PREFERRED", # Use ssl but no cert validation (autosign cert)

@@ -161,3 +161,41 @@ func appendUnique(values []string, value string) []string {
 	}
 	return append(values, value)
 }
+
+// UpsertUser inserts the user or, on email conflict, converges its user_id (the
+// Keycloak sub) and name. This is the write side used at provisioning time, paired
+// with the read side above. Idempotent.
+func (r *AuthRepository) UpsertUser(email, userID, firstName, lastName string) error {
+	err := r.db.Exec(`
+		INSERT INTO public.users (email, user_id, first_name, last_name)
+		VALUES (?, ?, ?, ?)
+		ON CONFLICT (email) DO UPDATE
+		SET user_id = EXCLUDED.user_id,
+		    first_name = EXCLUDED.first_name,
+		    last_name = EXCLUDED.last_name`,
+		email, userID, firstName, lastName).Error
+	if err != nil {
+		return fmt.Errorf("upsert user %q: %w", email, err)
+	}
+	return nil
+}
+
+// GrantRole grants a role to the user within a tenant. An empty orgCode is stored
+// as NULL (a tenant-wide grant); "*" and specific codes are stored verbatim. The
+// role must already exist (FK to public.role). Idempotent via ON CONFLICT DO NOTHING,
+// which catches either partial-unique index (NULL vs non-NULL org_code).
+func (r *AuthRepository) GrantRole(email, tenantCode, orgCode, roleCode string) error {
+	var org any
+	if orgCode != "" {
+		org = orgCode
+	}
+	err := r.db.Exec(`
+		INSERT INTO public.user_role (email, tenant_code, org_code, role_code, granted_by)
+		VALUES (?, ?, ?, ?, 'createuser')
+		ON CONFLICT DO NOTHING`,
+		email, tenantCode, org, roleCode).Error
+	if err != nil {
+		return fmt.Errorf("grant %s/%s/%s to %q: %w", tenantCode, orgCode, roleCode, email, err)
+	}
+	return nil
+}

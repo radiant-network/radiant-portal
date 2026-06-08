@@ -65,10 +65,22 @@ chmod 600 "${TOKEN_FILE}"
 trap 'rm -f "${TOKEN_FILE}"' EXIT
 printf '%s' "${TOKEN}" > "${TOKEN_FILE}"
 
-echo "=== Connecting to StarRocks ${SR_HOST}:${SR_PORT} as '${USER}' (OIDC) ===" >&2
+# principal_field=sub: the StarRocks username is the token's `sub` claim, not the
+# human handle. Decode the JWT payload to get it.
+LOGIN=$(printf '%s' "${TOKEN}" | python3 -c "
+import sys, json, base64
+tok = sys.stdin.read().strip()
+p = tok.split('.')[1]; p += '=' * (-len(p) % 4)
+sub = json.loads(base64.urlsafe_b64decode(p)).get('sub', '')
+if not sub:
+    sys.stderr.write('failed to extract sub from token\n'); sys.exit(1)
+print(sub)
+")
+
+echo "=== Connecting to StarRocks ${SR_HOST}:${SR_PORT} as '${USER}' (sub=${LOGIN}, OIDC) ===" >&2
 echo "Use SSL Mode PREFERRED -> use cert but no validation to accept auto signing cert"
 MYSQL_ARGS=(
-  -h"${SR_HOST}" -P"${SR_PORT}" -u"${USER}"
+  -h"${SR_HOST}" -P"${SR_PORT}" -u"${LOGIN}"
   --ssl-mode=PREFERRED
   --authentication-openid-connect-client-id-token-file="${TOKEN_FILE}"
   --default-auth=authentication_openid_connect_client

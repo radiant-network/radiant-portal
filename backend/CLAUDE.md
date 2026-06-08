@@ -162,7 +162,7 @@ StarRocks fixtures (`test/data/<folder>/*.tsv`) are loaded once per process per 
 
 Follow the [add-endpoint skill](.claude/skills/add-endpoint/SKILL.md). It covers DB schema, types, repository + tests, handler + tests, route + integration test, swagger + client regeneration, Postman, and updating this file when patterns change.
 
-Universal coding/testing rules that apply to every backend change live in [.claude/rules/universal.md](.claude/rules/universal.md).
+Universal coding/testing rules that apply to every backend change live in [.claude/rules/universal.md](.claude/rules/universal.md). Go style conventions (naming, errors, interface placement — a project-annotated copy of the Go Code Review Comments) live in [.claude/rules/go-code-review.md](.claude/rules/go-code-review.md).
 
 ## Adding a DB Migration
 

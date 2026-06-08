@@ -1,54 +1,22 @@
 /* ============================================================================
-   02_starrocks_users.sql — StarRocks users for the multi-tenant masking demo.
+   02_starrocks_users.sql — the StarRocks service admin for the masking demo.
 
    Run against StarRocks (MySQL protocol) as root, AFTER 02_starrocks_views.sql:
        mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_users.sql
    (StarRocks rejects `--` line comments when piped, so we use C-style comments.)
 
-   Two kinds of identity:
+   The regular JWT users (alice/bob/wendy) are NO LONGER created here. They are
+   provisioned by the Go tool `cmd/createuser`, which creates each StarRocks user
+   named by its Keycloak `sub` with authentication_jwt and "principal_field":
+   "sub" (was preferred_username). This file now only creates the native-auth
+   service admin, which is scaffolding, not a regular user.
 
-     * alice / bob / wendy — authenticate with a Keycloak-issued JWT
-       (IDENTIFIED WITH authentication_jwt). The StarRocks username MUST equal
-       the token's principal_field (preferred_username), so current_user()
-       stays '<login>'@'%' and the masks/row-filters in 02_starrocks_views.sql
-       keep resolving the login exactly as before. Get a token + connect with
-       ./connect.sh <user> (password radiant123!).
-
-       - jwks_url       in-network host: StarRocks reaches Keycloak at keycloak:8080.
-       - principal_field the JWT claim used as the StarRocks username.
-       - required_issuer  the host the *client* obtains the token from
-                          (localhost:8080), which is what lands in the `iss` claim.
-       - required_audience the token's `aud` must contain "starrocks". This is
-                          injected by an oidc-audience-mapper on the `radiant`
-                          client (backend/scripts/init-keycloak/cqdg.json). A
-                          token minted for any other audience is rejected at login.
-
-     * svc_admin_api — platform/service admin on a regular password. Native auth, password adminpass1. It is a member of the
-       Ranger admin_role (03_ranger_policies.py), so it bypasses masking.
+     * svc_admin_api — platform/service admin on native auth (password
+       adminpass1). It is a member of the Ranger admin_role
+       (03_ranger_policies.py), so it bypasses masking.
 
    Idempotent (CREATE USER IF NOT EXISTS).
    ============================================================================ */
-
-CREATE USER IF NOT EXISTS 'alice'@'%' IDENTIFIED WITH authentication_jwt AS '{
-  "jwks_url": "http://keycloak:8080/realms/CQDG/protocol/openid-connect/certs",
-  "principal_field": "preferred_username",
-  "required_issuer": "http://localhost:8080/realms/CQDG",
-  "required_audience": "radiant"
-}';
-
-CREATE USER IF NOT EXISTS 'bob'@'%' IDENTIFIED WITH authentication_jwt AS '{
-  "jwks_url": "http://keycloak:8080/realms/CQDG/protocol/openid-connect/certs",
-  "principal_field": "preferred_username",
-  "required_issuer": "http://localhost:8080/realms/CQDG",
-  "required_audience": "radiant"
-}';
-
-CREATE USER IF NOT EXISTS 'wendy'@'%' IDENTIFIED WITH authentication_jwt AS '{
-  "jwks_url": "http://keycloak:8080/realms/CQDG/protocol/openid-connect/certs",
-  "principal_field": "preferred_username",
-  "required_issuer": "http://localhost:8080/realms/CQDG",
-  "required_audience": "radiant"
-}';
 
 /* Platform/service admin (native auth; demo-only password). */
 CREATE USER IF NOT EXISTS 'svc_admin_api'@'%' IDENTIFIED BY 'adminpass1';
