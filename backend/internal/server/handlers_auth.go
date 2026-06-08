@@ -23,12 +23,12 @@ import (
 // @Router /auth/me [get]
 func GetMeHandler(repo repository.AuthRepositoryDAO, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		email, err := auth.RetrieveEmailFromToken(c)
+		userID, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
 			HandleUnauthorizedError(c)
 			return
 		}
-		memberships, err := repo.GetMemberships(*email)
+		memberships, err := repo.GetMemberships(*userID)
 		if err != nil {
 			HandleError(c, err)
 			return

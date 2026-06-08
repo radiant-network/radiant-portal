@@ -10,7 +10,6 @@ import (
 const (
 	DefaultMockUserId   = "1"
 	DefaultMockUsername = "mock-username"
-	DefaultMockEmail    = "mock-user@example.com"
 	DefaultMockFullName = "Mock User"
 	DefaultMockAzp      = "mock-azp"
 	DefaultMockRole     = "mock-role"
@@ -19,7 +18,6 @@ const (
 type MockAuth struct {
 	Id             string
 	Username       string
-	Email          string
 	Name           string
 	Azp            string
 	ResourceAccess map[string]ginkeycloak.ServiceRole
@@ -72,17 +70,6 @@ func (m *MockAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, error) {
 		return &result, nil
 	}
 	return &m.Username, nil
-}
-
-func (m *MockAuth) RetrieveEmailFromToken(c *gin.Context) (*string, error) {
-	if m.Error != nil {
-		return nil, m.Error
-	}
-	if m.Email == "" {
-		result := DefaultMockEmail
-		return &result, nil
-	}
-	return &m.Email, nil
 }
 
 func (m *MockAuth) RetrieveFullNameFromToken(c *gin.Context) (*string, error) {

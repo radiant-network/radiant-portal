@@ -338,6 +338,10 @@ A dedicated database in StarRocks holds the entire authorization model:
 | `auth_db.user_tenant_role(username, tenant_id, role_id)` | Tenant-scoped role assignments |
 | `auth_db.user_org_role(username, tenant_id, org_id, role_id)` | Org-scoped role assignments; `org_id = '*'` means all orgs in tenant |
 
+> **Implementation amendment (as shipped).** The delivered schema diverges from this proposal in two ways; the live source of truth is `backend/scripts/init-sql/migrations/` + `backend/CLAUDE.md`:
+> - **Natural keys, single grant table.** Identifiers are `varchar` `*_code` natural keys (no integer `*_id`). The two assignment tables collapsed into one `user_role(user_id, tenant_code, org_code, role_code)`, where `org_code` is `NULL` (tenant-wide), `'*'` (all orgs), or a specific code (migration `000009`).
+> - **Identity keyed by `user_id` (Keycloak `sub`).** `users` is keyed by `user_id` — required and unique — with `email`/`first_name`/`last_name` as optional attributes (migration `000011_rekey_users_by_user_id`). `000009` first keyed users by `email` (to allow pre-provisioning by invite before first login); that was reversed because the canonical, stable identifier is the Keycloak `sub`. **Consequence:** a user must exist in Keycloak before they can be granted roles — no email-only pre-provisioning.
+
 Granting and revoking happens through the admin API:
 - `auth_db.user_tenant_role` / `user_org_role` rows are inserted or deleted (the source-of-truth write).
 - The admin API mirrors that change in Ranger as a side-effect — `CREATE USER IF NOT EXISTS` on StarRocks, register the user in Ranger, and add/remove them from `<tenant>_member` and `authenticated` Ranger roles. This Ranger membership is purely a derived projection of `auth_db` and can be rebuilt at any time by re-walking the auth_db assignment tables.

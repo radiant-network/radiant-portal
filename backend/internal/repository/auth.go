@@ -15,9 +15,9 @@ type AuthRepository struct {
 }
 
 type AuthRepositoryDAO interface {
-	HasAction(email, tenantCode, orgCode, actionCode string) (bool, error)
-	HasTenantAccess(email, tenantCode string) (bool, error)
-	GetMemberships(email string) ([]types.TenantMembership, error)
+	HasAction(userID, tenantCode, orgCode, actionCode string) (bool, error)
+	HasTenantAccess(userID, tenantCode string) (bool, error)
+	GetMemberships(userID string) ([]types.TenantMembership, error)
 }
 
 func NewAuthRepository(db *gorm.DB) *AuthRepository {
@@ -32,7 +32,7 @@ func NewAuthRepository(db *gorm.DB) *AuthRepository {
 // by the action's scope, not the grant's org_code (a role may map both scopes): a
 // tenant-scoped action matches any grant in the tenant regardless of orgCode; an
 // org-scoped action requires a grant at orgCode or the '*' wildcard.
-func (r *AuthRepository) HasAction(email, tenantCode, orgCode, actionCode string) (bool, error) {
+func (r *AuthRepository) HasAction(userID, tenantCode, orgCode, actionCode string) (bool, error) {
 	var allowed bool
 	err := r.db.Raw(`
 		SELECT EXISTS (
@@ -40,11 +40,11 @@ func (r *AuthRepository) HasAction(email, tenantCode, orgCode, actionCode string
 			FROM user_role ur
 			JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
 			JOIN action a       ON a.code = ra.action_code
-			WHERE ur.email = ? AND ur.tenant_code = ? AND ra.action_code = ?
+			WHERE ur.user_id = ? AND ur.tenant_code = ? AND ra.action_code = ?
 			  AND (a.scope = ? OR (a.scope = ? AND (ur.org_code = ? OR ur.org_code = '*')))
-		)`, email, tenantCode, actionCode, types.ActionScopeTenant, types.ActionScopeOrg, orgCode).Scan(&allowed).Error
+		)`, userID, tenantCode, actionCode, types.ActionScopeTenant, types.ActionScopeOrg, orgCode).Scan(&allowed).Error
 	if err != nil {
-		return false, fmt.Errorf("error checking action %q for %q: %w", actionCode, email, err)
+		return false, fmt.Errorf("error checking action %q for %q: %w", actionCode, userID, err)
 	}
 	return allowed, nil
 }
@@ -52,15 +52,15 @@ func (r *AuthRepository) HasAction(email, tenantCode, orgCode, actionCode string
 // HasTenantAccess reports whether the user holds at least one role in the given tenant.
 // It backs the tenant-routing middleware: any grant (org-scoped or tenant-wide) makes the
 // caller a member of the tenant.
-func (r *AuthRepository) HasTenantAccess(email, tenantCode string) (bool, error) {
+func (r *AuthRepository) HasTenantAccess(userID, tenantCode string) (bool, error) {
 	var allowed bool
 	err := r.db.Raw(`
 		SELECT EXISTS (
 			SELECT 1 FROM user_role ur
-			WHERE ur.email = ? AND ur.tenant_code = ?
-		)`, email, tenantCode).Scan(&allowed).Error
+			WHERE ur.user_id = ? AND ur.tenant_code = ?
+		)`, userID, tenantCode).Scan(&allowed).Error
 	if err != nil {
-		return false, fmt.Errorf("error checking tenant access for %q in %q: %w", email, tenantCode, err)
+		return false, fmt.Errorf("error checking tenant access for %q in %q: %w", userID, tenantCode, err)
 	}
 	return allowed, nil
 }
@@ -80,7 +80,7 @@ type membershipGrant struct {
 // Each action routes by its own scope (a role may map both): tenant-scoped → tenant_actions;
 // org-scoped → orgs_by_action, where a specific org_code maps to that org and '*' expands to
 // every org in the tenant (ADR §5.4).
-func (r *AuthRepository) GetMemberships(email string) ([]types.TenantMembership, error) {
+func (r *AuthRepository) GetMemberships(userID string) ([]types.TenantMembership, error) {
 	var grants []membershipGrant
 	if err := r.db.Raw(`
 		SELECT ur.tenant_code, t.name AS tenant_name, ur.org_code, ra.action_code, a.scope, ra.role_code,
@@ -94,9 +94,9 @@ func (r *AuthRepository) GetMemberships(email string) ([]types.TenantMembership,
 			FROM organization
 			GROUP BY tenant_code
 		) o ON o.tenant_code = ur.tenant_code
-		WHERE ur.email = ?
-		ORDER BY ur.tenant_code, ra.action_code, ur.org_code`, email).Scan(&grants).Error; err != nil {
-		return nil, fmt.Errorf("error loading grants for %q: %w", email, err)
+		WHERE ur.user_id = ?
+		ORDER BY ur.tenant_code, ra.action_code, ur.org_code`, userID).Scan(&grants).Error; err != nil {
+		return nil, fmt.Errorf("error loading grants for %q: %w", userID, err)
 	}
 
 	// The ORDER BY is load-bearing twice over:

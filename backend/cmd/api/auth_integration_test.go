@@ -12,10 +12,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func assertGetMeHandler(t *testing.T, email string, expected string) {
+// user_id (Keycloak sub) values matching the seeded auth fixtures (test/data/auth/05_users.sql).
+// nobodyID has no rows, to exercise the no-grants path.
+const (
+	aliceID  = "25286548-fbef-4e93-b3c4-c659e6169396"
+	nobodyID = "c7dd9459-3b2f-4f8d-94a3-5db90a9c7091"
+)
+
+func assertGetMeHandler(t *testing.T, userID string, expected string) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := repository.NewAuthRepository(env.Postgres)
-		auth := &testutils.MockAuth{Email: email}
+		auth := &testutils.MockAuth{Id: userID}
 
 		router := gin.Default()
 		router.GET("/auth/me", server.GetMeHandler(repo, auth))
@@ -31,7 +38,7 @@ func assertGetMeHandler(t *testing.T, email string, expected string) {
 
 func Test_GetMeHandler_SeededUser(t *testing.T) {
 	// alice: geneticist @ CHOP + researcher tenant-wide, in the radiant tenant.
-	assertGetMeHandler(t, "alice@test.authz", `[{
+	assertGetMeHandler(t, aliceID, `[{
 		"code": "radiant",
 		"name": "Radiant",
 		"tenant_actions": ["can_search_case", "can_view_kb"],
@@ -43,15 +50,15 @@ func Test_GetMeHandler_SeededUser(t *testing.T) {
 }
 
 func Test_GetMeHandler_UserWithoutGrants(t *testing.T) {
-	assertGetMeHandler(t, "nobody@test.authz", `[]`)
+	assertGetMeHandler(t, nobodyID, `[]`)
 }
 
 // assertTenantAccess wires the real AuthRepository behind RequireTenantAccess and requests a
 // tenant-scoped route as the given user, returning the resulting status code.
-func assertTenantAccess(t *testing.T, email, tenant string, enforce bool, expectedStatus int) {
+func assertTenantAccess(t *testing.T, userID, tenant string, enforce bool, expectedStatus int) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := repository.NewAuthRepository(env.Postgres)
-		auth := &testutils.MockAuth{Email: email}
+		auth := &testutils.MockAuth{Id: userID}
 
 		router := gin.Default()
 		tenantRoutes := router.Group("/:tenant")
@@ -68,15 +75,15 @@ func assertTenantAccess(t *testing.T, email, tenant string, enforce bool, expect
 
 func Test_RequireTenantAccess_Member_Allowed(t *testing.T) {
 	// alice holds roles in radiant.
-	assertTenantAccess(t, "alice@test.authz", "radiant", true, http.StatusOK)
+	assertTenantAccess(t, aliceID, "radiant", true, http.StatusOK)
 }
 
 func Test_RequireTenantAccess_CrossTenant_Forbidden(t *testing.T) {
 	// alice has no grant in tenant_b → cross-tenant access is rejected.
-	assertTenantAccess(t, "alice@test.authz", "tenant_b", true, http.StatusForbidden)
+	assertTenantAccess(t, aliceID, "tenant_b", true, http.StatusForbidden)
 }
 
 func Test_RequireTenantAccess_EnforcementDisabled_AllowsCrossTenant(t *testing.T) {
 	// With enforcement off, even a non-member reaches the handler (no day-1 lockout).
-	assertTenantAccess(t, "alice@test.authz", "tenant_b", false, http.StatusOK)
+	assertTenantAccess(t, aliceID, "tenant_b", false, http.StatusOK)
 }
