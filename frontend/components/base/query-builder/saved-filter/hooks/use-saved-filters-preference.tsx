@@ -81,16 +81,10 @@ export function useSavedFiltersUpdatePreferenceEffect({
   savedFilterType,
   selectedSavedFilter,
 }: useSavedFilterStateObserverProps) {
-  // Bind the mutation to the GET key so a successful POST automatically
-  // revalidates the cached preference. Without this the GET cache stays stale
-  // and navigating to another case restores the previously selected filter.
   const { trigger } = useSWRMutation(`saved-filters-get-${savedFilterType}`, postUserPreference);
   const hasBeenMountedOnce = useRef(true);
 
   useEffect(() => {
-    // Skip the first run: on mount `selectedSavedFilter` may not be loaded yet
-    // (e.g. right after navigating from one case to another), and posting it
-    // would overwrite the persisted filter name with `undefined`.
     if (hasBeenMountedOnce.current) {
       hasBeenMountedOnce.current = false;
       return;

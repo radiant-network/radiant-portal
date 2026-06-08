@@ -30,24 +30,8 @@ type UseVariantSearchParamsEffectProps = {
 };
 
 /**
- * Keep the variant exploration URL params (`seq_id` and `task_id`) in sync with
- * the selected sequencing experiment and the available task list.
- *
- * - Derives the `seqId` state from the case entity when the current value is not
- *   a valid sequencing experiment.
- * - Writes `seq_id` and `task_id` together in a single setSearchParams call.
- *   Writing them from two separate effects raced (each based on its own render
- *   snapshot) and could drop `task_id` from the URL, which left the occurrence
- *   table and the facets unable to fetch.
- *
- * Once the task fetch has completed, task_id is:
- *  - cleared when no task exists for the current dataType (e.g. a stale task_id
- *    from a previously selected interface);
- *  - defaulted to the first task when the current task_id is no longer part of
- *    the list (e.g. after changing sequencing experiment or interface).
- *
- * seq_id / task_id drive both the occurrence table and the facets.
- */
+ * Loads & syncs the URL params (`seq_id`, `task_id`) used to fetch the variants tab.
+ * */
 export function useVariantSearchParamsEffect({
   seqId,
   setSeqId,
