@@ -8,8 +8,7 @@ import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 import SequencingExperimentVariantFilters from './filters/sequencing-experiment-variant-filters';
 import CNVTab from './germline-occurrence/cnv-tab';
 import SNVTab from './germline-occurrence/snv-tab';
-import { getDefaultSeqId, useSeqIdSearchParamsEffect } from './hooks/use-seqid-by-search';
-import { useTaskIdSearchParamsEffect } from './hooks/use-taskid-by-search';
+import { getDefaultSeqId, useVariantSearchParamsEffect } from './hooks/use-variant-search-params';
 
 export enum GermlineVariantInterface {
   SNV = 'SNV',
@@ -53,8 +52,7 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     [searchParams, setSearchParams],
   );
 
-  useSeqIdSearchParamsEffect({ seqId, setSeqId, caseEntity });
-  useTaskIdSearchParamsEffect({ tasks, isLoading: isTasksLoading });
+  useVariantSearchParamsEffect({ seqId, setSeqId, caseEntity, tasks, isLoading: isTasksLoading });
 
   return (
     <div className="bg-background flex flex-col">

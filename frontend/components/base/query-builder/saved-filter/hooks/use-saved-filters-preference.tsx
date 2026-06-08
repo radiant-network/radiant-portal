@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
@@ -81,9 +81,15 @@ export function useSavedFiltersUpdatePreferenceEffect({
   savedFilterType,
   selectedSavedFilter,
 }: useSavedFilterStateObserverProps) {
-  const { trigger } = useSWRMutation(`saved-filters-post-${savedFilterType}`, postUserPreference);
+  const { trigger } = useSWRMutation(`saved-filters-get-${savedFilterType}`, postUserPreference);
+  const hasBeenMountedOnce = useRef(true);
 
   useEffect(() => {
+    if (hasBeenMountedOnce.current) {
+      hasBeenMountedOnce.current = false;
+      return;
+    }
+
     const handler = setTimeout(() => {
       trigger({
         key: `saved-filters-${savedFilterType}`,

@@ -83,7 +83,8 @@ export function useSqonsQBUpdatePreferenceEffect({ appId, sqons, settings }: use
       revalidateOnFocus: false,
     },
   );
-  const { trigger } = useSWRMutation(`query-builder-post-${appId}`, postUserPreference);
+
+  const { trigger } = useSWRMutation(`query-builder-get-${appId}`, postUserPreference);
   const hasBeenMountedOnce = useRef(true);
 
   useEffect(() => {

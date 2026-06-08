@@ -7,8 +7,7 @@ import { useOccurrenceTasks } from '@/components/hooks/use-occurrence-tasks';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 import SequencingExperimentVariantFilters from './filters/sequencing-experiment-variant-filters';
-import { getDefaultSeqId, useSeqIdSearchParamsEffect } from './hooks/use-seqid-by-search';
-import { useTaskIdSearchParamsEffect } from './hooks/use-taskid-by-search';
+import { getDefaultSeqId, useVariantSearchParamsEffect } from './hooks/use-variant-search-params';
 import SNVTumorNormalTab from './somatic-occurrence/snv-tumor-normal-tab';
 
 export enum SomaticVariantInterface {
@@ -55,8 +54,7 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     [searchParams, setSearchParams],
   );
 
-  useSeqIdSearchParamsEffect({ seqId, setSeqId, caseEntity });
-  useTaskIdSearchParamsEffect({ tasks, isLoading: isTasksLoading });
+  useVariantSearchParamsEffect({ seqId, setSeqId, caseEntity, tasks, isLoading: isTasksLoading });
 
   // @TODO: to be changed when all tabs are implemented
   // options={Object.keys(SomaticVariantInterface)}
