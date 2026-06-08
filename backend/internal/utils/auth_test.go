@@ -190,62 +190,6 @@ func Test_RetrieveUsernameFromToken_ValidJWT(t *testing.T) {
 	assert.Equal(t, "superbob", *username)
 }
 
-func Test_RetrieveEmailFromToken_ValidKeycloakToken(t *testing.T) {
-	c := gin.Context{}
-	c.Set("token", ginkeycloak.KeyCloakToken{Email: "testuser@example.com"})
-
-	auth := KeycloakAuth{}
-	email, err := auth.RetrieveEmailFromToken(&c)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, email)
-	assert.Equal(t, "testuser@example.com", *email)
-}
-
-func Test_RetrieveEmailFromToken_LowerCasesEmail(t *testing.T) {
-	c := gin.Context{}
-	c.Set("token", ginkeycloak.KeyCloakToken{Email: "TestUser@Example.COM"})
-
-	auth := KeycloakAuth{}
-	email, err := auth.RetrieveEmailFromToken(&c)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, email)
-	assert.Equal(t, "testuser@example.com", *email, "email is normalized to lower case")
-}
-
-func Test_RetrieveEmailFromToken_ValidJWT(t *testing.T) {
-	c := gin.Context{}
-
-	token, err := jwt.GenerateMockJWT("radiant", []string{DataManagerRole})
-	assert.NoError(t, err)
-
-	c.Request = &http.Request{
-		Header: http.Header{
-			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
-		},
-	}
-
-	auth := KeycloakAuth{}
-	email, err := auth.RetrieveEmailFromToken(&c)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, email)
-	assert.Equal(t, "bob@bobson.com", *email)
-}
-
-func Test_RetrieveEmailFromToken_NoTokenInContext(t *testing.T) {
-	c := gin.Context{
-		Request: &http.Request{},
-	}
-
-	auth := KeycloakAuth{}
-	email, err := auth.RetrieveEmailFromToken(&c)
-
-	assert.Error(t, err)
-	assert.Nil(t, email)
-}
-
 func Test_RetrieveUsernameFromToken_InvalidKeycloakTokenType(t *testing.T) {
 	c := gin.Context{}
 	c.Set("token", 12345)

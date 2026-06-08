@@ -11,6 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// mockUserID stands in for a Keycloak sub (uuid). These tests use a stubbed repo, so the
+// value isn't looked up — it just needs to be a realistic user_id.
+const mockUserID = "25286548-fbef-4e93-b3c4-c659e6169396"
+
 // tenantTestRouter wires RequireTenantAccess in front of a handler that echoes the resolved
 // tenant, so tests can assert both the gate's status code and what it stored in context.
 func tenantTestRouter(repo *mockAuthRepository, auth *testutils.MockAuth, enforce bool) *gin.Engine {
@@ -30,7 +34,7 @@ func tenantTestRouter(repo *mockAuthRepository, auth *testutils.MockAuth, enforc
 
 func Test_RequireTenantAccess_Member_PassesAndSetsContext(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: true}
-	auth := &testutils.MockAuth{Email: "alice@test.authz"}
+	auth := &testutils.MockAuth{Id: mockUserID}
 	router := tenantTestRouter(repo, auth, true)
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/filters", nil)
@@ -43,7 +47,7 @@ func Test_RequireTenantAccess_Member_PassesAndSetsContext(t *testing.T) {
 
 func Test_RequireTenantAccess_NonMember_Returns403(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: false}
-	auth := &testutils.MockAuth{Email: "alice@test.authz"}
+	auth := &testutils.MockAuth{Id: mockUserID}
 	router := tenantTestRouter(repo, auth, true)
 
 	req, _ := http.NewRequest("GET", "/tenant_b/cases/filters", nil)
@@ -53,7 +57,7 @@ func Test_RequireTenantAccess_NonMember_Returns403(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
-func Test_RequireTenantAccess_EmailError_Returns401(t *testing.T) {
+func Test_RequireTenantAccess_TokenError_Returns401(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: true}
 	auth := &testutils.MockAuth{Error: fmt.Errorf("no token")}
 	router := tenantTestRouter(repo, auth, true)
@@ -67,7 +71,7 @@ func Test_RequireTenantAccess_EmailError_Returns401(t *testing.T) {
 
 func Test_RequireTenantAccess_RepoError_Returns500(t *testing.T) {
 	repo := &mockAuthRepository{tenantErr: fmt.Errorf("db down")}
-	auth := &testutils.MockAuth{Email: "alice@test.authz"}
+	auth := &testutils.MockAuth{Id: mockUserID}
 	router := tenantTestRouter(repo, auth, true)
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/filters", nil)
@@ -82,7 +86,7 @@ func Test_RequireTenantAccess_RepoError_Returns500(t *testing.T) {
 // before users are backfilled).
 func Test_RequireTenantAccess_EnforcementDisabled_AllowsAndSetsContext(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: false, tenantErr: fmt.Errorf("must not be called")}
-	auth := &testutils.MockAuth{Email: "alice@test.authz"}
+	auth := &testutils.MockAuth{Id: mockUserID}
 	router := tenantTestRouter(repo, auth, false)
 
 	req, _ := http.NewRequest("GET", "/tenant_b/cases/filters", nil)

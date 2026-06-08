@@ -19,7 +19,6 @@ type Auth interface {
 	RetrieveAzpFromToken(c *gin.Context) (*string, error)
 	RetrieveResourceAccessFromToken(c *gin.Context) (*map[string]ginkeycloak.ServiceRole, error)
 	RetrieveUsernameFromToken(c *gin.Context) (*string, error)
-	RetrieveEmailFromToken(c *gin.Context) (*string, error)
 	RetrieveFullNameFromToken(c *gin.Context) (*string, error)
 	UserHasRole(c *gin.Context, role string, resourceName string) (bool, error)
 }
@@ -70,18 +69,6 @@ func (auth KeycloakAuth) RetrieveUsernameFromToken(c *gin.Context) (*string, err
 		return nil, err
 	}
 	return &token.PreferredUsername, nil
-}
-
-func (auth KeycloakAuth) RetrieveEmailFromToken(c *gin.Context) (*string, error) {
-	token, err := getOrParseToken(c)
-	if err != nil {
-		return nil, err
-	}
-	// Normalize to lower case so authz lookups keyed by email (HasAction, HasTenantAccess,
-	// GetMemberships) match regardless of the case the IdP emits. The user backfill must
-	// store emails lower-cased too.
-	email := strings.ToLower(token.Email)
-	return &email, nil
 }
 
 func (auth KeycloakAuth) RetrieveFullNameFromToken(c *gin.Context) (*string, error) {

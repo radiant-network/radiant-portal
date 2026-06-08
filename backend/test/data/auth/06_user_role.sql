@@ -6,13 +6,14 @@
 --   carol: wildcard geneticist [radiant] + wildcard geneticist & researcher [tenant_b]
 --   pat:   mixed-scope practitioner at a specific org (CHUSJ)                 [radiant]
 --   tw:    mixed-scope practitioner granted tenant-wide (org_code NULL)       [radiant]
-INSERT INTO user_role (email, tenant_code, org_code, role_code)
-VALUES ('alice@test.authz', 'radiant',  'CHOP',  'geneticist'),
-       ('alice@test.authz', 'radiant',  NULL,    'researcher'),
-       ('wendy@test.authz', 'radiant',  '*',     'geneticist'),
-       ('dan@test.authz',   'radiant',  'CHUSJ', 'geneticist'),
-       ('carol@test.authz', 'radiant',  '*',     'geneticist'),
-       ('carol@test.authz', 'tenant_b', '*',     'geneticist'),
-       ('carol@test.authz', 'tenant_b', NULL,    'researcher'),
-       ('pat@test.authz',   'radiant',  'CHUSJ', 'practitioner'),
-       ('tw@test.authz',    'radiant',  NULL,    'practitioner');
+-- user_id values are the uuids seeded in 05_users.sql.
+INSERT INTO user_role (user_id, tenant_code, org_code, role_code)
+VALUES ('25286548-fbef-4e93-b3c4-c659e6169396', 'radiant',  'CHOP',  'geneticist'),   -- alice
+       ('25286548-fbef-4e93-b3c4-c659e6169396', 'radiant',  NULL,    'researcher'),   -- alice
+       ('79a8855e-3782-4dc8-be2a-8afdb34d6359', 'radiant',  '*',     'geneticist'),   -- wendy
+       ('e10fee0b-063b-4dcd-b086-90d1c9eb239d', 'radiant',  'CHUSJ', 'geneticist'),   -- dan
+       ('b6e6d0dd-7aa5-4018-ae03-1f5076801360', 'radiant',  '*',     'geneticist'),   -- carol
+       ('b6e6d0dd-7aa5-4018-ae03-1f5076801360', 'tenant_b', '*',     'geneticist'),   -- carol
+       ('b6e6d0dd-7aa5-4018-ae03-1f5076801360', 'tenant_b', NULL,    'researcher'),   -- carol
+       ('6c330322-c746-4436-bb76-efd2cd943686', 'radiant',  'CHUSJ', 'practitioner'), -- pat
+       ('4a330f72-24a1-4d37-8ad7-ff9989245fd3', 'radiant',  NULL,    'practitioner'); -- tw

@@ -25,14 +25,14 @@ func RequireTenantAccess(auth utils.Auth, repo repository.AuthRepositoryDAO, enf
 		tenant := c.Param("tenant")
 
 		if enforce {
-			email, err := auth.RetrieveEmailFromToken(c)
+			userID, err := auth.RetrieveUserIdFromToken(c)
 			if err != nil {
 				HandleUnauthorizedError(c)
 				c.Abort()
 				return
 			}
 
-			allowed, err := repo.HasTenantAccess(*email, tenant)
+			allowed, err := repo.HasTenantAccess(*userID, tenant)
 			if err != nil {
 				HandleError(c, err)
 				c.Abort()
