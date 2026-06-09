@@ -141,7 +141,7 @@ Shared POM utilities in `pom/shared/`:
 | Command | Purpose |
 |---|---|
 | `cy.getToken()` | Password grant → returns access_token |
-| `cy.apiCall(method, path, body, token)` | Authenticated request with auto-retry on 500 |
+| `cy.apiCall(method, path, body, token)` | Authenticated request with auto-retry on 500. `path` is tenant-scoped without the tenant prefix (e.g. `cases/search`); the tenant segment (`api_tenant`) is prepended automatically |
 | `cy.validateAcceptedBatchResponse(resp, type)` | Assert batch creation response structure |
 | `cy.validateSuccessBatchProcessed(resp)` | Assert completed batch (status=SUCCESS) |
 | `cy.validateReport(resp, level, code, msg, path)` | Assert error/warning/info in report |

@@ -9,13 +9,16 @@ const getExpose = (key: string): string => {
  * Makes an authenticated API call with automatic retry logic for 500 errors.
  * Retries up to the specified number of times if a 500 status code is received.
  * @param method The HTTP method (GET, POST, PUT, DELETE, etc.).
- * @param query The API endpoint path (e.g., 'patients/batch', 'analysis/123').
+ * @param query The tenant-scoped API endpoint path, without the tenant prefix
+ *              (e.g., 'patients/batch', 'cases/search'). The tenant segment is
+ *              prepended automatically from the `api_tenant` exposed config.
  * @param body The request body as a JSON string.
  * @param token The Bearer authentication token.
  * @param retries The number of retry attempts on 500 errors (default: 3).
  */
 Cypress.Commands.add('apiCall', (method: string, query: string, body: string, token: string, retries: number = 3) => {
   const apiUrl = Cypress.expose('api_base_url');
+  const tenant = Cypress.expose('api_tenant');
 
   if (Cypress.expose('debug')) {
     cy.log('with body: ' + body);
@@ -25,7 +28,7 @@ Cypress.Commands.add('apiCall', (method: string, query: string, body: string, to
     return cy
       .request({
         method: method,
-        url: `${apiUrl}${query}`,
+        url: `${apiUrl}${tenant}/${query}`,
         headers: { Authorization: `Bearer ${token}` },
         body: body,
         failOnStatusCode: false,

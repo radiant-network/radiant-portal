@@ -14,11 +14,12 @@ Cypress.Commands.add('setToken', () => {
 
 Cypress.Commands.add('isValidToken', token => {
   const apiUrl = Cypress.expose('api_base_url');
+  const tenant = Cypress.expose('api_tenant');
 
   return cy
     .request({
       method: 'GET',
-      url: `${apiUrl}batches/mustReturn500ifTokenValid`,
+      url: `${apiUrl}${tenant}/batches/mustReturn500ifTokenValid`,
       headers: { Authorization: `Bearer ${token}` },
       failOnStatusCode: false,
     })
