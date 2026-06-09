@@ -26,7 +26,7 @@ wouldn't (or risk a cycle)?*
 | Situation | Put the interface… | Why |
 |---|---|---|
 | Consumer would otherwise **not** import the implementer's package (or it'd risk a cycle) | **Consumer side** | Keeps the consumer decoupled — the load-bearing case |
-| Consumer **already** imports the implementer's package | Either; producer side is fine | Coupling-neutral; centralizing the contract reads better |
+| Consumer **already** imports the implementer's package | Either is allowed; still prefer a narrow interface next to the consumer | Coupling-neutral, so placement won't break the graph — but a per-consumer slice beats one shared fat contract |
 | Broad, reused extension point | Producer or a neutral package | Like `io.Reader` living in `io` |
 | Single impl, no consumer needs the abstraction yet | **Don't write one** | Return the struct; add the interface when a consumer needs it |
 
@@ -36,9 +36,17 @@ Worked examples in this repo:
   `internal/types`; `client`/`repository` return concrete structs and never import `service`.
   Putting these interfaces in `client`/`repository` would force `service` to import both —
   avoid that.
-- **Coupling-neutral (producer side is fine):** `repository.AuthRepositoryDAO` lives next to
-  its implementation and is consumed by `internal/server` handlers — which already import
-  `repository` everywhere, so the interface's home doesn't change the graph.
+- **Narrow consumer-side interfaces beat one shared producer-side `*DAO`:** the auth repository
+  was once exposed as a single `repository.AuthRepositoryDAO` interface next to its
+  implementation. It was coupling-neutral (`internal/server` already imports `repository`), so
+  it didn't *break* the import-graph rule — but it was the weaker shape: one fat contract that
+  also carried a `HasAction` method no handler called ("for mocking" / preemptive). It now lives
+  as two narrow, unexported interfaces in `internal/server`, each scoped to one consumer:
+  `membershipReader` (just `GetMemberships`, in `handlers_auth.go`) and `tenantAccessChecker`
+  (just `HasTenantAccess`, in `middlewares.go`). `NewAuthRepository` returns the concrete
+  `*AuthRepository`, which satisfies both for free. **Lesson:** coupling-neutral means "either
+  placement is *allowed*," not "producer side is *preferred*" — when a consumer needs only a
+  slice, declare that slice next to the consumer, and don't keep contract methods nobody calls.
 
 Don't write `Interface`+`Impl` pairs "for mocking" when there's one implementation and no
 consumer that needs the abstraction yet — that's the preemptive-interface anti-pattern.

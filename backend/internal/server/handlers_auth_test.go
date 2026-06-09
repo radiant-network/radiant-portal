@@ -19,10 +19,6 @@ type mockAuthRepository struct {
 	tenantErr       error
 }
 
-func (m *mockAuthRepository) HasAction(email, tenantCode, orgCode, actionCode string) (bool, error) {
-	return false, nil
-}
-
 func (m *mockAuthRepository) HasTenantAccess(email, tenantCode string) (bool, error) {
 	return m.hasTenantAccess, m.tenantErr
 }
