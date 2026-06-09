@@ -171,6 +171,9 @@ func (c *KeycloakAdminClient) findUserID(ctx context.Context, token, username st
 	if len(users) == 0 {
 		return "", nil
 	}
+	if len(users) > 1 {
+		return "", fmt.Errorf("find user %q: expected at most 1 exact match, got %d", username, len(users))
+	}
 	return users[0].ID, nil
 }
 

@@ -14,14 +14,15 @@ import (
 
 // fakeKeycloak is a minimal stateful stand-in for the Keycloak admin REST API.
 type fakeKeycloak struct {
-	realm        string
-	usersByName  map[string]string // username -> id (the sub)
-	nextID       string
-	tokenStatus  int // override token endpoint status (0 => 200)
-	createStatus int // override create status (0 => 201)
-	created      int
-	updated      int
-	passwordSets int
+	realm           string
+	usersByName     map[string]string // username -> id (the sub)
+	nextID          string
+	tokenStatus     int  // override token endpoint status (0 => 200)
+	createStatus    int  // override create status (0 => 201)
+	duplicateSearch bool // return two rows for the searched username
+	created         int
+	updated         int
+	passwordSets    int
 }
 
 func newFakeKeycloak(realm string) *fakeKeycloak {
@@ -52,6 +53,9 @@ func (f *fakeKeycloak) server() *httptest.Server {
 			out := []map[string]string{}
 			if ok {
 				out = append(out, map[string]string{"id": id, "username": username})
+				if f.duplicateSearch {
+					out = append(out, map[string]string{"id": id + "-dup", "username": username})
+				}
 			}
 			_ = json.NewEncoder(w).Encode(out)
 		case http.MethodPost:
@@ -155,6 +159,20 @@ func Test_KeycloakAdminClient_UpsertUser_TokenFailureIsReported(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "admin token request failed")
+}
+
+func Test_KeycloakAdminClient_UpsertUser_AmbiguousSearchIsReported(t *testing.T) {
+	fake := newFakeKeycloak("CQDG")
+	fake.usersByName["alice"] = "existing-id"
+	fake.duplicateSearch = true
+	srv := fake.server()
+	defer srv.Close()
+
+	sub, err := fake.client(srv.URL).UpsertUser(context.Background(), "alice", "alice@demo.org", "Alice", "Demo", "pw")
+
+	require.Error(t, err)
+	assert.Empty(t, sub)
+	assert.Contains(t, err.Error(), "expected at most 1 exact match")
 }
 
 func Test_KeycloakAdminClient_UpsertUser_CreateFailureIsReported(t *testing.T) {

@@ -1,19 +1,3 @@
-// Package provisioning creates a regular (non-admin) user end-to-end across the
-// four systems that back the platform's identity:
-//
-//   - Keycloak  — the identity provider; creating the user yields its `sub`.
-//   - Postgres  — the auth model (users + user_role grants), keyed on user_id
-//     (the Keycloak sub); email is an optional attribute.
-//   - Ranger    — the StarRocks authorizer; the user (named by sub) is added to
-//     its tenant role so the access/mask policies apply.
-//   - StarRocks — a JWT-authenticated user named by sub (principal_field "sub").
-//
-// The Keycloak `sub` is the single identity key: it is the StarRocks username,
-// the Postgres users.user_id, and the Ranger user name, so current_user() in
-// StarRocks resolves straight through to the auth model.
-//
-// ProvisionUser is deliberately built on small interfaces so it can be reused
-// behind a real POST /users API handler, not just the local seeding command.
 package service
 
 import (
