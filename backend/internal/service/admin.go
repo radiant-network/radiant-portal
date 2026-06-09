@@ -44,7 +44,7 @@ type StarrocksProvisioner interface {
 // are keyed on user_id (the Keycloak sub); email is an optional attribute.
 type AuthStore interface {
 	UpsertUser(userID, email, firstName, lastName string) error
-	GrantRole(userID, tenantCode, orgCode, roleCode string) error
+	GrantRole(userID, tenantCode, orgCode, roleCode, grantedBy string) error
 }
 
 // AdminDeps bundles the per-system provisioners ProvisionUser orchestrates.
@@ -67,7 +67,11 @@ func RangerTenantRole(tenantCode string) string {
 // then Postgres (the auth source of truth), then Ranger membership and the
 // StarRocks login that authorization rides on. Every step is idempotent, so a
 // re-run converges.
-func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput) (string, error) {
+//
+// grantedBy records audit attribution for the role grants (who performed the
+// provisioning) — the createuser CLI passes "createuser"; a POST /users handler
+// would pass the acting admin's identity.
+func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput, grantedBy string) (string, error) {
 	sub, err := deps.Keycloak.UpsertUser(ctx, in.Username, in.Email, in.FirstName, in.LastName, in.Password)
 	if err != nil {
 		return "", fmt.Errorf("keycloak: upsert user %q: %w", in.Username, err)
@@ -77,7 +81,7 @@ func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput) (str
 		return sub, fmt.Errorf("postgres: upsert user %q: %w", in.Email, err)
 	}
 	for _, g := range in.Grants {
-		if err := deps.Auth.GrantRole(sub, g.TenantCode, g.OrgCode, g.RoleCode); err != nil {
+		if err := deps.Auth.GrantRole(sub, g.TenantCode, g.OrgCode, g.RoleCode, grantedBy); err != nil {
 			return sub, fmt.Errorf("postgres: grant %s/%s/%s to %q: %w", g.TenantCode, g.OrgCode, g.RoleCode, in.Email, err)
 		}
 	}

@@ -183,18 +183,19 @@ func (r *AuthRepository) UpsertUser(userID, email, firstName, lastName string) e
 
 // GrantRole grants a role to the user within a tenant. An empty orgCode is stored
 // as NULL (a tenant-wide grant); "*" and specific codes are stored verbatim. The
-// role must already exist (FK to public.role). Idempotent via ON CONFLICT DO NOTHING,
-// which catches either partial-unique index (NULL vs non-NULL org_code).
-func (r *AuthRepository) GrantRole(userID, tenantCode, orgCode, roleCode string) error {
+// role must already exist (FK to public.role). grantedBy records audit attribution
+// for the grant (who performed it). Idempotent via ON CONFLICT DO NOTHING, which
+// catches either partial-unique index (NULL vs non-NULL org_code).
+func (r *AuthRepository) GrantRole(userID, tenantCode, orgCode, roleCode, grantedBy string) error {
 	var org any
 	if orgCode != "" {
 		org = orgCode
 	}
 	err := r.db.Exec(`
 		INSERT INTO public.user_role (user_id, tenant_code, org_code, role_code, granted_by)
-		VALUES (?, ?, ?, ?, 'createuser')
+		VALUES (?, ?, ?, ?, ?)
 		ON CONFLICT DO NOTHING`,
-		userID, tenantCode, org, roleCode).Error
+		userID, tenantCode, org, roleCode, grantedBy).Error
 	if err != nil {
 		return fmt.Errorf("grant %s/%s/%s to %q: %w", tenantCode, orgCode, roleCode, userID, err)
 	}

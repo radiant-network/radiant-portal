@@ -390,7 +390,7 @@ func Test_AuthRepository_GrantRole_GrantsActionAtOrg(t *testing.T) {
 		repo := NewAuthRepository(env.Postgres)
 		require.NoError(t, repo.UpsertUser(userID, "grant@provisioning.test", "First", "Last"))
 
-		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role))
+		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role, "test-admin"))
 
 		atOrg, err := repo.HasAction(userID, "radiant", "ORG_X", "can_read_pii")
 		require.NoError(t, err)
@@ -399,6 +399,12 @@ func Test_AuthRepository_GrantRole_GrantsActionAtOrg(t *testing.T) {
 		atOther, err := repo.HasAction(userID, "radiant", "ORG_Y", "can_read_pii")
 		require.NoError(t, err)
 		assert.False(t, atOther, "no grant at a different org")
+
+		var grantedBy string
+		require.NoError(t, env.Postgres.Raw(
+			"SELECT granted_by FROM public.user_role WHERE user_id = ? AND tenant_code = 'radiant' AND role_code = ? AND org_code = 'ORG_X'",
+			userID, role).Scan(&grantedBy).Error)
+		assert.Equal(t, "test-admin", grantedBy, "granted_by records the caller-supplied attribution")
 	})
 }
 
@@ -410,8 +416,8 @@ func Test_AuthRepository_GrantRole_IsIdempotent(t *testing.T) {
 		repo := NewAuthRepository(env.Postgres)
 		require.NoError(t, repo.UpsertUser(userID, "idem@provisioning.test", "First", "Last"))
 
-		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role))
-		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role)) // re-run
+		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role, "createuser"))
+		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role, "createuser")) // re-run
 
 		var count int64
 		require.NoError(t, env.Postgres.Raw(
@@ -430,7 +436,7 @@ func Test_AuthRepository_GrantRole_TenantWideStoresNullOrg(t *testing.T) {
 		require.NoError(t, repo.UpsertUser(userID, "tw@provisioning.test", "First", "Last"))
 
 		// An empty orgCode (tenant-wide grant) must store NULL, not the empty string.
-		require.NoError(t, repo.GrantRole(userID, "radiant", "", role))
+		require.NoError(t, repo.GrantRole(userID, "radiant", "", role, "createuser"))
 
 		var nullOrgCount int64
 		require.NoError(t, env.Postgres.Raw(

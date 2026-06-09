@@ -23,6 +23,9 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
+// grantedBy is the audit attribution recorded on role grants made by this CLI.
+const grantedBy = "createuser"
+
 // grantList collects repeated -grant tenant:org:role flags.
 type grantList []types.Grant
 
@@ -73,7 +76,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	sub, err := service.ProvisionUser(ctx, deps, in)
+	sub, err := service.ProvisionUser(ctx, deps, in, grantedBy)
 	if err != nil {
 		log.Fatalf("createuser: provision %q: %v", in.Email, err)
 	}

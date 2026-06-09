@@ -57,7 +57,7 @@ func (m *mockStarrocks) EnsureJWTUser(_ context.Context, sub string) error {
 
 type mockAuthStore struct {
 	users  [][2]string // {userID, email}
-	grants [][3]string // {tenant, org, role}
+	grants [][4]string // {tenant, org, role, grantedBy}
 	err    error
 }
 
@@ -69,11 +69,11 @@ func (m *mockAuthStore) UpsertUser(userID, email, _, _ string) error {
 	return nil
 }
 
-func (m *mockAuthStore) GrantRole(_, tenantCode, orgCode, roleCode string) error {
+func (m *mockAuthStore) GrantRole(_, tenantCode, orgCode, roleCode, grantedBy string) error {
 	if m.err != nil {
 		return m.err
 	}
-	m.grants = append(m.grants, [3]string{tenantCode, orgCode, roleCode})
+	m.grants = append(m.grants, [4]string{tenantCode, orgCode, roleCode, grantedBy})
 	return nil
 }
 
@@ -115,13 +115,14 @@ func Test_ProvisionUser_PropagatesSubToEverySystem(t *testing.T) {
 		Grants: []types.Grant{{TenantCode: "tenant_a", OrgCode: "ORG_A1", RoleCode: "geneticist"}},
 	}
 
-	sub, err := ProvisionUser(context.Background(), deps, in)
+	sub, err := ProvisionUser(context.Background(), deps, in, "test-admin")
 
 	assert.NoError(t, err)
 	assert.Equal(t, kc.sub, sub)
 	// Postgres user_id is the sub; email is the optional attribute.
 	assert.Equal(t, [][2]string{{kc.sub, "alice@demo.org"}}, auth.users)
-	assert.Equal(t, [][3]string{{"tenant_a", "ORG_A1", "geneticist"}}, auth.grants)
+	// grantedBy is threaded through to the grant for audit attribution.
+	assert.Equal(t, [][4]string{{"tenant_a", "ORG_A1", "geneticist", "test-admin"}}, auth.grants)
 	// Ranger user + tenant-role membership both keyed on the sub.
 	assert.Equal(t, []string{kc.sub}, rg.ensured)
 	assert.Equal(t, [][2]string{{"tenant_a_user", kc.sub}}, rg.roleAdds)
@@ -140,7 +141,7 @@ func Test_ProvisionUser_AddsUserToEachDistinctTenantRoleOnce(t *testing.T) {
 		},
 	}
 
-	_, err := ProvisionUser(context.Background(), deps, in)
+	_, err := ProvisionUser(context.Background(), deps, in, "createuser")
 
 	assert.NoError(t, err)
 	assert.Equal(t, []string{kc.sub}, rg.ensured, "ranger user ensured exactly once")
@@ -151,7 +152,7 @@ func Test_ProvisionUser_StopsWhenKeycloakFails(t *testing.T) {
 	_, rg, sr, auth, deps := newMockDeps()
 	deps.Keycloak = &mockKeycloak{err: errors.New("boom")}
 
-	sub, err := ProvisionUser(context.Background(), deps, types.UserInput{Username: "alice", Email: "a@b.c"})
+	sub, err := ProvisionUser(context.Background(), deps, types.UserInput{Username: "alice", Email: "a@b.c"}, "createuser")
 
 	assert.Error(t, err)
 	assert.Empty(t, sub)
@@ -167,7 +168,7 @@ func Test_ProvisionUser_ReturnsSubEvenWhenLaterStepFails(t *testing.T) {
 	sub, err := ProvisionUser(context.Background(), deps, types.UserInput{
 		Username: "alice", Email: "a@b.c",
 		Grants: []types.Grant{{TenantCode: "tenant_a", OrgCode: "ORG_A1", RoleCode: "geneticist"}},
-	})
+	}, "createuser")
 
 	assert.Error(t, err)
 	assert.Equal(t, kc.sub, sub, "sub is returned so a re-run/caller can still see it")
