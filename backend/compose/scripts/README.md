@@ -17,7 +17,7 @@ local `backend/compose` stack (StarRocks + Postgres + Ranger).
   control is enforced only on **base tables**.
   **Do not ship this to a real multi-tenant environment until #72910 is fixed**
   (then re-verify; the secured object would need to be a native/base table).
-  `04_verify.py` includes a tripwire that fails when the bug is fixed.
+  `05_verify.py` includes a tripwire that fails when the bug is fixed.
 
 ## Prerequisites
 
@@ -35,8 +35,9 @@ auth and work with any client.
 The scripts now seed only the **scaffolding** (tenants, orgs, patients, role &
 action definitions, Ranger role hierarchy + policies, StarRocks views and the
 service admin). The **regular users** alice/bob/wendy are created end-to-end by
-the Go tool `cmd/createuser`, which provisions each across Keycloak + Postgres +
-Ranger + StarRocks keyed on the Keycloak `sub` (see "Identity bridge" below).
+`04_seed_users.sh`, which drives the Go tool `cmd/createuser` once per user to
+provision each across Keycloak + Postgres + Ranger + StarRocks keyed on the
+Keycloak `sub` (see "Identity bridge" below).
 
 ```bash
 cd backend/compose/scripts
@@ -48,7 +49,7 @@ PGPASSWORD=radiant psql -h localhost -U radiant -d radiant -p 5432 -f 01_seed_po
 mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_views.sql
 
 # 2b. StarRocks service admin (native svc_admin_api, adminpass1).
-mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_users.sql
+mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_admin_user.sql
 
 # 3. Ranger: roles (empty tenant roles) + access / row-filter / mask policies.
 python3 03_ranger_policies.py
@@ -56,14 +57,14 @@ python3 03_ranger_policies.py
 # 4. Provision the regular users alice/bob/wendy across all four systems.
 #    (Keycloak user + Postgres users/grants + Ranger tenant-role membership +
 #     StarRocks JWT user, all keyed on the Keycloak sub.)
-cd ../../ && go run ./cmd/createuser    # from backend/ ; or: make seed-users
+./04_seed_users.sh
 
 # wait ~10s for StarRocks to poll Ranger, then:
 # 5. Verify masking matrix + can_read_pii flag + #72910 tripwire.
-python3 compose/scripts/04_verify.py
+python3 compose/scripts/05_verify.py
 ```
 All steps are idempotent; re-running converges to the same state. To provision a
-single ad-hoc user instead of the demo set:
+single ad-hoc user instead of the demo set, call the tool directly (from `backend/`):
 
 ```bash
 go run ./cmd/createuser -email carol@demo.org -first Carol -last Demo \
@@ -129,7 +130,7 @@ the "no matching item → pass through" behavior of Ranger mask/row-filter polic
 
 ## Demo users
 
-`alice` / `bob` / `wendy` are provisioned by `cmd/createuser` and authenticate
+`alice` / `bob` / `wendy` are provisioned by `04_seed_users.sh` and authenticate
 with a Keycloak JWT (password `radiant123!`); `svc_admin_api` is the platform
 admin on native auth (password `adminpass1`); `root` has no password on the
 allin1 image. The table uses the human handles for readability, but the actual

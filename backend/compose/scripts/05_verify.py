@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-04_verify.py — verify the multi-tenant PII-masking simulation end-to-end.
+05_verify.py — verify the multi-tenant PII-masking simulation end-to-end.
 
-    python3 04_verify.py
+    python3 05_verify.py
 
 No pip deps: shells out to the `mysql` client against StarRocks :9030.
 
@@ -35,7 +35,7 @@ import urllib.request
 
 SR_HOST, SR_PORT = "127.0.0.1", "9030"
 
-# Auth model (mirrors 02_starrocks_users.sql):
+# Auth model (mirrors 02_starrocks_admin_user.sql):
 #   root           native, no password (allin1 image)
 #   svc_admin_api  native, password adminpass1 (the platform/service admin)
 #   alice/bob/wendy JWT — a Keycloak token, sent via the mysql OIDC client plugin

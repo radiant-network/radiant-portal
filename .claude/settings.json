@@ -13,6 +13,7 @@
       "Write(**/.env)",
       "Write(.env.*)",
       "Write(**/.env.*)"
-    ]
+    ],
+    "allow": ["Read((**/.env.template)", "Edit((**/.env.template)"]
   }
 }

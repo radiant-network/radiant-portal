@@ -7,7 +7,7 @@
     matching init_starrocks.sql.)
 
    StarRocks users (JWT for alice/bob/wendy, native for svc_admin_api) live in
-   02_starrocks_users.sql — run it after this file.
+   02_starrocks_admin_user.sql — run it after this file.
 
    Views use the DEFAULT security mode (no SECURITY clause). Note: in StarRocks
    + Ranger, logical views are NOT an access-control boundary at any security

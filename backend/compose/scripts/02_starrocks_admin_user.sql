@@ -1,8 +1,8 @@
 /* ============================================================================
-   02_starrocks_users.sql — the StarRocks service admin for the masking demo.
+   02_starrocks_admin_user.sql — the StarRocks service admin for the masking demo.
 
    Run against StarRocks (MySQL protocol) as root, AFTER 02_starrocks_views.sql:
-       mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_users.sql
+       mysql -h127.0.0.1 -P9030 -uroot < 02_starrocks_admin_user.sql
    (StarRocks rejects `--` line comments when piped, so we use C-style comments.)
 
    The regular JWT users (alice/bob/wendy) are NO LONGER created here. They are

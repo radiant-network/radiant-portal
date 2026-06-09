@@ -17,7 +17,6 @@ import (
 const principalFieldSub = "sub"
 
 // StarrocksJWTConfig holds the authentication_jwt parameters baked into each user.
-// Defaults match 02_starrocks_users.sql for the local compose stack.
 type StarrocksJWTConfig struct {
 	JwksURL          string
 	RequiredIssuer   string

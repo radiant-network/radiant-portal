@@ -23,6 +23,7 @@ require (
 	github.com/szuecs/gin-glog v1.1.1
 	github.com/tbaehler/gin-keycloak v1.6.1
 	github.com/testcontainers/testcontainers-go v0.41.0
+	golang.org/x/term v0.40.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.25.12
