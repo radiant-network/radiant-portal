@@ -43,6 +43,8 @@ func Test_GetMeHandler_SeededUser(t *testing.T) {
 		"name": "Radiant",
 		"tenant_actions": ["can_search_case", "can_view_kb"],
 		"orgs_by_action": {
+			"can_comment_variant": ["CHOP"],
+			"can_flag_variant": ["CHOP"],
 			"can_interpret_variant": ["CHOP"],
 			"can_read_pii": ["CHOP"]
 		}

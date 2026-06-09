@@ -1,9 +1,12 @@
 -- Actions are seeded by migration 000009. Org-scoped actions go to the geneticist
 -- role, tenant-scoped actions to the researcher role, in each tenant.
+--
+-- No rows for radiant/geneticist: that role and its actions are seeded by migration
+-- 000012 (can_read_pii, can_interpret_variant, can_comment_variant, can_flag_variant);
+-- the radiant tests reuse the seeded set. tenant_b/geneticist is a test-only role and
+-- defines its own actions below.
 INSERT INTO role_action (tenant_code, role_code, action_code)
-VALUES ('radiant',  'geneticist', 'can_read_pii'),
-       ('radiant',  'geneticist', 'can_interpret_variant'),
-       ('radiant',  'researcher', 'can_search_case'),
+VALUES ('radiant',  'researcher', 'can_search_case'),
        ('radiant',  'researcher', 'can_view_kb'),
        ('tenant_b', 'geneticist', 'can_read_pii'),
        ('tenant_b', 'geneticist', 'can_interpret_variant'),
