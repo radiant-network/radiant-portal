@@ -498,7 +498,7 @@
           "tr_v_pseudogene": "Pseudogène TR V",
           "unitary_pseudogene": "Pseudogène unitaire",
           "unprocessed_pseudogene": "Pseudogène non traité",
-          "": "Aucun type de gène"
+          "": "Aucune donnée"
         },
         "consequence": {
           "3_prime_utr_variant": "3' UTR",
