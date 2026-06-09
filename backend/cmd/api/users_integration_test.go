@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func assertGetUserSet(t *testing.T, repo repository.UserSetsDAO, userSetId string, status int, expected string) {
+func assertGetUserSet(t *testing.T, repo *repository.UserSetsRepository, userSetId string, status int, expected string) {
 	router := gin.Default()
 	router.GET("/users/sets/:user_set_id", server.GetUserSet(repo))
 

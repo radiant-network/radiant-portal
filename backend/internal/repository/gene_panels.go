@@ -16,10 +16,6 @@ type GenePanelsRepository struct {
 	db *gorm.DB
 }
 
-type GenePanelsDAO interface {
-	GetVariantGenePanelConditions(panelType string, locusId int, conditionFilter string) (*GenePanelConditions, error)
-}
-
 func NewGenePanelsRepository(db *gorm.DB) *GenePanelsRepository {
 	if db == nil {
 		log.Print("GenePanelsRepository: db is nil")

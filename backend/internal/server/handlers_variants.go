@@ -11,6 +11,18 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
+// genePanelConditionsReader returns a variant's gene-panel conditions. GetGermlineVariantConditions
+// needs only this slice of the gene-panels repository.
+type genePanelConditionsReader interface {
+	GetVariantGenePanelConditions(panelType string, locusId int, conditionFilter string) (*types.GenePanelConditions, error)
+}
+
+// clinvarConditionsReader returns a variant's ClinVar conditions. GetGermlineVariantConditionsClinvar
+// needs only this slice of the ClinVar RCV repository.
+type clinvarConditionsReader interface {
+	GetVariantClinvarConditions(locusId int) ([]types.ClinvarRCV, error)
+}
+
 // GetGermlineVariantHeader handles retrieving a germline variant header by its locus
 // @Summary Get a germline VariantHeader
 // @Id getGermlineVariantHeader
@@ -318,7 +330,7 @@ func GetGermlineVariantCasesFilters(repo repository.VariantsDAO) gin.HandlerFunc
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/variants/germline/{locus_id}/conditions/{panel_type} [get]
-func GetGermlineVariantConditions(repo repository.GenePanelsDAO) gin.HandlerFunc {
+func GetGermlineVariantConditions(repo genePanelConditionsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
 		if errLocus != nil {
@@ -351,7 +363,7 @@ func GetGermlineVariantConditions(repo repository.GenePanelsDAO) gin.HandlerFunc
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/variants/germline/{locus_id}/conditions/clinvar [get]
-func GetGermlineVariantConditionsClinvar(repo repository.ClinvarRCVDAO) gin.HandlerFunc {
+func GetGermlineVariantConditionsClinvar(repo clinvarConditionsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusId, errLocus := strconv.Atoi(c.Param("locus_id"))
 		if errLocus != nil {

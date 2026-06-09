@@ -9,6 +9,12 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
+// dbHealthChecker reports a database's liveness ("up"/"down"). StatusHandler needs only
+// this slice of the StarRocks and Postgres repositories.
+type dbHealthChecker interface {
+	CheckDatabaseConnection() string
+}
+
 // StatusHandler handles the status endpoint
 // @Summary Get API status
 // @Description Returns the current status of the API
@@ -16,7 +22,7 @@ import (
 // @Produce json
 // @Success 200 {object} map[string]string
 // @Router /status [get]
-func StatusHandler(repoStarrocks repository.StarrocksDAO, repoPostgres repository.PostgresDAO) gin.HandlerFunc {
+func StatusHandler(repoStarrocks dbHealthChecker, repoPostgres dbHealthChecker) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": gin.H{
@@ -32,6 +38,12 @@ func extractUserSetParams(c *gin.Context) string {
 	return userSetId
 }
 
+// userSetReader fetches a saved user set by id. GetUserSet needs only this slice of the
+// user-sets repository.
+type userSetReader interface {
+	GetUserSet(userSetId string) (*types.UserSet, error)
+}
+
 // GetUserSet
 // @Summary Get user set by id
 // @Id GetUserSet
@@ -44,7 +56,7 @@ func extractUserSetParams(c *gin.Context) string {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /users/sets/{user_set_id} [get]
-func GetUserSet(repo repository.UserSetsDAO) gin.HandlerFunc {
+func GetUserSet(repo userSetReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userSetId := extractUserSetParams(c)
 		userSet, err := repo.GetUserSet(userSetId)

@@ -10,10 +10,6 @@ type StarrocksRepository struct {
 	db *gorm.DB
 }
 
-type StarrocksDAO interface {
-	CheckDatabaseConnection() string
-}
-
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
 	if db == nil {
 		log.Print("StarrocksRepository: db is nil")
