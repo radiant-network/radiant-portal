@@ -11,14 +11,10 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-// genePanelConditionsReader returns a variant's gene-panel conditions. GetGermlineVariantConditions
-// needs only this slice of the gene-panels repository.
 type genePanelConditionsReader interface {
 	GetVariantGenePanelConditions(panelType string, locusId int, conditionFilter string) (*types.GenePanelConditions, error)
 }
 
-// clinvarConditionsReader returns a variant's ClinVar conditions. GetGermlineVariantConditionsClinvar
-// needs only this slice of the ClinVar RCV repository.
 type clinvarConditionsReader interface {
 	GetVariantClinvarConditions(locusId int) ([]types.ClinvarRCV, error)
 }

@@ -9,8 +9,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-// dbHealthChecker reports a database's liveness ("up"/"down"). StatusHandler needs only
-// this slice of the StarRocks and Postgres repositories.
 type dbHealthChecker interface {
 	CheckDatabaseConnection() string
 }
@@ -38,8 +36,6 @@ func extractUserSetParams(c *gin.Context) string {
 	return userSetId
 }
 
-// userSetReader fetches a saved user set by id. GetUserSet needs only this slice of the
-// user-sets repository.
 type userSetReader interface {
 	GetUserSet(userSetId string) (*types.UserSet, error)
 }

@@ -9,8 +9,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
-// facetsReader resolves facet definitions by name. The germline and somatic SNV aggregate
-// and dictionary handlers each need only this slice of the facets repository.
 type facetsReader interface {
 	GetFacets(facetNames []string) ([]types.Facet, error)
 }

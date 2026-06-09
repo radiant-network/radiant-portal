@@ -11,8 +11,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
-// igvReader returns a case's IGV tracks. GetIGVHandler and CaseEntityHandler each need only
-// this slice of the IGV repository.
 type igvReader interface {
 	GetIGV(caseID int) ([]types.IGVTrack, error)
 }
