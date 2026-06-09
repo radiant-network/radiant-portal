@@ -87,7 +87,8 @@ func seedBaseCase(t *testing.T, ctx context.Context, client *minio.Client, db *g
 // Happy path: a PATCH that carries a sequencing experiment + a new task persists
 // the task, its output document and the task_has_document link.
 func Test_ProcessBatch_PatchCase_AttachTask_Success(t *testing.T) {
-	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
 		const submitterCaseId = "CASE-PATCH-A"
 		const outURL = "s3://test-bucket/CASE-PATCH-A.patch.recal.cram"
 		const outName = "CASE-PATCH-A.patch.recal.cram"
@@ -142,7 +143,8 @@ func Test_ProcessBatch_PatchCase_AttachTask_Success(t *testing.T) {
 // re-PATCHing the same tasks on a retry/re-import (Phase 2d idempotency) — Radiant will not
 // dedup for it.
 func Test_ProcessBatch_PatchCase_AppendsDuplicateTask_ExperimentAttachIdempotent(t *testing.T) {
-	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, ctx context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
 		const submitterCaseId = "CASE-PATCH-B"
 		const taskType = "alignment_germline_variant_calling" // same type the base scenario task uses
 		const outURL = "s3://test-bucket/CASE-PATCH-B.patch.recal.cram"
@@ -187,5 +189,72 @@ func Test_ProcessBatch_PatchCase_AppendsDuplicateTask_ExperimentAttachIdempotent
 		var docs int64
 		db.Table("document").Where("url = ?", outURL).Count(&docs)
 		assert.Equal(t, int64(1), docs, "the appended task's output document is persisted")
+	})
+}
+
+// Split flow: a non-QLIN caller attaches the experiment in one PATCH, then sends tasks in a
+// SECOND PATCH that does NOT re-list the experiment. The task aliquot must still validate against
+// the experiment ALREADY attached to the case (case_has_sequencing_experiment), not only against
+// the in-payload sequencing_experiments. Before this check the second PATCH failed TASK-002.
+func Test_ProcessBatch_PatchCase_TasksOnly_AliquotFromAlreadyAttachedExperiment(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
+		const submitterCaseId = "CASE-PATCH-D"
+		const outURL = "s3://test-bucket/CASE-PATCH-D.tasksonly.recal.cram"
+		const outName = "CASE-PATCH-D.tasksonly.recal.cram"
+
+		// Seed attaches experiment NA12891 to the case (case_has_sequencing_experiment).
+		seedBaseCase(t, ctx, client, db, submitterCaseId)
+
+		var ca types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, submitterCaseId).First(&ca)
+		var seqExpID int
+		db.Table("case_has_sequencing_experiment").Where("case_id = ?", ca.ID).Select("sequencing_experiment_id").Scan(&seqExpID)
+		assert.NotZero(t, seqExpID, "base case should have its experiment attached")
+		var tasksBefore int64
+		db.Table("task_context").Where("sequencing_experiment_id = ?", seqExpID).Count(&tasksBefore)
+
+		// Tasks-only PATCH: NO sequencing_experiments, task references the already-attached NA12891.
+		size := int64(11)
+		patches := []types.CaseBatchPatch{
+			{
+				ProjectCode:     "N1",
+				SubmitterCaseId: submitterCaseId,
+				Tasks: []*types.CaseTaskBatch{
+					{
+						TypeCode:        "alignment_germline_variant_calling",
+						Aliquots:        []string{"NA12891"},
+						PipelineName:    "Dragen",
+						PipelineVersion: "4.4.4",
+						GenomeBuild:     "GRch38",
+						OutputDocuments: []*types.OutputDocumentBatch{
+							{
+								DataCategoryCode: "genomic",
+								DataTypeCode:     "alignment",
+								FormatCode:       "cram",
+								Name:             outName,
+								Size:             &size,
+								Url:              outURL,
+							},
+						},
+					},
+				},
+			},
+		}
+		uploadPatchTaskDocuments(ctx, client, patches)
+		patchBytes, _ := json.Marshal(patches)
+
+		patchID := insertPayloadAndProcessBatch(db, string(patchBytes), types.BatchStatusPending, types.PatchCaseBatchType, false, "user123", "2025-12-05")
+		// No TASK-002: the aliquot resolves via the case's already-attached experiment.
+		assertBatchProcessing(t, db, patchID, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		// The tasks-only task was attached to the already-attached experiment.
+		var tasksAfter int64
+		db.Table("task_context").Where("sequencing_experiment_id = ?", seqExpID).Count(&tasksAfter)
+		assert.Equal(t, tasksBefore+1, tasksAfter, "tasks-only PATCH attaches the task to the already-attached experiment")
+
+		var doc types.Document
+		db.Table("document").Where("url = ?", outURL).First(&doc)
+		assert.NotZero(t, doc.ID, "tasks-only PATCH output document should be persisted")
 	})
 }

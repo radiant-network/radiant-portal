@@ -443,13 +443,19 @@ export interface CaseBatchPatch {
      * @type {Array<CaseSequencingExperimentBatch>}
      * @memberof CaseBatchPatch
      */
-    'sequencing_experiments': Array<CaseSequencingExperimentBatch>;
+    'sequencing_experiments'?: Array<CaseSequencingExperimentBatch>;
     /**
      * 
      * @type {string}
      * @memberof CaseBatchPatch
      */
     'submitter_case_id': string;
+    /**
+     * 
+     * @type {Array<CaseTaskBatch>}
+     * @memberof CaseBatchPatch
+     */
+    'tasks'?: Array<CaseTaskBatch>;
 }
 /**
  * Data for Case Entity Page

@@ -20,7 +20,7 @@ type PatchCaseValidationRecord struct {
 	CaseID                 *int
 	SequencingExperiments  map[int]*types.SequencingExperiment
 	DiagnosisLabCodeUpdate string
-	Task                 *CaseValidationRecord
+	Record                 *CaseValidationRecord
 }
 
 func (r *PatchCaseValidationRecord) GetBase() *batchval.BaseValidationRecord {
@@ -109,7 +109,7 @@ func validatePatchCaseRecord(ctx *batchval.BatchValidationContext, cache *batchv
 // tasks against the already-existing case. It drives a synthetic CaseValidationRecord
 // (same package, same helpers) and merges its messages back onto the patch record so the
 // batch report is identical to the POST path. The synthetic record is stored on
-// r.Task for the persist phase. Tasks are only validated when the case exists.
+// r.Record for the persist phase. Tasks are only validated when the case exists.
 func validatePatchTasks(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int, r *PatchCaseValidationRecord) error {
 	if r.CaseID == nil {
 		return nil // case missing — CASE-012 already raised; nothing to attach tasks to.
@@ -124,9 +124,22 @@ func validatePatchTasks(ctx *batchval.BatchValidationContext, cache *batchval.Ba
 		}
 	}
 	seqExps := make([]*types.CaseSequencingExperimentBatch, 0, len(patch.SequencingExperiments))
+	seenAliquots := map[string]struct{}{}
 	for _, se := range patch.SequencingExperiments {
 		if se != nil {
 			seqExps = append(seqExps, se)
+			seenAliquots[se.Aliquot] = struct{}{}
+		}
+	}
+
+	attached, err := ctx.SeqExpRepo.GetSequencingExperimentsByCaseId(*r.CaseID)
+	if err != nil {
+		return fmt.Errorf("get sequencing experiments attached to case %d: %w", *r.CaseID, err)
+	}
+	for _, se := range attached {
+		if _, ok := seenAliquots[se.Aliquot]; !ok {
+			seqExps = append(seqExps, &types.CaseSequencingExperimentBatch{Aliquot: se.Aliquot})
+			seenAliquots[se.Aliquot] = struct{}{}
 		}
 	}
 
@@ -163,7 +176,7 @@ func validatePatchTasks(ctx *batchval.BatchValidationContext, cache *batchval.Ba
 	r.Errors = append(r.Errors, taskRecord.Errors...)
 	r.Warnings = append(r.Warnings, taskRecord.Warnings...)
 	r.Infos = append(r.Infos, taskRecord.Infos...)
-	r.Task = taskRecord
+	r.Record = taskRecord
 	return nil
 }
 
@@ -229,8 +242,8 @@ func persistBatchAndPatchCaseRecords(db *gorm.DB, batch *types.Batch, records []
 			}
 			// Attach tasks + documents (task / task_context / document / task_has_document),
 			// reusing the POST persist logic via the synthetic record built at validation time.
-			if rec.Task != nil {
-				if err := persistTask(storageCtx, rec.Task); err != nil {
+			if rec.Record != nil {
+				if err := persistTask(storageCtx, rec.Record); err != nil {
 					return fmt.Errorf("failed to persist tasks for patch case %d: %w", *rec.CaseID, err)
 				}
 			}

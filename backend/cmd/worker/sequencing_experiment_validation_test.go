@@ -62,6 +62,10 @@ func (m *mockSeqExpDAO) GetSequencingExperimentBySampleID(sampleID int) ([]types
 	return nil, args.Error(1)
 }
 
+func (m *mockSeqExpDAO) GetSequencingExperimentsByCaseId(caseID int) ([]types.SequencingExperiment, error) {
+	return nil, nil
+}
+
 func (m *mockSeqExpDAO) GetSequencingExperimentByAliquot(aliquot string) ([]types.SequencingExperiment, error) {
 	args := m.Called(aliquot)
 	if se, ok := args.Get(0).([]types.SequencingExperiment); ok {
