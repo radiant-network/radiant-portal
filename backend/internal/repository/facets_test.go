@@ -27,6 +27,14 @@ func Test_GetFacets_WithValidNames(t *testing.T) {
 	}
 }
 
+func Test_GetFacets_Biotype_IncludesEmptyStringForNoData(t *testing.T) {
+	repo := NewFacetsRepository()
+	facets, err := repo.GetFacets([]string{"biotype"})
+	assert.NoError(t, err)
+	assert.Len(t, facets, 1)
+	assert.Contains(t, facets[0].Values, "")
+}
+
 func Test_GetFacets_WithNoNames(t *testing.T) {
 	repo := NewFacetsRepository()
 	facets, err := repo.GetFacets([]string{})

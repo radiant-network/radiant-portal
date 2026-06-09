@@ -61,7 +61,7 @@ func NewFacetsRepository() *FacetsRepository {
 				"processed_pseudogene", "polymorphic_pseudogene", "retrotransposed", "transcribed_processed_pseudogene", "transcribed_unprocessed_pseudogene",
 				"transcribed_unitary_pseudogene", "translated_processed_pseudogene", "translated_unprocessed_pseudogene", "unitary_pseudogene", "unprocessed_pseudogene",
 				"artifact", "lincRNA", "macro_lncRNA", "3prime_overlapping_ncRNA", "disrupted_domain",
-				"vault_RNA", "bidirectional_promoter_lncRNA",
+				"vault_RNA", "bidirectional_promoter_lncRNA", "",
 			},
 		},
 		"omim_inheritance": {
