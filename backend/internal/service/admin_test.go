@@ -56,16 +56,16 @@ func (m *mockStarrocks) EnsureJWTUser(_ context.Context, sub string) error {
 }
 
 type mockAuthStore struct {
-	users  [][2]string // {email, userID}
+	users  [][2]string // {userID, email}
 	grants [][3]string // {tenant, org, role}
 	err    error
 }
 
-func (m *mockAuthStore) UpsertUser(email, userID, _, _ string) error {
+func (m *mockAuthStore) UpsertUser(userID, email, _, _ string) error {
 	if m.err != nil {
 		return m.err
 	}
-	m.users = append(m.users, [2]string{email, userID})
+	m.users = append(m.users, [2]string{userID, email})
 	return nil
 }
 
@@ -119,8 +119,8 @@ func Test_ProvisionUser_PropagatesSubToEverySystem(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, kc.sub, sub)
-	// Postgres user_id is the sub.
-	assert.Equal(t, [][2]string{{"alice@demo.org", kc.sub}}, auth.users)
+	// Postgres user_id is the sub; email is the optional attribute.
+	assert.Equal(t, [][2]string{{kc.sub, "alice@demo.org"}}, auth.users)
 	assert.Equal(t, [][3]string{{"tenant_a", "ORG_A1", "geneticist"}}, auth.grants)
 	// Ranger user + tenant-role membership both keyed on the sub.
 	assert.Equal(t, []string{kc.sub}, rg.ensured)

@@ -7,8 +7,8 @@ local `backend/compose` stack (StarRocks + Postgres + Ranger).
 
 ## ⚠️ Status
 
-- **Masking — works and is the deliverable.** PII (`mrn`, `first_name`,
-  `last_name`, `date_of_birth`→year) is masked per `can_read_pii`.
+- **Masking — works and is the deliverable.** PII (`submitter_patient_id`,
+  `first_name`, `last_name`, `jhn`, `date_of_birth`→year) is masked per `can_read_pii`.
 - **Tenant *access* isolation — NOT enforced yet.** StarRocks bug
   [#72910](https://github.com/StarRocks/starrocks/issues/72910): Ranger
   authorization is bypassed for **views and materialized views**. The patient
@@ -77,15 +77,15 @@ go run ./cmd/createuser -email carol@demo.org -first Carol -last Demo \
 a StarRocks session as that user via the MySQL OIDC client plugin:
 
 ```bash
-./starrocks-connect.sh alice "SELECT id, mrn FROM tenant_a.patient ORDER BY id"   # 1001/1002 clear, 1003 ***
-./starrocks-connect.sh bob   "SELECT id, mrn FROM tenant_b.patient ORDER BY id"   # 2001 clear, 2002 ***
+./starrocks-connect.sh alice "SELECT id, submitter_patient_id FROM tenant_a.patient ORDER BY id"   # 1001/1002 clear, 1003 ***
+./starrocks-connect.sh bob   "SELECT id, submitter_patient_id FROM tenant_b.patient ORDER BY id"   # 2001 clear, 2002 ***
 ./starrocks-connect.sh wendy                                                      # interactive shell
 ```
 
 The service admin uses native auth (no plugin, no token):
 
 ```bash
-mysql -h127.0.0.1 -P9030 -usvc_admin_api -padminpass1 -e "SELECT id, mrn FROM tenant_a.patient"
+mysql -h127.0.0.1 -P9030 -usvc_admin_api -padminpass1 -e "SELECT id, submitter_patient_id FROM tenant_a.patient"
 ```
 
 ## How it fits together
@@ -94,8 +94,8 @@ mysql -h127.0.0.1 -P9030 -usvc_admin_api -padminpass1 -e "SELECT id, mrn FROM te
 radiant_jdbc (Postgres federation)
    public.patient, user_role, role_action, organization, users
         │
-        ├─ auth.pii_grant  (view) ── single source of truth: (login, tenant, org)
-        │     where login = users.user_id and role grants can_read_pii;
+        ├─ auth.pii_grant  (view) ── single source of truth: (user_id, tenant, org)
+        │     where user_role (keyed on user_id) grants can_read_pii;
         │     the '*' org wildcard is pre-expanded to concrete orgs.
         │
         └─ tenant_a.patient / tenant_b.patient (views, filtered by tenant)
@@ -160,7 +160,7 @@ Example — expected masking on `tenant_a.patient` (`1001/1002`=ORG_A1, `1003`=O
 | `mtm_access_tenant_a` / `_b` | access | tenant role → SELECT on its DB |
 | `mtm_access_auth_grant` | access | `user_role`+`admin_role` → SELECT on `auth.pii_grant` |
 | `mtm_rowfilter_auth_grant` | row-filter | `user_role` → own rows only |
-| `mtm_mask_pii_redact` | mask | `user_role` → `***` on `mrn`/`first_name`/`last_name` unless `can_read_pii` |
+| `mtm_mask_pii_redact` | mask | `user_role` → `***` on `submitter_patient_id`/`first_name`/`last_name`/`jhn` unless `can_read_pii` |
 | `mtm_mask_dob` | mask | `user_role` → year-only on `date_of_birth` unless `can_read_pii` |
 
 Masks target `tenant_*` (one policy covers every current and future tenant DB).

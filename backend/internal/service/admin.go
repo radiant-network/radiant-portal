@@ -2,8 +2,8 @@
 // four systems that back the platform's identity:
 //
 //   - Keycloak  — the identity provider; creating the user yields its `sub`.
-//   - Postgres  — the auth model (users + user_role grants), keyed on email,
-//     with user_id = the Keycloak sub.
+//   - Postgres  — the auth model (users + user_role grants), keyed on user_id
+//     (the Keycloak sub); email is an optional attribute.
 //   - Ranger    — the StarRocks authorizer; the user (named by sub) is added to
 //     its tenant role so the access/mask policies apply.
 //   - StarRocks — a JWT-authenticated user named by sub (principal_field "sub").
@@ -40,10 +40,11 @@ type StarrocksProvisioner interface {
 	EnsureJWTUser(ctx context.Context, sub string) error
 }
 
-// AuthStore writes the Postgres auth model (users registry + role grants).
+// AuthStore writes the Postgres auth model (users registry + role grants). Both
+// are keyed on user_id (the Keycloak sub); email is an optional attribute.
 type AuthStore interface {
-	UpsertUser(email, userID, firstName, lastName string) error
-	GrantRole(email, tenantCode, orgCode, roleCode string) error
+	UpsertUser(userID, email, firstName, lastName string) error
+	GrantRole(userID, tenantCode, orgCode, roleCode string) error
 }
 
 // AdminDeps bundles the per-system provisioners ProvisionUser orchestrates.
@@ -72,11 +73,11 @@ func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput) (str
 		return "", fmt.Errorf("keycloak: upsert user %q: %w", in.Username, err)
 	}
 
-	if err := deps.Auth.UpsertUser(in.Email, sub, in.FirstName, in.LastName); err != nil {
+	if err := deps.Auth.UpsertUser(sub, in.Email, in.FirstName, in.LastName); err != nil {
 		return sub, fmt.Errorf("postgres: upsert user %q: %w", in.Email, err)
 	}
 	for _, g := range in.Grants {
-		if err := deps.Auth.GrantRole(in.Email, g.TenantCode, g.OrgCode, g.RoleCode); err != nil {
+		if err := deps.Auth.GrantRole(sub, g.TenantCode, g.OrgCode, g.RoleCode); err != nil {
 			return sub, fmt.Errorf("postgres: grant %s/%s/%s to %q: %w", g.TenantCode, g.OrgCode, g.RoleCode, in.Email, err)
 		}
 	}

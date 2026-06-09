@@ -361,42 +361,42 @@ func seedRole(t *testing.T, db *gorm.DB, roleCode string) {
 // purge removes everything a test created, in FK order. Deleting the role cascades
 // its role_action rows. users/user_role are not covered by testutils.cleanUp, so
 // the test owns this cleanup.
-func purge(db *gorm.DB, email, roleCode string) {
-	db.Exec("DELETE FROM public.user_role WHERE email = ?", email)
-	db.Exec("DELETE FROM public.users WHERE email = ?", email)
+func purge(db *gorm.DB, userID, roleCode string) {
+	db.Exec("DELETE FROM public.user_role WHERE user_id = ?", userID)
+	db.Exec("DELETE FROM public.users WHERE user_id = ?", userID)
 	db.Exec("DELETE FROM public.role WHERE tenant_code = 'radiant' AND code = ?", roleCode)
 }
 
-func Test_AuthRepository_UpsertUser_InsertsThenConvergesUserID(t *testing.T) {
+func Test_AuthRepository_UpsertUser_InsertsThenConvergesEmail(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		const email = "createuser-upsert@provisioning.test"
-		defer purge(env.Postgres, email, "")
+		const userID = "sub-upsert"
+		defer purge(env.Postgres, userID, "")
 		repo := NewAuthRepository(env.Postgres)
 
-		require.NoError(t, repo.UpsertUser(email, "sub-1", "First", "Last"))
-		require.NoError(t, repo.UpsertUser(email, "sub-2", "First", "Last")) // re-run with a new sub
+		require.NoError(t, repo.UpsertUser(userID, "first@provisioning.test", "First", "Last"))
+		require.NoError(t, repo.UpsertUser(userID, "second@provisioning.test", "First", "Last")) // re-run, new email
 
-		var userID string
-		require.NoError(t, env.Postgres.Raw("SELECT user_id FROM public.users WHERE email = ?", email).Scan(&userID).Error)
-		assert.Equal(t, "sub-2", userID, "re-run converges user_id to the latest sub")
+		var email string
+		require.NoError(t, env.Postgres.Raw("SELECT email FROM public.users WHERE user_id = ?", userID).Scan(&email).Error)
+		assert.Equal(t, "second@provisioning.test", email, "re-run converges email to the latest value")
 	})
 }
 
 func Test_AuthRepository_GrantRole_GrantsActionAtOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		const email, role = "createuser-grant@provisioning.test", "cu_role_atorg"
-		defer purge(env.Postgres, email, role)
+		const userID, role = "sub-grant", "cu_role_atorg"
+		defer purge(env.Postgres, userID, role)
 		seedRole(t, env.Postgres, role)
 		repo := NewAuthRepository(env.Postgres)
-		require.NoError(t, repo.UpsertUser(email, "sub-grant", "First", "Last"))
+		require.NoError(t, repo.UpsertUser(userID, "grant@provisioning.test", "First", "Last"))
 
-		require.NoError(t, repo.GrantRole(email, "radiant", "ORG_X", role))
+		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role))
 
-		atOrg, err := repo.HasAction(email, "radiant", "ORG_X", "can_read_pii")
+		atOrg, err := repo.HasAction(userID, "radiant", "ORG_X", "can_read_pii")
 		require.NoError(t, err)
 		assert.True(t, atOrg, "user holds can_read_pii at the granted org")
 
-		atOther, err := repo.HasAction(email, "radiant", "ORG_Y", "can_read_pii")
+		atOther, err := repo.HasAction(userID, "radiant", "ORG_Y", "can_read_pii")
 		require.NoError(t, err)
 		assert.False(t, atOther, "no grant at a different org")
 	})
@@ -404,38 +404,38 @@ func Test_AuthRepository_GrantRole_GrantsActionAtOrg(t *testing.T) {
 
 func Test_AuthRepository_GrantRole_IsIdempotent(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		const email, role = "createuser-grant-idem@provisioning.test", "cu_role_idem"
-		defer purge(env.Postgres, email, role)
+		const userID, role = "sub-idem", "cu_role_idem"
+		defer purge(env.Postgres, userID, role)
 		seedRole(t, env.Postgres, role)
 		repo := NewAuthRepository(env.Postgres)
-		require.NoError(t, repo.UpsertUser(email, "sub-idem", "First", "Last"))
+		require.NoError(t, repo.UpsertUser(userID, "idem@provisioning.test", "First", "Last"))
 
-		require.NoError(t, repo.GrantRole(email, "radiant", "ORG_X", role))
-		require.NoError(t, repo.GrantRole(email, "radiant", "ORG_X", role)) // re-run
+		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role))
+		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role)) // re-run
 
 		var count int64
 		require.NoError(t, env.Postgres.Raw(
-			"SELECT count(*) FROM public.user_role WHERE email = ? AND tenant_code = 'radiant' AND role_code = ? AND org_code = 'ORG_X'",
-			email, role).Scan(&count).Error)
+			"SELECT count(*) FROM public.user_role WHERE user_id = ? AND tenant_code = 'radiant' AND role_code = ? AND org_code = 'ORG_X'",
+			userID, role).Scan(&count).Error)
 		assert.Equal(t, int64(1), count, "re-grant does not duplicate the row")
 	})
 }
 
 func Test_AuthRepository_GrantRole_TenantWideStoresNullOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
-		const email, role = "createuser-grant-tenantwide@provisioning.test", "cu_role_tw"
-		defer purge(env.Postgres, email, role)
+		const userID, role = "sub-tw", "cu_role_tw"
+		defer purge(env.Postgres, userID, role)
 		seedRole(t, env.Postgres, role)
 		repo := NewAuthRepository(env.Postgres)
-		require.NoError(t, repo.UpsertUser(email, "sub-tw", "First", "Last"))
+		require.NoError(t, repo.UpsertUser(userID, "tw@provisioning.test", "First", "Last"))
 
 		// An empty orgCode (tenant-wide grant) must store NULL, not the empty string.
-		require.NoError(t, repo.GrantRole(email, "radiant", "", role))
+		require.NoError(t, repo.GrantRole(userID, "radiant", "", role))
 
 		var nullOrgCount int64
 		require.NoError(t, env.Postgres.Raw(
-			"SELECT count(*) FROM public.user_role WHERE email = ? AND role_code = ? AND org_code IS NULL",
-			email, role).Scan(&nullOrgCount).Error)
+			"SELECT count(*) FROM public.user_role WHERE user_id = ? AND role_code = ? AND org_code IS NULL",
+			userID, role).Scan(&nullOrgCount).Error)
 		assert.Equal(t, int64(1), nullOrgCount, "empty orgCode is stored as NULL, not the empty string")
 	})
 }

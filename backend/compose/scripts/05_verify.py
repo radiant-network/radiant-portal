@@ -159,7 +159,7 @@ MATRIX = {
 def test_masking_matrix():
     print("\n== 1. Masking matrix (PII clear vs '***') ==")
     for (user, db), expected in MATRIX.items():
-        res = run_sql(user, f"SELECT id, mrn FROM {db}.patient ORDER BY id")
+        res = run_sql(user, f"SELECT id, submitter_patient_id FROM {db}.patient ORDER BY id")
         if res["denied"] or not res["rows"]:
             check(f"{user} @ {db}", False,
                   f"expected rows but got denied/empty (rc={res['rc']}) {res['err'][:80]}")
@@ -167,21 +167,22 @@ def test_masking_matrix():
         got = {int(r[0]): r[1] for r in res["rows"] if len(r) == 2}
         bad = []
         for pid, want_clear in expected.items():
-            mrn = got.get(pid)
-            is_clear = mrn is not None and mrn != "***"
-            if mrn is None or is_clear != want_clear:
-                bad.append(f"id={pid} want={'clear' if want_clear else 'masked'} got={mrn!r}")
+            spid = got.get(pid)
+            is_clear = spid is not None and spid != "***"
+            if spid is None or is_clear != want_clear:
+                bad.append(f"id={pid} want={'clear' if want_clear else 'masked'} got={spid!r}")
         check(f"{user} @ {db}", not bad, "; ".join(bad))
 
 
 def test_flag_matches_masking():
     # For regular (user_role) users the can_read_pii flag must equal "PII visible":
-    # can_read_pii=1 <=> mrn is clear, =0 <=> mrn is '***'. (Admins/root read the
-    # flag as 0 while seeing clear data — bypass, not action — so they're skipped.)
+    # can_read_pii=1 <=> submitter_patient_id is clear, =0 <=> it is '***'.
+    # (Admins/root read the flag as 0 while seeing clear data — bypass, not action
+    # — so they're skipped.)
     print("\n== 2. can_read_pii flag agrees with masking (regular users) ==")
     for user in ("alice", "bob", "wendy"):
         for db in ("tenant_a", "tenant_b"):
-            res = run_sql(user, f"SELECT id, mrn, can_read_pii FROM {db}.patient ORDER BY id")
+            res = run_sql(user, f"SELECT id, submitter_patient_id, can_read_pii FROM {db}.patient ORDER BY id")
             if res["denied"] or not res["rows"]:
                 check(f"{user} @ {db}", False, f"denied/empty (rc={res['rc']})")
                 continue
@@ -189,10 +190,10 @@ def test_flag_matches_masking():
             for r in res["rows"]:
                 if len(r) != 3:
                     continue
-                pid, mrn, flag = r[0], r[1], r[2]
-                clear = mrn != "***"
+                pid, spid, flag = r[0], r[1], r[2]
+                clear = spid != "***"
                 if (flag == "1") != clear:
-                    bad.append(f"id={pid} flag={flag} mrn={mrn!r}")
+                    bad.append(f"id={pid} flag={flag} submitter_patient_id={spid!r}")
             check(f"{user} @ {db}", not bad, "; ".join(bad))
 
 

@@ -67,9 +67,9 @@ ON CONFLICT (tenant_code, role_code, action_code) DO NOTHING;
 -- StarRocks — by the Go tool `cmd/createuser` (run it after this script), which
 -- keys them on the Keycloak `sub` (now stored in users.user_id and used as the
 -- StarRocks username / principal_field).
-INSERT INTO public.users (email, user_id, first_name, last_name) VALUES
-    ('svc_admin_api@demo.org', 'svc_admin_api', 'Service', 'Admin')
-ON CONFLICT (email) DO UPDATE SET user_id = EXCLUDED.user_id;
+INSERT INTO public.users (user_id, email, first_name, last_name) VALUES
+    ('svc_admin_api', 'svc_admin_api@demo.org', 'Service', 'Admin')
+ON CONFLICT (user_id) DO UPDATE SET email = EXCLUDED.email;
 
 COMMIT;
 
@@ -79,8 +79,9 @@ SELECT code, name FROM public.tenant WHERE code IN ('tenant_a','tenant_b');
 SELECT id, submitter_patient_id, first_name, last_name, organization_code, tenant_code
 FROM public.patient WHERE id >= 1001 ORDER BY id;
 \echo '--- effective can_read_pii grants ---'
-SELECT ur.email, ur.tenant_code, ur.org_code, ur.role_code
+SELECT ur.user_id, u.email, ur.tenant_code, ur.org_code, ur.role_code
 FROM public.user_role ur
+JOIN public.users u ON u.user_id = ur.user_id
 JOIN public.role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
-WHERE ra.action_code = 'can_read_pii' AND ur.email LIKE '%@demo.org'
-ORDER BY ur.email;
+WHERE ra.action_code = 'can_read_pii' AND u.email LIKE '%@demo.org'
+ORDER BY ur.user_id;

@@ -162,20 +162,21 @@ func appendUnique(values []string, value string) []string {
 	return append(values, value)
 }
 
-// UpsertUser inserts the user or, on email conflict, converges its user_id (the
-// Keycloak sub) and name. This is the write side used at provisioning time, paired
-// with the read side above. Idempotent.
-func (r *AuthRepository) UpsertUser(email, userID, firstName, lastName string) error {
+// UpsertUser inserts the user or, on user_id conflict, converges its email and
+// name. user_id (the Keycloak sub) is the identity key; email is an optional
+// attribute. This is the write side used at provisioning time, paired with the
+// read side above. Idempotent.
+func (r *AuthRepository) UpsertUser(userID, email, firstName, lastName string) error {
 	err := r.db.Exec(`
-		INSERT INTO public.users (email, user_id, first_name, last_name)
+		INSERT INTO public.users (user_id, email, first_name, last_name)
 		VALUES (?, ?, ?, ?)
-		ON CONFLICT (email) DO UPDATE
-		SET user_id = EXCLUDED.user_id,
+		ON CONFLICT (user_id) DO UPDATE
+		SET email = EXCLUDED.email,
 		    first_name = EXCLUDED.first_name,
 		    last_name = EXCLUDED.last_name`,
-		email, userID, firstName, lastName).Error
+		userID, email, firstName, lastName).Error
 	if err != nil {
-		return fmt.Errorf("upsert user %q: %w", email, err)
+		return fmt.Errorf("upsert user %q: %w", userID, err)
 	}
 	return nil
 }
@@ -184,18 +185,18 @@ func (r *AuthRepository) UpsertUser(email, userID, firstName, lastName string) e
 // as NULL (a tenant-wide grant); "*" and specific codes are stored verbatim. The
 // role must already exist (FK to public.role). Idempotent via ON CONFLICT DO NOTHING,
 // which catches either partial-unique index (NULL vs non-NULL org_code).
-func (r *AuthRepository) GrantRole(email, tenantCode, orgCode, roleCode string) error {
+func (r *AuthRepository) GrantRole(userID, tenantCode, orgCode, roleCode string) error {
 	var org any
 	if orgCode != "" {
 		org = orgCode
 	}
 	err := r.db.Exec(`
-		INSERT INTO public.user_role (email, tenant_code, org_code, role_code, granted_by)
+		INSERT INTO public.user_role (user_id, tenant_code, org_code, role_code, granted_by)
 		VALUES (?, ?, ?, ?, 'createuser')
 		ON CONFLICT DO NOTHING`,
-		email, tenantCode, org, roleCode).Error
+		userID, tenantCode, org, roleCode).Error
 	if err != nil {
-		return fmt.Errorf("grant %s/%s/%s to %q: %w", tenantCode, orgCode, roleCode, email, err)
+		return fmt.Errorf("grant %s/%s/%s to %q: %w", tenantCode, orgCode, roleCode, userID, err)
 	}
 	return nil
 }

@@ -5,7 +5,7 @@
 #
 #     ./connect.sh <user> ["SQL"]
 #     ./connect.sh alice
-#     ./connect.sh bob "SELECT id, mrn FROM tenant_b.patient ORDER BY id"
+#     ./connect.sh bob "SELECT id, submitter_patient_id FROM tenant_b.patient ORDER BY id"
 #
 # JWT users (alice/bob/wendy): a token is fetched from Keycloak via the ROPC
 # flow (password radiant123!), written to a temp file, and handed to the mysql

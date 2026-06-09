@@ -21,9 +21,9 @@ POLICIES (service `starrocks`)
   access     mtm_access_tenant_b   tenant_b_user -> SELECT on tenant_b
   access     mtm_access_auth_grant user_role   -> SELECT on auth.pii_grant
   rowfilter  mtm_rowfilter_auth_grant           any user sees only their own rows
-  mask       mtm_mask_pii_redact   CUSTOM '***' mask on mrn/first_name/last_name
+  mask       mtm_mask_pii_redact   CUSTOM '***' mask on submitter_patient_id/first_name/last_name/jhn
   mask       mtm_mask_dob          CUSTOM year-only mask on date_of_birth
-                                   - user_role : PII only where the login has
+                                   - user_role : PII only where the user_id has
                                      can_read_pii for the row's (tenant, org).
                                    No item for root/admin_role is needed: Ranger
                                    returns a column UNMASKED when the user matches
@@ -124,10 +124,10 @@ def upsert_policy(policy):
 
 
 # --- mask expression --------------------------------------------------------
-# current_user() -> "'<login>'@'%'": drop leading quote, take up to next quote.
+# current_user() -> "'<user_id>'@'%'": drop leading quote, take up to next quote.
 # Used by the auth.pii_grant row-filter below.
 LOGIN = "substring_index(substr(current_user(), 2), char(39), 1)"
-# The patient views expose a can_read_pii column (1 when the current login holds
+# The patient views expose a can_read_pii column (1 when the current user_id holds
 # can_read_pii for that row's org — same condition, computed once in the view).
 # The masks just reference it, so the rule lives in exactly one place.
 MASK_REDACT = "CASE WHEN can_read_pii THEN {col} ELSE '***' END"
@@ -212,10 +212,10 @@ def main():
             # admins/root need no explicit item, same as the mask policy.
             "rowFilterPolicyItems": [
                 {"roles": ["user_role"], "accesses": [{"type": "select", "isAllowed": True}],
-                 "rowFilterInfo": {"filterExpr": f"login = {LOGIN}"}},
+                 "rowFilterInfo": {"filterExpr": f"user_id = {LOGIN}"}},
             ],
         },
-        mask_policy("mtm_mask_pii_redact", ["mrn", "first_name", "last_name"], MASK_REDACT),
+        mask_policy("mtm_mask_pii_redact", ["submitter_patient_id", "first_name", "last_name", "jhn"], MASK_REDACT),
         mask_policy("mtm_mask_dob", ["date_of_birth"], MASK_DOB),
     ]
     failures = sum(0 if upsert_policy(p) else 1 for p in policies)
