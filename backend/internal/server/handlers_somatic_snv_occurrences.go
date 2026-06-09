@@ -9,6 +9,14 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
+type somaticSNVOccurrencesReader interface {
+	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.SomaticSNVOccurrence, error)
+	CountOccurrences(caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error)
+	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
+	GetStatisticsOccurrences(caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error)
+	GetExpandedOccurrence(caseId int, seqId int, taskId int, locusId int) (*types.ExpandedSomaticSNVOccurrence, error)
+}
+
 // OccurrencesSomaticSNVListHandler handles list of somatic SNV occurrences
 // @Summary List somatic SNV occurrences
 // @Id listSomaticSNVOccurrences
@@ -29,7 +37,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list [post]
-func OccurrencesSomaticSNVListHandler(repo repository.SomaticSNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.ListBodyWithSqon
@@ -94,7 +102,7 @@ func OccurrencesSomaticSNVListHandler(repo repository.SomaticSNVOccurrencesDAO) 
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count [post]
-func OccurrencesSomaticSNVCountHandler(repo repository.SomaticSNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesSomaticSNVCountHandler(repo somaticSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.CountBodyWithSqon
@@ -158,7 +166,7 @@ func OccurrencesSomaticSNVCountHandler(repo repository.SomaticSNVOccurrencesDAO)
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate [post]
-func OccurrencesSomaticSNVAggregateHandler(repo repository.SomaticSNVOccurrencesDAO, facetsRepo facetsReader) gin.HandlerFunc {
+func OccurrencesSomaticSNVAggregateHandler(repo somaticSNVOccurrencesReader, facetsRepo facetsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.AggregationBodyWithSqon
@@ -256,7 +264,7 @@ func OccurrencesSomaticSNVAggregateHandler(repo repository.SomaticSNVOccurrences
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics [post]
-func OccurrencesSomaticSNVStatisticsHandler(repo repository.SomaticSNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesSomaticSNVStatisticsHandler(repo somaticSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.StatisticsBodyWithSqon
@@ -317,7 +325,7 @@ func OccurrencesSomaticSNVStatisticsHandler(repo repository.SomaticSNVOccurrence
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded [get]
-func GetExpandedSomaticSNVOccurrence(repo repository.SomaticSNVOccurrencesDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
+func GetExpandedSomaticSNVOccurrence(repo somaticSNVOccurrencesReader, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errSeq := strconv.Atoi(c.Param("case_id"))
 		if errSeq != nil {

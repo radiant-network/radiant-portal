@@ -17,14 +17,6 @@ type GermlineCNVOccurrencesRepository struct {
 	db *gorm.DB
 }
 
-type GermlineCNVOccurrencesDAO interface {
-	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]GermlineCNVOccurrence, error)
-	CountOccurrences(caseId int, seqId int, taskId int, userFilter types.CountQuery) (int64, error)
-	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error)
-	GetStatisticsOccurrences(caseId int, seqId int, taskId int, query types.StatisticsQuery) (*Statistics, error)
-	GetGenesOverlap(caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error)
-}
-
 func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRepository {
 	if db == nil {
 		log.Print("GermlineCNVOccurrencesRepository: db is nil")

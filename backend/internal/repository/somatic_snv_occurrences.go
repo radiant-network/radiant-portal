@@ -19,14 +19,6 @@ type SomaticSNVOccurrencesRepository struct {
 	db *gorm.DB
 }
 
-type SomaticSNVOccurrencesDAO interface {
-	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]SomaticSNVOccurrence, error)
-	CountOccurrences(caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error)
-	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error)
-	GetStatisticsOccurrences(caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*Statistics, error)
-	GetExpandedOccurrence(caseId int, seqId int, taskId int, locusId int) (*ExpandedSomaticSNVOccurrence, error)
-}
-
 func NewSomaticSNVOccurrencesRepository(db *gorm.DB) *SomaticSNVOccurrencesRepository {
 	if db == nil {
 		log.Print("SomaticSNVOccurrencesRepository: db is nil")

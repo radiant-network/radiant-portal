@@ -27,19 +27,6 @@ type VariantsRepository struct {
 	db *gorm.DB
 }
 
-type VariantsDAO interface {
-	GetVariantHeader(locusId int) (*VariantHeader, error)
-	GetVariantOverview(locusId int) (*VariantOverview, error)
-	GetVariantConsequences(locusId int) (*[]VariantConsequence, error)
-	GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, *int64, error)
-	GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, *int64, error)
-	GetVariantCasesCount(locusId int) (*VariantCasesCount, error)
-	GetVariantCasesFilters() (*VariantCasesFilters, error)
-	GetVariantExternalFrequencies(locusId int) (*VariantExternalFrequencies, error)
-	GetGermlineVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error)
-	GetGermlineVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error)
-}
-
 func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
 	if db == nil {
 		log.Print("VariantsRepository: db is nil")
