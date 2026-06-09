@@ -20,7 +20,7 @@ type PatchCaseValidationRecord struct {
 	CaseID                 *int
 	SequencingExperiments  map[int]*types.SequencingExperiment
 	DiagnosisLabCodeUpdate string
-	TaskCR                 *CaseValidationRecord
+	Task                 *CaseValidationRecord
 }
 
 func (r *PatchCaseValidationRecord) GetBase() *batchval.BaseValidationRecord {
@@ -109,7 +109,7 @@ func validatePatchCaseRecord(ctx *batchval.BatchValidationContext, cache *batchv
 // tasks against the already-existing case. It drives a synthetic CaseValidationRecord
 // (same package, same helpers) and merges its messages back onto the patch record so the
 // batch report is identical to the POST path. The synthetic record is stored on
-// r.TaskCR for the persist phase. Tasks are only validated when the case exists.
+// r.Task for the persist phase. Tasks are only validated when the case exists.
 func validatePatchTasks(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int, r *PatchCaseValidationRecord) error {
 	if r.CaseID == nil {
 		return nil // case missing — CASE-012 already raised; nothing to attach tasks to.
@@ -139,31 +139,31 @@ func validatePatchTasks(ctx *batchval.BatchValidationContext, cache *batchval.Ba
 		SequencingExperiments: seqExps,
 		Tasks:                 tasks,
 	}
-	taskCR := NewCaseValidationRecord(ctx, cache, taskCase, index)
-	taskCR.CaseID = r.CaseID
+	taskRecord := NewCaseValidationRecord(ctx, cache, taskCase, index)
+	taskRecord.CaseID = r.CaseID
 
-	if err := taskCR.fetchTaskTypeCodes(); err != nil {
+	if err := taskRecord.fetchTaskTypeCodes(); err != nil {
 		return fmt.Errorf("fetch task type codes: %w", err)
 	}
-	if err := taskCR.fetchDocumentCodes(); err != nil {
+	if err := taskRecord.fetchDocumentCodes(); err != nil {
 		return fmt.Errorf("fetch document codes: %w", err)
 	}
 	// Resolves sequencing experiments (by task aliquot), their existing task contexts, and
 	// input/output documents already known to Radiant — needed by the validators below.
-	if err := taskCR.fetchFromTasks(); err != nil {
+	if err := taskRecord.fetchFromTasks(); err != nil {
 		return fmt.Errorf("fetch from tasks: %w", err)
 	}
-	if err := taskCR.validateTasks(); err != nil {
+	if err := taskRecord.validateTasks(); err != nil {
 		return fmt.Errorf("validate tasks: %w", err)
 	}
-	if err := taskCR.validateDocuments(); err != nil {
+	if err := taskRecord.validateDocuments(); err != nil {
 		return fmt.Errorf("validate documents: %w", err)
 	}
 
-	r.Errors = append(r.Errors, taskCR.Errors...)
-	r.Warnings = append(r.Warnings, taskCR.Warnings...)
-	r.Infos = append(r.Infos, taskCR.Infos...)
-	r.TaskCR = taskCR
+	r.Errors = append(r.Errors, taskRecord.Errors...)
+	r.Warnings = append(r.Warnings, taskRecord.Warnings...)
+	r.Infos = append(r.Infos, taskRecord.Infos...)
+	r.Task = taskRecord
 	return nil
 }
 
@@ -229,8 +229,8 @@ func persistBatchAndPatchCaseRecords(db *gorm.DB, batch *types.Batch, records []
 			}
 			// Attach tasks + documents (task / task_context / document / task_has_document),
 			// reusing the POST persist logic via the synthetic record built at validation time.
-			if rec.TaskCR != nil {
-				if err := persistTask(storageCtx, rec.TaskCR); err != nil {
+			if rec.Task != nil {
+				if err := persistTask(storageCtx, rec.Task); err != nil {
 					return fmt.Errorf("failed to persist tasks for patch case %d: %w", *rec.CaseID, err)
 				}
 			}

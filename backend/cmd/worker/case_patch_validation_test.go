@@ -49,7 +49,7 @@ func caseExistsMock() *CaseValidationMockRepo {
 
 // Tasks attached via PATCH are validated with the exact POST machinery. A task whose output
 // document is already another task's output must be rejected — proving the task path runs and
-// its errors are merged onto the patch record, and that TaskCR is captured for the persist phase.
+// its errors are merged onto the patch record, and that Task is captured for the persist phase.
 func Test_validatePatchCaseRecord_Tasks_DocumentAlreadyOutputOfAnotherTask(t *testing.T) {
 	cache, ctx := newCachePatchWithTasks(caseExistsMock())
 	size := int64(11)
@@ -74,7 +74,7 @@ func Test_validatePatchCaseRecord_Tasks_DocumentAlreadyOutputOfAnotherTask(t *te
 
 	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
 	assert.NoError(t, err)
-	assert.NotNil(t, rec.TaskCR)
+	assert.NotNil(t, rec.Task)
 	assert.True(t, hasErrorCode(rec.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, rec.Errors)
 }
 
@@ -101,7 +101,7 @@ func Test_validatePatchCaseRecord_Tasks_InvalidTypeCode(t *testing.T) {
 
 	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
 	assert.NoError(t, err)
-	assert.NotNil(t, rec.TaskCR)
+	assert.NotNil(t, rec.Task)
 	assert.True(t, hasErrorCode(rec.Errors, TaskInvalidField), "expected %s, got %+v", TaskInvalidField, rec.Errors)
 }
 
@@ -128,7 +128,7 @@ func Test_validatePatchCaseRecord_Tasks_UnknownAliquot(t *testing.T) {
 
 	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
 	assert.NoError(t, err)
-	assert.NotNil(t, rec.TaskCR)
+	assert.NotNil(t, rec.Task)
 	assert.True(t, hasErrorCode(rec.Errors, TaskUnknownAliquot), "expected %s, got %+v", TaskUnknownAliquot, rec.Errors)
 }
 
@@ -158,7 +158,7 @@ func Test_validatePatchCaseRecord_Tasks_SkippedWhenCaseMissing(t *testing.T) {
 
 	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
 	assert.NoError(t, err)
-	assert.Nil(t, rec.TaskCR)
+	assert.Nil(t, rec.Task)
 	assert.Nil(t, rec.CaseID)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, CaseNotFoundForAttach, rec.Errors[0].Code)
