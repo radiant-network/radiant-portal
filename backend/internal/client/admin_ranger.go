@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -47,11 +48,17 @@ func NewRangerAdminClient(cfg RangerConfig) *RangerAdminClient {
 
 // EnsureUser creates the Ranger user if it does not already exist. An existing user (HTTP 400) is treated as success.
 func (c *RangerAdminClient) EnsureUser(ctx context.Context, name string) error {
+	// The password is never used by StarRocks but is required by Ranger's
+	// user-creation API, so generate a throwaway random one per call.
+	pw, err := randomPassword()
+	if err != nil {
+		return err
+	}
 	body := map[string]any{
 		"name":         name,
 		"firstName":    name,
 		"emailAddress": "",
-		"password":     "Unused-P0c123!",
+		"password":     pw,
 		"userRoleList": []string{"ROLE_USER"},
 	}
 	resp, payload, err := c.request(ctx, http.MethodPost, "/service/xusers/secure/users", body)
@@ -63,6 +70,17 @@ func (c *RangerAdminClient) EnsureUser(ctx context.Context, name string) error {
 		return fmt.Errorf("ensure user %q: HTTP %d: %s", name, resp.StatusCode, string(payload))
 	}
 	return nil
+}
+
+// randomPassword returns a throwaway, policy-compliant password backed by
+// crypto/rand. The base64 body covers upper/lower/digits and the fixed suffix
+// guarantees Ranger's complexity requirement (upper, lower, digit, special).
+func randomPassword() (string, error) {
+	b := make([]byte, 24)
+	if _, err := rand.Read(b); err != nil {
+		return "", fmt.Errorf("generate ranger password: %w", err)
+	}
+	return base64.RawURLEncoding.EncodeToString(b) + "Aa1!", nil
 }
 
 type rangerRoleMember struct {
