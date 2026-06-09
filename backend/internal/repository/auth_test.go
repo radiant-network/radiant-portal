@@ -206,6 +206,8 @@ func Test_AuthRepository_GetMemberships_SpecificOrgAndTenantGrants(t *testing.T)
 				Name:          "Radiant",
 				TenantActions: []string{"can_search_case", "can_view_kb"},
 				OrgsByAction: map[string][]string{
+					"can_comment_variant":   {"CHOP"},
+					"can_flag_variant":      {"CHOP"},
 					"can_interpret_variant": {"CHOP"},
 					"can_read_pii":          {"CHOP"},
 				},
@@ -231,6 +233,8 @@ func Test_AuthRepository_GetMemberships_WildcardResolvesToAllTenantOrgs(t *testi
 				Name:          "Radiant",
 				TenantActions: []string{},
 				OrgsByAction: map[string][]string{
+					"can_comment_variant":   radiantOrgs,
+					"can_flag_variant":      radiantOrgs,
 					"can_interpret_variant": radiantOrgs,
 					"can_read_pii":          radiantOrgs,
 				},
@@ -318,6 +322,8 @@ func Test_AuthRepository_GetMemberships_MultipleTenantsNoCollision(t *testing.T)
 				Name:          "Radiant",
 				TenantActions: []string{},
 				OrgsByAction: map[string][]string{
+					"can_comment_variant":   radiantOrgs,
+					"can_flag_variant":      radiantOrgs,
 					"can_interpret_variant": radiantOrgs,
 					"can_read_pii":          radiantOrgs,
 				},
