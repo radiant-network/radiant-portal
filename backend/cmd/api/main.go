@@ -65,20 +65,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	repoTasks := repository.NewTaskRepository(dbPostgres)
 	repoAuth := repository.NewAuthRepository(dbPostgres)
 
-	r := gin.Default()
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
-
-	r.Use(ginglog.Logger(3 * time.Second))
-	r.Use(ginkeycloak.RequestLogger([]string{"uid"}, "data"))
-
-	var corsAllowedOrigins = strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",")
-
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     corsAllowedOrigins,
-		AllowMethods:     []string{"GET", "POST", "PUT", "OPTIONS"},
-		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
-		AllowCredentials: true, // Enable cookies/auth
-	}))
+	r := newEngine()
 
 	roleAccessMiddleware, err := authorization.InitAuthorizer()
 	if err != nil {
@@ -238,7 +225,35 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 		casesGroup.PATCH("/batch", server.PatchCaseBatchHandler(repoBatches, auth))
 	}
 
-	r.Use(gin.Recovery())
+	return r
+}
+
+// newEngine builds the gin engine with the global middleware stack in the correct order.
+//
+// gin.Recovery() MUST be the innermost (last-registered) global middleware. On a handler
+// panic, defers unwind LIFO: the gzip middleware's deferred gz.Close() flushes the gzip
+// footer to the response, which commits a 200 status. If Recovery sits outside gzip (as it
+// did when this used gin.Default(), which registers Recovery before gzip is added), it runs
+// after that flush and can no longer override the status — the client gets 200 instead of
+// 500 ("Headers were already written. Wanted to override status code 200 with 500"). By
+// registering Recovery after gzip, it recovers and sets 500 first, then gzip compresses the
+// 500 response. See SJRA-1578.
+func newEngine() *gin.Engine {
+	r := gin.New()
+	r.Use(gin.Logger())
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	r.Use(ginglog.Logger(3 * time.Second))
+	r.Use(ginkeycloak.RequestLogger([]string{"uid"}, "data"))
+
+	var corsAllowedOrigins = strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",")
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     corsAllowedOrigins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "OPTIONS"},
+		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
+		AllowCredentials: true, // Enable cookies/auth
+	}))
+
+	r.Use(gin.Recovery()) // innermost global middleware — see doc comment above
 	return r
 }
 
