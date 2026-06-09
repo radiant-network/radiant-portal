@@ -96,7 +96,14 @@ export function useGermlineSNVAggregationBuilder({
     data,
     async () =>
       occurrencesApi
-        .aggregateGermlineSNVOccurrences(caseId, seqId, taskId!, data!.aggregationBody, data!.withDictionary)
+        .aggregateGermlineSNVOccurrences(
+          DEFAULT_TENANT,
+          caseId,
+          seqId,
+          taskId!,
+          data!.aggregationBody,
+          data!.withDictionary,
+        )
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -234,7 +241,14 @@ export function useSomaticSNVAggregationBuilder({
     data,
     async () =>
       occurrencesApi
-        .aggregateSomaticSNVOccurrences(caseId, seqId, taskId!, data!.aggregationBody, data!.withDictionary)
+        .aggregateSomaticSNVOccurrences(
+          DEFAULT_TENANT,
+          caseId,
+          seqId,
+          taskId!,
+          data!.aggregationBody,
+          data!.withDictionary,
+        )
         .then(response => response.data),
     {
       revalidateOnFocus: false,
