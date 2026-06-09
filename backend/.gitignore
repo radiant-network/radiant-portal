@@ -45,3 +45,5 @@ bin/
 
 test.http
 /http-client.private.env.json
+
+*__pycache__

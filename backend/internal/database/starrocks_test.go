@@ -67,3 +67,40 @@ func Test_registerStarrocksTLS_GarbagePEM_Errors(t *testing.T) {
 	assert.Contains(t, err.Error(), "no certs found")
 	assert.Equal(t, "", param)
 }
+
+func Test_starrocksTLSParam_NoCANoMode_Disabled(t *testing.T) {
+	param, err := starrocksTLSParam("", "", "starrocks-none", "localhost")
+	assert.NoError(t, err)
+	assert.Equal(t, "", param)
+}
+
+func Test_starrocksTLSParam_FalseMode_Disabled(t *testing.T) {
+	param, err := starrocksTLSParam("", "false", "starrocks-false", "localhost")
+	assert.NoError(t, err)
+	assert.Equal(t, "", param)
+}
+
+func Test_starrocksTLSParam_DisableMode_Disabled(t *testing.T) {
+	param, err := starrocksTLSParam("", "disable", "starrocks-disable", "localhost")
+	assert.NoError(t, err)
+	assert.Equal(t, "", param)
+}
+
+func Test_starrocksTLSParam_SkipVerifyMode_PassedThrough(t *testing.T) {
+	param, err := starrocksTLSParam("", "skip-verify", "starrocks-skip", "localhost")
+	assert.NoError(t, err)
+	assert.Equal(t, "&tls=skip-verify", param)
+}
+
+func Test_starrocksTLSParam_PreferredMode_PassedThrough(t *testing.T) {
+	param, err := starrocksTLSParam("", "preferred", "starrocks-preferred", "localhost")
+	assert.NoError(t, err)
+	assert.Equal(t, "&tls=preferred", param)
+}
+
+func Test_starrocksTLSParam_CATakesPrecedenceOverMode(t *testing.T) {
+	caPath := writeTestCA(t)
+	param, err := starrocksTLSParam(caPath, "skip-verify", "starrocks-ca-wins", "localhost")
+	assert.NoError(t, err)
+	assert.Equal(t, "&tls=starrocks-ca-wins", param)
+}

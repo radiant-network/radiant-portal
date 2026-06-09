@@ -6,6 +6,8 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 // user_id (Keycloak sub) values for the seeded auth fixtures (test/data/auth/05_users.sql).
@@ -332,5 +334,114 @@ func Test_AuthRepository_GetMemberships_MultipleTenantsNoCollision(t *testing.T)
 				},
 			},
 		}, got)
+	})
+}
+
+// --- write side (provisioning) ---------------------------------------------
+//
+// The tests above read the shared seeded auth fixtures; the ones below exercise the
+// write side used at provisioning time and create/clean up their own rows.
+
+// seedRole creates a self-contained role under the seeded `radiant` tenant mapping
+// both an org-scoped (can_read_pii) and a tenant-scoped (can_search_case) action.
+// The tenant and actions come from migration 000009; the role is the test's own so
+// the test does not depend on another package's fixtures. Idempotent.
+func seedRole(t *testing.T, db *gorm.DB, roleCode string) {
+	t.Helper()
+	require.NoError(t, db.Exec(
+		"INSERT INTO public.role (tenant_code, code, name) VALUES ('radiant', ?, ?) ON CONFLICT DO NOTHING",
+		roleCode, roleCode).Error)
+	for _, action := range []string{"can_read_pii", "can_search_case"} {
+		require.NoError(t, db.Exec(
+			"INSERT INTO public.role_action (tenant_code, role_code, action_code) VALUES ('radiant', ?, ?) ON CONFLICT DO NOTHING",
+			roleCode, action).Error)
+	}
+}
+
+// purge removes everything a test created, in FK order. Deleting the role cascades
+// its role_action rows. users/user_role are not covered by testutils.cleanUp, so
+// the test owns this cleanup.
+func purge(db *gorm.DB, userID, roleCode string) {
+	db.Exec("DELETE FROM public.user_role WHERE user_id = ?", userID)
+	db.Exec("DELETE FROM public.users WHERE user_id = ?", userID)
+	db.Exec("DELETE FROM public.role WHERE tenant_code = 'radiant' AND code = ?", roleCode)
+}
+
+func Test_AuthRepository_UpsertUser_InsertsThenConvergesEmail(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const userID = "sub-upsert"
+		defer purge(env.Postgres, userID, "")
+		repo := NewAuthRepository(env.Postgres)
+
+		require.NoError(t, repo.UpsertUser(userID, "first@provisioning.test", "First", "Last"))
+		require.NoError(t, repo.UpsertUser(userID, "second@provisioning.test", "First", "Last")) // re-run, new email
+
+		var email string
+		require.NoError(t, env.Postgres.Raw("SELECT email FROM public.users WHERE user_id = ?", userID).Scan(&email).Error)
+		assert.Equal(t, "second@provisioning.test", email, "re-run converges email to the latest value")
+	})
+}
+
+func Test_AuthRepository_GrantRole_GrantsActionAtOrg(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const userID, role = "sub-grant", "cu_role_atorg"
+		defer purge(env.Postgres, userID, role)
+		seedRole(t, env.Postgres, role)
+		repo := NewAuthRepository(env.Postgres)
+		require.NoError(t, repo.UpsertUser(userID, "grant@provisioning.test", "First", "Last"))
+
+		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role, "test-admin"))
+
+		atOrg, err := repo.HasAction(userID, "radiant", "ORG_X", "can_read_pii")
+		require.NoError(t, err)
+		assert.True(t, atOrg, "user holds can_read_pii at the granted org")
+
+		atOther, err := repo.HasAction(userID, "radiant", "ORG_Y", "can_read_pii")
+		require.NoError(t, err)
+		assert.False(t, atOther, "no grant at a different org")
+
+		var grantedBy string
+		require.NoError(t, env.Postgres.Raw(
+			"SELECT granted_by FROM public.user_role WHERE user_id = ? AND tenant_code = 'radiant' AND role_code = ? AND org_code = 'ORG_X'",
+			userID, role).Scan(&grantedBy).Error)
+		assert.Equal(t, "test-admin", grantedBy, "granted_by records the caller-supplied attribution")
+	})
+}
+
+func Test_AuthRepository_GrantRole_IsIdempotent(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const userID, role = "sub-idem", "cu_role_idem"
+		defer purge(env.Postgres, userID, role)
+		seedRole(t, env.Postgres, role)
+		repo := NewAuthRepository(env.Postgres)
+		require.NoError(t, repo.UpsertUser(userID, "idem@provisioning.test", "First", "Last"))
+
+		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role, "createuser"))
+		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role, "createuser")) // re-run
+
+		var count int64
+		require.NoError(t, env.Postgres.Raw(
+			"SELECT count(*) FROM public.user_role WHERE user_id = ? AND tenant_code = 'radiant' AND role_code = ? AND org_code = 'ORG_X'",
+			userID, role).Scan(&count).Error)
+		assert.Equal(t, int64(1), count, "re-grant does not duplicate the row")
+	})
+}
+
+func Test_AuthRepository_GrantRole_TenantWideStoresNullOrg(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const userID, role = "sub-tw", "cu_role_tw"
+		defer purge(env.Postgres, userID, role)
+		seedRole(t, env.Postgres, role)
+		repo := NewAuthRepository(env.Postgres)
+		require.NoError(t, repo.UpsertUser(userID, "tw@provisioning.test", "First", "Last"))
+
+		// An empty orgCode (tenant-wide grant) must store NULL, not the empty string.
+		require.NoError(t, repo.GrantRole(userID, "radiant", "", role, "createuser"))
+
+		var nullOrgCount int64
+		require.NoError(t, env.Postgres.Raw(
+			"SELECT count(*) FROM public.user_role WHERE user_id = ? AND role_code = ? AND org_code IS NULL",
+			userID, role).Scan(&nullOrgCount).Error)
+		assert.Equal(t, int64(1), nullOrgCount, "empty orgCode is stored as NULL, not the empty string")
 	})
 }

@@ -20,6 +20,8 @@ var (
 	dbName     = os.Getenv("DB_NAME")
 	dbUserName = os.Getenv("DB_USERNAME")
 	dbPassword = os.Getenv("DB_PASSWORD")
+	dbSSLCA    = os.Getenv("DB_SSL_CA")
+	dbSSLMode  = os.Getenv("DB_SSL_MODE")
 )
 
 // registerStarrocksTLS reads the CA bundle at caPath, registers a TLS config
@@ -47,11 +49,27 @@ func registerStarrocksTLS(caPath, configName, serverName string) (string, error)
 	return "&tls=" + configName, nil
 }
 
+// starrocksTLSParam resolves the DSN tls parameter from the SSL config. A CA bundle
+// (caPath) registers a verifying TLS config named configName and takes precedence.
+// Otherwise sslMode is passed to the mysql driver verbatim — it accepts "skip-verify",
+// "preferred", and "true"; "", "false", and "disable" mean plaintext.
+func starrocksTLSParam(caPath, sslMode, configName, serverName string) (string, error) {
+	if caPath != "" {
+		return registerStarrocksTLS(caPath, configName, serverName)
+	}
+	switch sslMode {
+	case "", "false", "disable":
+		return "", nil
+	default:
+		return "&tls=" + sslMode, nil
+	}
+}
+
 func NewStarrocksDB() (*gorm.DB, error) {
 	if dbHost == "" {
 		return nil, fmt.Errorf("DB_HOST is not set")
 	}
-	tlsParam, err := registerStarrocksTLS(os.Getenv("DB_SSL_CA"), "starrocks", dbHost)
+	tlsParam, err := starrocksTLSParam(dbSSLCA, dbSSLMode, "starrocks", dbHost)
 	if err != nil {
 		return nil, err
 	}

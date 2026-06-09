@@ -6,13 +6,35 @@ include:
   - ranger-compose.yml
 
 services:
+  # Run-once: generate the self-signed cert + JKS keystore/truststore + PEM into the
+  # shared `starrocks-certs` volume that StarRocks and every StarRocks client mounts.
+  # Idempotent (skips if the keystore already exists). Uses a JDK image purely for
+  # `keytool`. See starrocks-conf/certs/generate-certs.sh.
+  cert-init:
+    image: eclipse-temurin:21-jdk
+    container_name: starrocks-cert-init
+    restart: "no"
+    volumes:
+      - starrocks-certs:/certs
+      - ./starrocks-conf/certs/generate-certs.sh:/generate-certs.sh:ro
+    entrypoint: ["bash", "/generate-certs.sh"]
+
   starrocks:
-    image: starrocks/allin1-ubuntu:3.4.2
+    image: starrocks/allin1-ubuntu:3.5.17
     container_name: starrocks_radiant
     ports:
       - "9030:9030"
       - "8030:8030"
       - "8040:8040"
+    volumes:
+      - ./starrocks-conf/ranger-starrocks-security.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-security.xml
+      - ./starrocks-conf/ranger-starrocks-audit.xml:/data/deploy/starrocks/fe/conf/ranger-starrocks-audit.xml
+      - ./starrocks-conf/fe.conf:/data/deploy/starrocks/fe/conf/fe.conf
+      # SSL keystore (read by fe.conf: ssl_keystore_location=/data/deploy/certs/...)
+      - starrocks-certs:/data/deploy/certs:ro
+    depends_on:
+      cert-init:
+        condition: service_completed_successfully
     healthcheck:
       test: >
         curl -sf http://localhost:8030/api/health || exit 1
@@ -39,7 +61,7 @@ services:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak
     volumes:
-      - ./scripts/init-keycloak:/opt/keycloak/data/import
+      - ../scripts/init-keycloak:/opt/keycloak/data/import
     environment:
       KC_LOG_LEVEL: info
       KC_METRICS_ENABLED: "true"
@@ -68,17 +90,22 @@ services:
 
   api:
     build:
-      context: .
+      context: ../
       dockerfile: api.Dockerfile
     container_name: radiant-api
     ports:
       - "8090:8090"
+    volumes:
+      # CA bundle (the self-signed StarRocks cert) for the Go MySQL driver TLS.
+      - starrocks-certs:/certs:ro
     environment:
       DB_USERNAME: root
       DB_PASSWORD:
       DB_HOST: starrocks
       DB_PORT: 9030
       DB_NAME: test_db
+      # Enables TLS to StarRocks (internal/database/starrocks.go reads this CA).
+      DB_SSL_CA: /certs/starrocks_cert.pem
       PGUSER: radiant
       PGPASSWORD: radiant
       PGPORT: 5432
@@ -103,7 +130,7 @@ services:
 
   worker:
     build:
-      context: .
+      context: ../
       dockerfile: worker.Dockerfile
     container_name: radiant-worker
     ports:
@@ -128,10 +155,12 @@ services:
       starrocks:
         condition: service_healthy
     volumes:
-      - ./scripts/init-sql:/docker-entrypoint-initdb.d
+      - ../scripts/init-sql:/docker-entrypoint-initdb.d
+      # CA bundle for the mysql client's --ssl-ca below.
+      - starrocks-certs:/certs:ro
     entrypoint: >
       /bin/bash -c "sleep 10 &&
-      mysql -hstarrocks -P9030 -uroot < /docker-entrypoint-initdb.d/init_starrocks.sql;"
+      mysql -hstarrocks -P9030 -uroot --ssl-mode=VERIFY_CA --ssl-ca=/certs/starrocks_cert.pem < /docker-entrypoint-initdb.d/init_starrocks.sql;"
 
   postgres-clinical-data:
     image: postgres
@@ -139,9 +168,15 @@ services:
       api:
         condition: service_started
     volumes:
-      - ./scripts/init-sql:/docker-entrypoint-initdb.d
+      - ../scripts/init-sql:/docker-entrypoint-initdb.d
     entrypoint: ["sh", "-c"]
     command:
       - -c
       - |
         export PGPASSWORD='radiant'; sleep 10 && psql -h postgres -U radiant -d radiant -f /docker-entrypoint-initdb.d/insert_clinical_data.sql;
+
+# Shared volume holding the StarRocks SSL artifacts (keystore.jks, cert.pem,
+# truststore.jks) produced by the cert-init service and mounted into StarRocks
+# and every StarRocks client (api, init-schema, ranger).
+volumes:
+  starrocks-certs:
