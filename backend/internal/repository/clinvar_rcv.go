@@ -16,10 +16,6 @@ type ClinvarRCVRepository struct {
 	db *gorm.DB
 }
 
-type ClinvarRCVDAO interface {
-	GetVariantClinvarConditions(locusId int) ([]ClinvarRCV, error)
-}
-
 func NewClinvarRCVRepository(db *gorm.DB) *ClinvarRCVRepository {
 	if db == nil {
 		log.Print("ClinvarRCVRepository: db is nil")

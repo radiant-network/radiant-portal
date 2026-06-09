@@ -12,10 +12,6 @@ type UserSetsRepository struct {
 	db *gorm.DB
 }
 
-type UserSetsDAO interface {
-	GetUserSet(userSetId string) (*types.UserSet, error)
-}
-
 func NewUserSetsRepository(db *gorm.DB) *UserSetsRepository {
 	if db == nil {
 		log.Fatal("UserSetsRepository: db is nil")

@@ -12,10 +12,6 @@ type FacetsRepository struct {
 	facetsDictionary map[string]Facet
 }
 
-type FacetsRepositoryDAO interface {
-	GetFacets(facetNames []string) ([]Facet, error)
-}
-
 func NewFacetsRepository() *FacetsRepository {
 	dictionary := map[string]Facet{
 		"variant_class": {

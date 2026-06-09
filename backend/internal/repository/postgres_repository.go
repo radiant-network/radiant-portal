@@ -13,10 +13,6 @@ type PostgresRepository struct {
 	UserSets        *UserSetsRepository
 }
 
-type PostgresDAO interface {
-	CheckDatabaseConnection() string
-}
-
 func NewPostgresRepository(db *gorm.DB, pubmedClient client.PubmedClientService) *PostgresRepository {
 	return &PostgresRepository{db: db, Interpretations: NewInterpretationsRepository(db, pubmedClient), UserSets: NewUserSetsRepository(db)}
 }

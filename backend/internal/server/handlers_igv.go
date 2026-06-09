@@ -11,6 +11,10 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
+type igvReader interface {
+	GetIGV(caseID int) ([]types.IGVTrack, error)
+}
+
 // GetIGVHandler
 // @Summary Get IGV
 // @Id getIGV
@@ -26,7 +30,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/igv/{case_id} [get]
-func GetIGVHandler(igvRepo repository.IGVRepositoryDAO, casesRepo repository.CasesDAO, presigner utils.PreSigner) gin.HandlerFunc {
+func GetIGVHandler(igvRepo igvReader, casesRepo repository.CasesDAO, presigner utils.PreSigner) gin.HandlerFunc {
 	if presigner == nil {
 		presigner = utils.NewS3PreSigner()
 	}

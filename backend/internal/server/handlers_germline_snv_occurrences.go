@@ -9,6 +9,10 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
+type facetsReader interface {
+	GetFacets(facetNames []string) ([]types.Facet, error)
+}
+
 // OccurrencesGermlineSNVListHandler handles list of germline SNV occurrences
 // @Summary List germline SNV occurrences
 // @Id listGermlineSNVOccurrences
@@ -158,7 +162,7 @@ func OccurrencesGermlineSNVCountHandler(repo repository.GermlineSNVOccurrencesDA
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate [post]
-func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrencesDAO, facetsRepo repository.FacetsRepositoryDAO) gin.HandlerFunc {
+func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrencesDAO, facetsRepo facetsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.AggregationBodyWithSqon
@@ -389,7 +393,7 @@ func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO,
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/snv/dictionary [get]
-func GetGermlineSNVDictionary(repo repository.FacetsRepositoryDAO) gin.HandlerFunc {
+func GetGermlineSNVDictionary(repo facetsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var queryParam types.FacetsQueryParam
 		if err := c.ShouldBindQuery(&queryParam); err != nil {

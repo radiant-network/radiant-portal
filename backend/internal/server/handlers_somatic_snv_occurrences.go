@@ -158,7 +158,7 @@ func OccurrencesSomaticSNVCountHandler(repo repository.SomaticSNVOccurrencesDAO)
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate [post]
-func OccurrencesSomaticSNVAggregateHandler(repo repository.SomaticSNVOccurrencesDAO, facetsRepo repository.FacetsRepositoryDAO) gin.HandlerFunc {
+func OccurrencesSomaticSNVAggregateHandler(repo repository.SomaticSNVOccurrencesDAO, facetsRepo facetsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.AggregationBodyWithSqon

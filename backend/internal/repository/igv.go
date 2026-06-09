@@ -16,10 +16,6 @@ type IGVRepository struct {
 	db *gorm.DB
 }
 
-type IGVRepositoryDAO interface {
-	GetIGV(caseID int) ([]IGVTrack, error)
-}
-
 func NewIGVRepository(db *gorm.DB) *IGVRepository {
 	if db == nil {
 		log.Print("GermlineCNVOccurrencesRepository: db is nil")
