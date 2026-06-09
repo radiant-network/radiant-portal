@@ -4,11 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-
-	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
 // principalFieldSub is the JWT claim StarRocks uses as the username. We key on the
@@ -26,9 +25,9 @@ type StarrocksJWTConfig struct {
 // StarrocksJWTConfigFromEnv builds the JWT config from the environment.
 func StarrocksJWTConfigFromEnv() StarrocksJWTConfig {
 	return StarrocksJWTConfig{
-		JwksURL:          utils.GetEnvOrDefault("SR_JWT_JWKS_URL", "http://keycloak:8080/realms/CQDG/protocol/openid-connect/certs"),
-		RequiredIssuer:   utils.GetEnvOrDefault("SR_JWT_REQUIRED_ISSUER", "http://localhost:8080/realms/CQDG"),
-		RequiredAudience: utils.GetEnvOrDefault("SR_JWT_REQUIRED_AUDIENCE", "radiant"),
+		JwksURL:          os.Getenv("STARROCKS_JWT_JWKS_URL"),
+		RequiredIssuer:   os.Getenv("STARROCKS_JWT_REQUIRED_ISSUER"),
+		RequiredAudience: os.Getenv("STARROCKS_JWT_REQUIRED_AUDIENCE"),
 	}
 }
 

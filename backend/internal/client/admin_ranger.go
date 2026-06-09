@@ -8,9 +8,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
-
-	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
 // RangerConfig points the admin client at Ranger. Mirrors 03_ranger_policies.py.
@@ -24,9 +23,9 @@ type RangerConfig struct {
 // the local compose stack.
 func RangerConfigFromEnv() RangerConfig {
 	return RangerConfig{
-		BaseURL:   utils.GetEnvOrDefault("RANGER_URL", "http://localhost:6080"),
-		AdminUser: utils.GetEnvOrDefault("RANGER_ADMIN_USER", "admin"),
-		AdminPass: utils.GetEnvOrDefault("RANGER_ADMIN_PASSWORD", "rangerR0cks!"),
+		BaseURL:   os.Getenv("RANGER_URL"),
+		AdminUser: os.Getenv("RANGER_ADMIN_USER"),
+		AdminPass: os.Getenv("RANGER_ADMIN_PASSWORD"),
 	}
 }
 

@@ -8,10 +8,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
-
-	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
 // KeycloakConfig points the admin client at a realm and the bootstrap admin used
@@ -28,10 +27,10 @@ type KeycloakConfig struct {
 // KC_ADMIN_USER/PASS match the admin seeded by master.json.
 func KeycloakConfigFromEnv() KeycloakConfig {
 	return KeycloakConfig{
-		BaseURL:   utils.GetEnvOrDefault("KEYCLOAK_HOST", "http://localhost:8080"),
-		Realm:     utils.GetEnvOrDefault("KEYCLOAK_REALM", "CQDG"),
-		AdminUser: utils.GetEnvOrDefault("KC_ADMIN_USER", "kcadmin"),
-		AdminPass: utils.GetEnvOrDefault("KC_ADMIN_PASS", "admin"),
+		BaseURL:   os.Getenv("KEYCLOAK_HOST"),
+		Realm:     os.Getenv("KEYCLOAK_REALM"),
+		AdminUser: os.Getenv("KEYCLOAK_ADMIN_USER"),
+		AdminPass: os.Getenv("KEYCLOAK_ADMIN_PASS"),
 	}
 }
 

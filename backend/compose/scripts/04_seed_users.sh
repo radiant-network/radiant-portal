@@ -51,6 +51,18 @@ export PGPORT="${PGPORT:-5432}"
 export PGDATABASE="${PGDATABASE:-radiant}"
 export PGUSER="${PGUSER:-radiant}"
 export PGPASSWORD="${PGPASSWORD:-radiant}"
+export STARROCKS_JWT_JWKS_URL=http://keycloak:8080/realms/CQDG/protocol/openid-connect/certs
+export STARROCKS_JWT_REQUIRED_ISSUER=http://localhost:8080/realms/CQDG
+export STARROCKS_JWT_REQUIRED_AUDIENCE=radiant
+
+export KEYCLOAK_HOST=http://localhost:8080
+export KEYCLOAK_REALM=CQDG
+export KEYCLOAK_ADMIN_USER=kcadmin
+export KEYCLOAK_ADMIN_PASS=admin
+
+export RANGER_URL=http://localhost:6080
+export RANGER_ADMIN_USER=admin
+export RANGER_ADMIN_PASSWORD=rangerR0cks!
 
 go run ./cmd/createuser -email alice@demo.org -first Alice -last Demo \
   -grant tenant_a:ORG_A1:geneticist

@@ -62,11 +62,11 @@ func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput, gran
 	}
 
 	if err := deps.Auth.UpsertUser(sub, in.Email, in.FirstName, in.LastName); err != nil {
-		return sub, fmt.Errorf("postgres: upsert user %q: %w", in.Email, err)
+		return sub, fmt.Errorf("postgres: upsert user %q: %w", sub, err)
 	}
 	for _, g := range in.Grants {
 		if err := deps.Auth.GrantRole(sub, g.TenantCode, g.OrgCode, g.RoleCode, grantedBy); err != nil {
-			return sub, fmt.Errorf("postgres: grant %s/%s/%s to %q: %w", g.TenantCode, g.OrgCode, g.RoleCode, in.Email, err)
+			return sub, fmt.Errorf("postgres: grant %s/%s/%s to %q: %w", g.TenantCode, g.OrgCode, g.RoleCode, sub, err)
 		}
 	}
 
