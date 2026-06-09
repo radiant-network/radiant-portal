@@ -16,7 +16,7 @@ import (
 
 func assertUpsertOccurrenceFlag(
 	t *testing.T,
-	repo repository.OccurrenceFlagsDAO,
+	repo *repository.OccurrenceFlagsRepository,
 	caseID, seqID, taskID, occurrenceID, flagType string,
 	expectedStatus int,
 ) {
@@ -37,7 +37,7 @@ func assertUpsertOccurrenceFlag(
 
 func assertDeleteOccurrenceFlag(
 	t *testing.T,
-	repo repository.OccurrenceFlagsDAO,
+	repo *repository.OccurrenceFlagsRepository,
 	caseID, seqID, taskID, occurrenceID string,
 	expectedStatus int,
 ) {

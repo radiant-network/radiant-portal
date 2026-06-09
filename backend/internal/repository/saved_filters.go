@@ -18,14 +18,6 @@ type SavedFiltersRepository struct {
 	db *gorm.DB
 }
 
-type SavedFiltersDAO interface {
-	GetSavedFilterByID(savedFilterId string) (*SavedFilter, error)
-	GetSavedFiltersByUserID(userId string, savedFilterType string) (*[]SavedFilter, error)
-	CreateSavedFilter(savedFilterInput SavedFilterCreationInput, userId string) (*SavedFilter, error)
-	UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, savedFilterId string, userId string) (*SavedFilter, error)
-	DeleteSavedFilter(savedFilterId string, userId string) error
-}
-
 func NewSavedFiltersRepository(db *gorm.DB) *SavedFiltersRepository {
 	if db == nil {
 		log.Fatal("SavedFiltersRepository: db is nil")

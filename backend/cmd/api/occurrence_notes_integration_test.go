@@ -19,7 +19,7 @@ import (
 
 const mockUserUUID = "11111111-1111-1111-1111-111111111111"
 
-func assertPostOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, auth *testutils.MockAuth, body string, expectedStatus int) *types.OccurrenceNote {
+func assertPostOccurrenceNote(t *testing.T, repo *repository.OccurrenceNotesRepository, auth *testutils.MockAuth, body string, expectedStatus int) *types.OccurrenceNote {
 	t.Helper()
 	router := gin.Default()
 	router.POST("/:tenant/notes", server.PostOccurrenceNoteHandler(repo, auth))
@@ -39,7 +39,7 @@ func assertPostOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, 
 	return nil
 }
 
-func assertPutOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, auth *testutils.MockAuth, id string, body string, expectedStatus int) *types.OccurrenceNote {
+func assertPutOccurrenceNote(t *testing.T, repo *repository.OccurrenceNotesRepository, auth *testutils.MockAuth, id string, body string, expectedStatus int) *types.OccurrenceNote {
 	t.Helper()
 	router := gin.Default()
 	router.PUT("/:tenant/notes/:id", server.PutOccurrenceNoteHandler(repo, auth))
@@ -59,7 +59,7 @@ func assertPutOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, a
 	return nil
 }
 
-func assertGetOccurrenceNotes(t *testing.T, repo repository.OccurrenceNotesDAO, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) []types.OccurrenceNote {
+func assertGetOccurrenceNotes(t *testing.T, repo *repository.OccurrenceNotesRepository, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) []types.OccurrenceNote {
 	t.Helper()
 	router := gin.Default()
 	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id", server.GetOccurrenceNotesHandler(repo))
@@ -76,7 +76,7 @@ func assertGetOccurrenceNotes(t *testing.T, repo repository.OccurrenceNotesDAO, 
 	return notes
 }
 
-func assertGetOccurrenceNoteCount(t *testing.T, repo repository.OccurrenceNotesDAO, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) int64 {
+func assertGetOccurrenceNoteCount(t *testing.T, repo *repository.OccurrenceNotesRepository, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) int64 {
 	t.Helper()
 	router := gin.Default()
 	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id/count", server.GetOccurrenceNoteCountHandler(repo))
@@ -93,7 +93,7 @@ func assertGetOccurrenceNoteCount(t *testing.T, repo repository.OccurrenceNotesD
 	return count.Count
 }
 
-func assertDeleteOccurrenceNote(t *testing.T, repo repository.OccurrenceNotesDAO, auth *testutils.MockAuth, id string, expectedStatus int) {
+func assertDeleteOccurrenceNote(t *testing.T, repo *repository.OccurrenceNotesRepository, auth *testutils.MockAuth, id string, expectedStatus int) {
 	t.Helper()
 	router := gin.Default()
 	router.DELETE("/:tenant/notes/:id", server.DeleteOccurrenceNoteHandler(repo, auth))
