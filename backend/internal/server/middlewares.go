@@ -4,13 +4,18 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
 // TenantContextKey is the gin context key under which RequireTenantAccess stores the
 // resolved tenant code for downstream handlers.
 const TenantContextKey = "tenant"
+
+// tenantAccessChecker reports whether a caller may access a tenant. RequireTenantAccess
+// needs only this slice of the auth repository.
+type tenantAccessChecker interface {
+	HasTenantAccess(userID, tenantCode string) (bool, error)
+}
 
 // RequireTenantAccess gates tenant-scoped routes (`/:tenant/...`). It always reads the
 // `tenant` path param and stores the resolved tenant code in the request context. When
@@ -20,7 +25,7 @@ const TenantContextKey = "tenant"
 // enforce is wired from TENANT_ENFORCEMENT_ENABLED so the path-prefix routing can be
 // deployed before users are backfilled into user_role: with enforcement off, routing and
 // context still work but nobody is locked out. Flip it on once the backfill lands.
-func RequireTenantAccess(auth utils.Auth, repo repository.AuthRepositoryDAO, enforce bool) gin.HandlerFunc {
+func RequireTenantAccess(auth utils.Auth, repo tenantAccessChecker, enforce bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tenant := c.Param("tenant")
 

@@ -4,7 +4,7 @@ Apply these to every coding task in the Go backend (`backend/`). They are intent
 
 Go style conventions (naming, error handling, interface placement, etc.) live in a curated, project-annotated copy of the Go Code Review Comments: [go-code-review.md](go-code-review.md). The headline rule from there, since it comes up most:
 
-> **Declare an interface in the package that *uses* it, not the one that implements it; constructors return concrete structs.** Place it by what keeps the import graph clean — consumer-side when the consumer wouldn't otherwise import the implementer (e.g. `service`'s provisioner interfaces), producer-side when the consumer already imports it (e.g. `repository.AuthRepositoryDAO`). Don't write `Interface`+`Impl` pairs "for mocking." See [go-code-review.md](go-code-review.md#interface-placement-the-rule-we-care-about-most) for the full heuristic.
+> **Declare an interface in the package that *uses* it, not the one that implements it; constructors return concrete structs.** Place it by what keeps the import graph clean — consumer-side when the consumer wouldn't otherwise import the implementer (e.g. `service`'s provisioner interfaces). Even when the consumer already imports the implementer (coupling-neutral), prefer a narrow interface scoped to that consumer over one shared `*DAO` contract — e.g. `internal/server`'s `membershipReader` / `tenantAccessChecker` over the old `repository.AuthRepositoryDAO`. Don't write `Interface`+`Impl` pairs "for mocking." See [go-code-review.md](go-code-review.md#interface-placement-the-rule-we-care-about-most) for the full heuristic.
 
 ## Test as you go
 

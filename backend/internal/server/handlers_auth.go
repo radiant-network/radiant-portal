@@ -4,9 +4,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
+
+// membershipReader returns a caller's tenant memberships. GetMeHandler needs only this
+// slice of the auth repository.
+type membershipReader interface {
+	GetMemberships(userID string) ([]types.TenantMembership, error)
+}
 
 // GetMeHandler
 // @Summary Get the caller's effective authorization
@@ -21,7 +27,7 @@ import (
 // @Failure 401 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /auth/me [get]
-func GetMeHandler(repo repository.AuthRepositoryDAO, auth utils.Auth) gin.HandlerFunc {
+func GetMeHandler(repo membershipReader, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {

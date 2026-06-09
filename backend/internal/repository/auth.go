@@ -14,12 +14,6 @@ type AuthRepository struct {
 	db *gorm.DB
 }
 
-type AuthRepositoryDAO interface {
-	HasAction(userID, tenantCode, orgCode, actionCode string) (bool, error)
-	HasTenantAccess(userID, tenantCode string) (bool, error)
-	GetMemberships(userID string) ([]types.TenantMembership, error)
-}
-
 func NewAuthRepository(db *gorm.DB) *AuthRepository {
 	if db == nil {
 		log.Print("AuthRepository: db is nil")
