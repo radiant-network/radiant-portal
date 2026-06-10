@@ -50,6 +50,7 @@ type userSetReader interface {
 // @Success 200 {object} types.UserSet
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /users/sets/{user_set_id} [get]
 func GetUserSet(repo userSetReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -85,6 +86,7 @@ type termAutoCompleter interface {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/mondo/autocomplete [get]
 func GetMondoTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -116,6 +118,7 @@ func GetMondoTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/hpo/autocomplete [get]
 func GetHPOTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 	return func(c *gin.Context) {

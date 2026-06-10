@@ -27,6 +27,7 @@ type genesReader interface {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/genes/autocomplete [get]
 func GetGeneAutoCompleteHandler(repo genesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -59,6 +60,7 @@ func GetGeneAutoCompleteHandler(repo genesReader) gin.HandlerFunc {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/genes/search [post]
 func SearchGenesHandler(repo genesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {

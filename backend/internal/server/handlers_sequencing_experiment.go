@@ -26,6 +26,7 @@ type seqExpDetailReader interface {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/sequencing/{seq_id}/details [get]
 func GetSequencingExperimentDetailByIdHandler(repo seqExpDetailReader) gin.HandlerFunc {
 	return func(c *gin.Context) {

@@ -27,6 +27,7 @@ type savedFiltersStore interface {
 // @Success 200 {object} types.SavedFilter
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /users/saved_filters/{saved_filter_id} [get]
 func GetSavedFilterByIDHandler(repo savedFiltersStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -56,6 +57,7 @@ func GetSavedFilterByIDHandler(repo savedFiltersStore) gin.HandlerFunc {
 // @Failure 401 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /users/saved_filters [get]
 func GetSavedFiltersHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -89,6 +91,7 @@ func GetSavedFiltersHandler(repo savedFiltersStore, auth utils.Auth) gin.Handler
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /users/saved_filters [post]
 func PostSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -130,6 +133,7 @@ func PostSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.Handler
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /users/saved_filters/{saved_filter_id} [put]
 func PutSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -178,6 +182,7 @@ func PutSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerF
 // @Success 204
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /users/saved_filters/{saved_filter_id} [delete]
 func DeleteSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {

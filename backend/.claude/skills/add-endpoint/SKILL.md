@@ -62,7 +62,7 @@ Goal: an HTTP handler that parses inputs, calls the repository, and returns the 
    - Group by resource — extend an existing `handlers_<resource>.go` if one exists, otherwise create one (lowercase, snake_case).
    - Signature: `func HandlerName(repo xxxReader) gin.HandlerFunc { return func(c *gin.Context) { ... } }`, where `xxxReader` is a **narrow, unexported interface declared in this handler file** listing only the repository methods this handler calls (consumer-side interface placement — see `.claude/rules/go-code-review.md`). Name it for the operation: `Reader` suffix for read-only, `Store` for CRUD/writes. The constructor returns the concrete `*repository.XxxRepository`, which satisfies it for free; `cmd/api` wiring passes the concrete value. Don't reference a `repository.XxxDAO` interface — those no longer exist.
    - Parse path params with `strconv.Atoi(c.Param("..."))`; query with `c.Query("...")`; body with `c.ShouldBindJSON(&dto)`.
-   - Use the project's error helpers: `HandleNotFoundError`, `HandleValidationError`, `HandleError` (in `internal/server/errors.go`).
+   - Use the project's error helpers: `HandleNotFoundError`, `HandleValidationError`, `HandleError` (in `internal/server/errors.go`). `HandleError` never leaks the raw error to the client — it logs it server-side under a correlation id and returns a generic body; pass it the real error.
    - Coerce nil slices to `[]T{}` before returning so JSON shows `[]` not `null`.
 2. **Swagger annotations** above the handler — required. Pattern:
    ```
@@ -77,11 +77,13 @@ Goal: an HTTP handler that parses inputs, calls the repository, and returns the 
    // @Failure 400 {object} types.ApiError
    // @Failure 404 {object} types.ApiError
    // @Failure 500 {object} types.ApiError
+   // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
    // @Router /path/{param} [get]
    ```
+   The `@Header 500` line is required on every endpoint: `HandleError` redacts the underlying error from the 500 body and instead logs it server-side under a correlation id, which it returns in the `X-Correlation-ID` response header. Keep this line paired with `@Failure 500` so the published spec documents that header.
 3. **Handler unit tests** in `handlers_<resource>_test.go`:
    - Build a small mock that implements the handler's narrow interface (the `xxxReader`/`xxxStore` from Step 3), returning zero values for methods you don't exercise.
-   - Cases: happy path, empty result, repo error → 500, each missing/invalid input → 400 or 404, sort/shape assertions on the JSON.
+   - Cases: happy path, empty result, repo error → 500 (assert the body is the generic `{"status":500,"message":"Internal Server Error"}` — `HandleError` redacts the underlying error), each missing/invalid input → 400 or 404, sort/shape assertions on the JSON.
    - Use `httptest.NewRecorder` + `gin.CreateTestContext` per existing handler tests.
 
 ## Step 4 — Route + integration test

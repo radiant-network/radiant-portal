@@ -28,6 +28,7 @@ type batchCreator interface {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/batch [post]
 func PostCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -86,6 +87,7 @@ func PostCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/batch [patch]
 func PatchCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {

@@ -39,6 +39,7 @@ type caseTasksReader interface {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/search [post]
 func SearchCasesHandler(repo casesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -83,6 +84,7 @@ func SearchCasesHandler(repo casesReader) gin.HandlerFunc {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/autocomplete [get]
 func CasesAutocompleteHandler(repo casesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -111,6 +113,7 @@ func CasesAutocompleteHandler(repo casesReader) gin.HandlerFunc {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Param tenant path string true "Tenant code"
 // @Router /{tenant}/cases/filters [get]
 func CasesFiltersHandler(repo casesReader) gin.HandlerFunc {
@@ -138,6 +141,7 @@ func CasesFiltersHandler(repo casesReader) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/{case_id} [get]
 func CaseEntityHandler(repo casesReader, igvRepo igvReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -181,6 +185,7 @@ func CaseEntityHandler(repo casesReader, igvRepo igvReader) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/{case_id}/documents/search [post]
 func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -239,6 +244,7 @@ func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc 
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences [get]
 func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -283,6 +289,7 @@ func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/{case_id}/documents/filters [get]
 func CaseEntityDocumentsFiltersHandler(repo caseDocumentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {

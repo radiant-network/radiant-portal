@@ -35,6 +35,7 @@ type germlineCNVOccurrencesReader interface {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list [post]
 func OccurrencesGermlineCNVListHandler(repo germlineCNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -99,6 +100,7 @@ func OccurrencesGermlineCNVListHandler(repo germlineCNVOccurrencesReader) gin.Ha
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count [post]
 func OccurrencesGermlineCNVCountHandler(repo germlineCNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -162,6 +164,7 @@ func OccurrencesGermlineCNVCountHandler(repo germlineCNVOccurrencesReader) gin.H
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate [post]
 func OccurrencesGermlineCNVAggregateHandler(repo germlineCNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -225,6 +228,7 @@ func OccurrencesGermlineCNVAggregateHandler(repo germlineCNVOccurrencesReader) g
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics [post]
 func OccurrencesGermlineCNVStatisticsHandler(repo germlineCNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -286,6 +290,7 @@ func OccurrencesGermlineCNVStatisticsHandler(repo germlineCNVOccurrencesReader) 
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap [get]
 func OccurrencesGermlineCNVGenesOverlapHandler(repo germlineCNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {

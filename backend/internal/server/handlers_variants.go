@@ -45,6 +45,7 @@ type variantsReader interface {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/variants/germline/{locus_id}/header [get]
 func GetGermlineVariantHeader(repo variantsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -80,6 +81,7 @@ func GetGermlineVariantHeader(repo variantsReader) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/variants/germline/{locus_id}/overview [get]
 func GetGermlineVariantOverview(repo variantsReader, exomiserRepository exomiserClassificationCountsReader, interpretationRepo germlineInterpretationCountsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -136,6 +138,7 @@ func GetGermlineVariantOverview(repo variantsReader, exomiserRepository exomiser
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/variants/germline/{locus_id}/consequences [get]
 func GetGermlineVariantConsequences(repo variantsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -173,6 +176,7 @@ func GetGermlineVariantConsequences(repo variantsReader) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/variants/germline/{locus_id}/cases/interpreted [post]
 func GetGermlineVariantInterpretedCases(repo variantsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -227,6 +231,7 @@ func GetGermlineVariantInterpretedCases(repo variantsReader) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/variants/germline/{locus_id}/cases/uninterpreted [post]
 func GetGermlineVariantUninterpretedCases(repo variantsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -279,6 +284,7 @@ func GetGermlineVariantUninterpretedCases(repo variantsReader) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/variants/germline/{locus_id}/cases/count [get]
 func GetGermlineVariantCasesCount(repo variantsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -308,6 +314,7 @@ func GetGermlineVariantCasesCount(repo variantsReader) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Param tenant path string true "Tenant code"
 // @Router /{tenant}/variants/germline/cases/filters [get]
 func GetGermlineVariantCasesFilters(repo variantsReader) gin.HandlerFunc {
@@ -337,6 +344,7 @@ func GetGermlineVariantCasesFilters(repo variantsReader) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/variants/germline/{locus_id}/conditions/{panel_type} [get]
 func GetGermlineVariantConditions(repo genePanelConditionsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -370,6 +378,7 @@ func GetGermlineVariantConditions(repo genePanelConditionsReader) gin.HandlerFun
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/variants/germline/{locus_id}/conditions/clinvar [get]
 func GetGermlineVariantConditionsClinvar(repo clinvarConditionsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -414,6 +423,7 @@ func GetGermlineVariantConditionsClinvar(repo clinvarConditionsReader) gin.Handl
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/variants/germline/{locus_id}/external_frequencies [get]
 func GetGermlineVariantExternalFrequenciesHandler(repo variantsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -451,6 +461,7 @@ func GetGermlineVariantExternalFrequenciesHandler(repo variantsReader) gin.Handl
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/variants/germline/{locus_id}/internal_frequencies [get]
 func GetGermlineVariantInternalFrequenciesHandler(repo variantsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -497,6 +508,7 @@ func GetGermlineVariantInternalFrequenciesHandler(repo variantsReader) gin.Handl
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/variants/germline/{locus_id}/internal_frequencies/global [get]
 func GetGermlineVariantGlobalInternalFrequenciesHandler(repo variantsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {

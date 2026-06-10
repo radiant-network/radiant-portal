@@ -32,6 +32,7 @@ type occurrenceFlagsStore interface {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} [post]
 func UpsertOccurrenceFlagHandler(repo occurrenceFlagsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -92,6 +93,7 @@ func UpsertOccurrenceFlagHandler(repo occurrenceFlagsStore) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} [delete]
 func DeleteOccurrenceFlagHandler(repo occurrenceFlagsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
