@@ -24,14 +24,6 @@ type GermlineSNVOccurrencesRepository struct {
 	db *gorm.DB
 }
 
-type GermlineSNVOccurrencesDAO interface {
-	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]GermlineSNVOccurrence, error)
-	CountOccurrences(caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error)
-	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error)
-	GetStatisticsOccurrences(caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*Statistics, error)
-	GetExpandedOccurrence(caseId int, seqId int, taskId int, locusId int) (*ExpandedGermlineSNVOccurrence, error)
-}
-
 func NewGermlineSNVOccurrencesRepository(db *gorm.DB) *GermlineSNVOccurrencesRepository {
 	if db == nil {
 		log.Print("GermlineSNVOccurrencesRepository: db is nil")

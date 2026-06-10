@@ -5,9 +5,16 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
+
+type germlineCNVOccurrencesReader interface {
+	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.GermlineCNVOccurrence, error)
+	CountOccurrences(caseId int, seqId int, taskId int, userFilter types.CountQuery) (int64, error)
+	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
+	GetStatisticsOccurrences(caseId int, seqId int, taskId int, query types.StatisticsQuery) (*types.Statistics, error)
+	GetGenesOverlap(caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error)
+}
 
 // OccurrencesGermlineCNVListHandler handles list of germline CNV occurrences
 // @Summary List germline CNV occurrences
@@ -29,7 +36,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list [post]
-func OccurrencesGermlineCNVListHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesGermlineCNVListHandler(repo germlineCNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.ListBodyWithSqon
@@ -93,7 +100,7 @@ func OccurrencesGermlineCNVListHandler(repo repository.GermlineCNVOccurrencesDAO
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count [post]
-func OccurrencesGermlineCNVCountHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesGermlineCNVCountHandler(repo germlineCNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.CountBodyWithSqon
@@ -156,7 +163,7 @@ func OccurrencesGermlineCNVCountHandler(repo repository.GermlineCNVOccurrencesDA
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate [post]
-func OccurrencesGermlineCNVAggregateHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesGermlineCNVAggregateHandler(repo germlineCNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.AggregationBodyWithSqon
@@ -219,7 +226,7 @@ func OccurrencesGermlineCNVAggregateHandler(repo repository.GermlineCNVOccurrenc
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics [post]
-func OccurrencesGermlineCNVStatisticsHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesGermlineCNVStatisticsHandler(repo germlineCNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.StatisticsBodyWithSqon
@@ -280,7 +287,7 @@ func OccurrencesGermlineCNVStatisticsHandler(repo repository.GermlineCNVOccurren
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap [get]
-func OccurrencesGermlineCNVGenesOverlapHandler(repo repository.GermlineCNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesGermlineCNVGenesOverlapHandler(repo germlineCNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errSeq := strconv.Atoi(c.Param("case_id"))
 		if errSeq != nil {

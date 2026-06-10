@@ -5,9 +5,13 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
+
+type genesReader interface {
+	GetGeneAutoComplete(prefix string, limit int) (*[]types.AutoCompleteGene, error)
+	SearchGenes(inputs []string) (*[]types.GeneResult, error)
+}
 
 // GetGeneAutoCompleteHandler handles retrieving genes by autocomplete
 // @Summary Get types.AutoCompleteGene list of matching input string with highlighted
@@ -24,7 +28,7 @@ import (
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/genes/autocomplete [get]
-func GetGeneAutoCompleteHandler(repo repository.GenesDAO) gin.HandlerFunc {
+func GetGeneAutoCompleteHandler(repo genesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
 		limit, err := strconv.Atoi(c.Query("limit"))
@@ -56,7 +60,7 @@ func GetGeneAutoCompleteHandler(repo repository.GenesDAO) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/genes/search [post]
-func SearchGenesHandler(repo repository.GenesDAO) gin.HandlerFunc {
+func SearchGenesHandler(repo genesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body types.GeneSearchBody

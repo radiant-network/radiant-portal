@@ -13,6 +13,14 @@ type facetsReader interface {
 	GetFacets(facetNames []string) ([]types.Facet, error)
 }
 
+type germlineSNVOccurrencesReader interface {
+	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.GermlineSNVOccurrence, error)
+	CountOccurrences(caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error)
+	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
+	GetStatisticsOccurrences(caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error)
+	GetExpandedOccurrence(caseId int, seqId int, taskId int, locusId int) (*types.ExpandedGermlineSNVOccurrence, error)
+}
+
 // OccurrencesGermlineSNVListHandler handles list of germline SNV occurrences
 // @Summary List germline SNV occurrences
 // @Id listGermlineSNVOccurrences
@@ -33,7 +41,7 @@ type facetsReader interface {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list [post]
-func OccurrencesGermlineSNVListHandler(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesGermlineSNVListHandler(repo germlineSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.ListBodyWithSqon
@@ -98,7 +106,7 @@ func OccurrencesGermlineSNVListHandler(repo repository.GermlineSNVOccurrencesDAO
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count [post]
-func OccurrencesGermlineSNVCountHandler(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesGermlineSNVCountHandler(repo germlineSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.CountBodyWithSqon
@@ -162,7 +170,7 @@ func OccurrencesGermlineSNVCountHandler(repo repository.GermlineSNVOccurrencesDA
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate [post]
-func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrencesDAO, facetsRepo facetsReader) gin.HandlerFunc {
+func OccurrencesGermlineSNVAggregateHandler(repo germlineSNVOccurrencesReader, facetsRepo facetsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.AggregationBodyWithSqon
@@ -260,7 +268,7 @@ func OccurrencesGermlineSNVAggregateHandler(repo repository.GermlineSNVOccurrenc
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics [post]
-func OccurrencesGermlineSNVStatisticsHandler(repo repository.GermlineSNVOccurrencesDAO) gin.HandlerFunc {
+func OccurrencesGermlineSNVStatisticsHandler(repo germlineSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.StatisticsBodyWithSqon
@@ -321,7 +329,7 @@ func OccurrencesGermlineSNVStatisticsHandler(repo repository.GermlineSNVOccurren
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded [get]
-func GetExpandedGermlineSNVOccurrence(repo repository.GermlineSNVOccurrencesDAO, exomiserRepo repository.ExomiserDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
+func GetExpandedGermlineSNVOccurrence(repo germlineSNVOccurrencesReader, exomiserRepo repository.ExomiserDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errSeq := strconv.Atoi(c.Param("case_id"))
 		if errSeq != nil {

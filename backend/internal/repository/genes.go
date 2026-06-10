@@ -19,11 +19,6 @@ type GenesRepository struct {
 	db *gorm.DB
 }
 
-type GenesDAO interface {
-	GetGeneAutoComplete(prefix string, limit int) (*[]AutoCompleteGene, error)
-	SearchGenes(inputs []string) (*[]GeneResult, error)
-}
-
 func NewGenesRepository(db *gorm.DB) *GenesRepository {
 	if db == nil {
 		log.Print("GenesRepository: db is nil")
