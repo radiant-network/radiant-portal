@@ -15,11 +15,6 @@ type ObservationStringRepository struct {
 	db *gorm.DB
 }
 
-type ObservationStringDAO interface {
-	GetById(obsId int) (*ObservationString, error)
-	CreateObservationString(observation *ObservationString) error
-}
-
 func NewObservationStringRepository(db *gorm.DB) *ObservationStringRepository {
 	if db == nil {
 		log.Print("ObservationStringRepository: db is nil")

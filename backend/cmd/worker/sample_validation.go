@@ -180,7 +180,11 @@ func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []*Sa
 	})
 }
 
-func insertSampleRecords(records []*SampleValidationRecord, repo repository.SamplesDAO) error {
+type sampleStore interface {
+	CreateSample(newSample *types.Sample) (*types.Sample, error)
+}
+
+func insertSampleRecords(records []*SampleValidationRecord, repo sampleStore) error {
 	createdSamples := make(map[SampleKey]int)
 
 	for _, record := range records {

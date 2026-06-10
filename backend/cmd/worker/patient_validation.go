@@ -224,7 +224,11 @@ func persistBatchAndPatientRecords(db *gorm.DB, batch *types.Batch, records []*P
 	})
 }
 
-func insertPatientRecords(records []*PatientValidationRecord, repo repository.PatientsDAO) error {
+type patientStore interface {
+	CreatePatient(newPatient *types.Patient) error
+}
+
+func insertPatientRecords(records []*PatientValidationRecord, repo patientStore) error {
 	for _, record := range records {
 		if !record.Skipped {
 			patient := types.Patient{

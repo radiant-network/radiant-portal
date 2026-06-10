@@ -13,10 +13,6 @@ type ProjectRepository struct {
 	db *gorm.DB
 }
 
-type ProjectDAO interface {
-	GetProjectByCode(code string) (*Project, error)
-}
-
 func NewProjectRepository(db *gorm.DB) *ProjectRepository {
 	return &ProjectRepository{db: db}
 }

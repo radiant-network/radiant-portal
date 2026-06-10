@@ -11,7 +11,6 @@ import (
 
 // Mock repositories
 type mockOrgRepo struct {
-	repository.OrganizationDAO
 	GetByCodeFunc func(code string) (*types.Organization, error)
 }
 
@@ -20,7 +19,6 @@ func (m *mockOrgRepo) GetOrganizationByCode(code string) (*types.Organization, e
 }
 
 type mockSampleRepo struct {
-	repository.SamplesDAO
 	GetByIdFunc                                func(id int) (*types.Sample, error)
 	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(orgCode string, submitterSampleId string) (*types.Sample, error)
 }
@@ -33,7 +31,6 @@ func (m *mockSampleRepo) GetSampleByOrgCodeAndSubmitterSampleId(orgCode string, 
 }
 
 type mockValueSetsRepo struct {
-	repository.ValueSetsDAO
 	GetCodesFunc func(vsType repository.ValueSetType) ([]string, error)
 }
 
@@ -42,7 +39,6 @@ func (m *mockValueSetsRepo) GetCodes(vsType repository.ValueSetType) ([]string, 
 }
 
 type mockProjectRepo struct {
-	repository.ProjectDAO
 	GetByCodeFunc func(code string) (*types.Project, error)
 }
 
@@ -63,7 +59,6 @@ func (m *mockCasesRepo) GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId str
 }
 
 type mockPatientRepo struct {
-	repository.PatientsDAO
 	GetByOrgAndSubmitterFunc func(orgCode string, submitterPatientId string) (*types.Patient, error)
 }
 

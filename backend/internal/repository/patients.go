@@ -14,11 +14,6 @@ type PatientsRepository struct {
 	db *gorm.DB
 }
 
-type PatientsDAO interface {
-	GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*Patient, error)
-	CreatePatient(newPatient *Patient) error
-}
-
 func NewPatientsRepository(db *gorm.DB) *PatientsRepository {
 	return &PatientsRepository{db: db}
 }

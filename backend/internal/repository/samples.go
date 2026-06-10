@@ -14,13 +14,6 @@ type SamplesRepository struct {
 	db *gorm.DB
 }
 
-type SamplesDAO interface {
-	GetSampleById(id int) (*Sample, error)
-	GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*Sample, error)
-	CreateSample(newSample *Sample) (*Sample, error)
-	GetTypeCodes() ([]string, error)
-}
-
 func NewSamplesRepository(db *gorm.DB) *SamplesRepository {
 	return &SamplesRepository{db: db}
 }
