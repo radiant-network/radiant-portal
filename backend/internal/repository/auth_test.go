@@ -81,6 +81,26 @@ func Test_AuthRepository_HasAction_OrgScoped_Wildcard(t *testing.T) {
 	})
 }
 
+// server.RequireAction passes "" (its WildcardOnlyOrg sentinel) for org-scoped actions until
+// per-resource org resolution lands. The empty org must match only '*' grants, never a
+// specific-org grant — the invariant that makes that sentinel correct under today's grants.
+// "" is used as a literal here because importing the server package would cycle.
+func Test_AuthRepository_HasAction_OrgScoped_EmptyOrgMatchesOnlyWildcard(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewAuthRepository(env.Postgres)
+
+		// wendy's grant is wildcard ('*') → the empty sentinel matches.
+		wildcardGrantee, err := repo.HasAction(wendyID, "radiant", "", "can_read_pii")
+		assert.NoError(t, err)
+		assert.True(t, wildcardGrantee, "empty org matches a '*' grant")
+
+		// dan's grant is specific (CHUSJ) → the empty sentinel must not match.
+		specificGrantee, err := repo.HasAction(danID, "radiant", "", "can_read_pii")
+		assert.NoError(t, err)
+		assert.False(t, specificGrantee, "empty org must not match a specific-org grant")
+	})
+}
+
 func Test_AuthRepository_HasAction_TenantScoped_IgnoresOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
