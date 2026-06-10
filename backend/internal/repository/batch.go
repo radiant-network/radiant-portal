@@ -17,14 +17,6 @@ type BatchRepository struct {
 	db *gorm.DB
 }
 
-type BatchDAO interface {
-	CreateBatch(payload any, batchType string, username string, dryRun bool) (*Batch, error)
-	UpdateBatch(batch Batch) (int64, error)
-	GetBatchByID(batchId string) (*Batch, error)
-	ClaimNextBatch() (*Batch, error)
-	UpdateStuckBatch() (int64, error)
-}
-
 func NewBatchRepository(db *gorm.DB) *BatchRepository {
 	if db == nil {
 		log.Fatal("BatchRepository: db is nil")

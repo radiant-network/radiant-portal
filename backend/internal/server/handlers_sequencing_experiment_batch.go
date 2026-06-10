@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
@@ -26,7 +25,7 @@ import (
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/sequencing/batch [post]
-func PostSequencingExperimentBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
+func PostSequencingExperimentBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.CreateSequencingExperimentBatchBody

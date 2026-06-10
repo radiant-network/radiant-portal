@@ -317,7 +317,11 @@ func persistBatchAndSequencingExperimentRecords(db *gorm.DB, batch *types.Batch,
 	})
 }
 
-func insertSequencingExperimentRecords(records []*SequencingExperimentValidationRecord, repo repository.SequencingExperimentDAO) error {
+type sequencingExperimentCreator interface {
+	CreateSequencingExperiment(*types.SequencingExperiment) error
+}
+
+func insertSequencingExperimentRecords(records []*SequencingExperimentValidationRecord, repo sequencingExperimentCreator) error {
 	for _, record := range records {
 		if !record.Skipped {
 			seqExp := types.SequencingExperiment{

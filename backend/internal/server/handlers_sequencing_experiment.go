@@ -5,8 +5,12 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
+	"github.com/radiant-network/radiant-api/internal/types"
 )
+
+type seqExpDetailReader interface {
+	GetSequencingExperimentDetailById(seqId int) (*types.SequencingExperimentDetail, error)
+}
 
 // GetSequencingExperimentDetailByIdHandler handles get sequencing experiment details by id
 // @Summary Get types.SequencingExperimentDetail by id
@@ -23,7 +27,7 @@ import (
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/sequencing/{seq_id}/details [get]
-func GetSequencingExperimentDetailByIdHandler(repo repository.SequencingExperimentDAO) gin.HandlerFunc {
+func GetSequencingExperimentDetailByIdHandler(repo seqExpDetailReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		seqId, errSeqId := strconv.Atoi(c.Param("seq_id"))
 		if errSeqId != nil {

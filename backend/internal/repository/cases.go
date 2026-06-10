@@ -28,19 +28,6 @@ type CasesRepository struct {
 	db *gorm.DB
 }
 
-type CasesDAO interface {
-	SearchCases(userQuery types.ListQuery) (*[]CaseResult, *int64, error)
-	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
-	GetCasesFilters() (*CaseFilters, error)
-	GetCaseEntity(caseId int) (*CaseEntity, error)
-	GetCaseType(caseID int) (string, error)
-	CreateCase(*Case) error
-	CreateCaseHasSequencingExperiment(caseHasSeqExp *types.CaseHasSequencingExperiment) error
-	GetCaseAnalysisCatalogIdByCode(code string) (*AnalysisCatalog, error)
-	GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*Case, error)
-	UpdateCaseDiagnosisLabCode(caseID int, code string) error
-}
-
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
 	if db == nil {
 		log.Print("CasesRepository: db is nil")

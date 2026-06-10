@@ -17,22 +17,6 @@ type TaskRepository struct {
 	db *gorm.DB
 }
 
-type TaskDAO interface {
-	CreateTask(task *Task) error
-	CreateTaskContext(tc *TaskContext) error
-	CreateTaskHasDocument(thd *TaskHasDocument) error
-
-	GetTaskTypeCodes() ([]types.TaskType, error)
-
-	GetTaskById(taskId int) (*Task, error)
-	GetTaskContextByTaskId(taskId int) ([]*TaskContext, error)
-	GetTaskHasDocumentByTaskId(taskId int) ([]*TaskHasDocument, error)
-	GetTaskHasDocumentByDocumentId(documentId int) ([]*TaskHasDocument, error)
-	GetTaskContextBySequencingExperimentId(seqExpId int) ([]*TaskContext, error)
-
-	ListTasksByCaseSeqAndTaskType(caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error)
-}
-
 func NewTaskRepository(db *gorm.DB) *TaskRepository {
 	if db == nil {
 		log.Print("TaskRepository: db is nil")

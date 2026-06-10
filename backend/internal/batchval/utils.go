@@ -43,7 +43,11 @@ func CopyRecordIntoBatch[T interface{ GetBase() *BaseValidationRecord }](batch *
 	}
 }
 
-func ProcessUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch repository.BatchDAO) {
+type batchUpdater interface {
+	UpdateBatch(batch types.Batch) (int64, error)
+}
+
+func ProcessUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch batchUpdater) {
 	glog.Errorf("unexpected error for batch %v: %v", batch.ID, unexpectedErr)
 	now := time.Now()
 	batch.FinishedOn = &now
