@@ -15,11 +15,6 @@ type ObservationCategoricalRepository struct {
 	db *gorm.DB
 }
 
-type ObservationCategoricalDAO interface {
-	GetById(obsId int) (*ObservationCategorical, error)
-	CreateObservationCategorical(observation *ObservationCategorical) error
-}
-
 func NewObservationCategoricalRepository(db *gorm.DB) *ObservationCategoricalRepository {
 	if db == nil {
 		log.Print("ObservationCategoricalRepository: db is nil")

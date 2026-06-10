@@ -36,10 +36,6 @@ const (
 	ValueSetTaskType                 ValueSetType = "task_type"
 )
 
-type ValueSetsDAO interface {
-	GetCodes(vsType ValueSetType) ([]string, error)
-}
-
 type ValueSetsRepository struct {
 	db       *gorm.DB
 	tableMap map[ValueSetType]string

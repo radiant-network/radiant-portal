@@ -12,10 +12,6 @@ type OrganizationRepository struct {
 	db *gorm.DB
 }
 
-type OrganizationDAO interface {
-	GetOrganizationByCode(organizationCode string) (*types.Organization, error)
-}
-
 func NewOrganizationRepository(db *gorm.DB) *OrganizationRepository {
 	return &OrganizationRepository{db: db}
 }

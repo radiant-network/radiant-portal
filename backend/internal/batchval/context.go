@@ -32,19 +32,43 @@ type taskReader interface {
 	GetTaskHasDocumentByDocumentId(documentId int) ([]*types.TaskHasDocument, error)
 }
 
+type familyStore interface {
+	CreateFamily(family *types.Family) error
+}
+
+type organizationReader interface {
+	GetOrganizationByCode(organizationCode string) (*types.Organization, error)
+}
+
+type patientReader interface {
+	GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*types.Patient, error)
+}
+
+type projectReader interface {
+	GetProjectByCode(code string) (*types.Project, error)
+}
+
+type sampleReader interface {
+	GetSampleById(id int) (*types.Sample, error)
+	GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*types.Sample, error)
+}
+
+type valueSetsReader interface {
+	GetCodes(vsType repository.ValueSetType) ([]string, error)
+}
+
 type BatchValidationContext struct {
 	BatchRepo     batchProcessor
 	CasesRepo     casesReader
 	DocRepo       documentsReader
-	FamilyRepo    repository.FamilyDAO
-	ObsCat        repository.ObservationCategoricalDAO
-	OrgRepo       repository.OrganizationDAO
-	PatientRepo   repository.PatientsDAO
-	ProjectRepo   repository.ProjectDAO
-	SampleRepo    repository.SamplesDAO
+	FamilyRepo    familyStore
+	OrgRepo       organizationReader
+	PatientRepo   patientReader
+	ProjectRepo   projectReader
+	SampleRepo    sampleReader
 	SeqExpRepo    sequencingExperimentReader
 	TaskRepo      taskReader
-	ValueSetsRepo repository.ValueSetsDAO
+	ValueSetsRepo valueSetsReader
 	S3FS          utils.FileMetadataGetter
 }
 
@@ -66,7 +90,6 @@ func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
 		CasesRepo:     repository.NewCasesRepository(db),
 		DocRepo:       repository.NewDocumentsRepository(db),
 		FamilyRepo:    repository.NewFamilyRepository(db),
-		ObsCat:        repository.NewObservationCategoricalRepository(db),
 		TaskRepo:      repository.NewTaskRepository(db),
 		S3FS:          s3fs,
 	}, nil

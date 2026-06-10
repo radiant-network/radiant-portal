@@ -15,11 +15,6 @@ type FamilyRepository struct {
 	db *gorm.DB
 }
 
-type FamilyDAO interface {
-	GetFamilyById(familyId int) (*Family, error)
-	CreateFamily(family *Family) error
-}
-
 func NewFamilyRepository(db *gorm.DB) *FamilyRepository {
 	if db == nil {
 		log.Print("FamilyRepository: db is nil")

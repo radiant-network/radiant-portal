@@ -38,14 +38,13 @@ Goal: the data model the endpoint will return is defined, and the DB supports it
 
 ## Step 2 — Repository layer + tests
 
-Goal: a tested DAO method that returns the data the handler will serve.
+Goal: a tested repository method that returns the data the handler will serve.
 
 1. **Pick the right file** in `backend/internal/repository/`:
    - StarRocks-backed repos for cases/variants/genes/etc.
    - PostgreSQL-backed repos for tasks/patients/sequencing/notes/preferences/etc.
-2. **Interface + impl**:
-   - Add the method signature to the existing `XxxDAO` interface in the file.
-   - Implement it on the repository struct. Use GORM (`r.db.Table(...).Where(...).Find(...)`) — match the style of nearby methods.
+2. **Implementation**:
+   - Implement the method on the concrete repository struct (`*XxxRepository`). There is no producer-side `XxxDAO` interface to update — consumers declare their own narrow interface (see Step 3); the concrete method satisfies it for free. Use GORM (`r.db.Table(...).Where(...).Find(...)`) — match the style of nearby methods.
    - Wrap returned errors with `fmt.Errorf("... %w", err)` (project convention).
    - Filter explicitly — never trust caller-side checks. For occurrence-style queries, **always include the partition filter** (`part = ?`) when one applies.
 3. **Tests** in the sibling `*_test.go`:
@@ -57,11 +56,11 @@ Goal: a tested DAO method that returns the data the handler will serve.
 
 ## Step 3 — Handler + tests
 
-Goal: an HTTP handler that parses inputs, calls the DAO, and returns the response.
+Goal: an HTTP handler that parses inputs, calls the repository, and returns the response.
 
 1. **Handler file** in `backend/internal/server/`:
    - Group by resource — extend an existing `handlers_<resource>.go` if one exists, otherwise create one (lowercase, snake_case).
-   - Signature: `func HandlerName(repo repository.XxxDAO) gin.HandlerFunc { return func(c *gin.Context) { ... } }`.
+   - Signature: `func HandlerName(repo xxxReader) gin.HandlerFunc { return func(c *gin.Context) { ... } }`, where `xxxReader` is a **narrow, unexported interface declared in this handler file** listing only the repository methods this handler calls (consumer-side interface placement — see `.claude/rules/go-code-review.md`). Name it for the operation: `Reader` suffix for read-only, `Store` for CRUD/writes. The constructor returns the concrete `*repository.XxxRepository`, which satisfies it for free; `cmd/api` wiring passes the concrete value. Don't reference a `repository.XxxDAO` interface — those no longer exist.
    - Parse path params with `strconv.Atoi(c.Param("..."))`; query with `c.Query("...")`; body with `c.ShouldBindJSON(&dto)`.
    - Use the project's error helpers: `HandleNotFoundError`, `HandleValidationError`, `HandleError` (in `internal/server/errors.go`).
    - Coerce nil slices to `[]T{}` before returning so JSON shows `[]` not `null`.
@@ -81,7 +80,7 @@ Goal: an HTTP handler that parses inputs, calls the DAO, and returns the respons
    // @Router /path/{param} [get]
    ```
 3. **Handler unit tests** in `handlers_<resource>_test.go`:
-   - Build a small mock that implements the DAO interface (return zero values for methods you don't exercise).
+   - Build a small mock that implements the handler's narrow interface (the `xxxReader`/`xxxStore` from Step 3), returning zero values for methods you don't exercise.
    - Cases: happy path, empty result, repo error → 500, each missing/invalid input → 400 or 404, sort/shape assertions on the JSON.
    - Use `httptest.NewRecorder` + `gin.CreateTestContext` per existing handler tests.
 
@@ -153,7 +152,7 @@ Goal: confirm the change compiles and passes against the **whole** backend, not 
 cd backend && make test
 ```
 
-Package-scoped tests can miss cross-package breakage. The most common case: adding a method to a DAO interface satisfied by mocks in other packages (e.g. `cmd/worker`'s test mocks also implement `TaskDAO`). The package you edited compiles, but the consumer package breaks. `make test` is the only thing that catches this consistently.
+Package-scoped tests can miss cross-package breakage. The most common case: a repository method is consumed via a shared interface field (e.g. `batchval.BatchValidationContext`'s reader/store fields) that `cmd/worker` also calls methods on — widening or renaming what that field needs can break a mock in the other package. The package you edited compiles, but the consumer package breaks. `make test` is the only thing that catches this consistently.
 
 If a test fails:
 - **Reproducible failure** in the package you touched → fix the code or test.
