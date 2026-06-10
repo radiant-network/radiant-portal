@@ -11,8 +11,8 @@ install:
 
 build:
 	@echo "Building API..."
-	
-	
+
+
 	@go build -o bin/api/ ./cmd/api/
 
 # Run the application
@@ -57,6 +57,11 @@ itest:
 	@echo "Running integration tests..."
 	@go test ./internal/repository
 
+# Format the code (gofmt); the CI golangci-lint job verifies this formatting
+fmt:
+	@echo "Formatting..."
+	@gofmt -w .
+
 # Lint the application (same config and linters as the CI golangci-lint job)
 lint:
 	@echo "Linting..."
@@ -94,7 +99,7 @@ doc:
 	@echo "Generating OpenAPI v3.1 documentation..."
 	@go run scripts/openapi/generate.go
 
-.PHONY: all build run test clean watch docker-run docker-down itest lint
+.PHONY: all build run test clean watch docker-run docker-down itest lint fmt
 
 migrate:
 	@echo "Create database migration..."

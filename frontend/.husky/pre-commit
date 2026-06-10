@@ -1,2 +1,14 @@
+# Auto-format staged backend Go files (no-op unless backend *.go files are staged).
+# Skips gracefully when the Go toolchain is absent; CI golangci-lint enforces gofmt regardless.
+go_files=$(git diff --cached --name-only --diff-filter=ACM -- backend | grep '\.go$' || true)
+if [ -n "$go_files" ]; then
+  if command -v gofmt >/dev/null 2>&1; then
+    echo "$go_files" | xargs gofmt -w
+    echo "$go_files" | xargs git add
+  else
+    echo "⚠ gofmt not found — skipping Go formatting; CI golangci-lint will enforce it."
+  fi
+fi
+
 cd frontend
 npx lint-staged

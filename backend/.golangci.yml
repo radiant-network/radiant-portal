@@ -36,3 +36,8 @@ linters:
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
+
+# gofmt is checked on `golangci-lint run` and applied by `golangci-lint fmt` / `make fmt`.
+formatters:
+  enable:
+    - gofmt
