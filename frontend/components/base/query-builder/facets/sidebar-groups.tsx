@@ -72,6 +72,7 @@ export function SidebarGroups({
 
   return (
     <Sidebar
+      id="sidebar-facets"
       variant="sidebar"
       collapsible="icon"
       className={'static! flex flex-col w-full bg-primary dark:bg-secondary '}
@@ -81,6 +82,7 @@ export function SidebarGroups({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                id="sidebar-group-toggle-sidebar"
                 iconOnly
                 onClick={() => toggleSidebar()}
                 className={buttonVariants({

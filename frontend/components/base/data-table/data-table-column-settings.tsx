@@ -107,20 +107,20 @@ function TableColumnSettings({
   return (
     <span>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button size="sm" iconOnly variant="ghost">
-            <Tooltip>
-              <TooltipTrigger asChild>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button id="data-table-column-settings" size="sm" iconOnly variant="ghost">
                 <div>
                   <SettingsIcon />
                 </div>
-              </TooltipTrigger>
-              <TooltipContent sideOffset={12}>{t('common.table.columns')}</TooltipContent>
-            </Tooltip>
-          </Button>
-        </DropdownMenuTrigger>
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent sideOffset={12}>{t('common.table.columns')}</TooltipContent>
+        </Tooltip>
         <DropdownMenuPortal>
-          <DropdownMenuContent>
+          <DropdownMenuContent id="data-table-column-settings-dropdown">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={columnOrder} strategy={verticalListSortingStrategy}>
                 {columnsLeft.map(column => {

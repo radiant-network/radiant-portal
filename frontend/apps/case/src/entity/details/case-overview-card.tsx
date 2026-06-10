@@ -11,7 +11,7 @@ function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentPr
   const { t } = useI18n();
 
   return (
-    <Card data-cy="case-overview-card" {...props}>
+    <Card id="case-overview-card" data-cy="case-overview-card" {...props}>
       <CardHeader className="border-b [.border-b]:pb-2">
         <CardTitle size="xl">{t('case_entity.details.case_overview')}</CardTitle>
       </CardHeader>

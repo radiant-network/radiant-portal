@@ -111,7 +111,7 @@ function SequencingVariantFilters({
 
   return (
     <div className="inline-flex gap-4 items-center border-b px-6 py-2.5">
-      <Tabs value={activeInterface}>
+      <Tabs id="sequencing-experiment-variant-type" value={activeInterface}>
         <TabsList className="w-full h-7">
           {options.map(({ tooltip, value }: SequencingVariantFiltersOption) => (
             <TabsTrigger
@@ -140,55 +140,61 @@ function SequencingVariantFilters({
         </TabsList>
       </Tabs>
       <Separator className="h-7" orientation="vertical" />
-      <Select
-        value={`${selectedSeqId}`}
-        onValueChange={value => {
-          handleChange(Number(value));
-        }}
-      >
-        <SelectTrigger className="min-w-[125px] max-w-[200px] " size="xs">
-          <SelectValue>
-            {selectedSequencingExperiment && <SequencingVariantFiltersSelectValue {...selectedSequencingExperiment} />}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {sequencingExperiments.map(seqExp => (
-            <SelectItem key={`case-relation-${seqExp.seq_id}`} value={`${seqExp.seq_id}`}>
-              <SequencingVariantFiltersSelectItem {...seqExp} />
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {/* Task select — shown only when multiple tasks are available */}
-      {tasks.length > 1 && (
+      <div id="sequencing-experiment-seq-id">
         <Select
-          value={selectedTaskId ? `${selectedTaskId}` : undefined}
-          onValueChange={value => onTaskChange?.(Number(value))}
+          value={`${selectedSeqId}`}
+          onValueChange={value => {
+            handleChange(Number(value));
+          }}
         >
-          <SelectTrigger className="min-w-[125px] max-w-[150px]" size="xs">
+          <SelectTrigger className="min-w-[125px] max-w-[200px] " size="xs">
             <SelectValue>
-              {selectedTask && formatDate(selectedTask.created_on, t('common.date.year_month_day'))}
+              {selectedSequencingExperiment && (
+                <SequencingVariantFiltersSelectValue {...selectedSequencingExperiment} />
+              )}
             </SelectValue>
           </SelectTrigger>
-          <SelectContent className="max-w-[200px]">
-            <SelectGroup>
-              <SelectLabel className="text-muted-foreground text-xs font-medium">
-                {t('case_entity.variants.filters.select_task_label')}
-              </SelectLabel>
-              <SelectSeparator />
-              {tasks.map(task => (
-                <SelectItem key={`task-${task.id}`} value={`${task.id}`}>
-                  <span className="inline-flex items-center gap-2">
-                    {formatDate(task.created_on, t('common.date.year_month_day'))}
-                    {task.id === latestTaskId && (
-                      <Badge variant="outline">{t('case_entity.variants.filters.latest')}</Badge>
-                    )}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectGroup>
+          <SelectContent>
+            {sequencingExperiments.map(seqExp => (
+              <SelectItem key={`case-relation-${seqExp.seq_id}`} value={`${seqExp.seq_id}`}>
+                <SequencingVariantFiltersSelectItem {...seqExp} />
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
+      </div>
+      {/* Task select — shown only when multiple tasks are available */}
+      {tasks.length > 1 && (
+        <div id="sequencing-experiment-tasks">
+          <Select
+            value={selectedTaskId ? `${selectedTaskId}` : undefined}
+            onValueChange={value => onTaskChange?.(Number(value))}
+          >
+            <SelectTrigger className="min-w-[125px] max-w-[150px]" size="xs">
+              <SelectValue>
+                {selectedTask && formatDate(selectedTask.created_on, t('common.date.year_month_day'))}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent className="max-w-[200px]">
+              <SelectGroup>
+                <SelectLabel className="text-muted-foreground text-xs font-medium">
+                  {t('case_entity.variants.filters.select_task_label')}
+                </SelectLabel>
+                <SelectSeparator />
+                {tasks.map(task => (
+                  <SelectItem key={`task-${task.id}`} value={`${task.id}`}>
+                    <span className="inline-flex items-center gap-2">
+                      {formatDate(task.created_on, t('common.date.year_month_day'))}
+                      {task.id === latestTaskId && (
+                        <Badge variant="outline">{t('case_entity.variants.filters.latest')}</Badge>
+                      )}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       )}
       {selectedSequencingExperiment && selectedSequencingExperiment.relationship_to_proband !== 'proband' && (
         <AffectedStatusBadge status={selectedSequencingExperiment.affected_status_code as AffectedStatusProps} />

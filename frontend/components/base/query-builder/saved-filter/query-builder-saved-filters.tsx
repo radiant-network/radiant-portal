@@ -21,7 +21,7 @@ function QueryBuilderSavedFilters() {
   });
 
   return (
-    <>
+    <div id="query-saved-filters" className="flex flex-1">
       <div className="flex items-center gap-4 whitespace-nowrap text-ellipsis overflow-hidden py-4 pr-4">
         <div className="text-ellipsis overflow-hidden text-base">
           {selectedSavedFilter ? selectedSavedFilter.name : t('common.saved_filter.untitled_filter')}
@@ -44,7 +44,7 @@ function QueryBuilderSavedFilters() {
           <SavedFiltersList />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

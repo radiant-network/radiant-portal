@@ -119,7 +119,7 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
   }, []);
 
   return (
-    <Card className="py-0">
+    <Card id="query-builder-card" className="py-0">
       <Accordion type="multiple" defaultValue={['query-builder']}>
         <AccordionItem value="query-builder" className="border-none">
           <AccordionTrigger

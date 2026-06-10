@@ -15,7 +15,7 @@ function DataTableFullscreenButton({ active, handleClick }: DataTableFullscreenB
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button size="sm" variant="ghost" iconOnly onClick={() => handleClick(!active)}>
+        <Button id="data-table-fullscreen" size="sm" variant="ghost" iconOnly onClick={() => handleClick(!active)}>
           {active ? <Minimize /> : <Maximize />}
         </Button>
       </TooltipTrigger>
