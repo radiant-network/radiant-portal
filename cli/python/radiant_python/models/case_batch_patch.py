@@ -20,6 +20,7 @@ import json
 from pydantic import BaseModel, ConfigDict, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from radiant_python.models.case_sequencing_experiment_batch import CaseSequencingExperimentBatch
+from radiant_python.models.case_task_batch import CaseTaskBatch
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,9 +30,10 @@ class CaseBatchPatch(BaseModel):
     """ # noqa: E501
     diagnostic_lab_code: Optional[StrictStr] = None
     project_code: StrictStr
-    sequencing_experiments: List[CaseSequencingExperimentBatch]
+    sequencing_experiments: Optional[List[CaseSequencingExperimentBatch]] = None
     submitter_case_id: StrictStr
-    __properties: ClassVar[List[str]] = ["diagnostic_lab_code", "project_code", "sequencing_experiments", "submitter_case_id"]
+    tasks: Optional[List[CaseTaskBatch]] = None
+    __properties: ClassVar[List[str]] = ["diagnostic_lab_code", "project_code", "sequencing_experiments", "submitter_case_id", "tasks"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -79,6 +81,13 @@ class CaseBatchPatch(BaseModel):
                 if _item_sequencing_experiments:
                     _items.append(_item_sequencing_experiments.to_dict())
             _dict['sequencing_experiments'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in tasks (list)
+        _items = []
+        if self.tasks:
+            for _item_tasks in self.tasks:
+                if _item_tasks:
+                    _items.append(_item_tasks.to_dict())
+            _dict['tasks'] = _items
         return _dict
 
     @classmethod
@@ -94,7 +103,8 @@ class CaseBatchPatch(BaseModel):
             "diagnostic_lab_code": obj.get("diagnostic_lab_code"),
             "project_code": obj.get("project_code"),
             "sequencing_experiments": [CaseSequencingExperimentBatch.from_dict(_item) for _item in obj["sequencing_experiments"]] if obj.get("sequencing_experiments") is not None else None,
-            "submitter_case_id": obj.get("submitter_case_id")
+            "submitter_case_id": obj.get("submitter_case_id"),
+            "tasks": [CaseTaskBatch.from_dict(_item) for _item in obj["tasks"]] if obj.get("tasks") is not None else None
         })
         return _obj
 

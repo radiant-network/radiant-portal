@@ -166,6 +166,10 @@ func (m *CaseValidationMockRepo) GetProjectByCode(code string) (*types.Project, 
 	return nil, nil
 }
 
+func (m *CaseValidationMockRepo) GetSequencingExperimentsByCaseId(caseID int) ([]repository.SequencingExperiment, error) {
+	return nil, nil
+}
+
 func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(aliquot string) ([]repository.SequencingExperiment, error) {
 	if aliquot == "ALIQUOT-1" {
 		return []repository.SequencingExperiment{
