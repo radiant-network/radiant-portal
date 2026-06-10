@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
@@ -82,7 +81,7 @@ func GetGermlineVariantHeader(repo variantsReader) gin.HandlerFunc {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/variants/germline/{locus_id}/overview [get]
-func GetGermlineVariantOverview(repo variantsReader, exomiserRepository repository.ExomiserDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
+func GetGermlineVariantOverview(repo variantsReader, exomiserRepository exomiserClassificationCountsReader, interpretationRepo germlineInterpretationCountsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		locusID, err := strconv.Atoi(c.Param("locus_id"))
 		if err != nil {

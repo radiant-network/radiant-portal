@@ -15,11 +15,6 @@ type ExomiserRepository struct {
 	db *gorm.DB
 }
 
-type ExomiserDAO interface {
-	GetExomiser(locusId int) ([]Exomiser, error)
-	GetExomiserACMGClassificationCounts(locusId int) (map[string]int, error)
-}
-
 func NewExomiserRepository(db *gorm.DB) *ExomiserRepository {
 	if db == nil {
 		log.Print("ExomiserRepository: db is nil")
