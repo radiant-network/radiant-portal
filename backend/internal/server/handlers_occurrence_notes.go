@@ -45,6 +45,7 @@ func sanitizeNoteContent(content string, userID string) string {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/notes [post]
 func PostOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -101,6 +102,7 @@ func PostOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.H
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/notes/{id} [put]
 func PutOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -154,6 +156,7 @@ func PutOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.Ha
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/notes/{id} [delete]
 func DeleteOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -204,6 +207,7 @@ func DeleteOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count [get]
 func GetOccurrenceNoteCountHandler(repo occurrenceNotesStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -253,6 +257,7 @@ func GetOccurrenceNoteCountHandler(repo occurrenceNotesStore) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id} [get]
 func GetOccurrenceNotesHandler(repo occurrenceNotesStore) gin.HandlerFunc {
 	return func(c *gin.Context) {

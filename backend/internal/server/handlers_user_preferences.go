@@ -24,6 +24,7 @@ type userPreferencesStore interface {
 // @Success 200 {object} types.UserPreference
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /users/preferences/{key} [get]
 func GetUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -60,6 +61,7 @@ func GetUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gin.H
 // @Failure 400 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /users/preferences/{key} [post]
 func UpdateUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {

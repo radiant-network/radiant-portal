@@ -26,6 +26,7 @@ type batchReader interface {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/batches/{batchId} [get]
 func GetBatchHandler(repo batchReader) gin.HandlerFunc {
 	return func(c *gin.Context) {

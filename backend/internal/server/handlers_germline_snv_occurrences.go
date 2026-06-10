@@ -47,6 +47,7 @@ type germlineSNVOccurrencesReader interface {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list [post]
 func OccurrencesGermlineSNVListHandler(repo germlineSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -112,6 +113,7 @@ func OccurrencesGermlineSNVListHandler(repo germlineSNVOccurrencesReader) gin.Ha
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count [post]
 func OccurrencesGermlineSNVCountHandler(repo germlineSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -176,6 +178,7 @@ func OccurrencesGermlineSNVCountHandler(repo germlineSNVOccurrencesReader) gin.H
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate [post]
 func OccurrencesGermlineSNVAggregateHandler(repo germlineSNVOccurrencesReader, facetsRepo facetsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -274,6 +277,7 @@ func OccurrencesGermlineSNVAggregateHandler(repo germlineSNVOccurrencesReader, f
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics [post]
 func OccurrencesGermlineSNVStatisticsHandler(repo germlineSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -335,6 +339,7 @@ func OccurrencesGermlineSNVStatisticsHandler(repo germlineSNVOccurrencesReader) 
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded [get]
 func GetExpandedGermlineSNVOccurrence(repo germlineSNVOccurrencesReader, exomiserRepo exomiserClassificationCountsReader, interpretationRepo germlineInterpretationCountsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -407,6 +412,7 @@ func GetExpandedGermlineSNVOccurrence(repo germlineSNVOccurrencesReader, exomise
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/snv/dictionary [get]
 func GetGermlineSNVDictionary(repo facetsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {

@@ -2900,6 +2900,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Retrieve a batch by ID
@@ -2953,6 +2959,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get CaseEntity case entity
@@ -3032,6 +3044,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: List tasks producing occurrences of a given type for a (case, sequencing)
@@ -3081,6 +3099,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get DocumentFilters documents filters for a specific case
@@ -3141,6 +3165,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Search DocumentResult list for a case entity
@@ -3195,6 +3225,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get AutocompleteResult list of matching prefix
@@ -3258,6 +3294,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Partially update existing cases (batch)
@@ -3317,6 +3359,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Create a new case batch
@@ -3358,6 +3406,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get CaseFilters cases filters
@@ -3412,6 +3466,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Search cases
@@ -3465,6 +3525,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get pre-signed S3 download URL for a document
@@ -3519,6 +3585,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get AutocompleteResult list of matching prefix
@@ -3560,6 +3632,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get DocumentFilters documents filters
@@ -3614,6 +3692,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Search documents
@@ -3669,6 +3753,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get AutoCompleteGene list of matching input string with highlighted
@@ -3725,6 +3815,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Post search GeneResult list of matching input strings
@@ -3780,6 +3876,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get AutoCompleteTerm list of matching input string with highlighted
@@ -3833,6 +3935,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get IGV
@@ -3876,6 +3984,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Search interpretation germline
@@ -3948,6 +4062,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get interpretation germline
@@ -4020,6 +4140,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Create or Update interpretation germline
@@ -4079,6 +4205,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get pubmed citation by ID
@@ -4122,6 +4254,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Search interpretation somatic
@@ -4194,6 +4332,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get interpretation somatic
@@ -4266,6 +4410,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Create or Update interpretation somatic
@@ -4343,6 +4493,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get interpretation germline
@@ -4420,6 +4576,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Create or Update interpretation germline
@@ -4497,6 +4659,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get interpretation somatic
@@ -4574,6 +4742,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Create or Update interpretation somatic
@@ -4629,6 +4803,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get AutoCompleteTerm list of matching input string with highlighted
@@ -4683,6 +4863,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Create a note on an occurrence
@@ -4756,6 +4942,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get notes for an occurrence
@@ -4827,6 +5019,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Count notes for an occurrence
@@ -4877,6 +5075,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Delete a note on an occurrence
@@ -4943,6 +5147,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Update a note on an occurrence
@@ -5011,6 +5221,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Delete the flag on an occurrence
@@ -5084,6 +5300,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Set or change the flag on an occurrence
@@ -5157,6 +5379,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: List genes overlapping a CNV with a given ID
@@ -5237,6 +5465,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Aggregate germline CNV occurrences
@@ -5315,6 +5549,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Count germline CNV occurrences
@@ -5395,6 +5635,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: List germline CNV occurrences
@@ -5473,6 +5719,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Statistics of germline CNV occurrences
@@ -5544,6 +5796,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get a germline ExpandedGermlineSNVOccurrence
@@ -5630,6 +5888,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Aggregate germline SNV occurrences
@@ -5708,6 +5972,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Count germline SNV occurrences
@@ -5788,6 +6058,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: List germline SNV occurrences
@@ -5866,6 +6142,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Statistics of germline SNV occurrences
@@ -5928,6 +6210,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get germline SNV facets dictionary
@@ -5999,6 +6287,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get a somatic ExpandedSomaticSNVOccurrence
@@ -6085,6 +6379,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Aggregate somatic SNV occurrences
@@ -6163,6 +6463,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Count somatic SNV occurrences
@@ -6243,6 +6549,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: List somatic SNV occurrences
@@ -6321,6 +6633,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Statistics of somatic SNV occurrences
@@ -6381,6 +6699,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Create a new patient batch
@@ -6441,6 +6765,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Create a new sample batch
@@ -6494,6 +6824,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get SequencingExperimentDetail by id
@@ -6554,6 +6890,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Create a new sequencing experiment batch
@@ -6607,6 +6949,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get germline cases count for a given locus
@@ -6667,6 +7015,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get list of interpreted Cases for a germline variant
@@ -6727,6 +7081,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get list of uninterpreted Cases for a germline variant
@@ -6796,6 +7156,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get conditions for germline variant entity for a specific gene panel
@@ -6849,6 +7215,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get ClinVar conditions for germline variant entity
@@ -6904,6 +7276,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get list of VariantConsequences for a germline variant
@@ -6957,6 +7335,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get external frequencies
@@ -7010,6 +7394,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get a germline VariantHeader
@@ -7079,6 +7469,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get internal frequencies
@@ -7132,6 +7528,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get global internal frequencies
@@ -7185,6 +7587,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get a germline VariantOverview
@@ -7232,6 +7640,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get cases filters for germline variant entity
@@ -7265,6 +7679,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get the caller's effective authorization
@@ -7315,6 +7735,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get user preferences
@@ -7362,6 +7788,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Create or update user preference
@@ -7404,6 +7836,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get user saved filters
@@ -7444,6 +7882,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Create a new saved filter
@@ -7475,6 +7919,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Delete a saved filter
@@ -7509,6 +7959,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get saved filter by id
@@ -7556,6 +8012,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Update a saved filter
@@ -7591,6 +8053,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
       security:
       - bearerauth: []
       summary: Get user set by id

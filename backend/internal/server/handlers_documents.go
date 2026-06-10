@@ -31,6 +31,7 @@ type documentsReader interface {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/documents/search [post]
 func SearchDocumentsHandler(repo documentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -75,6 +76,7 @@ func SearchDocumentsHandler(repo documentsReader) gin.HandlerFunc {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/documents/autocomplete [get]
 func DocumentsAutocompleteHandler(repo documentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -103,6 +105,7 @@ func DocumentsAutocompleteHandler(repo documentsReader) gin.HandlerFunc {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Param tenant path string true "Tenant code"
 // @Router /{tenant}/documents/filters [get]
 func DocumentsFiltersHandler(repo documentsReader) gin.HandlerFunc {
@@ -130,6 +133,7 @@ func DocumentsFiltersHandler(repo documentsReader) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/documents/{document_id}/download_url [get]
 func GetDocumentsDownloadUrlHandler(repo documentsReader, presigner utils.PreSigner) gin.HandlerFunc {
 	if presigner == nil {

@@ -39,6 +39,7 @@ type somaticSNVOccurrencesReader interface {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list [post]
 func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -104,6 +105,7 @@ func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader) gin.Hand
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count [post]
 func OccurrencesSomaticSNVCountHandler(repo somaticSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -168,6 +170,7 @@ func OccurrencesSomaticSNVCountHandler(repo somaticSNVOccurrencesReader) gin.Han
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate [post]
 func OccurrencesSomaticSNVAggregateHandler(repo somaticSNVOccurrencesReader, facetsRepo facetsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -266,6 +269,7 @@ func OccurrencesSomaticSNVAggregateHandler(repo somaticSNVOccurrencesReader, fac
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics [post]
 func OccurrencesSomaticSNVStatisticsHandler(repo somaticSNVOccurrencesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -327,6 +331,7 @@ func OccurrencesSomaticSNVStatisticsHandler(repo somaticSNVOccurrencesReader) gi
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded [get]
 func GetExpandedSomaticSNVOccurrence(repo somaticSNVOccurrencesReader, interpretationRepo somaticInterpretationCountsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {

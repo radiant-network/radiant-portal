@@ -26,6 +26,7 @@ type membershipReader interface {
 // @Success 200 {array} types.TenantMembership
 // @Failure 401 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /auth/me [get]
 func GetMeHandler(repo membershipReader, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {

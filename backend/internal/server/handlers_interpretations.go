@@ -99,6 +99,7 @@ func getInterpretationStatus(interpretation *types.InterpretationCommon) int {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationGermlineDeprecated(repo interpretationsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -134,6 +135,7 @@ func GetInterpretationGermlineDeprecated(repo interpretationsStore) gin.HandlerF
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationGermline(repo interpretationsStore, termsRepo termNameReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -180,6 +182,7 @@ func GetInterpretationGermline(repo interpretationsStore, termsRepo termNameRead
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/interpretations/germline/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationGermlineDeprecated(repo interpretationsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -224,6 +227,7 @@ func PostInterpretationGermlineDeprecated(repo interpretationsStore) gin.Handler
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationGermline(repo interpretationsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -267,6 +271,7 @@ func PostInterpretationGermline(repo interpretationsStore) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationSomaticDeprecated(repo interpretationsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -302,6 +307,7 @@ func GetInterpretationSomaticDeprecated(repo interpretationsStore) gin.HandlerFu
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [get]
 func GetInterpretationSomatic(repo interpretationsStore, termsRepo termNameReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -348,6 +354,7 @@ func GetInterpretationSomatic(repo interpretationsStore, termsRepo termNameReade
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/interpretations/somatic/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationSomaticDeprecated(repo interpretationsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -391,6 +398,7 @@ func PostInterpretationSomaticDeprecated(repo interpretationsStore) gin.HandlerF
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} [post]
 func PostInterpretationSomatic(repo interpretationsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -430,6 +438,7 @@ func PostInterpretationSomatic(repo interpretationsStore) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/interpretations/pubmed/{citation_id} [get]
 func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -465,6 +474,7 @@ func GetPubmedCitation(pubmedClient client.PubmedClientService) gin.HandlerFunc 
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Param tenant path string true "Tenant code"
 // @Router /{tenant}/interpretations/germline [get]
 func SearchInterpretationGermline(repo interpretationsStore) gin.HandlerFunc {
@@ -495,6 +505,7 @@ func SearchInterpretationGermline(repo interpretationsStore) gin.HandlerFunc {
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Param tenant path string true "Tenant code"
 // @Router /{tenant}/interpretations/somatic [get]
 func SearchInterpretationSomatic(repo interpretationsStore) gin.HandlerFunc {

@@ -118,7 +118,7 @@ func Test_GetInterpretationGermline_ok(t *testing.T) {
 }
 
 func Test_GetInterpretationGermline_error(t *testing.T) {
-	assertGetInterpretationGermline(t, "10", "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"status":500, "message":"Internal Server Error", "detail":"error"}`)
+	assertGetInterpretationGermline(t, "10", "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"status":500, "message":"Internal Server Error"}`)
 }
 
 func Test_GetInterpretationGermline_notFound(t *testing.T) {
@@ -176,7 +176,7 @@ func Test_GetInterpretationSomatic_ok(t *testing.T) {
 }
 
 func Test_GetInterpretationSomatic_error(t *testing.T) {
-	assertGetInterpretationSomatic(t, "11", "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"status": 500, "message":"Internal Server Error", "detail": "error"}`)
+	assertGetInterpretationSomatic(t, "11", "seq1", "locus1", "trans2", http.StatusInternalServerError, `{"status": 500, "message":"Internal Server Error"}`)
 }
 
 func Test_GetInterpretationSomatic_notFound(t *testing.T) {
@@ -234,7 +234,7 @@ func Test_GetPubmedCitation_ok(t *testing.T) {
 }
 
 func Test_GetPubmedCitation_error(t *testing.T) {
-	assertGetPubmedCitation(t, "2", http.StatusInternalServerError, `{"status": 500, "message":"Internal Server Error", "detail": "error"}`)
+	assertGetPubmedCitation(t, "2", http.StatusInternalServerError, `{"status": 500, "message":"Internal Server Error"}`)
 }
 
 func Test_GetPubmedCitation_notFound(t *testing.T) {

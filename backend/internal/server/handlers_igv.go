@@ -33,6 +33,7 @@ type caseTypeReader interface {
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/igv/{case_id} [get]
 func GetIGVHandler(igvRepo igvReader, casesRepo caseTypeReader, presigner utils.PreSigner) gin.HandlerFunc {
 	if presigner == nil {
