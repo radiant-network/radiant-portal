@@ -4,10 +4,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
+
+type savedFiltersStore interface {
+	GetSavedFilterByID(savedFilterId string) (*types.SavedFilter, error)
+	GetSavedFiltersByUserID(userId string, savedFilterType string) (*[]types.SavedFilter, error)
+	CreateSavedFilter(savedFilterInput types.SavedFilterCreationInput, userId string) (*types.SavedFilter, error)
+	UpdateSavedFilter(savedFilterInput types.SavedFilterUpdateInput, savedFilterId string, userId string) (*types.SavedFilter, error)
+	DeleteSavedFilter(savedFilterId string, userId string) error
+}
 
 // GetSavedFilterByIDHandler
 // @Summary Get saved filter by id
@@ -21,7 +28,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /users/saved_filters/{saved_filter_id} [get]
-func GetSavedFilterByIDHandler(repo repository.SavedFiltersDAO) gin.HandlerFunc {
+func GetSavedFilterByIDHandler(repo savedFiltersStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		savedFilterId := c.Param("saved_filter_id")
 		savedFilter, err := repo.GetSavedFilterByID(savedFilterId)
@@ -50,7 +57,7 @@ func GetSavedFilterByIDHandler(repo repository.SavedFiltersDAO) gin.HandlerFunc 
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /users/saved_filters [get]
-func GetSavedFiltersHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin.HandlerFunc {
+func GetSavedFiltersHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		savedFilterType := c.Query("type")
 		userId, err := auth.RetrieveUserIdFromToken(c)
@@ -83,7 +90,7 @@ func GetSavedFiltersHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gi
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /users/saved_filters [post]
-func PostSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin.HandlerFunc {
+func PostSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body types.SavedFilterCreationInput
@@ -124,7 +131,7 @@ func PostSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gi
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /users/saved_filters/{saved_filter_id} [put]
-func PutSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin.HandlerFunc {
+func PutSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body types.SavedFilterUpdateInput
@@ -172,7 +179,7 @@ func PutSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /users/saved_filters/{saved_filter_id} [delete]
-func DeleteSavedFilterHandler(repo repository.SavedFiltersDAO, auth utils.Auth) gin.HandlerFunc {
+func DeleteSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {

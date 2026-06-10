@@ -15,11 +15,6 @@ type UserPreferencesRepository struct {
 	db *gorm.DB
 }
 
-type UserPreferencesDAO interface {
-	GetUserPreferences(userId string, key string) (*types.JsonMap[string, interface{}], error)
-	UpdateUserPreferences(userId string, key string, content types.JsonMap[string, interface{}]) (*types.JsonMap[string, interface{}], error)
-}
-
 func NewUserPreferencesRepository(db *gorm.DB) *UserPreferencesRepository {
 	if db == nil {
 		log.Fatal("UserPreferencesRepository: db is nil")

@@ -7,10 +7,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/microcosm-cc/bluemonday"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
+
+type occurrenceNotesStore interface {
+	Create(note types.OccurrenceNote) (*types.OccurrenceNote, error)
+	GetByID(id string) (*types.OccurrenceNote, error)
+	GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error)
+	CountByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) (int, error)
+	Update(id string, content string) (*types.OccurrenceNote, error)
+	Delete(id string) error
+}
 
 var htmlPolicy = bluemonday.UGCPolicy()
 
@@ -38,7 +46,7 @@ func sanitizeNoteContent(content string, userID string) string {
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/notes [post]
-func PostOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Auth) gin.HandlerFunc {
+func PostOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body types.CreateOccurrenceNoteInput
 		if err := c.ShouldBindJSON(&body); err != nil {
@@ -94,7 +102,7 @@ func PostOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Au
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/notes/{id} [put]
-func PutOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Auth) gin.HandlerFunc {
+func PutOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 
@@ -147,7 +155,7 @@ func PutOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Aut
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/notes/{id} [delete]
-func DeleteOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.Auth) gin.HandlerFunc {
+func DeleteOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 
@@ -197,7 +205,7 @@ func DeleteOccurrenceNoteHandler(repo repository.OccurrenceNotesDAO, auth utils.
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id}/count [get]
-func GetOccurrenceNoteCountHandler(repo repository.OccurrenceNotesDAO) gin.HandlerFunc {
+func GetOccurrenceNoteCountHandler(repo occurrenceNotesStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseID, err := strconv.Atoi(c.Param("case_id"))
 		if err != nil {
@@ -246,7 +254,7 @@ func GetOccurrenceNoteCountHandler(repo repository.OccurrenceNotesDAO) gin.Handl
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/notes/{case_id}/{seq_id}/{task_id}/{occurrence_id} [get]
-func GetOccurrenceNotesHandler(repo repository.OccurrenceNotesDAO) gin.HandlerFunc {
+func GetOccurrenceNotesHandler(repo occurrenceNotesStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseID, err := strconv.Atoi(c.Param("case_id"))
 		if err != nil {

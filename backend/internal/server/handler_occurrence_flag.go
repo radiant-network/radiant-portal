@@ -7,9 +7,13 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
+
+type occurrenceFlagsStore interface {
+	Upsert(flag types.OccurrenceFlag) (*types.OccurrenceFlag, error)
+	Delete(caseID, seqID, taskID int, occurrenceID string) (int64, error)
+}
 
 // UpsertOccurrenceFlagHandler
 // @Summary Set or change the flag on an occurrence
@@ -29,7 +33,7 @@ import (
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} [post]
-func UpsertOccurrenceFlagHandler(repo repository.OccurrenceFlagsDAO) gin.HandlerFunc {
+func UpsertOccurrenceFlagHandler(repo occurrenceFlagsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseID, err := strconv.Atoi(c.Param("case_id"))
 		if err != nil {
@@ -89,7 +93,7 @@ func UpsertOccurrenceFlagHandler(repo repository.OccurrenceFlagsDAO) gin.Handler
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/flags/{case_id}/{seq_id}/{task_id}/{occurrence_id} [delete]
-func DeleteOccurrenceFlagHandler(repo repository.OccurrenceFlagsDAO) gin.HandlerFunc {
+func DeleteOccurrenceFlagHandler(repo occurrenceFlagsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseID, err := strconv.Atoi(c.Param("case_id"))
 		if err != nil {

@@ -14,15 +14,6 @@ type OccurrenceNotesRepository struct {
 	db *gorm.DB
 }
 
-type OccurrenceNotesDAO interface {
-	Create(note types.OccurrenceNote) (*types.OccurrenceNote, error)
-	GetByID(id string) (*types.OccurrenceNote, error)
-	GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error)
-	CountByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) (int, error)
-	Update(id string, content string) (*types.OccurrenceNote, error)
-	Delete(id string) error
-}
-
 func NewOccurrenceNotesRepository(db *gorm.DB) *OccurrenceNotesRepository {
 	if db == nil {
 		log.Fatal("OccurrenceNotesRepository: db is nil")

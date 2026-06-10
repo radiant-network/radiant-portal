@@ -4,10 +4,14 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
+
+type userPreferencesStore interface {
+	GetUserPreferences(userId string, key string) (*types.JsonMap[string, interface{}], error)
+	UpdateUserPreferences(userId string, key string, content types.JsonMap[string, interface{}]) (*types.JsonMap[string, interface{}], error)
+}
 
 // GetUserPreferencesHandler
 // @Summary Get user preferences
@@ -21,7 +25,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /users/preferences/{key} [get]
-func GetUserPreferencesHandler(repo repository.UserPreferencesDAO, auth utils.Auth) gin.HandlerFunc {
+func GetUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
@@ -57,7 +61,7 @@ func GetUserPreferencesHandler(repo repository.UserPreferencesDAO, auth utils.Au
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /users/preferences/{key} [post]
-func UpdateUserPreferencesHandler(repo repository.UserPreferencesDAO, auth utils.Auth) gin.HandlerFunc {
+func UpdateUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body types.JsonMap[string, interface{}]

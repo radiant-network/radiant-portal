@@ -13,11 +13,6 @@ type OccurrenceFlagsRepository struct {
 	db *gorm.DB
 }
 
-type OccurrenceFlagsDAO interface {
-	Upsert(flag types.OccurrenceFlag) (*types.OccurrenceFlag, error)
-	Delete(caseID, seqID, taskID int, occurrenceID string) (int64, error)
-}
-
 func NewOccurrenceFlagsRepository(db *gorm.DB) *OccurrenceFlagsRepository {
 	if db == nil {
 		log.Fatal("OccurrenceFlagsRepository: db is nil")

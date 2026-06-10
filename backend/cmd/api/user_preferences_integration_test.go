@@ -16,7 +16,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func assertGetUserPreferencesHandler(t *testing.T, repo repository.UserPreferencesDAO, auth utils.Auth, status int, key string, expected string) {
+func assertGetUserPreferencesHandler(t *testing.T, repo *repository.UserPreferencesRepository, auth utils.Auth, status int, key string, expected string) {
 	router := gin.Default()
 	router.GET("/users/preferences/:key", server.GetUserPreferencesHandler(repo, auth))
 
@@ -52,7 +52,7 @@ func Test_GetUserPreferencesHandler_Found(t *testing.T) {
 	})
 }
 
-func assertUpdateUserPreferencesHandler(t *testing.T, repo repository.UserPreferencesDAO, auth utils.Auth, body string, status int, key string, expected string) {
+func assertUpdateUserPreferencesHandler(t *testing.T, repo *repository.UserPreferencesRepository, auth utils.Auth, body string, status int, key string, expected string) {
 	router := gin.Default()
 	router.POST("/users/preferences/:key", server.UpdateUserPreferencesHandler(repo, auth))
 

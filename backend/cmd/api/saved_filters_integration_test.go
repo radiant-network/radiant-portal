@@ -17,7 +17,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func assertGetSavedFilterByIDHandler(t *testing.T, repo repository.SavedFiltersDAO, savedFilterId string, status int, expected string) {
+func assertGetSavedFilterByIDHandler(t *testing.T, repo *repository.SavedFiltersRepository, savedFilterId string, status int, expected string) {
 	router := gin.Default()
 	router.GET("/users/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repo))
 
@@ -59,7 +59,7 @@ func Test_GetSavedFilterByIDHandler(t *testing.T) {
 	})
 }
 
-func assertGetSavedFiltersHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterType *types.SavedFilterType, status int, expected string) {
+func assertGetSavedFiltersHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, savedFilterType *types.SavedFilterType, status int, expected string) {
 	router := gin.Default()
 	router.GET("/users/saved_filters", server.GetSavedFiltersHandler(repo, auth))
 
@@ -140,7 +140,7 @@ func Test_GetSavedFiltersHandler_FilterOnType(t *testing.T) {
 	})
 }
 
-func assertPostSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, body string, status int) {
+func assertPostSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, body string, status int) {
 	router := gin.Default()
 	router.POST("/users/saved_filters", server.PostSavedFilterHandler(repo, auth))
 
@@ -190,7 +190,7 @@ func Test_PostSavedFilterHandler_Success(t *testing.T) {
 	})
 }
 
-func assertPutSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterId string, body string, status int) {
+func assertPutSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, savedFilterId string, body string, status int) {
 	router := gin.Default()
 	router.PUT("/users/saved_filters/:saved_filter_id", server.PutSavedFilterHandler(repo, auth))
 
@@ -252,7 +252,7 @@ func Test_PutSavedFilterHandler_Success(t *testing.T) {
 	})
 }
 
-func assertDeleteSavedFilterHandler(t *testing.T, repo repository.SavedFiltersDAO, auth utils.Auth, savedFilterId string, status int) {
+func assertDeleteSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, savedFilterId string, status int) {
 	router := gin.Default()
 	router.DELETE("/users/saved_filters/:saved_filter_id", server.DeleteSavedFilterHandler(repo, auth))
 
