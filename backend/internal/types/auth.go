@@ -6,6 +6,18 @@ const (
 	ActionScopeTenant = "tenant"
 )
 
+// Action codes from the seeded auth catalog (migration 000009).
+const (
+	ActionSearchCase       = "can_search_case"
+	ActionViewKb           = "can_view_kb"
+	ActionReadPII          = "can_read_pii"
+	ActionInterpretVariant = "can_interpret_variant"
+	ActionCommentVariant   = "can_comment_variant"
+	ActionFlagVariant      = "can_flag_variant"
+	ActionDownloadFile     = "can_download_file"
+	ActionIngestData       = "can_ingest_data"
+)
+
 // TenantMembership is the caller's effective authorization within a single tenant.
 // TenantActions holds tenant-scoped actions; OrgsByAction maps each org-scoped action
 // to the org codes where it applies ('*' resolved to all the tenant's orgs).

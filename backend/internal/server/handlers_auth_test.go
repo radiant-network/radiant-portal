@@ -17,10 +17,20 @@ type mockAuthRepository struct {
 	err             error
 	hasTenantAccess bool
 	tenantErr       error
+	hasAction       bool
+	actionErr       error
+	gotOrgCode      string
+	gotAction       string
 }
 
 func (m *mockAuthRepository) HasTenantAccess(email, tenantCode string) (bool, error) {
 	return m.hasTenantAccess, m.tenantErr
+}
+
+func (m *mockAuthRepository) HasAction(userID, tenantCode, orgCode, actionCode string) (bool, error) {
+	m.gotOrgCode = orgCode
+	m.gotAction = actionCode
+	return m.hasAction, m.actionErr
 }
 
 func (m *mockAuthRepository) GetMemberships(email string) ([]types.TenantMembership, error) {

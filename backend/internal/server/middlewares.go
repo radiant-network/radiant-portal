@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
@@ -82,6 +83,67 @@ func RequireRole(auth utils.Auth, role string, resourceName string) gin.HandlerF
 			c.Abort()
 			return
 		}
+		c.Next()
+	}
+}
+
+type actionChecker interface {
+	HasAction(userID, tenantCode, orgCode, actionCode string) (bool, error)
+}
+
+// WildcardOnlyOrg matches only '*' grants in HasAction (GrantRole stores empty orgs as NULL),
+// so it is correct while every grant is '*'. STEP 2 will resolve the real org per resource.
+const WildcardOnlyOrg = ""
+
+func resolveOrgCode(_ *gin.Context) (string, error) {
+	return WildcardOnlyOrg, nil
+}
+
+// RequireAction gates a route on an action. It reads the caller from the token and the tenant
+// from context (RequireTenantAccess must run first). enforce is wired from
+// TENANT_ENFORCEMENT_ENABLED; when off it allows. On denial the missing action is logged, not
+// returned, so the 403 body stays generic.
+func RequireAction(auth utils.Auth, repo actionChecker, action string, enforce bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if !enforce {
+			c.Next()
+			return
+		}
+
+		userID, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleUnauthorizedError(c)
+			c.Abort()
+			return
+		}
+
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			c.Abort()
+			return
+		}
+
+		orgCode, err := resolveOrgCode(c)
+		if err != nil {
+			HandleError(c, err)
+			c.Abort()
+			return
+		}
+
+		allowed, err := repo.HasAction(*userID, *tenant, orgCode, action)
+		if err != nil {
+			HandleError(c, err)
+			c.Abort()
+			return
+		}
+		if !allowed {
+			glog.Warningf("forbidden: user %q lacks action %q in tenant %q", *userID, action, *tenant)
+			HandleForbiddenError(c)
+			c.Abort()
+			return
+		}
+
 		c.Next()
 	}
 }

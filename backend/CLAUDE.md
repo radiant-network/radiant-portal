@@ -94,6 +94,15 @@ The child clinical tables (`cases`, `patient`, `sample`, `sequencing_experiment`
 
 **Seeded** (idempotent, `ON CONFLICT DO NOTHING`): the `radiant` default tenant + 8 actions (`can_read_pii`, `can_interpret_variant`, `can_comment_variant`, `can_flag_variant`, `can_download_file`, `can_ingest_data`, `can_search_case`, `can_view_kb`). No default roles — tenants define their own. User backfill is out of scope.
 
+#### Enforcement
+
+Two `internal/server` middlewares enforce this model on `/:tenant/*` routes, both gated by `TENANT_ENFORCEMENT_ENABLED` (off = resolve context but allow, so it ships before `user_role` backfill without locking anyone out):
+
+- `RequireTenantAccess` — group-level; verifies tenant membership (`HasTenantAccess`) and stores the tenant in context (`GetTenant`).
+- `RequireAction(auth, repo, action, enforce)` — per-route; verifies the caller holds a specific action (`HasAction`). Wired in `cmd/api/main.go` via the `requireAction(...)` closure; action codes are `types.Action*` constants. On denial it returns a **generic 403** (the missing action is logged, never put in the body) and logs server-side.
+
+Org resolution for org-scoped actions is deferred behind `resolveOrgCode(c)` (a seam in `middlewares.go`): step 1 returns `WildcardOnlyOrg` (`""`, matches only `'*'` grants — correct while all grants are `'*'`); a follow-up will resolve the real org per resource. Every privileged `/:tenant` route is covered by `Test_TenantRoutesAreMappedToActions`, which fails if a new route ships unmapped.
+
 Until per-tenant API routing lands, batch-ingested records are attached to the default tenant via `DefaultTenantCode = "radiant"` in `cmd/worker/case_validation.go` (see its `TODO(multi-tenant)`).
 
 ## Worker

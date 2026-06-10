@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -95,4 +96,107 @@ func Test_RequireTenantAccess_EnforcementDisabled_AllowsAndSetsContext(t *testin
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{"tenant":"tenant_b"}`, w.Body.String())
+}
+
+// actionTestRouter wires RequireTenantAccess then RequireAction (the production order) in
+// front of a handler that returns 200, so tests exercise the action gate with a resolved tenant.
+func actionTestRouter(repo *mockAuthRepository, auth *testutils.MockAuth, action string, enforce bool) *gin.Engine {
+	router := gin.New()
+	tenantGroup := router.Group("/:tenant")
+	tenantGroup.Use(RequireTenantAccess(auth, repo, enforce))
+	tenantGroup.GET("/cases/filters", RequireAction(auth, repo, action, enforce), func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+	return router
+}
+
+func doActionRequest(router *gin.Engine) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/radiant/cases/filters", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_RequireAction_HasAction_Allows(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: true}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(actionTestRouter(repo, auth, types.ActionSearchCase, true))
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func Test_RequireAction_LacksAction_Returns403(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: false}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(actionTestRouter(repo, auth, types.ActionInterpretVariant, true))
+
+	assert.Equal(t, http.StatusForbidden, w.Code)
+	// The body must NOT name the missing action (no permission-model disclosure).
+	assert.NotContains(t, w.Body.String(), types.ActionInterpretVariant)
+}
+
+func Test_RequireAction_RepoError_Returns500(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, actionErr: fmt.Errorf("db down")}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(actionTestRouter(repo, auth, types.ActionSearchCase, true))
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func Test_RequireAction_TokenError_Returns401(t *testing.T) {
+	// Tenant access is satisfied; the action gate's own token read fails.
+	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: true}
+	router := gin.New()
+	tenantGroup := router.Group("/:tenant")
+	tenantGroup.Use(func(c *gin.Context) { c.Set(TenantContextKey, c.Param("tenant")) })
+	tenantGroup.GET("/cases/filters", RequireAction(&testutils.MockAuth{Error: fmt.Errorf("no token")}, repo, types.ActionSearchCase, true), func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+	w := doActionRequest(router)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+}
+
+func Test_RequireAction_NoTenantInContext_Returns500(t *testing.T) {
+	// RequireAction registered without RequireTenantAccess in front → GetTenant errors, and
+	// the gate must fail closed (500), never fall through to the handler.
+	repo := &mockAuthRepository{hasAction: true}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	router := gin.New()
+	router.GET("/cases/filters", RequireAction(auth, repo, types.ActionSearchCase, true), func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+
+	req, _ := http.NewRequest("GET", "/cases/filters", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+// With enforcement off the action gate allows even when the grant is absent. The repo is
+// rigged to error to prove HasAction is never called (no lockout before backfill).
+func Test_RequireAction_EnforcementDisabled_Allows(t *testing.T) {
+	repo := &mockAuthRepository{actionErr: fmt.Errorf("must not be called")}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	w := doActionRequest(actionTestRouter(repo, auth, types.ActionSearchCase, false))
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func Test_RequireAction_PassesResolvedOrgToChecker(t *testing.T) {
+	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: true}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	doActionRequest(actionTestRouter(repo, auth, types.ActionFlagVariant, true))
+
+	assert.Equal(t, WildcardOnlyOrg, repo.gotOrgCode)
+	assert.Equal(t, types.ActionFlagVariant, repo.gotAction)
+}
+
+func Test_resolveOrgCode_ReturnsWildcardOnly(t *testing.T) {
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	org, err := resolveOrgCode(c)
+
+	assert.NoError(t, err)
+	assert.Equal(t, WildcardOnlyOrg, org)
 }
