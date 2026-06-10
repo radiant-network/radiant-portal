@@ -50,6 +50,12 @@ const defaultFeatureDefinitions: FeatureDefinitions = {
     description: 'Change the position of the main navigation menu',
   },
   // Add more feature definitions here
+  onboarding: {
+    type: 'boolean',
+    defaultValue: false,
+    label: 'Onboarding Wizard',
+    description: "Enable onboarding wizard on case's variant tab page",
+  },
 };
 
 const BetaFeatureContext = createContext<BetaFeatureContextType | undefined>(undefined);

@@ -691,6 +691,37 @@
       "cannot_assign": "Aucune assignation"
     }
   },
+  "onboarding": {
+    "actions": {
+      "back": "Précédent",
+      "last": "Terminer",
+      "next": "Suivant",
+      "next_with_progress": "Suivant ({current} sur {total})",
+      "skip": "Passer"
+    },
+    "sequencing_experiment": {
+      "seq_id": "Choisissez le membre de la famille dont vous voulez interroger les données de séquençage — proband, parents ou fratrie. Le statut atteint et le lien de parenté sont indiqués à côté de chaque échantillon.",
+      "variant_type": "Basculez entre les différents types de vartiant. Vos filtres sont conservés séparément pour chaque type.",
+      "tasks": "Basculez entre les runs d'analyse — par exemple, différentes versions de variant callers — sans perdre vos filtres en cours."
+    },
+    "query_builder": {
+      "facets": "Parcourez les filtres par catégorie. Cliquez sur une catégorie pour ouvrir ses facettes.",
+      "query_bar": "Chaque requête (Q1, Q2, …) est un ensemble de filtres indépendant. Vous pouvez les combiner avec ET / OU, les dupliquer, ou activer les libellés pour lire le SQON en langage clair.",
+      "saved_filters": "Enregistrez un jeu de filtres récurrent (par exemple « LoF rares dans gènes OMIM »)."
+    },
+    "data_table": {
+      "column_settings": "Cliquez pour ouvrir les réglages des colonnes.",
+      "column_settings_dropdown": "Réordonnez, masquez ou épinglez les colonnes. La disposition est sauvegardée par utilisateur, l'espace de travail reste identique à la prochaine ouverture d'un cas.",
+      "fullscreen": "Agrandissez le tableau en plein écran pour les sessions de revue intensives. Appuyez sur Échap pour sortir.",
+      "interpretation_note_flag": "Chaque ligne offre trois actions rapides : ouvrir ou créer une interprétation, joindre une note, et marquer le variant (épinglé, retenu, exclu).",
+      "hgvsg": "Ouvrez le variant dans un panneau latéral."
+    },
+    "occurrence_slider": {
+      "header": "Chaque panneau est rattaché au patient/échantillon affiché en haut.",
+      "navigation": "Utilisez les flèches à droite pour parcourir les variants de votre tableau de résultats sans refermer le panneau.",
+      "note_flag": "Marquez le variant (épinglé, retenu, exclu), ajoutez une note ou démarrez une interprétation depuis ici — vos choix sont enregistrés sur le cas et reflétés dans le tableau."
+    }
+  },
   "case_exploration": {
     "filters_group": {
       "analysis_catalog_code": "Analyse",

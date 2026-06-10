@@ -12,9 +12,9 @@ type PreviewHeaderProps = {
 
 function SliderHeader({ children, onPrevious, onNext, hasPrevious = true, hasNext = true }: PreviewHeaderProps) {
   return (
-    <div className="flex flex-row items-center size-full pr-8">
+    <div id="slider-header" className="flex flex-row items-center size-full pr-8">
       <div className="flex flex-wrap gap-4 items-center pr-4 w-full min-w-0">{children}</div>
-      <div className="flex gap-2 items-center justify-end">
+      <div id="slider-header-navigation" className="flex gap-2 items-center justify-end">
         <Button variant="outline" iconOnly className="size-7 rounded-md" onClick={onPrevious} disabled={!hasPrevious}>
           <ChevronLeft />
         </Button>

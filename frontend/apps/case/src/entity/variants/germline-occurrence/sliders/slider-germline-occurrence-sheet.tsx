@@ -23,6 +23,7 @@ import { DEFAULT_TENANT, interpretationApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
+import SliderVariantsOnboardingWizard from '../../onboardings/slider-variant-onboarding';
 import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
 
 type InterpretationInput = {
@@ -128,7 +129,8 @@ export function GermlineOccurrenceSheetContent({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div id="occurrence-slider" className="flex flex-col gap-4">
+      <SliderVariantsOnboardingWizard />
       <SliderHeader onPrevious={onPrevious} onNext={onNext} hasPrevious={hasPrevious} hasNext={hasNext}>
         <SliderPatientRow
           patientId={patient?.patient_id}
@@ -142,7 +144,7 @@ export function GermlineOccurrenceSheetContent({
         locusId={occurrence.locus_id}
         hgvsg={occurrence.hgvsg}
         actions={
-          <div className="flex gap-2">
+          <div id="slider-note-flag" className="flex gap-2">
             <OccurrenceFlagDropdown
               size="sm"
               variant="outline"

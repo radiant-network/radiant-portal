@@ -41,7 +41,7 @@ function getSomaticSNVTumorNormalColumns({ t, caseEntity, patientId }: SomaticSN
     columnHelper.accessor(row => row, {
       id: 'row-info',
       cell: info => (
-        <div className="flex items-center gap-1">
+        <div id="data-table-occurrence-interpretation-note-flag" className="flex items-center gap-1">
           <InterpretationCell
             locusId={info.getValue().locus_id}
             taskId={info.getValue().task_id}

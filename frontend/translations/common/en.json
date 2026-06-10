@@ -697,6 +697,37 @@
       "cannot_assign": "No assignment"
     }
   },
+  "onboarding": {
+    "actions": {
+      "back": "Back",
+      "last": "Last",
+      "next": "Next",
+      "next_with_progress": "Next ({current} of {total})",
+      "skip": "Skip"
+    },
+    "sequencing_experiment": {
+      "seq_id": "Pick which family member's sequencing data you want to query — proband, parents, or siblings. Affected status and relationship are shown next to each sample.",
+      "variant_type": "Toggle between variant types. Your filters are kept separately per variant type.",
+      "tasks": "Switch between analysis runs — for example, different caller versions — without losing your current filters."
+    },
+    "query_builder": {
+      "facets": "Browse filters by category. Click a category to open its facets.",
+      "query_card": " Each query (Q1, Q2, …) is an independent filter set. You can combine queries with AND / OR, duplicate them, or toggle labels to read the SQON in plain language.",
+      "saved_filters": "Save a filter set you reuse often (e.g. \"Rare LoF in OMIM genes\")."
+    },
+    "data_table": {
+      "column_settings": "Click to open the column settings.",
+      "column_settings_dropdown": "Reorder, hide or pin columns. Your layout is saved per user, so the workspace looks the same the next time you open a case.",
+      "fullscreen": "Expand the table to fill the screen for dense review sessions. Press Esc to exit.",
+      "interpretation_note_flag": "Each row shows three quick actions: open or create an interpretation, attach a note, and flag the variant (pinned, kept, excluded).",
+      "hgvsg": "Open the variant in a side panel."
+    },
+    "occurrence_slider": {
+      "header": "Each panel is tied to a specific patient/sample shown at the top.",
+      "navigation": "Use the arrows on the right to step through the variants of your current result table without closing the panel.",
+      "note_flag": "Flag the variant (pinned, kept, excluded), attach a note, or start an interpretation directly from here — your choices are saved on the case and reflected in the table"
+    }
+  },
   "case_exploration": {
     "filters_group": {
       "analysis_catalog_code": "Analysis",

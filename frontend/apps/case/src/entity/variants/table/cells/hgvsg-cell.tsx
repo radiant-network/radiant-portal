@@ -20,7 +20,12 @@ function HgvsgCell({ locusId, hgvsg }: HgvsgCellProps) {
   };
 
   return (
-    <AnchorLink size="sm" variant="primary" className="overflow-hidden text-ellipsis" onClick={handleClick}>
+    <AnchorLink
+      size="sm"
+      variant="primary"
+      className="overflow-hidden text-ellipsis data-table-occurrence-hgvsg"
+      onClick={handleClick}
+    >
       {hgvsg}
     </AnchorLink>
   );
