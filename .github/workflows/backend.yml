@@ -97,6 +97,9 @@ jobs:
       - name: Install dependencies
         run: go mod download
         working-directory: ./backend
+      - name: Ensure dependencies are up-to-date
+        run: go mod tidy
+        working-directory: ./backend
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
