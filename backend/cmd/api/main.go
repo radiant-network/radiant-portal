@@ -274,6 +274,10 @@ func main() {
 	flag.Parse()
 	defer glog.Flush()
 
+	if err := database.AssertTLSRequirement(); err != nil {
+		log.Fatal(err)
+	}
+
 	database.MigrateWithEnvDefault()
 
 	// Initialize database connection
