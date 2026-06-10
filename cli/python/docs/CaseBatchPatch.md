@@ -7,8 +7,9 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **diagnostic_lab_code** | **str** |  | [optional] 
 **project_code** | **str** |  | 
-**sequencing_experiments** | [**List[CaseSequencingExperimentBatch]**](CaseSequencingExperimentBatch.md) |  | 
+**sequencing_experiments** | [**List[CaseSequencingExperimentBatch]**](CaseSequencingExperimentBatch.md) |  | [optional] 
 **submitter_case_id** | **str** |  | 
+**tasks** | [**List[CaseTaskBatch]**](CaseTaskBatch.md) |  | [optional] 
 
 ## Example
 

@@ -54,6 +54,10 @@ func (m *MockRepository) GetSequencingExperimentByAliquot(aliquot string) ([]typ
 	return []types.SequencingExperiment{}, nil
 }
 
+func (m *MockRepository) GetSequencingExperimentsByCaseId(caseID int) ([]types.SequencingExperiment, error) {
+	return []types.SequencingExperiment{}, nil
+}
+
 func (m *MockRepository) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, sampleOrganizationCode string) (*types.SequencingExperiment, error) {
 	return nil, nil
 }

@@ -80,7 +80,7 @@ type OutputDocumentBatch struct {
 	FormatCode       string `json:"format_code" toml:"format_code" binding:"required"`
 	Hash             string `json:"hash,omitempty" toml:"hash"`
 	Name             string `json:"name" toml:"name" binding:"required"`
-	Size             *int64 `json:"size" toml:"size" binding:"required"`
+	Size             *int64 `json:"size" toml:"size" binding:"required" swaggertype:"integer" format:"int64"`
 	Url              string `json:"url" toml:"url" binding:"required"`
 }
 
@@ -92,7 +92,8 @@ type CaseBatchPatch struct {
 	ProjectCode           string                           `json:"project_code" toml:"project_code" binding:"required"`
 	SubmitterCaseId       string                           `json:"submitter_case_id" toml:"submitter_case_id" binding:"required"`
 	DiagnosticLabCode     string                           `json:"diagnostic_lab_code,omitempty" toml:"diagnostic_lab_code"`
-	SequencingExperiments []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive,required"`
+	SequencingExperiments []*CaseSequencingExperimentBatch `json:"sequencing_experiments,omitempty" toml:"sequencing_experiments" binding:"omitempty,dive"`
+	Tasks                 []*CaseTaskBatch                 `json:"tasks,omitempty" toml:"tasks" binding:"omitempty,dive"`
 }
 
 type PatchCaseBatchBody struct {

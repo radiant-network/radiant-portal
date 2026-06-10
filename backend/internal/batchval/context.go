@@ -24,6 +24,7 @@ type documentsReader interface {
 type sequencingExperimentReader interface {
 	GetSequencingExperimentByAliquot(aliquot string) ([]types.SequencingExperiment, error)
 	GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, sampleOrganizationCode string) (*types.SequencingExperiment, error)
+	GetSequencingExperimentsByCaseId(caseID int) ([]types.SequencingExperiment, error)
 }
 
 type taskReader interface {

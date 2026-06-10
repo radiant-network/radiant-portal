@@ -74,6 +74,7 @@ func (m *mockPatientRepo) GetPatientByOrgCodeAndSubmitterPatientId(orgCode strin
 type mockSeqExpRepo struct {
 	GetByAliquotFunc          func(aliquot string) ([]types.SequencingExperiment, error)
 	GetByAliquotAndSampleFunc func(aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error)
+	GetByCaseIdFunc           func(caseID int) ([]types.SequencingExperiment, error)
 }
 
 func (m *mockSeqExpRepo) GetSequencingExperimentByAliquot(aliquot string) ([]types.SequencingExperiment, error) {
@@ -81,6 +82,9 @@ func (m *mockSeqExpRepo) GetSequencingExperimentByAliquot(aliquot string) ([]typ
 }
 func (m *mockSeqExpRepo) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error) {
 	return m.GetByAliquotAndSampleFunc(aliquot, submitterSampleId, organizationCode)
+}
+func (m *mockSeqExpRepo) GetSequencingExperimentsByCaseId(caseID int) ([]types.SequencingExperiment, error) {
+	return m.GetByCaseIdFunc(caseID)
 }
 
 type mockTaskRepo struct {

@@ -55,6 +55,24 @@ func (r *SequencingExperimentRepository) GetSequencingExperimentBySampleID(sampl
 	return seqExps, nil
 }
 
+func (r *SequencingExperimentRepository) GetSequencingExperimentsByCaseId(caseID int) ([]SequencingExperiment, error) {
+	var seqExps []SequencingExperiment
+	result := r.db.
+		Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name)).
+		Joins(fmt.Sprintf("JOIN %s chse ON chse.sequencing_experiment_id = se.id", types.CaseHasSequencingExperimentTable.Name)).
+		Where("chse.case_id = ?", caseID).
+		Order("se.id").
+		Select("se.*").
+		Find(&seqExps)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+	return seqExps, nil
+}
+
 func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquot(aliquot string) ([]SequencingExperiment, error) {
 	var seqExps []SequencingExperiment
 	result := r.db.Table(types.SequencingExperimentTable.Name).Where("aliquot = ?", aliquot).Order("id").Find(&seqExps)
