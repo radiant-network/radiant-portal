@@ -34,7 +34,7 @@ func (m *MockCNVRepository) GetStatisticsOccurrences(int, int, int, types.Statis
 
 func (m *MockCNVRepository) GetOccurrences(int, int, int, types.ListQuery) ([]types.GermlineCNVOccurrence, error) {
 	quality := float32(99.5)
-	bc :=10
+	bc := 10
 	cn := 2
 	sm := float32(0.95)
 	svLen := 4000

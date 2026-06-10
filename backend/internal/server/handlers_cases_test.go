@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseResult, *int64, error) {
 	var count = int64(1)
 	return &[]types.CaseResult{
@@ -281,7 +280,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 			DataTypeCode:           "alignment",
 			FormatCode:             "cram",
 			URL:                    "s3://example.com/file.cram",
-			},
+		},
 		},
 	}
 

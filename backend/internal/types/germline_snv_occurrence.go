@@ -3,43 +3,43 @@ package types
 // GermlineSNVOccurrence represents a germline SNV occurrence
 // @Description GermlineSNVOccurrence represents a germline SNV occurrence
 type GermlineSNVOccurrence struct {
-	SeqId                      int               `json:"seq_id" validate:"required"`
-	TaskId                     int               `json:"task_id" validate:"required"`
-	Chromosome                 string            `json:"chromosome" validate:"required"`
-	Start                      int64             `json:"start" validate:"required"`
-	End                        int64             `json:"end" validate:"required"`
-	LocusId                    string            `json:"locus_id" validate:"required"`
-	Locus                      string            `json:"locus" validate:"required"`
-	GenotypeQuality            int32             `json:"genotype_quality" validate:"required"`
-	Filter                     string            `json:"filter,omitempty"`
-	Zygosity                   string            `json:"zygosity" validate:"required"`
-	GermlinePfWgs              float64           `json:"germline_pf_wgs" validate:"required"`
-	GermlinePcWgs              int               `json:"germline_pc_wgs,omitempty"`
-	GermlinePnWgs              int               `json:"germline_pn_wgs,omitempty"`
-	GnomadV3Af                 float64           `json:"gnomad_v3_af" validate:"required"`
-	Hgvsg                      string            `json:"hgvsg" validate:"required"`
-	OmimInheritanceCode        JsonArray[string] `gorm:"type:json" json:"omim_inheritance_code,omitempty"`
-	AdRatio                    float32           `json:"ad_ratio" validate:"required"`
-	VariantClass               string            `json:"variant_class" validate:"required"`
-	VepImpact                  VepImpact         `json:"vep_impact,omitempty" enums:"MODIFIER,LOW,MODERATE,HIGH"`
-	Symbol                     string            `json:"symbol,omitempty"`
-	Clinvar                    JsonArray[string] `gorm:"type:json" json:"clinvar,omitempty"`
-	IsManeSelect               bool              `json:"is_mane_select"`
-	IsManePlus                 bool              `json:"is_mane_plus"`
-	IsCanonical                bool              `json:"is_canonical"`
-	AaChange                   string            `json:"aa_change,omitempty"`
-	Rsnumber                   string            `json:"rsnumber,omitempty"`
-	PickedConsequences         JsonArray[string] `gorm:"type:json" json:"picked_consequences" validate:"required"`
-	TranscriptId               string            `json:"transcript_id,omitempty"`
-	MaxImpactScore             int               `json:"max_impact_score" validate:"required"`
-	HasInterpretation          bool              `json:"has_interpretation" validate:"required"`
-	HasNote                    bool              `json:"has_note" validate:"required"`
+	SeqId                      int                `json:"seq_id" validate:"required"`
+	TaskId                     int                `json:"task_id" validate:"required"`
+	Chromosome                 string             `json:"chromosome" validate:"required"`
+	Start                      int64              `json:"start" validate:"required"`
+	End                        int64              `json:"end" validate:"required"`
+	LocusId                    string             `json:"locus_id" validate:"required"`
+	Locus                      string             `json:"locus" validate:"required"`
+	GenotypeQuality            int32              `json:"genotype_quality" validate:"required"`
+	Filter                     string             `json:"filter,omitempty"`
+	Zygosity                   string             `json:"zygosity" validate:"required"`
+	GermlinePfWgs              float64            `json:"germline_pf_wgs" validate:"required"`
+	GermlinePcWgs              int                `json:"germline_pc_wgs,omitempty"`
+	GermlinePnWgs              int                `json:"germline_pn_wgs,omitempty"`
+	GnomadV3Af                 float64            `json:"gnomad_v3_af" validate:"required"`
+	Hgvsg                      string             `json:"hgvsg" validate:"required"`
+	OmimInheritanceCode        JsonArray[string]  `gorm:"type:json" json:"omim_inheritance_code,omitempty"`
+	AdRatio                    float32            `json:"ad_ratio" validate:"required"`
+	VariantClass               string             `json:"variant_class" validate:"required"`
+	VepImpact                  VepImpact          `json:"vep_impact,omitempty" enums:"MODIFIER,LOW,MODERATE,HIGH"`
+	Symbol                     string             `json:"symbol,omitempty"`
+	Clinvar                    JsonArray[string]  `gorm:"type:json" json:"clinvar,omitempty"`
+	IsManeSelect               bool               `json:"is_mane_select"`
+	IsManePlus                 bool               `json:"is_mane_plus"`
+	IsCanonical                bool               `json:"is_canonical"`
+	AaChange                   string             `json:"aa_change,omitempty"`
+	Rsnumber                   string             `json:"rsnumber,omitempty"`
+	PickedConsequences         JsonArray[string]  `gorm:"type:json" json:"picked_consequences" validate:"required"`
+	TranscriptId               string             `json:"transcript_id,omitempty"`
+	MaxImpactScore             int                `json:"max_impact_score" validate:"required"`
+	HasInterpretation          bool               `json:"has_interpretation" validate:"required"`
+	HasNote                    bool               `json:"has_note" validate:"required"`
 	FlagType                   OccurrenceFlagType `json:"flag_type,omitempty" enums:"flag,pin,star"`
-	ExomiserMoi                string            `json:"exomiser_moi" validate:"required"`
-	ExomiserAcmgClassification string            `json:"exomiser_acmg_classification" validate:"required"`
-	ExomiserAcmgEvidence       JsonArray[string] `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`
-	ExomiserVariantScore       float64           `json:"exomiser_variant_score" validate:"required"`
-	ExomiserGeneCombinedScore  float64           `json:"exomiser_gene_combined_score" validate:"required"`
+	ExomiserMoi                string             `json:"exomiser_moi" validate:"required"`
+	ExomiserAcmgClassification string             `json:"exomiser_acmg_classification" validate:"required"`
+	ExomiserAcmgEvidence       JsonArray[string]  `gorm:"type:json" json:"exomiser_acmg_evidence" validate:"required"`
+	ExomiserVariantScore       float64            `json:"exomiser_variant_score" validate:"required"`
+	ExomiserGeneCombinedScore  float64            `json:"exomiser_gene_combined_score" validate:"required"`
 } // @name GermlineSNVOccurrence
 
 type ExpandedGermlineSNVOccurrence = struct {

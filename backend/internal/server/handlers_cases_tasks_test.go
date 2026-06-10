@@ -24,8 +24,8 @@ func (m *MockRepository) CreateTaskContext(tc *repository.TaskContext) error { r
 func (m *MockRepository) CreateTaskHasDocument(thd *repository.TaskHasDocument) error {
 	return nil
 }
-func (m *MockRepository) GetTaskTypeCodes() ([]types.TaskType, error)        { return nil, nil }
-func (m *MockRepository) GetTaskById(int) (*repository.Task, error)          { return nil, nil }
+func (m *MockRepository) GetTaskTypeCodes() ([]types.TaskType, error) { return nil, nil }
+func (m *MockRepository) GetTaskById(int) (*repository.Task, error)   { return nil, nil }
 func (m *MockRepository) GetTaskContextByTaskId(int) ([]*repository.TaskContext, error) {
 	return nil, nil
 }

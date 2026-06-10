@@ -211,4 +211,3 @@ func JoinGermlineInterpretationWithSNVOccurrence(tx *gorm.DB) *gorm.DB {
 func JoinGermlineInterpretationWithCase(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.case_id = %s.id", types.CaseTable.FederationName, types.CaseTable.Alias, types.InterpretationGermlineTable.Alias, types.CaseTable.Alias))
 }
-

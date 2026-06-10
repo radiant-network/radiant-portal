@@ -19,9 +19,9 @@ import (
 var supportedProcessors = map[string]func(*batchval.BatchValidationContext, *types.Batch, *gorm.DB){
 	types.PatientBatchType:              processPatientBatch,
 	types.SampleBatchType:               processSampleBatch,
-	types.SequencingExperimentBatchType:     processSequencingExperimentBatch,
-	types.CaseBatchType:                     processCaseBatch,
-	types.PatchCaseBatchType: processPatchCaseBatch,
+	types.SequencingExperimentBatchType: processSequencingExperimentBatch,
+	types.CaseBatchType:                 processCaseBatch,
+	types.PatchCaseBatchType:            processPatchCaseBatch,
 }
 
 func main() {

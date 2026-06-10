@@ -24,9 +24,9 @@ type PostgresMode int
 
 const (
 	NoPostgres        PostgresMode = iota
-	ReadPostgres                         // exposed; test must not write
-	WritePostgres                        // writes with unique keys; cleanUp runs; can run in parallel
-	ExclusivePostgres                    // writes to shared state; cleanUp runs; forces serial execution
+	ReadPostgres                   // exposed; test must not write
+	WritePostgres                  // writes with unique keys; cleanUp runs; can run in parallel
+	ExclusivePostgres              // writes to shared state; cleanUp runs; forces serial execution
 )
 
 // Need declares which test resources are required.
