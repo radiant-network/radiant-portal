@@ -5,12 +5,19 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
 type facetsReader interface {
 	GetFacets(facetNames []string) ([]types.Facet, error)
+}
+
+type exomiserClassificationCountsReader interface {
+	GetExomiserACMGClassificationCounts(locusId int) (map[string]int, error)
+}
+
+type germlineInterpretationCountsReader interface {
+	RetrieveGermlineInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error)
 }
 
 type germlineSNVOccurrencesReader interface {
@@ -329,7 +336,7 @@ func OccurrencesGermlineSNVStatisticsHandler(repo germlineSNVOccurrencesReader) 
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded [get]
-func GetExpandedGermlineSNVOccurrence(repo germlineSNVOccurrencesReader, exomiserRepo repository.ExomiserDAO, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
+func GetExpandedGermlineSNVOccurrence(repo germlineSNVOccurrencesReader, exomiserRepo exomiserClassificationCountsReader, interpretationRepo germlineInterpretationCountsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errSeq := strconv.Atoi(c.Param("case_id"))
 		if errSeq != nil {

@@ -20,17 +20,6 @@ type InterpretationsRepository struct {
 	pubmedClient client.PubmedClientService
 }
 
-type InterpretationsDAO interface {
-	FirstGermline(caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationGermline, error)
-	CreateOrUpdateGermline(interpretation *types.InterpretationGermline) error
-	SearchGermline(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationGermline, error)
-	FirstSomatic(caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationSomatic, error)
-	CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error
-	SearchSomatic(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationSomatic, error)
-	RetrieveGermlineInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error)
-	RetrieveSomaticInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error)
-}
-
 func NewInterpretationsRepository(db *gorm.DB, pubmedClient client.PubmedClientService) *InterpretationsRepository {
 	if db == nil {
 		log.Fatal("InterpretationsRepository: db is nil")

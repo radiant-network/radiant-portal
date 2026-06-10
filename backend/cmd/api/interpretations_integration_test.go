@@ -90,7 +90,7 @@ func Test_GetInterpretationGermlineWithPartialContent(t *testing.T) {
 	})
 }
 
-func assertGetInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, termsRepo repository.TermsDAO, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
+func assertGetInterpretationGermline(t *testing.T, repo *repository.InterpretationsRepository, termsRepo *repository.TermsRepository, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	router := gin.Default()
 	router.GET("/:tenant/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationGermline(repo, termsRepo))
 
@@ -104,7 +104,7 @@ func assertGetInterpretationGermline(t *testing.T, repo repository.Interpretatio
 	}
 }
 
-func assertPostInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, caseId string, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationGermline, expected string) *types.InterpretationGermline {
+func assertPostInterpretationGermline(t *testing.T, repo *repository.InterpretationsRepository, caseId string, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationGermline, expected string) *types.InterpretationGermline {
 	router := gin.Default()
 	router.POST("/:tenant/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", server.PostInterpretationGermline(repo))
 
@@ -172,7 +172,7 @@ func Test_GetInterpretationSomaticWithPartialContent(t *testing.T) {
 	})
 }
 
-func assertGetInterpretationSomatic(t *testing.T, repo repository.InterpretationsDAO, terms repository.TermsDAO, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) *types.InterpretationSomatic {
+func assertGetInterpretationSomatic(t *testing.T, repo *repository.InterpretationsRepository, terms *MockTermsRepository, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) *types.InterpretationSomatic {
 	router := gin.Default()
 	router.GET("/:tenant/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationSomatic(repo, terms))
 
@@ -192,7 +192,7 @@ func assertGetInterpretationSomatic(t *testing.T, repo repository.Interpretation
 	return nil
 }
 
-func assertPostInterpretationSomatic(t *testing.T, repo repository.InterpretationsDAO, caseId string, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationSomatic, expected string) *types.InterpretationSomatic {
+func assertPostInterpretationSomatic(t *testing.T, repo *repository.InterpretationsRepository, caseId string, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationSomatic, expected string) *types.InterpretationSomatic {
 	router := gin.Default()
 	router.POST("/:tenant/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", server.PostInterpretationSomatic(repo))
 
@@ -233,7 +233,7 @@ func Test_SearchGermline(t *testing.T) {
 	})
 }
 
-func assertSearchInterpretationGermline(t *testing.T, repo repository.InterpretationsDAO, queryParams string, status int, count int) {
+func assertSearchInterpretationGermline(t *testing.T, repo *repository.InterpretationsRepository, queryParams string, status int, count int) {
 	router := gin.Default()
 	router.GET("/:tenant/interpretations/germline", server.SearchInterpretationGermline(repo))
 
@@ -269,7 +269,7 @@ func Test_SearchSomatic(t *testing.T) {
 	})
 }
 
-func assertSearchInterpretationSomatic(t *testing.T, repo repository.InterpretationsDAO, queryParams string, status int, count int) {
+func assertSearchInterpretationSomatic(t *testing.T, repo *repository.InterpretationsRepository, queryParams string, status int, count int) {
 	router := gin.Default()
 	router.GET("/:tenant/interpretations/somatic", server.SearchInterpretationSomatic(repo))
 

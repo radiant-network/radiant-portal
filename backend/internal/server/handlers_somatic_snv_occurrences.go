@@ -5,9 +5,12 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
+
+type somaticInterpretationCountsReader interface {
+	RetrieveSomaticInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error)
+}
 
 type somaticSNVOccurrencesReader interface {
 	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.SomaticSNVOccurrence, error)
@@ -325,7 +328,7 @@ func OccurrencesSomaticSNVStatisticsHandler(repo somaticSNVOccurrencesReader) gi
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded [get]
-func GetExpandedSomaticSNVOccurrence(repo somaticSNVOccurrencesReader, interpretationRepo repository.InterpretationsDAO) gin.HandlerFunc {
+func GetExpandedSomaticSNVOccurrence(repo somaticSNVOccurrencesReader, interpretationRepo somaticInterpretationCountsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errSeq := strconv.Atoi(c.Param("case_id"))
 		if errSeq != nil {

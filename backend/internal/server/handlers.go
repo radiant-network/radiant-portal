@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
@@ -68,6 +67,10 @@ func GetUserSet(repo userSetReader) gin.HandlerFunc {
 	}
 }
 
+type termAutoCompleter interface {
+	GetTermAutoComplete(termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error)
+}
+
 // GetMondoTermAutoComplete handles retrieving mondo terms by autocomplete
 // @Summary Get AutoCompleteTerm list of matching input string with highlighted
 // @Id mondoTermAutoComplete
@@ -83,7 +86,7 @@ func GetUserSet(repo userSetReader) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/mondo/autocomplete [get]
-func GetMondoTermAutoComplete(repo repository.TermsDAO) gin.HandlerFunc {
+func GetMondoTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
 		limit, err := strconv.Atoi(c.Query("limit"))
@@ -114,7 +117,7 @@ func GetMondoTermAutoComplete(repo repository.TermsDAO) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/hpo/autocomplete [get]
-func GetHPOTermAutoComplete(repo repository.TermsDAO) gin.HandlerFunc {
+func GetHPOTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
 		limit, err := strconv.Atoi(c.Query("limit"))

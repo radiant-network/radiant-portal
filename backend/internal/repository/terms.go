@@ -15,11 +15,6 @@ type TermsRepository struct {
 	db *gorm.DB
 }
 
-type TermsDAO interface {
-	GetTermAutoComplete(termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error)
-	GetTermNameById(termsTable string, id string) (*string, error)
-}
-
 func NewTermsRepository(db *gorm.DB) *TermsRepository {
 	if db == nil {
 		log.Print("TermsRepository: db is nil")
