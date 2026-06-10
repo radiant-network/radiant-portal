@@ -236,7 +236,7 @@ func GetOccurrenceNoteCountHandler(repo occurrenceNotesStore) gin.HandlerFunc {
 			HandleError(c, err)
 			return
 		}
-		c.JSON(http.StatusOK, types.Count{int64(count)})
+		c.JSON(http.StatusOK, types.Count{Count: int64(count)})
 	}
 }
 

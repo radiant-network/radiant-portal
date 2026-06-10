@@ -407,16 +407,6 @@ func (r *CasesRepository) retrieveCaseTasks(caseId int) (*[]CaseTask, error) {
 	return &tasks, nil
 }
 
-func (r *CasesRepository) retrieveCasesFamilyMembersIds(caseId int) ([]int, error) {
-	var familyMembersIds []int
-	txFamilyMembersID := r.db.Table(fmt.Sprintf("%s %s", types.FamilyTable.FederationName, types.FamilyTable.Alias))
-	txFamilyMembersID = txFamilyMembersID.Where("f.case_id = ?", caseId)
-	if err := txFamilyMembersID.Distinct("f.family_member_id").Find(&familyMembersIds).Error; err != nil {
-		return nil, fmt.Errorf("error retrieving family members ids: %w", err)
-	}
-	return familyMembersIds, nil
-}
-
 func calculateCaseType(caseEntity CaseEntity) string {
 	if caseEntity.CaseTypeCode == "somatic" || len(caseEntity.Members) == 1 {
 		return caseEntity.CaseTypeCode

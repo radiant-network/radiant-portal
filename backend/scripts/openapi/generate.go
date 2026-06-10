@@ -1,8 +1,8 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -31,7 +31,7 @@ func main() {
 
 func cleanupFile(filePath string) {
 	// Read the file
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
 	if err != nil {
 		log.Printf("Failed to read file %s: %v", filePath, err)
 		return
@@ -41,7 +41,7 @@ func cleanupFile(filePath string) {
 	modifiedContent := strings.ReplaceAll(string(content), "types.", "")
 
 	// Write the modified content back to the file
-	err = ioutil.WriteFile(filePath, []byte(modifiedContent), 0644)
+	err = os.WriteFile(filePath, []byte(modifiedContent), 0644)
 	if err != nil {
 		log.Printf("Failed to write file %s: %v", filePath, err)
 		return

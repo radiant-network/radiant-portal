@@ -57,6 +57,17 @@ itest:
 	@echo "Running integration tests..."
 	@go test ./internal/repository
 
+# Lint the application (same config and linters as the CI golangci-lint job)
+lint:
+	@echo "Linting..."
+	@if command -v golangci-lint > /dev/null; then \
+		golangci-lint run; \
+	else \
+		echo "golangci-lint is not installed. Install it with:"; \
+		echo "  go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.5.0"; \
+		exit 1; \
+	fi
+
 # Clean the binary
 clean:
 	@echo "Cleaning..."
@@ -83,7 +94,7 @@ doc:
 	@echo "Generating OpenAPI v3.1 documentation..."
 	@go run scripts/openapi/generate.go
 
-.PHONY: all build run test clean watch docker-run docker-down itest
+.PHONY: all build run test clean watch docker-run docker-down itest lint
 
 migrate:
 	@echo "Create database migration..."

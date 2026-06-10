@@ -140,7 +140,7 @@ func OccurrencesGermlineCNVCountHandler(repo germlineCNVOccurrencesReader) gin.H
 			HandleError(c, err)
 			return
 		}
-		countResponse := types.Count{count}
+		countResponse := types.Count{Count: count}
 		c.JSON(http.StatusOK, countResponse)
 	}
 }

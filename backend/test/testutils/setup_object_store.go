@@ -40,12 +40,6 @@ func initMinioContainer(ctx context.Context) (*MinioContainer, error) {
 	return &MinioContainer{Container: ObjectStoreContainerSetup.Container, Endpoint: endpoint}, nil
 }
 
-func stopMinioContainer(ctx context.Context, mc *MinioContainer) {
-	if mc != nil {
-		_ = mc.Container.Terminate(ctx)
-	}
-}
-
 func initS3Client(endpoint string) (*minio.Client, error) {
 	client, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(minioAccessKey, minioSecretKey, ""),

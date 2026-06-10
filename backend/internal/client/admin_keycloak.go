@@ -135,7 +135,7 @@ func (c *KeycloakAdminClient) adminToken(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("admin token request failed: HTTP %d: %s", resp.StatusCode, string(body))
@@ -236,7 +236,7 @@ func (c *KeycloakAdminClient) adminRequest(ctx context.Context, method, endpoint
 	if err != nil {
 		return nil, nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, nil, err

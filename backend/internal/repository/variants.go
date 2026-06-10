@@ -443,13 +443,11 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(locusI
 		splitNameColumn = "p.name"
 		joinToRetrieveSplitCode = "JOIN radiant_jdbc.public.project p ON p.id = c.project_id"
 		joinToRetrieveSplitName = "JOIN radiant_jdbc.public.project p ON p.code = split_code"
-		break
 	case types.SPLIT_BY_PRIMARY_CONDITION:
 		splitCodeColumn = "c.primary_condition"
 		splitNameColumn = "m.name"
 		joinToRetrieveSplitCode = ""
 		joinToRetrieveSplitName = "JOIN mondo_term m on m.id = split_code"
-		break
 	case types.SPLIT_BY_ANALYSIS:
 		splitCodeColumn = "ac.code"
 		splitNameColumn = "ac.name"
@@ -534,19 +532,16 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(locusI
 				internalFreq.Frequencies.PnAll = af.Pn
 				internalFreq.Frequencies.PfAll = af.Pf
 				internalFreq.Frequencies.HomAll = af.Hom
-				break
 			case "affected":
 				internalFreq.Frequencies.PcAffected = af.Pc
 				internalFreq.Frequencies.PnAffected = af.Pn
 				internalFreq.Frequencies.PfAffected = af.Pf
 				internalFreq.Frequencies.HomAffected = af.Hom
-				break
 			case "non_affected":
 				internalFreq.Frequencies.PcNonAffected = af.Pc
 				internalFreq.Frequencies.PnNonAffected = af.Pn
 				internalFreq.Frequencies.PfNonAffected = af.Pf
 				internalFreq.Frequencies.HomNonAffected = af.Hom
-				break
 			}
 		}
 		splitRows = append(splitRows, internalFreq)

@@ -39,9 +39,7 @@ func extractArrayQueryParam(c *gin.Context, key string) []string {
 		for _, i := range values {
 			if strings.Contains(i, ",") {
 				idSplit := strings.Split(i, ",")
-				for _, i := range idSplit {
-					all = append(all, i)
-				}
+				all = append(all, idSplit...)
 			} else {
 				all = append(all, i)
 			}

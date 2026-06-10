@@ -1,0 +1,38 @@
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+  exclusions:
+    generated: lax
+    rules:
+      # Test files and shared test infrastructure: tolerate unchecked setup/teardown
+      # errors (os.Setenv, db.Exec cleanups, response Close, json.Unmarshal in asserts).
+      - path: (_test\.go|test/testutils/)
+        linters:
+          - errcheck
+      # Test files commonly reuse `err` across helper-built fixtures that cannot fail;
+      # the err-overwrite pattern is benign there. It trips both ineffassign and
+      # staticcheck's SA4006 ("value never used"); SA4006 stays strict in non-test code.
+      - path: _test\.go
+        linters:
+          - ineffassign
+      - path: _test\.go
+        linters:
+          - staticcheck
+        text: SA4006
+      # QF1003 ("could use tagged switch") is an opinionated refactor suggestion, not a
+      # correctness or style rule we enforce.
+      - linters:
+          - staticcheck
+        text: QF1003
+
+# Report every finding; do not truncate repeated issues so CI surfaces the full set.
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

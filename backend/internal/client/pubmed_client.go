@@ -42,7 +42,7 @@ func (client *PubmedClient) GetCitationById(id string) (*types.PubmedCitation, e
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (client *PubmedClient) GetCitationById(id string) (*types.PubmedCitation, e
 		return nil, nil
 	}
 	if res.StatusCode != http.StatusOK {
-		err = fmt.Errorf("Error while fetching citation from pubmed: %d %s", res.StatusCode, string(data))
+		err = fmt.Errorf("error while fetching citation from pubmed: %d %s", res.StatusCode, string(data))
 		log.Print(err)
 		if res.StatusCode == http.StatusTooManyRequests {
 			return &types.PubmedCitation{ID: id}, nil
@@ -62,7 +62,7 @@ func (client *PubmedClient) GetCitationById(id string) (*types.PubmedCitation, e
 	}
 	citation = &types.PubmedCitation{}
 	if err := json.Unmarshal(data, citation); err != nil {
-		err = fmt.Errorf("Error while parsing citation from pubmed: %d %s", res.StatusCode, string(data))
+		err = fmt.Errorf("error while parsing citation from pubmed: %d %s", res.StatusCode, string(data))
 		log.Print(err)
 		return nil, nil // equivalent to NOT FOUND during tests
 	}
