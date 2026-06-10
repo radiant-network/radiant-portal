@@ -5,10 +5,16 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
+
+type documentsReader interface {
+	SearchDocuments(userQuery types.ListQuery) (*[]types.DocumentResult, *int64, error)
+	SearchById(prefix string, limit int) (*[]types.AutocompleteResult, error)
+	GetDocumentsFilters(withProjectAndLab bool) (*types.DocumentFilters, error)
+	GetById(id int) (*types.Document, error)
+}
 
 // SearchDocumentsHandler handles search of documents
 // @Summary Search documents
@@ -26,7 +32,7 @@ import (
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/documents/search [post]
-func SearchDocumentsHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
+func SearchDocumentsHandler(repo documentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body types.ListBodyWithCriteria
@@ -70,7 +76,7 @@ func SearchDocumentsHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/documents/autocomplete [get]
-func DocumentsAutocompleteHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
+func DocumentsAutocompleteHandler(repo documentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
 		limit, err := strconv.Atoi(c.Query("limit"))
@@ -99,7 +105,7 @@ func DocumentsAutocompleteHandler(repo repository.DocumentsDAO) gin.HandlerFunc 
 // @Failure 500 {object} types.ApiError
 // @Param tenant path string true "Tenant code"
 // @Router /{tenant}/documents/filters [get]
-func DocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
+func DocumentsFiltersHandler(repo documentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		filters, err := repo.GetDocumentsFilters(true)
 		if err != nil {
@@ -125,7 +131,7 @@ func DocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/documents/{document_id}/download_url [get]
-func GetDocumentsDownloadUrlHandler(repo repository.DocumentsDAO, presigner utils.PreSigner) gin.HandlerFunc {
+func GetDocumentsDownloadUrlHandler(repo documentsReader, presigner utils.PreSigner) gin.HandlerFunc {
 	if presigner == nil {
 		presigner = utils.NewS3PreSigner()
 	}

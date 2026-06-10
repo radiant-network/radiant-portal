@@ -5,9 +5,24 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
+
+type casesReader interface {
+	SearchCases(userQuery types.ListQuery) (*[]types.CaseResult, *int64, error)
+	SearchById(prefix string, limit int) (*[]types.AutocompleteResult, error)
+	GetCasesFilters() (*types.CaseFilters, error)
+	GetCaseEntity(caseId int) (*types.CaseEntity, error)
+}
+
+type caseDocumentsReader interface {
+	SearchDocuments(userQuery types.ListQuery) (*[]types.DocumentResult, *int64, error)
+	GetDocumentsFilters(withProjectAndLab bool) (*types.DocumentFilters, error)
+}
+
+type caseTasksReader interface {
+	ListTasksByCaseSeqAndTaskType(caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error)
+}
 
 // SearchCasesHandler handles search of cases
 // @Summary Search cases
@@ -25,7 +40,7 @@ import (
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/cases/search [post]
-func SearchCasesHandler(repo repository.CasesDAO) gin.HandlerFunc {
+func SearchCasesHandler(repo casesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body types.ListBodyWithCriteria
@@ -69,7 +84,7 @@ func SearchCasesHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/cases/autocomplete [get]
-func CasesAutocompleteHandler(repo repository.CasesDAO) gin.HandlerFunc {
+func CasesAutocompleteHandler(repo casesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
 		limit, err := strconv.Atoi(c.Query("limit"))
@@ -98,7 +113,7 @@ func CasesAutocompleteHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Failure 500 {object} types.ApiError
 // @Param tenant path string true "Tenant code"
 // @Router /{tenant}/cases/filters [get]
-func CasesFiltersHandler(repo repository.CasesDAO) gin.HandlerFunc {
+func CasesFiltersHandler(repo casesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		filters, err := repo.GetCasesFilters()
 		if err != nil {
@@ -124,7 +139,7 @@ func CasesFiltersHandler(repo repository.CasesDAO) gin.HandlerFunc {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/cases/{case_id} [get]
-func CaseEntityHandler(repo repository.CasesDAO, igvRepo igvReader) gin.HandlerFunc {
+func CaseEntityHandler(repo casesReader, igvRepo igvReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, errCaseId := strconv.Atoi(c.Param("case_id"))
 		if errCaseId != nil {
@@ -167,7 +182,7 @@ func CaseEntityHandler(repo repository.CasesDAO, igvRepo igvReader) gin.HandlerF
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/cases/{case_id}/documents/search [post]
-func CaseEntityDocumentsSearchHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
+func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body types.ListBodyWithCriteria
@@ -225,7 +240,7 @@ func CaseEntityDocumentsSearchHandler(repo repository.DocumentsDAO) gin.HandlerF
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences [get]
-func CaseOccurrenceTasksHandler(repo repository.TaskDAO) gin.HandlerFunc {
+func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, err := strconv.Atoi(c.Param("case_id"))
 		if err != nil {
@@ -269,7 +284,7 @@ func CaseOccurrenceTasksHandler(repo repository.TaskDAO) gin.HandlerFunc {
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/cases/{case_id}/documents/filters [get]
-func CaseEntityDocumentsFiltersHandler(repo repository.DocumentsDAO) gin.HandlerFunc {
+func CaseEntityDocumentsFiltersHandler(repo caseDocumentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		filters, err := repo.GetDocumentsFilters(false)
 		if err != nil {

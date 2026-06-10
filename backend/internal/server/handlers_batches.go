@@ -4,9 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
+
+type batchReader interface {
+	GetBatchByID(batchId string) (*types.Batch, error)
+}
 
 // GetBatchHandler
 // @Summary Retrieve a batch by ID
@@ -24,7 +27,7 @@ import (
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/batches/{batchId} [get]
-func GetBatchHandler(repo repository.BatchDAO) gin.HandlerFunc {
+func GetBatchHandler(repo batchReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		batchID := c.Param("batch_id")
 		batch, err := repo.GetBatchByID(batchID)

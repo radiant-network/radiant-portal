@@ -22,15 +22,6 @@ type DocumentsRepository struct {
 	db *gorm.DB
 }
 
-type DocumentsDAO interface {
-	SearchDocuments(userQuery types.ListQuery) (*[]DocumentResult, *int64, error)
-	SearchById(prefix string, limit int) (*[]AutocompleteResult, error)
-	GetDocumentsFilters(withProjectAndLab bool) (*DocumentFilters, error)
-	GetById(id int) (*Document, error)
-	GetDocumentByUrl(url string) (*Document, error)
-	CreateDocument(document *Document) error
-}
-
 func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {
 	if db == nil {
 		log.Print("DocumentsRepository: db is nil")

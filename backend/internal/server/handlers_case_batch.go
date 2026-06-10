@@ -4,10 +4,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
+
+type batchCreator interface {
+	CreateBatch(payload any, batchType string, username string, dryRun bool) (*types.Batch, error)
+}
 
 // PostCaseBatchHandler
 // @Summary Create a new case batch
@@ -26,7 +29,7 @@ import (
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/cases/batch [post]
-func PostCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
+func PostCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.CreateCaseBatchBody
@@ -84,7 +87,7 @@ func PostCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.Handler
 // @Failure 403 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/cases/batch [patch]
-func PatchCaseBatchHandler(repo repository.BatchDAO, auth utils.Auth) gin.HandlerFunc {
+func PatchCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.PatchCaseBatchBody

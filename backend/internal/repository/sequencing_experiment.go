@@ -16,15 +16,6 @@ type SequencingExperimentRepository struct {
 	db *gorm.DB
 }
 
-type SequencingExperimentDAO interface {
-	GetSequencingExperimentDetailById(seqId int) (*SequencingExperimentDetail, error)
-	CreateSequencingExperiment(*SequencingExperiment) error
-	GetSequencingExperimentBySampleID(sampleID int) ([]SequencingExperiment, error)
-	GetSequencingExperimentByAliquot(aliquot string) ([]SequencingExperiment, error)
-	GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, sampleOrganizationCode string) (*SequencingExperiment, error)
-	GetSequencingExperimentsByCaseId(caseID int) ([]SequencingExperiment, error)
-}
-
 func NewSequencingExperimentRepository(db *gorm.DB) *SequencingExperimentRepository {
 	return &SequencingExperimentRepository{db: db}
 }

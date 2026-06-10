@@ -51,7 +51,6 @@ func (m *mockProjectRepo) GetProjectByCode(code string) (*types.Project, error) 
 }
 
 type mockCasesRepo struct {
-	repository.CasesDAO
 	GetAnalysisCatalogFunc func(code string) (*types.AnalysisCatalog, error)
 	GetCaseBySubmitterFunc func(submitterCaseId string, projectId int) (*types.Case, error)
 }
@@ -73,9 +72,9 @@ func (m *mockPatientRepo) GetPatientByOrgCodeAndSubmitterPatientId(orgCode strin
 }
 
 type mockSeqExpRepo struct {
-	repository.SequencingExperimentDAO
 	GetByAliquotFunc          func(aliquot string) ([]types.SequencingExperiment, error)
 	GetByAliquotAndSampleFunc func(aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error)
+	GetByCaseIdFunc           func(caseID int) ([]types.SequencingExperiment, error)
 }
 
 func (m *mockSeqExpRepo) GetSequencingExperimentByAliquot(aliquot string) ([]types.SequencingExperiment, error) {
@@ -84,9 +83,11 @@ func (m *mockSeqExpRepo) GetSequencingExperimentByAliquot(aliquot string) ([]typ
 func (m *mockSeqExpRepo) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error) {
 	return m.GetByAliquotAndSampleFunc(aliquot, submitterSampleId, organizationCode)
 }
+func (m *mockSeqExpRepo) GetSequencingExperimentsByCaseId(caseID int) ([]types.SequencingExperiment, error) {
+	return m.GetByCaseIdFunc(caseID)
+}
 
 type mockTaskRepo struct {
-	repository.TaskDAO
 	GetContextBySeqExpFunc func(seqExpId int) ([]*types.TaskContext, error)
 	GetHasDocByDocFunc     func(documentId int) ([]*types.TaskHasDocument, error)
 }
@@ -99,7 +100,6 @@ func (m *mockTaskRepo) GetTaskHasDocumentByDocumentId(documentId int) ([]*types.
 }
 
 type mockDocRepo struct {
-	repository.DocumentsDAO
 	GetByUrlFunc func(url string) (*types.Document, error)
 }
 

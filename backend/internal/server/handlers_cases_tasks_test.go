@@ -14,7 +14,7 @@ import (
 )
 
 // ---------------------------------------------------------------------------
-// repository.TaskDAO mock methods, attached to the shared MockRepository.
+// Task mock methods, attached to the shared MockRepository.
 // ---------------------------------------------------------------------------
 
 var mockTaskFixedTime = time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)

@@ -15,6 +15,10 @@ type igvReader interface {
 	GetIGV(caseID int) ([]types.IGVTrack, error)
 }
 
+type caseTypeReader interface {
+	GetCaseType(caseID int) (string, error)
+}
+
 // GetIGVHandler
 // @Summary Get IGV
 // @Id getIGV
@@ -30,7 +34,7 @@ type igvReader interface {
 // @Failure 404 {object} types.ApiError
 // @Failure 500 {object} types.ApiError
 // @Router /{tenant}/igv/{case_id} [get]
-func GetIGVHandler(igvRepo igvReader, casesRepo repository.CasesDAO, presigner utils.PreSigner) gin.HandlerFunc {
+func GetIGVHandler(igvRepo igvReader, casesRepo caseTypeReader, presigner utils.PreSigner) gin.HandlerFunc {
 	if presigner == nil {
 		presigner = utils.NewS3PreSigner()
 	}
