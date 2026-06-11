@@ -60,7 +60,7 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: ${{ runner.os }}-go-build-${{ hashFiles('backend/go.sum') }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('backend/go.mod') }}
           restore-keys: |
             ${{ runner.os }}-go-build-
 
@@ -115,7 +115,7 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: ${{ runner.os }}-go-itest-${{ hashFiles('backend/go.sum') }}
+          key: ${{ runner.os }}-go-itest-${{ hashFiles('backend/go.mod') }}
           restore-keys: |
             ${{ runner.os }}-go-itest-
       - name: Tidy and Install dependencies
