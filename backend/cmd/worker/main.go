@@ -97,8 +97,9 @@ func StartHealthProbe(db *gorm.DB) {
 	})
 
 	srv := &http.Server{
-		Addr:    ":" + port,
-		Handler: mux,
+		Addr:              ":" + port,
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	go func() {

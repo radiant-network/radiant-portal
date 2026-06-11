@@ -3,7 +3,9 @@ version: "2"
 linters:
   default: none
   enable:
+    - bodyclose
     - errcheck
+    - gosec
     - govet
     - ineffassign
     - staticcheck
@@ -13,9 +15,24 @@ linters:
     rules:
       # Test files and shared test infrastructure: tolerate unchecked setup/teardown
       # errors (os.Setenv, db.Exec cleanups, response Close, json.Unmarshal in asserts).
+      # gosec joins for the same reason — test fixtures legitimately use math/rand
+      # (G404), intentional cleanup db.Exec without error checks (G104), SQL built over
+      # trusted table names (G201/G204), and reading test-data files by path (G304).
       - path: (_test\.go|test/testutils/)
         linters:
           - errcheck
+          - gosec
+      # bodyclose in integration tests: response bodies aren't closed since the test
+      # process tears down right after asserting; no leak that outlives the test.
+      - path: _test\.go
+        linters:
+          - bodyclose
+      # scripts/ is build-time codegen tooling (OpenAPI spec generation), not runtime
+      # server code: reading a spec path (G304) and writing generated output (G306)
+      # operate on trusted, developer-controlled paths, not attacker input.
+      - path: scripts/
+        linters:
+          - gosec
       # Test files commonly reuse `err` across helper-built fixtures that cannot fail;
       # the err-overwrite pattern is benign there. It trips both ineffassign and
       # staticcheck's SA4006 ("value never used"); SA4006 stays strict in non-test code.
