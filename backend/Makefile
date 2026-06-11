@@ -47,15 +47,25 @@ docker-down:
 		docker-compose -f compose/docker-compose.yml down; \
 	fi
 
-# Test the application
+# Test the application (readable output via gotestsum, falls back to go test)
 test:
 	@echo "Testing..."
-	@go test ./...
+	@if command -v gotestsum > /dev/null; then \
+		gotestsum --format testname -- ./...; \
+	else \
+		echo "gotestsum not installed — falling back to 'go test'. Install: go install gotest.tools/gotestsum@latest"; \
+		go test ./...; \
+	fi
 
-# Integrations Tests for the application
+# Integrations Tests for the application (readable output via gotestsum, falls back to go test)
 itest:
 	@echo "Running integration tests..."
-	@go test ./internal/repository
+	@if command -v gotestsum > /dev/null; then \
+		gotestsum --format testname -- ./internal/repository; \
+	else \
+		echo "gotestsum not installed — falling back to 'go test'. Install: go install gotest.tools/gotestsum@latest"; \
+		go test ./internal/repository; \
+	fi
 
 # Format the code (gofmt); the CI golangci-lint job verifies this formatting
 fmt:
