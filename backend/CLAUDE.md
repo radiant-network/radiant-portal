@@ -2,7 +2,7 @@
 
 ## Overview
 
-Go backend for the Radiant Portal — a medical/genomic data platform. Exposes a REST API and an async batch-processing worker. Go 1.24.
+Go backend for the Radiant Portal — a medical/genomic data platform. Exposes a REST API and an async batch-processing worker. Go 1.25.
 
 ## Architecture
 

@@ -65,11 +65,6 @@ When opening a PR, **always** fill in [`.github/pull_request_template.md`](.gith
 
 Keep the template's section headings (Context, Changes, TO-DOs, Tests, Related Issues, Notes for Reviewers) and the `<!-- Begin/End JIRA Issues -->` markers intact, listing the relevant `SJRA-###` keys between them.
 
-`gh pr edit` silently fails on this repo (Projects-classic GraphQL deprecation), so set the title/body with the REST API instead:
-```
-gh api -X PATCH repos/<owner>/<repo>/pulls/<n> -f title="..." -f body="$(cat body.md)"
-```
-
 ## Architecture
 
 ### Backend ↔ Frontend Integration
