@@ -144,4 +144,8 @@ References: [Code Review Comments §Interfaces](https://go.dev/wiki/CodeReviewCo
 ## Formatting
 
 - **Gofmt/goimports:** always run them; they settle indentation, alignment, and import order.
+  Run `make fmt` to apply gofmt and `make lint` to run golangci-lint before you finish. CI
+  runs the same golangci-lint config (`backend/.golangci.yml`) and fails on unformatted code
+  (the `gofmt` formatter) or any finding from `errcheck`, `govet`, `ineffassign`, `staticcheck`,
+  or `unused`. A pre-commit hook also runs gofmt on staged Go files.
 - **Line length:** no hard limit — break for readability/semantics, not to hit a column count.
