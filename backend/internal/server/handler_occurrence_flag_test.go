@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,7 +26,7 @@ func (m *mockOccurrenceFlagsRepo) Delete(caseID, seqID, taskID int, occurrenceID
 
 func Test_UpsertOccurrenceFlagHandler(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("POST", "/radiant/occurrences/flags/1/2/3/10000?flag_type=flag", nil)
@@ -39,7 +38,7 @@ func Test_UpsertOccurrenceFlagHandler(t *testing.T) {
 
 func Test_UpsertOccurrenceFlagHandler_InvalidCaseID(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("POST", "/radiant/occurrences/flags/abc/2/3/10000?flag_type=flag", nil)
@@ -51,7 +50,7 @@ func Test_UpsertOccurrenceFlagHandler_InvalidCaseID(t *testing.T) {
 
 func Test_UpsertOccurrenceFlagHandler_InvalidSeqID(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("POST", "/radiant/occurrences/flags/1/abc/3/10000?flag_type=flag", nil)
@@ -63,7 +62,7 @@ func Test_UpsertOccurrenceFlagHandler_InvalidSeqID(t *testing.T) {
 
 func Test_UpsertOccurrenceFlagHandler_InvalidTaskID(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("POST", "/radiant/occurrences/flags/1/2/abc/10000?flag_type=flag", nil)
@@ -75,7 +74,7 @@ func Test_UpsertOccurrenceFlagHandler_InvalidTaskID(t *testing.T) {
 
 func Test_UpsertOccurrenceFlagHandler_InvalidFlagType(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("POST", "/radiant/occurrences/flags/1/2/3/10000?flag_type=bogus", nil)
@@ -87,7 +86,7 @@ func Test_UpsertOccurrenceFlagHandler_InvalidFlagType(t *testing.T) {
 
 func Test_UpsertOccurrenceFlagHandler_MissingFlagType(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("POST", "/radiant/occurrences/flags/1/2/3/10000", nil)
@@ -99,7 +98,7 @@ func Test_UpsertOccurrenceFlagHandler_MissingFlagType(t *testing.T) {
 
 func Test_UpsertOccurrenceFlagHandler_RepositoryError(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{upsertErr: fmt.Errorf("mock upsert error")}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", UpsertOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("POST", "/radiant/occurrences/flags/1/2/3/10000?flag_type=flag", nil)
@@ -111,7 +110,7 @@ func Test_UpsertOccurrenceFlagHandler_RepositoryError(t *testing.T) {
 
 func Test_DeleteOccurrenceFlagHandler(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{deleteAffected: 1}
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("DELETE", "/radiant/occurrences/flags/1/2/3/10000", nil)
@@ -123,7 +122,7 @@ func Test_DeleteOccurrenceFlagHandler(t *testing.T) {
 
 func Test_DeleteOccurrenceFlagHandler_NotFound(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{deleteAffected: 0}
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("DELETE", "/radiant/occurrences/flags/1/2/3/10000", nil)
@@ -135,7 +134,7 @@ func Test_DeleteOccurrenceFlagHandler_NotFound(t *testing.T) {
 
 func Test_DeleteOccurrenceFlagHandler_InvalidCaseID(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("DELETE", "/radiant/occurrences/flags/abc/2/3/10000", nil)
@@ -147,7 +146,7 @@ func Test_DeleteOccurrenceFlagHandler_InvalidCaseID(t *testing.T) {
 
 func Test_DeleteOccurrenceFlagHandler_InvalidSeqID(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("DELETE", "/radiant/occurrences/flags/1/abc/3/10000", nil)
@@ -159,7 +158,7 @@ func Test_DeleteOccurrenceFlagHandler_InvalidSeqID(t *testing.T) {
 
 func Test_DeleteOccurrenceFlagHandler_InvalidTaskID(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("DELETE", "/radiant/occurrences/flags/1/2/abc/10000", nil)
@@ -171,7 +170,7 @@ func Test_DeleteOccurrenceFlagHandler_InvalidTaskID(t *testing.T) {
 
 func Test_DeleteOccurrenceFlagHandler_RepositoryError(t *testing.T) {
 	repo := &mockOccurrenceFlagsRepo{deleteErr: fmt.Errorf("mock delete error")}
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", DeleteOccurrenceFlagHandler(repo))
 
 	req, _ := http.NewRequest("DELETE", "/radiant/occurrences/flags/1/2/3/10000", nil)

@@ -135,6 +135,7 @@ type StorageContext struct {
 	FamilyHistoryRepo *repository.FamilyHistoryRepository
 	FamilyRepo        *repository.FamilyRepository
 	TaskRepo          *repository.TaskRepository
+	TenantCode        string
 }
 
 func NewStorageContext(db *gorm.DB) *StorageContext {
@@ -1295,6 +1296,7 @@ func persistBatchAndCaseRecords(ctx context.Context, db *gorm.DB, batch *types.B
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		batchRepo := repository.NewBatchRepository(tx)
 		txCtx := NewStorageContext(tx)
+		txCtx.TenantCode = batch.TenantCode
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(batch, records, batchRepo)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
@@ -1353,7 +1355,7 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 		OrderingPhysician:        cr.Case.OrderingPhysician,
 		SubmitterCaseID:          cr.Case.SubmitterCaseId,
 		Note:                     cr.Case.Note,
-		TenantCode:               types.DefaultTenantCode,
+		TenantCode:               ctx.TenantCode,
 		OrderingOrganizationCode: &cr.Case.OrderingOrganizationCode,
 		DiagnosisLabCode:         &cr.Case.DiagnosticLabCode,
 	}
@@ -1430,7 +1432,7 @@ func persistFamily(ctx *StorageContext, cr *CaseValidationRecord) error {
 			FamilyMemberID:            patient.ID,
 			RelationshipToProbandCode: p.RelationToProbandCode,
 			AffectedStatusCode:        p.AffectedStatusCode,
-			TenantCode:                types.DefaultTenantCode,
+			TenantCode:                ctx.TenantCode,
 		}
 		if err := ctx.FamilyRepo.CreateFamily(&familyMember); err != nil {
 			return fmt.Errorf("failed to persist family member %q for case %d: %w", p.SubmitterPatientId, cr.Index, err)
@@ -1458,7 +1460,7 @@ func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord
 				OnsetCode:          o.OnsetCode,
 				InterpretationCode: o.InterpretationCode,
 				Note:               o.Note,
-				TenantCode:         types.DefaultTenantCode,
+				TenantCode:         ctx.TenantCode,
 			}
 
 			if err := ctx.ObsCatRepo.CreateObservationCategorical(&obs); err != nil {
@@ -1484,7 +1486,7 @@ func persistObservationText(ctx *StorageContext, cr *CaseValidationRecord) error
 				PatientID:       patient.ID,
 				ObservationCode: o.Code,
 				Value:           o.Value,
-				TenantCode:      types.DefaultTenantCode,
+				TenantCode:      ctx.TenantCode,
 			}
 
 			if err := ctx.ObsStringRepo.CreateObservationString(&obs); err != nil {
@@ -1510,7 +1512,7 @@ func persistFamilyHistory(ctx *StorageContext, cr *CaseValidationRecord) error {
 				PatientID:        patient.ID,
 				FamilyMemberCode: o.FamilyMemberCode,
 				Condition:        o.Condition,
-				TenantCode:       types.DefaultTenantCode,
+				TenantCode:       ctx.TenantCode,
 			}
 
 			if err := ctx.FamilyHistoryRepo.CreateFamilyHistory(&familyHistory); err != nil {
@@ -1528,7 +1530,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 			PipelineName:    t.PipelineName,
 			PipelineVersion: t.PipelineVersion,
 			GenomeBuild:     t.GenomeBuild,
-			TenantCode:      types.DefaultTenantCode,
+			TenantCode:      ctx.TenantCode,
 		}
 		err := ctx.TaskRepo.CreateTask(&task)
 		if err != nil {
@@ -1583,7 +1585,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 				Size:             *doc.Size,
 				Url:              doc.Url,
 				Hash:             doc.Hash,
-				TenantCode:       types.DefaultTenantCode,
+				TenantCode:       ctx.TenantCode,
 			}
 			err := ctx.DocRepo.CreateDocument(&d)
 			if err != nil {

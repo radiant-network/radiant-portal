@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -26,7 +25,7 @@ func Test_PostCaseBatch_OK(t *testing.T) {
 		auth := testutils.MockAuth{}
 		repo := repository.NewBatchRepository(db)
 
-		router := gin.Default()
+		router := tenantRouter()
 		router.POST("/:tenant/cases/batch", server.PostCaseBatchHandler(repo, &auth))
 
 		body := types.CreateCaseBatchBody{
@@ -78,7 +77,7 @@ func Test_PatchCaseBatch_OK(t *testing.T) {
 		auth := testutils.MockAuth{}
 		repo := repository.NewBatchRepository(db)
 
-		router := gin.Default()
+		router := tenantRouter()
 		router.PATCH("/:tenant/cases/batch", server.PatchCaseBatchHandler(repo, &auth))
 
 		body := types.PatchCaseBatchBody{
@@ -121,7 +120,7 @@ func Test_PatchCaseBatch_RejectsMissingCaseKeyFields(t *testing.T) {
 		auth := testutils.MockAuth{}
 		repo := repository.NewBatchRepository(env.Postgres)
 
-		router := gin.Default()
+		router := tenantRouter()
 		router.PATCH("/:tenant/cases/batch", server.PatchCaseBatchHandler(repo, &auth))
 
 		// Missing project_code + submitter_case_id → binding:"required" rejects the request.

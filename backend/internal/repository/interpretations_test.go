@@ -57,6 +57,7 @@ func Test_Interpretations_CreateOrUpdateGermline_Create(t *testing.T) {
 		repo := newTestInterpretationsRepo(db)
 		interpretation := &types.InterpretationGermline{
 			InterpretationCommon: types.InterpretationCommon{
+				TenantCode:    types.DefaultTenantCode,
 				CaseId:        "99",
 				SequencingId:  "99",
 				LocusId:       "9999",
@@ -89,6 +90,7 @@ func Test_Interpretations_CreateOrUpdateGermline_Update(t *testing.T) {
 		// Create a fresh record (not fixture) to update
 		interpretation := &types.InterpretationGermline{
 			InterpretationCommon: types.InterpretationCommon{
+				TenantCode:    types.DefaultTenantCode,
 				CaseId:        "98",
 				SequencingId:  "98",
 				LocusId:       "9998",
@@ -182,6 +184,7 @@ func Test_Interpretations_CreateOrUpdateSomatic_Create(t *testing.T) {
 		repo := newTestInterpretationsRepo(db)
 		interpretation := &types.InterpretationSomatic{
 			InterpretationCommon: types.InterpretationCommon{
+				TenantCode:    types.DefaultTenantCode,
 				CaseId:        "97",
 				SequencingId:  "97",
 				LocusId:       "9997",
@@ -213,6 +216,7 @@ func Test_Interpretations_CreateOrUpdateSomatic_Update(t *testing.T) {
 
 		interpretation := &types.InterpretationSomatic{
 			InterpretationCommon: types.InterpretationCommon{
+				TenantCode:    types.DefaultTenantCode,
 				CaseId:        "96",
 				SequencingId:  "96",
 				LocusId:       "9996",

@@ -179,7 +179,7 @@ func persistBatchAndSampleRecords(ctx context.Context, db *gorm.DB, batch *types
 			return fmt.Errorf("no rows updated when updating sample batch %v", batch.ID)
 		}
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
-			err := insertSampleRecords(records, txRepoSample)
+			err := insertSampleRecords(records, txRepoSample, batch.TenantCode)
 			if err != nil {
 				return fmt.Errorf("error during sample insertion %v", err)
 			}
@@ -192,7 +192,7 @@ type sampleStore interface {
 	CreateSample(newSample *types.Sample) (*types.Sample, error)
 }
 
-func insertSampleRecords(records []*SampleValidationRecord, repo sampleStore) error {
+func insertSampleRecords(records []*SampleValidationRecord, repo sampleStore, tenantCode string) error {
 	createdSamples := make(map[SampleKey]int)
 
 	for _, record := range records {
@@ -216,7 +216,7 @@ func insertSampleRecords(records []*SampleValidationRecord, repo sampleStore) er
 				TissueSite:        record.Sample.TissueSite.String(),
 				HistologyCode:     record.Sample.HistologyCode,
 				OrganizationCode:  record.OrganizationCode,
-				TenantCode:        types.DefaultTenantCode,
+				TenantCode:        tenantCode,
 				PatientID:         record.PatientId,
 				ParentSampleID:    parentSampleId,
 			}

@@ -134,9 +134,9 @@ func (m *CaseValidationMockRepo) GetDocumentsFilters(withProjectAndLab bool) (*t
 
 func (m *CaseValidationMockRepo) GetOrganizationByCode(organizationCode string) (*types.Organization, error) {
 	if organizationCode == "LAB-1" {
-		return &types.Organization{Code: organizationCode, TenantCode: "radiant", Name: "Organization 1"}, nil
+		return &types.Organization{Code: organizationCode, TenantCode: types.DefaultTenantCode, Name: "Organization 1"}, nil
 	} else if organizationCode == "LAB-2" {
-		return &types.Organization{Code: organizationCode, TenantCode: "radiant", Name: "Organization 2"}, nil
+		return &types.Organization{Code: organizationCode, TenantCode: types.DefaultTenantCode, Name: "Organization 2"}, nil
 	} else if strings.Contains(organizationCode, "ERROR") {
 		return nil, fmt.Errorf("database connection failed")
 	}
@@ -149,7 +149,7 @@ func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(organi
 			ID:                 100,
 			SubmitterPatientId: submitterPatientId,
 			OrganizationCode:   organizationCode,
-			TenantCode:         "radiant",
+			TenantCode:         types.DefaultTenantCode,
 		}, nil
 	} else if strings.Contains(organizationCode, "ERROR") || strings.Contains(submitterPatientId, "ERROR") {
 		return nil, fmt.Errorf("database connection failed")
@@ -3179,7 +3179,7 @@ func Test_validateSeqExpSample_Valid(t *testing.T) {
 					PatientID:         100,
 					SubmitterSampleId: "SAMPLE-1",
 					OrganizationCode:  "LAB-1",
-					TenantCode:        "radiant",
+					TenantCode:        types.DefaultTenantCode,
 					HistologyCode:     "germline",
 				}, nil
 			}

@@ -66,6 +66,12 @@ func PostOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.H
 			return
 		}
 
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
 		note := types.OccurrenceNote{
 			CaseID:       body.CaseID,
 			SeqID:        body.SeqID,
@@ -74,6 +80,7 @@ func PostOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.H
 			UserID:       *userID,
 			UserName:     *fullName,
 			Content:      sanitizeNoteContent(body.Content, *userID),
+			TenantCode:   *tenant,
 		}
 
 		created, err := repo.Create(note)

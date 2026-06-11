@@ -234,6 +234,7 @@ func persistBatchAndPatchCaseRecords(ctx context.Context, db *gorm.DB, batch *ty
 
 		casesRepo := repository.NewCasesRepository(tx)
 		storageCtx := NewStorageContext(tx)
+		storageCtx.TenantCode = batch.TenantCode
 		for _, rec := range records {
 			if rec.CaseID == nil {
 				continue

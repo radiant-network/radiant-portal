@@ -59,7 +59,7 @@ func Test_GetIGVByCaseIdHandler(t *testing.T) {
 
 		igvRepo := repository.NewIGVRepository(starrocks)
 		casesRepo := repository.NewCasesRepository(starrocks)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/igv/:case_id", server.GetIGVHandler(igvRepo, casesRepo, nil))
 
 		t.Run("germline trio (case 70)", func(t *testing.T) {

@@ -25,21 +25,20 @@ func NewBatchRepository(db *gorm.DB) *BatchRepository {
 	return &BatchRepository{db: db}
 }
 
-func (r *BatchRepository) CreateBatch(payload any, batchType string, username string, dryRun bool) (*Batch, error) {
+func (r *BatchRepository) CreateBatch(tenantCode string, payload any, batchType string, username string, dryRun bool) (*Batch, error) {
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling batch payload: %w", err)
 	}
 
 	newBatch := &Batch{
-		DryRun:    dryRun,
-		BatchType: batchType,
-		Status:    types.BatchStatusPending,
-		Username:  username,
-		Payload:   string(jsonPayload),
-		CreatedOn: time.Now(),
-		// TODO(multi-tenant): set from the active tenant once writes read it from context.
-		TenantCode: types.DefaultTenantCode,
+		DryRun:     dryRun,
+		BatchType:  batchType,
+		Status:     types.BatchStatusPending,
+		Username:   username,
+		Payload:    string(jsonPayload),
+		CreatedOn:  time.Now(),
+		TenantCode: tenantCode,
 	}
 	if err := r.db.Create(newBatch).Error; err != nil {
 		return nil, fmt.Errorf("error creating batch: %w", err)
@@ -88,7 +87,7 @@ func (r *BatchRepository) ClaimNextBatch() (*Batch, error) {
 			FOR UPDATE SKIP LOCKED
 			LIMIT 1
 		)
-		RETURNING id, payload, status, batch_type, dry_run, started_on, created_on;
+		RETURNING id, payload, status, batch_type, dry_run, started_on, created_on, tenant_code;
 	`, types.BatchTable.Name, types.BatchTable.Name, types.BatchStatusPending)
 
 	err := r.db.Raw(query).Scan(&batch).Error

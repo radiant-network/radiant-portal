@@ -107,7 +107,7 @@ func TestBatchValidationCache_GetOrganizationByCode(t *testing.T) {
 	ctx := &BatchValidationContext{OrgRepo: mockRepo}
 	cache := NewBatchValidationCache(ctx)
 
-	org := &types.Organization{Code: "ORG1", TenantCode: "radiant"}
+	org := &types.Organization{Code: "ORG1", TenantCode: types.DefaultTenantCode}
 
 	// Test cache miss
 	mockRepo.GetByCodeFunc = func(code string) (*types.Organization, error) {
@@ -437,7 +437,7 @@ func TestBatchValidationCache_GetSampleByOrgCodeAndSubmitterSampleId(t *testing.
 	mockSample := &mockSampleRepo{}
 	ctx := &BatchValidationContext{SampleRepo: mockSample}
 	cache := NewBatchValidationCache(ctx)
-	sample := &types.Sample{ID: 10, OrganizationCode: "ORG1", TenantCode: "radiant", SubmitterSampleId: "S1"}
+	sample := &types.Sample{ID: 10, OrganizationCode: "ORG1", TenantCode: types.DefaultTenantCode, SubmitterSampleId: "S1"}
 
 	// Test miss for both org and sample
 	mockSample.GetSampleByOrgCodeAndSubmitterSampleIdFunc = func(orgCode string, id string) (*types.Sample, error) {

@@ -50,7 +50,7 @@ func Test_CreateCases(t *testing.T) {
 			ResolutionStatusCode:     "unsolved",
 			OrderingPhysician:        "Dr. Test",
 			OrderingOrganizationCode: &orgCode,
-			TenantCode:               "radiant",
+			TenantCode:               types.DefaultTenantCode,
 		}
 		err := repo.CreateCase(newCase)
 		assert.NoError(t, err)
@@ -691,7 +691,7 @@ func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
 			ResolutionStatusCode:     "unsolved",
 			OrderingPhysician:        "Dr. Test",
 			OrderingOrganizationCode: &orgCode,
-			TenantCode:               "radiant",
+			TenantCode:               types.DefaultTenantCode,
 			SubmitterCaseID:          "1:1", // Duplicate submitter_case_id
 		}
 		err := repo.CreateCase(newCase)
@@ -727,7 +727,7 @@ func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
 			ResolutionStatusCode:     "unsolved",
 			OrderingPhysician:        "Dr. Test",
 			OrderingOrganizationCode: &orgCode,
-			TenantCode:               "radiant",
+			TenantCode:               types.DefaultTenantCode,
 			SubmitterCaseID:          "",
 		}
 		err := repo.CreateCase(newCase)

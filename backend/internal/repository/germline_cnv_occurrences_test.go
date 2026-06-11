@@ -56,6 +56,7 @@ func Test_GermlineCNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testi
 			OccurrenceID: "1",
 			UserID:       "11111111-1111-1111-1111-111111111111",
 			UserName:     "Test User",
+			TenantCode:   types.DefaultTenantCode,
 			Content:      "Test note",
 		})
 		assert.NoError(t, err)

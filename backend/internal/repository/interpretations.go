@@ -58,6 +58,7 @@ func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.Interpr
 		UpdatedBy:      dao.UpdatedBy,
 		UpdatedByName:  dao.UpdatedByName,
 		UpdatedAt:      dao.UpdatedAt,
+		TenantCode:     dao.TenantCode,
 	}
 	if len(dao.Metadata) > 0 {
 		if err := json.Unmarshal(dao.Metadata, &interpretation.Metadata); err != nil {
@@ -97,8 +98,7 @@ func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation 
 		UpdatedBy:     interpretation.UpdatedBy,
 		UpdatedByName: interpretation.UpdatedByName,
 		UpdatedAt:     interpretation.UpdatedAt,
-		// TODO(multi-tenant): set from the active tenant once writes read it from context.
-		TenantCode: types.DefaultTenantCode,
+		TenantCode:    interpretation.TenantCode,
 	}
 	for _, v := range interpretation.Pubmed {
 		citation, _ := r.pubmedClient.GetCitationById(v.CitationID)

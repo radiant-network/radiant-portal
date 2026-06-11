@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -91,7 +90,7 @@ func Test_GetInterpretationGermlineWithPartialContent(t *testing.T) {
 }
 
 func assertGetInterpretationGermline(t *testing.T, repo *repository.InterpretationsRepository, termsRepo *repository.TermsRepository, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationGermline(repo, termsRepo))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/interpretations/v2/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
@@ -105,7 +104,7 @@ func assertGetInterpretationGermline(t *testing.T, repo *repository.Interpretati
 }
 
 func assertPostInterpretationGermline(t *testing.T, repo *repository.InterpretationsRepository, caseId string, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationGermline, expected string) *types.InterpretationGermline {
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", server.PostInterpretationGermline(repo))
 
 	body, _ := json.Marshal(interpretation)
@@ -173,7 +172,7 @@ func Test_GetInterpretationSomaticWithPartialContent(t *testing.T) {
 }
 
 func assertGetInterpretationSomatic(t *testing.T, repo *repository.InterpretationsRepository, terms *MockTermsRepository, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) *types.InterpretationSomatic {
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", server.GetInterpretationSomatic(repo, terms))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/interpretations/v2/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
@@ -193,7 +192,7 @@ func assertGetInterpretationSomatic(t *testing.T, repo *repository.Interpretatio
 }
 
 func assertPostInterpretationSomatic(t *testing.T, repo *repository.InterpretationsRepository, caseId string, sequencingId string, locusId string, transcriptId string, status int, interpretation *types.InterpretationSomatic, expected string) *types.InterpretationSomatic {
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", server.PostInterpretationSomatic(repo))
 
 	body, _ := json.Marshal(interpretation)
@@ -234,7 +233,7 @@ func Test_SearchGermline(t *testing.T) {
 }
 
 func assertSearchInterpretationGermline(t *testing.T, repo *repository.InterpretationsRepository, queryParams string, status int, count int) {
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/interpretations/germline", server.SearchInterpretationGermline(repo))
 
 	req, _ := http.NewRequest("GET", "/radiant/interpretations/germline?"+queryParams, bytes.NewBuffer([]byte("{}")))
@@ -270,7 +269,7 @@ func Test_SearchSomatic(t *testing.T) {
 }
 
 func assertSearchInterpretationSomatic(t *testing.T, repo *repository.InterpretationsRepository, queryParams string, status int, count int) {
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/interpretations/somatic", server.SearchInterpretationSomatic(repo))
 
 	req, _ := http.NewRequest("GET", "/radiant/interpretations/somatic?"+queryParams, bytes.NewBuffer([]byte("{}")))

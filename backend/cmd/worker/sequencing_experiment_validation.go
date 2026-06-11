@@ -316,7 +316,7 @@ func persistBatchAndSequencingExperimentRecords(ctx context.Context, db *gorm.DB
 			return fmt.Errorf("no rows updated when updating sequencing experiment batch %v", batch.ID)
 		}
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
-			err := insertSequencingExperimentRecords(records, txRepoSeqExp)
+			err := insertSequencingExperimentRecords(records, txRepoSeqExp, batch.TenantCode)
 			if err != nil {
 				return fmt.Errorf("error during sequencing experiment insertion %w", err)
 			}
@@ -329,7 +329,7 @@ type sequencingExperimentCreator interface {
 	CreateSequencingExperiment(*types.SequencingExperiment) error
 }
 
-func insertSequencingExperimentRecords(records []*SequencingExperimentValidationRecord, repo sequencingExperimentCreator) error {
+func insertSequencingExperimentRecords(records []*SequencingExperimentValidationRecord, repo sequencingExperimentCreator, tenantCode string) error {
 	for _, record := range records {
 		if !record.Skipped {
 			seqExp := types.SequencingExperiment{
@@ -339,7 +339,7 @@ func insertSequencingExperimentRecords(records []*SequencingExperimentValidation
 				ExperimentalStrategyCode:     record.SequencingExperiment.ExperimentalStrategyCode,
 				SequencingReadTechnologyCode: record.SequencingExperiment.SequencingReadTechnologyCode,
 				PlatformCode:                 record.SequencingExperiment.PlatformCode,
-				TenantCode:                   types.DefaultTenantCode,
+				TenantCode:                   tenantCode,
 				SequencingLabCode:            record.SequencingExperiment.SequencingLabCode,
 			}
 

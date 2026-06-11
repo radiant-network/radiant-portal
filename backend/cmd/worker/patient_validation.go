@@ -223,7 +223,7 @@ func persistBatchAndPatientRecords(ctx context.Context, db *gorm.DB, batch *type
 			return fmt.Errorf("no rows updated when updating patient batch %v", batch.ID)
 		}
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
-			err := insertPatientRecords(records, txRepoPatient)
+			err := insertPatientRecords(records, txRepoPatient, batch.TenantCode)
 			if err != nil {
 				return fmt.Errorf("error during patient insertion %v", err)
 			}
@@ -236,13 +236,13 @@ type patientStore interface {
 	CreatePatient(newPatient *types.Patient) error
 }
 
-func insertPatientRecords(records []*PatientValidationRecord, repo patientStore) error {
+func insertPatientRecords(records []*PatientValidationRecord, repo patientStore, tenantCode string) error {
 	for _, record := range records {
 		if !record.Skipped {
 			patient := types.Patient{
 				SubmitterPatientId:     record.Patient.SubmitterPatientId.String(),
 				OrganizationCode:       record.OrganizationCode,
-				TenantCode:             types.DefaultTenantCode,
+				TenantCode:             tenantCode,
 				SubmitterPatientIdType: record.Patient.SubmitterPatientIdType.String(),
 				FirstName:              record.Patient.FirstName.String(),
 				LastName:               record.Patient.LastName.String(),

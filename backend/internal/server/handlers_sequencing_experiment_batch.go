@@ -47,7 +47,13 @@ func PostSequencingExperimentBatchHandler(repo batchCreator, auth utils.Auth) gi
 			return
 		}
 
-		batch, err := repo.CreateBatch(body.SequencingExperiments, "sequencing_experiment", *username, queryParam.DryRun)
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		batch, err := repo.CreateBatch(*tenant, body.SequencingExperiments, "sequencing_experiment", *username, queryParam.DryRun)
 		if err != nil {
 			HandleError(c, err)
 			return

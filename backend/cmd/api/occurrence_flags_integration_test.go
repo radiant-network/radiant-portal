@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -21,7 +20,7 @@ func assertUpsertOccurrenceFlag(
 	expectedStatus int,
 ) {
 	t.Helper()
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", server.UpsertOccurrenceFlagHandler(repo))
 
 	url := fmt.Sprintf("/radiant/occurrences/flags/%s/%s/%s/%s", caseID, seqID, taskID, occurrenceID)
@@ -42,7 +41,7 @@ func assertDeleteOccurrenceFlag(
 	expectedStatus int,
 ) {
 	t.Helper()
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/:tenant/occurrences/flags/:case_id/:seq_id/:task_id/:occurrence_id", server.DeleteOccurrenceFlagHandler(repo))
 
 	url := fmt.Sprintf("/radiant/occurrences/flags/%s/%s/%s/%s", caseID, seqID, taskID, occurrenceID)

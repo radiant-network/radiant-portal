@@ -18,7 +18,7 @@ import (
 func TestPostPatientBatchHandler_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -31,7 +31,7 @@ func TestPostPatientBatchHandler_Success(t *testing.T) {
 	}
 	auth := &testutils.MockAuth{Username: "testuser"}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/patients/batch", PostPatientBatchHandler(repo, auth))
 	body := `{"patients": [{"submitter_patient_id": "p1", "submitter_patient_id_type": "MR", "patient_organization_code": "org1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
 	req, _ := http.NewRequest(http.MethodPost, "/radiant/patients/batch", bytes.NewBuffer([]byte(body)))
@@ -53,7 +53,7 @@ func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/patients/batch", PostPatientBatchHandler(repo, auth))
 	body := `{"patients": [{"submitter_patient_id": "p1", "life_status_code": "alive", "sex_code": "male", "date_of_birth": "2000-01-01"}]}`
 	req, _ := http.NewRequest(http.MethodPost, "/radiant/patients/batch", bytes.NewBuffer([]byte(body)))
@@ -67,7 +67,7 @@ func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
 func TestPostPatientBatchHandler_EmptyPatients(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -80,7 +80,7 @@ func TestPostPatientBatchHandler_EmptyPatients(t *testing.T) {
 	}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/patients/batch", PostPatientBatchHandler(repo, auth))
 	body := `{"patients": []}`
 	req, _ := http.NewRequest(http.MethodPost, "/radiant/patients/batch", bytes.NewBuffer([]byte(body)))

@@ -62,12 +62,19 @@ func UpsertOccurrenceFlagHandler(repo occurrenceFlagsStore) gin.HandlerFunc {
 			return
 		}
 
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
 		if _, err := repo.Upsert(types.OccurrenceFlag{
 			CaseID:       caseID,
 			OccurrenceID: occurrenceID,
 			SeqID:        seqID,
 			TaskID:       taskID,
 			FlagType:     flagType,
+			TenantCode:   *tenant,
 		}); err != nil {
 			HandleError(c, err)
 			return

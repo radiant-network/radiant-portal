@@ -56,6 +56,10 @@ func fillInterpretationCommonWithContext(c *gin.Context, interpretation *types.I
 	interpretation.TranscriptId = transcriptId
 	interpretation.CaseId = caseId
 
+	if tenant, err := GetTenant(c); err == nil {
+		interpretation.TenantCode = *tenant
+	}
+
 	ginToken, exist := c.Get("token")
 	if exist {
 		decodedJWT := ginToken.(ginkeycloak.KeyCloakToken)

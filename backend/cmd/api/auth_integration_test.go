@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -77,7 +78,7 @@ func assertTenantAccess(t *testing.T, userID, tenant string, enforce bool, expec
 
 func Test_RequireTenantAccess_Member_Allowed(t *testing.T) {
 	// alice holds roles in radiant.
-	assertTenantAccess(t, aliceID, "radiant", true, http.StatusOK)
+	assertTenantAccess(t, aliceID, types.DefaultTenantCode, true, http.StatusOK)
 }
 
 func Test_RequireTenantAccess_CrossTenant_Forbidden(t *testing.T) {
