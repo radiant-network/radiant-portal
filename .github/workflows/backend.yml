@@ -49,7 +49,20 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: '1.25'
-          cache-dependency-path: backend/go.sum
+          # setup-go's built-in cache is unreliable when go.mod is not at the
+          # repo root (it fails to resolve the cache dirs on a cold runner and
+          # then never saves). Cache explicitly below instead.
+          cache: false
+
+      - name: Cache Go modules and build cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-build-${{ hashFiles('backend/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-build-
 
       - name: Install dependencies
         run: go mod download
@@ -95,8 +108,16 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version: '1.25'
-          cache: true
-          cache-dependency-path: backend/go.sum
+          cache: false
+      - name: Cache Go modules and build cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-itest-${{ hashFiles('backend/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-itest-
       - name: Tidy and Install dependencies
         run: |
           go mod tidy
