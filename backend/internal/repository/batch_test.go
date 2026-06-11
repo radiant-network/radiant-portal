@@ -153,8 +153,8 @@ func Test_ReleaseBatch_ResetsRunningToPending(t *testing.T) {
 
 		var id string
 		initErr := db.Raw(`
-			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on)
-			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now())
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
+			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now(), 'radiant')
 			RETURNING id;
 		`, types.BatchStatusRunning).Scan(&id).Error
 		if initErr != nil {
@@ -179,8 +179,8 @@ func Test_ReleaseBatch_IgnoresNonRunning(t *testing.T) {
 
 		var id string
 		initErr := db.Raw(`
-			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on)
-			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now())
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
+			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now(), 'radiant')
 			RETURNING id;
 		`, types.BatchStatusSuccess).Scan(&id).Error
 		if initErr != nil {
