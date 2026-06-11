@@ -145,7 +145,7 @@ func OccurrencesSomaticSNVCountHandler(repo somaticSNVOccurrencesReader) gin.Han
 			HandleError(c, err)
 			return
 		}
-		countResponse := types.Count{count}
+		countResponse := types.Count{Count: count}
 		c.JSON(http.StatusOK, countResponse)
 	}
 }

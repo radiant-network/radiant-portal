@@ -14,10 +14,8 @@ func AddImplicitSNVOccurrencesFilters(snvTable types.Table, seqId int, taskId in
 	switch snvTable {
 	case types.GermlineSNVOccurrenceTable:
 		tx = tx.Where(fmt.Sprintf("%s.seq_id = ? AND %s.task_id = ? AND %s.part=?", alias, alias, alias), seqId, taskId, part)
-		break
 	case types.SomaticSNVOccurrenceTable:
 		tx = tx.Where(fmt.Sprintf("%s.tumor_seq_id = ? AND %s.task_id = ? AND %s.part=?", alias, alias, alias), seqId, taskId, part)
-		break
 	}
 	return tx
 }

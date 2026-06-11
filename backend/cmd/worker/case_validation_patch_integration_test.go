@@ -146,7 +146,6 @@ func Test_ProcessBatch_PatchCase_AppendsDuplicateTask_ExperimentAttachIdempotent
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
 		ctx, client, db := env.Ctx, env.MinIO.Client, env.Postgres
 		const submitterCaseId = "CASE-PATCH-B"
-		const taskType = "alignment_germline_variant_calling" // same type the base scenario task uses
 		const outURL = "s3://test-bucket/CASE-PATCH-B.patch.recal.cram"
 		const outName = "CASE-PATCH-B.patch.recal.cram"
 

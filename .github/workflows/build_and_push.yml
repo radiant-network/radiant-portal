@@ -27,10 +27,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Log in to the Container registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -38,7 +38,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker image backend API
         id: meta_backend_api
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.BACKEND_API_IMAGE_NAME }}
           tags: |
@@ -53,7 +53,7 @@ jobs:
 
       - name: Build and push Docker image backend API
         id: push_backend_api
-        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: ./backend
           file: ./backend/api.Dockerfile
@@ -62,7 +62,7 @@ jobs:
           labels: ${{ steps.meta_backend_api.outputs.labels }}
 
       - name: Generate artifact attestation backend API
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.BACKEND_API_IMAGE_NAME }}
           subject-digest: ${{ steps.push_backend_api.outputs.digest }}
@@ -70,7 +70,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker image backend WORKER
         id: meta_backend_worker
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.BACKEND_WORKER_IMAGE_NAME }}
           tags: |
@@ -85,7 +85,7 @@ jobs:
 
       - name: Build and push Docker image backend WORKER
         id: push_backend_worker
-        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: ./backend
           file: ./backend/worker.Dockerfile
@@ -94,7 +94,7 @@ jobs:
           labels: ${{ steps.meta_backend_worker.outputs.labels }}
 
       - name: Generate artifact attestation backend WORKER
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.BACKEND_WORKER_IMAGE_NAME }}
           subject-digest: ${{ steps.push_backend_worker.outputs.digest }}
@@ -102,7 +102,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker image frontend
         id: meta_frontend
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.1.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.FRONTEND_IMAGE_NAME }}
           tags: |
@@ -117,7 +117,7 @@ jobs:
 
       - name: Build and push Docker image frontend
         id: push_frontend
-        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: ./frontend
           file: ./frontend/Dockerfile.radiant
@@ -126,7 +126,7 @@ jobs:
           labels: ${{ steps.meta_frontend.outputs.labels }}
 
       - name: Generate artifact attestation frontend
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.FRONTEND_IMAGE_NAME }}
           subject-digest: ${{ steps.push_frontend.outputs.digest }}

@@ -18,7 +18,7 @@ func FormatIds(resourceIds []string) string {
 		if len(resourceIds) > 1 {
 			formatResourceIds = fmt.Sprintf("(%s)", strings.Join(resourceIds, " / "))
 		} else {
-			formatResourceIds = fmt.Sprintf("%s", resourceIds[0])
+			formatResourceIds = resourceIds[0]
 		}
 	}
 	return formatResourceIds

@@ -43,16 +43,13 @@ func (r *GenePanelsRepository) GetVariantGenePanelConditions(panelType string, l
 	switch *table {
 	case types.OmimGenePanelTable:
 		tx = tx.Select("symbol, panel as panel_name, inheritance_code, omim_phenotype_id as panel_id")
-		break
 
 	case types.HpoGenePanelTable:
 		tx = tx.Select("symbol, hpo_term_name as panel_name, hpo_term_id as panel_id")
 		panelColumnName = "hpo_term_name"
-		break
 
 	case types.OrphanetGenePanelTable:
 		tx = tx.Select("symbol, panel as panel_name, disorder_id as panel_id, inheritance_code")
-		break
 
 	default:
 		return nil, fmt.Errorf("error while fetching variant gene panel conditions: invalid table")

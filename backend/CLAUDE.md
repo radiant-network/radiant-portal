@@ -2,7 +2,7 @@
 
 ## Overview
 
-Go backend for the Radiant Portal — a medical/genomic data platform. Exposes a REST API and an async batch-processing worker. Go 1.24.
+Go backend for the Radiant Portal — a medical/genomic data platform. Exposes a REST API and an async batch-processing worker. Go 1.25.
 
 ## Architecture
 
@@ -52,6 +52,8 @@ make docker-run    # docker compose up (all dependencies)
 make docker-down   # docker compose down
 make test          # Unit + integration tests
 make itest         # Integration tests only (repository layer)
+make fmt           # Format code (gofmt -w .)
+make lint          # Run golangci-lint (same config/linters as CI)
 make doc           # Generate OpenAPI v3.1 spec
 make clean         # Remove binaries
 make migrate       # Create new migration file

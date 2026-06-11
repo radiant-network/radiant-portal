@@ -102,9 +102,7 @@ func findNumericByAlias(fields []Field, alias string) *Field {
 // findSelectedFields returns the fields that can be selected from the list of string field names
 func findSelectedFields(fields []Field, additional []string, defaultFields []Field) []Field {
 	var selectedFields []Field
-	for _, s := range defaultFields {
-		selectedFields = append(selectedFields, s)
-	}
+	selectedFields = append(selectedFields, defaultFields...)
 	for _, s := range additional {
 		field := findSelectableByAlias(fields, s)
 		if field != nil {

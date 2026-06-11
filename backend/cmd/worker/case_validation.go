@@ -558,24 +558,6 @@ func (cr *CaseValidationRecord) fetchValidationInfos() error {
 	return nil
 }
 
-func (cr *CaseValidationRecord) formatPatientsInvalidFieldMessage(fieldName string, patientIndex int) string {
-	return fmt.Sprintf("Invalid field %s for case %d - patient %d. Reason:",
-		fieldName,
-		cr.Index,
-		patientIndex,
-	)
-}
-
-func (cr *CaseValidationRecord) formatObservationInvalidFieldMessage(fieldName string, patientIndex int, observationType string, obsIndex int) string {
-	return fmt.Sprintf("Invalid field %s for case %d - patient %d - %s %d. Reason:",
-		fieldName,
-		cr.Index,
-		patientIndex,
-		observationType,
-		obsIndex,
-	)
-}
-
 func (cr *CaseValidationRecord) formatTaskFieldErrorMessage(fieldName string, caseIndex, taskIndex int) string {
 	return fmt.Sprintf("Invalid field %s for case %d - task %d. Reason:", fieldName, caseIndex, taskIndex)
 }
@@ -1033,7 +1015,7 @@ func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch,
 	baseMsg := fmt.Sprintf("case %d - task %d", cr.Index, taskIndex)
 
 	if _, ok := RequiresInputDocumentsTaskTypes[task.TypeCode]; ok {
-		if task.InputDocuments == nil || len(task.InputDocuments) == 0 {
+		if len(task.InputDocuments) == 0 {
 			message := fmt.Sprintf("Missing input documents for case %d - task %d of type %s.", cr.Index, taskIndex, task.TypeCode)
 			cr.AddErrors(message, TaskMissingInputDocuments, path)
 		}

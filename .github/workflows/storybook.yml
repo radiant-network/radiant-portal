@@ -14,12 +14,12 @@ jobs:
 
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
       - name: Check Changed Files 👀
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -28,7 +28,7 @@ jobs:
 
       - name: Setup Node 🟢
         if: steps.filter.outputs.frontend == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
 
@@ -57,20 +57,20 @@ jobs:
 
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
       # Detect docs changes
       - name: Check Changed Files in docs 👀
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: docs_filter
         with:
           filters: |
             docs:
               - "docs/**"
       - name: Check Changed Files in backend/docs 👀
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: backend_docs_filter
         with:
           filters: |

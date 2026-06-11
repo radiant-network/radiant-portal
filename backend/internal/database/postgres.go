@@ -74,7 +74,7 @@ func MigrateWithParams(path string, host string, port string, database string, u
 		log.Fatal(err)
 	}
 	if err := m.Up(); err != nil {
-		if "no change" == err.Error() {
+		if err.Error() == "no change" {
 			log.Print(err)
 		} else {
 			log.Fatal(err)

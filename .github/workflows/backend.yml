@@ -7,15 +7,20 @@ on:
   pull_request:
     branches: [ "**" ]
 
+# Least-privilege default; the two test jobs opt into `checks: write` so
+# dorny/test-reporter can post results as a check run.
+permissions:
+  contents: read
+
 jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Check Changed Files 👀
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -26,12 +31,14 @@ jobs:
     needs: [changes]
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v6
 
       - name: Check Changed Files 👀
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -39,9 +46,23 @@ jobs:
               - 'backend/**'
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.23'
+          go-version: '1.25'
+          # setup-go's built-in cache is unreliable when go.mod is not at the
+          # repo root (it fails to resolve the cache dirs on a cold runner and
+          # then never saves). Cache explicitly below instead.
+          cache: false
+
+      - name: Cache Go modules and build cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-build-${{ hashFiles('backend/go.mod') }}
+          restore-keys: |
+            ${{ runner.os }}-go-build-
 
       - name: Install dependencies
         run: go mod download
@@ -56,30 +77,89 @@ jobs:
         run: go build -v ./...
         working-directory: ./backend
 
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@v1.13.0
+
       - name: Test all packages except internal/repository
         run: |
-          go test -timeout 30m $(go list ./... | grep -v './internal/repository')
+          gotestsum --format testname --junitfile report.xml -- -timeout 30m $(go list ./... | grep -v './internal/repository')
         working-directory: ./backend
         timeout-minutes: 30
+
+      - name: Report test results
+        # Pinned to the v3.0.0 commit SHA (supply-chain hardening); bump deliberately.
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        if: success() || failure()
+        with:
+          name: Go tests (non-repository)
+          path: backend/report.xml
+          reporter: java-junit
 
 
   test-repository:
     needs: [changes]
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
-          go-version: '1.23'
-          cache: true
-          cache-dependency-path: backend/go.sum
+          go-version: '1.25'
+          cache: false
+      - name: Cache Go modules and build cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-itest-${{ hashFiles('backend/go.mod') }}
+          restore-keys: |
+            ${{ runner.os }}-go-itest-
       - name: Tidy and Install dependencies
         run: |
           go mod tidy
           go mod download
         working-directory: ./backend
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@v1.13.0
       - name: Test internal/repository
-        run: go test -v -timeout 30m ./internal/repository/...
+        run: gotestsum --format testname --junitfile report.xml -- -timeout 30m ./internal/repository/...
         working-directory: ./backend
         timeout-minutes: 30
+
+      - name: Report test results
+        # Pinned to the v3.0.0 commit SHA (supply-chain hardening); bump deliberately.
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        if: success() || failure()
+        with:
+          name: Go tests (repository)
+          path: backend/report.xml
+          reporter: java-junit
+
+  golangci-lint:
+    needs: [changes]
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+          # golangci-lint-action does its own caching; avoid setup-go's
+          # overlapping cache (which warns here).
+          cache: false
+      - name: Install dependencies
+        run: go mod download
+        working-directory: ./backend
+      - name: Ensure dependencies are up-to-date
+        run: go mod tidy
+        working-directory: ./backend
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.5.0
+          working-directory: backend

@@ -5,14 +5,10 @@ all: build test
 
 install:
 	@echo "Installing dependencies..."
-
-
 	@go mod tidy
 
 build:
 	@echo "Building API..."
-	
-	
 	@go build -o bin/api/ ./cmd/api/
 
 # Run the application
@@ -21,8 +17,6 @@ run:
 
 build-worker:
 	@echo "Building Worker..."
-
-
 	@go build -o bin/worker/ ./cmd/worker/
 
 # Run the worker
@@ -47,15 +41,41 @@ docker-down:
 		docker-compose -f compose/docker-compose.yml down; \
 	fi
 
-# Test the application
+# Test the application (readable output via gotestsum, falls back to go test)
 test:
 	@echo "Testing..."
-	@go test ./...
+	@if command -v gotestsum > /dev/null; then \
+		gotestsum --format testname -- ./...; \
+	else \
+		echo "gotestsum not installed — falling back to 'go test'. Install: go install gotest.tools/gotestsum@latest"; \
+		go test ./...; \
+	fi
 
-# Integrations Tests for the application
+# Integrations Tests for the application (readable output via gotestsum, falls back to go test)
 itest:
 	@echo "Running integration tests..."
-	@go test ./internal/repository
+	@if command -v gotestsum > /dev/null; then \
+		gotestsum --format testname -- ./internal/repository; \
+	else \
+		echo "gotestsum not installed — falling back to 'go test'. Install: go install gotest.tools/gotestsum@latest"; \
+		go test ./internal/repository; \
+	fi
+
+# Format the code (gofmt); the CI golangci-lint job verifies this formatting
+fmt:
+	@echo "Formatting..."
+	@gofmt -w .
+
+# Lint the application (same config and linters as the CI golangci-lint job)
+lint:
+	@echo "Linting..."
+	@if command -v golangci-lint > /dev/null; then \
+		golangci-lint run; \
+	else \
+		echo "golangci-lint is not installed. Install it with:"; \
+		echo "  go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.5.0"; \
+		exit 1; \
+	fi
 
 # Clean the binary
 clean:
@@ -83,7 +103,7 @@ doc:
 	@echo "Generating OpenAPI v3.1 documentation..."
 	@go run scripts/openapi/generate.go
 
-.PHONY: all build run test clean watch docker-run docker-down itest
+.PHONY: all build run test clean watch docker-run docker-down itest lint fmt
 
 migrate:
 	@echo "Create database migration..."

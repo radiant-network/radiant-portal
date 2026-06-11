@@ -34,7 +34,6 @@ func Test_SearchDocumentsNoFilters(t *testing.T) {
 		assert.Len(t, *documents, 10)
 		assert.Equal(t, int64(148), *count)
 
-		
 		document270 := (*documents)[0]
 		assert.Equal(t, 270, document270.DocumentID)
 		assert.Equal(t, "SRX1091647-T.recal.cram", document270.Name)
