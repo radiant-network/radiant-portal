@@ -700,7 +700,7 @@
   "onboarding": {
     "actions": {
       "back": "Back",
-      "last": "Last",
+      "last": "Finish",
       "next": "Next",
       "next_with_progress": "Next ({current} of {total})",
       "skip": "Skip"
@@ -712,7 +712,7 @@
     },
     "query_builder": {
       "facets": "Browse filters by category. Click a category to open its facets.",
-      "query_card": " Each query (Q1, Q2, …) is an independent filter set. You can combine queries with AND / OR, duplicate them, or toggle labels to read the SQON in plain language.",
+      "query_card": "Each query (Q1, Q2, …) is an independent filter set. You can combine queries with AND / OR, duplicate them, or toggle labels to read the SQON in plain language.",
       "saved_filters": "Save a filter set you reuse often (e.g. \"Rare LoF in OMIM genes\")."
     },
     "data_table": {

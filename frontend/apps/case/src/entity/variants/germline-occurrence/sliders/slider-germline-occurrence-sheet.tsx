@@ -129,7 +129,7 @@ export function GermlineOccurrenceSheetContent({
   }
 
   return (
-    <div id="occurrence-slider" className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <SliderVariantsOnboardingWizard />
       <SliderHeader onPrevious={onPrevious} onNext={onNext} hasPrevious={hasPrevious} hasNext={hasNext}>
         <SliderPatientRow
