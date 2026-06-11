@@ -100,30 +100,35 @@ CREATE INDEX ix_batch_tenant_code ON public.batch (tenant_code);
 --    Composite (tenant_code, case_id) on the live tables — interpretations are
 --    looked up by case. The leading tenant_code also serves tenant-only scans, so
 --    no separate plain (tenant_code) index is needed on these two.
---    History tables: column appended last to match the live table's column order
---    (tp_history_func copies positionally via `$5.*`); NO FK (see header).
+--    Add tenant_code to the _history twin before backfilling the live table, and
+--    disable trg_interpretation_* during the backfill: the trigger copies the live
+--    row into _history via `$5.*`, which fails (or floods the audit log) if the
+--    history column is missing/not-yet-NOT-NULL. Column appended last on both so the
+--    trigger stays positionally aligned; history tables get NO FK.
 -- =============================================================================
-ALTER TABLE public.interpretation_germline ADD COLUMN tenant_code varchar(50) REFERENCES public.tenant(code);
-UPDATE public.interpretation_germline SET tenant_code = 'radiant';
-ALTER TABLE public.interpretation_germline ALTER COLUMN tenant_code SET NOT NULL;
+ALTER TABLE public.interpretation_germline         ADD COLUMN tenant_code varchar(50) REFERENCES public.tenant(code);
+ALTER TABLE public.interpretation_germline_history ADD COLUMN tenant_code varchar(50);
+ALTER TABLE public.interpretation_germline DISABLE TRIGGER trg_interpretation_germline;
+UPDATE public.interpretation_germline         SET tenant_code = 'radiant';
+UPDATE public.interpretation_germline_history SET tenant_code = 'radiant';
+ALTER TABLE public.interpretation_germline ENABLE TRIGGER trg_interpretation_germline;
+ALTER TABLE public.interpretation_germline         ALTER COLUMN tenant_code SET NOT NULL;
+ALTER TABLE public.interpretation_germline_history ALTER COLUMN tenant_code SET NOT NULL;
 CREATE INDEX ix_interpretation_germline_tenant_case
     ON public.interpretation_germline (tenant_code, case_id);
-
-ALTER TABLE public.interpretation_germline_history ADD COLUMN tenant_code varchar(50);
-UPDATE public.interpretation_germline_history SET tenant_code = 'radiant';
-ALTER TABLE public.interpretation_germline_history ALTER COLUMN tenant_code SET NOT NULL;
 CREATE INDEX ix_interpretation_germline_history_tenant_code
     ON public.interpretation_germline_history (tenant_code);
 
-ALTER TABLE public.interpretation_somatic ADD COLUMN tenant_code varchar(50) REFERENCES public.tenant(code);
-UPDATE public.interpretation_somatic SET tenant_code = 'radiant';
-ALTER TABLE public.interpretation_somatic ALTER COLUMN tenant_code SET NOT NULL;
+ALTER TABLE public.interpretation_somatic         ADD COLUMN tenant_code varchar(50) REFERENCES public.tenant(code);
+ALTER TABLE public.interpretation_somatic_history ADD COLUMN tenant_code varchar(50);
+ALTER TABLE public.interpretation_somatic DISABLE TRIGGER trg_interpretation_somatic;
+UPDATE public.interpretation_somatic         SET tenant_code = 'radiant';
+UPDATE public.interpretation_somatic_history SET tenant_code = 'radiant';
+ALTER TABLE public.interpretation_somatic ENABLE TRIGGER trg_interpretation_somatic;
+ALTER TABLE public.interpretation_somatic         ALTER COLUMN tenant_code SET NOT NULL;
+ALTER TABLE public.interpretation_somatic_history ALTER COLUMN tenant_code SET NOT NULL;
 CREATE INDEX ix_interpretation_somatic_tenant_case
     ON public.interpretation_somatic (tenant_code, case_id);
-
-ALTER TABLE public.interpretation_somatic_history ADD COLUMN tenant_code varchar(50);
-UPDATE public.interpretation_somatic_history SET tenant_code = 'radiant';
-ALTER TABLE public.interpretation_somatic_history ALTER COLUMN tenant_code SET NOT NULL;
 CREATE INDEX ix_interpretation_somatic_history_tenant_code
     ON public.interpretation_somatic_history (tenant_code);
 
