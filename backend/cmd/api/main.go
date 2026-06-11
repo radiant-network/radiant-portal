@@ -301,7 +301,7 @@ func main() {
 	defer stop()
 
 	r := setupRouter(dbStarrocks, dbPostgres)
-	srv := &http.Server{Addr: fmt.Sprintf(":%s", p), Handler: r}
+	srv := &http.Server{Addr: fmt.Sprintf(":%s", p), Handler: r, ReadHeaderTimeout: 10 * time.Second}
 
 	go func() {
 		glog.Infof("API server listening on :%s", p)
