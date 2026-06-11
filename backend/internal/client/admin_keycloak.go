@@ -156,12 +156,12 @@ func (c *KeycloakAdminClient) adminToken(ctx context.Context) (string, error) {
 func (c *KeycloakAdminClient) findUserID(ctx context.Context, token, username string) (string, error) {
 	endpoint := fmt.Sprintf("%s/admin/realms/%s/users?username=%s&exact=true",
 		c.cfg.BaseURL, c.cfg.Realm, url.QueryEscape(username))
-	resp, body, err := c.adminRequest(ctx, http.MethodGet, endpoint, token, nil)
+	status, body, err := c.adminRequest(ctx, http.MethodGet, endpoint, token, nil)
 	if err != nil {
 		return "", err
 	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("find user %q failed: HTTP %d: %s", username, resp.StatusCode, string(body))
+	if status != http.StatusOK {
+		return "", fmt.Errorf("find user %q failed: HTTP %d: %s", username, status, string(body))
 	}
 	var users []keycloakUser
 	if err := json.Unmarshal(body, &users); err != nil {
@@ -178,24 +178,24 @@ func (c *KeycloakAdminClient) findUserID(ctx context.Context, token, username st
 
 func (c *KeycloakAdminClient) createUser(ctx context.Context, token string, user keycloakUser) error {
 	endpoint := fmt.Sprintf("%s/admin/realms/%s/users", c.cfg.BaseURL, c.cfg.Realm)
-	resp, body, err := c.adminRequest(ctx, http.MethodPost, endpoint, token, user)
+	status, body, err := c.adminRequest(ctx, http.MethodPost, endpoint, token, user)
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusConflict {
-		return fmt.Errorf("create user %q failed: HTTP %d: %s", user.Username, resp.StatusCode, string(body))
+	if status != http.StatusCreated && status != http.StatusConflict {
+		return fmt.Errorf("create user %q failed: HTTP %d: %s", user.Username, status, string(body))
 	}
 	return nil
 }
 
 func (c *KeycloakAdminClient) updateUser(ctx context.Context, token, id string, user keycloakUser) error {
 	endpoint := fmt.Sprintf("%s/admin/realms/%s/users/%s", c.cfg.BaseURL, c.cfg.Realm, id)
-	resp, body, err := c.adminRequest(ctx, http.MethodPut, endpoint, token, user)
+	status, body, err := c.adminRequest(ctx, http.MethodPut, endpoint, token, user)
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("update user %q failed: HTTP %d: %s", user.Username, resp.StatusCode, string(body))
+	if status != http.StatusNoContent && status != http.StatusOK {
+		return fmt.Errorf("update user %q failed: HTTP %d: %s", user.Username, status, string(body))
 	}
 	return nil
 }
@@ -203,30 +203,31 @@ func (c *KeycloakAdminClient) updateUser(ctx context.Context, token, id string, 
 func (c *KeycloakAdminClient) resetPassword(ctx context.Context, token, id, password string) error {
 	endpoint := fmt.Sprintf("%s/admin/realms/%s/users/%s/reset-password", c.cfg.BaseURL, c.cfg.Realm, id)
 	cred := map[string]any{"type": "password", "value": password, "temporary": false}
-	resp, body, err := c.adminRequest(ctx, http.MethodPut, endpoint, token, cred)
+	status, body, err := c.adminRequest(ctx, http.MethodPut, endpoint, token, cred)
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("reset password failed: HTTP %d: %s", resp.StatusCode, string(body))
+	if status != http.StatusNoContent && status != http.StatusOK {
+		return fmt.Errorf("reset password failed: HTTP %d: %s", status, string(body))
 	}
 	return nil
 }
 
 // adminRequest issues a bearer-authenticated admin request, JSON-encoding body when
-// non-nil, and returns the response (body already drained) plus the raw body bytes.
-func (c *KeycloakAdminClient) adminRequest(ctx context.Context, method, endpoint, token string, body any) (*http.Response, []byte, error) {
+// non-nil, and returns the HTTP status code plus the raw body bytes. The response body
+// is fully read and closed before returning, so callers never hold an open body.
+func (c *KeycloakAdminClient) adminRequest(ctx context.Context, method, endpoint, token string, body any) (int, []byte, error) {
 	var reader io.Reader
 	if body != nil {
 		data, err := json.Marshal(body)
 		if err != nil {
-			return nil, nil, err
+			return 0, nil, err
 		}
 		reader = bytes.NewReader(data)
 	}
 	req, err := http.NewRequestWithContext(ctx, method, endpoint, reader)
 	if err != nil {
-		return nil, nil, err
+		return 0, nil, err
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 	if body != nil {
@@ -234,12 +235,12 @@ func (c *KeycloakAdminClient) adminRequest(ctx context.Context, method, endpoint
 	}
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, nil, err
+		return 0, nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, nil, err
+		return 0, nil, err
 	}
-	return resp, data, nil
+	return resp.StatusCode, data, nil
 }

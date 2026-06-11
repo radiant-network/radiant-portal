@@ -32,7 +32,7 @@ func registerStarrocksTLS(caPath, configName, serverName string) (string, error)
 	if caPath == "" {
 		return "", nil
 	}
-	pem, err := os.ReadFile(caPath)
+	pem, err := os.ReadFile(caPath) //nolint:gosec // G304: caPath is the operator-configured DB_SSL_CA path, not attacker-controlled input.
 	if err != nil {
 		return "", fmt.Errorf("read DB_SSL_CA: %w", err)
 	}
@@ -41,6 +41,7 @@ func registerStarrocksTLS(caPath, configName, serverName string) (string, error)
 		return "", fmt.Errorf("parse DB_SSL_CA: no certs found in %s", caPath)
 	}
 	if err := gomysql.RegisterTLSConfig(configName, &tls.Config{
+		MinVersion: tls.VersionTLS12,
 		RootCAs:    pool,
 		ServerName: serverName,
 	}); err != nil {

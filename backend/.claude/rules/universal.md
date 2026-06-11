@@ -37,7 +37,7 @@ A green build is the bar for advancing. For each workflow step:
 - Run `go build ./...` and confirm it's clean.
 - Run the tests for the package you just touched.
 - If you added a new test, run it explicitly so the framework can't silently skip it.
-- Run `make fmt` (gofmt) and `make lint` (golangci-lint) and confirm both are clean — CI runs the same golangci-lint config and fails on unformatted code or any lint finding.
+- Run `make fmt` (gofmt) and `make lint` (golangci-lint) and confirm both are clean — CI runs the same golangci-lint config and fails on unformatted code or any lint finding. `make lint` includes `go vet` (via the `govet` linter), so there's no need to run `go vet ./...` separately.
 
 Skipping this and reporting "done" produces work that compiles in your head but not in the repo.
 

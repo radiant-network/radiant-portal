@@ -61,13 +61,13 @@ func (c *RangerAdminClient) EnsureUser(ctx context.Context, name string) error {
 		"password":     pw,
 		"userRoleList": []string{"ROLE_USER"},
 	}
-	resp, payload, err := c.request(ctx, http.MethodPost, "/service/xusers/secure/users", body)
+	status, payload, err := c.request(ctx, http.MethodPost, "/service/xusers/secure/users", body)
 	if err != nil {
 		return err
 	}
 	// 200/201 = created; 400 = already exists -> both fine.
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusBadRequest {
-		return fmt.Errorf("ensure user %q: HTTP %d: %s", name, resp.StatusCode, string(payload))
+	if status != http.StatusOK && status != http.StatusCreated && status != http.StatusBadRequest {
+		return fmt.Errorf("ensure user %q: HTTP %d: %s", name, status, string(payload))
 	}
 	return nil
 }
@@ -99,12 +99,12 @@ type rangerRole struct {
 // existing members. The role must already exist, a missing role is an error.
 // Idempotent: a user already in the role is a no-op.
 func (c *RangerAdminClient) AddUserToRole(ctx context.Context, roleName, user string) error {
-	resp, payload, err := c.request(ctx, http.MethodGet, "/service/roles/roles/name/"+roleName, nil)
+	status, payload, err := c.request(ctx, http.MethodGet, "/service/roles/roles/name/"+roleName, nil)
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("get role %q: HTTP %d: %s", roleName, resp.StatusCode, string(payload))
+	if status != http.StatusOK {
+		return fmt.Errorf("get role %q: HTTP %d: %s", roleName, status, string(payload))
 	}
 	var role rangerRole
 	if err := json.Unmarshal(payload, &role); err != nil {
@@ -118,30 +118,31 @@ func (c *RangerAdminClient) AddUserToRole(ctx context.Context, roleName, user st
 	}
 	role.Users = append(role.Users, rangerRoleMember{Name: user, IsAdmin: false})
 
-	resp, payload, err = c.request(ctx, http.MethodPut, fmt.Sprintf("/service/roles/roles/%d", role.ID), role)
+	status, payload, err = c.request(ctx, http.MethodPut, fmt.Sprintf("/service/roles/roles/%d", role.ID), role)
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("update role %q: HTTP %d: %s", roleName, resp.StatusCode, string(payload))
+	if status != http.StatusOK && status != http.StatusCreated {
+		return fmt.Errorf("update role %q: HTTP %d: %s", roleName, status, string(payload))
 	}
 	return nil
 }
 
 // request issues a basic-auth request to Ranger, JSON-encoding body when non-nil,
-// and returns the response (body drained) plus the raw payload bytes.
-func (c *RangerAdminClient) request(ctx context.Context, method, path string, body any) (*http.Response, []byte, error) {
+// and returns the HTTP status code plus the raw payload bytes. The response body is
+// fully read and closed before returning, so callers never hold an open body.
+func (c *RangerAdminClient) request(ctx context.Context, method, path string, body any) (int, []byte, error) {
 	var reader io.Reader
 	if body != nil {
 		data, err := json.Marshal(body)
 		if err != nil {
-			return nil, nil, err
+			return 0, nil, err
 		}
 		reader = bytes.NewReader(data)
 	}
 	req, err := http.NewRequestWithContext(ctx, method, c.cfg.BaseURL+path, reader)
 	if err != nil {
-		return nil, nil, err
+		return 0, nil, err
 	}
 	req.Header.Set("Authorization", c.authHeader)
 	req.Header.Set("Accept", "application/json")
@@ -150,12 +151,12 @@ func (c *RangerAdminClient) request(ctx context.Context, method, path string, bo
 	}
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, nil, err
+		return 0, nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, nil, err
+		return 0, nil, err
 	}
-	return resp, data, nil
+	return resp.StatusCode, data, nil
 }
