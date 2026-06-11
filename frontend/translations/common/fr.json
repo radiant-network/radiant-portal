@@ -701,12 +701,12 @@
     },
     "sequencing_experiment": {
       "seq_id": "Choisissez le membre de la famille dont vous voulez interroger les données de séquençage — proband, parents ou fratrie. Le statut atteint et le lien de parenté sont indiqués à côté de chaque échantillon.",
-      "variant_type": "Basculez entre les différents types de vartiant. Vos filtres sont conservés séparément pour chaque type.",
+      "variant_type": "Basculez entre les différents types de variant. Vos filtres sont conservés séparément pour chaque type.",
       "tasks": "Basculez entre les runs d'analyse — par exemple, différentes versions de variant callers — sans perdre vos filtres en cours."
     },
     "query_builder": {
       "facets": "Parcourez les filtres par catégorie. Cliquez sur une catégorie pour ouvrir ses facettes.",
-      "query_bar": "Chaque requête (Q1, Q2, …) est un ensemble de filtres indépendant. Vous pouvez les combiner avec ET / OU, les dupliquer, ou activer les libellés pour lire le SQON en langage clair.",
+      "query_card": "Chaque requête (Q1, Q2, …) est un ensemble de filtres indépendant. Vous pouvez les combiner avec ET / OU, les dupliquer, ou activer les libellés pour lire le SQON en langage clair.",
       "saved_filters": "Enregistrez un jeu de filtres récurrent (par exemple « LoF rares dans gènes OMIM »)."
     },
     "data_table": {
