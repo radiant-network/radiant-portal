@@ -500,7 +500,7 @@ func Test_ValidateSequencingExperimentBatch_DuplicateInBatch_AddsError(t *testin
 		ValueSetsRepo: &mockValueSetsDAO{},
 	}
 
-	records, err := validateSequencingExperimentBatch(mockContext, []types.SequencingExperimentBatch{seq1, seq2})
+	records, err := validateSequencingExperimentBatch(t.Context(), mockContext, []types.SequencingExperimentBatch{seq1, seq2})
 
 	assert.NoError(t, err)
 	assert.Len(t, records, 2)

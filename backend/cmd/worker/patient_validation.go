@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 	"slices"
@@ -178,32 +180,38 @@ func validateIsDifferentExistingPatientField[T comparable](
 	return false
 }
 
-func processPatientBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+func processPatientBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	payload := []byte(batch.Payload)
 	var patients []types.PatientBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &patients); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling patient batch: %v", unexpectedErr), ctx.BatchRepo)
-		return
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling patient batch: %v", unexpectedErr), bv.BatchRepo)
+		return nil
 	}
 
-	records, unexpectedErr := validatePatientsBatch(ctx, patients)
+	records, unexpectedErr := validatePatientsBatch(ctx, bv, patients)
 	if unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error patient batch validation: %v", unexpectedErr), ctx.BatchRepo)
-		return
+		if errors.Is(unexpectedErr, context.Canceled) {
+			return unexpectedErr
+		}
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error patient batch validation: %v", unexpectedErr), bv.BatchRepo)
+		return nil
 	}
 
 	glog.Infof("Patient batch %v processed with %d records", batch.ID, len(records))
 
-	err := persistBatchAndPatientRecords(db, batch, records)
-	if err != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing patient batch records: %v", err), ctx.BatchRepo)
-		return
+	if err := persistBatchAndPatientRecords(ctx, db, batch, records); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return err
+		}
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing patient batch records: %v", err), bv.BatchRepo)
+		return nil
 	}
+	return nil
 }
 
-func persistBatchAndPatientRecords(db *gorm.DB, batch *types.Batch, records []*PatientValidationRecord) error {
-	return db.Transaction(func(tx *gorm.DB) error {
+func persistBatchAndPatientRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*PatientValidationRecord) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		txRepoPatient := repository.NewPatientsRepository(tx)
 		txRepoBatch := repository.NewBatchRepository(tx)
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(batch, records, txRepoBatch)
@@ -254,12 +262,15 @@ func insertPatientRecords(records []*PatientValidationRecord, repo patientStore)
 	return nil
 }
 
-func validatePatientsBatch(ctx *batchval.BatchValidationContext, patients []types.PatientBatch) ([]*PatientValidationRecord, error) {
+func validatePatientsBatch(ctx context.Context, bv *batchval.BatchValidationContext, patients []types.PatientBatch) ([]*PatientValidationRecord, error) {
 	var records []*PatientValidationRecord
-	cache := batchval.NewBatchValidationCache(ctx)
+	cache := batchval.NewBatchValidationCache(bv)
 	seenPatients := map[batchval.PatientKey]struct{}{}
 	for index, patient := range patients {
-		record, err := validatePatientRecord(ctx, cache, patient, index, seenPatients)
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		record, err := validatePatientRecord(bv, cache, patient, index, seenPatients)
 		if err != nil {
 			return nil, fmt.Errorf("error during patient validation: %v", err)
 		}

@@ -10,6 +10,7 @@ import (
 type batchProcessor interface {
 	ClaimNextBatch() (*types.Batch, error)
 	UpdateBatch(batch types.Batch) (int64, error)
+	ReleaseBatch(batchId string) (int64, error)
 }
 
 type casesReader interface {

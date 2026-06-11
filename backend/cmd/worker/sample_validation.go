@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 
@@ -133,33 +135,39 @@ func validateIsDifferentExistingSampleField[T comparable](
 	return false
 }
 
-func processSampleBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+func processSampleBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	payload := []byte(batch.Payload)
 	var samplesbatch []types.SampleBatch
-	cache := batchval.NewBatchValidationCache(ctx)
+	cache := batchval.NewBatchValidationCache(bv)
 
 	if unexpectedErr := json.Unmarshal(payload, &samplesbatch); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling sample batch: %v", unexpectedErr), ctx.BatchRepo)
-		return
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling sample batch: %v", unexpectedErr), bv.BatchRepo)
+		return nil
 	}
 
-	records, unexpectedErr := validateSamplesBatch(ctx, cache, samplesbatch)
+	records, unexpectedErr := validateSamplesBatch(ctx, bv, cache, samplesbatch)
 	if unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error sample batch validation: %v", unexpectedErr), ctx.BatchRepo)
-		return
+		if errors.Is(unexpectedErr, context.Canceled) {
+			return unexpectedErr
+		}
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error sample batch validation: %v", unexpectedErr), bv.BatchRepo)
+		return nil
 	}
 
 	glog.Infof("Sample batch %v processed with %d records", batch.ID, len(records))
 
-	err := persistBatchAndSampleRecords(db, batch, records)
-	if err != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing sample batch records: %v", err), ctx.BatchRepo)
-		return
+	if err := persistBatchAndSampleRecords(ctx, db, batch, records); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return err
+		}
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing sample batch records: %v", err), bv.BatchRepo)
+		return nil
 	}
+	return nil
 }
 
-func persistBatchAndSampleRecords(db *gorm.DB, batch *types.Batch, records []*SampleValidationRecord) error {
-	return db.Transaction(func(tx *gorm.DB) error {
+func persistBatchAndSampleRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SampleValidationRecord) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		txRepoSample := repository.NewSamplesRepository(tx)
 		txRepoBatch := repository.NewBatchRepository(tx)
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(batch, records, txRepoBatch)
@@ -317,15 +325,18 @@ func (r *SampleValidationRecord) validateHistologyCode() error {
 	return nil
 }
 
-func validateSamplesBatch(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, samples []types.SampleBatch) ([]*SampleValidationRecord, error) {
+func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, samples []types.SampleBatch) ([]*SampleValidationRecord, error) {
 	records := make([]*SampleValidationRecord, 0, len(samples))
 	samplesMap := samplesMap(samples)
 	seenSamples := make(map[SampleKey]struct{})
 
 	for index, sample := range samples {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		record := &SampleValidationRecord{
 			BaseValidationRecord: batchval.BaseValidationRecord{
-				Context: ctx,
+				Context: bv,
 				Cache:   cache,
 				Index:   index,
 			},

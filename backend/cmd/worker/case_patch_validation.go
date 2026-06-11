@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/golang/glog"
@@ -183,34 +185,41 @@ func validatePatchTasks(ctx *batchval.BatchValidationContext, cache *batchval.Ba
 // processPatchCaseBatch handles PATCH /cases/batch: it links existing
 // sequencing experiments to an existing case (case_has_sequencing_experiment). It never
 // creates the case — a missing case is CASE-012, a missing experiment is SEQ-007.
-func processPatchCaseBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+func processPatchCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	var patches []types.CaseBatchPatch
 	if err := json.Unmarshal([]byte(batch.Payload), &patches); err != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling patch_case batch: %v", err), ctx.BatchRepo)
-		return
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling patch_case batch: %v", err), bv.BatchRepo)
+		return nil
 	}
 
-	cache := batchval.NewBatchValidationCache(ctx)
+	cache := batchval.NewBatchValidationCache(bv)
 	var records []*PatchCaseValidationRecord
 	for i, p := range patches {
-		rec, err := validatePatchCaseRecord(ctx, cache, p, i)
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		rec, err := validatePatchCaseRecord(bv, cache, p, i)
 		if err != nil {
-			batchval.ProcessUnexpectedError(batch, fmt.Errorf("error validating patch_case batch: %v", err), ctx.BatchRepo)
-			return
+			batchval.ProcessUnexpectedError(batch, fmt.Errorf("error validating patch_case batch: %v", err), bv.BatchRepo)
+			return nil
 		}
 		records = append(records, rec)
 	}
 
 	glog.Infof("Patch_case batch %v processed with %d records", batch.ID, len(records))
 
-	if err := persistBatchAndPatchCaseRecords(db, batch, records); err != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing patch_case batch records: %v", err), ctx.BatchRepo)
-		return
+	if err := persistBatchAndPatchCaseRecords(ctx, db, batch, records); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return err
+		}
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing patch_case batch records: %v", err), bv.BatchRepo)
+		return nil
 	}
+	return nil
 }
 
-func persistBatchAndPatchCaseRecords(db *gorm.DB, batch *types.Batch, records []*PatchCaseValidationRecord) error {
-	return db.Transaction(func(tx *gorm.DB) error {
+func persistBatchAndPatchCaseRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*PatchCaseValidationRecord) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		batchRepo := repository.NewBatchRepository(tx)
 		rowsUpdated, err := batchval.UpdateBatch(batch, records, batchRepo)
 		if err != nil {

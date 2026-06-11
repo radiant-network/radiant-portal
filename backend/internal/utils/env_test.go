@@ -3,7 +3,29 @@ package utils
 import (
 	"os"
 	"testing"
+	"time"
 )
+
+func Test_ShutdownTimeout_Default(t *testing.T) {
+	os.Unsetenv("SHUTDOWN_TIMEOUT_SECONDS")
+	if got := ShutdownTimeout(); got != 30*time.Second {
+		t.Errorf("ShutdownTimeout() unset = %v; want %v", got, 30*time.Second)
+	}
+}
+
+func Test_ShutdownTimeout_Override(t *testing.T) {
+	t.Setenv("SHUTDOWN_TIMEOUT_SECONDS", "5")
+	if got := ShutdownTimeout(); got != 5*time.Second {
+		t.Errorf("ShutdownTimeout()=5 = %v; want %v", got, 5*time.Second)
+	}
+}
+
+func Test_ShutdownTimeout_InvalidFallsBackToDefault(t *testing.T) {
+	t.Setenv("SHUTDOWN_TIMEOUT_SECONDS", "not-a-number")
+	if got := ShutdownTimeout(); got != 30*time.Second {
+		t.Errorf("ShutdownTimeout()=invalid = %v; want %v", got, 30*time.Second)
+	}
+}
 
 func Test_GetEnvOrDefault_Exists(t *testing.T) {
 	key := "TEST_ENV_KEY_EXISTS"
