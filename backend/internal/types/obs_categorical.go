@@ -15,6 +15,7 @@ type ObsCategorical struct {
 	InterpretationCode string
 	Interpretation     ObservationInterpretation `gorm:"foreignKey:code;references:InterpretationCode"`
 	Note               string
+	TenantCode         string
 }
 
 type PhenotypeObsCategorical struct {

@@ -8,6 +8,7 @@ type ObsString struct {
 	Patient         Patient `gorm:"foreignKey:ID;references:PatientID"`
 	ObservationCode string
 	Value           string
+	TenantCode      string
 }
 
 var ObsStringTable = Table{

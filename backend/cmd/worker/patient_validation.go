@@ -242,7 +242,7 @@ func insertPatientRecords(records []*PatientValidationRecord, repo patientStore)
 			patient := types.Patient{
 				SubmitterPatientId:     record.Patient.SubmitterPatientId.String(),
 				OrganizationCode:       record.OrganizationCode,
-				TenantCode:             DefaultTenantCode,
+				TenantCode:             types.DefaultTenantCode,
 				SubmitterPatientIdType: record.Patient.SubmitterPatientIdType.String(),
 				FirstName:              record.Patient.FirstName.String(),
 				LastName:               record.Patient.LastName.String(),

@@ -78,6 +78,7 @@ type InterpretationCommonDAO struct {
 	UpdatedBy      string
 	UpdatedByName  string
 	UpdatedAt      time.Time
+	TenantCode     string
 }
 
 type InterpretationGermlineDAO struct {

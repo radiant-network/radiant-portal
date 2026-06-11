@@ -39,6 +39,7 @@ func Test_CreateFamilyHistory_OK(t *testing.T) {
 			PatientID:        1,
 			FamilyMemberCode: "aunt",
 			Condition:        "Breast cancer",
+			TenantCode:       types.DefaultTenantCode,
 		}
 
 		repo := NewFamilyHistoryRepository(db)
@@ -73,6 +74,7 @@ func Test_CreateFamilyHistory_CaseNotFound(t *testing.T) {
 			PatientID:        1,
 			FamilyMemberCode: "aunt",
 			Condition:        "Breast cancer",
+			TenantCode:       types.DefaultTenantCode,
 		}
 
 		repo := NewFamilyHistoryRepository(db)
@@ -93,6 +95,7 @@ func Test_CreateFamilyHistory_PatientNotFound(t *testing.T) {
 			PatientID:        9876,
 			FamilyMemberCode: "aunt",
 			Condition:        "Breast cancer",
+			TenantCode:       types.DefaultTenantCode,
 		}
 
 		repo := NewFamilyHistoryRepository(db)

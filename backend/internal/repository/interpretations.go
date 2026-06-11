@@ -97,6 +97,8 @@ func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation 
 		UpdatedBy:     interpretation.UpdatedBy,
 		UpdatedByName: interpretation.UpdatedByName,
 		UpdatedAt:     interpretation.UpdatedAt,
+		// TODO(multi-tenant): set from the active tenant once writes read it from context.
+		TenantCode: types.DefaultTenantCode,
 	}
 	for _, v := range interpretation.Pubmed {
 		citation, _ := r.pubmedClient.GetCitationById(v.CitationID)

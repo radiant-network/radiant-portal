@@ -20,11 +20,6 @@ import (
 const TextMaxLength = 100
 const NoteMaxLength = 1000
 
-// DefaultTenantCode is the single tenant every batch-ingested record is attached to.
-// TODO(multi-tenant): once the REST API is split per tenant (path prefix), derive the
-// tenant from the request context instead of hardcoding it here.
-const DefaultTenantCode = "radiant"
-
 // Regular expressions for external IDs (Ex: SubmitterPatientId, JHN).
 const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
 
@@ -1358,7 +1353,7 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 		OrderingPhysician:        cr.Case.OrderingPhysician,
 		SubmitterCaseID:          cr.Case.SubmitterCaseId,
 		Note:                     cr.Case.Note,
-		TenantCode:               DefaultTenantCode,
+		TenantCode:               types.DefaultTenantCode,
 		OrderingOrganizationCode: &cr.Case.OrderingOrganizationCode,
 		DiagnosisLabCode:         &cr.Case.DiagnosticLabCode,
 	}
@@ -1435,6 +1430,7 @@ func persistFamily(ctx *StorageContext, cr *CaseValidationRecord) error {
 			FamilyMemberID:            patient.ID,
 			RelationshipToProbandCode: p.RelationToProbandCode,
 			AffectedStatusCode:        p.AffectedStatusCode,
+			TenantCode:                types.DefaultTenantCode,
 		}
 		if err := ctx.FamilyRepo.CreateFamily(&familyMember); err != nil {
 			return fmt.Errorf("failed to persist family member %q for case %d: %w", p.SubmitterPatientId, cr.Index, err)
@@ -1462,6 +1458,7 @@ func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord
 				OnsetCode:          o.OnsetCode,
 				InterpretationCode: o.InterpretationCode,
 				Note:               o.Note,
+				TenantCode:         types.DefaultTenantCode,
 			}
 
 			if err := ctx.ObsCatRepo.CreateObservationCategorical(&obs); err != nil {
@@ -1487,6 +1484,7 @@ func persistObservationText(ctx *StorageContext, cr *CaseValidationRecord) error
 				PatientID:       patient.ID,
 				ObservationCode: o.Code,
 				Value:           o.Value,
+				TenantCode:      types.DefaultTenantCode,
 			}
 
 			if err := ctx.ObsStringRepo.CreateObservationString(&obs); err != nil {
@@ -1512,6 +1510,7 @@ func persistFamilyHistory(ctx *StorageContext, cr *CaseValidationRecord) error {
 				PatientID:        patient.ID,
 				FamilyMemberCode: o.FamilyMemberCode,
 				Condition:        o.Condition,
+				TenantCode:       types.DefaultTenantCode,
 			}
 
 			if err := ctx.FamilyHistoryRepo.CreateFamilyHistory(&familyHistory); err != nil {
@@ -1529,6 +1528,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 			PipelineName:    t.PipelineName,
 			PipelineVersion: t.PipelineVersion,
 			GenomeBuild:     t.GenomeBuild,
+			TenantCode:      types.DefaultTenantCode,
 		}
 		err := ctx.TaskRepo.CreateTask(&task)
 		if err != nil {
@@ -1583,6 +1583,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 				Size:             *doc.Size,
 				Url:              doc.Url,
 				Hash:             doc.Hash,
+				TenantCode:       types.DefaultTenantCode,
 			}
 			err := ctx.DocRepo.CreateDocument(&d)
 			if err != nil {

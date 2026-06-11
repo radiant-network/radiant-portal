@@ -77,6 +77,7 @@ type Batch struct {
 	Payload    string       `json:"payload"`
 	Summary    BatchSummary `gorm:"column:summary;type:jsonb"`
 	Report     BatchReport  `gorm:"column:report;type:jsonb"`
+	TenantCode string       `gorm:"column:tenant_code" json:"-"`
 }
 
 var BatchTable = Table{

@@ -352,8 +352,8 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 		/* This test verifies that rollback occurs when there is an error inserting patient records. */
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'RUNNING', ?, false, 'user999', '2025-10-09')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'RUNNING', ?, false, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
 		`, "{}", types.PatientBatchType).Scan(&id).Error
 		if initErr != nil {

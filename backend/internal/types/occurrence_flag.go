@@ -24,6 +24,7 @@ type OccurrenceFlag struct {
 	SeqID        int                `gorm:"primaryKey;column:seq_id"         json:"seq_id"        validate:"required"`
 	TaskID       int                `gorm:"primaryKey;column:task_id"        json:"task_id"       validate:"required"`
 	FlagType     OccurrenceFlagType `gorm:"column:flag_type"                 json:"flag_type"     validate:"required,oneof=flag pin star" enums:"flag,pin,star"`
+	TenantCode   string             `gorm:"column:tenant_code"               json:"-"`
 }
 
 func (OccurrenceFlag) TableName() string {

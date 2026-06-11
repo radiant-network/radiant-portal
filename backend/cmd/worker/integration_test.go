@@ -21,8 +21,8 @@ import (
 func insertPayloadAndProcessBatch(db *gorm.DB, payload string, status types.BatchStatus, batchType string, dryRun bool, username string, createdOn string) string {
 	var id string
 	initErr := db.Raw(`
-   		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-   		VALUES (?, ?, ?, ?, ?, ?)
+   		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+   		VALUES (?, ?, ?, ?, ?, ?, 'radiant')
    		RETURNING id;
 		`, payload, string(status), batchType, dryRun, username, createdOn).Scan(&id).Error
 	if initErr != nil {
@@ -63,8 +63,8 @@ func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
 		`, payload, types.PatientBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -115,8 +115,8 @@ func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
 		`, payload, types.PatientBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -161,8 +161,8 @@ func Test_ProcessBatch_Patient_Errors(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
 		`, payload, types.PatientBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -274,8 +274,8 @@ func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
 		`, payload, types.PatientBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -324,8 +324,8 @@ func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
         `
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -372,8 +372,8 @@ func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
         `
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -425,8 +425,8 @@ func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
         `
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -468,8 +468,8 @@ func Test_ProcessBatch_Sample_Existing_Different_Field_Warning(t *testing.T) {
         `
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -506,8 +506,8 @@ func Test_ProcessBatch_Sample_Patient_Not_Exist(t *testing.T) {
         `
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -542,8 +542,8 @@ func Test_ProcessBatch_Sample_Organization_Not_Exist(t *testing.T) {
         `
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -588,8 +588,8 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
         `
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -641,8 +641,8 @@ func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
         `
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -694,8 +694,8 @@ func Test_ProcessBatch_Sample_Unknown_Parent_Sample(t *testing.T) {
         `
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -738,8 +738,8 @@ func Test_ProcessBatch_Sample_Invalid_Patient_For_Parent_Sample(t *testing.T) {
         `
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -783,8 +783,8 @@ func Test_ProcessBatch_Sample_Duplicate_In_Batch(t *testing.T) {
         `
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -820,8 +820,8 @@ func Test_ProcessBatch_Sample_Field_Too_Long(t *testing.T) {
         `, longString)
 		var id string
 		initErr := db.Raw(`
-            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09')
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
             RETURNING id;
         `, payload, types.SampleBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -918,8 +918,8 @@ func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, true, 'user123', '2025-12-04')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, true, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
 		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -970,8 +970,8 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
 		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -1046,8 +1046,8 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
 		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -1069,8 +1069,8 @@ func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
 		assert.Equal(t, int64(1), count)
 
 		if err := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
 		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error; err != nil {
 			t.Fatal("failed to insert data:", initErr)
@@ -1118,8 +1118,8 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
 		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -1159,8 +1159,8 @@ func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
 		]
 		`
 		if err := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
 		`, diff, types.SequencingExperimentBatchType).Scan(&id).Error; err != nil {
 			t.Fatal("failed to insert data:", initErr)
@@ -1212,8 +1212,8 @@ func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
 		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -1270,8 +1270,8 @@ func Test_ProcessBatch_SequencingExperiment_Errors_InvalidOrgs(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
 		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -1342,8 +1342,8 @@ func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
     		RETURNING id;
 		`, payload, types.SequencingExperimentBatchType).Scan(&id).Error
 		if initErr != nil {
@@ -1502,8 +1502,8 @@ func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
 		`
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES (?, 'PENDING', 'unsupported_type', true, 'user999', '2025-10-09')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', 'unsupported_type', true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
 		`, payload).Scan(&id).Error
 		if initErr != nil {

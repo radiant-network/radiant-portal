@@ -47,6 +47,7 @@ func Test_CreateObservationCategorical_OK(t *testing.T) {
 			OnsetCode:          "unknown",
 			InterpretationCode: "negative",
 			Note:               "Super note",
+			TenantCode:         types.DefaultTenantCode,
 		}
 
 		repo := NewObservationCategoricalRepository(db)
@@ -89,6 +90,7 @@ func Test_CreateObservationCategorical_CaseNotFound(t *testing.T) {
 			OnsetCode:          "unknown",
 			InterpretationCode: "negative",
 			Note:               "Super note",
+			TenantCode:         types.DefaultTenantCode,
 		}
 
 		repo := NewObservationCategoricalRepository(db)
@@ -113,6 +115,7 @@ func Test_CreateObservationCategorical_PatientNotFound(t *testing.T) {
 			OnsetCode:          "unknown",
 			InterpretationCode: "negative",
 			Note:               "Super note",
+			TenantCode:         types.DefaultTenantCode,
 		}
 
 		repo := NewObservationCategoricalRepository(db)

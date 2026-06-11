@@ -18,8 +18,8 @@ func Test_Process_Unexpected_Errors(t *testing.T) {
 
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES ('{"unmarshalled_json":true}', 'RUNNING', 'patient', true, 'user999', '2025-10-09')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES ('{"unmarshalled_json":true}', 'RUNNING', 'patient', true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
 		`).Scan(&id).Error
 		if initErr != nil {
