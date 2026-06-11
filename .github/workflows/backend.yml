@@ -60,7 +60,7 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: ${{ runner.os }}-go-build-${{ hashFiles('backend/go.mod') }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('backend/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-build-
 
@@ -68,8 +68,8 @@ jobs:
         run: go mod download
         working-directory: ./backend
 
-      - name: Ensure dependencies are up-to-date
-        run: go mod tidy
+      - name: Verify module checksums
+        run: go mod verify
         working-directory: ./backend
 
       - name: Build
@@ -115,13 +115,11 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: ${{ runner.os }}-go-itest-${{ hashFiles('backend/go.mod') }}
+          key: ${{ runner.os }}-go-itest-${{ hashFiles('backend/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-itest-
-      - name: Tidy and Install dependencies
-        run: |
-          go mod tidy
-          go mod download
+      - name: Install dependencies
+        run: go mod download
         working-directory: ./backend
       - name: Install gotestsum
         run: go install gotest.tools/gotestsum@v1.13.0
@@ -155,8 +153,10 @@ jobs:
       - name: Install dependencies
         run: go mod download
         working-directory: ./backend
-      - name: Ensure dependencies are up-to-date
-        run: go mod tidy
+      - name: Verify go.mod/go.sum are tidy
+        run: |
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
         working-directory: ./backend
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9

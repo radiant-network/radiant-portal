@@ -33,9 +33,6 @@ vendor/
 .DS_Store
 Thumbs.db
 
-# Go modules
-go.sum
-
 # binary
 bin/
 
