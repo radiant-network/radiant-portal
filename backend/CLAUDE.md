@@ -126,6 +126,7 @@ Copy `.env.template` → `.env`. Key variables:
 | `DB_HOST/PORT/NAME/USERNAME/PASSWORD` | StarRocks | localhost:9030 |
 | `DB_SSL_CA` | Path to CA bundle to enable TLS to StarRocks; unset = plaintext | — |
 | `PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD` | PostgreSQL | localhost:5432 |
+| `REQUIRE_DB_TLS` | Fail fast at startup if a DB connection wouldn't be encrypted. When `true`, requires `DB_SSL_CA` set (or `DB_SSL_MODE=true`/`skip-verify`) **and** `PGSSLMODE` ∈ {`require`,`verify-ca`,`verify-full`}; otherwise the process exits. Off by default so local dev (plaintext) is unaffected; set `true` in prod manifests. Asserted in `internal/database/tls.go`. | false |
 | `API_PORT` | API listen port | 8090 |
 | `KEYCLOAK_HOST/REALM/CLIENT` | Keycloak | localhost:8080 |
 | `TENANT_ENFORCEMENT_ENABLED` | Enforce tenant membership on `/{tenant}/*` routes (403 on cross-tenant). Off by default so routing can ship before `user_role` is backfilled; set `true` once it is. | false |

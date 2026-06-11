@@ -115,6 +115,9 @@ func promptPassword() (string, error) {
 // godotenv/autoload). Against the compose stack, set DB_SSL_MODE=skip-verify so the
 // StarRocks connection uses TLS without cert validation (the stack enables SSL).
 func buildDeps() (service.AdminDeps, error) {
+	if err := database.AssertTLSRequirement(); err != nil {
+		return service.AdminDeps{}, err
+	}
 	pg, err := database.NewPostgresDB()
 	if err != nil {
 		return service.AdminDeps{}, fmt.Errorf("connect postgres: %w", err)
