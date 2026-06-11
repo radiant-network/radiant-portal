@@ -59,6 +59,14 @@ All commits must follow conventional commit format enforced by CommitLint + Husk
 type(scope): SJRA-### message
 ```
 
+### Pull Request Convention
+
+When opening a PR, fill in the repository's PR template:
+- **Backend** changes → use [`.github/pull_request_template.md`](.github/pull_request_template.md)
+- **Frontend** changes → use [`frontend/.github/pull_request_template.md`](frontend/.github/pull_request_template.md)
+
+Keep the template's section headings (Context, Changes, TO-DOs, Tests, Related Issues, Notes for Reviewers) and the `<!-- Begin/End JIRA Issues -->` markers intact, listing the relevant `SJRA-###` keys between them.
+
 ## Architecture
 
 ### Backend ↔ Frontend Integration
