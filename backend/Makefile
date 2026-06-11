@@ -5,14 +5,10 @@ all: build test
 
 install:
 	@echo "Installing dependencies..."
-
-
 	@go mod tidy
 
 build:
 	@echo "Building API..."
-
-
 	@go build -o bin/api/ ./cmd/api/
 
 # Run the application
@@ -21,8 +17,6 @@ run:
 
 build-worker:
 	@echo "Building Worker..."
-
-
 	@go build -o bin/worker/ ./cmd/worker/
 
 # Run the worker
