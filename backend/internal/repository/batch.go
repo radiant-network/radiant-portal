@@ -38,6 +38,8 @@ func (r *BatchRepository) CreateBatch(payload any, batchType string, username st
 		Username:  username,
 		Payload:   string(jsonPayload),
 		CreatedOn: time.Now(),
+		// TODO(multi-tenant): set from the active tenant once writes read it from context.
+		TenantCode: types.DefaultTenantCode,
 	}
 	if err := r.db.Create(newBatch).Error; err != nil {
 		return nil, fmt.Errorf("error creating batch: %w", err)

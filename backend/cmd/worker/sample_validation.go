@@ -216,7 +216,7 @@ func insertSampleRecords(records []*SampleValidationRecord, repo sampleStore) er
 				TissueSite:        record.Sample.TissueSite.String(),
 				HistologyCode:     record.Sample.HistologyCode,
 				OrganizationCode:  record.OrganizationCode,
-				TenantCode:        DefaultTenantCode,
+				TenantCode:        types.DefaultTenantCode,
 				PatientID:         record.PatientId,
 				ParentSampleID:    parentSampleId,
 			}

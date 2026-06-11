@@ -497,8 +497,8 @@ func Test_ProcessBatch_Case_validateDocument_Warning_PartiallyDifferentDocumentE
 		doc := payload[0].Tasks[0].OutputDocuments[0]
 
 		db.Exec(`
-            INSERT INTO document (name, data_category_code, data_type_code, format_code, size, url, hash)
-            VALUES (?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO document (name, data_category_code, data_type_code, format_code, size, url, hash, tenant_code)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'radiant');
         `,
 			doc.Name,
 			doc.DataCategoryCode,

@@ -8,6 +8,7 @@ type FamilyHistory struct {
 	Patient          Patient `gorm:"foreignKey:ID;references:PatientID"`
 	FamilyMemberCode string
 	Condition        string
+	TenantCode       string
 }
 
 var FamilyHistoryTable = Table{

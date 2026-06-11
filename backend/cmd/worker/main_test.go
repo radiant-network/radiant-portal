@@ -82,8 +82,8 @@ func Test_processBatch_RequeuesInflightBatchOnCancel(t *testing.T) {
 		var id string
 		// created_on far in the past so ClaimNextBatch (oldest-first) picks this batch.
 		insertErr := db.Raw(`
-			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-			VALUES (?, 'PENDING', ?, true, 'user-requeue', '2000-01-01')
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+			VALUES (?, 'PENDING', ?, true, 'user-requeue', '2000-01-01', 'radiant')
 			RETURNING id;
 		`, payload, types.PatientBatchType).Scan(&id).Error
 		if insertErr != nil {

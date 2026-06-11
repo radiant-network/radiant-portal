@@ -39,6 +39,7 @@ func Test_CreateObservationString_OK(t *testing.T) {
 			PatientID:       1,
 			ObservationCode: "phenotype",
 			Value:           "HP:00314159",
+			TenantCode:      types.DefaultTenantCode,
 		}
 
 		repo := NewObservationStringRepository(db)
@@ -73,6 +74,7 @@ func Test_CreateObservationString_CaseNotFound(t *testing.T) {
 			PatientID:       1,
 			ObservationCode: "phenotype",
 			Value:           "HP:00314159",
+			TenantCode:      types.DefaultTenantCode,
 		}
 
 		repo := NewObservationStringRepository(db)
@@ -93,6 +95,7 @@ func Test_CreateObservationString_PatientNotFound(t *testing.T) {
 			PatientID:       9876,
 			ObservationCode: "phenotype",
 			Value:           "HP:00314159",
+			TenantCode:      types.DefaultTenantCode,
 		}
 
 		repo := NewObservationStringRepository(db)

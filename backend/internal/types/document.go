@@ -15,6 +15,7 @@ type Document struct {
 	Url              string
 	Hash             string
 	CreatedOn        time.Time `gorm:"autoCreateTime"`
+	TenantCode       string
 }
 
 type DocumentResult struct {

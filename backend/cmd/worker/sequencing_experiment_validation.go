@@ -339,7 +339,7 @@ func insertSequencingExperimentRecords(records []*SequencingExperimentValidation
 				ExperimentalStrategyCode:     record.SequencingExperiment.ExperimentalStrategyCode,
 				SequencingReadTechnologyCode: record.SequencingExperiment.SequencingReadTechnologyCode,
 				PlatformCode:                 record.SequencingExperiment.PlatformCode,
-				TenantCode:                   DefaultTenantCode,
+				TenantCode:                   types.DefaultTenantCode,
 				SequencingLabCode:            record.SequencingExperiment.SequencingLabCode,
 			}
 

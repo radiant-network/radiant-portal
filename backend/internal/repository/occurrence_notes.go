@@ -23,6 +23,8 @@ func NewOccurrenceNotesRepository(db *gorm.DB) *OccurrenceNotesRepository {
 }
 
 func (r *OccurrenceNotesRepository) Create(note types.OccurrenceNote) (*types.OccurrenceNote, error) {
+	// TODO(multi-tenant): set from the active tenant once writes read it from context.
+	note.TenantCode = types.DefaultTenantCode
 	if err := r.db.Create(&note).Error; err != nil {
 		return nil, fmt.Errorf("error creating occurrence note: %w", err)
 	}

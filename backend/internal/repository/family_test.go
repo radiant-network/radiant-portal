@@ -20,6 +20,7 @@ func Test_GetFamilyById_OK(t *testing.T) {
 			FamilyMemberID:            1,
 			RelationshipToProbandCode: "mother",
 			AffectedStatusCode:        "affected",
+			TenantCode:                types.DefaultTenantCode,
 		}
 
 		assert.NoError(t, err)
@@ -44,6 +45,7 @@ func Test_CreateFamily_OK(t *testing.T) {
 			FamilyMemberID:            1,
 			RelationshipToProbandCode: "mother",
 			AffectedStatusCode:        "affected",
+			TenantCode:                types.DefaultTenantCode,
 		}
 
 		repo := NewFamilyRepository(db)

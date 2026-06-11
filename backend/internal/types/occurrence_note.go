@@ -22,6 +22,7 @@ type OccurrenceNote struct {
 	CreatedAt    time.Time `gorm:"column:created_at;autoCreateTime" json:"created_at" validate:"required"`
 	UpdatedAt    time.Time `gorm:"column:updated_at;autoUpdateTime" json:"updated_at" validate:"required"`
 	Deleted      bool      `gorm:"column:deleted;default:false"     json:"-"`
+	TenantCode   string    `gorm:"column:tenant_code"               json:"-"`
 }
 
 func (OccurrenceNote) TableName() string {

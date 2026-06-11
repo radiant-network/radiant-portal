@@ -10,6 +10,7 @@ type Family struct {
 	RelationshipToProband     FamilyRelationship `gorm:"foreignKey:code;references:RelationshipToProbandCode"`
 	AffectedStatusCode        string
 	AffectedStatus            AffectedStatus `gorm:"foreignKey:Code;references:AffectedStatusCode"`
+	TenantCode                string
 }
 
 var FamilyTable = Table{

@@ -20,6 +20,7 @@ func Test_CreateAndGetTask_OK(t *testing.T) {
 			PipelineName:    "dragen",
 			PipelineVersion: "4.4.4",
 			GenomeBuild:     "GRch38",
+			TenantCode:      types.DefaultTenantCode,
 		}
 
 		// Test Create
@@ -290,9 +291,9 @@ func Test_ListTasksByCaseSeqAndTaskType_SortedByCreatedOnDesc(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		require.NoError(t, db.Exec(`
-			INSERT INTO task (id, task_type_code, pipeline_name, pipeline_version, genome_build, created_on) VALUES
-				(91001, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2024-01-01 00:00:00'),
-				(91002, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2025-01-01 00:00:00');
+			INSERT INTO task (id, task_type_code, pipeline_name, pipeline_version, genome_build, created_on, tenant_code) VALUES
+				(91001, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2024-01-01 00:00:00', 'radiant'),
+				(91002, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2025-01-01 00:00:00', 'radiant');
 			INSERT INTO task_context (task_id, sequencing_experiment_id, case_id) VALUES
 				(91001, 1, 1),
 				(91002, 1, 1);
@@ -316,8 +317,8 @@ func Test_ListTasksByCaseSeqAndTaskType_ExcludesTaskAttachedToDifferentCase(t *t
 		// Insert a right-type task attached to (case=70, seq=70). Case 70 + seq 70
 		// is a real case_has_sequencing_experiment pair, so the FK is satisfied.
 		require.NoError(t, db.Exec(`
-			INSERT INTO task (id, task_type_code, pipeline_name, pipeline_version, genome_build, created_on)
-				VALUES (91003, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2025-01-01 00:00:00');
+			INSERT INTO task (id, task_type_code, pipeline_name, pipeline_version, genome_build, created_on, tenant_code)
+				VALUES (91003, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2025-01-01 00:00:00', 'radiant');
 			INSERT INTO task_context (task_id, sequencing_experiment_id, case_id)
 				VALUES (91003, 70, 70);
 		`).Error)
@@ -349,9 +350,9 @@ func Test_ListTasksByCaseSeqAndTaskType_CaseAgnosticTaskReturnedForBothCasesShar
 			-- Make seq 1 (already linked to case 1 in seed) also linked to case 70.
 			INSERT INTO case_has_sequencing_experiment (sequencing_experiment_id, case_id) VALUES (1, 70);
 
-			INSERT INTO task (id, task_type_code, pipeline_name, pipeline_version, genome_build, created_on) VALUES
-				(91010, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2024-01-01 00:00:00'),
-				(91011, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2025-01-01 00:00:00');
+			INSERT INTO task (id, task_type_code, pipeline_name, pipeline_version, genome_build, created_on, tenant_code) VALUES
+				(91010, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2024-01-01 00:00:00', 'radiant'),
+				(91011, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2025-01-01 00:00:00', 'radiant');
 
 			INSERT INTO task_context (task_id, sequencing_experiment_id, case_id) VALUES
 				(91010, 1, NULL),  -- case-agnostic on seq 1

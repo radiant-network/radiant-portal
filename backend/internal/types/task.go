@@ -36,6 +36,7 @@ type Task struct {
 	PipelineVersion string
 	GenomeBuild     string
 	CreatedOn       time.Time `gorm:"autoCreateTime"`
+	TenantCode      string
 }
 
 type TaskContext struct {

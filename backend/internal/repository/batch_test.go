@@ -44,8 +44,8 @@ func Test_GetBatchByID_Success(t *testing.T) {
 		repo := NewBatchRepository(db)
 		batchId := uuid.NewString()
 		initErr := db.Exec(`
-            INSERT INTO batch (id, payload, status, batch_type, dry_run, username, created_on) VALUES
-            (?, '{}', ?, 'patient', true, 'user1', now())
+            INSERT INTO batch (id, payload, status, batch_type, dry_run, username, created_on, tenant_code) VALUES
+            (?, '{}', ?, 'patient', true, 'user1', now(), 'radiant')
         `, batchId, types.BatchStatusSuccess).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
@@ -95,9 +95,9 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 		repo := NewBatchRepository(db)
 		// Add two pending batches
 		initErr := db.Exec(`
-			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on) VALUES
-            ('{}', ?, 'patient', true, 'user1', '2025-10-09'),
-            ('{}', ?, 'sample', false, 'user2', '2025-11-09')
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code) VALUES
+            ('{}', ?, 'patient', true, 'user1', '2025-10-09', 'radiant'),
+            ('{}', ?, 'sample', false, 'user2', '2025-11-09', 'radiant')
 		`, types.BatchStatusPending, types.BatchStatusPending).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
@@ -123,8 +123,8 @@ func Test_UpdateBatch(t *testing.T) {
 
 		var id string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on)
-    		VALUES ('{}', ?, 'patient', true, 'user999', '2025-10-09')
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES ('{}', ?, 'patient', true, 'user999', '2025-10-09', 'radiant')
     		RETURNING id;
 		`, types.BatchStatusRunning).Scan(&id).Error
 		if initErr != nil {
@@ -153,8 +153,8 @@ func Test_ReleaseBatch_ResetsRunningToPending(t *testing.T) {
 
 		var id string
 		initErr := db.Raw(`
-			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on)
-			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now())
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
+			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now(), 'radiant')
 			RETURNING id;
 		`, types.BatchStatusRunning).Scan(&id).Error
 		if initErr != nil {
@@ -179,8 +179,8 @@ func Test_ReleaseBatch_IgnoresNonRunning(t *testing.T) {
 
 		var id string
 		initErr := db.Raw(`
-			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on)
-			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now())
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
+			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now(), 'radiant')
 			RETURNING id;
 		`, types.BatchStatusSuccess).Scan(&id).Error
 		if initErr != nil {
@@ -207,10 +207,10 @@ func Test_UpdateStuckBatch(t *testing.T) {
 
 		var ids []string
 		initErr := db.Raw(`
-    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on)
-    		VALUES ('{}', ?, 'patient', true, 'user999', '2025-10-09', ?),
-				('{}', ?, 'sample', false, 'user999', '2025-10-09', ?),
-				('{}', ?, 'case', true, 'user999', '2025-10-09', ?)
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
+    		VALUES ('{}', ?, 'patient', true, 'user999', '2025-10-09', ?, 'radiant'),
+				('{}', ?, 'sample', false, 'user999', '2025-10-09', ?, 'radiant'),
+				('{}', ?, 'case', true, 'user999', '2025-10-09', ?, 'radiant')
     		RETURNING id;
 		`, types.BatchStatusRunning, timeMoreThan24hAgo,
 			types.BatchStatusPending, timeMoreThan24hAgo,
