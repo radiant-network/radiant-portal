@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 	"time"
@@ -272,32 +274,38 @@ func verifyIsDifferentField[T comparable](left T, right T, r *SequencingExperime
 	return true
 }
 
-func processSequencingExperimentBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+func processSequencingExperimentBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	payload := []byte(batch.Payload)
 	var experimentsBatch []types.SequencingExperimentBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &experimentsBatch); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), ctx.BatchRepo)
-		return
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), bv.BatchRepo)
+		return nil
 	}
 
-	records, unexpectedErr := validateSequencingExperimentBatch(ctx, experimentsBatch)
+	records, unexpectedErr := validateSequencingExperimentBatch(ctx, bv, experimentsBatch)
 	if unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), ctx.BatchRepo)
-		return
+		if errors.Is(unexpectedErr, context.Canceled) {
+			return unexpectedErr
+		}
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), bv.BatchRepo)
+		return nil
 	}
 
 	glog.Infof("Sequencing experiment batch %v processed with %d records", batch.ID, len(records))
 
-	err := persistBatchAndSequencingExperimentRecords(db, batch, records)
-	if err != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), ctx.BatchRepo)
-		return
+	if err := persistBatchAndSequencingExperimentRecords(ctx, db, batch, records); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return err
+		}
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), bv.BatchRepo)
+		return nil
 	}
+	return nil
 }
 
-func persistBatchAndSequencingExperimentRecords(db *gorm.DB, batch *types.Batch, records []*SequencingExperimentValidationRecord) error {
-	return db.Transaction(func(tx *gorm.DB) error {
+func persistBatchAndSequencingExperimentRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SequencingExperimentValidationRecord) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		txRepoSeqExp := repository.NewSequencingExperimentRepository(tx)
 		txRepoBatch := repository.NewBatchRepository(tx)
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(batch, records, txRepoBatch)
@@ -358,18 +366,21 @@ func insertSequencingExperimentRecords(records []*SequencingExperimentValidation
 	return nil
 }
 
-func validateSequencingExperimentBatch(ctx *batchval.BatchValidationContext, seqExps []types.SequencingExperimentBatch) ([]*SequencingExperimentValidationRecord, error) {
+func validateSequencingExperimentBatch(ctx context.Context, bv *batchval.BatchValidationContext, seqExps []types.SequencingExperimentBatch) ([]*SequencingExperimentValidationRecord, error) {
 	var records []*SequencingExperimentValidationRecord
 	visited := map[batchval.SequencingExperimentKey]struct{}{}
-	cache := batchval.NewBatchValidationCache(ctx)
+	cache := batchval.NewBatchValidationCache(bv)
 
 	for index, seqExp := range seqExps {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		key := batchval.SequencingExperimentKey{
 			SampleOrganizationCode: seqExp.SampleOrganizationCode,
 			SubmitterSampleId:      seqExp.SubmitterSampleId.String(),
 			Aliquot:                seqExp.Aliquot.String(),
 		}
-		record, err := validateSequencingExperimentRecord(ctx, cache, seqExp, index)
+		record, err := validateSequencingExperimentRecord(bv, cache, seqExp, index)
 		if err != nil {
 			return nil, fmt.Errorf("error during sequencing experiment validation: %v", err)
 		}

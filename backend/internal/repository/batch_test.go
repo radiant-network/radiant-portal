@@ -146,6 +146,58 @@ func Test_UpdateBatch(t *testing.T) {
 	})
 }
 
+func Test_ReleaseBatch_ResetsRunningToPending(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewBatchRepository(db)
+
+		var id string
+		initErr := db.Raw(`
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on)
+			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now())
+			RETURNING id;
+		`, types.BatchStatusRunning).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		rowsUpdated, err := repo.ReleaseBatch(id)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, rowsUpdated)
+
+		resultBatch := Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusPending, resultBatch.Status)
+		assert.Nil(t, resultBatch.StartedOn)
+	})
+}
+
+func Test_ReleaseBatch_IgnoresNonRunning(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewBatchRepository(db)
+
+		var id string
+		initErr := db.Raw(`
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on)
+			VALUES ('{}', ?, 'patient', true, 'user-release', '2025-10-09', now())
+			RETURNING id;
+		`, types.BatchStatusSuccess).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		rowsUpdated, err := repo.ReleaseBatch(id)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0, rowsUpdated)
+
+		resultBatch := Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.NotNil(t, resultBatch.StartedOn)
+	})
+}
+
 func Test_UpdateStuckBatch(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)

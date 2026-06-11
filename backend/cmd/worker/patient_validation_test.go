@@ -392,7 +392,7 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 			},
 		}
 
-		err := persistBatchAndPatientRecords(db, &batch, patientRecords)
+		err := persistBatchAndPatientRecords(t.Context(), db, &batch, patientRecords)
 		if assert.NotNil(t, err) {
 			assert.Contains(t, err.Error(), "violates foreign key constraint")
 		}

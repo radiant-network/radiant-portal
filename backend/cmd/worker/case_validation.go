@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 	"slices"
@@ -1264,32 +1266,38 @@ func validateCaseRecord(
 	return cr, nil
 }
 
-func processCaseBatch(ctx *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) {
+func processCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	payload := []byte(batch.Payload)
 	var caseBatches []types.CaseBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &caseBatches); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), ctx.BatchRepo)
-		return
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), bv.BatchRepo)
+		return nil
 	}
 
-	records, unexpectedErr := validateCaseBatch(ctx, caseBatches)
+	records, unexpectedErr := validateCaseBatch(ctx, bv, caseBatches)
 	if unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), ctx.BatchRepo)
-		return
+		if errors.Is(unexpectedErr, context.Canceled) {
+			return unexpectedErr
+		}
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), bv.BatchRepo)
+		return nil
 	}
 
 	glog.Infof("Case batch %v processed with %d records", batch.ID, len(records))
 
-	err := persistBatchAndCaseRecords(db, batch, records)
-	if err != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), ctx.BatchRepo)
-		return
+	if err := persistBatchAndCaseRecords(ctx, db, batch, records); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return err
+		}
+		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), bv.BatchRepo)
+		return nil
 	}
+	return nil
 }
 
-func persistBatchAndCaseRecords(db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
-	return db.Transaction(func(tx *gorm.DB) error {
+func persistBatchAndCaseRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		batchRepo := repository.NewBatchRepository(tx)
 		txCtx := NewStorageContext(tx)
 		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(batch, records, batchRepo)
@@ -1596,19 +1604,22 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 	return nil
 }
 
-func validateCaseBatch(ctx *batchval.BatchValidationContext, cases []types.CaseBatch) ([]*CaseValidationRecord, error) {
+func validateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, cases []types.CaseBatch) ([]*CaseValidationRecord, error) {
 	var records []*CaseValidationRecord
-	cache := batchval.NewBatchValidationCache(ctx)
+	cache := batchval.NewBatchValidationCache(bv)
 
 	visited := map[CaseKey]struct{}{}
 
 	for idx, c := range cases {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		key := CaseKey{
 			ProjectCode:     c.ProjectCode,
 			SubmitterCaseID: c.SubmitterCaseId,
 		}
 
-		record, err := validateCaseRecord(ctx, cache, c, idx)
+		record, err := validateCaseRecord(bv, cache, c, idx)
 		if err != nil {
 			return nil, fmt.Errorf("error during case validation: %v", err)
 		}

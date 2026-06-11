@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
 // GetEnvOrDefault retrieves the value of the environment variable named by the key.
@@ -31,6 +32,18 @@ func GetBoolEnvOrDefault(key string, fallback bool) bool {
 		return fallback
 	}
 	return parsed
+}
+
+// ShutdownTimeout returns the graceful-shutdown grace period from SHUTDOWN_TIMEOUT_SECONDS
+// (default 30s). If the variable is set but not a valid integer, the default is used.
+func ShutdownTimeout() time.Duration {
+	const defaultSeconds = 30
+	secs, err := strconv.Atoi(GetEnvOrDefault("SHUTDOWN_TIMEOUT_SECONDS", strconv.Itoa(defaultSeconds)))
+	if err != nil {
+		log.Printf("WARN: environment variable SHUTDOWN_TIMEOUT_SECONDS is not a valid integer; using default %ds", defaultSeconds)
+		return defaultSeconds * time.Second
+	}
+	return time.Duration(secs) * time.Second
 }
 
 // GetEnvOrPanic retrieves the value of the environment variable named by the key.

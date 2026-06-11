@@ -1,11 +1,16 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/authorization"
@@ -292,9 +297,27 @@ func main() {
 		p = "8090"
 	}
 
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
 	r := setupRouter(dbStarrocks, dbPostgres)
-	err = r.Run(fmt.Sprintf(":%s", p))
-	if err != nil {
-		log.Fatal(err)
+	srv := &http.Server{Addr: fmt.Sprintf(":%s", p), Handler: r}
+
+	go func() {
+		glog.Infof("API server listening on :%s", p)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal(err)
+		}
+	}()
+
+	<-ctx.Done()
+	stop() // restore default signal handling so a second signal force-quits
+	glog.Info("Shutdown signal received, draining connections...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), utils.ShutdownTimeout())
+	defer cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		glog.Errorf("API server shutdown error: %v", err)
 	}
+	glog.Info("API server shut down cleanly")
 }

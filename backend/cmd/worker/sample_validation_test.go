@@ -319,7 +319,7 @@ func Test_ValidateSamplesBatch(t *testing.T) {
 		{SubmitterSampleId: "P-BATCH2", SampleOrganizationCode: "CHUSJ", PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "P1", TypeCode: "dna", HistologyCode: "normal"},                                     // 7. The grandparent for S3
 	}
 
-	records, err := validateSamplesBatch(mockContext, cache, samples)
+	records, err := validateSamplesBatch(t.Context(), mockContext, cache, samples)
 	assert.NoError(t, err)
 	assert.Len(t, records, 7) // Updated from 6 to 7 to include P-BATCH2
 

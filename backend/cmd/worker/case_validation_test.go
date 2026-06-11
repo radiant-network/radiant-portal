@@ -2098,7 +2098,7 @@ func Test_validateCaseBatch_OK(t *testing.T) {
 		TaskRepo:      &mockRepo,
 	}
 
-	vr, err := validateCaseBatch(&mockContext, []types.CaseBatch{
+	vr, err := validateCaseBatch(t.Context(), &mockContext, []types.CaseBatch{
 		{
 			ProjectCode:                "PROJ-1",
 			AnalysisCode:               "WGA",
@@ -2196,7 +2196,7 @@ func Test_validateCaseBatch_Duplicates(t *testing.T) {
 		},
 	}
 
-	vr, err := validateCaseBatch(&mockContext, []types.CaseBatch{batch, batch})
+	vr, err := validateCaseBatch(t.Context(), &mockContext, []types.CaseBatch{batch, batch})
 	assert.NoError(t, err)
 	assert.Empty(t, vr[0].Infos)
 	assert.Empty(t, vr[0].Warnings)
