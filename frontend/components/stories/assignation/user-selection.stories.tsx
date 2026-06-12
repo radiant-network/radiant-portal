@@ -127,7 +127,7 @@ const PopoverVersionComponent = () => {
         />
 
         <div className="space-y-2 rounded-lg bg-muted p-4">
-          <StoryLabel>État actuel:</StoryLabel>
+          <StoryLabel>Actual state:</StoryLabel>
           <p className="text-sm text-muted-foreground">
             {selectedUsers.length === 0
               ? 'Aucun utilisateur sélectionné'

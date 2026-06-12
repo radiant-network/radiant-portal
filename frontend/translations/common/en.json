@@ -693,7 +693,7 @@
       "search": "Search"
     },
     "unassigned_avatar": {
-      "can_assign": "Assign this prescription",
+      "can_assign": "Assign case",
       "cannot_assign": "No assignment"
     }
   },

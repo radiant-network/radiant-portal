@@ -20,6 +20,11 @@ export const avatarStyles = tv({
         fallback: 'bg-transparent',
         text: 'text-muted-foreground/60',
       },
+      assignment: {
+        container: '',
+        fallback: 'bg-transparent',
+        text: 'text-muted-foreground/60',
+      },
     },
   },
   defaultVariants: {

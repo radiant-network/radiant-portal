@@ -68,8 +68,9 @@ const sampleUsers: AvatarUser[] = [
 // Every avatar state across all 7 sizes from the primitive.
 export const Sizes: Story = {
   render: () => {
-    const states: { label: string; users: AvatarUser[] }[] = [
-      { label: 'Unassigned', users: [] },
+    const states: { label: string; users: AvatarUser[]; canAssign?: boolean }[] = [
+      { label: 'Unassigned (placeholder)', users: [] },
+      { label: 'Assignment Button', users: [], canAssign: true },
       { label: 'User Avatar', users: [sampleUsers[0]] },
       { label: 'Users without count', users: [sampleUsers[0], sampleUsers[1]] },
       { label: 'Users with count', users: sampleUsers.slice(0, 4) },
@@ -82,7 +83,7 @@ export const Sizes: Story = {
             <div className="flex items-end gap-6">
               {avatarSizes.map(size => (
                 <div key={size} className="flex flex-col items-center gap-2">
-                  <Avatar users={state.users} size={size} />
+                  <Avatar users={state.users} size={size} canAssign={state.canAssign} />
                   <span className="text-xs text-muted-foreground">{size}</span>
                 </div>
               ))}
@@ -157,6 +158,11 @@ export const AssignmentStates: Story = {
           <StoryLabel>Unassigned States</StoryLabel>
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center gap-2">
+              <Avatar users={[]} />
+              <span className="text-xs text-muted-foreground">Placeholder</span>
+            </div>
+
+            <div className="flex flex-col items-center gap-2">
               <Avatar users={[]} canAssign={true} onAssignClick={() => alert('Assign clicked!')} />
               <span className="text-xs text-muted-foreground">Can Assign</span>
             </div>
@@ -202,16 +208,25 @@ export const TableUsageExample: Story = {
         <table className="w-full">
           <thead>
             <tr className="border-b bg-muted/50">
-              <th className="text-left p-3">Prescription ID</th>
+              <th className="text-left p-3">Case ID</th>
               <th className="text-left p-3">Assigned Users</th>
               <th className="text-left p-3">Status</th>
             </tr>
           </thead>
           <tbody>
             <tr className="border-b">
+              <td className="p-3 font-mono text-sm">659001</td>
+              <td className="p-3">
+                <Avatar users={[]} />
+              </td>
+              <td className="p-3">
+                <span className="text-muted-foreground">Unassigned (placeholder)</span>
+              </td>
+            </tr>
+            <tr className="border-b">
               <td className="p-3 font-mono text-sm">666106</td>
               <td className="p-3">
-                <Avatar users={[]} canAssign={true} onAssignClick={() => alert('Assign to prescription 666106')} />
+                <Avatar users={[]} canAssign={true} onAssignClick={() => alert('Assign to case 666106')} />
               </td>
               <td className="p-3">
                 <span className="text-muted-foreground">Can Assign</span>
