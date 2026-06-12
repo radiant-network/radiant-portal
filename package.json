@@ -32,5 +32,11 @@
   },
   "dependencies": {
     "cypress": "^15.11.0"
+  },
+  "overrides": {
+    "picomatch": "^2.3.2",
+    "yaml": "^2.9.0",
+    "serialize-javascript": "^7.0.5",
+    "diff": "^8.0.3"
   }
 }
