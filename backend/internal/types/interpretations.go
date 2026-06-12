@@ -26,6 +26,7 @@ type InterpretationCommon struct {
 	UpdatedBy      string                 `json:"updated_by,omitempty"`
 	UpdatedByName  string                 `json:"updated_by_name,omitempty"`
 	UpdatedAt      time.Time              `json:"updated_at,omitempty"`
+	TenantCode     string                 `json:"-"`
 }
 
 type InterpretationGermline struct {

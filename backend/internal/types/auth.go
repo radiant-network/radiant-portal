@@ -6,12 +6,11 @@ const (
 	ActionScopeTenant = "tenant"
 )
 
-// DefaultTenantCode is the launch tenant every record is attached to until per-tenant
-// request routing lands. Both the batch worker and the API write paths set tenant_code
-// to this explicitly (migrations 000009 and 000013 add the column NOT NULL with no DB
-// default, so writes must supply it).
-// TODO(multi-tenant): once writes can read the active tenant from the request context,
-// derive tenant_code from there instead of hardcoding this constant.
+// DefaultTenantCode is the launch tenant created by migration 000009 and used to backfill
+// existing rows in 000013. Write paths now derive tenant_code from the request: API handlers
+// read the active tenant via GetTenant (the /:tenant path segment) and the worker reads it
+// from the batch being processed. This constant remains the seed/default tenant (and the
+// value test fixtures attach their rows to).
 const DefaultTenantCode = "radiant"
 
 // Action codes from the seeded auth catalog (migration 000009).

@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -17,7 +16,7 @@ import (
 func getCaseOccurrenceTasks(t *testing.T, db *gorm.DB, caseId int, seqId int, dataType string) (int, string) {
 	t.Helper()
 	repo := repository.NewTaskRepository(db)
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", server.CaseOccurrenceTasksHandler(repo))
 
 	url := fmt.Sprintf("/radiant/cases/%d/%d/tasks_with_occurrences?data_type=%s", caseId, seqId, dataType)

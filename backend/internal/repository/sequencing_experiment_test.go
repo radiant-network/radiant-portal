@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
@@ -99,7 +100,7 @@ func Test_GetSequencingExperimentByAliquotAndSubmitterSample(t *testing.T) {
 			SequencingReadTechnologyCode: "short_read",
 			CaptureKit:                   "SureSelect Custom DNA Target",
 			SequencingLabCode:            "CQGC",
-			TenantCode:                   "radiant",
+			TenantCode:                   types.DefaultTenantCode,
 			RunName:                      "1617",
 			RunAlias:                     "A00516_0169",
 		}

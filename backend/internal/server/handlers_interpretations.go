@@ -48,13 +48,19 @@ func extractArrayQueryParam(c *gin.Context, key string) []string {
 	return all
 }
 
-func fillInterpretationCommonWithContext(c *gin.Context, interpretation *types.InterpretationCommon) {
+func fillInterpretationCommonWithContext(c *gin.Context, interpretation *types.InterpretationCommon) error {
 	caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
 
 	interpretation.SequencingId = sequencingId
 	interpretation.LocusId = locusId
 	interpretation.TranscriptId = transcriptId
 	interpretation.CaseId = caseId
+
+	tenant, err := GetTenant(c)
+	if err != nil {
+		return err
+	}
+	interpretation.TenantCode = *tenant
 
 	ginToken, exist := c.Get("token")
 	if exist {
@@ -66,6 +72,7 @@ func fillInterpretationCommonWithContext(c *gin.Context, interpretation *types.I
 		interpretation.UpdatedBy = decodedJWT.Sub
 		interpretation.UpdatedByName = decodedJWT.Name
 	}
+	return nil
 }
 
 func getInterpretationStatus(interpretation *types.InterpretationCommon) int {
@@ -193,7 +200,10 @@ func PostInterpretationGermlineDeprecated(repo interpretationsStore) gin.Handler
 			return
 		}
 
-		fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon)
+		if err := fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon); err != nil {
+			HandleError(c, err)
+			return
+		}
 
 		err = repo.CreateOrUpdateGermline(interpretation)
 
@@ -238,7 +248,10 @@ func PostInterpretationGermline(repo interpretationsStore) gin.HandlerFunc {
 			return
 		}
 
-		fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon)
+		if err := fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon); err != nil {
+			HandleError(c, err)
+			return
+		}
 
 		err = repo.CreateOrUpdateGermline(interpretation)
 
@@ -364,7 +377,10 @@ func PostInterpretationSomaticDeprecated(repo interpretationsStore) gin.HandlerF
 			return
 		}
 
-		fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon)
+		if err := fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon); err != nil {
+			HandleError(c, err)
+			return
+		}
 
 		err = repo.CreateOrUpdateSomatic(interpretation)
 
@@ -408,7 +424,10 @@ func PostInterpretationSomatic(repo interpretationsStore) gin.HandlerFunc {
 			return
 		}
 
-		fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon)
+		if err := fillInterpretationCommonWithContext(c, &interpretation.InterpretationCommon); err != nil {
+			HandleError(c, err)
+			return
+		}
 
 		err = repo.CreateOrUpdateSomatic(interpretation)
 

@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
@@ -102,7 +101,7 @@ func (m *MockRepository) GetByOccurrence(caseID int, seqID int, taskID int, occu
 func Test_PostOccurrenceNoteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "Test note"}`
@@ -128,7 +127,7 @@ func Test_PostOccurrenceNoteHandler(t *testing.T) {
 func Test_PostOccurrenceNoteHandler_MissingContent(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000"}`
@@ -142,7 +141,7 @@ func Test_PostOccurrenceNoteHandler_MissingContent(t *testing.T) {
 func Test_PostOccurrenceNoteHandler_MissingTaskID(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "occurrence_id": "10000", "content": "Test note"}`
@@ -156,7 +155,7 @@ func Test_PostOccurrenceNoteHandler_MissingTaskID(t *testing.T) {
 func Test_PostOccurrenceNoteHandler_MissingCaseID(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "Test note"}`
@@ -170,7 +169,7 @@ func Test_PostOccurrenceNoteHandler_MissingCaseID(t *testing.T) {
 func Test_PostOccurrenceNoteHandler_MissingOccurrenceID(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "content": "Test note"}`
@@ -184,7 +183,7 @@ func Test_PostOccurrenceNoteHandler_MissingOccurrenceID(t *testing.T) {
 func Test_PostOccurrenceNoteHandler_ContentTooLong(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	longContent := string(make([]byte, 1001))
@@ -199,7 +198,7 @@ func Test_PostOccurrenceNoteHandler_ContentTooLong(t *testing.T) {
 func Test_PostOccurrenceNoteHandler_ContentSanitized(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "<p>Safe text</p><script>alert('xss')</script><img src=x onerror=alert(1)>"}`
@@ -216,7 +215,7 @@ func Test_PostOccurrenceNoteHandler_ContentSanitized(t *testing.T) {
 func Test_PostOccurrenceNoteHandler_ContentWithSafeHTMLPreserved(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/notes", PostOccurrenceNoteHandler(repo, auth))
 
 	body := `{"case_id": 1, "seq_id": 2, "task_id": 1, "occurrence_id": "10000", "content": "<p>Some <strong>bold</strong> text</p>"}`
@@ -230,7 +229,7 @@ func Test_PostOccurrenceNoteHandler_ContentWithSafeHTMLPreserved(t *testing.T) {
 
 func Test_GetOccurrenceNotesHandler(t *testing.T) {
 	repo := &MockRepository{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
 
 	req, _ := http.NewRequest("GET", "/radiant/notes/1/2/1/10000", nil)
@@ -254,7 +253,7 @@ func Test_GetOccurrenceNotesHandler(t *testing.T) {
 
 func Test_GetOccurrenceNoteCountHandler(t *testing.T) {
 	repo := &MockRepository{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id/count", GetOccurrenceNoteCountHandler(repo))
 
 	req, _ := http.NewRequest("GET", "/radiant/notes/1/2/1/10000/count", nil)
@@ -267,7 +266,7 @@ func Test_GetOccurrenceNoteCountHandler(t *testing.T) {
 
 func Test_GetOccurrenceNotesHandler_EmptyResult(t *testing.T) {
 	repo := &MockRepository{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
 
 	req, _ := http.NewRequest("GET", "/radiant/notes/1/2/1/88888", nil)
@@ -280,7 +279,7 @@ func Test_GetOccurrenceNotesHandler_EmptyResult(t *testing.T) {
 
 func Test_GetOccurrenceNotesHandler_InvalidCaseID(t *testing.T) {
 	repo := &MockRepository{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id", GetOccurrenceNotesHandler(repo))
 
 	req, _ := http.NewRequest("GET", "/radiant/notes/abc/2/1/10000", nil)
@@ -293,7 +292,7 @@ func Test_GetOccurrenceNotesHandler_InvalidCaseID(t *testing.T) {
 func Test_PutOccurrenceNoteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.PUT("/:tenant/notes/:id", PutOccurrenceNoteHandler(repo, auth))
 
 	body := `{"content": "Updated content"}`
@@ -319,7 +318,7 @@ func Test_PutOccurrenceNoteHandler(t *testing.T) {
 func Test_PutOccurrenceNoteHandler_MissingContent(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.PUT("/:tenant/notes/:id", PutOccurrenceNoteHandler(repo, auth))
 
 	body := `{}`
@@ -333,7 +332,7 @@ func Test_PutOccurrenceNoteHandler_MissingContent(t *testing.T) {
 func Test_PutOccurrenceNoteHandler_ContentTooLong(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.PUT("/:tenant/notes/:id", PutOccurrenceNoteHandler(repo, auth))
 
 	longContent := string(make([]byte, 1001))
@@ -348,7 +347,7 @@ func Test_PutOccurrenceNoteHandler_ContentTooLong(t *testing.T) {
 func Test_PutOccurrenceNoteHandler_NoteNotFound(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.PUT("/:tenant/notes/:id", PutOccurrenceNoteHandler(repo, auth))
 
 	body := `{"content": "Updated content"}`
@@ -362,7 +361,7 @@ func Test_PutOccurrenceNoteHandler_NoteNotFound(t *testing.T) {
 func Test_PutOccurrenceNoteHandler_Forbidden(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{Id: "other-user-id"}
-	router := gin.Default()
+	router := tenantRouter()
 	router.PUT("/:tenant/notes/:id", PutOccurrenceNoteHandler(repo, auth))
 
 	body := `{"content": "Updated content"}`
@@ -376,7 +375,7 @@ func Test_PutOccurrenceNoteHandler_Forbidden(t *testing.T) {
 func Test_DeleteOccurrenceNoteHandler(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/:tenant/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
 
 	req, _ := http.NewRequest("DELETE", "/radiant/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", nil)
@@ -389,7 +388,7 @@ func Test_DeleteOccurrenceNoteHandler(t *testing.T) {
 func Test_DeleteOccurrenceNoteHandler_NoteNotFound(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/:tenant/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
 
 	req, _ := http.NewRequest("DELETE", "/radiant/notes/not-found-id", nil)
@@ -402,7 +401,7 @@ func Test_DeleteOccurrenceNoteHandler_NoteNotFound(t *testing.T) {
 func Test_DeleteOccurrenceNoteHandler_Forbidden(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{Id: "other-user-id"}
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/:tenant/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
 
 	req, _ := http.NewRequest("DELETE", "/radiant/notes/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", nil)
@@ -415,7 +414,7 @@ func Test_DeleteOccurrenceNoteHandler_Forbidden(t *testing.T) {
 func Test_DeleteOccurrenceNoteHandler_GetByIDError(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/:tenant/notes/:id", DeleteOccurrenceNoteHandler(repo, auth))
 
 	req, _ := http.NewRequest("DELETE", "/radiant/notes/error-id", nil)

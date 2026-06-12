@@ -40,7 +40,7 @@ func (m *mockAuthRepository) GetMemberships(email string) ([]types.TenantMembers
 func Test_GetMeHandler(t *testing.T) {
 	repo := &mockAuthRepository{memberships: []types.TenantMembership{
 		{
-			Code:          "radiant",
+			Code:          types.DefaultTenantCode,
 			Name:          "Radiant",
 			TenantActions: []string{"can_search_case", "can_view_kb"},
 			OrgsByAction:  map[string][]string{"can_read_pii": {"CHOP"}},

@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -18,7 +17,7 @@ import (
 func assertMondoTermAutoComplete(t *testing.T, data string, prefix string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewTermsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/mondo/autocomplete", server.GetMondoTermAutoComplete(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/mondo/autocomplete?prefix=%s", prefix), bytes.NewBuffer([]byte("{}")))

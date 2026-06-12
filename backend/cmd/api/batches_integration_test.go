@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -24,7 +23,7 @@ func Test_PostSequencingExperimentBatch_OK(t *testing.T) {
 		auth := testutils.MockAuth{}
 		repo := repository.NewBatchRepository(db)
 
-		router := gin.Default()
+		router := tenantRouter()
 		router.POST(
 			"/:tenant/sequencing/batches",
 			server.PostSequencingExperimentBatchHandler(repo, &auth),

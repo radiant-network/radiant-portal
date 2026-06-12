@@ -10,7 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
@@ -23,7 +22,7 @@ import (
 func assertDocumentsSearchHandler(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.POST("/:tenant/documents/search", server.SearchDocumentsHandler(repo))
 
 		req, _ := http.NewRequest("POST", "/radiant/documents/search", bytes.NewBuffer([]byte(body)))
@@ -167,7 +166,7 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 func assertDocumentIdsAutoComplete(t *testing.T, data string, prefix string, limit int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/documents/autocomplete", server.DocumentsAutocompleteHandler(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/documents/autocomplete?prefix=%s&limit=%d", prefix, limit), bytes.NewBuffer([]byte("{}")))
@@ -187,7 +186,7 @@ func Test_DocumentIdsAutoComplete(t *testing.T) {
 func assertGetDocumentsFilters(t *testing.T, data string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/documents/filters", server.DocumentsFiltersHandler(repo))
 
 		req, _ := http.NewRequest("GET", "/radiant/documents/filters", bytes.NewBuffer([]byte("{}")))
@@ -261,7 +260,7 @@ func Test_GetDocumentsDownloadUrl(t *testing.T) {
 		_ = os.Setenv("AWS_USE_SSL", "false")
 
 		repo := repository.NewDocumentsRepository(starrocks)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/documents/:document_id/download_url", server.GetDocumentsDownloadUrlHandler(repo, nil))
 
 		req, _ := http.NewRequest("GET", "/radiant/documents/1/download_url", nil)

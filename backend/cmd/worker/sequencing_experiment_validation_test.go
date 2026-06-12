@@ -294,7 +294,7 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 	orgDAO := &mockOrgDAO{}
 
 	sampleDAO := &mockSampleDAO{}
-	sampleDAO.On("GetSampleById", 10).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationCode: "ORG", TenantCode: "radiant"}, nil)
+	sampleDAO.On("GetSampleById", 10).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationCode: "ORG", TenantCode: types.DefaultTenantCode}, nil)
 
 	r.Context = &batchval.BatchValidationContext{
 		SeqExpRepo: seqDAO,
@@ -369,7 +369,7 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 	orgDAO := &mockOrgDAO{}
 
 	sampleDAO := &mockSampleDAO{}
-	sampleDAO.On("GetSampleById", 1).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationCode: "ORG", TenantCode: "radiant"}, nil)
+	sampleDAO.On("GetSampleById", 1).Return(&types.Sample{SubmitterSampleId: "S1", OrganizationCode: "ORG", TenantCode: types.DefaultTenantCode}, nil)
 
 	r.Context = &batchval.BatchValidationContext{
 		SeqExpRepo: seqDAO,

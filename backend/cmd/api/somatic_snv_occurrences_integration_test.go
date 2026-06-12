@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -19,7 +18,7 @@ import (
 func testSomaticSNVList(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesSomaticSNVListHandler(repo))
 
 		req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/71/74/74/list", bytes.NewBufferString(body))
@@ -33,7 +32,7 @@ func testSomaticSNVList(t *testing.T, data string, body string, expected string)
 func testSomaticSNVCount(t *testing.T, data string, body string, expected int) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/count", server.OccurrencesSomaticSNVCountHandler(repo))
 
 		req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/71/74/74/count", bytes.NewBufferString(body))
@@ -48,7 +47,7 @@ func testSomaticSNVAggregation(t *testing.T, data string, body string, queryPara
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
 		facetsRepo := repository.NewFacetsRepository()
-		router := gin.Default()
+		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/aggregate", server.OccurrencesSomaticSNVAggregateHandler(repo, facetsRepo))
 		path := "/radiant/occurrences/somatic/snv/71/74/74/aggregate"
 		if len(queryParams) > 0 {
@@ -65,7 +64,7 @@ func testSomaticSNVAggregation(t *testing.T, data string, body string, queryPara
 func testSomaticSNVStatistics(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSomaticSNVOccurrencesRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/statistics", server.OccurrencesSomaticSNVStatisticsHandler(repo))
 
 		req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/71/74/74/statistics", bytes.NewBufferString(body))
@@ -205,7 +204,7 @@ func assertGetExpandedSomaticOccurrence(t *testing.T, data string, caseId int, s
 		repo := repository.NewSomaticSNVOccurrencesRepository(starrocks)
 		pubmedClient := &MockExternalClient{}
 		interpretationRepo := repository.NewInterpretationsRepository(postgres, pubmedClient)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", server.GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/occurrences/somatic/snv/%d/%d/%d/%d/expanded", caseId, seqId, taskId, locusId), bytes.NewBuffer([]byte("{}")))

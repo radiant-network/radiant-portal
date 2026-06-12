@@ -22,8 +22,6 @@ func NewOccurrenceFlagsRepository(db *gorm.DB) *OccurrenceFlagsRepository {
 }
 
 func (r *OccurrenceFlagsRepository) Upsert(flag types.OccurrenceFlag) (*types.OccurrenceFlag, error) {
-	// TODO(multi-tenant): set from the active tenant once writes read it from context.
-	flag.TenantCode = types.DefaultTenantCode
 	if err := r.db.
 		Clauses(
 			clause.OnConflict{

@@ -12,15 +12,15 @@ import (
 )
 
 type MockBatchRepository struct {
-	CreateBatchFunc      func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error)
+	CreateBatchFunc      func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error)
 	GetBatchByIDFunc     func(batchId string) (*types.Batch, error)
 	ClaimNextBatchFunc   func() (*types.Batch, error)
 	UpdateStuckBatchFunc func() (int64, error)
 }
 
-func (m *MockBatchRepository) CreateBatch(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+func (m *MockBatchRepository) CreateBatch(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 	if m.CreateBatchFunc != nil {
-		return m.CreateBatchFunc(payload, batchType, username, dryRun)
+		return m.CreateBatchFunc(tenantCode, payload, batchType, username, dryRun)
 	}
 	return nil, errors.New("CreateBatchFunc not implemented")
 }

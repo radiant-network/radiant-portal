@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -18,7 +17,7 @@ import (
 func assertGetSequencingExperimentDetailByIdHandler(t *testing.T, data string, seqId int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewSequencingExperimentRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/sequencing/:seq_id/details", server.GetSequencingExperimentDetailByIdHandler(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/sequencing/%d/details", seqId), bytes.NewBuffer([]byte("{}")))

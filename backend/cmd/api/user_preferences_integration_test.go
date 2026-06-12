@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -17,7 +16,7 @@ import (
 )
 
 func assertGetUserPreferencesHandler(t *testing.T, repo *repository.UserPreferencesRepository, auth utils.Auth, status int, key string, expected string) {
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/users/preferences/:key", server.GetUserPreferencesHandler(repo, auth))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/preferences/%s", key), bytes.NewBuffer([]byte("{}")))
@@ -53,7 +52,7 @@ func Test_GetUserPreferencesHandler_Found(t *testing.T) {
 }
 
 func assertUpdateUserPreferencesHandler(t *testing.T, repo *repository.UserPreferencesRepository, auth utils.Auth, body string, status int, key string, expected string) {
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/users/preferences/:key", server.UpdateUserPreferencesHandler(repo, auth))
 
 	req, _ := http.NewRequest("POST", fmt.Sprintf("/users/preferences/%s", key), bytes.NewBuffer([]byte(body)))

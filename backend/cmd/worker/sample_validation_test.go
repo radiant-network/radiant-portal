@@ -267,7 +267,7 @@ func Test_ValidateParentSample_DifferentPatient(t *testing.T) {
 }
 
 func Test_ValidateSamplesBatch(t *testing.T) {
-	org := &types.Organization{Code: "CHUSJ", TenantCode: "radiant"}
+	org := &types.Organization{Code: "CHUSJ", TenantCode: types.DefaultTenantCode}
 	patient := &types.Patient{ID: 10, SubmitterPatientId: "P1"}
 	existingSampleInDb := &types.Sample{SubmitterSampleId: "S2", TypeCode: "blood", PatientID: 10, HistologyCode: "normal"}
 	parentInDb := &types.Sample{SubmitterSampleId: "P-DB", PatientID: 10}

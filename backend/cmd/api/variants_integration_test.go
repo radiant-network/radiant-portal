@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -19,7 +18,7 @@ import (
 func assertGetVariantHeader(t *testing.T, data string, locusId int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/header", server.GetGermlineVariantHeader(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/header", locusId), bytes.NewBuffer([]byte("{}")))
@@ -42,7 +41,7 @@ func assertGetVariantOverview(t *testing.T, data string, locusId int, expected s
 		exomiserRepository := repository.NewExomiserRepository(starrocks)
 		pubmedClient := &MockExternalClient{}
 		interpretationRepository := repository.NewInterpretationsRepository(postgres, pubmedClient)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/overview", server.GetGermlineVariantOverview(repo, exomiserRepository, interpretationRepository))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/overview", locusId), bytes.NewBuffer([]byte("{}")))
@@ -67,7 +66,7 @@ func Test_GetVariantOverview_With_ExomiserACMGClassificationCounts(t *testing.T)
 func assertGetVariantConsequences(t *testing.T, data string, locusId int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/consequences", server.GetGermlineVariantConsequences(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/consequences", locusId), bytes.NewBuffer([]byte("{}")))
@@ -87,7 +86,7 @@ func Test_GetVariantConsequences(t *testing.T) {
 func assertGetVariantInterpretedCases(t *testing.T, data string, locusId int, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.POST("/:tenant/variants/germline/:locus_id/cases/interpreted", server.GetGermlineVariantInterpretedCases(repo))
 
 		req, _ := http.NewRequest("POST", fmt.Sprintf("/radiant/variants/germline/%d/cases/interpreted", locusId), bytes.NewBuffer([]byte(body)))
@@ -132,7 +131,7 @@ func Test_GetVariantInterpretedCases(t *testing.T) {
 func assertGetVariantUninterpretedCases(t *testing.T, data string, locusId int, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.POST("/:tenant/variants/germline/:locus_id/cases/uninterpreted", server.GetGermlineVariantUninterpretedCases(repo))
 
 		req, _ := http.NewRequest("POST", fmt.Sprintf("/radiant/variants/germline/%d/cases/uninterpreted", locusId), bytes.NewBuffer([]byte(body)))
@@ -189,7 +188,7 @@ func Test_GetVariantUninterpretedCases(t *testing.T) {
 func assertGetVariantCasesCount(t *testing.T, data string, locusId int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/cases/count", server.GetGermlineVariantCasesCount(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/cases/count", locusId), bytes.NewBuffer([]byte("{}")))
@@ -209,7 +208,7 @@ func Test_GetVariantCasesCount(t *testing.T) {
 func assertGetVariantCasesFilters(t *testing.T, data string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewVariantsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/cases/filters", server.GetGermlineVariantCasesFilters(repo))
 
 		req, _ := http.NewRequest("GET", "/radiant/variants/germline/cases/filters", bytes.NewBuffer([]byte("{}")))
@@ -272,7 +271,7 @@ func Test_GetVariantCasesFilters(t *testing.T) {
 func assertGetGermlineVariantConditions(t *testing.T, data string, locusId int, panelType string, filter string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewGenePanelsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/conditions/:panel_type", server.GetGermlineVariantConditions(repo))
 
 		filterParam := ""
@@ -353,7 +352,7 @@ func Test_GetGermlineVariantConditions_Orphanet(t *testing.T) {
 func Test_GetGermlineVariantConditions_Clinvar(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewClinvarRCVRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/conditions/clinvar", 1000), bytes.NewBuffer([]byte("{}")))
@@ -369,7 +368,7 @@ func Test_GetGermlineVariantConditions_Clinvar(t *testing.T) {
 func Test_GetGermlineVariantConditions_Clinvar_Empty(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewClinvarRCVRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/conditions/clinvar", server.GetGermlineVariantConditionsClinvar(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/conditions/clinvar", 9999), bytes.NewBuffer([]byte("{}")))
@@ -385,7 +384,7 @@ func Test_GetGermlineVariantConditions_Clinvar_Empty(t *testing.T) {
 func assertGetGermlineVariantExternalFrequencies(t *testing.T, data string, locusId int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB) {
 		repo := repository.NewVariantsRepository(starrocks)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/external_frequencies", server.GetGermlineVariantExternalFrequenciesHandler(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/external_frequencies", locusId), bytes.NewBuffer([]byte("{}")))
@@ -412,7 +411,7 @@ func Test_GetGermlineVariantExternalFrequenciesHandler(t *testing.T) {
 func assertGetGermlineVariantGlobalInternalFrequencies(t *testing.T, data string, locusId int, status int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB) {
 		repo := repository.NewVariantsRepository(starrocks)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/internal_frequencies/global", server.GetGermlineVariantGlobalInternalFrequenciesHandler(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/internal_frequencies/global", locusId), bytes.NewBuffer([]byte("{}")))
@@ -442,7 +441,7 @@ func Test_GetGermlineVariantGlobalInternalFrequenciesHandler_NotFound(t *testing
 func assertGetGermlineVariantInternalFrequencies(t *testing.T, data string, locusId int, split string, status int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, starrocks *gorm.DB) {
 		repo := repository.NewVariantsRepository(starrocks)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/internal_frequencies", server.GetGermlineVariantInternalFrequenciesHandler(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/internal_frequencies?split=%s", locusId, split), bytes.NewBuffer([]byte("{}")))

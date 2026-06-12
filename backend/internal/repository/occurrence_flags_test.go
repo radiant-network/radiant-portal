@@ -18,6 +18,7 @@ func Test_UpsertOccurrenceFlag_Insert(t *testing.T) {
 			SeqID:        1,
 			TaskID:       1,
 			FlagType:     "flag",
+			TenantCode:   types.DefaultTenantCode,
 		}
 
 		created, err := repo.Upsert(flag)
@@ -48,6 +49,7 @@ func Test_UpsertOccurrenceFlag_UpdatesExistingFlagType(t *testing.T) {
 			OccurrenceID: "10000",
 			SeqID:        1,
 			TaskID:       1,
+			TenantCode:   types.DefaultTenantCode,
 		}
 
 		first := key
@@ -77,10 +79,10 @@ func Test_UpsertOccurrenceFlag_DifferentOccurrenceCreatesSeparateRow(t *testing.
 		db := env.Postgres
 		repo := NewOccurrenceFlagsRepository(db)
 
-		_, err := repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "10000", SeqID: 1, TaskID: 1, FlagType: "flag"})
+		_, err := repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "10000", SeqID: 1, TaskID: 1, FlagType: "flag", TenantCode: types.DefaultTenantCode})
 		assert.NoError(t, err)
 
-		_, err = repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "20000", SeqID: 1, TaskID: 1, FlagType: "star"})
+		_, err = repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "20000", SeqID: 1, TaskID: 1, FlagType: "star", TenantCode: types.DefaultTenantCode})
 		assert.NoError(t, err)
 
 		var count int64
@@ -99,6 +101,7 @@ func Test_UpsertOccurrenceFlag_RejectsNonExistentCaseID(t *testing.T) {
 			SeqID:        1,
 			TaskID:       1,
 			FlagType:     "flag",
+			TenantCode:   types.DefaultTenantCode,
 		})
 
 		assert.Error(t, err, "FK to cases(id) should reject non-existent case_id")
@@ -115,6 +118,7 @@ func Test_UpsertOccurrenceFlag_RejectsNonExistentSeqID(t *testing.T) {
 			SeqID:        99999,
 			TaskID:       1,
 			FlagType:     "flag",
+			TenantCode:   types.DefaultTenantCode,
 		})
 
 		assert.Error(t, err, "FK to sequencing_experiment(id) should reject non-existent seq_id")
@@ -131,6 +135,7 @@ func Test_UpsertOccurrenceFlag_RejectsNonExistentTaskID(t *testing.T) {
 			SeqID:        1,
 			TaskID:       99999,
 			FlagType:     "flag",
+			TenantCode:   types.DefaultTenantCode,
 		})
 
 		assert.Error(t, err, "FK to task(id) should reject non-existent task_id")
@@ -142,7 +147,7 @@ func Test_DeleteOccurrenceFlag_RemovesRow(t *testing.T) {
 		db := env.Postgres
 		repo := NewOccurrenceFlagsRepository(db)
 
-		_, err := repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "10000", SeqID: 1, TaskID: 1, FlagType: "flag"})
+		_, err := repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "10000", SeqID: 1, TaskID: 1, FlagType: "flag", TenantCode: types.DefaultTenantCode})
 		assert.NoError(t, err)
 
 		affected, err := repo.Delete(2, 1, 1, "10000")
@@ -172,9 +177,9 @@ func Test_DeleteOccurrenceFlag_OnlyDeletesMatchingCompositeKey(t *testing.T) {
 		db := env.Postgres
 		repo := NewOccurrenceFlagsRepository(db)
 
-		_, err := repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "10000", SeqID: 1, TaskID: 1, FlagType: "flag"})
+		_, err := repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "10000", SeqID: 1, TaskID: 1, FlagType: "flag", TenantCode: types.DefaultTenantCode})
 		assert.NoError(t, err)
-		_, err = repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "20000", SeqID: 1, TaskID: 1, FlagType: "pin"})
+		_, err = repo.Upsert(types.OccurrenceFlag{CaseID: 2, OccurrenceID: "20000", SeqID: 1, TaskID: 1, FlagType: "pin", TenantCode: types.DefaultTenantCode})
 		assert.NoError(t, err)
 
 		affected, err := repo.Delete(2, 1, 1, "10000")
@@ -200,6 +205,7 @@ func Test_UpsertOccurrenceFlag_RejectsInvalidFlagType(t *testing.T) {
 			SeqID:        1,
 			TaskID:       1,
 			FlagType:     "bogus",
+			TenantCode:   types.DefaultTenantCode,
 		})
 
 		assert.Error(t, err, "DB CHECK constraint should reject flag_type outside (flag, pin, star)")

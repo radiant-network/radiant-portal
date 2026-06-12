@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -18,7 +17,7 @@ import (
 )
 
 func assertGetSavedFilterByIDHandler(t *testing.T, repo *repository.SavedFiltersRepository, savedFilterId string, status int, expected string) {
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/users/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repo))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/saved_filters/%s", savedFilterId), bytes.NewBuffer([]byte("{}")))
@@ -60,7 +59,7 @@ func Test_GetSavedFilterByIDHandler(t *testing.T) {
 }
 
 func assertGetSavedFiltersHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, savedFilterType *types.SavedFilterType, status int, expected string) {
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/users/saved_filters", server.GetSavedFiltersHandler(repo, auth))
 
 	var req *http.Request
@@ -141,7 +140,7 @@ func Test_GetSavedFiltersHandler_FilterOnType(t *testing.T) {
 }
 
 func assertPostSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, body string, status int) {
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/users/saved_filters", server.PostSavedFilterHandler(repo, auth))
 
 	req, _ := http.NewRequest("POST", "/users/saved_filters", bytes.NewBuffer([]byte(body)))
@@ -191,7 +190,7 @@ func Test_PostSavedFilterHandler_Success(t *testing.T) {
 }
 
 func assertPutSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, savedFilterId string, body string, status int) {
-	router := gin.Default()
+	router := tenantRouter()
 	router.PUT("/users/saved_filters/:saved_filter_id", server.PutSavedFilterHandler(repo, auth))
 
 	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/saved_filters/%s", savedFilterId), bytes.NewBuffer([]byte(body)))
@@ -253,7 +252,7 @@ func Test_PutSavedFilterHandler_Success(t *testing.T) {
 }
 
 func assertDeleteSavedFilterHandler(t *testing.T, repo *repository.SavedFiltersRepository, auth utils.Auth, savedFilterId string, status int) {
-	router := gin.Default()
+	router := tenantRouter()
 	router.DELETE("/users/saved_filters/:saved_filter_id", server.DeleteSavedFilterHandler(repo, auth))
 
 	req, _ := http.NewRequest("DELETE", fmt.Sprintf("/users/saved_filters/%s", savedFilterId), bytes.NewBuffer([]byte("")))

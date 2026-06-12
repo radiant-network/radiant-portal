@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -16,7 +15,7 @@ import (
 )
 
 func assertGetUserSet(t *testing.T, repo *repository.UserSetsRepository, userSetId string, status int, expected string) {
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/users/sets/:user_set_id", server.GetUserSet(repo))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/sets/%s", userSetId), bytes.NewBuffer([]byte("{}")))

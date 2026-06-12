@@ -9,7 +9,7 @@ import (
 )
 
 type batchCreator interface {
-	CreateBatch(payload any, batchType string, username string, dryRun bool) (*types.Batch, error)
+	CreateBatch(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error)
 }
 
 // PostCaseBatchHandler
@@ -51,7 +51,13 @@ func PostCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 			return
 		}
 
-		batch, err := repo.CreateBatch(body.Cases, types.CaseBatchType, *username, queryParam.DryRun)
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		batch, err := repo.CreateBatch(*tenant, body.Cases, types.CaseBatchType, *username, queryParam.DryRun)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -110,7 +116,13 @@ func PatchCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 			return
 		}
 
-		batch, err := repo.CreateBatch(body.Cases, types.PatchCaseBatchType, *username, queryParam.DryRun)
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		batch, err := repo.CreateBatch(*tenant, body.Cases, types.PatchCaseBatchType, *username, queryParam.DryRun)
 		if err != nil {
 			HandleError(c, err)
 			return

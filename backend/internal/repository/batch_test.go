@@ -23,7 +23,7 @@ func Test_CreateBatch_Valid(t *testing.T) {
 		batchType := "test_type"
 		username := "test_user"
 		dryRun := true
-		createdBatch, err := repo.CreateBatch(payload, batchType, username, dryRun)
+		createdBatch, err := repo.CreateBatch(types.DefaultTenantCode, payload, batchType, username, dryRun)
 		assert.NoError(t, err)
 		assert.NotNil(t, createdBatch)
 		assert.NotEqual(t, uuid.Nil, createdBatch.ID)
@@ -147,7 +147,7 @@ func Test_UpdateBatch(t *testing.T) {
 }
 
 func Test_ReleaseBatch_ResetsRunningToPending(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		repo := NewBatchRepository(db)
 
@@ -173,7 +173,7 @@ func Test_ReleaseBatch_ResetsRunningToPending(t *testing.T) {
 }
 
 func Test_ReleaseBatch_IgnoresNonRunning(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
 		repo := NewBatchRepository(db)
 

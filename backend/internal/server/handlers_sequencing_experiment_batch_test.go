@@ -18,7 +18,7 @@ import (
 func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -31,7 +31,7 @@ func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
 	}
 	auth := &testutils.MockAuth{Username: "testuser"}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `
 		{
@@ -66,7 +66,7 @@ func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
 func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -79,7 +79,7 @@ func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 	}
 	auth := &testutils.MockAuth{Username: "testuser"}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `
 		{
@@ -113,7 +113,7 @@ func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 func TestPostSequencingExperimentBatchHandler_ValidationError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -126,7 +126,7 @@ func TestPostSequencingExperimentBatchHandler_ValidationError(t *testing.T) {
 	}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `
 		{
@@ -154,7 +154,7 @@ func TestPostSequencingExperimentBatchHandler_ValidationError(t *testing.T) {
 func TestPostSequencingExperimentBatchHandler_RunDate_Empty(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -167,7 +167,7 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Empty(t *testing.T) {
 	}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `
 		{
@@ -196,7 +196,7 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Empty(t *testing.T) {
 func TestPostSequencingExperimentBatchHandler_RunDate_Invalid(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -209,7 +209,7 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Invalid(t *testing.T) {
 	}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `
 		{
@@ -238,7 +238,7 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Invalid(t *testing.T) {
 func TestPostSequencingExperimentBatchHandler_EmptySequencingExperiments(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -251,7 +251,7 @@ func TestPostSequencingExperimentBatchHandler_EmptySequencingExperiments(t *test
 	}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/sequencing/batch", PostSequencingExperimentBatchHandler(repo, auth))
 	body := `{"sequencing_experiments": []}`
 	req, _ := http.NewRequest(http.MethodPost, "/radiant/sequencing/batch", bytes.NewBuffer([]byte(body)))

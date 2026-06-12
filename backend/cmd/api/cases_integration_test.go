@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/test/testutils"
@@ -18,7 +17,7 @@ import (
 func assertSearchCasesHandler(t *testing.T, data string, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.POST("/:tenant/cases/search", server.SearchCasesHandler(repo))
 
 		req, _ := http.NewRequest("POST", "/radiant/cases/search", bytes.NewBuffer([]byte(body)))
@@ -71,7 +70,7 @@ func Test_SearchCasesHandler_WithVariants(t *testing.T) {
 func assertCaseIdsAutoComplete(t *testing.T, data string, prefix string, limit int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/cases/autocomplete", server.CasesAutocompleteHandler(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/cases/autocomplete?prefix=%s&limit=%d", prefix, limit), bytes.NewBuffer([]byte("{}")))
@@ -91,7 +90,7 @@ func Test_CaseIdsAutoComplete(t *testing.T) {
 func assertGetCasesFilters(t *testing.T, data string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/cases/filters", server.CasesFiltersHandler(repo))
 
 		req, _ := http.NewRequest("GET", "/radiant/cases/filters", bytes.NewBuffer([]byte("{}")))
@@ -162,7 +161,7 @@ func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected str
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewCasesRepository(db)
 		igvRepo := repository.NewIGVRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/cases/:case_id", server.CaseEntityHandler(repo, igvRepo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/cases/%d", caseId), bytes.NewBuffer([]byte("{}")))
@@ -266,7 +265,7 @@ func Test_CaseEntityHandler(t *testing.T) {
 func assertCaseEntityDocumentsSearchHandler(t *testing.T, data string, caseId int, body string, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.POST("/:tenant/cases/:case_id/documents/search", server.CaseEntityDocumentsSearchHandler(repo))
 
 		req, _ := http.NewRequest("POST", fmt.Sprintf("/radiant/cases/%d/documents/search", caseId), bytes.NewBuffer([]byte(body)))
@@ -323,7 +322,7 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 func assertCaseEntityDocumentsFiltersHandler(t *testing.T, data string, caseId int, expected string) {
 	testutils.ParallelTestWithStarrocks(t, data, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewDocumentsRepository(db)
-		router := gin.Default()
+		router := tenantRouter()
 		router.GET("/:tenant/cases/:case_id/documents/filters", server.CaseEntityDocumentsFiltersHandler(repo))
 
 		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/cases/%d/documents/filters", caseId), bytes.NewBuffer([]byte("{}")))

@@ -57,11 +57,11 @@ func Test_AuthRepository_HasAction_OrgScoped_SpecificOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
 
-		atGrantedOrg, err := repo.HasAction(aliceID, "radiant", "CHOP", "can_read_pii")
+		atGrantedOrg, err := repo.HasAction(aliceID, types.DefaultTenantCode, "CHOP", "can_read_pii")
 		assert.NoError(t, err)
 		assert.True(t, atGrantedOrg, "alice has can_read_pii at her granted org")
 
-		atOtherOrg, err := repo.HasAction(aliceID, "radiant", "CHUSJ", "can_read_pii")
+		atOtherOrg, err := repo.HasAction(aliceID, types.DefaultTenantCode, "CHUSJ", "can_read_pii")
 		assert.NoError(t, err)
 		assert.False(t, atOtherOrg, "alice has no grant at CHUSJ")
 	})
@@ -71,11 +71,11 @@ func Test_AuthRepository_HasAction_OrgScoped_Wildcard(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
 
-		atChop, err := repo.HasAction(wendyID, "radiant", "CHOP", "can_read_pii")
+		atChop, err := repo.HasAction(wendyID, types.DefaultTenantCode, "CHOP", "can_read_pii")
 		assert.NoError(t, err)
 		assert.True(t, atChop)
 
-		atChusj, err := repo.HasAction(wendyID, "radiant", "CHUSJ", "can_read_pii")
+		atChusj, err := repo.HasAction(wendyID, types.DefaultTenantCode, "CHUSJ", "can_read_pii")
 		assert.NoError(t, err)
 		assert.True(t, atChusj, "wildcard grant covers every org in the tenant")
 	})
@@ -90,12 +90,12 @@ func Test_AuthRepository_HasAction_OrgScoped_EmptyOrgMatchesOnlyWildcard(t *test
 		repo := NewAuthRepository(env.Postgres)
 
 		// wendy's grant is wildcard ('*') → the empty sentinel matches.
-		wildcardGrantee, err := repo.HasAction(wendyID, "radiant", "", "can_read_pii")
+		wildcardGrantee, err := repo.HasAction(wendyID, types.DefaultTenantCode, "", "can_read_pii")
 		assert.NoError(t, err)
 		assert.True(t, wildcardGrantee, "empty org matches a '*' grant")
 
 		// dan's grant is specific (CHUSJ) → the empty sentinel must not match.
-		specificGrantee, err := repo.HasAction(danID, "radiant", "", "can_read_pii")
+		specificGrantee, err := repo.HasAction(danID, types.DefaultTenantCode, "", "can_read_pii")
 		assert.NoError(t, err)
 		assert.False(t, specificGrantee, "empty org must not match a specific-org grant")
 	})
@@ -105,11 +105,11 @@ func Test_AuthRepository_HasAction_TenantScoped_IgnoresOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
 
-		noOrg, err := repo.HasAction(aliceID, "radiant", "", "can_search_case")
+		noOrg, err := repo.HasAction(aliceID, types.DefaultTenantCode, "", "can_search_case")
 		assert.NoError(t, err)
 		assert.True(t, noOrg)
 
-		withIrrelevantOrg, err := repo.HasAction(aliceID, "radiant", "CHUSJ", "can_search_case")
+		withIrrelevantOrg, err := repo.HasAction(aliceID, types.DefaultTenantCode, "CHUSJ", "can_search_case")
 		assert.NoError(t, err)
 		assert.True(t, withIrrelevantOrg, "org arg is ignored for a tenant-scoped action")
 	})
@@ -120,11 +120,11 @@ func Test_AuthRepository_HasAction_OrgScoped_IsolatedToGrantedOrg(t *testing.T) 
 		repo := NewAuthRepository(env.Postgres)
 
 		// dan is geneticist at CHUSJ only.
-		atOwnOrg, err := repo.HasAction(danID, "radiant", "CHUSJ", "can_read_pii")
+		atOwnOrg, err := repo.HasAction(danID, types.DefaultTenantCode, "CHUSJ", "can_read_pii")
 		assert.NoError(t, err)
 		assert.True(t, atOwnOrg)
 
-		atOtherOrg, err := repo.HasAction(danID, "radiant", "CHOP", "can_read_pii")
+		atOtherOrg, err := repo.HasAction(danID, types.DefaultTenantCode, "CHOP", "can_read_pii")
 		assert.NoError(t, err)
 		assert.False(t, atOtherOrg, "dan's grant at CHUSJ must not leak to CHOP")
 	})
@@ -134,11 +134,11 @@ func Test_AuthRepository_HasAction_UnknownActionOrUser(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
 
-		unknownAction, err := repo.HasAction(aliceID, "radiant", "CHOP", "can_do_nothing")
+		unknownAction, err := repo.HasAction(aliceID, types.DefaultTenantCode, "CHOP", "can_do_nothing")
 		assert.NoError(t, err)
 		assert.False(t, unknownAction)
 
-		unknownUser, err := repo.HasAction(ghostID, "radiant", "CHOP", "can_read_pii")
+		unknownUser, err := repo.HasAction(ghostID, types.DefaultTenantCode, "CHOP", "can_read_pii")
 		assert.NoError(t, err)
 		assert.False(t, unknownUser)
 	})
@@ -149,7 +149,7 @@ func Test_AuthRepository_HasTenantAccess_Member(t *testing.T) {
 		repo := NewAuthRepository(env.Postgres)
 
 		// alice holds roles in radiant.
-		allowed, err := repo.HasTenantAccess(aliceID, "radiant")
+		allowed, err := repo.HasTenantAccess(aliceID, types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.True(t, allowed)
 	})
@@ -171,7 +171,7 @@ func Test_AuthRepository_HasTenantAccess_MultiTenantMember(t *testing.T) {
 		repo := NewAuthRepository(env.Postgres)
 
 		// carol belongs to both tenants.
-		inRadiant, err := repo.HasTenantAccess(carolID, "radiant")
+		inRadiant, err := repo.HasTenantAccess(carolID, types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.True(t, inRadiant)
 
@@ -185,7 +185,7 @@ func Test_AuthRepository_HasTenantAccess_UnknownUser(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewAuthRepository(env.Postgres)
 
-		allowed, err := repo.HasTenantAccess(ghostID, "radiant")
+		allowed, err := repo.HasTenantAccess(ghostID, types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.False(t, allowed)
 	})
@@ -198,17 +198,17 @@ func Test_AuthRepository_HasTenantAccess_OrgScopeShapesAllCountAsMember(t *testi
 		repo := NewAuthRepository(env.Postgres)
 
 		// wendy's only grant is a wildcard ('*') org role.
-		wildcardOnly, err := repo.HasTenantAccess(wendyID, "radiant")
+		wildcardOnly, err := repo.HasTenantAccess(wendyID, types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.True(t, wildcardOnly, "wildcard-org grant counts as membership")
 
 		// dan's only grant is a single specific-org role (CHUSJ).
-		specificOrgOnly, err := repo.HasTenantAccess(danID, "radiant")
+		specificOrgOnly, err := repo.HasTenantAccess(danID, types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.True(t, specificOrgOnly, "specific-org grant counts as membership")
 
 		// alice holds a tenant-wide (org_code NULL) grant alongside an org one.
-		tenantWide, err := repo.HasTenantAccess(aliceID, "radiant")
+		tenantWide, err := repo.HasTenantAccess(aliceID, types.DefaultTenantCode)
 		assert.NoError(t, err)
 		assert.True(t, tenantWide, "tenant-wide (NULL org) grant counts as membership")
 	})
@@ -222,7 +222,7 @@ func Test_AuthRepository_GetMemberships_SpecificOrgAndTenantGrants(t *testing.T)
 		assert.NoError(t, err)
 		assert.Equal(t, []types.TenantMembership{
 			{
-				Code:          "radiant",
+				Code:          types.DefaultTenantCode,
 				Name:          "Radiant",
 				TenantActions: []string{"can_search_case", "can_view_kb"},
 				OrgsByAction: map[string][]string{
@@ -242,14 +242,14 @@ func Test_AuthRepository_GetMemberships_WildcardResolvesToAllTenantOrgs(t *testi
 
 		// Expected wildcard expansion is exactly the tenant's full org list.
 		var radiantOrgs []string
-		err := env.Postgres.Raw(`SELECT code FROM organization WHERE tenant_code = ? ORDER BY code`, "radiant").Scan(&radiantOrgs).Error
+		err := env.Postgres.Raw(`SELECT code FROM organization WHERE tenant_code = ? ORDER BY code`, types.DefaultTenantCode).Scan(&radiantOrgs).Error
 		assert.NoError(t, err)
 
 		got, err := repo.GetMemberships(wendyID)
 		assert.NoError(t, err)
 		assert.Equal(t, []types.TenantMembership{
 			{
-				Code:          "radiant",
+				Code:          types.DefaultTenantCode,
 				Name:          "Radiant",
 				TenantActions: []string{},
 				OrgsByAction: map[string][]string{
@@ -274,7 +274,7 @@ func Test_AuthRepository_GetMemberships_MixedScopeRole_RoutesByActionScope(t *te
 		assert.NoError(t, err)
 		assert.Equal(t, []types.TenantMembership{
 			{
-				Code:          "radiant",
+				Code:          types.DefaultTenantCode,
 				Name:          "Radiant",
 				TenantActions: []string{"can_search_case", "can_view_kb"},
 				OrgsByAction: map[string][]string{
@@ -296,7 +296,7 @@ func Test_AuthRepository_GetMemberships_OrgActionGrantedTenantWide_OmittedFromOr
 		assert.NoError(t, err)
 		assert.Equal(t, []types.TenantMembership{
 			{
-				Code:          "radiant",
+				Code:          types.DefaultTenantCode,
 				Name:          "Radiant",
 				TenantActions: []string{"can_search_case", "can_view_kb"},
 				OrgsByAction:  map[string][]string{},
@@ -310,15 +310,15 @@ func Test_AuthRepository_HasAction_MixedScopeRole(t *testing.T) {
 		repo := NewAuthRepository(env.Postgres)
 
 		// pat's grant is org-specific (CHUSJ), but a tenant-scoped action applies tenant-wide.
-		tenantAction, err := repo.HasAction(patID, "radiant", "", "can_search_case")
+		tenantAction, err := repo.HasAction(patID, types.DefaultTenantCode, "", "can_search_case")
 		assert.NoError(t, err)
 		assert.True(t, tenantAction, "tenant-scoped action holds even when checked without an org")
 
-		atGrantedOrg, err := repo.HasAction(patID, "radiant", "CHUSJ", "can_read_pii")
+		atGrantedOrg, err := repo.HasAction(patID, types.DefaultTenantCode, "CHUSJ", "can_read_pii")
 		assert.NoError(t, err)
 		assert.True(t, atGrantedOrg)
 
-		atOtherOrg, err := repo.HasAction(patID, "radiant", "CHOP", "can_read_pii")
+		atOtherOrg, err := repo.HasAction(patID, types.DefaultTenantCode, "CHOP", "can_read_pii")
 		assert.NoError(t, err)
 		assert.False(t, atOtherOrg, "org-scoped action stays scoped to the granted org")
 	})
@@ -331,14 +331,14 @@ func Test_AuthRepository_GetMemberships_MultipleTenantsNoCollision(t *testing.T)
 		repo := NewAuthRepository(env.Postgres)
 
 		var radiantOrgs []string
-		err := env.Postgres.Raw(`SELECT code FROM organization WHERE tenant_code = ? ORDER BY code`, "radiant").Scan(&radiantOrgs).Error
+		err := env.Postgres.Raw(`SELECT code FROM organization WHERE tenant_code = ? ORDER BY code`, types.DefaultTenantCode).Scan(&radiantOrgs).Error
 		assert.NoError(t, err)
 
 		got, err := repo.GetMemberships(carolID)
 		assert.NoError(t, err)
 		assert.Equal(t, []types.TenantMembership{
 			{
-				Code:          "radiant",
+				Code:          types.DefaultTenantCode,
 				Name:          "Radiant",
 				TenantActions: []string{},
 				OrgsByAction: map[string][]string{
@@ -416,13 +416,13 @@ func Test_AuthRepository_GrantRole_GrantsActionAtOrg(t *testing.T) {
 		repo := NewAuthRepository(env.Postgres)
 		require.NoError(t, repo.UpsertUser(userID, "grant@provisioning.test", "First", "Last"))
 
-		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role, "test-admin"))
+		require.NoError(t, repo.GrantRole(userID, types.DefaultTenantCode, "ORG_X", role, "test-admin"))
 
-		atOrg, err := repo.HasAction(userID, "radiant", "ORG_X", "can_read_pii")
+		atOrg, err := repo.HasAction(userID, types.DefaultTenantCode, "ORG_X", "can_read_pii")
 		require.NoError(t, err)
 		assert.True(t, atOrg, "user holds can_read_pii at the granted org")
 
-		atOther, err := repo.HasAction(userID, "radiant", "ORG_Y", "can_read_pii")
+		atOther, err := repo.HasAction(userID, types.DefaultTenantCode, "ORG_Y", "can_read_pii")
 		require.NoError(t, err)
 		assert.False(t, atOther, "no grant at a different org")
 
@@ -442,8 +442,8 @@ func Test_AuthRepository_GrantRole_IsIdempotent(t *testing.T) {
 		repo := NewAuthRepository(env.Postgres)
 		require.NoError(t, repo.UpsertUser(userID, "idem@provisioning.test", "First", "Last"))
 
-		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role, "createuser"))
-		require.NoError(t, repo.GrantRole(userID, "radiant", "ORG_X", role, "createuser")) // re-run
+		require.NoError(t, repo.GrantRole(userID, types.DefaultTenantCode, "ORG_X", role, "createuser"))
+		require.NoError(t, repo.GrantRole(userID, types.DefaultTenantCode, "ORG_X", role, "createuser")) // re-run
 
 		var count int64
 		require.NoError(t, env.Postgres.Raw(
@@ -462,7 +462,7 @@ func Test_AuthRepository_GrantRole_TenantWideStoresNullOrg(t *testing.T) {
 		require.NoError(t, repo.UpsertUser(userID, "tw@provisioning.test", "First", "Last"))
 
 		// An empty orgCode (tenant-wide grant) must store NULL, not the empty string.
-		require.NoError(t, repo.GrantRole(userID, "radiant", "", role, "createuser"))
+		require.NoError(t, repo.GrantRole(userID, types.DefaultTenantCode, "", role, "createuser"))
 
 		var nullOrgCount int64
 		require.NoError(t, env.Postgres.Raw(

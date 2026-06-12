@@ -18,7 +18,7 @@ import (
 func TestPostCaseBatchHandler_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -31,7 +31,7 @@ func TestPostCaseBatchHandler_Success(t *testing.T) {
 	}
 	auth := &testutils.MockAuth{Username: "testuser"}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -93,7 +93,7 @@ func TestPostCaseBatchHandler_Success(t *testing.T) {
 func TestPostCaseBatchHandler_EmptyTasks(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -106,7 +106,7 @@ func TestPostCaseBatchHandler_EmptyTasks(t *testing.T) {
 	}
 	auth := &testutils.MockAuth{Username: "testuser"}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -151,7 +151,7 @@ func TestPostCaseBatchHandler_MissingRequiredFields(t *testing.T) {
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -186,7 +186,7 @@ func TestPostCaseBatchHandler_InvalidType(t *testing.T) {
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -221,7 +221,7 @@ func TestPostCaseBatchHandler_InvalidCategory(t *testing.T) {
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -256,7 +256,7 @@ func TestPostCaseBatchHandler_MissingPatients(t *testing.T) {
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -285,7 +285,7 @@ func TestPostCaseBatchHandler_EmptyPatients(t *testing.T) {
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -315,7 +315,7 @@ func TestPostCaseBatchHandler_MissingRequiredFieldInSequencingExperiments(t *tes
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -350,13 +350,13 @@ func TestPostCaseBatchHandler_MissingRequiredFieldInSequencingExperiments(t *tes
 func TestPostCaseBatchHandler_MissingSequencingExperiments(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{ID: uuid.NewString(), BatchType: batchType, Status: types.BatchStatusPending, CreatedOn: time.Now(), Username: username, DryRun: dryRun}, nil
 		},
 	}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -388,13 +388,13 @@ func TestPostCaseBatchHandler_MissingSequencingExperiments(t *testing.T) {
 func TestPostCaseBatchHandler_EmptySequencingExperiments(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{ID: uuid.NewString(), BatchType: batchType, Status: types.BatchStatusPending, CreatedOn: time.Now(), Username: username, DryRun: dryRun}, nil
 		},
 	}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -429,13 +429,13 @@ func TestPostCaseBatchHandler_EmptySequencingExperiments(t *testing.T) {
 func TestPatchCaseBatchHandler_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{ID: uuid.NewString(), BatchType: batchType, Status: types.BatchStatusPending, CreatedOn: time.Now(), Username: username, DryRun: dryRun}, nil
 		},
 	}
 	auth := &testutils.MockAuth{Username: "testuser"}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.PATCH("/:tenant/cases/batch", PatchCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -465,7 +465,7 @@ func TestPatchCaseBatchHandler_MissingFields(t *testing.T) {
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.PATCH("/:tenant/cases/batch", PatchCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -486,7 +486,7 @@ func TestPostCaseBatchHandler_MissingTasks(t *testing.T) {
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
@@ -521,7 +521,7 @@ func TestPostCaseBatchHandler_NoTasks(t *testing.T) {
 	repo := &MockBatchRepository{}
 	auth := &testutils.MockAuth{}
 
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/cases/batch", PostCaseBatchHandler(repo, auth))
 	body := `{
 		"cases": [{
