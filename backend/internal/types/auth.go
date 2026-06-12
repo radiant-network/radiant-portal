@@ -13,6 +13,12 @@ const (
 // value test fixtures attach their rows to).
 const DefaultTenantCode = "radiant"
 
+// TenantDatabase is the StarRocks database holding a tenant's views, derived from the
+// tenant code (e.g. "radiant" → "radiant_tenant").
+func TenantDatabase(tenantCode string) string {
+	return tenantCode + "_tenant"
+}
+
 // Action codes from the seeded auth catalog (migration 000009).
 const (
 	ActionSearchCase       = "can_search_case"

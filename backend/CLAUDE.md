@@ -142,6 +142,7 @@ Copy `.env.template` → `.env`. Key variables:
 | `LOG_LEVEL` | slog level for JSON logs (`debug`/`info`/`warn`/`error`) | info |
 | `KEYCLOAK_HOST/REALM/CLIENT` | Keycloak | localhost:8080 |
 | `TENANT_ENFORCEMENT_ENABLED` | Enforce tenant membership on `/{tenant}/*` routes (403 on cross-tenant). Off by default so routing can ship before `user_role` is backfilled; set `true` once it is. | false |
+| `VIEW_REFRESH_ON_STARTUP_ENABLED` | On API startup, after a migration that actually changed the schema, recreate every tenant's StarRocks views (advisory-locked across replicas, non-fatal). Off by default until the `FederationName→<tenant>_db` refactor makes the views load-bearing. Tenant *creation* (which needs Ranger) stays in the `cmd/create-tenant` CLI/task. | false |
 | `AWS_ENDPOINT_URL/REGION/ACCESS_KEY_ID/SECRET_ACCESS_KEY` | S3/MinIO | — |
 | `S3_PRESIGNED_URL_EXPIRE` | URL TTL | 60m |
 | `PUBMED_BASE_URL` | PubMed API | ncbi.nlm.nih.gov |
