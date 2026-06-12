@@ -9,7 +9,6 @@ import (
 
 	"github.com/radiant-network/radiant-api/internal/types"
 
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -102,7 +101,7 @@ func (m *MockRepository) RetrieveSomaticInterpretationClassificationCounts(locus
 
 func assertGetInterpretationGermline(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	repo := &MockRepository{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationGermline(repo, repo))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/interpretations/v2/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
@@ -127,7 +126,7 @@ func Test_GetInterpretationGermline_notFound(t *testing.T) {
 
 func assertPostInterpretationGermline(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, body string, expected string) {
 	repo := &MockRepository{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/interpretations/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id", PostInterpretationGermline(repo))
 
 	req, _ := http.NewRequest("POST", fmt.Sprintf("/radiant/interpretations/v2/germline/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBufferString(body))
@@ -160,7 +159,7 @@ func Test_PostInterpretationGermline_error(t *testing.T) {
 
 func assertGetInterpretationSomatic(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {
 	repo := &MockRepository{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", GetInterpretationSomatic(repo, repo))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/interpretations/v2/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBuffer([]byte("{}")))
@@ -185,7 +184,7 @@ func Test_GetInterpretationSomatic_notFound(t *testing.T) {
 
 func assertPostInterpretationSomatic(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, body string, expected string) {
 	repo := &MockRepository{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.POST("/:tenant/interpretations/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id", PostInterpretationSomatic(repo))
 
 	req, _ := http.NewRequest("POST", fmt.Sprintf("/radiant/interpretations/v2/somatic/%s/%s/%s/%s", caseId, sequencingId, locusId, transcriptId), bytes.NewBufferString(body))
@@ -218,7 +217,7 @@ func Test_PostInterpretationSomatic_error(t *testing.T) {
 
 func assertGetPubmedCitation(t *testing.T, id string, status int, expected string) {
 	repo := &MockRepository{}
-	router := gin.Default()
+	router := tenantRouter()
 	router.GET("/:tenant/interpretations/pubmed/:citation_id", GetPubmedCitation(repo))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/interpretations/pubmed/%s", id), bytes.NewBuffer([]byte("{}")))

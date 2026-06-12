@@ -171,7 +171,7 @@ CREATE INDEX ix_user_set_tenant_code ON public.user_set (tenant_code);
 --    required (tenant_code, <filter>) composite — its leftmost prefix also serves
 --    tenant-only scans, so cases needs no extra tenant_code index.
 -- =============================================================================
-DROP INDEX public.uc_cases_submitter_case_id_filtered;
+DROP INDEX IF EXISTS public.uc_cases_submitter_case_id_filtered;
 CREATE UNIQUE INDEX uc_cases_submitter_case_id_filtered
     ON public.cases (tenant_code, project_id, submitter_case_id)
     WHERE (submitter_case_id IS NOT NULL AND submitter_case_id <> '');
