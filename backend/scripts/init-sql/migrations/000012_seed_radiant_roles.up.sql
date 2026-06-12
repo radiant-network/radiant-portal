@@ -6,12 +6,12 @@
 -- defines the three roles that encode the two authorization use-cases that exist
 -- today, plus the read/interpret split:
 --
---   member       — base "see data" role: search cases, view the knowledge base,
---                  download files. Every existing portal user gets this.
---   geneticist   — clinical write/PII role: read PII, interpret/comment/flag
---                  variants. Granted alongside `member` to existing users to
---                  preserve today's full-portal behaviour; kept as a separate
---                  role so read-only users can be split off later without
+--   member       — base "see data" role: search cases, view the knowledge base.
+--                  Every existing portal user gets this.
+--   geneticist   — clinical write/PII role: read PII, download files, and
+--                  interpret/comment/flag variants. Granted alongside `member` to
+--                  existing users to preserve today's full-portal behaviour; kept as
+--                  a separate role so read-only users can be split off later without
 --                  touching this catalog.
 --   data_manager — batch-ingestion role (maps the Keycloak `data_manager` role):
 --                  submit batches. Granted on top of member+geneticist to users
@@ -26,8 +26,8 @@
 -- 1. Roles (per-tenant catalog)
 -- =============================================================================
 INSERT INTO public.role (tenant_code, code, name, description) VALUES
-    ('radiant', 'member',       'Member',       'Search cases, view the knowledge base, and download files.'),
-    ('radiant', 'geneticist',   'Geneticist',   'Read PII and interpret, comment on, and flag variants.'),
+    ('radiant', 'member',       'Member',       'Search cases and view the knowledge base.'),
+    ('radiant', 'geneticist',   'Geneticist',   'Read PII, download files, and interpret, comment on, and flag variants.'),
     ('radiant', 'data_manager', 'Data Manager', 'Submit batches (cases, patients, samples, sequencing).')
 ON CONFLICT (tenant_code, code) DO NOTHING;
 
@@ -38,13 +38,13 @@ INSERT INTO public.role_action (tenant_code, role_code, action_code) VALUES
     -- member: read-only portal access
     ('radiant', 'member',       'can_search_case'),    -- tenant-scoped
     ('radiant', 'member',       'can_view_kb'),         -- tenant-scoped
-    ('radiant', 'member',       'can_download_file'),   -- org-scoped
 
-    -- geneticist: PII + clinical writes
+    -- geneticist: PII + clinical writes + file download
     ('radiant', 'geneticist',   'can_read_pii'),        -- org-scoped
     ('radiant', 'geneticist',   'can_interpret_variant'),-- org-scoped
     ('radiant', 'geneticist',   'can_comment_variant'), -- org-scoped
     ('radiant', 'geneticist',   'can_flag_variant'),    -- org-scoped
+    ('radiant', 'geneticist',   'can_download_file'),   -- org-scoped
 
     -- data_manager: batch ingestion
     ('radiant', 'data_manager', 'can_ingest_data')      -- org-scoped
