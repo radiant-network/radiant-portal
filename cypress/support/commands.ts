@@ -64,11 +64,11 @@ Cypress.Commands.add('login', () => {
           const html: HTMLElement = document.createElement('html');
           html.innerHTML = response.body;
 
-          const script = html.getElementsByTagName('script')[0] as HTMLScriptElement;
-
-          eval(script.textContent ?? '');
-
-          const loginUrl: string = (window as any).kcContext.url.loginAction;
+          // The Keycloak login <form>'s `action` attribute is `loginAction` and exists in every
+          // theme, so parse it directly instead of eval-ing a theme-specific kcContext script.
+          const forms = Array.from(html.querySelectorAll('form'));
+          const loginForm = forms.find(f => (f.getAttribute('action') ?? '').includes('login-actions/authenticate')) ?? html.querySelector<HTMLFormElement>('#kc-form-login') ?? forms[0];
+          const loginUrl: string = loginForm?.getAttribute('action') ?? '';
 
           return cy.request({
             form: true,
@@ -85,9 +85,10 @@ Cypress.Commands.add('login', () => {
     },
     {
       validate() {
-        // Simple validation - just check we're not on auth server
+        // Simple validation - just check we're not on the auth server. Any Keycloak URL
+        // contains '/realms/' (same check logout() uses), so this is environment-independent.
         cy.visit('/', { failOnStatusCode: false });
-        cy.url().should('not.contain', 'auth.qa.juno.cqdg.ferlab.bio');
+        cy.url().should('not.contain', '/realms/');
       },
       cacheAcrossSpecs: true,
     }
