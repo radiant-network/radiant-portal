@@ -285,12 +285,15 @@ export const CaseEntity_Variants_SNV_Table = {
      * Yields 0 when no results are displayed.
      */
     getResultsCount(): Cypress.Chainable<number> {
-      return cy.get(CommonSelectors.tableIndexResult).invoke('text').then(text => {
-        const ofIndex = text.toLowerCase().indexOf(' of ');
-        if (ofIndex === -1) return 0;
-        const digits = text.substring(ofIndex + 4).replace(/\D/g, '');
-        return digits ? parseInt(digits, 10) : 0;
-      });
+      return cy
+        .get(CommonSelectors.tableIndexResult)
+        .invoke('text')
+        .then(text => {
+          const ofIndex = text.toLowerCase().indexOf(' of ');
+          if (ofIndex === -1) return 0;
+          const digits = text.substring(ofIndex + 4).replace(/\D/g, '');
+          return digits ? parseInt(digits, 10) : 0;
+        });
     },
     /**
      * Hides a specific column in the table.
@@ -588,16 +591,18 @@ export const CaseEntity_Variants_SNV_Table = {
      */
     shouldShowResultsCount(count: number | Cypress.Chainable<number>, beEqual: boolean = true) {
       const compare = (expected: number) => {
-        cy.get(CommonSelectors.tableIndexResult).invoke('text').should(text => {
-          const ofIndex = text.toLowerCase().indexOf(' of ');
-          const digits = ofIndex === -1 ? '' : text.substring(ofIndex + 4).replace(/\D/g, '');
-          const current = digits ? parseInt(digits, 10) : 0;
-          if (beEqual) {
-            expect(current).to.eq(expected);
-          } else {
-            expect(current).to.not.eq(expected);
-          }
-        });
+        cy.get(CommonSelectors.tableIndexResult)
+          .invoke('text')
+          .should(text => {
+            const ofIndex = text.toLowerCase().indexOf(' of ');
+            const digits = ofIndex === -1 ? '' : text.substring(ofIndex + 4).replace(/\D/g, '');
+            const current = digits ? parseInt(digits, 10) : 0;
+            if (beEqual) {
+              expect(current).to.eq(expected);
+            } else {
+              expect(current).to.not.eq(expected);
+            }
+          });
       };
       if (typeof count === 'number') {
         compare(count);

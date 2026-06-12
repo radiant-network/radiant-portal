@@ -1,8 +1,8 @@
 import { defineConfig } from "cypress";
 import { getDateTime } from "./cypress/pom/shared/Utils";
 import * as dotenv from "dotenv";
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
 
@@ -26,7 +26,7 @@ const getName = (url = "", parallel = "") => {
 };
 
 export default defineConfig({
-  projectId: 'g1apb2',
+  projectId: "g1apb2",
   chromeWebSecurity: true,
   video: false,
   screenshotOnRunFailure: true,
@@ -36,11 +36,11 @@ export default defineConfig({
   allowCypressEnv: false,
   expose: {
     keycloak_host: "https://auth.qa.juno.cqdg.ferlab.bio",
-    keycloak_realm: "CQDG",
-    keycloak_client: "cqdg-client",
-    api_client: 'radiant',
-    api_tenant: 'radiant',
-    api_base_url: "https://radiant-api.qa.juno.cqdg.ferlab.bio/",
+    keycloak_realm: "qlin",
+    keycloak_client: "radiant",
+    api_client: "radiant",
+    api_tenant: "radiant",
+    api_base_url: "https://api.dev.qlin.aws.sante.quebec/",
   },
   env: {
     user_username: process.env.CYPRESS_USER_USERNAME,
@@ -49,19 +49,18 @@ export default defineConfig({
 
   e2e: {
     setupNodeEvents(on, config) {
-      const cachedDataPath = path.join(__dirname, 'cypress/.cached-data.json');
+      const cachedDataPath = path.join(__dirname, "cypress/.cached-data.json");
       on("task", {
         checkCachedData() {
           return fs.existsSync(cachedDataPath);
         },
         loadCachedData() {
           if (fs.existsSync(cachedDataPath)) {
-            const data = JSON.parse(fs.readFileSync(cachedDataPath, 'utf8'));
+            const data = JSON.parse(fs.readFileSync(cachedDataPath, "utf8"));
             return data;
-          }
-          else {
+          } else {
             return null;
-          };
+          }
         },
         log(message: string) {
           console.log(message);
@@ -74,7 +73,7 @@ export default defineConfig({
       });
       return require("./cypress/plugins/index.ts")(on, config);
     },
-    baseUrl: "https://radiant.qa.juno.cqdg.ferlab.bio/",
+    baseUrl: "https://portail.dev.qlin.aws.sante.quebec/",
     supportFile: "cypress/support/e2e.js",
     specPattern: "cypress/**/*.cy.ts",
     slowTestThreshold: 60000,
@@ -101,4 +100,3 @@ export default defineConfig({
     rootSuiteTitle: "Tests Cypress",
   },
 });
-
