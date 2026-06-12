@@ -236,6 +236,7 @@ Cypress.Commands.add('showColumn', (column: string | RegExp) => {
   getSettingsCheckbox(column).click({ force: true });
   cy.get(CommonSelectors.logo).clickAndWait({ force: true }); // Close the popper
   cy.get(CommonSelectors.settingsPopper).should('not.exist');
+  cy.get(CommonSelectors.logo).clickAndWait({ force: true }); // Close the 'Columns' tooltip
   cy.waitWhileLoad(oneMinute);
 });
 
