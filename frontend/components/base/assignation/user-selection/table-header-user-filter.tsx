@@ -72,7 +72,7 @@ export function TableHeaderUserFilter({
     setSearchTerm('');
   };
 
-  const unassignedStyles = avatarStyles({ variant: 'unassigned' });
+  const unassignedStyles = avatarStyles({ variant: 'assignment' });
   const iconSize = getIconSize('xs');
 
   if (!isOpen) {

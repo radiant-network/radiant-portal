@@ -69,7 +69,6 @@ const sampleUsers: AvatarUser[] = [
 export const Sizes: Story = {
   render: () => {
     const states: { label: string; users: AvatarUser[]; canAssign?: boolean }[] = [
-      { label: 'Unassigned (placeholder)', users: [] },
       { label: 'Assignment Button', users: [], canAssign: true },
       { label: 'User Avatar', users: [sampleUsers[0]] },
       { label: 'Users without count', users: [sampleUsers[0], sampleUsers[1]] },
@@ -158,11 +157,6 @@ export const AssignmentStates: Story = {
           <StoryLabel>Unassigned States</StoryLabel>
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center gap-2">
-              <Avatar users={[]} />
-              <span className="text-xs text-muted-foreground">Placeholder</span>
-            </div>
-
-            <div className="flex flex-col items-center gap-2">
               <Avatar users={[]} canAssign={true} onAssignClick={() => alert('Assign clicked!')} />
               <span className="text-xs text-muted-foreground">Can Assign</span>
             </div>
@@ -214,15 +208,6 @@ export const TableUsageExample: Story = {
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b">
-              <td className="p-3 font-mono text-sm">659001</td>
-              <td className="p-3">
-                <Avatar users={[]} />
-              </td>
-              <td className="p-3">
-                <span className="text-muted-foreground">Unassigned (placeholder)</span>
-              </td>
-            </tr>
             <tr className="border-b">
               <td className="p-3 font-mono text-sm">666106</td>
               <td className="p-3">

@@ -21,7 +21,7 @@ function SelectedUsersDisplay({
   onRemoveUser?: (user: AvatarUser) => void;
   readOnly?: boolean;
 }) {
-  const unassignedStyles = avatarStyles({ variant: 'unassigned' });
+  const unassignedStyles = avatarStyles({ variant: 'assignment' });
   const iconSize = getIconSize('xs');
 
   return (
@@ -158,7 +158,7 @@ export function EditableUserSelection({
     onUsersChange(selectedUsers.filter(user => user.id !== userToRemove.id));
   };
 
-  const unassignedStyles = avatarStyles({ variant: 'unassigned' });
+  const unassignedStyles = avatarStyles({ variant: 'assignment' });
   const iconSize = getIconSize('xs');
 
   if (!isOpen) {

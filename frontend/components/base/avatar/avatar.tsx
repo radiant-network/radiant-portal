@@ -4,7 +4,6 @@ import type { AvatarProps } from './avatar.types';
 import { getInitials, getUserColor } from './avatar.utils';
 import { AvatarAssignmentButton } from './avatar-assignment-button';
 import { AvatarPopover } from './avatar-popover';
-import { UnassignedAvatar } from './unassigned-avatar';
 import { UserAvatar } from './user-avatar';
 
 // Largest count rendered before falling back to "99+"
@@ -13,20 +12,24 @@ const MAX_COUNT_DISPLAY = 99;
 /**
  * Avatar component that displays user assignment status.
  *
- * - No users + canAssign undefined: UnassignedAvatar (dashed circle with user icon)
- * - No users + canAssign defined: AvatarAssignmentButton (bare icon, gray hover when assignable)
+ * - No users: AvatarAssignmentButton (bare icon, gray hover when assignable)
  * - 1 user: UserAvatar (colored circle with initials)
  * - 2+ users: an AvatarGroup, collapsing the overflow into a `+N` count chip
  *   once there are more than `maxAvatars` users.
  */
-export function Avatar({ users = [], size = 'sm', maxAvatars = 2, className, canAssign, onAssignClick }: AvatarProps) {
+export function Avatar({
+  users = [],
+  size = 'sm',
+  maxAvatars = 2,
+  className,
+  canAssign = true,
+  onAssignClick,
+}: AvatarProps) {
   // Filter out any falsy users and ensure we have valid user objects
   const validUsers = users.filter(user => user && user.id && user.name);
 
   if (validUsers.length === 0) {
-    return canAssign === undefined ? (
-      <UnassignedAvatar size={size} className={className} />
-    ) : (
+    return (
       <AvatarAssignmentButton size={size} className={className} canAssign={canAssign} onAssignClick={onAssignClick} />
     );
   }
