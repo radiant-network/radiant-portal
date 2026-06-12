@@ -88,7 +88,11 @@ func runRefresh(ctx context.Context, code string, dryRun bool) {
 		if err := deps.Starrocks.EnsureAuthDatabase(ctx); err != nil {
 			log.Fatalf("create-tenant: ensure auth database: %v", err)
 		}
-		if err := deps.Starrocks.EnsureClinicalViews(ctx, code); err != nil {
+		columns, err := deps.Columns.FederatableColumnsForViews()
+		if err != nil {
+			log.Fatalf("create-tenant: federatable columns: %v", err)
+		}
+		if err := deps.Starrocks.EnsureClinicalViews(ctx, code, columns); err != nil {
 			log.Fatalf("create-tenant: refresh views %q: %v", code, err)
 		}
 		log.Printf("refreshed %d views for tenant %q", len(repository.ViewTables), code)
@@ -107,13 +111,13 @@ func runRefresh(ctx context.Context, code string, dryRun bool) {
 		fmt.Printf("DRY RUN — would refresh views for %d tenant(s): %v\n", len(codes), codes)
 		return
 	}
-	if err := service.RefreshAllTenantViews(ctx, deps.Lister, deps.Starrocks); err != nil {
+	if err := service.RefreshAllTenantViews(ctx, deps.Lister, deps.Columns, deps.Starrocks); err != nil {
 		log.Fatalf("create-tenant: refresh all views: %v", err)
 	}
 	log.Printf("refreshed views for %d tenant(s): %v", len(codes), codes)
 }
 
-func printCreatePlan(w io.Writer, code, name string, cols repository.FederatableColumnSource) error {
+func printCreatePlan(w io.Writer, code, name string, cols service.ViewColumnSource) error {
 	fmt.Fprintf(w, "DRY RUN — plan for tenant %q (%s)\n\n", code, name)
 
 	fmt.Fprintln(w, "Phase A — Postgres (source of truth):")
@@ -137,8 +141,8 @@ func printCreatePlan(w io.Writer, code, name string, cols repository.Federatable
 	return nil
 }
 
-func printViews(w io.Writer, code string, cols repository.FederatableColumnSource) error {
-	columns, err := cols.FederatableColumns(repository.ViewTables)
+func printViews(w io.Writer, code string, cols service.ViewColumnSource) error {
+	columns, err := cols.FederatableColumnsForViews()
 	if err != nil {
 		return err
 	}
@@ -152,7 +156,7 @@ func printViews(w io.Writer, code string, cols repository.FederatableColumnSourc
 	return nil
 }
 
-func connectColumnSource() (repository.FederatableColumnSource, error) {
+func connectColumnSource() (service.ViewColumnSource, error) {
 	pg, err := database.NewPostgresDB()
 	if err != nil {
 		return nil, fmt.Errorf("connect postgres: %w", err)
@@ -173,7 +177,8 @@ func buildDeps() (service.TenantDeps, error) {
 	return service.TenantDeps{
 		Store:     tenantRepo,
 		Lister:    tenantRepo,
-		Starrocks: repository.NewStarrocksTenantRepository(sr, tenantRepo),
+		Columns:   tenantRepo,
+		Starrocks: repository.NewStarrocksTenantRepository(sr),
 		Ranger:    client.NewRangerAdminClient(client.RangerConfigFromEnv()),
 	}, nil
 }

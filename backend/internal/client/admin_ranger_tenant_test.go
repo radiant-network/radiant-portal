@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -13,19 +14,26 @@ import (
 )
 
 // fakeRangerTenant is a minimal Ranger stand-in for the role/policy provisioning
-// paths (EnsureRole, EnsureAccessPolicy). It records the methods+paths it served.
+// paths (EnsureRole, EnsureAccessPolicy).
 type fakeRangerTenant struct {
-	existingRoles  map[string]bool // roles that already exist (GET by name -> 200)
-	createdRoles   []string        // names POSTed to /service/roles/roles
-	createdPolicy  map[string]any  // last policy POSTed
-	deletedPolicy  string          // last policy name deleted
-	policyPOSTCode int             // override policy create status (0 => 200)
+	existingRoles map[string]bool
+	roleGETStatus int      // override GET-role-by-name status (0 => normal 200/404)
+	createdRoles  []string // names POSTed to /service/roles/roles
+
+	existingPolicies  map[string]int64 // policy name -> id, for the GET-by-name upsert probe
+	createdPolicy     map[string]any   // last POST /service/plugins/policies body
+	updatedPolicy     map[string]any   // last PUT /service/public/v2/api/policy/{id} body
+	policyWriteStatus int              // override create/update status (0 => 200)
 }
 
 func (f *fakeRangerTenant) server() *httptest.Server {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/service/roles/roles/name/", func(w http.ResponseWriter, r *http.Request) {
+		if f.roleGETStatus != 0 {
+			w.WriteHeader(f.roleGETStatus)
+			return
+		}
 		name := strings.TrimPrefix(r.URL.Path, "/service/roles/roles/name/")
 		if f.existingRoles[name] {
 			w.WriteHeader(http.StatusOK)
@@ -40,21 +48,38 @@ func (f *fakeRangerTenant) server() *httptest.Server {
 		f.createdRoles = append(f.createdRoles, role.Name)
 		w.WriteHeader(http.StatusOK)
 	})
-	mux.HandleFunc("/service/public/v2/api/policy", func(w http.ResponseWriter, r *http.Request) {
-		f.deletedPolicy = r.URL.Query().Get("policyname")
-		w.WriteHeader(http.StatusNoContent)
+	// GET access policy by name (upsert probe): /service/public/v2/api/service/<svc>/policy/<name>
+	mux.HandleFunc("/service/public/v2/api/service/", func(w http.ResponseWriter, r *http.Request) {
+		parts := strings.Split(r.URL.Path, "/")
+		name := parts[len(parts)-1]
+		if id, ok := f.existingPolicies[name]; ok {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(fmt.Sprintf(`{"id":%d,"name":%q}`, id, name)))
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
 	})
+	// PUT access policy by id (update): /service/public/v2/api/policy/<id>
+	mux.HandleFunc("/service/public/v2/api/policy/", func(w http.ResponseWriter, r *http.Request) {
+		f.updatedPolicy = map[string]any{}
+		_ = json.NewDecoder(r.Body).Decode(&f.updatedPolicy)
+		w.WriteHeader(orDefault(f.policyWriteStatus, http.StatusOK))
+	})
+	// POST access policy (create).
 	mux.HandleFunc("/service/plugins/policies", func(w http.ResponseWriter, r *http.Request) {
 		f.createdPolicy = map[string]any{}
 		_ = json.NewDecoder(r.Body).Decode(&f.createdPolicy)
-		if f.policyPOSTCode != 0 {
-			w.WriteHeader(f.policyPOSTCode)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(orDefault(f.policyWriteStatus, http.StatusOK))
 	})
 
 	return httptest.NewServer(mux)
+}
+
+func orDefault(v, def int) int {
+	if v != 0 {
+		return v
+	}
+	return def
 }
 
 func (f *fakeRangerTenant) client(url string) *RangerAdminClient {
@@ -66,9 +91,7 @@ func Test_RangerAdminClient_EnsureRole_CreatesWhenMissing(t *testing.T) {
 	srv := fake.server()
 	defer srv.Close()
 
-	err := fake.client(srv.URL).EnsureRole(context.Background(), "demo_user")
-
-	require.NoError(t, err)
+	require.NoError(t, fake.client(srv.URL).EnsureRole(context.Background(), "demo_user"))
 	assert.Equal(t, []string{"demo_user"}, fake.createdRoles)
 }
 
@@ -77,32 +100,53 @@ func Test_RangerAdminClient_EnsureRole_LeavesExistingRoleUntouched(t *testing.T)
 	srv := fake.server()
 	defer srv.Close()
 
-	err := fake.client(srv.URL).EnsureRole(context.Background(), "demo_user")
-
-	require.NoError(t, err)
+	require.NoError(t, fake.client(srv.URL).EnsureRole(context.Background(), "demo_user"))
 	assert.Empty(t, fake.createdRoles, "must not re-create / clobber an existing role's membership")
 }
 
-func Test_RangerAdminClient_EnsureAccessPolicy_DeletesThenCreates(t *testing.T) {
-	fake := &fakeRangerTenant{existingRoles: map[string]bool{}}
+func Test_RangerAdminClient_EnsureRole_NonNotFoundStatusIsErrorNotCreate(t *testing.T) {
+	fake := &fakeRangerTenant{existingRoles: map[string]bool{}, roleGETStatus: http.StatusInternalServerError}
 	srv := fake.server()
 	defer srv.Close()
 
-	err := fake.client(srv.URL).EnsureAccessPolicy(context.Background(), "sr_access_demo", []string{"demo"}, []string{"*"}, []string{"demo_user"})
-
-	require.NoError(t, err)
-	assert.Equal(t, "sr_access_demo", fake.deletedPolicy, "old policy deleted first for convergence")
-	assert.Equal(t, "sr_access_demo", fake.createdPolicy["name"])
-	assert.EqualValues(t, 0, fake.createdPolicy["policyType"], "access policy is type 0")
+	err := fake.client(srv.URL).EnsureRole(context.Background(), "demo_user")
+	require.Error(t, err, "a transient 500 on GET must not be read as 'role absent'")
+	assert.Empty(t, fake.createdRoles, "must not attempt a create on a non-404 GET")
 }
 
-func Test_RangerAdminClient_EnsureAccessPolicy_ReportsServerError(t *testing.T) {
-	fake := &fakeRangerTenant{existingRoles: map[string]bool{}, policyPOSTCode: http.StatusInternalServerError}
+func Test_RangerAdminClient_EnsureAccessPolicy_CreatesWhenMissing(t *testing.T) {
+	fake := &fakeRangerTenant{existingPolicies: map[string]int64{}}
 	srv := fake.server()
 	defer srv.Close()
 
-	err := fake.client(srv.URL).EnsureAccessPolicy(context.Background(), "sr_access_demo", []string{"demo"}, []string{"*"}, []string{"demo_user"})
+	err := fake.client(srv.URL).EnsureAccessPolicy(context.Background(), "sr_access_demo", []string{"demo_tenant"}, []string{"*"}, []string{"demo_user"})
 
+	require.NoError(t, err)
+	require.NotNil(t, fake.createdPolicy, "missing policy is created via POST")
+	assert.Nil(t, fake.updatedPolicy, "no update when it didn't exist")
+	assert.Equal(t, "sr_access_demo", fake.createdPolicy["name"])
+	assert.EqualValues(t, 0, fake.createdPolicy["policyType"])
+}
+
+func Test_RangerAdminClient_EnsureAccessPolicy_UpdatesInPlaceWhenExists(t *testing.T) {
+	fake := &fakeRangerTenant{existingPolicies: map[string]int64{"sr_access_demo": 7}}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).EnsureAccessPolicy(context.Background(), "sr_access_demo", []string{"demo_tenant"}, []string{"*"}, []string{"demo_user"})
+
+	require.NoError(t, err)
+	require.NotNil(t, fake.updatedPolicy, "existing policy is updated via PUT (no delete-then-create)")
+	assert.Nil(t, fake.createdPolicy, "must not create when it already exists")
+	assert.EqualValues(t, 7, fake.updatedPolicy["id"], "PUT targets the existing policy id")
+}
+
+func Test_RangerAdminClient_EnsureAccessPolicy_ReportsWriteError(t *testing.T) {
+	fake := &fakeRangerTenant{existingPolicies: map[string]int64{}, policyWriteStatus: http.StatusInternalServerError}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).EnsureAccessPolicy(context.Background(), "sr_access_demo", []string{"demo_tenant"}, []string{"*"}, []string{"demo_user"})
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "create access policy")
+	assert.Contains(t, err.Error(), "ensure access policy")
 }

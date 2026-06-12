@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 
 	"github.com/golang/glog"
 	"gorm.io/gorm"
@@ -22,11 +23,10 @@ func shouldRefreshViewsOnStartup(enabled, migrated bool) bool {
 }
 
 // maybeRefreshTenantViewsOnStartup recreates per-tenant StarRocks views when a
-// migration changed the schema this boot. Gated (default off) and migration-gated so
-// plain restarts don't churn; advisory-locked so one replica runs it per deploy;
-// non-fatal so a failure never blocks serving (the break-glass
-// `create-tenant -refresh-views` can recover). Uses only the StarRocks + Postgres
-// connections the API already holds — no Ranger, no new credentials.
+// migration changed the schema this boot. It runs BEFORE the server starts serving on
+// purpose: a new build must not serve against views that don't match the new schema.
+// Gated (default off) and migration-gated so plain restarts don't churn; advisory-
+// locked so one replica runs it per deploy.
 func maybeRefreshTenantViewsOnStartup(ctx context.Context, pg, sr *gorm.DB, migrated bool) {
 	if !shouldRefreshViewsOnStartup(utils.GetBoolEnvOrDefault(viewRefreshOnStartupEnabledEnv, false), migrated) {
 		return
@@ -37,26 +37,47 @@ func maybeRefreshTenantViewsOnStartup(ctx context.Context, pg, sr *gorm.DB, migr
 	}
 
 	lister := repository.NewTenantRepository(pg)
-	srProvisioner := repository.NewStarrocksTenantRepository(sr, lister)
+	srProvisioner := repository.NewStarrocksTenantRepository(sr)
 
-	// xact lock auto-releases on commit or crash, so a death mid-refresh never leaks it.
-	err := pg.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		var locked bool
-		if err := tx.Raw("SELECT pg_try_advisory_xact_lock(?)", viewRefreshLockKey).Scan(&locked).Error; err != nil {
-			return err
-		}
-		if !locked {
-			glog.Info("another instance is refreshing tenant views; skipping")
-			return nil
-		}
-		if err := service.RefreshAllTenantViews(ctx, lister, srProvisioner); err != nil {
-			glog.Errorf("startup tenant view refresh failed (non-fatal): %v", err)
-			return nil
-		}
-		glog.Info("startup tenant view refresh completed")
-		return nil
-	})
+	sqlDB, err := pg.DB()
 	if err != nil {
-		glog.Errorf("startup tenant view refresh lock error (non-fatal): %v", err)
+		glog.Errorf("startup tenant view refresh skipped: %v", err)
+		return
 	}
+	// Hold the advisory lock on a SESSION (a dedicated connection), not a transaction:
+	// the StarRocks DDL runs outside any Postgres transaction, so the connection stays
+	// merely idle (not idle-in-transaction) and avoids idle_in_transaction_session_timeout
+	// and the VACUUM xmin hold. A crash still releases it — the session ends on disconnect.
+	conn, err := sqlDB.Conn(ctx)
+	if err != nil {
+		glog.Errorf("startup tenant view refresh skipped: %v", err)
+		return
+	}
+	defer func() { _ = conn.Close() }()
+
+	var locked bool
+	if err := conn.QueryRowContext(ctx, "SELECT pg_try_advisory_lock($1)", viewRefreshLockKey).Scan(&locked); err != nil {
+		glog.Errorf("startup tenant view refresh lock error (non-fatal): %v", err)
+		return
+	}
+	if !locked {
+		glog.Info("another instance is refreshing tenant views; skipping")
+		return
+	}
+	defer func() {
+		// WithoutCancel: still release if ctx was cancelled (SIGTERM) mid-refresh.
+		if _, err := conn.ExecContext(context.WithoutCancel(ctx), "SELECT pg_advisory_unlock($1)", viewRefreshLockKey); err != nil {
+			glog.Errorf("startup tenant view refresh: failed to release advisory lock: %v", err)
+		}
+	}()
+
+	if err := service.RefreshAllTenantViews(ctx, lister, lister, srProvisioner); err != nil {
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			glog.Warningf("startup tenant view refresh aborted (shutting down): %v", err)
+		} else {
+			glog.Errorf("startup tenant view refresh failed (non-fatal): %v", err)
+		}
+		return
+	}
+	glog.Info("startup tenant view refresh completed")
 }

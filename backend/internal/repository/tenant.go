@@ -54,12 +54,15 @@ func (r *TenantRepository) ListTenants() ([]string, error) {
 }
 
 // unsupportedFederationTypes are Postgres column types the StarRocks JDBC catalog
-// cannot map; a view selecting one fails to analyze, so they are excluded.
+// cannot map, so they are excluded.
 var unsupportedFederationTypes = []string{"json", "jsonb", "uuid"}
 
 // FederatableColumns returns, per table, the columns whose types the radiant_jdbc
-// catalog can read (ordinal order). Driving the views off this keeps them in sync
-// with the schema across migrations without hardcoded column lists.
+// catalog can read (ordinal order).
+func (r *TenantRepository) FederatableColumnsForViews() (map[string][]string, error) {
+	return r.FederatableColumns(ViewTables)
+}
+
 func (r *TenantRepository) FederatableColumns(tables []string) (map[string][]string, error) {
 	var rows []struct {
 		TableName  string

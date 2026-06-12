@@ -16,12 +16,6 @@ import (
 //go:embed views/*.sql views/*.sql.tmpl
 var viewFS embed.FS
 
-// ViewTables are the tables a tenant gets a view for: tenant-scoped tables the API
-// reads through the radiant_jdbc federation (those with a FederationName). A table
-// with a views/<table>.sql.tmpl (e.g. patient, for its can_read_pii flag) is rendered
-// from that template; the rest get a generated SELECT. Tables that are tenant-scoped
-// but NOT federated (batch, user_set) are intentionally absent — the API never reads
-// them via StarRocks.
 var ViewTables = []string{
 	"patient",
 	"organization", "cases", "sample", "sequencing_experiment",
@@ -32,28 +26,18 @@ var ViewTables = []string{
 	"panel", "project", "task",
 }
 
-// FederatableColumnSource yields the federatable columns per table (see
-// TenantRepository.FederatableColumns).
-type FederatableColumnSource interface {
-	FederatableColumns(tables []string) (map[string][]string, error)
-}
-
 type StarrocksTenantRepository struct {
-	db   *gorm.DB
-	cols FederatableColumnSource
+	db *gorm.DB
 }
 
-func NewStarrocksTenantRepository(db *gorm.DB, cols FederatableColumnSource) *StarrocksTenantRepository {
+func NewStarrocksTenantRepository(db *gorm.DB) *StarrocksTenantRepository {
 	if db == nil {
 		log.Print("StarrocksTenantRepository: db is nil")
 		return nil
 	}
-	return &StarrocksTenantRepository{db: db, cols: cols}
+	return &StarrocksTenantRepository{db: db}
 }
 
-// EnsureAuthDatabase creates the global auth database and pii_grant view — the PII
-// masking source shared by every tenant, not tenant-specific. Must run before any
-// tenant's patient view (which references auth.pii_grant). Idempotent.
 func (r *StarrocksTenantRepository) EnsureAuthDatabase(ctx context.Context) error {
 	for _, stmt := range BuildAuthStatements() {
 		if err := r.db.WithContext(ctx).Exec(stmt).Error; err != nil {
@@ -63,13 +47,9 @@ func (r *StarrocksTenantRepository) EnsureAuthDatabase(ctx context.Context) erro
 	return nil
 }
 
-func (r *StarrocksTenantRepository) EnsureClinicalViews(ctx context.Context, tenantCode string) error {
+func (r *StarrocksTenantRepository) EnsureClinicalViews(ctx context.Context, tenantCode string, columns map[string][]string) error {
 	if err := ValidateTenantCode(tenantCode); err != nil {
 		return err
-	}
-	columns, err := r.cols.FederatableColumns(ViewTables)
-	if err != nil {
-		return fmt.Errorf("federatable columns for %q: %w", tenantCode, err)
 	}
 	stmts, err := BuildViewStatements(tenantCode, columns)
 	if err != nil {
@@ -95,9 +75,7 @@ func BuildAuthStatements() []string {
 // BuildViewStatements builds the idempotent (DROP+CREATE) DDL for a tenant's database
 // and views, projecting only federatable columns (SELECT * breaks on jsonb/uuid the
 // JDBC catalog can't map). A table with views/<table>.sql.tmpl uses that template
-// (e.g. patient's can_read_pii flag); the rest get a generated SELECT. A StarRocks
-// view is NOT a Ranger access boundary — isolation comes from the DB-level access
-// policy plus per-tenant base data, not the WHERE clause.
+// (e.g. patient's can_read_pii flag); the rest get a generated SELECT.
 func BuildViewStatements(tenantCode string, columns map[string][]string) ([]string, error) {
 	if err := ValidateTenantCode(tenantCode); err != nil {
 		return nil, err
@@ -119,9 +97,6 @@ func BuildViewStatements(tenantCode string, columns map[string][]string) ([]stri
 }
 
 // viewTemplates holds the parsed views/<table>.sql.tmpl files, keyed by table name.
-// Loaded once at init so "does this table have a template?" is a deterministic map
-// lookup (not inferred from a read error), and a malformed template fails fast at
-// startup rather than silently degrading to a generated view.
 var viewTemplates = loadViewTemplates()
 
 func loadViewTemplates() map[string]*template.Template {
@@ -141,8 +116,6 @@ func loadViewTemplates() map[string]*template.Template {
 	return templates
 }
 
-// buildViewStatement renders the table's template when one exists, else generates a
-// tenant-filtered projection of the federatable columns.
 func buildViewStatement(db, tenantCode, table string, cols []string) (string, error) {
 	tmpl, found := viewTemplates[table]
 	if !found {
@@ -160,8 +133,6 @@ func buildViewStatement(db, tenantCode, table string, cols []string) (string, er
 	return buf.String(), nil
 }
 
-// readView returns an embedded view file. The file is guaranteed present by the
-// embed directive above, so a read error is a build/programming fault.
 func readView(name string) string {
 	b, err := viewFS.ReadFile("views/" + name)
 	if err != nil {

@@ -17,9 +17,13 @@ type TenantLister interface {
 	ListTenants() ([]string, error)
 }
 
+type ViewColumnSource interface {
+	FederatableColumnsForViews() (map[string][]string, error)
+}
+
 type StarrocksTenantProvisioner interface {
 	EnsureAuthDatabase(ctx context.Context) error
-	EnsureClinicalViews(ctx context.Context, tenantCode string) error
+	EnsureClinicalViews(ctx context.Context, tenantCode string, columns map[string][]string) error
 }
 
 type RangerTenantProvisioner interface {
@@ -30,6 +34,7 @@ type RangerTenantProvisioner interface {
 type TenantDeps struct {
 	Store     TenantStore
 	Lister    TenantLister
+	Columns   ViewColumnSource
 	Starrocks StarrocksTenantProvisioner
 	Ranger    RangerTenantProvisioner
 }
@@ -52,7 +57,11 @@ func CreateTenant(ctx context.Context, deps TenantDeps, code, name string) error
 	if err := deps.Starrocks.EnsureAuthDatabase(ctx); err != nil {
 		return fmt.Errorf("starrocks: ensure auth database: %w", err)
 	}
-	if err := deps.Starrocks.EnsureClinicalViews(ctx, code); err != nil {
+	columns, err := deps.Columns.FederatableColumnsForViews()
+	if err != nil {
+		return fmt.Errorf("starrocks: federatable columns: %w", err)
+	}
+	if err := deps.Starrocks.EnsureClinicalViews(ctx, code, columns); err != nil {
 		return fmt.Errorf("starrocks: create views for %q: %w", code, err)
 	}
 
@@ -69,11 +78,15 @@ func CreateTenant(ctx context.Context, deps TenantDeps, code, name string) error
 }
 
 // RefreshAllTenantViews re-applies view definitions to every tenant, continuing past
-// a per-tenant failure and returning the failures joined. The shared auth database is
-// ensured once up front.
-func RefreshAllTenantViews(ctx context.Context, lister TenantLister, sr StarrocksTenantProvisioner) error {
+// a per-tenant failure and returning the failures joined. The shared auth database and
+// the (tenant-independent) federatable column set are resolved once up front.
+func RefreshAllTenantViews(ctx context.Context, lister TenantLister, columns ViewColumnSource, sr StarrocksTenantProvisioner) error {
 	if err := sr.EnsureAuthDatabase(ctx); err != nil {
 		return fmt.Errorf("ensure auth database: %w", err)
+	}
+	cols, err := columns.FederatableColumnsForViews()
+	if err != nil {
+		return fmt.Errorf("federatable columns: %w", err)
 	}
 	codes, err := lister.ListTenants()
 	if err != nil {
@@ -81,7 +94,7 @@ func RefreshAllTenantViews(ctx context.Context, lister TenantLister, sr Starrock
 	}
 	var errs []error
 	for _, code := range codes {
-		if err := sr.EnsureClinicalViews(ctx, code); err != nil {
+		if err := sr.EnsureClinicalViews(ctx, code, cols); err != nil {
 			errs = append(errs, fmt.Errorf("refresh %q: %w", code, err))
 		}
 	}

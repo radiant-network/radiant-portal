@@ -29,7 +29,13 @@ func (d *recordingTenantDeps) SeedDefaultRoles(tenantCode string) error {
 func (d *recordingTenantDeps) EnsureAuthDatabase(ctx context.Context) error {
 	return d.record("EnsureAuthDatabase")
 }
-func (d *recordingTenantDeps) EnsureClinicalViews(ctx context.Context, tenantCode string) error {
+func (d *recordingTenantDeps) FederatableColumnsForViews() (map[string][]string, error) {
+	if err := d.record("FederatableColumnsForViews"); err != nil {
+		return nil, err
+	}
+	return map[string][]string{}, nil
+}
+func (d *recordingTenantDeps) EnsureClinicalViews(ctx context.Context, tenantCode string, columns map[string][]string) error {
 	return d.record("EnsureClinicalViews")
 }
 func (d *recordingTenantDeps) EnsureRole(ctx context.Context, name string) error {
@@ -40,7 +46,7 @@ func (d *recordingTenantDeps) EnsureAccessPolicy(ctx context.Context, name strin
 }
 
 func (d *recordingTenantDeps) deps() TenantDeps {
-	return TenantDeps{Store: d, Starrocks: d, Ranger: d}
+	return TenantDeps{Store: d, Columns: d, Starrocks: d, Ranger: d}
 }
 
 func Test_CreateTenant_RunsAllStepsInPostgresStarrocksRangerOrder(t *testing.T) {
@@ -51,7 +57,7 @@ func Test_CreateTenant_RunsAllStepsInPostgresStarrocksRangerOrder(t *testing.T) 
 	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"EnsureTenant", "SeedDefaultRoles", // Phase A — Postgres
-		"EnsureAuthDatabase", "EnsureClinicalViews", // Phase B — StarRocks
+		"EnsureAuthDatabase", "FederatableColumnsForViews", "EnsureClinicalViews", // Phase B — StarRocks
 		"EnsureRole", "EnsureAccessPolicy", // Phase C — Ranger
 	}, d.calls)
 }
@@ -63,21 +69,26 @@ func Test_CreateTenant_StopsAndWrapsOnFirstFailure(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "starrocks: create views")
-	assert.Equal(t, []string{"EnsureTenant", "SeedDefaultRoles", "EnsureAuthDatabase", "EnsureClinicalViews"}, d.calls)
+	assert.Equal(t, []string{"EnsureTenant", "SeedDefaultRoles", "EnsureAuthDatabase", "FederatableColumnsForViews", "EnsureClinicalViews"}, d.calls)
 }
 
 // refreshRecorder records which tenants EnsureClinicalViews was called for, and can
 // be told to fail for specific tenant codes.
 type refreshRecorder struct {
-	tenants    []string
-	refreshed  []string
-	authCalls  int
-	failTenant map[string]bool
+	tenants     []string
+	refreshed   []string
+	authCalls   int
+	columnCalls int
+	failTenant  map[string]bool
 }
 
 func (d *refreshRecorder) ListTenants() ([]string, error)               { return d.tenants, nil }
 func (d *refreshRecorder) EnsureAuthDatabase(ctx context.Context) error { d.authCalls++; return nil }
-func (d *refreshRecorder) EnsureClinicalViews(ctx context.Context, tenantCode string) error {
+func (d *refreshRecorder) FederatableColumnsForViews() (map[string][]string, error) {
+	d.columnCalls++
+	return map[string][]string{}, nil
+}
+func (d *refreshRecorder) EnsureClinicalViews(ctx context.Context, tenantCode string, columns map[string][]string) error {
 	d.refreshed = append(d.refreshed, tenantCode)
 	if d.failTenant[tenantCode] {
 		return errors.New("boom")
@@ -85,20 +96,21 @@ func (d *refreshRecorder) EnsureClinicalViews(ctx context.Context, tenantCode st
 	return nil
 }
 
-func Test_RefreshAllTenantViews_EnsuresAuthOnceThenRefreshesEveryTenant(t *testing.T) {
+func Test_RefreshAllTenantViews_EnsuresAuthAndFetchesColumnsOnceThenRefreshesEveryTenant(t *testing.T) {
 	d := &refreshRecorder{tenants: []string{"radiant", "demo", "cbtn"}}
 
-	err := RefreshAllTenantViews(context.Background(), d, d)
+	err := RefreshAllTenantViews(context.Background(), d, d, d)
 
 	require.NoError(t, err)
 	assert.Equal(t, 1, d.authCalls, "auth database ensured once up front, not per tenant")
+	assert.Equal(t, 1, d.columnCalls, "federatable columns fetched once, not per tenant")
 	assert.Equal(t, []string{"radiant", "demo", "cbtn"}, d.refreshed)
 }
 
 func Test_RefreshAllTenantViews_ContinuesPastAFailingTenantAndJoinsErrors(t *testing.T) {
 	d := &refreshRecorder{tenants: []string{"radiant", "demo", "cbtn"}, failTenant: map[string]bool{"demo": true}}
 
-	err := RefreshAllTenantViews(context.Background(), d, d)
+	err := RefreshAllTenantViews(context.Background(), d, d, d)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), `refresh "demo"`)

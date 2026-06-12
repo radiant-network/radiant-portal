@@ -16,7 +16,7 @@ type fakeColumnSource struct {
 	err  error
 }
 
-func (f fakeColumnSource) FederatableColumns(tables []string) (map[string][]string, error) {
+func (f fakeColumnSource) FederatableColumnsForViews() (map[string][]string, error) {
 	return f.cols, f.err
 }
 

@@ -102,15 +102,18 @@ type rangerRole struct {
 // untouched — its membership is owned by the user-provisioning flow, so a re-run must
 // never clobber it.
 func (c *RangerAdminClient) EnsureRole(ctx context.Context, name string) error {
-	status, _, err := c.request(ctx, http.MethodGet, "/service/roles/roles/name/"+name, nil)
+	status, payload, err := c.request(ctx, http.MethodGet, "/service/roles/roles/name/"+name, nil)
 	if err != nil {
 		return err
 	}
 	if status == http.StatusOK {
 		return nil
 	}
+	if status != http.StatusNotFound {
+		return fmt.Errorf("get role %q: HTTP %d: %s", name, status, string(payload))
+	}
 	role := rangerRole{Name: name, CreatedByUser: c.cfg.AdminUser, Users: []rangerRoleMember{}, Roles: []rangerRoleMember{}}
-	status, payload, err := c.request(ctx, http.MethodPost, "/service/roles/roles", role)
+	status, payload, err = c.request(ctx, http.MethodPost, "/service/roles/roles", role)
 	if err != nil {
 		return err
 	}
@@ -121,13 +124,9 @@ func (c *RangerAdminClient) EnsureRole(ctx context.Context, name string) error {
 }
 
 // EnsureAccessPolicy upserts a StarRocks access policy granting roles SELECT on the
-// databases/tables. Delete-by-name then create, so a re-run converges to exactly this
-// definition.
+// databases/tables. It updates in place when the policy exists (PUT) and creates it
+// otherwise (POST).
 func (c *RangerAdminClient) EnsureAccessPolicy(ctx context.Context, name string, databases, tables, roles []string) error {
-	if _, _, err := c.request(ctx, http.MethodDelete,
-		fmt.Sprintf("/service/public/v2/api/policy?servicename=%s&policyname=%s", rangerStarrocksService, name), nil); err != nil {
-		return err
-	}
 	policy := map[string]any{
 		"policyType":     0,
 		"name":           name,
@@ -145,12 +144,32 @@ func (c *RangerAdminClient) EnsureAccessPolicy(ctx context.Context, name string,
 			"accesses": []map[string]any{{"type": "select", "isAllowed": true}},
 		}},
 	}
-	status, payload, err := c.request(ctx, http.MethodPost, "/service/plugins/policies", policy)
+
+	status, payload, err := c.request(ctx, http.MethodGet,
+		fmt.Sprintf("/service/public/v2/api/service/%s/policy/%s", rangerStarrocksService, name), nil)
+	if err != nil {
+		return err
+	}
+	switch status {
+	case http.StatusOK:
+		var existing struct {
+			ID int64 `json:"id"`
+		}
+		if err := json.Unmarshal(payload, &existing); err != nil {
+			return fmt.Errorf("parse access policy %q: %w", name, err)
+		}
+		policy["id"] = existing.ID
+		status, payload, err = c.request(ctx, http.MethodPut, fmt.Sprintf("/service/public/v2/api/policy/%d", existing.ID), policy)
+	case http.StatusNotFound:
+		status, payload, err = c.request(ctx, http.MethodPost, "/service/plugins/policies", policy)
+	default:
+		return fmt.Errorf("get access policy %q: HTTP %d: %s", name, status, string(payload))
+	}
 	if err != nil {
 		return err
 	}
 	if status != http.StatusOK && status != http.StatusCreated {
-		return fmt.Errorf("create access policy %q: HTTP %d: %s", name, status, string(payload))
+		return fmt.Errorf("ensure access policy %q: HTTP %d: %s", name, status, string(payload))
 	}
 	return nil
 }
