@@ -58,6 +58,18 @@ func Test_GetGeneAutoComplete_FindOnAlias(t *testing.T) {
 	})
 }
 
+func Test_GetGeneAutoComplete_FindOnAliasNotFirst(t *testing.T) {
+	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
+		repo := NewGenesRepository(db)
+		// "ARMS1" is not the first element of CFH's alias array (["ARMD4","ARMS1",...]),
+		// so this exercises the ||-delimiter boundary of the collapsed-string match.
+		genes, err := repo.GetGeneAutoComplete("ARMS1", 10)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(*genes))
+		assert.Equal(t, "CFH", (*genes)[0].Source.Name)
+	})
+}
+
 func Test_GetGeneAutoComplete_WithLimit(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGenesRepository(db)
