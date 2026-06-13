@@ -52,16 +52,19 @@ func mapToAutoCompleteGene(gene *Gene, input string) AutoCompleteGene {
 
 func (r *GenesRepository) GetGeneAutoComplete(prefix string, limit int) (*[]AutoCompleteGene, error) {
 
-	//SELECT gene_id, name, (case WHEN name LIKE 'F%' THEN 1 ELSE (CASE WHEN gene_id LIKE 'F%' THEN 2 ELSE (CASE WHEN array_length(array_filter(alias, x -> UPPER(x) LIKE 'F%')) > 0 THEN 3 ELSE 4 END) END) END) weight
+	// Alias match collapses the array to a string rather than array_filter(alias, x -> ...):
+	// a derived ARRAY crossing the ORDER BY exchange crashes the StarRocks 3.5.18 CN.
+	//SELECT gene_id, name, (case WHEN name LIKE 'F%' THEN 1 ELSE (CASE WHEN gene_id LIKE 'F%' THEN 2 ELSE (CASE WHEN UPPER(CONCAT('||', array_join(alias, '||'))) LIKE '%||F%' THEN 3 ELSE 4 END) END) END) weight
 	//FROM ensembl_gene
-	//WHERE UPPER(name) like 'F%' or UPPER(gene_id) like 'F%' or array_length(array_filter(alias, x -> UPPER(x) LIKE 'F%')) > 0
+	//WHERE UPPER(name) like 'F%' or UPPER(gene_id) like 'F%' or UPPER(CONCAT('||', array_join(alias, '||'))) LIKE '%||F%'
 	//ORDER BY weight ASC, name ASC
 	//LIMIT 10;
 
 	like := fmt.Sprintf("%s%%", strings.ToUpper(prefix))
+	aliasLike := fmt.Sprintf("%%||%s%%", strings.ToUpper(prefix))
 	tx := r.db.Table(types.EnsemblGeneTable.Name)
-	tx = tx.Select("gene_id, name, (case WHEN name LIKE ? THEN 1 ELSE (CASE WHEN gene_id LIKE ? THEN 2 ELSE (CASE WHEN array_length(array_filter(alias, x -> UPPER(x) LIKE ?)) > 0 THEN 3 ELSE 4 END) END) END) weight", like, like, like)
-	tx = tx.Where("UPPER(name) like ? or UPPER(gene_id) like ? or array_length(array_filter(alias, x -> UPPER(x) LIKE ?)) > 0", like, like, like)
+	tx = tx.Select("gene_id, name, (case WHEN name LIKE ? THEN 1 ELSE (CASE WHEN gene_id LIKE ? THEN 2 ELSE (CASE WHEN UPPER(CONCAT('||', array_join(alias, '||'))) LIKE ? THEN 3 ELSE 4 END) END) END) weight", like, like, aliasLike)
+	tx = tx.Where("UPPER(name) like ? or UPPER(gene_id) like ? or UPPER(CONCAT('||', array_join(alias, '||'))) LIKE ?", like, like, aliasLike)
 	tx = tx.Order("weight ASC, name ASC")
 	tx = tx.Limit(limit)
 
