@@ -37,7 +37,7 @@ func (f *fakeRangerTenant) server() *httptest.Server {
 		name := strings.TrimPrefix(r.URL.Path, "/service/roles/roles/name/")
 		if f.existingRoles[name] {
 			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"id":1,"name":"` + name + `"}`))
+			_, _ = fmt.Fprintf(w, `{"id":1,"name":%q}`, name)
 			return
 		}
 		w.WriteHeader(http.StatusNotFound)
@@ -54,7 +54,7 @@ func (f *fakeRangerTenant) server() *httptest.Server {
 		name := parts[len(parts)-1]
 		if id, ok := f.existingPolicies[name]; ok {
 			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(fmt.Sprintf(`{"id":%d,"name":%q}`, id, name)))
+			_, _ = fmt.Fprintf(w, `{"id":%d,"name":%q}`, id, name)
 			return
 		}
 		w.WriteHeader(http.StatusNotFound)

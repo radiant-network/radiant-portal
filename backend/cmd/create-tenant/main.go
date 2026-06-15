@@ -117,26 +117,32 @@ func runRefresh(ctx context.Context, code string, dryRun bool) {
 	log.Printf("refreshed views for %d tenant(s): %v", len(codes), codes)
 }
 
-func printCreatePlan(w io.Writer, code, name string, cols service.ViewColumnSource) error {
-	fmt.Fprintf(w, "DRY RUN — plan for tenant %q (%s)\n\n", code, name)
+// fprintf writes a dry-run plan line, ignoring the write error: a failure printing
+// to stdout is not actionable, and the meaningful errors are returned separately.
+func fprintf(w io.Writer, format string, a ...any) {
+	_, _ = fmt.Fprintf(w, format, a...)
+}
 
-	fmt.Fprintln(w, "Phase A — Postgres (source of truth):")
-	fmt.Fprintf(w, "  INSERT INTO public.tenant (code, name) VALUES (%q, %q) ON CONFLICT DO NOTHING\n", code, name)
+func printCreatePlan(w io.Writer, code, name string, cols service.ViewColumnSource) error {
+	fprintf(w, "DRY RUN — plan for tenant %q (%s)\n\n", code, name)
+
+	fprintf(w, "Phase A — Postgres (source of truth):\n")
+	fprintf(w, "  INSERT INTO public.tenant (code, name) VALUES (%q, %q) ON CONFLICT DO NOTHING\n", code, name)
 	for _, r := range repository.DefaultRoles {
-		fmt.Fprintf(w, "  seed role %s/%s with actions %v\n", code, r.Code, r.Actions)
+		fprintf(w, "  seed role %s/%s with actions %v\n", code, r.Code, r.Actions)
 	}
 
-	fmt.Fprintln(w, "\nPhase B — StarRocks (control-plane DDL, privileged connection):")
+	fprintf(w, "\nPhase B — StarRocks (control-plane DDL, privileged connection):\n")
 	for _, stmt := range repository.BuildAuthStatements() {
-		fmt.Fprintf(w, "  %s;\n", stmt)
+		fprintf(w, "  %s;\n", stmt)
 	}
 	if err := printViews(w, code, cols); err != nil {
 		return err
 	}
 
-	fmt.Fprintln(w, "\nPhase C — Ranger (gate):")
-	fmt.Fprintf(w, "  ensure role %s (empty; membership owned by user provisioning)\n", service.RangerTenantRole(code))
-	fmt.Fprintf(w, "  ensure access policy %s → SELECT on %s.* for role %s\n",
+	fprintf(w, "\nPhase C — Ranger (gate):\n")
+	fprintf(w, "  ensure role %s (empty; membership owned by user provisioning)\n", service.RangerTenantRole(code))
+	fprintf(w, "  ensure access policy %s → SELECT on %s.* for role %s\n",
 		service.TenantAccessPolicy(code), types.TenantDatabase(code), service.RangerTenantRole(code))
 	return nil
 }
@@ -151,7 +157,7 @@ func printViews(w io.Writer, code string, cols service.ViewColumnSource) error {
 		return err
 	}
 	for _, stmt := range stmts {
-		fmt.Fprintf(w, "  %s;\n", stmt)
+		fprintf(w, "  %s;\n", stmt)
 	}
 	return nil
 }
