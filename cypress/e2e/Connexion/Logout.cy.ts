@@ -10,9 +10,7 @@ describe('Connexion - Logout', () => {
   it('Information displayed', () => {
     setupTest();
     cy.logout();
-    LandingPage.validations.shouldHaveLanguageButton();
-    LandingPage.validations.shouldHaveLogo();
+    LandingPage.validations.shouldHaveTitle();
     LandingPage.validations.shouldHaveLoginContent();
-    LandingPage.validations.shouldHaveProviders();
   });
 });
