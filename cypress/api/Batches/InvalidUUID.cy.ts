@@ -20,7 +20,7 @@ describe('Batches - Invalid UUID', () => {
   it('Return content', () => {
     expect(response.body).to.have.all.keys('status', 'message');
     expect(response.body).to.include({
-      message: apiMessages.InternalServerError
+      message: apiMessages.InternalServerError,
     });
   });
 });
