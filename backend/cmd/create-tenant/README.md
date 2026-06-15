@@ -1,22 +1,20 @@
 # create-tenant
 
 A control-plane CLI that onboards a tenant across the three systems that hold
-multi-tenant state — **PostgreSQL**, **StarRocks**, and **Apache Ranger** — and can
-re-apply a tenant's StarRocks views after a schema change.
+multi-tenant state — **PostgreSQL**, **StarRocks**, and **Apache Ranger**.
 
 It is an administrative tool, run as a one-off (locally, or as a deploy/ops task),
 **not** part of the request-serving API. Everything it does is idempotent: re-running
 converges and never clobbers existing state.
 
-## Modes
+To re-apply a tenant's StarRocks views after a schema change, use the separate
+[`refresh-views`](../refresh-views) command (it needs no Ranger and has a different goal).
+
+## Usage
 
 ```bash
 # Create (or converge) a tenant — PostgreSQL + StarRocks + Ranger
 go run ./cmd/create-tenant -code demo -name "Demo Hospital"
-
-# Re-apply view definitions only — manual / break-glass (see "View refresh" below)
-go run ./cmd/create-tenant -refresh-views            # every tenant
-go run ./cmd/create-tenant -refresh-views -code demo # one tenant
 
 # Print the plan without touching anything
 go run ./cmd/create-tenant -code demo -name "Demo Hospital" -dry-run
@@ -64,23 +62,6 @@ How the views are built:
 
 Role *membership* is not managed here — it's owned by the user-provisioning flow
 (`cmd/createuser`). `create-tenant` only creates the empty role and the policy.
-
-## View refresh
-
-StarRocks views freeze their column list at creation time, so a schema migration that
-adds/removes a column requires the views to be recreated. This is handled in **two**
-places:
-
-- **Automatically, in the API on startup** — when (and only when) a migration actually
-  changed the schema. Gated by `VIEW_REFRESH_ON_STARTUP_ENABLED` (default off),
-  serialized across replicas by a Postgres advisory lock, and non-fatal. See
-  [`cmd/api/view_refresh.go`](../api/view_refresh.go). This is the normal path.
-- **Manually, via `create-tenant -refresh-views`** — a break-glass / recovery tool to
-  rebuild views out of band (e.g. after a failed startup refresh). It self-heals a
-  missing tenant database.
-
-Refresh touches only StarRocks and PostgreSQL (no Ranger), so it needs no extra
-credentials beyond what the API already uses.
 
 ## Configuration
 

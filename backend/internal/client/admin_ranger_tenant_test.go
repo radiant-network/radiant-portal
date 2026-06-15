@@ -111,7 +111,18 @@ func Test_RangerAdminClient_EnsureRole_NonNotFoundStatusIsErrorNotCreate(t *test
 
 	err := fake.client(srv.URL).EnsureRole(context.Background(), "demo_user")
 	require.Error(t, err, "a transient 500 on GET must not be read as 'role absent'")
-	assert.Empty(t, fake.createdRoles, "must not attempt a create on a non-404 GET")
+	assert.Empty(t, fake.createdRoles, "must not attempt a create on a 5xx GET")
+}
+
+func Test_RangerAdminClient_EnsureRole_BadRequestTreatedAsAbsent(t *testing.T) {
+	// Ranger returns 400 ("...doesn't have permissions to get details...") for a role
+	// that doesn't exist — must be treated as absent and created, not errored.
+	fake := &fakeRangerTenant{existingRoles: map[string]bool{}, roleGETStatus: http.StatusBadRequest}
+	srv := fake.server()
+	defer srv.Close()
+
+	require.NoError(t, fake.client(srv.URL).EnsureRole(context.Background(), "demo_user"))
+	assert.Equal(t, []string{"demo_user"}, fake.createdRoles)
 }
 
 func Test_RangerAdminClient_EnsureAccessPolicy_CreatesWhenMissing(t *testing.T) {

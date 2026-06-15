@@ -71,7 +71,8 @@ func maybeRefreshTenantViewsOnStartup(ctx context.Context, pg, sr *gorm.DB, migr
 		}
 	}()
 
-	if err := service.RefreshAllTenantViews(ctx, lister, lister, srProvisioner); err != nil {
+	codes, err := service.RefreshAllTenantViews(ctx, lister, lister, srProvisioner)
+	if err != nil {
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 			glog.Warningf("startup tenant view refresh aborted (shutting down): %v", err)
 		} else {
@@ -79,5 +80,5 @@ func maybeRefreshTenantViewsOnStartup(ctx context.Context, pg, sr *gorm.DB, migr
 		}
 		return
 	}
-	glog.Info("startup tenant view refresh completed")
+	glog.Infof("startup tenant view refresh completed for %d tenant(s)", len(codes))
 }

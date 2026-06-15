@@ -1,10 +1,8 @@
-// Command create-tenant creates a tenant (Postgres + StarRocks + Ranger), or with
-// -refresh-views re-applies view definitions as a manual/break-glass tool (the API
-// already refreshes on startup; see cmd/api/view_refresh.go). Idempotent. Reads the
-// same env as the API (DB_* / PG* / RANGER_*).
+// Command create-tenant creates a tenant across Postgres, StarRocks, and Ranger.
+// Idempotent. Reads the same env as the API (DB_* / PG* / RANGER_*). To re-apply a
+// tenant's views after a schema change, use cmd/refresh-views instead.
 //
 //	go run ./cmd/create-tenant -code demo -name "Demo Hospital" [-dry-run]
-//	go run ./cmd/create-tenant -refresh-views [-code demo] [-dry-run]
 package main
 
 import (
@@ -25,35 +23,31 @@ import (
 )
 
 func main() {
-	code := flag.String("code", "", "tenant code; [a-z][a-z0-9_]*")
-	name := flag.String("name", "", "tenant display name (required when creating)")
-	refreshViews := flag.Bool("refresh-views", false, "re-apply view definitions instead of creating a tenant (all tenants, or just -code)")
+	code := flag.String("code", "", "tenant code (required); [a-z][a-z0-9_]*")
+	name := flag.String("name", "", "tenant display name (required)")
 	dryRun := flag.Bool("dry-run", false, "print the plan without applying anything")
 	flag.Parse()
 
-	ctx := context.Background()
-
-	if *refreshViews {
-		runRefresh(ctx, *code, *dryRun)
-		return
-	}
-
 	if *code == "" || *name == "" {
-		log.Fatal("create-tenant: -code and -name are required (or pass -refresh-views)")
+		log.Fatal("create-tenant: -code and -name are required")
 	}
 	if err := repository.ValidateTenantCode(*code); err != nil {
 		log.Fatalf("create-tenant: %v", err)
 	}
+
+	ctx := context.Background()
+
 	if *dryRun {
-		cols, err := connectColumnSource()
+		pg, err := connectPostgres()
 		if err != nil {
 			log.Fatalf("create-tenant: %v", err)
 		}
-		if err := printCreatePlan(os.Stdout, *code, *name, cols); err != nil {
+		if err := printCreatePlan(os.Stdout, *code, *name, pg); err != nil {
 			log.Fatalf("create-tenant: %v", err)
 		}
 		return
 	}
+
 	deps, err := buildDeps()
 	if err != nil {
 		log.Fatalf("create-tenant: %v", err)
@@ -64,57 +58,6 @@ func main() {
 	log.Printf("created tenant %q (%s): db=%s role=%s policy=%s, %d views",
 		*code, *name, types.TenantDatabase(*code), service.RangerTenantRole(*code), service.TenantAccessPolicy(*code),
 		len(repository.ViewTables))
-}
-
-func runRefresh(ctx context.Context, code string, dryRun bool) {
-	if code != "" {
-		if err := repository.ValidateTenantCode(code); err != nil {
-			log.Fatalf("create-tenant: %v", err)
-		}
-		if dryRun {
-			cols, err := connectColumnSource()
-			if err != nil {
-				log.Fatalf("create-tenant: %v", err)
-			}
-			if err := printViews(os.Stdout, code, cols); err != nil {
-				log.Fatalf("create-tenant: %v", err)
-			}
-			return
-		}
-		deps, err := buildDeps()
-		if err != nil {
-			log.Fatalf("create-tenant: %v", err)
-		}
-		if err := deps.Starrocks.EnsureAuthDatabase(ctx); err != nil {
-			log.Fatalf("create-tenant: ensure auth database: %v", err)
-		}
-		columns, err := deps.Columns.FederatableColumnsForViews()
-		if err != nil {
-			log.Fatalf("create-tenant: federatable columns: %v", err)
-		}
-		if err := deps.Starrocks.EnsureClinicalViews(ctx, code, columns); err != nil {
-			log.Fatalf("create-tenant: refresh views %q: %v", code, err)
-		}
-		log.Printf("refreshed %d views for tenant %q", len(repository.ViewTables), code)
-		return
-	}
-
-	deps, err := buildDeps()
-	if err != nil {
-		log.Fatalf("create-tenant: %v", err)
-	}
-	codes, err := deps.Lister.ListTenants()
-	if err != nil {
-		log.Fatalf("create-tenant: list tenants: %v", err)
-	}
-	if dryRun {
-		fmt.Printf("DRY RUN — would refresh views for %d tenant(s): %v\n", len(codes), codes)
-		return
-	}
-	if err := service.RefreshAllTenantViews(ctx, deps.Lister, deps.Columns, deps.Starrocks); err != nil {
-		log.Fatalf("create-tenant: refresh all views: %v", err)
-	}
-	log.Printf("refreshed views for %d tenant(s): %v", len(codes), codes)
 }
 
 // fprintf writes a dry-run plan line, ignoring the write error: a failure printing
@@ -162,7 +105,9 @@ func printViews(w io.Writer, code string, cols service.ViewColumnSource) error {
 	return nil
 }
 
-func connectColumnSource() (service.ViewColumnSource, error) {
+// connectPostgres opens just the Postgres handle, enough for the dry-run plan without
+// connecting to StarRocks or Ranger.
+func connectPostgres() (*repository.TenantRepository, error) {
 	pg, err := database.NewPostgresDB()
 	if err != nil {
 		return nil, fmt.Errorf("connect postgres: %w", err)
@@ -182,7 +127,6 @@ func buildDeps() (service.TenantDeps, error) {
 	tenantRepo := repository.NewTenantRepository(pg)
 	return service.TenantDeps{
 		Store:     tenantRepo,
-		Lister:    tenantRepo,
 		Columns:   tenantRepo,
 		Starrocks: repository.NewStarrocksTenantRepository(sr),
 		Ranger:    client.NewRangerAdminClient(client.RangerConfigFromEnv()),

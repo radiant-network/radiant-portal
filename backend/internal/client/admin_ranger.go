@@ -109,7 +109,10 @@ func (c *RangerAdminClient) EnsureRole(ctx context.Context, name string) error {
 	if status == http.StatusOK {
 		return nil
 	}
-	if status != http.StatusNotFound {
+	// Ranger returns 404 OR 400 ("...doesn't have permissions to get details...") for a
+	// role that does not exist; both mean "absent → create". Other statuses (401/5xx)
+	// are real failures and must NOT be read as absent (which would spuriously create).
+	if status != http.StatusNotFound && status != http.StatusBadRequest {
 		return fmt.Errorf("get role %q: HTTP %d: %s", name, status, string(payload))
 	}
 	role := rangerRole{Name: name, CreatedByUser: c.cfg.AdminUser, Users: []rangerRoleMember{}, Roles: []rangerRoleMember{}}

@@ -33,7 +33,6 @@ type RangerTenantProvisioner interface {
 
 type TenantDeps struct {
 	Store     TenantStore
-	Lister    TenantLister
 	Columns   ViewColumnSource
 	Starrocks StarrocksTenantProvisioner
 	Ranger    RangerTenantProvisioner
@@ -80,17 +79,19 @@ func CreateTenant(ctx context.Context, deps TenantDeps, code, name string) error
 // RefreshAllTenantViews re-applies view definitions to every tenant, continuing past
 // a per-tenant failure and returning the failures joined. The shared auth database and
 // the (tenant-independent) federatable column set are resolved once up front.
-func RefreshAllTenantViews(ctx context.Context, lister TenantLister, columns ViewColumnSource, sr StarrocksTenantProvisioner) error {
+// It returns the tenant codes it processed so the caller can report them without
+// listing again.
+func RefreshAllTenantViews(ctx context.Context, lister TenantLister, columns ViewColumnSource, sr StarrocksTenantProvisioner) ([]string, error) {
 	if err := sr.EnsureAuthDatabase(ctx); err != nil {
-		return fmt.Errorf("ensure auth database: %w", err)
+		return nil, fmt.Errorf("ensure auth database: %w", err)
 	}
 	cols, err := columns.FederatableColumnsForViews()
 	if err != nil {
-		return fmt.Errorf("federatable columns: %w", err)
+		return nil, fmt.Errorf("federatable columns: %w", err)
 	}
 	codes, err := lister.ListTenants()
 	if err != nil {
-		return fmt.Errorf("list tenants: %w", err)
+		return nil, fmt.Errorf("list tenants: %w", err)
 	}
 	var errs []error
 	for _, code := range codes {
@@ -98,5 +99,5 @@ func RefreshAllTenantViews(ctx context.Context, lister TenantLister, columns Vie
 			errs = append(errs, fmt.Errorf("refresh %q: %w", code, err))
 		}
 	}
-	return errors.Join(errs...)
+	return codes, errors.Join(errs...)
 }

@@ -99,18 +99,19 @@ func (d *refreshRecorder) EnsureClinicalViews(ctx context.Context, tenantCode st
 func Test_RefreshAllTenantViews_EnsuresAuthAndFetchesColumnsOnceThenRefreshesEveryTenant(t *testing.T) {
 	d := &refreshRecorder{tenants: []string{"radiant", "demo", "cbtn"}}
 
-	err := RefreshAllTenantViews(context.Background(), d, d, d)
+	codes, err := RefreshAllTenantViews(context.Background(), d, d, d)
 
 	require.NoError(t, err)
 	assert.Equal(t, 1, d.authCalls, "auth database ensured once up front, not per tenant")
 	assert.Equal(t, 1, d.columnCalls, "federatable columns fetched once, not per tenant")
 	assert.Equal(t, []string{"radiant", "demo", "cbtn"}, d.refreshed)
+	assert.Equal(t, []string{"radiant", "demo", "cbtn"}, codes, "returns the codes it processed")
 }
 
 func Test_RefreshAllTenantViews_ContinuesPastAFailingTenantAndJoinsErrors(t *testing.T) {
 	d := &refreshRecorder{tenants: []string{"radiant", "demo", "cbtn"}, failTenant: map[string]bool{"demo": true}}
 
-	err := RefreshAllTenantViews(context.Background(), d, d, d)
+	_, err := RefreshAllTenantViews(context.Background(), d, d, d)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), `refresh "demo"`)
