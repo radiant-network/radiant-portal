@@ -54,12 +54,12 @@ async function fetchFilters() {
 }
 
 function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFormProps) {
+  const { t } = useI18n();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-exploration-filters', {
     ...FILTER_DEFAULTS,
   });
-  const { t } = useI18n();
 
   const { data: apiFilters } = useSWR<CaseFilters>('case-filters', () => fetchFilters(), {
     revalidateOnFocus: false,
@@ -133,7 +133,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
       filterSearch={{
         placeholder: t('case_exploration.filters_group.search_placeholder'),
         minSearchLength: 1,
-        api: (prefix: string) => caseApi.autocompleteCases(prefix, '10'),
+        api: (prefix: string) => caseApi.autocompleteCases(DEFAULT_TENANT, prefix, '10'),
       }}
       filterButtons={filterButtons}
       changedFilterButtons={changedFilterButtons}
