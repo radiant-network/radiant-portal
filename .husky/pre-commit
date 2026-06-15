@@ -1,1 +1,1 @@
-npm run format:cypress
+npx lint-staged
