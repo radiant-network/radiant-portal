@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 interface CopyButtonProps {
   value: string;
   className?: string;
-  size?: 'sm' | 'default' | 'lg';
+  size?: '3xs' | '2xs' | 'xs' | 'sm' | 'default' | 'lg';
   variant?: 'default' | 'ghost' | 'outline' | 'secondary' | 'destructive' | 'link';
   iconSize?: number;
   successDuration?: number;
@@ -53,13 +53,8 @@ export function CopyButton({
         <Button
           variant={variant}
           size={size}
-          className={cn(
-            'h-auto',
-            'h-7',
-            copied && 'pointer-events-none',
-            label ? 'px-2 py-0.5 gap-1' : 'p-1',
-            className,
-          )}
+          iconOnly={!label}
+          className={cn(copied && 'pointer-events-none', label && 'h-auto h-7 px-2 py-0.5 gap-1', className)}
           onClick={onCopy}
         >
           {label && <span className={cn('text-sm', copied && 'text-foreground')}>{label}</span>}

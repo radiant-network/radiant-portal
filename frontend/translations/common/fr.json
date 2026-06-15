@@ -687,7 +687,7 @@
       "search": "Rechercher"
     },
     "unassigned_avatar": {
-      "can_assign": "Assigner cette prescription",
+      "can_assign": "Assigner ce cas",
       "cannot_assign": "Aucune assignation"
     }
   },

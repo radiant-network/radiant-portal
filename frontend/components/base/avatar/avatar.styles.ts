@@ -3,7 +3,7 @@ import { tv } from 'tailwind-variants';
 import type { AvatarSize } from '@/components/base/shadcn/avatar';
 
 /**
- * Styles for the unassigned avatar (dashed placeholder).
+ * Styles for the assignment avatar (bare user icon, no decoration).
  * Every other avatar relies on the Avatar primitive's `size` / `color` props
  * and `AvatarGroup` for stacking — no custom sizing or colors here.
  */
@@ -15,20 +15,20 @@ export const avatarStyles = tv({
   },
   variants: {
     variant: {
-      unassigned: {
-        container: 'border-2 border-dashed border-muted-foreground/40 bg-muted/20',
+      assignment: {
+        container: '',
         fallback: 'bg-transparent',
         text: 'text-muted-foreground/60',
       },
     },
   },
   defaultVariants: {
-    variant: 'unassigned',
+    variant: 'assignment',
   },
 });
 
 /**
- * Icon sizes for the unassigned avatar based on the primitive's size scale
+ * Icon sizes for the assignment avatar based on the primitive's size scale
  */
 export const getIconSize = (size: AvatarSize) => {
   const iconMap: Record<AvatarSize, string> = {
