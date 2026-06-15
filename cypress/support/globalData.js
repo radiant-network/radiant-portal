@@ -215,7 +215,7 @@ const globalData = {
           field: 'thousand_genome_af',
           value: '0.5',
           op: '<',
-          count: 48018,
+          count: 48017,
         },
       ],
       Occurrence: [
