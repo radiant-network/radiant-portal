@@ -23,6 +23,8 @@ type fakeKeycloak struct {
 	created         int
 	updated         int
 	passwordSets    int
+
+	lastPasswordTemporary bool // "temporary" field of the last reset-password credential
 }
 
 func newFakeKeycloak(realm string) *fakeKeycloak {
@@ -75,6 +77,9 @@ func (f *fakeKeycloak) server() *httptest.Server {
 	mux.HandleFunc(usersPath+"/", func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/reset-password") {
 			f.passwordSets++
+			var cred map[string]any
+			_ = json.NewDecoder(r.Body).Decode(&cred)
+			f.lastPasswordTemporary, _ = cred["temporary"].(bool)
 		} else {
 			f.updated++
 		}
@@ -102,6 +107,18 @@ func Test_KeycloakAdminClient_UpsertUser_CreatesNewUserAndReturnsSub(t *testing.
 	assert.Equal(t, 1, fake.created)
 	assert.Equal(t, 0, fake.updated)
 	assert.Equal(t, 1, fake.passwordSets)
+}
+
+func Test_KeycloakAdminClient_UpsertUser_ForcesPasswordResetOnFirstLogin(t *testing.T) {
+	fake := newFakeKeycloak("CQDG")
+	srv := fake.server()
+	defer srv.Close()
+
+	_, err := fake.client(srv.URL).UpsertUser(context.Background(), "alice", "alice@demo.org", "Alice", "Demo", "pw")
+
+	require.NoError(t, err)
+	assert.Equal(t, 1, fake.passwordSets)
+	assert.True(t, fake.lastPasswordTemporary, "a set password is temporary so Keycloak forces a reset at first login")
 }
 
 func Test_KeycloakAdminClient_UpsertUser_SkipsPasswordWhenEmpty(t *testing.T) {

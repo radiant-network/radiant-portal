@@ -62,9 +62,11 @@ type keycloakUser struct {
 // is exactly the `sub` claim of any token it later mints. Idempotent: an existing
 // user is updated in place.
 //
-// password is optional: a non-empty value is (re)set as a permanent password; an
-// empty value skips the password step entirely, for realms that delegate
-// authentication to an external IdP and therefore have no local credential.
+// password is optional: a non-empty value is (re)set as a temporary password —
+// Keycloak adds the UPDATE_PASSWORD required action so the user must choose their
+// own password at first login. An empty value skips the password step entirely,
+// for realms that delegate authentication to an external IdP and therefore have no
+// local credential.
 //
 // firstName/lastName are sent non-empty by callers because the Keycloak
 // user-profile feature otherwise injects a VERIFY_PROFILE required action that
@@ -202,7 +204,9 @@ func (c *KeycloakAdminClient) updateUser(ctx context.Context, token, id string, 
 
 func (c *KeycloakAdminClient) resetPassword(ctx context.Context, token, id, password string) error {
 	endpoint := fmt.Sprintf("%s/admin/realms/%s/users/%s/reset-password", c.cfg.BaseURL, c.cfg.Realm, id)
-	cred := map[string]any{"type": "password", "value": password, "temporary": false}
+	// temporary:true makes Keycloak add the UPDATE_PASSWORD required action, forcing
+	// the user to set their own password at first login.
+	cred := map[string]any{"type": "password", "value": password, "temporary": true}
 	status, body, err := c.adminRequest(ctx, http.MethodPut, endpoint, token, cred)
 	if err != nil {
 		return err
