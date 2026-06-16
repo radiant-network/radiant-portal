@@ -3,6 +3,9 @@
 //
 //	go run ./cmd/createuser -email carol@demo.org -first Carol -last Demo \
 //	    -grant tenant_a:ORG_A1:geneticist -grant tenant_b:*:geneticist
+//
+// The realm is configured with email-as-username, so the email is sent as the
+// Keycloak username verbatim — the CLI never derives a separate username.
 package main
 
 import (
@@ -42,12 +45,11 @@ func (g *grantList) Set(value string) error {
 
 func main() {
 	var (
-		email    = flag.String("email", "", "user email (PK); required")
-		username = flag.String("username", "", "Keycloak username (defaults to the local part of -email)")
-		first    = flag.String("first", "", "first name")
-		last     = flag.String("last", "", "last name")
-		prompt   = flag.Bool("p", false, "prompt for the user password (masked); ignored if USER_PASSWORD is set")
-		grants   grantList
+		email  = flag.String("email", "", "user email (PK and Keycloak username); required")
+		first  = flag.String("first", "", "first name")
+		last   = flag.String("last", "", "last name")
+		prompt = flag.Bool("p", false, "prompt for the user password (masked); ignored if USER_PASSWORD is set")
+		grants grantList
 	)
 	flag.Var(&grants, "grant", "tenant:org:role grant; repeatable")
 	flag.Parse()
@@ -66,12 +68,9 @@ func main() {
 		log.Fatalf("createuser: %v", err)
 	}
 
-	name := *username
-	if name == "" {
-		name = strings.SplitN(*email, "@", 2)[0]
-	}
+	// The realm uses email-as-username, so the email is the Keycloak username.
 	in := types.UserInput{
-		Username: name, Email: *email, FirstName: *first, LastName: *last,
+		Username: *email, Email: *email, FirstName: *first, LastName: *last,
 		Password: password, Grants: grants,
 	}
 
