@@ -2,7 +2,6 @@ package repository
 
 import (
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -17,10 +16,6 @@ type ClinvarRCVRepository struct {
 }
 
 func NewClinvarRCVRepository(db *gorm.DB) *ClinvarRCVRepository {
-	if db == nil {
-		slog.Error("ClinvarRCVRepository: db is nil")
-		return nil
-	}
 	return &ClinvarRCVRepository{db: db}
 }
 

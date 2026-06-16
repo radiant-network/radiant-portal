@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"sort"
 
 	"github.com/Goldziher/go-utils/sliceutils"
@@ -28,10 +27,6 @@ type VariantsRepository struct {
 }
 
 func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
-	if db == nil {
-		slog.Error("VariantsRepository: db is nil")
-		return nil
-	}
 	return &VariantsRepository{db: db}
 }
 

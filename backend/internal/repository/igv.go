@@ -2,7 +2,6 @@ package repository
 
 import (
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -17,10 +16,6 @@ type IGVRepository struct {
 }
 
 func NewIGVRepository(db *gorm.DB) *IGVRepository {
-	if db == nil {
-		slog.Error("GermlineCNVOccurrencesRepository: db is nil")
-		return nil
-	}
 	return &IGVRepository{db: db}
 }
 

@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -16,10 +15,6 @@ type UserPreferencesRepository struct {
 }
 
 func NewUserPreferencesRepository(db *gorm.DB) *UserPreferencesRepository {
-	if db == nil {
-		slog.Error("UserPreferencesRepository: db is nil")
-		return nil
-	}
 	return &UserPreferencesRepository{db: db}
 }
 

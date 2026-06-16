@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -16,10 +15,6 @@ type FamilyRepository struct {
 }
 
 func NewFamilyRepository(db *gorm.DB) *FamilyRepository {
-	if db == nil {
-		slog.Error("FamilyRepository: db is nil")
-		return nil
-	}
 	return &FamilyRepository{db: db}
 }
 

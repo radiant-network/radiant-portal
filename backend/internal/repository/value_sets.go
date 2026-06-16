@@ -41,10 +41,6 @@ type ValueSetsRepository struct {
 }
 
 func NewValueSetsRepository(db *gorm.DB) *ValueSetsRepository {
-	if db == nil {
-		panic("ValueSetsRepository: provided gorm.DB is nil")
-	}
-
 	tableNameMap := map[ValueSetType]string{
 		ValueSetAffectedStatus:           types.AffectedStatusTable.Name,
 		ValueSetAnalysisCatalog:          types.AnalysisCatalogTable.Name,

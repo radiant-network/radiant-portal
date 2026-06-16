@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -18,10 +17,6 @@ type BatchRepository struct {
 }
 
 func NewBatchRepository(db *gorm.DB) *BatchRepository {
-	if db == nil {
-		slog.Error("BatchRepository: db is nil")
-		return nil
-	}
 	return &BatchRepository{db: db}
 }
 

@@ -11,10 +11,6 @@ type StarrocksRepository struct {
 }
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
-	if db == nil {
-		slog.Error("StarrocksRepository: db is nil")
-		return nil
-	}
 	return &StarrocksRepository{db: db}
 }
 
