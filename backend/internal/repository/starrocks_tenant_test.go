@@ -43,10 +43,9 @@ func Test_ViewTemplates_RegistersOnlyTmplFilesKeyedByTable(t *testing.T) {
 
 func Test_BuildAuthStatements_CreatesAuthDbThenReplacesPiiGrant(t *testing.T) {
 	stmts := BuildAuthStatements()
-	require.Len(t, stmts, 3)
+	require.Len(t, stmts, 2)
 	assert.Contains(t, stmts[0], "CREATE DATABASE IF NOT EXISTS auth")
-	assert.Contains(t, stmts[1], "DROP VIEW IF EXISTS auth.pii_grant")
-	assert.Contains(t, stmts[2], "CREATE VIEW auth.pii_grant")
+	assert.Contains(t, stmts[1], "CREATE OR REPLACE VIEW auth.pii_grant")
 }
 
 // --- BuildViewStatements: database -------------------------------------------
@@ -72,7 +71,7 @@ func Test_BuildViewStatements_PatientUsesTemplateWithMaskingAndTenantFilter(t *t
 	require.NoError(t, err)
 	joined := strings.Join(stmts, "\n")
 
-	assert.Contains(t, joined, "CREATE VIEW `demo_tenant`.`patient` AS")
+	assert.Contains(t, joined, "CREATE OR REPLACE VIEW `demo_tenant`.`patient` AS")
 	assert.Contains(t, joined, "SELECT `id`, `organization_code`,")
 	assert.Contains(t, joined, "AS can_read_pii", "patient view exposes the masking flag")
 	assert.Contains(t, joined, "g.tenant_code = 'demo'", "mask subquery scoped to the tenant")
@@ -89,7 +88,7 @@ func Test_BuildViewStatements_GenericTableProjectsColumnsWithoutMasking(t *testi
 
 	assert.NotContains(t, joined, "SELECT *", "must not SELECT * (unfederatable columns break it)")
 	assert.Contains(t, joined,
-		"CREATE VIEW `demo_tenant`.`cases` AS SELECT `id`, `submitter_case_id` FROM radiant_jdbc.public.`cases` WHERE tenant_code = 'demo'")
+		"CREATE OR REPLACE VIEW `demo_tenant`.`cases` AS SELECT `id`, `submitter_case_id` FROM radiant_jdbc.public.`cases` WHERE tenant_code = 'demo'")
 	assert.NotContains(t, joined, "can_read_pii", "only the patient template carries the mask flag")
 }
 
@@ -128,20 +127,19 @@ func Test_BuildViewStatements_CoversEveryViewTable(t *testing.T) {
 	require.NoError(t, err)
 	joined := strings.Join(stmts, "\n")
 	for _, table := range ViewTables {
-		assert.Contains(t, joined, "CREATE VIEW `demo_tenant`.`"+table+"`", "missing view for %q", table)
+		assert.Contains(t, joined, "CREATE OR REPLACE VIEW `demo_tenant`.`"+table+"`", "missing view for %q", table)
 	}
 }
 
 // --- BuildViewStatements: idempotency & validation ---------------------------
 
-func Test_BuildViewStatements_EveryCreateViewIsPrecededByDrop(t *testing.T) {
+func Test_BuildViewStatements_ViewsAreCreateOrReplaceWithNoDrop(t *testing.T) {
 	stmts, err := BuildViewStatements("demo", testColumns())
 	require.NoError(t, err)
-	for i, s := range stmts {
-		if strings.HasPrefix(s, "CREATE VIEW") {
-			require.Positive(t, i)
-			assert.True(t, strings.HasPrefix(stmts[i-1], "DROP VIEW IF EXISTS"),
-				"CREATE VIEW at index %d is not preceded by DROP VIEW IF EXISTS: %q", i, s)
+	for _, s := range stmts {
+		assert.NotContains(t, s, "DROP VIEW", "views are CREATE OR REPLACE; no DROP step")
+		if strings.Contains(s, " VIEW ") {
+			assert.Contains(t, s, "CREATE OR REPLACE VIEW", "every view is idempotent via CREATE OR REPLACE: %q", s)
 		}
 	}
 }

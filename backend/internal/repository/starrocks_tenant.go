@@ -67,15 +67,15 @@ func (r *StarrocksTenantRepository) EnsureClinicalViews(ctx context.Context, ten
 func BuildAuthStatements() []string {
 	return []string{
 		"CREATE DATABASE IF NOT EXISTS auth",
-		"DROP VIEW IF EXISTS auth.pii_grant",
 		readView("auth_pii_grant.sql"),
 	}
 }
 
-// BuildViewStatements builds the idempotent (DROP+CREATE) DDL for a tenant's database
-// and views, projecting only federatable columns (SELECT * breaks on jsonb/uuid the
-// JDBC catalog can't map). A table with views/<table>.sql.tmpl uses that template
-// (e.g. patient's can_read_pii flag); the rest get a generated SELECT.
+// BuildViewStatements builds the idempotent DDL for a tenant's database and views,
+// projecting only federatable columns (SELECT * breaks on jsonb/uuid the JDBC catalog
+// can't map). Each view is CREATE OR REPLACE (atomic; replaces a stale definition on
+// refresh without a DROP→CREATE gap). A table with views/<table>.sql.tmpl uses that
+// template (e.g. patient's can_read_pii flag); the rest get a generated SELECT.
 func BuildViewStatements(tenantCode string, columns map[string][]string) ([]string, error) {
 	if err := ValidateTenantCode(tenantCode); err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func BuildViewStatements(tenantCode string, columns map[string][]string) ([]stri
 		if err != nil {
 			return nil, err
 		}
-		stmts = append(stmts, fmt.Sprintf("DROP VIEW IF EXISTS `%s`.`%s`", db, t), view)
+		stmts = append(stmts, view)
 	}
 	return stmts, nil
 }
@@ -119,7 +119,7 @@ func loadViewTemplates() map[string]*template.Template {
 func buildViewStatement(db, tenantCode, table string, cols []string) (string, error) {
 	tmpl, found := viewTemplates[table]
 	if !found {
-		return fmt.Sprintf("CREATE VIEW `%s`.`%s` AS SELECT %s FROM radiant_jdbc.public.`%s` WHERE tenant_code = '%s'",
+		return fmt.Sprintf("CREATE OR REPLACE VIEW `%s`.`%s` AS SELECT %s FROM radiant_jdbc.public.`%s` WHERE tenant_code = '%s'",
 			db, table, joinColumns(cols), table, tenantCode), nil
 	}
 	var buf bytes.Buffer

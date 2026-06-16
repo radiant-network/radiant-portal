@@ -1,4 +1,4 @@
-CREATE VIEW auth.pii_grant AS
+CREATE OR REPLACE VIEW auth.pii_grant AS
 SELECT ur.user_id, ur.tenant_code, ur.org_code
 FROM radiant_jdbc.public.user_role ur
 JOIN radiant_jdbc.public.role_action ra

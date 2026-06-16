@@ -1,4 +1,4 @@
-CREATE VIEW `{{.DB}}`.`patient` AS
+CREATE OR REPLACE VIEW `{{.DB}}`.`patient` AS
 SELECT {{.Columns}},
        EXISTS (SELECT 1 FROM auth.pii_grant g
                WHERE g.user_id = substring_index(substr(current_user(), 2), char(39), 1)

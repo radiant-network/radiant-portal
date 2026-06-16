@@ -31,7 +31,7 @@ func Test_printViews_RendersTenantDatabaseAndViews(t *testing.T) {
 
 	out := buf.String()
 	assert.Contains(t, out, "CREATE DATABASE IF NOT EXISTS `demo_tenant`")
-	assert.Contains(t, out, "CREATE VIEW `demo_tenant`.`cases`")
+	assert.Contains(t, out, "CREATE OR REPLACE VIEW `demo_tenant`.`cases`")
 	assert.Contains(t, out, "can_read_pii") // patient view from its template
 }
 
@@ -59,7 +59,7 @@ func Test_printCreatePlan_ShowsAllThreePhases(t *testing.T) {
 	assert.Contains(t, out, "seed role demo/geneticist")
 	// Phase B — StarRocks (auth + tenant views)
 	assert.Contains(t, out, "Phase B — StarRocks")
-	assert.Contains(t, out, "CREATE VIEW auth.pii_grant")
+	assert.Contains(t, out, "CREATE OR REPLACE VIEW auth.pii_grant")
 	assert.Contains(t, out, "`demo_tenant`.`patient`")
 	// Phase C — Ranger
 	assert.Contains(t, out, "Phase C — Ranger")
