@@ -2,11 +2,12 @@ package server
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang/glog"
 	"github.com/google/uuid"
+	"github.com/radiant-network/radiant-api/internal/observability"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
 
@@ -21,10 +22,18 @@ func HandleNotFoundError(c *gin.Context, field string) {
 // HandleError responds with a generic 500 and never leaks the underlying error to the client.
 // The full error is logged server-side with a correlation id (also returned in the
 // X-Correlation-ID header) so an operator can tie a client report back to the log line.
+// The correlation id is the request id assigned by the RequestID middleware; if none is
+// present on the context (e.g. a direct unit-test call), a fresh UUID is minted.
 func HandleError(c *gin.Context, err error) {
-	correlationID := uuid.NewString()
-	glog.Errorf("[correlation_id=%s] internal error on %s %s: %v",
-		correlationID, c.Request.Method, c.Request.URL.Path, err)
+	correlationID, ok := observability.RequestIDFromContext(c.Request.Context())
+	if !ok {
+		correlationID = uuid.NewString()
+	}
+	slog.ErrorContext(c.Request.Context(), "internal error",
+		slog.String("method", c.Request.Method),
+		slog.String("path", c.Request.URL.Path),
+		slog.Any("error", err),
+	)
 	c.Header("X-Correlation-ID", correlationID)
 	c.JSON(http.StatusInternalServerError, types.ApiError{Status: http.StatusInternalServerError, Message: "Internal Server Error"})
 }

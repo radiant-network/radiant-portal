@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
-	"log"
+	"log/slog"
 	"strings"
 )
 
@@ -18,7 +18,7 @@ type GenePanelsRepository struct {
 
 func NewGenePanelsRepository(db *gorm.DB) *GenePanelsRepository {
 	if db == nil {
-		log.Print("GenePanelsRepository: db is nil")
+		slog.Error("GenePanelsRepository: db is nil")
 		return nil
 	}
 	return &GenePanelsRepository{db: db}

@@ -3,18 +3,19 @@ package main
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
+	"log/slog"
 	"net/http"
+	"os"
 	"os/signal"
 	"strconv"
 	"sync"
 	"syscall"
 	"time"
 
-	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/observability"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -30,8 +31,7 @@ var supportedProcessors = map[string]func(context.Context, *batchval.BatchValida
 }
 
 func main() {
-	flag.Parse()
-	defer glog.Flush()
+	observability.Setup()
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -39,29 +39,32 @@ func main() {
 	pollIntervalStr := utils.GetEnvOrDefault("POLL_INTERVAL_MS", "1000")
 	pollInterval, pollIntervalErr := strconv.Atoi(pollIntervalStr)
 	if pollIntervalErr != nil {
-		glog.Fatalf("Polling interval defined in env var POLL_INTERVAL_MS (%v) must be an integer ", pollIntervalStr)
+		slog.Error("POLL_INTERVAL_MS must be an integer", slog.String("value", pollIntervalStr))
+		os.Exit(1)
 	}
 
 	dbPostgres, initDbErr := database.NewPostgresDB()
 	if initDbErr != nil {
-		glog.Fatalf("Failed to initialize postgres database: %v", initDbErr)
+		slog.Error("failed to initialize postgres database", slog.Any("error", initDbErr))
+		os.Exit(1)
 	}
 
 	bv, err := batchval.NewBatchValidationContext(dbPostgres)
 	if err != nil {
-		glog.Fatalf("Failed to initialize batch validation context: %v", err)
+		slog.Error("failed to initialize batch validation context", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	var wg sync.WaitGroup
 	StartHealthProbe(ctx, &wg, dbPostgres)
 	StartCleanUpWorker(ctx, &wg, dbPostgres)
 
-	glog.Info("Worker started...")
+	slog.Info("worker started")
 	runPollLoop(ctx, dbPostgres, bv, time.Duration(pollInterval)*time.Millisecond)
 
 	// Wait for the background goroutines (health probe, cleanup worker) to stop before exiting.
 	wg.Wait()
-	glog.Info("Worker shut down cleanly")
+	slog.Info("worker shut down cleanly")
 }
 
 // runPollLoop claims and processes batches until ctx is cancelled. It checks ctx before claiming a
@@ -86,14 +89,14 @@ func runPollLoop(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidationC
 func processBatch(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidationContext) {
 	nextBatch, err := bv.BatchRepo.ClaimNextBatch()
 	if err != nil {
-		glog.Errorf("Error claiming next batch: %v", err)
+		slog.ErrorContext(ctx, "error claiming next batch", slog.Any("error", err))
 		return
 	}
 	if nextBatch == nil {
 		return
 	}
 
-	glog.Infof("Processing batch: %v", nextBatch.ID)
+	slog.InfoContext(ctx, "processing batch", slog.String("batch_id", nextBatch.ID), slog.String("batch_type", nextBatch.BatchType))
 	processFn, ok := supportedProcessors[nextBatch.BatchType]
 	if !ok {
 		err = fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
@@ -104,9 +107,9 @@ func processBatch(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidation
 	// On a graceful shutdown the processor aborts before committing and returns context.Canceled;
 	// release the claim back to PENDING so the batch is reprocessed cleanly instead of left RUNNING.
 	if procErr := processFn(ctx, bv, nextBatch, db); errors.Is(procErr, context.Canceled) {
-		glog.Infof("Shutdown during batch %v; releasing it back to PENDING", nextBatch.ID)
+		slog.InfoContext(ctx, "shutdown during batch; releasing back to PENDING", slog.String("batch_id", nextBatch.ID))
 		if _, relErr := bv.BatchRepo.ReleaseBatch(nextBatch.ID); relErr != nil {
-			glog.Errorf("Failed to release batch %v: %v", nextBatch.ID, relErr)
+			slog.ErrorContext(ctx, "failed to release batch", slog.String("batch_id", nextBatch.ID), slog.Any("error", relErr))
 		}
 	}
 }
@@ -114,7 +117,8 @@ func processBatch(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidation
 func StartHealthProbe(ctx context.Context, wg *sync.WaitGroup, db *gorm.DB) {
 	port := utils.GetEnvOrDefault("PROBE_PORT", "9999")
 	if _, err := strconv.Atoi(port); err != nil {
-		glog.Fatalf("Probe port defined in env var PROBE_PORT (%v) must be an integer ", port)
+		slog.Error("PROBE_PORT must be an integer", slog.String("value", port))
+		os.Exit(1)
 	}
 	mux := http.NewServeMux()
 
@@ -141,10 +145,10 @@ func StartHealthProbe(ctx context.Context, wg *sync.WaitGroup, db *gorm.DB) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		glog.Infof("Starting health probe on :%s", port)
+		slog.Info("starting health probe", slog.String("port", port))
 
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			glog.Errorf("Health probe stopped unexpectedly: %v", err)
+			slog.Error("health probe stopped unexpectedly", slog.Any("error", err))
 		}
 	}()
 
@@ -155,7 +159,7 @@ func StartHealthProbe(ctx context.Context, wg *sync.WaitGroup, db *gorm.DB) {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), utils.ShutdownTimeout())
 		defer cancel()
 		if err := srv.Shutdown(shutdownCtx); err != nil {
-			glog.Errorf("Health probe shutdown error: %v", err)
+			slog.Error("health probe shutdown error", slog.Any("error", err))
 		}
 	}()
 }
@@ -167,12 +171,13 @@ func StartCleanUpWorker(ctx context.Context, wg *sync.WaitGroup, db *gorm.DB) {
 		cleanUpIntervalPollHourStr := utils.GetEnvOrDefault("CLEAN_UP_INTERVAL_POLL_HOUR", "24")
 		pollInterval, pollIntervalErr := strconv.Atoi(cleanUpIntervalPollHourStr)
 		if pollIntervalErr != nil {
-			glog.Fatalf("Polling interval defined in env var CLEAN_UP_INTERVAL_POLL_HOUR (%v) must be an integer ", cleanUpIntervalPollHourStr)
+			slog.Error("CLEAN_UP_INTERVAL_POLL_HOUR must be an integer", slog.String("value", cleanUpIntervalPollHourStr))
+			os.Exit(1)
 		}
 
 		duration := time.Duration(pollInterval) * time.Hour
 
-		glog.Infof("Starting clean-up worker with interval: %v", duration)
+		slog.Info("starting clean-up worker", slog.Duration("interval", duration))
 
 		ticker := time.NewTicker(duration)
 		defer ticker.Stop()
@@ -182,14 +187,14 @@ func StartCleanUpWorker(ctx context.Context, wg *sync.WaitGroup, db *gorm.DB) {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				glog.Info("Clean up worker started...")
+				slog.Info("clean-up worker started")
 				batchRepo := repository.NewBatchRepository(db)
 				rowUpdated, err := batchRepo.UpdateStuckBatch()
 				if err != nil {
-					glog.Errorf("Error executing batch clean up: %v", err)
+					slog.Error("error executing batch clean up", slog.Any("error", err))
 					continue
 				}
-				glog.Info("Stuck batches updated: ", rowUpdated)
+				slog.Info("stuck batches updated", slog.Int64("rows_updated", rowUpdated))
 			}
 		}
 	}()

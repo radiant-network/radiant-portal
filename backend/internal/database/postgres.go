@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/url"
 	"os"
 	"time"
@@ -58,7 +58,7 @@ func NewPostgresDB() (*gorm.DB, error) {
 }
 
 func MigrateWithParams(path string, host string, port string, database string, user string, password string, sslmode string, sslcert string) {
-	log.Print("Migrating postgres database...")
+	slog.Info("migrating postgres database")
 	conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?", user, url.QueryEscape(password), host, port, database)
 	if sslmode != "" {
 		conn += fmt.Sprintf("&sslmode=%s", sslmode)
@@ -71,13 +71,15 @@ func MigrateWithParams(path string, host string, port string, database string, u
 		conn,
 	)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("failed to initialize migrations", slog.Any("error", err))
+		os.Exit(1)
 	}
 	if err := m.Up(); err != nil {
 		if err.Error() == "no change" {
-			log.Print(err)
+			slog.Info("no migration changes to apply")
 		} else {
-			log.Fatal(err)
+			slog.Error("failed to apply migrations", slog.Any("error", err))
+			os.Exit(1)
 		}
 	}
 }

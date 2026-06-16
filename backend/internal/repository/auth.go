@@ -2,7 +2,7 @@ package repository
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"slices"
 	"strings"
 
@@ -16,7 +16,7 @@ type AuthRepository struct {
 
 func NewAuthRepository(db *gorm.DB) *AuthRepository {
 	if db == nil {
-		log.Print("AuthRepository: db is nil")
+		slog.Error("AuthRepository: db is nil")
 		return nil
 	}
 	return &AuthRepository{db: db}
@@ -128,7 +128,11 @@ func applyGrant(membership *types.TenantMembership, grant membershipGrant, tenan
 	case types.ActionScopeOrg:
 		if grant.OrgCode == nil {
 			// Org-scoped action on a tenant-wide grant (org_code NULL) so this action applies to no specific org and is intentionally dropped.
-			log.Printf("WARN: Org-scoped action %s should not be applied tenant wide (org_code = NULL) - Verify the role %s for tenant %s.", grant.ActionCode, grant.RoleCode, grant.TenantCode)
+			slog.Warn("org-scoped action should not be applied tenant wide (org_code = NULL)",
+				slog.String("action", grant.ActionCode),
+				slog.String("role", grant.RoleCode),
+				slog.String("tenant", grant.TenantCode),
+			)
 			return
 		} else if *grant.OrgCode == "*" {
 			// Wildcard: the action applies at every org in the tenant.

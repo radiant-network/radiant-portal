@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"regexp"
 	"time"
 
-	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -292,7 +292,7 @@ func processSequencingExperimentBatch(ctx context.Context, bv *batchval.BatchVal
 		return nil
 	}
 
-	glog.Infof("Sequencing experiment batch %v processed with %d records", batch.ID, len(records))
+	slog.InfoContext(ctx, "sequencing_experiment batch processed", slog.String("batch_id", batch.ID), slog.Int("records", len(records)))
 
 	if err := persistBatchAndSequencingExperimentRecords(ctx, db, batch, records); err != nil {
 		if errors.Is(err, context.Canceled) {

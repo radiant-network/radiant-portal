@@ -2,11 +2,90 @@ package server
 
 import (
 	"fmt"
+	"log/slog"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang/glog"
+	"github.com/google/uuid"
+	"github.com/radiant-network/radiant-api/internal/observability"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
+
+// RequestIDHeader is the HTTP header carrying the per-request correlation id, both on
+// the inbound request (when a caller or upstream proxy supplies one) and echoed on the
+// response.
+const RequestIDHeader = "X-Request-ID"
+
+// RequestIDContextKey is the gin context key under which RequestID stores the resolved
+// request id for gin-side handlers.
+const RequestIDContextKey = "request_id"
+
+// maxRequestIDLength bounds an accepted inbound request id. The id is logged on every
+// request and reflected in the response, so an attacker-supplied value is untrusted
+// input: capping the length prevents log-volume amplification (Go caps total headers
+// near 1 MB, which would otherwise be logged verbatim per request).
+const maxRequestIDLength = 128
+
+// RequestID assigns each request a correlation id. It reuses an inbound X-Request-ID
+// header when it is well-formed, otherwise generates a UUID. The id is stored on the
+// request context (so slog.*Context calls correlate to it), exposed on the gin context,
+// and echoed on the response. It must be registered first so every other middleware and
+// handler sees the id.
+func RequestID() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.GetHeader(RequestIDHeader)
+		if !validRequestID(id) {
+			id = uuid.NewString()
+		}
+		c.Request = c.Request.WithContext(observability.ContextWithRequestID(c.Request.Context(), id))
+		c.Set(RequestIDContextKey, id)
+		c.Header(RequestIDHeader, id)
+		c.Next()
+	}
+}
+
+// validRequestID reports whether an inbound request id is safe to trust and propagate.
+// We accept a conservative, log- and header-safe charset (letters, digits, and -._:)
+// up to maxRequestIDLength; anything else (empty, too long, control chars, CR/LF,
+// arbitrary bytes) is rejected so RequestID mints a fresh UUID instead. This covers the
+// common UUID/trace-id/hex formats upstream proxies emit while refusing untrusted junk.
+func validRequestID(id string) bool {
+	if id == "" || len(id) > maxRequestIDLength {
+		return false
+	}
+	for _, r := range id {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9':
+		case r == '-', r == '_', r == '.', r == ':':
+		default:
+			return false
+		}
+	}
+	return true
+}
+
+// RequestLogger emits one structured JSON log line per request after it completes,
+// carrying the method, matched route template, status, latency and client ip. The
+// request id is added automatically by the context handler. It replaces gin.Logger and
+// the gin-glog request logger.
+func RequestLogger() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		c.Next()
+
+		path := c.FullPath()
+		if path == "" {
+			path = c.Request.URL.Path
+		}
+		slog.InfoContext(c.Request.Context(), "http_request",
+			slog.String("method", c.Request.Method),
+			slog.String("path", path),
+			slog.Int("status", c.Writer.Status()),
+			slog.Int64("latency_ms", time.Since(start).Milliseconds()),
+			slog.String("client_ip", c.ClientIP()),
+		)
+	}
+}
 
 // TenantContextKey is the gin context key under which RequireTenantAccess stores the
 // resolved tenant code for downstream handlers.
@@ -138,7 +217,11 @@ func RequireAction(auth utils.Auth, repo actionChecker, action string, enforce b
 			return
 		}
 		if !allowed {
-			glog.Warningf("forbidden: user %q lacks action %q in tenant %q", *userID, action, *tenant)
+			slog.WarnContext(c.Request.Context(), "forbidden: caller lacks required action",
+				slog.String("user_id", *userID),
+				slog.String("action", action),
+				slog.String("tenant", *tenant),
+			)
 			HandleForbiddenError(c)
 			c.Abort()
 			return

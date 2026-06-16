@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"log"
+	"log/slog"
 
 	"gorm.io/gorm"
 )
@@ -12,7 +12,7 @@ type StarrocksRepository struct {
 
 func NewStarrocksRepository(db *gorm.DB) *StarrocksRepository {
 	if db == nil {
-		log.Print("StarrocksRepository: db is nil")
+		slog.Error("StarrocksRepository: db is nil")
 		return nil
 	}
 	return &StarrocksRepository{db: db}
@@ -24,12 +24,12 @@ func (r *StarrocksRepository) CheckDatabaseConnection() string {
 	}
 	sqlDb, err := r.db.DB()
 	if err != nil {
-		log.Fatal("failed to get database object:", err)
+		slog.Error("failed to get database object", slog.Any("error", err))
 		return "down"
 	}
 
 	if err = sqlDb.Ping(); err != nil {
-		log.Fatal("failed to ping database", err)
+		slog.Error("failed to ping database", slog.Any("error", err))
 		return "down"
 	}
 	return "up"

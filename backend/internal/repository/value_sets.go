@@ -2,7 +2,6 @@ package repository
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -43,7 +42,7 @@ type ValueSetsRepository struct {
 
 func NewValueSetsRepository(db *gorm.DB) *ValueSetsRepository {
 	if db == nil {
-		log.Panic("ValueSetsRepository: provided gorm.DB is nil")
+		panic("ValueSetsRepository: provided gorm.DB is nil")
 	}
 
 	tableNameMap := map[ValueSetType]string{

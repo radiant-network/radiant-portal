@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/radiant-network/radiant-api/internal/client"
 	"gorm.io/gorm"
@@ -20,12 +20,12 @@ func NewPostgresRepository(db *gorm.DB, pubmedClient client.PubmedClientService)
 func (r *PostgresRepository) CheckDatabaseConnection() string {
 	sqlDb, err := r.db.DB()
 	if err != nil {
-		log.Fatal("failed to get database object:", err)
+		slog.Error("failed to get database object", slog.Any("error", err))
 		return "down"
 	}
 
 	if err = sqlDb.Ping(); err != nil {
-		log.Fatal("failed to ping database", err)
+		slog.Error("failed to ping database", slog.Any("error", err))
 		return "down"
 	}
 	return "up"

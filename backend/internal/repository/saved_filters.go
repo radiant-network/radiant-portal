@@ -3,7 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -20,7 +20,7 @@ type SavedFiltersRepository struct {
 
 func NewSavedFiltersRepository(db *gorm.DB) *SavedFiltersRepository {
 	if db == nil {
-		log.Fatal("SavedFiltersRepository: db is nil")
+		slog.Error("SavedFiltersRepository: db is nil")
 		return nil
 	}
 	return &SavedFiltersRepository{db: db}

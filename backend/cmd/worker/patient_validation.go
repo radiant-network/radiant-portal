@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"regexp"
 	"slices"
 	"strings"
 	"time"
 
-	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/batchval"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -198,7 +198,7 @@ func processPatientBatch(ctx context.Context, bv *batchval.BatchValidationContex
 		return nil
 	}
 
-	glog.Infof("Patient batch %v processed with %d records", batch.ID, len(records))
+	slog.InfoContext(ctx, "patient batch processed", slog.String("batch_id", batch.ID), slog.Int("records", len(records)))
 
 	if err := persistBatchAndPatientRecords(ctx, db, batch, records); err != nil {
 		if errors.Is(err, context.Canceled) {
