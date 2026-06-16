@@ -2,7 +2,7 @@ package repository
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/radiant-network/radiant-api/internal/utils"
 
@@ -19,7 +19,7 @@ type GermlineCNVOccurrencesRepository struct {
 
 func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRepository {
 	if db == nil {
-		log.Print("GermlineCNVOccurrencesRepository: db is nil")
+		slog.Error("GermlineCNVOccurrencesRepository: db is nil")
 		return nil
 	}
 	return &GermlineCNVOccurrencesRepository{db: db}

@@ -3,9 +3,8 @@ package main
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,29 +13,21 @@ import (
 	"time"
 
 	"github.com/radiant-network/radiant-api/internal/authorization"
+	"github.com/radiant-network/radiant-api/internal/observability"
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"gorm.io/gorm"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/glog"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
-	ginglog "github.com/szuecs/gin-glog"
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
-
-func init() {
-	err := flag.Set("logtostderr", "true")
-	if err != nil {
-		log.Fatalf("Failed to set logtostderr flag: %v", err)
-	} // Log to standard error
-}
 
 func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	// Auth service
@@ -75,7 +66,8 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	roleAccessMiddleware, err := authorization.InitAuthorizer()
 	if err != nil {
-		log.Fatalf("Failed to initialize authorizer: %v", err)
+		slog.Error("failed to initialize authorizer", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	// Initialize public routes explicitly
@@ -250,9 +242,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 // 500 response. See SJRA-1578.
 func newEngine() *gin.Engine {
 	r := gin.New()
-	r.Use(gin.Logger())
+	r.Use(server.RequestID())
+	r.Use(server.RequestLogger())
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
-	r.Use(ginglog.Logger(3 * time.Second))
 	r.Use(ginkeycloak.RequestLogger([]string{"uid"}, "data"))
 
 	var corsAllowedOrigins = strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",")
@@ -276,20 +268,20 @@ func newEngine() *gin.Engine {
 // @securitydefinitions.bearerauth
 // @BasePath /
 func main() {
-	flag.Parse()
-	defer glog.Flush()
+	observability.Setup()
 
 	database.MigrateWithEnvDefault()
 
 	// Initialize database connection
 	dbStarrocks, err := database.NewStarrocksDB()
 	if err != nil {
-		log.Print("Failed to initialize starrocks database: ", err)
+		slog.Error("failed to initialize starrocks database", slog.Any("error", err))
 	}
 
 	dbPostgres, err := database.NewPostgresDB()
 	if err != nil {
-		log.Fatal("Failed to initialize postgres database: ", err)
+		slog.Error("failed to initialize postgres database", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	p := os.Getenv("API_PORT")
@@ -304,20 +296,21 @@ func main() {
 	srv := &http.Server{Addr: fmt.Sprintf(":%s", p), Handler: r, ReadHeaderTimeout: 10 * time.Second}
 
 	go func() {
-		glog.Infof("API server listening on :%s", p)
+		slog.Info("API server listening", slog.String("port", p))
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatal(err)
+			slog.Error("API server failed", slog.Any("error", err))
+			os.Exit(1)
 		}
 	}()
 
 	<-ctx.Done()
 	stop() // restore default signal handling so a second signal force-quits
-	glog.Info("Shutdown signal received, draining connections...")
+	slog.Info("shutdown signal received, draining connections...")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), utils.ShutdownTimeout())
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		glog.Errorf("API server shutdown error: %v", err)
+		slog.Error("API server shutdown error", slog.Any("error", err))
 	}
-	glog.Info("API server shut down cleanly")
+	slog.Info("API server shut down cleanly")
 }

@@ -21,7 +21,7 @@ build-worker:
 
 # Run the worker
 run-worker:
-	@go run ./cmd/worker -stderrthreshold=INFO
+	@go run ./cmd/worker
 
 # Create DB container
 docker-run:

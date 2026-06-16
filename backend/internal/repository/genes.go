@@ -3,7 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"regexp"
 	"strings"
 
@@ -21,7 +21,7 @@ type GenesRepository struct {
 
 func NewGenesRepository(db *gorm.DB) *GenesRepository {
 	if db == nil {
-		log.Print("GenesRepository: db is nil")
+		slog.Error("GenesRepository: db is nil")
 		return nil
 	}
 	return &GenesRepository{db: db}

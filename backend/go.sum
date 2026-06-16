@@ -1097,8 +1097,6 @@ github.com/sv-tools/openapi v0.2.1 h1:ES1tMQMJFGibWndMagvdoo34T1Vllxr1Nlm5wz6b1a
 github.com/sv-tools/openapi v0.2.1/go.mod h1:k5VuZamTw1HuiS9p2Wl5YIDWzYnHG6/FgPOSFXLAhGg=
 github.com/swaggo/swag/v2 v2.0.0-rc4 h1:SZ8cK68gcV6cslwrJMIOqPkJELRwq4gmjvk77MrvHvY=
 github.com/swaggo/swag/v2 v2.0.0-rc4/go.mod h1:Ow7Y8gF16BTCDn8YxZbyKn8FkMLRUHekv1kROJZpbvE=
-github.com/szuecs/gin-glog v1.1.1 h1:YwewjwcnxTVJeB6U7zcJ82FohUzxR4wzSTuspkj6BRE=
-github.com/szuecs/gin-glog v1.1.1/go.mod h1:eFFtHjaaO5lc0ich5AZPMsu3i8rn1TvwmpQnJb+3HP4=
 github.com/tbaehler/gin-keycloak v1.6.1 h1:LOXSW5P4j6eGt667/IiKQiyHSBVsECKgvMqdoHtnijA=
 github.com/tbaehler/gin-keycloak v1.6.1/go.mod h1:BwUAwDQjym9NfSg6MfCIMjQoyG6WKOJ3evtFF9XSfzo=
 github.com/testcontainers/testcontainers-go v0.41.0 h1:mfpsD0D36YgkxGj2LrIyxuwQ9i2wCKAD+ESsYM1wais=

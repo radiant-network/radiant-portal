@@ -3,7 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/Goldziher/go-utils/sliceutils"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -21,7 +21,7 @@ type SomaticSNVOccurrencesRepository struct {
 
 func NewSomaticSNVOccurrencesRepository(db *gorm.DB) *SomaticSNVOccurrencesRepository {
 	if db == nil {
-		log.Print("SomaticSNVOccurrencesRepository: db is nil")
+		slog.Error("SomaticSNVOccurrencesRepository: db is nil")
 		return nil
 	}
 	return &SomaticSNVOccurrencesRepository{db: db}

@@ -68,7 +68,9 @@ Route groups:
 - `/cases`, `/documents`, `/genes`, `/hpo`, `/igv`, `/interpretations`, `/mondo`, `/occurrences`, `/sequencing`, `/users`, `/variants` — protected by JWT auth middleware
 - `/batches`, `/patients/batch`, `/samples/batch`, `/sequencing/batch`, `/cases/batch` — additionally require `data_manager` Keycloak role
 
-Middleware stack (in order): CORS → Gzip → request logging → Keycloak logger → role-based auth → recovery.
+Middleware stack (in order): request id → structured request logging (slog) → metrics → gzip → Keycloak logger → CORS → role-based auth → recovery.
+
+Logging uses stdlib `log/slog` with JSON output (see `internal/observability`). The `RequestID` middleware assigns each request a correlation id (reusing an inbound `X-Request-ID` or minting a UUID), echoes it on the response, and threads it through the request context so every `slog.*Context` line carries `request_id`. `HandleError` returns that same id as `X-Correlation-ID`. Prometheus metrics are exposed at public `GET /metrics`.
 
 ## Authorization
 
@@ -137,6 +139,7 @@ Copy `.env.template` → `.env`. Key variables:
 | `DB_SSL_CA` | Path to CA bundle to enable TLS to StarRocks; unset = plaintext | — |
 | `PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD` | PostgreSQL | localhost:5432 |
 | `API_PORT` | API listen port | 8090 |
+| `LOG_LEVEL` | slog level for JSON logs (`debug`/`info`/`warn`/`error`) | info |
 | `KEYCLOAK_HOST/REALM/CLIENT` | Keycloak | localhost:8080 |
 | `TENANT_ENFORCEMENT_ENABLED` | Enforce tenant membership on `/{tenant}/*` routes (403 on cross-tenant). Off by default so routing can ship before `user_role` is backfilled; set `true` once it is. | false |
 | `AWS_ENDPOINT_URL/REGION/ACCESS_KEY_ID/SECRET_ACCESS_KEY` | S3/MinIO | — |

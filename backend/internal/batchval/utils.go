@@ -1,10 +1,10 @@
 package batchval
 
 import (
+	"log/slog"
 	"slices"
 	"time"
 
-	"github.com/golang/glog"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/types"
 )
@@ -48,7 +48,7 @@ type batchUpdater interface {
 }
 
 func ProcessUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch batchUpdater) {
-	glog.Errorf("unexpected error for batch %v: %v", batch.ID, unexpectedErr)
+	slog.Error("unexpected error processing batch", slog.String("batch_id", batch.ID), slog.Any("error", unexpectedErr))
 	now := time.Now()
 	batch.FinishedOn = &now
 	batch.Status = types.BatchStatusError
@@ -60,11 +60,11 @@ func ProcessUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch b
 	batch.Report = report
 	rowsUpdated, updateErr := repoBatch.UpdateBatch(*batch)
 	if updateErr != nil {
-		glog.Errorf("failed to update batch %v status to ERROR: %v", batch.ID, updateErr)
+		slog.Error("failed to update batch status to ERROR", slog.String("batch_id", batch.ID), slog.Any("error", updateErr))
 		return
 	}
 	if rowsUpdated == 0 {
-		glog.Warningf("no rows updated when setting batch %v status to ERROR", batch.ID)
+		slog.Warn("no rows updated when setting batch status to ERROR", slog.String("batch_id", batch.ID))
 	}
 }
 

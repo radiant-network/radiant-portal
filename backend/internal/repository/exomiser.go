@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
-	"log"
+	"log/slog"
 )
 
 type Exomiser = types.Exomiser
@@ -17,7 +17,7 @@ type ExomiserRepository struct {
 
 func NewExomiserRepository(db *gorm.DB) *ExomiserRepository {
 	if db == nil {
-		log.Print("ExomiserRepository: db is nil")
+		slog.Error("ExomiserRepository: db is nil")
 		return nil
 	}
 	return &ExomiserRepository{db: db}

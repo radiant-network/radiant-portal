@@ -3,7 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/radiant-network/radiant-api/internal/utils"
 
@@ -26,7 +26,7 @@ type GermlineSNVOccurrencesRepository struct {
 
 func NewGermlineSNVOccurrencesRepository(db *gorm.DB) *GermlineSNVOccurrencesRepository {
 	if db == nil {
-		log.Print("GermlineSNVOccurrencesRepository: db is nil")
+		slog.Error("GermlineSNVOccurrencesRepository: db is nil")
 		return nil
 	}
 	return &GermlineSNVOccurrencesRepository{db: db}

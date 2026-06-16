@@ -3,7 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -17,7 +17,7 @@ type ObservationCategoricalRepository struct {
 
 func NewObservationCategoricalRepository(db *gorm.DB) *ObservationCategoricalRepository {
 	if db == nil {
-		log.Print("ObservationCategoricalRepository: db is nil")
+		slog.Error("ObservationCategoricalRepository: db is nil")
 		return nil
 	}
 	return &ObservationCategoricalRepository{db: db}

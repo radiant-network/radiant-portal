@@ -3,7 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"regexp"
 	"strings"
 
@@ -17,7 +17,7 @@ type TermsRepository struct {
 
 func NewTermsRepository(db *gorm.DB) *TermsRepository {
 	if db == nil {
-		log.Print("TermsRepository: db is nil")
+		slog.Error("TermsRepository: db is nil")
 		return nil
 	}
 	return &TermsRepository{db: db}
