@@ -2,7 +2,6 @@ package repository
 
 import (
 	"fmt"
-	"log/slog"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -14,10 +13,6 @@ type OccurrenceFlagsRepository struct {
 }
 
 func NewOccurrenceFlagsRepository(db *gorm.DB) *OccurrenceFlagsRepository {
-	if db == nil {
-		slog.Error("OccurrenceFlagsRepository: db is nil")
-		return nil
-	}
 	return &OccurrenceFlagsRepository{db: db}
 }
 

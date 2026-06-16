@@ -15,10 +15,6 @@ type AuthRepository struct {
 }
 
 func NewAuthRepository(db *gorm.DB) *AuthRepository {
-	if db == nil {
-		slog.Error("AuthRepository: db is nil")
-		return nil
-	}
 	return &AuthRepository{db: db}
 }
 

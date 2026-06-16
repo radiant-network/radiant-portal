@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"slices"
 	"strings"
 
@@ -29,10 +28,6 @@ type CasesRepository struct {
 }
 
 func NewCasesRepository(db *gorm.DB) *CasesRepository {
-	if db == nil {
-		slog.Error("CasesRepository: db is nil")
-		return nil
-	}
 	return &CasesRepository{db: db}
 }
 

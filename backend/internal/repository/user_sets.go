@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
-	"log/slog"
 )
 
 type UserSetsRepository struct {
@@ -13,10 +12,6 @@ type UserSetsRepository struct {
 }
 
 func NewUserSetsRepository(db *gorm.DB) *UserSetsRepository {
-	if db == nil {
-		slog.Error("UserSetsRepository: db is nil")
-		return nil
-	}
 	return &UserSetsRepository{db: db}
 }
 

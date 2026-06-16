@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"html"
-	"log/slog"
 	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
@@ -21,14 +20,6 @@ type InterpretationsRepository struct {
 }
 
 func NewInterpretationsRepository(db *gorm.DB, pubmedClient client.PubmedClientService) *InterpretationsRepository {
-	if db == nil {
-		slog.Error("InterpretationsRepository: db is nil")
-		return nil
-	}
-	if pubmedClient == nil {
-		slog.Error("InterpretationsRepository: pubmedClient is nil")
-		return nil
-	}
 	return &InterpretationsRepository{db: db, pubmedClient: pubmedClient}
 }
 

@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
@@ -23,10 +22,6 @@ type DocumentsRepository struct {
 }
 
 func NewDocumentsRepository(db *gorm.DB) *DocumentsRepository {
-	if db == nil {
-		slog.Error("DocumentsRepository: db is nil")
-		return nil
-	}
 	return &DocumentsRepository{db: db}
 }
 

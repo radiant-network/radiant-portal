@@ -276,6 +276,7 @@ func main() {
 	dbStarrocks, err := database.NewStarrocksDB()
 	if err != nil {
 		slog.Error("failed to initialize starrocks database", slog.Any("error", err))
+		os.Exit(1)
 	}
 
 	dbPostgres, err := database.NewPostgresDB()

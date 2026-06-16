@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -18,10 +17,6 @@ type TaskRepository struct {
 }
 
 func NewTaskRepository(db *gorm.DB) *TaskRepository {
-	if db == nil {
-		slog.Error("TaskRepository: db is nil")
-		return nil
-	}
 	return &TaskRepository{db: db}
 }
 

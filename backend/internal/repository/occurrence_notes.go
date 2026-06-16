@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
@@ -15,10 +14,6 @@ type OccurrenceNotesRepository struct {
 }
 
 func NewOccurrenceNotesRepository(db *gorm.DB) *OccurrenceNotesRepository {
-	if db == nil {
-		slog.Error("OccurrenceNotesRepository: db is nil")
-		return nil
-	}
 	return &OccurrenceNotesRepository{db: db}
 }
 
