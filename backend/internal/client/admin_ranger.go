@@ -83,16 +83,98 @@ func randomPassword() (string, error) {
 	return base64.RawURLEncoding.EncodeToString(b) + "Aa1!", nil
 }
 
+const rangerStarrocksService = "starrocks"
+
 type rangerRoleMember struct {
 	Name    string `json:"name"`
 	IsAdmin bool   `json:"isAdmin"`
 }
 
 type rangerRole struct {
-	ID    int64              `json:"id,omitempty"`
-	Name  string             `json:"name"`
-	Users []rangerRoleMember `json:"users"`
-	Roles []rangerRoleMember `json:"roles"`
+	ID            int64              `json:"id,omitempty"`
+	Name          string             `json:"name"`
+	CreatedByUser string             `json:"createdByUser,omitempty"`
+	Users         []rangerRoleMember `json:"users"`
+	Roles         []rangerRoleMember `json:"roles"`
+}
+
+// EnsureRole creates an empty Ranger role if absent. An existing role is left
+// untouched — its membership is owned by the user-provisioning flow, so a re-run must
+// never clobber it.
+func (c *RangerAdminClient) EnsureRole(ctx context.Context, name string) error {
+	status, payload, err := c.request(ctx, http.MethodGet, "/service/roles/roles/name/"+name, nil)
+	if err != nil {
+		return err
+	}
+	if status == http.StatusOK {
+		return nil
+	}
+	// Ranger returns 404 OR 400 ("...doesn't have permissions to get details...") for a
+	// role that does not exist; both mean "absent → create". Other statuses (401/5xx)
+	// are real failures and must NOT be read as absent (which would spuriously create).
+	if status != http.StatusNotFound && status != http.StatusBadRequest {
+		return fmt.Errorf("get role %q: HTTP %d: %s", name, status, string(payload))
+	}
+	role := rangerRole{Name: name, CreatedByUser: c.cfg.AdminUser, Users: []rangerRoleMember{}, Roles: []rangerRoleMember{}}
+	status, payload, err = c.request(ctx, http.MethodPost, "/service/roles/roles", role)
+	if err != nil {
+		return err
+	}
+	if status != http.StatusOK && status != http.StatusCreated {
+		return fmt.Errorf("create role %q: HTTP %d: %s", name, status, string(payload))
+	}
+	return nil
+}
+
+// EnsureAccessPolicy upserts a StarRocks access policy granting roles SELECT on the
+// databases/tables. It updates in place when the policy exists (PUT) and creates it
+// otherwise (POST).
+func (c *RangerAdminClient) EnsureAccessPolicy(ctx context.Context, name string, databases, tables, roles []string) error {
+	policy := map[string]any{
+		"policyType":     0,
+		"name":           name,
+		"isEnabled":      true,
+		"isAuditEnabled": false,
+		"service":        rangerStarrocksService,
+		"resources": map[string]any{
+			"catalog":  map[string]any{"values": []string{"default_catalog"}},
+			"database": map[string]any{"values": databases},
+			"table":    map[string]any{"values": tables},
+			"column":   map[string]any{"values": []string{"*"}},
+		},
+		"policyItems": []map[string]any{{
+			"roles":    roles,
+			"accesses": []map[string]any{{"type": "select", "isAllowed": true}},
+		}},
+	}
+
+	status, payload, err := c.request(ctx, http.MethodGet,
+		fmt.Sprintf("/service/public/v2/api/service/%s/policy/%s", rangerStarrocksService, name), nil)
+	if err != nil {
+		return err
+	}
+	switch status {
+	case http.StatusOK:
+		var existing struct {
+			ID int64 `json:"id"`
+		}
+		if err := json.Unmarshal(payload, &existing); err != nil {
+			return fmt.Errorf("parse access policy %q: %w", name, err)
+		}
+		policy["id"] = existing.ID
+		status, payload, err = c.request(ctx, http.MethodPut, fmt.Sprintf("/service/public/v2/api/policy/%d", existing.ID), policy)
+	case http.StatusNotFound:
+		status, payload, err = c.request(ctx, http.MethodPost, "/service/plugins/policies", policy)
+	default:
+		return fmt.Errorf("get access policy %q: HTTP %d: %s", name, status, string(payload))
+	}
+	if err != nil {
+		return err
+	}
+	if status != http.StatusOK && status != http.StatusCreated {
+		return fmt.Errorf("ensure access policy %q: HTTP %d: %s", name, status, string(payload))
+	}
+	return nil
 }
 
 // AddUserToRole adds user to roleName via read-modify-write so it never clobbers

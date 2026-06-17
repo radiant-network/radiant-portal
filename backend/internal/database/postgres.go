@@ -58,7 +58,12 @@ func NewPostgresDB() (*gorm.DB, error) {
 	return db, nil
 }
 
-func MigrateWithParams(path string, host string, port string, database string, user string, password string, sslmode string, sslcert string) {
+// MigrateWithParams applies all up migrations and reports whether the schema
+// actually changed: true when at least one migration was applied, false when the
+// database was already current ("no change"). Real errors are fatal. The returned
+// bool lets startup gate follow-on work (e.g. tenant view refresh) on an actual
+// schema change rather than running it on every boot.
+func MigrateWithParams(path string, host string, port string, database string, user string, password string, sslmode string, sslcert string) bool {
 	slog.Info("migrating postgres database")
 	conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?", user, url.QueryEscape(password), host, port, database)
 	if sslmode != "" {
@@ -78,13 +83,15 @@ func MigrateWithParams(path string, host string, port string, database string, u
 	if err := m.Up(); err != nil {
 		if err.Error() == "no change" {
 			slog.Info("no migration changes to apply")
+			return false
 		} else {
 			slog.Error("failed to apply migrations", slog.Any("error", err))
 			os.Exit(1)
 		}
 	}
+	return true
 }
 
-func MigrateWithEnvDefault() {
-	MigrateWithParams("file://scripts/init-sql/migrations", dbPgHost, dbPgPort, dbPgDatabase, dbPgUser, dbPgPassword, dbPgSSLMode, dbPgSSLCert)
+func MigrateWithEnvDefault() bool {
+	return MigrateWithParams("file://scripts/init-sql/migrations", dbPgHost, dbPgPort, dbPgDatabase, dbPgUser, dbPgPassword, dbPgSSLMode, dbPgSSLCert)
 }

@@ -270,7 +270,7 @@ func newEngine() *gin.Engine {
 func main() {
 	observability.Setup()
 
-	database.MigrateWithEnvDefault()
+	migrated := database.MigrateWithEnvDefault()
 
 	// Initialize database connection
 	dbStarrocks, err := database.NewStarrocksDB()
@@ -292,6 +292,11 @@ func main() {
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+
+	if err := maybeRefreshTenantViewsOnStartup(ctx, dbPostgres, dbStarrocks, migrated); err != nil {
+		slog.Error("startup tenant view refresh failed", slog.Any("error", err))
+		os.Exit(1)
+	}
 
 	r := setupRouter(dbStarrocks, dbPostgres)
 	srv := &http.Server{Addr: fmt.Sprintf(":%s", p), Handler: r, ReadHeaderTimeout: 10 * time.Second}

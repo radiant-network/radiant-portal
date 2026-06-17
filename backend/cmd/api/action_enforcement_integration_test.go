@@ -89,11 +89,11 @@ func Test_ActionEnforcement_FlagVariant_WithoutActionDenied(t *testing.T) {
 }
 
 func Test_ActionEnforcement_DownloadFile_GranteeAllowed(t *testing.T) {
-	assertActionEnforced(t, mikeID, types.ActionDownloadFile, http.StatusOK)
+	assertActionEnforced(t, wendyID, types.ActionDownloadFile, http.StatusOK)
 }
 
 func Test_ActionEnforcement_DownloadFile_WithoutActionDenied(t *testing.T) {
-	assertActionEnforced(t, aliceID, types.ActionDownloadFile, http.StatusForbidden)
+	assertActionEnforced(t, mikeID, types.ActionDownloadFile, http.StatusForbidden)
 }
 
 func Test_ActionEnforcement_IngestData_GranteeAllowed(t *testing.T) {

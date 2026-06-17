@@ -30,6 +30,12 @@ If a constant, helper, or type already exists in another package, move it to a s
 
 `cmd/api` and `cmd/worker` cannot import each other; shared values **must** live under `internal/`. This is a Go module structure constraint, not a style preference.
 
+## Comments: minimal, self-documenting code
+
+Code should read for itself. Add a comment **only** for a genuinely tricky or non-obvious point — an injection guard, a load-bearing operation order, a subtle SQL expression, a security caveat (e.g. "a StarRocks view is not a Ranger access boundary"). Do **not** write a doc comment on every exported name, and do not narrate what the code plainly says (`// Create mode.`, `// loop over tenants`).
+
+This **overrides** the "every exported name gets a doc comment" guidance in [go-code-review.md](go-code-review.md#comments--docs); golangci-lint here does not enforce doc comments, so there is no lint cost. Keep a short package-doc/usage block for `package main` commands. When unsure, prefer fewer comments and a clearer name or smaller function.
+
 ## Run the build (or relevant tests) before marking work done
 
 A green build is the bar for advancing. For each workflow step:

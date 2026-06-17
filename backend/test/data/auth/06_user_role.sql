@@ -6,10 +6,11 @@
 --   carol: wildcard geneticist [radiant] + wildcard geneticist & researcher [tenant_b]
 --   pat:   mixed-scope practitioner at a specific org (CHUSJ)                 [radiant]
 --   tw:    mixed-scope practitioner granted tenant-wide (org_code NULL)       [radiant]
---   mike:  wildcard member ('*') — search cases + download files             [radiant]
+--   mike:  wildcard member ('*') — search cases + view kb                    [radiant]
 --   gabe:  wildcard data_manager ('*') — ingest data                         [radiant]
--- mike/gabe use the seeded radiant roles (migration 000012) to give a grantee for the
--- can_download_file and can_ingest_data actions, which no other fixture user holds.
+-- mike/gabe use the seeded radiant roles (migration 000012). gabe is the grantee for
+-- can_ingest_data; can_download_file lives on geneticist, so wendy (wildcard
+-- geneticist) is its grantee.
 -- user_id values are the uuids seeded in 05_users.sql.
 INSERT INTO user_role (user_id, tenant_code, org_code, role_code)
 VALUES ('25286548-fbef-4e93-b3c4-c659e6169396', 'radiant',  'CHOP',  'geneticist'),   -- alice

@@ -80,8 +80,11 @@ References: [Code Review Comments §Interfaces](https://go.dev/wiki/CodeReviewCo
 
 ## Comments & docs
 
-- **Doc comments:** every exported name and every non-trivial unexported type/func gets a doc comment,
-  written as full sentences.
+- **Doc comments:** when you do comment, write full sentences.
+  - **Project note:** this repo overrides upstream's "every exported name gets a doc comment." Keep
+    comments minimal and reserve them for genuinely tricky/non-obvious points — see
+    [universal.md](universal.md#comments-minimal-self-documenting-code). Don't add a doc comment just
+    because a name is exported.
 - **Comment sentences:** start with the name of the thing and end with a period
   (`// AuthRepository provides ...`).
 - **Package comments:** sit directly above the `package` clause, no blank line. For `package main`,
