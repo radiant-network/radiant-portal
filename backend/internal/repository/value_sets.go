@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -73,14 +74,14 @@ func NewValueSetsRepository(db *gorm.DB) *ValueSetsRepository {
 	}
 }
 
-func (r *ValueSetsRepository) GetCodes(vsType ValueSetType) ([]string, error) {
+func (r *ValueSetsRepository) GetCodes(ctx context.Context, vsType ValueSetType) ([]string, error) {
 	tableName, ok := r.tableMap[vsType]
 	if !ok {
 		return nil, fmt.Errorf("unknown value set type: %s", vsType)
 	}
 
 	var codes []string
-	err := r.db.
+	err := r.db.WithContext(ctx).
 		Table(tableName).
 		Select("code").
 		Order("code asc").

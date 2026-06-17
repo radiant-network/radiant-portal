@@ -13,7 +13,7 @@ import (
 func Test_GetClinvarRCV(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewClinvarRCVRepository(db)
-		clinvarRcv, err := repo.GetVariantClinvarConditions(1000)
+		clinvarRcv, err := repo.GetVariantClinvarConditions(t.Context(), 1000)
 		assert.NoError(t, err)
 
 		// Sort result by DateLastEvaluated descending
@@ -34,7 +34,7 @@ func Test_GetClinvarRCV(t *testing.T) {
 func Test_GetClinvarRCV_EmptyVariant(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewClinvarRCVRepository(db)
-		clinvarRcv, err := repo.GetVariantClinvarConditions(42)
+		clinvarRcv, err := repo.GetVariantClinvarConditions(t.Context(), 42)
 		assert.NoError(t, err)
 		assert.Len(t, clinvarRcv, 0)
 	})
@@ -43,7 +43,7 @@ func Test_GetClinvarRCV_EmptyVariant(t *testing.T) {
 func Test_GetClinvarRCV_EmptyClinvarRCV(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "clinvar", func(t *testing.T, db *gorm.DB) {
 		repo := NewClinvarRCVRepository(db)
-		clinvarRcv, err := repo.GetVariantClinvarConditions(1003)
+		clinvarRcv, err := repo.GetVariantClinvarConditions(t.Context(), 1003)
 		assert.NoError(t, err)
 		assert.Len(t, clinvarRcv, 0)
 	})

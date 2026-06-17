@@ -43,7 +43,7 @@ func main() {
 		if err != nil {
 			fatal("connect postgres", err)
 		}
-		if err := printCreatePlan(os.Stdout, *code, *name, pg); err != nil {
+		if err := printCreatePlan(ctx, os.Stdout, *code, *name, pg); err != nil {
 			fatal("print plan", err)
 		}
 		return
@@ -76,7 +76,7 @@ func fprintf(w io.Writer, format string, a ...any) {
 	_, _ = fmt.Fprintf(w, format, a...)
 }
 
-func printCreatePlan(w io.Writer, code, name string, cols service.ViewColumnSource) error {
+func printCreatePlan(ctx context.Context, w io.Writer, code, name string, cols service.ViewColumnSource) error {
 	fprintf(w, "DRY RUN — plan for tenant %q (%s)\n\n", code, name)
 
 	fprintf(w, "Phase A — Postgres (source of truth):\n")
@@ -89,7 +89,7 @@ func printCreatePlan(w io.Writer, code, name string, cols service.ViewColumnSour
 	for _, stmt := range repository.BuildAuthStatements() {
 		fprintf(w, "  %s;\n", stmt)
 	}
-	if err := printViews(w, code, cols); err != nil {
+	if err := printViews(ctx, w, code, cols); err != nil {
 		return err
 	}
 
@@ -100,8 +100,8 @@ func printCreatePlan(w io.Writer, code, name string, cols service.ViewColumnSour
 	return nil
 }
 
-func printViews(w io.Writer, code string, cols service.ViewColumnSource) error {
-	columns, err := cols.FederatableColumnsForViews()
+func printViews(ctx context.Context, w io.Writer, code string, cols service.ViewColumnSource) error {
+	columns, err := cols.FederatableColumnsForViews(ctx)
 	if err != nil {
 		return err
 	}

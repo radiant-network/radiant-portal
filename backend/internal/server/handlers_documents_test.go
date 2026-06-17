@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) SearchDocuments(userQuery types.ListQuery) (*[]types.DocumentResult, *int64, error) {
+func (m *MockRepository) SearchDocuments(ctx context.Context, userQuery types.ListQuery) (*[]types.DocumentResult, *int64, error) {
 	var count = int64(1)
 	return &[]types.DocumentResult{
 		{
@@ -38,7 +39,7 @@ func (m *MockRepository) SearchDocuments(userQuery types.ListQuery) (*[]types.Do
 	}, &count, nil
 }
 
-func (m *MockRepository) GetDocumentsFilters(withLabAndProject bool) (*types.DocumentFilters, error) {
+func (m *MockRepository) GetDocumentsFilters(ctx context.Context, withLabAndProject bool) (*types.DocumentFilters, error) {
 	var result = types.DocumentFilters{
 		Project: []types.FiltersValue{
 			{Key: "N1", Label: "NeuroDev Phase I"},
@@ -66,7 +67,7 @@ func (m *MockRepository) GetDocumentsFilters(withLabAndProject bool) (*types.Doc
 	return &result, nil
 }
 
-func (m *MockRepository) GetById(id int) (*types.Document, error) {
+func (m *MockRepository) GetById(ctx context.Context, id int) (*types.Document, error) {
 	if id == 999999 {
 		return nil, nil
 	}

@@ -1,6 +1,7 @@
 package batchval
 
 import (
+	"context"
 	"log/slog"
 	"slices"
 	"time"
@@ -44,10 +45,10 @@ func CopyRecordIntoBatch[T interface{ GetBase() *BaseValidationRecord }](batch *
 }
 
 type batchUpdater interface {
-	UpdateBatch(batch types.Batch) (int64, error)
+	UpdateBatch(ctx context.Context, batch types.Batch) (int64, error)
 }
 
-func ProcessUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch batchUpdater) {
+func ProcessUnexpectedError(ctx context.Context, batch *types.Batch, unexpectedErr error, repoBatch batchUpdater) {
 	slog.Error("unexpected error processing batch", slog.String("batch_id", batch.ID), slog.Any("error", unexpectedErr))
 	now := time.Now()
 	batch.FinishedOn = &now
@@ -58,7 +59,7 @@ func ProcessUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch b
 	}
 	report := types.BatchReport{Errors: []types.BatchMessage{errorMessage}}
 	batch.Report = report
-	rowsUpdated, updateErr := repoBatch.UpdateBatch(*batch)
+	rowsUpdated, updateErr := repoBatch.UpdateBatch(ctx, *batch)
 	if updateErr != nil {
 		slog.Error("failed to update batch status to ERROR", slog.String("batch_id", batch.ID), slog.Any("error", updateErr))
 		return
@@ -68,11 +69,11 @@ func ProcessUnexpectedError(batch *types.Batch, unexpectedErr error, repoBatch b
 	}
 }
 
-func UpdateBatch[T interface{ GetBase() *BaseValidationRecord }](batch *types.Batch, records []T, r *repository.BatchRepository) (int64, error) {
+func UpdateBatch[T interface{ GetBase() *BaseValidationRecord }](ctx context.Context, batch *types.Batch, records []T, r *repository.BatchRepository) (int64, error) {
 	CopyRecordIntoBatch(batch, records)
 	now := time.Now()
 	batch.FinishedOn = &now
-	return r.UpdateBatch(*batch)
+	return r.UpdateBatch(ctx, *batch)
 }
 
 func ValidateUniquenessInBatch[K comparable](

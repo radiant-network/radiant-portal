@@ -12,7 +12,7 @@ func Test_GetSampleBySubmitterSampleId_Found(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("CQGC", "S13224")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S13224")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, sample)
@@ -25,7 +25,7 @@ func Test_GetSampleBySubmitterSampleId_NotFound_InvalidSampleId(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("CQGC", "SAMPLE-UNKNOWN")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "SAMPLE-UNKNOWN")
 
 		assert.NoError(t, err)
 		assert.Nil(t, sample)
@@ -36,7 +36,7 @@ func Test_GetSampleBySubmitterSampleId_NotFound_InvalidOrgId(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("UNKNOWN-ORG", "S13224")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "UNKNOWN-ORG", "S13224")
 
 		assert.NoError(t, err)
 		assert.Nil(t, sample)
@@ -47,7 +47,7 @@ func Test_GetSampleBySubmitterSampleId_NotFound_BothInvalid(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("UNKNOWN-ORG", "SAMPLE-UNKNOWN")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "UNKNOWN-ORG", "SAMPLE-UNKNOWN")
 
 		assert.NoError(t, err)
 		assert.Nil(t, sample)
@@ -58,7 +58,7 @@ func Test_GetTypeCodes(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		typeCodes, err := repo.GetTypeCodes()
+		typeCodes, err := repo.GetTypeCodes(t.Context())
 
 		assert.NoError(t, err)
 		assert.NotNil(t, typeCodes)
@@ -70,7 +70,7 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_Found(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("CQGC", "S13224")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "S13224")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, sample)
@@ -83,7 +83,7 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidSampleId(t *tes
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("CQGC", "SAMPLE-UNKNOWN")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "CQGC", "SAMPLE-UNKNOWN")
 
 		assert.NoError(t, err)
 		assert.Nil(t, sample)
@@ -94,7 +94,7 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_InvalidOrgCode(t *test
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("INVALID-ORG", "S13224")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "INVALID-ORG", "S13224")
 
 		assert.NoError(t, err)
 		assert.Nil(t, sample)
@@ -105,7 +105,7 @@ func Test_GetSampleByOrgCodeAndSubmitterSampleId_NotFound_BothInvalid(t *testing
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSamplesRepository(db)
 
-		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId("INVALID-ORG", "SAMPLE-UNKNOWN")
+		sample, err := repo.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "INVALID-ORG", "SAMPLE-UNKNOWN")
 
 		assert.NoError(t, err)
 		assert.Nil(t, sample)

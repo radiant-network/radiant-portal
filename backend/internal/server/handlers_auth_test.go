@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -27,21 +28,21 @@ type mockAuthRepository struct {
 
 // TenantExists defaults to reporting the tenant as present (zero-value tenantNotFound=false)
 // so existing tests need no change; set tenantNotFound to exercise the unknown-tenant 403 path.
-func (m *mockAuthRepository) TenantExists(tenantCode string) (bool, error) {
+func (m *mockAuthRepository) TenantExists(ctx context.Context, tenantCode string) (bool, error) {
 	return !m.tenantNotFound, m.tenantExistsErr
 }
 
-func (m *mockAuthRepository) HasTenantAccess(email, tenantCode string) (bool, error) {
+func (m *mockAuthRepository) HasTenantAccess(ctx context.Context, email, tenantCode string) (bool, error) {
 	return m.hasTenantAccess, m.tenantErr
 }
 
-func (m *mockAuthRepository) HasAction(userID, tenantCode, orgCode, actionCode string) (bool, error) {
+func (m *mockAuthRepository) HasAction(ctx context.Context, userID, tenantCode, orgCode, actionCode string) (bool, error) {
 	m.gotOrgCode = orgCode
 	m.gotAction = actionCode
 	return m.hasAction, m.actionErr
 }
 
-func (m *mockAuthRepository) GetMemberships(email string) ([]types.TenantMembership, error) {
+func (m *mockAuthRepository) GetMemberships(ctx context.Context, email string) ([]types.TenantMembership, error) {
 	return m.memberships, m.err
 }
 

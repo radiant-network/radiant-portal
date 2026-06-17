@@ -58,7 +58,7 @@ func refreshOne(ctx context.Context, tenants *repository.TenantRepository, views
 	if err := views.EnsureAuthDatabase(ctx); err != nil {
 		fatal("ensure auth database", err)
 	}
-	columns, err := tenants.FederatableColumnsForViews()
+	columns, err := tenants.FederatableColumnsForViews(ctx)
 	if err != nil {
 		fatal("federatable columns", err)
 	}

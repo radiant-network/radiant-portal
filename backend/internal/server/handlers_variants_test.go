@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -13,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetVariantHeader(int) (*types.VariantHeader, error) {
+func (m *MockRepository) GetVariantHeader(context.Context, int) (*types.VariantHeader, error) {
 	return &types.VariantHeader{
 		Hgvsg:           "hgvsg1",
 		AssemblyVersion: "GRCh38",
@@ -21,7 +22,7 @@ func (m *MockRepository) GetVariantHeader(int) (*types.VariantHeader, error) {
 	}, nil
 }
 
-func (m *MockRepository) GetVariantOverview(int) (*types.VariantOverview, error) {
+func (m *MockRepository) GetVariantOverview(context.Context, int) (*types.VariantOverview, error) {
 	return &types.VariantOverview{
 		Locus:         "locus1",
 		GermlinePfWgs: 0.99,
@@ -46,7 +47,7 @@ func (m *MockRepository) GetVariantOverview(int) (*types.VariantOverview, error)
 	}, nil
 }
 
-func (r *MockRepository) GetVariantConsequences(int) (*[]types.VariantConsequence, error) {
+func (r *MockRepository) GetVariantConsequences(context.Context, int) (*[]types.VariantConsequence, error) {
 	var transcriptsBRAF = []types.Transcript{{TranscriptId: "T001"}, {TranscriptId: "T002"}}
 	var transcriptsBRAC = []types.Transcript{{TranscriptId: "T003"}}
 	return &[]types.VariantConsequence{
@@ -55,7 +56,7 @@ func (r *MockRepository) GetVariantConsequences(int) (*[]types.VariantConsequenc
 	}, nil
 }
 
-func (m *MockRepository) GetVariantInterpretedCases(int, types.ListQuery) (*[]types.VariantInterpretedCase, *int64, error) {
+func (m *MockRepository) GetVariantInterpretedCases(context.Context, int, types.ListQuery) (*[]types.VariantInterpretedCase, *int64, error) {
 	var count = int64(3)
 	return &[]types.VariantInterpretedCase{
 		{CaseId: 1, SeqId: 1, TranscriptId: "T002", PatientId: 1,
@@ -80,7 +81,7 @@ func (m *MockRepository) GetVariantInterpretedCases(int, types.ListQuery) (*[]ty
 	}, &count, nil
 }
 
-func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]types.VariantUninterpretedCase, *int64, error) {
+func (m *MockRepository) GetVariantUninterpretedCases(context.Context, int, types.ListQuery) (*[]types.VariantUninterpretedCase, *int64, error) {
 	var count = int64(2)
 	var filterIsPass = true
 	var filterIsNotPass = false
@@ -122,14 +123,14 @@ func (m *MockRepository) GetVariantUninterpretedCases(int, types.ListQuery) (*[]
 	}, &count, nil
 }
 
-func (m *MockRepository) GetVariantCasesCount(int) (*types.VariantCasesCount, error) {
+func (m *MockRepository) GetVariantCasesCount(context.Context, int) (*types.VariantCasesCount, error) {
 	return &types.VariantCasesCount{
 		CountInterpreted:   int64(1),
 		CountUninterpreted: int64(3),
 	}, nil
 }
 
-func (m *MockRepository) GetVariantCasesFilters() (*types.VariantCasesFilters, error) {
+func (m *MockRepository) GetVariantCasesFilters(context.Context) (*types.VariantCasesFilters, error) {
 	return &types.VariantCasesFilters{
 		Classification: []types.FiltersValue{
 			{Key: "LA6668-3", Label: "pathogenic"},
@@ -174,7 +175,7 @@ func (m *MockRepository) GetVariantCasesFilters() (*types.VariantCasesFilters, e
 	}, nil
 }
 
-func (m *MockRepository) GetVariantGenePanelConditions(panelType string, locusId int, conditionFilter string) (*types.GenePanelConditions, error) {
+func (m *MockRepository) GetVariantGenePanelConditions(ctx context.Context, panelType string, locusId int, conditionFilter string) (*types.GenePanelConditions, error) {
 	conditions := make(map[string][]types.GenePanelCondition)
 	conditions["BRAF"] = []types.GenePanelCondition{{Symbol: "BRAF", PanelName: "Name 1", PanelID: "1"}, {Symbol: "BRAF", PanelName: "Name 2", PanelID: "2"}}
 	conditions["BRCA2"] = []types.GenePanelCondition{{Symbol: "BRCA2", PanelName: "Name 3", PanelID: "3", InheritanceCode: []string{"AD", "AR"}}}
@@ -187,7 +188,7 @@ func (m *MockRepository) GetVariantGenePanelConditions(panelType string, locusId
 	}, nil
 }
 
-func (m *MockRepository) GetVariantClinvarConditions(locusId int) ([]types.ClinvarRCV, error) {
+func (m *MockRepository) GetVariantClinvarConditions(ctx context.Context, locusId int) ([]types.ClinvarRCV, error) {
 	return []types.ClinvarRCV{
 		{
 			LocusId:              strconv.Itoa(locusId),
@@ -205,7 +206,7 @@ func (m *MockRepository) GetVariantClinvarConditions(locusId int) ([]types.Clinv
 	}, nil
 }
 
-func (m *MockRepository) GetVariantExternalFrequencies(locusId int) (*types.VariantExternalFrequencies, error) {
+func (m *MockRepository) GetVariantExternalFrequencies(ctx context.Context, locusId int) (*types.VariantExternalFrequencies, error) {
 	af := 0.01
 	ac := 1
 	an := 100
@@ -237,7 +238,7 @@ func (m *MockRepository) GetVariantExternalFrequencies(locusId int) (*types.Vari
 	}, nil
 }
 
-func (m *MockRepository) GetGermlineVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error) {
+func (m *MockRepository) GetGermlineVariantGlobalInternalFrequencies(ctx context.Context, locusId int) (*types.InternalFrequencies, error) {
 	af := 0.01
 	ac := 1
 	an := 100
@@ -259,7 +260,7 @@ func (m *MockRepository) GetGermlineVariantGlobalInternalFrequencies(locusId int
 	}, nil
 }
 
-func (m *MockRepository) GetGermlineVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
+func (m *MockRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx context.Context, locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
 	af := 0.01
 	ac := 1
 	an := 100
@@ -327,7 +328,7 @@ func (m *MockExomiserRepository) GetExomiser(locusId int) ([]types.Exomiser, err
 	}, nil
 }
 
-func (m *MockExomiserRepository) GetExomiserACMGClassificationCounts(locusId int) (map[string]int, error) {
+func (m *MockExomiserRepository) GetExomiserACMGClassificationCounts(ctx context.Context, locusId int) (map[string]int, error) {
 	return map[string]int{
 		"Benign":     2,
 		"Pathogenic": 1,
@@ -338,7 +339,7 @@ func (m *MockEmptyExomiserRepository) GetExomiser(locusId int) ([]types.Exomiser
 	return nil, nil
 }
 
-func (m *MockEmptyExomiserRepository) GetExomiserACMGClassificationCounts(locusId int) (map[string]int, error) {
+func (m *MockEmptyExomiserRepository) GetExomiserACMGClassificationCounts(ctx context.Context, locusId int) (map[string]int, error) {
 	return nil, nil
 }
 

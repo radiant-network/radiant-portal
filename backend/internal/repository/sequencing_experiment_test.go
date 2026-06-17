@@ -13,7 +13,7 @@ import (
 func Test_GetSequencingExperimentDetailById(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewSequencingExperimentRepository(db)
-		sequencingExperiment, err := repo.GetSequencingExperimentDetailById(1)
+		sequencingExperiment, err := repo.GetSequencingExperimentDetailById(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, "completed", sequencingExperiment.StatusCode)
 		assert.Equal(t, "2021-09-12 13:08:00 +0000 UTC", sequencingExperiment.CreatedOn.String())
@@ -43,7 +43,7 @@ func Test_GetSequencingExperimentDetailById(t *testing.T) {
 func Test_GetSequencingExperimentBySampleID(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSequencingExperimentRepository(db)
-		seqExps, err := repo.GetSequencingExperimentBySampleID(1)
+		seqExps, err := repo.GetSequencingExperimentBySampleID(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Len(t, seqExps, 2)
 		assert.Equal(t, 1, seqExps[0].ID)
@@ -56,7 +56,7 @@ func Test_GetSequencingExperimentBySampleID(t *testing.T) {
 func Test_GetSequencingExperimentBySampleIDtNotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSequencingExperimentRepository(db)
-		sequencing, err := repo.GetSequencingExperimentBySampleID(-42)
+		sequencing, err := repo.GetSequencingExperimentBySampleID(t.Context(), -42)
 		assert.NoError(t, err)
 		assert.Empty(t, sequencing)
 	})
@@ -65,7 +65,7 @@ func Test_GetSequencingExperimentBySampleIDtNotFound(t *testing.T) {
 func Test_GetSequencingExperimentByAliquot(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSequencingExperimentRepository(db)
-		seqExps, err := repo.GetSequencingExperimentByAliquot("NA12892")
+		seqExps, err := repo.GetSequencingExperimentByAliquot(t.Context(), "NA12892")
 		assert.NoError(t, err)
 		assert.Len(t, seqExps, 2)
 		assert.Equal(t, 1, seqExps[0].ID)
@@ -76,7 +76,7 @@ func Test_GetSequencingExperimentByAliquot(t *testing.T) {
 func Test_GetSequencingExperimentByAliquotNotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSequencingExperimentRepository(db)
-		sequencing, err := repo.GetSequencingExperimentByAliquot("FOOBAR")
+		sequencing, err := repo.GetSequencingExperimentByAliquot(t.Context(), "FOOBAR")
 		assert.NoError(t, err)
 		assert.Empty(t, sequencing)
 	})
@@ -105,7 +105,7 @@ func Test_GetSequencingExperimentByAliquotAndSubmitterSample(t *testing.T) {
 			RunAlias:                     "A00516_0169",
 		}
 
-		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(aliquot, submitterSampleId, organizationCode)
+		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), aliquot, submitterSampleId, organizationCode)
 		assert.NoError(t, err)
 		assert.Equal(t, seqExp.ID, expected.ID)
 		assert.Equal(t, seqExp.Aliquot, expected.Aliquot)
@@ -128,7 +128,7 @@ func Test_GetSequencingExperimentByAliquotAndSubmitterSampleNotFound(t *testing.
 		aliquot := "NA12892"
 		submitterSampleId := "S13224"
 
-		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(aliquot, submitterSampleId, organizationCode)
+		seqExp, err := repo.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), aliquot, submitterSampleId, organizationCode)
 		assert.NoError(t, err)
 		assert.Nil(t, seqExp)
 	})

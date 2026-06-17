@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -15,7 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetSavedFilterByID(savedFilterId string) (*types.SavedFilter, error) {
+func (m *MockRepository) GetSavedFilterByID(ctx context.Context, savedFilterId string) (*types.SavedFilter, error) {
 	if savedFilterId == "42" {
 		return nil, fmt.Errorf("mock saved filter not found")
 	}
@@ -47,7 +48,7 @@ func (m *MockRepository) GetSavedFilterByID(savedFilterId string) (*types.SavedF
 	}, nil
 }
 
-func (m *MockRepository) GetSavedFiltersByUserID(userId string, savedFilterType string) (*[]types.SavedFilter, error) {
+func (m *MockRepository) GetSavedFiltersByUserID(ctx context.Context, userId string, savedFilterType string) (*[]types.SavedFilter, error) {
 	return &[]types.SavedFilter{
 		{
 			ID:       "1",
@@ -78,7 +79,7 @@ func (m *MockRepository) GetSavedFiltersByUserID(userId string, savedFilterType 
 	}, nil
 }
 
-func (m *MockRepository) CreateSavedFilter(savedFilterInput types.SavedFilterCreationInput, userId string) (*types.SavedFilter, error) {
+func (m *MockRepository) CreateSavedFilter(ctx context.Context, savedFilterInput types.SavedFilterCreationInput, userId string) (*types.SavedFilter, error) {
 	return &types.SavedFilter{
 		ID:       "1",
 		UserID:   userId,
@@ -93,7 +94,7 @@ func (m *MockRepository) CreateSavedFilter(savedFilterInput types.SavedFilterCre
 	}, nil
 }
 
-func (m *MockRepository) UpdateSavedFilter(savedFilterInput types.SavedFilterUpdateInput, savedFilterId string, userId string) (*types.SavedFilter, error) {
+func (m *MockRepository) UpdateSavedFilter(ctx context.Context, savedFilterInput types.SavedFilterUpdateInput, savedFilterId string, userId string) (*types.SavedFilter, error) {
 	return &types.SavedFilter{
 		ID:       savedFilterId,
 		UserID:   userId,
@@ -108,7 +109,7 @@ func (m *MockRepository) UpdateSavedFilter(savedFilterInput types.SavedFilterUpd
 	}, nil
 }
 
-func (m *MockRepository) DeleteSavedFilter(savedFilterId string, userId string) error {
+func (m *MockRepository) DeleteSavedFilter(ctx context.Context, savedFilterId string, userId string) error {
 	return nil
 }
 

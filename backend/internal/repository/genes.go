@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"regexp"
@@ -45,7 +46,7 @@ func mapToAutoCompleteGene(gene *Gene, input string) AutoCompleteGene {
 	}
 }
 
-func (r *GenesRepository) GetGeneAutoComplete(prefix string, limit int) (*[]AutoCompleteGene, error) {
+func (r *GenesRepository) GetGeneAutoComplete(ctx context.Context, prefix string, limit int) (*[]AutoCompleteGene, error) {
 
 	// Alias match collapses the array to a string rather than array_filter(alias, x -> ...):
 	// a derived ARRAY crossing the ORDER BY exchange crashes the StarRocks 3.5.18 CN.
@@ -57,7 +58,7 @@ func (r *GenesRepository) GetGeneAutoComplete(prefix string, limit int) (*[]Auto
 
 	like := fmt.Sprintf("%s%%", strings.ToUpper(prefix))
 	aliasLike := fmt.Sprintf("%%||%s%%", strings.ToUpper(prefix))
-	tx := r.db.Table(types.EnsemblGeneTable.Name)
+	tx := r.db.WithContext(ctx).Table(types.EnsemblGeneTable.Name)
 	tx = tx.Select("gene_id, name, (case WHEN name LIKE ? THEN 1 ELSE (CASE WHEN gene_id LIKE ? THEN 2 ELSE (CASE WHEN UPPER(CONCAT('||', array_join(alias, '||'))) LIKE ? THEN 3 ELSE 4 END) END) END) weight", like, like, aliasLike)
 	tx = tx.Where("UPPER(name) like ? or UPPER(gene_id) like ? or UPPER(CONCAT('||', array_join(alias, '||'))) LIKE ?", like, like, aliasLike)
 	tx = tx.Order("weight ASC, name ASC")
@@ -80,14 +81,14 @@ func (r *GenesRepository) GetGeneAutoComplete(prefix string, limit int) (*[]Auto
 	return &output, nil
 }
 
-func (r *GenesRepository) SearchGenes(inputs []string) (*[]GeneResult, error) {
+func (r *GenesRepository) SearchGenes(ctx context.Context, inputs []string) (*[]GeneResult, error) {
 	upperInputs := make([]string, 0)
 
 	for _, input := range inputs {
 		upperInputs = append(upperInputs, strings.ToUpper(input))
 	}
 
-	tx := r.db.Table(types.EnsemblGeneTable.Name)
+	tx := r.db.WithContext(ctx).Table(types.EnsemblGeneTable.Name)
 	tx = tx.Select("gene_id, name")
 	tx = tx.Where("UPPER(name) IN ? OR UPPER(gene_id) IN ?", upperInputs, upperInputs)
 	tx = tx.Order("name ASC")

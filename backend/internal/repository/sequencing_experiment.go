@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -20,10 +21,10 @@ func NewSequencingExperimentRepository(db *gorm.DB) *SequencingExperimentReposit
 	return &SequencingExperimentRepository{db: db}
 }
 
-func (r *SequencingExperimentRepository) GetSequencingExperimentDetailById(seqId int) (*SequencingExperimentDetail, error) {
+func (r *SequencingExperimentRepository) GetSequencingExperimentDetailById(ctx context.Context, seqId int) (*SequencingExperimentDetail, error) {
 	var sequencingExperiment SequencingExperimentDetail
 
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias))
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias))
 	tx = utils.JoinSeqExpWithSample(tx)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.experimental_strategy_code = %s.code", types.ExperimentalStrategyTable.FederationName, types.ExperimentalStrategyTable.Alias, types.SequencingExperimentTable.Alias, types.ExperimentalStrategyTable.Alias))
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_read_technology_code = %s.code", types.SequencingReadTechnologyTable.FederationName, types.SequencingReadTechnologyTable.Alias, types.SequencingExperimentTable.Alias, types.SequencingReadTechnologyTable.Alias))
@@ -39,13 +40,13 @@ func (r *SequencingExperimentRepository) GetSequencingExperimentDetailById(seqId
 	return &sequencingExperiment, nil
 }
 
-func (r *SequencingExperimentRepository) CreateSequencingExperiment(seqExp *SequencingExperiment) error {
-	return r.db.Create(&seqExp).Error
+func (r *SequencingExperimentRepository) CreateSequencingExperiment(ctx context.Context, seqExp *SequencingExperiment) error {
+	return r.db.WithContext(ctx).Create(&seqExp).Error
 }
 
-func (r *SequencingExperimentRepository) GetSequencingExperimentBySampleID(sampleID int) ([]SequencingExperiment, error) {
+func (r *SequencingExperimentRepository) GetSequencingExperimentBySampleID(ctx context.Context, sampleID int) ([]SequencingExperiment, error) {
 	var seqExps []SequencingExperiment
-	result := r.db.Table(types.SequencingExperimentTable.Name).Where("sample_id = ?", sampleID).Order("id").Find(&seqExps)
+	result := r.db.WithContext(ctx).Table(types.SequencingExperimentTable.Name).Where("sample_id = ?", sampleID).Order("id").Find(&seqExps)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -55,9 +56,9 @@ func (r *SequencingExperimentRepository) GetSequencingExperimentBySampleID(sampl
 	return seqExps, nil
 }
 
-func (r *SequencingExperimentRepository) GetSequencingExperimentsByCaseId(caseID int) ([]SequencingExperiment, error) {
+func (r *SequencingExperimentRepository) GetSequencingExperimentsByCaseId(ctx context.Context, caseID int) ([]SequencingExperiment, error) {
 	var seqExps []SequencingExperiment
-	result := r.db.
+	result := r.db.WithContext(ctx).
 		Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name)).
 		Joins(fmt.Sprintf("JOIN %s chse ON chse.sequencing_experiment_id = se.id", types.CaseHasSequencingExperimentTable.Name)).
 		Where("chse.case_id = ?", caseID).
@@ -73,9 +74,9 @@ func (r *SequencingExperimentRepository) GetSequencingExperimentsByCaseId(caseID
 	return seqExps, nil
 }
 
-func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquot(aliquot string) ([]SequencingExperiment, error) {
+func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquot(ctx context.Context, aliquot string) ([]SequencingExperiment, error) {
 	var seqExps []SequencingExperiment
-	result := r.db.Table(types.SequencingExperimentTable.Name).Where("aliquot = ?", aliquot).Order("id").Find(&seqExps)
+	result := r.db.WithContext(ctx).Table(types.SequencingExperimentTable.Name).Where("aliquot = ?", aliquot).Order("id").Find(&seqExps)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -85,9 +86,9 @@ func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquot(aliquo
 	return seqExps, nil
 }
 
-func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleID string, sampleOrganizationCode string) (*SequencingExperiment, error) {
+func (r *SequencingExperimentRepository) GetSequencingExperimentByAliquotAndSubmitterSample(ctx context.Context, aliquot string, submitterSampleID string, sampleOrganizationCode string) (*SequencingExperiment, error) {
 	var seqExp SequencingExperiment
-	txSeqExp := r.db.Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name))
+	txSeqExp := r.db.WithContext(ctx).Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name))
 	txSeqExp.Joins(fmt.Sprintf("LEFT JOIN %s sa ON sa.id = se.sample_id", types.SampleTable.Name))
 	txSeqExp.Where("se.aliquot = ? AND sa.submitter_sample_id = ? AND sa.organization_code = ?", aliquot, submitterSampleID, sampleOrganizationCode)
 	result := txSeqExp.First(&seqExp)

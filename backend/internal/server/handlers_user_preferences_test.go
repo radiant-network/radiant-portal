@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetUserPreferences(userId string, key string) (*types.JsonMap[string, interface{}], error) {
+func (m *MockRepository) GetUserPreferences(ctx context.Context, userId string, key string) (*types.JsonMap[string, interface{}], error) {
 	return &types.JsonMap[string, interface{}]{
 		"columnOrder": types.JsonArray[string]{"column_1", "column_2"},
 		"columnPinning": types.JsonMap[string, interface{}]{
@@ -36,7 +37,7 @@ func (m *MockRepository) GetUserPreferences(userId string, key string) (*types.J
 	}, nil
 }
 
-func (m *MockRepository) UpdateUserPreferences(userId string, key string, content types.JsonMap[string, interface{}]) (*types.JsonMap[string, interface{}], error) {
+func (m *MockRepository) UpdateUserPreferences(ctx context.Context, userId string, key string, content types.JsonMap[string, interface{}]) (*types.JsonMap[string, interface{}], error) {
 	return &content, nil
 }
 

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,7 +9,7 @@ import (
 )
 
 type batchReader interface {
-	GetBatchByID(batchId string) (*types.Batch, error)
+	GetBatchByID(ctx context.Context, batchId string) (*types.Batch, error)
 }
 
 // GetBatchHandler
@@ -31,7 +32,7 @@ type batchReader interface {
 func GetBatchHandler(repo batchReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		batchID := c.Param("batch_id")
-		batch, err := repo.GetBatchByID(batchID)
+		batch, err := repo.GetBatchByID(c.Request.Context(), batchID)
 		if err != nil {
 			HandleError(c, err)
 			return

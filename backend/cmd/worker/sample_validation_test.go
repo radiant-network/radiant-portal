@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/batchval"
@@ -13,7 +14,7 @@ type MockOrganizationRepository struct {
 	GetOrganizationByCodeFunc func(code string) (*types.Organization, error)
 }
 
-func (m *MockOrganizationRepository) GetOrganizationByCode(code string) (*types.Organization, error) {
+func (m *MockOrganizationRepository) GetOrganizationByCode(_ context.Context, code string) (*types.Organization, error) {
 	if m.GetOrganizationByCodeFunc != nil {
 		return m.GetOrganizationByCodeFunc(code)
 	}
@@ -24,14 +25,16 @@ type MockPatientsRepository struct {
 	GetPatientByOrgCodeAndSubmitterPatientIdFunc func(organizationCode string, submitterPatientId string) (*types.Patient, error)
 }
 
-func (m *MockPatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*types.Patient, error) {
+func (m *MockPatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string) (*types.Patient, error) {
 	if m.GetPatientByOrgCodeAndSubmitterPatientIdFunc != nil {
 		return m.GetPatientByOrgCodeAndSubmitterPatientIdFunc(organizationCode, submitterPatientId)
 	}
 	return nil, nil
 }
 
-func (m *MockPatientsRepository) CreatePatient(newPatient *types.Patient) error { return nil }
+func (m *MockPatientsRepository) CreatePatient(_ context.Context, newPatient *types.Patient) error {
+	return nil
+}
 
 type MockSamplesRepository struct {
 	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(organizationCode string, submitterSampleId string) (*types.Sample, error)
@@ -39,18 +42,18 @@ type MockSamplesRepository struct {
 	GetTypeCodesFunc                           func() ([]string, error)
 }
 
-func (m *MockSamplesRepository) GetSampleById(id int) (*types.Sample, error) {
+func (m *MockSamplesRepository) GetSampleById(_ context.Context, id int) (*types.Sample, error) {
 	return nil, nil
 }
 
-func (m *MockSamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+func (m *MockSamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, organizationCode string, submitterSampleId string) (*types.Sample, error) {
 	if m.GetSampleByOrgCodeAndSubmitterSampleIdFunc != nil {
 		return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(organizationCode, submitterSampleId)
 	}
 	return nil, nil
 }
 
-func (m *MockSamplesRepository) CreateSample(newSample *types.Sample) (*types.Sample, error) {
+func (m *MockSamplesRepository) CreateSample(_ context.Context, newSample *types.Sample) (*types.Sample, error) {
 	if m.CreateSampleFunc != nil {
 		return m.CreateSampleFunc(newSample)
 	}
@@ -68,7 +71,7 @@ type MockValueSetRepository struct {
 	GetCodesFunc func(vsType repository.ValueSetType) ([]string, error)
 }
 
-func (m *MockValueSetRepository) GetCodes(vsType repository.ValueSetType) ([]string, error) {
+func (m *MockValueSetRepository) GetCodes(_ context.Context, vsType repository.ValueSetType) ([]string, error) {
 	if m.GetCodesFunc != nil {
 		return m.GetCodesFunc(vsType)
 	}
@@ -170,7 +173,7 @@ func Test_ValidateTypeCode_Valid(t *testing.T) {
 		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
-	err := rec.validateTypeCode()
+	err := rec.validateTypeCode(t.Context())
 	assert.NoError(t, err)
 	assert.Empty(t, rec.Errors)
 }
@@ -187,7 +190,7 @@ func Test_ValidateTypeCode_Invalid(t *testing.T) {
 		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
-	err := rec.validateTypeCode()
+	err := rec.validateTypeCode(t.Context())
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SampleInvalidValueCode, rec.Errors[0].Code)
@@ -201,7 +204,7 @@ func Test_ValidateHistologyTypeCode_Valid(t *testing.T) {
 		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
-	err := rec.validateHistologyCode()
+	err := rec.validateHistologyCode(t.Context())
 	assert.NoError(t, err)
 	assert.Empty(t, rec.Errors)
 }
@@ -213,7 +216,7 @@ func Test_ValidateHistologyTypeCode_Invalid(t *testing.T) {
 		BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: batchval.NewBatchValidationCache(mockContext)},
 		Sample:               sample,
 	}
-	err := rec.validateHistologyCode()
+	err := rec.validateHistologyCode(t.Context())
 	expected := types.BatchMessage{
 		Code:    SampleInvalidValueCode,
 		Message: "Invalid field histology_code for sample (CHUSJ / S1). Reason: \"invalid_histology\" is not a valid histology code. Valid values [tumoral, normal].",

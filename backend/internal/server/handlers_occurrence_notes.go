@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strconv"
@@ -12,12 +13,12 @@ import (
 )
 
 type occurrenceNotesStore interface {
-	Create(note types.OccurrenceNote) (*types.OccurrenceNote, error)
-	GetByID(id string) (*types.OccurrenceNote, error)
-	GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error)
-	CountByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) (int, error)
-	Update(id string, content string) (*types.OccurrenceNote, error)
-	Delete(id string) error
+	Create(ctx context.Context, note types.OccurrenceNote) (*types.OccurrenceNote, error)
+	GetByID(ctx context.Context, id string) (*types.OccurrenceNote, error)
+	GetByOccurrence(ctx context.Context, caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error)
+	CountByOccurrence(ctx context.Context, caseID int, seqID int, taskID int, occurrenceID string) (int, error)
+	Update(ctx context.Context, id string, content string) (*types.OccurrenceNote, error)
+	Delete(ctx context.Context, id string) error
 }
 
 var htmlPolicy = bluemonday.UGCPolicy()
@@ -83,7 +84,7 @@ func PostOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.H
 			TenantCode:   *tenant,
 		}
 
-		created, err := repo.Create(note)
+		created, err := repo.Create(c.Request.Context(), note)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -126,7 +127,7 @@ func PutOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.Ha
 			return
 		}
 
-		note, err := repo.GetByID(id)
+		note, err := repo.GetByID(c.Request.Context(), id)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -140,7 +141,7 @@ func PutOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin.Ha
 			return
 		}
 
-		updated, err := repo.Update(id, sanitizeNoteContent(body.Content, *userID))
+		updated, err := repo.Update(c.Request.Context(), id, sanitizeNoteContent(body.Content, *userID))
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -175,7 +176,7 @@ func DeleteOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin
 			return
 		}
 
-		note, err := repo.GetByID(id)
+		note, err := repo.GetByID(c.Request.Context(), id)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -189,7 +190,7 @@ func DeleteOccurrenceNoteHandler(repo occurrenceNotesStore, auth utils.Auth) gin
 			return
 		}
 
-		if err := repo.Delete(id); err != nil {
+		if err := repo.Delete(c.Request.Context(), id); err != nil {
 			HandleError(c, err)
 			return
 		}
@@ -238,7 +239,7 @@ func GetOccurrenceNoteCountHandler(repo occurrenceNotesStore) gin.HandlerFunc {
 
 		occurrenceID := c.Param("occurrence_id")
 
-		count, err := repo.CountByOccurrence(caseID, seqID, taskID, occurrenceID)
+		count, err := repo.CountByOccurrence(c.Request.Context(), caseID, seqID, taskID, occurrenceID)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -288,7 +289,7 @@ func GetOccurrenceNotesHandler(repo occurrenceNotesStore) gin.HandlerFunc {
 
 		occurrenceID := c.Param("occurrence_id")
 
-		notes, err := repo.GetByOccurrence(caseID, seqID, taskID, occurrenceID)
+		notes, err := repo.GetByOccurrence(c.Request.Context(), caseID, seqID, taskID, occurrenceID)
 		if err != nil {
 			HandleError(c, err)
 			return

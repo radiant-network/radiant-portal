@@ -1,6 +1,7 @@
 package batchval
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -14,7 +15,7 @@ type mockOrgRepo struct {
 	GetByCodeFunc func(code string) (*types.Organization, error)
 }
 
-func (m *mockOrgRepo) GetOrganizationByCode(code string) (*types.Organization, error) {
+func (m *mockOrgRepo) GetOrganizationByCode(_ context.Context, code string) (*types.Organization, error) {
 	return m.GetByCodeFunc(code)
 }
 
@@ -23,10 +24,10 @@ type mockSampleRepo struct {
 	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(orgCode string, submitterSampleId string) (*types.Sample, error)
 }
 
-func (m *mockSampleRepo) GetSampleById(id int) (*types.Sample, error) {
+func (m *mockSampleRepo) GetSampleById(_ context.Context, id int) (*types.Sample, error) {
 	return m.GetByIdFunc(id)
 }
-func (m *mockSampleRepo) GetSampleByOrgCodeAndSubmitterSampleId(orgCode string, submitterSampleId string) (*types.Sample, error) {
+func (m *mockSampleRepo) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, orgCode string, submitterSampleId string) (*types.Sample, error) {
 	return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(orgCode, submitterSampleId)
 }
 
@@ -34,7 +35,7 @@ type mockValueSetsRepo struct {
 	GetCodesFunc func(vsType repository.ValueSetType) ([]string, error)
 }
 
-func (m *mockValueSetsRepo) GetCodes(vsType repository.ValueSetType) ([]string, error) {
+func (m *mockValueSetsRepo) GetCodes(_ context.Context, vsType repository.ValueSetType) ([]string, error) {
 	return m.GetCodesFunc(vsType)
 }
 
@@ -42,7 +43,7 @@ type mockProjectRepo struct {
 	GetByCodeFunc func(code string) (*types.Project, error)
 }
 
-func (m *mockProjectRepo) GetProjectByCode(code string) (*types.Project, error) {
+func (m *mockProjectRepo) GetProjectByCode(_ context.Context, code string) (*types.Project, error) {
 	return m.GetByCodeFunc(code)
 }
 
@@ -51,10 +52,10 @@ type mockCasesRepo struct {
 	GetCaseBySubmitterFunc func(submitterCaseId string, projectId int) (*types.Case, error)
 }
 
-func (m *mockCasesRepo) GetCaseAnalysisCatalogIdByCode(code string) (*types.AnalysisCatalog, error) {
+func (m *mockCasesRepo) GetCaseAnalysisCatalogIdByCode(_ context.Context, code string) (*types.AnalysisCatalog, error) {
 	return m.GetAnalysisCatalogFunc(code)
 }
-func (m *mockCasesRepo) GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*types.Case, error) {
+func (m *mockCasesRepo) GetCaseBySubmitterCaseIdAndProjectId(_ context.Context, submitterCaseId string, projectId int) (*types.Case, error) {
 	return m.GetCaseBySubmitterFunc(submitterCaseId, projectId)
 }
 
@@ -62,7 +63,7 @@ type mockPatientRepo struct {
 	GetByOrgAndSubmitterFunc func(orgCode string, submitterPatientId string) (*types.Patient, error)
 }
 
-func (m *mockPatientRepo) GetPatientByOrgCodeAndSubmitterPatientId(orgCode string, submitterPatientId string) (*types.Patient, error) {
+func (m *mockPatientRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, orgCode string, submitterPatientId string) (*types.Patient, error) {
 	return m.GetByOrgAndSubmitterFunc(orgCode, submitterPatientId)
 }
 
@@ -72,13 +73,13 @@ type mockSeqExpRepo struct {
 	GetByCaseIdFunc           func(caseID int) ([]types.SequencingExperiment, error)
 }
 
-func (m *mockSeqExpRepo) GetSequencingExperimentByAliquot(aliquot string) ([]types.SequencingExperiment, error) {
+func (m *mockSeqExpRepo) GetSequencingExperimentByAliquot(_ context.Context, aliquot string) ([]types.SequencingExperiment, error) {
 	return m.GetByAliquotFunc(aliquot)
 }
-func (m *mockSeqExpRepo) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error) {
+func (m *mockSeqExpRepo) GetSequencingExperimentByAliquotAndSubmitterSample(_ context.Context, aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error) {
 	return m.GetByAliquotAndSampleFunc(aliquot, submitterSampleId, organizationCode)
 }
-func (m *mockSeqExpRepo) GetSequencingExperimentsByCaseId(caseID int) ([]types.SequencingExperiment, error) {
+func (m *mockSeqExpRepo) GetSequencingExperimentsByCaseId(_ context.Context, caseID int) ([]types.SequencingExperiment, error) {
 	return m.GetByCaseIdFunc(caseID)
 }
 
@@ -87,10 +88,10 @@ type mockTaskRepo struct {
 	GetHasDocByDocFunc     func(documentId int) ([]*types.TaskHasDocument, error)
 }
 
-func (m *mockTaskRepo) GetTaskContextBySequencingExperimentId(seqExpId int) ([]*types.TaskContext, error) {
+func (m *mockTaskRepo) GetTaskContextBySequencingExperimentId(_ context.Context, seqExpId int) ([]*types.TaskContext, error) {
 	return m.GetContextBySeqExpFunc(seqExpId)
 }
-func (m *mockTaskRepo) GetTaskHasDocumentByDocumentId(documentId int) ([]*types.TaskHasDocument, error) {
+func (m *mockTaskRepo) GetTaskHasDocumentByDocumentId(_ context.Context, documentId int) ([]*types.TaskHasDocument, error) {
 	return m.GetHasDocByDocFunc(documentId)
 }
 
@@ -98,7 +99,7 @@ type mockDocRepo struct {
 	GetByUrlFunc func(url string) (*types.Document, error)
 }
 
-func (m *mockDocRepo) GetDocumentByUrl(url string) (*types.Document, error) {
+func (m *mockDocRepo) GetDocumentByUrl(_ context.Context, url string) (*types.Document, error) {
 	return m.GetByUrlFunc(url)
 }
 
@@ -114,7 +115,7 @@ func TestBatchValidationCache_GetOrganizationByCode(t *testing.T) {
 		assert.Equal(t, "ORG1", code)
 		return org, nil
 	}
-	result, err := cache.GetOrganizationByCode("ORG1")
+	result, err := cache.GetOrganizationByCode(t.Context(), "ORG1")
 	assert.NoError(t, err)
 	assert.Equal(t, org, result)
 	assert.Equal(t, org, cache.OrganizationsByCode["ORG1"])
@@ -124,7 +125,7 @@ func TestBatchValidationCache_GetOrganizationByCode(t *testing.T) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetOrganizationByCode("ORG1")
+	result, err = cache.GetOrganizationByCode(t.Context(), "ORG1")
 	assert.NoError(t, err)
 	assert.Equal(t, org, result)
 }
@@ -141,7 +142,7 @@ func TestBatchValidationCache_GetSampleById(t *testing.T) {
 		assert.Equal(t, 10, id)
 		return sample, nil
 	}
-	result, err := cache.GetSampleById(10)
+	result, err := cache.GetSampleById(t.Context(), 10)
 	assert.NoError(t, err)
 	assert.Equal(t, sample, result)
 	assert.Equal(t, sample, cache.SamplesById[10])
@@ -151,7 +152,7 @@ func TestBatchValidationCache_GetSampleById(t *testing.T) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetSampleById(10)
+	result, err = cache.GetSampleById(t.Context(), 10)
 	assert.NoError(t, err)
 	assert.Equal(t, sample, result)
 }
@@ -168,7 +169,7 @@ func TestBatchValidationCache_GetValueSetCodes(t *testing.T) {
 		assert.Equal(t, repository.ValueSetStatus, vsType)
 		return codes, nil
 	}
-	result, err := cache.GetValueSetCodes(repository.ValueSetStatus)
+	result, err := cache.GetValueSetCodes(t.Context(), repository.ValueSetStatus)
 	assert.NoError(t, err)
 	assert.Equal(t, codes, result)
 	assert.Equal(t, codes, cache.ValueSets[repository.ValueSetStatus])
@@ -178,7 +179,7 @@ func TestBatchValidationCache_GetValueSetCodes(t *testing.T) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetValueSetCodes(repository.ValueSetStatus)
+	result, err = cache.GetValueSetCodes(t.Context(), repository.ValueSetStatus)
 	assert.NoError(t, err)
 	assert.Equal(t, codes, result)
 }
@@ -195,7 +196,7 @@ func TestBatchValidationCache_GetProjectByCode(t *testing.T) {
 		assert.Equal(t, "PROJ1", code)
 		return project, nil
 	}
-	result, err := cache.GetProjectByCode("PROJ1")
+	result, err := cache.GetProjectByCode(t.Context(), "PROJ1")
 	assert.NoError(t, err)
 	assert.Equal(t, project, result)
 	assert.Equal(t, project, cache.Projects["PROJ1"])
@@ -205,7 +206,7 @@ func TestBatchValidationCache_GetProjectByCode(t *testing.T) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetProjectByCode("PROJ1")
+	result, err = cache.GetProjectByCode(t.Context(), "PROJ1")
 	assert.NoError(t, err)
 	assert.Equal(t, project, result)
 }
@@ -224,7 +225,7 @@ func TestBatchValidationCache_GetPatientByOrgCodeAndSubmitterPatientId(t *testin
 		assert.Equal(t, "PAT1", submitterPatientId)
 		return patient, nil
 	}
-	result, err := cache.GetPatientByOrgCodeAndSubmitterPatientId("ORG1", "PAT1")
+	result, err := cache.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "ORG1", "PAT1")
 	assert.NoError(t, err)
 	assert.Equal(t, patient, result)
 	assert.Equal(t, patient, cache.Patients[key])
@@ -234,7 +235,7 @@ func TestBatchValidationCache_GetPatientByOrgCodeAndSubmitterPatientId(t *testin
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetPatientByOrgCodeAndSubmitterPatientId("ORG1", "PAT1")
+	result, err = cache.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "ORG1", "PAT1")
 	assert.NoError(t, err)
 	assert.Equal(t, patient, result)
 }
@@ -251,7 +252,7 @@ func TestBatchValidationCache_GetSequencingExperimentByAliquot(t *testing.T) {
 		assert.Equal(t, "ALQ1", aliquot)
 		return seqExps, nil
 	}
-	result, err := cache.GetSequencingExperimentByAliquot("ALQ1")
+	result, err := cache.GetSequencingExperimentByAliquot(t.Context(), "ALQ1")
 	assert.NoError(t, err)
 	assert.Equal(t, seqExps, result)
 	assert.Equal(t, seqExps, cache.SequencingExperimentsByAliquot["ALQ1"])
@@ -261,7 +262,7 @@ func TestBatchValidationCache_GetSequencingExperimentByAliquot(t *testing.T) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetSequencingExperimentByAliquot("ALQ1")
+	result, err = cache.GetSequencingExperimentByAliquot(t.Context(), "ALQ1")
 	assert.NoError(t, err)
 	assert.Equal(t, seqExps, result)
 }
@@ -278,7 +279,7 @@ func TestBatchValidationCache_GetDocumentByUrl(t *testing.T) {
 		assert.Equal(t, "s3://bucket/file.bam", url)
 		return doc, nil
 	}
-	result, err := cache.GetDocumentByUrl("s3://bucket/file.bam")
+	result, err := cache.GetDocumentByUrl(t.Context(), "s3://bucket/file.bam")
 	assert.NoError(t, err)
 	assert.Equal(t, doc, result)
 	assert.Equal(t, doc, cache.Documents["s3://bucket/file.bam"])
@@ -288,7 +289,7 @@ func TestBatchValidationCache_GetDocumentByUrl(t *testing.T) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetDocumentByUrl("s3://bucket/file.bam")
+	result, err = cache.GetDocumentByUrl(t.Context(), "s3://bucket/file.bam")
 	assert.NoError(t, err)
 	assert.Equal(t, doc, result)
 }
@@ -305,7 +306,7 @@ func TestBatchValidationCache_GetCaseAnalysisCatalogByCode(t *testing.T) {
 		assert.Equal(t, "WGS", code)
 		return ac, nil
 	}
-	result, err := cache.GetCaseAnalysisCatalogByCode("WGS")
+	result, err := cache.GetCaseAnalysisCatalogByCode(t.Context(), "WGS")
 	assert.NoError(t, err)
 	assert.Equal(t, ac, result)
 	assert.Equal(t, ac, cache.AnalysisCatalogs["WGS"])
@@ -315,7 +316,7 @@ func TestBatchValidationCache_GetCaseAnalysisCatalogByCode(t *testing.T) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetCaseAnalysisCatalogByCode("WGS")
+	result, err = cache.GetCaseAnalysisCatalogByCode(t.Context(), "WGS")
 	assert.NoError(t, err)
 	assert.Equal(t, ac, result)
 }
@@ -334,7 +335,7 @@ func TestBatchValidationCache_GetCaseBySubmitterCaseIdAndProjectId(t *testing.T)
 		assert.Equal(t, 42, pid)
 		return cs, nil
 	}
-	result, err := cache.GetCaseBySubmitterCaseIdAndProjectId("CASE1", 42)
+	result, err := cache.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE1", 42)
 	assert.NoError(t, err)
 	assert.Equal(t, cs, result)
 	assert.Equal(t, cs, cache.Cases[key])
@@ -344,7 +345,7 @@ func TestBatchValidationCache_GetCaseBySubmitterCaseIdAndProjectId(t *testing.T)
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetCaseBySubmitterCaseIdAndProjectId("CASE1", 42)
+	result, err = cache.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE1", 42)
 	assert.NoError(t, err)
 	assert.Equal(t, cs, result)
 }
@@ -364,7 +365,7 @@ func TestBatchValidationCache_GetSequencingExperimentByAliquotAndSubmitterSample
 		assert.Equal(t, "ORG1", org)
 		return seqExp, nil
 	}
-	result, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample("ALQ1", "SMP1", "ORG1")
+	result, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALQ1", "SMP1", "ORG1")
 	assert.NoError(t, err)
 	assert.Equal(t, seqExp, result)
 	assert.Equal(t, seqExp, cache.SequencingExperimentsByKey[key])
@@ -374,7 +375,7 @@ func TestBatchValidationCache_GetSequencingExperimentByAliquotAndSubmitterSample
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetSequencingExperimentByAliquotAndSubmitterSample("ALQ1", "SMP1", "ORG1")
+	result, err = cache.GetSequencingExperimentByAliquotAndSubmitterSample(t.Context(), "ALQ1", "SMP1", "ORG1")
 	assert.NoError(t, err)
 	assert.Equal(t, seqExp, result)
 }
@@ -391,7 +392,7 @@ func TestBatchValidationCache_GetTaskContextBySequencingExperimentId(t *testing.
 		assert.Equal(t, 200, id)
 		return tc, nil
 	}
-	result, err := cache.GetTaskContextBySequencingExperimentId(200)
+	result, err := cache.GetTaskContextBySequencingExperimentId(t.Context(), 200)
 	assert.NoError(t, err)
 	assert.Equal(t, tc, result)
 	assert.Equal(t, tc, cache.TaskContext[200])
@@ -401,7 +402,7 @@ func TestBatchValidationCache_GetTaskContextBySequencingExperimentId(t *testing.
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetTaskContextBySequencingExperimentId(200)
+	result, err = cache.GetTaskContextBySequencingExperimentId(t.Context(), 200)
 	assert.NoError(t, err)
 	assert.Equal(t, tc, result)
 }
@@ -418,7 +419,7 @@ func TestBatchValidationCache_GetTaskHasDocumentByDocumentId(t *testing.T) {
 		assert.Equal(t, 500, id)
 		return thd, nil
 	}
-	result, err := cache.GetTaskHasDocumentByDocumentId(500)
+	result, err := cache.GetTaskHasDocumentByDocumentId(t.Context(), 500)
 	assert.NoError(t, err)
 	assert.Equal(t, thd, result)
 	assert.Equal(t, thd, cache.TaskHasDocuments[500])
@@ -428,7 +429,7 @@ func TestBatchValidationCache_GetTaskHasDocumentByDocumentId(t *testing.T) {
 		t.Fatal("Repo should not be called on cache hit")
 		return nil, nil
 	}
-	result, err = cache.GetTaskHasDocumentByDocumentId(500)
+	result, err = cache.GetTaskHasDocumentByDocumentId(t.Context(), 500)
 	assert.NoError(t, err)
 	assert.Equal(t, thd, result)
 }
@@ -444,7 +445,7 @@ func TestBatchValidationCache_GetSampleByOrgCodeAndSubmitterSampleId(t *testing.
 		return sample, nil
 	}
 
-	result, err := cache.GetSampleByOrgCodeAndSubmitterSampleId("ORG1", "S1")
+	result, err := cache.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "ORG1", "S1")
 	assert.NoError(t, err)
 	assert.Equal(t, sample, result)
 
@@ -453,7 +454,7 @@ func TestBatchValidationCache_GetSampleByOrgCodeAndSubmitterSampleId(t *testing.
 		t.Fatal("Sample Repo should not be called")
 		return nil, nil
 	}
-	result, err = cache.GetSampleByOrgCodeAndSubmitterSampleId("ORG1", "S1")
+	result, err = cache.GetSampleByOrgCodeAndSubmitterSampleId(t.Context(), "ORG1", "S1")
 	assert.NoError(t, err)
 	assert.Equal(t, sample, result)
 }
@@ -469,7 +470,7 @@ func TestBatchValidationCache_Errors(t *testing.T) {
 		return nil, expectedErr
 	}
 
-	result, err := cache.GetOrganizationByCode("ORG1")
+	result, err := cache.GetOrganizationByCode(t.Context(), "ORG1")
 	assert.Error(t, err)
 	assert.Nil(t, result)
 	assert.Equal(t, expectedErr, err)

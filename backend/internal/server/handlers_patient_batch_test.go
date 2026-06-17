@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +19,7 @@ import (
 func TestPostPatientBatchHandler_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -67,7 +68,7 @@ func TestPostPatientBatchHandler_ValidationError(t *testing.T) {
 func TestPostPatientBatchHandler_EmptyPatients(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,

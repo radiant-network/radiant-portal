@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -22,10 +23,11 @@ func NewSomaticSNVOccurrencesRepository(db *gorm.DB) *SomaticSNVOccurrencesRepos
 	return &SomaticSNVOccurrencesRepository{db: db}
 }
 
-func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]SomaticSNVOccurrence, error) {
+func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]SomaticSNVOccurrence, error) {
 	var occurrences []SomaticSNVOccurrence
 
-	tx, part, err := PrepareSNVListOrCountQuery(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
+	db := r.db.WithContext(ctx)
+	tx, part, err := PrepareSNVListOrCountQuery(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, db)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -48,7 +50,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, 
 	//	SELECT s_snv_o.locus_id FROM somatic__snv__occurrence JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
 	// ) AND s_snv_o.tumor_seq_id=? AND s_snv_o.part=? AND v.locus_id=s_snv_o.locus_id ORDER BY ad_ratio DESC
 	tx = tx.Select("s_snv_o.locus_id")
-	tx = r.db.Table("(somatic__snv__occurrence s_snv_o, snv__variant v)").
+	tx = db.Table("(somatic__snv__occurrence s_snv_o, snv__variant v)").
 		Joins("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM radiant_jdbc.public.interpretation_somatic) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
 		Joins("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM radiant_jdbc.public.occurrence_note WHERE deleted = false) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?", seqId, caseId).
 		Joins("LEFT JOIN radiant_jdbc.public.occurrence_flag flag ON flag.occurrence_id = s_snv_o.locus_id AND flag.task_id = s_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?", seqId, caseId).
@@ -63,20 +65,21 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, 
 	return occurrences, nil
 }
 
-func (r *SomaticSNVOccurrencesRepository) CountOccurrences(_ int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
-	return CountSNV(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
+func (r *SomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+	return CountSNV(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db.WithContext(ctx))
 }
 
-func (r *SomaticSNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	return AggregateSNV(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
+func (r *SomaticSNVOccurrencesRepository) AggregateOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {
+	return AggregateSNV(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db.WithContext(ctx))
 }
 
-func (r *SomaticSNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
-	return StatisticsSNV(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db)
+func (r *SomaticSNVOccurrencesRepository) GetStatisticsOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
+	return StatisticsSNV(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, r.db.WithContext(ctx))
 }
 
-func (r *SomaticSNVOccurrencesRepository) GetExpandedOccurrence(_ int, seqId int, taskId int, locusId int) (*ExpandedSomaticSNVOccurrence, error) {
-	tx := r.db.Table("somatic__snv__occurrence s_snv_o")
+func (r *SomaticSNVOccurrencesRepository) GetExpandedOccurrence(ctx context.Context, _ int, seqId int, taskId int, locusId int) (*ExpandedSomaticSNVOccurrence, error) {
+	db := r.db.WithContext(ctx)
+	tx := db.Table("somatic__snv__occurrence s_snv_o")
 	tx = tx.Where("s_snv_o.tumor_seq_id = ? AND s_snv_o.task_id = ? AND s_snv_o.locus_id = ?", seqId, taskId, locusId)
 	tx = tx.Joins("JOIN snv__consequence c ON s_snv_o.locus_id=c.locus_id AND c.is_picked = true")
 	tx = tx.Joins("JOIN snv__variant v ON s_snv_o.locus_id=v.locus_id")
@@ -99,7 +102,7 @@ func (r *SomaticSNVOccurrencesRepository) GetExpandedOccurrence(_ int, seqId int
 		}
 	}
 
-	txOmim := r.db.Table("omim_gene_panel omim")
+	txOmim := db.Table("omim_gene_panel omim")
 	txOmim = txOmim.Select("omim.omim_phenotype_id, omim.panel, omim.inheritance_code")
 	txOmim = txOmim.Where("omim.omim_phenotype_id is not null and omim.symbol = ?", expandedOccurrence.Symbol)
 	txOmim = txOmim.Order("omim.omim_phenotype_id asc")

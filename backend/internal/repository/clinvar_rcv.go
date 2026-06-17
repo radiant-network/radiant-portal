@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -19,7 +20,7 @@ func NewClinvarRCVRepository(db *gorm.DB) *ClinvarRCVRepository {
 	return &ClinvarRCVRepository{db: db}
 }
 
-func (r *ClinvarRCVRepository) GetVariantClinvarConditions(locusId int) ([]ClinvarRCV, error) {
+func (r *ClinvarRCVRepository) GetVariantClinvarConditions(ctx context.Context, locusId int) ([]ClinvarRCV, error) {
 	var clinvarRCV []ClinvarRCV
 
 	columns := utils.PrefixColumns(types.ClinvarRCVTable.Alias, []string{
@@ -36,7 +37,7 @@ func (r *ClinvarRCVRepository) GetVariantClinvarConditions(locusId int) ([]Clinv
 		"origins",
 	})
 
-	err := r.db.
+	err := r.db.WithContext(ctx).
 		Table(fmt.Sprintf("%s %s", types.VariantTable.Name, types.VariantTable.Alias)).
 		Select(strings.Join(columns, ",")).
 		Joins(fmt.Sprintf("JOIN %s %s ON %s.clinvar_name = %s.clinvar_id", types.ClinvarRCVTable.Name, types.ClinvarRCVTable.Alias, types.VariantTable.Alias, types.ClinvarRCVTable.Alias)).

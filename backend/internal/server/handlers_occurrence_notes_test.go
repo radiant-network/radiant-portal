@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -15,7 +16,7 @@ import (
 
 var fixedTime = time.Date(2024, 1, 15, 10, 0, 0, 0, time.UTC)
 
-func (m *MockRepository) Create(note types.OccurrenceNote) (*types.OccurrenceNote, error) {
+func (m *MockRepository) Create(ctx context.Context, note types.OccurrenceNote) (*types.OccurrenceNote, error) {
 	if note.Content == "trigger-error" {
 		return nil, fmt.Errorf("mock create error")
 	}
@@ -25,7 +26,7 @@ func (m *MockRepository) Create(note types.OccurrenceNote) (*types.OccurrenceNot
 	return &note, nil
 }
 
-func (m *MockRepository) GetByID(id string) (*types.OccurrenceNote, error) {
+func (m *MockRepository) GetByID(ctx context.Context, id string) (*types.OccurrenceNote, error) {
 	if id == "not-found-id" {
 		return nil, nil
 	}
@@ -46,7 +47,7 @@ func (m *MockRepository) GetByID(id string) (*types.OccurrenceNote, error) {
 	}, nil
 }
 
-func (m *MockRepository) Update(id string, content string) (*types.OccurrenceNote, error) {
+func (m *MockRepository) Update(ctx context.Context, id string, content string) (*types.OccurrenceNote, error) {
 	if content == "trigger-update-error" {
 		return nil, fmt.Errorf("mock update error")
 	}
@@ -64,18 +65,18 @@ func (m *MockRepository) Update(id string, content string) (*types.OccurrenceNot
 	}, nil
 }
 
-func (m *MockRepository) Delete(id string) error {
+func (m *MockRepository) Delete(ctx context.Context, id string) error {
 	if id == "error-delete-id" {
 		return fmt.Errorf("mock delete error")
 	}
 	return nil
 }
 
-func (m *MockRepository) CountByOccurrence(int, int, int, string) (int, error) {
+func (m *MockRepository) CountByOccurrence(context.Context, int, int, int, string) (int, error) {
 	return 5, nil
 }
 
-func (m *MockRepository) GetByOccurrence(caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error) {
+func (m *MockRepository) GetByOccurrence(ctx context.Context, caseID int, seqID int, taskID int, occurrenceID string) ([]types.OccurrenceNote, error) {
 	if occurrenceID == "99999" {
 		return nil, fmt.Errorf("mock get error")
 	}

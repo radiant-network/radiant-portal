@@ -17,9 +17,15 @@ import (
 // BatchValidationContext.BatchRepo, returning no work so the poll loop spins without a DB.
 type fakeBatchRepo struct{}
 
-func (fakeBatchRepo) ClaimNextBatch() (*types.Batch, error)  { return nil, nil }
-func (fakeBatchRepo) UpdateBatch(types.Batch) (int64, error) { return 1, nil }
-func (fakeBatchRepo) ReleaseBatch(string) (int64, error)     { return 1, nil }
+func (fakeBatchRepo) ClaimNextBatch(context.Context) (*types.Batch, error) {
+	return nil, nil
+}
+func (fakeBatchRepo) UpdateBatch(context.Context, types.Batch) (int64, error) {
+	return 1, nil
+}
+func (fakeBatchRepo) ReleaseBatch(context.Context, string) (int64, error) {
+	return 1, nil
+}
 
 func waitWithTimeout(t *testing.T, wg *sync.WaitGroup, d time.Duration, name string) {
 	t.Helper()

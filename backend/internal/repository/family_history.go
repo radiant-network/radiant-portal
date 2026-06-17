@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -18,9 +19,9 @@ func NewFamilyHistoryRepository(db *gorm.DB) *FamilyHistoryRepository {
 	return &FamilyHistoryRepository{db: db}
 }
 
-func (r *FamilyHistoryRepository) GetById(familyHistoryId int) (*FamilyHistory, error) {
+func (r *FamilyHistoryRepository) GetById(ctx context.Context, familyHistoryId int) (*FamilyHistory, error) {
 	var familyHistory FamilyHistory
-	if err := r.db.Table(types.FamilyHistoryTable.Name).First(&familyHistory, familyHistoryId).Error; err != nil {
+	if err := r.db.WithContext(ctx).Table(types.FamilyHistoryTable.Name).First(&familyHistory, familyHistoryId).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching family_history: %w", err)
 		} else {
@@ -30,6 +31,6 @@ func (r *FamilyHistoryRepository) GetById(familyHistoryId int) (*FamilyHistory, 
 	return &familyHistory, nil
 }
 
-func (r *FamilyHistoryRepository) CreateFamilyHistory(familyHistory *FamilyHistory) error {
-	return r.db.Create(familyHistory).Error
+func (r *FamilyHistoryRepository) CreateFamilyHistory(ctx context.Context, familyHistory *FamilyHistory) error {
+	return r.db.WithContext(ctx).Create(familyHistory).Error
 }

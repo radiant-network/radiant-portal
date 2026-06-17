@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"regexp"
@@ -41,9 +42,9 @@ func mapToAutoCompleteTerm(term *types.Term, input string) types.AutoCompleteTer
 	}
 }
 
-func (r *TermsRepository) GetTermAutoComplete(termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error) {
+func (r *TermsRepository) GetTermAutoComplete(ctx context.Context, termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error) {
 	like := fmt.Sprintf("%%%s%%", input)
-	tx := r.db.Table(termsTable).Select("id, name").Where("LOWER(name) like ? or UPPER(id) like ?", strings.ToLower(like), strings.ToUpper(like)).Order("id asc").Limit(limit)
+	tx := r.db.WithContext(ctx).Table(termsTable).Select("id, name").Where("LOWER(name) like ? or UPPER(id) like ?", strings.ToLower(like), strings.ToUpper(like)).Order("id asc").Limit(limit)
 
 	var terms []types.Term
 	if err := tx.Find(&terms).Error; err != nil {
@@ -62,8 +63,8 @@ func (r *TermsRepository) GetTermAutoComplete(termsTable string, input string, l
 	return &output, nil
 }
 
-func (r *TermsRepository) GetTermNameById(termsTable string, id string) (*string, error) {
-	tx := r.db.Table(termsTable).Select("name").Where("id = ?", id)
+func (r *TermsRepository) GetTermNameById(ctx context.Context, termsTable string, id string) (*string, error) {
+	tx := r.db.WithContext(ctx).Table(termsTable).Select("name").Where("id = ?", id)
 
 	var term types.Term
 	if err := tx.First(&term).Error; err != nil {

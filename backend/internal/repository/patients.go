@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -18,9 +19,9 @@ func NewPatientsRepository(db *gorm.DB) *PatientsRepository {
 	return &PatientsRepository{db: db}
 }
 
-func (r *PatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*Patient, error) {
+func (r *PatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(ctx context.Context, organizationCode string, submitterPatientId string) (*Patient, error) {
 	var patient Patient
-	tx := r.db.
+	tx := r.db.WithContext(ctx).
 		Table("patient").
 		Where("submitter_patient_id = ? AND organization_code = ?", submitterPatientId, organizationCode)
 	if err := tx.First(&patient).Error; err != nil {
@@ -33,7 +34,7 @@ func (r *PatientsRepository) GetPatientByOrgCodeAndSubmitterPatientId(organizati
 	return &patient, nil
 }
 
-func (r *PatientsRepository) CreatePatient(newPatient *Patient) error {
-	tx := r.db.Create(newPatient)
+func (r *PatientsRepository) CreatePatient(ctx context.Context, newPatient *Patient) error {
+	tx := r.db.WithContext(ctx).Create(newPatient)
 	return tx.Error
 }

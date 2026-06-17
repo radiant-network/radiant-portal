@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/radiant-network/radiant-api/internal/utils"
@@ -20,9 +21,9 @@ func NewGermlineCNVOccurrencesRepository(db *gorm.DB) *GermlineCNVOccurrencesRep
 	return &GermlineCNVOccurrencesRepository{db: db}
 }
 
-func (r *GermlineCNVOccurrencesRepository) GetOccurrences(caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]GermlineCNVOccurrence, error) {
+func (r *GermlineCNVOccurrencesRepository) GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.ListQuery) ([]GermlineCNVOccurrence, error) {
 	var occurrences []GermlineCNVOccurrence
-	tx, err := r.prepareQuery(seqId, taskId, userQuery)
+	tx, err := r.prepareQuery(ctx, seqId, taskId, userQuery)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -73,8 +74,8 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(caseId int, seqId int,
 	return occurrences, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) CountOccurrences(_ int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
-	tx, err := r.prepareQuery(seqId, taskId, userQuery)
+func (r *GermlineCNVOccurrencesRepository) CountOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+	tx, err := r.prepareQuery(ctx, seqId, taskId, userQuery)
 	if err != nil {
 		return 0, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -89,13 +90,14 @@ func (r *GermlineCNVOccurrencesRepository) CountOccurrences(_ int, seqId int, ta
 	return count, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) prepareQuery(seqId int, taskId int, userQuery types.Query) (*gorm.DB, error) {
-	part, err := utils.GetSequencingPart(seqId, r.db)
+func (r *GermlineCNVOccurrencesRepository) prepareQuery(ctx context.Context, seqId int, taskId int, userQuery types.Query) (*gorm.DB, error) {
+	db := r.db.WithContext(ctx)
+	part, err := utils.GetSequencingPart(seqId, db)
 	if err != nil {
 		return nil, fmt.Errorf("error during partition fetch %w", err)
 	}
 
-	tx := r.db.Table(
+	tx := db.Table(
 		fmt.Sprintf("%s %s", types.GermlineCNVOccurrenceTable.Name, types.GermlineCNVOccurrenceTable.Alias),
 	).Where("cnvo.seq_id = ? AND cnvo.task_id = ? AND cnvo.part=?", seqId, taskId, part)
 
@@ -111,8 +113,8 @@ func (r *GermlineCNVOccurrencesRepository) prepareQuery(seqId int, taskId int, u
 	return tx, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {
-	tx, err := r.prepareQuery(seqId, taskId, userQuery)
+func (r *GermlineCNVOccurrencesRepository) AggregateOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.AggQuery) ([]Aggregation, error) {
+	tx, err := r.prepareQuery(ctx, seqId, taskId, userQuery)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
@@ -140,8 +142,8 @@ func (r *GermlineCNVOccurrencesRepository) AggregateOccurrences(_ int, seqId int
 	return aggregation, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
-	tx, err := r.prepareQuery(seqId, taskId, userQuery)
+func (r *GermlineCNVOccurrencesRepository) GetStatisticsOccurrences(ctx context.Context, _ int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error) {
+	tx, err := r.prepareQuery(ctx, seqId, taskId, userQuery)
 	var statistics types.Statistics
 	if err != nil {
 		return &statistics, fmt.Errorf("error during query preparation %w", err)
@@ -161,15 +163,16 @@ func (r *GermlineCNVOccurrencesRepository) GetStatisticsOccurrences(_ int, seqId
 	return &statistics, nil
 }
 
-func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(_ int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error) {
-	part, err := utils.GetSequencingPart(seqId, r.db)
+func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, _ int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error) {
+	db := r.db.WithContext(ctx)
+	part, err := utils.GetSequencingPart(seqId, db)
 	if err != nil {
 		return nil, fmt.Errorf("error during partition fetch %w", err)
 	}
 	var chromosome string
 	var start, end, length int
 
-	err = r.db.Table(types.GermlineCNVOccurrenceTable.Name).
+	err = db.Table(types.GermlineCNVOccurrenceTable.Name).
 		Where("seq_id = ? AND task_id = ? AND part = ? AND cnv_id = ?", seqId, taskId, part, cnvId).
 		Select("chromosome, start, end, length").
 		Row().
@@ -233,7 +236,7 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(_ int, seqId int, tas
     	     LEFT JOIN gene_overlap_cytoband gc ON go.gene_id=gc.gene_id
 		ORDER BY overlapping_gene_percent DESC, overlapping_cnv_percent DESC;`
 	var overlaps []types.CNVGeneOverlap
-	query := r.db.Raw(sql, map[string]interface{}{"cnv_chromosome": chromosome, "cnv_start": start, "cnv_end": end, "cnv_length": length})
+	query := db.Raw(sql, map[string]interface{}{"cnv_chromosome": chromosome, "cnv_start": start, "cnv_end": end, "cnv_length": length})
 	if err = query.Find(&overlaps).Error; err != nil {
 		return nil, fmt.Errorf("error query gene overlap: %w", err)
 	}

@@ -22,14 +22,16 @@ func (d *recordingTenantDeps) record(step string) error {
 	return nil
 }
 
-func (d *recordingTenantDeps) EnsureTenant(code, name string) error { return d.record("EnsureTenant") }
-func (d *recordingTenantDeps) SeedDefaultRoles(tenantCode string) error {
+func (d *recordingTenantDeps) EnsureTenant(ctx context.Context, code, name string) error {
+	return d.record("EnsureTenant")
+}
+func (d *recordingTenantDeps) SeedDefaultRoles(ctx context.Context, tenantCode string) error {
 	return d.record("SeedDefaultRoles")
 }
 func (d *recordingTenantDeps) EnsureAuthDatabase(ctx context.Context) error {
 	return d.record("EnsureAuthDatabase")
 }
-func (d *recordingTenantDeps) FederatableColumnsForViews() (map[string][]string, error) {
+func (d *recordingTenantDeps) FederatableColumnsForViews(ctx context.Context) (map[string][]string, error) {
 	if err := d.record("FederatableColumnsForViews"); err != nil {
 		return nil, err
 	}
@@ -82,9 +84,9 @@ type refreshRecorder struct {
 	failTenant  map[string]bool
 }
 
-func (d *refreshRecorder) ListTenants() ([]string, error)               { return d.tenants, nil }
-func (d *refreshRecorder) EnsureAuthDatabase(ctx context.Context) error { d.authCalls++; return nil }
-func (d *refreshRecorder) FederatableColumnsForViews() (map[string][]string, error) {
+func (d *refreshRecorder) ListTenants(ctx context.Context) ([]string, error) { return d.tenants, nil }
+func (d *refreshRecorder) EnsureAuthDatabase(ctx context.Context) error      { d.authCalls++; return nil }
+func (d *refreshRecorder) FederatableColumnsForViews(ctx context.Context) (map[string][]string, error) {
 	d.columnCalls++
 	return map[string][]string{}, nil
 }

@@ -11,7 +11,7 @@ import (
 func Test_GetProjectByCode_OK(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewProjectRepository(db)
-		project, err := repo.GetProjectByCode("N1")
+		project, err := repo.GetProjectByCode(t.Context(), "N1")
 		assert.NoError(t, err)
 		assert.NotNil(t, project)
 		assert.Equal(t, 1, project.ID)
@@ -22,7 +22,7 @@ func Test_GetProjectByCode_OK(t *testing.T) {
 func Test_GetProjectByCode_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewProjectRepository(db)
-		project, err := repo.GetProjectByCode("notexists")
+		project, err := repo.GetProjectByCode(t.Context(), "notexists")
 		assert.NoError(t, err)
 		assert.Nil(t, project)
 	})

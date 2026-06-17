@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"slices"
@@ -11,24 +12,24 @@ import (
 )
 
 type genePanelConditionsReader interface {
-	GetVariantGenePanelConditions(panelType string, locusId int, conditionFilter string) (*types.GenePanelConditions, error)
+	GetVariantGenePanelConditions(ctx context.Context, panelType string, locusId int, conditionFilter string) (*types.GenePanelConditions, error)
 }
 
 type clinvarConditionsReader interface {
-	GetVariantClinvarConditions(locusId int) ([]types.ClinvarRCV, error)
+	GetVariantClinvarConditions(ctx context.Context, locusId int) ([]types.ClinvarRCV, error)
 }
 
 type variantsReader interface {
-	GetVariantHeader(locusId int) (*types.VariantHeader, error)
-	GetVariantOverview(locusId int) (*types.VariantOverview, error)
-	GetVariantConsequences(locusId int) (*[]types.VariantConsequence, error)
-	GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]types.VariantInterpretedCase, *int64, error)
-	GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]types.VariantUninterpretedCase, *int64, error)
-	GetVariantCasesCount(locusId int) (*types.VariantCasesCount, error)
-	GetVariantCasesFilters() (*types.VariantCasesFilters, error)
-	GetVariantExternalFrequencies(locusId int) (*types.VariantExternalFrequencies, error)
-	GetGermlineVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error)
-	GetGermlineVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error)
+	GetVariantHeader(ctx context.Context, locusId int) (*types.VariantHeader, error)
+	GetVariantOverview(ctx context.Context, locusId int) (*types.VariantOverview, error)
+	GetVariantConsequences(ctx context.Context, locusId int) (*[]types.VariantConsequence, error)
+	GetVariantInterpretedCases(ctx context.Context, locusId int, userQuery types.ListQuery) (*[]types.VariantInterpretedCase, *int64, error)
+	GetVariantUninterpretedCases(ctx context.Context, locusId int, userQuery types.ListQuery) (*[]types.VariantUninterpretedCase, *int64, error)
+	GetVariantCasesCount(ctx context.Context, locusId int) (*types.VariantCasesCount, error)
+	GetVariantCasesFilters(ctx context.Context) (*types.VariantCasesFilters, error)
+	GetVariantExternalFrequencies(ctx context.Context, locusId int) (*types.VariantExternalFrequencies, error)
+	GetGermlineVariantGlobalInternalFrequencies(ctx context.Context, locusId int) (*types.InternalFrequencies, error)
+	GetGermlineVariantInternalFrequenciesSplitBy(ctx context.Context, locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error)
 }
 
 // GetGermlineVariantHeader handles retrieving a germline variant header by its locus
@@ -54,7 +55,7 @@ func GetGermlineVariantHeader(repo variantsReader) gin.HandlerFunc {
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		variantHeader, err := repo.GetVariantHeader(locusID)
+		variantHeader, err := repo.GetVariantHeader(c.Request.Context(), locusID)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -90,7 +91,7 @@ func GetGermlineVariantOverview(repo variantsReader, exomiserRepository exomiser
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		variantOverview, err := repo.GetVariantOverview(locusID)
+		variantOverview, err := repo.GetVariantOverview(c.Request.Context(), locusID)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -100,7 +101,7 @@ func GetGermlineVariantOverview(repo variantsReader, exomiserRepository exomiser
 			return
 		}
 
-		exomiserACMGClassificationCounts, err := exomiserRepository.GetExomiserACMGClassificationCounts(locusID)
+		exomiserACMGClassificationCounts, err := exomiserRepository.GetExomiserACMGClassificationCounts(c.Request.Context(), locusID)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -110,7 +111,7 @@ func GetGermlineVariantOverview(repo variantsReader, exomiserRepository exomiser
 			variantOverview.ExomiserACMGClassificationCounts = exomiserACMGClassificationCounts
 		}
 
-		interpretationClassificationCounts, err := interpretationRepo.RetrieveGermlineInterpretationClassificationCounts(locusID)
+		interpretationClassificationCounts, err := interpretationRepo.RetrieveGermlineInterpretationClassificationCounts(c.Request.Context(), locusID)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -147,7 +148,7 @@ func GetGermlineVariantConsequences(repo variantsReader) gin.HandlerFunc {
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		variantConsequences, err := repo.GetVariantConsequences(locusID)
+		variantConsequences, err := repo.GetVariantConsequences(c.Request.Context(), locusID)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -201,7 +202,7 @@ func GetGermlineVariantInterpretedCases(repo variantsReader) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		cases, count, err := repo.GetVariantInterpretedCases(locusID, query)
+		cases, count, err := repo.GetVariantInterpretedCases(c.Request.Context(), locusID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -256,7 +257,7 @@ func GetGermlineVariantUninterpretedCases(repo variantsReader) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		cases, count, err := repo.GetVariantUninterpretedCases(locusID, query)
+		cases, count, err := repo.GetVariantUninterpretedCases(c.Request.Context(), locusID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -293,7 +294,7 @@ func GetGermlineVariantCasesCount(repo variantsReader) gin.HandlerFunc {
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		counts, err := repo.GetVariantCasesCount(locusId)
+		counts, err := repo.GetVariantCasesCount(c.Request.Context(), locusId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -319,7 +320,7 @@ func GetGermlineVariantCasesCount(repo variantsReader) gin.HandlerFunc {
 // @Router /{tenant}/variants/germline/cases/filters [get]
 func GetGermlineVariantCasesFilters(repo variantsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		filters, err := repo.GetVariantCasesFilters()
+		filters, err := repo.GetVariantCasesFilters(c.Request.Context())
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -355,7 +356,7 @@ func GetGermlineVariantConditions(repo genePanelConditionsReader) gin.HandlerFun
 		}
 		panelType := c.Param("panel_type")
 		filter := c.Query("filter")
-		genePanelConditions, err := repo.GetVariantGenePanelConditions(panelType, locusId, filter)
+		genePanelConditions, err := repo.GetVariantGenePanelConditions(c.Request.Context(), panelType, locusId, filter)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -387,7 +388,7 @@ func GetGermlineVariantConditionsClinvar(repo clinvarConditionsReader) gin.Handl
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		clinvarConditions, err := repo.GetVariantClinvarConditions(locusId)
+		clinvarConditions, err := repo.GetVariantClinvarConditions(c.Request.Context(), locusId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -432,7 +433,7 @@ func GetGermlineVariantExternalFrequenciesHandler(repo variantsReader) gin.Handl
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		variantExternalFrequencies, err := repo.GetVariantExternalFrequencies(locusID)
+		variantExternalFrequencies, err := repo.GetVariantExternalFrequencies(c.Request.Context(), locusID)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -480,7 +481,7 @@ func GetGermlineVariantInternalFrequenciesHandler(repo variantsReader) gin.Handl
 			HandleValidationError(c, fmt.Errorf("incorrect split"))
 			return
 		}
-		splitRows, err = repo.GetGermlineVariantInternalFrequenciesSplitBy(locusID, split)
+		splitRows, err = repo.GetGermlineVariantInternalFrequenciesSplitBy(c.Request.Context(), locusID, split)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -520,7 +521,7 @@ func GetGermlineVariantGlobalInternalFrequenciesHandler(repo variantsReader) gin
 			return
 		}
 
-		globalFrequencies, err = repo.GetGermlineVariantGlobalInternalFrequencies(locusID)
+		globalFrequencies, err = repo.GetGermlineVariantGlobalInternalFrequencies(c.Request.Context(), locusID)
 		if err != nil {
 			HandleError(c, err)
 			return

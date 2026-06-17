@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -12,11 +13,11 @@ import (
 )
 
 type igvReader interface {
-	GetIGV(caseID int) ([]types.IGVTrack, error)
+	GetIGV(ctx context.Context, caseID int) ([]types.IGVTrack, error)
 }
 
 type caseTypeReader interface {
-	GetCaseType(caseID int) (string, error)
+	GetCaseType(ctx context.Context, caseID int) (string, error)
 }
 
 // GetIGVHandler
@@ -47,13 +48,13 @@ func GetIGVHandler(igvRepo igvReader, casesRepo caseTypeReader, presigner utils.
 			return
 		}
 
-		caseType, err := casesRepo.GetCaseType(caseID)
+		caseType, err := casesRepo.GetCaseType(c.Request.Context(), caseID)
 		if err != nil {
 			HandleError(c, err)
 			return
 		}
 
-		internalIgvTracks, err := igvRepo.GetIGV(caseID)
+		internalIgvTracks, err := igvRepo.GetIGV(c.Request.Context(), caseID)
 		if err != nil {
 			HandleError(c, err)
 			return

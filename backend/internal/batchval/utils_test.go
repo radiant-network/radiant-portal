@@ -27,7 +27,7 @@ func Test_Process_Unexpected_Errors(t *testing.T) {
 		}
 
 		err := errors.New("some unexpected error")
-		ProcessUnexpectedError(&types.Batch{ID: id}, err, repo)
+		ProcessUnexpectedError(t.Context(), &types.Batch{ID: id}, err, repo)
 
 		resultBatch := types.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&resultBatch)

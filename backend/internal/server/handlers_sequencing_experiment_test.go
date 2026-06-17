@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetSequencingExperimentDetailById(seqId int) (*types.SequencingExperimentDetail, error) {
+func (m *MockRepository) GetSequencingExperimentDetailById(ctx context.Context, seqId int) (*types.SequencingExperimentDetail, error) {
 	return &types.SequencingExperimentDetail{
 		StatusCode: "completed",
 		CreatedOn: time.Date(

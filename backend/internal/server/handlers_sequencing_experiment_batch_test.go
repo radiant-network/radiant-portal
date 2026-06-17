@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +19,7 @@ import (
 func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -66,7 +67,7 @@ func TestPostSequencingExperimentBatchHandler_Success(t *testing.T) {
 func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -113,7 +114,7 @@ func TestPostSequencingExperimentBatchHandler_Success_NoRunDate(t *testing.T) {
 func TestPostSequencingExperimentBatchHandler_ValidationError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -154,7 +155,7 @@ func TestPostSequencingExperimentBatchHandler_ValidationError(t *testing.T) {
 func TestPostSequencingExperimentBatchHandler_RunDate_Empty(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -196,7 +197,7 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Empty(t *testing.T) {
 func TestPostSequencingExperimentBatchHandler_RunDate_Invalid(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,
@@ -238,7 +239,7 @@ func TestPostSequencingExperimentBatchHandler_RunDate_Invalid(t *testing.T) {
 func TestPostSequencingExperimentBatchHandler_EmptySequencingExperiments(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := &MockBatchRepository{
-		CreateBatchFunc: func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        uuid.NewString(),
 				BatchType: batchType,

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -9,23 +10,23 @@ import (
 )
 
 type facetsReader interface {
-	GetFacets(facetNames []string) ([]types.Facet, error)
+	GetFacets(ctx context.Context, facetNames []string) ([]types.Facet, error)
 }
 
 type exomiserClassificationCountsReader interface {
-	GetExomiserACMGClassificationCounts(locusId int) (map[string]int, error)
+	GetExomiserACMGClassificationCounts(ctx context.Context, locusId int) (map[string]int, error)
 }
 
 type germlineInterpretationCountsReader interface {
-	RetrieveGermlineInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error)
+	RetrieveGermlineInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error)
 }
 
 type germlineSNVOccurrencesReader interface {
-	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.GermlineSNVOccurrence, error)
-	CountOccurrences(caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error)
-	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
-	GetStatisticsOccurrences(caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error)
-	GetExpandedOccurrence(caseId int, seqId int, taskId int, locusId int) (*types.ExpandedGermlineSNVOccurrence, error)
+	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.GermlineSNVOccurrence, error)
+	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error)
+	AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
+	GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error)
+	GetExpandedOccurrence(ctx context.Context, caseId int, seqId int, taskId int, locusId int) (*types.ExpandedGermlineSNVOccurrence, error)
 }
 
 // OccurrencesGermlineSNVListHandler handles list of germline SNV occurrences
@@ -84,7 +85,7 @@ func OccurrencesGermlineSNVListHandler(repo germlineSNVOccurrencesReader) gin.Ha
 			return
 		}
 
-		occurrences, err := repo.GetOccurrences(caseID, seqID, taskID, query)
+		occurrences, err := repo.GetOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -148,7 +149,7 @@ func OccurrencesGermlineSNVCountHandler(repo germlineSNVOccurrencesReader) gin.H
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		count, err := repo.CountOccurrences(caseID, seqID, taskID, query)
+		count, err := repo.CountOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -215,7 +216,7 @@ func OccurrencesGermlineSNVAggregateHandler(repo germlineSNVOccurrencesReader, f
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		aggregation, err := repo.AggregateOccurrences(caseID, seqID, taskID, query)
+		aggregation, err := repo.AggregateOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -227,7 +228,7 @@ func OccurrencesGermlineSNVAggregateHandler(repo germlineSNVOccurrencesReader, f
 		}
 
 		if queryParam.WithDictionary {
-			facets, err := facetsRepo.GetFacets([]string{body.Field})
+			facets, err := facetsRepo.GetFacets(c.Request.Context(), []string{body.Field})
 			if err != nil {
 				HandleError(c, err)
 				return
@@ -313,7 +314,7 @@ func OccurrencesGermlineSNVStatisticsHandler(repo germlineSNVOccurrencesReader) 
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		statistics, err := repo.GetStatisticsOccurrences(caseID, seqID, taskID, query)
+		statistics, err := repo.GetStatisticsOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -363,7 +364,7 @@ func GetExpandedGermlineSNVOccurrence(repo germlineSNVOccurrencesReader, exomise
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		expandedOccurrence, err := repo.GetExpandedOccurrence(caseId, seqId, taskId, locusId)
+		expandedOccurrence, err := repo.GetExpandedOccurrence(c.Request.Context(), caseId, seqId, taskId, locusId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -373,7 +374,7 @@ func GetExpandedGermlineSNVOccurrence(repo germlineSNVOccurrencesReader, exomise
 			return
 		}
 
-		exomiserACMGClassificationCounts, err := exomiserRepo.GetExomiserACMGClassificationCounts(locusId)
+		exomiserACMGClassificationCounts, err := exomiserRepo.GetExomiserACMGClassificationCounts(c.Request.Context(), locusId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -383,7 +384,7 @@ func GetExpandedGermlineSNVOccurrence(repo germlineSNVOccurrencesReader, exomise
 			expandedOccurrence.ExomiserACMGClassificationCounts = exomiserACMGClassificationCounts
 		}
 
-		interpretationClassificationCounts, err := interpretationRepo.RetrieveGermlineInterpretationClassificationCounts(locusId)
+		interpretationClassificationCounts, err := interpretationRepo.RetrieveGermlineInterpretationClassificationCounts(c.Request.Context(), locusId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -422,7 +423,7 @@ func GetGermlineSNVDictionary(repo facetsReader) gin.HandlerFunc {
 			return
 		}
 
-		facets, err := repo.GetFacets(queryParam.Facets)
+		facets, err := repo.GetFacets(c.Request.Context(), queryParam.Facets)
 		if err != nil {
 			HandleNotFoundError(c, "facet")
 			return

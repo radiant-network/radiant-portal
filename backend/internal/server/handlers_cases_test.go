@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseResult, *int64, error) {
+func (m *MockRepository) SearchCases(ctx context.Context, userQuery types.ListQuery) (*[]types.CaseResult, *int64, error) {
 	var count = int64(1)
 	return &[]types.CaseResult{
 		{
@@ -46,7 +47,7 @@ func (m *MockRepository) SearchCases(userQuery types.ListQuery) (*[]types.CaseRe
 	}, &count, nil
 }
 
-func (m *MockRepository) SearchById(prefix string, limit int) (*[]types.AutocompleteResult, error) {
+func (m *MockRepository) SearchById(ctx context.Context, prefix string, limit int) (*[]types.AutocompleteResult, error) {
 	var result = []types.AutocompleteResult{
 		{Type: "case_id", Value: "1"},
 		{Type: "patient_id", Value: "10"},
@@ -55,7 +56,7 @@ func (m *MockRepository) SearchById(prefix string, limit int) (*[]types.Autocomp
 	return &result, nil
 }
 
-func (m *MockRepository) GetCasesFilters() (*types.CaseFilters, error) {
+func (m *MockRepository) GetCasesFilters(ctx context.Context) (*types.CaseFilters, error) {
 	var result = types.CaseFilters{
 		Status: []types.FiltersValue{
 			{Key: "draft", Label: "Draft"},
@@ -109,7 +110,7 @@ func (m *MockRepository) GetCasesFilters() (*types.CaseFilters, error) {
 	return &result, nil
 }
 
-func (m *MockRepository) GetCaseEntity(caseId int) (*types.CaseEntity, error) {
+func (m *MockRepository) GetCaseEntity(ctx context.Context, caseId int) (*types.CaseEntity, error) {
 	return &types.CaseEntity{
 		CaseID:              1,
 		AnalysisCatalogCode: "WGA",

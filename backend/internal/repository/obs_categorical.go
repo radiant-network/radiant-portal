@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -18,9 +19,9 @@ func NewObservationCategoricalRepository(db *gorm.DB) *ObservationCategoricalRep
 	return &ObservationCategoricalRepository{db: db}
 }
 
-func (r *ObservationCategoricalRepository) GetById(observationId int) (*ObservationCategorical, error) {
+func (r *ObservationCategoricalRepository) GetById(ctx context.Context, observationId int) (*ObservationCategorical, error) {
 	var obs ObservationCategorical
-	if err := r.db.Table(types.ObsCategoricalTable.Name).First(&obs, observationId).Error; err != nil {
+	if err := r.db.WithContext(ctx).Table(types.ObsCategoricalTable.Name).First(&obs, observationId).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching observation_categorical: %w", err)
 		} else {
@@ -30,6 +31,6 @@ func (r *ObservationCategoricalRepository) GetById(observationId int) (*Observat
 	return &obs, nil
 }
 
-func (r *ObservationCategoricalRepository) CreateObservationCategorical(observation *ObservationCategorical) error {
-	return r.db.Create(observation).Error
+func (r *ObservationCategoricalRepository) CreateObservationCategorical(ctx context.Context, observation *ObservationCategorical) error {
+	return r.db.WithContext(ctx).Create(observation).Error
 }

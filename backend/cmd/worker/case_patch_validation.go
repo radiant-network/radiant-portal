@@ -37,14 +37,14 @@ func (r *PatchCaseValidationRecord) path() string {
 	return fmt.Sprintf("%s[%d]", r.GetResourceType(), r.Index)
 }
 
-func validatePatchCaseRecord(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int) (*PatchCaseValidationRecord, error) {
+func validatePatchCaseRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int) (*PatchCaseValidationRecord, error) {
 	r := &PatchCaseValidationRecord{
 		BaseValidationRecord:  batchval.BaseValidationRecord{Cache: cache, Index: index},
 		Patch:                 patch,
 		SequencingExperiments: make(map[int]*types.SequencingExperiment),
 	}
 
-	project, err := cache.GetProjectByCode(patch.ProjectCode)
+	project, err := cache.GetProjectByCode(ctx, patch.ProjectCode)
 	if err != nil {
 		return nil, fmt.Errorf("get project by code %q: %w", patch.ProjectCode, err)
 	}
@@ -53,7 +53,7 @@ func validatePatchCaseRecord(ctx *batchval.BatchValidationContext, cache *batchv
 		return r, nil
 	}
 
-	c, err := cache.GetCaseBySubmitterCaseIdAndProjectId(patch.SubmitterCaseId, project.ID)
+	c, err := cache.GetCaseBySubmitterCaseIdAndProjectId(ctx, patch.SubmitterCaseId, project.ID)
 	if err != nil {
 		return nil, fmt.Errorf("get case by submitter_case_id %q and project_id %d: %w", patch.SubmitterCaseId, project.ID, err)
 	}
@@ -64,7 +64,7 @@ func validatePatchCaseRecord(ctx *batchval.BatchValidationContext, cache *batchv
 	r.CaseID = &c.ID
 
 	if patch.DiagnosticLabCode != "" {
-		lab, err := cache.GetOrganizationByCode(patch.DiagnosticLabCode)
+		lab, err := cache.GetOrganizationByCode(ctx, patch.DiagnosticLabCode)
 		if err != nil {
 			return nil, fmt.Errorf("get organization by code %q: %w", patch.DiagnosticLabCode, err)
 		}
@@ -83,7 +83,7 @@ func validatePatchCaseRecord(ctx *batchval.BatchValidationContext, cache *batchv
 		if se == nil {
 			continue // binding is omitempty,dive (no element-level required) — skip null entries
 		}
-		seqExp, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
+		seqExp, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
 		if err != nil {
 			return nil, fmt.Errorf("get sequencing experiment (%s / %s / %s): %w", se.SampleOrganizationCode, se.SubmitterSampleId, se.Aliquot, err)
 		}
@@ -99,7 +99,7 @@ func validatePatchCaseRecord(ctx *batchval.BatchValidationContext, cache *batchv
 	}
 
 	if len(patch.Tasks) > 0 {
-		if err := validatePatchTasks(ctx, cache, patch, index, r); err != nil {
+		if err := validatePatchTasks(ctx, bv, cache, patch, index, r); err != nil {
 			return nil, err
 		}
 	}
@@ -112,7 +112,7 @@ func validatePatchCaseRecord(ctx *batchval.BatchValidationContext, cache *batchv
 // (same package, same helpers) and merges its messages back onto the patch record so the
 // batch report is identical to the POST path. The synthetic record is stored on
 // r.Record for the persist phase. Tasks are only validated when the case exists.
-func validatePatchTasks(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int, r *PatchCaseValidationRecord) error {
+func validatePatchTasks(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patch types.CaseBatchPatch, index int, r *PatchCaseValidationRecord) error {
 	if r.CaseID == nil {
 		return nil // case missing — CASE-012 already raised; nothing to attach tasks to.
 	}
@@ -134,7 +134,7 @@ func validatePatchTasks(ctx *batchval.BatchValidationContext, cache *batchval.Ba
 		}
 	}
 
-	attached, err := ctx.SeqExpRepo.GetSequencingExperimentsByCaseId(*r.CaseID)
+	attached, err := bv.SeqExpRepo.GetSequencingExperimentsByCaseId(ctx, *r.CaseID)
 	if err != nil {
 		return fmt.Errorf("get sequencing experiments attached to case %d: %w", *r.CaseID, err)
 	}
@@ -154,18 +154,18 @@ func validatePatchTasks(ctx *batchval.BatchValidationContext, cache *batchval.Ba
 		SequencingExperiments: seqExps,
 		Tasks:                 tasks,
 	}
-	taskRecord := NewCaseValidationRecord(ctx, cache, taskCase, index)
+	taskRecord := NewCaseValidationRecord(bv, cache, taskCase, index)
 	taskRecord.CaseID = r.CaseID
 
-	if err := taskRecord.fetchTaskTypeCodes(); err != nil {
+	if err := taskRecord.fetchTaskTypeCodes(ctx); err != nil {
 		return fmt.Errorf("fetch task type codes: %w", err)
 	}
-	if err := taskRecord.fetchDocumentCodes(); err != nil {
+	if err := taskRecord.fetchDocumentCodes(ctx); err != nil {
 		return fmt.Errorf("fetch document codes: %w", err)
 	}
 	// Resolves sequencing experiments (by task aliquot), their existing task contexts, and
 	// input/output documents already known to Radiant — needed by the validators below.
-	if err := taskRecord.fetchFromTasks(); err != nil {
+	if err := taskRecord.fetchFromTasks(ctx); err != nil {
 		return fmt.Errorf("fetch from tasks: %w", err)
 	}
 	if err := taskRecord.validateTasks(); err != nil {
@@ -188,7 +188,7 @@ func validatePatchTasks(ctx *batchval.BatchValidationContext, cache *batchval.Ba
 func processPatchCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	var patches []types.CaseBatchPatch
 	if err := json.Unmarshal([]byte(batch.Payload), &patches); err != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling patch_case batch: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling patch_case batch: %v", err), bv.BatchRepo)
 		return nil
 	}
 
@@ -198,9 +198,9 @@ func processPatchCaseBatch(ctx context.Context, bv *batchval.BatchValidationCont
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		rec, err := validatePatchCaseRecord(bv, cache, p, i)
+		rec, err := validatePatchCaseRecord(ctx, bv, cache, p, i)
 		if err != nil {
-			batchval.ProcessUnexpectedError(batch, fmt.Errorf("error validating patch_case batch: %v", err), bv.BatchRepo)
+			batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error validating patch_case batch: %v", err), bv.BatchRepo)
 			return nil
 		}
 		records = append(records, rec)
@@ -212,7 +212,7 @@ func processPatchCaseBatch(ctx context.Context, bv *batchval.BatchValidationCont
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing patch_case batch records: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing patch_case batch records: %v", err), bv.BatchRepo)
 		return nil
 	}
 	return nil
@@ -221,7 +221,7 @@ func processPatchCaseBatch(ctx context.Context, bv *batchval.BatchValidationCont
 func persistBatchAndPatchCaseRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*PatchCaseValidationRecord) error {
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		batchRepo := repository.NewBatchRepository(tx)
-		rowsUpdated, err := batchval.UpdateBatch(batch, records, batchRepo)
+		rowsUpdated, err := batchval.UpdateBatch(ctx, batch, records, batchRepo)
 		if err != nil {
 			return err
 		}
@@ -240,20 +240,20 @@ func persistBatchAndPatchCaseRecords(ctx context.Context, db *gorm.DB, batch *ty
 				continue
 			}
 			if rec.DiagnosisLabCodeUpdate != "" {
-				if err := casesRepo.UpdateCaseDiagnosisLabCode(*rec.CaseID, rec.DiagnosisLabCodeUpdate); err != nil {
+				if err := casesRepo.UpdateCaseDiagnosisLabCode(ctx, *rec.CaseID, rec.DiagnosisLabCodeUpdate); err != nil {
 					return fmt.Errorf("failed to update diagnosis_lab_code on case %d: %w", *rec.CaseID, err)
 				}
 			}
 			for _, se := range rec.SequencingExperiments {
 				chse := types.CaseHasSequencingExperiment{CaseID: *rec.CaseID, SequencingExperimentID: se.ID}
-				if err := casesRepo.CreateCaseHasSequencingExperiment(&chse); err != nil {
+				if err := casesRepo.CreateCaseHasSequencingExperiment(ctx, &chse); err != nil {
 					return fmt.Errorf("failed to attach sequencing experiment %d to case %d: %w", se.ID, *rec.CaseID, err)
 				}
 			}
 			// Attach tasks + documents (task / task_context / document / task_has_document),
 			// reusing the POST persist logic via the synthetic record built at validation time.
 			if rec.Record != nil {
-				if err := persistTask(storageCtx, rec.Record); err != nil {
+				if err := persistTask(ctx, storageCtx, rec.Record); err != nil {
 					return fmt.Errorf("failed to persist tasks for patch case %d: %w", *rec.CaseID, err)
 				}
 			}

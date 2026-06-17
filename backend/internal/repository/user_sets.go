@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -15,9 +16,9 @@ func NewUserSetsRepository(db *gorm.DB) *UserSetsRepository {
 	return &UserSetsRepository{db: db}
 }
 
-func (r *UserSetsRepository) GetUserSet(userSetId string) (*types.UserSet, error) {
+func (r *UserSetsRepository) GetUserSet(ctx context.Context, userSetId string) (*types.UserSet, error) {
 	var dao types.UserSetDAO
-	if result := r.db.
+	if result := r.db.WithContext(ctx).
 		Table(types.UserSetTable.Name).
 		Preload("ParticipantIds").
 		Preload("FileIds").

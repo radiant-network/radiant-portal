@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"slices"
@@ -22,9 +23,9 @@ func NewAuthRepository(db *gorm.DB) *AuthRepository {
 // by the action's scope, not the grant's org_code (a role may map both scopes): a
 // tenant-scoped action matches any grant in the tenant regardless of orgCode; an
 // org-scoped action requires a grant at orgCode or the '*' wildcard.
-func (r *AuthRepository) HasAction(userID, tenantCode, orgCode, actionCode string) (bool, error) {
+func (r *AuthRepository) HasAction(ctx context.Context, userID, tenantCode, orgCode, actionCode string) (bool, error) {
 	var allowed bool
-	err := r.db.Raw(`
+	err := r.db.WithContext(ctx).Raw(`
 		SELECT EXISTS (
 			SELECT 1
 			FROM user_role ur
@@ -57,9 +58,9 @@ func (r *AuthRepository) TenantExists(tenantCode string) (bool, error) {
 // HasTenantAccess reports whether the user holds at least one role in the given tenant.
 // It backs the tenant-routing middleware: any grant (org-scoped or tenant-wide) makes the
 // caller a member of the tenant.
-func (r *AuthRepository) HasTenantAccess(userID, tenantCode string) (bool, error) {
+func (r *AuthRepository) HasTenantAccess(ctx context.Context, userID, tenantCode string) (bool, error) {
 	var allowed bool
-	err := r.db.Raw(`
+	err := r.db.WithContext(ctx).Raw(`
 		SELECT EXISTS (
 			SELECT 1 FROM user_role ur
 			WHERE ur.user_id = ? AND ur.tenant_code = ?
@@ -85,9 +86,9 @@ type membershipGrant struct {
 // Each action routes by its own scope (a role may map both): tenant-scoped → tenant_actions;
 // org-scoped → orgs_by_action, where a specific org_code maps to that org and '*' expands to
 // every org in the tenant (ADR §5.4).
-func (r *AuthRepository) GetMemberships(userID string) ([]types.TenantMembership, error) {
+func (r *AuthRepository) GetMemberships(ctx context.Context, userID string) ([]types.TenantMembership, error) {
 	var grants []membershipGrant
-	if err := r.db.Raw(`
+	if err := r.db.WithContext(ctx).Raw(`
 		SELECT ur.tenant_code, t.name AS tenant_name, ur.org_code, ra.action_code, a.scope, ra.role_code,
 		       o.org_codes AS tenant_org_codes
 		FROM user_role ur
@@ -175,8 +176,8 @@ func appendUnique(values []string, value string) []string {
 // name. user_id (the Keycloak sub) is the identity key; email is an optional
 // attribute. This is the write side used at provisioning time, paired with the
 // read side above. Idempotent.
-func (r *AuthRepository) UpsertUser(userID, email, firstName, lastName string) error {
-	err := r.db.Exec(`
+func (r *AuthRepository) UpsertUser(ctx context.Context, userID, email, firstName, lastName string) error {
+	err := r.db.WithContext(ctx).Exec(`
 		INSERT INTO public.users (user_id, email, first_name, last_name)
 		VALUES (?, ?, ?, ?)
 		ON CONFLICT (user_id) DO UPDATE
@@ -195,12 +196,12 @@ func (r *AuthRepository) UpsertUser(userID, email, firstName, lastName string) e
 // role must already exist (FK to public.role). grantedBy records audit attribution
 // for the grant (who performed it). Idempotent via ON CONFLICT DO NOTHING, which
 // catches either partial-unique index (NULL vs non-NULL org_code).
-func (r *AuthRepository) GrantRole(userID, tenantCode, orgCode, roleCode, grantedBy string) error {
+func (r *AuthRepository) GrantRole(ctx context.Context, userID, tenantCode, orgCode, roleCode, grantedBy string) error {
 	var org any
 	if orgCode != "" {
 		org = orgCode
 	}
-	err := r.db.Exec(`
+	err := r.db.WithContext(ctx).Exec(`
 		INSERT INTO public.user_role (user_id, tenant_code, org_code, role_code, granted_by)
 		VALUES (?, ?, ?, ?, ?)
 		ON CONFLICT DO NOTHING`,

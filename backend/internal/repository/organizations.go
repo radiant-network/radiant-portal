@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -16,9 +17,9 @@ func NewOrganizationRepository(db *gorm.DB) *OrganizationRepository {
 	return &OrganizationRepository{db: db}
 }
 
-func (r *OrganizationRepository) GetOrganizationByCode(organizationCode string) (*types.Organization, error) {
+func (r *OrganizationRepository) GetOrganizationByCode(ctx context.Context, organizationCode string) (*types.Organization, error) {
 	var organization types.Organization
-	tx := r.db.Table(types.OrganizationTable.Name).Where("code = ?", organizationCode)
+	tx := r.db.WithContext(ctx).Table(types.OrganizationTable.Name).Where("code = ?", organizationCode)
 	if err := tx.First(&organization).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieving organization by code: %w", err)

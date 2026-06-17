@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -18,9 +19,9 @@ func NewExomiserRepository(db *gorm.DB) *ExomiserRepository {
 	return &ExomiserRepository{db: db}
 }
 
-func (r *ExomiserRepository) GetExomiser(locusId int) ([]Exomiser, error) {
+func (r *ExomiserRepository) GetExomiser(ctx context.Context, locusId int) ([]Exomiser, error) {
 	var exomiser []Exomiser
-	tx := r.db.Table(types.ExomiserTable.Name)
+	tx := r.db.WithContext(ctx).Table(types.ExomiserTable.Name)
 	tx = tx.Select("part, seq_id, locus_id, id, locus_hash, moi, variant_score, gene_combined_score, variant_rank, rank, symbol, acmg_classification, acmg_evidence")
 	tx = tx.Where("locus_id = ?", locusId)
 
@@ -37,9 +38,9 @@ func (r *ExomiserRepository) GetExomiser(locusId int) ([]Exomiser, error) {
 	return exomiser, nil
 }
 
-func (r *ExomiserRepository) GetExomiserACMGClassificationCounts(locusId int) (map[string]int, error) {
+func (r *ExomiserRepository) GetExomiserACMGClassificationCounts(ctx context.Context, locusId int) (map[string]int, error) {
 	var exomiser []ExomiserACMGClassificationCounts
-	tx := r.db.Table(types.ExomiserTable.Name)
+	tx := r.db.WithContext(ctx).Table(types.ExomiserTable.Name)
 	tx = tx.Select("acmg_classification, COUNT(1) as acmg_classification_count")
 	tx = tx.Where("locus_id = ? and variant_rank=1", locusId)
 	tx = tx.Group("acmg_classification")

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -108,7 +109,7 @@ func NewFacetsRepository() *FacetsRepository {
 	}
 }
 
-func (r *FacetsRepository) GetFacets(facetNames []string) ([]Facet, error) {
+func (r *FacetsRepository) GetFacets(ctx context.Context, facetNames []string) ([]Facet, error) {
 	var facets []Facet
 
 	if len(facetNames) == 0 {

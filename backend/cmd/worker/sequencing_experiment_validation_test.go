@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -14,7 +15,7 @@ import (
 
 type mockOrgDAO struct{ mock.Mock }
 
-func (m *mockOrgDAO) GetOrganizationByCode(code string) (*types.Organization, error) {
+func (m *mockOrgDAO) GetOrganizationByCode(_ context.Context, code string) (*types.Organization, error) {
 	args := m.Called(code)
 	if org, ok := args.Get(0).(*types.Organization); ok {
 		return org, args.Error(1)
@@ -24,7 +25,7 @@ func (m *mockOrgDAO) GetOrganizationByCode(code string) (*types.Organization, er
 
 type mockSampleDAO struct{ mock.Mock }
 
-func (m *mockSampleDAO) CreateSample(*types.Sample) (*types.Sample, error) {
+func (m *mockSampleDAO) CreateSample(context.Context, *types.Sample) (*types.Sample, error) {
 	return nil, nil
 }
 
@@ -32,7 +33,7 @@ func (m *mockSampleDAO) GetTypeCodes() ([]string, error) {
 	return nil, nil
 }
 
-func (m *mockSampleDAO) GetSampleById(id int) (*types.Sample, error) {
+func (m *mockSampleDAO) GetSampleById(_ context.Context, id int) (*types.Sample, error) {
 	args := m.Called(id)
 	if s, ok := args.Get(0).(*types.Sample); ok {
 		return s, args.Error(1)
@@ -40,7 +41,7 @@ func (m *mockSampleDAO) GetSampleById(id int) (*types.Sample, error) {
 	return nil, args.Error(1)
 }
 
-func (m *mockSampleDAO) GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+func (m *mockSampleDAO) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, organizationCode string, submitterSampleId string) (*types.Sample, error) {
 	args := m.Called(organizationCode, submitterSampleId)
 	if s, ok := args.Get(0).(*types.Sample); ok {
 		return s, args.Error(1)
@@ -50,7 +51,7 @@ func (m *mockSampleDAO) GetSampleByOrgCodeAndSubmitterSampleId(organizationCode 
 
 type mockSeqExpDAO struct{ mock.Mock }
 
-func (m *mockSeqExpDAO) CreateSequencingExperiment(se *types.SequencingExperiment) error {
+func (m *mockSeqExpDAO) CreateSequencingExperiment(_ context.Context, se *types.SequencingExperiment) error {
 	return nil
 }
 
@@ -62,11 +63,11 @@ func (m *mockSeqExpDAO) GetSequencingExperimentBySampleID(sampleID int) ([]types
 	return nil, args.Error(1)
 }
 
-func (m *mockSeqExpDAO) GetSequencingExperimentsByCaseId(caseID int) ([]types.SequencingExperiment, error) {
+func (m *mockSeqExpDAO) GetSequencingExperimentsByCaseId(_ context.Context, caseID int) ([]types.SequencingExperiment, error) {
 	return nil, nil
 }
 
-func (m *mockSeqExpDAO) GetSequencingExperimentByAliquot(aliquot string) ([]types.SequencingExperiment, error) {
+func (m *mockSeqExpDAO) GetSequencingExperimentByAliquot(_ context.Context, aliquot string) ([]types.SequencingExperiment, error) {
 	args := m.Called(aliquot)
 	if se, ok := args.Get(0).([]types.SequencingExperiment); ok {
 		return se, args.Error(1)
@@ -74,7 +75,7 @@ func (m *mockSeqExpDAO) GetSequencingExperimentByAliquot(aliquot string) ([]type
 	return nil, args.Error(1)
 }
 
-func (m *mockSeqExpDAO) GetSequencingExperimentByAliquotAndSubmitterSample(string, string, string) (*types.SequencingExperiment, error) {
+func (m *mockSeqExpDAO) GetSequencingExperimentByAliquotAndSubmitterSample(context.Context, string, string, string) (*types.SequencingExperiment, error) {
 	return nil, nil
 }
 
@@ -84,7 +85,7 @@ func (m *mockSeqExpDAO) GetSequencingExperimentDetailById(seqId int) (*types.Seq
 
 type mockValueSetsDAO struct{ mock.Mock }
 
-func (m *mockValueSetsDAO) GetCodes(vsType repository.ValueSetType) ([]string, error) {
+func (m *mockValueSetsDAO) GetCodes(_ context.Context, vsType repository.ValueSetType) ([]string, error) {
 	switch vsType {
 	case repository.ValueSetExperimentalStrategy:
 		return []string{"wgs", "wxs", "rna_seq"}, nil
@@ -303,7 +304,7 @@ func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 	}
 	r.Cache = batchval.NewBatchValidationCache(r.Context)
 
-	err := r.validateExistingAliquotForSequencingLabCode()
+	err := r.validateExistingAliquotForSequencingLabCode(t.Context())
 	assert.NoError(t, err)
 	assert.Len(t, r.Infos, 1)
 	assert.Equal(t, "SEQ-001", r.Infos[0].Code)
@@ -378,7 +379,7 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 	}
 	r.Cache = batchval.NewBatchValidationCache(r.Context)
 
-	err := r.validateExistingAliquotForSequencingLabCode()
+	err := r.validateExistingAliquotForSequencingLabCode(t.Context())
 
 	assert.NoError(t, err)
 	assert.NotEmpty(t, r.Warnings)
@@ -449,7 +450,7 @@ func Test_ValidateSequencingExperimentRecord_Ok(t *testing.T) {
 	}
 	cache := batchval.NewBatchValidationCache(mockContext)
 
-	record, err := validateSequencingExperimentRecord(mockContext, cache, seq, 0)
+	record, err := validateSequencingExperimentRecord(t.Context(), mockContext, cache, seq, 0)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 0, record.Index)
@@ -544,7 +545,7 @@ func Test_PreFetchValidationInfo_SetsIDs(t *testing.T) {
 	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
 		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
 
-	err := r.preFetchValidationInfo()
+	err := r.preFetchValidationInfo(t.Context())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, r.SubmitterOrganizationCode)
@@ -588,7 +589,7 @@ func Test_PreFetchValidationInfo_NullOrg(t *testing.T) {
 		On("GetOrganizationByCode", "LAB1").
 		Return(&types.Organization{Code: "LAB1"}, nil)
 
-	err := r.preFetchValidationInfo()
+	err := r.preFetchValidationInfo(t.Context())
 
 	assert.NoError(t, err)
 	assert.Nil(t, r.SubmitterOrganizationCode)
@@ -631,7 +632,7 @@ func Test_PreFetchValidationInfo_NullSequencingLab(t *testing.T) {
 	sampleDAO.On("GetSampleByOrgCodeAndSubmitterSampleId", "ORG", "S1").
 		Return(&types.Sample{ID: 10, SubmitterSampleId: "S1"}, nil)
 
-	err := r.preFetchValidationInfo()
+	err := r.preFetchValidationInfo(t.Context())
 
 	assert.NoError(t, err)
 	assert.NotNil(t, r.SubmitterOrganizationCode)
@@ -673,7 +674,7 @@ func Test_PreFetchValidationInfo_SampleLookupError_Propagates(t *testing.T) {
 	}
 	r.Cache = batchval.NewBatchValidationCache(r.Context)
 
-	err := r.preFetchValidationInfo()
+	err := r.preFetchValidationInfo(t.Context())
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "error fetching sample: sample not found")
 }

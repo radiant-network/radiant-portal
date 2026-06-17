@@ -13,7 +13,7 @@ import (
 func Test_IGVInternal_GetIGV(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, starrocks *gorm.DB) {
 		repo := NewIGVRepository(starrocks)
-		igvInternal, err := repo.GetIGV(70)
+		igvInternal, err := repo.GetIGV(t.Context(), 70)
 		assert.NoError(t, err)
 		assert.Len(t, igvInternal, 6)
 		assert.Equal(t, IGVTrack{
