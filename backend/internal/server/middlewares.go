@@ -91,16 +91,21 @@ func RequestLogger() gin.HandlerFunc {
 // resolved tenant code for downstream handlers.
 const TenantContextKey = "tenant"
 
-// tenantAccessChecker reports whether a caller may access a tenant. RequireTenantAccess
-// needs only this slice of the auth repository.
+// tenantAccessChecker is the slice of the auth repository RequireTenantAccess needs: it
+// resolves whether a tenant exists and whether a caller may access it.
 type tenantAccessChecker interface {
+	TenantExists(tenantCode string) (bool, error)
 	HasTenantAccess(userID, tenantCode string) (bool, error)
 }
 
 // RequireTenantAccess gates tenant-scoped routes (`/:tenant/...`). It always reads the
-// `tenant` path param and stores the resolved tenant code in the request context. When
-// enforce is true it additionally verifies the caller holds at least one role in that
-// tenant, rejecting cross-tenant access with 403.
+// `tenant` path param, rejects an unknown tenant with 404, and stores the resolved tenant
+// code in the request context. When enforce is true it additionally verifies the caller
+// holds at least one role in that tenant, rejecting cross-tenant access with 403.
+//
+// The existence check runs regardless of enforce: the tenant comes from the URL path and is
+// foreign-key enforced on every write, so an unknown tenant is a client error (404) that must
+// not be allowed to reach a write and surface as an opaque 500 from an FK violation.
 //
 // enforce is wired from TENANT_ENFORCEMENT_ENABLED so the path-prefix routing can be
 // deployed before users are backfilled into user_role: with enforcement off, routing and
@@ -108,6 +113,18 @@ type tenantAccessChecker interface {
 func RequireTenantAccess(auth utils.Auth, repo tenantAccessChecker, enforce bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tenant := c.Param("tenant")
+
+		exists, err := repo.TenantExists(tenant)
+		if err != nil {
+			HandleError(c, err)
+			c.Abort()
+			return
+		}
+		if !exists {
+			HandleNotFoundError(c, "tenant")
+			c.Abort()
+			return
+		}
 
 		if enforce {
 			userID, err := auth.RetrieveUserIdFromToken(c)

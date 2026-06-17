@@ -561,7 +561,8 @@ VALUES (1, 'FI0037662.S13230.cram', 'genomic', 'alignment', 'cram', 110187385978
 ON CONFLICT(id) DO NOTHING;
 
 INSERT INTO tenant (code, name)
-VALUES ('radiant', 'Radiant')
+VALUES ('radiant', 'Radiant'),
+       ('QLIN', 'QLIN')
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO organization (code, name, category_code, tenant_code)
