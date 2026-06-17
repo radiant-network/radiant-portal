@@ -1054,9 +1054,9 @@ function DataTable<T>({
                 {footerGroups.map(footerGroup => (
                   <TableRow key={footerGroup.id}>
                     {footerGroup.headers.map(header => (
-                      <TableHead key={header.id}>
+                      <TableCell key={header.id}>
                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.footer, header.getContext())}
-                      </TableHead>
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))}
