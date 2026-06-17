@@ -12,6 +12,7 @@ import (
 
 	gomysql "github.com/go-sql-driver/mysql"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/radiant-network/radiant-api/internal/observability"
 )
 
 var (
@@ -76,7 +77,7 @@ func NewStarrocksDB() (*gorm.DB, error) {
 	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?interpolateParams=true&parseTime=true%s",
 		dbUserName, dbPassword, dbHost, dbPort, dbName, tlsParam)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: observability.NewGormLogger("starrocks")})
 	if err != nil {
 		return nil, err
 	}
