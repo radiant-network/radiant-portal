@@ -26,7 +26,7 @@ type mockAuthRepository struct {
 }
 
 // TenantExists defaults to reporting the tenant as present (zero-value tenantNotFound=false)
-// so existing tests need no change; set tenantNotFound to exercise the 404 path.
+// so existing tests need no change; set tenantNotFound to exercise the unknown-tenant 403 path.
 func (m *mockAuthRepository) TenantExists(tenantCode string) (bool, error) {
 	return !m.tenantNotFound, m.tenantExistsErr
 }

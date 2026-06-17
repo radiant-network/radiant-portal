@@ -82,10 +82,11 @@ func Test_RequireTenantAccess_RepoError_Returns500(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-// An unknown tenant in the URL path is a client error: 404, regardless of enforcement. This
-// guards against the bad tenant_code reaching a write and surfacing as an opaque 500 from a
-// foreign-key violation. Enforcement is off here to prove the check is independent of it.
-func Test_RequireTenantAccess_UnknownTenant_Returns404(t *testing.T) {
+// An unknown tenant in the URL path is rejected with the same generic 403 as a cross-tenant
+// denial, regardless of enforcement, so the response never discloses whether a tenant exists.
+// This also guards against the bad tenant_code reaching a write and surfacing as an opaque 500
+// from a foreign-key violation. Enforcement is off here to prove the check is independent of it.
+func Test_RequireTenantAccess_UnknownTenant_Returns403(t *testing.T) {
 	repo := &mockAuthRepository{tenantNotFound: true}
 	auth := &testutils.MockAuth{Id: mockUserID}
 	router := tenantTestRouter(repo, auth, false)
@@ -94,8 +95,7 @@ func Test_RequireTenantAccess_UnknownTenant_Returns404(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusNotFound, w.Code)
-	assert.JSONEq(t, `{"status":404,"message":"tenant not found"}`, w.Body.String())
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func Test_RequireTenantAccess_TenantLookupError_Returns500(t *testing.T) {

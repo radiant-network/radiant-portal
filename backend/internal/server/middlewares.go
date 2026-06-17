@@ -99,13 +99,15 @@ type tenantAccessChecker interface {
 }
 
 // RequireTenantAccess gates tenant-scoped routes (`/:tenant/...`). It always reads the
-// `tenant` path param, rejects an unknown tenant with 404, and stores the resolved tenant
+// `tenant` path param, rejects an unknown tenant with 403, and stores the resolved tenant
 // code in the request context. When enforce is true it additionally verifies the caller
 // holds at least one role in that tenant, rejecting cross-tenant access with 403.
 //
 // The existence check runs regardless of enforce: the tenant comes from the URL path and is
-// foreign-key enforced on every write, so an unknown tenant is a client error (404) that must
-// not be allowed to reach a write and surface as an opaque 500 from an FK violation.
+// foreign-key enforced on every write, so an unknown tenant must not be allowed to reach a
+// write and surface as an opaque 500 from an FK violation. It is rejected with the same
+// generic 403 as a cross-tenant denial so the response never discloses whether a tenant
+// exists (an authenticated caller cannot distinguish "unknown tenant" from "not a member").
 //
 // enforce is wired from TENANT_ENFORCEMENT_ENABLED so the path-prefix routing can be
 // deployed before users are backfilled into user_role: with enforcement off, routing and
@@ -121,7 +123,7 @@ func RequireTenantAccess(auth utils.Auth, repo tenantAccessChecker, enforce bool
 			return
 		}
 		if !exists {
-			HandleNotFoundError(c, "tenant")
+			HandleForbiddenError(c)
 			c.Abort()
 			return
 		}
