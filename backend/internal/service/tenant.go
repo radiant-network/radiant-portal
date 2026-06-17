@@ -13,12 +13,15 @@ type TenantStore interface {
 	SeedDefaultRoles(tenantCode string) error
 }
 
-type TenantLister interface {
-	ListTenants() ([]string, error)
-}
-
 type ViewColumnSource interface {
 	FederatableColumnsForViews() (map[string][]string, error)
+}
+
+// TenantReader is everything a full view refresh needs: list the tenants and read
+// their federatable columns. Both come from the same source, so refresh takes one.
+type TenantReader interface {
+	ViewColumnSource
+	ListTenants() ([]string, error)
 }
 
 type StarrocksTenantProvisioner interface {
@@ -81,15 +84,15 @@ func CreateTenant(ctx context.Context, deps TenantDeps, code, name string) error
 // the (tenant-independent) federatable column set are resolved once up front.
 // It returns the tenant codes it processed so the caller can report them without
 // listing again.
-func RefreshAllTenantViews(ctx context.Context, lister TenantLister, columns ViewColumnSource, sr StarrocksTenantProvisioner) ([]string, error) {
+func RefreshAllTenantViews(ctx context.Context, reader TenantReader, sr StarrocksTenantProvisioner) ([]string, error) {
 	if err := sr.EnsureAuthDatabase(ctx); err != nil {
 		return nil, fmt.Errorf("ensure auth database: %w", err)
 	}
-	cols, err := columns.FederatableColumnsForViews()
+	cols, err := reader.FederatableColumnsForViews()
 	if err != nil {
 		return nil, fmt.Errorf("federatable columns: %w", err)
 	}
-	codes, err := lister.ListTenants()
+	codes, err := reader.ListTenants()
 	if err != nil {
 		return nil, fmt.Errorf("list tenants: %w", err)
 	}

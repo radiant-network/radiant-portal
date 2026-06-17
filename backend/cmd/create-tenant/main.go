@@ -10,7 +10,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -29,10 +29,11 @@ func main() {
 	flag.Parse()
 
 	if *code == "" || *name == "" {
-		log.Fatal("create-tenant: -code and -name are required")
+		slog.Error("missing required flags: -code and -name")
+		os.Exit(1)
 	}
 	if err := repository.ValidateTenantCode(*code); err != nil {
-		log.Fatalf("create-tenant: %v", err)
+		fatal("invalid tenant code", err)
 	}
 
 	ctx := context.Background()
@@ -40,24 +41,33 @@ func main() {
 	if *dryRun {
 		pg, err := connectPostgres()
 		if err != nil {
-			log.Fatalf("create-tenant: %v", err)
+			fatal("connect postgres", err)
 		}
 		if err := printCreatePlan(os.Stdout, *code, *name, pg); err != nil {
-			log.Fatalf("create-tenant: %v", err)
+			fatal("print plan", err)
 		}
 		return
 	}
 
 	deps, err := buildDeps()
 	if err != nil {
-		log.Fatalf("create-tenant: %v", err)
+		fatal("build dependencies", err)
 	}
 	if err := service.CreateTenant(ctx, deps, *code, *name); err != nil {
-		log.Fatalf("create-tenant: create %q: %v", *code, err)
+		fatal("create tenant", err)
 	}
-	log.Printf("created tenant %q (%s): db=%s role=%s policy=%s, %d views",
-		*code, *name, types.TenantDatabase(*code), service.RangerTenantRole(*code), service.TenantAccessPolicy(*code),
-		len(repository.ViewTables))
+	slog.Info("created tenant",
+		slog.String("code", *code),
+		slog.String("name", *name),
+		slog.String("db", types.TenantDatabase(*code)),
+		slog.String("role", service.RangerTenantRole(*code)),
+		slog.String("policy", service.TenantAccessPolicy(*code)),
+		slog.Int("views", len(repository.ViewTables)))
+}
+
+func fatal(msg string, err error) {
+	slog.Error(msg, slog.Any("error", err))
+	os.Exit(1)
 }
 
 // fprintf writes a dry-run plan line, ignoring the write error: a failure printing

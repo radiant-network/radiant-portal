@@ -12,7 +12,8 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
+	"log/slog"
+	"os"
 
 	_ "github.com/joho/godotenv/autoload"
 
@@ -27,11 +28,11 @@ func main() {
 
 	pg, err := database.NewPostgresDB()
 	if err != nil {
-		log.Fatalf("refresh-views: connect postgres: %v", err)
+		fatal("connect postgres", err)
 	}
 	sr, err := database.NewStarrocksDB()
 	if err != nil {
-		log.Fatalf("refresh-views: connect starrocks: %v", err)
+		fatal("connect starrocks", err)
 	}
 	tenants := repository.NewTenantRepository(pg)
 	views := repository.NewStarrocksTenantRepository(sr)
@@ -43,26 +44,31 @@ func main() {
 		return
 	}
 
-	codes, err := service.RefreshAllTenantViews(ctx, tenants, tenants, views)
+	codes, err := service.RefreshAllTenantViews(ctx, tenants, views)
 	if err != nil {
-		log.Fatalf("refresh-views: %v", err)
+		fatal("refresh all views", err)
 	}
-	log.Printf("refreshed views for %d tenant(s): %v", len(codes), codes)
+	slog.Info("refreshed tenant views", slog.Int("tenants", len(codes)), slog.Any("codes", codes))
 }
 
 func refreshOne(ctx context.Context, tenants *repository.TenantRepository, views *repository.StarrocksTenantRepository, code string) {
 	if err := repository.ValidateTenantCode(code); err != nil {
-		log.Fatalf("refresh-views: %v", err)
+		fatal("invalid tenant code", err)
 	}
 	if err := views.EnsureAuthDatabase(ctx); err != nil {
-		log.Fatalf("refresh-views: ensure auth database: %v", err)
+		fatal("ensure auth database", err)
 	}
 	columns, err := tenants.FederatableColumnsForViews()
 	if err != nil {
-		log.Fatalf("refresh-views: federatable columns: %v", err)
+		fatal("federatable columns", err)
 	}
 	if err := views.EnsureClinicalViews(ctx, code, columns); err != nil {
-		log.Fatalf("refresh-views: %q: %v", code, err)
+		fatal("refresh views", err)
 	}
-	log.Printf("refreshed %d views for tenant %q", len(repository.ViewTables), code)
+	slog.Info("refreshed tenant views", slog.String("tenant", code), slog.Int("views", len(repository.ViewTables)))
+}
+
+func fatal(msg string, err error) {
+	slog.Error(msg, slog.Any("error", err))
+	os.Exit(1)
 }
