@@ -15,6 +15,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/radiant-network/radiant-api/internal/observability"
 )
 
 var (
@@ -36,7 +37,7 @@ func NewPostgresDB() (*gorm.DB, error) {
 	if dbPgSSLCert != "" {
 		dsn += fmt.Sprintf(" sslrootcert=%s", dbPgSSLCert)
 	}
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: observability.NewGormLogger("postgres")})
 	if err != nil {
 		return nil, err
 	}
