@@ -93,3 +93,93 @@ export const ageAtFirstEngamentIncludeData = [
   { age: '50-59', trisomy: 123, disomy: 7 },
   { age: '60+', trisomy: 19, disomy: 6 },
 ];
+
+export const studiesData = [
+  {
+    label: 'AADSC',
+    count: 6023,
+  },
+  {
+    label: 'DSC',
+    count: 3633,
+  },
+  {
+    label: 'HTP',
+    count: 1232,
+  },
+  {
+    label: 'X01-Hakonarson',
+    count: 1149,
+  },
+  {
+    label: 'X01-deSmith',
+    count: 436,
+  },
+  {
+    label: 'ABC-DS',
+    count: 417,
+  },
+  {
+    label: 'BRI-DSR',
+    count: 167,
+  },
+  {
+    label: 'DS-DETERMINED',
+    count: 123,
+  },
+  {
+    label: 'TEAM-DS',
+    count: 122,
+  },
+  {
+    label: 'BrainPower',
+    count: 82,
+  },
+  {
+    label: 'DS-Sleep',
+    count: 76,
+  },
+  {
+    label: 'AECOM-DS',
+    count: 25,
+  },
+  {
+    label: 'DS-HPBM',
+    count: 15,
+  },
+];
+
+export const sexData = [
+  { label: 'male', count: 6892 },
+  { label: 'female', count: 6598 },
+  { label: 'unknown', count: 7 },
+  { label: 'other', count: 3 },
+];
+
+export const ethnicityData = [
+  { label: 'Not Hispanic or Latino', count: 10386 },
+  { label: 'Hispanic or Latino', count: 1614 },
+  { label: 'Unknown', count: 825 },
+  { label: 'asked but unknown', count: 675 },
+];
+
+export const familyTypeData = [
+  { label: 'trio', count: 5754 },
+  { label: 'proband-only', count: 3130 },
+  { label: 'duo', count: 780 },
+  { label: 'trio+', count: 663 },
+  { label: 'duo+', count: 242 },
+  { label: 'other', count: 19 },
+  { label: '__missing__', count: 404 },
+];
+
+export const raceData = [
+  { label: 'White', count: 10743 },
+  { label: 'Black or African American', count: 1019 },
+  { label: 'Unknown', count: 581 },
+  { label: 'Other Race', count: 491 },
+  { label: 'Asian', count: 455 },
+  { label: 'American Indian or Alaska Native', count: 78 },
+  { label: 'Native Hawaiian or Other Pacific Islander', count: 68 },
+  { label: 'asked but unknown', count: 65 },
+];

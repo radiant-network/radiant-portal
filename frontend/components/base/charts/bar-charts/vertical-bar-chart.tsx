@@ -1,17 +1,18 @@
+import { useId } from 'react';
 import { BarChart as RechartBarChart, CartesianGrid } from 'recharts';
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../../shadcn/chart';
-
+import ChartAxis from '../axis/chart-axis';
+import { useBarChartConfig } from '../hooks/use-chart-config';
 import { useChartPalette } from '../hooks/use-chart-palette';
 import ChartPalette from '../palettes/chart-palette';
-import { BarChartProps } from '../type';
-import { useId } from 'react';
-import { useBarChartConfig } from '../hooks/use-chart-config';
-import ChartAxis from '../axis/chart-axis';
 import BarRectangle from '../shapes/bar-rectangle';
+import { BarChartProps } from '../type';
 
 /**
  * Vertical bar chart with a single series, one bar per category.
+ *
+ * Value (number) must always use "count" key
  *
  *     │ Lbl  ▓▒▓▒▓▒▓▒▓▒▓▒
  *     │ Lbl2 ▓▒▓▒▓▒▓▒

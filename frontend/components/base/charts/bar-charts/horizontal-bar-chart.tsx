@@ -2,16 +2,17 @@ import { useId } from 'react';
 import { BarChart as RechartBarChart, CartesianGrid } from 'recharts';
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../../shadcn/chart';
-import ChartPalette from '../palettes/chart-palette';
+import ChartAxis from '../axis/chart-axis';
 import { useBarChartConfig } from '../hooks/use-chart-config';
 import { useChartPalette } from '../hooks/use-chart-palette';
-import { BarChartProps } from '../type';
-
-import ChartAxis from '../axis/chart-axis';
+import ChartPalette from '../palettes/chart-palette';
 import BarRectangle from '../shapes/bar-rectangle';
+import { BarChartProps } from '../type';
 
 /**
  * Horizontal bar chart with a single series, one bar per category.
+ *
+ * Value (number) must always use "count" key
  *
  *     │  ▓▒
  *     │  ▓▒

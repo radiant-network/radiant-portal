@@ -1,17 +1,18 @@
+import { useId } from 'react';
 import { BarChart as RechartBarChart, CartesianGrid } from 'recharts';
 
-import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '../../shadcn/chart';
-
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip } from '../../shadcn/chart';
+import ChartAxis from '../axis/chart-axis';
+import { useGroupedBarChartConfig } from '../hooks/use-chart-config';
 import { colors, useChartPalette } from '../hooks/use-chart-palette';
 import ChartPalette from '../palettes/chart-palette';
-import { useId } from 'react';
-import { useGroupedBarChartConfig } from '../hooks/use-chart-config';
-import ChartAxis from '../axis/chart-axis';
-import { ChartTooltipPayload, GroupedBarChartProps } from '../type';
 import GroupedBarRectangle from '../shapes/grouped-bar-rectangle';
+import { ChartTooltipPayload, GroupedBarChartProps } from '../type';
 
 /**
  * Horizontal bar chart with grouped (side-by-side) series per category.
+ *
+ * "bars" is used to generate the dataKey
  *
  *     ■ test 1  ■ test 2
  *     │  ▓▒
