@@ -76,7 +76,7 @@ echo "🔧 Replacing %name% with '$app_name' in matching files..."
 find "$TARGET_DIR" -type f | while read -r file; do
   if grep -q '%name%' "$file"; then
     echo "✏️  Modified: $file"
-    sed -i "s/%name%/$app_name/g" "$file"
+    perl -i -pe "s/\Q%name%\E/$app_name/g" "$file"
   fi
 done
 

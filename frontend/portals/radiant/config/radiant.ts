@@ -738,6 +738,20 @@ export const radiantConfig = {
       },
     },
   },
+  study: {
+    app_id: ApplicationId.study,
+    aggregations: {
+      study: {
+        items: [
+          { key: 'program', translation_key: 'program', type: FilterTypes.MULTIPLE },
+          { key: 'domain', translation_key: 'domain', type: FilterTypes.MULTIPLE },
+          { key: 'data_category', translation_key: 'data_category', type: FilterTypes.MULTIPLE },
+          { key: 'experimental_strategy', translation_key: 'experimental_strategy', type: FilterTypes.MULTIPLE },
+          { key: 'family_data', translation_key: 'family_data', type: FilterTypes.BOOLEAN },
+        ],
+      },
+    },
+  },
   variant_entity: {
     app_id: ApplicationId.variant_entity,
   },
@@ -750,5 +764,15 @@ export const radiantConfig = {
       settings: true,
       logout: true,
     },
+  },
+  somatic_snv_tn_occurrence: {
+    app_id: ApplicationId.somatic_snv_tn_occurrence,
+    aggregations: {},
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_cnv_to_occurrence: {
+    app_id: ApplicationId.somatic_cnv_to_occurrence,
+    aggregations: {},
+    saved_filter_type: SavedFilterType.SOMATIC_CNV_OCCURRENCE,
   },
 } satisfies PortalConfig;

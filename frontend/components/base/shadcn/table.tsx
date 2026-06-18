@@ -81,7 +81,7 @@ function TableFooter({ className, ...props }: React.HTMLAttributes<HTMLTableSect
   return (
     <tfoot
       className={cn(
-        '[&_th]:border-t [&>tr:last-child>th]:border-b-0 [&>tr>th]:bg-table-accent [&>tr>th]:p-2 [&>tr>th]:font-normal [&>tr>th]:text-foreground',
+        '[&_td]:border-t [&>tr:last-child>td]:border-b-0 [&>tr>td]:bg-table-accent [&>tr>td]:p-2 [&>tr>td]:font-normal [&>tr>td]:text-foreground',
         className,
       )}
       {...props}

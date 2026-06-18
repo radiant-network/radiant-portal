@@ -50,6 +50,12 @@ const defaultFeatureDefinitions: FeatureDefinitions = {
     description: 'Change the position of the main navigation menu',
   },
   // Add more feature definitions here
+  study: {
+    type: 'link',
+    link: '/study',
+    label: 'Studies',
+    description: 'Access the new Studies page',
+  },
   onboarding: {
     type: 'boolean',
     defaultValue: false,

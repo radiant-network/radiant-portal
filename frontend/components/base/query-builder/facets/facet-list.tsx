@@ -15,13 +15,11 @@ import UploadIdModal from './upload-id-facet';
 interface FacetListProps {
   groupKey?: string | null;
   aggregations: AggregationConfig;
+  defaultExpanded?: boolean;
 }
 
-export function FacetList({ groupKey, aggregations }: FacetListProps) {
+export function FacetList({ groupKey, aggregations, defaultExpanded = false }: FacetListProps) {
   const { t } = useI18n();
-  const [toggleExpandAll, setToggleExpandAll] = useState<boolean>(false);
-  const [expandedFacets, setExpandedFacets] = useState<string[]>([]);
-  const [prevGroupKey, setPrevGroupKey] = useState<string | null | undefined>(groupKey);
 
   // If groupKey is provided, use that group's aggregations, otherwise get all aggregations from all groups
   const allFields = groupKey
@@ -33,10 +31,15 @@ export function FacetList({ groupKey, aggregations }: FacetListProps) {
   const uploadListFilters = allFields.filter(item => item.type === FilterTypes.UPLOAD_LIST);
   const fields = allFields.filter(item => item.type !== FilterTypes.SEARCH_BY && item.type !== FilterTypes.UPLOAD_LIST);
 
+  const [toggleExpandAll, setToggleExpandAll] = useState<boolean>(defaultExpanded);
+  const [expandedFacets, setExpandedFacets] = useState<string[]>(defaultExpanded ? fields.map(field => field.key) : []);
+  const [prevGroupKey, setPrevGroupKey] = useState<string | null | undefined>(groupKey);
+
   useEffect(() => {
-    setToggleExpandAll(false);
-    setExpandedFacets([]);
-  }, [groupKey]);
+    setToggleExpandAll(defaultExpanded);
+    setExpandedFacets(defaultExpanded ? fields.map(field => field.key) : []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupKey, defaultExpanded]);
 
   // Detect sidebar closure (groupKey → null) OR content change (groupKey1 → groupKey2)
   useEffect(() => {
@@ -45,14 +48,16 @@ export function FacetList({ groupKey, aggregations }: FacetListProps) {
 
   return (
     <div>
-      <div className="flex flex-col gap-3 mb-3">
-        {searchByFilters.map((search, index) => (
-          <SearchFacet key={`${search.key}-${index}`} search={search} />
-        ))}
-        {uploadListFilters.map((uploadList, index) => (
-          <UploadIdModal key={`${uploadList.key}-${index}`} variant={uploadList.key.replace(/upload_list_/g, '')} />
-        ))}
-      </div>
+      {(searchByFilters.length > 0 || uploadListFilters.length > 0) && (
+        <div className="flex flex-col gap-3 mb-3">
+          {searchByFilters.map((search, index) => (
+            <SearchFacet key={`${search.key}-${index}`} search={search} />
+          ))}
+          {uploadListFilters.map((uploadList, index) => (
+            <UploadIdModal key={`${uploadList.key}-${index}`} variant={uploadList.key.replace(/upload_list_/g, '')} />
+          ))}
+        </div>
+      )}
       <div className="flex justify-end">
         <Button
           data-cy="expand-collapse-button"

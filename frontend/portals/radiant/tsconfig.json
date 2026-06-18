@@ -21,6 +21,7 @@
       "variant/*": ["../../apps/variant/src/*"],
       "case/*": ["../../apps/case/src/*"],
       "file-archive/*": ["../../apps/file-archive/src/*"],
+      "study/*": ["../../apps/study/src/*"],
       "~/*": ["./app/*"],
       "react": ["./node_modules/@types/react"]
     },

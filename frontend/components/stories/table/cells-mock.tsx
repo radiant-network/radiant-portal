@@ -19,6 +19,7 @@ import AnalysisTypeCodeCell, {
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import BadgeListCell from '@/components/base/data-table/cells/badge-list-cell';
+import BooleanCell from '@/components/base/data-table/cells/boolean-cell';
 import ClassificationCell from '@/components/base/data-table/cells/classification-cell';
 import ConditionCell from '@/components/base/data-table/cells/condition-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
@@ -127,6 +128,7 @@ export type BaseCellMockData = {
   phenotype_condition_name?: string;
   text?: string;
   tooltips?: string;
+  boolean_value?: boolean;
   number_value?: number;
   number_list_value?: number[];
   clinvar?: string[];
@@ -173,6 +175,7 @@ export type BaseCellMockData = {
   length?: number;
   cnv_id?: string;
   seq_id?: string;
+  task_id?: number;
   transcript_id?: string;
   has_interpretation?: boolean;
 };
@@ -193,6 +196,7 @@ const baseCellColumnHelper = createColumnHelper<BaseCellMockData>();
  *   - TextTooltipCell
  *   - NumberCell
  *   - DateCell
+ *   - BooleanCell
  */
 export const firstSetCellColumns = [
   {
@@ -278,6 +282,11 @@ export const firstSetCellColumns = [
     cell: info => <DateCell date={info.getValue()} />,
     header: 'DateCell',
   }),
+  baseCellColumnHelper.accessor(row => row.boolean_value, {
+    id: 'boolean_value',
+    cell: info => <BooleanCell value={info.getValue() ?? false} />,
+    header: 'BooleanCell',
+  }),
 ];
 
 export const firstSetCellData = [
@@ -293,6 +302,7 @@ export const firstSetCellData = [
     text: 'no tooltips',
     tooltips: undefined,
     number_list_value: [10, 20, 30],
+    boolean_value: true,
   },
   {
     link: 'AnchorLinkCell 2',
@@ -320,6 +330,7 @@ export const firstSetCellData = [
     tooltips: 'This is a tooltips',
     number_value: 1,
     number_list_value: [100.123, 200.456],
+    boolean_value: true,
   },
   {
     link: 'AnchorLinkCell 4',
@@ -348,6 +359,7 @@ export const firstSetCellData = [
     tooltips: 'This is a tooltips',
     number_value: 0.5,
     number_list_value: [42.0, 84.5],
+    boolean_value: true,
   },
   {
     link: 'AnchorLinkCell 6',
@@ -863,6 +875,7 @@ export const applicationFirstSetCellColumns = [
         transcriptId={info.getValue().transcript_id}
         hasInterpretation={info.getValue().has_interpretation ?? false}
         patientId={info.getValue().patient_id}
+        taskId={info.getValue().task_id ?? 1}
         InterpretationDialog={GermlineInterpretationDialog}
       />
     ),
@@ -1005,6 +1018,7 @@ export const applicationCellData = [
     patient_id: 1,
     cnv_id: 'cnv-1',
     seq_id: 'seq-1',
+    task_id: 1,
     transcript_id: 'NM_000000.1',
     has_interpretation: true,
   },
@@ -1033,6 +1047,7 @@ export const applicationCellData = [
     patient_id: 2,
     cnv_id: 'cnv-2',
     seq_id: 'seq-2',
+    task_id: 2,
     transcript_id: 'NM_000000.1',
     has_interpretation: false,
   },
@@ -1061,6 +1076,7 @@ export const applicationCellData = [
     patient_id: 3,
     cnv_id: 'cnv-3',
     seq_id: 'seq-3',
+    task_id: 3,
   },
   {
     locus_id: '-7485572602358923261',
@@ -1087,6 +1103,7 @@ export const applicationCellData = [
     patient_id: 4,
     cnv_id: 'cnv-4',
     seq_id: 'seq-4',
+    task_id: 4,
   },
   {
     locus_id: '-7485572602358923261',
@@ -1113,6 +1130,7 @@ export const applicationCellData = [
     patient_id: 5,
     cnv_id: 'cnv-5',
     seq_id: 'seq-5',
+    task_id: 5,
   },
   {
     locus_id: '-7485572602358923261',
@@ -1139,6 +1157,7 @@ export const applicationCellData = [
     patient_id: 6,
     cnv_id: 'cnv-6',
     seq_id: 'seq-6',
+    task_id: 6,
   },
   {
     locus_id: '-7485572602358923261',

@@ -8,6 +8,7 @@ export default [
     route('case/', './routes/cases/list.tsx'),
     route('case/entity/:caseId', './routes/cases/entity.tsx'),
     route('file/', './routes/files/list.tsx'),
+    route('study/', './routes/studies/list.tsx'),
     route('admin/features', './routes/admin/beta-features.tsx'),
   ]),
   route('auth/callback', './routes/auth/callback.ts'),

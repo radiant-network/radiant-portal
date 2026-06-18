@@ -11,6 +11,7 @@ export enum ApplicationId {
   'somatic_snv_tn_occurrence' = 'somatic_snv_tn_occurrence',
   'somatic_cnv_to_occurrence' = 'somatic_cnv_to_occurrence',
   'variant_entity' = 'germline_snv_occurrence',
+  'study' = 'study',
 }
 
 export interface IFilterRangeTypes {
@@ -90,6 +91,11 @@ export interface AppsConfig extends BaseAppsConfig {
   saved_filter_type: SavedFilterType;
 }
 
+/** Listing page with facets but no saved filters (e.g. studies). */
+export interface AppsListConfig extends BaseAppsConfig {
+  aggregations: AggregationConfig;
+}
+
 export interface AppsAdminConfig extends BaseAppsConfig {
   admin_code: string;
 }
@@ -102,6 +108,7 @@ export interface PortalConfig {
   somatic_snv_to_occurrence: AppsConfig;
   somatic_snv_tn_occurrence: AppsConfig;
   somatic_cnv_to_occurrence: AppsConfig;
+  study?: AppsListConfig;
   portal: {
     name: string;
     navigation: {

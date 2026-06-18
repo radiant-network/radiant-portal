@@ -11,12 +11,14 @@ type FacetListContextProps = {
   appId: ApplicationId;
   builderFetcher: (params: IAggregationBuilder) => any;
   statisticFetcher: (params: IAggregationBuilder) => any;
+  searchAutoFocus?: boolean;
 };
 
 export const FacetConfigContext = createContext<FacetListContextProps>({
   appId: ApplicationId.germline_snv_occurrence,
   builderFetcher: _params => undefined,
   statisticFetcher: _params => undefined,
+  searchAutoFocus: true,
 });
 
 export function useFacetConfig(): FacetListContextProps {

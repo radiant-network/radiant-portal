@@ -96,7 +96,7 @@ function sortAggregates(qbValues: string[]) {
  */
 export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps) {
   const { t, sanitize, lazyTranslate } = useI18n();
-  const { appId, builderFetcher } = useFacetConfig();
+  const { appId, builderFetcher, searchAutoFocus = true } = useFacetConfig();
   const dispatch = useQBDispatch();
 
   const [isDictionaryEnabled, setIsDictionaryEnabled] = useState<boolean>(
@@ -280,7 +280,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
           className="w-full text-xs mt-3 py-1.5 px-3 mb-4 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           onChange={e => setSearchValue(e.target.value)}
           value={searchValue}
-          autoFocus
+          autoFocus={searchAutoFocus}
         />
 
         <div className="flex gap-2 items-center">

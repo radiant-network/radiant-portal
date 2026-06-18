@@ -13,13 +13,19 @@ import { useQBActiveQuery, useQBContext } from './hooks/use-query-builder';
 type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'> & {
   defaultPageSize?: number;
   swrId?: string | number;
+  paginationType?: 'server' | 'hidden';
 };
 
 /**
  * Wrapper for data-table
  * Used to access QBContext and create list and count query
  */
-function QueryBuilderDataTable<T>({ defaultPageSize = 10, swrId, ...props }: QueryBuilderDataTableProps<T>) {
+function QueryBuilderDataTable<T>({
+  defaultPageSize = 10,
+  swrId,
+  paginationType = 'server',
+  ...props
+}: QueryBuilderDataTableProps<T>) {
   const activeQuery = useQBActiveQuery();
   const { fetcher } = useQBContext();
 
@@ -92,7 +98,11 @@ function QueryBuilderDataTable<T>({ defaultPageSize = 10, swrId, ...props }: Que
               setAdditionalFields,
               onSortingChange: setSorting,
             }}
-            pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
+            pagination={
+              paginationType === 'hidden'
+                ? { type: 'hidden' }
+                : { state: pagination, type: 'server', onPaginationChange: setPagination }
+            }
             {...props}
           />
         </DataTableProvider>
