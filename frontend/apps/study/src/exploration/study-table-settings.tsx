@@ -60,32 +60,31 @@ export function getStudyColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.dbgap, {
       id: 'dbgap',
       header: t('study.table.headers.dbgap'),
-      // TODO(back): point href to the real dbGaP study URL.
-      cell: info => (info.getValue() ? <AnchorLinkCell href="#">{info.getValue()}</AnchorLinkCell> : <EmptyCell />),
+      cell: info =>
+        info.getValue() ? (
+          <AnchorLinkCell
+            href={`https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=${info.getValue()}`}
+          >
+            {info.getValue()}
+          </AnchorLinkCell>
+        ) : (
+          <EmptyCell />
+        ),
       size: 110,
     }),
     columnHelper.accessor(row => row.participant_count, {
       id: 'participant_count',
       header: t('study.table.headers.participant_count'),
-      // TODO(back): point href to the participants view.
-      cell: info =>
-        info.getValue() != null ? (
-          <AnchorLinkCell href="#">{thousandNumberFormat(info.getValue()!)}</AnchorLinkCell>
-        ) : (
-          <EmptyCell />
-        ),
+      // TODO add link to data explo participants tab
+      cell: info => (info.getValue() != null ? thousandNumberFormat(info.getValue()!) : <EmptyCell />),
       footer: sumFooter(t('study.table.headers.participant_count'), 'participant_count'),
       size: 120,
     }),
     columnHelper.accessor(row => row.biospecimen_count, {
       id: 'biospecimen_count',
       header: t('study.table.headers.biospecimen_count'),
-      cell: info =>
-        info.getValue() != null ? (
-          <AnchorLinkCell href="#">{thousandNumberFormat(info.getValue()!)}</AnchorLinkCell>
-        ) : (
-          <EmptyCell />
-        ),
+      // TODO add link to data explo biospecimen tab
+      cell: info => (info.getValue() != null ? thousandNumberFormat(info.getValue()!) : <EmptyCell />),
       footer: sumFooter(t('study.table.headers.biospecimen_count'), 'biospecimen_count'),
       size: 120,
     }),
@@ -99,15 +98,12 @@ export function getStudyColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor(row => row.file_count, {
       id: 'file_count',
       header: t('study.table.headers.file_count'),
-      cell: info =>
-        info.getValue() != null ? (
-          <AnchorLinkCell href="#">{thousandNumberFormat(info.getValue()!)}</AnchorLinkCell>
-        ) : (
-          <EmptyCell />
-        ),
+      // TODO add link to files
+      cell: info => (info.getValue() != null ? thousandNumberFormat(info.getValue()!) : <EmptyCell />),
       footer: sumFooter(t('study.table.headers.file_count'), 'file_count'),
       size: 110,
     }),
+    // Last columns will be determine with data category, only boolean for the moment
     columnHelper.accessor(row => row.data_categories.includes('Genomics'), {
       id: 'genomics',
       header: t('study.table.headers.genomics'),

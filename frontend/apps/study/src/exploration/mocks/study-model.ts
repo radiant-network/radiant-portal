@@ -12,7 +12,6 @@ export interface Study {
   biospecimen_count: number | null;
   family_count: number | null;
   file_count: number | null;
-  /** Drives the "Data Category" facet AND the Genomics/Transcriptomics/Imaging/Proteomics columns. */
   data_categories: string[];
   experimental_strategies: string[];
   family_data: boolean;

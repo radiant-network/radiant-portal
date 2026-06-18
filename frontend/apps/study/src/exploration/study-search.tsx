@@ -8,8 +8,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { STUDY_SEARCH_FIELD } from './mocks/study-fetcher-mock';
 
 /**
- * Free-text search (study code / name / dbGaP). Injects the term into the active sqon as a
- * `search_text` pill, so the table refetches like any facet change.
+ * Injects the term into the active sqon as a `search_text` pill
  * TODO(back): the real endpoint will expose a dedicated search_by criterion.
  */
 export default function StudySearch() {
