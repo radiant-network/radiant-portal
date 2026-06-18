@@ -15,11 +15,11 @@ import (
 // fakeKeycloak is a minimal stateful stand-in for the Keycloak admin REST API.
 type fakeKeycloak struct {
 	realm           string
-	usersByName     map[string]string // username -> id (the sub)
+	usersByEmail    map[string]string // email -> id (the sub)
 	nextID          string
 	tokenStatus     int  // override token endpoint status (0 => 200)
 	createStatus    int  // override create status (0 => 201)
-	duplicateSearch bool // return two rows for the searched username
+	duplicateSearch bool // return two rows for the searched email
 	created         int
 	updated         int
 	passwordSets    int
@@ -29,9 +29,9 @@ type fakeKeycloak struct {
 
 func newFakeKeycloak(realm string) *fakeKeycloak {
 	return &fakeKeycloak{
-		realm:       realm,
-		usersByName: map[string]string{},
-		nextID:      "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+		realm:        realm,
+		usersByEmail: map[string]string{},
+		nextID:       "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
 	}
 }
 
@@ -50,13 +50,13 @@ func (f *fakeKeycloak) server() *httptest.Server {
 	mux.HandleFunc(usersPath, func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
-			username := r.URL.Query().Get("username")
-			id, ok := f.usersByName[username]
+			email := r.URL.Query().Get("email")
+			id, ok := f.usersByEmail[email]
 			out := []map[string]string{}
 			if ok {
-				out = append(out, map[string]string{"id": id, "username": username})
+				out = append(out, map[string]string{"id": id, "email": email})
 				if f.duplicateSearch {
-					out = append(out, map[string]string{"id": id + "-dup", "username": username})
+					out = append(out, map[string]string{"id": id + "-dup", "email": email})
 				}
 			}
 			_ = json.NewEncoder(w).Encode(out)
@@ -67,7 +67,7 @@ func (f *fakeKeycloak) server() *httptest.Server {
 			}
 			var u map[string]any
 			_ = json.NewDecoder(r.Body).Decode(&u)
-			f.usersByName[u["username"].(string)] = f.nextID
+			f.usersByEmail[u["email"].(string)] = f.nextID
 			f.created++
 			w.WriteHeader(http.StatusCreated)
 		}
@@ -137,7 +137,7 @@ func Test_KeycloakAdminClient_UpsertUser_SkipsPasswordWhenEmpty(t *testing.T) {
 
 func Test_KeycloakAdminClient_UpsertUser_UpdatesExistingUser(t *testing.T) {
 	fake := newFakeKeycloak("CQDG")
-	fake.usersByName["alice"] = "existing-1111-2222-3333-444444444444"
+	fake.usersByEmail["alice@demo.org"] = "existing-1111-2222-3333-444444444444"
 	srv := fake.server()
 	defer srv.Close()
 
@@ -180,7 +180,7 @@ func Test_KeycloakAdminClient_UpsertUser_TokenFailureIsReported(t *testing.T) {
 
 func Test_KeycloakAdminClient_UpsertUser_AmbiguousSearchIsReported(t *testing.T) {
 	fake := newFakeKeycloak("CQDG")
-	fake.usersByName["alice"] = "existing-id"
+	fake.usersByEmail["alice@demo.org"] = "existing-id"
 	fake.duplicateSearch = true
 	srv := fake.server()
 	defer srv.Close()
