@@ -1,7 +1,19 @@
 import { useMemo } from 'react';
-import { ChartAxis } from '../type';
 
-export function useBarChartConfig(axis: ChartAxis) {
+import { ChartAxisProps } from '../type';
+
+export function usePieChartConfig(pies: string[]) {
+  return useMemo(() => {
+    const config: { [key: string]: {} } = {};
+    pies.forEach(pie => {
+      config[pie] = {};
+    });
+
+    return config;
+  }, [pies]);
+}
+
+export function useBarChartConfig(axis: ChartAxisProps) {
   return useMemo(
     () => ({
       [axis.x.dataKey]: {},
@@ -11,7 +23,7 @@ export function useBarChartConfig(axis: ChartAxis) {
   );
 }
 
-export function useGroupedBarChartConfig(axis: ChartAxis, bars: string[]) {
+export function useGroupedBarChartConfig(axis: ChartAxisProps, bars: string[]) {
   return useMemo(() => {
     const seriesConfig = bars.reduce<Record<string, { label: string }>>((acc, key) => {
       acc[key] = { label: key };

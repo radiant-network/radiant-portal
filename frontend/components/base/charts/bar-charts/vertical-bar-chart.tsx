@@ -1,40 +1,43 @@
+import { useId } from 'react';
 import { BarChart as RechartBarChart, CartesianGrid } from 'recharts';
 
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../../shadcn/chart';
-
+import ChartAxis from '../axis/chart-axis';
+import { useBarChartConfig } from '../hooks/use-chart-config';
 import { useChartPalette } from '../hooks/use-chart-palette';
 import ChartPalette from '../palettes/chart-palette';
-import { BarChartProps } from '../type';
-import { useId } from 'react';
-import { useBarChartConfig } from '../hooks/use-chart-config';
-import ChartAxis from '../axis/chart-axis';
 import BarRectangle from '../shapes/bar-rectangle';
+import { BarChartProps } from '../type';
 
 /**
  * Vertical bar chart with a single series, one bar per category.
  *
- *     │ Lbl  ▓▒▓▒▓▒▓▒▓▒▓▒
- *     │ Lbl2 ▓▒▓▒▓▒▓▒
- *     │ Lbl3 ▓▒▓▒▓▒▓▒▓▒
- *     │ Lbl4 ▓▒▓▒
- *     │ Lbl5 ▓▒▓▒▓▒
+ * Value (number) must always use "count" key
+ *
+ *     │  ▓▒
+ *     │  ▓▒
+ *     │  ▓▒          ▓▒
+ *     │  ▓▒    ▓▒    ▓▒
+ *     │  ▓▒ ▓▒ ▓▒ ▓▒ ▓▒ ▓▒
  *     └─────────────────────
+ *        Lbl   Lbl2  Lbl3
+ *
  */
-function VerticalBarChart<T extends object>({ axis, data, colorblindMode = true, onClick, tooltip }: BarChartProps<T>) {
+function VerticalBarChart<T extends object>({ axis, colorblindMode = true, data, onClick, tooltip }: BarChartProps<T>) {
   const id = useId();
   const chartData = useChartPalette(data);
   const chartConfig = useBarChartConfig(axis);
 
   return (
     <ChartContainer config={chartConfig}>
-      <RechartBarChart accessibilityLayer data={chartData} layout="vertical" margin={{ bottom: 12, left: 6 }}>
+      <RechartBarChart accessibilityLayer data={chartData} layout="horizontal" margin={{ bottom: 12, left: 6 }}>
         <ChartPalette id={id} data={chartData} colorblindMode={colorblindMode} />
 
         <CartesianGrid />
 
-        <ChartAxis axis={axis} layout="vertical" />
+        <ChartAxis axis={axis} layout="horizontal" />
 
-        <BarRectangle dataKey="count" id={id} layout="vertical" onClick={onClick} />
+        <BarRectangle dataKey="count" id={id} layout="horizontal" onClick={onClick} />
 
         <ChartTooltip
           isAnimationActive={false}

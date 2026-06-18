@@ -21,6 +21,15 @@ export type BarRectangleProps = {
   onClick?: (data: any) => void;
 };
 
+export type PieSliceProps = {
+  id: string;
+  data: ReadonlyArray<object>;
+  dataKey: string;
+  nameKey: string;
+  outerRadius?: number | string;
+  onClick?: (data: any) => void;
+};
+
 export type GroupedBarRectangleProps = BarRectangleProps & {
   patternIndex: number;
   color: string;
@@ -43,4 +52,16 @@ export type BarChartProps<T extends object> = {
 
 export type GroupedBarChartProps<T extends object> = BarChartProps<T> & {
   bars: string[];
+};
+
+export type PieChartProps<T extends object> = {
+  data: ReadonlyArray<T>;
+  pies: string[];
+  dataKey?: string;
+  nameKey?: string;
+  title?: string;
+  legend?: boolean;
+  colorblindMode?: boolean;
+  onClick?: (data: any) => void;
+  tooltip: (payload: ChartTooltipPayload) => ReactNode;
 };
