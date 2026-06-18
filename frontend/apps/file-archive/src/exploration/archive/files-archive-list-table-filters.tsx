@@ -107,7 +107,7 @@ function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
       filterSearch={{
         minSearchLength: 1,
         placeholder: t('file_entity.search_by_id_placeholder'),
-        api: (prefix: string) => documentApi.autocompleteDocuments(prefix, '10'),
+        api: (prefix: string) => documentApi.autocompleteDocuments(DEFAULT_TENANT, prefix, '10'),
       }}
       filterButtons={filterButtons}
       changedFilterButtons={changedFilterButtons}
