@@ -28,10 +28,11 @@ import { ChartTooltipPayload, GroupedBarChartProps } from '../type';
  * render the custom tooltip.
  *
  */
-function GroupedHorizontalBarChart<T extends object>({
+function GroupedVerticalBarChart<T extends object>({
   axis,
   bars,
   colorblindMode = true,
+  onClick,
   tooltip,
   data,
 }: GroupedBarChartProps<T>) {
@@ -55,6 +56,7 @@ function GroupedHorizontalBarChart<T extends object>({
             id={id}
             layout="horizontal"
             patternIndex={i}
+            onClick={onClick}
             color={`var(--color-${colors[i % colors.length]}-400)`}
           />
         ))}
@@ -75,4 +77,4 @@ function GroupedHorizontalBarChart<T extends object>({
     </ChartContainer>
   );
 }
-export default GroupedHorizontalBarChart;
+export default GroupedVerticalBarChart;

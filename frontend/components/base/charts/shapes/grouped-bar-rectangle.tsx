@@ -1,4 +1,5 @@
 import { Bar, LabelList, Rectangle } from 'recharts';
+
 import { GroupedBarRectangleProps } from '../type';
 
 /**
@@ -16,12 +17,19 @@ import { GroupedBarRectangleProps } from '../type';
  *      ▓▒ ▒░ ▓▒ ▒░ ▒░ ▓▒
  *      ──    ──    ──
  */
-function GroupedBarRectangle({ id, dataKey, layout, patternIndex, color }: GroupedBarRectangleProps) {
+function GroupedBarRectangle({ id, dataKey, layout, patternIndex, color, onClick }: GroupedBarRectangleProps) {
   return (
     <Bar
       dataKey={dataKey}
       fill={color}
-      shape={(props: any) => <Rectangle {...props} fill={`url(#${id}-bar-pattern-${patternIndex})`} />}
+      onClick={onClick}
+      shape={(props: any) => (
+        <Rectangle
+          {...props}
+          fill={`url(#${id}-bar-pattern-${patternIndex})`}
+          style={onClick ? { cursor: 'pointer' } : undefined}
+        />
+      )}
       radius={2}
     >
       {
@@ -30,6 +38,7 @@ function GroupedBarRectangle({ id, dataKey, layout, patternIndex, color }: Group
           className="fill-foreground"
           fontSize={12}
           position={layout == 'horizontal' ? 'top' : 'middle'}
+          style={onClick ? { cursor: 'pointer' } : undefined}
         />
       }
     </Bar>
