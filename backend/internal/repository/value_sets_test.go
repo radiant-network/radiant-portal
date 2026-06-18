@@ -13,7 +13,7 @@ func Test_GetCodes(t *testing.T) {
 		repo := NewValueSetsRepository(db)
 
 		for vsType, tableName := range repo.tableMap {
-			result, err := repo.GetCodes(vsType)
+			result, err := repo.GetCodes(t.Context(), vsType)
 			assert.NoError(t, err)
 			assert.NotNil(t, result)
 			assert.Greater(t, len(result), 0, "ValueSetType: %s, TableName: %s", vsType, tableName)

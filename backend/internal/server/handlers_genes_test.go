@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetGeneAutoComplete(string, int) (*[]types.AutoCompleteGene, error) {
+func (m *MockRepository) GetGeneAutoComplete(context.Context, string, int) (*[]types.AutoCompleteGene, error) {
 	return &[]types.AutoCompleteGene{
 			{Source: types.Term{
 				ID:   "ENSG00000000938",
@@ -24,7 +25,7 @@ func (m *MockRepository) GetGeneAutoComplete(string, int) (*[]types.AutoComplete
 		nil
 }
 
-func (m *MockRepository) SearchGenes([]string) (*[]types.GeneResult, error) {
+func (m *MockRepository) SearchGenes(context.Context, []string) (*[]types.GeneResult, error) {
 	return &[]types.GeneResult{
 		{Name: "BRAF", GeneID: "ENSG00000157764"},
 		{Name: "ENSA", GeneID: "ENSG00000143420"},

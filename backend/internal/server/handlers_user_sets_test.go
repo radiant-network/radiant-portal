@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -14,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetUserSet(userSetId string) (*types.UserSet, error) {
+func (m *MockRepository) GetUserSet(ctx context.Context, userSetId string) (*types.UserSet, error) {
 	if userSetId == "set1" {
 		return &types.UserSet{
 			ID:     userSetId,

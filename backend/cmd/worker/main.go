@@ -87,7 +87,7 @@ func runPollLoop(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidationC
 }
 
 func processBatch(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidationContext) {
-	nextBatch, err := bv.BatchRepo.ClaimNextBatch()
+	nextBatch, err := bv.BatchRepo.ClaimNextBatch(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "error claiming next batch", slog.Any("error", err))
 		return
@@ -100,7 +100,7 @@ func processBatch(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidation
 	processFn, ok := supportedProcessors[nextBatch.BatchType]
 	if !ok {
 		err = fmt.Errorf("batch type %v not supported", nextBatch.BatchType)
-		batchval.ProcessUnexpectedError(nextBatch, err, bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, nextBatch, err, bv.BatchRepo)
 		return
 	}
 
@@ -108,7 +108,7 @@ func processBatch(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidation
 	// release the claim back to PENDING so the batch is reprocessed cleanly instead of left RUNNING.
 	if procErr := processFn(ctx, bv, nextBatch, db); errors.Is(procErr, context.Canceled) {
 		slog.InfoContext(ctx, "shutdown during batch; releasing back to PENDING", slog.String("batch_id", nextBatch.ID))
-		if _, relErr := bv.BatchRepo.ReleaseBatch(nextBatch.ID); relErr != nil {
+		if _, relErr := bv.BatchRepo.ReleaseBatch(ctx, nextBatch.ID); relErr != nil {
 			slog.ErrorContext(ctx, "failed to release batch", slog.String("batch_id", nextBatch.ID), slog.Any("error", relErr))
 		}
 	}
@@ -189,7 +189,7 @@ func StartCleanUpWorker(ctx context.Context, wg *sync.WaitGroup, db *gorm.DB) {
 			case <-ticker.C:
 				slog.Info("clean-up worker started")
 				batchRepo := repository.NewBatchRepository(db)
-				rowUpdated, err := batchRepo.UpdateStuckBatch()
+				rowUpdated, err := batchRepo.UpdateStuckBatch(ctx)
 				if err != nil {
 					slog.Error("error executing batch clean up", slog.Any("error", err))
 					continue

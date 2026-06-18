@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -36,11 +37,11 @@ func (m *MockExternalClient) GetCitationById(id string) (*types.PubmedCitation, 
 
 type MockTermsRepository struct{}
 
-func (m *MockTermsRepository) GetTermAutoComplete(termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error) {
+func (m *MockTermsRepository) GetTermAutoComplete(ctx context.Context, termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error) {
 	return nil, nil
 }
 
-func (m *MockTermsRepository) GetTermNameById(termsTable string, id string) (*string, error) {
+func (m *MockTermsRepository) GetTermNameById(ctx context.Context, termsTable string, id string) (*string, error) {
 	terms := map[string]string{
 		"MONDO:0000032": "some tumoral condition",
 	}

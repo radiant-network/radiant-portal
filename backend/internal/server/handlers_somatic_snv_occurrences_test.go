@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,11 +15,11 @@ import (
 
 type MockSomaticSNVOccurrencesRepository struct{}
 
-func (m *MockSomaticSNVOccurrencesRepository) CountOccurrences(caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
+func (m *MockSomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error) {
 	return 1111, nil
 }
 
-func (m *MockSomaticSNVOccurrencesRepository) AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]repository.Aggregation, error) {
+func (m *MockSomaticSNVOccurrencesRepository) AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]repository.Aggregation, error) {
 	return []types.Aggregation{
 			{Bucket: "insertion", Count: 479564},
 			{Bucket: "deletion", Count: 495942},
@@ -26,7 +27,7 @@ func (m *MockSomaticSNVOccurrencesRepository) AggregateOccurrences(caseId int, s
 		nil
 }
 
-func (m *MockSomaticSNVOccurrencesRepository) GetStatisticsOccurrences(caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*repository.Statistics, error) {
+func (m *MockSomaticSNVOccurrencesRepository) GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*repository.Statistics, error) {
 	return &types.Statistics{
 			Min:  0,
 			Max:  100,
@@ -35,7 +36,7 @@ func (m *MockSomaticSNVOccurrencesRepository) GetStatisticsOccurrences(caseId in
 		nil
 }
 
-func (m *MockSomaticSNVOccurrencesRepository) GetExpandedOccurrence(int, int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
+func (m *MockSomaticSNVOccurrencesRepository) GetExpandedOccurrence(context.Context, int, int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
 	return &types.ExpandedSomaticSNVOccurrence{
 		LocusId:    "1000",
 		Locus:      "locus1",
@@ -45,7 +46,7 @@ func (m *MockSomaticSNVOccurrencesRepository) GetExpandedOccurrence(int, int, in
 	}, nil
 }
 
-func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(int, int, int, types.ListQuery) ([]types.SomaticSNVOccurrence, error) {
+func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(context.Context, int, int, int, types.ListQuery) ([]types.SomaticSNVOccurrence, error) {
 	somaticPfTn := 0.55
 	somaticPcTn := 6
 	germlinePf := 0.99
@@ -198,7 +199,7 @@ type MockNotFoundSomaticSNVOccurrencesRepository struct {
 	MockSomaticSNVOccurrencesRepository
 }
 
-func (m *MockNotFoundSomaticSNVOccurrencesRepository) GetExpandedOccurrence(int, int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
+func (m *MockNotFoundSomaticSNVOccurrencesRepository) GetExpandedOccurrence(context.Context, int, int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
 	return nil, nil
 }
 
@@ -206,7 +207,7 @@ type MockEmptyInterpretationsRepository struct {
 	MockRepository
 }
 
-func (m *MockEmptyInterpretationsRepository) RetrieveSomaticInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error) {
+func (m *MockEmptyInterpretationsRepository) RetrieveSomaticInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error) {
 	return nil, nil
 }
 

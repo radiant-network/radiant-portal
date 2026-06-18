@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -20,29 +21,29 @@ func NewTaskRepository(db *gorm.DB) *TaskRepository {
 	return &TaskRepository{db: db}
 }
 
-func (r *TaskRepository) CreateTask(task *Task) error {
-	return r.db.Create(task).Error
+func (r *TaskRepository) CreateTask(ctx context.Context, task *Task) error {
+	return r.db.WithContext(ctx).Create(task).Error
 }
 
-func (r *TaskRepository) CreateTaskContext(tc *TaskContext) error {
-	return r.db.Create(tc).Error
+func (r *TaskRepository) CreateTaskContext(ctx context.Context, tc *TaskContext) error {
+	return r.db.WithContext(ctx).Create(tc).Error
 }
 
-func (r *TaskRepository) CreateTaskHasDocument(thd *TaskHasDocument) error {
-	return r.db.Create(thd).Error
+func (r *TaskRepository) CreateTaskHasDocument(ctx context.Context, thd *TaskHasDocument) error {
+	return r.db.WithContext(ctx).Create(thd).Error
 }
 
-func (r *TaskRepository) GetTaskTypeCodes() ([]types.TaskType, error) {
+func (r *TaskRepository) GetTaskTypeCodes(ctx context.Context) ([]types.TaskType, error) {
 	var taskTypeCodes []types.TaskType
-	if err := r.db.Table(types.TaskTypeTable.Name).Find(&taskTypeCodes).Error; err != nil {
+	if err := r.db.WithContext(ctx).Table(types.TaskTypeTable.Name).Find(&taskTypeCodes).Error; err != nil {
 		return nil, fmt.Errorf("error while fetching task type codes: %w", err)
 	}
 	return taskTypeCodes, nil
 }
 
-func (r *TaskRepository) GetTaskById(taskId int) (*Task, error) {
+func (r *TaskRepository) GetTaskById(ctx context.Context, taskId int) (*Task, error) {
 	var task Task
-	if err := r.db.Table(types.TaskTable.Name).First(&task, taskId).Error; err != nil {
+	if err := r.db.WithContext(ctx).Table(types.TaskTable.Name).First(&task, taskId).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching task: %w", err)
 		} else {
@@ -52,9 +53,9 @@ func (r *TaskRepository) GetTaskById(taskId int) (*Task, error) {
 	return &task, nil
 }
 
-func (r *TaskRepository) GetTaskContextByTaskId(taskId int) ([]*TaskContext, error) {
+func (r *TaskRepository) GetTaskContextByTaskId(ctx context.Context, taskId int) ([]*TaskContext, error) {
 	var tc []*TaskContext
-	if err := r.db.Table(types.TaskContextTable.Name).Where("task_id = ?", taskId).Find(&tc).Error; err != nil {
+	if err := r.db.WithContext(ctx).Table(types.TaskContextTable.Name).Where("task_id = ?", taskId).Find(&tc).Error; err != nil {
 		return nil, err
 	}
 	if len(tc) == 0 {
@@ -63,9 +64,9 @@ func (r *TaskRepository) GetTaskContextByTaskId(taskId int) ([]*TaskContext, err
 	return tc, nil
 }
 
-func (r *TaskRepository) GetTaskHasDocumentByTaskId(taskId int) ([]*TaskHasDocument, error) {
+func (r *TaskRepository) GetTaskHasDocumentByTaskId(ctx context.Context, taskId int) ([]*TaskHasDocument, error) {
 	var thd []*TaskHasDocument
-	if err := r.db.Table(types.TaskHasDocumentTable.Name).Where("task_id = ?", taskId).Find(&thd).Error; err != nil {
+	if err := r.db.WithContext(ctx).Table(types.TaskHasDocumentTable.Name).Where("task_id = ?", taskId).Find(&thd).Error; err != nil {
 		return nil, err
 	}
 	if len(thd) == 0 {
@@ -74,9 +75,9 @@ func (r *TaskRepository) GetTaskHasDocumentByTaskId(taskId int) ([]*TaskHasDocum
 	return thd, nil
 }
 
-func (r *TaskRepository) GetTaskContextBySequencingExperimentId(seqExpId int) ([]*TaskContext, error) {
+func (r *TaskRepository) GetTaskContextBySequencingExperimentId(ctx context.Context, seqExpId int) ([]*TaskContext, error) {
 	var tc []*TaskContext
-	if err := r.db.Table(types.TaskContextTable.Name).Where("sequencing_experiment_id = ?", seqExpId).Find(&tc).Error; err != nil {
+	if err := r.db.WithContext(ctx).Table(types.TaskContextTable.Name).Where("sequencing_experiment_id = ?", seqExpId).Find(&tc).Error; err != nil {
 		return nil, err
 	}
 	if len(tc) == 0 {
@@ -85,9 +86,9 @@ func (r *TaskRepository) GetTaskContextBySequencingExperimentId(seqExpId int) ([
 	return tc, nil
 }
 
-func (r *TaskRepository) GetTaskHasDocumentByDocumentId(documentId int) ([]*TaskHasDocument, error) {
+func (r *TaskRepository) GetTaskHasDocumentByDocumentId(ctx context.Context, documentId int) ([]*TaskHasDocument, error) {
 	var thd []*TaskHasDocument
-	if err := r.db.Table(types.TaskHasDocumentTable.Name).Where("document_id = ?", documentId).Find(&thd).Error; err != nil {
+	if err := r.db.WithContext(ctx).Table(types.TaskHasDocumentTable.Name).Where("document_id = ?", documentId).Find(&thd).Error; err != nil {
 		return nil, err
 	}
 	if len(thd) == 0 {
@@ -117,9 +118,9 @@ func joinTaskWithTaskType(tx *gorm.DB) *gorm.DB {
 // alignment_germline_variant_calling) are modeled in the ETL: they belong to
 // the sequencing experiment itself and are shared across every case that
 // reuses that sequencing.
-func (r *TaskRepository) ListTasksByCaseSeqAndTaskType(caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error) {
+func (r *TaskRepository) ListTasksByCaseSeqAndTaskType(ctx context.Context, caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error) {
 	var tasks []types.TaskOccurrenceType
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.TaskContextTable.Name, types.TaskContextTable.Alias))
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.TaskContextTable.Name, types.TaskContextTable.Alias))
 	tx = joinTaskContextWithTask(tx)
 	tx = joinTaskWithTaskType(tx)
 	tx = tx.Select("id, task_type_code, name_en AS task_type_name, pipeline_name, pipeline_version, genome_build, created_on")

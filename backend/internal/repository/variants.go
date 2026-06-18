@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sort"
@@ -30,8 +31,8 @@ func NewVariantsRepository(db *gorm.DB) *VariantsRepository {
 	return &VariantsRepository{db: db}
 }
 
-func (r *VariantsRepository) GetVariantHeader(locusId int) (*VariantHeader, error) {
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.VariantTable.Name, types.VariantTable.Alias))
+func (r *VariantsRepository) GetVariantHeader(ctx context.Context, locusId int) (*VariantHeader, error) {
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.VariantTable.Name, types.VariantTable.Alias))
 	tx = tx.Where("v.locus_id = ?", locusId)
 	tx = tx.Select("v.hgvsg")
 
@@ -50,8 +51,9 @@ func (r *VariantsRepository) GetVariantHeader(locusId int) (*VariantHeader, erro
 	return &variantHeader, nil
 }
 
-func (r *VariantsRepository) GetVariantOverview(locusId int) (*VariantOverview, error) {
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.VariantTable.Name, types.VariantTable.Alias))
+func (r *VariantsRepository) GetVariantOverview(ctx context.Context, locusId int) (*VariantOverview, error) {
+	db := r.db.WithContext(ctx)
+	tx := db.Table(fmt.Sprintf("%s %s", types.VariantTable.Name, types.VariantTable.Alias))
 	tx = tx.Joins("JOIN snv__consequence c ON v.locus_id=c.locus_id AND v.locus_id = ? AND c.is_picked = true", locusId)
 	tx = tx.Joins("LEFT JOIN clinvar cl ON cl.locus_id = v.locus_id")
 	tx = tx.Select("v.symbol, v.consequences, v.clinvar_interpretation, v.clinvar_name, v.germline_pc_wgs, v.germline_pf_wgs, v.germline_pn_wgs, v.gnomad_v3_af, v.is_canonical, v.is_mane_select, c.is_mane_plus, c.exon_rank, c.exon_total, c.transcript_id, c.dna_change, v.rsnumber, v.vep_impact, v.aa_change, c.consequences, c.sift_pred, c.sift_score, c.revel_score,c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, v.locus, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate, c.gnomad_pli, cl.name as clinvar_id")
@@ -65,7 +67,7 @@ func (r *VariantsRepository) GetVariantOverview(locusId int) (*VariantOverview, 
 		}
 	}
 
-	txOmim := r.db.Table("omim_gene_panel omim")
+	txOmim := db.Table("omim_gene_panel omim")
 	txOmim = txOmim.Select("omim.omim_phenotype_id, omim.panel, omim.inheritance_code")
 	txOmim = txOmim.Where("omim.omim_phenotype_id is not null and omim.symbol = ?", variantOverview.Symbol)
 	txOmim = txOmim.Order("omim.omim_phenotype_id asc")
@@ -83,8 +85,8 @@ func (r *VariantsRepository) GetVariantOverview(locusId int) (*VariantOverview, 
 	return &variantOverview, nil
 }
 
-func (r *VariantsRepository) GetVariantConsequences(locusId int) (*[]VariantConsequence, error) {
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.ConsequenceTable.Name, types.ConsequenceTable.Alias))
+func (r *VariantsRepository) GetVariantConsequences(ctx context.Context, locusId int) (*[]VariantConsequence, error) {
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.ConsequenceTable.Name, types.ConsequenceTable.Alias))
 	tx = tx.Select("c.is_picked, c.symbol, c.biotype, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_ds, c.spliceai_type, c.transcript_id, c.vep_impact, c.is_canonical, c.is_mane_select, c.is_mane_plus, c.exon_rank, c.exon_total, c.dna_change, c.aa_change, c.consequences, c.sift_pred, c.sift_score, c.fathmm_pred, c.fathmm_score, c.cadd_phred, c.cadd_score, c.dann_score, c.lrt_pred, c.lrt_score, c.revel_score, c.polyphen2_hvar_pred, c.polyphen2_hvar_score, c.phyloP17way_primate")
 	tx = tx.Where("c.locus_id = ?", locusId)
 
@@ -105,12 +107,13 @@ func (r *VariantsRepository) GetVariantConsequences(locusId int) (*[]VariantCons
 	return &variantConsequences, nil
 }
 
-func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, *int64, error) {
+func (r *VariantsRepository) GetVariantInterpretedCases(ctx context.Context, locusId int, userQuery types.ListQuery) (*[]VariantInterpretedCase, *int64, error) {
 	var count int64
 
-	txAggPhenotypes := utils.GetAggregatedPhenotypes(r.db)
+	db := r.db.WithContext(ctx)
+	txAggPhenotypes := utils.GetAggregatedPhenotypes(db)
 
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias))
+	tx := db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias))
 	tx = utils.JoinGermlineInterpretationWithSNVOccurrence(tx)
 	// interpretation_germline has no task_id column, so the snv↔interpretation
 	// join above is on (seq_id, locus_id) alone. Bridge through task_context to
@@ -172,14 +175,15 @@ func (r *VariantsRepository) GetVariantInterpretedCases(locusId int, userQuery t
 	return &variantInterpretedCases, &count, nil
 }
 
-func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, *int64, error) {
+func (r *VariantsRepository) GetVariantUninterpretedCases(ctx context.Context, locusId int, userQuery types.ListQuery) (*[]VariantUninterpretedCase, *int64, error) {
 	var count int64
 	if userQuery != nil && userQuery.HasFieldFromTables(types.InterpretationGermlineTable) {
 		count = 0
 		return &[]VariantUninterpretedCase{}, &count, nil
 	}
 
-	txAggPhenotypes := utils.GetAggregatedPhenotypes(r.db)
+	db := r.db.WithContext(ctx)
+	txAggPhenotypes := utils.GetAggregatedPhenotypes(db)
 
 	// interpretation_germline.locus_id is text, so this ANTI JOIN compares strings; g_snv_o.locus_id is int and uses locusId directly.
 	locusIdString := fmt.Sprintf("%d", locusId)
@@ -188,7 +192,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	// reached via its annotation task (case-scoped row, case_id NOT NULL).
 	// Joining the occurrence on (seq_id, task_id) prevents leaking occurrences
 	// across cases that share a sequencing experiment.
-	tx := r.db.Table(fmt.Sprintf("%s %s", types.TaskContextTable.FederationName, types.TaskContextTable.Alias))
+	tx := db.Table(fmt.Sprintf("%s %s", types.TaskContextTable.FederationName, types.TaskContextTable.Alias))
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence g_snv_o ON g_snv_o.seq_id = tctx.sequencing_experiment_id AND g_snv_o.task_id = tctx.task_id")
 	tx = tx.Joins("INNER JOIN radiant_jdbc.public.cases c ON c.id = tctx.case_id")
 	tx = tx.Joins("INNER JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = tctx.sequencing_experiment_id")
@@ -243,16 +247,17 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(locusId int, userQuery
 	return &variantUninterpretedCases, &count, nil
 }
 
-func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCount, error) {
+func (r *VariantsRepository) GetVariantCasesCount(ctx context.Context, locusId int) (*VariantCasesCount, error) {
 	var countInterpreted int64
 	var countUnInterpreted int64
 
+	db := r.db.WithContext(ctx)
 	locusIdString := fmt.Sprintf("%d", locusId)
 
 	// Count distinct (case_id, seq_id, task_id) triples that have an
 	// interpretation at this locus. interpretation_germline has no task_id, so
 	// bridge through germline_snv_occurrence + task_context to recover it.
-	txInterpreted := r.db.Raw(`
+	txInterpreted := db.Raw(`
 		SELECT COUNT(DISTINCT CONCAT(tctx.case_id, '-', tctx.sequencing_experiment_id, '-', tctx.task_id))
 		FROM radiant_jdbc.public.interpretation_germline ig
 		INNER JOIN germline__snv__occurrence g_snv_o
@@ -273,7 +278,7 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCou
 	// of case_has_sequencing_experiment) ensures the occurrence is attributed
 	// only to the case whose annotation task produced it — preventing a leak
 	// when a sequencing experiment is reused across multiple cases.
-	txUnInterpreted := r.db.Raw(`
+	txUnInterpreted := db.Raw(`
 		SELECT COUNT(DISTINCT CONCAT(tctx.case_id, '-', tctx.sequencing_experiment_id, '-', tctx.task_id))
 		FROM radiant_jdbc.public.task_context tctx
 		INNER JOIN germline__snv__occurrence g_snv_o
@@ -295,19 +300,20 @@ func (r *VariantsRepository) GetVariantCasesCount(locusId int) (*VariantCasesCou
 	}, nil
 }
 
-func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, error) {
-	analysisCatalog, err := utils.GetFilter(r.db, types.AnalysisCatalogTable, "name", nil)
+func (r *VariantsRepository) GetVariantCasesFilters(ctx context.Context) (*VariantCasesFilters, error) {
+	db := r.db.WithContext(ctx)
+	analysisCatalog, err := utils.GetFilter(db, types.AnalysisCatalogTable, "name", nil)
 	if err != nil {
 		return nil, err
 	}
 
 	isDiagnosisLabCondition := fmt.Sprintf("%s.category_code = 'diagnostic_laboratory'", types.SequencingLabTable.Alias)
-	diagnosisLab, err := utils.GetFilter(r.db, types.SequencingLabTable, "name", &isDiagnosisLabCondition)
+	diagnosisLab, err := utils.GetFilter(db, types.SequencingLabTable, "name", &isDiagnosisLabCondition)
 	if err != nil {
 		return nil, err
 	}
 
-	sex, err := utils.GetFilter(r.db, types.SexTable, "name_en", nil)
+	sex, err := utils.GetFilter(db, types.SexTable, "name_en", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -344,13 +350,13 @@ func (r *VariantsRepository) GetVariantCasesFilters() (*VariantCasesFilters, err
 	}, nil
 }
 
-func (r *VariantsRepository) GetVariantExternalFrequencies(locusId int) (*VariantExternalFrequencies, error) {
+func (r *VariantsRepository) GetVariantExternalFrequencies(ctx context.Context, locusId int) (*VariantExternalFrequencies, error) {
 	var topmed types.ExternalFrequencies
 	var gnomadV3 types.ExternalFrequencies
 	var thousandGenomes types.ExternalFrequencies
 	var result types.VariantExternalFrequencies
 
-	tx := r.db.Table(fmt.Sprintf("%s v", types.VariantTable.Name))
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s v", types.VariantTable.Name))
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s topmed ON topmed.locus_id = v.locus_id", types.TopmedTable.Name))
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s gnomad ON gnomad.locus_id = v.locus_id", types.GnomadGenomesV3Table.Name))
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s thousand ON thousand.locus_id = v.locus_id", types.ThousandGenomesTable.Name))
@@ -396,10 +402,10 @@ func (r *VariantsRepository) GetVariantExternalFrequencies(locusId int) (*Varian
 	return &result, nil
 }
 
-func (r *VariantsRepository) GetGermlineVariantGlobalInternalFrequencies(locusId int) (*types.InternalFrequencies, error) {
+func (r *VariantsRepository) GetGermlineVariantGlobalInternalFrequencies(ctx context.Context, locusId int) (*types.InternalFrequencies, error) {
 	var globalFrequencies types.InternalFrequencies
 
-	tx := r.db.Table(fmt.Sprintf("%s v", types.VariantTable.Name))
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s v", types.VariantTable.Name))
 	tx = tx.Select("v.germline_pc_wgs as pc_all, v.germline_pn_wgs as pn_all, v.germline_pf_wgs as pf_all, v.germline_pc_wgs_affected as pc_affected, v.germline_pn_wgs_affected as pn_affected, v.germline_pf_wgs_affected as pf_affected, v.germline_pc_wgs_not_affected as pc_non_affected, v.germline_pn_wgs_not_affected as pn_non_affected, v.germline_pf_wgs_not_affected as pf_non_affected")
 	tx = tx.Where("v.locus_id = ?", locusId)
 
@@ -414,7 +420,7 @@ func (r *VariantsRepository) GetGermlineVariantGlobalInternalFrequencies(locusId
 	return &globalFrequencies, nil
 }
 
-func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
+func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx context.Context, locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
 	type TempFreqBySplit struct {
 		SplitCode          string
 		SplitName          string
@@ -452,7 +458,7 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(locusI
 		return nil, fmt.Errorf("unsupported split type")
 	}
 
-	tx := r.db.Raw(fmt.Sprintf(`
+	tx := r.db.WithContext(ctx).Raw(fmt.Sprintf(`
 		WITH
 			base AS (
 				SELECT

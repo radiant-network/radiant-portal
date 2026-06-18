@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -18,10 +19,10 @@ func NewUserPreferencesRepository(db *gorm.DB) *UserPreferencesRepository {
 	return &UserPreferencesRepository{db: db}
 }
 
-func (r *UserPreferencesRepository) GetUserPreferences(userId string, key string) (*types.JsonMap[string, interface{}], error) {
+func (r *UserPreferencesRepository) GetUserPreferences(ctx context.Context, userId string, key string) (*types.JsonMap[string, interface{}], error) {
 	var userPreference UserPreference
 
-	if err := r.db.First(&userPreference, "user_id = ? AND key = ?", userId, key).Error; err != nil {
+	if err := r.db.WithContext(ctx).First(&userPreference, "user_id = ? AND key = ?", userId, key).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error retrieve user preference: %w", err)
 		} else {
@@ -32,13 +33,13 @@ func (r *UserPreferencesRepository) GetUserPreferences(userId string, key string
 	return &userPreference.Content, nil
 }
 
-func (r *UserPreferencesRepository) UpdateUserPreferences(userId string, key string, content types.JsonMap[string, interface{}]) (*types.JsonMap[string, interface{}], error) {
+func (r *UserPreferencesRepository) UpdateUserPreferences(ctx context.Context, userId string, key string, content types.JsonMap[string, interface{}]) (*types.JsonMap[string, interface{}], error) {
 	userPreference := UserPreference{
 		UserID:  userId,
 		Key:     key,
 		Content: content,
 	}
-	tx := r.db.Save(&userPreference)
+	tx := r.db.WithContext(ctx).Save(&userPreference)
 	if err := tx.Error; err != nil {
 		return nil, fmt.Errorf("error while updating user preferences: %w", err)
 	}

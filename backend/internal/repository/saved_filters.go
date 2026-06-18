@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -21,10 +22,10 @@ func NewSavedFiltersRepository(db *gorm.DB) *SavedFiltersRepository {
 	return &SavedFiltersRepository{db: db}
 }
 
-func (r *SavedFiltersRepository) GetSavedFilterByID(savedFilterId string) (*SavedFilter, error) {
+func (r *SavedFiltersRepository) GetSavedFilterByID(ctx context.Context, savedFilterId string) (*SavedFilter, error) {
 	var savedFilter SavedFilter
 
-	tx := r.db.
+	tx := r.db.WithContext(ctx).
 		Table(types.SavedFilterTable.Name).Where("id = ?", savedFilterId)
 
 	if err := tx.First(&savedFilter).Error; err != nil {
@@ -38,15 +39,16 @@ func (r *SavedFiltersRepository) GetSavedFilterByID(savedFilterId string) (*Save
 	return &savedFilter, nil
 }
 
-func (r *SavedFiltersRepository) GetSavedFiltersByUserID(userId string, savedFilterType string) (*[]SavedFilter, error) {
+func (r *SavedFiltersRepository) GetSavedFiltersByUserID(ctx context.Context, userId string, savedFilterType string) (*[]SavedFilter, error) {
 	var savedFilters []SavedFilter
 	var tx *gorm.DB
+	db := r.db.WithContext(ctx)
 
 	if savedFilterType != "" {
-		tx = r.db.
+		tx = db.
 			Table(types.SavedFilterTable.Name).Where("user_id = ? and type = ?", userId, savedFilterType)
 	} else {
-		tx = r.db.
+		tx = db.
 			Table(types.SavedFilterTable.Name).Where("user_id = ?", userId)
 	}
 
@@ -57,7 +59,7 @@ func (r *SavedFiltersRepository) GetSavedFiltersByUserID(userId string, savedFil
 	return &savedFilters, nil
 }
 
-func (r *SavedFiltersRepository) CreateSavedFilter(savedFilterInput SavedFilterCreationInput, userId string) (*SavedFilter, error) {
+func (r *SavedFiltersRepository) CreateSavedFilter(ctx context.Context, savedFilterInput SavedFilterCreationInput, userId string) (*SavedFilter, error) {
 	savedFilter := SavedFilter{
 		Name:      savedFilterInput.Name,
 		Type:      savedFilterInput.Type,
@@ -66,29 +68,29 @@ func (r *SavedFiltersRepository) CreateSavedFilter(savedFilterInput SavedFilterC
 		CreatedOn: time.Now(),
 		UpdatedOn: time.Now(),
 	}
-	if err := r.db.Create(&savedFilter).Error; err != nil {
+	if err := r.db.WithContext(ctx).Create(&savedFilter).Error; err != nil {
 		return nil, fmt.Errorf("error creating saved filter: %w", err)
 	}
 
-	return r.GetSavedFilterByID(savedFilter.ID)
+	return r.GetSavedFilterByID(ctx, savedFilter.ID)
 }
 
-func (r *SavedFiltersRepository) UpdateSavedFilter(savedFilterInput SavedFilterUpdateInput, savedFilterId string, userId string) (*SavedFilter, error) {
+func (r *SavedFiltersRepository) UpdateSavedFilter(ctx context.Context, savedFilterInput SavedFilterUpdateInput, savedFilterId string, userId string) (*SavedFilter, error) {
 	savedFilter := SavedFilter{
 		Favorite:  savedFilterInput.Favorite,
 		Name:      savedFilterInput.Name,
 		Queries:   savedFilterInput.Queries,
 		UpdatedOn: time.Now(),
 	}
-	if err := r.db.Where("id = ? and user_id = ?", savedFilterId, userId).Updates(&savedFilter).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("id = ? and user_id = ?", savedFilterId, userId).Updates(&savedFilter).Error; err != nil {
 		return nil, fmt.Errorf("error updating saved filter: %w", err)
 	}
 
-	return r.GetSavedFilterByID(savedFilterId)
+	return r.GetSavedFilterByID(ctx, savedFilterId)
 }
 
-func (r *SavedFiltersRepository) DeleteSavedFilter(savedFilterId string, userId string) error {
-	if err := r.db.Where("id = ? and user_id = ?", savedFilterId, userId).Delete(&SavedFilter{}).Error; err != nil {
+func (r *SavedFiltersRepository) DeleteSavedFilter(ctx context.Context, savedFilterId string, userId string) error {
+	if err := r.db.WithContext(ctx).Where("id = ? and user_id = ?", savedFilterId, userId).Delete(&SavedFilter{}).Error; err != nil {
 		return fmt.Errorf("error deleting saved filter: %w", err)
 	}
 	return nil

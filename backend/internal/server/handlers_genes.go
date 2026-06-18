@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -9,8 +10,8 @@ import (
 )
 
 type genesReader interface {
-	GetGeneAutoComplete(prefix string, limit int) (*[]types.AutoCompleteGene, error)
-	SearchGenes(inputs []string) (*[]types.GeneResult, error)
+	GetGeneAutoComplete(ctx context.Context, prefix string, limit int) (*[]types.AutoCompleteGene, error)
+	SearchGenes(ctx context.Context, inputs []string) (*[]types.GeneResult, error)
 }
 
 // GetGeneAutoCompleteHandler handles retrieving genes by autocomplete
@@ -36,7 +37,7 @@ func GetGeneAutoCompleteHandler(repo genesReader) gin.HandlerFunc {
 		if err != nil {
 			limit = 25
 		}
-		genes, err := repo.GetGeneAutoComplete(prefix, limit)
+		genes, err := repo.GetGeneAutoComplete(c.Request.Context(), prefix, limit)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -74,7 +75,7 @@ func SearchGenesHandler(repo genesReader) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		genes, err := repo.SearchGenes(body.Inputs)
+		genes, err := repo.SearchGenes(c.Request.Context(), body.Inputs)
 		if err != nil {
 			HandleError(c, err)
 			return

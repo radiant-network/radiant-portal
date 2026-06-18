@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
@@ -11,16 +12,16 @@ import (
 )
 
 type interpretationsStore interface {
-	FirstGermline(caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationGermline, error)
-	CreateOrUpdateGermline(interpretation *types.InterpretationGermline) error
-	SearchGermline(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationGermline, error)
-	FirstSomatic(caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationSomatic, error)
-	CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error
-	SearchSomatic(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationSomatic, error)
+	FirstGermline(ctx context.Context, caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationGermline, error)
+	CreateOrUpdateGermline(ctx context.Context, interpretation *types.InterpretationGermline) error
+	SearchGermline(ctx context.Context, analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationGermline, error)
+	FirstSomatic(ctx context.Context, caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationSomatic, error)
+	CreateOrUpdateSomatic(ctx context.Context, interpretation *types.InterpretationSomatic) error
+	SearchSomatic(ctx context.Context, analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationSomatic, error)
 }
 
 type termNameReader interface {
-	GetTermNameById(termsTable string, id string) (*string, error)
+	GetTermNameById(ctx context.Context, termsTable string, id string) (*string, error)
 }
 
 func extractInterpretationParams(c *gin.Context) (string, string, string, string) {
@@ -109,7 +110,7 @@ func getInterpretationStatus(interpretation *types.InterpretationCommon) int {
 func GetInterpretationGermlineDeprecated(repo interpretationsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
-		interpretation, err := repo.FirstGermline(caseId, sequencingId, locusId, transcriptId)
+		interpretation, err := repo.FirstGermline(c.Request.Context(), caseId, sequencingId, locusId, transcriptId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -145,7 +146,7 @@ func GetInterpretationGermlineDeprecated(repo interpretationsStore) gin.HandlerF
 func GetInterpretationGermline(repo interpretationsStore, termsRepo termNameReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
-		interpretation, err := repo.FirstGermline(caseId, sequencingId, locusId, transcriptId)
+		interpretation, err := repo.FirstGermline(c.Request.Context(), caseId, sequencingId, locusId, transcriptId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -155,7 +156,7 @@ func GetInterpretationGermline(repo interpretationsStore, termsRepo termNameRead
 			return
 		}
 
-		conditionName, err := termsRepo.GetTermNameById(types.MondoTable.Name, interpretation.Condition)
+		conditionName, err := termsRepo.GetTermNameById(c.Request.Context(), types.MondoTable.Name, interpretation.Condition)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -205,7 +206,7 @@ func PostInterpretationGermlineDeprecated(repo interpretationsStore) gin.Handler
 			return
 		}
 
-		err = repo.CreateOrUpdateGermline(interpretation)
+		err = repo.CreateOrUpdateGermline(c.Request.Context(), interpretation)
 
 		if err != nil {
 			HandleValidationError(c, err)
@@ -253,7 +254,7 @@ func PostInterpretationGermline(repo interpretationsStore) gin.HandlerFunc {
 			return
 		}
 
-		err = repo.CreateOrUpdateGermline(interpretation)
+		err = repo.CreateOrUpdateGermline(c.Request.Context(), interpretation)
 
 		if err != nil {
 			HandleValidationError(c, err)
@@ -287,7 +288,7 @@ func PostInterpretationGermline(repo interpretationsStore) gin.HandlerFunc {
 func GetInterpretationSomaticDeprecated(repo interpretationsStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
-		interpretation, err := repo.FirstSomatic(caseId, sequencingId, locusId, transcriptId)
+		interpretation, err := repo.FirstSomatic(c.Request.Context(), caseId, sequencingId, locusId, transcriptId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -323,7 +324,7 @@ func GetInterpretationSomaticDeprecated(repo interpretationsStore) gin.HandlerFu
 func GetInterpretationSomatic(repo interpretationsStore, termsRepo termNameReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, sequencingId, locusId, transcriptId := extractInterpretationParams(c)
-		interpretation, err := repo.FirstSomatic(caseId, sequencingId, locusId, transcriptId)
+		interpretation, err := repo.FirstSomatic(c.Request.Context(), caseId, sequencingId, locusId, transcriptId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -333,7 +334,7 @@ func GetInterpretationSomatic(repo interpretationsStore, termsRepo termNameReade
 			return
 		}
 
-		conditionName, err := termsRepo.GetTermNameById(types.MondoTable.Name, interpretation.TumoralType)
+		conditionName, err := termsRepo.GetTermNameById(c.Request.Context(), types.MondoTable.Name, interpretation.TumoralType)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -382,7 +383,7 @@ func PostInterpretationSomaticDeprecated(repo interpretationsStore) gin.HandlerF
 			return
 		}
 
-		err = repo.CreateOrUpdateSomatic(interpretation)
+		err = repo.CreateOrUpdateSomatic(c.Request.Context(), interpretation)
 
 		if err != nil {
 			HandleValidationError(c, err)
@@ -429,7 +430,7 @@ func PostInterpretationSomatic(repo interpretationsStore) gin.HandlerFunc {
 			return
 		}
 
-		err = repo.CreateOrUpdateSomatic(interpretation)
+		err = repo.CreateOrUpdateSomatic(c.Request.Context(), interpretation)
 
 		if err != nil {
 			HandleValidationError(c, err)
@@ -499,7 +500,7 @@ func SearchInterpretationGermline(repo interpretationsStore) gin.HandlerFunc {
 		analysisIds := extractArrayQueryParam(c, "analysis_id")
 		patientIds := extractArrayQueryParam(c, "patient_id")
 		variantHashIds := extractArrayQueryParam(c, "variant_hash")
-		interpretations, err := repo.SearchGermline(analysisIds, patientIds, variantHashIds)
+		interpretations, err := repo.SearchGermline(c.Request.Context(), analysisIds, patientIds, variantHashIds)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -530,7 +531,7 @@ func SearchInterpretationSomatic(repo interpretationsStore) gin.HandlerFunc {
 		analysisIds := extractArrayQueryParam(c, "analysis_id")
 		patientIds := extractArrayQueryParam(c, "patient_id")
 		variantHashIds := extractArrayQueryParam(c, "variant_hash")
-		interpretations, err := repo.SearchSomatic(analysisIds, patientIds, variantHashIds)
+		interpretations, err := repo.SearchSomatic(c.Request.Context(), analysisIds, patientIds, variantHashIds)
 		if err != nil {
 			HandleError(c, err)
 			return

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,8 +10,8 @@ import (
 )
 
 type userPreferencesStore interface {
-	GetUserPreferences(userId string, key string) (*types.JsonMap[string, interface{}], error)
-	UpdateUserPreferences(userId string, key string, content types.JsonMap[string, interface{}]) (*types.JsonMap[string, interface{}], error)
+	GetUserPreferences(ctx context.Context, userId string, key string) (*types.JsonMap[string, interface{}], error)
+	UpdateUserPreferences(ctx context.Context, userId string, key string, content types.JsonMap[string, interface{}]) (*types.JsonMap[string, interface{}], error)
 }
 
 // GetUserPreferencesHandler
@@ -34,7 +35,7 @@ func GetUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gin.H
 			return
 		}
 		key := c.Param("key")
-		userPreference, err := repo.GetUserPreferences(*userId, key)
+		userPreference, err := repo.GetUserPreferences(c.Request.Context(), *userId, key)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -81,7 +82,7 @@ func UpdateUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gi
 			return
 		}
 		key := c.Param("key")
-		userPreference, err := repo.UpdateUserPreferences(*userId, key, body)
+		userPreference, err := repo.UpdateUserPreferences(c.Request.Context(), *userId, key, body)
 		if err != nil {
 			HandleError(c, err)
 			return

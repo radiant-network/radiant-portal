@@ -24,11 +24,11 @@ func Test_CreateAndGetTask_OK(t *testing.T) {
 		}
 
 		// Test Create
-		err := repo.CreateTask(newTask)
+		err := repo.CreateTask(t.Context(), newTask)
 		assert.NoError(t, err)
 
 		// Test GetTaskById
-		result, err := repo.GetTaskById(8888)
+		result, err := repo.GetTaskById(t.Context(), 8888)
 		assert.NoError(t, err)
 		assert.Equal(t, 8888, result.ID)
 		assert.Equal(t, "radiant_germline_annotation", result.TaskTypeCode)
@@ -43,7 +43,7 @@ func Test_CreateAndGetTask_OK(t *testing.T) {
 func Test_CreateTask_NilError(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		err := repo.CreateTask(nil)
+		err := repo.CreateTask(t.Context(), nil)
 		assert.Error(t, err)
 	})
 }
@@ -51,7 +51,7 @@ func Test_CreateTask_NilError(t *testing.T) {
 func Test_GetTaskById_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		result, err := repo.GetTaskById(999999)
+		result, err := repo.GetTaskById(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
@@ -68,10 +68,10 @@ func Test_CreateAndGetTaskContext_OK(t *testing.T) {
 			SequencingExperimentID: se,
 		}
 
-		err := repo.CreateTaskContext(newContext)
+		err := repo.CreateTaskContext(t.Context(), newContext)
 		assert.NoError(t, err)
 
-		ctxs, err := repo.GetTaskContextByTaskId(1)
+		ctxs, err := repo.GetTaskContextByTaskId(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Len(t, ctxs, 2)
 		assert.Equal(t, 1, ctxs[1].TaskID)
@@ -86,7 +86,7 @@ func Test_CreateAndGetTaskContext_OK(t *testing.T) {
 func Test_CreateTaskContext_NilError(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		err := repo.CreateTaskContext(nil)
+		err := repo.CreateTaskContext(t.Context(), nil)
 		assert.Error(t, err)
 	})
 }
@@ -94,7 +94,7 @@ func Test_CreateTaskContext_NilError(t *testing.T) {
 func Test_GetTaskContextByTaskId_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		result, err := repo.GetTaskContextByTaskId(999999)
+		result, err := repo.GetTaskContextByTaskId(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Empty(t, result)
 	})
@@ -110,10 +110,10 @@ func Test_CreateAndGetTaskHasDocument_OK(t *testing.T) {
 			Type:       "output",
 		}
 
-		err := repo.CreateTaskHasDocument(doc)
+		err := repo.CreateTaskHasDocument(t.Context(), doc)
 		assert.NoError(t, err)
 
-		thd, err := repo.GetTaskHasDocumentByTaskId(1)
+		thd, err := repo.GetTaskHasDocumentByTaskId(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Len(t, thd, 6)
 		assert.Equal(t, 1, thd[5].TaskID)
@@ -128,7 +128,7 @@ func Test_CreateAndGetTaskHasDocument_OK(t *testing.T) {
 func Test_CreateTaskHasDocument_NilError(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		err := repo.CreateTaskHasDocument(nil)
+		err := repo.CreateTaskHasDocument(t.Context(), nil)
 		assert.Error(t, err)
 	})
 }
@@ -136,7 +136,7 @@ func Test_CreateTaskHasDocument_NilError(t *testing.T) {
 func Test_GetTaskTypeCodes(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		result, err := repo.GetTaskTypeCodes()
+		result, err := repo.GetTaskTypeCodes(t.Context())
 		assert.NoError(t, err)
 		assert.Greater(t, len(result), 0)
 	})
@@ -145,7 +145,7 @@ func Test_GetTaskTypeCodes(t *testing.T) {
 func Test_GetTaskHasDocumentByTaskId_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		result, err := repo.GetTaskHasDocumentByTaskId(999999)
+		result, err := repo.GetTaskHasDocumentByTaskId(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
@@ -154,7 +154,7 @@ func Test_GetTaskHasDocumentByTaskId_NotFound(t *testing.T) {
 func Test_GetTaskHasDocumentByDocumentId_OK(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		result, err := repo.GetTaskHasDocumentByDocumentId(1)
+		result, err := repo.GetTaskHasDocumentByDocumentId(t.Context(), 1)
 
 		expected := []*types.TaskHasDocument{
 			{
@@ -173,7 +173,7 @@ func Test_GetTaskHasDocumentByDocumentId_OK(t *testing.T) {
 func Test_GetTaskHasDocumentByDocumentId_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		result, err := repo.GetTaskHasDocumentByDocumentId(999999)
+		result, err := repo.GetTaskHasDocumentByDocumentId(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
@@ -182,7 +182,7 @@ func Test_GetTaskHasDocumentByDocumentId_NotFound(t *testing.T) {
 func Test_GetTaskContextBySequencingExperimentId_OK(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		result, err := repo.GetTaskContextBySequencingExperimentId(1)
+		result, err := repo.GetTaskContextBySequencingExperimentId(t.Context(), 1)
 
 		caseId := 1
 
@@ -218,7 +218,7 @@ func Test_GetTaskContextBySequencingExperimentId_OK(t *testing.T) {
 func Test_GetTaskContextBySequencingExperimentId_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewTaskRepository(db)
-		result, err := repo.GetTaskContextBySequencingExperimentId(999)
+		result, err := repo.GetTaskContextBySequencingExperimentId(t.Context(), 999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
@@ -234,7 +234,7 @@ func Test_ListTasksByCaseSeqAndTaskType_GermlineSNV_ReturnsGermlineAnnotationTas
 		repo := NewTaskRepository(env.Postgres)
 
 		code, _ := types.OccurrenceTypeGermlineSNV.TaskTypeCode()
-		result, err := repo.ListTasksByCaseSeqAndTaskType(1, 1, *code)
+		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, *code)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 1)
@@ -249,7 +249,7 @@ func Test_ListTasksByCaseSeqAndTaskType_GermlineCNV_ReturnsGermlineAlignmentTask
 		repo := NewTaskRepository(env.Postgres)
 
 		code, _ := types.OccurrenceTypeGermlineCNV.TaskTypeCode()
-		result, err := repo.ListTasksByCaseSeqAndTaskType(1, 1, *code)
+		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, *code)
 
 		// Task 1 has task_context.case_id = NULL — included via the OR-NULL branch.
 		assert.NoError(t, err)
@@ -264,7 +264,7 @@ func Test_ListTasksByCaseSeqAndTaskType_SomaticSNV_ReturnsSomaticAnnotationTask(
 		repo := NewTaskRepository(env.Postgres)
 
 		code, _ := types.OccurrenceTypeSomaticSNV.TaskTypeCode()
-		result, err := repo.ListTasksByCaseSeqAndTaskType(71, 73, *code)
+		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 71, 73, *code)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 1)
@@ -280,7 +280,7 @@ func Test_ListTasksByCaseSeqAndTaskType_EmptyWhenCaseHasNoMatchingTask(t *testin
 		// Case 2 has its own sequencings (4, 5, 6) — querying with seq 1 (which
 		// belongs to case 1) must not leak case 1's annotation task (task 5).
 		code, _ := types.OccurrenceTypeGermlineSNV.TaskTypeCode()
-		result, err := repo.ListTasksByCaseSeqAndTaskType(2, 1, *code)
+		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 2, 1, *code)
 
 		assert.NoError(t, err)
 		assert.Empty(t, result)
@@ -301,7 +301,7 @@ func Test_ListTasksByCaseSeqAndTaskType_SortedByCreatedOnDesc(t *testing.T) {
 
 		repo := NewTaskRepository(db)
 		code, _ := types.OccurrenceTypeGermlineSNV.TaskTypeCode()
-		result, err := repo.ListTasksByCaseSeqAndTaskType(1, 1, *code)
+		result, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, *code)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 3) // seeded task 5 (2021) + inserted 91001 (2024) + 91002 (2025)
@@ -328,12 +328,12 @@ func Test_ListTasksByCaseSeqAndTaskType_ExcludesTaskAttachedToDifferentCase(t *t
 
 		// Querying with a *different* case on the same sequencing must not see
 		// the case-scoped task we just inserted.
-		resultOtherCase, err := repo.ListTasksByCaseSeqAndTaskType(71, 70, *code)
+		resultOtherCase, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 71, 70, *code)
 		assert.NoError(t, err)
 		assert.Empty(t, resultOtherCase)
 
 		// Sanity check: querying with the right case does see it.
-		resultRightCase, err := repo.ListTasksByCaseSeqAndTaskType(70, 70, *code)
+		resultRightCase, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 70, 70, *code)
 		assert.NoError(t, err)
 		assert.Len(t, resultRightCase, 1)
 		assert.Equal(t, 91003, resultRightCase[0].ID)
@@ -369,14 +369,14 @@ func Test_ListTasksByCaseSeqAndTaskType_CaseAgnosticTaskReturnedForBothCasesShar
 		code, _ := types.OccurrenceTypeGermlineSNV.TaskTypeCode()
 
 		// Case 1 sees: seeded task 5 (case=1) + case-agnostic 91010. Not 91011 (case=70).
-		fromCase1, err := repo.ListTasksByCaseSeqAndTaskType(1, 1, *code)
+		fromCase1, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 1, 1, *code)
 		assert.NoError(t, err)
 		assert.Len(t, fromCase1, 2)
 		assert.Equal(t, 91010, fromCase1[0].ID) // 2024 > 2021
 		assert.Equal(t, 5, fromCase1[1].ID)
 
 		// Case 70 sees: case-specific 91011 + case-agnostic 91010. Not task 5 (case=1).
-		fromCase70, err := repo.ListTasksByCaseSeqAndTaskType(70, 1, *code)
+		fromCase70, err := repo.ListTasksByCaseSeqAndTaskType(t.Context(), 70, 1, *code)
 		assert.NoError(t, err)
 		assert.Len(t, fromCase70, 2)
 		assert.Equal(t, 91011, fromCase70[0].ID) // 2025 > 2024

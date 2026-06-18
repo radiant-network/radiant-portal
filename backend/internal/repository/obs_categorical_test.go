@@ -12,7 +12,7 @@ import (
 func Test_GetObservationCategoricalById_OK(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewObservationCategoricalRepository(db)
-		result, err := repo.GetById(1)
+		result, err := repo.GetById(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, result.ID)
 		assert.Equal(t, 16, result.CaseID)
@@ -29,7 +29,7 @@ func Test_GetObservationCategoricalById_OK(t *testing.T) {
 func Test_GetObservationCategoricalById_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewObservationCategoricalRepository(db)
-		result, err := repo.GetById(999)
+		result, err := repo.GetById(t.Context(), 999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
@@ -51,10 +51,10 @@ func Test_CreateObservationCategorical_OK(t *testing.T) {
 		}
 
 		repo := NewObservationCategoricalRepository(db)
-		err := repo.CreateObservationCategorical(newObs)
+		err := repo.CreateObservationCategorical(t.Context(), newObs)
 		assert.NoError(t, err)
 
-		result, err := repo.GetById(9999)
+		result, err := repo.GetById(t.Context(), 9999)
 		assert.NoError(t, err)
 		assert.Equal(t, 9999, result.ID)
 		assert.Equal(t, 1, result.CaseID)
@@ -73,7 +73,7 @@ func Test_CreateObservationCategorical_OK(t *testing.T) {
 func Test_CreateObservationCategorical_NilError(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewObservationCategoricalRepository(db)
-		err := repo.CreateObservationCategorical(nil)
+		err := repo.CreateObservationCategorical(t.Context(), nil)
 		assert.Error(t, err)
 	})
 }
@@ -94,10 +94,10 @@ func Test_CreateObservationCategorical_CaseNotFound(t *testing.T) {
 		}
 
 		repo := NewObservationCategoricalRepository(db)
-		err := repo.CreateObservationCategorical(newObs)
+		err := repo.CreateObservationCategorical(t.Context(), newObs)
 		assert.Error(t, err)
 
-		result, err := repo.GetById(4242)
+		result, err := repo.GetById(t.Context(), 4242)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
@@ -119,10 +119,10 @@ func Test_CreateObservationCategorical_PatientNotFound(t *testing.T) {
 		}
 
 		repo := NewObservationCategoricalRepository(db)
-		err := repo.CreateObservationCategorical(newObs)
+		err := repo.CreateObservationCategorical(t.Context(), newObs)
 		assert.Error(t, err)
 
-		result, err := repo.GetById(4242)
+		result, err := repo.GetById(t.Context(), 4242)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})

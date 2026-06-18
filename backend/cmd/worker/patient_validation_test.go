@@ -426,7 +426,7 @@ func Test_ValidateLifeStatusCode_Valid(t *testing.T) {
 			Patient: patient,
 		}
 		rec.Cache = batchval.NewBatchValidationCache(rec.Context)
-		err := rec.validateLifeStatusCode()
+		err := rec.validateLifeStatusCode(t.Context())
 		assert.NoError(t, err)
 		assert.Nil(t, rec.Errors)
 	})
@@ -444,7 +444,7 @@ func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
 			Patient: patient,
 		}
 		rec.Cache = batchval.NewBatchValidationCache(rec.Context)
-		err := rec.validateLifeStatusCode()
+		err := rec.validateLifeStatusCode(t.Context())
 
 		expected := types.BatchMessage{
 			Code:    "PATIENT-004",
@@ -470,7 +470,7 @@ func Test_ValidateLifeStatusCode_Missing(t *testing.T) {
 			Patient: patient,
 		}
 		rec.Cache = batchval.NewBatchValidationCache(rec.Context)
-		err := rec.validateLifeStatusCode()
+		err := rec.validateLifeStatusCode(t.Context())
 		expected := types.BatchMessage{
 			Code:    "PATIENT-004",
 			Message: "Invalid field life_status_code for patient (CHUSJ / id1). Reason: \"\" is not a valid life status code. Valid values [alive, deceased, unknown].",

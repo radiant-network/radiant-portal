@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"strings"
@@ -16,7 +17,7 @@ type fakeColumnSource struct {
 	err  error
 }
 
-func (f fakeColumnSource) FederatableColumnsForViews() (map[string][]string, error) {
+func (f fakeColumnSource) FederatableColumnsForViews(ctx context.Context) (map[string][]string, error) {
 	return f.cols, f.err
 }
 
@@ -27,7 +28,7 @@ func Test_printViews_RendersTenantDatabaseAndViews(t *testing.T) {
 		"cases":   {"id"},
 	}}
 
-	require.NoError(t, printViews(&buf, "demo", src))
+	require.NoError(t, printViews(t.Context(), &buf, "demo", src))
 
 	out := buf.String()
 	assert.Contains(t, out, "CREATE DATABASE IF NOT EXISTS `demo_tenant`")
@@ -36,13 +37,13 @@ func Test_printViews_RendersTenantDatabaseAndViews(t *testing.T) {
 }
 
 func Test_printViews_PropagatesColumnSourceError(t *testing.T) {
-	err := printViews(io.Discard, "demo", fakeColumnSource{err: errors.New("boom")})
+	err := printViews(t.Context(), io.Discard, "demo", fakeColumnSource{err: errors.New("boom")})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "boom")
 }
 
 func Test_printViews_PropagatesInvalidTenantCodeError(t *testing.T) {
-	err := printViews(io.Discard, "Bad Code", fakeColumnSource{cols: map[string][]string{"cases": {"id"}}})
+	err := printViews(t.Context(), io.Discard, "Bad Code", fakeColumnSource{cols: map[string][]string{"cases": {"id"}}})
 	require.Error(t, err) // BuildViewStatements rejects the code
 }
 
@@ -50,7 +51,7 @@ func Test_printCreatePlan_ShowsAllThreePhases(t *testing.T) {
 	var buf bytes.Buffer
 	src := fakeColumnSource{cols: map[string][]string{"patient": {"id", "organization_code"}}}
 
-	require.NoError(t, printCreatePlan(&buf, "demo", "Demo Hospital", src))
+	require.NoError(t, printCreatePlan(t.Context(), &buf, "demo", "Demo Hospital", src))
 
 	out := buf.String()
 	// Phase A — Postgres
@@ -69,14 +70,14 @@ func Test_printCreatePlan_ShowsAllThreePhases(t *testing.T) {
 }
 
 func Test_printCreatePlan_PropagatesError(t *testing.T) {
-	err := printCreatePlan(io.Discard, "demo", "Demo", fakeColumnSource{err: errors.New("boom")})
+	err := printCreatePlan(t.Context(), io.Discard, "demo", "Demo", fakeColumnSource{err: errors.New("boom")})
 	require.Error(t, err)
 }
 
 func Test_printCreatePlan_AuthBlockPrecedesViews(t *testing.T) {
 	var buf bytes.Buffer
 	src := fakeColumnSource{cols: map[string][]string{"patient": {"id", "organization_code"}}}
-	require.NoError(t, printCreatePlan(&buf, "demo", "Demo", src))
+	require.NoError(t, printCreatePlan(t.Context(), &buf, "demo", "Demo", src))
 
 	out := buf.String()
 	assert.Less(t, strings.Index(out, "auth.pii_grant"), strings.Index(out, "`demo_tenant`.`patient`"),

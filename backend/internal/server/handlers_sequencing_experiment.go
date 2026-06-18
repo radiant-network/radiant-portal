@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -9,7 +10,7 @@ import (
 )
 
 type seqExpDetailReader interface {
-	GetSequencingExperimentDetailById(seqId int) (*types.SequencingExperimentDetail, error)
+	GetSequencingExperimentDetailById(ctx context.Context, seqId int) (*types.SequencingExperimentDetail, error)
 }
 
 // GetSequencingExperimentDetailByIdHandler handles get sequencing experiment details by id
@@ -35,7 +36,7 @@ func GetSequencingExperimentDetailByIdHandler(repo seqExpDetailReader) gin.Handl
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
-		seqExpDetail, err := repo.GetSequencingExperimentDetailById(seqId)
+		seqExpDetail, err := repo.GetSequencingExperimentDetailById(c.Request.Context(), seqId)
 		if err != nil {
 			HandleError(c, err)
 			return

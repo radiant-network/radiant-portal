@@ -1,6 +1,7 @@
 package batchval
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/radiant-network/radiant-api/internal/repository"
@@ -74,12 +75,12 @@ func getCopy[T any](input []T) []T {
 	return out
 }
 
-func (c *BatchValidationCache) GetCaseAnalysisCatalogByCode(code string) (*types.AnalysisCatalog, error) {
+func (c *BatchValidationCache) GetCaseAnalysisCatalogByCode(ctx context.Context, code string) (*types.AnalysisCatalog, error) {
 	if ac, ok := c.AnalysisCatalogs[code]; ok {
 		return ac, nil
 	}
 
-	ac, err := c.Context.CasesRepo.GetCaseAnalysisCatalogIdByCode(code)
+	ac, err := c.Context.CasesRepo.GetCaseAnalysisCatalogIdByCode(ctx, code)
 	if err != nil {
 		return nil, err
 	}
@@ -88,13 +89,13 @@ func (c *BatchValidationCache) GetCaseAnalysisCatalogByCode(code string) (*types
 	return ac, nil
 }
 
-func (c *BatchValidationCache) GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*types.Case, error) {
+func (c *BatchValidationCache) GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int) (*types.Case, error) {
 	key := CaseKey{projectId, submitterCaseId}
 	if cs, ok := c.Cases[key]; ok {
 		return cs, nil
 	}
 
-	cs, err := c.Context.CasesRepo.GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId, projectId)
+	cs, err := c.Context.CasesRepo.GetCaseBySubmitterCaseIdAndProjectId(ctx, submitterCaseId, projectId)
 	if err != nil {
 		return nil, err
 	}
@@ -106,12 +107,12 @@ func (c *BatchValidationCache) GetCaseBySubmitterCaseIdAndProjectId(submitterCas
 	return cs, nil
 }
 
-func (c *BatchValidationCache) GetDocumentByUrl(url string) (*types.Document, error) {
+func (c *BatchValidationCache) GetDocumentByUrl(ctx context.Context, url string) (*types.Document, error) {
 	if doc, ok := c.Documents[url]; ok {
 		return doc, nil
 	}
 
-	doc, err := c.Context.DocRepo.GetDocumentByUrl(url)
+	doc, err := c.Context.DocRepo.GetDocumentByUrl(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -123,12 +124,12 @@ func (c *BatchValidationCache) GetDocumentByUrl(url string) (*types.Document, er
 	return doc, nil
 }
 
-func (c *BatchValidationCache) GetOrganizationByCode(code string) (*types.Organization, error) {
+func (c *BatchValidationCache) GetOrganizationByCode(ctx context.Context, code string) (*types.Organization, error) {
 	if org, ok := c.OrganizationsByCode[code]; ok {
 		return org, nil
 	}
 
-	org, err := c.Context.OrgRepo.GetOrganizationByCode(code)
+	org, err := c.Context.OrgRepo.GetOrganizationByCode(ctx, code)
 	if err != nil {
 		return nil, err
 	}
@@ -140,13 +141,13 @@ func (c *BatchValidationCache) GetOrganizationByCode(code string) (*types.Organi
 	return org, nil
 }
 
-func (c *BatchValidationCache) GetPatientByOrgCodeAndSubmitterPatientId(orgCode string, submitterPatientId string) (*types.Patient, error) {
+func (c *BatchValidationCache) GetPatientByOrgCodeAndSubmitterPatientId(ctx context.Context, orgCode string, submitterPatientId string) (*types.Patient, error) {
 	key := PatientKey{orgCode, submitterPatientId}
 	if patient, ok := c.Patients[key]; ok {
 		return patient, nil
 	}
 
-	patient, err := c.Context.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(orgCode, submitterPatientId)
+	patient, err := c.Context.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(ctx, orgCode, submitterPatientId)
 	if err != nil {
 		return nil, err
 	}
@@ -158,12 +159,12 @@ func (c *BatchValidationCache) GetPatientByOrgCodeAndSubmitterPatientId(orgCode 
 	return patient, nil
 }
 
-func (c *BatchValidationCache) GetProjectByCode(code string) (*types.Project, error) {
+func (c *BatchValidationCache) GetProjectByCode(ctx context.Context, code string) (*types.Project, error) {
 	if project, ok := c.Projects[code]; ok {
 		return project, nil
 	}
 
-	project, err := c.Context.ProjectRepo.GetProjectByCode(code)
+	project, err := c.Context.ProjectRepo.GetProjectByCode(ctx, code)
 	if err != nil {
 		return nil, err
 	}
@@ -175,12 +176,12 @@ func (c *BatchValidationCache) GetProjectByCode(code string) (*types.Project, er
 	return project, nil
 }
 
-func (c *BatchValidationCache) GetSampleById(id int) (*types.Sample, error) {
+func (c *BatchValidationCache) GetSampleById(ctx context.Context, id int) (*types.Sample, error) {
 	if sample, ok := c.SamplesById[id]; ok {
 		return sample, nil
 	}
 
-	sample, err := c.Context.SampleRepo.GetSampleById(id)
+	sample, err := c.Context.SampleRepo.GetSampleById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -192,13 +193,13 @@ func (c *BatchValidationCache) GetSampleById(id int) (*types.Sample, error) {
 	return sample, nil
 }
 
-func (c *BatchValidationCache) GetSampleByOrgCodeAndSubmitterSampleId(orgCode string, submitterSampleId string) (*types.Sample, error) {
+func (c *BatchValidationCache) GetSampleByOrgCodeAndSubmitterSampleId(ctx context.Context, orgCode string, submitterSampleId string) (*types.Sample, error) {
 	key := SampleKey{orgCode, submitterSampleId}
 	if sample, ok := c.SamplesByKey[key]; ok {
 		return sample, nil
 	}
 
-	sample, err := c.Context.SampleRepo.GetSampleByOrgCodeAndSubmitterSampleId(orgCode, submitterSampleId)
+	sample, err := c.Context.SampleRepo.GetSampleByOrgCodeAndSubmitterSampleId(ctx, orgCode, submitterSampleId)
 	if err != nil {
 		return nil, err
 	}
@@ -211,12 +212,12 @@ func (c *BatchValidationCache) GetSampleByOrgCodeAndSubmitterSampleId(orgCode st
 	return sample, nil
 }
 
-func (c *BatchValidationCache) GetSequencingExperimentByAliquot(aliquot string) ([]types.SequencingExperiment, error) {
+func (c *BatchValidationCache) GetSequencingExperimentByAliquot(ctx context.Context, aliquot string) ([]types.SequencingExperiment, error) {
 	if seqExps, ok := c.SequencingExperimentsByAliquot[aliquot]; ok {
 		return getCopy(seqExps), nil
 	}
 
-	seqExps, err := c.Context.SeqExpRepo.GetSequencingExperimentByAliquot(aliquot)
+	seqExps, err := c.Context.SeqExpRepo.GetSequencingExperimentByAliquot(ctx, aliquot)
 	if err != nil {
 		return nil, err
 	}
@@ -225,13 +226,13 @@ func (c *BatchValidationCache) GetSequencingExperimentByAliquot(aliquot string) 
 	return getCopy(seqExps), nil
 }
 
-func (c *BatchValidationCache) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error) {
+func (c *BatchValidationCache) GetSequencingExperimentByAliquotAndSubmitterSample(ctx context.Context, aliquot string, submitterSampleId string, organizationCode string) (*types.SequencingExperiment, error) {
 	key := SequencingExperimentKey{organizationCode, submitterSampleId, aliquot}
 	if seqExp, ok := c.SequencingExperimentsByKey[key]; ok {
 		return seqExp, nil
 	}
 
-	seqExp, err := c.Context.SeqExpRepo.GetSequencingExperimentByAliquotAndSubmitterSample(aliquot, submitterSampleId, organizationCode)
+	seqExp, err := c.Context.SeqExpRepo.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, aliquot, submitterSampleId, organizationCode)
 	if err != nil {
 		return nil, err
 	}
@@ -243,12 +244,12 @@ func (c *BatchValidationCache) GetSequencingExperimentByAliquotAndSubmitterSampl
 	return seqExp, nil
 }
 
-func (c *BatchValidationCache) GetTaskContextBySequencingExperimentId(seqExpId int) ([]*types.TaskContext, error) {
+func (c *BatchValidationCache) GetTaskContextBySequencingExperimentId(ctx context.Context, seqExpId int) ([]*types.TaskContext, error) {
 	if tc, ok := c.TaskContext[seqExpId]; ok {
 		return getCopy(tc), nil
 	}
 
-	tc, err := c.Context.TaskRepo.GetTaskContextBySequencingExperimentId(seqExpId)
+	tc, err := c.Context.TaskRepo.GetTaskContextBySequencingExperimentId(ctx, seqExpId)
 	if err != nil {
 		return nil, err
 	}
@@ -257,12 +258,12 @@ func (c *BatchValidationCache) GetTaskContextBySequencingExperimentId(seqExpId i
 	return getCopy(tc), nil
 }
 
-func (c *BatchValidationCache) GetTaskHasDocumentByDocumentId(documentId int) ([]*types.TaskHasDocument, error) {
+func (c *BatchValidationCache) GetTaskHasDocumentByDocumentId(ctx context.Context, documentId int) ([]*types.TaskHasDocument, error) {
 	if thd, ok := c.TaskHasDocuments[documentId]; ok {
 		return getCopy(thd), nil
 	}
 
-	thd, err := c.Context.TaskRepo.GetTaskHasDocumentByDocumentId(documentId)
+	thd, err := c.Context.TaskRepo.GetTaskHasDocumentByDocumentId(ctx, documentId)
 	if err != nil {
 		return nil, err
 	}
@@ -271,12 +272,12 @@ func (c *BatchValidationCache) GetTaskHasDocumentByDocumentId(documentId int) ([
 	return getCopy(thd), nil
 }
 
-func (c *BatchValidationCache) GetValueSetCodes(valueSetType repository.ValueSetType) ([]string, error) {
+func (c *BatchValidationCache) GetValueSetCodes(ctx context.Context, valueSetType repository.ValueSetType) ([]string, error) {
 	if codes, ok := c.ValueSets[valueSetType]; ok {
 		return getCopy(codes), nil
 	}
 
-	codes, err := c.Context.ValueSetsRepo.GetCodes(valueSetType)
+	codes, err := c.Context.ValueSetsRepo.GetCodes(ctx, valueSetType)
 	if err != nil {
 		return nil, fmt.Errorf("batch validation cache GetValueSetCodes: %w", err)
 	}

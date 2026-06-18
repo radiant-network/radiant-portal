@@ -52,7 +52,7 @@ func Test_CreateCases(t *testing.T) {
 			OrderingOrganizationCode: &orgCode,
 			TenantCode:               types.DefaultTenantCode,
 		}
-		err := repo.CreateCase(newCase)
+		err := repo.CreateCase(t.Context(), newCase)
 		assert.NoError(t, err)
 
 		var c types.Case
@@ -69,7 +69,7 @@ func Test_CreateCases(t *testing.T) {
 func Test_GetCaseAnalysisCatalogIdByCode(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode("WGA")
+		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "WGA")
 		assert.NoError(t, err)
 		assert.Equal(t, 1, analysisCatalog.ID)
 		assert.Equal(t, "WGA", analysisCatalog.Code)
@@ -79,7 +79,7 @@ func Test_GetCaseAnalysisCatalogIdByCode(t *testing.T) {
 func Test_GetCaseAnalysisCatalogIdByCode_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode("NON_EXISTENT_CODE")
+		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "NON_EXISTENT_CODE")
 		assert.NoError(t, err)
 		assert.Nil(t, analysisCatalog)
 	})
@@ -89,11 +89,11 @@ func Test_GetCaseType(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 
-		caseType, err := repo.GetCaseType(70)
+		caseType, err := repo.GetCaseType(t.Context(), 70)
 		assert.NoError(t, err)
 		assert.Equal(t, "germline", caseType)
 
-		caseType, err = repo.GetCaseType(71)
+		caseType, err = repo.GetCaseType(t.Context(), 71)
 		assert.NoError(t, err)
 		assert.Equal(t, "somatic", caseType)
 	})
@@ -103,7 +103,7 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, nil, nil, nil)
-		cases, count, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Len(t, *cases, 10)
 		assert.Equal(t, int64(23), *count)
@@ -139,7 +139,7 @@ func Test_SearchCasesNoResult(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		cases, count, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(0), *count)
 		assert.Len(t, *cases, 0)
@@ -156,7 +156,7 @@ func Test_SearchCases(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		cases, count, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(2), *count)
 		assert.Len(t, *cases, 2)
@@ -173,7 +173,7 @@ func Test_SearchCases_OnProbandOrganizationID(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		cases, count, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(2), *count)
 		assert.Len(t, *cases, 2)
@@ -192,7 +192,7 @@ func Test_SearchCases_OnPatientMRN(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		cases, count, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(2), *count)
 		assert.Len(t, *cases, 2)
@@ -211,7 +211,7 @@ func Test_SearchCases_OnProbandID(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		cases, count, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(2), *count)
 		assert.Len(t, *cases, 2)
@@ -230,7 +230,7 @@ func Test_SearchCases_OnPatientID(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		cases, count, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(2), *count)
 		assert.Len(t, *cases, 2)
@@ -249,7 +249,7 @@ func Test_SearchCases_OnSequencingExperimentID(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		cases, count, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(1), *count)
 		assert.Len(t, *cases, 1)
@@ -267,7 +267,7 @@ func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err := repo.SearchCases(query)
+		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(23), *count)
 
@@ -278,7 +278,7 @@ func Test_SearchCases_OnResolutionStatusCode(t *testing.T) {
 			},
 		}
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err = repo.SearchCases(query)
+		_, count, err = repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(0), *count)
 	})
@@ -294,7 +294,7 @@ func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err := repo.SearchCases(query)
+		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(21), *count)
 
@@ -305,7 +305,7 @@ func Test_SearchCases_OnPrimaryConditionId(t *testing.T) {
 			},
 		}
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err = repo.SearchCases(query)
+		_, count, err = repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(0), *count)
 	})
@@ -321,7 +321,7 @@ func Test_SearchCases_OnPanelCode(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err := repo.SearchCases(query)
+		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(17), *count)
 	})
@@ -337,7 +337,7 @@ func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err := repo.SearchCases(query)
+		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(23), *count)
 
@@ -348,7 +348,7 @@ func Test_SearchCases_OnProbandLifeStatusCode(t *testing.T) {
 			},
 		}
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err = repo.SearchCases(query)
+		_, count, err = repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(0), *count)
 	})
@@ -364,7 +364,7 @@ func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err := repo.SearchCases(query)
+		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(23), *count)
 
@@ -375,7 +375,7 @@ func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
 			},
 		}
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err = repo.SearchCases(query)
+		_, count, err = repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(0), *count)
 	})
@@ -391,7 +391,7 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 			},
 		}
 		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err := repo.SearchCases(query)
+		_, count, err := repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(22), *count)
 
@@ -402,7 +402,7 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 			},
 		}
 		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err = repo.SearchCases(query)
+		_, count, err = repo.SearchCases(t.Context(), query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(1), *count)
 	})
@@ -411,7 +411,7 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 func Test_Cases_SearchById(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		autocompleteResult, err := repo.SearchById("1", 5)
+		autocompleteResult, err := repo.SearchById(t.Context(), "1", 5)
 		assert.NoError(t, err)
 		assert.Equal(t, len(*autocompleteResult), 5)
 		assert.Equal(t, "1", (*autocompleteResult)[0].Value)
@@ -425,8 +425,8 @@ func Test_Cases_SearchById(t *testing.T) {
 func Test_SearchById_CaseInsensitive(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		autocompleteResultLower, errLower := repo.SearchById("mrn", 5)
-		autocompleteResultUpper, errUpper := repo.SearchById("MRN", 5)
+		autocompleteResultLower, errLower := repo.SearchById(t.Context(), "mrn", 5)
+		autocompleteResultUpper, errUpper := repo.SearchById(t.Context(), "MRN", 5)
 		assert.NoError(t, errLower)
 		assert.NoError(t, errUpper)
 		assert.Equal(t, len(*autocompleteResultLower), len(*autocompleteResultUpper))
@@ -441,7 +441,7 @@ func Test_SearchById_CaseInsensitive(t *testing.T) {
 func Test_GetCasesFilters(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		filters, err := repo.GetCasesFilters()
+		filters, err := repo.GetCasesFilters(t.Context())
 		assert.NoError(t, err)
 		assert.Equal(t, len((*filters).Status), 7)
 		assert.Equal(t, len((*filters).Priority), 4)
@@ -460,7 +460,7 @@ func Test_GetCasesFilters(t *testing.T) {
 func Test_GetCaseEntity(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		caseEntity, err := repo.GetCaseEntity(1)
+		caseEntity, err := repo.GetCaseEntity(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, (*caseEntity).CaseID)
 		assert.Equal(t, "germline_family", (*caseEntity).CaseType)
@@ -473,7 +473,7 @@ func Test_GetCaseEntity(t *testing.T) {
 func Test_RetrieveCaseLevelData(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		caseEntity, err := repo.retrieveCaseLevelData(1)
+		caseEntity, err := repo.retrieveCaseLevelData(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, (*caseEntity).CaseID)
 		assert.Equal(t, 3, (*caseEntity).ProbandID)
@@ -504,7 +504,7 @@ func Test_RetrieveCaseLevelData(t *testing.T) {
 func Test_RetrieveCaseSequencingExperiments_Germline(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(1)
+		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, len(*sequencingExperiments))
 
@@ -545,7 +545,7 @@ func Test_RetrieveCaseSequencingExperiments_Germline(t *testing.T) {
 func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(71)
+		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(t.Context(), 71)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(*sequencingExperiments))
 
@@ -572,7 +572,7 @@ func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
 func Test_RetrieveCasePatients(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		members, err := repo.retrieveCasePatients(1)
+		members, err := repo.retrieveCasePatients(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, len(*members))
 
@@ -634,7 +634,7 @@ func Test_RetrieveCasePatients(t *testing.T) {
 func Test_RetrieveCaseTasks(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		tasks, err := repo.retrieveCaseTasks(1)
+		tasks, err := repo.retrieveCaseTasks(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 8, len(*tasks))
 
@@ -658,7 +658,7 @@ func Test_RetrieveCaseTasks(t *testing.T) {
 func Test_RetrieveCaseTasks_DeduplicatePatients(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewCasesRepository(db)
-		tasks, err := repo.retrieveCaseTasks(71)
+		tasks, err := repo.retrieveCaseTasks(t.Context(), 71)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, len(*tasks))
 
@@ -694,7 +694,7 @@ func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
 			TenantCode:               types.DefaultTenantCode,
 			SubmitterCaseID:          "1:1", // Duplicate submitter_case_id
 		}
-		err := repo.CreateCase(newCase)
+		err := repo.CreateCase(t.Context(), newCase)
 		assert.Error(t, err)
 		assert.Equal(t, "ERROR: duplicate key value violates unique constraint \"uc_cases_submitter_case_id_filtered\" (SQLSTATE 23505)", err.Error())
 
@@ -730,7 +730,7 @@ func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
 			TenantCode:               types.DefaultTenantCode,
 			SubmitterCaseID:          "",
 		}
-		err := repo.CreateCase(newCase)
+		err := repo.CreateCase(t.Context(), newCase)
 		assert.NoError(t, err)
 		db.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='';")
 	})

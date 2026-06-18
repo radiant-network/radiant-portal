@@ -31,8 +31,8 @@ func Test_TenantRepository_EnsureTenant_InsertsIdempotentlyWithoutOverwriting(t 
 		const code = "zz_ensure_tenant"
 		defer env.Postgres.Exec("DELETE FROM tenant WHERE code = ?", code)
 
-		require.NoError(t, repo.EnsureTenant(code, "First Name"))
-		require.NoError(t, repo.EnsureTenant(code, "Second Name")) // ON CONFLICT DO NOTHING
+		require.NoError(t, repo.EnsureTenant(t.Context(), code, "First Name"))
+		require.NoError(t, repo.EnsureTenant(t.Context(), code, "Second Name")) // ON CONFLICT DO NOTHING
 
 		var name string
 		require.NoError(t, env.Postgres.Raw("SELECT name FROM tenant WHERE code = ?", code).Scan(&name).Error)
@@ -48,10 +48,10 @@ func Test_TenantRepository_SeedDefaultRoles_SeedsCatalogIdempotently(t *testing.
 			env.Postgres.Exec("DELETE FROM role WHERE tenant_code = ?", code) // cascades role_action
 			env.Postgres.Exec("DELETE FROM tenant WHERE code = ?", code)
 		}()
-		require.NoError(t, repo.EnsureTenant(code, "Seed Roles"))
+		require.NoError(t, repo.EnsureTenant(t.Context(), code, "Seed Roles"))
 
-		require.NoError(t, repo.SeedDefaultRoles(code))
-		require.NoError(t, repo.SeedDefaultRoles(code)) // idempotent — no duplicate rows
+		require.NoError(t, repo.SeedDefaultRoles(t.Context(), code))
+		require.NoError(t, repo.SeedDefaultRoles(t.Context(), code)) // idempotent — no duplicate rows
 
 		var wantActions int64
 		for _, r := range DefaultRoles {
@@ -67,7 +67,7 @@ func Test_TenantRepository_SeedDefaultRoles_SeedsCatalogIdempotently(t *testing.
 
 func Test_TenantRepository_ListTenants_IncludesSeededDefault(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		codes, err := NewTenantRepository(env.Postgres).ListTenants()
+		codes, err := NewTenantRepository(env.Postgres).ListTenants(t.Context())
 		require.NoError(t, err)
 		assert.Contains(t, codes, types.DefaultTenantCode) // "radiant", seeded by migration 000009
 	})
@@ -75,7 +75,7 @@ func Test_TenantRepository_ListTenants_IncludesSeededDefault(t *testing.T) {
 
 func Test_TenantRepository_FederatableColumns_ExcludesJsonbAndUuid(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		cols, err := NewTenantRepository(env.Postgres).FederatableColumns([]string{"interpretation_germline"})
+		cols, err := NewTenantRepository(env.Postgres).FederatableColumns(t.Context(), []string{"interpretation_germline"})
 		require.NoError(t, err)
 
 		got := cols["interpretation_germline"]

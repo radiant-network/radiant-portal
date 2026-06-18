@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 // membershipReader returns a caller's tenant memberships. GetMeHandler needs only this
 // slice of the auth repository.
 type membershipReader interface {
-	GetMemberships(userID string) ([]types.TenantMembership, error)
+	GetMemberships(ctx context.Context, userID string) ([]types.TenantMembership, error)
 }
 
 // GetMeHandler
@@ -35,7 +36,7 @@ func GetMeHandler(repo membershipReader, auth utils.Auth) gin.HandlerFunc {
 			HandleUnauthorizedError(c)
 			return
 		}
-		memberships, err := repo.GetMemberships(*userID)
+		memberships, err := repo.GetMemberships(c.Request.Context(), *userID)
 		if err != nil {
 			HandleError(c, err)
 			return

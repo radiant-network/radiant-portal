@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -16,11 +17,11 @@ type mockOccurrenceFlagsRepo struct {
 	deleteErr      error
 }
 
-func (m *mockOccurrenceFlagsRepo) Upsert(flag types.OccurrenceFlag) (*types.OccurrenceFlag, error) {
+func (m *mockOccurrenceFlagsRepo) Upsert(ctx context.Context, flag types.OccurrenceFlag) (*types.OccurrenceFlag, error) {
 	return &flag, m.upsertErr
 }
 
-func (m *mockOccurrenceFlagsRepo) Delete(caseID, seqID, taskID int, occurrenceID string) (int64, error) {
+func (m *mockOccurrenceFlagsRepo) Delete(ctx context.Context, caseID, seqID, taskID int, occurrenceID string) (int64, error) {
 	return m.deleteAffected, m.deleteErr
 }
 

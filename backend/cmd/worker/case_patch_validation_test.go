@@ -72,7 +72,7 @@ func Test_validatePatchCaseRecord_Tasks_DocumentAlreadyOutputOfAnotherTask(t *te
 		},
 	}
 
-	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
+	rec, err := validatePatchCaseRecord(t.Context(), ctx, cache, patch, 0)
 	assert.NoError(t, err)
 	assert.NotNil(t, rec.Record)
 	assert.True(t, hasErrorCode(rec.Errors, DocumentAlreadyOutputOfAnotherTask), "expected %s, got %+v", DocumentAlreadyOutputOfAnotherTask, rec.Errors)
@@ -99,7 +99,7 @@ func Test_validatePatchCaseRecord_Tasks_InvalidTypeCode(t *testing.T) {
 		},
 	}
 
-	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
+	rec, err := validatePatchCaseRecord(t.Context(), ctx, cache, patch, 0)
 	assert.NoError(t, err)
 	assert.NotNil(t, rec.Record)
 	assert.True(t, hasErrorCode(rec.Errors, TaskInvalidField), "expected %s, got %+v", TaskInvalidField, rec.Errors)
@@ -126,7 +126,7 @@ func Test_validatePatchCaseRecord_Tasks_UnknownAliquot(t *testing.T) {
 		},
 	}
 
-	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
+	rec, err := validatePatchCaseRecord(t.Context(), ctx, cache, patch, 0)
 	assert.NoError(t, err)
 	assert.NotNil(t, rec.Record)
 	assert.True(t, hasErrorCode(rec.Errors, TaskUnknownAliquot), "expected %s, got %+v", TaskUnknownAliquot, rec.Errors)
@@ -156,7 +156,7 @@ func Test_validatePatchCaseRecord_Tasks_SkippedWhenCaseMissing(t *testing.T) {
 		},
 	}
 
-	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
+	rec, err := validatePatchCaseRecord(t.Context(), ctx, cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Nil(t, rec.Record)
 	assert.Nil(t, rec.CaseID)
@@ -193,7 +193,7 @@ func Test_validatePatchCaseRecord_Success(t *testing.T) {
 		},
 	}
 
-	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
+	rec, err := validatePatchCaseRecord(t.Context(), ctx, cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Empty(t, rec.Errors)
 	assert.NotNil(t, rec.CaseID)
@@ -218,7 +218,7 @@ func Test_validatePatchCaseRecord_EmptyExperimentsIsNoOp(t *testing.T) {
 		SequencingExperiments: nil,
 	}
 
-	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
+	rec, err := validatePatchCaseRecord(t.Context(), ctx, cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Empty(t, rec.Errors)
 	assert.NotNil(t, rec.CaseID)
@@ -237,7 +237,7 @@ func Test_validatePatchCaseRecord_UnknownProject(t *testing.T) {
 		},
 	}
 
-	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
+	rec, err := validatePatchCaseRecord(t.Context(), ctx, cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, CaseUnknownProject, rec.Errors[0].Code)
@@ -262,7 +262,7 @@ func Test_validatePatchCaseRecord_CaseNotFound(t *testing.T) {
 		},
 	}
 
-	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
+	rec, err := validatePatchCaseRecord(t.Context(), ctx, cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, CaseNotFoundForAttach, rec.Errors[0].Code)
@@ -284,7 +284,7 @@ func Test_validatePatchCaseRecord_DiagnosticLabCode_Resolved(t *testing.T) {
 		DiagnosticLabCode: "LAB-1", // exists in mock
 	}
 
-	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
+	rec, err := validatePatchCaseRecord(t.Context(), ctx, cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Empty(t, rec.Errors)
 	assert.Equal(t, "LAB-1", rec.DiagnosisLabCodeUpdate)
@@ -304,7 +304,7 @@ func Test_validatePatchCaseRecord_DiagnosticLabCode_Unknown(t *testing.T) {
 		DiagnosticLabCode: "LAB-UNKNOWN", // not in mock
 	}
 
-	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
+	rec, err := validatePatchCaseRecord(t.Context(), ctx, cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, CaseUnknownDiagnosticLab, rec.Errors[0].Code)
@@ -331,7 +331,7 @@ func Test_validatePatchCaseRecord_SequencingExperimentMissing(t *testing.T) {
 		},
 	}
 
-	rec, err := validatePatchCaseRecord(ctx, cache, patch, 0)
+	rec, err := validatePatchCaseRecord(t.Context(), ctx, cache, patch, 0)
 	assert.NoError(t, err)
 	assert.Len(t, rec.Errors, 1)
 	assert.Equal(t, SequencingExperimentNotFound, rec.Errors[0].Code)

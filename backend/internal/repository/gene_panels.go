@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -19,7 +20,8 @@ func NewGenePanelsRepository(db *gorm.DB) *GenePanelsRepository {
 	return &GenePanelsRepository{db: db}
 }
 
-func (r *GenePanelsRepository) GetVariantGenePanelConditions(panelType string, locusId int, conditionFilter string) (*GenePanelConditions, error) {
+func (r *GenePanelsRepository) GetVariantGenePanelConditions(ctx context.Context, panelType string, locusId int, conditionFilter string) (*GenePanelConditions, error) {
+	db := r.db.WithContext(ctx)
 	var genePanelConditions []GenePanelCondition
 	var genePanelConditionsPerSymbol = make(map[string][]GenePanelCondition)
 	like := fmt.Sprintf("%%%s%%", conditionFilter)
@@ -30,9 +32,9 @@ func (r *GenePanelsRepository) GetVariantGenePanelConditions(panelType string, l
 		return nil, fmt.Errorf("error while fetching variant gene panel conditions: %s", err)
 	}
 
-	txGene := r.db.Table(types.ConsequenceTable.Name).Where("locus_id = ?", locusId).Distinct("symbol")
+	txGene := db.Table(types.ConsequenceTable.Name).Where("locus_id = ?", locusId).Distinct("symbol")
 
-	tx := r.db.Table((*table).Name)
+	tx := db.Table((*table).Name)
 	tx = tx.Where("symbol in (?)", txGene)
 
 	switch *table {
@@ -56,17 +58,17 @@ func (r *GenePanelsRepository) GetVariantGenePanelConditions(panelType string, l
 
 	tx = tx.Order("panel_name asc")
 
-	countOmim, err := r.CountGenePanel(types.OmimGenePanelTable, "panel", conditionFilter, txGene)
+	countOmim, err := r.CountGenePanel(ctx, types.OmimGenePanelTable, "panel", conditionFilter, txGene)
 	if err != nil {
 		return nil, fmt.Errorf("error while counting gene panel: %w", err)
 	}
 
-	countOrphanet, err := r.CountGenePanel(types.OrphanetGenePanelTable, "panel", conditionFilter, txGene)
+	countOrphanet, err := r.CountGenePanel(ctx, types.OrphanetGenePanelTable, "panel", conditionFilter, txGene)
 	if err != nil {
 		return nil, fmt.Errorf("error while counting gene panel: %w", err)
 	}
 
-	countHpo, err := r.CountGenePanel(types.HpoGenePanelTable, "hpo_term_name", conditionFilter, txGene)
+	countHpo, err := r.CountGenePanel(ctx, types.HpoGenePanelTable, "hpo_term_name", conditionFilter, txGene)
 	if err != nil {
 		return nil, fmt.Errorf("error while counting gene panel: %w", err)
 	}
@@ -111,10 +113,10 @@ func retrieveTableByPanelType(panelType string) (*types.Table, error) {
 	}
 }
 
-func (r *GenePanelsRepository) CountGenePanel(table types.Table, panelColumnName string, conditionFilter string, geneFilter *gorm.DB) (*int64, error) {
+func (r *GenePanelsRepository) CountGenePanel(ctx context.Context, table types.Table, panelColumnName string, conditionFilter string, geneFilter *gorm.DB) (*int64, error) {
 	var count int64
 	like := fmt.Sprintf("%%%s%%", conditionFilter)
-	txCount := r.db.Table(table.Name).Where("symbol in (?)", geneFilter)
+	txCount := r.db.WithContext(ctx).Table(table.Name).Where("symbol in (?)", geneFilter)
 	if len(conditionFilter) > 0 {
 		txCount = txCount.Where(fmt.Sprintf("LOWER(%s) like ?", panelColumnName), strings.ToLower(like))
 	}

@@ -28,7 +28,7 @@ func newTestInterpretationsRepo(db *gorm.DB) *InterpretationsRepository {
 func Test_Interpretations_FirstGermline(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
-		interpretation, err := repo.FirstGermline("1", "1", "1000", "T001")
+		interpretation, err := repo.FirstGermline(t.Context(), "1", "1", "1000", "T001")
 		assert.NoError(t, err)
 		if assert.NotNil(t, interpretation) {
 			assert.Equal(t, "1", interpretation.CaseId)
@@ -46,7 +46,7 @@ func Test_Interpretations_FirstGermline(t *testing.T) {
 func Test_Interpretations_FirstGermline_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
-		interpretation, err := repo.FirstGermline("999", "999", "999", "T999")
+		interpretation, err := repo.FirstGermline(t.Context(), "999", "999", "999", "T999")
 		assert.NoError(t, err)
 		assert.Nil(t, interpretation)
 	})
@@ -70,11 +70,11 @@ func Test_Interpretations_CreateOrUpdateGermline_Create(t *testing.T) {
 			Condition:      "MONDO:0000099",
 			Classification: "LA6675-8",
 		}
-		err := repo.CreateOrUpdateGermline(interpretation)
+		err := repo.CreateOrUpdateGermline(t.Context(), interpretation)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, interpretation.ID)
 
-		found, err := repo.FirstGermline("99", "99", "9999", "T099")
+		found, err := repo.FirstGermline(t.Context(), "99", "99", "9999", "T099")
 		assert.NoError(t, err)
 		if assert.NotNil(t, found) {
 			assert.Equal(t, "MONDO:0000099", found.Condition)
@@ -103,15 +103,15 @@ func Test_Interpretations_CreateOrUpdateGermline_Update(t *testing.T) {
 			Condition:      "MONDO:0000001",
 			Classification: "LA6668-3",
 		}
-		err := repo.CreateOrUpdateGermline(interpretation)
+		err := repo.CreateOrUpdateGermline(t.Context(), interpretation)
 		assert.NoError(t, err)
 
 		// Now update it
 		interpretation.Classification = "LA26333-7"
-		err = repo.CreateOrUpdateGermline(interpretation)
+		err = repo.CreateOrUpdateGermline(t.Context(), interpretation)
 		assert.NoError(t, err)
 
-		updated, err := repo.FirstGermline("98", "98", "9998", "T098")
+		updated, err := repo.FirstGermline(t.Context(), "98", "98", "9998", "T098")
 		assert.NoError(t, err)
 		if assert.NotNil(t, updated) {
 			assert.Equal(t, "LA26333-7", updated.Classification)
@@ -122,7 +122,7 @@ func Test_Interpretations_CreateOrUpdateGermline_Update(t *testing.T) {
 func Test_Interpretations_SearchGermline(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
-		results, err := repo.SearchGermline([]string{}, []string{}, []string{})
+		results, err := repo.SearchGermline(t.Context(), []string{}, []string{}, []string{})
 		assert.NoError(t, err)
 		assert.NotNil(t, results)
 	})
@@ -131,7 +131,7 @@ func Test_Interpretations_SearchGermline(t *testing.T) {
 func Test_Interpretations_RetrieveGermlineClassificationCounts(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
-		counts, err := repo.RetrieveGermlineInterpretationClassificationCounts(1000)
+		counts, err := repo.RetrieveGermlineInterpretationClassificationCounts(t.Context(), 1000)
 		assert.NoError(t, err)
 		if assert.NotNil(t, counts) {
 			assert.Equal(t, 1, counts["pathogenic"])
@@ -144,7 +144,7 @@ func Test_Interpretations_RetrieveGermlineClassificationCounts(t *testing.T) {
 func Test_Interpretations_RetrieveGermlineClassificationCounts_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
-		counts, err := repo.RetrieveGermlineInterpretationClassificationCounts(999999)
+		counts, err := repo.RetrieveGermlineInterpretationClassificationCounts(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Nil(t, counts)
 	})
@@ -155,7 +155,7 @@ func Test_Interpretations_RetrieveGermlineClassificationCounts_NotFound(t *testi
 func Test_Interpretations_FirstSomatic(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
-		interpretation, err := repo.FirstSomatic("1", "1", "1000", "T001")
+		interpretation, err := repo.FirstSomatic(t.Context(), "1", "1", "1000", "T001")
 		assert.NoError(t, err)
 		if assert.NotNil(t, interpretation) {
 			assert.Equal(t, "1", interpretation.CaseId)
@@ -173,7 +173,7 @@ func Test_Interpretations_FirstSomatic(t *testing.T) {
 func Test_Interpretations_FirstSomatic_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
-		interpretation, err := repo.FirstSomatic("999", "999", "999", "T999")
+		interpretation, err := repo.FirstSomatic(t.Context(), "999", "999", "999", "T999")
 		assert.NoError(t, err)
 		assert.Nil(t, interpretation)
 	})
@@ -197,11 +197,11 @@ func Test_Interpretations_CreateOrUpdateSomatic_Create(t *testing.T) {
 			TumoralType:  "MONDO:0000004",
 			Oncogenicity: "Oncogenic",
 		}
-		err := repo.CreateOrUpdateSomatic(interpretation)
+		err := repo.CreateOrUpdateSomatic(t.Context(), interpretation)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, interpretation.ID)
 
-		found, err := repo.FirstSomatic("97", "97", "9997", "T097")
+		found, err := repo.FirstSomatic(t.Context(), "97", "97", "9997", "T097")
 		assert.NoError(t, err)
 		if assert.NotNil(t, found) {
 			assert.Equal(t, "MONDO:0000004", found.TumoralType)
@@ -229,14 +229,14 @@ func Test_Interpretations_CreateOrUpdateSomatic_Update(t *testing.T) {
 			TumoralType:  "MONDO:TEST00001",
 			Oncogenicity: "Likely Oncogenic",
 		}
-		err := repo.CreateOrUpdateSomatic(interpretation)
+		err := repo.CreateOrUpdateSomatic(t.Context(), interpretation)
 		assert.NoError(t, err)
 
 		interpretation.Oncogenicity = "Oncogenic"
-		err = repo.CreateOrUpdateSomatic(interpretation)
+		err = repo.CreateOrUpdateSomatic(t.Context(), interpretation)
 		assert.NoError(t, err)
 
-		updated, err := repo.FirstSomatic("96", "96", "9996", "T096")
+		updated, err := repo.FirstSomatic(t.Context(), "96", "96", "9996", "T096")
 		assert.NoError(t, err)
 		if assert.NotNil(t, updated) {
 			assert.Equal(t, "Oncogenic", updated.Oncogenicity)
@@ -247,7 +247,7 @@ func Test_Interpretations_CreateOrUpdateSomatic_Update(t *testing.T) {
 func Test_Interpretations_SearchSomatic(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
-		results, err := repo.SearchSomatic([]string{}, []string{}, []string{})
+		results, err := repo.SearchSomatic(t.Context(), []string{}, []string{}, []string{})
 		assert.NoError(t, err)
 		assert.NotNil(t, results)
 	})
@@ -256,7 +256,7 @@ func Test_Interpretations_SearchSomatic(t *testing.T) {
 func Test_Interpretations_RetrieveSomaticClassificationCounts(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
-		counts, err := repo.RetrieveSomaticInterpretationClassificationCounts(1000)
+		counts, err := repo.RetrieveSomaticInterpretationClassificationCounts(t.Context(), 1000)
 		assert.NoError(t, err)
 		if assert.NotNil(t, counts) {
 			assert.Equal(t, 2, counts["Oncogenic"])
@@ -268,7 +268,7 @@ func Test_Interpretations_RetrieveSomaticClassificationCounts(t *testing.T) {
 func Test_Interpretations_RetrieveSomaticClassificationCounts_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
-		counts, err := repo.RetrieveSomaticInterpretationClassificationCounts(999999)
+		counts, err := repo.RetrieveSomaticInterpretationClassificationCounts(t.Context(), 999999)
 		assert.NoError(t, err)
 		assert.Nil(t, counts)
 	})

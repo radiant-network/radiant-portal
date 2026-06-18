@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"slices"
@@ -11,8 +12,8 @@ import (
 )
 
 type occurrenceFlagsStore interface {
-	Upsert(flag types.OccurrenceFlag) (*types.OccurrenceFlag, error)
-	Delete(caseID, seqID, taskID int, occurrenceID string) (int64, error)
+	Upsert(ctx context.Context, flag types.OccurrenceFlag) (*types.OccurrenceFlag, error)
+	Delete(ctx context.Context, caseID, seqID, taskID int, occurrenceID string) (int64, error)
 }
 
 // UpsertOccurrenceFlagHandler
@@ -68,7 +69,7 @@ func UpsertOccurrenceFlagHandler(repo occurrenceFlagsStore) gin.HandlerFunc {
 			return
 		}
 
-		if _, err := repo.Upsert(types.OccurrenceFlag{
+		if _, err := repo.Upsert(c.Request.Context(), types.OccurrenceFlag{
 			CaseID:       caseID,
 			OccurrenceID: occurrenceID,
 			SeqID:        seqID,
@@ -124,7 +125,7 @@ func DeleteOccurrenceFlagHandler(repo occurrenceFlagsStore) gin.HandlerFunc {
 
 		occurrenceID := c.Param("occurrence_id")
 
-		affected, err := repo.Delete(caseID, seqID, taskID, occurrenceID)
+		affected, err := repo.Delete(c.Request.Context(), caseID, seqID, taskID, occurrenceID)
 		if err != nil {
 			HandleError(c, err)
 			return

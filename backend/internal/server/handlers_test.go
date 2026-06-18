@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -42,7 +43,7 @@ func (m *MockRepository) CheckDatabaseConnection() string {
 	return "up"
 }
 
-func (m *MockRepository) GetTermAutoComplete(string, string, int) (*[]types.AutoCompleteTerm, error) {
+func (m *MockRepository) GetTermAutoComplete(ctx context.Context, termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error) {
 	return &[]types.AutoCompleteTerm{
 			{Source: types.Term{
 				ID:   "MONDO:0000001",
@@ -55,7 +56,7 @@ func (m *MockRepository) GetTermAutoComplete(string, string, int) (*[]types.Auto
 		nil
 }
 
-func (m *MockRepository) GetTermNameById(termsTable string, id string) (*string, error) {
+func (m *MockRepository) GetTermNameById(ctx context.Context, termsTable string, id string) (*string, error) {
 	if termsTable == types.MondoTable.Name && id == "MONDO:0000001" {
 		name := "blood group incompatibility"
 		return &name, nil
@@ -79,11 +80,11 @@ func (m *MockRepository) GetOrganizations() (*[]string, error) {
 	return &[]string{"CHOP"}, nil
 }
 
-func (r *MockIGVRepository) GetIGV(caseID int) ([]types.IGVTrack, error) {
+func (r *MockIGVRepository) GetIGV(ctx context.Context, caseID int) ([]types.IGVTrack, error) {
 	return r.igvTracks, r.err
 }
 
-func (m *MockRepository) GetCaseType(caseID int) (string, error) {
+func (m *MockRepository) GetCaseType(ctx context.Context, caseID int) (string, error) {
 	return m.caseType, nil
 }
 

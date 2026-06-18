@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -17,9 +18,9 @@ func NewProjectRepository(db *gorm.DB) *ProjectRepository {
 	return &ProjectRepository{db: db}
 }
 
-func (r *ProjectRepository) GetProjectByCode(code string) (*Project, error) {
+func (r *ProjectRepository) GetProjectByCode(ctx context.Context, code string) (*Project, error) {
 	var project Project
-	tx := r.db.Table(types.ProjectTable.Name).Where("code = ?", code)
+	tx := r.db.WithContext(ctx).Table(types.ProjectTable.Name).Where("code = ?", code)
 	if err := tx.First(&project).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil

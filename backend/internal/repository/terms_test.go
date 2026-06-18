@@ -13,7 +13,7 @@ import (
 func Test_GetTermAutoComplete(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewTermsRepository(db)
-		terms, err := repo.GetTermAutoComplete(types.MondoTable.Name, "blood", 20)
+		terms, err := repo.GetTermAutoComplete(t.Context(), types.MondoTable.Name, "blood", 20)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(*terms))
 		assert.Equal(t, "MONDO:0000001", (*terms)[0].Source.ID)
@@ -27,7 +27,7 @@ func Test_GetTermAutoComplete(t *testing.T) {
 func Test_GetTermAutoCompleteWithLimit(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewTermsRepository(db)
-		terms, err := repo.GetTermAutoComplete(types.MondoTable.Name, "blood", 1)
+		terms, err := repo.GetTermAutoComplete(t.Context(), types.MondoTable.Name, "blood", 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(*terms))
 		assert.Equal(t, "MONDO:0000001", (*terms)[0].Source.ID)
@@ -40,7 +40,7 @@ func Test_GetTermAutoCompleteWithLimit(t *testing.T) {
 func Test_GetTermAutoCompleteNoResult(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewTermsRepository(db)
-		terms, err := repo.GetTermAutoComplete(types.MondoTable.Name, "not_here", 20)
+		terms, err := repo.GetTermAutoComplete(t.Context(), types.MondoTable.Name, "not_here", 20)
 		assert.NoError(t, err)
 		assert.Equal(t, 0, len(*terms))
 	})
@@ -49,7 +49,7 @@ func Test_GetTermAutoCompleteNoResult(t *testing.T) {
 func Test_GetTermNameById(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewTermsRepository(db)
-		term, err := repo.GetTermNameById(types.MondoTable.Name, "MONDO:0000003")
+		term, err := repo.GetTermNameById(t.Context(), types.MondoTable.Name, "MONDO:0000003")
 		assert.NoError(t, err)
 		assert.Equal(t, "colorblindness, partial", *term)
 	})
@@ -58,7 +58,7 @@ func Test_GetTermNameById(t *testing.T) {
 func Test_GetTermNameByIdNoResult(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewTermsRepository(db)
-		term, err := repo.GetTermNameById(types.MondoTable.Name, "MONDO:not_existing")
+		term, err := repo.GetTermNameById(t.Context(), types.MondoTable.Name, "MONDO:not_existing")
 		assert.NoError(t, err)
 		assert.Nil(t, term)
 	})

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"regexp"
@@ -45,9 +46,9 @@ func NewTenantRepository(db *gorm.DB) *TenantRepository {
 	return &TenantRepository{db: db}
 }
 
-func (r *TenantRepository) ListTenants() ([]string, error) {
+func (r *TenantRepository) ListTenants(ctx context.Context) ([]string, error) {
 	var codes []string
-	if err := r.db.Raw(`SELECT code FROM public.tenant ORDER BY code`).Scan(&codes).Error; err != nil {
+	if err := r.db.WithContext(ctx).Raw(`SELECT code FROM public.tenant ORDER BY code`).Scan(&codes).Error; err != nil {
 		return nil, fmt.Errorf("list tenants: %w", err)
 	}
 	return codes, nil
@@ -59,16 +60,16 @@ var unsupportedFederationTypes = []string{"json", "jsonb", "uuid"}
 
 // FederatableColumns returns, per table, the columns whose types the radiant_jdbc
 // catalog can read (ordinal order).
-func (r *TenantRepository) FederatableColumnsForViews() (map[string][]string, error) {
-	return r.FederatableColumns(ViewTables)
+func (r *TenantRepository) FederatableColumnsForViews(ctx context.Context) (map[string][]string, error) {
+	return r.FederatableColumns(ctx, ViewTables)
 }
 
-func (r *TenantRepository) FederatableColumns(tables []string) (map[string][]string, error) {
+func (r *TenantRepository) FederatableColumns(ctx context.Context, tables []string) (map[string][]string, error) {
 	var rows []struct {
 		TableName  string
 		ColumnName string
 	}
-	err := r.db.Raw(`
+	err := r.db.WithContext(ctx).Raw(`
 		SELECT table_name, column_name
 		FROM information_schema.columns
 		WHERE table_schema = 'public' AND table_name IN ? AND data_type NOT IN ?
@@ -84,11 +85,11 @@ func (r *TenantRepository) FederatableColumns(tables []string) (map[string][]str
 	return cols, nil
 }
 
-func (r *TenantRepository) EnsureTenant(code, name string) error {
+func (r *TenantRepository) EnsureTenant(ctx context.Context, code, name string) error {
 	if err := ValidateTenantCode(code); err != nil {
 		return err
 	}
-	err := r.db.Exec(`
+	err := r.db.WithContext(ctx).Exec(`
 		INSERT INTO public.tenant (code, name)
 		VALUES (?, ?)
 		ON CONFLICT (code) DO NOTHING`,
@@ -99,11 +100,11 @@ func (r *TenantRepository) EnsureTenant(code, name string) error {
 	return nil
 }
 
-func (r *TenantRepository) SeedDefaultRoles(tenantCode string) error {
+func (r *TenantRepository) SeedDefaultRoles(ctx context.Context, tenantCode string) error {
 	if err := ValidateTenantCode(tenantCode); err != nil {
 		return err
 	}
-	return r.db.Transaction(func(tx *gorm.DB) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		for _, role := range DefaultRoles {
 			if err := tx.Exec(`
 				INSERT INTO public.role (tenant_code, code, name, description)

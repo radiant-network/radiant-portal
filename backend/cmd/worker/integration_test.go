@@ -1457,13 +1457,13 @@ func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
 func Test_ProcessBatch_Using_Cache(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := repository.NewValueSetsRepository(db)
-		ctx := batchval.BatchValidationContext{
+		bv := batchval.BatchValidationContext{
 			ValueSetsRepo: repo,
 		}
-		cache := batchval.NewBatchValidationCache(&ctx)
+		cache := batchval.NewBatchValidationCache(&bv)
 		expected := []string{"completed", "draft", "incomplete", "in_progress", "revoke", "submitted", "unknown"}
 
-		vc, err := cache.GetValueSetCodes(repository.ValueSetStatus)
+		vc, err := cache.GetValueSetCodes(t.Context(), repository.ValueSetStatus)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, vc)
 
@@ -1474,12 +1474,12 @@ func Test_ProcessBatch_Using_Cache(t *testing.T) {
 			t.Fatal("failed to insert status code:", err)
 		}
 
-		codes, err := repo.GetCodes(repository.ValueSetStatus)
+		codes, err := repo.GetCodes(t.Context(), repository.ValueSetStatus)
 		assert.NoError(t, err)
 		assert.Contains(t, codes, "foo") // Make sure the new code is in the DB
 
 		// We should not get the new value, since we use the cache
-		vc, err = cache.GetValueSetCodes(repository.ValueSetStatus)
+		vc, err = cache.GetValueSetCodes(t.Context(), repository.ValueSetStatus)
 		assert.NoError(t, err)
 		assert.Equal(t, expected, vc)
 

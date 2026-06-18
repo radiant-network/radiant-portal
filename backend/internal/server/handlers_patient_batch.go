@@ -53,7 +53,7 @@ func PostPatientBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc
 			return
 		}
 
-		batch, err := repo.CreateBatch(*tenant, body.Patients, types.PatientBatchType, *username, queryParam.DryRun)
+		batch, err := repo.CreateBatch(c.Request.Context(), *tenant, body.Patients, types.PatientBatchType, *username, queryParam.DryRun)
 		if err != nil {
 			HandleError(c, err)
 			return

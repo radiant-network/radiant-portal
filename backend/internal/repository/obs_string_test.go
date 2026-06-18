@@ -12,7 +12,7 @@ import (
 func Test_GetObservationStringById_OK(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewObservationStringRepository(db)
-		result, err := repo.GetById(1)
+		result, err := repo.GetById(t.Context(), 1)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, result.ID)
 		assert.Equal(t, 16, result.CaseID)
@@ -25,7 +25,7 @@ func Test_GetObservationStringById_OK(t *testing.T) {
 func Test_GetObservationStringById_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewObservationStringRepository(db)
-		result, err := repo.GetById(999)
+		result, err := repo.GetById(t.Context(), 999)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
@@ -43,10 +43,10 @@ func Test_CreateObservationString_OK(t *testing.T) {
 		}
 
 		repo := NewObservationStringRepository(db)
-		err := repo.CreateObservationString(newObs)
+		err := repo.CreateObservationString(t.Context(), newObs)
 		assert.NoError(t, err)
 
-		result, err := repo.GetById(9999)
+		result, err := repo.GetById(t.Context(), 9999)
 		assert.NoError(t, err)
 		assert.Equal(t, 9999, result.ID)
 		assert.Equal(t, 1, result.CaseID)
@@ -61,7 +61,7 @@ func Test_CreateObservationString_OK(t *testing.T) {
 func Test_CreateObservationString_NilError(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewObservationStringRepository(db)
-		err := repo.CreateObservationString(nil)
+		err := repo.CreateObservationString(t.Context(), nil)
 		assert.Error(t, err)
 	})
 }
@@ -78,10 +78,10 @@ func Test_CreateObservationString_CaseNotFound(t *testing.T) {
 		}
 
 		repo := NewObservationStringRepository(db)
-		err := repo.CreateObservationString(newObs)
+		err := repo.CreateObservationString(t.Context(), newObs)
 		assert.Error(t, err)
 
-		result, err := repo.GetById(4242)
+		result, err := repo.GetById(t.Context(), 4242)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})
@@ -99,10 +99,10 @@ func Test_CreateObservationString_PatientNotFound(t *testing.T) {
 		}
 
 		repo := NewObservationStringRepository(db)
-		err := repo.CreateObservationString(newObs)
+		err := repo.CreateObservationString(t.Context(), newObs)
 		assert.Error(t, err)
 
-		result, err := repo.GetById(4242)
+		result, err := repo.GetById(t.Context(), 4242)
 		assert.NoError(t, err)
 		assert.Nil(t, result)
 	})

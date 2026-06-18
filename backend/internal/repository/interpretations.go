@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -32,7 +33,7 @@ func addWhere(tx *gorm.DB, caseId string, sequencingId string, locusId string, t
 }
 
 // mappers, could be moved to a separate file
-func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.InterpretationCommonDAO) (*types.InterpretationCommon, error) {
+func (r *InterpretationsRepository) mapToInterpretationCommon(ctx context.Context, dao *types.InterpretationCommonDAO) (*types.InterpretationCommon, error) {
 	pubmeds := utils.SplitRemoveEmptyString(dao.Pubmed, ",")
 	interpretation := &types.InterpretationCommon{
 		ID:             dao.ID,
@@ -66,7 +67,7 @@ func (r *InterpretationsRepository) mapToInterpretationCommon(dao *types.Interpr
 	return interpretation, nil
 }
 
-func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation *types.InterpretationCommon) (*types.InterpretationCommonDAO, error) {
+func (r *InterpretationsRepository) mapToInterpretationCommonDAO(ctx context.Context, interpretation *types.InterpretationCommon) (*types.InterpretationCommonDAO, error) {
 	metadata, err := json.Marshal(interpretation.Metadata)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal metadata from interpretation: %s", interpretation.Metadata)
@@ -100,8 +101,8 @@ func (r *InterpretationsRepository) mapToInterpretationCommonDAO(interpretation 
 	return common, nil
 }
 
-func (r *InterpretationsRepository) mapToInterpretationGermline(dao *types.InterpretationGermlineDAO) (*types.InterpretationGermline, error) {
-	common, err := r.mapToInterpretationCommon(&dao.InterpretationCommonDAO)
+func (r *InterpretationsRepository) mapToInterpretationGermline(ctx context.Context, dao *types.InterpretationGermlineDAO) (*types.InterpretationGermline, error) {
+	common, err := r.mapToInterpretationCommon(ctx, &dao.InterpretationCommonDAO)
 	if err != nil {
 		return nil, err
 	}
@@ -115,8 +116,8 @@ func (r *InterpretationsRepository) mapToInterpretationGermline(dao *types.Inter
 	return interpretation, nil
 }
 
-func (r *InterpretationsRepository) mapToInterpretationGermlineDAO(interpretation *types.InterpretationGermline) (*types.InterpretationGermlineDAO, error) {
-	common, err := r.mapToInterpretationCommonDAO(&interpretation.InterpretationCommon)
+func (r *InterpretationsRepository) mapToInterpretationGermlineDAO(ctx context.Context, interpretation *types.InterpretationGermline) (*types.InterpretationGermlineDAO, error) {
+	common, err := r.mapToInterpretationCommonDAO(ctx, &interpretation.InterpretationCommon)
 	if err != nil {
 		return nil, err
 	}
@@ -130,8 +131,8 @@ func (r *InterpretationsRepository) mapToInterpretationGermlineDAO(interpretatio
 	return dao, nil
 }
 
-func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.InterpretationSomaticDAO) (*types.InterpretationSomatic, error) {
-	common, err := r.mapToInterpretationCommon(&dao.InterpretationCommonDAO)
+func (r *InterpretationsRepository) mapToInterpretationSomatic(ctx context.Context, dao *types.InterpretationSomaticDAO) (*types.InterpretationSomatic, error) {
+	common, err := r.mapToInterpretationCommon(ctx, &dao.InterpretationCommonDAO)
 	if err != nil {
 		return nil, err
 	}
@@ -145,8 +146,8 @@ func (r *InterpretationsRepository) mapToInterpretationSomatic(dao *types.Interp
 	return interpretation, nil
 }
 
-func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(interpretation *types.InterpretationSomatic) (*types.InterpretationSomaticDAO, error) {
-	common, err := r.mapToInterpretationCommonDAO(&interpretation.InterpretationCommon)
+func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(ctx context.Context, interpretation *types.InterpretationSomatic) (*types.InterpretationSomaticDAO, error) {
+	common, err := r.mapToInterpretationCommonDAO(ctx, &interpretation.InterpretationCommon)
 	if err != nil {
 		return nil, err
 	}
@@ -160,9 +161,9 @@ func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(interpretation
 	return dao, nil
 }
 
-func (r *InterpretationsRepository) FirstGermline(caseId string, sequencingId string, locus string, transcriptId string) (*types.InterpretationGermline, error) {
+func (r *InterpretationsRepository) FirstGermline(ctx context.Context, caseId string, sequencingId string, locus string, transcriptId string) (*types.InterpretationGermline, error) {
 	var dao types.InterpretationGermlineDAO
-	tx := r.db.
+	tx := r.db.WithContext(ctx).
 		Table(types.InterpretationGermlineTable.Name)
 	addWhere(tx, caseId, sequencingId, locus, transcriptId)
 	if result := tx.
@@ -174,23 +175,23 @@ func (r *InterpretationsRepository) FirstGermline(caseId string, sequencingId st
 			return nil, nil
 		}
 	}
-	mapped, err := r.mapToInterpretationGermline(&dao)
+	mapped, err := r.mapToInterpretationGermline(ctx, &dao)
 	if err != nil {
 		return nil, err
 	}
 	return mapped, nil
 }
 
-func (r *InterpretationsRepository) CreateOrUpdateGermline(interpretation *types.InterpretationGermline) error {
-	dao, err := r.mapToInterpretationGermlineDAO(interpretation)
+func (r *InterpretationsRepository) CreateOrUpdateGermline(ctx context.Context, interpretation *types.InterpretationGermline) error {
+	dao, err := r.mapToInterpretationGermlineDAO(ctx, interpretation)
 	if err != nil {
 		return err
 	}
-	existing, err := r.FirstGermline(interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
+	existing, err := r.FirstGermline(ctx, interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if err != nil {
 		return err
 	}
-	query := r.db.
+	query := r.db.WithContext(ctx).
 		Table(types.InterpretationGermlineTable.Name)
 	addWhere(query, interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if existing != nil {
@@ -207,7 +208,7 @@ func (r *InterpretationsRepository) CreateOrUpdateGermline(interpretation *types
 	if err != nil {
 		return fmt.Errorf("error while create/update germline interpretation: %w", err)
 	}
-	mapped, err := r.mapToInterpretationGermline(&res)
+	mapped, err := r.mapToInterpretationGermline(ctx, &res)
 	if err != nil {
 		return err
 	}
@@ -215,10 +216,10 @@ func (r *InterpretationsRepository) CreateOrUpdateGermline(interpretation *types
 	return nil
 }
 
-func (r *InterpretationsRepository) FirstSomatic(caseId string, sequencingId string, locus string, transcriptId string) (*types.InterpretationSomatic, error) {
+func (r *InterpretationsRepository) FirstSomatic(ctx context.Context, caseId string, sequencingId string, locus string, transcriptId string) (*types.InterpretationSomatic, error) {
 	var dao types.InterpretationSomaticDAO
 
-	tx := r.db.Table(types.InterpretationSomaticTable.Name)
+	tx := r.db.WithContext(ctx).Table(types.InterpretationSomaticTable.Name)
 	addWhere(tx, caseId, sequencingId, locus, transcriptId)
 	if result := tx.
 		First(&dao); result.Error != nil {
@@ -229,23 +230,23 @@ func (r *InterpretationsRepository) FirstSomatic(caseId string, sequencingId str
 			return nil, nil
 		}
 	}
-	mapped, err := r.mapToInterpretationSomatic(&dao)
+	mapped, err := r.mapToInterpretationSomatic(ctx, &dao)
 	if err != nil {
 		return nil, err
 	}
 	return mapped, nil
 }
 
-func (r *InterpretationsRepository) CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error {
-	dao, err := r.mapToInterpretationSomaticDAO(interpretation)
+func (r *InterpretationsRepository) CreateOrUpdateSomatic(ctx context.Context, interpretation *types.InterpretationSomatic) error {
+	dao, err := r.mapToInterpretationSomaticDAO(ctx, interpretation)
 	if err != nil {
 		return err
 	}
-	existing, err := r.FirstSomatic(interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
+	existing, err := r.FirstSomatic(ctx, interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if err != nil {
 		return err
 	}
-	query := r.db.Table(types.InterpretationSomaticTable.Name)
+	query := r.db.WithContext(ctx).Table(types.InterpretationSomaticTable.Name)
 	addWhere(query, interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if existing != nil {
 		dao.CreatedBy = existing.CreatedBy
@@ -260,7 +261,7 @@ func (r *InterpretationsRepository) CreateOrUpdateSomatic(interpretation *types.
 	if err != nil {
 		return fmt.Errorf("error while create/update somatic interpretation: %w", err)
 	}
-	mapped, err := r.mapToInterpretationSomatic(&res)
+	mapped, err := r.mapToInterpretationSomatic(ctx, &res)
 	if err != nil {
 		return err
 	}
@@ -268,16 +269,16 @@ func (r *InterpretationsRepository) CreateOrUpdateSomatic(interpretation *types.
 	return nil
 }
 
-func (r *InterpretationsRepository) SearchGermline(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationGermline, error) {
+func (r *InterpretationsRepository) SearchGermline(ctx context.Context, analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationGermline, error) {
 	var dao []types.InterpretationGermlineDAO
-	r.db.
+	r.db.WithContext(ctx).
 		Table(types.InterpretationGermlineTable.Name).
 		Where("metadata->>'analysis_id' IN ? OR metadata->>'patient_id' IN ? OR metadata->>'variant_hash' IN ?", analysisId, patientId, variantHash).
 		Find(&dao)
 
 	interpretations := make([]*types.InterpretationGermline, len(dao))
 	for i, v := range dao {
-		mapped, err := r.mapToInterpretationGermline(&v)
+		mapped, err := r.mapToInterpretationGermline(ctx, &v)
 		if err != nil {
 			return nil, err
 		}
@@ -287,16 +288,16 @@ func (r *InterpretationsRepository) SearchGermline(analysisId []string, patientI
 	return interpretations, nil
 }
 
-func (r *InterpretationsRepository) SearchSomatic(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationSomatic, error) {
+func (r *InterpretationsRepository) SearchSomatic(ctx context.Context, analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationSomatic, error) {
 	var dao []types.InterpretationSomaticDAO
-	r.db.
+	r.db.WithContext(ctx).
 		Table(types.InterpretationSomaticTable.Name).
 		Where("metadata->>'analysis_id' IN ? OR metadata->>'patient_id' IN ? OR metadata->>'variant_hash' IN ?", analysisId, patientId, variantHash).
 		Find(&dao)
 
 	interpretations := make([]*types.InterpretationSomatic, len(dao))
 	for i, v := range dao {
-		mapped, err := r.mapToInterpretationSomatic(&v)
+		mapped, err := r.mapToInterpretationSomatic(ctx, &v)
 		if err != nil {
 			return nil, err
 		}
@@ -306,9 +307,9 @@ func (r *InterpretationsRepository) SearchSomatic(analysisId []string, patientId
 	return interpretations, nil
 }
 
-func (r *InterpretationsRepository) RetrieveGermlineInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error) {
+func (r *InterpretationsRepository) RetrieveGermlineInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error) {
 	var classificationCounts []types.ClassificationCounts
-	tx := r.db.Table("interpretation_germline")
+	tx := r.db.WithContext(ctx).Table("interpretation_germline")
 	tx = tx.Select("classification, COUNT(1) as classification_count")
 	tx = tx.Where("locus_id = ?", fmt.Sprintf("%d", locusId))
 	tx = tx.Group("classification")
@@ -336,9 +337,9 @@ func (r *InterpretationsRepository) RetrieveGermlineInterpretationClassification
 	return results, nil
 }
 
-func (r *InterpretationsRepository) RetrieveSomaticInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error) {
+func (r *InterpretationsRepository) RetrieveSomaticInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error) {
 	var classificationCounts []types.ClassificationCounts
-	tx := r.db.Table("interpretation_somatic")
+	tx := r.db.WithContext(ctx).Table("interpretation_somatic")
 	tx = tx.Select("oncogenicity as classification, COUNT(1) as classification_count")
 	tx = tx.Where("locus_id = ?", fmt.Sprintf("%d", locusId))
 	tx = tx.Group("oncogenicity")

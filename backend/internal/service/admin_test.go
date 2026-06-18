@@ -61,7 +61,7 @@ type mockAuthStore struct {
 	err    error
 }
 
-func (m *mockAuthStore) UpsertUser(userID, email, _, _ string) error {
+func (m *mockAuthStore) UpsertUser(_ context.Context, userID, email, _, _ string) error {
 	if m.err != nil {
 		return m.err
 	}
@@ -69,7 +69,7 @@ func (m *mockAuthStore) UpsertUser(userID, email, _, _ string) error {
 	return nil
 }
 
-func (m *mockAuthStore) GrantRole(_, tenantCode, orgCode, roleCode, grantedBy string) error {
+func (m *mockAuthStore) GrantRole(_ context.Context, _, tenantCode, orgCode, roleCode, grantedBy string) error {
 	if m.err != nil {
 		return m.err
 	}

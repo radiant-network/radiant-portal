@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"time"
@@ -94,8 +95,8 @@ const TenantContextKey = "tenant"
 // tenantAccessChecker is the slice of the auth repository RequireTenantAccess needs: it
 // resolves whether a tenant exists and whether a caller may access it.
 type tenantAccessChecker interface {
-	TenantExists(tenantCode string) (bool, error)
-	HasTenantAccess(userID, tenantCode string) (bool, error)
+	TenantExists(ctx context.Context, tenantCode string) (bool, error)
+	HasTenantAccess(ctx context.Context, userID, tenantCode string) (bool, error)
 }
 
 // RequireTenantAccess gates tenant-scoped routes (`/:tenant/...`). It always reads the
@@ -116,7 +117,7 @@ func RequireTenantAccess(auth utils.Auth, repo tenantAccessChecker, enforce bool
 	return func(c *gin.Context) {
 		tenant := c.Param("tenant")
 
-		exists, err := repo.TenantExists(tenant)
+		exists, err := repo.TenantExists(c.Request.Context(), tenant)
 		if err != nil {
 			HandleError(c, err)
 			c.Abort()
@@ -136,7 +137,7 @@ func RequireTenantAccess(auth utils.Auth, repo tenantAccessChecker, enforce bool
 				return
 			}
 
-			allowed, err := repo.HasTenantAccess(*userID, tenant)
+			allowed, err := repo.HasTenantAccess(c.Request.Context(), *userID, tenant)
 			if err != nil {
 				HandleError(c, err)
 				c.Abort()
@@ -186,7 +187,7 @@ func RequireRole(auth utils.Auth, role string, resourceName string) gin.HandlerF
 }
 
 type actionChecker interface {
-	HasAction(userID, tenantCode, orgCode, actionCode string) (bool, error)
+	HasAction(ctx context.Context, userID, tenantCode, orgCode, actionCode string) (bool, error)
 }
 
 // WildcardOnlyOrg matches only '*' grants in HasAction (GrantRole stores empty orgs as NULL),
@@ -229,7 +230,7 @@ func RequireAction(auth utils.Auth, repo actionChecker, action string, enforce b
 			return
 		}
 
-		allowed, err := repo.HasAction(*userID, *tenant, orgCode, action)
+		allowed, err := repo.HasAction(c.Request.Context(), *userID, *tenant, orgCode, action)
 		if err != nil {
 			HandleError(c, err)
 			c.Abort()

@@ -31,7 +31,7 @@ func Test_GermlineCNV_GetOccurrences(t *testing.T) {
 		repo := NewGermlineCNVOccurrencesRepository(db)
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
@@ -49,7 +49,7 @@ func Test_GermlineCNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testi
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
 
-		note, err := notesRepo.Create(types.OccurrenceNote{
+		note, err := notesRepo.Create(t.Context(), types.OccurrenceNote{
 			CaseID:       2,
 			SeqID:        1,
 			TaskID:       1,
@@ -61,16 +61,16 @@ func Test_GermlineCNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testi
 		})
 		assert.NoError(t, err)
 
-		occurrences, err := repo.GetOccurrences(2, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(t.Context(), 2, 1, 1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.True(t, occurrences[0].HasNote)
 		}
 
-		err = notesRepo.Delete(note.ID)
+		err = notesRepo.Delete(t.Context(), note.ID)
 		assert.NoError(t, err)
 
-		occurrences, err = repo.GetOccurrences(2, 1, 1, query)
+		occurrences, err = repo.GetOccurrences(t.Context(), 2, 1, 1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.False(t, occurrences[0].HasNote)
@@ -91,7 +91,7 @@ func Test_GermlineCNV_GetOccurrences_QualityFilter(t *testing.T) {
 
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
@@ -114,7 +114,7 @@ func Test_GermlineCNV_GetOccurrences_PanelFilter(t *testing.T) {
 
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
@@ -142,7 +142,7 @@ func Test_GermlineCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
 
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, pagination, sortedBody)
 		assert.NoError(t, err)
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
@@ -157,7 +157,7 @@ func Test_GermlineCNV_GetOccurrences_PaginationAndSorting(t *testing.T) {
 
 		query, err = types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, pagination, sortedBody)
 		assert.NoError(t, err)
-		occurrences, err = repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err = repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, 1, occurrences[0].SeqID)
@@ -174,7 +174,7 @@ func Test_GermlineCNV_GetOccurrences_NbSnv(t *testing.T) {
 		assert.NoError(t, err)
 
 		// CNV1: nb_snv NULL in DB -> expect 0
-		occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, "CNV1", occurrences[0].Name)
@@ -182,7 +182,7 @@ func Test_GermlineCNV_GetOccurrences_NbSnv(t *testing.T) {
 		}
 
 		// CNV2: nb_snv = 0 in DB -> expect 0
-		occurrences, err = repo.GetOccurrences(1, 2, 2, query)
+		occurrences, err = repo.GetOccurrences(t.Context(), 1, 2, 2, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, "CNV2", occurrences[0].Name)
@@ -190,7 +190,7 @@ func Test_GermlineCNV_GetOccurrences_NbSnv(t *testing.T) {
 		}
 
 		// CNV3: nb_snv = 1 in DB -> expect 1
-		occurrences, err = repo.GetOccurrences(3, 7, 7, query)
+		occurrences, err = repo.GetOccurrences(t.Context(), 3, 7, 7, query)
 		assert.NoError(t, err)
 		if assert.Len(t, occurrences, 1) {
 			assert.Equal(t, "CNV3", occurrences[0].Name)
@@ -204,7 +204,7 @@ func Test_GermlineCNV_CountOccurrences(t *testing.T) {
 		repo := NewGermlineCNVOccurrencesRepository(db)
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
 		assert.NoError(t, err)
-		count, err := repo.CountOccurrences(1, 1, 1, query)
+		count, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(2), count)
 	})
@@ -222,14 +222,14 @@ func Test_GermlineCNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
 
 		// Case 1 (task_id=1) sees its CNV1/CNV2 at seq_id=1, not the row
 		// attached to task_id=201.
-		case1Occurrences, err := repo.GetOccurrences(1, 1, 1, query)
+		case1Occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
 		for _, occ := range case1Occurrences {
 			assert.NotEqual(t, "CNV_SHARED", occ.Name, "task_id=1 query must not return case 2's CNV")
 		}
 
 		// Case 2 (task_id=201, reusing seq_id=1) sees only the task_id=201 row.
-		case2Occurrences, err := repo.GetOccurrences(2, 1, 201, query)
+		case2Occurrences, err := repo.GetOccurrences(t.Context(), 2, 1, 201, query)
 		assert.NoError(t, err)
 		if assert.Len(t, case2Occurrences, 1) {
 			assert.Equal(t, "CNV_SHARED", case2Occurrences[0].Name)
@@ -250,7 +250,7 @@ func Test_GermlineCNV_CountOccurrences_With_Filtering(t *testing.T) {
 
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
 		assert.NoError(t, err)
-		count, err := repo.CountOccurrences(1, 1, 1, query)
+		count, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(1), count)
 	})
@@ -269,7 +269,7 @@ func Test_GermlineCNV_CountOccurrences_PanelFilter(t *testing.T) {
 
 		query, err := types.NewListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
 		assert.NoError(t, err)
-		count, err := repo.CountOccurrences(1, 1, 1, query)
+		count, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
 		assert.NoError(t, err)
 		assert.Equal(t, int64(1), count)
 	})
@@ -280,7 +280,7 @@ func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By
 		repo := NewGermlineCNVOccurrencesRepository(db)
 		query, err := types.NewAggregationQueryFromSqon("omim_gene_panel", nil, GermlineCnvQueryConfigForTest.AllFields)
 		assert.NoError(t, err)
-		aggregate, err := repo.AggregateOccurrences(1, 2, 2, query)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 2, 2, query)
 		assert.NoError(t, err)
 		if assert.Len(t, aggregate, 4) {
 			assert.EqualValues(t, 1, aggregate[0].Count)
@@ -300,7 +300,7 @@ func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By
 		repo := NewGermlineCNVOccurrencesRepository(db)
 		query, err := types.NewAggregationQueryFromSqon("cytoband", nil, GermlineCnvQueryConfigForTest.AllFields)
 		assert.NoError(t, err)
-		aggregate, err := repo.AggregateOccurrences(1, 2, 2, query)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 2, 2, query)
 		assert.NoError(t, err)
 		if assert.Len(t, aggregate, 2) {
 			assert.EqualValues(t, 1, aggregate[0].Count)
@@ -322,7 +322,7 @@ func Test_GermlineCNV_AggregateOccurrences_Return_Expected_Aggregate_When_Agg_By
 		}
 		query, err := types.NewAggregationQueryFromSqon("cytoband", sqon, GermlineCnvQueryConfigForTest.AllFields)
 		assert.NoError(t, err)
-		aggregate, err := repo.AggregateOccurrences(1, 2, 2, query)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 2, 2, query)
 		assert.NoError(t, err)
 		if assert.Len(t, aggregate, 2) {
 			assert.EqualValues(t, 1, aggregate[0].Count)
@@ -339,7 +339,7 @@ func Test_GermlineCNV_GetStatisticsOccurrences_Length(t *testing.T) {
 		repo := NewGermlineCNVOccurrencesRepository(db)
 		query, err := types.NewStatisticsQueryFromSqon("length", nil, types.GermlineCNVOccurrencesFields)
 		assert.NoError(t, err)
-		statistics, err := repo.GetStatisticsOccurrences(1, 2, 2, query)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 1, 2, 2, query)
 		assert.NoError(t, err)
 		assert.EqualValues(t, 100, statistics.Min)
 		assert.EqualValues(t, 300, statistics.Max)
@@ -352,7 +352,7 @@ func Test_GermlineCNV_GetStatisticsOccurrences_Pe(t *testing.T) {
 		repo := NewGermlineCNVOccurrencesRepository(db)
 		query, err := types.NewStatisticsQueryFromSqon("pe", nil, types.GermlineCNVOccurrencesFields)
 		assert.NoError(t, err)
-		statistics, err := repo.GetStatisticsOccurrences(1, 2, 2, query)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 1, 2, 2, query)
 		assert.NoError(t, err)
 		assert.EqualValues(t, 1, statistics.Min)
 		assert.EqualValues(t, 18, statistics.Max)
@@ -363,7 +363,7 @@ func Test_GermlineCNV_GetStatisticsOccurrences_Pe(t *testing.T) {
 func Test_GermlineCNV_GetGenesOverlap(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "simple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineCNVOccurrencesRepository(db)
-		overlaps, err := repo.GetGenesOverlap(1, 1, 1, 1)
+		overlaps, err := repo.GetGenesOverlap(t.Context(), 1, 1, 1, 1)
 		if assert.NoError(t, err) {
 			if assert.Len(t, overlaps, 3) {
 				fullGeneOverlap := overlaps[0]

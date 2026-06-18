@@ -9,19 +9,19 @@ import (
 )
 
 type TenantStore interface {
-	EnsureTenant(code, name string) error
-	SeedDefaultRoles(tenantCode string) error
+	EnsureTenant(ctx context.Context, code, name string) error
+	SeedDefaultRoles(ctx context.Context, tenantCode string) error
 }
 
 type ViewColumnSource interface {
-	FederatableColumnsForViews() (map[string][]string, error)
+	FederatableColumnsForViews(ctx context.Context) (map[string][]string, error)
 }
 
 // TenantReader is everything a full view refresh needs: list the tenants and read
 // their federatable columns. Both come from the same source, so refresh takes one.
 type TenantReader interface {
 	ViewColumnSource
-	ListTenants() ([]string, error)
+	ListTenants(ctx context.Context) ([]string, error)
 }
 
 type StarrocksTenantProvisioner interface {
@@ -49,17 +49,17 @@ func TenantAccessPolicy(tenantCode string) string {
 // access policy references the database created in the StarRocks phase, which in turn
 // follows the Postgres source of truth.
 func CreateTenant(ctx context.Context, deps TenantDeps, code, name string) error {
-	if err := deps.Store.EnsureTenant(code, name); err != nil {
+	if err := deps.Store.EnsureTenant(ctx, code, name); err != nil {
 		return fmt.Errorf("postgres: ensure tenant %q: %w", code, err)
 	}
-	if err := deps.Store.SeedDefaultRoles(code); err != nil {
+	if err := deps.Store.SeedDefaultRoles(ctx, code); err != nil {
 		return fmt.Errorf("postgres: seed default roles for %q: %w", code, err)
 	}
 
 	if err := deps.Starrocks.EnsureAuthDatabase(ctx); err != nil {
 		return fmt.Errorf("starrocks: ensure auth database: %w", err)
 	}
-	columns, err := deps.Columns.FederatableColumnsForViews()
+	columns, err := deps.Columns.FederatableColumnsForViews(ctx)
 	if err != nil {
 		return fmt.Errorf("starrocks: federatable columns: %w", err)
 	}
@@ -88,11 +88,11 @@ func RefreshAllTenantViews(ctx context.Context, reader TenantReader, sr Starrock
 	if err := sr.EnsureAuthDatabase(ctx); err != nil {
 		return nil, fmt.Errorf("ensure auth database: %w", err)
 	}
-	cols, err := reader.FederatableColumnsForViews()
+	cols, err := reader.FederatableColumnsForViews(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("federatable columns: %w", err)
 	}
-	codes, err := reader.ListTenants()
+	codes, err := reader.ListTenants(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list tenants: %w", err)
 	}

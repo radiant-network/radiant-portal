@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -36,7 +37,7 @@ func extractUserSetParams(c *gin.Context) string {
 }
 
 type userSetReader interface {
-	GetUserSet(userSetId string) (*types.UserSet, error)
+	GetUserSet(ctx context.Context, userSetId string) (*types.UserSet, error)
 }
 
 // GetUserSet
@@ -55,7 +56,7 @@ type userSetReader interface {
 func GetUserSet(repo userSetReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userSetId := extractUserSetParams(c)
-		userSet, err := repo.GetUserSet(userSetId)
+		userSet, err := repo.GetUserSet(c.Request.Context(), userSetId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -69,7 +70,7 @@ func GetUserSet(repo userSetReader) gin.HandlerFunc {
 }
 
 type termAutoCompleter interface {
-	GetTermAutoComplete(termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error)
+	GetTermAutoComplete(ctx context.Context, termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error)
 }
 
 // GetMondoTermAutoComplete handles retrieving mondo terms by autocomplete
@@ -95,7 +96,7 @@ func GetMondoTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 		if err != nil {
 			limit = 25
 		}
-		mondoTerms, err := repo.GetTermAutoComplete(types.MondoTable.Name, prefix, limit)
+		mondoTerms, err := repo.GetTermAutoComplete(c.Request.Context(), types.MondoTable.Name, prefix, limit)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -127,7 +128,7 @@ func GetHPOTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 		if err != nil {
 			limit = 25
 		}
-		hpoTerms, err := repo.GetTermAutoComplete(types.HPOTable.Name, prefix, limit)
+		hpoTerms, err := repo.GetTermAutoComplete(c.Request.Context(), types.HPOTable.Name, prefix, limit)
 		if err != nil {
 			HandleError(c, err)
 			return

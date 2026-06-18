@@ -23,7 +23,7 @@ func Test_CreateBatch_Valid(t *testing.T) {
 		batchType := "test_type"
 		username := "test_user"
 		dryRun := true
-		createdBatch, err := repo.CreateBatch(types.DefaultTenantCode, payload, batchType, username, dryRun)
+		createdBatch, err := repo.CreateBatch(t.Context(), types.DefaultTenantCode, payload, batchType, username, dryRun)
 		assert.NoError(t, err)
 		assert.NotNil(t, createdBatch)
 		assert.NotEqual(t, uuid.Nil, createdBatch.ID)
@@ -50,7 +50,7 @@ func Test_GetBatchByID_Success(t *testing.T) {
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
-		batch, err := repo.GetBatchByID(batchId)
+		batch, err := repo.GetBatchByID(t.Context(), batchId)
 		assert.NoError(t, err)
 		assert.NotNil(t, batch)
 		assert.Equal(t, batchId, batch.ID)
@@ -65,7 +65,7 @@ func Test_GetBatchByID_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 		nonExistentId := uuid.NewString()
-		batch, err := repo.GetBatchByID(nonExistentId)
+		batch, err := repo.GetBatchByID(t.Context(), nonExistentId)
 		assert.NoError(t, err)
 		assert.Nil(t, batch)
 	})
@@ -75,7 +75,7 @@ func Test_GetBatchByID_InvalidUUID(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
 		invalidId := "not-a-valid-uuid"
-		batch, err := repo.GetBatchByID(invalidId)
+		batch, err := repo.GetBatchByID(t.Context(), invalidId)
 		assert.Error(t, err)
 		assert.Nil(t, batch)
 	})
@@ -84,7 +84,7 @@ func Test_GetBatchByID_InvalidUUID(t *testing.T) {
 func Test_ClaimNextBatch_Without_Pending(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)
-		batch, err := repo.ClaimNextBatch()
+		batch, err := repo.ClaimNextBatch(t.Context())
 		assert.NoError(t, err)
 		assert.Nil(t, batch)
 	})
@@ -102,7 +102,7 @@ func Test_ClaimNextBatch_Several_Entries(t *testing.T) {
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
-		batch, err := repo.ClaimNextBatch()
+		batch, err := repo.ClaimNextBatch(t.Context())
 		assert.NoError(t, err)
 		assert.NotNil(t, batch)
 		expectedDate, _ := time.Parse(time.DateOnly, "2025-10-09")
@@ -132,7 +132,7 @@ func Test_UpdateBatch(t *testing.T) {
 		}
 
 		finished := time.Date(2025, 10, 9, 15, 30, 0, 0, time.UTC)
-		rowsUpdated, err := repo.UpdateBatch(Batch{ID: id, Status: types.BatchStatusSuccess, FinishedOn: &finished})
+		rowsUpdated, err := repo.UpdateBatch(t.Context(), Batch{ID: id, Status: types.BatchStatusSuccess, FinishedOn: &finished})
 		assert.NoError(t, err)
 		assert.EqualValues(t, 1, rowsUpdated)
 		resultBatch := Batch{}
@@ -161,7 +161,7 @@ func Test_ReleaseBatch_ResetsRunningToPending(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		rowsUpdated, err := repo.ReleaseBatch(id)
+		rowsUpdated, err := repo.ReleaseBatch(t.Context(), id)
 		assert.NoError(t, err)
 		assert.EqualValues(t, 1, rowsUpdated)
 
@@ -187,7 +187,7 @@ func Test_ReleaseBatch_IgnoresNonRunning(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		rowsUpdated, err := repo.ReleaseBatch(id)
+		rowsUpdated, err := repo.ReleaseBatch(t.Context(), id)
 		assert.NoError(t, err)
 		assert.EqualValues(t, 0, rowsUpdated)
 
@@ -219,7 +219,7 @@ func Test_UpdateStuckBatch(t *testing.T) {
 			t.Fatal("failed to insert data:", initErr)
 		}
 
-		rowsUpdated, err := repo.UpdateStuckBatch()
+		rowsUpdated, err := repo.UpdateStuckBatch(t.Context())
 		assert.NoError(t, err)
 		assert.Equal(t, int64(1), rowsUpdated)
 		resultBatch := Batch{}

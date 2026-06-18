@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -26,7 +27,7 @@ func (m *MockRepository) GetCitationById(id string) (*types.PubmedCitation, erro
 	return nil, nil
 }
 
-func (m *MockRepository) FirstGermline(caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationGermline, error) {
+func (m *MockRepository) FirstGermline(ctx context.Context, caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationGermline, error) {
 	var uniqueId = fmt.Sprintf("%s-%s-%s-%s", caseId, sequencingId, locusId, transcriptId)
 	if uniqueId == "10-seq1-locus1-trans1" {
 		return &types.InterpretationGermline{
@@ -44,7 +45,7 @@ func (m *MockRepository) FirstGermline(caseId string, sequencingId string, locus
 	}
 	return nil, nil
 }
-func (m *MockRepository) CreateOrUpdateGermline(interpretation *types.InterpretationGermline) error {
+func (m *MockRepository) CreateOrUpdateGermline(ctx context.Context, interpretation *types.InterpretationGermline) error {
 	if interpretation.ID == "" {
 		interpretation.ID = "uuid1"
 	} else if interpretation.ID == "uuid2" {
@@ -52,7 +53,7 @@ func (m *MockRepository) CreateOrUpdateGermline(interpretation *types.Interpreta
 	}
 	return nil
 }
-func (m *MockRepository) FirstSomatic(caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationSomatic, error) {
+func (m *MockRepository) FirstSomatic(ctx context.Context, caseId string, sequencingId string, locusId string, transcriptId string) (*types.InterpretationSomatic, error) {
 	var uniqueId = fmt.Sprintf("%s-%s-%s-%s", caseId, sequencingId, locusId, transcriptId)
 	if uniqueId == "11-seq1-locus1-trans1" {
 		return &types.InterpretationSomatic{
@@ -70,7 +71,7 @@ func (m *MockRepository) FirstSomatic(caseId string, sequencingId string, locusI
 	}
 	return nil, nil
 }
-func (m *MockRepository) CreateOrUpdateSomatic(interpretation *types.InterpretationSomatic) error {
+func (m *MockRepository) CreateOrUpdateSomatic(ctx context.Context, interpretation *types.InterpretationSomatic) error {
 	if interpretation.ID == "" {
 		interpretation.ID = "uuid1"
 	} else if interpretation.ID == "uuid2" {
@@ -78,21 +79,21 @@ func (m *MockRepository) CreateOrUpdateSomatic(interpretation *types.Interpretat
 	}
 	return nil
 }
-func (m *MockRepository) SearchGermline(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationGermline, error) {
+func (m *MockRepository) SearchGermline(ctx context.Context, analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationGermline, error) {
 	return nil, nil
 }
-func (m *MockRepository) SearchSomatic(analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationSomatic, error) {
+func (m *MockRepository) SearchSomatic(ctx context.Context, analysisId []string, patientId []string, variantHash []string) ([]*types.InterpretationSomatic, error) {
 	return nil, nil
 }
 
-func (m *MockRepository) RetrieveGermlineInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error) {
+func (m *MockRepository) RetrieveGermlineInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error) {
 	return types.JsonMap[string, int]{
 		"benign":     2,
 		"pathogenic": 1,
 	}, nil
 }
 
-func (m *MockRepository) RetrieveSomaticInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error) {
+func (m *MockRepository) RetrieveSomaticInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error) {
 	return types.JsonMap[string, int]{
 		"Oncogenic":        2,
 		"Likely Oncogenic": 1,

@@ -29,19 +29,19 @@ func (m *CaseValidationMockRepo) GetTaskTypeCodes() ([]types.TaskType, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetTaskContextBySequencingExperimentId(seqExpId int) ([]*repository.TaskContext, error) {
+func (m *CaseValidationMockRepo) GetTaskContextBySequencingExperimentId(_ context.Context, seqExpId int) ([]*repository.TaskContext, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) CreateTask(task *repository.Task) error {
+func (m *CaseValidationMockRepo) CreateTask(_ context.Context, task *repository.Task) error {
 	return nil
 }
 
-func (m *CaseValidationMockRepo) CreateTaskContext(tc *repository.TaskContext) error {
+func (m *CaseValidationMockRepo) CreateTaskContext(_ context.Context, tc *repository.TaskContext) error {
 	return nil
 }
 
-func (m *CaseValidationMockRepo) CreateTaskHasDocument(thd *repository.TaskHasDocument) error {
+func (m *CaseValidationMockRepo) CreateTaskHasDocument(_ context.Context, thd *repository.TaskHasDocument) error {
 	return nil
 }
 
@@ -61,7 +61,7 @@ func (m *CaseValidationMockRepo) ListTasksByCaseSeqAndTaskType(caseId int, seqId
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) CreateCase(c *repository.Case) error {
+func (m *CaseValidationMockRepo) CreateCase(_ context.Context, c *repository.Case) error {
 	return nil
 }
 
@@ -69,19 +69,19 @@ func (m *CaseValidationMockRepo) CreateCaseHasSequencingExperiment(caseHasSeqExp
 	return nil
 }
 
-func (m *CaseValidationMockRepo) UpdateCaseDiagnosisLabCode(caseID int, code string) error {
+func (m *CaseValidationMockRepo) UpdateCaseDiagnosisLabCode(_ context.Context, caseID int, code string) error {
 	return nil
 }
 
-func (m *CaseValidationMockRepo) CreateDocument(document *repository.Document) error {
+func (m *CaseValidationMockRepo) CreateDocument(_ context.Context, document *repository.Document) error {
 	return nil
 }
 
-func (m *CaseValidationMockRepo) CreatePatient(newPatient *repository.Patient) error {
+func (m *CaseValidationMockRepo) CreatePatient(_ context.Context, newPatient *repository.Patient) error {
 	return nil
 }
 
-func (m *CaseValidationMockRepo) CreateSequencingExperiment(experiment *repository.SequencingExperiment) error {
+func (m *CaseValidationMockRepo) CreateSequencingExperiment(_ context.Context, experiment *repository.SequencingExperiment) error {
 	return nil
 }
 
@@ -89,7 +89,7 @@ func (m *CaseValidationMockRepo) GetById(id int) (*repository.Document, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetCaseAnalysisCatalogIdByCode(code string) (*repository.AnalysisCatalog, error) {
+func (m *CaseValidationMockRepo) GetCaseAnalysisCatalogIdByCode(_ context.Context, code string) (*repository.AnalysisCatalog, error) {
 	if code == "WGA" {
 		return &repository.AnalysisCatalog{ID: 1, Code: code, Name: "Whole Genome Analysis"}, nil
 	} else if strings.Contains(code, "ERROR") {
@@ -106,7 +106,7 @@ func (m *CaseValidationMockRepo) GetCaseType(caseID int) (string, error) {
 	return "", nil
 }
 
-func (m *CaseValidationMockRepo) GetCaseBySubmitterCaseIdAndProjectId(submitterCaseId string, projectId int) (*repository.Case, error) {
+func (m *CaseValidationMockRepo) GetCaseBySubmitterCaseIdAndProjectId(_ context.Context, submitterCaseId string, projectId int) (*repository.Case, error) {
 	if m.GetCaseBySubmitterCaseIdAndProjectIdFunc != nil {
 		return m.GetCaseBySubmitterCaseIdAndProjectIdFunc(submitterCaseId, projectId)
 	}
@@ -117,7 +117,7 @@ func (m *CaseValidationMockRepo) GetCasesFilters() (*repository.CaseFilters, err
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetDocumentByUrl(url string) (*types.Document, error) {
+func (m *CaseValidationMockRepo) GetDocumentByUrl(_ context.Context, url string) (*types.Document, error) {
 	if url == "file://bucket/file.bam" {
 		return &types.Document{ID: 500, Url: url, Name: "file.bam"}, nil
 	} else if url == "file://bucket/error.bam" {
@@ -132,7 +132,7 @@ func (m *CaseValidationMockRepo) GetDocumentsFilters(withProjectAndLab bool) (*t
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetOrganizationByCode(organizationCode string) (*types.Organization, error) {
+func (m *CaseValidationMockRepo) GetOrganizationByCode(_ context.Context, organizationCode string) (*types.Organization, error) {
 	if organizationCode == "LAB-1" {
 		return &types.Organization{Code: organizationCode, TenantCode: types.DefaultTenantCode, Name: "Organization 1"}, nil
 	} else if organizationCode == "LAB-2" {
@@ -143,7 +143,7 @@ func (m *CaseValidationMockRepo) GetOrganizationByCode(organizationCode string) 
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*repository.Patient, error) {
+func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string) (*repository.Patient, error) {
 	if organizationCode == "LAB-1" && submitterPatientId == "PAT-1" {
 		return &repository.Patient{
 			ID:                 100,
@@ -157,7 +157,7 @@ func (m *CaseValidationMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(organi
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetProjectByCode(code string) (*types.Project, error) {
+func (m *CaseValidationMockRepo) GetProjectByCode(_ context.Context, code string) (*types.Project, error) {
 	if code == "PROJ-1" {
 		return &types.Project{ID: 42, Code: code, Name: "PROJ-1", Description: "Project #1"}, nil
 	} else if strings.Contains(code, "ERROR") {
@@ -166,11 +166,11 @@ func (m *CaseValidationMockRepo) GetProjectByCode(code string) (*types.Project, 
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetSequencingExperimentsByCaseId(caseID int) ([]repository.SequencingExperiment, error) {
+func (m *CaseValidationMockRepo) GetSequencingExperimentsByCaseId(_ context.Context, caseID int) ([]repository.SequencingExperiment, error) {
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(aliquot string) ([]repository.SequencingExperiment, error) {
+func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(_ context.Context, aliquot string) ([]repository.SequencingExperiment, error) {
 	if aliquot == "ALIQUOT-1" {
 		return []repository.SequencingExperiment{
 			{ID: 200, Aliquot: "ALIQUOT-1"},
@@ -182,7 +182,7 @@ func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquot(aliquot string
 	return nil, nil // Not found
 }
 
-func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquotAndSubmitterSample(aliquot string, submitterSampleId string, sampleOrganizationCode string) (*repository.SequencingExperiment, error) {
+func (m *CaseValidationMockRepo) GetSequencingExperimentByAliquotAndSubmitterSample(_ context.Context, aliquot string, submitterSampleId string, sampleOrganizationCode string) (*repository.SequencingExperiment, error) {
 	if aliquot == "ALIQUOT-1" && submitterSampleId == "SAMPLE-1" && sampleOrganizationCode == "LAB-1" {
 		return &repository.SequencingExperiment{
 			ID:      200,
@@ -217,7 +217,7 @@ func (m *CaseValidationMockRepo) SearchDocuments(userQuery types.ListQuery) (*[]
 	return nil, nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetTaskHasDocumentByDocumentId(docId int) ([]*types.TaskHasDocument, error) {
+func (m *CaseValidationMockRepo) GetTaskHasDocumentByDocumentId(_ context.Context, docId int) ([]*types.TaskHasDocument, error) {
 	if docId == 500 {
 		return []*types.TaskHasDocument{
 			{TaskID: 300, DocumentID: docId, Type: "output"},
@@ -232,7 +232,7 @@ func (m *CaseValidationMockRepo) GetOrganizationById(id int) (*types.Organizatio
 	return nil, nil
 }
 
-func (m *CaseValidationMockRepo) GetCodes(setType repository.ValueSetType) ([]string, error) {
+func (m *CaseValidationMockRepo) GetCodes(_ context.Context, setType repository.ValueSetType) ([]string, error) {
 	switch setType {
 	case repository.ValueSetTaskType:
 		return []string{"alignment", "alignment_germline_variant_calling", "family_variant_calling", "somatic_variant_calling", "tumor_only_variant_calling", "radiant_germline_annotation", "exomiser", "rnaseq_analysis"}, nil
@@ -248,7 +248,7 @@ type CodesMockRepo struct {
 	GetCodesFunc func(setType repository.ValueSetType) ([]string, error)
 }
 
-func (m *CodesMockRepo) GetCodes(setType repository.ValueSetType) ([]string, error) {
+func (m *CodesMockRepo) GetCodes(_ context.Context, setType repository.ValueSetType) ([]string, error) {
 	if m.GetCodesFunc != nil {
 		return m.GetCodesFunc(setType)
 	}
@@ -304,11 +304,11 @@ type SamplesMockRepo struct {
 	GetSampleByOrgCodeAndSubmitterSampleIdFunc func(organizationCode string, submitterSampleId string) (*types.Sample, error)
 }
 
-func (m *SamplesMockRepo) GetSampleById(id int) (*repository.Sample, error) {
+func (m *SamplesMockRepo) GetSampleById(_ context.Context, id int) (*repository.Sample, error) {
 	return nil, nil
 }
 
-func (m *SamplesMockRepo) GetSampleByOrgCodeAndSubmitterSampleId(organizationCode string, submitterSampleId string) (*types.Sample, error) {
+func (m *SamplesMockRepo) GetSampleByOrgCodeAndSubmitterSampleId(_ context.Context, organizationCode string, submitterSampleId string) (*types.Sample, error) {
 	if m.GetSampleByOrgCodeAndSubmitterSampleIdFunc != nil {
 		return m.GetSampleByOrgCodeAndSubmitterSampleIdFunc(organizationCode, submitterSampleId)
 	}
@@ -319,7 +319,7 @@ func (m *SamplesMockRepo) GetSampleBySubmitterSampleId(organizationId int, submi
 	return nil, nil
 }
 
-func (m *SamplesMockRepo) CreateSample(newSample *types.Sample) (*types.Sample, error) {
+func (m *SamplesMockRepo) CreateSample(_ context.Context, newSample *types.Sample) (*types.Sample, error) {
 	return nil, nil
 }
 
@@ -331,7 +331,7 @@ type PatientsMockRepo struct {
 	GetPatientByOrgCodeAndSubmitterPatientIdFunc func(organizationCode string, submitterPatientId string) (*types.Patient, error)
 }
 
-func (m *PatientsMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(organizationCode string, submitterPatientId string) (*types.Patient, error) {
+func (m *PatientsMockRepo) GetPatientByOrgCodeAndSubmitterPatientId(_ context.Context, organizationCode string, submitterPatientId string) (*types.Patient, error) {
 	if m.GetPatientByOrgCodeAndSubmitterPatientIdFunc != nil {
 		return m.GetPatientByOrgCodeAndSubmitterPatientIdFunc(organizationCode, submitterPatientId)
 	}
@@ -342,7 +342,9 @@ func (m *PatientsMockRepo) GetPatientBySubmitterPatientId(organizationId int, su
 	return nil, nil
 }
 
-func (m *PatientsMockRepo) CreatePatient(newPatient *types.Patient) error { return nil }
+func (m *PatientsMockRepo) CreatePatient(_ context.Context, newPatient *types.Patient) error {
+	return nil
+}
 
 func createString(length int) string {
 	var result strings.Builder
@@ -612,7 +614,7 @@ func Test_fetchStatusCodes_OK(t *testing.T) {
 	cache := batchval.NewBatchValidationCache(mockContext)
 	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
-	err := record.fetchStatusCodes()
+	err := record.fetchStatusCodes(t.Context())
 	assert.NoError(t, err)
 	assert.NotNil(t, record.StatusCodes)
 	assert.Equal(t, record.StatusCodes, []string{"in_progress", "incomplete", "completed", "unknown"})
@@ -630,7 +632,7 @@ func Test_fetchStatusCodes_Error(t *testing.T) {
 	cache := batchval.NewBatchValidationCache(mockContext)
 	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
-	err := record.fetchStatusCodes()
+	err := record.fetchStatusCodes(t.Context())
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error retrieving status codes")
 	assert.Contains(t, err.Error(), "database connection failed")
@@ -644,7 +646,7 @@ func Test_fetchObservationCodes_OK(t *testing.T) {
 	cache := batchval.NewBatchValidationCache(mockContext)
 	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
-	err := record.fetchObservationCodes()
+	err := record.fetchObservationCodes(t.Context())
 	assert.NoError(t, err)
 	assert.NotNil(t, record.ObservationCodes)
 	assert.Equal(t, record.ObservationCodes, []string{"phenotype", "condition", "note", "ancestry", "consanguinity"})
@@ -662,7 +664,7 @@ func Test_fetchObservationCodes_Error(t *testing.T) {
 	cache := batchval.NewBatchValidationCache(mockContext)
 	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
-	err := record.fetchObservationCodes()
+	err := record.fetchObservationCodes(t.Context())
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "error retrieving observation codes")
 	assert.Contains(t, err.Error(), "database connection failed")
@@ -677,7 +679,7 @@ func Test_fetchOnsetCodes_OK(t *testing.T) {
 	cache := batchval.NewBatchValidationCache(mockContext)
 	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
-	err := record.fetchOnsetCodes()
+	err := record.fetchOnsetCodes(t.Context())
 	assert.NoError(t, err)
 	assert.NotNil(t, record.OnsetCodes)
 	assert.Equal(t, record.OnsetCodes, []string{"unknown", "antenatal", "congenital", "neonatal", "infantile", "childhood", "juvenile", "young_adult", "middle_age", "senior"})
@@ -695,7 +697,7 @@ func Test_fetchOnsetCodes_Error(t *testing.T) {
 	cache := batchval.NewBatchValidationCache(mockContext)
 	record := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: mockContext, Cache: cache}}
 
-	err := record.fetchOnsetCodes()
+	err := record.fetchOnsetCodes(t.Context())
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "error retrieving onset codes")
 	assert.ErrorContains(t, err, "database connection failed")
@@ -713,7 +715,7 @@ func Test_fetchCodeInfos_OK(t *testing.T) {
 	}
 	record.Cache = batchval.NewBatchValidationCache(record.Context)
 
-	err := record.fetchCodeInfos()
+	err := record.fetchCodeInfos(t.Context())
 	assert.NoError(t, err)
 	assert.NotNil(t, record.StatusCodes)
 	assert.NotNil(t, record.ObservationCodes)
@@ -739,7 +741,7 @@ func Test_fetchCodeInfos_StatusCodesError(t *testing.T) {
 	}
 	record.Cache = batchval.NewBatchValidationCache(record.Context)
 
-	err := record.fetchCodeInfos()
+	err := record.fetchCodeInfos(t.Context())
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "failed to retrieve status codes")
 	assert.ErrorContains(t, err, "database connection failed")
@@ -761,7 +763,7 @@ func Test_fetchCodeInfos_ObservationCodesError(t *testing.T) {
 	}
 	record.Cache = batchval.NewBatchValidationCache(record.Context)
 
-	err := record.fetchObservationCodes()
+	err := record.fetchObservationCodes(t.Context())
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "error retrieving observation codes")
 	assert.ErrorContains(t, err, "database connection failed")
@@ -783,7 +785,7 @@ func Test_fetchCodeInfos_OnsetCodesError(t *testing.T) {
 	}
 	record.Cache = batchval.NewBatchValidationCache(record.Context)
 
-	err := record.fetchOnsetCodes()
+	err := record.fetchOnsetCodes(t.Context())
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "error retrieving onset codes")
 	assert.ErrorContains(t, err, "database connection failed")
@@ -797,7 +799,7 @@ func Test_fetchTaskTypeCodes_OK(t *testing.T) {
 	cache := batchval.NewBatchValidationCache(&mockContext)
 	mockRecord := CaseValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{Context: &mockContext, Cache: cache}}
 
-	err := mockRecord.fetchTaskTypeCodes()
+	err := mockRecord.fetchTaskTypeCodes(t.Context())
 	assert.NoError(t, err)
 	assert.Equal(t, []string{
 		"alignment",
@@ -827,7 +829,7 @@ func Test_fetchProject_OK(t *testing.T) {
 		},
 	}
 
-	err := record.fetchProject()
+	err := record.fetchProject(t.Context())
 	assert.NoError(t, err)
 	assert.NotNil(t, record.ProjectID)
 	assert.Equal(t, 42, *record.ProjectID)
@@ -849,7 +851,7 @@ func Test_fetchProject_NotFound(t *testing.T) {
 		},
 	}
 
-	err := record.fetchProject()
+	err := record.fetchProject(t.Context())
 	assert.NoError(t, err)
 	assert.Nil(t, record.ProjectID)
 }
@@ -870,7 +872,7 @@ func Test_fetchProject_Error(t *testing.T) {
 		},
 	}
 
-	err := record.fetchProject()
+	err := record.fetchProject(t.Context())
 	assert.Error(t, err)
 	assert.Nil(t, record.ProjectID)
 }
@@ -891,7 +893,7 @@ func Test_fetchAnalysisCatalog_OK(t *testing.T) {
 		},
 	}
 
-	err := record.fetchAnalysisCatalog()
+	err := record.fetchAnalysisCatalog(t.Context())
 	assert.NoError(t, err)
 	assert.NotNil(t, record.AnalysisCatalogID)
 	assert.Equal(t, 1, *record.AnalysisCatalogID)
@@ -913,7 +915,7 @@ func Test_fetchAnalysisCatalog_NotFound(t *testing.T) {
 		},
 	}
 
-	err := record.fetchAnalysisCatalog()
+	err := record.fetchAnalysisCatalog(t.Context())
 	assert.NoError(t, err)
 	assert.Nil(t, record.AnalysisCatalogID)
 }
@@ -934,7 +936,7 @@ func Test_fetchAnalysisCatalog_Error(t *testing.T) {
 		},
 	}
 
-	err := record.fetchAnalysisCatalog()
+	err := record.fetchAnalysisCatalog(t.Context())
 	assert.Error(t, err)
 	assert.Nil(t, record.AnalysisCatalogID)
 }
@@ -956,7 +958,7 @@ func Test_ResolveOrganizations_OK(t *testing.T) {
 		},
 	}
 
-	err := record.resolveOrganizations()
+	err := record.resolveOrganizations(t.Context())
 	assert.NoError(t, err)
 	assert.True(t, record.OrderingOrganizationExists)
 	assert.True(t, record.DiagnosisLabExists)
@@ -979,7 +981,7 @@ func Test_ResolveOrganizations_NotFound(t *testing.T) {
 		},
 	}
 
-	err := record.resolveOrganizations()
+	err := record.resolveOrganizations(t.Context())
 	assert.NoError(t, err)
 	assert.True(t, record.OrderingOrganizationExists)
 	assert.False(t, record.DiagnosisLabExists)
@@ -1002,7 +1004,7 @@ func Test_ResolveOrganizations_Error(t *testing.T) {
 		},
 	}
 
-	err := record.resolveOrganizations()
+	err := record.resolveOrganizations(t.Context())
 	assert.Error(t, err)
 	assert.False(t, record.OrderingOrganizationExists)
 	assert.False(t, record.DiagnosisLabExists)
@@ -1018,7 +1020,7 @@ func Test_ResolveOrganizations_Error(t *testing.T) {
 		},
 	}
 
-	err = record.resolveOrganizations()
+	err = record.resolveOrganizations(t.Context())
 	assert.Error(t, err)
 	assert.True(t, record.OrderingOrganizationExists)
 	assert.False(t, record.DiagnosisLabExists)
@@ -1044,7 +1046,7 @@ func Test_fetchPatients_PartialOK(t *testing.T) {
 		},
 	}
 
-	err := record.fetchPatients()
+	err := record.fetchPatients(t.Context())
 	assert.NoError(t, err)
 
 	assert.Len(t, record.Patients, 1)
@@ -1084,7 +1086,7 @@ func Test_fetchFromTasks_OK(t *testing.T) {
 		},
 	}
 
-	err := record.fetchFromTasks()
+	err := record.fetchFromTasks(t.Context())
 	assert.NoError(t, err)
 	assert.Len(t, record.SequencingExperiments, 1)
 	assert.Equal(t, "ALIQUOT-1", record.SequencingExperiments[200].Aliquot)
@@ -1123,7 +1125,7 @@ func Test_fetchFromTasks_DocumentError(t *testing.T) {
 		},
 	}
 
-	err := record.fetchFromTasks()
+	err := record.fetchFromTasks(t.Context())
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "failed to get document by url")
 }
@@ -1151,7 +1153,7 @@ func Test_fetchFromTasks_SeqExpError(t *testing.T) {
 		},
 	}
 
-	err := record.fetchFromTasks()
+	err := record.fetchFromTasks(t.Context())
 	assert.Error(t, err)
 	assert.ErrorContains(t, err, "failed to get sequencing experiment by aliquot")
 }
@@ -1186,7 +1188,7 @@ func Test_fetchValidationInfos_OK(t *testing.T) {
 	}
 	cache := batchval.NewBatchValidationCache(&mockContext)
 	record := NewCaseValidationRecord(&mockContext, cache, caseBatch, 0)
-	err := record.fetchValidationInfos()
+	err := record.fetchValidationInfos(t.Context())
 	assert.NoError(t, err)
 	assert.Equal(t, 42, *record.ProjectID)
 	assert.Equal(t, 1, *record.AnalysisCatalogID)
@@ -1210,7 +1212,7 @@ func Test_fetchValidationInfos_Error(t *testing.T) {
 	caseBatch := types.CaseBatch{}
 	caseBatch.ProjectCode = "PROJ-ERROR"
 	record := NewCaseValidationRecord(&mockContext, cache, caseBatch, 0)
-	err := record.fetchValidationInfos()
+	err := record.fetchValidationInfos(t.Context())
 	assert.Error(t, err)
 	assert.Nil(t, record.ProjectID)
 	assert.Nil(t, record.AnalysisCatalogID)
@@ -1281,7 +1283,7 @@ func Test_fetchSequencingExperimentsInTask_OK(t *testing.T) {
 	task := types.CaseTaskBatch{
 		Aliquots: []string{"ALIQUOT-1"},
 	}
-	err := record.fetchSequencingExperimentsInTask(&task)
+	err := record.fetchSequencingExperimentsInTask(t.Context(), &task)
 	assert.NoError(t, err)
 	assert.Len(t, record.SequencingExperiments, 1)
 	assert.Equal(t, 200, record.SequencingExperiments[200].ID)
@@ -1299,7 +1301,7 @@ func Test_fetchSequencingExperimentsInTask_NotFound(t *testing.T) {
 	task := types.CaseTaskBatch{
 		Aliquots: []string{"ALIQUOT-999"},
 	}
-	err := record.fetchSequencingExperimentsInTask(&task)
+	err := record.fetchSequencingExperimentsInTask(t.Context(), &task)
 	assert.NoError(t, err)
 	assert.Len(t, record.SequencingExperiments, 0)
 }
@@ -1315,7 +1317,7 @@ func Test_fetchSequencingExperimentsInTask_Error(t *testing.T) {
 	task := types.CaseTaskBatch{
 		Aliquots: []string{"ALIQUOT-ERROR"},
 	}
-	err := record.fetchSequencingExperimentsInTask(&task)
+	err := record.fetchSequencingExperimentsInTask(t.Context(), &task)
 	assert.Error(t, err)
 	assert.Len(t, record.SequencingExperiments, 0)
 }
@@ -1334,7 +1336,7 @@ func Test_fetchInputDocumentsFromTask_OK(t *testing.T) {
 			Url: "file://bucket/file.bam",
 		}},
 	}
-	err := record.fetchInputDocumentsFromTask(&task)
+	err := record.fetchInputDocumentsFromTask(t.Context(), &task)
 	assert.NoError(t, err)
 	assert.Len(t, record.Documents, 1)
 	assert.Equal(t, 500, record.Documents["file://bucket/file.bam"].ID)
@@ -1353,7 +1355,7 @@ func Test_fetchInputDocumentsFromTask_NotFound(t *testing.T) {
 			Url: "file://bucket/unknown.bam",
 		}},
 	}
-	err := record.fetchInputDocumentsFromTask(&task)
+	err := record.fetchInputDocumentsFromTask(t.Context(), &task)
 	assert.NoError(t, err)
 	assert.Len(t, record.Documents, 0)
 }
@@ -1371,7 +1373,7 @@ func Test_fetchInputDocumentsFromTask_Error(t *testing.T) {
 			Url: "file://bucket/error.bam",
 		}},
 	}
-	err := record.fetchInputDocumentsFromTask(&task)
+	err := record.fetchInputDocumentsFromTask(t.Context(), &task)
 	assert.Error(t, err)
 	assert.Len(t, record.Documents, 0)
 }
@@ -1390,7 +1392,7 @@ func Test_fetchOutputDocumentsFromTask_OK(t *testing.T) {
 			Url: "file://bucket/file.bam",
 		}},
 	}
-	err := record.fetchOutputDocumentsFromTask(&task)
+	err := record.fetchOutputDocumentsFromTask(t.Context(), &task)
 	assert.NoError(t, err)
 	assert.Len(t, record.Documents, 1)
 	assert.Equal(t, 500, record.Documents["file://bucket/file.bam"].ID)
@@ -1414,7 +1416,7 @@ func Test_fetchOutputDocumentsFromTask_NotFound(t *testing.T) {
 			Url: "file://bucket/unknown.bam",
 		}},
 	}
-	err := record.fetchOutputDocumentsFromTask(&task)
+	err := record.fetchOutputDocumentsFromTask(t.Context(), &task)
 	assert.NoError(t, err)
 	assert.Len(t, record.Documents, 0)
 	assert.Len(t, record.DocumentsInTasks, 0)
@@ -1434,7 +1436,7 @@ func Test_fetchOutputDocumentsFromTask_Error(t *testing.T) {
 			Url: "file://bucket/task-error.bam",
 		}},
 	}
-	err := record.fetchOutputDocumentsFromTask(&task)
+	err := record.fetchOutputDocumentsFromTask(t.Context(), &task)
 	assert.Error(t, err)
 	assert.Len(t, record.Documents, 1)
 	assert.Equal(t, 999, record.Documents["file://bucket/task-error.bam"].ID)
@@ -1659,7 +1661,7 @@ func Test_validateCase_Valid(t *testing.T) {
 		},
 	}
 
-	err := cr.validateCase()
+	err := cr.validateCase(t.Context())
 
 	assert.NoError(t, err)
 	assert.Empty(t, cr.Errors)
@@ -1699,7 +1701,7 @@ func Test_validateCase_MissingProject(t *testing.T) {
 		},
 	}
 
-	err := cr.validateCase()
+	err := cr.validateCase(t.Context())
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
@@ -1744,7 +1746,7 @@ func Test_validateCase_MissingDiagnosticLab(t *testing.T) {
 		},
 	}
 
-	err := cr.validateCase()
+	err := cr.validateCase(t.Context())
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
@@ -1786,7 +1788,7 @@ func Test_validateCase_MissingAnalysisCatalog(t *testing.T) {
 		},
 	}
 
-	err := cr.validateCase()
+	err := cr.validateCase(t.Context())
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
@@ -1830,7 +1832,7 @@ func Test_validateCase_MissingOrderingOrganization(t *testing.T) {
 		},
 	}
 
-	err := cr.validateCase()
+	err := cr.validateCase(t.Context())
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
@@ -1873,7 +1875,7 @@ func Test_validateCase_InvalidStatusCode(t *testing.T) {
 		},
 	}
 
-	err := cr.validateCase()
+	err := cr.validateCase(t.Context())
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
@@ -1916,7 +1918,7 @@ func Test_validateCase_InvalidFieldFormat(t *testing.T) {
 		},
 	}
 
-	err := cr.validateCase()
+	err := cr.validateCase(t.Context())
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Errors, 1)
@@ -1959,7 +1961,7 @@ func Test_validateCase_CaseAlreadyExists(t *testing.T) {
 		},
 	}
 
-	err := cr.validateCase()
+	err := cr.validateCase(t.Context())
 
 	assert.NoError(t, err)
 	assert.Len(t, cr.Infos, 1)
@@ -1996,7 +1998,7 @@ func Test_validateCase_MultipleErrors(t *testing.T) {
 		},
 	}
 
-	err := cr.validateCase()
+	err := cr.validateCase(t.Context())
 
 	assert.NoError(t, err)
 	assert.GreaterOrEqual(t, len(cr.Errors), 2)
@@ -2055,7 +2057,7 @@ func Test_validateCase_OptionalSubmitterCaseId(t *testing.T) {
 		},
 	}
 
-	err := cr.validateCase()
+	err := cr.validateCase(t.Context())
 
 	assert.NoError(t, err)
 	assert.Empty(t, cr.Errors)
@@ -3131,7 +3133,7 @@ func Test_validateSeqExp_SeqExpExists(t *testing.T) {
 		},
 	}
 
-	err, exists := record.validateSeqExpExists(0)
+	err, exists := record.validateSeqExpExists(t.Context(), 0)
 	assert.NoError(t, err)
 	assert.Empty(t, record.Errors)
 	assert.True(t, exists)
@@ -3161,7 +3163,7 @@ func Test_validateSeqExp_SeqExpNotFound(t *testing.T) {
 		},
 	}
 
-	err, exists := record.validateSeqExpExists(0)
+	err, exists := record.validateSeqExpExists(t.Context(), 0)
 	assert.NoError(t, err)
 	assert.False(t, exists)
 	assert.Len(t, record.Errors, 1)
@@ -3208,7 +3210,7 @@ func Test_validateSeqExpSample_Valid(t *testing.T) {
 		},
 	}
 
-	sample, err := record.validateSeqExpSample(0)
+	sample, err := record.validateSeqExpSample(t.Context(), 0)
 	assert.NoError(t, err)
 	assert.NotNil(t, sample)
 	assert.Equal(t, 1, sample.ID)
@@ -3245,7 +3247,7 @@ func Test_validateSeqExpSample_SampleNotFound(t *testing.T) {
 		},
 	}
 
-	sample, err := record.validateSeqExpSample(0)
+	sample, err := record.validateSeqExpSample(t.Context(), 0)
 	assert.NoError(t, err)
 	assert.Nil(t, sample)
 }
@@ -3268,7 +3270,7 @@ func Test_validateCaseSequencingExperiments_NoSeqExps(t *testing.T) {
 		},
 	}
 
-	err := record.validateCaseSequencingExperiments()
+	err := record.validateCaseSequencingExperiments(t.Context())
 	assert.NoError(t, err)
 	assert.Empty(t, record.Errors)
 }
@@ -3303,7 +3305,7 @@ func Test_validateCaseSequencingExperiments_MultipleSeqExps(t *testing.T) {
 		},
 	}
 
-	err := record.validateCaseSequencingExperiments()
+	err := record.validateCaseSequencingExperiments(t.Context())
 	assert.NoError(t, err)
 	assert.Empty(t, record.Errors)
 }
@@ -3360,7 +3362,7 @@ func Test_validateCaseSequencingExperiments_WithErrors(t *testing.T) {
 		},
 	}
 
-	err := record.validateCaseSequencingExperiments()
+	err := record.validateCaseSequencingExperiments(t.Context())
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 2)
 	assert.Equal(t, SequencingExperimentNotFound, record.Errors[0].Code)
@@ -3601,7 +3603,7 @@ func Test_validateCaseSequencingExperiments_WithCaseTypeValidation(t *testing.T)
 		},
 	}
 
-	err := record.validateCaseSequencingExperiments()
+	err := record.validateCaseSequencingExperiments(t.Context())
 	assert.NoError(t, err)
 	assert.Len(t, record.Errors, 1)
 	assert.Equal(t, CaseInvalidSeqExpForType, record.Errors[0].Code)

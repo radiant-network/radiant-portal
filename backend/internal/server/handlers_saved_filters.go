@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,11 +10,11 @@ import (
 )
 
 type savedFiltersStore interface {
-	GetSavedFilterByID(savedFilterId string) (*types.SavedFilter, error)
-	GetSavedFiltersByUserID(userId string, savedFilterType string) (*[]types.SavedFilter, error)
-	CreateSavedFilter(savedFilterInput types.SavedFilterCreationInput, userId string) (*types.SavedFilter, error)
-	UpdateSavedFilter(savedFilterInput types.SavedFilterUpdateInput, savedFilterId string, userId string) (*types.SavedFilter, error)
-	DeleteSavedFilter(savedFilterId string, userId string) error
+	GetSavedFilterByID(ctx context.Context, savedFilterId string) (*types.SavedFilter, error)
+	GetSavedFiltersByUserID(ctx context.Context, userId string, savedFilterType string) (*[]types.SavedFilter, error)
+	CreateSavedFilter(ctx context.Context, savedFilterInput types.SavedFilterCreationInput, userId string) (*types.SavedFilter, error)
+	UpdateSavedFilter(ctx context.Context, savedFilterInput types.SavedFilterUpdateInput, savedFilterId string, userId string) (*types.SavedFilter, error)
+	DeleteSavedFilter(ctx context.Context, savedFilterId string, userId string) error
 }
 
 // GetSavedFilterByIDHandler
@@ -32,7 +33,7 @@ type savedFiltersStore interface {
 func GetSavedFilterByIDHandler(repo savedFiltersStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		savedFilterId := c.Param("saved_filter_id")
-		savedFilter, err := repo.GetSavedFilterByID(savedFilterId)
+		savedFilter, err := repo.GetSavedFilterByID(c.Request.Context(), savedFilterId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -68,7 +69,7 @@ func GetSavedFiltersHandler(repo savedFiltersStore, auth utils.Auth) gin.Handler
 			return
 		}
 
-		savedFilters, err := repo.GetSavedFiltersByUserID(*userId, savedFilterType)
+		savedFilters, err := repo.GetSavedFiltersByUserID(c.Request.Context(), *userId, savedFilterType)
 
 		if err != nil {
 			HandleError(c, err)
@@ -110,7 +111,7 @@ func PostSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.Handler
 			HandleNotFoundError(c, "user id")
 			return
 		}
-		savedFilter, err := repo.CreateSavedFilter(body, *userId)
+		savedFilter, err := repo.CreateSavedFilter(c.Request.Context(), body, *userId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -157,12 +158,12 @@ func PutSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.HandlerF
 			HandleNotFoundError(c, "saved_filter_id")
 			return
 		}
-		savedFilter, err := repo.GetSavedFilterByID(savedFilterId)
+		savedFilter, err := repo.GetSavedFilterByID(c.Request.Context(), savedFilterId)
 		if err != nil || savedFilter == nil || (*savedFilter).UserID != *userId {
 			HandleNotFoundError(c, "saved filter")
 			return
 		}
-		updatedSavedFilter, err := repo.UpdateSavedFilter(body, savedFilterId, *userId)
+		updatedSavedFilter, err := repo.UpdateSavedFilter(c.Request.Context(), body, savedFilterId, *userId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -196,12 +197,12 @@ func DeleteSavedFilterHandler(repo savedFiltersStore, auth utils.Auth) gin.Handl
 			HandleNotFoundError(c, "saved_filter_id")
 			return
 		}
-		savedFilter, err := repo.GetSavedFilterByID(savedFilterId)
+		savedFilter, err := repo.GetSavedFilterByID(c.Request.Context(), savedFilterId)
 		if err != nil || savedFilter == nil || (*savedFilter).UserID != *userId {
 			HandleNotFoundError(c, "saved filter")
 			return
 		}
-		err = repo.DeleteSavedFilter(savedFilterId, *userId)
+		err = repo.DeleteSavedFilter(c.Request.Context(), savedFilterId, *userId)
 		if err != nil {
 			HandleError(c, err)
 			return

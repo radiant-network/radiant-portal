@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,7 +16,7 @@ import (
 
 type MockCNVRepository struct{}
 
-func (m *MockCNVRepository) AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]repository.Aggregation, error) {
+func (m *MockCNVRepository) AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]repository.Aggregation, error) {
 	return []types.Aggregation{
 			{Bucket: "p1", Count: 2},
 			{Bucket: "p2", Count: 1},
@@ -23,7 +24,7 @@ func (m *MockCNVRepository) AggregateOccurrences(caseId int, seqId int, taskId i
 		nil
 }
 
-func (m *MockCNVRepository) GetStatisticsOccurrences(int, int, int, types.StatisticsQuery) (*types.Statistics, error) {
+func (m *MockCNVRepository) GetStatisticsOccurrences(context.Context, int, int, int, types.StatisticsQuery) (*types.Statistics, error) {
 	return &types.Statistics{
 			Min:  0,
 			Max:  100,
@@ -32,7 +33,7 @@ func (m *MockCNVRepository) GetStatisticsOccurrences(int, int, int, types.Statis
 		nil
 }
 
-func (m *MockCNVRepository) GetOccurrences(int, int, int, types.ListQuery) ([]types.GermlineCNVOccurrence, error) {
+func (m *MockCNVRepository) GetOccurrences(context.Context, int, int, int, types.ListQuery) ([]types.GermlineCNVOccurrence, error) {
 	quality := float32(99.5)
 	bc := 10
 	cn := 2
@@ -97,11 +98,11 @@ func (m *MockCNVRepository) GetOccurrences(int, int, int, types.ListQuery) ([]ty
 	}, nil
 }
 
-func (m *MockCNVRepository) CountOccurrences(int, int, int, types.CountQuery) (int64, error) {
+func (m *MockCNVRepository) CountOccurrences(context.Context, int, int, int, types.CountQuery) (int64, error) {
 	return 15, nil
 }
 
-func (m *MockCNVRepository) GetGenesOverlap(caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error) {
+func (m *MockCNVRepository) GetGenesOverlap(ctx context.Context, caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error) {
 	return []types.CNVGeneOverlap{
 		{
 			Symbol:                 "GENE1",

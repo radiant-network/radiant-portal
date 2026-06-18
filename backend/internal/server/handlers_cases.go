@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -9,19 +10,19 @@ import (
 )
 
 type casesReader interface {
-	SearchCases(userQuery types.ListQuery) (*[]types.CaseResult, *int64, error)
-	SearchById(prefix string, limit int) (*[]types.AutocompleteResult, error)
-	GetCasesFilters() (*types.CaseFilters, error)
-	GetCaseEntity(caseId int) (*types.CaseEntity, error)
+	SearchCases(ctx context.Context, userQuery types.ListQuery) (*[]types.CaseResult, *int64, error)
+	SearchById(ctx context.Context, prefix string, limit int) (*[]types.AutocompleteResult, error)
+	GetCasesFilters(ctx context.Context) (*types.CaseFilters, error)
+	GetCaseEntity(ctx context.Context, caseId int) (*types.CaseEntity, error)
 }
 
 type caseDocumentsReader interface {
-	SearchDocuments(userQuery types.ListQuery) (*[]types.DocumentResult, *int64, error)
-	GetDocumentsFilters(withProjectAndLab bool) (*types.DocumentFilters, error)
+	SearchDocuments(ctx context.Context, userQuery types.ListQuery) (*[]types.DocumentResult, *int64, error)
+	GetDocumentsFilters(ctx context.Context, withProjectAndLab bool) (*types.DocumentFilters, error)
 }
 
 type caseTasksReader interface {
-	ListTasksByCaseSeqAndTaskType(caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error)
+	ListTasksByCaseSeqAndTaskType(ctx context.Context, caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error)
 }
 
 // SearchCasesHandler handles search of cases
@@ -59,7 +60,7 @@ func SearchCasesHandler(repo casesReader) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		cases, count, err := repo.SearchCases(query)
+		cases, count, err := repo.SearchCases(c.Request.Context(), query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -93,7 +94,7 @@ func CasesAutocompleteHandler(repo casesReader) gin.HandlerFunc {
 		if err != nil {
 			limit = 25
 		}
-		ids, err := repo.SearchById(prefix, limit)
+		ids, err := repo.SearchById(c.Request.Context(), prefix, limit)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -118,7 +119,7 @@ func CasesAutocompleteHandler(repo casesReader) gin.HandlerFunc {
 // @Router /{tenant}/cases/filters [get]
 func CasesFiltersHandler(repo casesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		filters, err := repo.GetCasesFilters()
+		filters, err := repo.GetCasesFilters(c.Request.Context())
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -150,7 +151,7 @@ func CaseEntityHandler(repo casesReader, igvRepo igvReader) gin.HandlerFunc {
 			HandleNotFoundError(c, "case_id")
 			return
 		}
-		caseEntity, err := repo.GetCaseEntity(caseId)
+		caseEntity, err := repo.GetCaseEntity(c.Request.Context(), caseId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -159,7 +160,7 @@ func CaseEntityHandler(repo casesReader, igvRepo igvReader) gin.HandlerFunc {
 			HandleNotFoundError(c, "case")
 			return
 		}
-		igvTracks, err := igvRepo.GetIGV(caseId)
+		igvTracks, err := igvRepo.GetIGV(c.Request.Context(), caseId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -211,7 +212,7 @@ func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc 
 			HandleValidationError(c, err)
 			return
 		}
-		documents, count, err := repo.SearchDocuments(query)
+		documents, count, err := repo.SearchDocuments(c.Request.Context(), query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -264,7 +265,7 @@ func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
 			return
 		}
 
-		tasks, err := repo.ListTasksByCaseSeqAndTaskType(caseId, seqId, *taskTypeCode)
+		tasks, err := repo.ListTasksByCaseSeqAndTaskType(c.Request.Context(), caseId, seqId, *taskTypeCode)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -293,7 +294,7 @@ func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
 // @Router /{tenant}/cases/{case_id}/documents/filters [get]
 func CaseEntityDocumentsFiltersHandler(repo caseDocumentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		filters, err := repo.GetDocumentsFilters(false)
+		filters, err := repo.GetDocumentsFilters(c.Request.Context(), false)
 		if err != nil {
 			HandleError(c, err)
 			return

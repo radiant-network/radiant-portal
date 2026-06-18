@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -39,7 +40,7 @@ func (m *MockRepository) GetTaskContextBySequencingExperimentId(int) ([]*reposit
 	return nil, nil
 }
 
-func (m *MockRepository) ListTasksByCaseSeqAndTaskType(caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error) {
+func (m *MockRepository) ListTasksByCaseSeqAndTaskType(ctx context.Context, caseId int, seqId int, taskTypeCode string) ([]types.TaskOccurrenceType, error) {
 	if caseId == 9999 {
 		return nil, fmt.Errorf("mock repo error")
 	}
@@ -67,7 +68,7 @@ func (m *MockRepository) ListTasksByCaseSeqAndTaskType(caseId int, seqId int, ta
 // handler's nil → [] coercion can be exercised explicitly.
 type emptyTaskRepo struct{ MockRepository }
 
-func (e *emptyTaskRepo) ListTasksByCaseSeqAndTaskType(int, int, string) ([]types.TaskOccurrenceType, error) {
+func (e *emptyTaskRepo) ListTasksByCaseSeqAndTaskType(context.Context, int, int, string) ([]types.TaskOccurrenceType, error) {
 	return nil, nil
 }
 

@@ -224,8 +224,8 @@ func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) 
 	return nil, nil
 }
 
-func (r *CaseValidationRecord) fetchStatusCodes() error {
-	statusCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetStatus)
+func (r *CaseValidationRecord) fetchStatusCodes(ctx context.Context) error {
+	statusCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetStatus)
 	if err != nil {
 		return fmt.Errorf("error retrieving status codes: %v", err)
 	}
@@ -233,8 +233,8 @@ func (r *CaseValidationRecord) fetchStatusCodes() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchObservationCodes() error {
-	observationCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetObservation)
+func (r *CaseValidationRecord) fetchObservationCodes(ctx context.Context) error {
+	observationCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetObservation)
 	if err != nil {
 		return fmt.Errorf("error retrieving observation codes: %v", err)
 	}
@@ -242,8 +242,8 @@ func (r *CaseValidationRecord) fetchObservationCodes() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchOnsetCodes() error {
-	onsetCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetOnset)
+func (r *CaseValidationRecord) fetchOnsetCodes(ctx context.Context) error {
+	onsetCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetOnset)
 	if err != nil {
 		return fmt.Errorf("error retrieving onset codes: %v", err)
 	}
@@ -251,8 +251,8 @@ func (r *CaseValidationRecord) fetchOnsetCodes() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchResolutionStatusCodes() error {
-	rsCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetResolutionStatus)
+func (r *CaseValidationRecord) fetchResolutionStatusCodes(ctx context.Context) error {
+	rsCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetResolutionStatus)
 	if err != nil {
 		return fmt.Errorf("error retrieving resolution status codes: %v", err)
 	}
@@ -260,8 +260,8 @@ func (r *CaseValidationRecord) fetchResolutionStatusCodes() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchPriorityCodes() error {
-	priorityCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetPriority)
+func (r *CaseValidationRecord) fetchPriorityCodes(ctx context.Context) error {
+	priorityCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetPriority)
 	if err != nil {
 		return fmt.Errorf("error retrieving priority codes: %v", err)
 	}
@@ -269,8 +269,8 @@ func (r *CaseValidationRecord) fetchPriorityCodes() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchCategoryCodes() error {
-	categoryCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetCaseCategory)
+func (r *CaseValidationRecord) fetchCategoryCodes(ctx context.Context) error {
+	categoryCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetCaseCategory)
 	if err != nil {
 		return fmt.Errorf("error retrieving category codes: %v", err)
 	}
@@ -278,14 +278,14 @@ func (r *CaseValidationRecord) fetchCategoryCodes() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchPatientCodes() error {
-	affectedStatusCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetAffectedStatus)
+func (r *CaseValidationRecord) fetchPatientCodes(ctx context.Context) error {
+	affectedStatusCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetAffectedStatus)
 	if err != nil {
 		return fmt.Errorf("error retrieving patient affected status codes: %v", err)
 	}
 	r.PatientAffectedStatusCodes = affectedStatusCodes
 
-	relationshipToProbandCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetFamilyRelationship)
+	relationshipToProbandCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetFamilyRelationship)
 	if err != nil {
 		return fmt.Errorf("error retrieving patient relationship to proband codes: %v", err)
 	}
@@ -293,20 +293,20 @@ func (r *CaseValidationRecord) fetchPatientCodes() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchDocumentCodes() error {
-	dataCategoryCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetDataCategory)
+func (r *CaseValidationRecord) fetchDocumentCodes(ctx context.Context) error {
+	dataCategoryCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetDataCategory)
 	if err != nil {
 		return fmt.Errorf("error retrieving document data category codes: %v", err)
 	}
 	r.DocumentDataCategoryCodes = dataCategoryCodes
 
-	dataTypeCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetDataType)
+	dataTypeCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetDataType)
 	if err != nil {
 		return fmt.Errorf("error retrieving document data type codes: %v", err)
 	}
 	r.DocumentDataTypeCodes = dataTypeCodes
 
-	formatCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetFileFormat)
+	formatCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetFileFormat)
 	if err != nil {
 		return fmt.Errorf("error retrieving document format codes: %v", err)
 	}
@@ -315,39 +315,39 @@ func (r *CaseValidationRecord) fetchDocumentCodes() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchCodeInfos() error {
-	if err := r.fetchStatusCodes(); err != nil {
+func (r *CaseValidationRecord) fetchCodeInfos(ctx context.Context) error {
+	if err := r.fetchStatusCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve status codes: %w", err)
 	}
-	if err := r.fetchObservationCodes(); err != nil {
+	if err := r.fetchObservationCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve observation codes: %w", err)
 	}
-	if err := r.fetchOnsetCodes(); err != nil {
+	if err := r.fetchOnsetCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve onset codes: %w", err)
 	}
-	if err := r.fetchTaskTypeCodes(); err != nil {
+	if err := r.fetchTaskTypeCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve task type codes: %w", err)
 	}
-	if err := r.fetchResolutionStatusCodes(); err != nil {
+	if err := r.fetchResolutionStatusCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve resolution status codes: %w", err)
 	}
-	if err := r.fetchPriorityCodes(); err != nil {
+	if err := r.fetchPriorityCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve priority codes: %w", err)
 	}
-	if err := r.fetchCategoryCodes(); err != nil {
+	if err := r.fetchCategoryCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve category codes: %w", err)
 	}
-	if err := r.fetchPatientCodes(); err != nil {
+	if err := r.fetchPatientCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve patient codes: %w", err)
 	}
-	if err := r.fetchDocumentCodes(); err != nil {
+	if err := r.fetchDocumentCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve document codes: %w", err)
 	}
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchTaskTypeCodes() error {
-	taskTypeCodes, err := r.Cache.GetValueSetCodes(repository.ValueSetTaskType)
+func (r *CaseValidationRecord) fetchTaskTypeCodes(ctx context.Context) error {
+	taskTypeCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetTaskType)
 	if err != nil {
 		return fmt.Errorf("error retrieving task type codes: %v", err)
 	}
@@ -355,8 +355,8 @@ func (r *CaseValidationRecord) fetchTaskTypeCodes() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchProject() error {
-	p, err := r.Cache.GetProjectByCode(r.Case.ProjectCode)
+func (r *CaseValidationRecord) fetchProject(ctx context.Context) error {
+	p, err := r.Cache.GetProjectByCode(ctx, r.Case.ProjectCode)
 	if err != nil {
 		return fmt.Errorf("get project by code %q: %w", r.Case.ProjectCode, err)
 	}
@@ -366,8 +366,8 @@ func (r *CaseValidationRecord) fetchProject() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchAnalysisCatalog() error {
-	a, err := r.Cache.GetCaseAnalysisCatalogByCode(r.Case.AnalysisCode)
+func (r *CaseValidationRecord) fetchAnalysisCatalog(ctx context.Context) error {
+	a, err := r.Cache.GetCaseAnalysisCatalogByCode(ctx, r.Case.AnalysisCode)
 	if err != nil {
 		return fmt.Errorf("get analysis catalog by code %q: %w", r.Case.AnalysisCode, err)
 	}
@@ -382,9 +382,9 @@ func (r *CaseValidationRecord) fetchAnalysisCatalog() error {
 // come straight from the batch payload; this only records existence so
 // validateCase can emit a friendly error before the (code, tenant_code) FK
 // would reject the insert.
-func (r *CaseValidationRecord) resolveOrganizations() error {
+func (r *CaseValidationRecord) resolveOrganizations(ctx context.Context) error {
 	if r.Case.OrderingOrganizationCode != "" {
-		org, err := r.Cache.GetOrganizationByCode(r.Case.OrderingOrganizationCode)
+		org, err := r.Cache.GetOrganizationByCode(ctx, r.Case.OrderingOrganizationCode)
 		if err != nil {
 			return fmt.Errorf("get organization by code %q: %w", r.Case.OrderingOrganizationCode, err)
 		}
@@ -392,7 +392,7 @@ func (r *CaseValidationRecord) resolveOrganizations() error {
 	}
 
 	if r.Case.DiagnosticLabCode != "" {
-		diagnosisLabOrg, err := r.Cache.GetOrganizationByCode(r.Case.DiagnosticLabCode)
+		diagnosisLabOrg, err := r.Cache.GetOrganizationByCode(ctx, r.Case.DiagnosticLabCode)
 		if err != nil {
 			return fmt.Errorf("get organization by code %q: %w", r.Case.DiagnosticLabCode, err)
 		}
@@ -401,9 +401,9 @@ func (r *CaseValidationRecord) resolveOrganizations() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchPatients() error {
+func (r *CaseValidationRecord) fetchPatients(ctx context.Context) error {
 	for _, cp := range r.Case.Patients {
-		patient, err := r.Cache.GetPatientByOrgCodeAndSubmitterPatientId(cp.PatientOrganizationCode, cp.SubmitterPatientId)
+		patient, err := r.Cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, cp.PatientOrganizationCode, cp.SubmitterPatientId)
 		if err != nil {
 			return fmt.Errorf("failed to get patient by org code %q and submitter patient id %q: %w", cp.PatientOrganizationCode, cp.SubmitterPatientId, err)
 		}
@@ -416,9 +416,9 @@ func (r *CaseValidationRecord) fetchPatients() error {
 	return nil
 }
 
-func (r *CaseValidationRecord) fetchFromSequencingExperiments() error {
+func (r *CaseValidationRecord) fetchFromSequencingExperiments(ctx context.Context) error {
 	for _, se := range r.Case.SequencingExperiments {
-		seqExp, err := r.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
+		seqExp, err := r.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
 		if err != nil {
 			return fmt.Errorf("failed to get sequencing experiment: %w", err)
 		}
@@ -432,9 +432,9 @@ func (r *CaseValidationRecord) fetchFromSequencingExperiments() error {
 	return nil
 }
 
-func (cr *CaseValidationRecord) fetchSequencingExperimentsInTask(task *types.CaseTaskBatch) error {
+func (cr *CaseValidationRecord) fetchSequencingExperimentsInTask(ctx context.Context, task *types.CaseTaskBatch) error {
 	for _, aliquot := range task.Aliquots {
-		seqs, err := cr.Cache.GetSequencingExperimentByAliquot(aliquot)
+		seqs, err := cr.Cache.GetSequencingExperimentByAliquot(ctx, aliquot)
 		if err != nil {
 			return fmt.Errorf("failed to get sequencing experiment by aliquot %q: %w", aliquot, err)
 		}
@@ -449,9 +449,9 @@ func (cr *CaseValidationRecord) fetchSequencingExperimentsInTask(task *types.Cas
 	return nil
 }
 
-func (cr *CaseValidationRecord) fetchTaskContextFromSequencingExperiments() error {
+func (cr *CaseValidationRecord) fetchTaskContextFromSequencingExperiments(ctx context.Context) error {
 	for _, se := range cr.SequencingExperiments {
-		tcs, err := cr.Cache.GetTaskContextBySequencingExperimentId(se.ID)
+		tcs, err := cr.Cache.GetTaskContextBySequencingExperimentId(ctx, se.ID)
 		if err != nil {
 			return err
 		}
@@ -462,9 +462,9 @@ func (cr *CaseValidationRecord) fetchTaskContextFromSequencingExperiments() erro
 	return nil
 }
 
-func (cr *CaseValidationRecord) fetchDocumentsFromURLs(urls []string) error {
+func (cr *CaseValidationRecord) fetchDocumentsFromURLs(ctx context.Context, urls []string) error {
 	for _, url := range urls {
-		d, err := cr.Cache.GetDocumentByUrl(url)
+		d, err := cr.Cache.GetDocumentByUrl(ctx, url)
 		if err != nil {
 			return fmt.Errorf("failed to get document by url %q: %w", url, err)
 		}
@@ -473,7 +473,7 @@ func (cr *CaseValidationRecord) fetchDocumentsFromURLs(urls []string) error {
 		}
 
 		cr.Documents[url] = d
-		docs, err := cr.Cache.GetTaskHasDocumentByDocumentId(d.ID)
+		docs, err := cr.Cache.GetTaskHasDocumentByDocumentId(ctx, d.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get task has document by document id %d: %w", d.ID, err)
 		}
@@ -497,60 +497,60 @@ func (cr *CaseValidationRecord) fetchDocumentsFromURLs(urls []string) error {
 	return nil
 }
 
-func (cr *CaseValidationRecord) fetchInputDocumentsFromTask(task *types.CaseTaskBatch) error {
+func (cr *CaseValidationRecord) fetchInputDocumentsFromTask(ctx context.Context, task *types.CaseTaskBatch) error {
 	var urls []string
 	for _, doc := range task.InputDocuments {
 		urls = append(urls, doc.Url)
 	}
-	return cr.fetchDocumentsFromURLs(urls)
+	return cr.fetchDocumentsFromURLs(ctx, urls)
 }
 
-func (cr *CaseValidationRecord) fetchOutputDocumentsFromTask(task *types.CaseTaskBatch) error {
+func (cr *CaseValidationRecord) fetchOutputDocumentsFromTask(ctx context.Context, task *types.CaseTaskBatch) error {
 	var urls []string
 	for _, doc := range task.OutputDocuments {
 		urls = append(urls, doc.Url)
 	}
-	return cr.fetchDocumentsFromURLs(urls)
+	return cr.fetchDocumentsFromURLs(ctx, urls)
 }
 
-func (cr *CaseValidationRecord) fetchFromTasks() error {
+func (cr *CaseValidationRecord) fetchFromTasks(ctx context.Context) error {
 	for _, t := range cr.Case.Tasks {
-		if err := cr.fetchSequencingExperimentsInTask(t); err != nil {
+		if err := cr.fetchSequencingExperimentsInTask(ctx, t); err != nil {
 			return fmt.Errorf("failed to fetch sequencing experiments from task: %w", err)
 		}
 
-		if err := cr.fetchTaskContextFromSequencingExperiments(); err != nil {
+		if err := cr.fetchTaskContextFromSequencingExperiments(ctx); err != nil {
 			return fmt.Errorf("failed to fetch task context from sequencing experiments: %w", err)
 		}
 
-		if err := cr.fetchInputDocumentsFromTask(t); err != nil {
+		if err := cr.fetchInputDocumentsFromTask(ctx, t); err != nil {
 			return fmt.Errorf("failed to fetch input documents from task: %w", err)
 		}
 
-		if err := cr.fetchOutputDocumentsFromTask(t); err != nil {
+		if err := cr.fetchOutputDocumentsFromTask(ctx, t); err != nil {
 			return fmt.Errorf("failed to fetch output documents from task: %w", err)
 		}
 	}
 	return nil
 }
 
-func (cr *CaseValidationRecord) fetchValidationInfos() error {
-	if err := cr.fetchProject(); err != nil {
+func (cr *CaseValidationRecord) fetchValidationInfos(ctx context.Context) error {
+	if err := cr.fetchProject(ctx); err != nil {
 		return fmt.Errorf("failed to resolve project: %w", err)
 	}
-	if err := cr.fetchAnalysisCatalog(); err != nil {
+	if err := cr.fetchAnalysisCatalog(ctx); err != nil {
 		return fmt.Errorf("failed to resolve analysis catalog: %w", err)
 	}
-	if err := cr.resolveOrganizations(); err != nil {
+	if err := cr.resolveOrganizations(ctx); err != nil {
 		return fmt.Errorf("failed to resolve organizations: %w", err)
 	}
-	if err := cr.fetchPatients(); err != nil {
+	if err := cr.fetchPatients(ctx); err != nil {
 		return fmt.Errorf("failed to resolve patients: %w", err)
 	}
-	if err := cr.fetchFromSequencingExperiments(); err != nil {
+	if err := cr.fetchFromSequencingExperiments(ctx); err != nil {
 		return fmt.Errorf("failed to resolve sequencing experiments: %w", err)
 	}
-	if err := cr.fetchFromTasks(); err != nil {
+	if err := cr.fetchFromTasks(ctx); err != nil {
 		return fmt.Errorf("failed to resolve tasks: %w", err)
 	}
 	return nil
@@ -743,9 +743,9 @@ func (cr *CaseValidationRecord) validateCasePatients() error {
 	return nil
 }
 
-func (cr *CaseValidationRecord) validateSeqExpExists(seqExpIndex int) (error, bool) {
+func (cr *CaseValidationRecord) validateSeqExpExists(ctx context.Context, seqExpIndex int) (error, bool) {
 	se := cr.Case.SequencingExperiments[seqExpIndex]
-	seqExp, err := cr.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
+	seqExp, err := cr.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode)
 	if err != nil {
 		return fmt.Errorf("error getting existing sequencing experiment: %v", err), false
 	}
@@ -762,9 +762,9 @@ func (cr *CaseValidationRecord) validateSeqExpExists(seqExpIndex int) (error, bo
 	return nil, true
 }
 
-func (cr *CaseValidationRecord) validateSeqExpSample(seqExpIndex int) (*types.Sample, error) {
+func (cr *CaseValidationRecord) validateSeqExpSample(ctx context.Context, seqExpIndex int) (*types.Sample, error) {
 	se := cr.Case.SequencingExperiments[seqExpIndex]
-	sample, err := cr.Cache.GetSampleByOrgCodeAndSubmitterSampleId(se.SampleOrganizationCode, se.SubmitterSampleId)
+	sample, err := cr.Cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, se.SampleOrganizationCode, se.SubmitterSampleId)
 	if err != nil {
 		return nil, fmt.Errorf("error getting existing sample: %v", err)
 	}
@@ -818,16 +818,16 @@ func (cr *CaseValidationRecord) validateSeqExpCaseType(seqExpIndex int, sample *
 	return nil
 }
 
-func (cr *CaseValidationRecord) validateCaseSequencingExperiments() error {
+func (cr *CaseValidationRecord) validateCaseSequencingExperiments(ctx context.Context) error {
 	for seqExpIndex := range cr.Case.SequencingExperiments {
-		err, exists := cr.validateSeqExpExists(seqExpIndex)
+		err, exists := cr.validateSeqExpExists(ctx, seqExpIndex)
 		if err != nil {
 			return fmt.Errorf("error validating sequencing experiment in organization for sequencing experiment index %d: %v", seqExpIndex, err)
 		}
 		if !exists {
 			continue
 		}
-		sample, err := cr.validateSeqExpSample(seqExpIndex)
+		sample, err := cr.validateSeqExpSample(ctx, seqExpIndex)
 		if err != nil {
 			return fmt.Errorf("error validating sequencing experiment sample for sequencing experiment index %d: %v", seqExpIndex, err)
 		}
@@ -856,13 +856,13 @@ func (cr *CaseValidationRecord) validateCodes() {
 	cr.ValidateCode(cr.GetResourceType(), path+".category_code", "category_code", CaseInvalidField, cr.Case.CategoryCode, cr.CategoryCodes, resIds, false)
 }
 
-func (cr *CaseValidationRecord) validateCase() error {
+func (cr *CaseValidationRecord) validateCase(ctx context.Context) error {
 
 	path := batchval.FormatPath(cr, "")
 
 	// Validate case uniqueness in DB
 	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
-		c, err := cr.Cache.GetCaseBySubmitterCaseIdAndProjectId(cr.Case.SubmitterCaseId, *cr.ProjectID)
+		c, err := cr.Cache.GetCaseBySubmitterCaseIdAndProjectId(ctx, cr.Case.SubmitterCaseId, *cr.ProjectID)
 		if err != nil {
 			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.Case.SubmitterCaseId, *cr.ProjectID, err)
 		}
@@ -1215,24 +1215,25 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 }
 
 func validateCaseRecord(
-	ctx *batchval.BatchValidationContext,
+	ctx context.Context,
+	bv *batchval.BatchValidationContext,
 	cache *batchval.BatchValidationCache,
 	c types.CaseBatch,
 	index int,
 ) (*CaseValidationRecord, error) {
-	cr := NewCaseValidationRecord(ctx, cache, c, index)
+	cr := NewCaseValidationRecord(bv, cache, c, index)
 
 	// TODO: optimize by fetching all codes at once outside of the record
-	if err := cr.fetchCodeInfos(); err != nil {
+	if err := cr.fetchCodeInfos(ctx); err != nil {
 		return nil, fmt.Errorf("error during pre-fetching code infos: %v", err)
 	}
 
-	if err := cr.fetchValidationInfos(); err != nil {
+	if err := cr.fetchValidationInfos(ctx); err != nil {
 		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", err)
 	}
 
 	// 1. Validate Case fields
-	if err := cr.validateCase(); err != nil {
+	if err := cr.validateCase(ctx); err != nil {
 		return nil, fmt.Errorf("error during case validation: %v", err)
 	}
 	if cr.Skipped {
@@ -1245,7 +1246,7 @@ func validateCaseRecord(
 	}
 
 	// 3. Validate Case Sequencing Experiments
-	if err := cr.validateCaseSequencingExperiments(); err != nil {
+	if err := cr.validateCaseSequencingExperiments(ctx); err != nil {
 		return nil, fmt.Errorf("error during case sequencing experiments validation: %v", err)
 	}
 
@@ -1267,7 +1268,7 @@ func processCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, 
 	var caseBatches []types.CaseBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &caseBatches); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -1276,7 +1277,7 @@ func processCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, 
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
 		}
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -1286,7 +1287,7 @@ func processCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, 
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		batchval.ProcessUnexpectedError(batch, fmt.Errorf("error processing case batch records: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing case batch records: %v", err), bv.BatchRepo)
 		return nil
 	}
 	return nil
@@ -1297,7 +1298,7 @@ func persistBatchAndCaseRecords(ctx context.Context, db *gorm.DB, batch *types.B
 		batchRepo := repository.NewBatchRepository(tx)
 		txCtx := NewStorageContext(tx)
 		txCtx.TenantCode = batch.TenantCode
-		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(batch, records, batchRepo)
+		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, batchRepo)
 		if unexpectedErrUpdate != nil {
 			return unexpectedErrUpdate
 		}
@@ -1308,7 +1309,7 @@ func persistBatchAndCaseRecords(ctx context.Context, db *gorm.DB, batch *types.B
 			return nil
 		}
 
-		if err := persistCaseRecords(txCtx, records); err != nil {
+		if err := persistCaseRecords(ctx, txCtx, records); err != nil {
 			return fmt.Errorf("error during case insertion %w", err)
 		}
 
@@ -1316,7 +1317,7 @@ func persistBatchAndCaseRecords(ctx context.Context, db *gorm.DB, batch *types.B
 	})
 }
 
-func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
+func persistCase(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
 	if cr.ProjectID == nil {
 		return fmt.Errorf("project ID is nil for case %d", cr.Index)
 	}
@@ -1355,21 +1356,21 @@ func persistCase(ctx *StorageContext, cr *CaseValidationRecord) error {
 		OrderingPhysician:        cr.Case.OrderingPhysician,
 		SubmitterCaseID:          cr.Case.SubmitterCaseId,
 		Note:                     cr.Case.Note,
-		TenantCode:               ctx.TenantCode,
+		TenantCode:               sc.TenantCode,
 		OrderingOrganizationCode: &cr.Case.OrderingOrganizationCode,
 		DiagnosisLabCode:         &cr.Case.DiagnosticLabCode,
 	}
 
-	if err := ctx.CasesRepo.CreateCase(&c); err != nil {
+	if err := sc.CasesRepo.CreateCase(ctx, &c); err != nil {
 		return fmt.Errorf("failed to persist case %w", err)
 	}
 
 	cr.CaseID = &c.ID
 
-	return persistCaseHasSequencingExperiments(ctx, cr)
+	return persistCaseHasSequencingExperiments(ctx, sc, cr)
 }
 
-func persistCaseHasSequencingExperiments(ctx *StorageContext, cr *CaseValidationRecord) error {
+func persistCaseHasSequencingExperiments(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
 	if cr.CaseID == nil {
 		return fmt.Errorf("case ID is nil when persisting case_has_sequencing_experiment for case %d", cr.Index)
 	}
@@ -1379,7 +1380,7 @@ func persistCaseHasSequencingExperiments(ctx *StorageContext, cr *CaseValidation
 			SequencingExperimentID: se.ID,
 		}
 
-		if err := ctx.CasesRepo.CreateCaseHasSequencingExperiment(&chse); err != nil {
+		if err := sc.CasesRepo.CreateCaseHasSequencingExperiment(ctx, &chse); err != nil {
 			return fmt.Errorf("failed to persist case has sequencing experiment for case %d and sequencing experiment %q: %w", cr.Index, se.ID, err)
 		}
 	}
@@ -1387,39 +1388,40 @@ func persistCaseHasSequencingExperiments(ctx *StorageContext, cr *CaseValidation
 }
 
 func persistCaseRecords(
-	ctx *StorageContext,
+	ctx context.Context,
+	sc *StorageContext,
 	records []*CaseValidationRecord,
 ) error {
 	for _, record := range records {
 		if record.Skipped {
 			continue
 		}
-		if err := persistCase(ctx, record); err != nil {
+		if err := persistCase(ctx, sc, record); err != nil {
 			return fmt.Errorf("failed to persist case for case %d: %w", record.Index, err)
 		}
 		if record.CaseID == nil {
 			return fmt.Errorf("case ID is nil after persisting case for case %d", record.Index)
 		}
-		if err := persistFamily(ctx, record); err != nil {
+		if err := persistFamily(ctx, sc, record); err != nil {
 			return fmt.Errorf("failed to persist family for case %d: %w", record.Index, err)
 		}
-		if err := persistObservationCategorical(ctx, record); err != nil {
+		if err := persistObservationCategorical(ctx, sc, record); err != nil {
 			return fmt.Errorf("failed to persist observations categorical for case %d: %w", record.Index, err)
 		}
-		if err := persistObservationText(ctx, record); err != nil {
+		if err := persistObservationText(ctx, sc, record); err != nil {
 			return fmt.Errorf("failed to persist observations text for case %d: %w", record.Index, err)
 		}
-		if err := persistFamilyHistory(ctx, record); err != nil {
+		if err := persistFamilyHistory(ctx, sc, record); err != nil {
 			return fmt.Errorf("failed to persist family history for case %d: %w", record.Index, err)
 		}
-		if err := persistTask(ctx, record); err != nil {
+		if err := persistTask(ctx, sc, record); err != nil {
 			return fmt.Errorf("failed to persist tasks for case %d: %w", record.Index, err)
 		}
 	}
 	return nil
 }
 
-func persistFamily(ctx *StorageContext, cr *CaseValidationRecord) error {
+func persistFamily(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
 	for _, p := range cr.Case.Patients {
 
 		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId}
@@ -1432,16 +1434,16 @@ func persistFamily(ctx *StorageContext, cr *CaseValidationRecord) error {
 			FamilyMemberID:            patient.ID,
 			RelationshipToProbandCode: p.RelationToProbandCode,
 			AffectedStatusCode:        p.AffectedStatusCode,
-			TenantCode:                ctx.TenantCode,
+			TenantCode:                sc.TenantCode,
 		}
-		if err := ctx.FamilyRepo.CreateFamily(&familyMember); err != nil {
+		if err := sc.FamilyRepo.CreateFamily(ctx, &familyMember); err != nil {
 			return fmt.Errorf("failed to persist family member %q for case %d: %w", p.SubmitterPatientId, cr.Index, err)
 		}
 	}
 	return nil
 }
 
-func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord) error {
+func persistObservationCategorical(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
 	for _, p := range cr.Case.Patients {
 
 		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId}
@@ -1460,10 +1462,10 @@ func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord
 				OnsetCode:          o.OnsetCode,
 				InterpretationCode: o.InterpretationCode,
 				Note:               o.Note,
-				TenantCode:         ctx.TenantCode,
+				TenantCode:         sc.TenantCode,
 			}
 
-			if err := ctx.ObsCatRepo.CreateObservationCategorical(&obs); err != nil {
+			if err := sc.ObsCatRepo.CreateObservationCategorical(ctx, &obs); err != nil {
 				return fmt.Errorf("failed to persist observation categorical for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
 			}
 		}
@@ -1471,7 +1473,7 @@ func persistObservationCategorical(ctx *StorageContext, cr *CaseValidationRecord
 	return nil
 }
 
-func persistObservationText(ctx *StorageContext, cr *CaseValidationRecord) error {
+func persistObservationText(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
 	for _, p := range cr.Case.Patients {
 
 		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId}
@@ -1486,10 +1488,10 @@ func persistObservationText(ctx *StorageContext, cr *CaseValidationRecord) error
 				PatientID:       patient.ID,
 				ObservationCode: o.Code,
 				Value:           o.Value,
-				TenantCode:      ctx.TenantCode,
+				TenantCode:      sc.TenantCode,
 			}
 
-			if err := ctx.ObsStringRepo.CreateObservationString(&obs); err != nil {
+			if err := sc.ObsStringRepo.CreateObservationString(ctx, &obs); err != nil {
 				return fmt.Errorf("failed to persist observation text for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
 			}
 		}
@@ -1497,7 +1499,7 @@ func persistObservationText(ctx *StorageContext, cr *CaseValidationRecord) error
 	return nil
 }
 
-func persistFamilyHistory(ctx *StorageContext, cr *CaseValidationRecord) error {
+func persistFamilyHistory(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
 	for _, p := range cr.Case.Patients {
 
 		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId}
@@ -1512,10 +1514,10 @@ func persistFamilyHistory(ctx *StorageContext, cr *CaseValidationRecord) error {
 				PatientID:        patient.ID,
 				FamilyMemberCode: o.FamilyMemberCode,
 				Condition:        o.Condition,
-				TenantCode:       ctx.TenantCode,
+				TenantCode:       sc.TenantCode,
 			}
 
-			if err := ctx.FamilyHistoryRepo.CreateFamilyHistory(&familyHistory); err != nil {
+			if err := sc.FamilyHistoryRepo.CreateFamilyHistory(ctx, &familyHistory); err != nil {
 				return fmt.Errorf("failed to persist family history for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
 			}
 		}
@@ -1523,16 +1525,16 @@ func persistFamilyHistory(ctx *StorageContext, cr *CaseValidationRecord) error {
 	return nil
 }
 
-func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
+func persistTask(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
 	for _, t := range cr.Case.Tasks {
 		task := types.Task{
 			TaskTypeCode:    t.TypeCode,
 			PipelineName:    t.PipelineName,
 			PipelineVersion: t.PipelineVersion,
 			GenomeBuild:     t.GenomeBuild,
-			TenantCode:      ctx.TenantCode,
+			TenantCode:      sc.TenantCode,
 		}
-		err := ctx.TaskRepo.CreateTask(&task)
+		err := sc.TaskRepo.CreateTask(ctx, &task)
 		if err != nil {
 			return fmt.Errorf("failed to persist task for case %d: %w", cr.Index, err)
 		}
@@ -1549,7 +1551,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 					c = cr.CaseID
 				}
 
-				err := ctx.TaskRepo.CreateTaskContext(&types.TaskContext{
+				err := sc.TaskRepo.CreateTaskContext(ctx, &types.TaskContext{
 					TaskID:                 task.ID,
 					SequencingExperimentID: se.ID,
 					CaseID:                 c,
@@ -1566,7 +1568,7 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 				return fmt.Errorf("failed to find input document by url %q for task %q in case %d", doc.Url, t.TypeCode, cr.Index)
 			}
 
-			err := ctx.TaskRepo.CreateTaskHasDocument(&types.TaskHasDocument{
+			err := sc.TaskRepo.CreateTaskHasDocument(ctx, &types.TaskHasDocument{
 				TaskID:     task.ID,
 				DocumentID: d.ID,
 				Type:       "input",
@@ -1585,15 +1587,15 @@ func persistTask(ctx *StorageContext, cr *CaseValidationRecord) error {
 				Size:             *doc.Size,
 				Url:              doc.Url,
 				Hash:             doc.Hash,
-				TenantCode:       ctx.TenantCode,
+				TenantCode:       sc.TenantCode,
 			}
-			err := ctx.DocRepo.CreateDocument(&d)
+			err := sc.DocRepo.CreateDocument(ctx, &d)
 			if err != nil {
 				return fmt.Errorf("failed to persist document %q for case %d: %w", doc.Name, cr.Index, err)
 			}
 			cr.Documents[doc.Url] = &d
 
-			err = ctx.TaskRepo.CreateTaskHasDocument(&types.TaskHasDocument{
+			err = sc.TaskRepo.CreateTaskHasDocument(ctx, &types.TaskHasDocument{
 				TaskID:     task.ID,
 				DocumentID: d.ID,
 				Type:       "output",
@@ -1622,7 +1624,7 @@ func validateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext,
 			SubmitterCaseID: c.SubmitterCaseId,
 		}
 
-		record, err := validateCaseRecord(bv, cache, c, idx)
+		record, err := validateCaseRecord(ctx, bv, cache, c, idx)
 		if err != nil {
 			return nil, fmt.Errorf("error during case validation: %v", err)
 		}

@@ -13,7 +13,7 @@ import (
 func Test_GetSavedFilterByID(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
-		savedFilter, err := repo.GetSavedFilterByID("1e1c5bc3-4f65-496a-ad61-cab239bf72d5")
+		savedFilter, err := repo.GetSavedFilterByID(t.Context(), "1e1c5bc3-4f65-496a-ad61-cab239bf72d5")
 		assert.NoError(t, err)
 		if assert.NotNil(t, savedFilter) {
 			assert.Equal(t, "1e1c5bc3-4f65-496a-ad61-cab239bf72d5", savedFilter.ID)
@@ -32,7 +32,7 @@ func Test_GetSavedFilterByID(t *testing.T) {
 func Test_GetSavedFilterByID_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
-		savedFilter, err := repo.GetSavedFilterByID("ac2df672-9702-4dcf-8cfd-457494384762")
+		savedFilter, err := repo.GetSavedFilterByID(t.Context(), "ac2df672-9702-4dcf-8cfd-457494384762")
 		assert.NoError(t, err)
 		assert.Nil(t, savedFilter)
 	})
@@ -41,7 +41,7 @@ func Test_GetSavedFilterByID_NotFound(t *testing.T) {
 func Test_GetSavedFiltersByUserID_NotType(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
-		savedFilters, err := repo.GetSavedFiltersByUserID("1", "")
+		savedFilters, err := repo.GetSavedFiltersByUserID(t.Context(), "1", "")
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
 		assert.Len(t, *savedFilters, 2)
@@ -51,7 +51,7 @@ func Test_GetSavedFiltersByUserID_NotType(t *testing.T) {
 func Test_GetSavedFiltersByUserID_UserIdNotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
-		savedFilters, err := repo.GetSavedFiltersByUserID("not_existing_user", "")
+		savedFilters, err := repo.GetSavedFiltersByUserID(t.Context(), "not_existing_user", "")
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
 		assert.Len(t, *savedFilters, 0)
@@ -61,7 +61,7 @@ func Test_GetSavedFiltersByUserID_UserIdNotFound(t *testing.T) {
 func Test_GetSavedFiltersByUserID(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
-		savedFilters, err := repo.GetSavedFiltersByUserID("1", types.GERMLINE_SNV_OCCURRENCE)
+		savedFilters, err := repo.GetSavedFiltersByUserID(t.Context(), "1", types.GERMLINE_SNV_OCCURRENCE)
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
 		assert.Len(t, *savedFilters, 1)
@@ -71,7 +71,7 @@ func Test_GetSavedFiltersByUserID(t *testing.T) {
 func Test_GetSavedFiltersByUserID_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewSavedFiltersRepository(db)
-		savedFilters, err := repo.GetSavedFiltersByUserID("1", types.SOMATIC_SNV_VARIANT)
+		savedFilters, err := repo.GetSavedFiltersByUserID(t.Context(), "1", types.SOMATIC_SNV_VARIANT)
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilters)
 		assert.Len(t, *savedFilters, 0)
@@ -100,7 +100,7 @@ func Test_CreateSavedFilter(t *testing.T) {
 				},
 			},
 		}
-		savedFilter, err := repo.CreateSavedFilter(savedFilterInput, "3")
+		savedFilter, err := repo.CreateSavedFilter(t.Context(), savedFilterInput, "3")
 		assert.NoError(t, err)
 		assert.NotNil(t, savedFilter)
 		assert.Equal(t, savedFilterInput.Name, (*savedFilter).Name)
@@ -136,11 +136,11 @@ func Test_CreateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 				},
 			},
 		}
-		savedFilter1, err1 := repo.CreateSavedFilter(savedFilterInput, "3")
+		savedFilter1, err1 := repo.CreateSavedFilter(t.Context(), savedFilterInput, "3")
 		assert.NoError(t, err1)
 		assert.NotNil(t, savedFilter1)
 
-		savedFilter2, err2 := repo.CreateSavedFilter(savedFilterInput, "3")
+		savedFilter2, err2 := repo.CreateSavedFilter(t.Context(), savedFilterInput, "3")
 		assert.Error(t, err2)
 		assert.Nil(t, savedFilter2)
 	})
@@ -168,7 +168,7 @@ func Test_UpdateSavedFilter(t *testing.T) {
 				},
 			},
 		}
-		savedFilter, err1 := repo.CreateSavedFilter(savedFilterCreationInput, "3")
+		savedFilter, err1 := repo.CreateSavedFilter(t.Context(), savedFilterCreationInput, "3")
 		assert.NoError(t, err1)
 		assert.NotNil(t, savedFilter)
 
@@ -192,7 +192,7 @@ func Test_UpdateSavedFilter(t *testing.T) {
 			Favorite: utils.BoolPointer(true),
 		}
 
-		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, savedFilter.ID, "3")
+		savedFilterUpdated, err2 := repo.UpdateSavedFilter(t.Context(), savedFilterUpdateInput, savedFilter.ID, "3")
 		assert.NoError(t, err2)
 		assert.NotNil(t, savedFilterUpdated)
 		assert.Equal(t, savedFilterUpdateInput.Name, (*savedFilterUpdated).Name)
@@ -210,7 +210,7 @@ func Test_UpdateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 			Type:    types.GERMLINE_SNV_OCCURRENCE,
 			Queries: types.JsonArray[types.Sqon]{},
 		}
-		savedFilter, err1 := repo.CreateSavedFilter(savedFilterCreationInput, "3")
+		savedFilter, err1 := repo.CreateSavedFilter(t.Context(), savedFilterCreationInput, "3")
 		assert.NoError(t, err1)
 		assert.NotNil(t, savedFilter)
 
@@ -219,7 +219,7 @@ func Test_UpdateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 			Type:    types.GERMLINE_SNV_OCCURRENCE,
 			Queries: types.JsonArray[types.Sqon]{},
 		}
-		savedFilter2, err1 := repo.CreateSavedFilter(savedFilterCreationInput, "3")
+		savedFilter2, err1 := repo.CreateSavedFilter(t.Context(), savedFilterCreationInput, "3")
 		assert.NoError(t, err1)
 		assert.NotNil(t, savedFilter2)
 
@@ -229,7 +229,7 @@ func Test_UpdateSavedFilter_ErrorUniqueConstraint(t *testing.T) {
 			Favorite: utils.BoolPointer(true),
 		}
 
-		savedFilterUpdated, err2 := repo.UpdateSavedFilter(savedFilterUpdateInput, savedFilter.ID, "3")
+		savedFilterUpdated, err2 := repo.UpdateSavedFilter(t.Context(), savedFilterUpdateInput, savedFilter.ID, "3")
 		assert.Error(t, err2)
 		assert.Nil(t, savedFilterUpdated)
 	})
@@ -243,14 +243,14 @@ func Test_DeleteSavedFilter(t *testing.T) {
 			Type:    types.GERMLINE_SNV_OCCURRENCE,
 			Queries: types.JsonArray[types.Sqon]{},
 		}
-		savedFilter, err1 := repo.CreateSavedFilter(savedFilterCreationInput, "3")
+		savedFilter, err1 := repo.CreateSavedFilter(t.Context(), savedFilterCreationInput, "3")
 		assert.NoError(t, err1)
 		assert.NotNil(t, savedFilter)
 
-		err2 := repo.DeleteSavedFilter(savedFilter.ID, "3")
+		err2 := repo.DeleteSavedFilter(t.Context(), savedFilter.ID, "3")
 		assert.NoError(t, err2)
 
-		savedFilter, err3 := repo.GetSavedFilterByID(savedFilter.ID)
+		savedFilter, err3 := repo.GetSavedFilterByID(t.Context(), savedFilter.ID)
 		assert.NoError(t, err3)
 		assert.Nil(t, savedFilter)
 	})

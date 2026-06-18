@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -16,8 +17,8 @@ func NewOccurrenceFlagsRepository(db *gorm.DB) *OccurrenceFlagsRepository {
 	return &OccurrenceFlagsRepository{db: db}
 }
 
-func (r *OccurrenceFlagsRepository) Upsert(flag types.OccurrenceFlag) (*types.OccurrenceFlag, error) {
-	if err := r.db.
+func (r *OccurrenceFlagsRepository) Upsert(ctx context.Context, flag types.OccurrenceFlag) (*types.OccurrenceFlag, error) {
+	if err := r.db.WithContext(ctx).
 		Clauses(
 			clause.OnConflict{
 				Columns:   []clause.Column{{Name: "case_id"}, {Name: "occurrence_id"}, {Name: "task_id"}, {Name: "seq_id"}},
@@ -31,8 +32,8 @@ func (r *OccurrenceFlagsRepository) Upsert(flag types.OccurrenceFlag) (*types.Oc
 	return &flag, nil
 }
 
-func (r *OccurrenceFlagsRepository) Delete(caseID, seqID, taskID int, occurrenceID string) (int64, error) {
-	result := r.db.
+func (r *OccurrenceFlagsRepository) Delete(ctx context.Context, caseID, seqID, taskID int, occurrenceID string) (int64, error) {
+	result := r.db.WithContext(ctx).
 		Where("case_id = ? AND seq_id = ? AND task_id = ? AND occurrence_id = ?", caseID, seqID, taskID, occurrenceID).
 		Delete(&types.OccurrenceFlag{})
 	if result.Error != nil {

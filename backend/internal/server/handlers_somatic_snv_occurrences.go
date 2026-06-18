@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -9,15 +10,15 @@ import (
 )
 
 type somaticInterpretationCountsReader interface {
-	RetrieveSomaticInterpretationClassificationCounts(locusId int) (types.JsonMap[string, int], error)
+	RetrieveSomaticInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error)
 }
 
 type somaticSNVOccurrencesReader interface {
-	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.SomaticSNVOccurrence, error)
-	CountOccurrences(caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error)
-	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
-	GetStatisticsOccurrences(caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error)
-	GetExpandedOccurrence(caseId int, seqId int, taskId int, locusId int) (*types.ExpandedSomaticSNVOccurrence, error)
+	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.SomaticSNVOccurrence, error)
+	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.CountQuery) (int64, error)
+	AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
+	GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error)
+	GetExpandedOccurrence(ctx context.Context, caseId int, seqId int, taskId int, locusId int) (*types.ExpandedSomaticSNVOccurrence, error)
 }
 
 // OccurrencesSomaticSNVListHandler handles list of somatic SNV occurrences
@@ -76,7 +77,7 @@ func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader) gin.Hand
 			return
 		}
 
-		occurrences, err := repo.GetOccurrences(caseID, seqID, taskID, query)
+		occurrences, err := repo.GetOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -140,7 +141,7 @@ func OccurrencesSomaticSNVCountHandler(repo somaticSNVOccurrencesReader) gin.Han
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		count, err := repo.CountOccurrences(caseID, seqID, taskID, query)
+		count, err := repo.CountOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -207,7 +208,7 @@ func OccurrencesSomaticSNVAggregateHandler(repo somaticSNVOccurrencesReader, fac
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		aggregation, err := repo.AggregateOccurrences(caseID, seqID, taskID, query)
+		aggregation, err := repo.AggregateOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -219,7 +220,7 @@ func OccurrencesSomaticSNVAggregateHandler(repo somaticSNVOccurrencesReader, fac
 		}
 
 		if queryParam.WithDictionary {
-			facets, err := facetsRepo.GetFacets([]string{body.Field})
+			facets, err := facetsRepo.GetFacets(c.Request.Context(), []string{body.Field})
 			if err != nil {
 				HandleError(c, err)
 				return
@@ -305,7 +306,7 @@ func OccurrencesSomaticSNVStatisticsHandler(repo somaticSNVOccurrencesReader) gi
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		statistics, err := repo.GetStatisticsOccurrences(caseID, seqID, taskID, query)
+		statistics, err := repo.GetStatisticsOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -355,7 +356,7 @@ func GetExpandedSomaticSNVOccurrence(repo somaticSNVOccurrencesReader, interpret
 			HandleNotFoundError(c, "locus_id")
 			return
 		}
-		expandedOccurrence, err := repo.GetExpandedOccurrence(caseId, seqId, taskId, locusId)
+		expandedOccurrence, err := repo.GetExpandedOccurrence(c.Request.Context(), caseId, seqId, taskId, locusId)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -365,7 +366,7 @@ func GetExpandedSomaticSNVOccurrence(repo somaticSNVOccurrencesReader, interpret
 			return
 		}
 
-		interpretationClassificationCounts, err := interpretationRepo.RetrieveSomaticInterpretationClassificationCounts(locusId)
+		interpretationClassificationCounts, err := interpretationRepo.RetrieveSomaticInterpretationClassificationCounts(c.Request.Context(), locusId)
 		if err != nil {
 			HandleError(c, err)
 			return

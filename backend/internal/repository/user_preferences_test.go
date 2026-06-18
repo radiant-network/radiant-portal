@@ -14,7 +14,7 @@ func Test_GetUserPreference(t *testing.T) {
 		repo := NewUserPreferencesRepository(db)
 
 		userId := "b3a74785-b0a9-4a45-879e-f13c476976f7"
-		userPreference, err := repo.GetUserPreferences(userId, "table_1")
+		userPreference, err := repo.GetUserPreferences(t.Context(), userId, "table_1")
 		assert.NoError(t, err)
 		assert.NotNil(t, userPreference)
 	})
@@ -24,7 +24,7 @@ func Test_GetUserPreference_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewUserPreferencesRepository(db)
 		userId := "b3a74785-b0a9-4a45-879e-f13c476976f7"
-		userPreference, err := repo.GetUserPreferences(userId, "not_found")
+		userPreference, err := repo.GetUserPreferences(t.Context(), userId, "not_found")
 		assert.NoError(t, err)
 		assert.Nil(t, userPreference)
 	})
@@ -39,15 +39,15 @@ func Test_UpdateUserPreference_Create(t *testing.T) {
 			"content": "test content",
 		}
 
-		userPreference, err := repo.GetUserPreferences(userId, "table_1") // No existing preferences
+		userPreference, err := repo.GetUserPreferences(t.Context(), userId, "table_1") // No existing preferences
 		assert.NoError(t, err)
 		assert.Nil(t, userPreference)
 
-		userPreference, err = repo.UpdateUserPreferences(userId, "table_1", userPref)
+		userPreference, err = repo.UpdateUserPreferences(t.Context(), userId, "table_1", userPref)
 		assert.NoError(t, err)
 		assert.NotNil(t, userPreference)
 
-		userPreference, err = repo.GetUserPreferences(userId, "table_1") // Preferences have been inserted
+		userPreference, err = repo.GetUserPreferences(t.Context(), userId, "table_1") // Preferences have been inserted
 		assert.NoError(t, err)
 		assert.NotNil(t, userPreference)
 		assert.Equal(t, types.JsonMap[string, interface{}]{
@@ -65,15 +65,15 @@ func Test_UpdateUserPreference_Update(t *testing.T) {
 			"content": "test content",
 		}
 
-		userPreference, err := repo.GetUserPreferences(userId, "table_1") // No existing preferences
+		userPreference, err := repo.GetUserPreferences(t.Context(), userId, "table_1") // No existing preferences
 		assert.NoError(t, err)
 		assert.Nil(t, userPreference)
 
-		userPreference, err = repo.UpdateUserPreferences(userId, "table_1", userPref)
+		userPreference, err = repo.UpdateUserPreferences(t.Context(), userId, "table_1", userPref)
 		assert.NoError(t, err)
 		assert.NotNil(t, userPreference)
 
-		userPreference, err = repo.GetUserPreferences(userId, "table_1") // Preferences have been inserted
+		userPreference, err = repo.GetUserPreferences(t.Context(), userId, "table_1") // Preferences have been inserted
 		assert.NoError(t, err)
 		assert.NotNil(t, userPreference)
 		assert.Equal(t, types.JsonMap[string, interface{}]{
@@ -84,11 +84,11 @@ func Test_UpdateUserPreference_Update(t *testing.T) {
 			"content": "test content updated",
 		}
 
-		userPreference, err = repo.UpdateUserPreferences(userId, "table_1", updatedContent)
+		userPreference, err = repo.UpdateUserPreferences(t.Context(), userId, "table_1", updatedContent)
 		assert.NoError(t, err)
 		assert.NotNil(t, userPreference)
 
-		userPreference, err = repo.GetUserPreferences(userId, "table_1") // Preferences have been updated
+		userPreference, err = repo.GetUserPreferences(t.Context(), userId, "table_1") // Preferences have been updated
 		assert.NoError(t, err)
 		assert.NotNil(t, userPreference)
 		assert.Equal(t, types.JsonMap[string, interface{}]{

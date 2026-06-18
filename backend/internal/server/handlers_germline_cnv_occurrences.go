@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -9,11 +10,11 @@ import (
 )
 
 type germlineCNVOccurrencesReader interface {
-	GetOccurrences(caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.GermlineCNVOccurrence, error)
-	CountOccurrences(caseId int, seqId int, taskId int, userFilter types.CountQuery) (int64, error)
-	AggregateOccurrences(caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
-	GetStatisticsOccurrences(caseId int, seqId int, taskId int, query types.StatisticsQuery) (*types.Statistics, error)
-	GetGenesOverlap(caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error)
+	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.ListQuery) ([]types.GermlineCNVOccurrence, error)
+	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.CountQuery) (int64, error)
+	AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
+	GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, query types.StatisticsQuery) (*types.Statistics, error)
+	GetGenesOverlap(ctx context.Context, caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error)
 }
 
 // OccurrencesGermlineCNVListHandler handles list of germline CNV occurrences
@@ -71,7 +72,7 @@ func OccurrencesGermlineCNVListHandler(repo germlineCNVOccurrencesReader) gin.Ha
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		occurrences, err := repo.GetOccurrences(caseID, seqID, taskID, query)
+		occurrences, err := repo.GetOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -135,7 +136,7 @@ func OccurrencesGermlineCNVCountHandler(repo germlineCNVOccurrencesReader) gin.H
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		count, err := repo.CountOccurrences(caseID, seqID, taskID, query)
+		count, err := repo.CountOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -200,7 +201,7 @@ func OccurrencesGermlineCNVAggregateHandler(repo germlineCNVOccurrencesReader) g
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		aggregation, err := repo.AggregateOccurrences(caseID, seqID, taskID, query)
+		aggregation, err := repo.AggregateOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -264,7 +265,7 @@ func OccurrencesGermlineCNVStatisticsHandler(repo germlineCNVOccurrencesReader) 
 			HandleNotFoundError(c, "task_id")
 			return
 		}
-		statistics, err := repo.GetStatisticsOccurrences(caseID, seqID, taskID, query)
+		statistics, err := repo.GetStatisticsOccurrences(c.Request.Context(), caseID, seqID, taskID, query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -315,7 +316,7 @@ func OccurrencesGermlineCNVGenesOverlapHandler(repo germlineCNVOccurrencesReader
 			return
 		}
 
-		genesOverlap, err := repo.GetGenesOverlap(caseId, seqId, taskId, cnvId)
+		genesOverlap, err := repo.GetGenesOverlap(c.Request.Context(), caseId, seqId, taskId, cnvId)
 		if err != nil {
 			HandleError(c, err)
 			return

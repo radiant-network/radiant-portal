@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -12,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetOccurrences(int, int, int, types.ListQuery) ([]types.GermlineSNVOccurrence, error) {
+func (m *MockRepository) GetOccurrences(context.Context, int, int, int, types.ListQuery) ([]types.GermlineSNVOccurrence, error) {
 	return []types.GermlineSNVOccurrence{
 		{
 			SeqId:              1,
@@ -43,11 +44,11 @@ func (m *MockRepository) GetOccurrences(int, int, int, types.ListQuery) ([]types
 	}, nil
 }
 
-func (m *MockRepository) CountOccurrences(int, int, int, types.CountQuery) (int64, error) {
+func (m *MockRepository) CountOccurrences(context.Context, int, int, int, types.CountQuery) (int64, error) {
 	return 15, nil
 }
 
-func (m *MockRepository) AggregateOccurrences(int, int, int, types.AggQuery) ([]types.Aggregation, error) {
+func (m *MockRepository) AggregateOccurrences(context.Context, int, int, int, types.AggQuery) ([]types.Aggregation, error) {
 	return []types.Aggregation{
 			{Bucket: "insertion", Count: 479564},
 			{Bucket: "deletion", Count: 495942},
@@ -55,7 +56,7 @@ func (m *MockRepository) AggregateOccurrences(int, int, int, types.AggQuery) ([]
 		nil
 }
 
-func (m *MockRepository) GetStatisticsOccurrences(int, int, int, types.StatisticsQuery) (*types.Statistics, error) {
+func (m *MockRepository) GetStatisticsOccurrences(context.Context, int, int, int, types.StatisticsQuery) (*types.Statistics, error) {
 	return &types.Statistics{
 			Min:  0,
 			Max:  100,
@@ -64,7 +65,7 @@ func (m *MockRepository) GetStatisticsOccurrences(int, int, int, types.Statistic
 		nil
 }
 
-func (m *MockRepository) GetExpandedOccurrence(int, int, int, int) (*types.ExpandedGermlineSNVOccurrence, error) {
+func (m *MockRepository) GetExpandedOccurrence(context.Context, int, int, int, int) (*types.ExpandedGermlineSNVOccurrence, error) {
 	return &types.ExpandedGermlineSNVOccurrence{
 		LocusId:            "1000",
 		Locus:              "locus1",
@@ -327,7 +328,7 @@ func Test_GetExpandedOccurrenceHandler_emptyExomiserACMGCounts(t *testing.T) {
 
 type MockFacetsRepository struct{}
 
-func (m *MockFacetsRepository) GetFacets(facetNames []string) ([]types.Facet, error) {
+func (m *MockFacetsRepository) GetFacets(ctx context.Context, facetNames []string) ([]types.Facet, error) {
 	var variantClassFacet = types.Facet{
 		Name: "variant_class",
 		Values: []string{

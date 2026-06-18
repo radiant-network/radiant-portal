@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,7 +10,7 @@ import (
 )
 
 type batchCreator interface {
-	CreateBatch(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error)
+	CreateBatch(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error)
 }
 
 // PostCaseBatchHandler
@@ -57,7 +58,7 @@ func PostCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 			return
 		}
 
-		batch, err := repo.CreateBatch(*tenant, body.Cases, types.CaseBatchType, *username, queryParam.DryRun)
+		batch, err := repo.CreateBatch(c.Request.Context(), *tenant, body.Cases, types.CaseBatchType, *username, queryParam.DryRun)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -122,7 +123,7 @@ func PatchCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 			return
 		}
 
-		batch, err := repo.CreateBatch(*tenant, body.Cases, types.PatchCaseBatchType, *username, queryParam.DryRun)
+		batch, err := repo.CreateBatch(c.Request.Context(), *tenant, body.Cases, types.PatchCaseBatchType, *username, queryParam.DryRun)
 		if err != nil {
 			HandleError(c, err)
 			return

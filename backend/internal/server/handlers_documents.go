@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -10,10 +11,10 @@ import (
 )
 
 type documentsReader interface {
-	SearchDocuments(userQuery types.ListQuery) (*[]types.DocumentResult, *int64, error)
-	SearchById(prefix string, limit int) (*[]types.AutocompleteResult, error)
-	GetDocumentsFilters(withProjectAndLab bool) (*types.DocumentFilters, error)
-	GetById(id int) (*types.Document, error)
+	SearchDocuments(ctx context.Context, userQuery types.ListQuery) (*[]types.DocumentResult, *int64, error)
+	SearchById(ctx context.Context, prefix string, limit int) (*[]types.AutocompleteResult, error)
+	GetDocumentsFilters(ctx context.Context, withProjectAndLab bool) (*types.DocumentFilters, error)
+	GetById(ctx context.Context, id int) (*types.Document, error)
 }
 
 // SearchDocumentsHandler handles search of documents
@@ -51,7 +52,7 @@ func SearchDocumentsHandler(repo documentsReader) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		documents, count, err := repo.SearchDocuments(query)
+		documents, count, err := repo.SearchDocuments(c.Request.Context(), query)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -85,7 +86,7 @@ func DocumentsAutocompleteHandler(repo documentsReader) gin.HandlerFunc {
 		if err != nil {
 			limit = 25
 		}
-		ids, err := repo.SearchById(prefix, limit)
+		ids, err := repo.SearchById(c.Request.Context(), prefix, limit)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -110,7 +111,7 @@ func DocumentsAutocompleteHandler(repo documentsReader) gin.HandlerFunc {
 // @Router /{tenant}/documents/filters [get]
 func DocumentsFiltersHandler(repo documentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		filters, err := repo.GetDocumentsFilters(true)
+		filters, err := repo.GetDocumentsFilters(c.Request.Context(), true)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -147,7 +148,7 @@ func GetDocumentsDownloadUrlHandler(repo documentsReader, presigner utils.PreSig
 			return
 		}
 
-		document, err := repo.GetById(documentId)
+		document, err := repo.GetById(c.Request.Context(), documentId)
 		if err != nil {
 			HandleError(c, err)
 			return

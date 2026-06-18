@@ -61,7 +61,7 @@ func Test_PostCaseBatch_OK(t *testing.T) {
 		assert.Equal(t, types.CaseBatchType, resp.BatchType)
 		assert.Equal(t, types.BatchStatusPending, resp.Status)
 
-		batch, err := repo.ClaimNextBatch()
+		batch, err := repo.ClaimNextBatch(t.Context())
 		assert.NoError(t, err)
 		if assert.NotNil(t, batch) {
 			assert.Equal(t, resp.ID, batch.ID)
@@ -105,7 +105,7 @@ func Test_PatchCaseBatch_OK(t *testing.T) {
 		assert.Equal(t, types.PatchCaseBatchType, resp.BatchType)
 		assert.Equal(t, types.BatchStatusPending, resp.Status)
 
-		batch, err := repo.ClaimNextBatch()
+		batch, err := repo.ClaimNextBatch(t.Context())
 		assert.NoError(t, err)
 		if assert.NotNil(t, batch) {
 			assert.Equal(t, resp.ID, batch.ID)

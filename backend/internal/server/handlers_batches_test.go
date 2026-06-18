@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -12,15 +13,15 @@ import (
 )
 
 type MockBatchRepository struct {
-	CreateBatchFunc      func(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error)
-	GetBatchByIDFunc     func(batchId string) (*types.Batch, error)
+	CreateBatchFunc      func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error)
+	GetBatchByIDFunc     func(ctx context.Context, batchId string) (*types.Batch, error)
 	ClaimNextBatchFunc   func() (*types.Batch, error)
 	UpdateStuckBatchFunc func() (int64, error)
 }
 
-func (m *MockBatchRepository) CreateBatch(tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+func (m *MockBatchRepository) CreateBatch(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
 	if m.CreateBatchFunc != nil {
-		return m.CreateBatchFunc(tenantCode, payload, batchType, username, dryRun)
+		return m.CreateBatchFunc(ctx, tenantCode, payload, batchType, username, dryRun)
 	}
 	return nil, errors.New("CreateBatchFunc not implemented")
 }
@@ -29,9 +30,9 @@ func (m *MockBatchRepository) UpdateBatch(batch types.Batch) (int64, error) {
 	return 0, errors.New("UpdateBatch not implemented")
 }
 
-func (m *MockBatchRepository) GetBatchByID(batchId string) (*types.Batch, error) {
+func (m *MockBatchRepository) GetBatchByID(ctx context.Context, batchId string) (*types.Batch, error) {
 	if m.GetBatchByIDFunc != nil {
-		return m.GetBatchByIDFunc(batchId)
+		return m.GetBatchByIDFunc(ctx, batchId)
 	}
 	return nil, errors.New("GetBatchByIDFunc not implemented")
 }
@@ -54,7 +55,7 @@ func Test_GetBatchHandler_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	repo := &MockBatchRepository{
-		GetBatchByIDFunc: func(batchId string) (*types.Batch, error) {
+		GetBatchByIDFunc: func(ctx context.Context, batchId string) (*types.Batch, error) {
 			return &types.Batch{
 				ID:        batchId,
 				BatchType: "test-batch-type",
@@ -80,7 +81,7 @@ func Test_GetBatchHandler_NotFound(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	repo := &MockBatchRepository{
-		GetBatchByIDFunc: func(batchId string) (*types.Batch, error) {
+		GetBatchByIDFunc: func(ctx context.Context, batchId string) (*types.Batch, error) {
 			return nil, nil
 		},
 	}

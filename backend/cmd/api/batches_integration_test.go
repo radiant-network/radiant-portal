@@ -71,7 +71,7 @@ func Test_PostSequencingExperimentBatch_OK(t *testing.T) {
 			if assert.NotEmpty(t, respBody.ID, "Batch ID should not be empty") {
 
 				expectedPayload := `[{"aliquot": "ALIQUOT-123", "run_date": "2024-12-15T12:00:00Z", "run_name": "RUN-1", "run_alias": "RUN-ALIAS-1", "capture_kit": "CPT-123", "status_code": "in_progress", "platform_code": "illumina", "sequencing_lab_code": "CHUSJ", "submitter_sample_id": "SAMPLE-123", "sample_organization_code": "ORG-123", "experimental_strategy_code": "wgs", "sequencing_read_technology_code": "short_read"}]`
-				batch, err := repo.ClaimNextBatch()
+				batch, err := repo.ClaimNextBatch(t.Context())
 				assert.Nil(t, err)
 				if assert.NotNil(t, batch) {
 					assert.Equal(t, respBody.ID, batch.ID)

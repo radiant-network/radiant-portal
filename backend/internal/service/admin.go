@@ -27,8 +27,8 @@ type StarrocksProvisioner interface {
 // AuthStore writes the Postgres auth model (users registry + role grants). Both
 // are keyed on user_id (the Keycloak sub); email is an optional attribute.
 type AuthStore interface {
-	UpsertUser(userID, email, firstName, lastName string) error
-	GrantRole(userID, tenantCode, orgCode, roleCode, grantedBy string) error
+	UpsertUser(ctx context.Context, userID, email, firstName, lastName string) error
+	GrantRole(ctx context.Context, userID, tenantCode, orgCode, roleCode, grantedBy string) error
 }
 
 // AdminDeps bundles the per-system provisioners ProvisionUser orchestrates.
@@ -61,11 +61,11 @@ func ProvisionUser(ctx context.Context, deps AdminDeps, in types.UserInput, gran
 		return "", fmt.Errorf("keycloak: upsert user %q: %w", in.Username, err)
 	}
 
-	if err := deps.Auth.UpsertUser(sub, in.Email, in.FirstName, in.LastName); err != nil {
+	if err := deps.Auth.UpsertUser(ctx, sub, in.Email, in.FirstName, in.LastName); err != nil {
 		return sub, fmt.Errorf("postgres: upsert user %q: %w", sub, err)
 	}
 	for _, g := range in.Grants {
-		if err := deps.Auth.GrantRole(sub, g.TenantCode, g.OrgCode, g.RoleCode, grantedBy); err != nil {
+		if err := deps.Auth.GrantRole(ctx, sub, g.TenantCode, g.OrgCode, g.RoleCode, grantedBy); err != nil {
 			return sub, fmt.Errorf("postgres: grant %s/%s/%s to %q: %w", g.TenantCode, g.OrgCode, g.RoleCode, sub, err)
 		}
 	}
