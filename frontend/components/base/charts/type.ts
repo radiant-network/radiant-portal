@@ -64,3 +64,16 @@ export type PieChartProps<T extends object> = {
   onClick?: (data: any) => void;
   tooltip: (payload: ChartTooltipPayload) => ReactNode;
 };
+
+type UpsetItem = {
+  name: string;
+  elems: string[];
+};
+
+export type UpsetChartProps = {
+  data: UpsetItem[];
+  setName: string;
+  combinationName: string;
+  attributesSanitizer?: RegExp;
+  onClick?: (data: string[]) => void;
+};
