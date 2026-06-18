@@ -10,18 +10,28 @@ import { Card, CardContent } from '../shadcn/card';
 
 import { useQBActiveQuery, useQBContext } from './hooks/use-query-builder';
 
+const HIDDEN_PAGINATION_LIMIT = 1000;
+
 type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'> & {
   defaultPageSize?: number;
   swrId?: string | number;
+  paginationType?: 'server' | 'hidden';
 };
 
 /**
  * Wrapper for data-table
  * Used to access QBContext and create list and count query
  */
-function QueryBuilderDataTable<T>({ defaultPageSize = 10, swrId, ...props }: QueryBuilderDataTableProps<T>) {
+function QueryBuilderDataTable<T>({
+  defaultPageSize = 10,
+  swrId,
+  paginationType = 'server',
+  ...props
+}: QueryBuilderDataTableProps<T>) {
   const activeQuery = useQBActiveQuery();
   const { fetcher } = useQBContext();
+
+  const isPaginationHidden = paginationType === 'hidden';
 
   const [additionalFields, setAdditionalFields] = useState<string[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -38,8 +48,8 @@ function QueryBuilderDataTable<T>({ defaultPageSize = 10, swrId, ...props }: Que
       id: swrKey,
       listBody: {
         additional_fields: additionalFields,
-        limit: pagination.pageSize,
-        page_index: pagination.pageIndex,
+        limit: isPaginationHidden ? HIDDEN_PAGINATION_LIMIT : pagination.pageSize,
+        page_index: isPaginationHidden ? 0 : pagination.pageIndex,
         sort: sorting,
         sqon: {
           content: activeQuery.content as SqonContent,
@@ -92,7 +102,11 @@ function QueryBuilderDataTable<T>({ defaultPageSize = 10, swrId, ...props }: Que
               setAdditionalFields,
               onSortingChange: setSorting,
             }}
-            pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
+            pagination={
+              isPaginationHidden
+                ? { type: 'hidden' }
+                : { state: pagination, type: 'server', onPaginationChange: setPagination }
+            }
             {...props}
           />
         </DataTableProvider>

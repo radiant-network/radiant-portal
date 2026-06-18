@@ -6,12 +6,12 @@ import { FacetList } from '@/components/base/query-builder/facets/facet-list';
 import { FacetConfigContext } from '@/components/base/query-builder/facets/hooks/use-facet-config';
 import { getDefaultQBContext, QBProvider } from '@/components/base/query-builder/hooks/use-query-builder';
 import { getVisibleAggregations } from '@/components/base/query-builder/libs/aggregations';
+import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
 import { Button } from '@/components/base/shadcn/button';
 import { ApplicationId, useConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { studyBuilderFetcher, studyFetcher, studyStatisticFetcher } from './mocks/study-fetcher-mock';
-import StudyDataTable from './study-data-table';
 import StudySearch from './study-search';
 import { defaultStudyColumnSettings, getStudyColumns } from './study-table-settings';
 
@@ -66,12 +66,13 @@ export default function StudyExploration() {
             )}
             <main className="min-w-0 flex-1 space-y-4 overflow-auto p-4">
               <StudySearch />
-              <StudyDataTable
+              <QueryBuilderDataTable
                 id={ApplicationId.study}
                 columns={columns}
                 defaultColumnSettings={defaultStudyColumnSettings}
                 enableColumnOrdering
                 tableIndexResultPosition="top"
+                paginationType="hidden"
               />
             </main>
           </div>
