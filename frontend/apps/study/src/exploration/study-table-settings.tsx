@@ -64,6 +64,7 @@ export function getStudyColumns(t: TFunction<string, undefined>) {
         info.getValue() ? (
           <AnchorLinkCell
             href={`https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=${info.getValue()}`}
+            target="_blank"
           >
             {info.getValue()}
           </AnchorLinkCell>
@@ -136,17 +137,17 @@ export function getStudyColumns(t: TFunction<string, undefined>) {
 }
 
 export const defaultStudyColumnSettings = createColumnSettings([
-  { id: 'study_code', visible: true },
-  { id: 'study_name', visible: true },
-  { id: 'program', visible: true },
-  { id: 'domain', visible: true },
-  { id: 'dbgap', visible: true },
-  { id: 'participant_count', visible: true },
-  { id: 'biospecimen_count', visible: true },
-  { id: 'family_count', visible: true },
-  { id: 'file_count', visible: true },
-  { id: 'genomics', visible: true },
-  { id: 'transcriptomics', visible: true },
-  { id: 'imaging', visible: true },
-  { id: 'proteomics', visible: true },
+  { id: 'study_code', label: 'study.table.headers.study_code', visible: true },
+  { id: 'study_name', label: 'study.table.headers.study_name', visible: true },
+  { id: 'program', label: 'study.table.headers.program', visible: true },
+  { id: 'domain', label: 'study.table.headers.domain', visible: true },
+  { id: 'dbgap', label: 'study.table.headers.dbgap', visible: true },
+  { id: 'participant_count', label: 'study.table.headers.participant_count', visible: true },
+  { id: 'biospecimen_count', label: 'study.table.headers.biospecimen_count', visible: true },
+  { id: 'family_count', label: 'study.table.headers.family_count', visible: true },
+  { id: 'file_count', label: 'study.table.headers.file_count', visible: true },
+  { id: 'genomics', label: 'study.table.headers.genomics', visible: true },
+  { id: 'transcriptomics', label: 'study.table.headers.transcriptomics', visible: true },
+  { id: 'imaging', label: 'study.table.headers.imaging', visible: true },
+  { id: 'proteomics', label: 'study.table.headers.proteomics', visible: true },
 ]);
