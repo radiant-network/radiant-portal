@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -28,6 +29,15 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
+
+// glog (pulled in transitively by gin-keycloak) defaults to writing log files under
+// /tmp. Our container has no writable /tmp, so when gin-keycloak logs an auth error
+// (e.g. an expired token, gin_keycloak.go:217) glog fails to create its file sink and
+// escalates to its own Fatal handler, aborting the whole process (SIGABRT, exit 2).
+// Forcing logtostderr keeps glog off the filesystem and routes those lines to stderr.
+func init() {
+	_ = flag.Set("logtostderr", "true")
+}
 
 func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	// Auth service
