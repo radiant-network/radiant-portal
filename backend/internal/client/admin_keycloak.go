@@ -87,7 +87,10 @@ func (c *KeycloakAdminClient) UpsertUser(ctx context.Context, username, email, f
 		RequiredActions: []string{},
 	}
 
-	id, err := c.findUserID(ctx, token, username)
+	// Match on email, not username: a pre-existing user may have been provisioned
+	// with a username that differs from its email (the realm need not enforce
+	// email-as-username), so email is the reliable identity key.
+	id, err := c.findUserIDByEmail(ctx, token, email)
 	if err != nil {
 		return "", err
 	}
@@ -95,11 +98,11 @@ func (c *KeycloakAdminClient) UpsertUser(ctx context.Context, username, email, f
 		if err := c.createUser(ctx, token, user); err != nil {
 			return "", err
 		}
-		if id, err = c.findUserID(ctx, token, username); err != nil {
+		if id, err = c.findUserIDByEmail(ctx, token, email); err != nil {
 			return "", err
 		}
 		if id == "" {
-			return "", fmt.Errorf("user %q not found after create", username)
+			return "", fmt.Errorf("user %q not found after create", email)
 		}
 	} else {
 		if err := c.updateUser(ctx, token, id, user); err != nil {
@@ -154,26 +157,26 @@ func (c *KeycloakAdminClient) adminToken(ctx context.Context) (string, error) {
 	return parsed.AccessToken, nil
 }
 
-// findUserID returns the id of the user with an exact username match, or "" if none.
-func (c *KeycloakAdminClient) findUserID(ctx context.Context, token, username string) (string, error) {
-	endpoint := fmt.Sprintf("%s/admin/realms/%s/users?username=%s&exact=true",
-		c.cfg.BaseURL, c.cfg.Realm, url.QueryEscape(username))
+// findUserIDByEmail returns the id of the user with an exact email match, or "" if none.
+func (c *KeycloakAdminClient) findUserIDByEmail(ctx context.Context, token, email string) (string, error) {
+	endpoint := fmt.Sprintf("%s/admin/realms/%s/users?email=%s&exact=true",
+		c.cfg.BaseURL, c.cfg.Realm, url.QueryEscape(email))
 	status, body, err := c.adminRequest(ctx, http.MethodGet, endpoint, token, nil)
 	if err != nil {
 		return "", err
 	}
 	if status != http.StatusOK {
-		return "", fmt.Errorf("find user %q failed: HTTP %d: %s", username, status, string(body))
+		return "", fmt.Errorf("find user %q failed: HTTP %d: %s", email, status, string(body))
 	}
 	var users []keycloakUser
 	if err := json.Unmarshal(body, &users); err != nil {
-		return "", fmt.Errorf("parse user search for %q: %w", username, err)
+		return "", fmt.Errorf("parse user search for %q: %w", email, err)
 	}
 	if len(users) == 0 {
 		return "", nil
 	}
 	if len(users) > 1 {
-		return "", fmt.Errorf("find user %q: expected at most 1 exact match, got %d", username, len(users))
+		return "", fmt.Errorf("find user %q: expected at most 1 exact match, got %d", email, len(users))
 	}
 	return users[0].ID, nil
 }

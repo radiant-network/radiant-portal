@@ -4,8 +4,10 @@
 //	go run ./cmd/createuser -email carol@demo.org -first Carol -last Demo \
 //	    -grant tenant_a:ORG_A1:geneticist -grant tenant_b:*:geneticist
 //
-// The realm is configured with email-as-username, so the email is sent as the
-// Keycloak username verbatim — the CLI never derives a separate username.
+// On create, the email is sent as the Keycloak username verbatim — the CLI never
+// derives a separate username. Identity is keyed on email, not username, so this
+// works whether or not the realm enforces email-as-username: an existing user is
+// matched by email even if its stored username differs.
 package main
 
 import (
@@ -68,7 +70,8 @@ func main() {
 		log.Fatalf("createuser: %v", err)
 	}
 
-	// The realm uses email-as-username, so the email is the Keycloak username.
+	// New users are created with the email as their Keycloak username; existing
+	// users are matched by email regardless of their stored username.
 	in := types.UserInput{
 		Username: *email, Email: *email, FirstName: *first, LastName: *last,
 		Password: password, Grants: grants,
