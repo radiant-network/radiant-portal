@@ -39,6 +39,21 @@ func (r *AuthRepository) HasAction(userID, tenantCode, orgCode, actionCode strin
 	return allowed, nil
 }
 
+// TenantExists reports whether a tenant with the given code exists. It backs the
+// tenant-routing middleware: an unknown tenant in the URL path becomes a 404 instead of
+// reaching a write and surfacing as a foreign-key violation (a 500) downstream.
+func (r *AuthRepository) TenantExists(tenantCode string) (bool, error) {
+	var exists bool
+	err := r.db.Raw(`
+		SELECT EXISTS (
+			SELECT 1 FROM tenant WHERE code = ?
+		)`, tenantCode).Scan(&exists).Error
+	if err != nil {
+		return false, fmt.Errorf("error checking tenant existence for %q: %w", tenantCode, err)
+	}
+	return exists, nil
+}
+
 // HasTenantAccess reports whether the user holds at least one role in the given tenant.
 // It backs the tenant-routing middleware: any grant (org-scoped or tenant-wide) makes the
 // caller a member of the tenant.

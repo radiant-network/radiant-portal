@@ -15,12 +15,20 @@ import (
 type mockAuthRepository struct {
 	memberships     []types.TenantMembership
 	err             error
+	tenantNotFound  bool
+	tenantExistsErr error
 	hasTenantAccess bool
 	tenantErr       error
 	hasAction       bool
 	actionErr       error
 	gotOrgCode      string
 	gotAction       string
+}
+
+// TenantExists defaults to reporting the tenant as present (zero-value tenantNotFound=false)
+// so existing tests need no change; set tenantNotFound to exercise the unknown-tenant 403 path.
+func (m *mockAuthRepository) TenantExists(tenantCode string) (bool, error) {
+	return !m.tenantNotFound, m.tenantExistsErr
 }
 
 func (m *mockAuthRepository) HasTenantAccess(email, tenantCode string) (bool, error) {
