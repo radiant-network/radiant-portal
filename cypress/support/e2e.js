@@ -19,12 +19,12 @@ Cypress.Commands.add('isValidToken', token => {
   return cy
     .request({
       method: 'GET',
-      url: `${apiUrl}${tenant}/batches/mustReturn500ifTokenValid`,
+      url: `${apiUrl}${tenant}/batches/${globalData.BatchesId.patientNotFound}`,
       headers: { Authorization: `Bearer ${token}` },
       failOnStatusCode: false,
     })
     .then(res => {
-      return cy.wrap(res.status === 500);
+      return cy.wrap(res.status !== 401 && res.status !== 403);
     });
 });
 

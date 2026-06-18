@@ -76,7 +76,7 @@ export const data = {
     patients: '2 (1.43e-1)',
     transcript_id: 'ENST00000370552',
     exon: null,
-    dna_change: null,
+    dna_change: 'c.290+7C>T',
     omim: {
       condition: 'Urofacial syndrome 1',
       inheritance: 'AR',
