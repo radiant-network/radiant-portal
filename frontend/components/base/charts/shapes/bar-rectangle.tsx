@@ -1,4 +1,5 @@
 import { Bar, LabelList, Rectangle } from 'recharts';
+
 import { BarRectangleProps } from '../type';
 
 /**
@@ -27,15 +28,13 @@ function BarRectangle({ id, dataKey, layout, onClick }: BarRectangleProps) {
       )}
       radius={2}
     >
-      {
-        <LabelList
-          dataKey={dataKey}
-          className="fill-foreground"
-          fontSize={12}
-          position={layout == 'horizontal' ? 'top' : 'middle'}
-          style={onClick ? { cursor: 'pointer' } : undefined}
-        />
-      }
+      <LabelList
+        dataKey={dataKey}
+        className="fill-foreground"
+        fontSize={12}
+        position={layout == 'horizontal' ? 'top' : 'middle'}
+        style={onClick ? { cursor: 'pointer' } : undefined}
+      />
     </Bar>
   );
 }

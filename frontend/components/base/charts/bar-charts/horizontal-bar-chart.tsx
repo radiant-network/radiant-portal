@@ -10,7 +10,7 @@ import BarRectangle from '../shapes/bar-rectangle';
 import { BarChartProps } from '../type';
 
 /**
- * Vertical bar chart with a single series, one bar per category.
+ * Horizontal bar chart with a single series, one bar per category.
  *
  * Value (number) must always use "count" key
  *

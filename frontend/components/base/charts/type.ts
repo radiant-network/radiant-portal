@@ -43,7 +43,6 @@ export type ChartTooltipPayload = {
 
 export type BarChartProps<T extends object> = {
   axis: ChartAxisProps;
-  bars?: string[];
   data: ReadonlyArray<T>;
   colorblindMode?: boolean;
   onClick?: (data: any) => void;

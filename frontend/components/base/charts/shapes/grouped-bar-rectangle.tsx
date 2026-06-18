@@ -32,15 +32,13 @@ function GroupedBarRectangle({ id, dataKey, layout, patternIndex, color, onClick
       )}
       radius={2}
     >
-      {
-        <LabelList
-          dataKey={dataKey}
-          className="fill-foreground"
-          fontSize={12}
-          position={layout == 'horizontal' ? 'top' : 'middle'}
-          style={onClick ? { cursor: 'pointer' } : undefined}
-        />
-      }
+      <LabelList
+        dataKey={dataKey}
+        className="fill-foreground"
+        fontSize={12}
+        position={layout == 'horizontal' ? 'top' : 'middle'}
+        style={onClick ? { cursor: 'pointer' } : undefined}
+      />
     </Bar>
   );
 }
