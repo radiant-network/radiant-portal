@@ -43,9 +43,9 @@ func (r *AuthRepository) HasAction(ctx context.Context, userID, tenantCode, orgC
 // TenantExists reports whether a tenant with the given code exists. It backs the
 // tenant-routing middleware: an unknown tenant in the URL path becomes a 404 instead of
 // reaching a write and surfacing as a foreign-key violation (a 500) downstream.
-func (r *AuthRepository) TenantExists(tenantCode string) (bool, error) {
+func (r *AuthRepository) TenantExists(ctx context.Context, tenantCode string) (bool, error) {
 	var exists bool
-	err := r.db.Raw(`
+	err := r.db.WithContext(ctx).Raw(`
 		SELECT EXISTS (
 			SELECT 1 FROM tenant WHERE code = ?
 		)`, tenantCode).Scan(&exists).Error
