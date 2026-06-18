@@ -124,7 +124,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <StorySection title="Vertical Bar chart">
+    <StorySection title="Horizontal Bar chart">
       <div className="w-full flex gap-6">
         <Card className={`w-full`}>
           <CardHeader>

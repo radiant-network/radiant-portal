@@ -74,7 +74,7 @@ export const filesByDataTypesData = [
   { key: 'VO2 Measures', count: 89 },
 ];
 
-export const ageAtFirstEngamentKFData = [
+export const ageAtFirstEngagementKFData = [
   { age: '0-9', count: 523 },
   { age: '10-19', count: 43 },
   { age: '20-29', count: 50 },
@@ -84,7 +84,7 @@ export const ageAtFirstEngamentKFData = [
   { age: '60+', count: 25 },
 ];
 
-export const ageAtFirstEngamentIncludeData = [
+export const ageAtFirstEngagementIncludeData = [
   { age: '0-9', trisomy: 523, disomy: 90 },
   { age: '10-19', trisomy: 43, disomy: 0 },
   { age: '20-29', trisomy: 45, disomy: 5 },

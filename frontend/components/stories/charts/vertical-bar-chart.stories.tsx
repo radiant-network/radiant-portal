@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shad
 
 import { StorySection } from '../story-section';
 
-import { ageAtFirstEngamentIncludeData, ageAtFirstEngamentKFData } from './data';
+import { ageAtFirstEngagementIncludeData, ageAtFirstEngagementKFData } from './data';
 
 const ageAtFirstEngagementFKProps = {
   axis: {
@@ -21,7 +21,7 @@ const ageAtFirstEngagementFKProps = {
       label: '# of participants',
     },
   },
-  data: ageAtFirstEngamentKFData,
+  data: ageAtFirstEngagementKFData,
   onClick: (data: any) => {
     console.warn('data', data);
   },
@@ -45,7 +45,7 @@ const ageAtFirstEngagementIncludeProps = {
     },
   },
   bars: ['trisomy', 'disomy'],
-  data: ageAtFirstEngamentIncludeData,
+  data: ageAtFirstEngagementIncludeData,
   onClick: (data: any) => {
     console.warn('data', data);
   },
@@ -75,7 +75,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <StorySection title="Horizontal Bar chart">
+    <StorySection title="Vertical Bar chart">
       <div className="w-full flex gap-6">
         <Card className={`w-full`}>
           <CardHeader>
