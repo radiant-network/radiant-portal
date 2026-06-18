@@ -10,8 +10,6 @@ import { Card, CardContent } from '../shadcn/card';
 
 import { useQBActiveQuery, useQBContext } from './hooks/use-query-builder';
 
-const HIDDEN_PAGINATION_LIMIT = 1000;
-
 type QueryBuilderDataTableProps<T> = Omit<TableProps<T>, 'loadingStates' | 'data' | 'pagination' | 'serverOptions'> & {
   defaultPageSize?: number;
   swrId?: string | number;
@@ -31,8 +29,6 @@ function QueryBuilderDataTable<T>({
   const activeQuery = useQBActiveQuery();
   const { fetcher } = useQBContext();
 
-  const isPaginationHidden = paginationType === 'hidden';
-
   const [additionalFields, setAdditionalFields] = useState<string[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -48,8 +44,8 @@ function QueryBuilderDataTable<T>({
       id: swrKey,
       listBody: {
         additional_fields: additionalFields,
-        limit: isPaginationHidden ? HIDDEN_PAGINATION_LIMIT : pagination.pageSize,
-        page_index: isPaginationHidden ? 0 : pagination.pageIndex,
+        limit: pagination.pageSize,
+        page_index: pagination.pageIndex,
         sort: sorting,
         sqon: {
           content: activeQuery.content as SqonContent,
@@ -103,7 +99,7 @@ function QueryBuilderDataTable<T>({
               onSortingChange: setSorting,
             }}
             pagination={
-              isPaginationHidden
+              paginationType === 'hidden'
                 ? { type: 'hidden' }
                 : { state: pagination, type: 'server', onPaginationChange: setPagination }
             }

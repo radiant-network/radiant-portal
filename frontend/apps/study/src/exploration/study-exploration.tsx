@@ -73,6 +73,7 @@ export default function StudyExploration() {
                 enableColumnOrdering
                 tableIndexResultPosition="top"
                 paginationType="hidden"
+                defaultPageSize={1000}
               />
             </main>
           </div>
