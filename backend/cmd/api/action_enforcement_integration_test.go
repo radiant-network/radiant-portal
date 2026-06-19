@@ -39,8 +39,8 @@ func assertActionEnforced(t *testing.T, userID, action string, expectedStatus in
 
 		router := gin.New()
 		tenantRoutes := router.Group("/:tenant")
-		tenantRoutes.Use(server.RequireTenantAccess(auth, repo, true))
-		tenantRoutes.GET("/probe", server.RequireAction(auth, repo, action, true), func(c *gin.Context) {
+		tenantRoutes.Use(server.RequireTenantAccess(auth, repo))
+		tenantRoutes.GET("/probe", server.RequireAction(auth, repo, action), func(c *gin.Context) {
 			c.Status(http.StatusOK)
 		})
 
@@ -110,8 +110,8 @@ func assertBatchEnforced(t *testing.T, userID string, expectedStatus int) {
 
 		router := gin.New()
 		tenantRoutes := router.Group("/:tenant")
-		tenantRoutes.Use(server.RequireTenantAccess(auth, repo, true))
-		tenantRoutes.POST("/cases/batch", server.RequireAction(auth, repo, types.ActionIngestData, true), func(c *gin.Context) {
+		tenantRoutes.Use(server.RequireTenantAccess(auth, repo))
+		tenantRoutes.POST("/cases/batch", server.RequireAction(auth, repo, types.ActionIngestData), func(c *gin.Context) {
 			c.Status(http.StatusOK)
 		})
 

@@ -18,10 +18,10 @@ const mockUserID = "25286548-fbef-4e93-b3c4-c659e6169396"
 
 // tenantTestRouter wires RequireTenantAccess in front of a handler that echoes the resolved
 // tenant, so tests can assert both the gate's status code and what it stored in context.
-func tenantTestRouter(repo *mockAuthRepository, auth *testutils.MockAuth, enforce bool) *gin.Engine {
+func tenantTestRouter(repo *mockAuthRepository, auth *testutils.MockAuth) *gin.Engine {
 	router := gin.New()
 	tenantGroup := router.Group("/:tenant")
-	tenantGroup.Use(RequireTenantAccess(auth, repo, enforce))
+	tenantGroup.Use(RequireTenantAccess(auth, repo))
 	tenantGroup.GET("/cases/filters", func(c *gin.Context) {
 		tenant, err := GetTenant(c)
 		if err != nil {
@@ -36,7 +36,7 @@ func tenantTestRouter(repo *mockAuthRepository, auth *testutils.MockAuth, enforc
 func Test_RequireTenantAccess_Member_PassesAndSetsContext(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: true}
 	auth := &testutils.MockAuth{Id: mockUserID}
-	router := tenantTestRouter(repo, auth, true)
+	router := tenantTestRouter(repo, auth)
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/filters", nil)
 	w := httptest.NewRecorder()
@@ -49,7 +49,7 @@ func Test_RequireTenantAccess_Member_PassesAndSetsContext(t *testing.T) {
 func Test_RequireTenantAccess_NonMember_Returns403(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: false}
 	auth := &testutils.MockAuth{Id: mockUserID}
-	router := tenantTestRouter(repo, auth, true)
+	router := tenantTestRouter(repo, auth)
 
 	req, _ := http.NewRequest("GET", "/tenant_b/cases/filters", nil)
 	w := httptest.NewRecorder()
@@ -61,7 +61,7 @@ func Test_RequireTenantAccess_NonMember_Returns403(t *testing.T) {
 func Test_RequireTenantAccess_TokenError_Returns401(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: true}
 	auth := &testutils.MockAuth{Error: fmt.Errorf("no token")}
-	router := tenantTestRouter(repo, auth, true)
+	router := tenantTestRouter(repo, auth)
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/filters", nil)
 	w := httptest.NewRecorder()
@@ -73,7 +73,7 @@ func Test_RequireTenantAccess_TokenError_Returns401(t *testing.T) {
 func Test_RequireTenantAccess_RepoError_Returns500(t *testing.T) {
 	repo := &mockAuthRepository{tenantErr: fmt.Errorf("db down")}
 	auth := &testutils.MockAuth{Id: mockUserID}
-	router := tenantTestRouter(repo, auth, true)
+	router := tenantTestRouter(repo, auth)
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/filters", nil)
 	w := httptest.NewRecorder()
@@ -83,13 +83,13 @@ func Test_RequireTenantAccess_RepoError_Returns500(t *testing.T) {
 }
 
 // An unknown tenant in the URL path is rejected with the same generic 403 as a cross-tenant
-// denial, regardless of enforcement, so the response never discloses whether a tenant exists.
-// This also guards against the bad tenant_code reaching a write and surfacing as an opaque 500
-// from a foreign-key violation. Enforcement is off here to prove the check is independent of it.
+// denial, so the response never discloses whether a tenant exists. This also guards against
+// the bad tenant_code reaching a write and surfacing as an opaque 500 from a foreign-key
+// violation. The existence check runs before the membership check, so it aborts first here.
 func Test_RequireTenantAccess_UnknownTenant_Returns403(t *testing.T) {
 	repo := &mockAuthRepository{tenantNotFound: true}
 	auth := &testutils.MockAuth{Id: mockUserID}
-	router := tenantTestRouter(repo, auth, false)
+	router := tenantTestRouter(repo, auth)
 
 	req, _ := http.NewRequest("GET", "/nope/cases/filters", nil)
 	w := httptest.NewRecorder()
@@ -101,7 +101,7 @@ func Test_RequireTenantAccess_UnknownTenant_Returns403(t *testing.T) {
 func Test_RequireTenantAccess_TenantLookupError_Returns500(t *testing.T) {
 	repo := &mockAuthRepository{tenantExistsErr: fmt.Errorf("db down")}
 	auth := &testutils.MockAuth{Id: mockUserID}
-	router := tenantTestRouter(repo, auth, true)
+	router := tenantTestRouter(repo, auth)
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/filters", nil)
 	w := httptest.NewRecorder()
@@ -110,29 +110,13 @@ func Test_RequireTenantAccess_TenantLookupError_Returns500(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-// With enforcement off, a non-member still passes and the tenant is stored in context. The
-// repo is rigged to error to prove the membership check is skipped entirely (no lockout
-// before users are backfilled).
-func Test_RequireTenantAccess_EnforcementDisabled_AllowsAndSetsContext(t *testing.T) {
-	repo := &mockAuthRepository{hasTenantAccess: false, tenantErr: fmt.Errorf("must not be called")}
-	auth := &testutils.MockAuth{Id: mockUserID}
-	router := tenantTestRouter(repo, auth, false)
-
-	req, _ := http.NewRequest("GET", "/tenant_b/cases/filters", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"tenant":"tenant_b"}`, w.Body.String())
-}
-
 // actionTestRouter wires RequireTenantAccess then RequireAction (the production order) in
 // front of a handler that returns 200, so tests exercise the action gate with a resolved tenant.
-func actionTestRouter(repo *mockAuthRepository, auth *testutils.MockAuth, action string, enforce bool) *gin.Engine {
+func actionTestRouter(repo *mockAuthRepository, auth *testutils.MockAuth, action string) *gin.Engine {
 	router := gin.New()
 	tenantGroup := router.Group("/:tenant")
-	tenantGroup.Use(RequireTenantAccess(auth, repo, enforce))
-	tenantGroup.GET("/cases/filters", RequireAction(auth, repo, action, enforce), func(c *gin.Context) {
+	tenantGroup.Use(RequireTenantAccess(auth, repo))
+	tenantGroup.GET("/cases/filters", RequireAction(auth, repo, action), func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	})
 	return router
@@ -148,7 +132,7 @@ func doActionRequest(router *gin.Engine) *httptest.ResponseRecorder {
 func Test_RequireAction_HasAction_Allows(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: true}
 	auth := &testutils.MockAuth{Id: mockUserID}
-	w := doActionRequest(actionTestRouter(repo, auth, types.ActionSearchCase, true))
+	w := doActionRequest(actionTestRouter(repo, auth, types.ActionSearchCase))
 
 	assert.Equal(t, http.StatusOK, w.Code)
 }
@@ -156,7 +140,7 @@ func Test_RequireAction_HasAction_Allows(t *testing.T) {
 func Test_RequireAction_LacksAction_Returns403(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: false}
 	auth := &testutils.MockAuth{Id: mockUserID}
-	w := doActionRequest(actionTestRouter(repo, auth, types.ActionInterpretVariant, true))
+	w := doActionRequest(actionTestRouter(repo, auth, types.ActionInterpretVariant))
 
 	assert.Equal(t, http.StatusForbidden, w.Code)
 	// The body must NOT name the missing action (no permission-model disclosure).
@@ -166,7 +150,7 @@ func Test_RequireAction_LacksAction_Returns403(t *testing.T) {
 func Test_RequireAction_RepoError_Returns500(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: true, actionErr: fmt.Errorf("db down")}
 	auth := &testutils.MockAuth{Id: mockUserID}
-	w := doActionRequest(actionTestRouter(repo, auth, types.ActionSearchCase, true))
+	w := doActionRequest(actionTestRouter(repo, auth, types.ActionSearchCase))
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
@@ -177,7 +161,7 @@ func Test_RequireAction_TokenError_Returns401(t *testing.T) {
 	router := gin.New()
 	tenantGroup := router.Group("/:tenant")
 	tenantGroup.Use(func(c *gin.Context) { c.Set(TenantContextKey, c.Param("tenant")) })
-	tenantGroup.GET("/cases/filters", RequireAction(&testutils.MockAuth{Error: fmt.Errorf("no token")}, repo, types.ActionSearchCase, true), func(c *gin.Context) {
+	tenantGroup.GET("/cases/filters", RequireAction(&testutils.MockAuth{Error: fmt.Errorf("no token")}, repo, types.ActionSearchCase), func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	})
 	w := doActionRequest(router)
@@ -191,7 +175,7 @@ func Test_RequireAction_NoTenantInContext_Returns500(t *testing.T) {
 	repo := &mockAuthRepository{hasAction: true}
 	auth := &testutils.MockAuth{Id: mockUserID}
 	router := gin.New()
-	router.GET("/cases/filters", RequireAction(auth, repo, types.ActionSearchCase, true), func(c *gin.Context) {
+	router.GET("/cases/filters", RequireAction(auth, repo, types.ActionSearchCase), func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	})
 
@@ -202,20 +186,10 @@ func Test_RequireAction_NoTenantInContext_Returns500(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-// With enforcement off the action gate allows even when the grant is absent. The repo is
-// rigged to error to prove HasAction is never called (no lockout before backfill).
-func Test_RequireAction_EnforcementDisabled_Allows(t *testing.T) {
-	repo := &mockAuthRepository{actionErr: fmt.Errorf("must not be called")}
-	auth := &testutils.MockAuth{Id: mockUserID}
-	w := doActionRequest(actionTestRouter(repo, auth, types.ActionSearchCase, false))
-
-	assert.Equal(t, http.StatusOK, w.Code)
-}
-
 func Test_RequireAction_PassesResolvedOrgToChecker(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: true, hasAction: true}
 	auth := &testutils.MockAuth{Id: mockUserID}
-	doActionRequest(actionTestRouter(repo, auth, types.ActionFlagVariant, true))
+	doActionRequest(actionTestRouter(repo, auth, types.ActionFlagVariant))
 
 	assert.Equal(t, WildcardOnlyOrg, repo.gotOrgCode)
 	assert.Equal(t, types.ActionFlagVariant, repo.gotAction)

@@ -99,21 +99,16 @@ type tenantAccessChecker interface {
 	HasTenantAccess(ctx context.Context, userID, tenantCode string) (bool, error)
 }
 
-// RequireTenantAccess gates tenant-scoped routes (`/:tenant/...`). It always reads the
-// `tenant` path param, rejects an unknown tenant with 403, and stores the resolved tenant
-// code in the request context. When enforce is true it additionally verifies the caller
-// holds at least one role in that tenant, rejecting cross-tenant access with 403.
+// RequireTenantAccess gates tenant-scoped routes (`/:tenant/...`). It reads the `tenant`
+// path param, rejects an unknown tenant with 403, verifies the caller holds at least one
+// role in that tenant (rejecting cross-tenant access with 403), and stores the resolved
+// tenant code in the request context.
 //
-// The existence check runs regardless of enforce: the tenant comes from the URL path and is
-// foreign-key enforced on every write, so an unknown tenant must not be allowed to reach a
-// write and surface as an opaque 500 from an FK violation. It is rejected with the same
-// generic 403 as a cross-tenant denial so the response never discloses whether a tenant
-// exists (an authenticated caller cannot distinguish "unknown tenant" from "not a member").
-//
-// enforce is wired from TENANT_ENFORCEMENT_ENABLED so the path-prefix routing can be
-// deployed before users are backfilled into user_role: with enforcement off, routing and
-// context still work but nobody is locked out. Flip it on once the backfill lands.
-func RequireTenantAccess(auth utils.Auth, repo tenantAccessChecker, enforce bool) gin.HandlerFunc {
+// An unknown tenant is rejected with the same generic 403 as a cross-tenant denial so the
+// response never discloses whether a tenant exists (an authenticated caller cannot
+// distinguish "unknown tenant" from "not a member"). It also keeps a bad tenant_code from
+// reaching a write and surfacing as an opaque 500 from a foreign-key violation.
+func RequireTenantAccess(auth utils.Auth, repo tenantAccessChecker) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tenant := c.Param("tenant")
 
@@ -129,25 +124,23 @@ func RequireTenantAccess(auth utils.Auth, repo tenantAccessChecker, enforce bool
 			return
 		}
 
-		if enforce {
-			userID, err := auth.RetrieveUserIdFromToken(c)
-			if err != nil {
-				HandleUnauthorizedError(c)
-				c.Abort()
-				return
-			}
+		userID, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleUnauthorizedError(c)
+			c.Abort()
+			return
+		}
 
-			allowed, err := repo.HasTenantAccess(c.Request.Context(), *userID, tenant)
-			if err != nil {
-				HandleError(c, err)
-				c.Abort()
-				return
-			}
-			if !allowed {
-				HandleForbiddenError(c)
-				c.Abort()
-				return
-			}
+		allowed, err := repo.HasTenantAccess(c.Request.Context(), *userID, tenant)
+		if err != nil {
+			HandleError(c, err)
+			c.Abort()
+			return
+		}
+		if !allowed {
+			HandleForbiddenError(c)
+			c.Abort()
+			return
 		}
 
 		c.Set(TenantContextKey, tenant)
@@ -182,16 +175,10 @@ func resolveOrgCode(_ *gin.Context) (string, error) {
 }
 
 // RequireAction gates a route on an action. It reads the caller from the token and the tenant
-// from context (RequireTenantAccess must run first). enforce is wired from
-// TENANT_ENFORCEMENT_ENABLED; when off it allows. On denial the missing action is logged, not
-// returned, so the 403 body stays generic.
-func RequireAction(auth utils.Auth, repo actionChecker, action string, enforce bool) gin.HandlerFunc {
+// from context (RequireTenantAccess must run first). On denial the missing action is logged,
+// not returned, so the 403 body stays generic.
+func RequireAction(auth utils.Auth, repo actionChecker, action string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !enforce {
-			c.Next()
-			return
-		}
-
 		userID, err := auth.RetrieveUserIdFromToken(c)
 		if err != nil {
 			HandleUnauthorizedError(c)

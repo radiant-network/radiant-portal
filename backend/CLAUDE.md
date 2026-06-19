@@ -66,15 +66,15 @@ make migrate       # Create new migration file
 Route groups:
 - `GET /status` — health check (public, no auth)
 - `/cases`, `/documents`, `/genes`, `/hpo`, `/igv`, `/interpretations`, `/mondo`, `/occurrences`, `/sequencing`, `/users`, `/variants` — protected by JWT auth middleware
-- `/batches`, `/patients/batch`, `/samples/batch`, `/sequencing/batch`, `/cases/batch` — additionally require `data_manager` Keycloak role
+- `/batches`, `/patients/batch`, `/samples/batch`, `/sequencing/batch`, `/cases/batch` — additionally require the `can_ingest_data` action
 
-Middleware stack (in order): request id → structured request logging (slog) → metrics → gzip → Keycloak logger → CORS → role-based auth → recovery.
+Middleware stack (in order): request id → structured request logging (slog) → metrics → gzip → Keycloak logger → CORS → Keycloak authentication → recovery.
 
 Logging uses stdlib `log/slog` with JSON output (see `internal/observability`). The `RequestID` middleware assigns each request a correlation id (reusing an inbound `X-Request-ID` or minting a UUID), echoes it on the response, and threads it through the request context so every `slog.*Context` line carries `request_id`. `HandleError` returns that same id as `X-Correlation-ID`. Prometheus metrics are exposed at public `GET /metrics`.
 
 ## Authorization
 
-Keycloak is the sole authentication provider: JWT claims (`sub`, `azp`, `resource_access`). The `data_manager` role gates batch endpoints.
+Keycloak is the sole authentication provider: JWT claims (`sub`, `azp`, `resource_access`). Authorization is the tenant/action model below — Keycloak roles no longer gate any route. Batch endpoints are gated by the `can_ingest_data` action.
 
 Auth utilities live in `internal/utils/auth.go` (`KeycloakAuth` interface).
 
@@ -110,10 +110,10 @@ The remaining tenant-scoped tables carry `tenant_code varchar(50) NOT NULL` with
 
 #### Enforcement
 
-Two `internal/server` middlewares enforce this model on `/:tenant/*` routes, both gated by `TENANT_ENFORCEMENT_ENABLED` (off = resolve context but allow, so it ships before `user_role` backfill without locking anyone out):
+Two `internal/server` middlewares enforce this model on `/:tenant/*` routes:
 
 - `RequireTenantAccess` — group-level; verifies tenant membership (`HasTenantAccess`) and stores the tenant in context (`GetTenant`).
-- `RequireAction(auth, repo, action, enforce)` — per-route; verifies the caller holds a specific action (`HasAction`). Wired in `cmd/api/main.go` via the `requireAction(...)` closure; action codes are `types.Action*` constants. On denial it returns a **generic 403** (the missing action is logged, never put in the body) and logs server-side.
+- `RequireAction(auth, repo, action)` — per-route; verifies the caller holds a specific action (`HasAction`). Wired in `cmd/api/main.go` via the `requireAction(...)` closure; action codes are `types.Action*` constants. On denial it returns a **generic 403** (the missing action is logged, never put in the body) and logs server-side.
 
 Org resolution for org-scoped actions is deferred behind `resolveOrgCode(c)` (a seam in `middlewares.go`): step 1 returns `WildcardOnlyOrg` (`""`, matches only `'*'` grants — correct while all grants are `'*'`); a follow-up will resolve the real org per resource. Every privileged `/:tenant` route is covered by `Test_TenantRoutesAreMappedToActions`, which fails if a new route ships unmapped.
 
@@ -141,7 +141,6 @@ Copy `.env.template` → `.env`. Key variables:
 | `API_PORT` | API listen port | 8090 |
 | `LOG_LEVEL` | slog level for JSON logs (`debug`/`info`/`warn`/`error`) | info |
 | `KEYCLOAK_HOST/REALM/CLIENT` | Keycloak | localhost:8080 |
-| `TENANT_ENFORCEMENT_ENABLED` | Enforce tenant membership on `/{tenant}/*` routes (403 on cross-tenant). Off by default so routing can ship before `user_role` is backfilled; set `true` once it is. | false |
 | `VIEW_REFRESH_ON_STARTUP_ENABLED` | On API startup, after a migration that actually changed the schema, recreate every tenant's StarRocks views (advisory-locked across replicas, non-fatal). Off by default until the `FederationName→<tenant>_db` refactor makes the views load-bearing. Tenant *creation* (which needs Ranger) stays in the `cmd/create-tenant` CLI/task. | false |
 | `AWS_ENDPOINT_URL/REGION/ACCESS_KEY_ID/SECRET_ACCESS_KEY` | S3/MinIO | — |
 | `S3_PRESIGNED_URL_EXPIRE` | URL TTL | 60m |
