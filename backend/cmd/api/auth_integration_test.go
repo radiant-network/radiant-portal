@@ -59,14 +59,14 @@ func Test_GetMeHandler_UserWithoutGrants(t *testing.T) {
 
 // assertTenantAccess wires the real AuthRepository behind RequireTenantAccess and requests a
 // tenant-scoped route as the given user, returning the resulting status code.
-func assertTenantAccess(t *testing.T, userID, tenant string, enforce bool, expectedStatus int) {
+func assertTenantAccess(t *testing.T, userID, tenant string, expectedStatus int) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := repository.NewAuthRepository(env.Postgres)
 		auth := &testutils.MockAuth{Id: userID}
 
 		router := gin.Default()
 		tenantRoutes := router.Group("/:tenant")
-		tenantRoutes.Use(server.RequireTenantAccess(auth, repo, enforce))
+		tenantRoutes.Use(server.RequireTenantAccess(auth, repo))
 		tenantRoutes.GET("/cases/filters", func(c *gin.Context) { c.Status(http.StatusOK) })
 
 		req, _ := http.NewRequest("GET", "/"+tenant+"/cases/filters", nil)
@@ -79,15 +79,10 @@ func assertTenantAccess(t *testing.T, userID, tenant string, enforce bool, expec
 
 func Test_RequireTenantAccess_Member_Allowed(t *testing.T) {
 	// alice holds roles in radiant.
-	assertTenantAccess(t, aliceID, types.DefaultTenantCode, true, http.StatusOK)
+	assertTenantAccess(t, aliceID, types.DefaultTenantCode, http.StatusOK)
 }
 
 func Test_RequireTenantAccess_CrossTenant_Forbidden(t *testing.T) {
 	// alice has no grant in tenant_b → cross-tenant access is rejected.
-	assertTenantAccess(t, aliceID, "tenant_b", true, http.StatusForbidden)
-}
-
-func Test_RequireTenantAccess_EnforcementDisabled_AllowsCrossTenant(t *testing.T) {
-	// With enforcement off, even a non-member reaches the handler (no day-1 lockout).
-	assertTenantAccess(t, aliceID, "tenant_b", false, http.StatusOK)
+	assertTenantAccess(t, aliceID, "tenant_b", http.StatusForbidden)
 }
