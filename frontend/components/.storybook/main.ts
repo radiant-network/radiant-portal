@@ -36,6 +36,9 @@ const config: StorybookConfig = {
   viteFinal: async (config) => {
     return mergeConfig(config, {
       plugins: [tsConfigPaths()],
+      define: {
+        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'development'),
+      },
     });
   },
   typescript: {

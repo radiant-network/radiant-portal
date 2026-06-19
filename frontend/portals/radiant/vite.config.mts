@@ -22,6 +22,7 @@ export default defineConfig({
     __PROJECT__: configs[project],
     __THEME__: JSON.stringify(project),
     'import.meta.env.THEME': JSON.stringify(project),
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'development'),
   },
   resolve: {
     alias: {

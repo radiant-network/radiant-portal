@@ -10,7 +10,7 @@ import { StorySection } from '../story-section';
 
 import { ageAtFirstEngagementIncludeData, ageAtFirstEngagementKFData } from './data';
 
-const ageAtFirstEngagementFKProps = {
+export const ageAtFirstEngagementFKProps = {
   axis: {
     x: {
       dataKey: 'age',
@@ -33,7 +33,7 @@ const ageAtFirstEngagementFKProps = {
   ),
 };
 
-const ageAtFirstEngagementIncludeProps = {
+export const ageAtFirstEngagementIncludeProps = {
   axis: {
     x: {
       dataKey: 'age',

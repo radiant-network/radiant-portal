@@ -9,7 +9,7 @@ import { StorySection } from '../story-section';
 
 import { ethnicityData, familyTypeData, raceData, sexData, studiesData } from './data';
 
-const studiesProps = {
+export const studiesProps = {
   data: studiesData,
   pies: studiesData.map(d => d.label),
   onClick: (data: any) => {
@@ -23,7 +23,7 @@ const studiesProps = {
   ),
 };
 
-const sexProps = {
+export const sexProps = {
   title: 'Sex',
   data: sexData,
   pies: sexData.map(d => d.label),
@@ -35,7 +35,7 @@ const sexProps = {
   ),
 };
 
-const raceProps = {
+export const raceProps = {
   title: 'Race',
   data: raceData,
   pies: raceData.map(d => d.label),
@@ -47,7 +47,7 @@ const raceProps = {
   ),
 };
 
-const ethnicityProps = {
+export const ethnicityProps = {
   title: 'ethnicity',
   data: ethnicityData,
   pies: ethnicityData.map(d => d.label),
@@ -59,7 +59,7 @@ const ethnicityProps = {
   ),
 };
 
-const familyTypeProps = {
+export const familyTypeProps = {
   title: 'Family Composition',
   data: familyTypeData,
   pies: familyTypeData.map(d => d.label),
