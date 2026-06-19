@@ -74,7 +74,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	r := newEngine()
 
-	roleAccessMiddleware, err := authorization.InitAuthorizer()
+	authMiddleware, err := authorization.InitAuthorizer()
 	if err != nil {
 		slog.Error("failed to initialize authorizer", slog.Any("error", err))
 		os.Exit(1)
@@ -84,9 +84,9 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres))
 
 	// Private routes, alphabetically ordered
-	// Use privateRoutes instead of `r` for all private routes to automatically apply the role access middleware
+	// Use privateRoutes instead of `r` for all private routes to automatically apply the auth middleware
 	privateRoutes := r.Group("/")
-	privateRoutes.Use(roleAccessMiddleware)
+	privateRoutes.Use(authMiddleware)
 
 	// Global routes (not tenant-scoped) stay on privateRoutes: /auth/*, /users/*.
 	authGroup := privateRoutes.Group("/auth")
@@ -216,26 +216,19 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	documentsGroup.GET("/filters", requireAction(types.ActionSearchCase), server.DocumentsFiltersHandler(repoDocuments))
 	documentsGroup.GET("/:document_id/download_url", requireAction(types.ActionDownloadFile), server.GetDocumentsDownloadUrlHandler(repoDocuments, s3Presigner))
 
-	dataManagerResourceName := os.Getenv("KEYCLOAK_CLIENT")
-	dataManagerRoutes := tenantRoutes.Group("/")
-	dataManagerRoutes.Use(server.RequireRole(auth, utils.DataManagerRole, dataManagerResourceName))
-	{
-		batchesGroup := dataManagerRoutes.Group("/batches")
-		batchesGroup.GET("/:batch_id", requireAction(types.ActionIngestData), server.GetBatchHandler(repoBatches))
+	batchesGroup := tenantRoutes.Group("/batches")
+	batchesGroup.GET("/:batch_id", requireAction(types.ActionIngestData), server.GetBatchHandler(repoBatches))
 
-		patientsGroup := dataManagerRoutes.Group("/patients")
-		patientsGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostPatientBatchHandler(repoBatches, auth))
+	patientsGroup := tenantRoutes.Group("/patients")
+	patientsGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostPatientBatchHandler(repoBatches, auth))
 
-		samplesGroup := dataManagerRoutes.Group("/samples")
-		samplesGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostSampleBatchHandler(repoBatches, auth))
+	samplesGroup := tenantRoutes.Group("/samples")
+	samplesGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostSampleBatchHandler(repoBatches, auth))
 
-		sequencingGroup := dataManagerRoutes.Group("/sequencing")
-		sequencingGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostSequencingExperimentBatchHandler(repoBatches, auth))
+	sequencingGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostSequencingExperimentBatchHandler(repoBatches, auth))
 
-		casesGroup := dataManagerRoutes.Group("/cases")
-		casesGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostCaseBatchHandler(repoBatches, auth))
-		casesGroup.PATCH("/batch", requireAction(types.ActionIngestData), server.PatchCaseBatchHandler(repoBatches, auth))
-	}
+	casesGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostCaseBatchHandler(repoBatches, auth))
+	casesGroup.PATCH("/batch", requireAction(types.ActionIngestData), server.PatchCaseBatchHandler(repoBatches, auth))
 
 	return r
 }
