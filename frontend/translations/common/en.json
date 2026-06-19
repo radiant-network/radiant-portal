@@ -860,6 +860,78 @@
       }
     }
   },
+  "landing": {
+    "include": {
+      "hero": {
+        "wordmark": "INCLUDE Data Hub",
+        "title": "Uncover new insights into the biology of Down Syndrome and co-occurring conditions.",
+        "description": "Access large-scale integrated data resources and analyze custom built cohort datasets based on participants, biospecimens, clinical, and genomic data.",
+        "mondo_chart_title": "Most frequent diagnoses (MONDO)"
+      },
+      "tiles": {
+        "germline_variants": {
+          "title": "Germline Variants",
+          "description": "Explore germline variants across INCLUDE studies.",
+          "buttons": {
+            "explore": "Explore variant data"
+          }
+        },
+        "cavatica": {
+          "title": "CAVATICA",
+          "description": "Analyze data in a secure cloud-based environment.",
+          "buttons": {
+            "learn_more": "Learn more",
+            "login": "Login"
+          }
+        },
+        "experimental_models": {
+          "title": "Experimental Models",
+          "description": "Browse cellular and animal models for Down syndrome research.",
+          "buttons": {
+            "explore": "Explore Experimental Models"
+          }
+        }
+      },
+      "data_release": {
+        "title": "Data Release",
+        "stats": {
+          "studies": "Studies",
+          "participants": "Participants",
+          "biospecimens": "Biospecimens",
+          "families": "Families",
+          "files": "Files",
+          "variants": "Variants"
+        }
+      },
+      "demographics": {
+        "title": "Demographics",
+        "sex": "Sex",
+        "race": "Race",
+        "ethnicity": "Ethnicity"
+      },
+      "studies": {
+        "title": "Studies",
+        "description": "Explore a curated collection of harmonized studies, ranging from participant-reported programs, INCLUDE-funded cohorts, institutional initiatives, and dedicated consortia focused on Down Syndrome research.",
+        "view_all": "View all studies"
+      },
+      "documentation": {
+        "center": {
+          "title": "INCLUDE Documentation Center",
+          "description": "For information on accessing, submitting and uploading data, visit our Documentation Center.",
+          "cta": "Documentation",
+          "citation": "Citation guidelines"
+        },
+        "participate": {
+          "title": "Participate in the INCLUDE Project",
+          "description": "Visit the NIH INCLUDE project page to learn more about the initiative, funding opportunities, or other resources.",
+          "cta": "Learn more"
+        }
+      },
+      "footer": {
+        "legal": "The INCLUDE Data Coordinating Center (DCC) is supported by the National Institutes of Health INCLUDE Project under Project Number U2CHL156291 administered by the National Heart, Lung and Blood Institute. All content, terms and conditions and policies associated with the INCLUDE DCC content and website (the \"Services\") are produced by the INCLUDE DCC. The views and opinions of authors expressed on the Services do not necessarily state or reflect those of the National Institutes of Health (\"NIH\") or the U.S. government. Furthermore, the NIH does not endorse or promote any INCLUDE DCC entity or any of its products or services nor guarantees the products, services, or information provided by the INCLUDE DCC."
+      }
+    }
+  },
   "interpretation": {
     "title": "Clinical Interpretation"
   },

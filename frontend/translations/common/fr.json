@@ -854,6 +854,78 @@
       }
     }
   },
+  "landing": {
+    "include": {
+      "hero": {
+        "wordmark": "INCLUDE Data Hub",
+        "title": "Découvrez de nouvelles perspectives sur la biologie de la trisomie 21 et des affections concomitantes.",
+        "description": "Accédez à des ressources de données intégrées à grande échelle et analysez des ensembles de données de cohortes personnalisés à partir des participants, des biospécimens et des données cliniques et génomiques.",
+        "mondo_chart_title": "Diagnostics les plus fréquents (MONDO)"
+      },
+      "tiles": {
+        "germline_variants": {
+          "title": "Variants germinaux",
+          "description": "Explorez les variants germinaux à travers les études INCLUDE.",
+          "buttons": {
+            "explore": "Explorer les données de variants"
+          }
+        },
+        "cavatica": {
+          "title": "CAVATICA",
+          "description": "Analysez les données dans un environnement infonuagique sécurisé.",
+          "buttons": {
+            "learn_more": "En savoir plus",
+            "login": "Connexion"
+          }
+        },
+        "experimental_models": {
+          "title": "Modèles expérimentaux",
+          "description": "Parcourez les modèles cellulaires et animaux pour la recherche sur la trisomie 21.",
+          "buttons": {
+            "explore": "Explorer les modèles expérimentaux"
+          }
+        }
+      },
+      "data_release": {
+        "title": "Publication de données",
+        "stats": {
+          "studies": "Études",
+          "participants": "Participants",
+          "biospecimens": "Biospécimens",
+          "families": "Familles",
+          "files": "Fichiers",
+          "variants": "Variants"
+        }
+      },
+      "demographics": {
+        "title": "Démographie",
+        "sex": "Sexe",
+        "race": "Race",
+        "ethnicity": "Ethnicité"
+      },
+      "studies": {
+        "title": "Études",
+        "description": "Explorez une collection sélectionnée d'études harmonisées, allant des programmes déclarés par les participants aux cohortes financées par INCLUDE, aux initiatives institutionnelles et aux consortiums dédiés à la recherche sur la trisomie 21.",
+        "view_all": "Voir toutes les études"
+      },
+      "documentation": {
+        "center": {
+          "title": "Centre de documentation INCLUDE",
+          "description": "Pour en savoir plus sur l'accès, la soumission et le téléversement de données, consultez notre Centre de documentation.",
+          "cta": "Documentation",
+          "citation": "Règles de citation"
+        },
+        "participate": {
+          "title": "Participer au projet INCLUDE",
+          "description": "Visitez la page du projet NIH INCLUDE pour en savoir plus sur l'initiative, les possibilités de financement et d'autres ressources.",
+          "cta": "En savoir plus"
+        }
+      },
+      "footer": {
+        "legal": "Le Data Coordinating Center (DCC) d'INCLUDE est soutenu par le projet INCLUDE des National Institutes of Health, sous le numéro de projet U2CHL156291 administré par le National Heart, Lung and Blood Institute. L'ensemble du contenu, des conditions générales et des politiques associés au contenu et au site Web du DCC d'INCLUDE (les « Services ») est produit par le DCC d'INCLUDE. Les points de vue et opinions des auteurs exprimés sur les Services ne reflètent pas nécessairement ceux des National Institutes of Health (« NIH ») ni du gouvernement des États-Unis. De plus, les NIH n'endossent ni ne promeuvent aucune entité du DCC d'INCLUDE ni aucun de ses produits ou services, et ne garantissent pas les produits, services ou informations fournis par le DCC d'INCLUDE."
+      }
+    }
+  },
   "interpretation": {
     "title": "Interprétation clinique"
   },
