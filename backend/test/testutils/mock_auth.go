@@ -1,8 +1,6 @@
 package testutils
 
 import (
-	"slices"
-
 	"github.com/gin-gonic/gin"
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
@@ -81,15 +79,4 @@ func (m *MockAuth) RetrieveFullNameFromToken(c *gin.Context) (*string, error) {
 		return &result, nil
 	}
 	return &m.Name, nil
-}
-
-func (m *MockAuth) UserHasRole(c *gin.Context, role string, resourceName string) (bool, error) {
-	if m.Error != nil {
-		return false, m.Error
-	}
-	roles, ok := m.ResourceAccess[resourceName]
-	if !ok {
-		return false, nil
-	}
-	return slices.Contains(roles.Roles, role), nil
 }

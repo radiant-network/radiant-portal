@@ -7,16 +7,13 @@ import (
 	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
+// NewKeyCloakAuthorizer authenticates the bearer token against the Keycloak realm
+// (signature + validity) and sets it on the context. It does not restrict by role —
+// per-route authorization is enforced by the tenant/action middlewares.
 func NewKeyCloakAuthorizer() (gin.HandlerFunc, error) {
-	var keycloakConfig = ginkeycloak.BuilderConfig{
-		Service: os.Getenv("KEYCLOAK_CLIENT"),
-		Url:     os.Getenv("KEYCLOAK_HOST"),
-		Realm:   os.Getenv("KEYCLOAK_REALM"),
+	keycloakConfig := ginkeycloak.KeycloakConfig{
+		Url:   os.Getenv("KEYCLOAK_HOST"),
+		Realm: os.Getenv("KEYCLOAK_REALM"),
 	}
-
-	role := os.Getenv("KEYCLOAK_CLIENT_ROLE")
-	return ginkeycloak.NewAccessBuilder(keycloakConfig).
-		RestrictButForRole(role).
-		RestrictButForRealm(role).
-		Build(), nil
+	return ginkeycloak.Auth(ginkeycloak.AuthCheck(), keycloakConfig), nil
 }

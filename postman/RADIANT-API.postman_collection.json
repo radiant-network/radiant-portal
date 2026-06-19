@@ -61,13 +61,13 @@
               ]
             },
             "url": {
-              "raw": "{{keycloak-url}}/realms/CQDG/protocol/openid-connect/token",
+              "raw": "{{keycloak-url}}/realms/qlin/protocol/openid-connect/token",
               "host": [
                 "{{keycloak-url}}"
               ],
               "path": [
                 "realms",
-                "CQDG",
+                "qlin",
                 "protocol",
                 "openid-connect",
                 "token"
@@ -118,13 +118,13 @@
               ]
             },
             "url": {
-              "raw": "{{keycloak-url}}/realms/CQDG/protocol/openid-connect/token",
+              "raw": "{{keycloak-url}}/realms/qlin/protocol/openid-connect/token",
               "host": [
                 "{{keycloak-url}}"
               ],
               "path": [
                 "realms",
-                "CQDG",
+                "qlin",
                 "protocol",
                 "openid-connect",
                 "token"

@@ -24,5 +24,7 @@ func Test_InitAuthorizer_ReturnsKeycloakMiddleware(t *testing.T) {
 	auth, err := InitAuthorizer()
 	assert.Nil(t, err)
 	assert.NotNil(t, auth)
-	assert.Contains(t, extractMethodName(auth), "github.com/tbaehler/gin-keycloak/pkg/ginkeycloak")
+	// The middleware is ginkeycloak's auth chain (ginkeycloak.Auth → authChain). Inlining roots the
+	// closure name in this package, so we match the stable ginkeycloak symbol rather than its import path.
+	assert.Contains(t, extractMethodName(auth), "authChain")
 }

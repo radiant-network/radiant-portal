@@ -11,10 +11,8 @@ import (
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/server"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
-	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 )
 
 // Probe users from the seeded auth fixtures (test/data/auth/06_user_role.sql):
@@ -104,23 +102,16 @@ func Test_ActionEnforcement_IngestData_WithoutActionDenied(t *testing.T) {
 	assertActionEnforced(t, aliceID, types.ActionIngestData, http.StatusForbidden)
 }
 
-// Batch routes are gated by RequireRole (Keycloak data_manager) AND RequireAction
-// (can_ingest_data). Holding the Keycloak role is not enough without the action grant.
+// Batch routes are gated by RequireAction (can_ingest_data).
 func assertBatchEnforced(t *testing.T, userID string, expectedStatus int) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := repository.NewAuthRepository(env.Postgres)
-		const resource = "radiant-client"
-		auth := &testutils.MockAuth{
-			Id:             userID,
-			ResourceAccess: map[string]ginkeycloak.ServiceRole{resource: {Roles: []string{utils.DataManagerRole}}},
-		}
+		auth := &testutils.MockAuth{Id: userID}
 
 		router := gin.New()
 		tenantRoutes := router.Group("/:tenant")
 		tenantRoutes.Use(server.RequireTenantAccess(auth, repo, true))
-		dataManagerRoutes := tenantRoutes.Group("/")
-		dataManagerRoutes.Use(server.RequireRole(auth, utils.DataManagerRole, resource))
-		dataManagerRoutes.POST("/cases/batch", server.RequireAction(auth, repo, types.ActionIngestData, true), func(c *gin.Context) {
+		tenantRoutes.POST("/cases/batch", server.RequireAction(auth, repo, types.ActionIngestData, true), func(c *gin.Context) {
 			c.Status(http.StatusOK)
 		})
 
@@ -132,13 +123,13 @@ func assertBatchEnforced(t *testing.T, userID string, expectedStatus int) {
 	})
 }
 
-func Test_ActionEnforcement_Batch_RoleAndActionGranteeAllowed(t *testing.T) {
-	// gabe holds the Keycloak role (mocked) and the can_ingest_data grant.
+func Test_ActionEnforcement_Batch_GranteeAllowed(t *testing.T) {
+	// gabe holds the can_ingest_data grant.
 	assertBatchEnforced(t, gabeID, http.StatusOK)
 }
 
-func Test_ActionEnforcement_Batch_RoleWithoutActionDenied(t *testing.T) {
-	// alice holds the Keycloak role (mocked) but no can_ingest_data grant → the action gate 403s.
+func Test_ActionEnforcement_Batch_WithoutActionDenied(t *testing.T) {
+	// alice has no can_ingest_data grant → the action gate 403s.
 	assertBatchEnforced(t, aliceID, http.StatusForbidden)
 }
 

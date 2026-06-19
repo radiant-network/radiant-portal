@@ -169,23 +169,6 @@ func GetTenant(c *gin.Context) (*string, error) {
 	return &tenant, nil
 }
 
-func RequireRole(auth utils.Auth, role string, resourceName string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		hasRole, err := auth.UserHasRole(c, role, resourceName)
-		if err != nil {
-			HandleError(c, err)
-			c.Abort()
-			return
-		}
-		if !hasRole {
-			HandleForbiddenError(c)
-			c.Abort()
-			return
-		}
-		c.Next()
-	}
-}
-
 type actionChecker interface {
 	HasAction(ctx context.Context, userID, tenantCode, orgCode, actionCode string) (bool, error)
 }
