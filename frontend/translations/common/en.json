@@ -864,9 +864,17 @@
     "include": {
       "hero": {
         "wordmark": "INCLUDE Data Hub",
-        "title": "Uncover new insights into the biology of Down Syndrome and co-occurring conditions.",
+        "title": "Uncover <accent>new insights</accent> into the biology of Down Syndrome and co-occurring conditions.",
         "description": "Access large-scale integrated data resources and analyze custom built cohort datasets based on participants, biospecimens, clinical, and genomic data.",
-        "mondo_chart_title": "Most frequent diagnoses (MONDO)"
+        "login": "Login",
+        "signup": "Sign up",
+        "mondo_chart": {
+          "title": "Most Frequent Co-occurring Conditions (MONDO)",
+          "axis": {
+            "x_label": "# of participants",
+            "y_label": "Diagnosis (MONDO)"
+          }
+        }
       },
       "tiles": {
         "germline_variants": {

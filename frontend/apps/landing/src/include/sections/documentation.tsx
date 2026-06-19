@@ -13,7 +13,7 @@ function Documentation() {
   const { t } = useI18n();
 
   return (
-    <div className="grid gap-8 rounded-xl border bg-card p-8 md:grid-cols-2 md:gap-12 md:p-10">
+    <div className="grid gap-8 rounded-xl bg-muted p-8 md:grid-cols-2 md:gap-12 md:p-10">
       {ITEMS.map(item => (
         <div key={item.key} className="flex flex-col gap-4">
           <div className="flex items-center gap-4">

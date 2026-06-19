@@ -20,7 +20,7 @@ function Footer() {
   const { t } = useI18n();
 
   return (
-    <footer className="bg-background w-full">
+    <footer className="bg-muted w-full">
       <Container className="w-full px-4 py-10 sm:px-6 lg:px-12">
         <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8 md:justify-between">
           {LOGOS.map(logo => (

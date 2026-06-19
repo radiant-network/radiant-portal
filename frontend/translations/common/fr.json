@@ -858,9 +858,17 @@
     "include": {
       "hero": {
         "wordmark": "INCLUDE Data Hub",
-        "title": "Découvrez de nouvelles perspectives sur la biologie de la trisomie 21 et des affections concomitantes.",
+        "title": "Découvrez de <accent>nouvelles perspectives</accent> sur la biologie de la trisomie 21 et des affections concomitantes.",
         "description": "Accédez à des ressources de données intégrées à grande échelle et analysez des ensembles de données de cohortes personnalisés à partir des participants, des biospécimens et des données cliniques et génomiques.",
-        "mondo_chart_title": "Diagnostics les plus fréquents (MONDO)"
+        "login": "Connexion",
+        "signup": "Inscription",
+        "mondo_chart": {
+          "title": "Affections concomitantes les plus fréquentes (MONDO)",
+          "axis": {
+            "x_label": "Nombre de participants",
+            "y_label": "Diagnostic (MONDO)"
+          }
+        }
       },
       "tiles": {
         "germline_variants": {
