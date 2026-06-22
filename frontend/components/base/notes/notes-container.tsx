@@ -108,7 +108,8 @@ function NotesContainer({ enableEmptyIcon = false, enableSkeletonLoading = true,
 
   return (
     <>
-      <div className="px-4 py-3 shrink-0">
+      <div className="px-4 pt-4 text-foreground text-sm font-semibold">{t('notes.variant.title')}</div>
+      <div className="p-4 shrink-0">
         <RichTextEditor
           onChange={setContent}
           clearContent={clearContent}
