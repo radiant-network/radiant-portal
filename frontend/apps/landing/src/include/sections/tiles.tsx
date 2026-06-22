@@ -14,7 +14,7 @@ const TILES = [
     key: 'cavatica',
     icon: <Cloud />,
     buttons: [
-      { id: 'learn_more', href: '#', variant: 'default', icon: <SquareArrowOutUpRight /> },
+      { id: 'learn_more', href: '#', variant: 'secondary', icon: <SquareArrowOutUpRight /> },
       { id: 'login', href: '#', variant: 'outline', icon: <SquareArrowOutUpRight /> },
     ],
   },
@@ -34,8 +34,10 @@ function Tiles() {
       {TILES.map(tile => (
         <Card key={tile.key} className="h-full">
           <CardHeader>
-            <div className="text-primary [&_svg]:size-8">{tile.icon}</div>
-            <CardTitle>{t(`landing.include.tiles.${tile.key}.title`)}</CardTitle>
+            <CardTitle className="flex items-center gap-3">
+              <span className="text-primary [&_svg]:size-8">{tile.icon}</span>
+              {t(`landing.include.tiles.${tile.key}.title`)}
+            </CardTitle>
           </CardHeader>
           <CardContent className="flex-1">
             <p className="text-muted-foreground text-sm">{t(`landing.include.tiles.${tile.key}.description`)}</p>
