@@ -900,16 +900,16 @@
           "studies": "Études",
           "participants": "Participants",
           "biospecimens": "Biospécimens",
-          "families": "Familles",
           "files": "Fichiers",
-          "variants": "Variants"
+          "genomes": "Génomes",
+          "transcriptomes": "Transcriptomes"
         }
       },
       "demographics": {
         "title": "Démographie",
+        "t21_status": "Statut T21",
         "sex": "Sexe",
-        "race": "Race",
-        "ethnicity": "Ethnicité"
+        "race": "Race"
       },
       "studies": {
         "title": "Études",

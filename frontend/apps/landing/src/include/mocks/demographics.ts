@@ -1,6 +1,11 @@
 export type DemographicDatum = { label: string; count: number };
 
 /** Mock demographics distributions — replaced by Arranger data in a later task. */
+export const t21StatusData: DemographicDatum[] = [
+  { label: 'Trisomy 21', count: 12540 },
+  { label: 'Disomy 21, euploid', count: 960 },
+];
+
 export const sexData: DemographicDatum[] = [
   { label: 'male', count: 6892 },
   { label: 'female', count: 6598 },
@@ -17,11 +22,4 @@ export const raceData: DemographicDatum[] = [
   { label: 'American Indian or Alaska Native', count: 78 },
   { label: 'Native Hawaiian or Other Pacific Islander', count: 68 },
   { label: 'asked but unknown', count: 65 },
-];
-
-export const ethnicityData: DemographicDatum[] = [
-  { label: 'Not Hispanic or Latino', count: 10386 },
-  { label: 'Hispanic or Latino', count: 1614 },
-  { label: 'Unknown', count: 825 },
-  { label: 'asked but unknown', count: 675 },
 ];

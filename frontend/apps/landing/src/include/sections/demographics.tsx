@@ -4,7 +4,7 @@ import type { ChartTooltipPayload } from '@/components/base/charts/type';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { ethnicityData, raceData, sexData } from '../mocks/demographics';
+import { raceData, sexData, t21StatusData } from '../mocks/demographics';
 
 const tooltip = (payload: ChartTooltipPayload) => (
   <div className="flex items-center gap-2">
@@ -15,9 +15,9 @@ const tooltip = (payload: ChartTooltipPayload) => (
 );
 
 const CHARTS = [
+  { key: 't21_status', data: t21StatusData },
   { key: 'sex', data: sexData },
   { key: 'race', data: raceData },
-  { key: 'ethnicity', data: ethnicityData },
 ] as const;
 
 /** Demographics breakdown: three pie charts (sex, race, ethnicity). */

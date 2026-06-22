@@ -1,4 +1,4 @@
-/** Bilingual mock text. Real study data will come from the backend (shape TBD). */
+/** Bilingual mock text. Real study data will come from the backend. */
 type LocalizedText = { en: string; fr: string };
 
 export type Study = {

@@ -906,16 +906,16 @@
           "studies": "Studies",
           "participants": "Participants",
           "biospecimens": "Biospecimens",
-          "families": "Families",
           "files": "Files",
-          "variants": "Variants"
+          "genomes": "Genomes",
+          "transcriptomes": "Transcriptomes"
         }
       },
       "demographics": {
         "title": "Demographics",
+        "t21_status": "T21 Status",
         "sex": "Sex",
-        "race": "Race",
-        "ethnicity": "Ethnicity"
+        "race": "Race"
       },
       "studies": {
         "title": "Studies",

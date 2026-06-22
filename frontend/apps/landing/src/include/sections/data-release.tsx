@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Dna, FileText, FlaskConical, TestTube, Users, UsersRound } from 'lucide-react';
+import { BookOpenText, Dna, FileText, Fingerprint, TestTube, User } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import StatItem from '@/components/base/stat-item/stat-item';
@@ -9,12 +9,12 @@ import { thousandNumberFormat } from '@/components/lib/number-format';
 import { type DataReleaseStatKey, dataReleaseStats } from '../mocks/data-release';
 
 const ICONS: Record<DataReleaseStatKey, ReactNode> = {
-  studies: <FlaskConical />,
-  participants: <Users />,
+  studies: <BookOpenText />,
+  participants: <User />,
   biospecimens: <TestTube />,
-  families: <UsersRound />,
+  genomes: <Dna />,
   files: <FileText />,
-  variants: <Dna />,
+  transcriptomes: <Fingerprint />,
 };
 
 /** Data-release summary: six key figures of the current release. */
@@ -33,7 +33,7 @@ function DataRelease() {
               key={stat.key}
               className="min-w-0"
               icon={ICONS[stat.key]}
-              value={thousandNumberFormat(stat.value)}
+              value={typeof stat.value === 'number' ? thousandNumberFormat(stat.value) : stat.value}
               label={t(`landing.include.data_release.stats.${stat.key}`)}
             />
           ))}
