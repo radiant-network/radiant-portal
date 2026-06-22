@@ -6,6 +6,7 @@ import { data } from 'pom/shared/Data';
 describe('CaseEntity - Details - Bioinformatics - Columns', () => {
   const setupTest = () => {
     cy.login();
+    cy.resetTablePreferences();
     cy.visitCaseDetailsPage(data.case.case);
   };
 

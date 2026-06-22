@@ -5,6 +5,7 @@ import { CasesTable } from 'pom/pages/CasesTable';
 describe('Cases - Columns', () => {
   const setupTest = () => {
     cy.login();
+    cy.resetTablePreferences();
     cy.visitCasesPage();
   };
 

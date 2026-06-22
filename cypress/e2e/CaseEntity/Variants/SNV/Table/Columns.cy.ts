@@ -7,6 +7,7 @@ import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_
 describe('Case Entity - Variants - SNV - Table - Columns', () => {
   const setupTest = () => {
     cy.login();
+    cy.resetTablePreferences();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV');
     CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Clean Query Builder
   };

@@ -6,6 +6,7 @@ import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 describe('VariantEntity - Patients - Uninterpreted - Columns', () => {
   const setupTest = () => {
     cy.login();
+    cy.resetTablePreferences();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
     VariantEntity_Patients.uninterpreted.actions.selectTab();
     cy.resetColumns();

@@ -6,6 +6,7 @@ import { data } from 'pom/shared/Data';
 describe('CaseEntity - Files - Columns', () => {
   const setupTest = () => {
     cy.login();
+    cy.resetTablePreferences();
     cy.visitCaseFilesPage(data.file.case);
   };
 

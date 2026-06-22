@@ -6,6 +6,7 @@ import { VariantEntity_EvidCond } from 'pom/pages/VariantEntity_EvidCond';
 describe('VariantEntity - EvidCond - CondPhen - Omim - Columns', () => {
   const setupTest = () => {
     cy.login();
+    cy.resetTablePreferences();
     cy.visitVariantEvidCondPage(data.variantGermline.locus_id);
   };
 

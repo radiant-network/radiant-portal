@@ -6,6 +6,7 @@ import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV
 describe('Case Entity - Variants - CNV - Table - Columns', () => {
   const setupTest = () => {
     cy.login();
+    cy.resetTablePreferences();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV');
   };
 

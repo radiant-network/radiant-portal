@@ -5,6 +5,7 @@ import { FilesTable } from 'pom/pages/FilesTable';
 describe('Files - Columns', () => {
   const setupTest = () => {
     cy.login();
+    cy.resetTablePreferences();
     cy.visitFilesPage();
   };
 
