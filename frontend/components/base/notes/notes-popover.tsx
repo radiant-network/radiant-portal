@@ -52,7 +52,7 @@ function NotesPopover({ hasNotes, loading = false, ...props }: NotesPopoverProps
         onFocusOutside={handlePreventClosing}
         onInteractOutside={handlePreventClosing}
       >
-        <NotesContainer {...props} enableSkeletonLoading={false} />
+        <NotesContainer {...props} enableSkeletonLoading={false} withHeader />
       </PopoverContent>
     </Popover>
   );
