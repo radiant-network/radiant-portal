@@ -11,6 +11,7 @@ import { Button } from '@/components/base/shadcn/button';
 import { TooltipProvider } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { useLoginContext } from '@/components/hooks/use-login';
+import { cn } from '@/lib/utils';
 import { DEFAULT_TENANT, occurencesNotesApi } from '@/utils/api';
 
 import { useNotesContext } from './hooks/use-notes';
@@ -31,6 +32,7 @@ type NoteContainerBaseProps = {
 export type NotesContainerProps = NoteContainerBaseProps & {
   enableEmptyIcon?: boolean;
   enableSkeletonLoading?: boolean;
+  withHeader?: boolean;
 };
 
 export type GetOccurrenceNoteInput = Omit<NotesContainerProps, 'enableEmptyIcon'>;
@@ -56,7 +58,12 @@ async function saveNote(_url: string, { arg }: { arg: CreateOccurrenceNoteInput 
  *
  * - ListFetcher refresh the table list when a note is saved or deleted to update the note's icon state
  */
-function NotesContainer({ enableEmptyIcon = false, enableSkeletonLoading = true, ...props }: NotesContainerProps) {
+function NotesContainer({
+  enableEmptyIcon = false,
+  enableSkeletonLoading = true,
+  withHeader = false,
+  ...props
+}: NotesContainerProps) {
   const { t } = useI18n();
   const { sub } = useLoginContext();
   const { onChangeCallback } = useNotesContext();
@@ -108,7 +115,8 @@ function NotesContainer({ enableEmptyIcon = false, enableSkeletonLoading = true,
 
   return (
     <>
-      <div className="px-4 py-3 shrink-0">
+      {withHeader && <div className="px-4 pt-4 text-foreground text-sm font-semibold">{t('notes.variant.title')}</div>}
+      <div className={cn('shrink-0', withHeader ? 'p-4' : 'px-4 py-3')}>
         <RichTextEditor
           onChange={setContent}
           clearContent={clearContent}
