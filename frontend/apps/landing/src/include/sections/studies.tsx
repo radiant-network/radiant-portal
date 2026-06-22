@@ -56,7 +56,7 @@ function Studies() {
       </div>
 
       {/* Carousel */}
-      <div className="bg-background order-1 p-8 lg:order-2">
+      <div className="bg-background order-1 min-w-0 p-8 lg:order-2">
         <Carousel opts={{ align: 'start' }} className="w-full">
           <CarouselContent>
             {studies.map(study => (
