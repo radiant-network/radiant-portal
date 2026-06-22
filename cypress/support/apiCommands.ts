@@ -78,6 +78,14 @@ Cypress.Commands.add('getToken', () => {
 });
 
 /**
+ * Forces every data-table user-preference read to return 404 so each table loads with
+ * its default configuration (column pinning, order, sizing, visibility, pagination).
+ */
+Cypress.Commands.add('resetTablePreferences', () => {
+  cy.intercept('GET', '**/users/preferences/data-table-*', { statusCode: 404 });
+});
+
+/**
  * Validates that a batch response has the expected structure and values.
  * Checks response keys, static fields and validates dynamic fields.
  * @param response The API response object from a batch request.
@@ -89,7 +97,7 @@ Cypress.Commands.add('validateAcceptedBatchResponse', (response: any, batch_type
     dry_run: true,
     batch_type: batch_type,
     status: 'PENDING',
-    username: 'cypress',
+    username: 'cypress@email.me',
   });
   expect(response.body.id)
     .to.be.a('string')
@@ -155,7 +163,7 @@ Cypress.Commands.add('validateSuccessBatchProcessed', (response: any, batch_type
     dry_run: true,
     batch_type: batch_type,
     status: 'SUCCESS',
-    username: 'cypress',
+    username: 'cypress@email.me',
   });
   expect(response.body.created_on)
     .to.be.a('string')
