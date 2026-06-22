@@ -894,7 +894,7 @@
         },
         "experimental_models": {
           "title": "Experimental Models",
-          "description": "Browse cellular and animal models for Down syndrome research.",
+          "description": "Browse cellular and animal models for Down Syndrome research.",
           "buttons": {
             "explore": "Explore Experimental Models"
           }

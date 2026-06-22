@@ -15,16 +15,17 @@ import { thousandNumberFormat } from '@/components/lib/number-format';
 import { studies, studiesTotal, type Study } from '../mocks/studies';
 
 function StudySlide({ study }: { study: Study }) {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const lang = language?.startsWith('fr') ? 'fr' : 'en';
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="text-primary text-2xl font-bold tracking-tight">{study.sponsor}</div>
-      <h3 className="text-lg font-semibold tracking-tight">{study.name}</h3>
-      <p className="text-muted-foreground text-sm">{study.description}</p>
+      <div className="text-primary text-2xl font-bold tracking-tight">{study.title}</div>
+      <h3 className="text-lg font-semibold tracking-tight">{study.name[lang]}</h3>
+      <p className="text-muted-foreground text-sm">{study.description[lang]}</p>
       <StatItem
         icon={<Users />}
-        value={thousandNumberFormat(study.participants)}
+        value={thousandNumberFormat(study.participantCount)}
         label={t('landing.include.data_release.stats.participants')}
       />
     </div>
@@ -59,7 +60,7 @@ function Studies() {
         <Carousel opts={{ align: 'start' }} className="w-full">
           <CarouselContent>
             {studies.map(study => (
-              <CarouselItem key={study.sponsor}>
+              <CarouselItem key={study.title}>
                 <StudySlide study={study} />
               </CarouselItem>
             ))}
