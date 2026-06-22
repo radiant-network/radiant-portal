@@ -11,6 +11,11 @@ export default [
     route('study/', './routes/studies/list.tsx'),
     route('admin/features', './routes/admin/beta-features.tsx'),
   ]),
+  // QA preview only: two explicit URLs let both landing variants be viewed in a single build.
+  // In prod this should collapse to a single THEME-driven `/landing` (and remove these routes
+  // plus the matching beta-feature links).
+  route('landing/include', './routes/landing/include.tsx'),
+  route('landing/kidsfirst', './routes/landing/kidsfirst.tsx'),
   route('auth/callback', './routes/auth/callback.ts'),
   route('auth/logout', './routes/auth/logout.ts'),
   route('auth/refresh-token', './api/refresh-token.ts'),

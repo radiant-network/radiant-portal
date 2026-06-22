@@ -22,6 +22,7 @@
       "case/*": ["../../apps/case/src/*"],
       "file-archive/*": ["../../apps/file-archive/src/*"],
       "study/*": ["../../apps/study/src/*"],
+      "landing/*": ["../../apps/landing/src/*"],
       "~/*": ["./app/*"],
       "react": ["./node_modules/@types/react"]
     },
