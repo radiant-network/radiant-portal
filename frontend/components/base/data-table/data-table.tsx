@@ -55,7 +55,7 @@ import {
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/lib/utils';
 
-import Empty from '../empty';
+import Empty from '../empties/empty';
 
 import { useDataTable } from './hooks/use-data-table';
 import {

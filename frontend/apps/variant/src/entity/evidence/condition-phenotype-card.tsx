@@ -9,7 +9,7 @@ import {
   GenePanelConditions,
   GetGermlineVariantConditionsPanelTypeEnum,
 } from '@/api/api';
-import Empty from '@/components/base/empty';
+import Empty from '@/components/base/empties/empty';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Input } from '@/components/base/shadcn/input';
