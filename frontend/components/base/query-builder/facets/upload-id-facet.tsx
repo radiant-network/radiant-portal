@@ -19,9 +19,10 @@ import { Label } from '@/components/base/shadcn/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { Textarea } from '@/components/base/shadcn/textarea';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { useDebounce } from '@/components/hooks/useDebounce';
 import { thousandNumberFormat } from '@/components/lib/number-format';
-import { DEFAULT_TENANT, genesApi } from '@/utils/api';
+import { genesApi } from '@/utils/api';
 
 import CollapsibleCard from '../../cards/collapsible-card';
 import { TableColumnDef } from '../../data-table/data-table';
@@ -96,6 +97,7 @@ async function readFile(file: File): Promise<string> {
 
 function UploadIdModal({ variant }: UploadIdModalProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const dispatch = useQBDispatch();
   const [value, setValue] = useState('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -161,7 +163,7 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
     if (debouncedValue) {
       (async () => {
         setIsLoading(true);
-        const results = await genesApi.geneSearch(DEFAULT_TENANT, {
+        const results = await genesApi.geneSearch(tenant, {
           inputs: debouncedValue.split(/[\n,\r ]/).filter(val => !!val),
         });
         setMatched(getMatchList(results.data));

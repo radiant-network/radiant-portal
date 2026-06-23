@@ -5,7 +5,8 @@ import { IGVTracks } from '@/api/api';
 import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from '@/components/base/shadcn/dialog';
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, igvApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { igvApi } from '@/utils/api';
 
 import IgvContainer from './igv-container';
 
@@ -20,17 +21,18 @@ type IGVDialogProps = {
   renderTrigger?: (handleOpen: () => void) => ReactNode;
 };
 
-const fetchIGVForCaseId = async ({ caseId }: { caseId: number }) =>
-  igvApi.getIGV(DEFAULT_TENANT, caseId.toString()).then(response => response.data);
+const fetchIGVForCaseId = async ({ caseId }: { caseId: number }, tenant: string) =>
+  igvApi.getIGV(tenant, caseId.toString()).then(response => response.data);
 
 const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, renderTrigger }: IGVDialogProps) => {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const fetchIGV = useSWR<IGVTracks>(
     {
       key: `igv-${caseId}-${seqId}-${locus}`,
       caseId: caseId,
     },
-    fetchIGVForCaseId,
+    ({ caseId }: { caseId: number }) => fetchIGVForCaseId({ caseId }, tenant),
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,

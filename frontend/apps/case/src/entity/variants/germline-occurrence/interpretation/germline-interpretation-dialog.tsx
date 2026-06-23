@@ -22,7 +22,8 @@ import {
 } from '@/components/base/slider/slider-variant-details-card';
 import { Spinner } from '@/components/base/spinner';
 import { useI18n } from '@/components/hooks/i18n';
-import { caseApi, DEFAULT_TENANT, interpretationApi, occurrencesApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { caseApi, interpretationApi, occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
@@ -69,14 +70,18 @@ type GermlineInterpretationFormInput = {
   interpretationGermline: InterpretationGermline;
 };
 
-async function fetchCaseEntity(_url: string, { arg }: { arg: CaseEntityInput }) {
-  const response = await caseApi.caseEntity(DEFAULT_TENANT, arg.caseId);
+async function fetchCaseEntity(_url: string, { arg }: { arg: CaseEntityInput }, tenant: string) {
+  const response = await caseApi.caseEntity(tenant, arg.caseId);
   return response.data;
 }
 
-async function fetchInterpretationGermline(_url: string, { arg }: { arg: InterpretationGermlineInput }) {
+async function fetchInterpretationGermline(
+  _url: string,
+  { arg }: { arg: InterpretationGermlineInput },
+  tenant: string,
+) {
   const response = await interpretationApi.getInterpretationGermline(
-    DEFAULT_TENANT,
+    tenant,
     arg.caseId,
     arg.seqId,
     arg.locusId,
@@ -85,9 +90,9 @@ async function fetchInterpretationGermline(_url: string, { arg }: { arg: Interpr
   return response.data;
 }
 
-async function fetchExpandedGermlineSNVOccurrence(_url: string, { arg }: { arg: ExpandGermlineInput }) {
+async function fetchExpandedGermlineSNVOccurrence(_url: string, { arg }: { arg: ExpandGermlineInput }, tenant: string) {
   const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(
-    DEFAULT_TENANT,
+    tenant,
     arg.caseId,
     arg.seqId,
     arg.taskId,
@@ -96,9 +101,13 @@ async function fetchExpandedGermlineSNVOccurrence(_url: string, { arg }: { arg: 
   return response.data;
 }
 
-async function saveGermlineInterpretation(_url: string, { arg }: { arg: GermlineInterpretationFormInput }) {
+async function saveGermlineInterpretation(
+  _url: string,
+  { arg }: { arg: GermlineInterpretationFormInput },
+  tenant: string,
+) {
   const response = await interpretationApi.postInterpretationGermline(
-    DEFAULT_TENANT,
+    tenant,
     arg.caseId,
     arg.seqId,
     arg.locusId,
@@ -118,6 +127,7 @@ function GermlineInterpretationDialog({
   isCreation = false,
 }: GermlineInterpretationDialogProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -125,21 +135,23 @@ function GermlineInterpretationDialog({
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
 
-  const caseEntity = useSWRMutation<CaseEntity, any, string, CaseEntityInput>('case-entity', fetchCaseEntity);
+  const caseEntity = useSWRMutation<CaseEntity, any, string, CaseEntityInput>('case-entity', (url, opts) =>
+    fetchCaseEntity(url, opts, tenant),
+  );
 
   const occurrenceExpand = useSWRMutation<ExpandedGermlineSNVOccurrence, any, string, ExpandGermlineInput>(
     `form-somatic-expand-${caseId}-${locusId}-${seqId}`,
-    fetchExpandedGermlineSNVOccurrence,
+    (url, opts) => fetchExpandedGermlineSNVOccurrence(url, opts, tenant),
   );
 
   const interpretation = useSWRMutation<Interpretation, any, string, InterpretationGermlineInput>(
     `form-somatic-interpretation-${seqId}-${locusId}-${transcriptId}`,
-    fetchInterpretationGermline,
+    (url, opts) => fetchInterpretationGermline(url, opts, tenant),
   );
 
   const saveInterpretation = useSWRMutation(
     `save-germline-interpretation-${seqId}-${locusId}-${transcriptId}`,
-    saveGermlineInterpretation,
+    (url, opts) => saveGermlineInterpretation(url, opts, tenant),
     {
       onSuccess: () => {
         setOpen(false);

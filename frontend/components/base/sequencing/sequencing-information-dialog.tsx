@@ -18,7 +18,8 @@ import {
 } from '@/components/base/shadcn/dialog';
 import { Separator } from '@/components/base/shadcn/separator';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, sequencingApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { sequencingApi } from '@/utils/api';
 
 import EmptyField from '../information/empty-field';
 
@@ -27,10 +28,10 @@ type SequencingInput = {
 };
 
 export function useSequencingHelper(input: SequencingInput) {
+  const { tenant } = useTenant();
   const fetchSequencingHelper = useCallback(
-    async () =>
-      sequencingApi.getSequencingExperimentDetailById(DEFAULT_TENANT, input.seqId).then(response => response.data),
-    [input],
+    async () => sequencingApi.getSequencingExperimentDetailById(tenant, input.seqId).then(response => response.data),
+    [input, tenant],
   );
 
   return fetchSequencingHelper;

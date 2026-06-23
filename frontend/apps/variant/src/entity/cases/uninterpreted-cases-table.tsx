@@ -12,9 +12,10 @@ import {
 } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import SliderUninterpretedCaseSheet from '@/entity/cases/slider/slider-uninterpreted-case-sheet';
 import { useSliderCasePatientIdNavigation } from '@/entity/cases/slider/use-slider-case-navigation';
-import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
+import { variantsApi } from '@/utils/api';
 
 import UninterpretedCasesTableFilters from './table/uninterpreted-cases-table-filters';
 import {
@@ -29,9 +30,9 @@ type UninterpretedCasesSearchInput = {
   listBodyWithCriteria: ListBodyWithCriteria;
 };
 
-async function fetchUninterpretedCases(input: UninterpretedCasesSearchInput) {
+async function fetchUninterpretedCases(input: UninterpretedCasesSearchInput, tenant: string) {
   const response = await variantsApi.getGermlineVariantUninterpretedCases(
-    DEFAULT_TENANT,
+    tenant,
     input.locusId,
     input.listBodyWithCriteria,
   );
@@ -40,6 +41,7 @@ async function fetchUninterpretedCases(input: UninterpretedCasesSearchInput) {
 
 function UninterpretedCasesTable() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const params = useParams<{ locusId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [rowSelection, setRowSelection] = useState({});
@@ -68,7 +70,7 @@ function UninterpretedCasesTable() {
         sort: sorting,
       },
     },
-    fetchUninterpretedCases,
+    input => fetchUninterpretedCases(input, tenant),
     {
       revalidateOnFocus: false,
     },

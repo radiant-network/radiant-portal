@@ -5,7 +5,8 @@ import { VariantConsequence } from '@/api/api';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Card, CardContent, CardHeader } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
-import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { variantsApi } from '@/utils/api';
 
 import ConsequenceAccordionItem from './consequence-accordion-item';
 
@@ -14,12 +15,13 @@ type VariantTranscriptsInput = {
   locusId: string;
 };
 
-async function fetchVariantConsequences(input: VariantTranscriptsInput) {
-  const response = await variantsApi.getGermlineVariantConsequences(DEFAULT_TENANT, input.locusId);
+async function fetchVariantConsequences(input: VariantTranscriptsInput, tenant: string) {
+  const response = await variantsApi.getGermlineVariantConsequences(tenant, input.locusId);
   return response.data;
 }
 
 function TranscriptsTab() {
+  const { tenant } = useTenant();
   const params = useParams<{ locusId: string }>();
 
   const { data, isLoading } = useSWR<VariantConsequence[], any, VariantTranscriptsInput>(
@@ -27,7 +29,7 @@ function TranscriptsTab() {
       key: 'variant-transcripts',
       locusId: params.locusId!,
     },
-    fetchVariantConsequences,
+    input => fetchVariantConsequences(input, tenant),
     {
       revalidateOnFocus: false,
     },

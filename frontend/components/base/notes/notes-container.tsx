@@ -11,8 +11,9 @@ import { Button } from '@/components/base/shadcn/button';
 import { TooltipProvider } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { useLoginContext } from '@/components/hooks/use-login';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { cn } from '@/lib/utils';
-import { DEFAULT_TENANT, occurencesNotesApi } from '@/utils/api';
+import { occurencesNotesApi } from '@/utils/api';
 
 import { useNotesContext } from './hooks/use-notes';
 import Note from './note';
@@ -37,9 +38,9 @@ export type NotesContainerProps = NoteContainerBaseProps & {
 
 export type GetOccurrenceNoteInput = Omit<NotesContainerProps, 'enableEmptyIcon'>;
 
-async function fetchNotes(input: GetOccurrenceNoteInput) {
+async function fetchNotes(input: GetOccurrenceNoteInput, tenant: string) {
   const response = await occurencesNotesApi.getOccurrenceNotes(
-    DEFAULT_TENANT,
+    tenant,
     input.caseId,
     input.seqId,
     input.taskId,
@@ -48,8 +49,8 @@ async function fetchNotes(input: GetOccurrenceNoteInput) {
   return response.data;
 }
 
-async function saveNote(_url: string, { arg }: { arg: CreateOccurrenceNoteInput }) {
-  const response = await occurencesNotesApi.postOccurrenceNote(DEFAULT_TENANT, arg);
+async function saveNote(_url: string, { arg }: { arg: CreateOccurrenceNoteInput }, tenant: string) {
+  const response = await occurencesNotesApi.postOccurrenceNote(tenant, arg);
   return response.data;
 }
 
@@ -65,11 +66,14 @@ function NotesContainer({
   ...props
 }: NotesContainerProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const { sub } = useLoginContext();
   const { onChangeCallback } = useNotesContext();
   const [content, setContent] = useState<string>('');
   const [clearContent, setClearContent] = useState<boolean>(false);
-  const save = useSWRMutation('notes/save', saveNote);
+  const save = useSWRMutation('notes/save', (key, opts: { arg: CreateOccurrenceNoteInput }) =>
+    saveNote(key, opts, tenant),
+  );
   const fetcher = useSWR<OccurrenceNote[], ApiError, GetOccurrenceNoteInput>(
     {
       caseId: props.caseId,
@@ -77,7 +81,7 @@ function NotesContainer({
       taskId: props.taskId,
       occurrenceId: props.occurrenceId,
     },
-    fetchNotes,
+    input => fetchNotes(input, tenant),
     {
       revalidateOnMount: true,
       revalidateOnFocus: true,

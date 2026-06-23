@@ -5,7 +5,8 @@ import useSWR from 'swr';
 import { ApiError, DocumentsSearchResponse, ListBodyWithCriteria, SearchCriterion, SortBody } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, documentApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { documentApi } from '@/utils/api';
 
 import FilesTableFilters from './files-archive-list-table-filters';
 import { defaultSettings, getFilesArchiveColumns } from './files-archive-table-settings';
@@ -14,13 +15,14 @@ type DocumentInput = {
   body: ListBodyWithCriteria;
 };
 
-async function fetchDocuments(input: DocumentInput) {
-  const response = await documentApi.searchDocuments(DEFAULT_TENANT, input.body);
+async function fetchDocuments(input: DocumentInput, tenant: string) {
+  const response = await documentApi.searchDocuments(tenant, input.body);
   return response.data;
 }
 
 function FilesArchiveList() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
   const [sorting, setSorting] = useState<SortBody[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -41,7 +43,7 @@ function FilesArchiveList() {
         search_criteria: searchCriteria,
       },
     },
-    fetchDocuments,
+    input => fetchDocuments(input, tenant),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,

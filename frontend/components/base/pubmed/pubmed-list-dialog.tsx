@@ -12,17 +12,18 @@ import {
   DialogTitle,
 } from '@/components/base/shadcn/dialog';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, sequencingApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { sequencingApi } from '@/utils/api';
 
 type SequencingInput = {
   seqId: string;
 };
 
 export function useSequencingHelper(input: SequencingInput) {
+  const { tenant } = useTenant();
   const fetchSequencingHelper = useCallback(
-    async () =>
-      sequencingApi.getSequencingExperimentDetailById(DEFAULT_TENANT, input.seqId).then(response => response.data),
-    [input],
+    async () => sequencingApi.getSequencingExperimentDetailById(tenant, input.seqId).then(response => response.data),
+    [input, tenant],
   );
 
   return fetchSequencingHelper;

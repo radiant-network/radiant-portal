@@ -16,8 +16,9 @@ import { Input } from '@/components/base/shadcn/input';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { thousandNumberFormat } from '@/components/lib/number-format';
-import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
+import { variantsApi } from '@/utils/api';
 
 import GeneAccordionItem from './gene-accordion-item';
 
@@ -27,13 +28,14 @@ type ConditionByPanelTypeInput = {
   panel_type: GetGermlineVariantConditionsPanelTypeEnum;
 };
 
-async function fetchConditionByPanelType(input: ConditionByPanelTypeInput) {
-  const response = await variantsApi.getGermlineVariantConditions(DEFAULT_TENANT, input.locus_id, input.panel_type);
+async function fetchConditionByPanelType(input: ConditionByPanelTypeInput, tenant: string) {
+  const response = await variantsApi.getGermlineVariantConditions(tenant, input.locus_id, input.panel_type);
   return response.data;
 }
 
 function ConditionPhenotypeCard() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const params = useParams<{ locusId: string }>();
   const [panelType, setPanelType] = useState<GetGermlineVariantConditionsPanelTypeEnum>(
     GetGermlineVariantConditionsPanelTypeEnum.Omim,
@@ -46,7 +48,7 @@ function ConditionPhenotypeCard() {
       locus_id: params.locusId!,
       panel_type: panelType,
     },
-    fetchConditionByPanelType,
+    input => fetchConditionByPanelType(input, tenant),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,

@@ -1883,6 +1883,11 @@
       "website": "Website",
       "documentation": "Documentation",
       "contact": "Contact"
+    },
+    "tenant_switcher": {
+      "title": "Switch Tenant",
+      "empty_title": "No tenant available",
+      "empty_description": "You do not have access to any tenant. Please contact your administrator."
     }
   },
   "occurrence": {

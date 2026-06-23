@@ -1880,6 +1880,11 @@
       "website": "Site web",
       "documentation": "Documentation",
       "contact": "Contact"
+    },
+    "tenant_switcher": {
+      "title": "Changer de tenant",
+      "empty_title": "Aucun tenant disponible",
+      "empty_description": "Vous n'avez accès à aucun tenant. Veuillez contacter votre administrateur."
     }
   },
   "occurrence": {

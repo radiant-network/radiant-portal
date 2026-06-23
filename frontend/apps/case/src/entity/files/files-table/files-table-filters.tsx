@@ -8,8 +8,9 @@ import getDataTypeOptions from '@/components/base/data-table/filters/options/opt
 import getFileFormatOptions from '@/components/base/data-table/filters/options/option-file-format';
 import getRelationshipOptions from '@/components/base/data-table/filters/options/option-relationship';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
-import { caseApi, DEFAULT_TENANT } from '@/utils/api';
+import { caseApi } from '@/utils/api';
 
 const DEFAULT_VISIBLE_FILTERS = ['format_code', 'data_type_code', 'relationship_to_proband_code'];
 
@@ -30,24 +31,29 @@ const CRITERIAS = {
   relationship_to_proband_code: { key: 'relationship_to_proband_code', weight: 3, visible: true },
 };
 
-async function fetchFilters(caseId: number) {
-  const response = await caseApi.caseEntityDocumentsFilters(DEFAULT_TENANT, caseId);
+async function fetchFilters(caseId: number, tenant: string) {
+  const response = await caseApi.caseEntityDocumentsFilters(tenant, caseId);
   return response.data;
 }
 
 function FilesTableFilters({ caseId, setSearchCriteria }: FilesTableFilters) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-files-filters', {
     ...FILTER_DEFAULTS,
   });
-  const { data: apiFilters, isLoading } = useSWR<DocumentFilters>('document-filters', () => fetchFilters(caseId), {
-    revalidateOnFocus: false,
-    revalidateOnMount: true,
-    revalidateIfStale: false,
-    revalidateOnReconnect: false,
-  });
+  const { data: apiFilters, isLoading } = useSWR<DocumentFilters>(
+    'document-filters',
+    () => fetchFilters(caseId, tenant),
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: true,
+      revalidateIfStale: false,
+      revalidateOnReconnect: false,
+    },
+  );
 
   // Mesmoize filter buttons to prevent unnecessary re-renders
   const filterButtons = useMemo(() => {

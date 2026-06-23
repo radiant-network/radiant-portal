@@ -13,8 +13,9 @@ import {
 } from '@/components/base/shadcn/alert-dialog';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { useI18n } from '@/hooks/i18n';
-import { DEFAULT_TENANT, documentApi } from '@/utils/api';
+import { documentApi } from '@/utils/api';
 
 interface DownloadFileCellProps {
   documentId: number;
@@ -22,13 +23,14 @@ interface DownloadFileCellProps {
 
 function DownloadFileCell({ documentId }: DownloadFileCellProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [isDownloading, setIsDownloading] = useState(false);
   const [showError, setShowError] = useState(false);
 
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      const response = await documentApi.getDocumentDownloadUrl(DEFAULT_TENANT, documentId.toString());
+      const response = await documentApi.getDocumentDownloadUrl(tenant, documentId.toString());
       const { url } = response.data;
 
       if (url) {

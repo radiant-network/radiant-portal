@@ -9,12 +9,14 @@ import { Button } from '@/components/base/shadcn/button';
 import { FormLabel, FormMessage } from '@/components/base/shadcn/form';
 import { Input } from '@/components/base/shadcn/input';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, interpretationApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { interpretationApi } from '@/utils/api';
 
 import { GenericInterpretationSchemaType } from './types';
 
 function PubmedFormField() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const { control, register, getValues, setError, clearErrors, setValue, getFieldState } =
     useFormContext<GenericInterpretationSchemaType>();
   const { fields, append, remove } = useFieldArray<GenericInterpretationSchemaType>({
@@ -26,7 +28,7 @@ function PubmedFormField() {
 
   const pubmedFetch = useSWR(
     pubmedFetchKey,
-    ({ value }) => interpretationApi.getPubmedCitation(DEFAULT_TENANT, value).then(res => res.data),
+    ({ value }) => interpretationApi.getPubmedCitation(tenant, value).then(res => res.data),
     {
       onSuccess: data => {
         if (pubmedFetchKey?.index !== undefined) {

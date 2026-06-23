@@ -11,8 +11,9 @@ import getDataTypeOptions from '@/components/base/data-table/filters/options/opt
 import getFileFormatOptions from '@/components/base/data-table/filters/options/option-file-format';
 import getRelationshipOptions from '@/components/base/data-table/filters/options/option-relationship';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
-import { DEFAULT_TENANT, documentApi } from '@/utils/api';
+import { documentApi } from '@/utils/api';
 
 type FilesTableFilters = {
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
@@ -34,19 +35,20 @@ const CRITERIAS = {
   data_type_code: { key: 'data_type_code', weight: 5, visible: true },
 };
 
-async function fetchFilters() {
-  const response = await documentApi.documentsFilters(DEFAULT_TENANT);
+async function fetchFilters(tenant: string) {
+  const response = await documentApi.documentsFilters(tenant);
   return response.data;
 }
 
 function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('files-filters', {
     ...FILTER_DEFAULTS,
   });
-  const { data: apiFilters, isLoading } = useSWR<DocumentFilters>('document-filters', () => fetchFilters(), {
+  const { data: apiFilters, isLoading } = useSWR<DocumentFilters>('document-filters', () => fetchFilters(tenant), {
     revalidateOnFocus: false,
     revalidateOnMount: true,
     revalidateIfStale: false,
@@ -107,7 +109,7 @@ function FilesTableFilters({ setSearchCriteria }: FilesTableFilters) {
       filterSearch={{
         minSearchLength: 1,
         placeholder: t('file_entity.search_by_id_placeholder'),
-        api: (prefix: string) => documentApi.autocompleteDocuments(DEFAULT_TENANT, prefix, '10'),
+        api: (prefix: string) => documentApi.autocompleteDocuments(tenant, prefix, '10'),
       }}
       filterButtons={filterButtons}
       changedFilterButtons={changedFilterButtons}

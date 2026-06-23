@@ -24,8 +24,9 @@ import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton'
 import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
 import SomaticSliderInterpretationDetailsCard from '@/components/base/slider/somatic-slider-interpretation-details-card';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { getPatientClinicalInformation } from '@/components/lib/case-entity';
-import { caseApi, DEFAULT_TENANT, interpretationApi, occurrencesApi } from '@/utils/api';
+import { caseApi, interpretationApi, occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
@@ -56,9 +57,9 @@ type InterpretationInput = {
   transcriptId: string;
 };
 
-export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput) {
+export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput, tenant: string) {
   const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(
-    DEFAULT_TENANT,
+    tenant,
     input.caseId,
     input.seqId,
     input.taskId,
@@ -67,14 +68,14 @@ export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput)
   return response.data;
 }
 
-export async function fetchCaseEntity(input: CaseInput) {
-  const response = await caseApi.caseEntity(DEFAULT_TENANT, input.caseId);
+export async function fetchCaseEntity(input: CaseInput, tenant: string) {
+  const response = await caseApi.caseEntity(tenant, input.caseId);
   return response.data;
 }
 
-export async function fetchInterpretation(input: InterpretationInput) {
+export async function fetchInterpretation(input: InterpretationInput, tenant: string) {
   const response = await interpretationApi.getInterpretationSomatic(
-    DEFAULT_TENANT,
+    tenant,
     input.caseId,
     input.seqId,
     input.locusId,
@@ -127,6 +128,7 @@ export function SomaticOccurrenceSheetContent({
   hasPrevious,
 }: SomaticOccurrenceSheetContentProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
 
   const { list } = useDataTable();
@@ -139,7 +141,7 @@ export function SomaticOccurrenceSheetContent({
       seqId: occurrence.seq_id,
       taskId: occurrence.task_id,
     },
-    fetchSomaticOccurrenceExpand,
+    key => fetchSomaticOccurrenceExpand(key, tenant),
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,
@@ -152,7 +154,7 @@ export function SomaticOccurrenceSheetContent({
       key: 'case-entity',
       caseId: caseId,
     },
-    fetchCaseEntity,
+    key => fetchCaseEntity(key as CaseInput, tenant),
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,
@@ -166,7 +168,7 @@ export function SomaticOccurrenceSheetContent({
       locusId: occurrence.locus_id,
       transcriptId: expandResult.data?.transcript_id,
     },
-    fetchInterpretation,
+    key => fetchInterpretation(key as InterpretationInput, tenant),
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,

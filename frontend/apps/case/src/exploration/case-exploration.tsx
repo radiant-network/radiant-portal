@@ -7,7 +7,8 @@ import DataTable from '@/components/base/data-table/data-table';
 import PageHeader from '@/components/base/page/page-header';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
-import { caseApi, DEFAULT_TENANT } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { caseApi } from '@/utils/api';
 
 import TableFilters from './table/case-exploration-table-filters';
 import { defaultSettings, getCaseExplorationColumns } from './table/cases-exploration-table-settings';
@@ -16,13 +17,14 @@ type CaseListInput = {
   listBodyWithCriteria: ListBodyWithCriteria;
 };
 
-async function fetchCasesList(input: CaseListInput) {
-  const response = await caseApi.searchCases(DEFAULT_TENANT, input.listBodyWithCriteria);
+async function fetchCasesList(input: CaseListInput, tenant: string) {
+  const response = await caseApi.searchCases(tenant, input.listBodyWithCriteria);
   return response.data;
 }
 
 export default function App() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [sorting, setSorting] = useState<SortBody[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -44,7 +46,7 @@ export default function App() {
         sort: sorting,
       },
     },
-    fetchCasesList,
+    input => fetchCasesList(input, tenant),
     {
       revalidateOnFocus: false,
     },

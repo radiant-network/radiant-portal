@@ -3,7 +3,8 @@ import useSWR from 'swr';
 import { type Aggregation, AggregationBodyWithSqon, Statistics, StatisticsBodyWithSqon } from '@/api/api';
 import { useQBActiveSqon } from '@/components/base/query-builder/hooks/use-query-builder';
 import { ApplicationId } from '@/components/cores/applications-config';
-import { DEFAULT_TENANT, occurrencesApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useSeqIdFromSearchParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 export interface IAggregationBuilder {
@@ -72,6 +73,7 @@ export function useGermlineSNVAggregationBuilder({
   size = 30,
   withDictionary = false,
 }: SNVAggregationBuilderProps) {
+  const { tenant } = useTenant();
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
@@ -96,14 +98,7 @@ export function useGermlineSNVAggregationBuilder({
     data,
     async () =>
       occurrencesApi
-        .aggregateGermlineSNVOccurrences(
-          DEFAULT_TENANT,
-          caseId,
-          seqId,
-          taskId!,
-          data!.aggregationBody,
-          data!.withDictionary,
-        )
+        .aggregateGermlineSNVOccurrences(tenant, caseId, seqId, taskId!, data!.aggregationBody, data!.withDictionary)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -112,6 +107,7 @@ export function useGermlineSNVAggregationBuilder({
 }
 
 export function useGermlineSNVAggregationStatistics({ field }: CNVAggregationBuilderProps) {
+  const { tenant } = useTenant();
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
@@ -134,7 +130,7 @@ export function useGermlineSNVAggregationStatistics({ field }: CNVAggregationBui
     data,
     async () =>
       occurrencesApi
-        .statisticsGermlineSNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId!, data!.statisticsBody)
+        .statisticsGermlineSNVOccurrences(tenant, caseId, seqId, taskId!, data!.statisticsBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -147,6 +143,7 @@ export function useGermlineSNVAggregationStatistics({ field }: CNVAggregationBui
  */
 type CNVAggregationBuilderProps = IAggregationBuilder;
 export function useGermlineCNVAggregationBuilder({ field, size = 30 }: CNVAggregationBuilderProps) {
+  const { tenant } = useTenant();
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
@@ -170,7 +167,7 @@ export function useGermlineCNVAggregationBuilder({ field, size = 30 }: CNVAggreg
     data,
     async () =>
       occurrencesApi
-        .aggregateGermlineCNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId!, data!.aggregationBody)
+        .aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId!, data!.aggregationBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -179,6 +176,7 @@ export function useGermlineCNVAggregationBuilder({ field, size = 30 }: CNVAggreg
 }
 
 export function useGermlineCNVAggregationStatistics({ field }: CNVAggregationBuilderProps) {
+  const { tenant } = useTenant();
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
@@ -201,7 +199,7 @@ export function useGermlineCNVAggregationStatistics({ field }: CNVAggregationBui
     data,
     async () =>
       occurrencesApi
-        .statisticsGermlineCNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId!, data!.statisticsBody)
+        .statisticsGermlineCNVOccurrences(tenant, caseId, seqId, taskId!, data!.statisticsBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -217,6 +215,7 @@ export function useSomaticSNVAggregationBuilder({
   size = 30,
   withDictionary = false,
 }: SNVAggregationBuilderProps) {
+  const { tenant } = useTenant();
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
@@ -241,14 +240,7 @@ export function useSomaticSNVAggregationBuilder({
     data,
     async () =>
       occurrencesApi
-        .aggregateSomaticSNVOccurrences(
-          DEFAULT_TENANT,
-          caseId,
-          seqId,
-          taskId!,
-          data!.aggregationBody,
-          data!.withDictionary,
-        )
+        .aggregateSomaticSNVOccurrences(tenant, caseId, seqId, taskId!, data!.aggregationBody, data!.withDictionary)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
@@ -257,6 +249,7 @@ export function useSomaticSNVAggregationBuilder({
 }
 
 export function useSomaticSNVAggregationStatistics({ field }: CNVAggregationBuilderProps) {
+  const { tenant } = useTenant();
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
@@ -279,7 +272,7 @@ export function useSomaticSNVAggregationStatistics({ field }: CNVAggregationBuil
     data,
     async () =>
       occurrencesApi
-        .statisticsSomaticSNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId!, data!.statisticsBody)
+        .statisticsSomaticSNVOccurrences(tenant, caseId, seqId, taskId!, data!.statisticsBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,

@@ -8,8 +8,9 @@ import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { tabContentClassName } from '@/style';
-import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
+import { variantsApi } from '@/utils/api';
 
 import { CasesFiltersProvider } from './table/filters/cases-filters-context';
 import InterpretedCasesTable from './interpreted-cases-table';
@@ -22,18 +23,19 @@ type CasesCountInput = {
   locusId: string;
 };
 
-async function fetchCasesCount(input: CasesCountInput) {
-  const response = await variantsApi.getGermlineVariantCasesCount(DEFAULT_TENANT, input.locusId);
+async function fetchCasesCount(input: CasesCountInput, tenant: string) {
+  const response = await variantsApi.getGermlineVariantCasesCount(tenant, input.locusId);
   return response.data;
 }
 
-async function fetchCasesFilters() {
-  const response = await variantsApi.getGermlineVariantCasesFilters(DEFAULT_TENANT);
+async function fetchCasesFilters(tenant: string) {
+  const response = await variantsApi.getGermlineVariantCasesFilters(tenant);
   return response.data;
 }
 
 function CasesTab() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const params = useParams<{ locusId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<CaseEntityCasesTabs>(
@@ -45,14 +47,14 @@ function CasesTab() {
       key: 'cases-count',
       locusId: params.locusId!,
     },
-    fetchCasesCount,
+    input => fetchCasesCount(input, tenant),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,
     },
   );
 
-  const filtersQuery = useSWR<VariantCasesFilters, ApiError, string>('cases-filters', fetchCasesFilters);
+  const filtersQuery = useSWR<VariantCasesFilters, ApiError, string>('cases-filters', () => fetchCasesFilters(tenant));
 
   const handleOnTabChange = useCallback(
     (value: CaseEntityCasesTabs) => {

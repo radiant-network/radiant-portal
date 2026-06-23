@@ -6,8 +6,9 @@ import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
 import { useConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { getPatientClinicalInformation } from '@/components/lib/case-entity';
-import { DEFAULT_TENANT, occurrencesApi } from '@/utils/api';
+import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 import VariantsOnboardingWizard from '../onboardings/variants-onboarding-wizard';
@@ -27,6 +28,7 @@ type SNVTabProps = {
 
 function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const config = useConfig();
   const caseId = useCaseIdFromParam();
   const appId = config.germline_snv_occurrence.app_id;
@@ -50,13 +52,13 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
           list: async (params: IListInput) => {
             if (taskId === undefined) return [];
             return occurrencesApi
-              .listGermlineSNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId, params.listBody)
+              .listGermlineSNVOccurrences(tenant, caseId, seqId, taskId, params.listBody)
               .then(response => response.data);
           },
           count: async (params: ICountInput) => {
             if (taskId === undefined) return { count: 0 };
             return occurrencesApi
-              .countGermlineSNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId, params.countBody)
+              .countGermlineSNVOccurrences(tenant, caseId, seqId, taskId, params.countBody)
               .then(response => response.data);
           },
         }}
