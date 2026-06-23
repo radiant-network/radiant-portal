@@ -8,8 +8,9 @@ import { AutoComplete, Option } from '@/components/base/data-entry/auto-complete
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/shadcn/form';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { debounce } from '@/components/hooks/useDebounce';
-import { DEFAULT_TENANT, mondoApi } from '@/utils/api';
+import { mondoApi } from '@/utils/api';
 import MondoOptionItemLabel from 'components/base/variant/mondo-option-item-label';
 
 import { GermlineInterpretationSchemaType, SomaticInterpretationSchemaType } from './types';
@@ -23,6 +24,7 @@ type MondoAutoCompleteFormFieldProps = {
 
 function MondoAutoCompleteFormField({ name, label, placeholder, schema }: MondoAutoCompleteFormFieldProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const form = useFormContext();
   const [options, setOptions] = useState<Option[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
@@ -30,7 +32,7 @@ function MondoAutoCompleteFormField({ name, label, placeholder, schema }: MondoA
 
   const mondoSearch = useSWR(
     searchValue || form.getValues(name),
-    (value: string) => mondoApi.mondoTermAutoComplete(DEFAULT_TENANT, value),
+    (value: string) => mondoApi.mondoTermAutoComplete(tenant, value),
     {
       onSuccess: data => {
         setOptions(

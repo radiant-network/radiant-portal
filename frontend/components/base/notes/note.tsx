@@ -18,8 +18,9 @@ import {
 } from '@/components/base/shadcn/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { formatRelativeByCurrentTime } from '@/components/lib/date';
-import { DEFAULT_TENANT, occurencesNotesApi } from '@/utils/api';
+import { occurencesNotesApi } from '@/utils/api';
 
 import { useNotesContext } from './hooks/use-notes';
 import NoteSkeleton from './note-skeleton';
@@ -33,24 +34,29 @@ type PutOccurrenceNoteInput = UpdateOccurrenceNoteInput & {
   id: string;
 };
 
-async function updateNote(_url: string, { arg }: { arg: PutOccurrenceNoteInput }) {
-  const response = await occurencesNotesApi.putOccurrenceNote(DEFAULT_TENANT, arg.id, { content: arg.content });
+async function updateNote(_url: string, { arg }: { arg: PutOccurrenceNoteInput }, tenant: string) {
+  const response = await occurencesNotesApi.putOccurrenceNote(tenant, arg.id, { content: arg.content });
   return response.data;
 }
 
-async function deleteNote(_url: string, { arg }: { arg: string }) {
-  const response = await occurencesNotesApi.deleteOccurrenceNote(DEFAULT_TENANT, arg);
+async function deleteNote(_url: string, { arg }: { arg: string }, tenant: string) {
+  const response = await occurencesNotesApi.deleteOccurrenceNote(tenant, arg);
   return response.data;
 }
 
 function Note({ id, user_id, user_name, created_at, updated_at, content, isOwner, onChanged }: NoteProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const { onChangeCallback } = useNotesContext();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [editedContent, setEditedContent] = useState<string>(content);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const { trigger: triggerDelete } = useSWRMutation(`note/delete/${id}`, deleteNote);
-  const { trigger: triggerUpdate } = useSWRMutation(`note/update/${id}`, updateNote);
+  const { trigger: triggerDelete } = useSWRMutation(`note/delete/${id}`, (key, opts: { arg: string }) =>
+    deleteNote(key, opts, tenant),
+  );
+  const { trigger: triggerUpdate } = useSWRMutation(`note/update/${id}`, (key, opts: { arg: PutOccurrenceNoteInput }) =>
+    updateNote(key, opts, tenant),
+  );
 
   const changedCallback = useCallback(async () => {
     onChanged().then(() => {

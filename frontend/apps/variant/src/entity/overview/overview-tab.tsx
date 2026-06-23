@@ -5,8 +5,9 @@ import { VariantOverview } from '@/api/api';
 import { Card, CardContent, CardFooter } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { tabContentClassName } from '@/style';
-import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
+import { variantsApi } from '@/utils/api';
 
 import AssociatedConditionsCard from './associated-conditions-card';
 import ClassificationCard from './classification-card';
@@ -20,12 +21,13 @@ type VariantOverviewInput = {
   locusId: string;
 };
 
-async function fetchVariantOverview(input: VariantOverviewInput) {
-  const response = await variantsApi.getGermlineVariantOverview(DEFAULT_TENANT, input.locusId);
+async function fetchVariantOverview(input: VariantOverviewInput, tenant: string) {
+  const response = await variantsApi.getGermlineVariantOverview(tenant, input.locusId);
   return response.data;
 }
 
 function OverviewTab() {
+  const { tenant } = useTenant();
   const params = useParams<{ locusId: string }>();
 
   const { data, isLoading } = useSWR<VariantOverview, any, VariantOverviewInput>(
@@ -33,7 +35,7 @@ function OverviewTab() {
       key: 'variant-overview',
       locusId: params.locusId!,
     },
-    fetchVariantOverview,
+    input => fetchVariantOverview(input, tenant),
     {
       revalidateOnFocus: false,
     },

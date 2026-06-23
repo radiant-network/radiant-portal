@@ -1,5 +1,5 @@
 import { VariantOverview } from '@/api/api';
-import Empty from '@/components/base/empty';
+import Empty from '@/components/base/empties/empty';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, CardHeader, CardProps } from '@/components/base/shadcn/card';
 import { getDbSnpUrl } from '@/components/base/variant/utils';

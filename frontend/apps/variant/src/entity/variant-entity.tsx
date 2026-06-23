@@ -11,7 +11,8 @@ import { BadgeProps } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { variantsApi } from '@/utils/api';
 
 import CasesTab from './cases/cases-tab';
 import EvidenceTab from './evidence/evidence-tab';
@@ -26,13 +27,14 @@ type VariantHeaderInput = {
   locusId: string;
 };
 
-async function fetchVariantHeader(input: VariantHeaderInput) {
-  const response = await variantsApi.getGermlineVariantHeader(DEFAULT_TENANT, input.locusId);
+async function fetchVariantHeader(input: VariantHeaderInput, tenant: string) {
+  const response = await variantsApi.getGermlineVariantHeader(tenant, input.locusId);
   return response.data;
 }
 
 export default function App() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const params = useParams<{ locusId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<VariantEntityTabs>(
@@ -44,7 +46,7 @@ export default function App() {
       key: 'variant-header',
       locusId: params.locusId!,
     },
-    fetchVariantHeader,
+    input => fetchVariantHeader(input, tenant),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,

@@ -11,6 +11,7 @@ import { ThemeToggle } from '../theme-toggle/theme-toggle';
 
 import MainNavbarItem from './main-navbar-item';
 import MainNavbarLangSwitcher from './main-navbar-lang-switcher';
+import MainNavbarTenantSwitcher from './main-navbar-tenant-switcher';
 import { BaseMainNavbarProps } from './main-navbar-types';
 import MainNavbarUserAvatar from './main-navbar-user-avatar';
 import MainSidebar from './main-sidebar';
@@ -92,7 +93,7 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
           <div className={navbarStyles.base()}>
             <div
               data-cy="logo-desktop"
-              className="flex mr-6 h-7 text-primary [&_svg]:h-full [&_img]:h-full"
+              className="flex mr-2 h-7 text-primary [&_svg]:h-full [&_img]:h-full"
               onClick={e => {
                 if (e.metaKey && e.altKey) {
                   setBetaSuperMode(!betaSuperMode);
@@ -101,7 +102,8 @@ function MainNavbar({ placement, logo, links, actions, userDetails, onLogoutClic
             >
               {logo}
             </div>
-            <div className="flex flex-1 gap-1 items-center">
+            <MainNavbarTenantSwitcher />
+            <div className="flex flex-1 gap-1 items-center ml-2">
               {links.map(link => (
                 <MainNavbarItem key={link.title} {...link} />
               ))}
@@ -144,8 +146,11 @@ function MobileNavbar({
         as="button"
         responsive={false}
       />
-      <div data-cy="logo-mobile" className="flex flex-1 h-8 justify-center text-primary">
-        {logo}
+      <div className="flex flex-1 items-center justify-center gap-1.5">
+        <div data-cy="logo-mobile" className="flex h-8 text-primary">
+          {logo}
+        </div>
+        <MainNavbarTenantSwitcher hideSingleTenantLabel />
       </div>
       <MainNavbarLangSwitcher />
     </div>

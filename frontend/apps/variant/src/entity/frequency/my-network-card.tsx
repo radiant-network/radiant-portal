@@ -14,8 +14,9 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/base/shadcn/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { toPercentage } from '@/components/lib/number-format';
-import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
+import { variantsApi } from '@/utils/api';
 
 import { getMyNetworkColumns, myNetworkDefaultSettings } from './table-settings';
 
@@ -24,13 +25,13 @@ type MyNetworkInput = {
   split: GetGermlineVariantInternalFrequenciesSplitEnum;
 };
 
-async function fetchFrequenciesBySplit(input: MyNetworkInput): Promise<VariantInternalFrequencies> {
-  const response = await variantsApi.getGermlineVariantInternalFrequencies(DEFAULT_TENANT, input.locusId, input.split);
+async function fetchFrequenciesBySplit(input: MyNetworkInput, tenant: string): Promise<VariantInternalFrequencies> {
+  const response = await variantsApi.getGermlineVariantInternalFrequencies(tenant, input.locusId, input.split);
   return response.data;
 }
 
-async function fetchGlobalFrequencies(locusId: string): Promise<InternalFrequencies> {
-  const response = await variantsApi.getGermlineVariantGlobalInternalFrequencies(DEFAULT_TENANT, locusId);
+async function fetchGlobalFrequencies(locusId: string, tenant: string): Promise<InternalFrequencies> {
+  const response = await variantsApi.getGermlineVariantGlobalInternalFrequencies(tenant, locusId);
   return response.data;
 }
 
@@ -54,6 +55,7 @@ const TABS_CONFIG = [
 
 function MyNetworkCard() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const params = useParams<{ locusId: string }>();
   const [activeTab, setActiveTab] = useState<string>(GetGermlineVariantInternalFrequenciesSplitEnum.PrimaryCondition);
   const columns = useMemo(() => getMyNetworkColumns(t, activeTab), [t, activeTab]);
@@ -62,14 +64,14 @@ function MyNetworkCard() {
     InternalFrequencies,
     ApiError,
     string
-  >(`global-frequencies-${params.locusId}`, () => fetchGlobalFrequencies(params.locusId!), {
+  >(`global-frequencies-${params.locusId}`, () => fetchGlobalFrequencies(params.locusId!, tenant), {
     revalidateOnFocus: false,
     shouldRetryOnError: false,
   });
 
   const { data } = useSWR<VariantInternalFrequencies, ApiError, MyNetworkInput>(
     { locusId: params.locusId!, split: activeTab as GetGermlineVariantInternalFrequenciesSplitEnum },
-    fetchFrequenciesBySplit,
+    input => fetchFrequenciesBySplit(input, tenant),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,

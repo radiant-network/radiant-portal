@@ -17,7 +17,8 @@ import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
 import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, interpretationApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { interpretationApi } from '@/utils/api';
 
 import ClassificationBadge from '../badges/classification-badge';
 import { getOncogenicityClassificationCriteriaColor } from '../classifications/oncogenicity';
@@ -42,9 +43,9 @@ type InterpretationInput = {
   transcriptId: string;
 };
 
-export async function fetchInterpretation(input: InterpretationInput) {
+export async function fetchInterpretation(input: InterpretationInput, tenant: string) {
   const response = await interpretationApi.getInterpretationSomatic(
-    DEFAULT_TENANT,
+    tenant,
     input.caseId,
     input.seqId,
     input.locusId,
@@ -65,6 +66,7 @@ function SomaticSliderInterpretationDetailsCard({
   transcriptId,
 }: SliderInterpretationDetailsCardProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [isPubmedOpen, setIsPubmedOpen] = useState<boolean>(false);
 
   const interpretation = useSWR<InterpretationSomatic>(
@@ -74,7 +76,7 @@ function SomaticSliderInterpretationDetailsCard({
       locusId: locusId,
       transcriptId: transcriptId,
     },
-    fetchInterpretation,
+    input => fetchInterpretation(input, tenant),
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,

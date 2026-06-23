@@ -12,8 +12,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/base/shadcn/dropdown-menu';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { cn } from '@/components/lib/utils';
-import { DEFAULT_TENANT, occurrenceFlagApi } from '@/utils/api';
+import { occurrenceFlagApi } from '@/utils/api';
 
 import { useDataTable } from '../data-table/hooks/use-data-table';
 
@@ -63,9 +64,9 @@ export const FLAGS = {
   },
 } as OccurrenceFlagConfig;
 
-async function saveOccurrenceFlag(_url: string, { arg }: { arg: UpsertOccurrenceFlagInput }) {
+async function saveOccurrenceFlag(_url: string, { arg }: { arg: UpsertOccurrenceFlagInput }, tenant: string) {
   const response = await occurrenceFlagApi.upsertOccurrenceFlag(
-    DEFAULT_TENANT,
+    tenant,
     arg.caseId,
     arg.seqId,
     arg.taskId,
@@ -75,9 +76,9 @@ async function saveOccurrenceFlag(_url: string, { arg }: { arg: UpsertOccurrence
   return response.data;
 }
 
-async function deleteOccurrenceFlag(_url: string, { arg }: { arg: DeleteOccurrenceFlagInput }) {
+async function deleteOccurrenceFlag(_url: string, { arg }: { arg: DeleteOccurrenceFlagInput }, tenant: string) {
   const response = await occurrenceFlagApi.deleteOccurrenceFlag(
-    DEFAULT_TENANT,
+    tenant,
     arg.caseId,
     arg.seqId,
     arg.taskId,
@@ -96,14 +97,15 @@ function OccurrenceFlagDropdown({
   ...props
 }: OccurrenceFlagDropdownProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const { list } = useDataTable();
   const saveFlag = useSWRMutation(
     `upsert-occurrence-flag-${caseId}-${taskId}-${seqId}-${occurrenceId}`,
-    saveOccurrenceFlag,
+    (key, opts: { arg: UpsertOccurrenceFlagInput }) => saveOccurrenceFlag(key, opts, tenant),
   );
   const deleteFlag = useSWRMutation(
     `delete-occurrence-flag-${caseId}-${taskId}-${seqId}-${occurrenceId}`,
-    deleteOccurrenceFlag,
+    (key, opts: { arg: DeleteOccurrenceFlagInput }) => deleteOccurrenceFlag(key, opts, tenant),
   );
   const [selectedFlag, setSelectedFlag] = useState<OccurrenceFlagType | null>(flag ?? null);
   const selectedFlagConfig = selectedFlag ? FLAGS[selectedFlag] : null;

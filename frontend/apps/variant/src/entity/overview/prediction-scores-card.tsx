@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { TFunction } from 'i18next';
 
 import { VariantOverview } from '@/api/api';
-import Empty from '@/components/base/empty';
+import Empty from '@/components/base/empties/empty';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent, CardHeader, CardProps } from '@/components/base/shadcn/card';

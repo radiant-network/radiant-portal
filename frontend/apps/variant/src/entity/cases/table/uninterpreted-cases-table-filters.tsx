@@ -11,8 +11,9 @@ import DataTableFilters, {
 import getItemTransmissionMode from '@/components/base/data-table/filters/options/option-transmission-mode';
 import getItemZygosity from '@/components/base/data-table/filters/options/option-zygosity';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
-import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
+import { variantsApi } from '@/utils/api';
 
 import PhenotypeCasesFilter from './filters/phenotype-cases-filter';
 
@@ -40,8 +41,8 @@ const CRITERIAS = {
   sex_code: { key: 'sex_code', weight: 6, visible: false },
 };
 
-async function fetchFilters() {
-  const response = await variantsApi.getGermlineVariantCasesFilters(DEFAULT_TENANT);
+async function fetchFilters(tenant: string) {
+  const response = await variantsApi.getGermlineVariantCasesFilters(tenant);
   return response.data;
 }
 
@@ -51,13 +52,14 @@ function UninterpretedCasesTableFilters({
   loading,
 }: UninterpretedCasesTableFiltersProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('uninterpreted-cases-filters', {
     ...FILTER_DEFAULTS,
   });
 
-  const { data: apiFilters } = useSWR<VariantCasesFilters>('uninterpreted-cases-filters', fetchFilters, {
+  const { data: apiFilters } = useSWR<VariantCasesFilters>('uninterpreted-cases-filters', () => fetchFilters(tenant), {
     revalidateOnFocus: false,
     revalidateOnMount: true,
     revalidateIfStale: false,

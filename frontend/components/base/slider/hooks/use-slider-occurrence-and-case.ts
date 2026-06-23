@@ -8,7 +8,8 @@ import {
   ExpandedSomaticSNVOccurrence,
 } from '@/api/api';
 import { PROBAND } from '@/components/base/constants';
-import { caseApi, DEFAULT_TENANT, occurrencesApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { caseApi, occurrencesApi } from '@/utils/api';
 
 export type OccurrenceExpandInput = {
   caseId: number;
@@ -22,9 +23,9 @@ export type CaseInput = {
   caseId: number;
 };
 
-export async function fetchGermlineOccurrenceExpand(input: OccurrenceExpandInput) {
+export async function fetchGermlineOccurrenceExpand(input: OccurrenceExpandInput, tenant: string) {
   const response = await occurrencesApi.getExpandedGermlineSNVOccurrence(
-    DEFAULT_TENANT,
+    tenant,
     input.caseId,
     input.seqId,
     input.taskId,
@@ -33,9 +34,9 @@ export async function fetchGermlineOccurrenceExpand(input: OccurrenceExpandInput
   return response.data;
 }
 
-export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput) {
+export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput, tenant: string) {
   const response = await occurrencesApi.getExpandedSomaticSNVOccurrence(
-    DEFAULT_TENANT,
+    tenant,
     input.caseId,
     input.seqId,
     input.taskId,
@@ -44,12 +45,12 @@ export async function fetchSomaticOccurrenceExpand(input: OccurrenceExpandInput)
   return response.data;
 }
 
-export async function fetchCase(input: CaseInput) {
+export async function fetchCase(input: CaseInput, tenant: string) {
   if (!input.caseId) {
     return null;
   }
 
-  const response = await caseApi.caseEntity(DEFAULT_TENANT, input.caseId);
+  const response = await caseApi.caseEntity(tenant, input.caseId);
   return response.data;
 }
 
@@ -63,6 +64,7 @@ export function useGermlineOccurrenceAndCase(
   locusId: string,
   patientSelected?: CaseSequencingExperiment,
 ) {
+  const { tenant } = useTenant();
   const expandResult = useSWR<ExpandedGermlineSNVOccurrence, any, OccurrenceExpandInput>(
     {
       caseId: caseId,
@@ -70,7 +72,7 @@ export function useGermlineOccurrenceAndCase(
       seqId: seqId,
       taskId: taskId,
     },
-    fetchGermlineOccurrenceExpand,
+    input => fetchGermlineOccurrenceExpand(input, tenant),
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,
@@ -82,7 +84,7 @@ export function useGermlineOccurrenceAndCase(
       key: 'case-entity',
       caseId: caseId,
     },
-    fetchCase,
+    input => fetchCase(input, tenant),
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,
@@ -120,6 +122,7 @@ export function useSomaticOccurrenceAndCase(
   locusId: string,
   patientSelected?: CaseSequencingExperiment,
 ) {
+  const { tenant } = useTenant();
   const expandResult = useSWR<ExpandedSomaticSNVOccurrence, any, OccurrenceExpandInput>(
     {
       caseId: caseId,
@@ -127,7 +130,7 @@ export function useSomaticOccurrenceAndCase(
       seqId: seqId,
       taskId: taskId,
     },
-    fetchSomaticOccurrenceExpand,
+    input => fetchSomaticOccurrenceExpand(input, tenant),
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,
@@ -139,7 +142,7 @@ export function useSomaticOccurrenceAndCase(
       key: 'case-entity',
       caseId: caseId,
     },
-    fetchCase,
+    input => fetchCase(input, tenant),
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,
@@ -171,6 +174,7 @@ export function useSomaticOccurrenceAndCase(
  * Hook to fetch case data for preview sheets
  */
 export function useCase(caseId: number, seqId: number, taskId: number, locusId: string) {
+  const { tenant } = useTenant();
   const expandResult = useSWR<ExpandedGermlineSNVOccurrence, any, OccurrenceExpandInput>(
     {
       caseId: caseId,
@@ -178,7 +182,7 @@ export function useCase(caseId: number, seqId: number, taskId: number, locusId: 
       seqId: seqId,
       taskId: taskId,
     },
-    fetchGermlineOccurrenceExpand,
+    input => fetchGermlineOccurrenceExpand(input, tenant),
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,
@@ -190,7 +194,7 @@ export function useCase(caseId: number, seqId: number, taskId: number, locusId: 
       key: 'case-entity',
       caseId: caseId,
     },
-    fetchCase,
+    input => fetchCase(input, tenant),
     {
       shouldRetryOnError: false,
       revalidateOnFocus: false,

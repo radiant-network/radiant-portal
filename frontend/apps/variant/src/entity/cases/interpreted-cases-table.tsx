@@ -12,7 +12,8 @@ import {
 } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, variantsApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { variantsApi } from '@/utils/api';
 
 import SliderInterpretedCaseSheet from './slider/slider-interpreted-case-sheet';
 import { useSliderCasePatientIdNavigation } from './slider/use-slider-case-navigation';
@@ -26,13 +27,14 @@ type InterpretedCasesSearchInput = {
   criteria: ListBodyWithCriteria;
 };
 
-async function fetchInterpretedCases(input: InterpretedCasesSearchInput) {
-  const response = await variantsApi.getGermlineVariantInterpretedCases(DEFAULT_TENANT, input.locusId, input.criteria);
+async function fetchInterpretedCases(input: InterpretedCasesSearchInput, tenant: string) {
+  const response = await variantsApi.getGermlineVariantInterpretedCases(tenant, input.locusId, input.criteria);
   return response.data;
 }
 
 function InterpretedCasesTable() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const params = useParams<{ locusId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [rowSelection, setRowSelection] = useState({});
@@ -96,7 +98,7 @@ function InterpretedCasesTable() {
         page_index: pagination.pageIndex,
       },
     },
-    fetchInterpretedCases,
+    input => fetchInterpretedCases(input, tenant),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,

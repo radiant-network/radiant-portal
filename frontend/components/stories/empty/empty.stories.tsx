@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Dna } from 'lucide-react';
 
-import Empty from '@/components/base/empty';
+import Empty from '@/components/base/empties/empty';
 
 import { StorySection } from '../story-section';
 

@@ -1,4 +1,5 @@
 import {
+  AuthApi,
   CasesApi,
   Configuration,
   DocumentsApi,
@@ -22,11 +23,7 @@ const config = new Configuration({
   basePath: '/api',
 });
 
-// Tenant-scoped endpoints now live under /{tenant}/. Until the tenant switcher ships
-// (SJRA follow-up), every tenant-scoped client call passes this default tenant.
-// TODO(multi-tenant): replace with the active tenant from the tenant switcher.
-export const DEFAULT_TENANT = 'radiant';
-
+export const authApi = new AuthApi(config, BASE_PATH, axiosClient);
 export const variantsApi = new VariantApi(config, BASE_PATH, axiosClient);
 export const occurrenceFlagApi = new OccurrenceFlagsApi(config, BASE_PATH, axiosClient);
 export const occurrencesApi = new OccurrencesApi(config, BASE_PATH, axiosClient);

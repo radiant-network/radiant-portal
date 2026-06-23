@@ -19,7 +19,8 @@ import SliderSheet from '@/components/base/slider/slider-sheet';
 import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
 import SliderVariantDetailsCard from '@/components/base/slider/slider-variant-details-card';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, interpretationApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { interpretationApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { SELECTED_VARIANT_PARAM } from '../../constants';
@@ -33,9 +34,9 @@ type InterpretationInput = {
   transcriptId: string;
 };
 
-async function fetchInterpretation(input: InterpretationInput) {
+async function fetchInterpretation(input: InterpretationInput, tenant: string) {
   const response = await interpretationApi.getInterpretationGermline(
-    DEFAULT_TENANT,
+    tenant,
     input.caseId,
     input.seqId,
     input.locusId,
@@ -93,6 +94,7 @@ export function GermlineOccurrenceSheetContent({
   patientSelected,
 }: OccurrenceSheetContentProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
   const { list } = useDataTable();
 
@@ -111,7 +113,7 @@ export function GermlineOccurrenceSheetContent({
       locusId: occurrence.locus_id,
       transcriptId: expandResult.data?.transcript_id,
     },
-    fetchInterpretation,
+    (key: InterpretationInput) => fetchInterpretation(key, tenant),
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,

@@ -6,7 +6,8 @@ import { useDataTable } from '@/components/base/data-table/hooks/use-data-table'
 import { NotesProvider } from '@/components/base/notes/hooks/use-notes';
 import { GetOccurrenceNoteInput } from '@/components/base/notes/notes-container';
 import NotesPopover from '@/components/base/notes/notes-popover';
-import { DEFAULT_TENANT, occurencesNotesApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { occurencesNotesApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 type VariantNoteCellProps = {
@@ -16,9 +17,9 @@ type VariantNoteCellProps = {
   hasNote: boolean;
 };
 
-async function fetchNotesCount(_url: string, { arg }: { arg: GetOccurrenceNoteInput }) {
+async function fetchNotesCount(_url: string, { arg }: { arg: GetOccurrenceNoteInput }, tenant: string) {
   const response = await occurencesNotesApi.countOccurrenceNotes(
-    DEFAULT_TENANT,
+    tenant,
     arg.caseId,
     arg.seqId,
     arg.taskId,
@@ -29,11 +30,12 @@ async function fetchNotesCount(_url: string, { arg }: { arg: GetOccurrenceNoteIn
 
 function OccurrenceNoteCell({ seqId, taskId, occurrenceId, hasNote }: VariantNoteCellProps) {
   const caseId = useCaseIdFromParam();
+  const { tenant } = useTenant();
   const { list } = useDataTable();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { trigger } = useSWRMutation<Count, Error, string, GetOccurrenceNoteInput>(
     `list/notes/cout/${caseId}/${seqId}/${taskId}/${occurrenceId}`,
-    fetchNotesCount,
+    (key, opts) => fetchNotesCount(key, opts, tenant),
   );
 
   const onChangeCallback = useCallback(async () => {

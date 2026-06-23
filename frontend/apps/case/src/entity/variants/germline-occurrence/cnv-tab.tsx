@@ -6,7 +6,8 @@ import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
 import { useConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, occurrencesApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
 import { isValidSeqId } from './libs/seq-id';
@@ -22,6 +23,7 @@ type CNVTabProps = {
 
 function CNVTab({ seqId, caseEntity }: CNVTabProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const config = useConfig();
   const caseId = useCaseIdFromParam();
   const appId = config.germline_cnv_occurrence.app_id;
@@ -40,13 +42,13 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
         list: async (params: IListInput) => {
           if (taskId === undefined) return [];
           return occurrencesApi
-            .listGermlineCNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId, params.listBody)
+            .listGermlineCNVOccurrences(tenant, caseId, seqId, taskId, params.listBody)
             .then(response => response.data);
         },
         count: async (params: ICountInput) => {
           if (taskId === undefined) return { count: 0 };
           return occurrencesApi
-            .countGermlineCNVOccurrences(DEFAULT_TENANT, caseId, seqId, taskId, params.countBody)
+            .countGermlineCNVOccurrences(tenant, caseId, seqId, taskId, params.countBody)
             .then(response => response.data);
         },
       }}

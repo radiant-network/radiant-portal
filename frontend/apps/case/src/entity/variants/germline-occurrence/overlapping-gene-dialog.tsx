@@ -12,8 +12,9 @@ import {
   DialogTrigger,
 } from '@/components/base/shadcn/dialog';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import { toKiloBases } from '@/components/lib/number-format';
-import { DEFAULT_TENANT, occurrencesApi } from '@/utils/api';
+import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
 import {
@@ -34,12 +35,13 @@ type OverlappingGeneDialogProps = {
 };
 
 export function useCNVOverlappingGenesListHelper(input: OverlappingGenesInput) {
+  const { tenant } = useTenant();
   const fetch = useCallback(
     async () =>
       occurrencesApi
-        .listGermlineCNVGenesOverlap(DEFAULT_TENANT, input.caseId, input.seqId, input.taskId, input.cnvId)
+        .listGermlineCNVGenesOverlap(tenant, input.caseId, input.seqId, input.taskId, input.cnvId)
         .then(response => response.data),
-    [input],
+    [input, tenant],
   );
 
   return {

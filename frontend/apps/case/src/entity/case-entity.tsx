@@ -11,7 +11,8 @@ import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
 import { useI18n } from '@/components/hooks/i18n';
-import { caseApi, DEFAULT_TENANT } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { caseApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import DetailsTab from './details/details-tab';
@@ -27,13 +28,14 @@ type CaseEntityInput = {
   caseId: number;
 };
 
-async function fetchCaseEntity(input: CaseEntityInput) {
-  const response = await caseApi.caseEntity(DEFAULT_TENANT, input.caseId);
+async function fetchCaseEntity(input: CaseEntityInput, tenant: string) {
+  const response = await caseApi.caseEntity(tenant, input.caseId);
   return response.data;
 }
 
 export default function App() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
   const mainRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -46,7 +48,7 @@ export default function App() {
       key: 'case-entity',
       caseId,
     },
-    fetchCaseEntity,
+    input => fetchCaseEntity(input, tenant),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,

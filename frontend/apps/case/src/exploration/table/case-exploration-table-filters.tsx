@@ -12,8 +12,9 @@ import DataTableFilters, {
 import getItemPriority from '@/components/base/data-table/filters/options/option-priority';
 import getItemStatus from '@/components/base/data-table/filters/options/option-status';
 import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
 import usePersistedFilters, { StringArrayRecord } from '@/components/hooks/usePersistedFilters';
-import { caseApi, DEFAULT_TENANT } from '@/utils/api';
+import { caseApi } from '@/utils/api';
 
 type FiltersGroupFormProps = {
   loading?: boolean;
@@ -48,20 +49,21 @@ export const FILTER_DEFAULTS = {
   case_category_code: [],
 };
 
-async function fetchFilters() {
-  const response = await caseApi.casesFilters(DEFAULT_TENANT);
+async function fetchFilters(tenant: string) {
+  const response = await caseApi.casesFilters(tenant);
   return response.data;
 }
 
 function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFormProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-exploration-filters', {
     ...FILTER_DEFAULTS,
   });
 
-  const { data: apiFilters } = useSWR<CaseFilters>('case-filters', () => fetchFilters(), {
+  const { data: apiFilters } = useSWR<CaseFilters>('case-filters', () => fetchFilters(tenant), {
     revalidateOnFocus: false,
     revalidateOnMount: true,
     revalidateIfStale: false,
@@ -133,7 +135,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
       filterSearch={{
         placeholder: t('case_exploration.filters_group.search_placeholder'),
         minSearchLength: 1,
-        api: (prefix: string) => caseApi.autocompleteCases(DEFAULT_TENANT, prefix, '10'),
+        api: (prefix: string) => caseApi.autocompleteCases(tenant, prefix, '10'),
       }}
       filterButtons={filterButtons}
       changedFilterButtons={changedFilterButtons}

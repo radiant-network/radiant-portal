@@ -9,7 +9,8 @@ import { Label } from '@/components/base/shadcn/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { type Aggregation as AggregationConfig } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, genesApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { genesApi } from '@/utils/api';
 
 import {
   QBActionType,
@@ -27,6 +28,7 @@ const MAX_API_CALLS = 2;
 
 export function SearchFacet({ search }: SearchFilterProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const dispatch = useQBDispatch();
   const activeQuery = useQBActiveQuery();
   const history = useQBHistory();
@@ -82,7 +84,7 @@ export function SearchFacet({ search }: SearchFilterProps) {
         // Fetch details for each selected gene
         const optionsPromises = selectedValues.map(async value => {
           try {
-            const response = await genesApi.geneAutoComplete(DEFAULT_TENANT, value);
+            const response = await genesApi.geneAutoComplete(tenant, value);
             const geneData = response.data.find(item => item.source?.name === value);
 
             if (geneData) {
@@ -130,7 +132,7 @@ export function SearchFacet({ search }: SearchFilterProps) {
     if (!searchTerm) return [];
 
     try {
-      const response = await genesApi.geneAutoComplete(DEFAULT_TENANT, searchTerm);
+      const response = await genesApi.geneAutoComplete(tenant, searchTerm);
       return response.data.map(item => ({
         value: item.source?.name || '',
         label: (

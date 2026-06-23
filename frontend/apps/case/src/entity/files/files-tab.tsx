@@ -6,7 +6,8 @@ import { ApiError, DocumentsSearchResponse, ListBodyWithCriteria, SearchCriterio
 import DataTable from '@/components/base/data-table/data-table';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
-import { caseApi, DEFAULT_TENANT } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { caseApi } from '@/utils/api';
 import { useCaseIdFromParam } from '@/utils/helper';
 
 import { defaultSettings, getCaseEntityDocumentsColumns } from './files-table/files-tab-table-settings';
@@ -17,13 +18,14 @@ type DocumentInput = {
   body: ListBodyWithCriteria;
 };
 
-async function fetchDocuments(input: DocumentInput) {
-  const response = await caseApi.caseEntityDocumentsSearch(DEFAULT_TENANT, input.caseId, input.body);
+async function fetchDocuments(input: DocumentInput, tenant: string) {
+  const response = await caseApi.caseEntityDocumentsSearch(tenant, input.caseId, input.body);
   return response.data;
 }
 
 function FilesTab() {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const caseId = useCaseIdFromParam();
   const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
   const [sorting, setSorting] = useState<SortBody[]>([]);
@@ -46,7 +48,7 @@ function FilesTab() {
         search_criteria: searchCriteria,
       },
     },
-    fetchDocuments,
+    input => fetchDocuments(input, tenant),
     {
       revalidateOnFocus: false,
       shouldRetryOnError: false,

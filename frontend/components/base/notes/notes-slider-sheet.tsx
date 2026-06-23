@@ -4,7 +4,8 @@ import useSWR from 'swr';
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/base/shadcn/sheet';
 import { useI18n } from '@/components/hooks/i18n';
-import { DEFAULT_TENANT, occurencesNotesApi } from '@/utils/api';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { occurencesNotesApi } from '@/utils/api';
 
 import { Button } from '../shadcn/button';
 import { Spinner } from '../shadcn/spinner';
@@ -13,9 +14,9 @@ import NotesContainer, { NotesContainerProps } from './notes-container';
 
 type NotesSliderProps = NotesContainerProps;
 
-async function fetchNotesCount(input: NotesContainerProps) {
+async function fetchNotesCount(input: NotesContainerProps, tenant: string) {
   const response = await occurencesNotesApi.countOccurrenceNotes(
-    DEFAULT_TENANT,
+    tenant,
     input.caseId,
     input.seqId,
     input.taskId,
@@ -26,17 +27,21 @@ async function fetchNotesCount(input: NotesContainerProps) {
 
 function NotesSliderSheet({ ...props }: NotesSliderProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { data, mutate, isLoading } = useSWR(
     `fetch-note-count-${props.caseId}-${props.seqId}-${props.taskId}-${props.occurrenceId}`,
     () =>
-      fetchNotesCount({
-        seqId: props.seqId,
-        caseId: props.caseId,
-        taskId: props.taskId,
-        occurrenceId: props.occurrenceId,
-      }),
+      fetchNotesCount(
+        {
+          seqId: props.seqId,
+          caseId: props.caseId,
+          taskId: props.taskId,
+          occurrenceId: props.occurrenceId,
+        },
+        tenant,
+      ),
     {
       revalidateOnFocus: true,
     },
