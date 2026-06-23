@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
-import Empty from '../empty';
+import Empty from '../empties/empty';
 
 import { HEADER_HEIGHT, ROW_HEIGHT, TableColumnDef } from './data-table';
 

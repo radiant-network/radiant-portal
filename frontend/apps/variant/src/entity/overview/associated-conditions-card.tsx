@@ -1,5 +1,5 @@
 import { VariantOverview } from '@/api/api';
-import Empty from '@/components/base/empty';
+import Empty from '@/components/base/empties/empty';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Card, CardContent, CardHeader, CardProps } from '@/components/base/shadcn/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';

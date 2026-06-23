@@ -2,7 +2,7 @@ import { useParams } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
 
 import { CaseTasksWithOccurrencesDataTypeEnum, VariantUninterpretedCase } from '@/api/api';
-import Empty from '@/components/base/empty';
+import Empty from '@/components/base/empties/empty';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
 import { useCase } from '@/components/base/slider/hooks/use-slider-occurrence-and-case';

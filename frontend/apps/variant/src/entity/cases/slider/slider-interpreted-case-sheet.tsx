@@ -2,7 +2,7 @@ import { useParams } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
 
 import { CaseTasksWithOccurrencesDataTypeEnum, VariantInterpretedCase } from '@/api/api';
-import Empty from '@/components/base/empty';
+import Empty from '@/components/base/empties/empty';
 import { Button } from '@/components/base/shadcn/button';
 import { Separator } from '@/components/base/shadcn/separator';
 import GermlineSliderInterpretationDetailsCard from '@/components/base/slider/germline-slider-interpretation-details-card';
@@ -122,6 +122,7 @@ function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }
         isManePlus={expandResult.data.is_mane_plus}
         isCanonical={expandResult.data.is_canonical}
         transcriptId={expandResult.data.transcript_id}
+        actions={undefined}
       />
 
       <OccurrenceSheetDetailsCard
