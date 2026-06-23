@@ -3,9 +3,8 @@ import useSWR from 'swr';
 
 import type { TenantMembership, UserPreference } from '../../api/api';
 import { authApi, userPreferenceApi } from '../../utils/api';
+import EmptyTenant from '../base/empties/empty_tenant';
 import { Spinner } from '../base/spinner';
-
-import { useI18n } from './i18n';
 
 export const TENANT_PREFERENCE_KEY = 'selected-tenant';
 
@@ -80,27 +79,10 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
   // Empty state: the user belongs to no tenant.
   if (!tenant) {
-    return <TenantEmptyState />;
+    return <EmptyTenant />;
   }
 
   return (
     <TenantContext.Provider value={{ tenant, tenants: tenants ?? [], setTenant }}>{children}</TenantContext.Provider>
-  );
-}
-
-/** Full-screen message shown by TenantProvider when the user belongs to no tenant. */
-export function TenantEmptyState() {
-  const { t } = useI18n();
-  return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center gap-2 px-6 text-center">
-      <h1 className="text-lg font-semibold">
-        {t('main_navbar.tenant_switcher.empty_title', { defaultValue: 'No tenant available' })}
-      </h1>
-      <p className="text-muted-foreground">
-        {t('main_navbar.tenant_switcher.empty_description', {
-          defaultValue: 'You do not have access to any tenant. Please contact your administrator.',
-        })}
-      </p>
-    </div>
   );
 }

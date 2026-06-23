@@ -2,7 +2,7 @@ import React from 'react';
 import { ChartColumn, ChartLine, ChartPie, ChartScatter, LucideIcon } from 'lucide-react';
 import { tv, VariantProps } from 'tailwind-variants';
 
-import { cn } from '../lib/utils';
+import { cn } from '@/components/lib/utils';
 
 const emptyVariants = tv({
   slots: {
@@ -79,17 +79,15 @@ function Empty({
 
   return (
     <div className={styles.base({ className })} {...props}>
-      {showIcon ? (
-        iconType === 'chartRow' ? (
-          <EmptyIconsRow className={styles.iconsContainer()} />
-        ) : iconType === 'chartGrid' ? (
-          <EmptyIconsGrid className={styles.iconsContainer()} />
-        ) : iconType === 'custom' ? (
-          <div className="flex justify-center">
-            <div className={styles.customIcon()}>{<Icon />}</div>
+      {showIcon && iconType === 'chartRow' && <EmptyIconsRow className={styles.iconsContainer()} />}
+      {showIcon && iconType === 'chartGrid' && <EmptyIconsGrid className={styles.iconsContainer()} />}
+      {showIcon && iconType === 'custom' && Icon && (
+        <div className="flex justify-center">
+          <div className={styles.customIcon()}>
+            <Icon />
           </div>
-        ) : null
-      ) : null}
+        </div>
+      )}
       <div className={styles.textContainer()}>
         {title && <h1 className={styles.title()}>{title}</h1>}
         {description && <div className={styles.description()}>{description}</div>}
