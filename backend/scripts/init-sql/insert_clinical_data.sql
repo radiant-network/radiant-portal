@@ -560,9 +560,31 @@ VALUES (1, 'FI0037662.S13230.cram', 'genomic', 'alignment', 'cram', 110187385978
 ON CONFLICT(id) DO NOTHING;
 
 INSERT INTO tenant (code, name)
-VALUES ('radiant', 'Radiant'),
-       ('QLIN', 'QLIN')
+VALUES ('qlin', 'QLIN')
 ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO public.role (tenant_code, code, name, description) VALUES
+    ('qlin', 'member',       'Member',       'Search cases and view the knowledge base.'),
+    ('qlin', 'geneticist',   'Geneticist',   'Read PII, download files, and interpret, comment on, and flag variants.'),
+    ('qlin', 'data_manager', 'Data Manager', 'Submit batches (cases, patients, samples, sequencing).')
+ON CONFLICT (tenant_code, code) DO NOTHING;
+
+INSERT INTO public.role_action (tenant_code, role_code, action_code) VALUES
+    -- member: read-only portal access
+    ('qlin', 'member',       'can_search_case'),    -- tenant-scoped
+    ('qlin', 'member',       'can_view_kb'),         -- tenant-scoped
+
+    -- geneticist: PII + clinical writes + file download
+    ('qlin', 'geneticist',   'can_read_pii'),        -- org-scoped
+    ('qlin', 'geneticist',   'can_interpret_variant'),-- org-scoped
+    ('qlin', 'geneticist',   'can_comment_variant'), -- org-scoped
+    ('qlin', 'geneticist',   'can_flag_variant'),    -- org-scoped
+    ('qlin', 'geneticist',   'can_download_file'),   -- org-scoped
+
+    -- data_manager: batch ingestion
+    ('qlin', 'data_manager', 'can_ingest_data')      -- org-scoped
+ON CONFLICT (tenant_code, role_code, action_code) DO NOTHING;
+
 
 INSERT INTO organization (code, name, category_code, tenant_code)
 VALUES ('CHOP', 'Children Hospital of Philadelphia', 'healthcare_provider', 'radiant'),
