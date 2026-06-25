@@ -873,14 +873,14 @@
       "tiles": {
         "germline_variants": {
           "title": "Variants germinaux",
-          "description": "Explorez les variants germinaux à travers les études INCLUDE.",
+          "description": "Notre explorateur de variants offre des capacités de recherche avancées. En quelques clics, vous pouvez explorer des millions de variants germinaux annotés provenant des génomes des participants de l'INCLUDE Data Hub.",
           "buttons": {
             "explore": "Explorer les données de variants"
           }
         },
         "cavatica": {
           "title": "CAVATICA",
-          "description": "Analysez les données dans un environnement infonuagique sécurisé.",
+          "description": "Le portail s'intègre à CAVATICA, une plateforme infonuagique conçue pour l'analyse de données et la collaboration à l'échelle mondiale. Les chercheurs peuvent analyser les jeux de données INCLUDE à l'aide de flux de travail personnalisés ou préexistants.",
           "buttons": {
             "learn_more": "En savoir plus",
             "login": "Connexion"
@@ -888,7 +888,7 @@
         },
         "experimental_models": {
           "title": "Modèles expérimentaux",
-          "description": "Parcourez les modèles cellulaires et animaux pour la recherche sur la trisomie 21.",
+          "description": "Le portail Modèles expérimentaux fournit aux chercheurs des publications, des phénotypes, des jeux de données et des biospécimens issus de modèles expérimentaux du syndrome de Down, permettant de mieux comprendre les mécanismes des effets tissu-spécifiques de la trisomie 21.",
           "buttons": {
             "explore": "Explorer les modèles expérimentaux"
           }
