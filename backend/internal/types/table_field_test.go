@@ -22,6 +22,21 @@ func Test_FieldGetAlias_Return_Name_If_Empty(t *testing.T) {
 	assert.Equal(t, f.GetAlias(), "name")
 }
 
+func Test_Table_In_QualifiesNameWithSchema(t *testing.T) {
+	t.Parallel()
+	tbl := Table{Name: "cases", FederationName: "radiant_jdbc.public.cases"}
+	assert.Equal(t, tbl.In("radiant_jdbc.public"), "radiant_jdbc.public.cases")
+	assert.Equal(t, tbl.In("demo_tenant"), "demo_tenant.cases")
+}
+
+func Test_Table_In_FederationSchemaMatchesFederationName(t *testing.T) {
+	t.Parallel()
+	// In(FederationSchema) must reproduce the static FederationName so the legacy read path
+	// is byte-identical until a tenant is bound to the context.
+	assert.Equal(t, CaseTable.In(FederationSchema), CaseTable.FederationName)
+	assert.Equal(t, PatientTable.In(FederationSchema), PatientTable.FederationName)
+}
+
 func Test_FindSortedFields_Return_Only_Valid_Field_And_Field_That_Can_Be_Sorted(t *testing.T) {
 	t.Parallel()
 	fields := []Field{
