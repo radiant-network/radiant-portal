@@ -13,7 +13,7 @@ export type TenantContextValue = {
   tenant: string;
   /** All tenants the user belongs to (from /auth/me). */
   tenants: TenantMembership[];
-  /** Persist the chosen tenant then hard-reload so every request uses it. */
+  /** Persist the chosen tenant then hard-reload onto /case so every request uses it. */
   setTenant: (code: string) => Promise<void>;
 };
 
@@ -64,9 +64,9 @@ export function TenantProvider({ children }: { children: ReactNode }) {
       key: TENANT_PREFERENCE_KEY,
       content: { tenant: code },
     });
-    // Hard reload: the provider re-reads the preference and every request picks
-    // up the new tenant. Keeps us clear of a global SWR cache mutate.
-    window.location.reload();
+    // Hard navigation to /case: the provider re-reads the preference and every
+    // request picks up the new tenant. Keeps us clear of a global SWR cache mutate.
+    window.location.assign('/case');
   };
 
   if (tenantsLoading || preferenceLoading) {
