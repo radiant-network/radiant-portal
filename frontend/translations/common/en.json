@@ -872,21 +872,21 @@
           "title": "Most Frequent Co-occurring Conditions (MONDO)",
           "axis": {
             "x_label": "# of participants",
-            "y_label": "Diagnosis (MONDO)"
+            "y_label": "Diagnoses (MONDO)"
           }
         }
       },
       "tiles": {
         "germline_variants": {
           "title": "Germline Variants",
-          "description": "Explore germline variants across INCLUDE studies.",
+          "description": "Our variant explorer offers advanced searching capabilities. With just a few clicks, you can explore millions of annotated germline variants from genomes of INCLUDE Data Hub participants.",
           "buttons": {
             "explore": "Explore variant data"
           }
         },
         "cavatica": {
           "title": "CAVATICA",
-          "description": "Analyze data in a secure cloud-based environment.",
+          "description": "The portal integrates with CAVATICA, a cloud-based platform designed for worldwide data analysis and collaboration. Researchers can analyze INCLUDE datasets using custom or pre-existing workflows.",
           "buttons": {
             "learn_more": "Learn more",
             "login": "Login"
@@ -894,7 +894,7 @@
         },
         "experimental_models": {
           "title": "Experimental Models",
-          "description": "Browse cellular and animal models for Down Syndrome research.",
+          "description": "The Experimental Models portal provides researchers with publications, phenotypes, datasets, and biospecimens derived from experimental models of Down syndrome, enabling mechanistic insights into the tissue-specific effects of trisomy 21.",
           "buttons": {
             "explore": "Explore Experimental Models"
           }
