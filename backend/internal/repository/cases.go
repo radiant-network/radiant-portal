@@ -114,13 +114,13 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 
 func (r *CasesRepository) SearchById(ctx context.Context, prefix string, limit int) (*[]AutocompleteResult, error) {
 	/**
-	  	(SELECT "case_id" as type, id as value from cases WHERE CAST(id AS TEXT) LIKE '1%')
+	  	(SELECT "case_id" as type, id as value from <schema>.cases WHERE CAST(id AS TEXT) LIKE '1%')
 	    UNION
-	    (SELECT "patient_id" as type, proband_id as value from cases WHERE CAST(proband_id AS TEXT) LIKE '1%')
+	    (SELECT "patient_id" as type, proband_id as value from <schema>.cases WHERE CAST(proband_id AS TEXT) LIKE '1%')
 	    UNION
-	    (SELECT "mrn" as type, submitter_patient_id as value from patient WHERE submitter_patient_id LIKE '1%')
+	    (SELECT "mrn" as type, submitter_patient_id as value from <schema>.patient WHERE submitter_patient_id LIKE '1%')
 		UNION
-		(SELECT "sequencing_experiment_id" as type, id as value from sequencing_experiment WHERE CAST(id AS TEXT) LIKE '1%')
+		(SELECT "sequencing_experiment_id" as type, id as value from <schema>.sequencing_experiment WHERE CAST(id AS TEXT) LIKE '1%')
 	    ORDER BY value asc;
 	*/
 	var autocompleteResult []AutocompleteResult

@@ -44,9 +44,9 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	// we build a TOP-N query like :
 	// SELECT s_snv_o.locus_id, s_snv_o.quality, s_snv_o.ad_ratio, ...., v.variant_class, v.hgvsg..., i.locus_id IS NOT NULL AS has_interpretation
 	// FROM (somatic__snv__occurrence o, snv__variant v)
-	// 		LEFT JOIN (SELECT DISTINCT locus_id, sequencing_id FROM interpretation_somatic) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ?
-	// 		LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM occurrence_note WHERE deleted = false) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?
-	// 		LEFT JOIN occurrence_flag flag ON flag.occurrence_id = s_snv_o.locus_id AND flag.task_id = s_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?
+	// 		LEFT JOIN (SELECT DISTINCT locus_id, sequencing_id FROM <schema>.interpretation_somatic) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ?
+	// 		LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM <schema>.occurrence_note WHERE deleted = false) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?
+	// 		LEFT JOIN <schema>.occurrence_flag flag ON flag.occurrence_id = s_snv_o.locus_id AND flag.task_id = s_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?
 	// WHERE s_snv_o.locus_id in (
 	//	SELECT s_snv_o.locus_id FROM somatic__snv__occurrence JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
 	// ) AND s_snv_o.tumor_seq_id=? AND s_snv_o.part=? AND v.locus_id=s_snv_o.locus_id ORDER BY ad_ratio DESC
