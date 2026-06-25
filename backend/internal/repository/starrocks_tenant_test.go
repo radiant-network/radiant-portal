@@ -81,15 +81,25 @@ func Test_BuildViewStatements_PatientUsesTemplateWithMaskingAndTenantFilter(t *t
 
 // --- BuildViewStatements: generic path ---------------------------------------
 
-func Test_BuildViewStatements_GenericTableProjectsColumnsWithoutMasking(t *testing.T) {
-	stmts, err := BuildViewStatements("demo", map[string][]string{"cases": {"id", "submitter_case_id"}})
+func Test_BuildViewStatements_TenantScopedTableIsFilteredByTenantCode(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", map[string][]string{"cases": {"id", "submitter_case_id", "tenant_code"}})
 	require.NoError(t, err)
 	joined := strings.Join(stmts, "\n")
 
 	assert.NotContains(t, joined, "SELECT *", "must not SELECT * (unfederatable columns break it)")
 	assert.Contains(t, joined,
-		"CREATE OR REPLACE VIEW `demo_tenant`.`cases` AS SELECT `id`, `submitter_case_id` FROM radiant_jdbc.public.`cases` WHERE tenant_code = 'demo'")
+		"CREATE OR REPLACE VIEW `demo_tenant`.`cases` AS SELECT `id`, `submitter_case_id`, `tenant_code` FROM radiant_jdbc.public.`cases` WHERE tenant_code = 'demo'")
 	assert.NotContains(t, joined, "can_read_pii", "only the patient template carries the mask flag")
+}
+
+func Test_BuildViewStatements_NonTenantScopedTableIsUnfiltered(t *testing.T) {
+	// sex is a value-set table with no tenant_code column → exposed unfiltered.
+	stmts, err := BuildViewStatements("demo", map[string][]string{"sex": {"code", "name"}})
+	require.NoError(t, err)
+	joined := strings.Join(stmts, "\n")
+
+	assert.Contains(t, joined, "CREATE OR REPLACE VIEW `demo_tenant`.`sex` AS SELECT `code`, `name` FROM radiant_jdbc.public.`sex`")
+	assert.NotContains(t, joined, "WHERE tenant_code", "a table without tenant_code must not be filtered")
 }
 
 func Test_BuildViewStatements_BacktickQuotesEveryColumn(t *testing.T) {
@@ -99,7 +109,7 @@ func Test_BuildViewStatements_BacktickQuotesEveryColumn(t *testing.T) {
 }
 
 func Test_BuildViewStatements_FiltersByBareTenantCodeNotDatabaseName(t *testing.T) {
-	stmts, err := BuildViewStatements("demo", map[string][]string{"cases": {"id"}})
+	stmts, err := BuildViewStatements("demo", map[string][]string{"cases": {"id", "tenant_code"}})
 	require.NoError(t, err)
 	joined := strings.Join(stmts, "\n")
 	assert.Contains(t, joined, "WHERE tenant_code = 'demo'")

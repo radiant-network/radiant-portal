@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/radiant-network/radiant-api/internal/observability"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
@@ -92,6 +93,12 @@ func RequestLogger() gin.HandlerFunc {
 // resolved tenant code for downstream handlers.
 const TenantContextKey = "tenant"
 
+// tenantViewsReadEnabledEnv gates whether RequireTenantAccess binds the resolved tenant to
+// the request context. When set, repository reads resolve the tenant's view database
+// (<code>_tenant) via types.TenantSchema instead of the radiant_jdbc federation. Off by
+// default until every repository read path emits tenant-qualified table references.
+const tenantViewsReadEnabledEnv = "TENANT_VIEWS_READ_ENABLED"
+
 // tenantAccessChecker is the slice of the auth repository RequireTenantAccess needs: it
 // resolves whether a tenant exists and whether a caller may access it.
 type tenantAccessChecker interface {
@@ -144,6 +151,9 @@ func RequireTenantAccess(auth utils.Auth, repo tenantAccessChecker) gin.HandlerF
 		}
 
 		c.Set(TenantContextKey, tenant)
+		if utils.GetBoolEnvOrDefault(tenantViewsReadEnabledEnv, false) {
+			c.Request = c.Request.WithContext(types.ContextWithTenant(c.Request.Context(), tenant))
+		}
 		c.Next()
 	}
 }

@@ -46,6 +46,46 @@ func Test_RequireTenantAccess_Member_PassesAndSetsContext(t *testing.T) {
 	assert.JSONEq(t, `{"tenant":"radiant"}`, w.Body.String())
 }
 
+// tenantSchemaRouter wires RequireTenantAccess in front of a handler that reports the schema
+// the read path would resolve from the request context, so tests can assert the gated binding.
+func tenantSchemaRouter(repo *mockAuthRepository, auth *testutils.MockAuth) *gin.Engine {
+	router := gin.New()
+	tenantGroup := router.Group("/:tenant")
+	tenantGroup.Use(RequireTenantAccess(auth, repo))
+	tenantGroup.GET("/cases/filters", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"schema": types.TenantSchema(c.Request.Context())})
+	})
+	return router
+}
+
+func Test_RequireTenantAccess_ViewsReadEnabled_BindsTenantToRequestContext(t *testing.T) {
+	t.Setenv("TENANT_VIEWS_READ_ENABLED", "true")
+	repo := &mockAuthRepository{hasTenantAccess: true}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	router := tenantSchemaRouter(repo, auth)
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/filters", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"schema":"radiant_tenant"}`, w.Body.String())
+}
+
+func Test_RequireTenantAccess_ViewsReadDisabled_LeavesFederationSchema(t *testing.T) {
+	t.Setenv("TENANT_VIEWS_READ_ENABLED", "false")
+	repo := &mockAuthRepository{hasTenantAccess: true}
+	auth := &testutils.MockAuth{Id: mockUserID}
+	router := tenantSchemaRouter(repo, auth)
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/filters", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"schema":"radiant_jdbc.public"}`, w.Body.String())
+}
+
 func Test_RequireTenantAccess_NonMember_Returns403(t *testing.T) {
 	repo := &mockAuthRepository{hasTenantAccess: false}
 	auth := &testutils.MockAuth{Id: mockUserID}

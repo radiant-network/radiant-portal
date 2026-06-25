@@ -24,10 +24,11 @@ func NewSequencingExperimentRepository(db *gorm.DB) *SequencingExperimentReposit
 func (r *SequencingExperimentRepository) GetSequencingExperimentDetailById(ctx context.Context, seqId int) (*SequencingExperimentDetail, error) {
 	var sequencingExperiment SequencingExperimentDetail
 
-	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias))
+	schema := types.TenantSchema(ctx)
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.In(schema), types.SequencingExperimentTable.Alias))
 	tx = utils.JoinSeqExpWithSample(tx)
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.experimental_strategy_code = %s.code", types.ExperimentalStrategyTable.FederationName, types.ExperimentalStrategyTable.Alias, types.SequencingExperimentTable.Alias, types.ExperimentalStrategyTable.Alias))
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_read_technology_code = %s.code", types.SequencingReadTechnologyTable.FederationName, types.SequencingReadTechnologyTable.Alias, types.SequencingExperimentTable.Alias, types.SequencingReadTechnologyTable.Alias))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.experimental_strategy_code = %s.code", types.ExperimentalStrategyTable.In(schema), types.ExperimentalStrategyTable.Alias, types.SequencingExperimentTable.Alias, types.ExperimentalStrategyTable.Alias))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.sequencing_read_technology_code = %s.code", types.SequencingReadTechnologyTable.In(schema), types.SequencingReadTechnologyTable.Alias, types.SequencingExperimentTable.Alias, types.SequencingReadTechnologyTable.Alias))
 	tx = utils.JoinSeqExpWithSequencingLab(tx)
 	tx = tx.Where("s.id = ?", seqId)
 

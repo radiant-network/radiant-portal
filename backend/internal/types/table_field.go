@@ -12,6 +12,14 @@ type Table struct {
 	FederationName string // FederationName name through Starrocks federation
 }
 
+// In qualifies the table by a StarRocks schema (database), e.g.
+// CaseTable.In("radiant_jdbc.public") → "radiant_jdbc.public.cases" and
+// CaseTable.In("demo_tenant") → "demo_tenant.cases". Combined with TenantSchema it
+// replaces the static FederationName on read paths so the active tenant's views are used.
+func (t Table) In(schema string) string {
+	return schema + "." + t.Name
+}
+
 const (
 	IntegerType = "integer"
 	DecimalType = "decimal"

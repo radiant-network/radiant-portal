@@ -111,17 +111,18 @@ func (r *VariantsRepository) GetVariantInterpretedCases(ctx context.Context, loc
 	var count int64
 
 	db := r.db.WithContext(ctx)
+	schema := types.TenantSchema(ctx)
 	txAggPhenotypes := utils.GetAggregatedPhenotypes(db)
 
-	tx := db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.FederationName, types.InterpretationGermlineTable.Alias))
+	tx := db.Table(fmt.Sprintf("%s %s", types.InterpretationGermlineTable.In(schema), types.InterpretationGermlineTable.Alias))
 	tx = utils.JoinGermlineInterpretationWithSNVOccurrence(tx)
 	// interpretation_germline has no task_id column, so the snv↔interpretation
 	// join above is on (seq_id, locus_id) alone. Bridge through task_context to
 	// scope the snv occurrence to the interpretation's case — otherwise an
 	// occurrence at the same seq_id but produced by another case's annotation
 	// task would leak into this case's interpreted results.
-	tx = tx.Joins("INNER JOIN radiant_jdbc.public.task_context tctx ON tctx.task_id = g_snv_o.task_id AND tctx.sequencing_experiment_id = g_snv_o.seq_id AND tctx.case_id = ig.case_id")
-	tx = tx.Joins("INNER JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = g_snv_o.seq_id")
+	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s.task_context tctx ON tctx.task_id = g_snv_o.task_id AND tctx.sequencing_experiment_id = g_snv_o.seq_id AND tctx.case_id = ig.case_id", schema))
+	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s.sequencing_experiment s ON s.id = g_snv_o.seq_id", schema))
 	tx = utils.JoinGermlineInterpretationWithCase(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
 	tx = utils.JoinSampleAndCaseWithFamily(tx)
@@ -183,6 +184,7 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(ctx context.Context, l
 	}
 
 	db := r.db.WithContext(ctx)
+	schema := types.TenantSchema(ctx)
 	txAggPhenotypes := utils.GetAggregatedPhenotypes(db)
 
 	// interpretation_germline.locus_id is text, so this ANTI JOIN compares strings; g_snv_o.locus_id is int and uses locusId directly.
@@ -192,21 +194,21 @@ func (r *VariantsRepository) GetVariantUninterpretedCases(ctx context.Context, l
 	// reached via its annotation task (case-scoped row, case_id NOT NULL).
 	// Joining the occurrence on (seq_id, task_id) prevents leaking occurrences
 	// across cases that share a sequencing experiment.
-	tx := db.Table(fmt.Sprintf("%s %s", types.TaskContextTable.FederationName, types.TaskContextTable.Alias))
+	tx := db.Table(fmt.Sprintf("%s %s", types.TaskContextTable.In(schema), types.TaskContextTable.Alias))
 	tx = tx.Joins("INNER JOIN germline__snv__occurrence g_snv_o ON g_snv_o.seq_id = tctx.sequencing_experiment_id AND g_snv_o.task_id = tctx.task_id")
-	tx = tx.Joins("INNER JOIN radiant_jdbc.public.cases c ON c.id = tctx.case_id")
-	tx = tx.Joins("INNER JOIN radiant_jdbc.public.sequencing_experiment s ON s.id = tctx.sequencing_experiment_id")
+	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s.cases c ON c.id = tctx.case_id", schema))
+	tx = tx.Joins(fmt.Sprintf("INNER JOIN %s.sequencing_experiment s ON s.id = tctx.sequencing_experiment_id", schema))
 	tx = utils.JoinCaseWithAnalysisCatalog(tx)
 	tx = utils.JoinCaseWithDiagnosisLab(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
-	tx = tx.Joins("LEFT JOIN radiant_jdbc.public.family f ON f.family_member_id = spl.patient_id AND f.case_id = tctx.case_id")
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s.family f ON f.family_member_id = spl.patient_id AND f.case_id = tctx.case_id", schema))
 
 	if userQuery != nil && userQuery.HasFieldFromTables(types.PatientTable) {
 		tx = utils.JoinFamilyWithPatient(tx)
 	}
 
 	tx = tx.Joins("LEFT JOIN mondo_term mondo ON mondo.id = c.primary_condition")
-	tx = tx.Joins("LEFT ANTI JOIN radiant_jdbc.public.interpretation_germline ig ON ig.locus_id = ? AND ig.sequencing_id = tctx.sequencing_experiment_id AND ig.case_id = tctx.case_id", locusIdString)
+	tx = tx.Joins(fmt.Sprintf("LEFT ANTI JOIN %s.interpretation_germline ig ON ig.locus_id = ? AND ig.sequencing_id = tctx.sequencing_experiment_id AND ig.case_id = tctx.case_id", schema), locusIdString)
 	tx = tx.Joins("LEFT JOIN (?) agg_phenotypes ON agg_phenotypes.case_id = c.id AND agg_phenotypes.patient_id = spl.patient_id", txAggPhenotypes)
 	tx = tx.Where("g_snv_o.locus_id = ?", locusId)
 
@@ -252,22 +254,23 @@ func (r *VariantsRepository) GetVariantCasesCount(ctx context.Context, locusId i
 	var countUnInterpreted int64
 
 	db := r.db.WithContext(ctx)
+	schema := types.TenantSchema(ctx)
 	locusIdString := fmt.Sprintf("%d", locusId)
 
 	// Count distinct (case_id, seq_id, task_id) triples that have an
 	// interpretation at this locus. interpretation_germline has no task_id, so
 	// bridge through germline_snv_occurrence + task_context to recover it.
-	txInterpreted := db.Raw(`
+	txInterpreted := db.Raw(fmt.Sprintf(`
 		SELECT COUNT(DISTINCT CONCAT(tctx.case_id, '-', tctx.sequencing_experiment_id, '-', tctx.task_id))
-		FROM radiant_jdbc.public.interpretation_germline ig
+		FROM %s.interpretation_germline ig
 		INNER JOIN germline__snv__occurrence g_snv_o
 		    ON g_snv_o.seq_id = ig.sequencing_id
 		   AND g_snv_o.locus_id = ig.locus_id
-		INNER JOIN radiant_jdbc.public.task_context tctx
+		INNER JOIN %s.task_context tctx
 		    ON tctx.task_id = g_snv_o.task_id
 		   AND tctx.sequencing_experiment_id = g_snv_o.seq_id
 		   AND tctx.case_id = ig.case_id
-		WHERE g_snv_o.locus_id = ?`, locusId)
+		WHERE g_snv_o.locus_id = ?`, schema, schema), locusId)
 
 	if err := txInterpreted.Scan(&countInterpreted).Error; err != nil {
 		return nil, fmt.Errorf("error counting variant interpreted cases: %w", err)
@@ -278,17 +281,17 @@ func (r *VariantsRepository) GetVariantCasesCount(ctx context.Context, locusId i
 	// of case_has_sequencing_experiment) ensures the occurrence is attributed
 	// only to the case whose annotation task produced it — preventing a leak
 	// when a sequencing experiment is reused across multiple cases.
-	txUnInterpreted := db.Raw(`
+	txUnInterpreted := db.Raw(fmt.Sprintf(`
 		SELECT COUNT(DISTINCT CONCAT(tctx.case_id, '-', tctx.sequencing_experiment_id, '-', tctx.task_id))
-		FROM radiant_jdbc.public.task_context tctx
+		FROM %s.task_context tctx
 		INNER JOIN germline__snv__occurrence g_snv_o
 		    ON g_snv_o.seq_id = tctx.sequencing_experiment_id
 		   AND g_snv_o.task_id = tctx.task_id
-		LEFT ANTI JOIN radiant_jdbc.public.interpretation_germline ig
+		LEFT ANTI JOIN %s.interpretation_germline ig
 		    ON ig.locus_id = ?
 		   AND ig.sequencing_id = tctx.sequencing_experiment_id
 		   AND ig.case_id = tctx.case_id
-		WHERE g_snv_o.locus_id = ?`, locusIdString, locusId)
+		WHERE g_snv_o.locus_id = ?`, schema, schema), locusIdString, locusId)
 
 	if err := txUnInterpreted.Scan(&countUnInterpreted).Error; err != nil {
 		return nil, fmt.Errorf("error counting variant interpreted cases: %w", err)
@@ -438,12 +441,14 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 	var joinToRetrieveSplitCode string
 	var joinToRetrieveSplitName string
 
+	schema := types.TenantSchema(ctx)
+
 	switch splitType {
 	case types.SPLIT_BY_PROJECT:
 		splitCodeColumn = "p.code"
 		splitNameColumn = "p.name"
-		joinToRetrieveSplitCode = "JOIN radiant_jdbc.public.project p ON p.id = c.project_id"
-		joinToRetrieveSplitName = "JOIN radiant_jdbc.public.project p ON p.code = split_code"
+		joinToRetrieveSplitCode = fmt.Sprintf("JOIN %s.project p ON p.id = c.project_id", schema)
+		joinToRetrieveSplitName = fmt.Sprintf("JOIN %s.project p ON p.code = split_code", schema)
 	case types.SPLIT_BY_PRIMARY_CONDITION:
 		splitCodeColumn = "c.primary_condition"
 		splitNameColumn = "m.name"
@@ -452,8 +457,8 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 	case types.SPLIT_BY_ANALYSIS:
 		splitCodeColumn = "ac.code"
 		splitNameColumn = "ac.name"
-		joinToRetrieveSplitCode = "JOIN radiant_jdbc.public.analysis_catalog ac ON ac.id = c.analysis_catalog_id"
-		joinToRetrieveSplitName = "JOIN radiant_jdbc.public.analysis_catalog ac ON ac.code = split_code"
+		joinToRetrieveSplitCode = fmt.Sprintf("JOIN %s.analysis_catalog ac ON ac.id = c.analysis_catalog_id", schema)
+		joinToRetrieveSplitName = fmt.Sprintf("JOIN %s.analysis_catalog ac ON ac.code = split_code", schema)
 	default:
 		return nil, fmt.Errorf("unsupported split type")
 	}
@@ -466,9 +471,9 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 					seq.patient_id,
 					seq.affected_status as affected_status_code,
 					g_snv_o.zygosity
-				FROM radiant_jdbc.public.cases c
+				FROM %s.cases c
 				%s
-				LEFT JOIN radiant_jdbc.public.case_has_sequencing_experiment chse ON chse.case_id = c.id
+				LEFT JOIN %s.case_has_sequencing_experiment chse ON chse.case_id = c.id
 				JOIN staging_sequencing_experiment seq ON seq.seq_id = chse.sequencing_experiment_id AND seq.case_id = chse.case_id AND seq.experimental_strategy = 'wgs' AND analysis_type = 'germline'
 				LEFT JOIN germline__snv__occurrence g_snv_o ON g_snv_o.seq_id = seq.seq_id AND g_snv_o.locus_id = ? AND g_snv_o.gq >= 20 AND g_snv_o.filter = 'PASS' AND g_snv_o.ad_alt > 3
 			),
@@ -504,7 +509,7 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 			END AS pf
 		FROM result
 		%s
-		ORDER BY split_code;`, splitCodeColumn, joinToRetrieveSplitCode, splitNameColumn, joinToRetrieveSplitName), locusId)
+		ORDER BY split_code;`, splitCodeColumn, schema, joinToRetrieveSplitCode, schema, splitNameColumn, joinToRetrieveSplitName), locusId)
 
 	if err := tx.Scan(&frequenciesByPrimaryCondition).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {

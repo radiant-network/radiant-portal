@@ -68,7 +68,7 @@ func (r *CasesRepository) GetCaseAnalysisCatalogIdByCode(ctx context.Context, co
 // duplicating the lookup.
 func (r *CasesRepository) GetCaseType(ctx context.Context, caseID int) (string, error) {
 	var caseType string
-	tx := r.db.WithContext(ctx).Table(types.CaseTable.FederationName)
+	tx := r.db.WithContext(ctx).Table(types.CaseTable.In(types.TenantSchema(ctx)))
 	tx = tx.Select("case_type_code").Where("id = ?", caseID)
 	err := tx.Scan(&caseType).Error
 	return caseType, err
@@ -79,6 +79,7 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 	var count int64
 
 	db := r.db.WithContext(ctx)
+	schema := types.TenantSchema(ctx)
 	tx, err := prepareQuery(ctx, userQuery, r)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error during query preparation %w", err)
@@ -93,12 +94,12 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 		return nil, nil, fmt.Errorf("error counting cases: %w", err)
 	}
 
-	txStg := db.Table(fmt.Sprintf("%s chse", types.CaseHasSequencingExperimentTable.FederationName))
+	txStg := db.Table(fmt.Sprintf("%s chse", types.CaseHasSequencingExperimentTable.In(schema)))
 	txStg = txStg.Select("DISTINCT(chse.case_id)")
 	txStg = txStg.Where("se.ingested_at IS NOT NULL AND (se.task_type = 'radiant_germline_annotation' OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral'))")
 	txStg = txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.Name))
 
-	txMembersCount := db.Table(types.FamilyTable.FederationName).Select("case_id, count(distinct family_member_id) as distinct_members_count").Group("case_id")
+	txMembersCount := db.Table(types.FamilyTable.In(schema)).Select("case_id, count(distinct family_member_id) as distinct_members_count").Group("case_id")
 
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) stg ON stg.case_id=%s.id", types.CaseTable.Alias), txStg)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) members_count ON members_count.case_id = %s.id", types.CaseTable.Alias), txMembersCount)
@@ -113,31 +114,32 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 
 func (r *CasesRepository) SearchById(ctx context.Context, prefix string, limit int) (*[]AutocompleteResult, error) {
 	/**
-	  	(SELECT "case_id" as type, id as value from `radiant_jdbc`.`public`.`cases` WHERE CAST(id AS TEXT) LIKE '1%')
+	  	(SELECT "case_id" as type, id as value from <schema>.cases WHERE CAST(id AS TEXT) LIKE '1%')
 	    UNION
-	    (SELECT "patient_id" as type, proband_id as value from `radiant_jdbc`.`public`.`cases` WHERE CAST(proband_id AS TEXT) LIKE '1%')
+	    (SELECT "patient_id" as type, proband_id as value from <schema>.cases WHERE CAST(proband_id AS TEXT) LIKE '1%')
 	    UNION
-	    (SELECT "mrn" as type, submitter_patient_id as value from `radiant_jdbc`.`public`.`patient` WHERE submitter_patient_id LIKE '1%')
+	    (SELECT "mrn" as type, submitter_patient_id as value from <schema>.patient WHERE submitter_patient_id LIKE '1%')
 		UNION
-		(SELECT "sequencing_experiment_id" as type, id as value from radiant_jdbc.public.sequencing_experiment WHERE CAST(id AS TEXT) LIKE '1%')
+		(SELECT "sequencing_experiment_id" as type, id as value from <schema>.sequencing_experiment WHERE CAST(id AS TEXT) LIKE '1%')
 	    ORDER BY value asc;
 	*/
 	var autocompleteResult []AutocompleteResult
 	db := r.db.WithContext(ctx)
+	schema := types.TenantSchema(ctx)
 	searchInput := fmt.Sprintf("%s%%", prefix)
-	subQueryCaseId := db.Table(fmt.Sprintf("%s %s", types.CaseTable.FederationName, types.CaseTable.Alias))
+	subQueryCaseId := db.Table(fmt.Sprintf("%s %s", types.CaseTable.In(schema), types.CaseTable.Alias))
 	subQueryCaseId = subQueryCaseId.Select("\"case_id\" as type, id as value")
 	subQueryCaseId = subQueryCaseId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryProbandId := db.Table(fmt.Sprintf("%s %s", types.PatientTable.FederationName, types.PatientTable.Alias))
+	subQueryProbandId := db.Table(fmt.Sprintf("%s %s", types.PatientTable.In(schema), types.PatientTable.Alias))
 	subQueryProbandId = subQueryProbandId.Select("\"patient_id\" as type, id as value")
 	subQueryProbandId = subQueryProbandId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryOrgPatID := db.Table(fmt.Sprintf("%s %s", types.PatientTable.FederationName, types.PatientTable.Alias))
+	subQueryOrgPatID := db.Table(fmt.Sprintf("%s %s", types.PatientTable.In(schema), types.PatientTable.Alias))
 	subQueryOrgPatID = subQueryOrgPatID.Select("submitter_patient_id_type as type, submitter_patient_id as value")
 	subQueryOrgPatID = subQueryOrgPatID.Where("LOWER(submitter_patient_id) LIKE ?", strings.ToLower(searchInput))
 
-	subQuerySeqId := db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.FederationName, types.SequencingExperimentTable.Alias))
+	subQuerySeqId := db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.In(schema), types.SequencingExperimentTable.Alias))
 	subQuerySeqId = subQuerySeqId.Select("\"sequencing_experiment_id\" as type, id as value")
 	subQuerySeqId = subQuerySeqId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
@@ -254,7 +256,7 @@ func (r *CasesRepository) GetCaseEntity(ctx context.Context, caseId int) (*CaseE
 }
 
 func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository) (*gorm.DB, error) {
-	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.CaseTable.FederationName, types.CaseTable.Alias))
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.CaseTable.In(types.TenantSchema(ctx)), types.CaseTable.Alias))
 	tx = utils.JoinCaseWithProband(tx, userQuery)
 	tx = utils.JoinCaseWithAnalysisCatalog(tx)
 	tx = utils.JoinCaseWithProject(tx)
@@ -291,7 +293,7 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 func (r *CasesRepository) retrieveCaseLevelData(ctx context.Context, caseId int) (*CaseEntity, error) {
 	var caseEntity CaseEntity
 
-	txCase := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.CaseTable.FederationName, types.CaseTable.Alias))
+	txCase := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.CaseTable.In(types.TenantSchema(ctx)), types.CaseTable.Alias))
 	txCase = utils.JoinCaseWithAnalysisCatalog(txCase)
 	txCase = utils.JoinCaseWithCaseCategory(txCase)
 	txCase = utils.JoinAnalysisCatalogWithPanel(txCase)
@@ -311,7 +313,7 @@ func (r *CasesRepository) retrieveCaseLevelData(ctx context.Context, caseId int)
 func (r *CasesRepository) retrieveCaseSequencingExperiments(ctx context.Context, caseId int) (*[]CaseSequencingExperiment, error) {
 	var sequencingExperiments []CaseSequencingExperiment
 
-	txSeqExp := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.FederationName, types.CaseHasSequencingExperimentTable.Alias))
+	txSeqExp := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.CaseHasSequencingExperimentTable.In(types.TenantSchema(ctx)), types.CaseHasSequencingExperimentTable.Alias))
 	txSeqExp = utils.JoinCaseHasSeqExpWithSequencingExperiment(txSeqExp)
 	txSeqExp = utils.JoinSeqExpWithSample(txSeqExp)
 	txSeqExp = utils.JoinSampleAndCaseHasSeqExpWithFamily(txSeqExp)
@@ -330,7 +332,8 @@ func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) 
 	var phenotypeObsCategoricals []types.PhenotypeObsCategorical
 
 	db := r.db.WithContext(ctx)
-	txMembers := db.Table(fmt.Sprintf("%s %s", types.FamilyTable.FederationName, types.FamilyTable.Alias))
+	schema := types.TenantSchema(ctx)
+	txMembers := db.Table(fmt.Sprintf("%s %s", types.FamilyTable.In(schema), types.FamilyTable.Alias))
 	txMembers = utils.JoinFamilyWithPatient(txMembers)
 	txMembers = utils.JoinPatientWithManagingOrg(txMembers)
 	txMembers = txMembers.Where("f.case_id = ?", caseId)
@@ -340,7 +343,7 @@ func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) 
 		return nil, fmt.Errorf("error retrieving case members: %w", err)
 	}
 
-	txObservations := db.Table(fmt.Sprintf("%s %s", types.ObsCategoricalTable.FederationName, types.ObsCategoricalTable.Alias))
+	txObservations := db.Table(fmt.Sprintf("%s %s", types.ObsCategoricalTable.In(schema), types.ObsCategoricalTable.Alias))
 	txObservations = txObservations.Joins("LEFT JOIN hpo_term hpo ON obs.observation_code = 'phenotype' AND hpo.id = obs.code_value")
 	txObservations = txObservations.Where("obs.observation_code = 'phenotype' AND obs.case_id = ?", caseId)
 	txObservations = txObservations.Order("phenotype_name asc")
@@ -381,10 +384,11 @@ func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) 
 
 func (r *CasesRepository) retrieveCaseTasks(ctx context.Context, caseId int) (*[]CaseTask, error) {
 	var tasks []CaseTask
-	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.TaskContextTable.FederationName, types.TaskContextTable.Alias))
+	schema := types.TenantSchema(ctx)
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.TaskContextTable.In(schema), types.TaskContextTable.Alias))
 	tx = utils.JoinTaskContextWithCaseHasSeqExp(tx)
 	tx = utils.JoinTaskContextWithTask(tx)
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_type_code = %s.code", types.TaskTypeTable.FederationName, types.TaskTypeTable.Alias, types.TaskTable.Alias, types.TaskTypeTable.Alias))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_type_code = %s.code", types.TaskTypeTable.In(schema), types.TaskTypeTable.Alias, types.TaskTable.Alias, types.TaskTypeTable.Alias))
 	tx = utils.JoinTaskContextWithSeqExp(tx)
 	tx = utils.JoinSeqExpWithSample(tx)
 	tx = utils.JoinSampleAndCaseHasSeqExpWithFamily(tx)

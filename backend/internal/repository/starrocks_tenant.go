@@ -6,6 +6,7 @@ import (
 	"embed"
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -16,7 +17,14 @@ import (
 //go:embed views/*.sql views/*.sql.tmpl
 var viewFS embed.FS
 
+// ViewTables are the tables the API reads through the radiant_jdbc federation; each
+// tenant gets a <tenant>_tenant view per table so the API can read <tenant>_tenant.*
+// and never touch radiant_jdbc directly. A view is filtered by tenant_code when the
+// table HAS that column; reference/value-set tables and junctions have no tenant_code
+// and are exposed unfiltered. patient is templated (adds the can_read_pii mask flag).
+// (Filtering is decided per table from its columns, not from the grouping below.)
 var ViewTables = []string{
+	// Tenant-scoped clinical data.
 	"patient",
 	"organization", "cases", "sample", "sequencing_experiment",
 	"analysis_catalog", "document", "family", "family_history",
@@ -24,6 +32,14 @@ var ViewTables = []string{
 	"interpretation_somatic", "interpretation_somatic_history",
 	"obs_categorical", "obs_string", "occurrence_flag", "occurrence_note",
 	"panel", "project", "task",
+	// Junctions.
+	"case_has_sequencing_experiment", "task_context", "task_has_document",
+	// Reference / value-set tables.
+	"affected_status", "case_category", "case_type", "consanguinity", "data_category",
+	"data_type", "experimental_strategy", "family_relationship", "file_format",
+	"histology_type", "life_status", "obs_interpretation", "observation", "onset",
+	"organization_category", "panel_type", "platform", "priority", "resolution_status",
+	"sample_type", "sequencing_read_technology", "sex", "status", "task_type",
 }
 
 type StarrocksTenantRepository struct {
@@ -119,8 +135,14 @@ func loadViewTemplates() map[string]*template.Template {
 func buildViewStatement(db, tenantCode, table string, cols []string) (string, error) {
 	tmpl, found := viewTemplates[table]
 	if !found {
-		return fmt.Sprintf("CREATE OR REPLACE VIEW `%s`.`%s` AS SELECT %s FROM radiant_jdbc.public.`%s` WHERE tenant_code = '%s'",
-			db, table, joinColumns(cols), table, tenantCode), nil
+		// Filter to the tenant only when the table is tenant-scoped (has tenant_code).
+		// Reference/enum tables and junctions have no tenant_code → exposed unfiltered.
+		where := ""
+		if slices.Contains(cols, "tenant_code") {
+			where = fmt.Sprintf(" WHERE tenant_code = '%s'", tenantCode)
+		}
+		return fmt.Sprintf("CREATE OR REPLACE VIEW `%s`.`%s` AS SELECT %s FROM radiant_jdbc.public.`%s`%s",
+			db, table, joinColumns(cols), table, where), nil
 	}
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, map[string]string{
