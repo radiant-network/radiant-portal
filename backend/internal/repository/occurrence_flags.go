@@ -34,6 +34,7 @@ func (r *OccurrenceFlagsRepository) Upsert(ctx context.Context, flag types.Occur
 
 func (r *OccurrenceFlagsRepository) Delete(ctx context.Context, caseID, seqID, taskID int, occurrenceID string) (int64, error) {
 	result := r.db.WithContext(ctx).
+		Scopes(WithTenant(ctx)).
 		Where("case_id = ? AND seq_id = ? AND task_id = ? AND occurrence_id = ?", caseID, seqID, taskID, occurrenceID).
 		Delete(&types.OccurrenceFlag{})
 	if result.Error != nil {

@@ -43,7 +43,7 @@ func (r *TaskRepository) GetTaskTypeCodes(ctx context.Context) ([]types.TaskType
 
 func (r *TaskRepository) GetTaskById(ctx context.Context, taskId int) (*Task, error) {
 	var task Task
-	if err := r.db.WithContext(ctx).Table(types.TaskTable.Name).First(&task, taskId).Error; err != nil {
+	if err := r.db.WithContext(ctx).Table(types.TaskTable.Name).Scopes(WithTenant(ctx)).First(&task, taskId).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching task: %w", err)
 		} else {

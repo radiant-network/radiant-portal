@@ -43,6 +43,25 @@ func Test_Interpretations_FirstGermline(t *testing.T) {
 	})
 }
 
+// A row belonging to the radiant tenant must be invisible to a caller acting in another
+// tenant — the WithTenant scope filters it out, and the handler surfaces nil as 404 (no
+// existence leak). It is visible to the radiant tenant itself.
+func Test_Interpretations_FirstGermline_CrossTenantIsInvisible(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := newTestInterpretationsRepo(env.Postgres)
+
+		other := types.ContextWithTenant(t.Context(), "tenant_b")
+		got, err := repo.FirstGermline(other, "1", "1", "1000", "T001")
+		assert.NoError(t, err)
+		assert.Nil(t, got, "radiant interpretation must be invisible to another tenant")
+
+		radiant := types.ContextWithTenant(t.Context(), types.DefaultTenantCode)
+		got, err = repo.FirstGermline(radiant, "1", "1", "1000", "T001")
+		assert.NoError(t, err)
+		assert.NotNil(t, got, "radiant interpretation must be visible to the radiant tenant")
+	})
+}
+
 func Test_Interpretations_FirstGermline_NotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := newTestInterpretationsRepo(db)
