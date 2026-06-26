@@ -164,7 +164,8 @@ func (r *InterpretationsRepository) mapToInterpretationSomaticDAO(ctx context.Co
 func (r *InterpretationsRepository) FirstGermline(ctx context.Context, caseId string, sequencingId string, locus string, transcriptId string) (*types.InterpretationGermline, error) {
 	var dao types.InterpretationGermlineDAO
 	tx := r.db.WithContext(ctx).
-		Table(types.InterpretationGermlineTable.Name)
+		Table(types.InterpretationGermlineTable.Name).
+		Scopes(WithTenant(ctx))
 	addWhere(tx, caseId, sequencingId, locus, transcriptId)
 	if result := tx.
 		First(&dao); result.Error != nil {
@@ -192,7 +193,8 @@ func (r *InterpretationsRepository) CreateOrUpdateGermline(ctx context.Context, 
 		return err
 	}
 	query := r.db.WithContext(ctx).
-		Table(types.InterpretationGermlineTable.Name)
+		Table(types.InterpretationGermlineTable.Name).
+		Scopes(WithTenant(ctx))
 	addWhere(query, interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if existing != nil {
 		dao.CreatedBy = existing.CreatedBy
@@ -219,7 +221,7 @@ func (r *InterpretationsRepository) CreateOrUpdateGermline(ctx context.Context, 
 func (r *InterpretationsRepository) FirstSomatic(ctx context.Context, caseId string, sequencingId string, locus string, transcriptId string) (*types.InterpretationSomatic, error) {
 	var dao types.InterpretationSomaticDAO
 
-	tx := r.db.WithContext(ctx).Table(types.InterpretationSomaticTable.Name)
+	tx := r.db.WithContext(ctx).Table(types.InterpretationSomaticTable.Name).Scopes(WithTenant(ctx))
 	addWhere(tx, caseId, sequencingId, locus, transcriptId)
 	if result := tx.
 		First(&dao); result.Error != nil {
@@ -246,7 +248,7 @@ func (r *InterpretationsRepository) CreateOrUpdateSomatic(ctx context.Context, i
 	if err != nil {
 		return err
 	}
-	query := r.db.WithContext(ctx).Table(types.InterpretationSomaticTable.Name)
+	query := r.db.WithContext(ctx).Table(types.InterpretationSomaticTable.Name).Scopes(WithTenant(ctx))
 	addWhere(query, interpretation.CaseId, interpretation.SequencingId, interpretation.LocusId, interpretation.TranscriptId)
 	if existing != nil {
 		dao.CreatedBy = existing.CreatedBy
@@ -273,6 +275,7 @@ func (r *InterpretationsRepository) SearchGermline(ctx context.Context, analysis
 	var dao []types.InterpretationGermlineDAO
 	r.db.WithContext(ctx).
 		Table(types.InterpretationGermlineTable.Name).
+		Scopes(WithTenant(ctx)).
 		Where("metadata->>'analysis_id' IN ? OR metadata->>'patient_id' IN ? OR metadata->>'variant_hash' IN ?", analysisId, patientId, variantHash).
 		Find(&dao)
 
@@ -292,6 +295,7 @@ func (r *InterpretationsRepository) SearchSomatic(ctx context.Context, analysisI
 	var dao []types.InterpretationSomaticDAO
 	r.db.WithContext(ctx).
 		Table(types.InterpretationSomaticTable.Name).
+		Scopes(WithTenant(ctx)).
 		Where("metadata->>'analysis_id' IN ? OR metadata->>'patient_id' IN ? OR metadata->>'variant_hash' IN ?", analysisId, patientId, variantHash).
 		Find(&dao)
 
@@ -309,7 +313,7 @@ func (r *InterpretationsRepository) SearchSomatic(ctx context.Context, analysisI
 
 func (r *InterpretationsRepository) RetrieveGermlineInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error) {
 	var classificationCounts []types.ClassificationCounts
-	tx := r.db.WithContext(ctx).Table("interpretation_germline")
+	tx := r.db.WithContext(ctx).Table("interpretation_germline").Scopes(WithTenant(ctx))
 	tx = tx.Select("classification, COUNT(1) as classification_count")
 	tx = tx.Where("locus_id = ?", fmt.Sprintf("%d", locusId))
 	tx = tx.Group("classification")
@@ -339,7 +343,7 @@ func (r *InterpretationsRepository) RetrieveGermlineInterpretationClassification
 
 func (r *InterpretationsRepository) RetrieveSomaticInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error) {
 	var classificationCounts []types.ClassificationCounts
-	tx := r.db.WithContext(ctx).Table("interpretation_somatic")
+	tx := r.db.WithContext(ctx).Table("interpretation_somatic").Scopes(WithTenant(ctx))
 	tx = tx.Select("oncogenicity as classification, COUNT(1) as classification_count")
 	tx = tx.Where("locus_id = ?", fmt.Sprintf("%d", locusId))
 	tx = tx.Group("oncogenicity")

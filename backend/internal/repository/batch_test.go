@@ -39,6 +39,32 @@ func Test_CreateBatch_Valid(t *testing.T) {
 	})
 }
 
+// A batch created under the radiant tenant must be invisible to a caller acting in another
+// tenant (the handler surfaces nil as 404), and visible to the radiant tenant itself. The
+// worker path (ClaimNextBatch, no tenant in context) is unaffected — WithTenant is a no-op there.
+func Test_GetBatchByID_CrossTenantIsInvisible(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewBatchRepository(env.Postgres)
+		batchId := uuid.NewString()
+		if err := env.Postgres.Exec(`
+            INSERT INTO batch (id, payload, status, batch_type, dry_run, username, created_on, tenant_code) VALUES
+            (?, '{}', ?, 'patient', true, 'user1', now(), 'radiant')
+        `, batchId, types.BatchStatusSuccess).Error; err != nil {
+			t.Fatal("failed to insert data:", err)
+		}
+
+		other := types.ContextWithTenant(t.Context(), "tenant_b")
+		got, err := repo.GetBatchByID(other, batchId)
+		assert.NoError(t, err)
+		assert.Nil(t, got, "radiant batch must be invisible to another tenant")
+
+		radiant := types.ContextWithTenant(t.Context(), types.DefaultTenantCode)
+		got, err = repo.GetBatchByID(radiant, batchId)
+		assert.NoError(t, err)
+		assert.NotNil(t, got, "radiant batch must be visible to the radiant tenant")
+	})
+}
+
 func Test_GetBatchByID_Success(t *testing.T) {
 	testutils.SequentialTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		repo := NewBatchRepository(db)

@@ -57,6 +57,7 @@ func (r *BatchRepository) GetBatchByID(ctx context.Context, batchId string) (*Ba
 
 	tx := r.db.WithContext(ctx).
 		Table(types.BatchTable.Name).
+		Scopes(WithTenant(ctx)).
 		Omit("payload").
 		Where("id = ?", batchId)
 	if err := tx.First(&batch).Error; err != nil {
