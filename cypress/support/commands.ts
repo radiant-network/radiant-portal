@@ -146,6 +146,16 @@ Cypress.Commands.add('setLang', (lang: string) => {
 });
 
 /**
+ * Set the tenant of the application (from the env).
+ */
+Cypress.Commands.add('setTenant', () => {
+  const tenant = Cypress.expose('api_tenant');
+
+  cy.get(CommonSelectors.tenantSwitcherButton).click();
+  cy.get(CommonSelectors.menuPopper).contains(tenant).clickAndWait();
+});
+
+/**
  * Asserts that the given tab is active.
  * @param subject The tab element.
  */
@@ -390,6 +400,7 @@ Cypress.Commands.add('visitCasesPage', (searchCriteria?: string) => {
   }
 
   cy.setLang('EN');
+  cy.setTenant();
   cy.resetColumns();
 });
 
@@ -412,6 +423,7 @@ Cypress.Commands.add('visitFilesPage', (searchCriteria?: string) => {
   }
 
   cy.setLang('EN');
+  cy.setTenant();
   cy.resetColumns();
 });
 
@@ -422,6 +434,7 @@ Cypress.Commands.add('visitFilesPage', (searchCriteria?: string) => {
 Cypress.Commands.add('visitCaseDetailsPage', (caseId: string) => {
   cy.visitAndIntercept(`/case/entity/${caseId}?tab=details`, 'GET', `**/cases/${caseId}`, 1);
   cy.setLang('EN');
+  cy.setTenant();
 });
 
 /**
@@ -444,6 +457,7 @@ Cypress.Commands.add('visitCaseFilesPage', (caseId: string, searchCriteria?: str
   }
 
   cy.setLang('EN');
+  cy.setTenant();
   cy.resetColumns();
 });
 
@@ -488,6 +502,7 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, seqId: string, ty
   }
 
   cy.setLang('EN');
+  cy.setTenant();
   cy.resetColumns();
 });
 
@@ -498,6 +513,7 @@ Cypress.Commands.add('visitCaseVariantsPage', (caseId: string, seqId: string, ty
 Cypress.Commands.add('visitVariantEvidCondPage', (locusID: string) => {
   cy.visitAndIntercept(`/variants/entity/${locusID}?tab=evidenceAndConditions`, 'GET', `**/conditions/omim`, 1);
   cy.setLang('EN');
+  cy.setTenant();
 });
 
 /**
@@ -507,6 +523,7 @@ Cypress.Commands.add('visitVariantEvidCondPage', (locusID: string) => {
 Cypress.Commands.add('visitVariantFrequencyPage', (locusID: string) => {
   cy.visitAndIntercept(`/variants/entity/${locusID}?tab=frequency`, 'GET', `**/external_frequencies`, 1);
   cy.setLang('EN');
+  cy.setTenant();
 });
 
 /**
@@ -516,6 +533,7 @@ Cypress.Commands.add('visitVariantFrequencyPage', (locusID: string) => {
 Cypress.Commands.add('visitVariantOverviewPage', (locusID: string) => {
   cy.visitAndIntercept(`/variants/entity/${locusID}?tab=overview`, 'GET', `**/variants/germline/*/overview`, 1);
   cy.setLang('EN');
+  cy.setTenant();
 });
 
 /**
@@ -525,6 +543,7 @@ Cypress.Commands.add('visitVariantOverviewPage', (locusID: string) => {
 Cypress.Commands.add('visitVariantPatientsPage', (locusID: string) => {
   cy.visitAndIntercept(`/variants/entity/${locusID}?tab=patients`, 'POST', `**/cases/interpreted`, 1);
   cy.setLang('EN');
+  cy.setTenant();
 });
 
 /**
