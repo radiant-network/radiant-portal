@@ -26,6 +26,7 @@ function UninterpretedCaseActionsCell({ row }: CellContext<VariantUninterpretedC
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem
+            data-cy="menu-item-case"
             onClick={() => {
               navigate(`/case/entity/${row.original.case_id}`);
             }}
@@ -34,6 +35,7 @@ function UninterpretedCaseActionsCell({ row }: CellContext<VariantUninterpretedC
             {t('variant_entity.cases.other_table.view_case')}
           </DropdownMenuItem>
           <DropdownMenuItem
+            data-cy="menu-item-variants"
             onClick={() => {
               navigate(
                 `/case/entity/${row.original.case_id}?tab=${CaseEntityTabs.Variants}&seq_id=${row.original.seq_id}`,

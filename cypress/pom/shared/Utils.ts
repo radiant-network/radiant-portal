@@ -282,11 +282,18 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
       return data.gene ? `https://www.omim.org/search?index=entry&start=1&limit=10&sort=score+desc%2C+prefix_sort+desc&search=${data.gene}` : undefined;
     case 'gnomad':
       return data.locus ? `https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3` : undefined;
+    case 'link':
+      if (data.omim_id) return `https://omim.org/entry/${data.omim_id}`;
+      if (data.orphanet_id) return `https://www.orpha.net/en/disease/detail/${data.orphanet_id}`;
+      if (data.hpo_id) return `https://hpo.jax.org/app/browse/term/${data.hpo_id}`;
+      return undefined;
     case 'omim_phenotype':
       return data.omim_id ? `https://www.omim.org/entry/${data.omim_id}` : undefined;
     case 'primary_condition':
       const conditionId = data.primary_condition_id.replace(/:/g, '_');
       return `http://purl.obolibrary.org/obo/${conditionId}`;
+    case 'rcv_link':
+      return data.rcv_link ? `https://www.ncbi.nlm.nih.gov/clinvar/${data.rcv_link}.${data.version}` : undefined;
     case 'transcript_id':
       return data.transcript_id ? `https://www.ensembl.org/id/${data.transcript_id}` : undefined;
     default:
