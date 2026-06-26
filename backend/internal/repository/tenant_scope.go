@@ -22,3 +22,16 @@ func WithTenant(ctx context.Context) func(*gorm.DB) *gorm.DB {
 		return db
 	}
 }
+
+// WithTenantOn is WithTenant for queries where tenant_code must be qualified by a table
+// alias — e.g. a join driven by a non-tenant-scoped table (task_context) onto a tenant-scoped
+// one (task), where unqualified `tenant_code` would be fragile. qualifier is a static table
+// alias, never user input.
+func WithTenantOn(ctx context.Context, qualifier string) func(*gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		if code, ok := types.TenantFromContext(ctx); ok && code != "" {
+			return db.Where(qualifier+".tenant_code = ?", code)
+		}
+		return db
+	}
+}

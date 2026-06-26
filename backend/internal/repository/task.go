@@ -123,6 +123,7 @@ func (r *TaskRepository) ListTasksByCaseSeqAndTaskType(ctx context.Context, case
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.TaskContextTable.Name, types.TaskContextTable.Alias))
 	tx = joinTaskContextWithTask(tx)
 	tx = joinTaskWithTaskType(tx)
+	tx = tx.Scopes(WithTenantOn(ctx, types.TaskTable.Alias)) // task_context has no tenant_code; scope the joined task
 	tx = tx.Select("id, task_type_code, name_en AS task_type_name, pipeline_name, pipeline_version, genome_build, created_on")
 	tx = tx.Where("sequencing_experiment_id = ? AND (case_id = ? OR case_id IS NULL) AND task_type_code = ?", seqId, caseId, taskTypeCode)
 	tx = tx.Order("created_on DESC, id DESC")

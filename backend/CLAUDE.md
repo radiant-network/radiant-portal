@@ -117,7 +117,12 @@ Two `internal/server` middlewares enforce this model on `/:tenant/*` routes:
 
 Org resolution for org-scoped actions is deferred behind `resolveOrgCode(c)` (a seam in `middlewares.go`): step 1 returns `WildcardOnlyOrg` (`""`, matches only `'*'` grants — correct while all grants are `'*'`); a follow-up will resolve the real org per resource. Every privileged `/:tenant` route is covered by `Test_TenantRoutesAreMappedToActions`, which fails if a new route ships unmapped.
 
-Until per-tenant API routing lands, batch-ingested records are attached to the default tenant via `DefaultTenantCode = "radiant"` in `cmd/worker/case_validation.go` (see its `TODO(multi-tenant)`).
+#### Read-path tenant isolation
+
+Reads are scoped to the active tenant in two places, both activated by `TENANT_VIEWS_READ_ENABLED` (`RequireTenantAccess` binds the tenant to the request context only when on; off → no tenant bound → reads are unscoped / single-tenant behavior):
+
+- **StarRocks (federated clinical reads):** repositories address the tenant's view database `<code>_tenant.*` via `types.TenantSchema(ctx)` / `types.Table.In(schema)` instead of `radiant_jdbc.public.*`. Off → `radiant_jdbc.public` (unchanged).
+- **PostgreSQL-direct reads:** repositories that read/update/delete a tenant-scoped table apply the `repository.WithTenant(ctx)` GORM scope, which adds `WHERE tenant_code = ?` from the bound tenant. It is a **no-op when no tenant is bound**, so the worker (processes all tenants) and the unscoped default path are unaffected. A cross-tenant row is then invisible → repos return nil → handlers return 404 (no existence leak). **Any new read/update/delete against a tenant-scoped PG table (`interpretation_germline`/`interpretation_somatic`, `occurrence_note`, `occurrence_flag`, `batch`, `task`) must add `.Scopes(repository.WithTenant(ctx))`.** The federated tables (cases, patient, documents, …) are isolated by the StarRocks views above, not here.
 
 ## Worker
 
