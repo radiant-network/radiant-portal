@@ -6,86 +6,44 @@ This file provides guidance to Claude Code when working in the `cypress/` direct
 
 End-to-end (E2E) and API test suite for the Radiant Portal. Tests run against a live QA environment using Cypress with a Page Object Model (POM) pattern.
 
-- **QA base URL**: `https://radiant.qa.juno.cqdg.ferlab.bio/`
-- **API base URL**: `https://radiant-api.qa.juno.cqdg.ferlab.bio/`
-- **Auth**: Keycloak at `https://auth.qa.juno.cqdg.ferlab.bio`
+Base URLs (portal, API, Keycloak) and tenant/realm/client identifiers are **not hardcoded here** — they live in the `expose`/`baseUrl` blocks of `cypress.config.ts` and are overridable through `.env` (see [Environment](#environment) below). Check those sources for the current values rather than trusting any URL pasted into docs.
 
 ## Directory Structure
 
-```
-cypress/
-├── api/                   # API tests (organized by resource)
-│   ├── Batches/           # Batch job management
-│   ├── Cases/
-│   │   ├── Autocomplete/  # Autocomplete suggestions
-│   │   ├── Batch/         # Batch case operations
-│   │   └── Search/        # Case search filtering
-│   ├── Documents/
-│   │   └── Search/        # Document/file search
-│   ├── Occurrences/
-│   │   └── Germline/
-│   │       ├── CNV/
-│   │       │   ├── Count/ # CNV facet counts (Variant, Gene, Frequency, MetricQC)
-│   │       │   └── List/  # CNV list pagination
-│   │       └── SNV/
-│   │           ├── Count/ # SNV facet counts (Variant, Gene, Pathogenicity, Frequency, Occurrence)
-│   │           └── List/  # SNV list pagination
-│   ├── Patients/
-│   │   └── Batch/         # Batch patient creation (Valid, BlankFields, InvalidValues, etc.)
-│   │       └── ProcessWorker/
-│   ├── Samples/
-│   │   └── Batch/         # Batch sample operations
-│   │       └── ProcessWorker/
-│   └── Sequencing/
-│       └── Batch/         # Batch sequencing operations
-│           └── ProcessWorker/
-├── e2e/                   # E2E UI tests (organized by feature/page)
-│   ├── Cases/             # Case list table tests
-│   ├── CaseEntity/        # Case detail page (Details, Files, Variants SNV/CNV)
-│   ├── Connexion/         # Login tests
-│   ├── Files/             # Files list tests
-│   └── VariantEntity/     # Variant detail page (EvidCond, Frequency, Patients)
-├── pom/                   # Page Object Model
-│   ├── pages/             # 18 page objects (one per page/component)
-│   └── shared/            # Selectors.ts, Data.ts, Utils.ts, Texts.ts
-├── support/               # Custom commands and global setup
-│   ├── commands.ts        # UI commands (login, navigation, table ops, assertions)
-│   ├── apiCommands.ts     # API commands (getToken, apiCall, validators)
-│   ├── e2e.js             # Global before() hook, token caching
-│   ├── globalData.js      # Runtime shared data (token, batch IDs, counts)
-│   └── index.d.ts         # TypeScript definitions for custom commands
-├── fixtures/
-│   └── RequestBody/       # JSON templates (ApplyFacet, Sort payloads)
-└── plugins/
-    └── index.ts           # Env var loading from dotenv
-```
+Top-level layout (browse the actual folders for the current feature/resource breakdown — the per-feature subfolders evolve and aren't enumerated here):
+
+| Folder | Role |
+|---|---|
+| `api/` | API tests, organized by resource (one subfolder per resource, nested by operation: search, count, batch, …) |
+| `e2e/` | E2E UI tests, organized by feature/page (one subfolder per page or entity tab) |
+| `pom/pages/` | Page Object Model — one file per page/component |
+| `pom/shared/` | Cross-page POM utilities: `Selectors.ts`, `Data.ts`, `Utils.ts`, `Texts.ts` |
+| `support/` | Custom commands (`commands.ts` UI, `apiCommands.ts` API), global setup (`e2e.js`), runtime shared data (`globalData.js`), and TS command defs (`index.d.ts`) |
+| `fixtures/` | JSON request/response templates |
+| `plugins/` | Cypress plugin setup (env var loading) |
 
 Config lives at repo root: `cypress.config.ts`.
 
 ## Running Tests
 
+Core Cypress invocation patterns (the `--spec` glob targets any folder/file under `cypress/`):
+
 ```bash
-# Open Cypress UI (interactive)
-npx cypress open
-
-# Run all tests headless
-npx cypress run
-
-# Run a specific spec
-npx cypress run --spec "cypress/e2e/Cases/Columns.cy.ts"
-
-# Run only API tests
-npx cypress run --spec "cypress/api/**/*.cy.ts"
-
-# Formatting and type-checking (from repo root)
-npm run format:cypress
-npm run format:cypress:check
-npm run type-check:cypress
+npx cypress open                                          # interactive UI
+npx cypress run                                           # all tests headless
+npx cypress run --spec "cypress/e2e/Cases/Columns.cy.ts"  # a single spec
+npx cypress run --spec "cypress/api/**/*.cy.ts"           # a subtree (e.g. API only)
 ```
 
-Environment variables are loaded from `.env` at repo root. Required:
+Cypress-related npm scripts (formatting, type-checking, CI runs) are defined in the repo-root `package.json` — run `npm run` to list the current ones rather than relying on a copy here.
+
+## Environment
+
+Config and env wiring: `cypress.config.ts` (defaults in `expose`/`baseUrl`) and `cypress/plugins/index.ts` (reads env vars with fallbacks). Environment variables are loaded from `.env` at repo root. Sensitive values required:
 - `CYPRESS_USER_USERNAME`, `CYPRESS_USER_PASSWORD` — test user credentials
 - `KEYCLOAK_CLIENT_SECRET` — OAuth client secret
+
+Non-sensitive values (URLs, tenant, realm, client) have defaults in config and can be overridden via the corresponding env vars (`CYPRESS_API_BASE_URL`, `CYPRESS_API_TENANT`, `KEYCLOAK_HOST`, …).
 
 ## Page Object Model (POM) Pattern
 

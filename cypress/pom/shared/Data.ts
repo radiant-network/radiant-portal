@@ -101,6 +101,7 @@ export const data = {
       status: 0,
       origin: 'Germline',
       rcv_link: 'RCV003916198',
+      version: 2,
     },
     clinvar_name: '784210',
     exomiser: '0.438',
