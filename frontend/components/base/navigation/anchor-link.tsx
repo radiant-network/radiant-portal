@@ -25,6 +25,9 @@ export const anchorLinkVariants = tv({
       secondary: {
         base: 'text-foreground',
       },
+      white: {
+        base: 'text-white',
+      },
     },
     size: {
       xs: {

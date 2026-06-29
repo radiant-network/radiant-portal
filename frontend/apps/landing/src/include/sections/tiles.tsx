@@ -1,7 +1,7 @@
 import { ArrowRight, Cloud, Dna, Microscope, SquareArrowOutUpRight } from 'lucide-react';
 
+import ResourceTile from '@/components/base/landing/resource-tile';
 import { Button } from '@/components/base/shadcn/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 
 const TILES = [
@@ -32,27 +32,24 @@ function Tiles() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {TILES.map(tile => (
-        <Card key={tile.key} className="h-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
+        <ResourceTile
+          key={tile.key}
+          title={
+            <span className="flex items-center gap-3">
               <span className="text-primary [&_svg]:size-8">{tile.icon}</span>
               {t(`landing.include.tiles.${tile.key}.title`)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1">
-            <p className="text-muted-foreground text-sm">{t(`landing.include.tiles.${tile.key}.description`)}</p>
-          </CardContent>
-          <CardFooter className="justify-start gap-2">
-            {tile.buttons.map(button => (
-              <Button key={button.id} asChild variant={button.variant}>
-                <a href={button.href}>
-                  {t(`landing.include.tiles.${tile.key}.buttons.${button.id}`)}
-                  {button.icon}
-                </a>
-              </Button>
-            ))}
-          </CardFooter>
-        </Card>
+            </span>
+          }
+          description={t(`landing.include.tiles.${tile.key}.description`)}
+          footer={tile.buttons.map(button => (
+            <Button key={button.id} asChild variant={button.variant}>
+              <a href={button.href}>
+                {t(`landing.include.tiles.${tile.key}.buttons.${button.id}`)}
+                {button.icon}
+              </a>
+            </Button>
+          ))}
+        />
       ))}
     </div>
   );
