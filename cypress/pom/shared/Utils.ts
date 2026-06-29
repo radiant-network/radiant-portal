@@ -268,7 +268,9 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
   const strEnd = data.end ? data.end.replace(/,/g, '') : '';
   switch (columnID) {
     case 'clingen':
-      return data.cnv_variant ? `https://search.clinicalgenome.org/kb/regions?page=1&type=GRCh38&region=chr${data.chromosome}%3A${strStart}-${strEnd}&size=25&search=` : undefined;
+      if (data.cnv_variant) return `https://search.clinicalgenome.org/kb/regions?page=1&type=GRCh38&region=chr${data.chromosome}%3A${strStart}-${strEnd}&size=25&search=`;
+      if (data.gene) return `https://search.clinicalgenome.org/kb/genes?search=${data.gene}`;
+      return undefined;
     case 'clinvar':
       return data.clinvar_name ? `https://www.ncbi.nlm.nih.gov/clinvar/variation/${data.clinvar_name}` : undefined;
     case 'cnv_variant':

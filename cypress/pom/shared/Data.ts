@@ -197,4 +197,14 @@ export const data = {
     pe: '2836',
     sqon: '{"content":[{"content":{"field":"name","value":["DRAGEN:GAIN:chr22:23709618-23720246"]},"op":"in"}],"op":"and"}',
   },
+  cnvOverlappingGenes: {
+    gene: 'GUSBP11',
+    cytoband: 'q11.23',
+    length: '57.4 kb',
+    nb_overlap_bases: '7.7 kb',
+    nb_exons: '4',
+    overlapping_gene_percent: '13',
+    overlapping_cnv_percent: '72.24',
+    overlap_type: 'partial',
+  },
 };
