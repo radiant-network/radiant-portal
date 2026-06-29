@@ -12,7 +12,7 @@ const ITEMS = [
   { key: 'get_answers', href: 'https://kidsfirstdrc.org/help-center/' },
 ] as const;
 
-/** Documentation section: Find Inspiration + Get Answers, on a dark band. */
+/** Documentation section: Find Inspiration + Get Answers. */
 function Documentation() {
   const { t } = useI18n();
 

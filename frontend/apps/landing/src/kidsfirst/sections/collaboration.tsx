@@ -14,7 +14,6 @@ import { variantsCount } from '../mocks/collaboration';
 
 const externalButtonClass = 'border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white';
 
-/** Navy tile background: radial highlight over the primary-gradient navy. */
 const navyTileBackground: CSSProperties = {
   background:
     'radial-gradient(50% 50% at 50% 50%, var(--primary-gradient) 0%, rgba(34, 43, 92, 0.6) 100%), var(--primary-gradient)',
@@ -33,7 +32,7 @@ function Collaboration() {
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* Germline Variants — purple card */}
+        {/* Germline Variants */}
         <ResourceTile
           className="border-0 bg-[var(--purple-6)] text-white"
           descriptionClassName="text-white/90"
@@ -51,7 +50,7 @@ function Collaboration() {
           }
         />
 
-        {/* CAVATICA — navy card, white logo */}
+        {/* CAVATICA */}
         <ResourceTile
           className="border-0 text-white"
           style={navyTileBackground}
@@ -67,7 +66,7 @@ function Collaboration() {
           }
         />
 
-        {/* PedcBioPortal — navy card, color logo on a white chip */}
+        {/* PedcBioPortal */}
         <ResourceTile
           className="border-0 text-white"
           style={navyTileBackground}

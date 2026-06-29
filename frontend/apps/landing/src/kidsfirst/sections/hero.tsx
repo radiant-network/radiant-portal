@@ -17,7 +17,7 @@ function Hero() {
       className="relative w-full overflow-hidden text-white"
       style={{ backgroundColor: 'var(--primary-gradient)' }}
     >
-      {/* Mobile : image en fond estompé (cachée sur lg+) */}
+      {/* Mobile: faded background image (hidden on lg+) */}
       <img
         src={heroImage}
         alt=""
@@ -25,13 +25,13 @@ function Hero() {
       />
 
       <Container className="relative z-10 max-w-8xl px-4 pt-12 sm:px-6">
-        {/* Lang switcher — conservé pour cohérence avec la landing Include */}
+        {/* Lang switcher — kept for consistency with the Include landing */}
         <div className="flex mb-3 justify-end">
           <NavbarLangSwitcher className="border-white/40 hover:bg-white/10 border text-white hover:text-white" />
         </div>
 
         <div className="grid items-end gap-8 md:grid-cols-[3fr_2fr] lg:grid-cols-[1fr_1fr] lg:gap-20">
-          {/* Colonne gauche : branding + texte + CTAs */}
+          {/* Left column: branding + text + CTAs */}
           <div className="space-y-6 self-start pb-6 text-center lg:text-left">
             <img
               src={kidsFirstLogo}
@@ -56,9 +56,9 @@ function Hero() {
             </div>
           </div>
 
-          {/* Colonne droite (image + dégradé) */}
+          {/* Right column (image + gradient) */}
           <div className="self-end">
-            {/* Tablette (md→lg) : image contenue, débordant un peu au-dessus du dégradé */}
+            {/* Tablet (md→lg): contained image, overflowing slightly above the gradient */}
             <div className="relative hidden h-[500px] md:block lg:hidden">
               <div
                 className="absolute inset-x-0 bottom-0 top-[40px] rounded-t-2xl opacity-75"
@@ -67,7 +67,7 @@ function Hero() {
               <img src={heroImage} alt="" className="relative h-full w-full object-cover object-left-bottom" />
             </div>
 
-            {/* Desktop (lg+) : la photo déborde sur le dégradé */}
+            {/* Desktop (lg+): the photo overflows onto the gradient */}
             <div className="relative hidden lg:block">
               <img
                 src={heroImage}

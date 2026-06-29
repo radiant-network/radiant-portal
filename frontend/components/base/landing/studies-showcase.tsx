@@ -38,7 +38,7 @@ type StudiesShowcaseProps<T> = {
   renderItem: (item: T) => ReactNode;
 };
 
-/** Dark side panel (count + description + CTA) next to a carousel of study slides. */
+/** Side panel (count + description + CTA) next to a carousel of study slides. */
 function StudiesShowcase<T>({
   accent = StudiesAccent.Panel,
   arrows = StudiesArrows.Below,

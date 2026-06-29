@@ -1,6 +1,6 @@
 export type DemographicDatum = { label: string; count: number };
 
-/** Mock demographics distributions — replaced by Arranger data in a later task. */
+/** Mock demographics distributions — replaced by backend data in a later task. */
 export const familyCompositionData: DemographicDatum[] = [
   { label: 'Proband', count: 12040 },
   { label: 'Family member', count: 9580 },

@@ -4,7 +4,7 @@ export type MondoDatum = {
   countWithDescendant: number;
 };
 
-/** Mock diagnosis distribution (MONDO) — replaced by Arranger data in a later task. */
+/** Mock diagnosis distribution (MONDO) — replaced by backend data in a later task. */
 export const mondoData: MondoDatum[] = [
   { mondo_id: 'congenital diaphragmatic hernia (MONDO:0005711)', count: 1462, countWithDescendant: 1500 },
   { mondo_id: 'Down syndrome (MONDO:0008608)', count: 1310, countWithDescendant: 1400 },
