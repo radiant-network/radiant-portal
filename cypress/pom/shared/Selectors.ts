@@ -70,7 +70,7 @@ export const CommonSelectors = {
   settingsPopper: '[class*="radix-dropdown-menu-content"]',
   sidebarSection: (section: string) => `[data-sidebar="menu-item"]:contains("${section}") svg`,
   shareIcon: '[class*="lucide-share2"]',
-  sortIcon: '[class*="lucide-arrow-up"], [class*="lucide lucide-arrow-down"]',
+  sortIcon: '[class*="lucide-arrow-up"], [class*="lucide-arrow-down"]',
   starEmptyIcon: '[class*="lucide-star text-bookmark-off"]',
   starFillIcon: '[class*="lucide-star text-bookmark-amber"]',
   statusIcon: (icon: string) => `[class*="lucide-${icon}"]`,

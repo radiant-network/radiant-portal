@@ -172,12 +172,12 @@ const generateTableActionsFunctions = (tableId: string, columns: any[], headRowS
     );
   },
   /**
-   * Sorts a column, optionally using an intercept.
+   * Sorts a column.
    * @param columnID The ID of the column to sort.
    */
   sortColumn(columnID: string) {
     cy.then(() =>
-      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
         if (position !== -1) {
           cy.sortTableAndWait(position, tableId);
         } else {
@@ -290,7 +290,6 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
         if (customColumnContent) {
           customColumnContent(columnID, data, position);
         } else {
-          // Comportement par défaut
           cy.validateTableFirstRowContent(data[columnID], position, tableId);
         }
       } else {
