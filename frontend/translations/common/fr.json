@@ -932,6 +932,120 @@
       "footer": {
         "legal": "Le Data Coordinating Center (DCC) d'INCLUDE est soutenu par le projet INCLUDE des National Institutes of Health, sous le numéro de projet U2CHL156291 administré par le National Heart, Lung and Blood Institute. L'ensemble du contenu, des conditions générales et des politiques associés au contenu et au site Web du DCC d'INCLUDE (les « Services ») est produit par le DCC d'INCLUDE. Les points de vue et opinions des auteurs exprimés sur les Services ne reflètent pas nécessairement ceux des National Institutes of Health (« NIH ») ni du gouvernement des États-Unis. De plus, les NIH n'endossent ni ne promeuvent aucune entité du DCC d'INCLUDE ni aucun de ses produits ou services, et ne garantissent pas les produits, services ou informations fournis par le DCC d'INCLUDE."
       }
+    },
+    "kidsfirst": {
+      "hero": {
+        "logo_alt": "Kids First Data Resource Portal",
+        "title": "Kids First Data Resource Portal",
+        "description": "Boostez vos recherches grâce à notre vaste collection de données sur les cancers pédiatriques, les troubles congénitaux et les conditions croisées.",
+        "getting_started": "Commencer est aussi simple que 1-2-3",
+        "free": "Inscrivez-vous en quelques minutes… gratuitement !",
+        "login": "Connexion",
+        "signup": "S'inscrire"
+      },
+      "studies": {
+        "section_title": "Ouvrir la voie grâce au partage des données",
+        "title": "Études",
+        "description": "Explorez une vaste collection d'études harmonisées axées sur le cancer pédiatrique et les malformations congénitales structurelles pour la recherche transversale.",
+        "view_all": "Voir toutes les études",
+        "participants": "Participants",
+        "domains": {
+          "cancer": "Cancer",
+          "cross_condition": "Condition croisée",
+          "congenital_disorder": "Trouble congénital",
+          "unknown": "Inconnu"
+        }
+      },
+      "accelerating_research": {
+        "title": "Accélérer la recherche",
+        "description": "Constituez des cohortes virtuelles à partir de données de plus de 99 000 échantillons, incluant le séquençage du génome entier (WGS) et le séquençage de l'ARN, disponibles pour stimuler vos recherches dès aujourd'hui.",
+        "get_started": "Commencer",
+        "stats": {
+          "studies": "Études",
+          "participants": "Participants",
+          "variants": "Variants",
+          "biospecimens": "Biospécimens",
+          "files": "Fichiers",
+          "genomes": "Génomes"
+        },
+        "mondo_chart": {
+          "title": "Diagnostics les plus fréquents (MONDO)",
+          "axis": {
+            "x_label": "# de participants",
+            "y_label": "Diagnostics (MONDO)"
+          }
+        },
+        "demographics": {
+          "title": "Démographie",
+          "family_composition": "Composition familiale",
+          "race": "Origine",
+          "ethnicity": "Ethnicité"
+        }
+      },
+      "collaboration": {
+        "section_title": "Faire progresser la science par la collaboration",
+        "subtitle": "Accédez facilement à une gamme de ressources robustes basées sur le cloud pour faire avancer des recherches significatives.",
+        "germline_variants": {
+          "title": "Variants germinaux",
+          "description": "Notre explorateur de variants offre des capacités de recherche avancées. En quelques clics, vous pouvez explorer des millions de variants germinaux annotés issus des génomes des participants de Kids First.",
+          "button": "Explorer les données de variants"
+        },
+        "cavatica": {
+          "description": "Le portail s'intègre à CAVATICA, une plateforme cloud conçue pour l'analyse et la collaboration de données à l'échelle mondiale. Les chercheurs peuvent analyser les jeux de données Kids First à l'aide de flux de travail personnalisés ou préexistants.",
+          "button": "Commencer"
+        },
+        "pedcbioportal": {
+          "description": "Outil de navigation regroupant des données cliniques issues des visites médicales des patients, PedcBioPortal guide les chercheurs et les cliniciens vers des pistes de traitement optimales pour favoriser l'exploration de thérapies innovantes.",
+          "button": "Commencer"
+        }
+      },
+      "documentation": {
+        "find_inspiration": {
+          "title": "Trouver l'inspiration",
+          "description": "Consultez les travaux publiés qui citent Kids First, puis publiez les découvertes que vous avez faites grâce à cette puissante ressource.",
+          "button": "Voir les publications"
+        },
+        "get_answers": {
+          "title": "Obtenir des réponses",
+          "description": "Naviguez dans l'univers Kids First comme un pro grâce aux conseils et informations du Centre d'aide du portail de données.",
+          "button": "Centre d'aide"
+        }
+      },
+      "footer": {
+        "columns": {
+          "about": {
+            "title": "À propos",
+            "links": {
+              "about_kids_first": "À propos de Kids First",
+              "community": "Communauté",
+              "faqs": "FAQ"
+            }
+          },
+          "resources": {
+            "title": "Ressources",
+            "links": {
+              "data": "Données",
+              "tools": "Outils",
+              "help_center": "Centre d'aide"
+            }
+          },
+          "news": {
+            "title": "Actualités",
+            "links": {
+              "articles": "Articles",
+              "events": "Événements",
+              "press": "Presse"
+            }
+          }
+        },
+        "partners_title": "Institutions partenaires de Kids First",
+        "follow": "Suivez @kidsfirstdrc",
+        "email": "Écrire à Kids First",
+        "privacy": "Politique de confidentialité",
+        "cookies": "Témoins",
+        "disclaimer": "Le Kids First Data Resource Center (« DRC ») regroupe des institutions partenaires soutenues par le NIH Common Fund sous le numéro de subvention U2CHL138346, dans le cadre du programme Gabriella Miller Kids First Pediatric Research du Common Fund (« Kids First »). L'ensemble du contenu, des conditions générales et des politiques associés au portail et au site Web du DRC (les « Services ») est produit par le DRC. Les points de vue et opinions des auteurs exprimés sur les Services ne reflètent pas nécessairement ceux des National Institutes of Health (« NIH ») ni du gouvernement des États-Unis. De plus, les NIH n'endossent ni ne promeuvent aucune entité du DRC ni aucun de ses produits ou services, et ne garantissent pas les produits, services ou informations fournis par le DRC.",
+        "copyright": "© 2024 Gabriella Miller Kids First Data Resource Center. Tous droits réservés."
+      }
     }
   },
   "interpretation": {
