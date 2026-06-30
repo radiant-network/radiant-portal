@@ -278,6 +278,9 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
       return data.cnv_variant ? `https://franklin.genoox.com/clinical-db/variant/sv/chr${data.chromosome}-${strStart}-${strEnd}-${DupDel}-HG38` : undefined;
     case 'cohort':
       return data.locus ? `https://bravo.sph.umich.edu/freeze8/hg38/variant/snv/${data.locus}` : undefined;
+    case 'condition_mondo':
+    case 'primary_condition':
+      return data.primary_condition_id ? `http://purl.obolibrary.org/obo/${data.primary_condition_id.replace(/:/g, '_')}` : undefined;
     case 'dbsnp':
       return data.dbsnp ? `https://www.ncbi.nlm.nih.gov/snp/${data.dbsnp}` : undefined;
     case 'gene':
@@ -291,9 +294,6 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
       return undefined;
     case 'omim_phenotype':
       return data.omim_id ? `https://www.omim.org/entry/${data.omim_id}` : undefined;
-    case 'primary_condition':
-      const conditionId = data.primary_condition_id.replace(/:/g, '_');
-      return `http://purl.obolibrary.org/obo/${conditionId}`;
     case 'rcv_link':
       return data.rcv_link ? `https://www.ncbi.nlm.nih.gov/clinvar/${data.rcv_link}.${data.version}` : undefined;
     case 'transcript_id':

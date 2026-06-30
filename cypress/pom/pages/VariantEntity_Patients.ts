@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { getClass, getColumnPosition, getStatusColor, getStatusIcon, stringToRegExp } from 'pom/shared/Utils';
+import { getClass, getColumnPosition, getStatusColor, getStatusIcon, getUrlLink, stringToRegExp } from 'pom/shared/Utils';
 
 const selectors = {
   tab: '[data-cy="cases-tab"]',
@@ -428,6 +428,22 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
     );
   },
   /**
+   * Validates the link in a specific table cell for a given data and column.
+   * @param data The data object.
+   * @param columnID The ID of the column.
+   */
+  shouldHaveTableCellLink(data: any, columnID: string) {
+    cy.then(() =>
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+        if (position !== -1) {
+          cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, data));
+        } else {
+          cy.handleColumnNotFound(columnID);
+        }
+      })
+    );
+  },
+  /**
    * Validates the default visibility of each column.
    */
   shouldMatchDefaultColumnVisibility() {
@@ -619,8 +635,8 @@ const interpretedColumnContentHandler = (columnID: string, dataInterpreted: any,
       cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position, tableId);
       break;
     case 'condition_mondo':
-      cy.validateTableFirstRowContent(dataInterpreted[columnID], position, tableId);
-      cy.validateTableFirstRowContent(dataInterpreted.mondo_id, position, tableId);
+      cy.validateTableFirstRowContent(dataInterpreted.primary_condition_name, position, tableId);
+      cy.validateTableFirstRowContent(dataInterpreted.primary_condition_id, position, tableId);
       break;
     case 'classification':
       cy.validateTableFirstRowContent(getClass(dataInterpreted[columnID]).abbrev, position, tableId);
