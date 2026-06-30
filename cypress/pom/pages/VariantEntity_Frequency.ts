@@ -167,7 +167,7 @@ const generateTableActionsFunctions = (tableId: string, columns: any[], headRowS
   pinColumn(columnID: string) {
     cy.then(() =>
       getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
-        cy.pinColumn(position, tableId);
+        cy.pinColumn(position, tableId, headRowSelector);
       })
     );
   },
@@ -177,9 +177,9 @@ const generateTableActionsFunctions = (tableId: string, columns: any[], headRowS
    */
   sortColumn(columnID: string) {
     cy.then(() =>
-      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
+      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
         if (position !== -1) {
-          cy.sortTableAndWait(position, tableId);
+          cy.sortTableAndWait(position, tableId, headRowSelector);
         } else {
           cy.handleColumnNotFound(columnID);
         }
@@ -193,7 +193,7 @@ const generateTableActionsFunctions = (tableId: string, columns: any[], headRowS
   unpinColumn(columnID: string) {
     cy.then(() =>
       getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
-        cy.unpinColumn(position, tableId);
+        cy.unpinColumn(position, tableId, headRowSelector);
       })
     );
   },
@@ -337,7 +337,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   shouldPinnedColumn(columnID: string) {
     cy.then(() =>
       getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
-        cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinned('left');
+        const baseSelector = headRowSelector ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}` : CommonSelectors.tableHeadCell(tableId);
+        cy.get(baseSelector).eq(position).shouldBePinned('left');
       })
     );
   },
@@ -365,7 +366,8 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   shouldUnpinnedColumn(columnID: string) {
     cy.then(() =>
       getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
-        cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldBePinned(null);
+        const baseSelector = headRowSelector ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}` : CommonSelectors.tableHeadCell(tableId);
+        cy.get(baseSelector).eq(position).shouldBePinned(null);
       })
     );
   },
@@ -401,7 +403,6 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
                       throw new Error(`Error: "${biggest}" should be equal to "${smallest}" (unique values expected)`);
                     }
                   } else if (!isReverseSorting && biggest.localeCompare(smallest) <= 0) {
-                    throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
                     throw new Error(`Error: "${biggest}" should be > "${smallest}"`);
                   } else if (isReverseSorting && biggest.localeCompare(smallest) >= 0) {
                     throw new Error(`Error: "${biggest}" should be < "${smallest}"`);
