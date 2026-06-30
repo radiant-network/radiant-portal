@@ -1,0 +1,51 @@
+/// <reference types="cypress"/>
+import 'support/commands';
+import { data } from 'pom/shared/Data';
+import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_SavedFilters';
+import { ManagerFilterModal } from 'pom/pages/ManagerFilterModal';
+
+describe('Case Entity - Variants - Germline - SNV - Saved filters - Manager', () => {
+  const setupTest = () => {
+    cy.login();
+    cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV', data.variantGermline.sqon);
+    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Clean Query Builder
+    CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
+  };
+
+  it('Rename', () => {
+    setupTest();
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_FA');
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F1 COPY');
+    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('Cypress_F1');
+    CaseEntity_Variants_SavedFilters.snv.actions.openManager();
+    ManagerFilterModal.actions.editFilterName('Cypress_F1', 'Cypress_FA');
+
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown(/^Cypress_F1$/, false /*shouldExist*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('Cypress_FA');
+    CaseEntity_Variants_SavedFilters.snv.actions.openManager();
+
+    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_F1', false /*shouldExist*/);
+    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_FA');
+    ManagerFilterModal.actions.closeManager();
+  });
+
+  it('Delete', () => {
+    setupTest();
+    CaseEntity_Variants_SavedFilters.snv.actions.deleteFilter('Cypress_F2');
+    CaseEntity_Variants_SavedFilters.snv.actions.createFilter('Cypress_F2');
+    CaseEntity_Variants_SavedFilters.snv.actions.openManager();
+    ManagerFilterModal.actions.deleteFilter('Cypress_F2');
+
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayFilterName('Cypress_F2', false /*shouldExist*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldDisplayInDropdown('Cypress_F2', false /*shouldExist*/);
+    CaseEntity_Variants_SavedFilters.snv.actions.openManager();
+
+    ManagerFilterModal.validations.shouldDisplayInManager('Cypress_F2', false /*shouldExist*/);
+    ManagerFilterModal.actions.closeManager();
+
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('plus', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('duplicate', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.snv.validations.shouldIconHaveExpectedStates('delete', true /*isDisable*/, false /*isDirty*/);
+  });
+});

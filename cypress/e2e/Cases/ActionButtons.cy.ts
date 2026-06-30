@@ -21,7 +21,7 @@ describe('Cases - Action Buttons', () => {
   it('View Variants', () => {
     setupTest();
     CasesTable.actions.selectAction(data.case, 'variants');
-    CaseEntity_Variants_SNV_Table.validations.shouldHaveTitle(data.case);
-    CaseEntity_Variants_SNV_Table.validations.shouldHaveActiveTabAndToggle();
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldHaveTitle(data.case);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldHaveActiveTabAndToggle();
   });
 });

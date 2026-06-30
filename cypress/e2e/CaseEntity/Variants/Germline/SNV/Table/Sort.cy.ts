@@ -1,0 +1,41 @@
+/// <reference types="cypress"/>
+import 'support/commands';
+import { data } from 'pom/shared/Data';
+import { CaseEntity_Variants_SNV_Table } from 'pom/pages/CaseEntity_Variants_SNV_Table';
+import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_SavedFilters';
+
+describe('Case Entity - Variants - Germline - SNV - Table - Sort', () => {
+  const setupTest = () => {
+    cy.login();
+    cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV');
+    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Clean Query Builder
+  };
+
+  it('Alphanumeric', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldSortColumn('variant', false /*hasUniqueValues*/, true /*isReverseSorting*/);
+  });
+
+  it('Number', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldSortColumn('exomiser', false /*hasUniqueValues*/, false /*isReverseSorting*/);
+  });
+
+  it('Tag', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldSortColumn('acmg_exomiser', false /*hasUniqueValues*/, true /*isReverseSorting*/);
+  });
+
+  it('Scientific number', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldSortColumn('gnomad', false /*hasUniqueValues*/, false /*isReverseSorting*/);
+  });
+
+  it('Multiple', () => {
+    setupTest();
+    CaseEntity_Variants_SNV_Table.germline.actions.sortColumn('gnomad');
+    CaseEntity_Variants_SNV_Table.germline.actions.sortColumn('gq');
+    CaseEntity_Variants_SNV_Table.germline.actions.sortColumn('gq');
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldHaveFirstRowValue('3.00', 'gq');
+  });
+});
