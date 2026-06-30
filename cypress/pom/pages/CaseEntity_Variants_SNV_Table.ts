@@ -1,15 +1,8 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from '../shared/Selectors';
-import { getClass, getUrlLink, stringToRegExp } from '../shared/Utils';
-import { getColumnName, getColumnPosition } from '../shared/Utils';
+import { getClass, getColumnName, getColumnPosition, getUrlLink, stringToRegExp } from '../shared/Utils';
 
-const selectors = {
-  tableCell: (dataVariant: any) => `${CommonSelectors.tableRow()}:contains("${dataVariant.variant}") ${CommonSelectors.tableCellData}`,
-  tab: '[data-cy="variants-tab"]',
-  toggle: '[data-cy="tabs-trigger-SNV"]',
-};
-
-const tableColumns = [
+const tableGermlineSNVColumns = [
   {
     id: 'interpretation',
     name: '',
@@ -232,8 +225,300 @@ const tableColumns = [
   },
 ];
 
-export const CaseEntity_Variants_SNV_Table = {
-  actions: {
+const tableSomaticSNVColumns = [
+  {
+    id: 'interpretation',
+    name: '',
+    apiField: 'has_interpretation',
+    isVisibleByDefault: true,
+    pinByDefault: 'left',
+    isSortable: false,
+    isPinnable: false,
+    position: 0,
+    tooltip: null,
+  },
+  {
+    id: 'note',
+    name: '',
+    apiField: 'has_note',
+    isVisibleByDefault: true,
+    pinByDefault: 'left',
+    isSortable: false,
+    isPinnable: false,
+    position: 0,
+    tooltip: null,
+  },
+  {
+    id: 'flag',
+    name: '',
+    apiField: 'flag_type',
+    isVisibleByDefault: true,
+    pinByDefault: 'left',
+    isSortable: false,
+    isPinnable: false,
+    position: 0,
+    tooltip: null,
+  },
+  {
+    id: 'variant',
+    name: 'Variant',
+    apiField: 'hgvsg',
+    isVisibleByDefault: true,
+    pinByDefault: 'left',
+    isSortable: true,
+    isPinnable: true,
+    position: 1,
+    tooltip: null,
+  },
+  {
+    id: 'gene',
+    name: 'Gene',
+    apiField: 'symbol',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 2,
+    tooltip: null,
+  },
+  {
+    id: 'aa_change',
+    name: 'AA',
+    apiField: 'aa_change',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 3,
+    tooltip: 'Amino acid change',
+  },
+  {
+    id: 'type',
+    name: 'Type',
+    apiField: 'variant_class',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 4,
+    tooltip: null,
+  },
+  {
+    id: 'consequence',
+    name: 'Consequence',
+    apiField: 'max_impact_score',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 5,
+    tooltip: 'Most deleterious consequence annotated using VEP',
+  },
+  {
+    id: 'mane',
+    name: 'MANE',
+    apiField: 'is_mane_select',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 6,
+    tooltip: null,
+  },
+  {
+    id: 'dbsnp',
+    name: 'dbSNP',
+    apiField: 'rsnumber',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 7,
+    tooltip: null,
+  },
+  {
+    id: 'omim',
+    name: 'OMIM',
+    apiField: 'omim_inheritance_code',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 8,
+    tooltip: 'MIM inheritance modes for the gene associated with the most deleterious consequence',
+  },
+  {
+    id: 'hotspot',
+    name: 'Hotspot',
+    apiField: 'hotspot',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 9,
+    tooltip: 'Hotspot Cancer',
+  },
+  {
+    id: 'clinvar',
+    name: 'ClinVar',
+    apiField: 'clinvar',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 10,
+    tooltip: null,
+  },
+  {
+    id: 'gnomad',
+    name: 'gnomAD',
+    apiField: 'gnomad_v3_af',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 11,
+    tooltip: 'gnomAD Genome 3.1.2 (Allele Frequency)',
+  },
+  {
+    id: 'freq_tn',
+    name: 'Freq. TN',
+    apiField: 'somatic_pf_tn_wgs',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 12,
+    tooltip: 'Number of tumor-normal genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.',
+  },
+  {
+    id: 'freq_g',
+    name: 'Freq. G',
+    apiField: 'germline_pf_wgs',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 13,
+    tooltip: 'Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.',
+  },
+  {
+    id: 'ad_ratio',
+    name: 'AD Ratio',
+    apiField: 'ad_ratio',
+    isVisibleByDefault: false,
+    pinByDefault: null,
+    isSortable: true,
+    isPinnable: true,
+    position: 14,
+    tooltip: 'Allele depth ratio ALT/(ALT+REF)',
+  },
+  {
+    id: 'actions',
+    name: '',
+    apiField: '',
+    isVisibleByDefault: true,
+    pinByDefault: 'right',
+    isSortable: false,
+    isPinnable: true,
+    position: 15,
+    tooltip: null,
+  },
+];
+
+type ContentCtx = { position: number; dataVariant: any; columnID: string; tableCell: (dataVariant: any) => string };
+type ContentHandler = (ctx: ContentCtx) => void;
+
+const defaultContentHandler: ContentHandler = ({ position, dataVariant, columnID }) => {
+  cy.validateTableFirstRowContent(dataVariant[columnID], position);
+};
+
+const sharedContentHandlers: Record<string, ContentHandler> = {
+  interpretation: ({ position }) => cy.validateTableFirstRowClass(CommonSelectors.interpretationIcon, position),
+  dbsnp: ({ position }) => cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position),
+  gene: ({ position, dataVariant }) => {
+    cy.validateTableFirstRowContent(dataVariant.gene, position);
+    cy.validateTableFirstRowClass(CommonSelectors.plusIcon, position);
+  },
+  type: ({ position, dataVariant }) => {
+    cy.validateTableFirstRowContent(dataVariant.type, position);
+    cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
+  },
+  consequence: ({ position, dataVariant }) => {
+    cy.validateTableFirstRowClass(dataVariant.consequenceImpact, position);
+    cy.validateTableFirstRowContent(dataVariant.consequence, position);
+  },
+  mane: ({ position, dataVariant, tableCell }) => {
+    cy.get(tableCell(dataVariant))
+      .eq(position)
+      .find(CommonSelectors.maneC)
+      .should(dataVariant.maneC ? 'exist' : 'not.exist');
+    cy.get(tableCell(dataVariant))
+      .eq(position)
+      .find(CommonSelectors.maneM)
+      .should(dataVariant.maneM ? 'exist' : 'not.exist');
+    cy.get(tableCell(dataVariant))
+      .eq(position)
+      .find(CommonSelectors.maneP)
+      .should(dataVariant.maneP ? 'exist' : 'not.exist');
+  },
+  gnomad: ({ position, dataVariant }) => {
+    cy.validateTableFirstRowContent(dataVariant.gnomad, position);
+    cy.validateTableFirstRowClass(CommonSelectors.gnomadRedIcon, position);
+  },
+  actions: ({ position }) => {
+    cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position);
+    cy.validateTableFirstRowClass(CommonSelectors.actionButton, position);
+  },
+};
+
+const germlineContentHandlers: Record<string, ContentHandler> = {
+  ...sharedContentHandlers,
+  omim: ({ position, dataVariant }) => {
+    cy.validateTableFirstRowContent(dataVariant.omim.inheritance, position);
+    cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
+  },
+  clinvar: ({ position, dataVariant }) => {
+    cy.validateTableFirstRowContent(dataVariant.clinvar_evidence.classification, position);
+    cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
+  },
+  acmg_exomiser: ({ position, dataVariant }) => {
+    dataVariant.acmg_exomiser.forEach((value: string) => {
+      cy.validateTableFirstRowContent(getClass(value).abbrev, position);
+    });
+    cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
+  },
+};
+
+const somaticContentHandlers: Record<string, ContentHandler> = {
+  ...sharedContentHandlers,
+  omim: ({ position, dataVariant }) => {
+    dataVariant.omim.codes.forEach((code: string) => {
+      cy.validateTableFirstRowContent(code, position);
+    });
+    cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
+  },
+  clinvar: ({ position, dataVariant }) => {
+    dataVariant.clinvar.forEach((value: string) => {
+      cy.validateTableFirstRowContent(getClass(value).abbrev, position);
+      cy.validateTableFirstRowClass(CommonSelectors.tag(getClass(value).color), position);
+    });
+  },
+};
+
+type SNVTableConfig = {
+  tableColumns: typeof tableGermlineSNVColumns;
+  selectors: { tab: string; toggle?: string };
+  newTabLinkColumns: string[];
+  contentHandlers: Record<string, ContentHandler>;
+  linkResolver: (columnID: string, dataVariant: any) => string | undefined;
+};
+
+const tableCellSelector = (dataVariant: any) => `${CommonSelectors.tableRow()}:contains("${dataVariant.variant}") ${CommonSelectors.tableCellData}`;
+
+const generateSNVTableActions = (config: SNVTableConfig) => {
+  const { tableColumns, newTabLinkColumns } = config;
+  return {
     /**
      * Click the specific button to change table paging
      * @param buttonName The button name to click (first | last | previous | next | select)
@@ -252,33 +537,22 @@ export const CaseEntity_Variants_SNV_Table = {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
-            switch (columnID) {
-              case 'variant':
-              case 'freq':
-                cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).invoke('removeAttr', 'target').clickAndWait({ force: true });
-                break;
-              case 'gene':
-                if (onPlusIcon) {
-                  cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.plusIcon).clickAndWait({ force: true });
-                } else {
-                  cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
-                }
-                break;
-              default:
-                cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
-                break;
+            if (newTabLinkColumns.includes(columnID)) {
+              cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.link).invoke('removeAttr', 'target').clickAndWait({ force: true });
+            } else if (columnID === 'gene') {
+              if (onPlusIcon) {
+                cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.plusIcon).clickAndWait({ force: true });
+              } else {
+                cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
+              }
+            } else {
+              cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.link).clickAndWait({ force: true });
             }
           } else {
             cy.handleColumnNotFound(columnID);
           }
         })
       );
-    },
-    /**
-     * Click the toggle button to change variants type
-     */
-    clickToggle() {
-      cy.get(selectors.toggle).clickAndWait({ force: true });
     },
     /**
      * Returns the total results count displayed in the table index result.
@@ -326,7 +600,7 @@ export const CaseEntity_Variants_SNV_Table = {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(), tableColumns, 'actions').then(position => {
           if (position !== -1) {
-            cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.actionButton).clickAndWait({ force: true });
+            cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.actionButton).clickAndWait({ force: true });
             cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(action)}`).clickAndWait({ force: true });
           } else {
             cy.handleColumnNotFound('actions');
@@ -388,9 +662,14 @@ export const CaseEntity_Variants_SNV_Table = {
         })
       );
     },
-  },
+  };
+};
 
-  validations: {
+type SNVTableActions = ReturnType<typeof generateSNVTableActions>;
+
+const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableActions) => {
+  const { tableColumns, contentHandlers, linkResolver } = config;
+  return {
     /**
      * Checks that the drawer is displayed.
      * @param dataVariant The variant object.
@@ -404,13 +683,6 @@ export const CaseEntity_Variants_SNV_Table = {
      */
     shouldDisplayColumn(columnID: string) {
       cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('exist');
-    },
-    /**
-     * Checks that the tab and toggle are active.
-     */
-    shouldHaveActiveTabAndToggle() {
-      cy.get(selectors.tab).shouldBeActiveTab();
-      cy.get(selectors.toggle).shouldBeDataState('active');
     },
     /**
      * Checks that custom query is not implemented for this page.
@@ -454,7 +726,7 @@ export const CaseEntity_Variants_SNV_Table = {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
-            cy.get(selectors.tableCell(dataVariant)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataVariant));
+            cy.get(tableCellSelector(dataVariant)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', linkResolver(columnID, dataVariant));
           } else {
             cy.handleColumnNotFound(columnID);
           }
@@ -485,7 +757,7 @@ export const CaseEntity_Variants_SNV_Table = {
      * Validates the default pin state of each column.
      */
     shouldMatchDefaultPinnedColumns() {
-      CaseEntity_Variants_SNV_Table.actions.showAllColumns();
+      actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -541,7 +813,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest2');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('next');
+      actions.clickPaginationButton('next');
       cy.wait('@listRequest2');
       cy.waitWhileLoad(60 * 1000);
 
@@ -550,7 +822,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(2);
         req.continue();
       }).as('listRequest3');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('next');
+      actions.clickPaginationButton('next');
       cy.wait('@listRequest3');
       cy.waitWhileLoad(60 * 1000);
 
@@ -559,7 +831,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(1);
         req.continue();
       }).as('listRequest4');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('previous');
+      actions.clickPaginationButton('previous');
       cy.wait('@listRequest4');
       cy.waitWhileLoad(60 * 1000);
 
@@ -568,7 +840,7 @@ export const CaseEntity_Variants_SNV_Table = {
         expect(req.body.page_index).to.deep.equal(0);
         req.continue();
       }).as('listRequest5');
-      CaseEntity_Variants_SNV_Table.actions.clickPaginationButton('first');
+      actions.clickPaginationButton('first');
       cy.wait('@listRequest5');
     },
     /**
@@ -576,12 +848,12 @@ export const CaseEntity_Variants_SNV_Table = {
      * @param columnID The ID of the column to sort.
      */
     shouldRequestOnSort(columnID: string) {
-      CaseEntity_Variants_SNV_Table.actions.showAllColumns();
+      actions.showAllColumns();
       cy.intercept('POST', '**/list', req => {
         expect(req.body.sort).to.have.length(1);
         expect(req.body.sort).to.deep.include({ field: tableColumns.find(col => col.id === columnID)?.apiField, order: 'asc' });
       }).as('sortRequest');
-      CaseEntity_Variants_SNV_Table.actions.sortColumn(columnID, false /*needIntercept*/);
+      actions.sortColumn(columnID, false /*needIntercept*/);
       cy.wait('@sortRequest');
     },
     /**
@@ -614,7 +886,7 @@ export const CaseEntity_Variants_SNV_Table = {
      * Validates that all columns are displayed in the correct order in the table.
      */
     shouldShowAllColumns() {
-      CaseEntity_Variants_SNV_Table.actions.showAllColumns();
+      actions.showAllColumns();
       tableColumns.forEach(column => {
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHeadCell()).eq(column.position).find(column.name).should('exist');
@@ -629,71 +901,11 @@ export const CaseEntity_Variants_SNV_Table = {
      * @param dataVariant The variant object containing the expected values.
      */
     shouldShowColumnContent(columnID: string, dataVariant: any) {
-      CaseEntity_Variants_SNV_Table.actions.showAllColumns();
+      actions.showAllColumns();
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
-          switch (columnID) {
-            case 'interpretation':
-              cy.validateTableFirstRowClass(CommonSelectors.interpretationIcon, position);
-              break;
-            case 'dbsnp':
-              cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position);
-              break;
-            case 'gene':
-              cy.validateTableFirstRowContent(dataVariant[columnID], position);
-              cy.validateTableFirstRowClass(CommonSelectors.plusIcon, position);
-              break;
-            case 'aa_change':
-              cy.validateTableFirstRowContent(dataVariant.aa_change, position);
-              break;
-            case 'type':
-              cy.validateTableFirstRowContent(dataVariant[columnID], position);
-              cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
-              break;
-            case 'consequence':
-              cy.validateTableFirstRowClass(dataVariant.consequenceImpact, position);
-              cy.validateTableFirstRowContent(dataVariant[columnID], position);
-              break;
-            case 'mane':
-              cy.get(selectors.tableCell(dataVariant))
-                .eq(position)
-                .find(CommonSelectors.maneC)
-                .should(dataVariant.maneC ? 'exist' : 'not.exist');
-              cy.get(selectors.tableCell(dataVariant))
-                .eq(position)
-                .find(CommonSelectors.maneM)
-                .should(dataVariant.maneM ? 'exist' : 'not.exist');
-              cy.get(selectors.tableCell(dataVariant))
-                .eq(position)
-                .find(CommonSelectors.maneP)
-                .should(dataVariant.maneP ? 'exist' : 'not.exist');
-              break;
-            case 'omim':
-              cy.validateTableFirstRowContent(dataVariant.omim.inheritance, position);
-              cy.validateTableFirstRowClass(CommonSelectors.tagBlank, position);
-              break;
-            case 'clinvar':
-              cy.validateTableFirstRowContent(dataVariant.clinvar_evidence.classification, position);
-              cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
-              break;
-            case 'acmg_exomiser':
-              dataVariant[columnID].forEach((value: string) => {
-                cy.validateTableFirstRowContent(getClass(value).abbrev, position);
-              });
-              cy.validateTableFirstRowClass(CommonSelectors.tag('lime'), position);
-              break;
-            case 'gnomad':
-              cy.validateTableFirstRowContent(dataVariant[columnID], position);
-              cy.validateTableFirstRowClass(CommonSelectors.gnomadRedIcon, position);
-              break;
-            case 'actions':
-              cy.validateTableFirstRowClass(CommonSelectors.anchorIcon, position);
-              cy.validateTableFirstRowClass(CommonSelectors.actionButton, position);
-              break;
-            default:
-              cy.validateTableFirstRowContent(dataVariant[columnID], position);
-              break;
-          }
+          const handler = contentHandlers[columnID] ?? defaultContentHandler;
+          handler({ position, dataVariant, columnID, tableCell: tableCellSelector });
         } else {
           cy.handleColumnNotFound(columnID);
         }
@@ -703,12 +915,12 @@ export const CaseEntity_Variants_SNV_Table = {
      * Validates the tooltips on columns.
      */
     shouldShowColumnTooltips() {
-      CaseEntity_Variants_SNV_Table.actions.showAllColumns();
+      actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
             if (position !== -1) {
-              CaseEntity_Variants_SNV_Table.actions.shrinkAllColumns();
+              actions.shrinkAllColumns();
               cy.get(CommonSelectors.tableHeadCell()).eq(position).shouldHaveTooltip(column);
             } else {
               cy.handleColumnNotFound(column.id);
@@ -721,7 +933,7 @@ export const CaseEntity_Variants_SNV_Table = {
      * Validates that pinnable columns are correctly marked as pinnable.
      */
     shouldShowPinnableColumns() {
-      CaseEntity_Variants_SNV_Table.actions.showAllColumns();
+      actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -738,7 +950,7 @@ export const CaseEntity_Variants_SNV_Table = {
      * Validates that sortable columns are correctly marked as sortable.
      */
     shouldShowSortableColumns() {
-      CaseEntity_Variants_SNV_Table.actions.showAllColumns();
+      actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -758,11 +970,11 @@ export const CaseEntity_Variants_SNV_Table = {
      * @param isReverseSorting The first sort of the column is Ascending (compare to Descending by default).
      */
     shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean) {
-      CaseEntity_Variants_SNV_Table.actions.showAllColumns();
+      actions.showAllColumns();
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           if (position !== -1) {
-            CaseEntity_Variants_SNV_Table.actions.sortColumn(columnID);
+            actions.sortColumn(columnID);
             cy.get(CommonSelectors.tableRow())
               .eq(0)
               .find(CommonSelectors.tableCellData)
@@ -771,7 +983,7 @@ export const CaseEntity_Variants_SNV_Table = {
               .then(biggestValue => {
                 const biggest = biggestValue.trim();
 
-                CaseEntity_Variants_SNV_Table.actions.sortColumn(columnID);
+                actions.sortColumn(columnID);
                 cy.get(CommonSelectors.tableRow())
                   .eq(0)
                   .find(CommonSelectors.tableCellData)
@@ -805,5 +1017,64 @@ export const CaseEntity_Variants_SNV_Table = {
         })
       );
     },
+  };
+};
+
+const germlineConfig: SNVTableConfig = {
+  tableColumns: tableGermlineSNVColumns,
+  selectors: { tab: '[data-cy="variants-tab"]', toggle: '[data-cy="tabs-trigger-SNV"]' },
+  newTabLinkColumns: ['variant', 'freq'],
+  contentHandlers: germlineContentHandlers,
+  linkResolver: (columnID, dataVariant) => getUrlLink(columnID, dataVariant),
+};
+
+const somaticConfig: SNVTableConfig = {
+  tableColumns: tableSomaticSNVColumns,
+  selectors: { tab: '[data-cy="variants-tab"]' },
+  newTabLinkColumns: ['variant', 'freq_tn', 'freq_g'],
+  contentHandlers: somaticContentHandlers,
+  linkResolver: (columnID, dataVariant) => {
+    switch (columnID) {
+      case 'freq_tn':
+        return `/variants/entity/${dataVariant.locus_id}?tab=patients&cases=OtherCases`;
+      case 'freq_g':
+        return `/variants/entity/${dataVariant.locus_id}?tab=patients&cases=InterpretedCases`;
+      default:
+        return getUrlLink(columnID, dataVariant);
+    }
   },
+};
+
+export const CaseEntity_Variants_SNV_Table = {
+  germline: (() => {
+    const actions = generateSNVTableActions(germlineConfig);
+    const validations = generateSNVTableValidations(germlineConfig, actions);
+    const { selectors } = germlineConfig;
+    return {
+      actions: {
+        ...actions,
+        /**
+         * Click the toggle button to change variants type.
+         */
+        clickToggle() {
+          cy.get(selectors.toggle!).clickAndWait({ force: true });
+        },
+      },
+      validations: {
+        ...validations,
+        /**
+         * Checks that the tab and toggle are active.
+         */
+        shouldHaveActiveTabAndToggle() {
+          cy.get(selectors.tab).shouldBeActiveTab();
+          cy.get(selectors.toggle!).shouldBeDataState('active');
+        },
+      },
+    };
+  })(),
+  somatic: (() => {
+    const actions = generateSNVTableActions(somaticConfig);
+    const validations = generateSNVTableValidations(somaticConfig, actions);
+    return { actions, validations };
+  })(),
 };
