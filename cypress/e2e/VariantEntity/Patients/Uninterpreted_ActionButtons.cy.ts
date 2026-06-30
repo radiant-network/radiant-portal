@@ -21,7 +21,7 @@ describe('VariantEntity - Patients - Uninterpreted - Action Buttons', () => {
   it('View Variants', () => {
     setupTest();
     VariantEntity_Patients.uninterpreted.actions.selectAction('variants');
-    CaseEntity_Variants_SNV_Table.validations.shouldHaveTitle(data.variantGermline.uninterpreted);
-    CaseEntity_Variants_SNV_Table.validations.shouldHaveActiveTabAndToggle();
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldHaveTitle(data.variantGermline.uninterpreted);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldHaveActiveTabAndToggle();
   });
 });

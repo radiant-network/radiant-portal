@@ -1,0 +1,41 @@
+/// <reference types="cypress"/>
+import 'support/commands';
+import { data } from 'pom/shared/Data';
+import { CaseEntity_Variants_Facets } from 'pom/pages/CaseEntity_Variants_Facets';
+import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_SavedFilters';
+
+describe('Case Entity - Variants - Germline - CNV - Facets - Configuration', () => {
+  const setupTest = () => {
+    cy.login();
+    cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV');
+    CaseEntity_Variants_SavedFilters.cnv.actions.clickNewFilterButton(); // Clean Query Builder
+  };
+
+  it('Order', () => {
+    setupTest();
+    CaseEntity_Variants_Facets.cnv.validations.shouldShowAllFacets('Variant');
+    CaseEntity_Variants_Facets.cnv.validations.shouldShowAllFacets('Gene');
+    CaseEntity_Variants_Facets.cnv.validations.shouldShowAllFacets('Frequency');
+    CaseEntity_Variants_Facets.cnv.validations.shouldShowAllFacets('Metric QC');
+  });
+
+  it('Expand and collapse', () => {
+    setupTest();
+    CaseEntity_Variants_Facets.cnv.validations.shouldExpandAndCollapse();
+  });
+
+  it('Default operator', () => {
+    setupTest();
+    CaseEntity_Variants_Facets.cnv.validations.shouldNumericalHaveDefaultOperator();
+  });
+
+  it('Dictionary', () => {
+    setupTest();
+    CaseEntity_Variants_Facets.cnv.validations.shouldHaveDictionary();
+  });
+
+  it('Tooltip', () => {
+    setupTest();
+    CaseEntity_Variants_Facets.cnv.validations.shouldHaveTooltip();
+  });
+});
