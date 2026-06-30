@@ -21,7 +21,7 @@ declare namespace Cypress {
     hideColumn(column: string): cy & CyEventEmitter;
     login(): cy & CyEventEmitter;
     logout(): cy & CyEventEmitter;
-    pinColumn(position: number, tableId: string = ''): cy & CyEventEmitter;
+    pinColumn(position: number, tableId: string = '', headRowSelector?: string): cy & CyEventEmitter;
     resetColumns(): cy & CyEventEmitter;
     setLang(lang: string): cy & CyEventEmitter;
     setTenant(): cy & CyEventEmitter;
@@ -33,8 +33,8 @@ declare namespace Cypress {
     shouldHaveTooltip(column: any): cy & CyEventEmitter;
     showColumn(column: string | RegExp): cy & CyEventEmitter;
     sortTableAndIntercept(position: number, routeMatcher: string, nbCalls: number, tableId: string = ''): cy & CyEventEmitter;
-    sortTableAndWait(position: number, tableId: string = ''): cy & CyEventEmitter;
-    unpinColumn(position: number, tableId: string = ''): cy & CyEventEmitter;
+    sortTableAndWait(position: number, tableId: string = '', headRowSelector?: string): cy & CyEventEmitter;
+    unpinColumn(position: number, tableId: string = '', headRowSelector?: string): cy & CyEventEmitter;
     validatePillSelectedQuery(facetTitle: string | RegExp, values: (string | RegExp)[], eq?: number): cy & CyEventEmitter;
     validateTableFirstRowAttr(expectedAttr: string, expectedValue: string, columnIndex: number, tableId: string = ''): cy & CyEventEmitter;
     validateTableFirstRowClass(expectedClass: string, columnIndex: number, tableId: string = ''): cy & CyEventEmitter;

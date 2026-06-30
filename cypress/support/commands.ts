@@ -110,9 +110,13 @@ Cypress.Commands.add('logout', () => {
  * Pins a column in the table to the left side.
  * @param position The column position index to pin.
  * @param tableId The table ID to pin the column in (default: '').
+ * @param headRowSelector Optional selector to scope the lookup to a specific header row (e.g. `'tr:eq(1)'`) for tables with multi-level headers.
  */
-Cypress.Commands.add('pinColumn', (position: number, tableId: string = '') => {
-  cy.get(`${CommonSelectors.tableHeadCell(tableId)}`)
+Cypress.Commands.add('pinColumn', (position: number, tableId: string = '', headRowSelector?: string) => {
+  const headCellSelector = headRowSelector
+    ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}`
+    : CommonSelectors.tableHeadCell(tableId);
+  cy.get(headCellSelector)
     .eq(position)
     .find(CommonSelectors.pinIcon)
     .click({ force: true });
@@ -277,13 +281,17 @@ Cypress.Commands.add('sortTableAndIntercept', (position: number, routeMatcher: s
  * Sorts a table column and waits for a fixed duration.
  * @param position The column position index to sort.
  * @param tableId The table ID to sort (default: '').
+ * @param headRowSelector Optional selector to scope the lookup to a specific header row (e.g. `'tr:eq(1)'`) for tables with multi-level headers.
  */
-Cypress.Commands.add('sortTableAndWait', (position: number, tableId: string = '') => {
-  cy.get(`${CommonSelectors.tableHeadCell(tableId)}`)
+Cypress.Commands.add('sortTableAndWait', (position: number, tableId: string = '', headRowSelector?: string) => {
+  const headCellSelector = headRowSelector
+    ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}`
+    : CommonSelectors.tableHeadCell(tableId);
+  cy.get(headCellSelector)
     .eq(position)
     .find(CommonSelectors.sortIcon)
     .click({ force: true });
-  cy.get(`${CommonSelectors.tableHeadCell(tableId)}`)
+  cy.get(headCellSelector)
     .eq(position)
     .find(CommonSelectors.sortIcon)
     .should('exist');
@@ -293,9 +301,13 @@ Cypress.Commands.add('sortTableAndWait', (position: number, tableId: string = ''
  * Unpins a column in the table.
  * @param position The column position index to unpin.
  * @param tableId The table ID to unpin the column in (default: '').
+ * @param headRowSelector Optional selector to scope the lookup to a specific header row (e.g. `'tr:eq(1)'`) for tables with multi-level headers.
  */
-Cypress.Commands.add('unpinColumn', (position: number, tableId: string = '') => {
-  cy.get(`${CommonSelectors.tableHeadCell(tableId)}`)
+Cypress.Commands.add('unpinColumn', (position: number, tableId: string = '', headRowSelector?: string) => {
+  const headCellSelector = headRowSelector
+    ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}`
+    : CommonSelectors.tableHeadCell(tableId);
+  cy.get(headCellSelector)
     .eq(position)
     .find(CommonSelectors.pinIcon)
     .click({ force: true });
