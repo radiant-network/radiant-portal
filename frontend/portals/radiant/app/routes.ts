@@ -9,6 +9,7 @@ export default [
     route('case/entity/:caseId', './routes/cases/entity.tsx'),
     route('file/', './routes/files/list.tsx'),
     route('study/', './routes/studies/list.tsx'),
+    route('community/', './routes/community/list.tsx'),
     route('admin/features', './routes/admin/beta-features.tsx'),
   ]),
   // QA preview only: two explicit URLs let both landing variants be viewed in a single build.

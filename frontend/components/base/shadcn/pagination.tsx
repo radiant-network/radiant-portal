@@ -33,7 +33,14 @@ type PaginationLinkProps = {
 } & ButtonProps;
 
 const PaginationLink = ({ className, isActive, size = 'sm', variant = 'outline', ...props }: PaginationLinkProps) => (
-  <Button aria-current={isActive ? 'page' : undefined} className={className} size={size} variant={variant} {...props} />
+  // h-7 keeps the number buttons the same height as the arrow controls (which get it via defaultPaginationStyle).
+  <Button
+    aria-current={isActive ? 'page' : undefined}
+    className={cn('h-7', className)}
+    size={size}
+    variant={variant}
+    {...props}
+  />
 );
 PaginationLink.displayName = 'PaginationLink';
 
