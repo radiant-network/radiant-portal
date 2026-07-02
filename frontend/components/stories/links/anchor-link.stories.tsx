@@ -48,6 +48,14 @@ export const AllVariants: Story = {
         </AnchorLink>
       </StorySection>
 
+      <StorySection title="White (on a dark surface)">
+        <div className="rounded-md bg-slate-900 p-4">
+          <AnchorLink external variant="white">
+            Anchor Link
+          </AnchorLink>
+        </div>
+      </StorySection>
+
       <StorySection title="Mono">
         <AnchorLink external mono>
           Anchor Link

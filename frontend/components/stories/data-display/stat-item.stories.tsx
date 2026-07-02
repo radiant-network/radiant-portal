@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { FileText, FlaskConical, Users } from 'lucide-react';
 
-import StatItem from '@/components/base/stat-item/stat-item';
+import StatItem, { StatItemLayout } from '@/components/base/stat-item/stat-item';
 
 import { StorySection, StoryShowcase } from '../story-section';
 
@@ -28,6 +28,17 @@ export const AllVariants: Story = {
 
       <StorySection title="Without icon">
         <StatItem value="121,540" label="Files" />
+      </StorySection>
+
+      <StorySection title="Inline layout (icon + value + label on one centered line)">
+        <StatItem layout={StatItemLayout.Inline} icon={<Users />} value="13,500" label="Participants" />
+      </StorySection>
+
+      <StorySection title="Sizes (md default / lg)">
+        <div className="flex items-center gap-12">
+          <StatItem size="md" icon={<Users />} value="13,500" label="Participants" />
+          <StatItem size="lg" icon={<Users />} value="13,500" label="Participants" />
+        </div>
       </StorySection>
 
       <StorySection title="In a grid">
