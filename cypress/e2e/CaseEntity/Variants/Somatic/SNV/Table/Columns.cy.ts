@@ -9,6 +9,7 @@ describe('Case Entity - Variants - Somatic - SNV - Table - Columns', () => {
     cy.login();
     cy.resetTablePreferences();
     cy.visitCaseVariantsPage(data.caseSomatic.case, data.caseSomatic.seq.seq_id, 'SNV');
+    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Apply a filter for a cleaner query builder
     CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
   };
 
