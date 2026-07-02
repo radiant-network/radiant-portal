@@ -9,7 +9,8 @@ describe('Case Entity - Variants - Germline - SNV - Table - Columns', () => {
     cy.login();
     cy.resetTablePreferences();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV');
-    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Clean Query Builder
+    CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Apply a filter for a cleaner query builder
+    CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
   };
 
   it('Default display', () => {
