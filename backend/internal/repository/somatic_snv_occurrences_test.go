@@ -161,9 +161,8 @@ func Test_Somatic_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
 		}
 		assert.ElementsMatch(t, []string{"1000", "2000", "3000"}, case71LocusIds)
 
-		// Case 72 (task_id=202, reusing tumor_seq_id=74) sees only its locus_ids(s)
-		// {2000,5000}, each stamped task_id=202 — never case 71's task_id=74 row
-		// for shared locus 2000.
+		// Case 72 (task_id=202, reusing tumor_seq_id=74) sees only its locus_ids(s) {2000,5000},
+		// each stamped task_id=202 — never case 71's task_id=74 row for shared locus 2000.
 		case72Occurrences, err := repo.GetOccurrences(t.Context(), 72, 74, 202, query)
 		assert.NoError(t, err)
 		case72LocusIds := make([]string, 0, len(case72Occurrences))
