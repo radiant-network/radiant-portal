@@ -11,7 +11,6 @@ type CommunityFiltersProps = {
   onRolesChange: (roles: string[]) => void;
   areasOfInterest: string[];
   onAreasOfInterestChange: (areasOfInterest: string[]) => void;
-  /** Clears role + area of interest only (leaves the search untouched). */
   onClear: () => void;
 };
 

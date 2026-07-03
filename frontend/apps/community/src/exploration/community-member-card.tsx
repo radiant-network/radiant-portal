@@ -6,7 +6,6 @@ import HighlightText from './highlight-text';
 
 type CommunityMemberCardProps = {
   member: CommunityMember;
-  /** Current search term, highlighted where it matches the name or affiliation. */
   highlight?: string;
 };
 

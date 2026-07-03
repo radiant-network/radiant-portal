@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ListFilter } from 'lucide-react';
 
 import TableIndexResult from '@/components/base/data-table/data-table-index-result';
@@ -27,6 +27,33 @@ const PAGE_SIZE = 25;
 const MAX_VISIBLE_PAGES = 5;
 const SEARCH_DEBOUNCE_MS = 250;
 
+/**
+ * Builds the page-number sequence, collapsing gaps into `'ellipsis'` markers.
+ * TODO(design-system): this windowing logic is duplicated with the Storybook
+ * `InteractivePagination` story — extract into a shared `getPaginationRange`
+ * helper (or a controlled `PaginationNav` wrapper) so all consumers reuse it.
+ */
+function getPageNumbers(currentPage: number, totalPages: number): Array<number | 'ellipsis'> {
+  if (totalPages <= MAX_VISIBLE_PAGES) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  const pages: Array<number | 'ellipsis'> = [1];
+  if (currentPage > 3) {
+    pages.push('ellipsis');
+  }
+  const start = Math.max(2, currentPage - 1);
+  const end = Math.min(totalPages - 1, currentPage + 1);
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+  if (currentPage < totalPages - 2) {
+    pages.push('ellipsis');
+  }
+  pages.push(totalPages);
+  return pages;
+}
+
 export default function CommunityExploration() {
   const { t } = useI18n();
   // `searchInput` mirrors the field live; `search` is the debounced term used to filter + highlight.
@@ -43,7 +70,7 @@ export default function CommunityExploration() {
     [search, roles, areasOfInterest, sort, pageIndex],
   );
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
 
   // Debounce the live input into the committed search term (also resets to page 1).
   useEffect(() => {
@@ -72,7 +99,7 @@ export default function CommunityExploration() {
     setRoles([]);
     setAreasOfInterest([]);
   };
-  const goToPage = (page: number) => setPageIndex(Math.max(1, Math.min(page, totalPages)));
+  const goToPage = useCallback((page: number) => setPageIndex(Math.max(1, Math.min(page, totalPages))), [totalPages]);
 
   const pageNumbers = getPageNumbers(pageIndex, totalPages);
 
@@ -159,31 +186,4 @@ export default function CommunityExploration() {
       </main>
     </>
   );
-}
-
-/**
- * Builds the page-number sequence, collapsing gaps into `'ellipsis'` markers.
- * TODO(design-system): this windowing logic is duplicated with the Storybook
- * `InteractivePagination` story — extract into a shared `getPaginationRange`
- * helper (or a controlled `PaginationNav` wrapper) so all consumers reuse it.
- */
-function getPageNumbers(currentPage: number, totalPages: number): Array<number | 'ellipsis'> {
-  if (totalPages <= MAX_VISIBLE_PAGES) {
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-  }
-
-  const pages: Array<number | 'ellipsis'> = [1];
-  if (currentPage > 3) {
-    pages.push('ellipsis');
-  }
-  const start = Math.max(2, currentPage - 1);
-  const end = Math.min(totalPages - 1, currentPage + 1);
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-  if (currentPage < totalPages - 2) {
-    pages.push('ellipsis');
-  }
-  pages.push(totalPages);
-  return pages;
 }

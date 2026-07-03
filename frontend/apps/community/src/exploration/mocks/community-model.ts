@@ -8,19 +8,15 @@ export type CommunityMember = {
   id: string;
   firstName: string;
   lastName: string;
-  /** Institution / lab shown as the card subtitle (optional). */
   affiliation?: string;
-  /** Values matched against the Role filter. */
   roles: string[];
-  /** Values matched against the Area of Interest filter. */
   areasOfInterest: string[];
-  /** ISO date used by the "Newest / Oldest first" sort. */
   createdAt: string;
 };
 
 export type CommunitySort = 'newest' | 'oldest' | 'name';
 
-/** Options offered by the Role filter button (matched by `key`). */
+/** Role options */
 export const ROLE_OPTIONS: IFilterButtonItem[] = [
   { key: 'research', label: 'Researcher' },
   { key: 'health', label: 'Healthcare Professional' },
@@ -28,7 +24,7 @@ export const ROLE_OPTIONS: IFilterButtonItem[] = [
   { key: 'community', label: 'Community Member' },
 ];
 
-/** Options offered by the Area of Interest filter button (key === label). */
+/** Area of Interest options */
 export const AREA_OF_INTEREST: IFilterButtonItem[] = [
   'Adolescent Idiopathic Scoliosis',
   'Bladder Exstrophy-Epispadias Complex',

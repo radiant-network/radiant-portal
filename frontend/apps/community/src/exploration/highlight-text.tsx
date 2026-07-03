@@ -2,7 +2,6 @@ import { Fragment } from 'react';
 
 type HighlightTextProps = {
   text: string;
-  /** Substring to highlight (case-insensitive). When empty, the text is rendered as-is. */
   query?: string;
 };
 
