@@ -1,4 +1,21 @@
 {
+  "community": {
+    "title": "Communauté",
+    "search": {
+      "label": "Rechercher par nom de membre ou affiliation",
+      "placeholder": "ex. Watson, Linda Crnic Institute"
+    },
+    "filters": {
+      "toggle": "Filtres",
+      "role": "Rôle",
+      "area_of_interest": "Domaine d'intérêt"
+    },
+    "sort": {
+      "newest": "Plus récents d'abord",
+      "oldest": "Plus anciens d'abord",
+      "name": "Nom (A–Z)"
+    }
+  },
   "common": {
     "date": {
       "hour": "HH'h'mm",

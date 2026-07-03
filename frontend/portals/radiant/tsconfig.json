@@ -23,6 +23,7 @@
       "file-archive/*": ["../../apps/file-archive/src/*"],
       "study/*": ["../../apps/study/src/*"],
       "landing/*": ["../../apps/landing/src/*"],
+      "community/*": ["../../apps/community/src/*"],
       "~/*": ["./app/*"],
       "react": ["./node_modules/@types/react"]
     },

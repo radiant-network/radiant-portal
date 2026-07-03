@@ -71,6 +71,12 @@ const defaultFeatureDefinitions: FeatureDefinitions = {
     label: 'Studies',
     description: 'Access the new Studies page',
   },
+  community: {
+    type: 'link',
+    link: '/community',
+    label: 'Community',
+    description: 'Access the new Community exploration page',
+  },
   onboarding: {
     type: 'boolean',
     defaultValue: false,
