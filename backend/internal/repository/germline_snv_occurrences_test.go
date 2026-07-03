@@ -207,24 +207,24 @@ func Test_Germline_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
 		// stamped task_id=5 — never the task_id=200 row for shared locus 2000.
 		case1Occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
-		case1Locus := make([]string, 0, len(case1Occurrences))
+		case1LocusIds := make([]string, 0, len(case1Occurrences))
 		for _, occ := range case1Occurrences {
 			assert.Equal(t, 5, occ.TaskId, "task_id=5 query leaked an occurrence from another task")
-			case1Locus = append(case1Locus, occ.LocusId)
+			case1LocusIds = append(case1LocusIds, occ.LocusId)
 		}
-		assert.ElementsMatch(t, []string{"1000", "2000"}, case1Locus)
+		assert.ElementsMatch(t, []string{"1000", "2000"}, case1LocusIds)
 
-		// Case 2 (task_id=200, reusing seq_id=1) sees only its locus_id {2000,5000},
+		// Case 2 (task_id=200, reusing seq_id=1) sees only its locus_id(s) {2000,5000},
 		// each stamped task_id=200 — never case 1's task_id=5 row for shared
 		// locus 2000.
 		case2Occurrences, err := repo.GetOccurrences(t.Context(), 2, 1, 200, query)
 		assert.NoError(t, err)
-		case2Locus := make([]string, 0, len(case2Occurrences))
+		case2LocusIds := make([]string, 0, len(case2Occurrences))
 		for _, occ := range case2Occurrences {
 			assert.Equal(t, 200, occ.TaskId, "task_id=200 query leaked an occurrence from another task")
-			case2Locus = append(case2Locus, occ.LocusId)
+			case2LocusIds = append(case2LocusIds, occ.LocusId)
 		}
-		assert.ElementsMatch(t, []string{"2000", "5000"}, case2Locus)
+		assert.ElementsMatch(t, []string{"2000", "5000"}, case2LocusIds)
 	})
 }
 
