@@ -54,14 +54,14 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 	// 		LEFT JOIN <schema>.occurrence_flag flag ON flag.occurrence_id = g_snv_o.locus_id AND flag.task_id = g_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?
 	// WHERE g_snv_o.locus_id in (
 	//	SELECT g_snv_o.locus_id FROM germline__snv__occurrence JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
-	// ) AND g_snv_o.seq_id=? AND g_snv_o.part=? AND v.locus_id=g_snv_o.locus_id ORDER BY ad_ratio DESC
+	// ) AND g_snv_o.seq_id=? AND g_snv_o.task_id=? AND g_snv_o.part=? AND v.locus_id=g_snv_o.locus_id ORDER BY ad_ratio DESC
 	tx = tx.Select("g_snv_o.locus_id")
 	tx = db.Table("(germline__snv__occurrence g_snv_o, snv__variant v)").
 		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM %s.interpretation_germline) i ON i.locus_id = g_snv_o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", schema), fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
 		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s.occurrence_note WHERE deleted = false) note ON note.occurrence_id = g_snv_o.locus_id AND note.task_id = g_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?", schema), seqId, caseId).
 		Joins(fmt.Sprintf("LEFT JOIN %s.occurrence_flag flag ON flag.occurrence_id = g_snv_o.locus_id AND flag.task_id = g_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?", schema), seqId, caseId).
 		Select(columns).
-		Where("g_snv_o.seq_id = ? and part=? and v.locus_id = g_snv_o.locus_id and g_snv_o.locus_id in (?)", seqId, part, tx)
+		Where("g_snv_o.seq_id = ? and g_snv_o.task_id = ? and part=? and v.locus_id = g_snv_o.locus_id and g_snv_o.locus_id in (?)", seqId, taskId, part, tx)
 
 	utils.AddSort(tx, userQuery) //We re-apply the sort on the outer query
 
