@@ -162,3 +162,53 @@ func Test_RangerAdminClient_AddUserToRole_MissingRoleIsReported(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "get role")
 }
+
+func Test_RangerAdminClient_AddRoleToRole_NestsNewChild(t *testing.T) {
+	fake := newFakeRanger()
+	fake.roles["user_role"] = &rangerRole{ID: 3, Name: "user_role", Roles: []rangerRoleMember{}}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).AddRoleToRole(context.Background(), "user_role", "demo_user")
+
+	require.NoError(t, err)
+	require.NotNil(t, fake.lastPutRole)
+	assert.Equal(t, []rangerRoleMember{{Name: "demo_user", IsAdmin: false}}, fake.lastPutRole.Roles)
+}
+
+func Test_RangerAdminClient_AddRoleToRole_PreservesExistingSubRoles(t *testing.T) {
+	fake := newFakeRanger()
+	fake.roles["user_role"] = &rangerRole{ID: 3, Name: "user_role", Roles: []rangerRoleMember{{Name: "cbtn_user"}}}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).AddRoleToRole(context.Background(), "user_role", "demo_user")
+
+	require.NoError(t, err)
+	require.NotNil(t, fake.lastPutRole)
+	names := []string{fake.lastPutRole.Roles[0].Name, fake.lastPutRole.Roles[1].Name}
+	assert.Equal(t, []string{"cbtn_user", "demo_user"}, names, "existing sub-role kept, new one appended")
+}
+
+func Test_RangerAdminClient_AddRoleToRole_IsIdempotent(t *testing.T) {
+	fake := newFakeRanger()
+	fake.roles["user_role"] = &rangerRole{ID: 3, Name: "user_role", Roles: []rangerRoleMember{{Name: "demo_user"}}}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).AddRoleToRole(context.Background(), "user_role", "demo_user")
+
+	require.NoError(t, err)
+	assert.Nil(t, fake.lastPutRole, "no PUT when the child is already nested")
+}
+
+func Test_RangerAdminClient_AddRoleToRole_MissingParentIsReported(t *testing.T) {
+	fake := newFakeRanger()
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).AddRoleToRole(context.Background(), "no_such_role", "demo_user")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "get role")
+}

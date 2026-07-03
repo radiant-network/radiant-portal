@@ -159,5 +159,52 @@ func Test_RangerAdminClient_EnsureAccessPolicy_ReportsWriteError(t *testing.T) {
 
 	err := fake.client(srv.URL).EnsureAccessPolicy(context.Background(), "sr_access_demo", []string{"demo_tenant"}, []string{"*"}, []string{"demo_user"})
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "ensure access policy")
+	assert.Contains(t, err.Error(), "ensure policy")
+}
+
+func Test_RangerAdminClient_EnsureRowFilterPolicy_CreatesWithFilterExpr(t *testing.T) {
+	fake := &fakeRangerTenant{existingPolicies: map[string]int64{}}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).EnsureRowFilterPolicy(context.Background(),
+		"sr_rowfilter_auth", "auth", "pii_grant", "user_id = current_user()", []string{"user_role"})
+
+	require.NoError(t, err)
+	require.NotNil(t, fake.createdPolicy)
+	assert.EqualValues(t, 2, fake.createdPolicy["policyType"], "row-filter is policyType 2")
+	items := fake.createdPolicy["rowFilterPolicyItems"].([]any)
+	item := items[0].(map[string]any)
+	assert.Equal(t, "user_id = current_user()", item["rowFilterInfo"].(map[string]any)["filterExpr"])
+}
+
+func Test_RangerAdminClient_EnsureMaskPolicy_CreatesWithMaskExpr(t *testing.T) {
+	fake := &fakeRangerTenant{existingPolicies: map[string]int64{}}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).EnsureMaskPolicy(context.Background(),
+		"sr_mask_pii_redact", []string{"*_tenant"}, "patient", []string{"first_name", "last_name"}, "'***'", []string{"user_role"})
+
+	require.NoError(t, err)
+	require.NotNil(t, fake.createdPolicy)
+	assert.EqualValues(t, 1, fake.createdPolicy["policyType"], "mask is policyType 1")
+	items := fake.createdPolicy["dataMaskPolicyItems"].([]any)
+	mask := items[0].(map[string]any)["dataMaskInfo"].(map[string]any)
+	assert.Equal(t, "CUSTOM", mask["dataMaskType"])
+	assert.Equal(t, "'***'", mask["valueExpr"])
+}
+
+func Test_RangerAdminClient_EnsureMaskPolicy_UpdatesInPlaceWhenExists(t *testing.T) {
+	fake := &fakeRangerTenant{existingPolicies: map[string]int64{"sr_mask_dob": 9}}
+	srv := fake.server()
+	defer srv.Close()
+
+	err := fake.client(srv.URL).EnsureMaskPolicy(context.Background(),
+		"sr_mask_dob", []string{"*_tenant"}, "patient", []string{"date_of_birth"}, "year(x)", []string{"user_role"})
+
+	require.NoError(t, err)
+	require.NotNil(t, fake.updatedPolicy, "existing mask updated via PUT, not delete-then-create")
+	assert.Nil(t, fake.createdPolicy)
+	assert.EqualValues(t, 9, fake.updatedPolicy["id"])
 }

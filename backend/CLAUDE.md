@@ -147,7 +147,7 @@ Copy `.env.template` → `.env`. Key variables:
 | `LOG_LEVEL` | slog level for JSON logs (`debug`/`info`/`warn`/`error`) | info |
 | `KEYCLOAK_HOST/REALM/CLIENT` | Keycloak | localhost:8080 |
 | `VIEW_REFRESH_ON_STARTUP_ENABLED` | On every API startup, recreate every tenant's StarRocks views (CREATE OR REPLACE, idempotent; advisory-locked across replicas so one runs it per deploy; fatal on error — a build must not serve against stale views). Off by default. Tenant *creation* (which needs Ranger) stays in the `cmd/create-tenant` CLI/task. | false |
-| `TENANT_VIEWS_READ_ENABLED` | When on, `RequireTenantAccess` binds the active tenant to the request context so the read path resolves the tenant's view database (`<code>_tenant`) via `types.TenantSchema` instead of the `radiant_jdbc` federation. Off by default: with no tenant bound, reads stay on `radiant_jdbc.public` (unchanged). Flip on only after every tenant's views exist and are populated (`cmd/create-tenant` / `cmd/refresh-views`). | false |
+| `TENANT_VIEWS_READ_ENABLED` | When on, `RequireTenantAccess` binds the active tenant to the request context so the read path resolves the tenant's view database (`<code>_tenant`) via `types.TenantSchema` instead of the `radiant_jdbc` federation. Off by default: with no tenant bound, reads stay on `radiant_jdbc.public` (unchanged). Flip on only after every tenant's views exist and are populated (`cmd/create-tenant` / `cmd/refresh-tenants`). | false |
 | `AWS_ENDPOINT_URL/REGION/ACCESS_KEY_ID/SECRET_ACCESS_KEY` | S3/MinIO | — |
 | `S3_PRESIGNED_URL_EXPIRE` | URL TTL | 60m |
 | `PUBMED_BASE_URL` | PubMed API | ncbi.nlm.nih.gov |

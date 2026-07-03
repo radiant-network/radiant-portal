@@ -7,8 +7,8 @@ It is an administrative tool, run as a one-off (locally, or as a deploy/ops task
 **not** part of the request-serving API. Everything it does is idempotent: re-running
 converges and never clobbers existing state.
 
-To re-apply a tenant's StarRocks views after a schema change, use the separate
-[`refresh-views`](../refresh-views) command (it needs no Ranger and has a different goal).
+To re-apply a tenant's StarRocks views and Ranger masking policies after a schema or
+policy change, use the separate [`refresh-tenants`](../refresh-tenants) command.
 
 ## Usage
 
@@ -55,13 +55,18 @@ How the views are built:
 > per-tenant ergonomics and column masking; tenant *isolation* comes from the
 > database-level access policy plus per-tenant base data.
 
-### 3. Ranger — the access gate
+### 3. Ranger — the access gate + PII masking
 - Ensures the Ranger role `<code>_user`.
 - Ensures the access policy `sr_access_<code>` granting `<code>_user` `SELECT` on
   `<code>_tenant.*`.
+- Bootstraps the global PII-masking policies (idempotent, tenant-independent): the
+  `user_role` masking-subject marker, `SELECT` + row-filter on `auth.pii_grant`, and the
+  `patient` column masks (`sr_mask_pii_redact`, `sr_mask_dob`) over `*_tenant`.
+- Nests `<code>_user` under `user_role` so the tenant's members are masking subjects.
 
 Role *membership* is not managed here — it's owned by the user-provisioning flow
-(`cmd/createuser`). `create-tenant` only creates the empty role and the policy.
+(`cmd/createuser`). `create-tenant` only creates the empty role, the policies, and the
+role nesting.
 
 ## Configuration
 

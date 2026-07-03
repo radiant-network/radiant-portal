@@ -126,9 +126,8 @@ func (c *RangerAdminClient) EnsureRole(ctx context.Context, name string) error {
 	return nil
 }
 
-// EnsureAccessPolicy upserts a StarRocks access policy granting roles SELECT on the
-// databases/tables. It updates in place when the policy exists (PUT) and creates it
-// otherwise (POST).
+// EnsureAccessPolicy upserts a StarRocks access policy (policyType 0) granting roles
+// SELECT on the databases/tables.
 func (c *RangerAdminClient) EnsureAccessPolicy(ctx context.Context, name string, databases, tables, roles []string) error {
 	policy := map[string]any{
 		"policyType":     0,
@@ -147,7 +146,63 @@ func (c *RangerAdminClient) EnsureAccessPolicy(ctx context.Context, name string,
 			"accesses": []map[string]any{{"type": "select", "isAllowed": true}},
 		}},
 	}
+	return c.upsertPolicy(ctx, name, policy)
+}
 
+// EnsureRowFilterPolicy upserts a StarRocks row-filter policy (policyType 2) restricting
+// SELECT on database.table to rows matching filterExpr, for the given roles. A caller
+// matched by no item is unfiltered (Ranger applies no filter), so root/admins need no item.
+func (c *RangerAdminClient) EnsureRowFilterPolicy(ctx context.Context, name, database, table, filterExpr string, roles []string) error {
+	policy := map[string]any{
+		"policyType":     2,
+		"name":           name,
+		"isEnabled":      true,
+		"isAuditEnabled": false,
+		"service":        rangerStarrocksService,
+		"resources": map[string]any{
+			"catalog":  map[string]any{"values": []string{"default_catalog"}},
+			"database": map[string]any{"values": []string{database}},
+			"table":    map[string]any{"values": []string{table}},
+		},
+		"rowFilterPolicyItems": []map[string]any{{
+			"roles":         roles,
+			"accesses":      []map[string]any{{"type": "select", "isAllowed": true}},
+			"rowFilterInfo": map[string]any{"filterExpr": filterExpr},
+		}},
+	}
+	return c.upsertPolicy(ctx, name, policy)
+}
+
+// EnsureMaskPolicy upserts a StarRocks column-mask policy (policyType 1) applying a CUSTOM
+// mask expression to the given columns of databases.table, for the given roles. Ranger
+// substitutes {col} per column, so one policy covers columns that share a mask. A caller
+// matched by no item sees the column unmasked, so root/admins need no item.
+func (c *RangerAdminClient) EnsureMaskPolicy(ctx context.Context, name string, databases []string, table string, columns []string, maskExpr string, roles []string) error {
+	policy := map[string]any{
+		"policyType":     1,
+		"name":           name,
+		"isEnabled":      true,
+		"isAuditEnabled": false,
+		"service":        rangerStarrocksService,
+		"resources": map[string]any{
+			"catalog":  map[string]any{"values": []string{"default_catalog"}},
+			"database": map[string]any{"values": databases},
+			"table":    map[string]any{"values": []string{table}},
+			"column":   map[string]any{"values": columns},
+		},
+		"dataMaskPolicyItems": []map[string]any{{
+			"roles":        roles,
+			"accesses":     []map[string]any{{"type": "select", "isAllowed": true}},
+			"dataMaskInfo": map[string]any{"dataMaskType": "CUSTOM", "valueExpr": maskExpr},
+		}},
+	}
+	return c.upsertPolicy(ctx, name, policy)
+}
+
+// upsertPolicy creates the policy (POST) or updates it in place by id (PUT) so an existing
+// policy is never deleted-then-recreated (no access-revoke window). The GET-by-name probe
+// distinguishes the two.
+func (c *RangerAdminClient) upsertPolicy(ctx context.Context, name string, policy map[string]any) error {
 	status, payload, err := c.request(ctx, http.MethodGet,
 		fmt.Sprintf("/service/public/v2/api/service/%s/policy/%s", rangerStarrocksService, name), nil)
 	if err != nil {
@@ -159,20 +214,20 @@ func (c *RangerAdminClient) EnsureAccessPolicy(ctx context.Context, name string,
 			ID int64 `json:"id"`
 		}
 		if err := json.Unmarshal(payload, &existing); err != nil {
-			return fmt.Errorf("parse access policy %q: %w", name, err)
+			return fmt.Errorf("parse policy %q: %w", name, err)
 		}
 		policy["id"] = existing.ID
 		status, payload, err = c.request(ctx, http.MethodPut, fmt.Sprintf("/service/public/v2/api/policy/%d", existing.ID), policy)
 	case http.StatusNotFound:
 		status, payload, err = c.request(ctx, http.MethodPost, "/service/plugins/policies", policy)
 	default:
-		return fmt.Errorf("get access policy %q: HTTP %d: %s", name, status, string(payload))
+		return fmt.Errorf("get policy %q: HTTP %d: %s", name, status, string(payload))
 	}
 	if err != nil {
 		return err
 	}
 	if status != http.StatusOK && status != http.StatusCreated {
-		return fmt.Errorf("ensure access policy %q: HTTP %d: %s", name, status, string(payload))
+		return fmt.Errorf("ensure policy %q: HTTP %d: %s", name, status, string(payload))
 	}
 	return nil
 }
@@ -206,6 +261,39 @@ func (c *RangerAdminClient) AddUserToRole(ctx context.Context, roleName, user st
 	}
 	if status != http.StatusOK && status != http.StatusCreated {
 		return fmt.Errorf("update role %q: HTTP %d: %s", roleName, status, string(payload))
+	}
+	return nil
+}
+
+// AddRoleToRole adds child as a sub-role of parent via read-modify-write so it never
+// clobbers existing members. parent must already exist. Idempotent: a child already
+// nested is a no-op. Used to nest each tenant role under the masking-subject marker role.
+func (c *RangerAdminClient) AddRoleToRole(ctx context.Context, parent, child string) error {
+	status, payload, err := c.request(ctx, http.MethodGet, "/service/roles/roles/name/"+parent, nil)
+	if err != nil {
+		return err
+	}
+	if status != http.StatusOK {
+		return fmt.Errorf("get role %q: HTTP %d: %s", parent, status, string(payload))
+	}
+	var role rangerRole
+	if err := json.Unmarshal(payload, &role); err != nil {
+		return fmt.Errorf("parse role %q: %w", parent, err)
+	}
+
+	for _, m := range role.Roles {
+		if m.Name == child {
+			return nil // already nested
+		}
+	}
+	role.Roles = append(role.Roles, rangerRoleMember{Name: child, IsAdmin: false})
+
+	status, payload, err = c.request(ctx, http.MethodPut, fmt.Sprintf("/service/roles/roles/%d", role.ID), role)
+	if err != nil {
+		return err
+	}
+	if status != http.StatusOK && status != http.StatusCreated {
+		return fmt.Errorf("update role %q: HTTP %d: %s", parent, status, string(payload))
 	}
 	return nil
 }
