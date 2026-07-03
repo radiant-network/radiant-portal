@@ -32,7 +32,6 @@ interface ActionButtonProps
   className?: string;
   tooltip?: string;
   tooltipSide?: 'top' | 'right' | 'bottom' | 'left';
-  dataCy?: string;
 }
 
 function ActionButton({
@@ -44,7 +43,7 @@ function ActionButton({
   variant,
   tooltip,
   tooltipSide = 'top',
-  dataCy,
+  'data-cy': dataCy,
   ...btnProps
 }: ActionButtonProps) {
   const style = actionButtonVariants({ size, variant, disabled: btnProps.disabled });
