@@ -92,12 +92,12 @@ export default function CommunityExploration() {
                     placeholder={t('community.search.placeholder')}
                   />
                 </div>
-                <Button variant="outline" onClick={() => setFiltersOpen(open => !open)}>
+                <Button variant="outline" size="sm" onClick={() => setFiltersOpen(open => !open)}>
                   <ListFilter />
                   {t('community.filters.toggle')}
                 </Button>
                 <Select value={sort} onValueChange={handleSortChange}>
-                  <SelectTrigger className="w-44">
+                  <SelectTrigger size="sm" className="w-44">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

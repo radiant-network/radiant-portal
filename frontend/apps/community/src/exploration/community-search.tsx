@@ -26,6 +26,7 @@ export default function CommunitySearch({ value, onValueChange, placeholder, cla
         onChange={event => onValueChange(event.target.value)}
         placeholder={placeholder}
         className={cn({ 'pr-8': value.length > 0 })}
+        size="sm"
       />
       {value.length > 0 && (
         <button
