@@ -1,12 +1,16 @@
-// Command refresh-views re-applies every tenant's StarRocks views — or one tenant's
-// with -code — after a schema change. It is idempotent and control-plane only
-// (StarRocks DDL + Postgres reads, no Ranger). The API also refreshes on startup
-// (see cmd/api/view_refresh.go); this is the manual / break-glass entry point.
+// Command refresh-tenants re-applies the derived StarRocks + Ranger configuration for
+// every tenant — or one with -code — after a schema or policy change. It refreshes the
+// per-tenant StarRocks views AND the global Ranger PII-masking policies (self-access +
+// row-filter on auth.pii_grant, patient column masks) plus each tenant role's nesting
+// under the masking-subject marker. Idempotent, control-plane only.
 //
-//	go run ./cmd/refresh-views            # every tenant
-//	go run ./cmd/refresh-views -code demo # one tenant
+// Unlike the API-startup view refresh (cmd/api/view_refresh.go), this needs Ranger admin
+// creds, so masking lives here — the manual / break-glass entry point.
 //
-// Reads the same env as the API (DB_* for StarRocks, PG* for Postgres).
+//	go run ./cmd/refresh-tenants            # every tenant
+//	go run ./cmd/refresh-tenants -code demo # one tenant
+//
+// Reads the same env as the API (DB_* for StarRocks, PG* for Postgres, RANGER_* for Ranger).
 package main
 
 import (
@@ -17,6 +21,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
+	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository"
 	"github.com/radiant-network/radiant-api/internal/service"
@@ -36,19 +41,25 @@ func main() {
 	}
 	tenants := repository.NewTenantRepository(pg)
 	views := repository.NewStarrocksTenantRepository(sr)
+	ranger := client.NewRangerAdminClient(client.RangerConfigFromEnv())
 
 	ctx := context.Background()
 
+	codes := []string{*code}
 	if *code != "" {
 		refreshOne(ctx, tenants, views, *code)
-		return
+	} else {
+		codes, err = service.RefreshAllTenantViews(ctx, tenants, views)
+		if err != nil {
+			fatal("refresh all views", err)
+		}
+		slog.Info("refreshed tenant views", slog.Int("tenants", len(codes)), slog.Any("codes", codes))
 	}
 
-	codes, err := service.RefreshAllTenantViews(ctx, tenants, views)
-	if err != nil {
-		fatal("refresh all views", err)
+	if err := service.RefreshMaskingPolicies(ctx, ranger, codes); err != nil {
+		fatal("refresh masking policies", err)
 	}
-	slog.Info("refreshed tenant views", slog.Int("tenants", len(codes)), slog.Any("codes", codes))
+	slog.Info("refreshed masking policies", slog.Any("codes", codes))
 }
 
 func refreshOne(ctx context.Context, tenants *repository.TenantRepository, views *repository.StarrocksTenantRepository, code string) {

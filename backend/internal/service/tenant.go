@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
-	"github.com/radiant-network/radiant-api/internal/types"
 )
 
 type TenantStore interface {
@@ -30,8 +28,8 @@ type StarrocksTenantProvisioner interface {
 }
 
 type RangerTenantProvisioner interface {
-	EnsureRole(ctx context.Context, name string) error
-	EnsureAccessPolicy(ctx context.Context, name string, databases, tables, roles []string) error
+	RangerMaskingProvisioner
+	AddRoleToRole(ctx context.Context, parent, child string) error
 }
 
 type TenantDeps struct {
@@ -67,13 +65,13 @@ func CreateTenant(ctx context.Context, deps TenantDeps, code, name string) error
 		return fmt.Errorf("starrocks: create views for %q: %w", code, err)
 	}
 
-	role := RangerTenantRole(code)
-	if err := deps.Ranger.EnsureRole(ctx, role); err != nil {
-		return fmt.Errorf("ranger: ensure role %q: %w", role, err)
+	// Global PII-masking policies first (they ensure the marker role the tenant role nests
+	// into), then this tenant's role + access policy + nesting. Both idempotent.
+	if err := BootstrapMaskingPolicies(ctx, deps.Ranger); err != nil {
+		return err
 	}
-	policy := TenantAccessPolicy(code)
-	if err := deps.Ranger.EnsureAccessPolicy(ctx, policy, []string{types.TenantDatabase(code)}, []string{"*"}, []string{role}); err != nil {
-		return fmt.Errorf("ranger: ensure access policy %q: %w", policy, err)
+	if err := EnsureTenantRangerConfig(ctx, deps.Ranger, code); err != nil {
+		return err
 	}
 
 	return nil

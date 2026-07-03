@@ -1,6 +1,6 @@
 // Command create-tenant creates a tenant across Postgres, StarRocks, and Ranger.
 // Idempotent. Reads the same env as the API (DB_* / PG* / RANGER_*). To re-apply a
-// tenant's views after a schema change, use cmd/refresh-views instead.
+// tenant's views/masking policies after a schema change, use cmd/refresh-tenants instead.
 //
 //	go run ./cmd/create-tenant -code demo -name "Demo Hospital" [-dry-run]
 package main
