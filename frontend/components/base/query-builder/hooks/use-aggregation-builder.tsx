@@ -141,8 +141,14 @@ export function useGermlineSNVAggregationStatistics({ field }: CNVAggregationBui
 /**
  * Germline CNV
  */
-type CNVAggregationBuilderProps = IAggregationBuilder;
-export function useGermlineCNVAggregationBuilder({ field, size = 30 }: CNVAggregationBuilderProps) {
+type CNVAggregationBuilderProps = IAggregationBuilder & {
+  withDictionary?: boolean;
+};
+export function useGermlineCNVAggregationBuilder({
+  field,
+  size = 30,
+  withDictionary = false,
+}: CNVAggregationBuilderProps) {
   const { tenant } = useTenant();
   const activeSqon = useQBActiveSqon();
   const caseId = useCaseIdFromParam();
@@ -161,13 +167,14 @@ export function useGermlineCNVAggregationBuilder({ field, size = 30 }: CNVAggreg
             size: size,
             sqon: activeSqon,
           },
+          withDictionary,
         };
 
   return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(
     data,
     async () =>
       occurrencesApi
-        .aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId!, data!.aggregationBody)
+        .aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId!, data!.aggregationBody, data!.withDictionary)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
