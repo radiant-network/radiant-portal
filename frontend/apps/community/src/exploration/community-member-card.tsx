@@ -15,7 +15,6 @@ export default function CommunityMemberCard({ member, highlight }: CommunityMemb
 
   return (
     <Card size="sm" className="flex flex-col items-center gap-2 p-6 text-center">
-      {/* id + name only → initials avatar without the hover popover */}
       <UserAvatar user={{ id: member.id, name }} size="2xl" />
       <span className="text-primary font-semibold">
         <HighlightText text={name} query={highlight} />
