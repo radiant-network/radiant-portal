@@ -204,7 +204,7 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
   return (
     <Dialog onOpenChange={onClear}>
       <DialogTrigger asChild>
-        <Button size="sm" className="w-full mb-2">
+        <Button size="sm" className="w-full mb-2" data-cy={`upload-list-button-${variant}`}>
           <UploadIcon />
           {t(`common.upload_id.${variant}.button`)}
         </Button>
@@ -218,9 +218,9 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
             <Label>{t('common.upload_id.input_label')}</Label>
             <HoverCard>
               <HoverCardTrigger asChild>
-                <InfoIcon size={16} />
+                <InfoIcon size={16} data-cy="upload-list-info" />
               </HoverCardTrigger>
-              <HoverCardContent className="w-full">
+              <HoverCardContent className="w-full" data-cy="upload-list-popover">
                 <h4 className="font-semibold mb-3">{t(`common.upload_id.popover_title`)}</h4>
                 <div className="flex gap-2 items-center">
                   <Label className="font-semibold">{t(`common.upload_id.popover_identifiers`)}</Label>
@@ -271,7 +271,7 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
               />
             </>
             {(unmatched.length > 0 || matched.length > 0) && (
-              <Button variant="ghost" onClick={onClear}>
+              <Button variant="ghost" onClick={onClear} data-cy="upload-list-clear">
                 {t('common.upload_id.clear')}
               </Button>
             )}
@@ -329,10 +329,13 @@ function UploadIdModal({ variant }: UploadIdModalProps) {
         </DialogBody>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">{t('common.actions.cancel')}</Button>
+            <Button variant="outline" data-cy="upload-list-cancel">
+              {t('common.actions.cancel')}
+            </Button>
           </DialogClose>
           <DialogClose asChild>
             <Button
+              data-cy="upload-list-submit"
               disabled={matched.length === 0}
               onClick={() => {
                 dispatch({

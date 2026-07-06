@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { CommonTexts } from 'pom/shared/Texts';
 import { CommonSelectors } from '../shared/Selectors';
-import { getTextOperator } from 'pom/shared/Utils';
+import { buildBilingualRegExp, getTextOperator } from 'pom/shared/Utils';
 
 export const tableSNVFacets = [
   {
@@ -993,6 +993,24 @@ const generateFacetsActionsFunctions = () => ({
   clickSidebarSection(section: string) {
     cy.get(CommonSelectors.sidebarSection(section)).clickAndWait({ force: true });
   },
+  /**
+   * Opens the upload-list modal.
+   */
+  openUploadListModal() {
+    cy.get(CommonSelectors.uploadListButton).clickAndWait({ force: true });
+  },
+  /**
+   * Types a gene in the search autocomplete and selects the matching suggestion.
+   * @param gene The gene symbol or Ensembl ID to search (e.g., 'HPSE2').
+   */
+  searchGene(gene: string) {
+    cy.intercept('GET', '**/genes/autocomplete*').as('getGeneAutocomplete');
+    cy.intercept('POST', '**/list').as('postListSearchBy');
+    cy.get(`${CommonSelectors.searchFacet} ${CommonSelectors.input}`).type(gene, { force: true });
+    cy.wait('@getGeneAutocomplete');
+    cy.get(`${CommonSelectors.searchFacet} ${CommonSelectors.commandItem}`).contains(gene).clickAndWait({ force: true });
+    cy.wait('@postListSearchBy');
+  },
 });
 
 const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSectionAction: (section: string) => void) => ({
@@ -1093,6 +1111,13 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
     });
   },
   /**
+   * Validates that the applied filter produced a `symbol` (Gene Symbol) query pill.
+   * @param genes The gene symbols expected in the pill (compared lowercase, as rendered by the query builder).
+   */
+  shouldHaveGeneSymbolPill(genes: string[]) {
+    cy.validatePillSelectedQuery('Gene Symbol', genes.map(gene => gene.toLowerCase()));
+  },
+  /**
    * Validates that facets display tooltips when expected.
    * Iterates through all sections and checks each facet's tooltip presence.
    */
@@ -1185,7 +1210,14 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
       });
     });
   },
-
+  /**
+   * SEARCH_BY facet: validates that the search facet displays its tooltip on hover.
+   * @param field The search facet field key (default: 'symbol' for `search_by_symbol`).
+   */
+  shouldSearchByHaveTooltip(field: string = 'symbol') {
+    cy.get(CommonSelectors.searchFacetTooltip(field)).realHover();
+    cy.get(CommonSelectors.searchFacetTooltipContent(field)).contains(buildBilingualRegExp('searchByGeneTooltip')).should('exist');
+  },
   /**
    * Validates that all facets in a section are displayed in the correct order.
    * @param section - The section name to validate (e.g., 'Variant', 'Gene', 'Pathogenicity').
