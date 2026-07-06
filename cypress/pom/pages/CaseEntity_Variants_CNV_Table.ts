@@ -258,6 +258,21 @@ export const CaseEntity_Variants_CNV_Table = {
       cy.get(selectors.toggle).clickAndWait({ force: true });
     },
     /**
+     * Returns the total results count displayed in the table index result.
+     * Yields 0 when no results are displayed.
+     */
+    getResultsCount(): Cypress.Chainable<number> {
+      return cy
+        .get(CommonSelectors.tableIndexResult)
+        .invoke('text')
+        .then(text => {
+          const ofIndex = text.toLowerCase().indexOf(' of ');
+          if (ofIndex === -1) return 0;
+          const digits = text.substring(ofIndex + 4).replace(/\D/g, '');
+          return digits ? parseInt(digits, 10) : 0;
+        });
+    },
+    /**
      * Hides a specific column in the table.
      * @param columnID The ID of the column to hide.
      */
@@ -370,6 +385,32 @@ export const CaseEntity_Variants_CNV_Table = {
      */
     shouldHaveCustomQuery() {
       cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.saveIcon}`).should('not.exist');
+    },
+    /**
+     * Checks the total results count displayed in the table index result.
+     * @param count The expected count (number or Cypress.Chainable yielding a number).
+     * @param beEqual Whether the displayed count should be equal to `count` (default: true).
+     */
+    shouldShowResultsCount(count: number | Cypress.Chainable<number>, beEqual: boolean = true) {
+      const compare = (expected: number) => {
+        cy.get(CommonSelectors.tableIndexResult)
+          .invoke('text')
+          .should(text => {
+            const ofIndex = text.toLowerCase().indexOf(' of ');
+            const digits = ofIndex === -1 ? '' : text.substring(ofIndex + 4).replace(/\D/g, '');
+            const current = digits ? parseInt(digits, 10) : 0;
+            if (beEqual) {
+              expect(current).to.eq(expected);
+            } else {
+              expect(current).to.not.eq(expected);
+            }
+          });
+      };
+      if (typeof count === 'number') {
+        compare(count);
+      } else {
+        count.then(compare);
+      }
     },
     /**
      * Validates the value of the first row for a given column.

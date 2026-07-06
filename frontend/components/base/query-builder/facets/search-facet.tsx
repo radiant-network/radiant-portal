@@ -164,14 +164,16 @@ export function SearchFacet({ search }: SearchFilterProps) {
   };
 
   return (
-    <div className="flex flex-col gap-2 ">
+    <div className="flex flex-col gap-2 " data-cy={`search-facet-${fieldKey}`}>
       <div className="flex items-center gap-2">
         <Label>{t(`common.filters.labels.${translation_key}`)}</Label>
         <Tooltip>
           <TooltipTrigger asChild>
-            <InfoIcon size={16} />
+            <InfoIcon size={16} data-cy={`search-facet-tooltip-${fieldKey}`} />
           </TooltipTrigger>
-          <TooltipContent>{t(`common.filters.labels.${translation_key}_tooltip`)}</TooltipContent>
+          <TooltipContent data-cy={`search-facet-tooltip-content-${fieldKey}`}>
+            {t(`common.filters.labels.${translation_key}_tooltip`)}
+          </TooltipContent>
         </Tooltip>
       </div>
       <MultiSelector
