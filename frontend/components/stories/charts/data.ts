@@ -9160,3 +9160,46 @@ export const cooccurenceOftopTenConditionsData = [
     ],
   },
 ];
+
+type SwarmSample = {
+  value: number;
+  sample_id: string;
+  sex: 'Male' | 'Female';
+};
+
+export const swarmPlotGroups: { name: string; points: SwarmSample[] }[] = [
+  {
+    name: 'T21 (n=12)',
+    points: [
+      { value: 8.12, sample_id: 'BS-001', sex: 'Female' },
+      { value: 9.44, sample_id: 'BS-002', sex: 'Male' },
+      { value: 7.63, sample_id: 'BS-003', sex: 'Female' },
+      { value: 10.21, sample_id: 'BS-004', sex: 'Male' },
+      { value: 8.9, sample_id: 'BS-005', sex: 'Female' },
+      { value: 11.05, sample_id: 'BS-006', sex: 'Male' },
+      { value: 9.78, sample_id: 'BS-007', sex: 'Female' },
+      { value: 8.34, sample_id: 'BS-008', sex: 'Male' },
+      { value: 12.4, sample_id: 'BS-009', sex: 'Female' },
+      { value: 9.11, sample_id: 'BS-010', sex: 'Male' },
+      { value: 10.66, sample_id: 'BS-011', sex: 'Female' },
+      { value: 7.98, sample_id: 'BS-012', sex: 'Male' },
+    ],
+  },
+  {
+    name: 'Control (n=12)',
+    points: [
+      { value: 3.21, sample_id: 'BS-101', sex: 'Male' },
+      { value: 4.05, sample_id: 'BS-102', sex: 'Female' },
+      { value: 2.88, sample_id: 'BS-103', sex: 'Male' },
+      { value: 5.12, sample_id: 'BS-104', sex: 'Female' },
+      { value: 3.76, sample_id: 'BS-105', sex: 'Male' },
+      { value: 4.63, sample_id: 'BS-106', sex: 'Female' },
+      { value: 2.4, sample_id: 'BS-107', sex: 'Male' },
+      { value: 3.99, sample_id: 'BS-108', sex: 'Female' },
+      { value: 4.87, sample_id: 'BS-109', sex: 'Male' },
+      { value: 3.05, sample_id: 'BS-110', sex: 'Female' },
+      { value: 5.44, sample_id: 'BS-111', sex: 'Male' },
+      { value: 3.52, sample_id: 'BS-112', sex: 'Female' },
+    ],
+  },
+];

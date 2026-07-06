@@ -77,3 +77,29 @@ export type UpsetChartProps = {
   attributesSanitizer?: RegExp;
   onClick?: (data: string[]) => void;
 };
+
+export type SwarmPlotPoint<T = Record<string, unknown>> = T & {
+  /** Numeric value distributed along the y-axis. */
+  value: number;
+};
+
+export type SwarmPlotGroup<T = Record<string, unknown>> = {
+  /** Label used for the x-axis tick and the legend entry. */
+  name: string;
+  color?: string;
+  points: SwarmPlotPoint<T>[];
+};
+
+export type SwarmPlotProps<T = Record<string, unknown>> = {
+  groups: SwarmPlotGroup<T>[];
+  title?: string;
+  yAxisLabel?: string;
+  loading?: boolean;
+  colors?: string[];
+  selectedPoints?: SwarmPlotPoint<T>[];
+  tooltip?: (point: SwarmPlotPoint<T>) => string;
+  annotation?: (point: SwarmPlotPoint<T>) => string;
+  onPointClick?: (point: SwarmPlotPoint<T>) => void;
+  onSelect?: (points: SwarmPlotPoint<T>[]) => void;
+  className?: string;
+};
