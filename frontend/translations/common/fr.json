@@ -331,10 +331,9 @@
         }
       },
       "reset": "Réinitialiser",
-      "results": "Résultats",
+      "results": "Résultats {{from}} - {{to}} de {{total}}",
       "no_result": "Aucun résultat",
       "no_result_description": "Ajuster vos filtres et essayer à nouveau.",
-      "of": "de",
       "has_error": "Erreur lors du chargement du contenu",
       "has_error_description": "Essayer de rafraichir la page ou essayer à nouveau dans quelques minutes."
     },
