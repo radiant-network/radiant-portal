@@ -9,7 +9,7 @@ import { StorySection } from '../story-section';
 
 import { biospecimensData, filesByDataTypesData, hpoData, mondoData } from './data';
 
-const hpoProps = {
+export const hpoProps = {
   axis: {
     x: {
       dataKey: 'count',
@@ -39,7 +39,7 @@ const hpoProps = {
     </div>
   ),
 };
-const mondoProps = {
+export const mondoProps = {
   axis: {
     x: {
       dataKey: 'count',
@@ -70,7 +70,7 @@ const mondoProps = {
   ),
 };
 
-const filesByDataTypesProps = {
+export const filesByDataTypesProps = {
   axis: {
     x: {
       dataKey: 'count',
@@ -91,7 +91,7 @@ const filesByDataTypesProps = {
   ),
 };
 
-const biospecimensProps = {
+export const biospecimensProps = {
   axis: {
     x: {
       dataKey: 'count',

@@ -77,6 +77,11 @@
       "type_to_search": "Type to search",
       "no_data": "No data"
     },
+    "grid": {
+      "charts": "Charts",
+      "remove_chart": "Remove chart",
+      "reset": "Reset"
+    },
     "sex": {
       "male": "Male",
       "female": "Female",

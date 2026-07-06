@@ -77,6 +77,11 @@
       "type_to_search": "Tapez pour rechercher",
       "no_data": "Aucune donnée"
     },
+    "grid": {
+      "charts": "Graphiques",
+      "remove_chart": "Retirer le graphique",
+      "reset": "Réinitialiser"
+    },
     "sex": {
       "male": "Masculin",
       "female": "Féminin",
