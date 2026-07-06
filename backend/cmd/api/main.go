@@ -160,7 +160,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 	occurrencesGermlineCNVGroup := occurrencesGermlineGroup.Group("/cnv")
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/count", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVCountHandler(repoGermlineCNVOccurrences))
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVListHandler(repoGermlineCNVOccurrences))
-	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVAggregateHandler(repoGermlineCNVOccurrences))
+	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVAggregateHandler(repoGermlineCNVOccurrences, repoFacets))
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVStatisticsHandler(repoGermlineCNVOccurrences))
 	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVGenesOverlapHandler(repoGermlineCNVOccurrences))
 

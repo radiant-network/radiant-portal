@@ -18,8 +18,8 @@ type MockCNVRepository struct{}
 
 func (m *MockCNVRepository) AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]repository.Aggregation, error) {
 	return []types.Aggregation{
-			{Bucket: "p1", Count: 2},
-			{Bucket: "p2", Count: 1},
+			{Bucket: "GAIN", Count: 2},
+			{Bucket: "LOSS", Count: 1},
 		},
 		nil
 }
@@ -198,11 +198,12 @@ func Test_CNVOccurrencesCountHandler(t *testing.T) {
 
 func Test_CNVOccurrencesAggregateHandler(t *testing.T) {
 	repo := &MockCNVRepository{}
+	facetsRepo := &MockFacetsRepository{}
 	router := gin.Default()
-	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/aggregate", OccurrencesGermlineCNVAggregateHandler(repo))
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/aggregate", OccurrencesGermlineCNVAggregateHandler(repo, facetsRepo))
 
 	body := `{
-			"field": "cytoband",
+			"field": "type",
 			"sqon":{
 				"op":"in",
 				"content":{
@@ -216,7 +217,33 @@ func Test_CNVOccurrencesAggregateHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	expected := `[{"key": "p1", "count": 2}, {"key": "p2", "count": 1}]`
+	expected := `[{"key": "GAIN", "count": 2}, {"key": "LOSS", "count": 1}]`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_CNVOccurrencesAggregateHandler_withDictionary(t *testing.T) {
+	repo := &MockCNVRepository{}
+	facetsRepo := &MockFacetsRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/aggregate", OccurrencesGermlineCNVAggregateHandler(repo, facetsRepo))
+
+	body := `{
+			"field": "type",
+			"sqon":{
+				"op":"in",
+				"content":{
+					"field": "filter",
+					"value": ["PASS"]
+				}
+		    },
+			"size": 10
+	}`
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/aggregate?with_dictionary=true", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `[{"key": "GAIN", "count": 2}, {"key": "LOSS", "count": 1}, {"key": "GAINLOH", "count": 0}, {"key": "CNLOH", "count": 0}]`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }

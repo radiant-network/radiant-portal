@@ -35,6 +35,15 @@ func Test_GetFacets_Biotype_IncludesEmptyStringForNoData(t *testing.T) {
 	assert.Contains(t, facets[0].Values, "")
 }
 
+func Test_GetFacets_CNVType(t *testing.T) {
+	repo := NewFacetsRepository()
+	facets, err := repo.GetFacets(t.Context(), []string{"type"})
+	assert.NoError(t, err)
+	assert.Len(t, facets, 1)
+	assert.Equal(t, "type", facets[0].Name)
+	assert.ElementsMatch(t, []string{"GAIN", "LOSS", "GAINLOH", "CNLOH"}, facets[0].Values)
+}
+
 func Test_GetFacets_WithNoNames(t *testing.T) {
 	repo := NewFacetsRepository()
 	facets, err := repo.GetFacets(t.Context(), []string{})
