@@ -1,0 +1,15 @@
+import{r,j as e}from"./iframe-jfSntGFs.js";import{C as t}from"./checkbox-Cbw8d62y.js";import{a as n,b as o}from"./story-section-r6zyD_Yn.js";import"./preload-helper-PPVm8Dsz.js";import"./index-CR3ShZdK.js";import"./check-2HNr6tyJ.js";const k={title:"Components/Inputs/Checkbox",args:{size:"default",checked:!1,onCheckedChange:()=>{}},component:t},s={render:()=>{const[c,a]=r.useState(!1);return e.jsxs(n,{title:"Sizes",children:[e.jsxs("div",{className:"flex flex-col gap-2",children:[e.jsx(o,{children:"default"}),e.jsx(t,{size:"default",checked:c,onCheckedChange:a})]}),e.jsxs("div",{className:"flex flex-col gap-2",children:[e.jsx(o,{children:"xs"}),e.jsx(t,{size:"xs",checked:c,onCheckedChange:a})]})]})}};s.parameters={...s.parameters,docs:{...s.parameters?.docs,source:{originalSource:`{
+  render: () => {
+    const [checked, setChecked] = useState<CheckedState>(false);
+    return <StorySection title="Sizes">
+        <div className="flex flex-col gap-2">
+          <StoryLabel>default</StoryLabel>
+          <Checkbox size="default" checked={checked} onCheckedChange={setChecked} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <StoryLabel>xs</StoryLabel>
+          <Checkbox size="xs" checked={checked} onCheckedChange={setChecked} />
+        </div>
+      </StorySection>;
+  }
+}`,...s.parameters?.docs?.source}}};const p=["Sizes"];export{s as Sizes,p as __namedExportsOrder,k as default};

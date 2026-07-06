@@ -1,0 +1,1 @@
+import{j as t,c as a}from"./iframe-jfSntGFs.js";function n({className:e,...o}){return t.jsx("div",{"data-cy":"load-indicator",className:a("animate-pulse rounded-md bg-muted",e),...o})}n.__docgenInfo={description:"",methods:[],displayName:"Skeleton"};export{n as S};
