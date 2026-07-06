@@ -156,6 +156,7 @@ func OccurrencesGermlineCNVCountHandler(repo germlineCNVOccurrencesReader) gin.H
 // @Param case_id path int true "Case ID"
 // @Param seq_id path int true "Sequence ID"
 // @Param task_id path int true "Task ID"
+// @Param with_dictionary query bool false "Whether to include all possible facet values" default(false)
 // @Param			message	body		types.AggregationBodyWithSqon	true	"Aggregation Body"
 // @Accept json
 // @Produce json
@@ -167,11 +168,12 @@ func OccurrencesGermlineCNVCountHandler(repo germlineCNVOccurrencesReader) gin.H
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate [post]
-func OccurrencesGermlineCNVAggregateHandler(repo germlineCNVOccurrencesReader) gin.HandlerFunc {
+func OccurrencesGermlineCNVAggregateHandler(repo germlineCNVOccurrencesReader, facetsRepo facetsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			body  types.AggregationBodyWithSqon
-			query types.AggQuery
+			body       types.AggregationBodyWithSqon
+			query      types.AggQuery
+			queryParam types.AggregationQueryParam
 		)
 
 		// Bind JSON to the struct
@@ -206,6 +208,40 @@ func OccurrencesGermlineCNVAggregateHandler(repo germlineCNVOccurrencesReader) g
 			HandleError(c, err)
 			return
 		}
+
+		if err := c.ShouldBindQuery(&queryParam); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		if queryParam.WithDictionary {
+			facets, err := facetsRepo.GetFacets(c.Request.Context(), []string{body.Field})
+			if err != nil {
+				HandleError(c, err)
+				return
+			}
+			if len(facets) == 0 {
+				HandleNotFoundError(c, "facet")
+				return
+			}
+
+			existingBuckets := make(map[string]struct{}, len(aggregation))
+			for _, agg := range aggregation {
+				existingBuckets[agg.Bucket] = struct{}{}
+			}
+
+			for _, facet := range facets { // Should be only one facet for now
+				for _, facetValue := range facet.Values {
+					if _, found := existingBuckets[facetValue]; !found {
+						aggregation = append(aggregation, types.Aggregation{
+							Bucket: facetValue,
+							Count:  0,
+						})
+					}
+				}
+			}
+		}
+
 		c.JSON(http.StatusOK, aggregation)
 	}
 }

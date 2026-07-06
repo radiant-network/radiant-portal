@@ -102,6 +102,12 @@ func NewFacetsRepository() *FacetsRepository {
 				"unknown_mother_genotype", "unknown_proband_genotype",
 			},
 		},
+		"type": {
+			Name: "type",
+			Values: []string{
+				"GAIN", "LOSS", "GAINLOH", "CNLOH",
+			},
+		},
 	}
 
 	return &FacetsRepository{

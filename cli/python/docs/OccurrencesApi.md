@@ -23,7 +23,7 @@ Method | HTTP request | Description
 
 
 # **aggregate_germline_cnv_occurrences**
-> List[Aggregation] aggregate_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon)
+> List[Aggregation] aggregate_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
 
 Aggregate germline CNV occurrences
 
@@ -65,10 +65,11 @@ with radiant_python.ApiClient(configuration) as api_client:
     seq_id = 56 # int | Sequence ID
     task_id = 56 # int | Task ID
     aggregation_body_with_sqon = radiant_python.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
+    with_dictionary = False # bool | Whether to include all possible facet values (optional) (default to False)
 
     try:
         # Aggregate germline CNV occurrences
-        api_response = api_instance.aggregate_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon)
+        api_response = api_instance.aggregate_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
         print("The response of OccurrencesApi->aggregate_germline_cnv_occurrences:\n")
         pprint(api_response)
     except Exception as e:
@@ -87,6 +88,7 @@ Name | Type | Description  | Notes
  **seq_id** | **int**| Sequence ID | 
  **task_id** | **int**| Task ID | 
  **aggregation_body_with_sqon** | [**AggregationBodyWithSqon**](AggregationBodyWithSqon.md)| Aggregation Body | 
+ **with_dictionary** | **bool**| Whether to include all possible facet values | [optional] [default to False]
 
 ### Return type
 

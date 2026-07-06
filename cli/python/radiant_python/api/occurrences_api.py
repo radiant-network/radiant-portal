@@ -60,6 +60,7 @@ class OccurrencesApi:
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
+        with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -87,6 +88,8 @@ class OccurrencesApi:
         :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
+        :param with_dictionary: Whether to include all possible facet values
+        :type with_dictionary: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -115,6 +118,7 @@ class OccurrencesApi:
             seq_id=seq_id,
             task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
+            with_dictionary=with_dictionary,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -148,6 +152,7 @@ class OccurrencesApi:
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
+        with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -175,6 +180,8 @@ class OccurrencesApi:
         :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
+        :param with_dictionary: Whether to include all possible facet values
+        :type with_dictionary: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -203,6 +210,7 @@ class OccurrencesApi:
             seq_id=seq_id,
             task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
+            with_dictionary=with_dictionary,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -236,6 +244,7 @@ class OccurrencesApi:
         seq_id: Annotated[StrictInt, Field(description="Sequence ID")],
         task_id: Annotated[StrictInt, Field(description="Task ID")],
         aggregation_body_with_sqon: Annotated[AggregationBodyWithSqon, Field(description="Aggregation Body")],
+        with_dictionary: Annotated[Optional[StrictBool], Field(description="Whether to include all possible facet values")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -263,6 +272,8 @@ class OccurrencesApi:
         :type task_id: int
         :param aggregation_body_with_sqon: Aggregation Body (required)
         :type aggregation_body_with_sqon: AggregationBodyWithSqon
+        :param with_dictionary: Whether to include all possible facet values
+        :type with_dictionary: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -291,6 +302,7 @@ class OccurrencesApi:
             seq_id=seq_id,
             task_id=task_id,
             aggregation_body_with_sqon=aggregation_body_with_sqon,
+            with_dictionary=with_dictionary,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -319,6 +331,7 @@ class OccurrencesApi:
         seq_id,
         task_id,
         aggregation_body_with_sqon,
+        with_dictionary,
         _request_auth,
         _content_type,
         _headers,
@@ -349,6 +362,10 @@ class OccurrencesApi:
         if task_id is not None:
             _path_params['task_id'] = task_id
         # process the query parameters
+        if with_dictionary is not None:
+            
+            _query_params.append(('with_dictionary', with_dictionary))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter

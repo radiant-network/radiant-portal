@@ -9648,10 +9648,11 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+         * @param {boolean} [withDictionary] Whether to include all possible facet values
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineCNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        aggregateGermlineCNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'tenant' is not null or undefined
             assertParamExists('aggregateGermlineCNVOccurrences', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
@@ -9681,6 +9682,10 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             // authentication bearerauth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (withDictionary !== undefined) {
+                localVarQueryParameter['with_dictionary'] = withDictionary;
+            }
 
 
     
@@ -10545,11 +10550,12 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+         * @param {boolean} [withDictionary] Whether to include all possible facet values
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async aggregateGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, options);
+        async aggregateGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Aggregation>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.aggregateGermlineCNVOccurrences']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10826,11 +10832,12 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          * @param {number} seqId Sequence ID
          * @param {number} taskId Task ID
          * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+         * @param {boolean} [withDictionary] Whether to include all possible facet values
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        aggregateGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
-            return localVarFp.aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, options).then((request) => request(axios, basePath));
+        aggregateGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Array<Aggregation>> {
+            return localVarFp.aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(axios, basePath));
         },
         /**
          * Aggregate germline SNV occurrences for a given sequence ID
@@ -11059,12 +11066,13 @@ export class OccurrencesApi extends BaseAPI {
      * @param {number} seqId Sequence ID
      * @param {number} taskId Task ID
      * @param {AggregationBodyWithSqon} aggregationBodyWithSqon Aggregation Body
+     * @param {boolean} [withDictionary] Whether to include all possible facet values
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof OccurrencesApi
      */
-    public aggregateGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, options?: RawAxiosRequestConfig) {
-        return OccurrencesApiFp(this.configuration).aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    public aggregateGermlineCNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, aggregationBodyWithSqon: AggregationBodyWithSqon, withDictionary?: boolean, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).aggregateGermlineCNVOccurrences(tenant, caseId, seqId, taskId, aggregationBodyWithSqon, withDictionary, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

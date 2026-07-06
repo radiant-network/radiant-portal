@@ -350,6 +350,16 @@ func (m *MockFacetsRepository) GetFacets(ctx context.Context, facetNames []strin
 		},
 	}
 
+	var cnvTypeFacet = types.Facet{
+		Name: "type",
+		Values: []string{
+			"GAIN",
+			"LOSS",
+			"GAINLOH",
+			"CNLOH",
+		},
+	}
+
 	if len(facetNames) == 2 {
 		return []types.Facet{variantClassFacet, lrtPredFacet}, nil
 	}
@@ -360,6 +370,10 @@ func (m *MockFacetsRepository) GetFacets(ctx context.Context, facetNames []strin
 
 	if len(facetNames) == 1 && facetNames[0] == "lrt_pred" {
 		return []types.Facet{lrtPredFacet}, nil
+	}
+
+	if len(facetNames) == 1 && facetNames[0] == "type" {
+		return []types.Facet{cnvTypeFacet}, nil
 	}
 
 	return nil, fmt.Errorf("error")
