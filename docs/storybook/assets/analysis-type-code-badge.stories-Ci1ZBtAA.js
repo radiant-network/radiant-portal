@@ -1,0 +1,10 @@
+import{j as r}from"./iframe-BDYK6UvR.js";import{S as a}from"./api-EcWoeBNP.js";import{A as t}from"./analysis-type-code-badge-mMGMzdWA.js";import{C as c,A as e}from"./applications-config-E939f-Wl.js";import{a as _}from"./story-section-FMAs1sHp.js";import{B as m}from"./chunk-QUQL4437-FnWNOlwB.js";import"./preload-helper-PPVm8Dsz.js";import"./badge-CXb43PLs.js";import"./separator-3qJkDnyN.js";import"./x-tHk7glPu.js";import"./i18n-DvEGfvD-.js";import"./index-C16L_Bj1.js";import"./users-mSVm6TNT.js";import"./user-BQ2cazRN.js";const p={variant_entity:{app_id:e.variant_entity},germline_snv_occurrence:{app_id:e.germline_snv_occurrence,aggregations:[],saved_filter_type:a.GERMLINE_SNV_OCCURRENCE},germline_cnv_occurrence:{app_id:e.germline_cnv_occurrence,aggregations:[],saved_filter_type:a.GERMLINE_CNV_OCCURRENCE},somatic_snv_to_occurrence:{app_id:e.somatic_snv_to_occurrence,aggregations:[],saved_filter_type:a.SOMATIC_SNV_OCCURRENCE},somatic_snv_tn_occurrence:{app_id:e.somatic_snv_tn_occurrence,aggregations:[],saved_filter_type:a.SOMATIC_SNV_OCCURRENCE},somatic_cnv_to_occurrence:{app_id:e.somatic_cnv_to_occurrence,aggregations:[],saved_filter_type:a.SOMATIC_CNV_OCCURRENCE},admin:{admin_code:"admin",app_id:e.admin},portal:{name:"",navigation:{}}},O={title:"Components/Badges/Analysis Type Code Badge",component:t,args:{},decorators:[i=>r.jsx(m,{children:r.jsx(c,{config:p,children:r.jsx(i,{})})})]},o={args:{code:"somatic"},render:i=>r.jsx(_,{title:"Default",children:r.jsx("div",{className:"flex gap-2",children:["somatic","germline","germline_family"].map((s,n)=>r.jsx(t,{code:s},n))})})};o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:`{
+  args: {
+    code: 'somatic' as AnalysisTypeCode
+  },
+  render: _args => <StorySection title="Default">
+      <div className="flex gap-2">
+        {['somatic', 'germline', 'germline_family'].map((code, index) => <AnalysisTypeCodeBadge key={index} code={code as AnalysisTypeCode} />)}
+      </div>
+    </StorySection>
+}`,...o.parameters?.docs?.source}}};const T=["Default"];export{o as Default,T as __namedExportsOrder,O as default};
