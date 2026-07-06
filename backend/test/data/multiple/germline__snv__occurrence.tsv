@@ -3,3 +3,4 @@ part	seq_id	task_id	locus_id	gq	filter	zygosity	ad_ratio
 1	2	5	1000	100	PASS	HET	1.0
 1	1	5	2000	100	LowQuality	HET	1.0
 1	1	200	5000	100	PASS	HET	1.0
+1	1	200	2000	100	PASS	HET	1.0

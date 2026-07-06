@@ -190,31 +190,41 @@ func Test_Germline_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *t
 	})
 }
 
-// Reproduces the cross-case leak scenario: the `multiple` fixture has two rows
-// at seq_id=1 with different task_ids — task_id=1 for case 1's annotation,
-// task_id=200 simulating a second case that reuses the same sequencing. The
-// repository must filter on task_id so each case sees only its own occurrence.
+// Reproduces the cross-task leak scenario: the `multiple` fixture has, at the
+// same seq_id=1/part, locus 2000 under BOTH task_id=5 (case 1's annotation) and
+// task_id=200 (a second case reusing the same sequencing). Because the list
+// query's outer SELECT re-joins the occurrence table, filtering only on seq_id +
+// `locus_id IN (<task-filtered subquery>)` is not enough — locus 2000 is IN both
+// subqueries, so without an explicit task_id on the outer query each case leaks
+// the other's row for that locus.
 func Test_Germline_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
 	testutils.ParallelTestWithStarrocks(t, "multiple", func(t *testing.T, db *gorm.DB) {
 		repo := NewGermlineSNVOccurrencesRepository(db)
 		query, err := types.NewListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
 		assert.NoError(t, err)
 
-		// Case 1 (annotation task_id=5) sees its own loci at seq_id=1, not the
-		// row attached to task_id=200.
+		// Case 1 (task_id=5) sees only its own loci {1000,2000} at seq_id=1, each
+		// stamped task_id=5 — never the task_id=200 row for shared locus 2000.
 		case1Occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
 		assert.NoError(t, err)
+		case1LocusIds := make([]string, 0, len(case1Occurrences))
 		for _, occ := range case1Occurrences {
-			assert.NotEqual(t, "5000", occ.LocusId, "task_id=5 query must not return case 2's occurrence (locus 5000)")
+			assert.Equal(t, 5, occ.TaskId, "task_id=5 query leaked an occurrence from another task")
+			case1LocusIds = append(case1LocusIds, occ.LocusId)
 		}
+		assert.ElementsMatch(t, []string{"1000", "2000"}, case1LocusIds)
 
-		// Case 2 (annotation task_id=200, reusing seq_id=1) sees only the
-		// task_id=200 row, not case 1's loci 1000/2000.
+		// Case 2 (task_id=200, reusing seq_id=1) sees only its locus_id(s) {2000,5000},
+		// each stamped task_id=200 — never case 1's task_id=5 row for shared
+		// locus 2000.
 		case2Occurrences, err := repo.GetOccurrences(t.Context(), 2, 1, 200, query)
 		assert.NoError(t, err)
-		if assert.Len(t, case2Occurrences, 1) {
-			assert.EqualValues(t, "5000", case2Occurrences[0].LocusId)
+		case2LocusIds := make([]string, 0, len(case2Occurrences))
+		for _, occ := range case2Occurrences {
+			assert.Equal(t, 200, occ.TaskId, "task_id=200 query leaked an occurrence from another task")
+			case2LocusIds = append(case2LocusIds, occ.LocusId)
 		}
+		assert.ElementsMatch(t, []string{"2000", "5000"}, case2LocusIds)
 	})
 }
 
