@@ -341,6 +341,7 @@
       "results": "Results",
       "no_result": "No results",
       "no_result_description": "Adjust your filters and try again.",
+      "of": "of",
       "has_error": "Error loading this content",
       "has_error_description": "Try refreshing the page or try again in a few minutes."
     },

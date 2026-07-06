@@ -28,7 +28,7 @@ function TableIndexResult({ loading, pageIndex, pageSize, total }: TableIndexRes
     <span className="text-xs text-muted-foreground" data-cy="table-index-result">
       {total > 0 ? (
         <>
-          {t('common.table.results')} {thousandNumberFormat(from)} - {thousandNumberFormat(to)} of{' '}
+          {t('common.table.results')} {thousandNumberFormat(from)} - {thousandNumberFormat(to)} {t('common.table.of')}{' '}
           {thousandNumberFormat(total)}
         </>
       ) : (
