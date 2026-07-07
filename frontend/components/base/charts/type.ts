@@ -79,12 +79,10 @@ export type UpsetChartProps = {
 };
 
 export type SwarmPlotPoint<T = Record<string, unknown>> = T & {
-  /** Numeric value distributed along the y-axis. */
   value: number;
 };
 
 export type SwarmPlotGroup<T = Record<string, unknown>> = {
-  /** Label used for the x-axis tick and the legend entry. */
   name: string;
   color?: string;
   points: SwarmPlotPoint<T>[];
@@ -110,9 +108,7 @@ export type ScatterPlotPoint<T = Record<string, unknown>> = T & {
 };
 
 export type ScatterPlotSeries<T = Record<string, unknown>> = {
-  /** Legend label for this series. */
   name: string;
-  /** Marker color (hex/rgb). Falls back to the palette when omitted. */
   color?: string;
   points: ScatterPlotPoint<T>[];
 };
@@ -123,13 +119,9 @@ export type ScatterPlotProps<T = Record<string, unknown>> = {
   xAxisLabel?: string;
   yAxisLabel?: string;
   loading?: boolean;
-  /** Fallback colors for series without an explicit color. */
   colors?: string[];
-  /** Per-point color override (e.g. gray-out below a significance threshold). Takes precedence over the series color. */
   pointColor?: (point: ScatterPlotPoint<T>) => string;
-  /** When provided, these points stay at full opacity and all others are dimmed. */
   highlightedPoints?: ScatterPlotPoint<T>[];
-  /** Points highlighted with an annotation callout. */
   selectedPoints?: ScatterPlotPoint<T>[];
   tooltip?: (point: ScatterPlotPoint<T>) => string;
   annotation?: (point: ScatterPlotPoint<T>) => string;

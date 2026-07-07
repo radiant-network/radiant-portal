@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Plot from 'react-plotly.js';
 import { Annotations, Data, Layout, PlotMouseEvent, PlotSelectionEvent } from 'plotly.js';
 
+import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
 import { ScatterPlotPoint, ScatterPlotProps } from '@/components/base/charts/type';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { cn } from '@/components/lib/utils';
@@ -12,10 +13,19 @@ const DEFAULT_COLORS = ['#94a3b8', '#b91c1c', '#60a5fa'];
 const DIMMED_OPACITY = 0.4;
 
 /**
- * Scatter plot (e.g. a volcano plot). One WebGL marker series per group, with
- * per-point coloring, dimming of non-highlighted points, point selection, and
- * annotation callouts. When exactly one point is annotated, the plot keeps it
+ * Scatter plot: one WebGL marker series per group, scattered across the x/y plane.
+ * Supports per-point coloring, dimming of non-highlighted points, point selection,
+ * and annotation callouts. When exactly one point is annotated, the plot keeps it
  * centered while the user zooms.
+ *
+ *
+ *        │ ·                  ·
+ *        │  ··              ··
+ *        │   ···          ···
+ *        │     ···      ···
+ *        │   ·· ············ ··
+ *        └──────────────────────
+ *              x-axis
  */
 function ScatterPlot<T extends Record<string, unknown>>({
   series,
@@ -33,51 +43,72 @@ function ScatterPlot<T extends Record<string, unknown>>({
   onSelect,
   className,
 }: ScatterPlotProps<T>) {
-  const data = useMemo<Data[]>(
-    () =>
-      series.map((serie, index) => {
-        const seriesColor = serie.color ?? colors[index % colors.length];
-        const dim = highlightedPoints !== undefined && highlightedPoints.length > 0;
-        return {
-          type: 'scattergl',
-          mode: 'markers',
-          name: serie.name,
-          x: serie.points.map(point => point.x),
-          y: serie.points.map(point => point.y),
-          marker: {
-            color: pointColor ? serie.points.map(pointColor) : seriesColor,
-            opacity: dim ? serie.points.map(point => (highlightedPoints.includes(point) ? 1 : DIMMED_OPACITY)) : 1,
-            size: 7,
-            line: { color: 'white', width: 0.8 },
-          },
-          hoverlabel: { namelength: 0 },
-          hovertemplate: tooltip ? '%{hovertext}<extra></extra>' : undefined,
-          hovertext: tooltip ? serie.points.map(tooltip) : undefined,
-          customdata: serie.points,
-        };
-      }) as unknown as Data[],
-    [series, colors, pointColor, highlightedPoints, tooltip],
-  );
+  const theme = usePlotlyTheme();
 
-  // Stable signature of the annotated points. Drives the re-center effect
-  // without depending on the identity of `selectedPoints` / `annotation`,
-  // which callers commonly pass as fresh array/function literals each render.
+  const data = useMemo<Data[]>(() => {
+    const traces = series.map((serie, index) => {
+      const seriesColor = serie.color ?? colors[index % colors.length];
+      const dim = highlightedPoints !== undefined && highlightedPoints.length > 0;
+      return {
+        type: 'scattergl',
+        mode: 'markers',
+        name: serie.name,
+        x: serie.points.map(point => point.x),
+        y: serie.points.map(point => point.y),
+        marker: {
+          color: pointColor ? serie.points.map(pointColor) : seriesColor,
+          opacity: dim ? serie.points.map(point => (highlightedPoints.includes(point) ? 1 : DIMMED_OPACITY)) : 1,
+          size: 7,
+          line: { color: 'white', width: 0.8 },
+        },
+        selected: { marker: { color: theme.foreground } },
+        unselected: { marker: { opacity: DIMMED_OPACITY } },
+        hoverlabel: { namelength: 0 },
+        hovertemplate: tooltip ? '%{hovertext}<extra></extra>' : undefined,
+        hovertext: tooltip ? serie.points.map(tooltip) : undefined,
+        customdata: serie.points,
+      };
+    }) as unknown as Data[];
+
+    return traces;
+  }, [series, colors, pointColor, highlightedPoints, tooltip, theme]);
+
   const annotationKey = annotation ? selectedPoints.map(point => `${point.x},${point.y}`).join('|') : '';
 
   const baseLayout = useMemo<Partial<Layout>>(
     () => ({
       autosize: true,
+      paper_bgcolor: 'transparent',
+      plot_bgcolor: 'transparent',
+      font: { color: theme.foreground },
       title: title ? { text: title, x: 0.05, font: { size: 16, weight: 600 } } : undefined,
       margin: { l: 40, r: 10, t: title ? 60 : 20, b: 40 },
-      legend: { borderwidth: 1, yanchor: 'top', y: 0.99, xanchor: 'right', x: 0.99 },
-      xaxis: { title: xAxisLabel ? { text: xAxisLabel, font: { size: 14 } } : undefined, tickfont: { size: 12 } },
+      legend: {
+        borderwidth: 1,
+        bordercolor: theme.border,
+        bgcolor: theme.card,
+        yanchor: 'top',
+        y: 0.99,
+        xanchor: 'right',
+        x: 0.99,
+      },
+      xaxis: {
+        title: xAxisLabel ? { text: xAxisLabel, font: { size: 14 } } : undefined,
+        tickfont: { size: 12 },
+        gridcolor: theme.border,
+        linecolor: theme.border,
+        zerolinecolor: theme.border,
+      },
       yaxis: {
         title: yAxisLabel ? { text: yAxisLabel, font: { size: 14 } } : undefined,
         tickfont: { size: 12 },
         automargin: true,
+        gridcolor: theme.border,
+        linecolor: theme.border,
+        zerolinecolor: theme.border,
       },
     }),
-    [title, xAxisLabel, yAxisLabel],
+    [title, xAxisLabel, yAxisLabel, theme],
   );
 
   const [layout, setLayout] = useState<Partial<Layout>>(baseLayout);
@@ -96,19 +127,21 @@ function ScatterPlot<T extends Record<string, unknown>>({
               y: point.y,
               text: annotation(point),
               arrowhead: 6,
+              arrowsize: 1.6,
+              arrowwidth: 2,
+              arrowcolor: theme.foreground,
               ax: 30,
               ay: -50,
-              bgcolor: 'rgba(255, 255, 255, 0.9)',
-              bordercolor: 'black',
+              bgcolor: theme.card,
+              bordercolor: theme.border,
               borderwidth: 2,
               borderpad: 4,
-              font: { size: 12 },
+              font: { size: 12, color: theme.foreground },
             })),
         )
       : [];
     setLayout({ ...baseLayout, annotations });
     setPlotKey(prevKey => prevKey + 1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [annotationKey, baseLayout]);
 
   if (loading) {

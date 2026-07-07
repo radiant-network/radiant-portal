@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import Plot from 'react-plotly.js';
 import { Annotations, Data, Layout, PlotMouseEvent, PlotSelectionEvent } from 'plotly.js';
 
+import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
 import { SwarmPlotPoint, SwarmPlotProps } from '@/components/base/charts/type';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { cn } from '@/components/lib/utils';
@@ -33,6 +34,8 @@ function SwarmPlot<T extends Record<string, unknown>>({
   onSelect,
   className,
 }: SwarmPlotProps<T>) {
+  const theme = usePlotlyTheme();
+
   const data = useMemo<Data[]>(
     () =>
       groups.map((group, index) => {
@@ -66,12 +69,15 @@ function SwarmPlot<T extends Record<string, unknown>>({
             y: point.value,
             text: annotation(point),
             arrowhead: 6,
+            arrowsize: 1,
+            arrowwidth: 2,
+            arrowcolor: theme.foreground,
             ax: 100,
             ay: 0,
-            bgcolor: 'rgba(255, 255, 255, 0.9)',
-            bordercolor: 'black',
+            bgcolor: theme.card,
+            bordercolor: theme.border,
             borderwidth: 1,
-            font: { size: 12 },
+            font: { size: 12, color: theme.foreground },
           })),
       )
     : [];
@@ -95,11 +101,33 @@ function SwarmPlot<T extends Record<string, unknown>>({
   const layout: Partial<Layout> = {
     annotations,
     autosize: true,
+    paper_bgcolor: 'transparent',
+    plot_bgcolor: 'transparent',
+    font: { color: theme.foreground },
     title: title ? { text: title, x: 0.05, font: { size: 16, weight: 600 } } : undefined,
     margin: { l: 40, r: 10, t: title ? 60 : 20, b: 40 },
-    legend: { borderwidth: 1, yanchor: 'top', y: 0.99, xanchor: 'right', x: 0.99 },
-    yaxis: { title: yAxisLabel ? { text: yAxisLabel } : undefined },
-    xaxis: { tickvals: groups.map((_, index) => index + 1), ticktext: groups.map(group => group.name) },
+    legend: {
+      borderwidth: 1,
+      bordercolor: theme.border,
+      bgcolor: theme.card,
+      yanchor: 'top',
+      y: 0.99,
+      xanchor: 'right',
+      x: 0.99,
+    },
+    yaxis: {
+      title: yAxisLabel ? { text: yAxisLabel } : undefined,
+      gridcolor: theme.border,
+      linecolor: theme.border,
+      zerolinecolor: theme.border,
+    },
+    xaxis: {
+      tickvals: groups.map((_, index) => index + 1),
+      ticktext: groups.map(group => group.name),
+      gridcolor: theme.border,
+      linecolor: theme.border,
+      zerolinecolor: theme.border,
+    },
   };
 
   return (
