@@ -1,0 +1,10 @@
+import{j as a,c as p,b as c}from"./iframe--Wr8akaj.js";import{a as u}from"./story-section-mf2KVIsr.js";import{n as g}from"./utils-D76j_Oop.js";import"./preload-helper-PPVm8Dsz.js";const x=c({slots:{base:"relative",badge:"absolute h-[14px] min-w-[14px] px-[3px] rounded-xl text-xs leading-[14px] text-center"},variants:{variant:{default:{badge:"bg-primary text-primary-foreground"},ghost:{badge:"bg-background text-muted-foreground"},destructive:{badge:"bg-destructive text-destructive-foreground"}}},defaultVariants:{variant:"default"}});function n({count:e,className:r,children:s,offsetTop:o=5,variant:d,showZero:m=!1,...l}){const i=x({variant:d});return a.jsxs("div",{className:i.base({className:r}),...l,children:[(e>0||m)&&a.jsx("div",{className:i.badge({className:p({"right-[-12px]":e>9,"right-[-8px]":e<=9,"right-[-18px]":e>99})}),style:{top:-1*o},children:e>99?"99+":e}),s]})}n.__docgenInfo={description:"",methods:[],displayName:"NumberBadge",props:{count:{required:!0,tsType:{name:"number"},description:""},offsetTop:{required:!1,tsType:{name:"number"},description:"",defaultValue:{value:"5",computed:!1}},showZero:{required:!1,tsType:{name:"boolean"},description:"",defaultValue:{value:"false",computed:!1}}},composes:["VariantProps"]};const y={title:"Components/Badges/Number Badge",component:n,args:{count:5,offsetTop:5}},t={args:{},render:e=>a.jsx(u,{title:"Variants",children:a.jsx("div",{className:"flex flex-col items-start gap-2",children:g.map((r,s)=>a.jsx(n,{variant:r,...e,children:r},s))})})};t.parameters={...t.parameters,docs:{...t.parameters?.docs,source:{originalSource:`{
+  args: {},
+  render: args => <StorySection title="Variants">
+      <div className="flex flex-col items-start gap-2">
+        {numberBadgeVariants.map((variant, index) => <NumberBadge key={index} variant={variant} {...args}>
+            {variant}
+          </NumberBadge>)}
+      </div>
+    </StorySection>
+}`,...t.parameters?.docs?.source}}};const N=["Variants"];export{t as Variants,N as __namedExportsOrder,y as default};
