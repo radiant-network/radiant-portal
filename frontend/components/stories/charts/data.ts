@@ -9160,3 +9160,92 @@ export const cooccurenceOftopTenConditionsData = [
     ],
   },
 ];
+
+type SwarmSample = {
+  value: number;
+  sample_id: string;
+  sex: 'Male' | 'Female';
+};
+
+export const swarmPlotGroups: { name: string; points: SwarmSample[] }[] = [
+  {
+    name: 'T21 (n=12)',
+    points: [
+      { value: 8.12, sample_id: 'BS-001', sex: 'Female' },
+      { value: 9.44, sample_id: 'BS-002', sex: 'Male' },
+      { value: 7.63, sample_id: 'BS-003', sex: 'Female' },
+      { value: 10.21, sample_id: 'BS-004', sex: 'Male' },
+      { value: 8.9, sample_id: 'BS-005', sex: 'Female' },
+      { value: 11.05, sample_id: 'BS-006', sex: 'Male' },
+      { value: 9.78, sample_id: 'BS-007', sex: 'Female' },
+      { value: 8.34, sample_id: 'BS-008', sex: 'Male' },
+      { value: 12.4, sample_id: 'BS-009', sex: 'Female' },
+      { value: 9.11, sample_id: 'BS-010', sex: 'Male' },
+      { value: 10.66, sample_id: 'BS-011', sex: 'Female' },
+      { value: 7.98, sample_id: 'BS-012', sex: 'Male' },
+    ],
+  },
+  {
+    name: 'Control (n=12)',
+    points: [
+      { value: 3.21, sample_id: 'BS-101', sex: 'Male' },
+      { value: 4.05, sample_id: 'BS-102', sex: 'Female' },
+      { value: 2.88, sample_id: 'BS-103', sex: 'Male' },
+      { value: 5.12, sample_id: 'BS-104', sex: 'Female' },
+      { value: 3.76, sample_id: 'BS-105', sex: 'Male' },
+      { value: 4.63, sample_id: 'BS-106', sex: 'Female' },
+      { value: 2.4, sample_id: 'BS-107', sex: 'Male' },
+      { value: 3.99, sample_id: 'BS-108', sex: 'Female' },
+      { value: 4.87, sample_id: 'BS-109', sex: 'Male' },
+      { value: 3.05, sample_id: 'BS-110', sex: 'Female' },
+      { value: 5.44, sample_id: 'BS-111', sex: 'Male' },
+      { value: 3.52, sample_id: 'BS-112', sex: 'Female' },
+    ],
+  },
+];
+
+type DiffGene = {
+  // x: log2 fold change, y: -log10(adjusted p-value)
+  x: number;
+  y: number;
+  gene_symbol: string;
+  ensembl_gene_id: string;
+  padj: number;
+};
+
+export const scatterPlotSeries: { name: string; points: DiffGene[] }[] = [
+  {
+    name: 'Up-regulated',
+    points: [
+      { x: 2.8, y: 6.1, gene_symbol: 'APP', ensembl_gene_id: 'ENSG00000142192', padj: 0.0000008 },
+      { x: 1.9, y: 4.3, gene_symbol: 'SOD1', ensembl_gene_id: 'ENSG00000142168', padj: 0.00005 },
+      { x: 3.4, y: 7.8, gene_symbol: 'DYRK1A', ensembl_gene_id: 'ENSG00000157540', padj: 0.0000000158 },
+      { x: 1.2, y: 2.6, gene_symbol: 'RCAN1', ensembl_gene_id: 'ENSG00000159200', padj: 0.0025 },
+      { x: 2.1, y: 3.1, gene_symbol: 'ITSN1', ensembl_gene_id: 'ENSG00000205726', padj: 0.0008 },
+      { x: 0.8, y: 1.1, gene_symbol: 'SYNJ1', ensembl_gene_id: 'ENSG00000159082', padj: 0.079 },
+      { x: 1.6, y: 5.2, gene_symbol: 'OLIG2', ensembl_gene_id: 'ENSG00000205927', padj: 0.000006 },
+      { x: 2.5, y: 4.9, gene_symbol: 'ETS2', ensembl_gene_id: 'ENSG00000157557', padj: 0.0000126 },
+      { x: 0.6, y: 0.7, gene_symbol: 'BACH1', ensembl_gene_id: 'ENSG00000156273', padj: 0.2 },
+      { x: 1.4, y: 3.6, gene_symbol: 'HMGN1', ensembl_gene_id: 'ENSG00000205581', padj: 0.00025 },
+      { x: 2.9, y: 6.7, gene_symbol: 'GART', ensembl_gene_id: 'ENSG00000159131', padj: 0.0000002 },
+      { x: 0.9, y: 1.4, gene_symbol: 'CBS', ensembl_gene_id: 'ENSG00000160200', padj: 0.04 },
+    ],
+  },
+  {
+    name: 'Down-regulated',
+    points: [
+      { x: -2.6, y: 5.8, gene_symbol: 'NRG1', ensembl_gene_id: 'ENSG00000157168', padj: 0.0000016 },
+      { x: -1.8, y: 4.1, gene_symbol: 'BDNF', ensembl_gene_id: 'ENSG00000176697', padj: 0.00008 },
+      { x: -3.1, y: 7.2, gene_symbol: 'GRIN2A', ensembl_gene_id: 'ENSG00000183454', padj: 0.0000000631 },
+      { x: -1.1, y: 2.3, gene_symbol: 'RELN', ensembl_gene_id: 'ENSG00000189056', padj: 0.005 },
+      { x: -2.0, y: 3.4, gene_symbol: 'CNTNAP2', ensembl_gene_id: 'ENSG00000174469', padj: 0.0004 },
+      { x: -0.7, y: 0.9, gene_symbol: 'FOXP2', ensembl_gene_id: 'ENSG00000128573', padj: 0.126 },
+      { x: -1.5, y: 4.7, gene_symbol: 'GAD1', ensembl_gene_id: 'ENSG00000128683', padj: 0.00002 },
+      { x: -2.4, y: 5.1, gene_symbol: 'SLC6A4', ensembl_gene_id: 'ENSG00000108576', padj: 0.0000079 },
+      { x: -0.5, y: 0.6, gene_symbol: 'DRD2', ensembl_gene_id: 'ENSG00000149295', padj: 0.251 },
+      { x: -1.3, y: 3.2, gene_symbol: 'SNAP25', ensembl_gene_id: 'ENSG00000132639', padj: 0.0006 },
+      { x: -2.8, y: 6.4, gene_symbol: 'CACNA1C', ensembl_gene_id: 'ENSG00000151067', padj: 0.0000004 },
+      { x: -0.8, y: 1.2, gene_symbol: 'COMT', ensembl_gene_id: 'ENSG00000093010', padj: 0.063 },
+    ],
+  },
+];

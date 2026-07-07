@@ -77,3 +77,55 @@ export type UpsetChartProps = {
   attributesSanitizer?: RegExp;
   onClick?: (data: string[]) => void;
 };
+
+export type SwarmPlotPoint<T = Record<string, unknown>> = T & {
+  value: number;
+};
+
+export type SwarmPlotGroup<T = Record<string, unknown>> = {
+  name: string;
+  color?: string;
+  points: SwarmPlotPoint<T>[];
+};
+
+export type SwarmPlotProps<T = Record<string, unknown>> = {
+  groups: SwarmPlotGroup<T>[];
+  title?: string;
+  yAxisLabel?: string;
+  loading?: boolean;
+  colors?: string[];
+  selectedPoints?: SwarmPlotPoint<T>[];
+  tooltip?: (point: SwarmPlotPoint<T>) => string;
+  annotation?: (point: SwarmPlotPoint<T>) => string;
+  onPointClick?: (point: SwarmPlotPoint<T>) => void;
+  onSelect?: (points: SwarmPlotPoint<T>[]) => void;
+  className?: string;
+};
+
+export type ScatterPlotPoint<T = Record<string, unknown>> = T & {
+  x: number;
+  y: number;
+};
+
+export type ScatterPlotSeries<T = Record<string, unknown>> = {
+  name: string;
+  color?: string;
+  points: ScatterPlotPoint<T>[];
+};
+
+export type ScatterPlotProps<T = Record<string, unknown>> = {
+  series: ScatterPlotSeries<T>[];
+  title?: string;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
+  loading?: boolean;
+  colors?: string[];
+  pointColor?: (point: ScatterPlotPoint<T>) => string;
+  highlightedPoints?: ScatterPlotPoint<T>[];
+  selectedPoints?: ScatterPlotPoint<T>[];
+  tooltip?: (point: ScatterPlotPoint<T>) => string;
+  annotation?: (point: ScatterPlotPoint<T>) => string;
+  onPointClick?: (point: ScatterPlotPoint<T>) => void;
+  onSelect?: (points: ScatterPlotPoint<T>[]) => void;
+  className?: string;
+};
