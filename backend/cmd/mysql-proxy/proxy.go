@@ -123,17 +123,16 @@ func removeCapability(handshake []byte, capability uint32) []byte {
 	if low+2 > len(handshake) {
 		return handshake
 	}
-	capLow := uint16(handshake[low]) | uint16(handshake[low+1])<<8
-	capLow &^= uint16(capability & 0xffff) // &^= clears the masked bits
-	handshake[low] = byte(capLow)
-	handshake[low+1] = byte(capLow >> 8)
+	// Clear the capability's set bits from the little-endian field byte by byte (&^= clears
+	// bits), avoiding any 16-bit narrowing conversion. Low word = bytes [low], [low+1].
+	handshake[low] &^= byte(capability)
+	handshake[low+1] &^= byte(capability >> 8)
 
 	high := low + 2 + 1 + 2 // past capability_flags_low + charset(1) + status(2)
 	if high+2 <= len(handshake) {
-		capHigh := uint16(handshake[high]) | uint16(handshake[high+1])<<8
-		capHigh &^= uint16((capability >> 16) & 0xffff)
-		handshake[high] = byte(capHigh)
-		handshake[high+1] = byte(capHigh >> 8)
+		// High word (bits 16-31) = bytes [high], [high+1].
+		handshake[high] &^= byte(capability >> 16)
+		handshake[high+1] &^= byte(capability >> 24)
 	}
 	return handshake
 }
@@ -194,7 +193,7 @@ func appendLenEncInt(b []byte, n int) []byte {
 	case n < 251:
 		return append(b, byte(n))
 	case n < 1<<16:
-		return binary.LittleEndian.AppendUint16(append(b, 0xfc), uint16(n))
+		return append(b, 0xfc, byte(n), byte(n>>8))
 	case n < 1<<24:
 		return append(b, 0xfd, byte(n), byte(n>>8), byte(n>>16))
 	default:
