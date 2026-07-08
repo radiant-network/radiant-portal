@@ -10,8 +10,8 @@ import { TableColumnDef } from '@/components/base/data-table/data-table';
 import { getDefaultQBContext, ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
 import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
+import { RangeOperators } from '@/components/base/query-builder/type';
 import { ApplicationId, ConfigProvider, FilterTypes, PortalConfig } from '@/components/cores/applications-config';
-import { RangeOperators } from '@/components/cores/sqon';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
 import {

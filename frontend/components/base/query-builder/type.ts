@@ -1,5 +1,6 @@
 // @TODO: Every type name should be re-validated to ensure their name are explicites and comprehensibles
-import { SqonOpEnum } from '@/api/api';
+// Relative path (not the @/ alias) so this file stays loadable from vite.config at Node level, where TS path aliases aren't resolved.
+import { SqonOpEnum } from '../../../api/api';
 
 export const RangeOperators = {
   GreaterThan: SqonOpEnum.GreaterThan,

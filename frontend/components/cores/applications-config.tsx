@@ -1,7 +1,7 @@
 import { createContext, type ReactNode, useContext } from 'react';
 
 import { SavedFilterType } from '@/api/index';
-import { RangeOperators } from '@/components/cores/sqon';
+import { RangeOperators } from '@/components/base/query-builder/type';
 
 export enum ApplicationId {
   'admin' = 'admin',
