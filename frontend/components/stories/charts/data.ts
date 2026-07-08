@@ -9249,3 +9249,1113 @@ export const scatterPlotSeries: { name: string; points: DiffGene[] }[] = [
     ],
   },
 ];
+
+export const vennTwoSetsData = {
+  summary: [
+    {
+      operation: 'Q₁',
+      sqon: {
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+            },
+            op: 'in',
+          },
+        ],
+        op: 'and',
+      },
+      count: 58,
+    },
+    {
+      operation: 'Q₂',
+      sqon: {
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+            },
+            op: 'in',
+          },
+        ],
+        op: 'and',
+      },
+      count: 100,
+    },
+  ],
+  operations: [
+    {
+      operation: 'Q₁-Q₂',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+            },
+            op: 'in',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      field: 'locus',
+                      index: 'variants',
+                      value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          },
+        ],
+      },
+      count: 20,
+      setId: 'set-0',
+    },
+    {
+      operation: 'Q₂-Q₁',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+            },
+            op: 'in',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      field: 'locus',
+                      index: 'variants',
+                      value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          },
+        ],
+      },
+      count: 62,
+      setId: 'set-1',
+    },
+    {
+      operation: 'Q₁∩Q₂',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+            },
+            op: 'in',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+        ],
+      },
+      count: 38,
+      setId: 'set-2',
+    },
+  ],
+};
+
+export const vennThreeSetsData = {
+  summary: [
+    {
+      operation: 'Q₁',
+      sqon: {
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+            },
+            op: 'in',
+          },
+        ],
+        op: 'and',
+      },
+      count: 58,
+    },
+    {
+      operation: 'Q₂',
+      sqon: {
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:824580ed-f5aa-4f27-a881-64a29444f7e4'],
+            },
+            op: 'in',
+          },
+        ],
+        op: 'and',
+      },
+      count: 28,
+    },
+    {
+      operation: 'Q₃',
+      sqon: {
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+            },
+            op: 'in',
+          },
+        ],
+        op: 'and',
+      },
+      count: 100,
+    },
+  ],
+  operations: [
+    {
+      operation: 'Q₁-(Q₂∪Q₃)',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+            },
+            op: 'in',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                op: 'or',
+                content: [
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:824580ed-f5aa-4f27-a881-64a29444f7e4'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      count: 15,
+      setId: 'set-0',
+    },
+    {
+      operation: 'Q₂-(Q₁∪Q₃)',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:824580ed-f5aa-4f27-a881-64a29444f7e4'],
+            },
+            op: 'in',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                op: 'or',
+                content: [
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      count: 3,
+      setId: 'set-1',
+    },
+    {
+      operation: 'Q₃-(Q₁∪Q₂)',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+            },
+            op: 'in',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                op: 'or',
+                content: [
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:824580ed-f5aa-4f27-a881-64a29444f7e4'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      count: 52,
+      setId: 'set-2',
+    },
+    {
+      operation: '(Q₁∩Q₂)-Q₃',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+            },
+            op: 'in',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:824580ed-f5aa-4f27-a881-64a29444f7e4'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      field: 'locus',
+                      index: 'variants',
+                      value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          },
+        ],
+      },
+      count: 5,
+      setId: 'set-3',
+    },
+    {
+      operation: '(Q₂∩Q₃)-Q₁',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:824580ed-f5aa-4f27-a881-64a29444f7e4'],
+            },
+            op: 'in',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      field: 'locus',
+                      index: 'variants',
+                      value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          },
+        ],
+      },
+      count: 10,
+      setId: 'set-4',
+    },
+    {
+      operation: '(Q₁∩Q₃)-Q₂',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+            },
+            op: 'in',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      field: 'locus',
+                      index: 'variants',
+                      value: ['set_id:824580ed-f5aa-4f27-a881-64a29444f7e4'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          },
+        ],
+      },
+      count: 28,
+      setId: 'set-5',
+    },
+    {
+      operation: 'Q₁∩Q₂∩Q₃',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:64be2b86-f7ae-455b-b660-46e419a5b32c'],
+            },
+            op: 'in',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:824580ed-f5aa-4f27-a881-64a29444f7e4'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:43391006-5275-4e5a-bba2-0a91c33b391d'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+        ],
+      },
+      count: 10,
+      setId: 'set-6',
+    },
+  ],
+};
+
+export const vennTwoSetsDisabled = {
+  summary: [
+    {
+      operation: 'Q₁',
+      sqon: {
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+            },
+            op: 'in',
+          },
+        ],
+        op: 'and',
+      },
+      count: 4,
+    },
+    {
+      operation: 'Q₂',
+      sqon: {
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+            },
+            op: 'in',
+          },
+        ],
+        op: 'and',
+      },
+      count: 10,
+    },
+  ],
+  operations: [
+    {
+      operation: 'Q₁-Q₂',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+            },
+            op: 'in',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      field: 'locus',
+                      index: 'variants',
+                      value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          },
+        ],
+      },
+      count: 4,
+      setId: 'set-0',
+    },
+    {
+      operation: 'Q₂-Q₁',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+            },
+            op: 'in',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      field: 'locus',
+                      index: 'variants',
+                      value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          },
+        ],
+      },
+      count: 10,
+      setId: 'set-1',
+    },
+    {
+      operation: 'Q₁∩Q₂',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+            },
+            op: 'in',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+        ],
+      },
+      count: 0,
+      setId: 'set-2',
+    },
+  ],
+};
+
+export const vennThreeSetsDisaled = {
+  summary: [
+    {
+      operation: 'Q₁',
+      sqon: {
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+            },
+            op: 'in',
+          },
+        ],
+        op: 'and',
+      },
+      count: 4,
+    },
+    {
+      operation: 'Q₂',
+      sqon: {
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:07113ad1-12be-4279-aa7c-6fd515e2b3ca'],
+            },
+            op: 'in',
+          },
+        ],
+        op: 'and',
+      },
+      count: 6,
+    },
+    {
+      operation: 'Q₃',
+      sqon: {
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+            },
+            op: 'in',
+          },
+        ],
+        op: 'and',
+      },
+      count: 10,
+    },
+  ],
+  operations: [
+    {
+      operation: 'Q₁-(Q₂∪Q₃)',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+            },
+            op: 'in',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                op: 'or',
+                content: [
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:07113ad1-12be-4279-aa7c-6fd515e2b3ca'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      count: 4,
+      setId: 'set-0',
+    },
+    {
+      operation: 'Q₂-(Q₁∪Q₃)',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:07113ad1-12be-4279-aa7c-6fd515e2b3ca'],
+            },
+            op: 'in',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                op: 'or',
+                content: [
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      count: 6,
+      setId: 'set-1',
+    },
+    {
+      operation: 'Q₃-(Q₁∪Q₂)',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+            },
+            op: 'in',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                op: 'or',
+                content: [
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                  {
+                    content: [
+                      {
+                        content: {
+                          field: 'locus',
+                          index: 'variants',
+                          value: ['set_id:07113ad1-12be-4279-aa7c-6fd515e2b3ca'],
+                        },
+                        op: 'in',
+                      },
+                    ],
+                    op: 'and',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      count: 10,
+      setId: 'set-2',
+    },
+    {
+      operation: '(Q₁∩Q₂)-Q₃',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+            },
+            op: 'in',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:07113ad1-12be-4279-aa7c-6fd515e2b3ca'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      field: 'locus',
+                      index: 'variants',
+                      value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          },
+        ],
+      },
+      count: 0,
+      setId: 'set-3',
+    },
+    {
+      operation: '(Q₂∩Q₃)-Q₁',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:07113ad1-12be-4279-aa7c-6fd515e2b3ca'],
+            },
+            op: 'in',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      field: 'locus',
+                      index: 'variants',
+                      value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          },
+        ],
+      },
+      count: 0,
+      setId: 'set-4',
+    },
+    {
+      operation: '(Q₁∩Q₃)-Q₂',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+            },
+            op: 'in',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+          {
+            op: 'not',
+            content: [
+              {
+                content: [
+                  {
+                    content: {
+                      field: 'locus',
+                      index: 'variants',
+                      value: ['set_id:07113ad1-12be-4279-aa7c-6fd515e2b3ca'],
+                    },
+                    op: 'in',
+                  },
+                ],
+                op: 'and',
+              },
+            ],
+          },
+        ],
+      },
+      count: 0,
+      setId: 'set-5',
+    },
+    {
+      operation: 'Q₁∩Q₂∩Q₃',
+      sqon: {
+        op: 'and',
+        content: [
+          {
+            content: {
+              field: 'locus',
+              index: 'variants',
+              value: ['set_id:ab4c323e-0d51-4462-80ba-21e6c282bd6c'],
+            },
+            op: 'in',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:07113ad1-12be-4279-aa7c-6fd515e2b3ca'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+          {
+            content: [
+              {
+                content: {
+                  field: 'locus',
+                  index: 'variants',
+                  value: ['set_id:6a5fc313-cee1-4329-8578-da2a0fa29157'],
+                },
+                op: 'in',
+              },
+            ],
+            op: 'and',
+          },
+        ],
+      },
+      count: 0,
+      setId: 'set-6',
+    },
+  ],
+};

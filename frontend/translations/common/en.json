@@ -1,4 +1,13 @@
 {
+  "analysis": {
+    "set_operations": {
+      "download": "Download PNG",
+      "selected_sets": "Selected Sets",
+      "set_definitions": "Set Definitions",
+      "set_definition": "Set Definition",
+      "union_of_selected_set": "Union of selected sets:"
+    }
+  },
   "community": {
     "title": "Community",
     "search": {
