@@ -24,6 +24,7 @@ import (
 	"io"
 	"log/slog"
 	"net"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -232,6 +233,10 @@ type proxy struct {
 // handle performs the two-sided login translation for one client connection, then pipes.
 // The numbered steps are the login script described at the top of this file.
 func (p *proxy) handle(clientConn net.Conn) {
+	// Recover per connection: each runs in its own goroutine, and an unrecovered panic in any
+	// goroutine crashes the whole process — one malformed connection must not take the proxy
+	// down. Logged and dropped here; the deferred Close calls still run during unwinding.
+	defer recoverConn(clientConn.RemoteAddr().String())
 	defer func() { _ = clientConn.Close() }()
 	log := slog.With("remote", clientConn.RemoteAddr().String())
 
@@ -332,7 +337,10 @@ func (p *proxy) handle(clientConn net.Conn) {
 		return
 	}
 	if len(authResult) > 0 && authResult[0] == 0xff { // 0xff = ERR
-		code := uint16(authResult[1]) | uint16(authResult[2])<<8
+		code := uint16(0)
+		if len(authResult) >= 3 { // ERR = 0xff + 2-byte code; guard a truncated packet
+			code = uint16(authResult[1]) | uint16(authResult[2])<<8
+		}
 		log.Warn("backend auth failed", "user", username, "code", code)
 		return
 	}
@@ -343,6 +351,15 @@ func (p *proxy) handle(clientConn net.Conn) {
 	_ = backend.conn.SetDeadline(time.Time{})
 	pipe(clientConn, backend.conn)
 	log.Info("connection closed", "user", username)
+}
+
+// recoverConn swallows a panic from a connection handler so one bad connection can't crash the
+// proxy process. Deferred at the top of handle; logs the panic and stack for the given peer.
+func recoverConn(remote string) {
+	if r := recover(); r != nil {
+		slog.Error("recovered from panic in connection handler",
+			"remote", remote, "panic", r, "stack", string(debug.Stack()))
+	}
 }
 
 // pipe copies bytes in both directions until either side closes, then closes both so the

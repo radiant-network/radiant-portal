@@ -97,6 +97,15 @@ func Test_authSwitchPacket_RequestsClearPassword(t *testing.T) {
 	assert.Equal(t, append([]byte{0xfe}, append([]byte(clearPlugin), 0)...), authSwitchPacket())
 }
 
+func Test_recoverConn_ContainsPanicSoTheProxySurvives(t *testing.T) {
+	// A panic in a connection handler must be swallowed (each runs in its own goroutine, so an
+	// unrecovered panic would crash the whole process). Deferring recoverConn contains it.
+	assert.NotPanics(t, func() {
+		defer recoverConn("test-remote")
+		panic("boom in handler")
+	})
+}
+
 func Test_errPacket_EncodesCodeStateAndMessage(t *testing.T) {
 	out := errPacket(1045, "28000", "nope")
 
