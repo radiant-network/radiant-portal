@@ -107,6 +107,14 @@ func Test_readLenEncInt_DecodesEachLengthClass(t *testing.T) {
 	assert.Zero(t, consumed)
 }
 
+func Test_readLenEncInt_RejectsOversizedEightByteLength(t *testing.T) {
+	oversized := binary.LittleEndian.AppendUint64([]byte{0xfe}, uint64(maxPacket)+1)
+
+	_, consumed := readLenEncInt(oversized)
+
+	assert.Zero(t, consumed, "length beyond max packet size is malformed, not a valid int")
+}
+
 func Test_removeCapability_ClearsSSLBitAndPreservesOthers(t *testing.T) {
 	hs := testHandshake(uint16(clientSSL|clientProtocol41), 0x00f0, 0x21)
 
