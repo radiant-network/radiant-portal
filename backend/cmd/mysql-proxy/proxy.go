@@ -33,16 +33,20 @@ import (
 // MySQL capability flags — a bitfield where each bit advertises one feature. We only need
 // to set/clear a handful.
 const (
-	clientSSL        uint32 = 0x00000800 // connection will upgrade to TLS
-	clientProtocol41 uint32 = 0x00000200 // 4.1+ protocol (always on for us)
-	clientSecureConn uint32 = 0x00008000 // secure-auth handshake layout
-	clientPluginAuth uint32 = 0x00080000 // pluggable authentication
+	clientConnectWithDB    uint32 = 0x00000008 // handshake response carries a default database
+	clientSSL              uint32 = 0x00000800 // connection will upgrade to TLS
+	clientProtocol41       uint32 = 0x00000200 // 4.1+ protocol (always on for us)
+	clientSecureConn       uint32 = 0x00008000 // secure-auth handshake layout
+	clientPluginAuth       uint32 = 0x00080000 // pluggable authentication
+	clientConnectAttrs     uint32 = 0x00100000 // handshake response carries key/value attributes
+	clientPluginAuthLenEnc uint32 = 0x00200000 // auth response is length-encoded (vs 1-byte length)
 )
 
 const (
 	maxPacket    = 16 * 1024 * 1024        // max packet size we advertise (standard)
 	nativePlugin = "mysql_native_password" // classic password plugin
 	clearPlugin  = "mysql_clear_password"  // send-password-in-clear (what we ask the Go client for)
+	oidcPlugin   = "authentication_openid_connect_client"
 )
 
 // HandshakeV10 fixed-field byte sizes, in wire order after the NUL-terminated server_version
@@ -98,18 +102,87 @@ func (p *packetConn) write(seq byte, payload []byte) error {
 // Pure protocol helpers (unit-tested in proxy_test.go).
 // ---------------------------------------------------------------------------
 
-// extractUsername reads the null-terminated username from a client HandshakeResponse41.
-// That packet starts with a fixed 32-byte header (capabilities 4 + max_packet 4 +
-// charset 1 + 23 reserved zero bytes); the username follows immediately after.
-func extractUsername(handshakeResponse []byte) string {
-	if len(handshakeResponse) < 33 {
-		return ""
+// clientHello is what we keep from the client's HandshakeResponse41: its capability flags and
+// charset (mirrored toward StarRocks so both hops agree on the post-auth wire format), the
+// username, and the default database when the DSN carries one (CLIENT_CONNECT_WITH_DB).
+type clientHello struct {
+	caps     uint32
+	charset  byte
+	username string
+	database string
+}
+
+// parseClientHello decodes a HandshakeResponse41: a fixed 32-byte header (capabilities 4 +
+// max_packet 4 + charset 1 + 23 reserved zero bytes), then the NUL-terminated username, then
+// the auth response (whose length prefix depends on the capability bits), then the database
+// (NUL-terminated) if CLIENT_CONNECT_WITH_DB is set.
+func parseClientHello(resp []byte) (clientHello, error) {
+	var h clientHello
+	if len(resp) < 33 {
+		return h, errors.New("handshake response too short")
 	}
-	rest := handshakeResponse[32:]
-	if end := bytes.IndexByte(rest, 0); end >= 0 {
-		return string(rest[:end])
+	h.caps = binary.LittleEndian.Uint32(resp[0:4])
+	h.charset = resp[8]
+
+	i := 32
+	end := bytes.IndexByte(resp[i:], 0)
+	if end < 0 {
+		return h, errors.New("unterminated username")
 	}
-	return string(rest)
+	h.username = string(resp[i : i+end])
+	i += end + 1
+
+	// Skip the auth response — we replace it anyway; we only parse past it to reach the database.
+	switch {
+	case h.caps&clientPluginAuthLenEnc != 0:
+		n, consumed := readLenEncInt(resp[i:])
+		if consumed == 0 {
+			return h, errors.New("malformed auth-response length")
+		}
+		i += consumed + n
+	case h.caps&clientSecureConn != 0:
+		if i >= len(resp) {
+			return h, errors.New("missing auth-response length")
+		}
+		i += 1 + int(resp[i])
+	default:
+		nul := bytes.IndexByte(resp[i:], 0)
+		if nul < 0 {
+			return h, errors.New("unterminated auth response")
+		}
+		i += nul + 1
+	}
+	if i > len(resp) {
+		return h, errors.New("auth response overruns packet")
+	}
+
+	if h.caps&clientConnectWithDB != 0 && i < len(resp) {
+		if nul := bytes.IndexByte(resp[i:], 0); nul >= 0 {
+			h.database = string(resp[i : i+nul])
+		} else {
+			h.database = string(resp[i:])
+		}
+	}
+	return h, nil
+}
+
+// readLenEncInt decodes a MySQL length-encoded integer, returning the value and the number of
+// bytes consumed (consumed == 0 means malformed/truncated).
+func readLenEncInt(b []byte) (n, consumed int) {
+	if len(b) == 0 {
+		return 0, 0
+	}
+	switch {
+	case b[0] < 0xfb:
+		return int(b[0]), 1
+	case b[0] == 0xfc && len(b) >= 3:
+		return int(binary.LittleEndian.Uint16(b[1:3])), 3
+	case b[0] == 0xfd && len(b) >= 4:
+		return int(uint32(b[1]) | uint32(b[2])<<8 | uint32(b[3])<<16), 4
+	case b[0] == 0xfe && len(b) >= 9:
+		return int(binary.LittleEndian.Uint64(b[1:9])), 9
+	}
+	return 0, 0
 }
 
 // serverVersionEnd returns the index just past the NUL that terminates the server-version
@@ -160,13 +233,43 @@ func charsetFromHandshake(handshake []byte) byte {
 	return 0x21
 }
 
+// serverCapabilities reassembles the split low/high capability words of a HandshakeV10 packet
+// (same layout removeCapability walks). Returns 0 on a truncated packet.
+func serverCapabilities(handshake []byte) uint32 {
+	low := serverVersionEnd(handshake) + hsConnIDLen + hsSaltLen + hsFillerLen
+	if low+hsCapLowLen > len(handshake) {
+		return 0
+	}
+	caps := uint32(binary.LittleEndian.Uint16(handshake[low:]))
+	high := low + hsCapLowLen + hsCharsetLen + hsStatusLen
+	if high+hsCapHighLen <= len(handshake) {
+		caps |= uint32(binary.LittleEndian.Uint16(handshake[high:])) << 16
+	}
+	return caps
+}
+
+// backendCaps derives the capability flags the proxy presents to StarRocks from what the
+// client negotiated with us. After login the pipe is a dumb byte copier, so a capability
+// active on one hop but not the other (COMPRESS, DEPRECATE_EOF, MULTI_STATEMENTS, ...)
+// corrupts the framing — mirroring the client's flags keeps both hops in agreement. We strip:
+// CLIENT_SSL (the proxy does its own TLS), lenenc-auth (our auth data is empty, 1-byte
+// length), and connect-attrs (we don't forward the client's attributes).
+func backendCaps(clientCaps uint32, database string) uint32 {
+	caps := clientCaps &^ (clientSSL | clientPluginAuthLenEnc | clientConnectAttrs)
+	caps |= clientProtocol41 | clientSecureConn | clientPluginAuth
+	if database == "" {
+		caps &^= clientConnectWithDB
+	}
+	return caps
+}
+
 // buildSSLRequest is the short packet we send to StarRocks to say "upgrade this connection
-// to TLS." It carries only capability flags (with CLIENT_SSL set) + max_packet + charset +
-// 23 reserved zero bytes; right after sending it we start the TLS handshake.
-func buildSSLRequest(charset byte) []byte {
-	caps := clientSSL | clientProtocol41 | clientSecureConn | clientPluginAuth
+// to TLS." It carries only capability flags (caps must be the same set later sent in the
+// handshake response, plus CLIENT_SSL) + max_packet + charset + 23 reserved zero bytes; right
+// after sending it we start the TLS handshake.
+func buildSSLRequest(caps uint32, charset byte) []byte {
 	b := make([]byte, 0, 32)
-	b = binary.LittleEndian.AppendUint32(b, caps)
+	b = binary.LittleEndian.AppendUint32(b, caps|clientSSL)
 	b = binary.LittleEndian.AppendUint32(b, maxPacket)
 	b = append(b, charset)
 	return append(b, make([]byte, 23)...)
@@ -175,10 +278,10 @@ func buildSSLRequest(charset byte) []byte {
 // buildNativeHandshakeResponse is the login packet we send to StarRocks: it claims
 // mysql_native_password with EMPTY auth data. This is deliberate — StarRocks looks the user
 // up, sees it's a JWT user, and answers with an AuthSwitchRequest to the OIDC plugin, which
-// is the hook we use to hand over the JWT.
-func buildNativeHandshakeResponse(username string, charset byte) []byte {
-	caps := clientProtocol41 | clientSecureConn | clientPluginAuth
-	b := make([]byte, 0, 64+len(username))
+// is the hook we use to hand over the JWT. caps/charset/database mirror the client's own
+// handshake response (see backendCaps) so the DSN's default database survives the proxy.
+func buildNativeHandshakeResponse(caps uint32, charset byte, username, database string) []byte {
+	b := make([]byte, 0, 64+len(username)+len(database))
 	b = binary.LittleEndian.AppendUint32(b, caps)
 	b = binary.LittleEndian.AppendUint32(b, maxPacket)
 	b = append(b, charset)
@@ -186,6 +289,10 @@ func buildNativeHandshakeResponse(username string, charset byte) []byte {
 	b = append(b, username...)
 	b = append(b, 0) // username terminator
 	b = append(b, 0) // empty auth data (length 0)
+	if caps&clientConnectWithDB != 0 {
+		b = append(b, database...)
+		b = append(b, 0) // database terminator
+	}
 	b = append(b, nativePlugin...)
 	return append(b, 0) // plugin-name terminator
 }
@@ -220,6 +327,16 @@ func authSwitchPacket() []byte {
 	b := []byte{0xfe}
 	b = append(b, clearPlugin...)
 	return append(b, 0)
+}
+
+// authSwitchPluginName extracts the plugin name from an AuthSwitchRequest
+// (0xfe + NUL-terminated name + plugin data).
+func authSwitchPluginName(pkt []byte) string {
+	rest := pkt[1:]
+	if nul := bytes.IndexByte(rest, 0); nul >= 0 {
+		return string(rest[:nul])
+	}
+	return string(rest)
 }
 
 // errPacket builds an ERR packet (0xff = error): code + '#' + SQLSTATE + message.
@@ -267,16 +384,65 @@ func (p *proxy) handle(clientConn net.Conn) {
 	backend := &packetConn{conn: backendTCP}
 	client := &packetConn{conn: clientConn}
 
-	// 1. Read StarRocks' opening handshake.
+	// 1. Read StarRocks' opening handshake; it must offer TLS or the OIDC hop can't happen.
 	_, hs, err := backend.read()
 	if err != nil {
 		log.Error("read backend handshake failed", "error", err)
 		return
 	}
-	charset := charsetFromHandshake(hs)
+	if serverCapabilities(hs)&clientSSL == 0 {
+		log.Error("backend does not advertise CLIENT_SSL — enable TLS on the StarRocks FE")
+		return
+	}
 
-	// 2. Tell StarRocks we want TLS, then upgrade the proxy→backend socket.
-	if err := backend.write(1, buildSSLRequest(charset)); err != nil {
+	// 2. Forward the handshake to the Go client, but with CLIENT_SSL stripped so it stays
+	//    cleartext and hands us the raw JWT. Copy first — removeCapability mutates in place.
+	if err := client.write(0, removeCapability(append([]byte(nil), hs...), clientSSL)); err != nil {
+		log.Error("send handshake to client failed", "error", err)
+		return
+	}
+
+	// 3. Read the client's response: its capabilities, charset, username and — when the DSN
+	//    carries one — the default database, all mirrored toward StarRocks below.
+	_, clientResp, err := client.read()
+	if err != nil {
+		log.Error("read client response failed", "error", err)
+		return
+	}
+	hello, err := parseClientHello(clientResp)
+	if err != nil {
+		log.Warn("malformed client handshake response", "error", err)
+		_ = client.write(2, errPacket(1045, "28000", "malformed handshake response"))
+		return
+	}
+
+	// 4. Ask the client to switch to cleartext so it resends the "password" (the JWT) raw.
+	if err := client.write(2, authSwitchPacket()); err != nil {
+		log.Error("auth switch to client failed", "error", err)
+		return
+	}
+
+	// 5. Read the JWT (a cleartext-plugin payload is the password + a trailing NUL).
+	_, jwtPayload, err := client.read()
+	if err != nil {
+		log.Error("read JWT failed", "error", err)
+		return
+	}
+	jwt := strings.TrimRight(string(jwtPayload), "\x00")
+	if !strings.HasPrefix(jwt, "ey") { // every JWT starts with base64url({"alg"... → "ey"
+		log.Warn("client did not send a JWT", "user", hello.username)
+		_ = client.write(4, errPacket(1045, "28000", "expected JWT as password"))
+		return
+	}
+
+	// 6. Tell StarRocks we want TLS (mirroring the client's capabilities so both hops agree on
+	//    the post-auth wire format), then upgrade the proxy→backend socket.
+	caps := backendCaps(hello.caps, hello.database)
+	charset := hello.charset
+	if charset == 0 {
+		charset = charsetFromHandshake(hs)
+	}
+	if err := backend.write(1, buildSSLRequest(caps, charset)); err != nil {
 		log.Error("send SSL request failed", "error", err)
 		return
 	}
@@ -287,42 +453,8 @@ func (p *proxy) handle(clientConn net.Conn) {
 	}
 	backend.conn = tlsConn
 
-	// 3. Forward the handshake to the Go client, but with CLIENT_SSL stripped so it stays
-	//    cleartext and hands us the raw JWT. Copy first — removeCapability mutates in place.
-	if err := client.write(0, removeCapability(append([]byte(nil), hs...), clientSSL)); err != nil {
-		log.Error("send handshake to client failed", "error", err)
-		return
-	}
-
-	// 4. Read the client's first response — we only need the username from it.
-	_, clientResp, err := client.read()
-	if err != nil {
-		log.Error("read client response failed", "error", err)
-		return
-	}
-	username := extractUsername(clientResp)
-
-	// 5. Ask the client to switch to cleartext so it resends the "password" (the JWT) raw.
-	if err := client.write(2, authSwitchPacket()); err != nil {
-		log.Error("auth switch to client failed", "error", err)
-		return
-	}
-
-	// 6. Read the JWT (a cleartext-plugin payload is the password + a trailing NUL).
-	_, jwtPayload, err := client.read()
-	if err != nil {
-		log.Error("read JWT failed", "error", err)
-		return
-	}
-	jwt := strings.TrimRight(string(jwtPayload), "\x00")
-	if !strings.HasPrefix(jwt, "ey") { // every JWT starts with base64url({"alg"... → "ey"
-		log.Warn("client did not send a JWT", "user", username)
-		_ = client.write(4, errPacket(1045, "28000", "expected JWT as password"))
-		return
-	}
-
 	// 7. Log in to StarRocks with native_password + empty auth; it will ask us to switch.
-	if err := backend.write(2, buildNativeHandshakeResponse(username, charset)); err != nil {
+	if err := backend.write(2, buildNativeHandshakeResponse(caps, charset, hello.username, hello.database)); err != nil {
 		log.Error("send auth to backend failed", "error", err)
 		return
 	}
@@ -334,6 +466,13 @@ func (p *proxy) handle(clientConn net.Conn) {
 
 	// 8. On the AuthSwitchRequest (0xfe), send the JWT in OIDC format and read the verdict.
 	if len(authResult) > 0 && authResult[0] == 0xfe {
+		if plugin := authSwitchPluginName(authResult); plugin != oidcPlugin {
+			// Non-JWT user (or misconfigured FE): our OIDC-formatted reply would only produce a
+			// confusing backend error, so fail fast with a clear one.
+			log.Error("backend requested unsupported auth plugin", "plugin", plugin, "user", hello.username)
+			_ = client.write(4, errPacket(1045, "28000", "backend requested unsupported auth plugin: "+plugin))
+			return
+		}
 		if err := backend.write(seq+1, buildOIDCAuthResponse([]byte(jwt))); err != nil {
 			log.Error("send OIDC auth response failed", "error", err)
 			return
@@ -354,16 +493,16 @@ func (p *proxy) handle(clientConn net.Conn) {
 		if len(authResult) >= 3 { // ERR = 0xff + 2-byte code; guard a truncated packet
 			code = uint16(authResult[1]) | uint16(authResult[2])<<8
 		}
-		log.Warn("backend auth failed", "user", username, "code", code)
+		log.Warn("backend auth failed", "user", hello.username, "code", code)
 		return
 	}
-	log.Info("authenticated, piping", "user", username)
+	log.Info("authenticated, piping", "user", hello.username)
 
 	// 10. Login done. Clear the deadline (sessions are long-lived) and become a dumb tube.
 	_ = clientConn.SetDeadline(time.Time{})
 	_ = backend.conn.SetDeadline(time.Time{})
 	pipe(clientConn, backend.conn)
-	log.Info("connection closed", "user", username)
+	log.Info("connection closed", "user", hello.username)
 }
 
 // recoverConn swallows a panic from a connection handler so one bad connection can't crash the
