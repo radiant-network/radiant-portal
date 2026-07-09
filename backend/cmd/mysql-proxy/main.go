@@ -26,11 +26,18 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 )
 
-const authTimeout = 15 * time.Second
+const (
+	authTimeout = 15 * time.Second
+	// drainTimeout bounds how long shutdown waits for in-flight connections. Piped sessions
+	// are long-lived, so this is a grace period for short queries, not a guarantee — after it
+	// elapses remaining connections die with the process.
+	drainTimeout = 10 * time.Second
+)
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
@@ -65,17 +72,38 @@ func main() {
 		_ = ln.Close()
 	}()
 
+	var handlers sync.WaitGroup
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			if ctx.Err() != nil {
-				slog.Info("shutting down")
+				slog.Info("shutting down, draining connections", "timeout", drainTimeout)
+				waitWithTimeout(&handlers, drainTimeout)
 				return
 			}
 			slog.Error("accept error", "error", err)
 			continue
 		}
-		go p.handle(conn)
+		handlers.Add(1)
+		go func() {
+			defer handlers.Done()
+			p.handle(conn)
+		}()
+	}
+}
+
+// waitWithTimeout waits for wg up to d, then gives up (long-lived piped sessions would
+// otherwise block shutdown forever).
+func waitWithTimeout(wg *sync.WaitGroup, d time.Duration) {
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(d):
+		slog.Warn("drain timeout reached, exiting with active connections")
 	}
 }
 

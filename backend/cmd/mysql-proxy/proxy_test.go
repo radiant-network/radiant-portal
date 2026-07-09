@@ -24,13 +24,87 @@ func testHandshake(capLow, capHigh uint16, charset byte) []byte {
 	return h
 }
 
-func Test_extractUsername_ReadsNullTerminatedNameAfterHeader(t *testing.T) {
-	resp := append(make([]byte, 32), []byte("alice\x00trailing-junk")...)
-	assert.Equal(t, "alice", extractUsername(resp))
+// testClientHello builds a HandshakeResponse41 payload: caps + max_packet + charset + 23
+// reserved bytes, username NUL, 1-byte-length auth response, then optional database NUL.
+func testClientHello(caps uint32, charset byte, username string, auth []byte, database string) []byte {
+	b := binary.LittleEndian.AppendUint32(nil, caps)
+	b = binary.LittleEndian.AppendUint32(b, maxPacket)
+	b = append(b, charset)
+	b = append(b, make([]byte, 23)...)
+	b = append(b, username...)
+	b = append(b, 0)
+	b = append(b, byte(len(auth)))
+	b = append(b, auth...)
+	if caps&clientConnectWithDB != 0 {
+		b = append(b, database...)
+		b = append(b, 0)
+	}
+	return b
 }
 
-func Test_extractUsername_ShortPacketYieldsEmpty(t *testing.T) {
-	assert.Equal(t, "", extractUsername(make([]byte, 10)))
+func Test_parseClientHello_ReadsCapsCharsetAndUsername(t *testing.T) {
+	resp := testClientHello(clientProtocol41|clientSecureConn, 0x2d, "alice", []byte{1, 2, 3}, "")
+
+	h, err := parseClientHello(resp)
+
+	require.NoError(t, err)
+	assert.Equal(t, clientProtocol41|clientSecureConn, h.caps)
+	assert.Equal(t, byte(0x2d), h.charset)
+	assert.Equal(t, "alice", h.username)
+	assert.Empty(t, h.database)
+}
+
+func Test_parseClientHello_ReadsDatabaseWhenConnectWithDB(t *testing.T) {
+	resp := testClientHello(clientSecureConn|clientConnectWithDB, 0x21, "alice", nil, "radiant")
+
+	h, err := parseClientHello(resp)
+
+	require.NoError(t, err)
+	assert.Equal(t, "radiant", h.database)
+}
+
+func Test_parseClientHello_SkipsLenEncAuthResponse(t *testing.T) {
+	// go-sql-driver switches to a length-encoded auth response for long auth data.
+	caps := clientSecureConn | clientPluginAuthLenEnc | clientConnectWithDB
+	b := binary.LittleEndian.AppendUint32(nil, caps)
+	b = binary.LittleEndian.AppendUint32(b, maxPacket)
+	b = append(b, 0x21)
+	b = append(b, make([]byte, 23)...)
+	b = append(b, "alice"...)
+	b = append(b, 0)
+	b = appendLenEncInt(b, 300)
+	b = append(b, bytes.Repeat([]byte{0xaa}, 300)...)
+	b = append(b, "radiant\x00"...)
+
+	h, err := parseClientHello(b)
+
+	require.NoError(t, err)
+	assert.Equal(t, "alice", h.username)
+	assert.Equal(t, "radiant", h.database)
+}
+
+func Test_parseClientHello_ShortPacketErrors(t *testing.T) {
+	_, err := parseClientHello(make([]byte, 10))
+	assert.Error(t, err)
+}
+
+func Test_parseClientHello_TruncatedAuthResponseErrors(t *testing.T) {
+	resp := testClientHello(clientSecureConn, 0x21, "alice", nil, "")
+	resp[len(resp)-1] = 200 // auth-response length points past the packet end
+
+	_, err := parseClientHello(resp)
+
+	assert.Error(t, err)
+}
+
+func Test_readLenEncInt_DecodesEachLengthClass(t *testing.T) {
+	for _, want := range []int{10, 300, 70000} {
+		got, consumed := readLenEncInt(appendLenEncInt(nil, want))
+		assert.Equal(t, want, got)
+		assert.NotZero(t, consumed)
+	}
+	_, consumed := readLenEncInt([]byte{0xfc}) // truncated 2-byte length
+	assert.Zero(t, consumed)
 }
 
 func Test_removeCapability_ClearsSSLBitAndPreservesOthers(t *testing.T) {
@@ -53,7 +127,7 @@ func Test_charsetFromHandshake_ShortPacketDefaultsToUtf8(t *testing.T) {
 }
 
 func Test_buildSSLRequest_SetsSSLCapabilityAndCharset(t *testing.T) {
-	req := buildSSLRequest(0x21)
+	req := buildSSLRequest(clientProtocol41|clientSecureConn|clientPluginAuth, 0x21)
 
 	require.Len(t, req, 32)
 	assert.NotZero(t, binary.LittleEndian.Uint32(req[0:4])&clientSSL, "CLIENT_SSL advertised")
@@ -61,11 +135,58 @@ func Test_buildSSLRequest_SetsSSLCapabilityAndCharset(t *testing.T) {
 }
 
 func Test_buildNativeHandshakeResponse_CarriesUsernameNativePluginAndNoSSL(t *testing.T) {
-	resp := buildNativeHandshakeResponse("alice", 0x21)
+	caps := backendCaps(clientProtocol41, "")
+
+	resp := buildNativeHandshakeResponse(caps, 0x21, "alice", "")
 
 	assert.Zero(t, binary.LittleEndian.Uint32(resp[0:4])&clientSSL, "client stays cleartext (no SSL)")
 	assert.True(t, bytes.Contains(resp, []byte("alice\x00")), "username present and terminated")
 	assert.True(t, bytes.HasSuffix(resp, []byte(nativePlugin+"\x00")), "declares native_password plugin")
+}
+
+func Test_buildNativeHandshakeResponse_ForwardsDatabase(t *testing.T) {
+	caps := backendCaps(clientProtocol41|clientConnectWithDB, "radiant")
+
+	resp := buildNativeHandshakeResponse(caps, 0x21, "alice", "radiant")
+
+	assert.NotZero(t, binary.LittleEndian.Uint32(resp[0:4])&clientConnectWithDB)
+	assert.True(t, bytes.Contains(resp, []byte("alice\x00\x00radiant\x00")),
+		"database follows the empty auth response, before the plugin name")
+}
+
+func Test_backendCaps_MirrorsClientAndStripsProxyHandledBits(t *testing.T) {
+	clientAsked := clientProtocol41 | clientSSL | clientPluginAuthLenEnc | clientConnectAttrs |
+		clientConnectWithDB | 0x00010000 // arbitrary extra bit (e.g. MULTI_STATEMENTS) must survive
+
+	caps := backendCaps(clientAsked, "radiant")
+
+	assert.Zero(t, caps&(clientSSL|clientPluginAuthLenEnc|clientConnectAttrs), "proxy-handled bits stripped")
+	assert.NotZero(t, caps&0x00010000, "client's other capability bits forwarded")
+	assert.NotZero(t, caps&clientConnectWithDB, "CONNECT_WITH_DB kept when a database is present")
+	assert.NotZero(t, caps&(clientProtocol41|clientSecureConn|clientPluginAuth), "proxy minimum always set")
+}
+
+func Test_backendCaps_DropsConnectWithDBWhenNoDatabase(t *testing.T) {
+	assert.Zero(t, backendCaps(clientConnectWithDB, "")&clientConnectWithDB)
+}
+
+func Test_serverCapabilities_ReassemblesLowAndHighWords(t *testing.T) {
+	hs := testHandshake(uint16(clientSSL|clientProtocol41), uint16(clientPluginAuth>>16), 0x21)
+
+	caps := serverCapabilities(hs)
+
+	assert.NotZero(t, caps&clientSSL)
+	assert.NotZero(t, caps&clientProtocol41)
+	assert.NotZero(t, caps&clientPluginAuth, "high word reassembled into bits 16-31")
+}
+
+func Test_serverCapabilities_TruncatedPacketYieldsZero(t *testing.T) {
+	assert.Zero(t, serverCapabilities([]byte{0x0a, 0x00}))
+}
+
+func Test_authSwitchPluginName_ExtractsNulTerminatedName(t *testing.T) {
+	pkt := append([]byte{0xfe}, oidcPlugin+"\x00plugin-data"...)
+	assert.Equal(t, oidcPlugin, authSwitchPluginName(pkt))
 }
 
 func Test_buildOIDCAuthResponse_SmallToken(t *testing.T) {
