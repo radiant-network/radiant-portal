@@ -39,10 +39,9 @@ const (
 )
 
 const (
-	maxPacket    = 16 * 1024 * 1024                       // max packet size we advertise (standard)
-	nativePlugin = "mysql_native_password"                // classic password plugin
-	clearPlugin  = "mysql_clear_password"                 // send-password-in-clear (what we ask the Go client for)
-	oidcPlugin   = "authentication_openid_connect_client" // StarRocks' JWT plugin (backend side)
+	maxPacket    = 16 * 1024 * 1024        // max packet size we advertise (standard)
+	nativePlugin = "mysql_native_password" // classic password plugin
+	clearPlugin  = "mysql_clear_password"  // send-password-in-clear (what we ask the Go client for)
 )
 
 // ---------------------------------------------------------------------------
