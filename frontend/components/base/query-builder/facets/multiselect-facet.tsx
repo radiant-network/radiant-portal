@@ -273,6 +273,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
     <>
       <CardContent size="sm" variant="outline">
         <Input
+          data-cy={`facet-search-input-${field.key}`}
           startIcon={SearchIcon}
           size="xs"
           type="text"
@@ -284,11 +285,23 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
         />
 
         <div className="flex gap-2 items-center">
-          <Button size="xs" onClick={() => selectAll()} variant="link" className="px-0">
+          <Button
+            data-cy={`facet-select-all-${field.key}`}
+            size="xs"
+            onClick={() => selectAll()}
+            variant="link"
+            className="px-0"
+          >
             {t('common.filters.buttons.all')}
           </Button>
           <Separator orientation="vertical" className="h-4" />
-          <Button size="xs" onClick={() => unSelectAll()} variant="link" className="px-0">
+          <Button
+            data-cy={`facet-select-none-${field.key}`}
+            size="xs"
+            onClick={() => unSelectAll()}
+            variant="link"
+            className="px-0"
+          >
             {t('common.filters.buttons.none')}
           </Button>
 
@@ -342,19 +355,37 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
         </div>
 
         {!isLoading && items.length > visibleItemsCount && (
-          <Button className="mt-2 px-0" onClick={showMore} size="xs" variant="link">
+          <Button
+            data-cy={`facet-show-more-${field.key}`}
+            className="mt-2 px-0"
+            onClick={showMore}
+            size="xs"
+            variant="link"
+          >
             {t('common.filters.buttons.show_more', { value: thousandNumberFormat(items.length - visibleItemsCount) })}
           </Button>
         )}
         {!isLoading && visibleItemsCount > maxVisibleItems && (
-          <Button className="mt-2 px-0" onClick={showLess} size="xs" variant="link">
+          <Button
+            data-cy={`facet-show-less-${field.key}`}
+            className="mt-2 px-0"
+            onClick={showLess}
+            size="xs"
+            variant="link"
+          >
             {t('common.filters.buttons.show_less')}
           </Button>
         )}
       </CardContent>
       <CardFooter size="sm">
         <div className="flex align-right justify-end items-center space-x-2">
-          <Button size="2xs" variant="ghost" onClick={reset} disabled={selectedItems.length === 0 || isLoading}>
+          <Button
+            data-cy={`facet-clear-button-${field.key}`}
+            size="2xs"
+            variant="ghost"
+            onClick={reset}
+            disabled={selectedItems.length === 0 || isLoading}
+          >
             {t('common.filters.buttons.clear')}
           </Button>
           <div className="flex space-x-2">

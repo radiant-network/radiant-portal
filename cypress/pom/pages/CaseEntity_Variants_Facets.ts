@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { CommonTexts } from 'pom/shared/Texts';
 import { CommonSelectors } from '../shared/Selectors';
-import { buildBilingualRegExp, getTextOperator } from 'pom/shared/Utils';
+import { buildBilingualRegExp, findFacetData, findSectionData, getTextOperator } from 'pom/shared/Utils';
 
 export const tableSNVFacets = [
   {
@@ -973,7 +973,37 @@ export const tableSomaticFacets = [
   },
 ];
 
-const generateFacetsActionsFunctions = () => ({
+const generateFacetsActionsFunctions = (tableFacets: any[] = []) => ({
+  /**
+   * Applies a multiselect facet filter by selecting its first value and clicking apply.
+   * @param section The section name to open (e.g., 'Variant', 'Gene', 'Pathogenicity').
+   * @param facet The multiselect facet id to apply (e.g., 'chromosome', 'variant_type').
+   */
+  applyMultiselectFacetFilter(section: string, facet: string) {
+    const facetData = findFacetData(tableFacets, section, facet);
+    cy.get(CommonSelectors.sidebarSection(section)).clickAndWait({ force: true });
+    cy.get(CommonSelectors.facetHeader(facetData.apiField)).clickAndWait({ force: true });
+    cy.get(CommonSelectors.facetCheckbox(facetData.apiField, /*any value*/ '')).eq(0).click({ force: true });
+    cy.get(CommonSelectors.facetApplyButton(facetData.apiField)).clickAndWait({ force: true });
+  },
+  /**
+   * Applies a numerical facet filter by filling its input(s) with `1` and clicking apply.
+   * A `between` facet is filled with min = max = 1.
+   * @param section The section name to open (e.g., 'Variant', 'Gene', 'Pathogenicity').
+   * @param facet The numerical facet id to apply (e.g., 'position', 'start').
+   */
+  applyNumericalFacetFilter(section: string, facet: string) {
+    const facetData = findFacetData(tableFacets, section, facet);
+    cy.get(CommonSelectors.sidebarSection(section)).clickAndWait({ force: true });
+    cy.get(CommonSelectors.facetHeader(facetData.apiField)).clickAndWait({ force: true });
+    if (facetData.defaultOperator === 'between') {
+      cy.get(CommonSelectors.facetMinInput(facetData.apiField)).clear({ force: true }).type('1', { force: true });
+      cy.get(CommonSelectors.facetMaxInput(facetData.apiField)).clear({ force: true }).type('1', { force: true });
+    } else {
+      cy.get(CommonSelectors.facetValueInput(facetData.apiField)).clear({ force: true }).type('1', { force: true });
+    }
+    cy.get(CommonSelectors.facetApplyButton(facetData.apiField)).clickAndWait({ force: true });
+  },
   /**
    * Clicks the collapse all button to collapse all facets.
    */
@@ -1115,7 +1145,10 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
    * @param genes The gene symbols expected in the pill (compared lowercase, as rendered by the query builder).
    */
   shouldHaveGeneSymbolPill(genes: string[]) {
-    cy.validatePillSelectedQuery('Gene Symbol', genes.map(gene => gene.toLowerCase()));
+    cy.validatePillSelectedQuery(
+      'Gene Symbol',
+      genes.map(gene => gene.toLowerCase())
+    );
   },
   /**
    * Validates that facets display tooltips when expected.
@@ -1169,20 +1202,11 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
    * Compares the intercepted request with the expected fixture data.
    * @param section - The section name (e.g., 'Variant', 'Gene', 'Pathogenicity').
    * @param facet - The facet ID to test (e.g., 'variant_type', 'consequence').
-   * @throws Error if the section or facet is not found in tableSNVFacets configuration.
+   * @throws Error if the section or facet is not found in tableFacets configuration.
    */
   shouldRequestOnApply(section: string, facet: string) {
     clickSidebarSectionAction(section);
-    const sectionData = tableFacets.find(s => s.section === section);
-
-    if (!sectionData) {
-      throw new Error(`Section "${section}" not found in tableSNVFacets`);
-    }
-    const facetData = sectionData.facets.find((f: any) => f.id === facet);
-
-    if (!facetData) {
-      throw new Error(`Facet "${facet}" not found in tableSNVFacets section ${section}`);
-    }
+    const facetData = findFacetData(tableFacets, section, facet);
 
     let opWithData = facetData.defaultOperator ? facetData.defaultOperator : '';
     cy.get(CommonSelectors.facetHeader(facetData.apiField)).clickAndWait({ force: true });
@@ -1211,6 +1235,92 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
     });
   },
   /**
+   * Validates that the clear (reset) button unselects the facet values.
+   * @param section The section name (e.g., 'Variant', 'Gene', 'Pathogenicity').
+   * @param facet The facet id to test (e.g., 'chromosome', 'variant_type').
+   */
+  shouldResetFacet(section: string, facet: string) {
+    clickSidebarSectionAction(section);
+    const facetData = findFacetData(tableFacets, section, facet);
+    cy.get(CommonSelectors.facetHeader(facetData.apiField)).clickAndWait({ force: true });
+
+    cy.get(CommonSelectors.facetClearButton(facetData.apiField)).should('be.disabled');
+    cy.get(CommonSelectors.facetCheckbox(facetData.apiField, /*any value*/ '')).eq(0).click({ force: true });
+    cy.get(CommonSelectors.facetCheckbox(facetData.apiField, '')).eq(0).shouldBeDataState('checked');
+
+    cy.get(CommonSelectors.facetClearButton(facetData.apiField)).should('be.enabled').click({ force: true });
+    cy.get(CommonSelectors.facetCheckbox(facetData.apiField, '')).eq(0).shouldBeDataState('unchecked');
+    cy.get(CommonSelectors.facetClearButton(facetData.apiField)).should('be.disabled');
+  },
+  /**
+   * Validates the intra-facet search: a matching term keeps the value visible,
+   * a non-matching term shows the empty state, and clearing restores the values.
+   * @param section The section name (e.g., 'Variant', 'Gene', 'Pathogenicity').
+   * @param facet The facet id to test (e.g., 'chromosome', 'variant_type').
+   */
+  shouldSearchInFacet(section: string, facet: string) {
+    clickSidebarSectionAction(section);
+    const facetData = findFacetData(tableFacets, section, facet);
+    cy.get(CommonSelectors.facetHeader(facetData.apiField)).clickAndWait({ force: true });
+
+    // A matching term keeps the searched value visible (data-cy encodes the value key)
+    cy.get(CommonSelectors.facetCheckbox(facetData.apiField, ''))
+      .first()
+      .invoke('attr', 'data-cy')
+      .then(dataCy => {
+        const value = (dataCy ?? '').replace(`facet-checkbox-${facetData.apiField}-`, '');
+        cy.get(CommonSelectors.facetSearchInput(facetData.apiField)).clear({ force: true }).type(value, { force: true });
+        cy.get(CommonSelectors.facetCheckbox(facetData.apiField, value)).should('exist');
+      });
+
+    // A non-matching term shows the empty state (no checkbox rendered)
+    cy.get(CommonSelectors.facetSearchInput(facetData.apiField)).clear({ force: true }).type('noMatchValue', { force: true });
+    cy.get(CommonSelectors.facetCheckbox(facetData.apiField, '')).should('not.exist');
+
+    // Clearing the search restores the values
+    cy.get(CommonSelectors.facetSearchInput(facetData.apiField)).clear({ force: true });
+    cy.get(CommonSelectors.facetCheckbox(facetData.apiField, '')).should('exist');
+  },
+  /**
+   * Validates the select all / none buttons: 'All' checks every visible value,
+   * 'None' unchecks them.
+   * @param section The section name (e.g., 'Variant', 'Gene', 'Pathogenicity').
+   * @param facet The facet id to test (e.g., 'chromosome', 'variant_type').
+   */
+  shouldSelectAllAndNone(section: string, facet: string) {
+    clickSidebarSectionAction(section);
+    const facetData = findFacetData(tableFacets, section, facet);
+    cy.get(CommonSelectors.facetHeader(facetData.apiField)).clickAndWait({ force: true });
+
+    cy.get(CommonSelectors.facetSelectAll(facetData.apiField)).click({ force: true });
+    cy.get(CommonSelectors.facetCheckbox(facetData.apiField, '')).each($checkbox => cy.wrap($checkbox).shouldBeDataState('checked'));
+
+    cy.get(CommonSelectors.facetSelectNone(facetData.apiField)).click({ force: true });
+    cy.get(CommonSelectors.facetCheckbox(facetData.apiField, '')).each($checkbox => cy.wrap($checkbox).shouldBeDataState('unchecked'));
+  },
+  /**
+   * Validates the show more / show less toggle: 'show more' reveals additional values,
+   * 'show less' collapses back to the default visible count.
+   * Applicable only to facets rendering more than the default visible items.
+   * @param section The section name (e.g., 'Variant', 'Gene', 'Pathogenicity').
+   * @param facet The facet id to test (e.g., 'chromosome', 'consequence').
+   */
+  shouldShowMoreAndLess(section: string, facet: string) {
+    clickSidebarSectionAction(section);
+    const facetData = findFacetData(tableFacets, section, facet);
+    cy.get(CommonSelectors.facetHeader(facetData.apiField)).clickAndWait({ force: true });
+
+    cy.get(CommonSelectors.facetShowMore(facetData.apiField)).should('exist');
+    cy.get(CommonSelectors.facetCheckbox(facetData.apiField, '')).then($visible => {
+      const visibleCount = $visible.length;
+      cy.get(CommonSelectors.facetShowMore(facetData.apiField)).click({ force: true });
+      cy.get(CommonSelectors.facetCheckbox(facetData.apiField, '')).its('length').should('be.gt', visibleCount);
+
+      cy.get(CommonSelectors.facetShowLess(facetData.apiField)).should('exist').click({ force: true });
+      cy.get(CommonSelectors.facetCheckbox(facetData.apiField, '')).its('length').should('eq', visibleCount);
+    });
+  },
+  /**
    * SEARCH_BY facet: validates that the search facet displays its tooltip on hover.
    * @param field The search facet field key (default: 'symbol' for `search_by_symbol`).
    */
@@ -1225,11 +1335,7 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
    */
   shouldShowAllFacets(section: string) {
     clickSidebarSectionAction(section);
-    const sectionData = tableFacets.find(s => s.section === section);
-
-    if (!sectionData) {
-      throw new Error(`Section "${section}" not found in tableSNVFacets`);
-    }
+    const sectionData = findSectionData(tableFacets, section);
 
     sectionData.facets.forEach((facet: any) => {
       cy.get(CommonSelectors.facetHeader('' /*all facets*/)).eq(facet.position).should('match', CommonSelectors.facetHeader(facet.apiField));
@@ -1239,9 +1345,9 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
 
 export const CaseEntity_Variants_Facets = {
   snv: {
-    actions: generateFacetsActionsFunctions(),
+    actions: generateFacetsActionsFunctions(tableSNVFacets),
     validations: (() => {
-      const actions = generateFacetsActionsFunctions();
+      const actions = generateFacetsActionsFunctions(tableSNVFacets);
       const baseValidations = generateFacetsValidationsFunctions(tableSNVFacets, actions.clickSidebarSection);
       return {
         ...baseValidations,
@@ -1249,9 +1355,9 @@ export const CaseEntity_Variants_Facets = {
     })(),
   },
   cnv: {
-    actions: generateFacetsActionsFunctions(),
+    actions: generateFacetsActionsFunctions(tableCNVFacets),
     validations: (() => {
-      const actions = generateFacetsActionsFunctions();
+      const actions = generateFacetsActionsFunctions(tableCNVFacets);
       const baseValidations = generateFacetsValidationsFunctions(tableCNVFacets, actions.clickSidebarSection);
       return {
         ...baseValidations,
@@ -1259,9 +1365,9 @@ export const CaseEntity_Variants_Facets = {
     })(),
   },
   somatic: {
-    actions: generateFacetsActionsFunctions(),
+    actions: generateFacetsActionsFunctions(tableSomaticFacets),
     validations: (() => {
-      const actions = generateFacetsActionsFunctions();
+      const actions = generateFacetsActionsFunctions(tableSomaticFacets);
       const baseValidations = generateFacetsValidationsFunctions(tableSomaticFacets, actions.clickSidebarSection);
       return {
         ...baseValidations,

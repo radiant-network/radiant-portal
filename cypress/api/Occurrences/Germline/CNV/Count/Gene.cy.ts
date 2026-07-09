@@ -1,5 +1,6 @@
 /// <reference types="cypress"/>
 import { tableCNVFacets } from 'pom/pages/CaseEntity_Variants_Facets';
+import { findSectionData } from 'pom/shared/Utils';
 
 describe('Occurrences - Germline - CNV - Count - Gene', () => {
   let response: any;
@@ -17,11 +18,7 @@ describe('Occurrences - Germline - CNV - Count - Gene', () => {
     task_id = globalData.Count.cnv.task_id;
   });
 
-  const sectionData = tableCNVFacets.find(s => s.section === 'Gene');
-
-  if (!sectionData) {
-    throw new Error(`Section "Gene" not found in tableFacets`);
-  }
+  const sectionData = findSectionData(tableCNVFacets, 'Gene');
 
   sectionData.facets.forEach(facet => {
     const facetName = facet.name instanceof RegExp ? facet.name.source.replace(/^\^|\$$/g, '') : facet.name;
