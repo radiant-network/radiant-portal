@@ -12,12 +12,12 @@ describe('Case Entity - Variants - Germline - CNV - Facets - Dictionary', () => 
     CaseEntity_Variants_SavedFilters.cnv.actions.clickNewFilterButton(); // Clean Query Builder
   };
 
-  it('Non zero values [SJRA-1686]', () => {
+  it('Non zero values', () => {
     setupTest();
     CaseEntity_Variants_Facets.cnv.validations.shouldDictionaryIncludeAllNonZeroValues();
   });
 
-  it('Additional values [SJRA-1686]', () => {
+  it('Additional values', () => {
     setupTest();
     CaseEntity_Variants_Facets.cnv.validations.shouldDictionaryAdditionalValuesHaveZeroCount();
   });

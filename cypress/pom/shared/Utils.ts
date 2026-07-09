@@ -28,6 +28,38 @@ export const buildBilingualRegExp = (commonTextsId: string): RegExp => {
 };
 
 /**
+ * Resolves a facet section from its name.
+ * Shared by the facet POM validations and the facet API tests (e.g., api/Occurrences/.../Count).
+ * @param tableFacets The facets configuration of the zone (e.g., tableSNVFacets).
+ * @param section The section name (e.g., 'Variant', 'Gene', 'Pathogenicity').
+ * @throws Error if the section is not found in the configuration.
+ */
+export const findSectionData = <T extends { section: string; facets: unknown[] }>(tableFacets: T[], section: string): T => {
+  const sectionData = tableFacets.find(s => s.section === section);
+
+  if (!sectionData) {
+    throw new Error(`Section "${section}" not found in tableFacets`);
+  }
+  return sectionData;
+};
+
+/**
+ * Resolves a facet configuration from its section name and facet id.
+ * @param tableFacets The facets configuration of the zone (e.g., tableSNVFacets).
+ * @param section The section name (e.g., 'Variant', 'Gene', 'Pathogenicity').
+ * @param facet The facet id (e.g., 'chromosome', 'variant_type').
+ * @throws Error if the section or facet is not found in the configuration.
+ */
+export const findFacetData = (tableFacets: any[], section: string, facet: string) => {
+  const facetData = findSectionData(tableFacets, section).facets.find((f: any) => f.id === facet);
+
+  if (!facetData) {
+    throw new Error(`Facet "${facet}" not found in tableFacets section ${section}`);
+  }
+  return facetData;
+};
+
+/**
  * Gets the column name from a columns array by column ID.
  * @param columns The array of column objects.
  * @param columnID The ID of the column.
