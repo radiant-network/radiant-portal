@@ -10,9 +10,9 @@ type ObsCategorical struct {
 	Observation        Observation `gorm:"foreignKey:code;references:ObservationCode"`
 	CodingSystem       string
 	CodeValue          string
-	OnsetCode          string
+	OnsetCode          *string
 	Onset              Onset `gorm:"foreignKey:code;references:OnsetCode"`
-	InterpretationCode string
+	InterpretationCode *string
 	Interpretation     ObservationInterpretation `gorm:"foreignKey:code;references:InterpretationCode"`
 	Note               string
 	TenantCode         string

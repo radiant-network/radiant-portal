@@ -2485,6 +2485,7 @@ func Test_validateObservationsCategorical_Valid(t *testing.T) {
 		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
 		ObservationCodes:     []string{"phenotype", "condition"},
 		OnsetCodes:           []string{"childhood", "juvenile"},
+		InterpretationCodes:  []string{"positive", "negative"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -2523,6 +2524,7 @@ func Test_validateObservationsCategorical_Valid(t *testing.T) {
 func Test_validateObservationsCategorical_MultipleErrors(t *testing.T) {
 	record := CaseValidationRecord{
 		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
+		InterpretationCodes:  []string{"positive", "negative"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -3015,6 +3017,7 @@ func Test_validateCasePatients_Valid(t *testing.T) {
 		BaseValidationRecord: batchval.BaseValidationRecord{Index: 0},
 		OnsetCodes:           []string{"unknown"},
 		ObservationCodes:     []string{"phenotype", "condition"},
+		InterpretationCodes:  []string{"positive", "negative"},
 		Case: types.CaseBatch{
 			ProjectCode:     "PROJ-1",
 			SubmitterCaseId: "CASE-1",
@@ -3102,7 +3105,7 @@ func Test_validateCasePatients_WithErrors(t *testing.T) {
 
 	err := record.validateCasePatients()
 	assert.NoError(t, err)
-	assert.Equal(t, 10, len(record.Errors))
+	assert.Equal(t, 11, len(record.Errors))
 }
 
 // -----------------------------------------------------------------------------
@@ -4586,4 +4589,110 @@ func Test_validateFileMetadata_OptionalHash(t *testing.T) {
 		assert.Len(t, record.Warnings, 0)
 		assert.Len(t, record.Errors, 0)
 	})
+}
+
+func obsCategoricalRecord(obs *types.ObservationCategoricalBatch) CaseValidationRecord {
+	return CaseValidationRecord{
+		Case: types.CaseBatch{
+			Patients: []*types.CasePatientBatch{
+				{ObservationsCategorical: []*types.ObservationCategoricalBatch{obs}},
+			},
+		},
+		ObservationCodes:    []string{"phenotype", "ancestry", "consanguinity"},
+		OnsetCodes:          []string{"infantile", "unknown"},
+		InterpretationCodes: []string{"positive", "negative"},
+		AncestryCodes:       []string{"CA-FR", "EU", "OTH"},
+		ConsanguinityCodes:  []string{"consanguinity", "no_consanguinity", "unknown"},
+	}
+}
+
+func hasErrorForField(errors []types.BatchMessage, field string) bool {
+	for _, e := range errors {
+		if strings.HasSuffix(e.Path, "."+field) {
+			return true
+		}
+	}
+	return false
+}
+
+func Test_validateObservationsCategorical_RequiredCode_RequiresOnsetAndInterpretation(t *testing.T) {
+	record := obsCategoricalRecord(&types.ObservationCategoricalBatch{
+		Code: "phenotype", System: "HPO", Value: "Seizures",
+	})
+
+	err := record.validateObservationsCategorical(0)
+
+	assert.NoError(t, err)
+	assert.True(t, hasErrorForField(record.Errors, "onset_code"), "onset_code should be required for a non-exempt code")
+	assert.True(t, hasErrorForField(record.Errors, "interpretation_code"), "interpretation_code should be required for a non-exempt code")
+}
+
+func Test_validateObservationsCategorical_ValidRequiredCode_NoError(t *testing.T) {
+	record := obsCategoricalRecord(&types.ObservationCategoricalBatch{
+		Code: "phenotype", System: "HPO", Value: "Seizures",
+		OnsetCode: "infantile", InterpretationCode: "positive",
+	})
+
+	err := record.validateObservationsCategorical(0)
+
+	assert.NoError(t, err)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateObservationsCategorical_Ancestry_OnsetAndInterpretationOptional(t *testing.T) {
+	// An ancestry observation (ethnicity) has neither onset nor interpretation.
+	record := obsCategoricalRecord(&types.ObservationCategoricalBatch{
+		Code: types.ObsCodeAncestry, System: "radiant", Value: "CA-FR",
+	})
+
+	err := record.validateObservationsCategorical(0)
+
+	assert.NoError(t, err)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateObservationsCategorical_Consanguinity_OnsetAndInterpretationOptional(t *testing.T) {
+	record := obsCategoricalRecord(&types.ObservationCategoricalBatch{
+		Code: types.ObsCodeConsanguinity, System: "radiant", Value: "consanguinity",
+	})
+
+	err := record.validateObservationsCategorical(0)
+
+	assert.NoError(t, err)
+	assert.Empty(t, record.Errors)
+}
+
+func Test_validateObservationsCategorical_ExemptCode_InvalidOnsetStillRejected(t *testing.T) {
+	// When provided (even for an exempt code), onset_code must be a valid code.
+	record := obsCategoricalRecord(&types.ObservationCategoricalBatch{
+		Code: types.ObsCodeAncestry, System: "radiant", Value: "CA-FR", OnsetCode: "not-a-real-onset",
+	})
+
+	err := record.validateObservationsCategorical(0)
+
+	assert.NoError(t, err)
+	assert.True(t, hasErrorForField(record.Errors, "onset_code"))
+}
+
+func Test_validateObservationsCategorical_Ancestry_InvalidValueRejected(t *testing.T) {
+	// An ancestry value must belong to the Radiant-owned ancestry value set.
+	record := obsCategoricalRecord(&types.ObservationCategoricalBatch{
+		Code: types.ObsCodeAncestry, System: "radiant", Value: "not-an-ethnicity",
+	})
+
+	err := record.validateObservationsCategorical(0)
+
+	assert.NoError(t, err)
+	assert.True(t, hasErrorForField(record.Errors, "value"))
+}
+
+func Test_validateObservationsCategorical_Consanguinity_InvalidValueRejected(t *testing.T) {
+	record := obsCategoricalRecord(&types.ObservationCategoricalBatch{
+		Code: types.ObsCodeConsanguinity, System: "radiant", Value: "maybe",
+	})
+
+	err := record.validateObservationsCategorical(0)
+
+	assert.NoError(t, err)
+	assert.True(t, hasErrorForField(record.Errors, "value"))
 }

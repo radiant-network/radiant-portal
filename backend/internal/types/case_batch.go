@@ -5,6 +5,20 @@ const (
 	PatchCaseBatchType = "patch_case"
 )
 
+const (
+	ObsCodeAncestry      = "ancestry"
+	ObsCodeConsanguinity = "consanguinity"
+)
+
+func ObservationRequiresOnsetAndInterpretation(code string) bool {
+	switch code {
+	case ObsCodeAncestry, ObsCodeConsanguinity:
+		return false
+	default:
+		return true
+	}
+}
+
 type CaseBatch struct {
 	SubmitterCaseId            string                           `json:"submitter_case_id,omitempty" toml:"submitter_case_id"`
 	Type                       string                           `json:"type" toml:"type" binding:"required,oneof=germline somatic"`
@@ -44,8 +58,8 @@ type ObservationCategoricalBatch struct {
 	Code               string `json:"code" toml:"code" binding:"required"`
 	System             string `json:"system" toml:"system" binding:"required"`
 	Value              string `json:"value" toml:"value" binding:"required"`
-	OnsetCode          string `json:"onset_code" toml:"onset_code" binding:"required"`
-	InterpretationCode string `json:"interpretation_code,omitempty" toml:"interpretation_code" binding:"oneof=positive negative"`
+	OnsetCode          string `json:"onset_code,omitempty" toml:"onset_code"`
+	InterpretationCode string `json:"interpretation_code,omitempty" toml:"interpretation_code" binding:"omitempty,oneof=positive negative"`
 	Note               string `json:"note,omitempty" toml:"note"`
 }
 

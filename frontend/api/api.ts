@@ -3621,7 +3621,7 @@ export interface ObservationCategoricalBatch {
      * @type {string}
      * @memberof ObservationCategoricalBatch
      */
-    'onset_code': string;
+    'onset_code'?: string;
     /**
      * 
      * @type {string}

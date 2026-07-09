@@ -124,3 +124,16 @@ func Test_CaseBatch_FromJSON(t *testing.T) {
 	assert.Nil(t, err, "Failed to unmarshal JSON to Case Batch")
 	assert.Equal(t, expected, caseBatch, "Objects should be equal after unmarshalling from JSON")
 }
+
+func Test_ObservationRequiresOnsetAndInterpretation_ExemptCodes(t *testing.T) {
+	assert.False(t, ObservationRequiresOnsetAndInterpretation(ObsCodeAncestry))
+	assert.False(t, ObservationRequiresOnsetAndInterpretation(ObsCodeConsanguinity))
+}
+
+func Test_ObservationRequiresOnsetAndInterpretation_RequiredCodes(t *testing.T) {
+	assert.True(t, ObservationRequiresOnsetAndInterpretation("phenotype"))
+	assert.True(t, ObservationRequiresOnsetAndInterpretation("condition"))
+	assert.True(t, ObservationRequiresOnsetAndInterpretation("note"))
+	// Empty code defaults to required (safe default).
+	assert.True(t, ObservationRequiresOnsetAndInterpretation(""))
+}
