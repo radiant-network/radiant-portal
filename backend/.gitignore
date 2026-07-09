@@ -35,6 +35,9 @@ Thumbs.db
 
 # binary
 bin/
+# mysql-proxy binary from `go build ./cmd/mysql-proxy` (no -o drops it here). Anchored with a
+# leading slash so it ignores only the root artifact, NOT the cmd/mysql-proxy/ source dir.
+/mysql-proxy
 
 
 #config
