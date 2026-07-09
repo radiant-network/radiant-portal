@@ -180,7 +180,11 @@ func readLenEncInt(b []byte) (n, consumed int) {
 	case b[0] == 0xfd && len(b) >= 4:
 		return int(uint32(b[1]) | uint32(b[2])<<8 | uint32(b[3])<<16), 4
 	case b[0] == 0xfe && len(b) >= 9:
-		return int(binary.LittleEndian.Uint64(b[1:9])), 9
+		v := binary.LittleEndian.Uint64(b[1:9])
+		if v > maxPacket { // longer than any legal MySQL packet payload — malformed
+			return 0, 0
+		}
+		return int(v), 9
 	}
 	return 0, 0
 }
