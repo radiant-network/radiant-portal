@@ -45,6 +45,19 @@ const (
 	clearPlugin  = "mysql_clear_password"  // send-password-in-clear (what we ask the Go client for)
 )
 
+// HandshakeV10 fixed-field byte sizes, in wire order after the NUL-terminated server_version
+// string. Used to locate the capability flags / charset by offset (see removeCapability and
+// charsetFromHandshake) instead of magic numbers.
+const (
+	hsConnIDLen  = 4 // connection_id
+	hsSaltLen    = 8 // auth-plugin-data part 1 (salt)
+	hsFillerLen  = 1 // filler byte
+	hsCapLowLen  = 2 // capability_flags, low 16 bits
+	hsCharsetLen = 1 // charset
+	hsStatusLen  = 2 // status_flags
+	hsCapHighLen = 2 // capability_flags, high 16 bits
+)
+
 // ---------------------------------------------------------------------------
 // Packet framing: read/write one MySQL packet over a connection.
 // ---------------------------------------------------------------------------
@@ -119,8 +132,8 @@ func serverVersionEnd(handshake []byte) int {
 // The capability flags are historically split into a low and high 16-bit word, so we clear
 // the bit from whichever word it lives in.
 func removeCapability(handshake []byte, capability uint32) []byte {
-	low := serverVersionEnd(handshake) + 4 + 8 + 1
-	if low+2 > len(handshake) {
+	low := serverVersionEnd(handshake) + hsConnIDLen + hsSaltLen + hsFillerLen
+	if low+hsCapLowLen > len(handshake) {
 		return handshake
 	}
 	// Clear the capability's set bits from the little-endian field byte by byte (&^= clears
@@ -128,8 +141,8 @@ func removeCapability(handshake []byte, capability uint32) []byte {
 	handshake[low] &^= byte(capability)
 	handshake[low+1] &^= byte(capability >> 8)
 
-	high := low + 2 + 1 + 2 // past capability_flags_low + charset(1) + status(2)
-	if high+2 <= len(handshake) {
+	high := low + hsCapLowLen + hsCharsetLen + hsStatusLen
+	if high+hsCapHighLen <= len(handshake) {
 		// High word (bits 16-31) = bytes [high], [high+1].
 		handshake[high] &^= byte(capability >> 16)
 		handshake[high+1] &^= byte(capability >> 24)
@@ -140,7 +153,7 @@ func removeCapability(handshake []byte, capability uint32) []byte {
 // charsetFromHandshake reads the charset byte StarRocks chose (it sits right after the low
 // capability word), so we can echo it back in the packets we build. Defaults to utf8 (0x21).
 func charsetFromHandshake(handshake []byte) byte {
-	charset := serverVersionEnd(handshake) + 4 + 8 + 1 + 2
+	charset := serverVersionEnd(handshake) + hsConnIDLen + hsSaltLen + hsFillerLen + hsCapLowLen
 	if charset < len(handshake) {
 		return handshake[charset]
 	}
