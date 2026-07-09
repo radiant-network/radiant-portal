@@ -1,13 +1,13 @@
 import * as React from 'react';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
-import { Check } from 'lucide-react';
+import { Check, Minus } from 'lucide-react';
 import { tv, VariantProps } from 'tailwind-variants';
 
 import { cn } from '@/lib/utils';
 
 export const checkboxVariants = tv({
   slots: {
-    base: 'peer shrink-0 rounded-xs border border-primary ring-offset-background transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-1 focus-visible:outline-ring shadow-sm disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground',
+    base: 'peer shrink-0 rounded-xs border border-primary ring-offset-background transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-1 focus-visible:outline-ring shadow-sm disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground data-[state=indeterminate]:bg-primary data-[state=indeterminate]:border-primary data-[state=indeterminate]:text-primary-foreground',
     icon: '',
   },
   variants: {
@@ -47,7 +47,8 @@ function Checkbox({ className, size, ...props }: CheckboxProps) {
   return (
     <CheckboxPrimitive.Root className={style.base({ className })} {...props}>
       <CheckboxPrimitive.Indicator className={cn('flex items-center justify-center text-current')}>
-        <Check className={style.icon()} />
+        {props.checked === 'indeterminate' && <Minus className={style.icon()} />}
+        {props.checked == true && <Check className={style.icon()} />}
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   );

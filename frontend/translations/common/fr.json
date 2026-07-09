@@ -1,4 +1,13 @@
 {
+  "analysis": {
+    "set_operations": {
+      "download": "Télécharger PNG",
+      "selected_sets": "Ensembles sélectionnés",
+      "set_definitions": "Définitions des ensembles",
+      "set_definition": "Définitions d'ensemble",
+      "union_of_selected_set": "Union des ensembles sélectionnés :"
+    }
+  },
   "community": {
     "title": "Communauté",
     "search": {

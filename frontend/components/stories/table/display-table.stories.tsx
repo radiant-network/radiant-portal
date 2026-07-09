@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { createColumnHelper } from '@tanstack/react-table';
+import { createColumnHelper, HeaderContext, RowSelectionState } from '@tanstack/react-table';
 
 import { SavedFilterType } from '@/api/api';
+import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
 import { TableColumnDef } from '@/components/base/data-table/data-table';
 import DisplayTable from '@/components/base/data-table/display-table';
+import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
 import { ApplicationId, ConfigProvider, PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
@@ -189,4 +192,51 @@ export const Empty: Story = {
       <DisplayTable {...args} />
     </StorySection>
   ),
+};
+
+export const WithRowSelection: Story = {
+  args: {
+    columns: [
+      {
+        id: 'rowSelection',
+        size: 48,
+        maxSize: 48,
+        header: (header: HeaderContext<TableMockData, unknown>) => <RowSelectionHeader table={header.table} />,
+        cell: info => <RowSelectionCell row={info.row} />,
+      },
+      columnHelper.accessor('firstName', {
+        cell: info => info.getValue(),
+        header: () => <span>First Name</span>,
+      }),
+      columnHelper.accessor(row => row.lastName, {
+        id: 'lastName',
+        cell: info => <i>{info.getValue()}</i>,
+        header: () => <span>Last Name</span>,
+      }),
+      columnHelper.accessor('age', {
+        header: () => 'Age',
+        cell: info => info.renderValue(),
+      }),
+      columnHelper.accessor('visits', {
+        header: () => <span>Visits</span>,
+      }),
+      columnHelper.accessor('status', {
+        header: 'Status',
+      }),
+      columnHelper.accessor('progress', {
+        header: 'Profile Progress',
+      }),
+    ] as TableColumnDef<TableMockData, any>[],
+  },
+  render: args => {
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+    return (
+      <StorySection
+        title="With row selection"
+        description="Click a row's checkbox to select it, or use the header checkbox to toggle all rows on the page."
+      >
+        <DisplayTable {...args} rowSelection={rowSelection} onRowSelectionChange={setRowSelection} />
+      </StorySection>
+    );
+  },
 };
