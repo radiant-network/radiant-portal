@@ -175,4 +175,5 @@ const generateSavedFiltersFunctions = () => {
 export const CaseEntity_Variants_SavedFilters = {
   snv: generateSavedFiltersFunctions(),
   cnv: generateSavedFiltersFunctions(),
+  somatic: generateSavedFiltersFunctions(),
 };
