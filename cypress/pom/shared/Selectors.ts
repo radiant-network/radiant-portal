@@ -16,6 +16,7 @@ export const CommonSelectors = {
   deleteIcon: '[class*="lucide-trash"]',
   detailsButton: '[data-cy="details-button"]',
   dirtyClass: 'text-yellow-500',
+  discardIcon: '[class*="lucide-rotate-ccw"]',
   duplicateIcon: '[class*="lucide-copy"]',
   editIcon: '[class*="lucide-pen"]',
   editLineIcon: '[class*="lucide-pencil-line"]',
