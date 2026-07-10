@@ -108,4 +108,34 @@ describe('Case Entity - Variants - Somatic - SNV - Saved filters - Query builder
     CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('duplicate', true /*isDisable*/, false /*isDirty*/);
     CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('delete', true /*isDisable*/, false /*isDirty*/);
   });
+
+  it('Modify and update', () => {
+    setupTest();
+    CaseEntity_Variants_SavedFilters.somatic.actions.deleteFilter('Cypress_F1');
+    CaseEntity_Variants_SavedFilters.somatic.actions.createFilter('Cypress_F1');
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('discard', true /*isDisable*/, false /*isDirty*/);
+
+    CaseEntity_Variants_SavedFilters.somatic.actions.modifyFilter();
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('save', false /*isDisable*/, true /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('discard', false /*isDisable*/, false /*isDirty*/);
+
+    CaseEntity_Variants_SavedFilters.somatic.actions.updateFilter();
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('discard', true /*isDisable*/, false /*isDirty*/);
+  });
+
+  it('Modify and discard', () => {
+    setupTest();
+    CaseEntity_Variants_SavedFilters.somatic.actions.deleteFilter('Cypress_F1');
+    CaseEntity_Variants_SavedFilters.somatic.actions.createFilter('Cypress_F1');
+
+    CaseEntity_Variants_SavedFilters.somatic.actions.modifyFilter();
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('save', false /*isDisable*/, true /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('discard', false /*isDisable*/, false /*isDirty*/);
+
+    CaseEntity_Variants_SavedFilters.somatic.actions.clickDiscardButton();
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('discard', true /*isDisable*/, false /*isDirty*/);
+  });
 });

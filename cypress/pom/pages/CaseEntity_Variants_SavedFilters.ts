@@ -3,13 +3,22 @@ import { CommonSelectors } from 'pom/shared/Selectors';
 import { CommonTexts } from 'pom/shared/Texts';
 import { CaseEntity_Variants_Facets } from './CaseEntity_Variants_Facets';
 
-const generateSavedFiltersFunctions = () => {
+const generateSavedFiltersFunctions = (
+  facetsActions: typeof CaseEntity_Variants_Facets.snv.actions,
+  numericalFacet: { section: string; field: string },
+) => {
   const actions = {
     /**
      * Clicks the delete filter button.
      */
     clickDeleteButton() {
       cy.get(`${CommonSelectors.querybuilderHeader} ${CommonSelectors.deleteIcon}`).clickAndWait({ force: true });
+    },
+    /**
+     * Clicks the discard filter button.
+     */
+    clickDiscardButton() {
+      cy.get(`${CommonSelectors.querybuilderHeader} ${CommonSelectors.discardIcon}`).clickAndWait({ force: true });
     },
     /**
      * Clicks the duplicate filter button.
@@ -48,7 +57,7 @@ const generateSavedFiltersFunctions = () => {
     createFilter(name: string) {
       actions.deleteFilter(name);
 
-      CaseEntity_Variants_Facets.snv.actions.clickSidebarSection('Variant'); // Also works for CNV
+      facetsActions.clickSidebarSection('Variant');
       cy.get(CommonSelectors.facetHeader('chromosome')).clickAndWait({ force: true });
       cy.get(CommonSelectors.facetCheckbox('chromosome', '1')).click({ force: true });
       cy.get(CommonSelectors.facetApplyButton('chromosome')).click({ force: true });
@@ -103,6 +112,12 @@ const generateSavedFiltersFunctions = () => {
       cy.wait('@postSavedFilters');
     },
     /**
+     * Modifies the current filter by applying a numerical facet.
+     */
+    modifyFilter() {
+      facetsActions.applyNumericalFacetFilter(numericalFacet.section, numericalFacet.field);
+    },
+    /**
      * Opens the manager filter modal.
      */
     openManager() {
@@ -123,6 +138,14 @@ const generateSavedFiltersFunctions = () => {
     selectFilterInDropdown(name: string | RegExp) {
       actions.openMyFiltersDropdown();
       cy.get(CommonSelectors.savedListDropdown).contains(name).clickAndWait({ force: true });
+    },
+    /**
+     * Updates the selected filter by saving its unsaved changes.
+     */
+    updateFilter() {
+      cy.intercept('**/saved_filters{,/**}').as('putSavedFilters');
+      actions.clickSaveButton();
+      cy.wait('@putSavedFilters');
     },
   };
 
@@ -173,7 +196,7 @@ const generateSavedFiltersFunctions = () => {
 };
 
 export const CaseEntity_Variants_SavedFilters = {
-  snv: generateSavedFiltersFunctions(),
-  cnv: generateSavedFiltersFunctions(),
-  somatic: generateSavedFiltersFunctions(),
+  snv: generateSavedFiltersFunctions(CaseEntity_Variants_Facets.snv.actions, { section: 'Variant', field: 'position' }),
+  cnv: generateSavedFiltersFunctions(CaseEntity_Variants_Facets.cnv.actions, { section: 'Variant', field: 'start' }),
+  somatic: generateSavedFiltersFunctions(CaseEntity_Variants_Facets.somatic.actions, { section: 'Variant', field: 'position' }),
 };
