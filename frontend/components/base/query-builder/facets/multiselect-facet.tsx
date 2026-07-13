@@ -343,7 +343,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
             items.slice(0, visibleItemsCount).map(item => (
               <div className="gap-3 py-1.5" key={item.key}>
                 <CheckboxFilter
-                  data-cy={`facet-checkbox-${field.key}-${item.key}`}
+                  dataCy={`facet-checkbox-${field.key}-${item.key}`}
                   size="xs"
                   label={item.label}
                   checked={selectedItems.some(f => f === item.key)}
@@ -390,7 +390,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
           </Button>
           <div className="flex space-x-2">
             <ActionButton
-              data-cy={`facet-apply-button-${field.key}`}
+              dataCy={`facet-apply-button-${field.key}`}
               size="2xs"
               variant="outline"
               className="h-7"

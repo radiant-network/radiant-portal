@@ -60,7 +60,7 @@ type CheckboxFilterProps = React.ComponentPropsWithoutRef<typeof CheckboxPrimiti
     count?: number;
     description?: string;
     fluid?: boolean;
-    'data-cy'?: string;
+    dataCy?: string;
   };
 
 function CheckboxFilter({
@@ -71,7 +71,7 @@ function CheckboxFilter({
   count,
   description,
   fluid,
-  'data-cy': dataCy,
+  dataCy,
   ...props
 }: CheckboxFilterProps) {
   const styles = checkboxFilterVariants({ size, fluid });
