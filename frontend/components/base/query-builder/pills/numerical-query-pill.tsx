@@ -39,10 +39,10 @@ function NumericalQueryPill({ sqon }: NumericalPillProps) {
       <div className="flex gap-2">
         <LabelOperator field={sqon.content.field} operator={<Operator size={14} type={sqon.op} />} />
         <Popover>
-          <PopoverTrigger>
+          <PopoverTrigger data-cy="query-pill-value">
             <QueryPillValues sqon={sqon} />
           </PopoverTrigger>
-          <PopoverContent align="start" className="p-2.5">
+          <PopoverContent align="start" className="p-2.5" data-cy="query-pill-editor">
             <FacetComponent field={aggregation} isOpen />
           </PopoverContent>
         </Popover>

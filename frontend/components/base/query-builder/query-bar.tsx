@@ -220,6 +220,7 @@ function QueryBar({ index, sqon }: QueryBarProps) {
             })}
           >
             <Checkbox
+              data-cy="query-select-checkbox"
               size="sm"
               defaultChecked={false}
               checked={selectedQueries.includes(sqon.id)}
@@ -240,7 +241,7 @@ function QueryBar({ index, sqon }: QueryBarProps) {
             </div>
 
             {/* count */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1" data-cy="query-count">
               {fetchTotal.isLoading ? (
                 <Spinner />
               ) : (
@@ -254,13 +255,13 @@ function QueryBar({ index, sqon }: QueryBarProps) {
 
           {/* actions */}
           <div className={cn('flex items-center py-2 px-3 border-r border-t border-b', backgroundColor)}>
-            <Button iconOnly variant="ghost" size="sm" onClick={handleDuplicate}>
+            <Button data-cy="query-duplicate-button" iconOnly variant="ghost" size="sm" onClick={handleDuplicate}>
               <CopyIcon />
             </Button>
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button iconOnly variant="ghost" size="sm">
+                <Button data-cy="query-delete-button" iconOnly variant="ghost" size="sm">
                   <TrashIcon />
                 </Button>
               </PopoverTrigger>
@@ -268,12 +269,12 @@ function QueryBar({ index, sqon }: QueryBarProps) {
                 <div className="text-sm">{t('common.query_bar.delete_popover.title')}</div>
                 <div className="flex gap-1 justify-end">
                   <PopoverClose asChild>
-                    <Button size="xs" variant="outline">
+                    <Button data-cy="query-delete-cancel" size="xs" variant="outline">
                       {t('common.query_bar.delete_popover.cancel')}
                     </Button>
                   </PopoverClose>
                   <PopoverClose asChild>
-                    <Button size="xs" variant="destructive" onClick={handleDelete}>
+                    <Button data-cy="query-delete-confirm" size="xs" variant="destructive" onClick={handleDelete}>
                       {t('common.query_bar.delete_popover.ok')}
                     </Button>
                   </PopoverClose>

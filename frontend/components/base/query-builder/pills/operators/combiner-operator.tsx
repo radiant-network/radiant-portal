@@ -41,7 +41,12 @@ function CombinerOperator({ sqon }: CombineOperatorProps) {
     <div className="px-2">
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="link" className="text-current text-sm p-0 h-auto font-normal" onClick={handleOnClick}>
+          <Button
+            data-cy="query-combiner-operator"
+            variant="link"
+            className="text-current text-sm p-0 h-auto font-normal"
+            onClick={handleOnClick}
+          >
             {t(`common.query_pill.operator.${sqon.op}`)}
           </Button>
         </TooltipTrigger>

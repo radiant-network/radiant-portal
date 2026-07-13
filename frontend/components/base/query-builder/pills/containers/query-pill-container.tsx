@@ -26,6 +26,7 @@ function QueryPillContainer({ children, onRemovePill }: QueryPillContainerProps)
       {children}
 
       <Button
+        data-cy="query-pill-remove"
         iconOnly
         variant="ghost"
         size="sm"

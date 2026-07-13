@@ -104,9 +104,11 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
       title: t('common.toolbar.clear_all_dialog.title'),
       description: t('common.toolbar.clear_all_dialog.description'),
       cancelProps: {
+        'data-cy': 'clear-all-cancel',
         children: t('common.toolbar.clear_all_dialog.cancel'),
       },
       actionProps: {
+        'data-cy': 'clear-all-confirm',
         variant: 'destructive',
         onClick: () => {
           dispatch({
@@ -143,6 +145,7 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
                   <>
                     {/* Combine Queries */}
                     <ActionButton
+                      data-cy="combine-queries-button"
                       size="xs"
                       actions={[
                         {
@@ -164,14 +167,24 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
                 ) : (
                   <>
                     {/* Add New Query */}
-                    <Button size="xs" disabled={hasEmptyQuery(sqons)} onClick={handleNewQueryClick}>
+                    <Button
+                      data-cy="new-query-button"
+                      size="xs"
+                      disabled={hasEmptyQuery(sqons)}
+                      onClick={handleNewQueryClick}
+                    >
                       <PlusIcon />
                       {t('common.toolbar.new_query')}
                     </Button>
 
                     {/* Toggle labelsEnabled Settings */}
                     <div className="flex items-center gap-1.5">
-                      <Switch size="sm" checked={settings.labelsEnabled} onCheckedChange={handleLabelsCheckedChange} />
+                      <Switch
+                        data-cy="labels-switch"
+                        size="sm"
+                        checked={settings.labelsEnabled}
+                        onCheckedChange={handleLabelsCheckedChange}
+                      />
                       {t('common.toolbar.labels')}
                     </div>
                   </>
@@ -182,6 +195,7 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
               {sqons.length > 1 && (
                 <div>
                   <Button
+                    data-cy="clear-all-button"
                     variant="ghost"
                     size="sm"
                     className="no-underline enabled:hover:no-underline"

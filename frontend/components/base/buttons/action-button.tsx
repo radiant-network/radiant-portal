@@ -32,6 +32,7 @@ interface ActionButtonProps
   className?: string;
   tooltip?: string;
   tooltipSide?: 'top' | 'right' | 'bottom' | 'left';
+  'data-cy'?: string;
 }
 
 function ActionButton({

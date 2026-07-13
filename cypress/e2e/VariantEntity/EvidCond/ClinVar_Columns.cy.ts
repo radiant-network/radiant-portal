@@ -3,7 +3,7 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { VariantEntity_EvidCond } from 'pom/pages/VariantEntity_EvidCond';
 
-describe('VariantEntity - EvidCond - ClinVar - Columns', () => {
+describe('VariantEntity - EvidCond - ClinVar - Columns [SJRA-1702]', () => {
   const setupTest = () => {
     cy.login();
     cy.resetTablePreferences();

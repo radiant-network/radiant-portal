@@ -14,7 +14,7 @@ interface OpenAlertDialogBaseProps {
 
 interface OpenAlertDialogWithCancelProps extends OpenAlertDialogBaseProps {
   hideCancel?: never;
-  cancelProps: AlertDialogCancelProps;
+  cancelProps: AlertDialogCancelProps & { 'data-cy'?: string };
 }
 
 interface OpenAlertDialogWithoutCancelProps extends OpenAlertDialogBaseProps {
