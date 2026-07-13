@@ -175,6 +175,8 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpretation(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
+		// Ancestry is validated against its value set (created empty by the migration — real values are instance-seeded).
+		assert.NoError(t, db.Exec("INSERT INTO ancestry (code, name_en) VALUES ('CA-FR', 'French Canadian') ON CONFLICT (code) DO NOTHING").Error)
 		payload := createBaseCasePayload("Ancestry_Obs")
 		// CLIN-6022: an ancestry observation has no onset_code / interpretation_code.
 		payload[0].Patients[0].ObservationsCategorical = append(
