@@ -35,7 +35,7 @@ var ViewTables = []string{
 	// Junctions.
 	"case_has_sequencing_experiment", "task_context", "task_has_document",
 	// Reference / value-set tables.
-	"affected_status", "case_category", "case_type", "consanguinity", "data_category",
+	"affected_status", "ancestry", "case_category", "case_type", "consanguinity", "data_category",
 	"data_type", "experimental_strategy", "family_relationship", "file_format",
 	"histology_type", "life_status", "obs_interpretation", "observation", "onset",
 	"organization_category", "panel_type", "platform", "priority", "resolution_status",

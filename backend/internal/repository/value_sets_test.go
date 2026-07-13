@@ -12,10 +12,6 @@ func Test_GetCodes(t *testing.T) {
 		repo := NewValueSetsRepository(env.Postgres)
 
 		for vsType, tableName := range repo.tableMap {
-			if vsType == ValueSetAncestry {
-				// Ancestry is instance-seeded (not shipped by radiant-portal migrations), so empty here.
-				continue
-			}
 			result, err := repo.GetCodes(t.Context(), vsType)
 			assert.NoError(t, err)
 			assert.NotNil(t, result)

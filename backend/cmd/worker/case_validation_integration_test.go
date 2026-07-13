@@ -175,8 +175,6 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpretation(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
-		// Ancestry is validated against its value set (created empty by the migration — real values are instance-seeded).
-		assert.NoError(t, db.Exec("INSERT INTO ancestry (code, name_en) VALUES ('CA-FR', 'French Canadian') ON CONFLICT (code) DO NOTHING").Error)
 		payload := createBaseCasePayload("Ancestry_Obs")
 		// CLIN-6022: an ancestry observation has no onset_code / interpretation_code.
 		payload[0].Patients[0].ObservationsCategorical = append(
@@ -184,7 +182,7 @@ func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpre
 			&types.ObservationCategoricalBatch{
 				Code:   types.ObsCodeAncestry,
 				System: "radiant",
-				Value:  "CA-FR",
+				Value:  "BLK",
 			},
 		)
 		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
@@ -201,7 +199,7 @@ func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpre
 		db.Table("obs_categorical").Where("case_id = ? AND observation_code = ?", ca.ID, types.ObsCodeAncestry).First(&ancestry)
 		assert.NotNil(t, ancestry)
 		assert.Equal(t, "radiant", ancestry.CodingSystem)
-		assert.Equal(t, "CA-FR", ancestry.CodeValue)
+		assert.Equal(t, "BLK", ancestry.CodeValue)
 		// Persisted as NULL, not "" — the FK to onset(code) / obs_interpretation(code)
 		// would reject an empty string.
 		assert.Nil(t, ancestry.OnsetCode)
