@@ -8,13 +8,13 @@ interface OpenAlertDialogBaseProps {
   title: string;
   description: ReactNode;
   type?: AlertDialogType;
-  actionProps: AlertDialogActionProps & { 'data-cy'?: string };
+  actionProps: AlertDialogActionProps & { dataCy?: string };
   className?: string;
 }
 
 interface OpenAlertDialogWithCancelProps extends OpenAlertDialogBaseProps {
   hideCancel?: never;
-  cancelProps: AlertDialogCancelProps & { 'data-cy'?: string };
+  cancelProps: AlertDialogCancelProps & { dataCy?: string };
 }
 
 interface OpenAlertDialogWithoutCancelProps extends OpenAlertDialogBaseProps {

@@ -256,6 +256,7 @@ Wrapping with an extra `<span>` (or any layout-irrelevant element) pollutes the 
 
 - **File naming**: PascalCase for page objects (`CasesTable.ts`), PascalCase for specs (`Columns.cy.ts`)
 - **Selectors**: Prefer `data-cy` attributes. `data-cy` values must be kebab-case (e.g. `data-cy="case-id-cell"`). Centralize reusable selectors in `CommonSelectors`.
+- **Component test-hook prop naming**: when a custom component needs an *explicit* prop to receive its test hook (i.e. it does not transparently spread `...props` onto a single root DOM node — see Source code instrumentation §2), name that prop `dataCy` (camelCase) and apply it internally on the DOM as `data-cy={dataCy}`. Never declare a literal `'data-cy'` prop on a component. Reference pattern: `components/base/data-table/display-table.tsx`. For a prop bag that is spread onto a DOM-bound component (e.g. `alertDialog` `actionProps`/`cancelProps`), type it with `dataCy` and destructure it out to apply `data-cy` at the boundary — do not spread a `dataCy` key onto the DOM. Apply this convention consistently across all components.
 - **Bilingual tests**: Use `buildBilingualRegExp()` from Utils when validating text that could be EN or FR.
 - **Column testing**: Define column metadata in the POM (`tableColumns[]`), use `getColumnPosition()` to find columns dynamically rather than hardcoding indices.
 - **API retries**: `cy.apiCall()` auto-retries 500 errors (3 attempts). For async batch operations, poll until processed.

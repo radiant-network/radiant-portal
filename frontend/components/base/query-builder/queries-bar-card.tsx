@@ -104,11 +104,11 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
       title: t('common.toolbar.clear_all_dialog.title'),
       description: t('common.toolbar.clear_all_dialog.description'),
       cancelProps: {
-        'data-cy': 'clear-all-cancel',
+        dataCy: 'clear-all-cancel',
         children: t('common.toolbar.clear_all_dialog.cancel'),
       },
       actionProps: {
-        'data-cy': 'clear-all-confirm',
+        dataCy: 'clear-all-confirm',
         variant: 'destructive',
         onClick: () => {
           dispatch({
@@ -145,7 +145,7 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
                   <>
                     {/* Combine Queries */}
                     <ActionButton
-                      data-cy="combine-queries-button"
+                      dataCy="combine-queries-button"
                       size="xs"
                       actions={[
                         {

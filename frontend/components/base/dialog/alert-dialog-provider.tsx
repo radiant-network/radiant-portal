@@ -61,6 +61,9 @@ export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [activeAlertDialog, setActiveAlertDialog]);
 
+  const { dataCy: cancelDataCy, ...cancelProps } = activeAlertDialog?.cancelProps ?? {};
+  const { dataCy: actionDataCy, ...actionProps } = activeAlertDialog?.actionProps ?? {};
+
   return (
     <AlertDialogContext.Provider value={{ open, close }}>
       {children}
@@ -83,12 +86,13 @@ export const AlertDialogProvider = ({ children }: { children: ReactNode }) => {
             </div>
             <AlertDialogFooter>
               {activeAlertDialog.hideCancel ? null : (
-                <AlertDialogCancel {...activeAlertDialog.cancelProps} variant="outline">
+                <AlertDialogCancel {...cancelProps} data-cy={cancelDataCy} variant="outline">
                   {activeAlertDialog.cancelProps?.children || 'Cancel'}
                 </AlertDialogCancel>
               )}
               <AlertDialogAction
-                {...activeAlertDialog.actionProps}
+                {...actionProps}
+                data-cy={actionDataCy}
                 disabled={activeAlertDialog.actionProps.disabled || loading}
                 onClick={async e => {
                   e.preventDefault();
