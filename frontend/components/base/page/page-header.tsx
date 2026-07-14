@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { tv, VariantProps } from 'tailwind-variants';
 
 import { Badge, BadgeProps } from '@/components/base/shadcn/badge';
@@ -8,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { cn } from '@/components/lib/utils';
 
 import Container from '../container';
+import AnchorLink from '../navigation/anchor-link';
 
 const pageHeaderVariants = tv({
   slots: {
@@ -37,9 +39,19 @@ interface EntityHeaderProps extends VariantProps<typeof pageHeaderVariants> {
   statuses?: ReactNode[];
   title?: string;
   description?: string;
+  previousPageUrl?: string;
 }
 
-function PageHeader({ title, badges, buttons, statuses, description, isLoading = true, variant }: EntityHeaderProps) {
+function PageHeader({
+  title,
+  badges,
+  buttons,
+  previousPageUrl,
+  statuses,
+  description,
+  isLoading = true,
+  variant,
+}: EntityHeaderProps) {
   const style = pageHeaderVariants({ variant });
 
   if (isLoading) {
@@ -61,6 +73,11 @@ function PageHeader({ title, badges, buttons, statuses, description, isLoading =
           <div className="flex justify-between">
             <div className={cn('flex flex-col', { 'gap-3': !!description })}>
               <div className="flex items-center gap-4 flex-wrap">
+                {previousPageUrl && (
+                  <AnchorLink href={previousPageUrl}>
+                    <ArrowLeft size={20} />
+                  </AnchorLink>
+                )}
                 <h1 className="text-2xl font-bold max-w-md text-ellipsis overflow-hidden whitespace-nowrap">{title}</h1>
                 <div className="flex items-center gap-2">
                   {(badges ?? []).map((badgeProps, index) => {

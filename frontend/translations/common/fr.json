@@ -1,11 +1,52 @@
 {
   "analysis": {
+    "title": "Analyses",
+    "subtitle": "Visualisez et interprétez rapidement les données grâce à nos outils conviviaux.",
+    "newsletter": {
+      "title": "Nouveaux outils d'analyse à venir bientôt !",
+      "description": "Inscrivez-vous à notre liste de diffusion pour recevoir les mises à jour et être parmi les premiers à essayer nos prochains outils.",
+      "form": {
+        "placeholder": "courriel@exemple.com",
+        "button_label": "Recevoir les mises à jour"
+      }
+    },
     "set_operations": {
+      "get_started": "Sélectionnez deux ou trois ensembles pour commencer",
+      "get_started_visualize": "Visualisez les intersections entre les ensembles sauvegardés à l'aide d'un diagramme de Venn interactif.",
+      "get_started_dashboard": "Consultez vos ensembles sauvegardés dans le <dashboard>Tableau de bord</dashboard>.",
+      "title": "Opérations sur les ensembles",
+      "description": "Visualisez les intersections entre les cohortes virtuelles sauvegardées comme ensembles à l'aide d'un diagramme de Venn interactif.",
+      "tags": {
+        "clinical": "Clinique",
+        "genomics": "Génomique"
+      },
+      "empty": {
+        "title": "Aucun ensemble à comparer",
+        "description": "Vous devez avoir au moins deux ensembles sauvegardés d'identifiants d'entités (p. ex. deux ensembles de participants) pour utiliser cet outil. Vous pouvez créer des ensembles sauvegardés en haut du tableau des résultats dans les <variant>pages d'exploration des variants</variant>."
+      },
+      "launch": "Lancer",
       "download": "Télécharger PNG",
       "selected_sets": "Ensembles sélectionnés",
       "set_definitions": "Définitions des ensembles",
       "set_definition": "Définitions d'ensemble",
-      "union_of_selected_set": "Union des ensembles sélectionnés :"
+      "union_of_selected_set": "Union des ensembles sélectionnés :",
+      "entity_type": {
+        "participants": "Participants",
+        "biospecimens": "Biospécimens",
+        "files": "Fichiers",
+        "variants_germline": "Variants germinaux",
+        "variants_somatic": "Variants somatiques"
+      },
+      "filters": {
+        "select_entity": "Type d'entité",
+        "select_entity_placeholder": "Sélectionner un type d'entité",
+        "select_set": "Ensembles",
+        "select_set_placeholder": "Sélectionner deux ou trois ensembles",
+        "reset": "Réinitialiser",
+        "reset_tooltip": "Revenir à la dernière sélection comparée",
+        "compare": "Comparer",
+        "compare_disabled_tooltip": "Sélectionner au moins deux ensembles pour comparer"
+      }
     }
   },
   "community": {
