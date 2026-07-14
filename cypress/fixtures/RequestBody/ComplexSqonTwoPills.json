@@ -1,0 +1,19 @@
+{
+  "op": "_OP",
+  "content": [
+    {
+      "content": {
+        "field": "_CHROM_FIELD",
+        "value": ["_VALUE"]
+      },
+      "op": "in"
+    },
+    {
+      "content": {
+        "field": "_VTYPE_FIELD",
+        "value": ["_VALUE"]
+      },
+      "op": "in"
+    }
+  ]
+}

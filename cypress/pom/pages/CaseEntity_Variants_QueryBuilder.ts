@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { buildBilingualRegExp, findFacetData } from 'pom/shared/Utils';
+import { buildBilingualRegExp, findFacetData, normalizeSqon, shouldHaveTableResultsCount } from 'pom/shared/Utils';
 import { CaseEntity_Variants_Facets, tableCNVFacets, tableSNVFacets, tableSomaticFacets } from './CaseEntity_Variants_Facets';
 
 type FacetRef = { section: string; facet: string };
@@ -22,10 +22,38 @@ const generateQueryBuilderFunctions = (
       facetsActions.applyMultiselectFacetFilter(config.secondFacet.section, config.secondFacet.facet);
     },
     /**
+     * Registers the `/count` intercept, then adds a second pill — capturing the SQON of
+     * the resulting two-pill query. Pair with {@link validations.shouldMatchSentSqon}.
+     */
+    addSecondPillAndCaptureCount() {
+      cy.intercept('POST', '**/count').as('postComplexCount');
+      actions.addSecondPill();
+    },
+    /**
      * Builds a first multiselect pill (chromosome) in the active query.
      */
     buildFirstPill() {
       facetsActions.applyMultiselectFacetFilter(config.multiselectFacet.section, config.multiselectFacet.facet);
+    },
+    /**
+     * Builds a `not-in` multiselect pill (chromosome) in the active query: selects
+     * the first value, then applies it through the split-button `not_in` action.
+     */
+    buildNotInPill() {
+      const apiField = findFacetData(tableFacets, config.multiselectFacet.section, config.multiselectFacet.facet).apiField;
+      facetsActions.clickSidebarSection(config.multiselectFacet.section);
+      cy.get(CommonSelectors.facetHeader(apiField)).clickAndWait({ force: true });
+      cy.get(CommonSelectors.facetCheckbox(apiField, /*any value*/ '')).eq(0).click({ force: true });
+      cy.get(CommonSelectors.facetApplyButton(apiField)).siblings('button').first().clickAndWait({ force: true });
+      cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem('not_in')}`).clickAndWait({ force: true });
+    },
+    /**
+     * Registers the `/count` intercept, then builds a `not-in` pill — capturing the SQON
+     * of the resulting query. Pair with {@link validations.shouldMatchSentSqon}.
+     */
+    buildNotInPillAndCaptureCount() {
+      cy.intercept('POST', '**/count').as('postComplexCount');
+      actions.buildNotInPill();
     },
     /**
      * Builds a numerical pill (position|start) in the active query, filled with `1`.
@@ -59,6 +87,15 @@ const generateQueryBuilderFunctions = (
         cy.get(CommonSelectors.combineQueriesButton).siblings('button').first().clickAndWait({ force: true });
         cy.get(`${CommonSelectors.menuPopper} ${CommonSelectors.menuItem(`combine_${operator}`)}`).clickAndWait({ force: true });
       }
+    },
+    /**
+     * Registers the `/count` intercept, then combines the selected queries — capturing the
+     * SQON of the resulting combined query. Pair with {@link validations.shouldMatchSentSqon}.
+     * @param operator The combine operator: 'default' (split button), 'and' or 'or' (dropdown item).
+     */
+    combineQueriesAndCaptureCount(operator: 'default' | 'and' | 'or') {
+      cy.intercept('POST', '**/count').as('postComplexCount');
+      actions.combineQueries(operator);
     },
     /**
      * Deletes a query then confirms or cancels the popover.
@@ -137,6 +174,14 @@ const generateQueryBuilderFunctions = (
      */
     toggleOperator() {
       cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.queryCombinerOperator}`).first().clickAndWait({ force: true });
+    },
+    /**
+     * Registers the `/count` intercept, then toggles the intra-query operator — capturing the
+     * SQON of the resulting query. Pair with {@link validations.shouldMatchSentSqon}.
+     */
+    toggleOperatorAndCaptureCount() {
+      cy.intercept('POST', '**/count').as('postComplexCount');
+      actions.toggleOperator();
     },
   };
 
@@ -223,9 +268,35 @@ const generateQueryBuilderFunctions = (
     shouldShowClearAll(shouldExist: boolean) {
       cy.get(CommonSelectors.clearAllButton).should(shouldExist ? 'exist' : 'not.exist');
     },
+    /**
+     * Validates the SQON captured by a preceding `…AndCaptureCount` action and the returned count
+     * of the `/count` response must match the total displayed by the table.
+     * @param fixtureName The fixture file under `RequestBody/` describing the expected structure.
+     * @param replacements The placeholder → value map to resolve in the fixture (e.g. `_OP`, `_CHROM_FIELD`).
+     */
+    shouldMatchSentSqon(fixtureName: string, replacements: Record<string, string>) {
+      cy.wait('@postComplexCount').then(interception => {
+        cy.fixture(`RequestBody/${fixtureName}`).then(fixture => {
+          let json = JSON.stringify(fixture);
+          Object.entries(replacements).forEach(([token, value]) => {
+            json = json.split(token).join(value);
+          });
+          const expected = JSON.parse(json);
+          const actual = normalizeSqon(interception.request.body.sqon);
+
+          expect(actual).to.deep.equal(expected);
+          shouldHaveTableResultsCount(interception.response!.body.count);
+        });
+      });
+    },
   };
 
-  return { actions, validations };
+  const fields = {
+    chromosome: findFacetData(tableFacets, config.multiselectFacet.section, config.multiselectFacet.facet).apiField,
+    variantType: findFacetData(tableFacets, config.secondFacet.section, config.secondFacet.facet).apiField,
+  };
+
+  return { actions, validations, fields };
 };
 
 export const CaseEntity_Variants_QueryBuilder = {
