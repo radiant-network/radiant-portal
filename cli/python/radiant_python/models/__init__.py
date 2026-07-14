@@ -102,6 +102,8 @@ from radiant_python.models.task_occurrence_type import TaskOccurrenceType
 from radiant_python.models.tenant_membership import TenantMembership
 from radiant_python.models.term import Term
 from radiant_python.models.transcript import Transcript
+from radiant_python.models.update_case_batch import UpdateCaseBatch
+from radiant_python.models.update_case_batch_body import UpdateCaseBatchBody
 from radiant_python.models.update_occurrence_note_input import UpdateOccurrenceNoteInput
 from radiant_python.models.user_preference import UserPreference
 from radiant_python.models.user_set import UserSet

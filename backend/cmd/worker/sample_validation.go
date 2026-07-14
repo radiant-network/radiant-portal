@@ -27,6 +27,7 @@ const (
 	SampleInvalidValueCode                   = "SAMPLE-006"
 	SampleInvalidPatientForParentSampleCode  = "SAMPLE-007"
 	SampleDuplicateInBatchCode               = "SAMPLE-008"
+	SampleNotExistForUpdateCode              = "SAMPLE-009"
 )
 
 type SampleKey struct {
@@ -102,6 +103,14 @@ func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParent
 		} else {
 			validateIsDifferentExistingSampleField(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
 		}
+	}
+}
+
+func (r *SampleValidationRecord) validateExistingSampleForUpdate(existingSample *types.Sample) {
+	if existingSample == nil {
+		message := fmt.Sprintf("Sample (%s / %s) does not exist, cannot update.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+		r.AddErrors(message, SampleNotExistForUpdateCode, r.getFormattedPath(""))
+		r.Skipped = true
 	}
 }
 
@@ -417,4 +426,161 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 
 	reordered := reorderSampleRecords(records)
 	return reordered, nil
+}
+
+func processUpdateSampleBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
+	payload := []byte(batch.Payload)
+	var samplesBatch []types.SampleBatch
+	cache := batchval.NewBatchValidationCache(bv)
+
+	if unexpectedErr := json.Unmarshal(payload, &samplesBatch); unexpectedErr != nil {
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update sample batch: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	records, unexpectedErr := validateUpdateSamplesBatch(ctx, bv, cache, samplesBatch)
+	if unexpectedErr != nil {
+		if errors.Is(unexpectedErr, context.Canceled) {
+			return unexpectedErr
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update sample batch validation: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	slog.InfoContext(ctx, "update sample batch processed", slog.String("batch_id", batch.ID), slog.Int("records", len(records)))
+
+	if err := persistBatchAndUpdateSampleRecords(ctx, db, batch, records); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return err
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update sample batch records: %v", err), bv.BatchRepo)
+		return nil
+	}
+	return nil
+}
+
+func persistBatchAndUpdateSampleRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SampleValidationRecord) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		txRepoSample := repository.NewSamplesRepository(tx)
+		txRepoBatch := repository.NewBatchRepository(tx)
+		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
+		if unexpectedErrUpdate != nil {
+			return unexpectedErrUpdate
+		}
+		if rowsUpdated == 0 {
+			return fmt.Errorf("no rows updated when updating update_sample batch %v", batch.ID)
+		}
+		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
+			err := updateSampleRecords(ctx, records, txRepoSample, batch.TenantCode)
+			if err != nil {
+				return fmt.Errorf("error during sample update %v", err)
+			}
+		}
+		return nil
+	})
+}
+
+type sampleUpdater interface {
+	UpdateSample(ctx context.Context, sample *types.Sample) error
+}
+
+func updateSampleRecords(ctx context.Context, records []*SampleValidationRecord, repo sampleUpdater, tenantCode string) error {
+	for _, record := range records {
+		if !record.Skipped {
+			sample := types.Sample{
+				TypeCode:          record.Sample.TypeCode,
+				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
+				TissueSite:        record.Sample.TissueSite.String(),
+				HistologyCode:     record.Sample.HistologyCode,
+				OrganizationCode:  record.OrganizationCode,
+				TenantCode:        tenantCode,
+				PatientID:         record.PatientId,
+				ParentSampleID:    record.ParentSampleId,
+			}
+			if err := repo.UpdateSample(ctx, &sample); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// validateUpdateSamplesBatch mirrors validateSamplesBatch, but a referenced parent sample must
+// already exist in the database — an update batch never creates rows, so there is no in-batch
+// parent to reorder against.
+func validateUpdateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, samples []types.SampleBatch) ([]*SampleValidationRecord, error) {
+	records := make([]*SampleValidationRecord, 0, len(samples))
+	seenSamples := make(map[SampleKey]struct{})
+
+	for index, sample := range samples {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		record := &SampleValidationRecord{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: bv,
+				Cache:   cache,
+				Index:   index,
+			},
+			Sample: sample,
+		}
+
+		record.validateSubmitterPatientId()
+		record.validateSubmitterSampleId()
+		record.validateSubmitterParentSampleId()
+		record.validateTissueSite()
+
+		if err := record.validateTypeCode(ctx); err != nil {
+			return nil, err
+		}
+		if err := record.validateHistologyCode(ctx); err != nil {
+			return nil, err
+		}
+
+		batchval.ValidateUniquenessInBatch(
+			record,
+			SampleKey{
+				OrganizationCode:  sample.SampleOrganizationCode,
+				SubmitterSampleId: sample.SubmitterSampleId.String(),
+			},
+			seenSamples,
+			SampleDuplicateInBatchCode,
+			[]string{sample.SampleOrganizationCode, sample.SubmitterSampleId.String()},
+		)
+
+		patient, patientErr := cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, sample.PatientOrganizationCode, sample.SubmitterPatientId.String())
+		if patientErr != nil {
+			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
+		}
+		record.validatePatient(patient)
+
+		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode)
+		if orgErr != nil {
+			return nil, fmt.Errorf("error getting existing sample organization: %v", orgErr)
+		}
+		record.validateOrganization(organization)
+
+		if organization != nil {
+			existingSample, sampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterSampleId.String())
+			if sampleErr != nil {
+				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
+			}
+			record.validateExistingSampleForUpdate(existingSample)
+
+			if sample.SubmitterParentSampleId != "" {
+				existingParentSample, parentSampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterParentSampleId.String())
+				if parentSampleErr != nil {
+					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
+				}
+				if existingParentSample == nil {
+					record.validateExistingParentSampleInBatch(false)
+				} else {
+					record.validateExistingParentSampleInDb(existingParentSample)
+					record.ParentSampleId = &existingParentSample.ID
+				}
+			}
+		}
+		records = append(records, record)
+	}
+	return records, nil
 }

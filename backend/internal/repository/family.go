@@ -34,3 +34,7 @@ func (r *FamilyRepository) GetFamilyById(ctx context.Context, familyId int) (*Fa
 func (r *FamilyRepository) CreateFamily(ctx context.Context, family *Family) error {
 	return r.db.WithContext(ctx).Create(family).Error
 }
+
+func (r *FamilyRepository) DeleteFamilyByCaseID(ctx context.Context, caseID int) error {
+	return r.db.WithContext(ctx).Where("case_id = ?", caseID).Delete(&Family{}).Error
+}

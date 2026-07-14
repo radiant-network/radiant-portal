@@ -11,6 +11,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -412,6 +413,173 @@ func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
 
 	})
 
+}
+
+func patientValueSetRepo() *MockValueSetRepository {
+	return &MockValueSetRepository{
+		GetCodesFunc: func(vsType repository.ValueSetType) ([]string, error) {
+			switch vsType {
+			case repository.ValueSetLifeStatus:
+				return []string{"alive", "deceased", "unknown"}, nil
+			case repository.ValueSetSex:
+				return []string{"male", "female", "unknown"}, nil
+			default:
+				return []string{}, nil
+			}
+		},
+	}
+}
+
+func Test_ValidateExistingPatientForUpdate_Nil(t *testing.T) {
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1"}
+	rec := PatientValidationRecord{Patient: patient}
+	rec.validateExistingPatientForUpdate(nil)
+	assert.True(t, rec.Skipped)
+	assert.Len(t, rec.Errors, 1)
+	assert.Equal(t, PatientNotExistForUpdateCode, rec.Errors[0].Code)
+	assert.Contains(t, rec.Errors[0].Message, "does not exist, cannot update")
+}
+
+func Test_ValidateExistingPatientForUpdate_Found(t *testing.T) {
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1"}
+	rec := PatientValidationRecord{Patient: patient}
+	rec.validateExistingPatientForUpdate(&types.Patient{ID: 1, SubmitterPatientId: "id1"})
+	assert.False(t, rec.Skipped)
+	assert.Empty(t, rec.Errors)
+}
+
+func Test_ValidateUpdatePatientsBatch_MissingPatientReportsError(t *testing.T) {
+	org := &types.Organization{Code: "CHUSJ", CategoryCode: "healthcare_provider"}
+	mockOrgRepo := &MockOrganizationRepository{
+		GetOrganizationByCodeFunc: func(code string) (*types.Organization, error) {
+			return org, nil
+		},
+	}
+	mockPatientRepo := &MockPatientsRepository{
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string) (*types.Patient, error) {
+			return nil, nil
+		},
+	}
+	mockContext := &batchval.BatchValidationContext{
+		OrgRepo:       mockOrgRepo,
+		PatientRepo:   mockPatientRepo,
+		ValueSetsRepo: patientValueSetRepo(),
+	}
+
+	dob := types.DateISO8601(time.Now().AddDate(-1, 0, 0))
+	patients := []types.PatientBatch{{
+		PatientOrganizationCode: "CHUSJ",
+		SubmitterPatientId:      "id-missing",
+		SubmitterPatientIdType:  "mrn",
+		SexCode:                 "male",
+		LifeStatusCode:          "alive",
+		DateOfBirth:             &dob,
+	}}
+
+	records, err := validateUpdatePatientsBatch(t.Context(), mockContext, patients)
+	assert.NoError(t, err)
+	assert.Len(t, records, 1)
+	assert.True(t, records[0].Skipped)
+	assert.Len(t, records[0].Errors, 1)
+	assert.Equal(t, PatientNotExistForUpdateCode, records[0].Errors[0].Code)
+}
+
+func Test_ValidateUpdatePatientsBatch_ExistingPatientNotSkipped(t *testing.T) {
+	org := &types.Organization{Code: "CHUSJ", CategoryCode: "healthcare_provider"}
+	existing := &types.Patient{ID: 1, SubmitterPatientId: "id-existing"}
+	mockOrgRepo := &MockOrganizationRepository{
+		GetOrganizationByCodeFunc: func(code string) (*types.Organization, error) {
+			return org, nil
+		},
+	}
+	mockPatientRepo := &MockPatientsRepository{
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string) (*types.Patient, error) {
+			return existing, nil
+		},
+	}
+	mockContext := &batchval.BatchValidationContext{
+		OrgRepo:       mockOrgRepo,
+		PatientRepo:   mockPatientRepo,
+		ValueSetsRepo: patientValueSetRepo(),
+	}
+
+	dob := types.DateISO8601(time.Now().AddDate(-1, 0, 0))
+	patients := []types.PatientBatch{{
+		PatientOrganizationCode: "CHUSJ",
+		SubmitterPatientId:      "id-existing",
+		SubmitterPatientIdType:  "mrn",
+		SexCode:                 "male",
+		LifeStatusCode:          "alive",
+		DateOfBirth:             &dob,
+	}}
+
+	records, err := validateUpdatePatientsBatch(t.Context(), mockContext, patients)
+	assert.NoError(t, err)
+	assert.Len(t, records, 1)
+	assert.False(t, records[0].Skipped)
+	assert.Empty(t, records[0].Errors)
+}
+
+func Test_UpdatePatientRecords_SkipsMissingRecords(t *testing.T) {
+	mockRepo := &MockPatientsRepository{}
+	records := []*PatientValidationRecord{
+		{Patient: types.PatientBatch{SubmitterPatientId: "id1"}, OrganizationCode: "CHUSJ", BaseValidationRecord: batchval.BaseValidationRecord{Skipped: false}},
+		{Patient: types.PatientBatch{SubmitterPatientId: "id2"}, OrganizationCode: "CHUSJ", BaseValidationRecord: batchval.BaseValidationRecord{Skipped: true}},
+	}
+
+	err := updatePatientRecords(t.Context(), records, mockRepo, types.DefaultTenantCode)
+	assert.NoError(t, err)
+	require.Len(t, mockRepo.UpdatedPatients, 1)
+	assert.Equal(t, "id1", mockRepo.UpdatedPatients[0].SubmitterPatientId)
+}
+
+func Test_Persist_Batch_And_Update_Patient_Records(t *testing.T) {
+	// ExclusivePostgres: writes directly into "patient" (id >= 1000), a table other parallel
+	// WritePostgres tests may bulk-clean concurrently — see setup_postgres.go cleanUp.
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		require.NoError(t, db.Exec(`
+			INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organization_code, tenant_code, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)
+			VALUES (1001, 'MRN-WORKER-UPDATE-1', 'mrn', 'CHUSJ', 'radiant', 'male', '2000-01-01', 'alive', 'Original', 'Name', 'JHN-ORIGINAL')
+		`).Error)
+
+		var id string
+		require.NoError(t, db.Raw(`
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+			VALUES (?, 'RUNNING', ?, false, 'user999', '2025-10-09', 'radiant')
+			RETURNING id;
+		`, "{}", types.UpdatePatientBatchType).Scan(&id).Error)
+
+		batch := types.Batch{
+			ID:        id,
+			BatchType: types.UpdatePatientBatchType,
+			Payload:   "[]",
+			Status:    types.BatchStatusSuccess,
+			DryRun:    false,
+		}
+		records := []*PatientValidationRecord{{
+			Patient: types.PatientBatch{
+				SubmitterPatientId:     "MRN-WORKER-UPDATE-1",
+				SubmitterPatientIdType: "ramq",
+				SexCode:                "female",
+				LifeStatusCode:         "deceased",
+				FirstName:              "Updated",
+				LastName:               "Person",
+			},
+			OrganizationCode: "CHUSJ",
+		}}
+
+		err := persistBatchAndUpdatePatientRecords(t.Context(), db, &batch, records)
+		require.NoError(t, err)
+
+		repo := repository.NewPatientsRepository(db)
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-WORKER-UPDATE-1")
+		require.NoError(t, err)
+		require.NotNil(t, patient)
+		assert.Equal(t, "female", patient.SexCode)
+		assert.Equal(t, "deceased", patient.LifeStatusCode)
+		assert.Equal(t, "Updated", patient.FirstName)
+	})
 }
 
 func Test_ValidateLifeStatusCode_Valid(t *testing.T) {

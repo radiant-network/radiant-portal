@@ -4965,6 +4965,130 @@ export interface Transcript {
 /**
  * 
  * @export
+ * @interface UpdateCaseBatch
+ */
+export interface UpdateCaseBatch {
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'analysis_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'category_code': UpdateCaseBatchCategoryCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'diagnostic_lab_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'note'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'ordering_organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'ordering_physician'?: string;
+    /**
+     * 
+     * @type {Array<CasePatientBatch>}
+     * @memberof UpdateCaseBatch
+     */
+    'patients': Array<CasePatientBatch>;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'primary_condition_code_system'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'primary_condition_value'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'priority_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'project_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'resolution_status_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'status_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'submitter_case_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UpdateCaseBatch
+     */
+    'type': UpdateCaseBatchTypeEnum;
+}
+
+export const UpdateCaseBatchCategoryCodeEnum = {
+    Prenatal: 'prenatal',
+    Postnatal: 'postnatal'
+} as const;
+
+export type UpdateCaseBatchCategoryCodeEnum = typeof UpdateCaseBatchCategoryCodeEnum[keyof typeof UpdateCaseBatchCategoryCodeEnum];
+export const UpdateCaseBatchTypeEnum = {
+    Germline: 'germline',
+    Somatic: 'somatic'
+} as const;
+
+export type UpdateCaseBatchTypeEnum = typeof UpdateCaseBatchTypeEnum[keyof typeof UpdateCaseBatchTypeEnum];
+
+/**
+ * 
+ * @export
+ * @interface UpdateCaseBatchBody
+ */
+export interface UpdateCaseBatchBody {
+    /**
+     * 
+     * @type {Array<UpdateCaseBatch>}
+     * @memberof UpdateCaseBatchBody
+     */
+    'cases': Array<UpdateCaseBatch>;
+}
+/**
+ * 
+ * @export
  * @interface UpdateOccurrenceNoteInput
  */
 export interface UpdateOccurrenceNoteInput {
@@ -6396,6 +6520,55 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiment attachments and tasks are left untouched.
+         * @summary Update existing cases (batch)
+         * @param {string} tenant Tenant code
+         * @param {UpdateCaseBatchBody} updateCaseBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putCaseBatch: async (tenant: string, updateCaseBatchBody: UpdateCaseBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('putCaseBatch', 'tenant', tenant)
+            // verify required parameter 'updateCaseBatchBody' is not null or undefined
+            assertParamExists('putCaseBatch', 'updateCaseBatchBody', updateCaseBatchBody)
+            const localVarPath = `/{tenant}/cases/batch`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (dryRun !== undefined) {
+                localVarQueryParameter['dry_run'] = dryRun;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateCaseBatchBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Search cases
          * @summary Search cases
          * @param {string} tenant Tenant code
@@ -6567,6 +6740,21 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiment attachments and tasks are left untouched.
+         * @summary Update existing cases (batch)
+         * @param {string} tenant Tenant code
+         * @param {UpdateCaseBatchBody} updateCaseBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putCaseBatch(tenant: string, updateCaseBatchBody: UpdateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putCaseBatch(tenant, updateCaseBatchBody, dryRun, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['CasesApi.putCaseBatch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Search cases
          * @summary Search cases
          * @param {string} tenant Tenant code
@@ -6682,6 +6870,18 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          */
         postCaseBatch(tenant: string, createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
             return localVarFp.postCaseBatch(tenant, createCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiment attachments and tasks are left untouched.
+         * @summary Update existing cases (batch)
+         * @param {string} tenant Tenant code
+         * @param {UpdateCaseBatchBody} updateCaseBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putCaseBatch(tenant: string, updateCaseBatchBody: UpdateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.putCaseBatch(tenant, updateCaseBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
         /**
          * Search cases
@@ -6811,6 +7011,20 @@ export class CasesApi extends BaseAPI {
      */
     public postCaseBatch(tenant: string, createCaseBatchBody: CreateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
         return CasesApiFp(this.configuration).postCaseBatch(tenant, createCaseBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Replaces a case\'s scalar fields and clinical patient data (family, observations, family history). Each case is looked up by (project_code, submitter_case_id); CASE-013 is returned if not found. Sequencing experiment attachments and tasks are left untouched.
+     * @summary Update existing cases (batch)
+     * @param {string} tenant Tenant code
+     * @param {UpdateCaseBatchBody} updateCaseBatchBody Update Body
+     * @param {boolean} [dryRun] Dry Run
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof CasesApi
+     */
+    public putCaseBatch(tenant: string, updateCaseBatchBody: UpdateCaseBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).putCaseBatch(tenant, updateCaseBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -11372,6 +11586,55 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Update existing patients — each patient is looked up by (patient_organization_code, submitter_patient_id). A patient not found is reported as a validation error and left untouched.
+         * @summary Update existing patients (batch)
+         * @param {string} tenant Tenant code
+         * @param {CreatePatientBatchBody} createPatientBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putPatientBatch: async (tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('putPatientBatch', 'tenant', tenant)
+            // verify required parameter 'createPatientBatchBody' is not null or undefined
+            assertParamExists('putPatientBatch', 'createPatientBatchBody', createPatientBatchBody)
+            const localVarPath = `/{tenant}/patients/batch`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (dryRun !== undefined) {
+                localVarQueryParameter['dry_run'] = dryRun;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createPatientBatchBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -11397,6 +11660,21 @@ export const PatientsApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['PatientsApi.postPatientBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Update existing patients — each patient is looked up by (patient_organization_code, submitter_patient_id). A patient not found is reported as a validation error and left untouched.
+         * @summary Update existing patients (batch)
+         * @param {string} tenant Tenant code
+         * @param {CreatePatientBatchBody} createPatientBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putPatientBatch(tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putPatientBatch(tenant, createPatientBatchBody, dryRun, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.putPatientBatch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -11418,6 +11696,18 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
          */
         postPatientBatch(tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
             return localVarFp.postPatientBatch(tenant, createPatientBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Update existing patients — each patient is looked up by (patient_organization_code, submitter_patient_id). A patient not found is reported as a validation error and left untouched.
+         * @summary Update existing patients (batch)
+         * @param {string} tenant Tenant code
+         * @param {CreatePatientBatchBody} createPatientBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putPatientBatch(tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.putPatientBatch(tenant, createPatientBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -11441,6 +11731,20 @@ export class PatientsApi extends BaseAPI {
      */
     public postPatientBatch(tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
         return PatientsApiFp(this.configuration).postPatientBatch(tenant, createPatientBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Update existing patients — each patient is looked up by (patient_organization_code, submitter_patient_id). A patient not found is reported as a validation error and left untouched.
+     * @summary Update existing patients (batch)
+     * @param {string} tenant Tenant code
+     * @param {CreatePatientBatchBody} createPatientBatchBody Update Body
+     * @param {boolean} [dryRun] Dry Run
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public putPatientBatch(tenant: string, createPatientBatchBody: CreatePatientBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).putPatientBatch(tenant, createPatientBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -11501,6 +11805,55 @@ export const SamplesApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Update existing samples — each sample is looked up by (sample_organization_code, submitter_sample_id). A sample not found is reported as a validation error and left untouched.
+         * @summary Update existing samples (batch)
+         * @param {string} tenant Tenant code
+         * @param {CreateSampleBatchBody} createSampleBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putSampleBatch: async (tenant: string, createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('putSampleBatch', 'tenant', tenant)
+            // verify required parameter 'createSampleBatchBody' is not null or undefined
+            assertParamExists('putSampleBatch', 'createSampleBatchBody', createSampleBatchBody)
+            const localVarPath = `/{tenant}/samples/batch`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (dryRun !== undefined) {
+                localVarQueryParameter['dry_run'] = dryRun;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createSampleBatchBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -11526,6 +11879,21 @@ export const SamplesApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['SamplesApi.postSampleBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Update existing samples — each sample is looked up by (sample_organization_code, submitter_sample_id). A sample not found is reported as a validation error and left untouched.
+         * @summary Update existing samples (batch)
+         * @param {string} tenant Tenant code
+         * @param {CreateSampleBatchBody} createSampleBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putSampleBatch(tenant: string, createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putSampleBatch(tenant, createSampleBatchBody, dryRun, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SamplesApi.putSampleBatch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -11547,6 +11915,18 @@ export const SamplesApiFactory = function (configuration?: Configuration, basePa
          */
         postSampleBatch(tenant: string, createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
             return localVarFp.postSampleBatch(tenant, createSampleBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Update existing samples — each sample is looked up by (sample_organization_code, submitter_sample_id). A sample not found is reported as a validation error and left untouched.
+         * @summary Update existing samples (batch)
+         * @param {string} tenant Tenant code
+         * @param {CreateSampleBatchBody} createSampleBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putSampleBatch(tenant: string, createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.putSampleBatch(tenant, createSampleBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -11570,6 +11950,20 @@ export class SamplesApi extends BaseAPI {
      */
     public postSampleBatch(tenant: string, createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
         return SamplesApiFp(this.configuration).postSampleBatch(tenant, createSampleBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Update existing samples — each sample is looked up by (sample_organization_code, submitter_sample_id). A sample not found is reported as a validation error and left untouched.
+     * @summary Update existing samples (batch)
+     * @param {string} tenant Tenant code
+     * @param {CreateSampleBatchBody} createSampleBatchBody Update Body
+     * @param {boolean} [dryRun] Dry Run
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SamplesApi
+     */
+    public putSampleBatch(tenant: string, createSampleBatchBody: CreateSampleBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return SamplesApiFp(this.configuration).putSampleBatch(tenant, createSampleBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -12088,6 +12482,55 @@ export const SequencingApiAxiosParamCreator = function (configuration?: Configur
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Update existing sequencing experiments — each one is looked up by (sample_organization_code, submitter_sample_id, aliquot). A sequencing experiment not found is reported as a validation error and left untouched.
+         * @summary Update existing sequencing experiments (batch)
+         * @param {string} tenant Tenant code
+         * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putSequencingExperimentBatch: async (tenant: string, createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('putSequencingExperimentBatch', 'tenant', tenant)
+            // verify required parameter 'createSequencingExperimentBatchBody' is not null or undefined
+            assertParamExists('putSequencingExperimentBatch', 'createSequencingExperimentBatchBody', createSequencingExperimentBatchBody)
+            const localVarPath = `/{tenant}/sequencing/batch`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (dryRun !== undefined) {
+                localVarQueryParameter['dry_run'] = dryRun;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createSequencingExperimentBatchBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -12127,6 +12570,21 @@ export const SequencingApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['SequencingApi.postSequencingExperimentBatch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Update existing sequencing experiments — each one is looked up by (sample_organization_code, submitter_sample_id, aliquot). A sequencing experiment not found is reported as a validation error and left untouched.
+         * @summary Update existing sequencing experiments (batch)
+         * @param {string} tenant Tenant code
+         * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async putSequencingExperimentBatch(tenant: string, createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateBatchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.putSequencingExperimentBatch(tenant, createSequencingExperimentBatchBody, dryRun, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SequencingApi.putSequencingExperimentBatch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -12159,6 +12617,18 @@ export const SequencingApiFactory = function (configuration?: Configuration, bas
          */
         postSequencingExperimentBatch(tenant: string, createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
             return localVarFp.postSequencingExperimentBatch(tenant, createSequencingExperimentBatchBody, dryRun, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Update existing sequencing experiments — each one is looked up by (sample_organization_code, submitter_sample_id, aliquot). A sequencing experiment not found is reported as a validation error and left untouched.
+         * @summary Update existing sequencing experiments (batch)
+         * @param {string} tenant Tenant code
+         * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Update Body
+         * @param {boolean} [dryRun] Dry Run
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        putSequencingExperimentBatch(tenant: string, createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<CreateBatchResponse> {
+            return localVarFp.putSequencingExperimentBatch(tenant, createSequencingExperimentBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -12195,6 +12665,20 @@ export class SequencingApi extends BaseAPI {
      */
     public postSequencingExperimentBatch(tenant: string, createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
         return SequencingApiFp(this.configuration).postSequencingExperimentBatch(tenant, createSequencingExperimentBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Update existing sequencing experiments — each one is looked up by (sample_organization_code, submitter_sample_id, aliquot). A sequencing experiment not found is reported as a validation error and left untouched.
+     * @summary Update existing sequencing experiments (batch)
+     * @param {string} tenant Tenant code
+     * @param {CreateSequencingExperimentBatchBody} createSequencingExperimentBatchBody Update Body
+     * @param {boolean} [dryRun] Dry Run
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SequencingApi
+     */
+    public putSequencingExperimentBatch(tenant: string, createSequencingExperimentBatchBody: CreateSequencingExperimentBatchBody, dryRun?: boolean, options?: RawAxiosRequestConfig) {
+        return SequencingApiFp(this.configuration).putSequencingExperimentBatch(tenant, createSequencingExperimentBatchBody, dryRun, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

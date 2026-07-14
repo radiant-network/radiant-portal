@@ -30,6 +30,7 @@ const (
 	ExistingAliquotForSequencingLabCode      = "SEQ-004"
 	UnknownSampleForOrganizationCode         = "SEQ-005"
 	IdenticalSequencingExperimentInBatchCode = "SEQ-006"
+	SeqExpNotExistForUpdateCode              = "SEQ-007"
 )
 
 type SequencingExperimentValidationRecord struct {
@@ -251,6 +252,14 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 	return nil
 }
 
+func (r *SequencingExperimentValidationRecord) validateExistingSeqExpForUpdate(existing *types.SequencingExperiment) {
+	if existing == nil {
+		message := fmt.Sprintf("Sequencing experiment (%s / %s / %s) does not exist, cannot update.", r.SequencingExperiment.SampleOrganizationCode, r.SequencingExperiment.SubmitterSampleId, r.SequencingExperiment.Aliquot)
+		r.AddErrors(message, SeqExpNotExistForUpdateCode, r.getPath(""))
+		r.Skipped = true
+	}
+}
+
 func (r *SequencingExperimentValidationRecord) validateUnknownSampleForOrganizationCode() error {
 	if r.SampleID == nil {
 		r.AddErrors(
@@ -434,5 +443,166 @@ func validateSequencingExperimentRecord(ctx context.Context, bv *batchval.BatchV
 	if err := record.validateUnknownSampleForOrganizationCode(); err != nil {
 		return nil, fmt.Errorf("validate sample for organization: %w", err)
 	}
+	return &record, nil
+}
+
+func processUpdateSequencingExperimentBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
+	payload := []byte(batch.Payload)
+	var experimentsBatch []types.SequencingExperimentBatch
+
+	if unexpectedErr := json.Unmarshal(payload, &experimentsBatch); unexpectedErr != nil {
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update sequencing experiment batch: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	records, unexpectedErr := validateUpdateSequencingExperimentBatch(ctx, bv, experimentsBatch)
+	if unexpectedErr != nil {
+		if errors.Is(unexpectedErr, context.Canceled) {
+			return unexpectedErr
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update sequencing experiment batch validation: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	slog.InfoContext(ctx, "update sequencing_experiment batch processed", slog.String("batch_id", batch.ID), slog.Int("records", len(records)))
+
+	if err := persistBatchAndUpdateSequencingExperimentRecords(ctx, db, batch, records); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return err
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update sequencing experiment batch records: %v", err), bv.BatchRepo)
+		return nil
+	}
+	return nil
+}
+
+func persistBatchAndUpdateSequencingExperimentRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SequencingExperimentValidationRecord) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		txRepoSeqExp := repository.NewSequencingExperimentRepository(tx)
+		txRepoBatch := repository.NewBatchRepository(tx)
+		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
+		if unexpectedErrUpdate != nil {
+			return unexpectedErrUpdate
+		}
+		if rowsUpdated == 0 {
+			return fmt.Errorf("no rows updated when updating update_sequencing_experiment batch %v", batch.ID)
+		}
+		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
+			err := updateSequencingExperimentRecords(ctx, records, txRepoSeqExp, batch.TenantCode)
+			if err != nil {
+				return fmt.Errorf("error during sequencing experiment update %w", err)
+			}
+		}
+		return nil
+	})
+}
+
+type sequencingExperimentUpdater interface {
+	UpdateSequencingExperiment(ctx context.Context, seqExp *types.SequencingExperiment) error
+}
+
+func updateSequencingExperimentRecords(ctx context.Context, records []*SequencingExperimentValidationRecord, repo sequencingExperimentUpdater, tenantCode string) error {
+	for _, record := range records {
+		if !record.Skipped {
+			seqExp := types.SequencingExperiment{
+				SampleID:                     *record.SampleID,
+				Aliquot:                      record.SequencingExperiment.Aliquot.String(),
+				StatusCode:                   record.SequencingExperiment.StatusCode,
+				ExperimentalStrategyCode:     record.SequencingExperiment.ExperimentalStrategyCode,
+				SequencingReadTechnologyCode: record.SequencingExperiment.SequencingReadTechnologyCode,
+				PlatformCode:                 record.SequencingExperiment.PlatformCode,
+				TenantCode:                   tenantCode,
+				SequencingLabCode:            record.SequencingExperiment.SequencingLabCode,
+				RunName:                      record.SequencingExperiment.RunName.String(),
+				RunAlias:                     record.SequencingExperiment.RunAlias.String(),
+				CaptureKit:                   record.SequencingExperiment.CaptureKit.String(),
+			}
+			if record.SequencingExperiment.RunDate != nil {
+				seqExp.RunDate = time.Time(*record.SequencingExperiment.RunDate)
+			}
+
+			err := repo.UpdateSequencingExperiment(ctx, &seqExp)
+			if err != nil {
+				return fmt.Errorf("update sequencing experiment :%w", err)
+			}
+		}
+	}
+	return nil
+}
+
+// validateUpdateSequencingExperimentBatch mirrors validateSequencingExperimentBatch, but the
+// duplicate-detection lookup (validateExistingAliquotForSequencingLabCode) is replaced by a direct
+// natural-key lookup: a missing sequencing experiment is an error, not a silent skip.
+func validateUpdateSequencingExperimentBatch(ctx context.Context, bv *batchval.BatchValidationContext, seqExps []types.SequencingExperimentBatch) ([]*SequencingExperimentValidationRecord, error) {
+	var records []*SequencingExperimentValidationRecord
+	visited := map[batchval.SequencingExperimentKey]struct{}{}
+	cache := batchval.NewBatchValidationCache(bv)
+
+	for index, seqExp := range seqExps {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		key := batchval.SequencingExperimentKey{
+			SampleOrganizationCode: seqExp.SampleOrganizationCode,
+			SubmitterSampleId:      seqExp.SubmitterSampleId.String(),
+			Aliquot:                seqExp.Aliquot.String(),
+		}
+		record, err := validateUpdateSequencingExperimentRecord(ctx, bv, cache, seqExp, index)
+		if err != nil {
+			return nil, fmt.Errorf("error during update sequencing experiment validation: %v", err)
+		}
+		batchval.ValidateUniquenessInBatch(record, key, visited, IdenticalSequencingExperimentInBatchCode, []string{seqExp.SampleOrganizationCode, seqExp.SubmitterSampleId.String(), seqExp.Aliquot.String()})
+		records = append(records, record)
+	}
+	return records, nil
+}
+
+func validateUpdateSequencingExperimentRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, seqExp types.SequencingExperimentBatch, index int) (*SequencingExperimentValidationRecord, error) {
+	record := SequencingExperimentValidationRecord{
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: bv,
+			Cache:   cache,
+			Index:   index,
+		},
+		SequencingExperiment: seqExp,
+	}
+
+	err := record.preFetchValidationInfo(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("prefetch validation info: %w", err)
+	}
+
+	record.validateAliquotField()
+	if err := record.validateExperimentalStrategyCodeField(); err != nil {
+		return nil, fmt.Errorf("validate experimental strategy code: %w", err)
+	}
+	if err := record.validateSequencingReadTechnologyCodeField(); err != nil {
+		return nil, fmt.Errorf("validate sequencing read technology code: %w", err)
+	}
+	record.validateSequencingLabCodeField()
+	if err := record.validatePlatformCodeField(); err != nil {
+		return nil, fmt.Errorf("validate platform code: %w", err)
+	}
+	record.validateCaptureKitField()
+	record.validateRunAliasField()
+	record.validateRunDateField()
+	record.validateRunNameField()
+	if err := record.validateStatusCodeField(); err != nil {
+		return nil, fmt.Errorf("validate status code: %w", err)
+	}
+
+	if err := record.validateSequencingLabCode(); err != nil {
+		return nil, fmt.Errorf("validate sequencing lab code: %w", err)
+	}
+	if err := record.validateUnknownSampleForOrganizationCode(); err != nil {
+		return nil, fmt.Errorf("validate sample for organization: %w", err)
+	}
+
+	existing, err := cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, seqExp.Aliquot.String(), seqExp.SubmitterSampleId.String(), seqExp.SampleOrganizationCode)
+	if err != nil {
+		return nil, fmt.Errorf("get existing sequencing experiment: %w", err)
+	}
+	record.validateExistingSeqExpForUpdate(existing)
+
 	return &record, nil
 }

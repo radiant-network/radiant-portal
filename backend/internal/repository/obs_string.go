@@ -34,3 +34,7 @@ func (r *ObservationStringRepository) GetById(ctx context.Context, observationId
 func (r *ObservationStringRepository) CreateObservationString(ctx context.Context, observation *ObservationString) error {
 	return r.db.WithContext(ctx).Create(observation).Error
 }
+
+func (r *ObservationStringRepository) DeleteObsStringByCaseID(ctx context.Context, caseID int) error {
+	return r.db.WithContext(ctx).Where("case_id = ?", caseID).Delete(&ObservationString{}).Error
+}

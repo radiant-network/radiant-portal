@@ -218,14 +218,18 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB) *gin.Engine {
 
 	patientsGroup := tenantRoutes.Group("/patients")
 	patientsGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostPatientBatchHandler(repoBatches, auth))
+	patientsGroup.PUT("/batch", requireAction(types.ActionIngestData), server.PutPatientBatchHandler(repoBatches, auth))
 
 	samplesGroup := tenantRoutes.Group("/samples")
 	samplesGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostSampleBatchHandler(repoBatches, auth))
+	samplesGroup.PUT("/batch", requireAction(types.ActionIngestData), server.PutSampleBatchHandler(repoBatches, auth))
 
 	sequencingGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostSequencingExperimentBatchHandler(repoBatches, auth))
+	sequencingGroup.PUT("/batch", requireAction(types.ActionIngestData), server.PutSequencingExperimentBatchHandler(repoBatches, auth))
 
 	casesGroup.POST("/batch", requireAction(types.ActionIngestData), server.PostCaseBatchHandler(repoBatches, auth))
 	casesGroup.PATCH("/batch", requireAction(types.ActionIngestData), server.PatchCaseBatchHandler(repoBatches, auth))
+	casesGroup.PUT("/batch", requireAction(types.ActionIngestData), server.PutCaseBatchHandler(repoBatches, auth))
 
 	return r
 }

@@ -140,3 +140,69 @@ func PatchCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
 		c.JSON(http.StatusAccepted, response)
 	}
 }
+
+// PutCaseBatchHandler
+// @Summary Update existing cases (batch)
+// @Id putCaseBatch
+// @Description Replaces a case's scalar fields and clinical patient data (family, observations,
+// @Description family history). Each case is looked up by (project_code, submitter_case_id);
+// @Description CASE-013 is returned if not found. Sequencing experiment attachments and tasks
+// @Description are left untouched.
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param dry_run query boolean false "Dry Run" default(false)
+// @Param message	body		types.UpdateCaseBatchBody	true	"Update Body"
+// @Accept json
+// @Produce json
+// @Success 202 {object} types.CreateBatchResponse
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/batch [put]
+func PutCaseBatchHandler(repo batchCreator, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body       types.UpdateCaseBatchBody
+			queryParam types.CreateBatchQueryParam
+		)
+		if err := c.ShouldBindJSON(&body); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if err := c.ShouldBindQuery(&queryParam); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		username, err := auth.RetrieveUsernameFromToken(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		batch, err := repo.CreateBatch(c.Request.Context(), *tenant, body.Cases, types.UpdateCaseBatchType, *username, queryParam.DryRun)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		response := types.CreateBatchResponse{
+			ID:        batch.ID,
+			BatchType: batch.BatchType,
+			Status:    batch.Status,
+			CreatedOn: batch.CreatedOn,
+			Username:  batch.Username,
+			DryRun:    batch.DryRun,
+		}
+		c.JSON(http.StatusAccepted, response)
+	}
+}

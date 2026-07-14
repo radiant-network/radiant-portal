@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -619,6 +620,147 @@ func TestPostCaseBatchHandler_MissingTasks(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+// PUT /cases/batch enqueues an update_case batch that replaces a case's scalars and
+// clinical patient data.
+func TestPutCaseBatchHandler_Success(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+			return &types.Batch{ID: uuid.NewString(), BatchType: batchType, Status: types.BatchStatusPending, CreatedOn: time.Now(), Username: username, DryRun: dryRun}, nil
+		},
+	}
+	auth := &testutils.MockAuth{Username: "testuser"}
+
+	router := tenantRouter()
+	router.PUT("/:tenant/cases/batch", PutCaseBatchHandler(repo, auth))
+	body := `{
+		"cases": [{
+			"project_code": "proj1",
+			"submitter_case_id": "case1",
+			"type": "germline",
+			"status_code": "active",
+			"category_code": "postnatal",
+			"analysis_code": "WGA",
+			"diagnostic_lab_code": "lab1",
+			"ordering_organization_code": "org1",
+			"patients": [{
+				"affected_status_code": "affected",
+				"submitter_patient_id": "p1",
+				"patient_organization_code": "org1",
+				"relation_to_proband_code": "proband"
+			}]
+		}]
+	}`
+	req, _ := http.NewRequest(http.MethodPut, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusAccepted, w.Code)
+	var response types.CreateBatchResponse
+	assert.NoError(t, json.Unmarshal(w.Body.Bytes(), &response))
+	assert.Equal(t, types.UpdateCaseBatchType, response.BatchType)
+	assert.Equal(t, "testuser", response.Username)
+	assert.Equal(t, types.BatchStatusPending, response.Status)
+}
+
+// PUT requires project_code, submitter_case_id, the scalar fields, and at least one patient —
+// it never carries tasks or sequencing_experiments.
+func TestPutCaseBatchHandler_MissingRequiredFields(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{}
+	auth := &testutils.MockAuth{}
+
+	router := tenantRouter()
+	router.PUT("/:tenant/cases/batch", PutCaseBatchHandler(repo, auth))
+	body := `{
+		"cases": [{
+			"submitter_case_id": "case1",
+			"type": "germline",
+			"status_code": "active",
+			"category_code": "postnatal",
+			"patients": [{
+				"affected_status_code": "affected",
+				"submitter_patient_id": "p1",
+				"patient_organization_code": "org1",
+				"relation_to_proband_code": "proband"
+			}]
+		}]
+	}`
+	req, _ := http.NewRequest(http.MethodPut, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestPutCaseBatchHandler_EmptyPatients(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{}
+	auth := &testutils.MockAuth{}
+
+	router := tenantRouter()
+	router.PUT("/:tenant/cases/batch", PutCaseBatchHandler(repo, auth))
+	body := `{
+		"cases": [{
+			"project_code": "proj1",
+			"submitter_case_id": "case1",
+			"type": "germline",
+			"status_code": "active",
+			"category_code": "postnatal",
+			"analysis_code": "WGA",
+			"diagnostic_lab_code": "lab1",
+			"ordering_organization_code": "org1",
+			"patients": []
+		}]
+	}`
+	req, _ := http.NewRequest(http.MethodPut, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestPutCaseBatchHandler_RepoError(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	repo := &MockBatchRepository{
+		CreateBatchFunc: func(ctx context.Context, tenantCode string, payload any, batchType string, username string, dryRun bool) (*types.Batch, error) {
+			return nil, errors.New("boom")
+		},
+	}
+	auth := &testutils.MockAuth{Username: "testuser"}
+
+	router := tenantRouter()
+	router.PUT("/:tenant/cases/batch", PutCaseBatchHandler(repo, auth))
+	body := `{
+		"cases": [{
+			"project_code": "proj1",
+			"submitter_case_id": "case1",
+			"type": "germline",
+			"status_code": "active",
+			"category_code": "postnatal",
+			"analysis_code": "WGA",
+			"diagnostic_lab_code": "lab1",
+			"ordering_organization_code": "org1",
+			"patients": [{
+				"affected_status_code": "affected",
+				"submitter_patient_id": "p1",
+				"patient_organization_code": "org1",
+				"relation_to_proband_code": "proband"
+			}]
+		}]
+	}`
+	req, _ := http.NewRequest(http.MethodPut, "/radiant/cases/batch", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }
 
 func TestPostCaseBatchHandler_NoTasks(t *testing.T) {

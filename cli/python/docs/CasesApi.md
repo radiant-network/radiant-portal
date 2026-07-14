@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**cases_filters**](CasesApi.md#cases_filters) | **GET** /{tenant}/cases/filters | Get CaseFilters cases filters
 [**patch_case_batch**](CasesApi.md#patch_case_batch) | **PATCH** /{tenant}/cases/batch | Partially update existing cases (batch)
 [**post_case_batch**](CasesApi.md#post_case_batch) | **POST** /{tenant}/cases/batch | Create a new case batch
+[**put_case_batch**](CasesApi.md#put_case_batch) | **PUT** /{tenant}/cases/batch | Update existing cases (batch)
 [**search_cases**](CasesApi.md#search_cases) | **POST** /{tenant}/cases/search | Search cases
 
 
@@ -673,6 +674,96 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **tenant** | **str**| Tenant code | 
  **create_case_batch_body** | [**CreateCaseBatchBody**](CreateCaseBatchBody.md)| Create Body | 
+ **dry_run** | **bool**| Dry Run | [optional] [default to False]
+
+### Return type
+
+[**CreateBatchResponse**](CreateBatchResponse.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**202** | Accepted |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **put_case_batch**
+> CreateBatchResponse put_case_batch(tenant, update_case_batch_body, dry_run=dry_run)
+
+Update existing cases (batch)
+
+Replaces a case's scalar fields and clinical patient data (family, observations,
+family history). Each case is looked up by (project_code, submitter_case_id);
+CASE-013 is returned if not found. Sequencing experiment attachments and tasks
+are left untouched.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.create_batch_response import CreateBatchResponse
+from radiant_python.models.update_case_batch_body import UpdateCaseBatchBody
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.CasesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    update_case_batch_body = radiant_python.UpdateCaseBatchBody() # UpdateCaseBatchBody | Update Body
+    dry_run = False # bool | Dry Run (optional) (default to False)
+
+    try:
+        # Update existing cases (batch)
+        api_response = api_instance.put_case_batch(tenant, update_case_batch_body, dry_run=dry_run)
+        print("The response of CasesApi->put_case_batch:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling CasesApi->put_case_batch: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **update_case_batch_body** | [**UpdateCaseBatchBody**](UpdateCaseBatchBody.md)| Update Body | 
  **dry_run** | **bool**| Dry Run | [optional] [default to False]
 
 ### Return type

@@ -87,6 +87,33 @@ func Test_CreateFamilyHistory_CaseNotFound(t *testing.T) {
 	})
 }
 
+func Test_DeleteFamilyHistoryByCaseID_OK(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewFamilyHistoryRepository(db)
+
+		createTestCase(t, db, 100029)
+		createTestCase(t, db, 100030)
+
+		db.Exec(`INSERT INTO family_history (id, case_id, patient_id, family_member_code, condition, tenant_code) VALUES (100031, 100029, 1, 'aunt', 'Breast cancer', 'radiant')`)
+		db.Exec(`INSERT INTO family_history (id, case_id, patient_id, family_member_code, condition, tenant_code) VALUES (100032, 100030, 1, 'uncle', 'Diabetes', 'radiant')`)
+		t.Cleanup(func() {
+			db.Exec("DELETE FROM family_history WHERE id IN (100031, 100032)")
+		})
+
+		err := repo.DeleteFamilyHistoryByCaseID(t.Context(), 100029)
+		assert.NoError(t, err)
+
+		deleted, err := repo.GetById(t.Context(), 100031)
+		assert.NoError(t, err)
+		assert.Nil(t, deleted)
+
+		untouched, err := repo.GetById(t.Context(), 100032)
+		assert.NoError(t, err)
+		assert.NotNil(t, untouched)
+	})
+}
+
 func Test_CreateFamilyHistory_PatientNotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		newFamilyHistory := &types.FamilyHistory{

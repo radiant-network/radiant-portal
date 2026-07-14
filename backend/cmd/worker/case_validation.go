@@ -938,6 +938,16 @@ func (cr *CaseValidationRecord) validateCase(ctx context.Context) error {
 		message := fmt.Sprintf("Project %s for case %d does not exist.", cr.Case.ProjectCode, cr.Index)
 		cr.AddErrors(message, CaseUnknownProject, path) // CASE-003
 	}
+
+	cr.validateCaseCommonFields(path)
+	return nil
+}
+
+// validateCaseCommonFields validates diagnostic lab/analysis catalog/ordering organization
+// existence and the case's scalar field formats. Shared by the POST (validateCase) and
+// PUT (validateUpdateCaseRecord) paths — these checks apply identically whether the case is
+// being created or updated.
+func (cr *CaseValidationRecord) validateCaseCommonFields(path string) {
 	if !cr.DiagnosisLabExists {
 		message := fmt.Sprintf("Diagnostic lab %q for case %d does not exist.", cr.Case.DiagnosticLabCode, cr.Index)
 		cr.AddErrors(message, CaseUnknownDiagnosticLab, path) // CASE-004
@@ -972,7 +982,6 @@ func (cr *CaseValidationRecord) validateCase(ctx context.Context) error {
 	if cr.Case.OrderingPhysician != "" {
 		cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, NameRegExpCompiled, TextMaxLength, false)
 	}
-	return nil
 }
 
 // Tasks validation

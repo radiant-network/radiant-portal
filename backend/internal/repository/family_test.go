@@ -67,3 +67,31 @@ func Test_CreateFamily_NilError(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func Test_DeleteFamilyByCaseID_OK(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewFamilyRepository(db)
+
+		// Two dedicated cases so the delete-by-case-id can be asserted not to touch the other one.
+		createTestCase(t, db, 100013)
+		createTestCase(t, db, 100014)
+
+		db.Exec(`INSERT INTO family (id, case_id, family_member_id, relationship_to_proband_code, affected_status_code, tenant_code) VALUES (100011, 100013, 1, 'proband', 'affected', 'radiant')`)
+		db.Exec(`INSERT INTO family (id, case_id, family_member_id, relationship_to_proband_code, affected_status_code, tenant_code) VALUES (100012, 100014, 1, 'mother', 'non_affected', 'radiant')`)
+		t.Cleanup(func() {
+			db.Exec("DELETE FROM family WHERE id IN (100011, 100012)")
+		})
+
+		err := repo.DeleteFamilyByCaseID(t.Context(), 100013)
+		assert.NoError(t, err)
+
+		deleted, err := repo.GetFamilyById(t.Context(), 100011)
+		assert.NoError(t, err)
+		assert.Nil(t, deleted)
+
+		untouched, err := repo.GetFamilyById(t.Context(), 100012)
+		assert.NoError(t, err)
+		assert.NotNil(t, untouched)
+	})
+}

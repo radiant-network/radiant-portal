@@ -103,6 +103,33 @@ func Test_CreateObservationCategorical_CaseNotFound(t *testing.T) {
 	})
 }
 
+func Test_DeleteObsCategoricalByCaseID_OK(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewObservationCategoricalRepository(db)
+
+		createTestCase(t, db, 100021)
+		createTestCase(t, db, 100022)
+
+		db.Exec(`INSERT INTO obs_categorical (id, case_id, patient_id, observation_code, coding_system, code_value, tenant_code) VALUES (100023, 100021, 1, 'phenotype', 'HPO', 'HP:0000001', 'radiant')`)
+		db.Exec(`INSERT INTO obs_categorical (id, case_id, patient_id, observation_code, coding_system, code_value, tenant_code) VALUES (100024, 100022, 1, 'phenotype', 'HPO', 'HP:0000002', 'radiant')`)
+		t.Cleanup(func() {
+			db.Exec("DELETE FROM obs_categorical WHERE id IN (100023, 100024)")
+		})
+
+		err := repo.DeleteObsCategoricalByCaseID(t.Context(), 100021)
+		assert.NoError(t, err)
+
+		deleted, err := repo.GetById(t.Context(), 100023)
+		assert.NoError(t, err)
+		assert.Nil(t, deleted)
+
+		untouched, err := repo.GetById(t.Context(), 100024)
+		assert.NoError(t, err)
+		assert.NotNil(t, untouched)
+	})
+}
+
 func Test_CreateObservationCategorical_PatientNotFound(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		newObs := &types.ObsCategorical{

@@ -38,3 +38,22 @@ func (r *PatientsRepository) CreatePatient(ctx context.Context, newPatient *Pati
 	tx := r.db.WithContext(ctx).Create(newPatient)
 	return tx.Error
 }
+
+func (r *PatientsRepository) UpdatePatient(ctx context.Context, patient *Patient) error {
+	tx := r.db.WithContext(ctx).
+		Table("patient").
+		Where("organization_code = ? AND submitter_patient_id = ?", patient.OrganizationCode, patient.SubmitterPatientId).
+		Updates(map[string]any{
+			"submitter_patient_id_type": patient.SubmitterPatientIdType,
+			"sex_code":                  patient.SexCode,
+			"life_status_code":          patient.LifeStatusCode,
+			"first_name":                patient.FirstName,
+			"last_name":                 patient.LastName,
+			"jhn":                       patient.Jhn,
+			"date_of_birth":             patient.DateOfBirth,
+		})
+	if tx.Error != nil {
+		return fmt.Errorf("error updating patient: %w", tx.Error)
+	}
+	return nil
+}

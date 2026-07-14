@@ -87,6 +87,33 @@ func Test_CreateObservationString_CaseNotFound(t *testing.T) {
 	})
 }
 
+func Test_DeleteObsStringByCaseID_OK(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewObservationStringRepository(db)
+
+		createTestCase(t, db, 100025)
+		createTestCase(t, db, 100026)
+
+		db.Exec(`INSERT INTO obs_string (id, case_id, patient_id, observation_code, value, tenant_code) VALUES (100027, 100025, 1, 'phenotype', 'HP:0000001', 'radiant')`)
+		db.Exec(`INSERT INTO obs_string (id, case_id, patient_id, observation_code, value, tenant_code) VALUES (100028, 100026, 1, 'phenotype', 'HP:0000002', 'radiant')`)
+		t.Cleanup(func() {
+			db.Exec("DELETE FROM obs_string WHERE id IN (100027, 100028)")
+		})
+
+		err := repo.DeleteObsStringByCaseID(t.Context(), 100025)
+		assert.NoError(t, err)
+
+		deleted, err := repo.GetById(t.Context(), 100027)
+		assert.NoError(t, err)
+		assert.Nil(t, deleted)
+
+		untouched, err := repo.GetById(t.Context(), 100028)
+		assert.NoError(t, err)
+		assert.NotNil(t, untouched)
+	})
+}
+
 func Test_CreateObservationString_PatientNotFound(t *testing.T) {
 	testutils.ParallelTestWithPostgres(t, func(t *testing.T, db *gorm.DB) {
 		newObs := &types.ObsString{

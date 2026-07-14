@@ -1,6 +1,7 @@
 package types
 
 const SequencingExperimentBatchType = "sequencing_experiment"
+const UpdateSequencingExperimentBatchType = "update_sequencing_experiment"
 
 type SequencingExperimentBatch struct {
 	Aliquot                      TrimmedString `json:"aliquot" toml:"aliquot" binding:"required"`

@@ -229,8 +229,12 @@ var expectedTenantActions = map[string]string{
 	"GET /:tenant/documents/:document_id/download_url":                                           types.ActionDownloadFile,
 	"GET /:tenant/batches/:batch_id":                                                             types.ActionIngestData,
 	"POST /:tenant/patients/batch":                                                               types.ActionIngestData,
+	"PUT /:tenant/patients/batch":                                                                types.ActionIngestData,
 	"POST /:tenant/samples/batch":                                                                types.ActionIngestData,
+	"PUT /:tenant/samples/batch":                                                                 types.ActionIngestData,
 	"POST /:tenant/sequencing/batch":                                                             types.ActionIngestData,
+	"PUT /:tenant/sequencing/batch":                                                              types.ActionIngestData,
 	"POST /:tenant/cases/batch":                                                                  types.ActionIngestData,
 	"PATCH /:tenant/cases/batch":                                                                 types.ActionIngestData,
+	"PUT /:tenant/cases/batch":                                                                   types.ActionIngestData,
 }

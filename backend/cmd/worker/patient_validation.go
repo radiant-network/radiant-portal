@@ -30,6 +30,7 @@ const (
 	PatientInvalidValueCode                  = "PATIENT-004"
 	PatientOrganizationTypeCode              = "PATIENT-005"
 	PatientDuplicateInBatchCode              = "PATIENT-006"
+	PatientNotExistForUpdateCode             = "PATIENT-007"
 )
 
 type PatientValidationRecord struct {
@@ -138,6 +139,14 @@ func (r *PatientValidationRecord) validateExistingPatient(existingPatient *types
 		message := fmt.Sprintf("Patient (%s / %s) already exists, skipped.",
 			r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
 		r.AddInfos(message, PatientAlreadyExistCode, r.getFormattedPath(""))
+	}
+}
+
+func (r *PatientValidationRecord) validateExistingPatientForUpdate(existingPatient *types.Patient) {
+	if existingPatient == nil {
+		message := fmt.Sprintf("Patient (%s / %s) does not exist, cannot update.", r.Patient.PatientOrganizationCode, r.Patient.SubmitterPatientId)
+		r.AddErrors(message, PatientNotExistForUpdateCode, r.getFormattedPath(""))
+		r.Skipped = true
 	}
 }
 
@@ -325,6 +334,153 @@ func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationCont
 		} else {
 			record.validateExistingPatient(existingPatient)
 		}
+	}
+	return record, nil
+}
+
+func processUpdatePatientBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
+	payload := []byte(batch.Payload)
+	var patients []types.PatientBatch
+
+	if unexpectedErr := json.Unmarshal(payload, &patients); unexpectedErr != nil {
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update patient batch: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	records, unexpectedErr := validateUpdatePatientsBatch(ctx, bv, patients)
+	if unexpectedErr != nil {
+		if errors.Is(unexpectedErr, context.Canceled) {
+			return unexpectedErr
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update patient batch validation: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	slog.InfoContext(ctx, "update patient batch processed", slog.String("batch_id", batch.ID), slog.Int("records", len(records)))
+
+	if err := persistBatchAndUpdatePatientRecords(ctx, db, batch, records); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return err
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update patient batch records: %v", err), bv.BatchRepo)
+		return nil
+	}
+	return nil
+}
+
+func persistBatchAndUpdatePatientRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*PatientValidationRecord) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		txRepoPatient := repository.NewPatientsRepository(tx)
+		txRepoBatch := repository.NewBatchRepository(tx)
+		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
+		if unexpectedErrUpdate != nil {
+			return unexpectedErrUpdate
+		}
+		if rowsUpdated == 0 {
+			return fmt.Errorf("no rows updated when updating update_patient batch %v", batch.ID)
+		}
+		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
+			err := updatePatientRecords(ctx, records, txRepoPatient, batch.TenantCode)
+			if err != nil {
+				return fmt.Errorf("error during patient update %v", err)
+			}
+		}
+		return nil
+	})
+}
+
+type patientUpdater interface {
+	UpdatePatient(ctx context.Context, patient *types.Patient) error
+}
+
+func updatePatientRecords(ctx context.Context, records []*PatientValidationRecord, repo patientUpdater, tenantCode string) error {
+	for _, record := range records {
+		if !record.Skipped {
+			patient := types.Patient{
+				SubmitterPatientId:     record.Patient.SubmitterPatientId.String(),
+				OrganizationCode:       record.OrganizationCode,
+				TenantCode:             tenantCode,
+				SubmitterPatientIdType: record.Patient.SubmitterPatientIdType.String(),
+				FirstName:              record.Patient.FirstName.String(),
+				LastName:               record.Patient.LastName.String(),
+				Jhn:                    record.Patient.Jhn.String(),
+				SexCode:                record.Patient.SexCode,
+				LifeStatusCode:         record.Patient.LifeStatusCode,
+			}
+			if record.Patient.DateOfBirth != nil {
+				patient.DateOfBirth = time.Time(*record.Patient.DateOfBirth)
+			}
+			err := repo.UpdatePatient(ctx, &patient)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func validateUpdatePatientsBatch(ctx context.Context, bv *batchval.BatchValidationContext, patients []types.PatientBatch) ([]*PatientValidationRecord, error) {
+	var records []*PatientValidationRecord
+	cache := batchval.NewBatchValidationCache(bv)
+	seenPatients := map[batchval.PatientKey]struct{}{}
+	for index, patient := range patients {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		record, err := validateUpdatePatientRecord(ctx, bv, cache, patient, index, seenPatients)
+		if err != nil {
+			return nil, fmt.Errorf("error during update patient validation: %v", err)
+		}
+		records = append(records, record)
+	}
+	return records, nil
+}
+
+func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, patient types.PatientBatch, index int, seenPatients map[batchval.PatientKey]struct{}) (*PatientValidationRecord, error) {
+	record := &PatientValidationRecord{
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context: bv,
+			Cache:   cache,
+			Index:   index,
+		},
+		Patient: patient,
+	}
+	record.validateSubmitterPatientId()
+	record.validateSubmitterPatientIdType()
+	record.validateFirstName()
+	record.validateLastName()
+	record.validateJhn()
+	record.validateDateOfBirth()
+
+	if err := record.validateLifeStatusCode(ctx); err != nil {
+		return nil, fmt.Errorf("error validating life status code: %v", err)
+	}
+	if err := record.validateSexCode(ctx); err != nil {
+		return nil, fmt.Errorf("error validating sex code: %v", err)
+	}
+
+	batchval.ValidateUniquenessInBatch(record,
+		batchval.PatientKey{
+			OrganizationCode:   patient.PatientOrganizationCode,
+			SubmitterPatientId: patient.SubmitterPatientId.String(),
+		},
+		seenPatients,
+		PatientDuplicateInBatchCode,
+		[]string{patient.PatientOrganizationCode, patient.SubmitterPatientId.String()},
+	)
+
+	organization, orgErr := bv.OrgRepo.GetOrganizationByCode(ctx, patient.PatientOrganizationCode)
+	if orgErr != nil {
+		return nil, fmt.Errorf("error getting existing organization: %v", orgErr)
+	} else {
+		record.validateOrganization(organization)
+	}
+	if organization != nil {
+		existingPatient, patientErr := bv.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(ctx, organization.Code, patient.SubmitterPatientId.String())
+		if patientErr != nil {
+			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
+		}
+		record.validateExistingPatientForUpdate(existingPatient)
 	}
 	return record, nil
 }

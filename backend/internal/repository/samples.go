@@ -51,6 +51,23 @@ func (r *SamplesRepository) CreateSample(ctx context.Context, newSample *Sample)
 	return newSample, err
 }
 
+func (r *SamplesRepository) UpdateSample(ctx context.Context, sample *Sample) error {
+	tx := r.db.WithContext(ctx).
+		Table(types.SampleTable.Name).
+		Where("organization_code = ? AND submitter_sample_id = ?", sample.OrganizationCode, sample.SubmitterSampleId).
+		Updates(map[string]any{
+			"type_code":        sample.TypeCode,
+			"tissue_site":      sample.TissueSite,
+			"histology_code":   sample.HistologyCode,
+			"patient_id":       sample.PatientID,
+			"parent_sample_id": sample.ParentSampleID,
+		})
+	if tx.Error != nil {
+		return fmt.Errorf("error updating sample: %w", tx.Error)
+	}
+	return nil
+}
+
 func (r *SamplesRepository) GetTypeCodes(ctx context.Context) ([]string, error) {
 	var typeCodes []string
 	tx := r.db.WithContext(ctx).

@@ -34,3 +34,7 @@ func (r *ObservationCategoricalRepository) GetById(ctx context.Context, observat
 func (r *ObservationCategoricalRepository) CreateObservationCategorical(ctx context.Context, observation *ObservationCategorical) error {
 	return r.db.WithContext(ctx).Create(observation).Error
 }
+
+func (r *ObservationCategoricalRepository) DeleteObsCategoricalByCaseID(ctx context.Context, caseID int) error {
+	return r.db.WithContext(ctx).Where("case_id = ?", caseID).Delete(&ObservationCategorical{}).Error
+}
