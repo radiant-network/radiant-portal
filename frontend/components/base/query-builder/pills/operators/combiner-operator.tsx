@@ -51,7 +51,7 @@ function CombinerOperator({ sqon }: CombineOperatorProps) {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          {t('common.query_pill.operator.change_operator_to')}
+          {t('common.query_pill.operator.change_operator_to')}{' '}
           {sqon.op === BooleanOperators.And ? t(`common.query_pill.operator.or`) : t(`common.query_pill.operator.and`)}
         </TooltipContent>
       </Tooltip>
