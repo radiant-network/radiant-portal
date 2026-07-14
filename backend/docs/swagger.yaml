@@ -1769,7 +1769,6 @@ components:
           type: string
       required:
       - code
-      - onset_code
       - system
       - value
       type: object

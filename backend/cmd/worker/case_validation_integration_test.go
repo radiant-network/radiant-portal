@@ -172,6 +172,41 @@ func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
 	})
 }
 
+func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpretation(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, MinIO: true}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		payload := createBaseCasePayload("Ancestry_Obs")
+		// CLIN-6022: an ancestry observation has no onset_code / interpretation_code.
+		payload[0].Patients[0].ObservationsCategorical = append(
+			payload[0].Patients[0].ObservationsCategorical,
+			&types.ObservationCategoricalBatch{
+				Code:   types.ObsCodeAncestry,
+				System: "radiant",
+				Value:  "BLK",
+			},
+		)
+		createDocumentsForBatch(env.Ctx, env.MinIO.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Ancestry_Obs").First(&ca)
+		assert.NotNil(t, ca)
+
+		var ancestry *types.ObsCategorical
+		db.Table("obs_categorical").Where("case_id = ? AND observation_code = ?", ca.ID, types.ObsCodeAncestry).First(&ancestry)
+		assert.NotNil(t, ancestry)
+		assert.Equal(t, "radiant", ancestry.CodingSystem)
+		assert.Equal(t, "BLK", ancestry.CodeValue)
+		// Persisted as NULL, not "" — the FK to onset(code) / obs_interpretation(code)
+		// would reject an empty string.
+		assert.Nil(t, ancestry.OnsetCode)
+		assert.Nil(t, ancestry.InterpretationCode)
+	})
+}
+
 func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
 	testutils.SequentialTestWithPostgresAndMinIO(t, func(t *testing.T, context context.Context, client *minio.Client, endpoint string, db *gorm.DB) {
 		payload := createBaseCasePayload("")

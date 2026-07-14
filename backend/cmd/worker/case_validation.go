@@ -164,6 +164,9 @@ type CaseValidationRecord struct {
 	StatusCodes                       []string
 	ObservationCodes                  []string
 	OnsetCodes                        []string
+	InterpretationCodes               []string
+	AncestryCodes                     []string
+	ConsanguinityCodes                []string
 	TaskTypeCodes                     []string
 	ResolutionStatusCodes             []string
 	PriorityCodes                     []string
@@ -251,6 +254,33 @@ func (r *CaseValidationRecord) fetchOnsetCodes(ctx context.Context) error {
 	return nil
 }
 
+func (r *CaseValidationRecord) fetchInterpretationCodes(ctx context.Context) error {
+	interpretationCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetObservationInterpretation)
+	if err != nil {
+		return fmt.Errorf("error retrieving interpretation codes: %v", err)
+	}
+	r.InterpretationCodes = interpretationCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchAncestryCodes(ctx context.Context) error {
+	ancestryCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetAncestry)
+	if err != nil {
+		return fmt.Errorf("error retrieving ancestry codes: %v", err)
+	}
+	r.AncestryCodes = ancestryCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchConsanguinityCodes(ctx context.Context) error {
+	consanguinityCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetConsanguinity)
+	if err != nil {
+		return fmt.Errorf("error retrieving consanguinity codes: %v", err)
+	}
+	r.ConsanguinityCodes = consanguinityCodes
+	return nil
+}
+
 func (r *CaseValidationRecord) fetchResolutionStatusCodes(ctx context.Context) error {
 	rsCodes, err := r.Cache.GetValueSetCodes(ctx, repository.ValueSetResolutionStatus)
 	if err != nil {
@@ -324,6 +354,15 @@ func (r *CaseValidationRecord) fetchCodeInfos(ctx context.Context) error {
 	}
 	if err := r.fetchOnsetCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve onset codes: %w", err)
+	}
+	if err := r.fetchInterpretationCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve interpretation codes: %w", err)
+	}
+	if err := r.fetchAncestryCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve ancestry codes: %w", err)
+	}
+	if err := r.fetchConsanguinityCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve consanguinity codes: %w", err)
 	}
 	if err := r.fetchTaskTypeCodes(ctx); err != nil {
 		return fmt.Errorf("failed to retrieve task type codes: %w", err)
@@ -613,17 +652,37 @@ func (cr *CaseValidationRecord) validateFamilyHistory(patientIndex int) {
 
 // Observations Categorical validation
 
+// observationValueCodes returns the values allowed for this observation code,
+// or nil when the value is validated by format only.
+func (cr *CaseValidationRecord) observationValueCodes(code string) []string {
+	switch code {
+	case types.ObsCodeAncestry:
+		return cr.AncestryCodes
+	case types.ObsCodeConsanguinity:
+		return cr.ConsanguinityCodes
+	default:
+		return nil
+	}
+}
+
 func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int) error {
 	for obsIndex := range cr.Case.Patients[patientIndex].ObservationsCategorical {
 		obsPath := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
 		obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
 		res := fmt.Sprintf("case %d - patient %d - observations_categorical %d", cr.Index, patientIndex, obsIndex)
 
+		onsetInterpretationRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code)
+
 		cr.ValidateCode(res, obsPath+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
-		cr.ValidateCode(res, obsPath+".onset_code", "onset_code", ObservationInvalidField, obs.OnsetCode, cr.OnsetCodes, []string{}, true)
+		cr.ValidateCode(res, obsPath+".onset_code", "onset_code", ObservationInvalidField, obs.OnsetCode, cr.OnsetCodes, []string{}, onsetInterpretationRequired)
+		cr.ValidateCode(res, obsPath+".interpretation_code", "interpretation_code", ObservationInvalidField, obs.InterpretationCode, cr.InterpretationCodes, []string{}, onsetInterpretationRequired)
 
 		cr.ValidateStringField(obs.System, "system", obsPath+".system", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
-		cr.ValidateStringField(obs.Value, "value", obsPath+".value", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
+		if valueCodes := cr.observationValueCodes(obs.Code); valueCodes != nil {
+			cr.ValidateCode(res, obsPath+".value", "value", ObservationInvalidField, obs.Value, valueCodes, []string{}, true)
+		} else {
+			cr.ValidateStringField(obs.Value, "value", obsPath+".value", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
+		}
 		cr.ValidateStringField(obs.Note, "note", obsPath+".note", ObservationInvalidField, res, NoteMaxLength, TextRegExpCompiled, []string{}, false)
 	}
 	return nil
@@ -1459,8 +1518,8 @@ func persistObservationCategorical(ctx context.Context, sc *StorageContext, cr *
 				ObservationCode:    o.Code,
 				CodingSystem:       o.System,
 				CodeValue:          o.Value,
-				OnsetCode:          o.OnsetCode,
-				InterpretationCode: o.InterpretationCode,
+				OnsetCode:          utils.NilIfEmpty(o.OnsetCode),
+				InterpretationCode: utils.NilIfEmpty(o.InterpretationCode),
 				Note:               o.Note,
 				TenantCode:         sc.TenantCode,
 			}

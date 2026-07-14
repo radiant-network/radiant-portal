@@ -29,7 +29,7 @@ class ObservationCategoricalBatch(BaseModel):
     code: StrictStr
     interpretation_code: Optional[StrictStr] = None
     note: Optional[StrictStr] = None
-    onset_code: StrictStr
+    onset_code: Optional[StrictStr] = None
     system: StrictStr
     value: StrictStr
     __properties: ClassVar[List[str]] = ["code", "interpretation_code", "note", "onset_code", "system", "value"]
