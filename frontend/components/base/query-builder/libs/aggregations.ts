@@ -20,14 +20,24 @@ export function getVisibleAggregations(aggregationGroups: AggregationConfig) {
 }
 
 /**
+ * Read aggregations config to return the associated aggregation, or undefined when
+ * the field has no configured facet.
+ */
+export function findAggregationByField(aggregations: AggregationConfig, field: string): Aggregation | undefined {
+  for (const key in aggregations) {
+    const result = aggregations[key].items.find(item => item.key === field);
+    if (result) return result;
+  }
+
+  return undefined;
+}
+
+/**
  * Read aggregations config to return the associated aggregation
  */
 export function getAggregationByField(aggregations: AggregationConfig, field: string): Aggregation {
-  let result;
-  for (const key in aggregations) {
-    result = aggregations[key].items.find(item => item.key === field);
-    if (result) return result;
-  }
+  const result = findAggregationByField(aggregations, field);
+  if (result) return result;
 
   console.error(`${field} doesn't exist in aggregations`, aggregations);
   return {
