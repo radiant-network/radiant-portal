@@ -55,10 +55,13 @@ export STARROCKS_JWT_JWKS_URL=http://keycloak:8080/realms/CQDG/protocol/openid-c
 export STARROCKS_JWT_REQUIRED_ISSUER=http://localhost:8080/realms/CQDG
 export STARROCKS_JWT_REQUIRED_AUDIENCE=radiant
 
+# Admin API auth is the CQDG-realm service account (radiant-admin-cli) seeded by
+# scripts/init-keycloak/cqdg.json — a client_credentials grant, not a human admin,
+# so it is not blocked by OTP the way the old ROPC (kcadmin) flow was.
 export KEYCLOAK_HOST=http://localhost:8080
 export KEYCLOAK_REALM=CQDG
-export KEYCLOAK_ADMIN_USER=kcadmin
-export KEYCLOAK_ADMIN_PASS=admin
+export KEYCLOAK_ADMIN_CLIENT_ID=radiant-admin-cli
+export KEYCLOAK_ADMIN_CLIENT_SECRET=radiant-admin-secret
 
 export RANGER_URL=http://localhost:6080
 export RANGER_ADMIN_USER=admin
