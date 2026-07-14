@@ -28,6 +28,22 @@ export const buildBilingualRegExp = (commonTextsId: string): RegExp => {
 };
 
 /**
+ * Resolves a facet configuration from its section name and facet id.
+ * @param tableFacets The facets configuration of the zone (e.g., tableSNVFacets).
+ * @param section The section name (e.g., 'Variant', 'Gene', 'Pathogenicity').
+ * @param facet The facet id (e.g., 'chromosome', 'variant_type').
+ * @throws Error if the section or facet is not found in the configuration.
+ */
+export const findFacetData = (tableFacets: any[], section: string, facet: string) => {
+  const facetData = findSectionData(tableFacets, section).facets.find((f: any) => f.id === facet);
+
+  if (!facetData) {
+    throw new Error(`Facet "${facet}" not found in tableFacets section ${section}`);
+  }
+  return facetData;
+};
+
+/**
  * Resolves a facet section from its name.
  * Shared by the facet POM validations and the facet API tests (e.g., api/Occurrences/.../Count).
  * @param tableFacets The facets configuration of the zone (e.g., tableSNVFacets).
@@ -44,19 +60,37 @@ export const findSectionData = <T extends { section: string; facets: unknown[] }
 };
 
 /**
- * Resolves a facet configuration from its section name and facet id.
- * @param tableFacets The facets configuration of the zone (e.g., tableSNVFacets).
- * @param section The section name (e.g., 'Variant', 'Gene', 'Pathogenicity').
- * @param facet The facet id (e.g., 'chromosome', 'variant_type').
- * @throws Error if the section or facet is not found in the configuration.
+ * Gets the color, display string and abbreviation associated with a classification.
+ * @param classification The classification key (e.g., 'Benign', 'Likely_pathogenic', etc.).
+ * @returns An object containing { color, display, abbrev } for the classification.
  */
-export const findFacetData = (tableFacets: any[], section: string, facet: string) => {
-  const facetData = findSectionData(tableFacets, section).facets.find((f: any) => f.id === facet);
+export const getClass = (classification: string) => {
+  const mapping: Record<string, { color: string; display: string; abbrev: string }> = {
+    association: { color: 'neutral', display: 'Association', abbrev: 'AS' },
+    association_not_found: { color: 'neutral', display: 'Association Not Found', abbrev: 'ANF' },
+    Benign: { color: 'green', display: 'Benign', abbrev: 'B' },
+    confers_sensitivity: { color: 'neutral', display: 'Confers Sensitivity', abbrev: 'CS' },
+    Conflicting_classifications_of_pathogenicity: { color: 'orange', display: 'Conflict. Class. of Patho.', abbrev: 'CC' },
+    Conflicting_interpretations_of_pathogenicity: { color: 'yellow', display: 'Conflict. Interpretat. of Patho.', abbrev: 'CI' },
+    drug_response: { color: 'neutral', display: 'Drug Response', abbrev: 'DR' },
+    established_risk_allele: { color: 'neutral', display: 'Established Risk Allele', abbrev: 'ERA' },
+    Likely_benign: { color: 'lime', display: 'Likely Benign', abbrev: 'LB' },
+    likely_oncogenic: { color: 'violet', display: 'Likely Oncogenic', abbrev: 'LO' },
+    Likely_pathogenic: { color: 'orange', display: 'Likely Patho.', abbrev: 'LP' },
+    Likely_risk_allele: { color: 'neutral', display: 'Likely Risk Allele', abbrev: 'LRA' },
+    low_penetrance: { color: 'neutral', display: 'Low Penetrance', abbrev: 'LPN' },
+    no_data: { color: 'neutral', display: 'No Data', abbrev: 'ND' },
+    not_provided: { color: 'neutral', display: 'Not Provided', abbrev: 'NP' },
+    oncogenic: { color: 'red', display: 'Oncogenic', abbrev: 'O' },
+    other: { color: 'neutral', display: 'Other', abbrev: 'O' },
+    Pathogenic: { color: 'red', display: 'Pathogenic', abbrev: 'P' },
+    protective: { color: 'neutral', display: 'Protective', abbrev: 'PV' },
+    risk_factor: { color: 'neutral', display: 'Risk Factor', abbrev: 'RF' },
+    Uncertain_risk_allele: { color: 'neutral', display: 'Uncertain Risk Allele', abbrev: 'URA' },
+    Uncertain_significance: { color: 'yellow', display: 'VUS', abbrev: 'VUS' },
+  };
 
-  if (!facetData) {
-    throw new Error(`Facet "${facet}" not found in tableFacets section ${section}`);
-  }
-  return facetData;
+  return mapping[classification];
 };
 
 /**
@@ -111,40 +145,6 @@ export const getDateTime = () => {
   const strTime = joinWithPadding([date.getHours(), date.getMinutes()]);
 
   return { strDate, strTime };
-};
-
-/**
- * Gets the color, display string and abbreviation associated with a classification.
- * @param classification The classification key (e.g., 'Benign', 'Likely_pathogenic', etc.).
- * @returns An object containing { color, display, abbrev } for the classification.
- */
-export const getClass = (classification: string) => {
-  const mapping: Record<string, { color: string; display: string; abbrev: string }> = {
-    association: { color: 'neutral', display: 'Association', abbrev: 'AS' },
-    association_not_found: { color: 'neutral', display: 'Association Not Found', abbrev: 'ANF' },
-    Benign: { color: 'green', display: 'Benign', abbrev: 'B' },
-    confers_sensitivity: { color: 'neutral', display: 'Confers Sensitivity', abbrev: 'CS' },
-    Conflicting_classifications_of_pathogenicity: { color: 'orange', display: 'Conflict. Class. of Patho.', abbrev: 'CC' },
-    Conflicting_interpretations_of_pathogenicity: { color: 'yellow', display: 'Conflict. Interpretat. of Patho.', abbrev: 'CI' },
-    drug_response: { color: 'neutral', display: 'Drug Response', abbrev: 'DR' },
-    established_risk_allele: { color: 'neutral', display: 'Established Risk Allele', abbrev: 'ERA' },
-    Likely_benign: { color: 'lime', display: 'Likely Benign', abbrev: 'LB' },
-    likely_oncogenic: { color: 'violet', display: 'Likely Oncogenic', abbrev: 'LO' },
-    Likely_pathogenic: { color: 'orange', display: 'Likely Patho.', abbrev: 'LP' },
-    Likely_risk_allele: { color: 'neutral', display: 'Likely Risk Allele', abbrev: 'LRA' },
-    low_penetrance: { color: 'neutral', display: 'Low Penetrance', abbrev: 'LPN' },
-    no_data: { color: 'neutral', display: 'No Data', abbrev: 'ND' },
-    not_provided: { color: 'neutral', display: 'Not Provided', abbrev: 'NP' },
-    oncogenic: { color: 'red', display: 'Oncogenic', abbrev: 'O' },
-    other: { color: 'neutral', display: 'Other', abbrev: 'O' },
-    Pathogenic: { color: 'red', display: 'Pathogenic', abbrev: 'P' },
-    protective: { color: 'neutral', display: 'Protective', abbrev: 'PV' },
-    risk_factor: { color: 'neutral', display: 'Risk Factor', abbrev: 'RF' },
-    Uncertain_risk_allele: { color: 'neutral', display: 'Uncertain Risk Allele', abbrev: 'URA' },
-    Uncertain_significance: { color: 'yellow', display: 'VUS', abbrev: 'VUS' },
-  };
-
-  return mapping[classification];
 };
 
 /**
@@ -272,6 +272,18 @@ export const getStatusIcon = (status: string) => {
 };
 
 /**
+ * Reads the total results count displayed by the results table.
+ * There is a single results table on the variants page, so this is shared by all zones
+ * (germline/somatic × snv/cnv) and the Query Builder oracle count.
+ * @returns A Cypress chain yielding the total (0 when no results are displayed).
+ */
+export const getTableResultsCount = (): Cypress.Chainable<number> =>
+  cy
+    .get(CommonSelectors.tableIndexResult)
+    .invoke('text')
+    .then(parseResultsCount);
+
+/**
  * Gets the text operateur associated with a symbol operator.
  * @param operator The symbol operator (e.g., 'between', '<', etc.).
  * @returns The text operateur.
@@ -345,6 +357,71 @@ export const isEmpty = (value: unknown): boolean => {
   if (Array.isArray(value)) return value.length === 0;
   if (typeof value === 'object') return Object.keys(value as object).length === 0;
   return false;
+};
+
+/**
+ * Recursively normalizes a SQON captured from a `/count` request so it can be
+ * compared structurally, independently of the data (QB-3 SQON validation).
+ * Every group/pill `id` is dropped (group ids are volatile uuids) and every leaf
+ * `value` array is replaced with a single `['_VALUE']` placeholder, keeping only
+ * the structure (`op`, nesting) and `field` under scrutiny.
+ * @param sqon The SQON node to normalize.
+ * @returns A new normalized SQON node (the input is left untouched).
+ */
+export const normalizeSqon = (sqon: any): any => {
+  const clone = JSON.parse(JSON.stringify(sqon));
+  const walk = (node: any) => {
+    if (Array.isArray(node)) {
+      node.forEach(walk);
+      return;
+    }
+    if (node && typeof node === 'object') {
+      delete node.id;
+      if (Array.isArray(node.content)) {
+        walk(node.content); // group node → recurse into nested queries/pills
+      } else if (node.content && typeof node.content === 'object' && 'value' in node.content) {
+        node.content.value = ['_VALUE']; // leaf pill → neutralize the selected value(s)
+      }
+    }
+  };
+  walk(clone);
+  return clone;
+};
+
+/**
+ * Parses the total results count out of the table index result text (e.g. `1-20 of 1,234`).
+ * @param text The raw text of the table element.
+ * @returns The parsed total, or 0 when no `of N` segment is present (e.g. "No results").
+ */
+const parseResultsCount = (text: string): number => {
+  const ofIndex = text.toLowerCase().indexOf(' of ');
+  const digits = ofIndex === -1 ? '' : text.substring(ofIndex + 4).replace(/\D/g, '');
+  return digits ? parseInt(digits, 10) : 0;
+};
+
+/**
+ * Asserts the total results count displayed by the results table.
+ * @param count The expected count (number or Cypress.Chainable yielding a number).
+ * @param beEqual Whether the displayed count should be equal to `count` (default: true).
+ */
+export const shouldHaveTableResultsCount = (count: number | Cypress.Chainable<number>, beEqual: boolean = true) => {
+  const compare = (expected: number) => {
+    cy.get(CommonSelectors.tableIndexResult)
+      .invoke('text')
+      .should(text => {
+        const current = parseResultsCount(text);
+        if (beEqual) {
+          expect(current).to.eq(expected);
+        } else {
+          expect(current).to.not.eq(expected);
+        }
+      });
+  };
+  if (typeof count === 'number') {
+    compare(count);
+  } else {
+    count.then(compare);
+  }
 };
 
 /**

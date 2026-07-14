@@ -1,0 +1,12 @@
+{
+  "op": "and",
+  "content": [
+    {
+      "content": {
+        "field": "_CHROM_FIELD",
+        "value": ["_VALUE"]
+      },
+      "op": "not-in"
+    }
+  ]
+}
