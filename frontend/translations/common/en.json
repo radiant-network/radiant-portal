@@ -1,11 +1,52 @@
 {
   "analysis": {
+    "title": "Analysis",
+    "subtitle": "Quickly visualize and interpret data with our user-friendly tools.",
+    "newsletter": {
+      "title": "New Analysis Tools Coming Soon!",
+      "description": "Join our mailing list to receive updates and be among the first to try our upcoming tools.",
+      "form": {
+        "placeholder": "email@example.com",
+        "button_label": "Get updates"
+      }
+    },
     "set_operations": {
+      "get_started": "Select two or three sets to get started",
+      "get_started_visualize": "Visualize intersections between saved sets using an interactive Venn diagram.",
+      "get_started_dashboard": "View your saved sets in the <dashboard>Dashboard</dashboard>.",
+      "title": "Set Operations",
+      "description": "Visualize intersections between virtual cohorts saved as sets using an interactive Venn diagram.",
+      "tags": {
+        "clinical": "Clinical",
+        "genomics": "Genomics"
+      },
+      "empty": {
+        "title": "No sets to compare",
+        "description": "You need at least two saved sets of entity IDs (e.g. two sets of participants) in order to use this tool. You can create saved sets at the top of the table of results in the <variant>Variants Exploration pages</variant>."
+      },
+      "launch": "Launch",
       "download": "Download PNG",
       "selected_sets": "Selected Sets",
       "set_definitions": "Set Definitions",
       "set_definition": "Set Definition",
-      "union_of_selected_set": "Union of selected sets:"
+      "union_of_selected_set": "Union of selected sets:",
+      "entity_type": {
+        "participants": "Participants",
+        "biospecimens": "Biospecimens",
+        "files": "Files",
+        "variants_germline": "Variants Germline",
+        "variants_somatic": "Variants Somatic"
+      },
+      "filters": {
+        "select_entity": "Entity type",
+        "select_entity_placeholder": "Select an entity type",
+        "select_set": "Sets",
+        "select_set_placeholder": "Select two or three sets",
+        "reset": "Reset",
+        "reset_tooltip": "Reset to the last compared selection",
+        "compare": "Compare",
+        "compare_disabled_tooltip": "Select at least two sets to compare"
+      }
     }
   },
   "community": {

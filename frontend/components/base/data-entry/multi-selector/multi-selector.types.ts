@@ -78,6 +78,11 @@ export interface MultipleSelectorProps {
   openOnFocus?: boolean;
 
   /**
+   *
+   */
+  autoCloseOnSelect?: boolean;
+
+  /**
    * Render the badge for each option.
    */
   renderBadge?: (params: { option: MultiSelectorOption; onRemove: () => void }) => React.ReactNode;
