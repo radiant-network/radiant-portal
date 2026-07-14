@@ -513,7 +513,36 @@
       }
     ]
   },
+  "users": [
+    {
+      "username": "service-account-radiant-admin-cli",
+      "enabled": true,
+      "serviceAccountClientId": "radiant-admin-cli",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users",
+          "query-users"
+        ]
+      }
+    }
+  ],
   "clients": [
+    {
+      "clientId": "radiant-admin-cli",
+      "name": "Radiant admin CLI service account",
+      "description": "Service account used by cmd/createuser to manage users via the Admin API",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "radiant-admin-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    },
     {
       "id": "71dd3aff-390a-4c0b-b42f-b05104e03373",
       "clientId": "CBTN",

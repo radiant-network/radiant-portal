@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -24,7 +25,8 @@ type fakeKeycloak struct {
 	updated         int
 	passwordSets    int
 
-	lastPasswordTemporary bool // "temporary" field of the last reset-password credential
+	lastPasswordTemporary bool       // "temporary" field of the last reset-password credential
+	lastTokenForm         url.Values // form of the last token request
 }
 
 func newFakeKeycloak(realm string) *fakeKeycloak {
@@ -38,7 +40,9 @@ func newFakeKeycloak(realm string) *fakeKeycloak {
 func (f *fakeKeycloak) server() *httptest.Server {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/realms/master/protocol/openid-connect/token", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/realms/"+f.realm+"/protocol/openid-connect/token", func(w http.ResponseWriter, r *http.Request) {
+		_ = r.ParseForm()
+		f.lastTokenForm = r.PostForm
 		if f.tokenStatus != 0 {
 			w.WriteHeader(f.tokenStatus)
 			return
@@ -91,7 +95,7 @@ func (f *fakeKeycloak) server() *httptest.Server {
 
 func (f *fakeKeycloak) client(url string) *KeycloakAdminClient {
 	return NewKeycloakAdminClient(KeycloakConfig{
-		BaseURL: url, Realm: f.realm, AdminUser: "kcadmin", AdminPass: "admin",
+		BaseURL: url, Realm: f.realm, ClientID: "radiant-admin-cli", ClientSecret: "s3cret",
 	})
 }
 
@@ -164,6 +168,20 @@ func Test_KeycloakAdminClient_UpsertUser_IsIdempotent(t *testing.T) {
 	assert.Equal(t, sub1, sub2, "re-run converges to the same sub")
 	assert.Equal(t, 1, fake.created)
 	assert.Equal(t, 1, fake.updated, "second run updates rather than re-creates")
+}
+
+func Test_KeycloakAdminClient_UpsertUser_UsesClientCredentialsGrant(t *testing.T) {
+	fake := newFakeKeycloak("CQDG")
+	srv := fake.server()
+	defer srv.Close()
+
+	_, err := fake.client(srv.URL).UpsertUser(context.Background(), "alice", "alice@demo.org", "Alice", "Demo", "pw")
+
+	require.NoError(t, err)
+	assert.Equal(t, "client_credentials", fake.lastTokenForm.Get("grant_type"))
+	assert.Equal(t, "radiant-admin-cli", fake.lastTokenForm.Get("client_id"))
+	assert.Equal(t, "s3cret", fake.lastTokenForm.Get("client_secret"))
+	assert.Empty(t, fake.lastTokenForm.Get("username"), "a service account sends no username")
 }
 
 func Test_KeycloakAdminClient_UpsertUser_TokenFailureIsReported(t *testing.T) {

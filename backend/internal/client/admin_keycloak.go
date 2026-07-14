@@ -13,24 +13,27 @@ import (
 	"time"
 )
 
-// KeycloakConfig points the admin client at a realm and the bootstrap admin used
-// to manage it. Mirrors the values 00_keycloak_users.sh relied on.
+// KeycloakConfig points the admin client at a realm and the service account used
+// to manage it. Authentication is the OAuth2 client_credentials grant — a service
+// account, not a human admin. This is deliberate: human admins enforce OTP, which
+// makes the password (ROPC) grant fail with invalid_grant. The service-account
+// client is defined in Realm, so Realm is also the token-endpoint realm.
 type KeycloakConfig struct {
-	BaseURL   string // e.g. http://localhost:8080
-	Realm     string // realm the users live in, e.g. CQDG
-	AdminUser string // a fully-set-up admin (kcadmin), NOT the temporary bootstrap admin
-	AdminPass string
+	BaseURL      string // e.g. http://localhost:8080
+	Realm        string // realm the users live in and the client is defined in, e.g. CQDG
+	ClientID     string // confidential client with a service account (realm-management roles)
+	ClientSecret string
 }
 
 // KeycloakConfigFromEnv builds a KeycloakConfig from the environment, defaulting
 // to the local compose stack. KEYCLOAK_HOST/REALM match the backend's own config;
-// KC_ADMIN_USER/PASS match the admin seeded by master.json.
+// KEYCLOAK_ADMIN_CLIENT_ID/SECRET are the service-account client's credentials.
 func KeycloakConfigFromEnv() KeycloakConfig {
 	return KeycloakConfig{
-		BaseURL:   os.Getenv("KEYCLOAK_HOST"),
-		Realm:     os.Getenv("KEYCLOAK_REALM"),
-		AdminUser: os.Getenv("KEYCLOAK_ADMIN_USER"),
-		AdminPass: os.Getenv("KEYCLOAK_ADMIN_PASS"),
+		BaseURL:      os.Getenv("KEYCLOAK_HOST"),
+		Realm:        os.Getenv("KEYCLOAK_REALM"),
+		ClientID:     os.Getenv("KEYCLOAK_ADMIN_CLIENT_ID"),
+		ClientSecret: os.Getenv("KEYCLOAK_ADMIN_CLIENT_SECRET"),
 	}
 }
 
@@ -120,16 +123,15 @@ func (c *KeycloakAdminClient) UpsertUser(ctx context.Context, username, email, f
 	return id, nil
 }
 
-// adminToken fetches an access token for the admin via the ROPC flow against the
-// master realm (admin-cli client), as the bash script did.
+// adminToken fetches an access token for the service account via the OAuth2
+// client_credentials grant against the realm's token endpoint.
 func (c *KeycloakAdminClient) adminToken(ctx context.Context) (string, error) {
 	form := url.Values{
-		"client_id":  {"admin-cli"},
-		"username":   {c.cfg.AdminUser},
-		"password":   {c.cfg.AdminPass},
-		"grant_type": {"password"},
+		"client_id":     {c.cfg.ClientID},
+		"client_secret": {c.cfg.ClientSecret},
+		"grant_type":    {"client_credentials"},
 	}
-	endpoint := fmt.Sprintf("%s/realms/master/protocol/openid-connect/token", c.cfg.BaseURL)
+	endpoint := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", c.cfg.BaseURL, c.cfg.Realm)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, strings.NewReader(form.Encode()))
 	if err != nil {
 		return "", err
