@@ -27,8 +27,8 @@ func Test_TenantSchema_EmptyTenant_ReturnsFederationSchema(t *testing.T) {
 
 func Test_TenantDatabaseOrEmpty_WithTenant_ReturnsTenantDatabase(t *testing.T) {
 	t.Parallel()
-	ctx := ContextWithTenant(context.Background(), "cbtn")
-	assert.Equal(t, "cbtn_tenant", TenantDatabaseOrEmpty(ctx))
+	ctx := ContextWithTenant(context.Background(), "tenant1")
+	assert.Equal(t, "tenant1_tenant", TenantDatabaseOrEmpty(ctx))
 }
 
 func Test_TenantDatabaseOrEmpty_NoTenant_ReturnsEmpty(t *testing.T) {
@@ -39,7 +39,7 @@ func Test_TenantDatabaseOrEmpty_NoTenant_ReturnsEmpty(t *testing.T) {
 
 func Test_SharedDatabaseOrEmpty_WithTenant_ReturnsSharedDatabase(t *testing.T) {
 	t.Parallel()
-	ctx := ContextWithTenant(context.Background(), "cbtn")
+	ctx := ContextWithTenant(context.Background(), "tenant1")
 	assert.Equal(t, SharedDatabase, SharedDatabaseOrEmpty(ctx))
 }
 

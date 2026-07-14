@@ -11,11 +11,11 @@ import (
 
 func Test_CtxOf_ReturnsStatementContext(t *testing.T) {
 	t.Parallel()
-	ctx := types.ContextWithTenant(context.Background(), "cbtn")
+	ctx := types.ContextWithTenant(context.Background(), "tenant1")
 	tx := &gorm.DB{Statement: &gorm.Statement{Context: ctx}}
 	code, ok := types.TenantFromContext(CtxOf(tx))
 	assert.True(t, ok)
-	assert.Equal(t, "cbtn", code)
+	assert.Equal(t, "tenant1", code)
 }
 
 func Test_CtxOf_NilOrEmpty_ReturnsBackground(t *testing.T) {

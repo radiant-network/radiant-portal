@@ -19,7 +19,7 @@ func buildSNVSQL(db *gorm.DB) string {
 
 func Test_SingleRowLookup_BoundTenant_NoBrokenImplicitOrderBy(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
-		ctx := types.ContextWithTenant(env.Ctx, "cbtn")
+		ctx := types.ContextWithTenant(env.Ctx, "tenant1")
 		db := env.Starrocks.Session(&gorm.Session{DryRun: true}).WithContext(ctx)
 		tx := db.Table(fmt.Sprintf("%s %s", types.VariantTable.TenantQualifiedName(ctx), types.VariantTable.Alias)).
 			Where("v.locus_id = ?", -1).
@@ -35,13 +35,13 @@ func Test_SingleRowLookup_BoundTenant_NoBrokenImplicitOrderBy(t *testing.T) {
 func Test_SNVOccurrences_TenantIsolation(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		db := env.Starrocks.Session(&gorm.Session{DryRun: true}).
-			WithContext(types.ContextWithTenant(env.Ctx, "cbtn"))
+			WithContext(types.ContextWithTenant(env.Ctx, "tenant1"))
 
 		sql := buildSNVSQL(db)
 
-		assert.Contains(t, sql, "cbtn_tenant.germline__snv__occurrence")
+		assert.Contains(t, sql, "tenant1_tenant.germline__snv__occurrence")
 		assert.Contains(t, sql, "radiant.snv__variant")
-		assert.NotContains(t, sql, "udn_tenant")
+		assert.NotContains(t, sql, "tenant2_tenant")
 	})
 }
 
