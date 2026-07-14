@@ -182,8 +182,8 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, 
 		return nil, fmt.Errorf("failed to fetch CNV info: %w", err)
 	}
 
-	// ensembl_gene / ensembl_exon_by_gene / cytoband are shared reference tables; qualify them with
-	// the shared base database when a tenant is bound (bare otherwise, unchanged pre-rollout).
+	// Necessary to keep the shared table names scoped to either the shared tenant `radiant`
+	// or empty database if we are in legacy single-database mode.
 	shared := func(name string) string {
 		if db := types.SharedDatabaseOrEmpty(ctx); db != "" {
 			return db + "." + name

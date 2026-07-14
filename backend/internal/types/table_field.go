@@ -22,8 +22,7 @@ func (t Table) In(schema string) string {
 	return schema + "." + t.Name
 }
 
-// TenantQualifiedName returns the table name to write into SQL for the active request. Residency is
-// declared once on the Table (FederationName / PerTenant) and read here.
+// TenantQualifiedName returns the qualified (tenant or shared) table name to write into SQL for the request.
 func (t Table) TenantQualifiedName(ctx context.Context) string {
 	switch {
 	case t.FederationName != "":

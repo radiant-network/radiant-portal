@@ -33,8 +33,6 @@ func Test_TenantDatabaseOrEmpty_WithTenant_ReturnsTenantDatabase(t *testing.T) {
 
 func Test_TenantDatabaseOrEmpty_NoTenant_ReturnsEmpty(t *testing.T) {
 	t.Parallel()
-	// Unlike TenantSchema, native tables must fall back to the bare name (empty schema), not the
-	// radiant_jdbc federation.
 	assert.Equal(t, "", TenantDatabaseOrEmpty(context.Background()))
 	assert.Equal(t, "", TenantDatabaseOrEmpty(ContextWithTenant(context.Background(), "")))
 }

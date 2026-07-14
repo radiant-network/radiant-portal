@@ -67,8 +67,6 @@ func (r *TermsRepository) GetTermNameById(ctx context.Context, termsTable string
 	tx := r.db.WithContext(ctx).Table(termsTable).Select("name").Where("id = ?", id)
 
 	var term types.Term
-	// Take, not First: termsTable may be schema-qualified (e.g. radiant.mondo_term), and First's
-	// implicit ORDER BY <pk> mis-quotes a db-qualified table into invalid SQL.
 	if err := tx.Take(&term).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching term name: %w", err)

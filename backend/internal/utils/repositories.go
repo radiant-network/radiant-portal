@@ -14,10 +14,8 @@ const (
 	MaxLimit = 200
 )
 
-// CtxOf returns the context carried on the query (set by RequireTenantAccess when the tenant-views
-// read path is enabled), or context.Background() when none is bound. Repository query builders that
-// receive an already-WithContext-bound *gorm.DB use it to resolve the active tenant for table
-// qualification without threading ctx through every helper signature.
+// CtxOf returns the context carried on the query or context.Background() when none is bound.
+// Useful to infer table qualification (tenant or shared).
 func CtxOf(tx *gorm.DB) context.Context {
 	if tx == nil || tx.Statement == nil || tx.Statement.Context == nil {
 		return context.Background()
@@ -29,12 +27,6 @@ func AddSort(tx *gorm.DB, userQuery types.ListQuery) {
 	for _, sort := range userQuery.SortedFields() {
 		s := fmt.Sprintf("%s.%s %s", sort.Field.Table.Alias, sort.Field.GetName(), sort.Order)
 		tx = tx.Order(s)
-	}
-}
-func AddGroupBy(tx *gorm.DB, fields []types.Field) {
-	for _, field := range fields {
-		s := fmt.Sprintf("%s.%s", field.Table.Alias, field.GetName())
-		tx = tx.Group(s)
 	}
 }
 

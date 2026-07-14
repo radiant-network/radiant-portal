@@ -209,8 +209,6 @@ func filterOutIndexFiles(tx *gorm.DB) {
 
 func (r *DocumentsRepository) GetById(ctx context.Context, id int) (*Document, error) {
 	var document Document
-	// Take, not First: the table is schema-qualified (<tenant>_tenant.document), and First's implicit
-	// ORDER BY <pk> mis-quotes a db-qualified table into invalid SQL.
 	err := r.db.WithContext(ctx).Table(types.DocumentTable.In(types.TenantSchema(ctx))).
 		Where("id = ?", id).
 		Where("format_code not in ?", []string{"crai", "tbi"}).
