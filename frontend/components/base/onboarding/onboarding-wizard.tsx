@@ -4,6 +4,8 @@ import { Joyride, type Step } from 'react-joyride';
 import { useBetaFeatures } from '@/components/hooks/beta-feature-provider';
 import { useI18n } from '@/components/hooks/i18n';
 
+import OnboardingTooltip from './onboarding-tooltip';
+
 type OnboardingWizard = {
   steps: Step[];
 };
@@ -37,6 +39,8 @@ function OnboardingWizard({ steps }: OnboardingWizard) {
       run
       steps={steps}
       continuous
+      tooltipComponent={OnboardingTooltip}
+      floatingOptions={{ hideArrow: true }}
       options={{ buttons: ['back', 'skip', 'primary'], showProgress: true }}
       locale={{
         back: t('onboarding.actions.back'),
