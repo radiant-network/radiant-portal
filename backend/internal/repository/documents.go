@@ -87,39 +87,38 @@ func (r *DocumentsRepository) SearchById(ctx context.Context, prefix string, lim
 	var autocompleteResult []AutocompleteResult
 	searchInput := fmt.Sprintf("%s%%", prefix)
 	db := r.db.WithContext(ctx)
-	schema := types.TenantSchema(ctx)
 
-	subQueryDocumentId := db.Table(fmt.Sprintf("%s %s", types.DocumentTable.In(schema), types.DocumentTable.Alias))
+	subQueryDocumentId := db.Table(fmt.Sprintf("%s %s", types.DocumentTable.TenantQualifiedName(ctx), types.DocumentTable.Alias))
 	subQueryDocumentId = subQueryDocumentId.Select("\"document_id\" as type, id as value")
 	subQueryDocumentId = subQueryDocumentId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 	filterOutIndexFiles(subQueryDocumentId)
 
-	subQueryDocumentName := db.Table(fmt.Sprintf("%s %s", types.DocumentTable.In(schema), types.DocumentTable.Alias))
+	subQueryDocumentName := db.Table(fmt.Sprintf("%s %s", types.DocumentTable.TenantQualifiedName(ctx), types.DocumentTable.Alias))
 	subQueryDocumentName = subQueryDocumentName.Select("\"name\" as type, name as value")
 	subQueryDocumentName = subQueryDocumentName.Where("name LIKE ?", searchInput)
 	filterOutIndexFiles(subQueryDocumentName)
 
-	subQueryRunName := db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.In(schema), types.SequencingExperimentTable.Alias))
+	subQueryRunName := db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.TenantQualifiedName(ctx), types.SequencingExperimentTable.Alias))
 	subQueryRunName = subQueryRunName.Select("\"run_name\" as type, run_name as value")
 	subQueryRunName = subQueryRunName.Where("LOWER(run_name) LIKE ?", strings.ToLower(searchInput))
 
-	subQuerySampleId := db.Table(fmt.Sprintf("%s %s", types.SampleTable.In(schema), types.SampleTable.Alias))
+	subQuerySampleId := db.Table(fmt.Sprintf("%s %s", types.SampleTable.TenantQualifiedName(ctx), types.SampleTable.Alias))
 	subQuerySampleId = subQuerySampleId.Select("\"sample_id\" as type, id as value")
 	subQuerySampleId = subQuerySampleId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryPatientId := db.Table(fmt.Sprintf("%s %s", types.PatientTable.In(schema), types.PatientTable.Alias))
+	subQueryPatientId := db.Table(fmt.Sprintf("%s %s", types.PatientTable.TenantQualifiedName(ctx), types.PatientTable.Alias))
 	subQueryPatientId = subQueryPatientId.Select("\"patient_id\" as type, id as value")
 	subQueryPatientId = subQueryPatientId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryCaseId := db.Table(fmt.Sprintf("%s %s", types.CaseTable.In(schema), types.CaseTable.Alias))
+	subQueryCaseId := db.Table(fmt.Sprintf("%s %s", types.CaseTable.TenantQualifiedName(ctx), types.CaseTable.Alias))
 	subQueryCaseId = subQueryCaseId.Select("\"case_id\" as type, id as value")
 	subQueryCaseId = subQueryCaseId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQuerySeqId := db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.In(schema), types.SequencingExperimentTable.Alias))
+	subQuerySeqId := db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.TenantQualifiedName(ctx), types.SequencingExperimentTable.Alias))
 	subQuerySeqId = subQuerySeqId.Select("\"seq_id\" as type, id as value")
 	subQuerySeqId = subQuerySeqId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
-	subQueryTaskId := db.Table(fmt.Sprintf("%s %s", types.TaskTable.In(schema), types.TaskTable.Alias))
+	subQueryTaskId := db.Table(fmt.Sprintf("%s %s", types.TaskTable.TenantQualifiedName(ctx), types.TaskTable.Alias))
 	subQueryTaskId = subQueryTaskId.Select("\"task_id\" as type, id as value")
 	subQueryTaskId = subQueryTaskId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
@@ -181,7 +180,7 @@ func (r *DocumentsRepository) GetDocumentsFilters(ctx context.Context, withProje
 }
 
 func prepareDocumentsQuery(ctx context.Context, userQuery types.Query, r *DocumentsRepository) *gorm.DB {
-	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.DocumentTable.In(types.TenantSchema(ctx)), types.DocumentTable.Alias))
+	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.DocumentTable.TenantQualifiedName(ctx), types.DocumentTable.Alias))
 	tx = utils.JoinDocumentWithTaskHasDocument(tx)
 	tx = utils.JoinTaskHasDocWithTaskContext(tx)
 	tx = utils.JoinTaskContextWithCaseHasSeqExp(tx)
@@ -210,7 +209,7 @@ func filterOutIndexFiles(tx *gorm.DB) {
 func (r *DocumentsRepository) GetById(ctx context.Context, id int) (*Document, error) {
 	var document Document
 	// Keep Take (not First): First can build invalid SQL when the table name carries a database prefix.
-	err := r.db.WithContext(ctx).Table(types.DocumentTable.In(types.TenantSchema(ctx))).
+	err := r.db.WithContext(ctx).Table(types.DocumentTable.TenantQualifiedName(ctx)).
 		Where("id = ?", id).
 		Where("format_code not in ?", []string{"crai", "tbi"}).
 		Take(&document).Error

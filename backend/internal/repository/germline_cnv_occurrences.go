@@ -182,14 +182,9 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, 
 		return nil, fmt.Errorf("failed to fetch CNV info: %w", err)
 	}
 
-	// Necessary to keep the shared table names scoped to either the shared tenant `radiant`
-	// or empty database if we are in legacy single-database mode.
-	shared := func(name string) string {
-		if db := types.SharedDatabaseOrEmpty(ctx); db != "" {
-			return db + "." + name
-		}
-		return name
-	}
+	ensemblGene := types.EnsemblGeneTable.TenantQualifiedName(ctx)
+	ensemblExon := types.Table{Name: "ensembl_exon_by_gene"}.TenantQualifiedName(ctx)
+	cytoband := types.Table{Name: "cytoband"}.TenantQualifiedName(ctx)
 	sql := fmt.Sprintf(`WITH gene_overlap AS (
     	SELECT
     	    g.gene_id,
@@ -243,7 +238,7 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, 
     	     LEFT JOIN exon_overlap eo ON go.gene_id = eo.gene_id
     	     LEFT JOIN gene_overlap_cytoband gc ON go.gene_id=gc.gene_id
 		ORDER BY overlapping_gene_percent DESC, overlapping_cnv_percent DESC;`,
-		shared("ensembl_gene"), shared("ensembl_exon_by_gene"), shared("cytoband"))
+		ensemblGene, ensemblExon, cytoband)
 	var overlaps []types.CNVGeneOverlap
 	query := db.Raw(sql, map[string]interface{}{"cnv_chromosome": chromosome, "cnv_start": start, "cnv_end": end, "cnv_length": length})
 	if err = query.Find(&overlaps).Error; err != nil {
