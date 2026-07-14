@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/Goldziher/go-utils/sliceutils"
@@ -10,6 +11,7 @@ type Table struct {
 	Name           string // Name of the table
 	Alias          string // Alias of the table to use in query
 	FederationName string // FederationName name through Starrocks federation
+	PerTenant      bool   // If the table lives in the tenant DB (true) or the shared DB (false).
 }
 
 // In qualifies the table by a StarRocks schema (database), e.g.
@@ -18,6 +20,26 @@ type Table struct {
 // replaces the static FederationName on read paths so the active tenant's views are used.
 func (t Table) In(schema string) string {
 	return schema + "." + t.Name
+}
+
+// TenantQualifiedName returns the table name to write into SQL for the active request. Residency is
+// declared once on the Table (FederationName / PerTenant) and read here.
+func (t Table) TenantQualifiedName(ctx context.Context) string {
+	switch {
+	case t.FederationName != "":
+		return t.In(TenantSchema(ctx))
+	case t.PerTenant:
+		return t.qualifyWith(TenantDatabaseOrEmpty(ctx))
+	default:
+		return t.qualifyWith(SharedDatabaseOrEmpty(ctx))
+	}
+}
+
+func (t Table) qualifyWith(database string) string {
+	if database == "" {
+		return t.Name
+	}
+	return database + "." + t.Name
 }
 
 const (

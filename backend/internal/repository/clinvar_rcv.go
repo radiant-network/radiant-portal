@@ -38,9 +38,9 @@ func (r *ClinvarRCVRepository) GetVariantClinvarConditions(ctx context.Context, 
 	})
 
 	err := r.db.WithContext(ctx).
-		Table(fmt.Sprintf("%s %s", types.VariantTable.Name, types.VariantTable.Alias)).
+		Table(fmt.Sprintf("%s %s", types.VariantTable.TenantQualifiedName(ctx), types.VariantTable.Alias)).
 		Select(strings.Join(columns, ",")).
-		Joins(fmt.Sprintf("JOIN %s %s ON %s.clinvar_name = %s.clinvar_id", types.ClinvarRCVTable.Name, types.ClinvarRCVTable.Alias, types.VariantTable.Alias, types.ClinvarRCVTable.Alias)).
+		Joins(fmt.Sprintf("JOIN %s %s ON %s.clinvar_name = %s.clinvar_id", types.ClinvarRCVTable.TenantQualifiedName(ctx), types.ClinvarRCVTable.Alias, types.VariantTable.Alias, types.ClinvarRCVTable.Alias)).
 		Where(fmt.Sprintf("%s.locus_id = ?", types.VariantTable.Alias), locusId).
 		Find(&clinvarRCV).Error
 	if err != nil {

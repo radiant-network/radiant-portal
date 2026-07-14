@@ -27,7 +27,6 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	var occurrences []SomaticSNVOccurrence
 
 	db := r.db.WithContext(ctx)
-	schema := types.TenantSchema(ctx)
 	tx, part, err := PrepareSNVListOrCountQuery(types.SomaticSNVOccurrenceTable, seqId, taskId, userQuery, db)
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
@@ -51,10 +50,10 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	//	SELECT s_snv_o.locus_id FROM somatic__snv__occurrence JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
 	// ) AND s_snv_o.tumor_seq_id=? AND s_snv_o.task_id=? AND s_snv_o.part=? AND v.locus_id=s_snv_o.locus_id ORDER BY ad_ratio DESC
 	tx = tx.Select("s_snv_o.locus_id")
-	tx = db.Table("(somatic__snv__occurrence s_snv_o, snv__variant v)").
-		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM %s.interpretation_somatic) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", schema), fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
-		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s.occurrence_note WHERE deleted = false) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?", schema), seqId, caseId).
-		Joins(fmt.Sprintf("LEFT JOIN %s.occurrence_flag flag ON flag.occurrence_id = s_snv_o.locus_id AND flag.task_id = s_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?", schema), seqId, caseId).
+	tx = db.Table(fmt.Sprintf("(%s s_snv_o, %s v)", types.SomaticSNVOccurrenceTable.TenantQualifiedName(ctx), types.VariantTable.TenantQualifiedName(ctx))).
+		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM %s) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", types.InterpretationSomaticTable.TenantQualifiedName(ctx)), fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
+		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx)), seqId, caseId).
+		Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = s_snv_o.locus_id AND flag.task_id = s_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx)), seqId, caseId).
 		Select(columns).
 		Where("s_snv_o.tumor_seq_id = ? and s_snv_o.task_id = ? and part=? and v.locus_id = s_snv_o.locus_id and s_snv_o.locus_id in (?)", seqId, taskId, part, tx)
 
@@ -80,11 +79,11 @@ func (r *SomaticSNVOccurrencesRepository) GetStatisticsOccurrences(ctx context.C
 
 func (r *SomaticSNVOccurrencesRepository) GetExpandedOccurrence(ctx context.Context, _ int, seqId int, taskId int, locusId int) (*ExpandedSomaticSNVOccurrence, error) {
 	db := r.db.WithContext(ctx)
-	tx := db.Table("somatic__snv__occurrence s_snv_o")
+	tx := db.Table(fmt.Sprintf("%s s_snv_o", types.SomaticSNVOccurrenceTable.TenantQualifiedName(ctx)))
 	tx = tx.Where("s_snv_o.tumor_seq_id = ? AND s_snv_o.task_id = ? AND s_snv_o.locus_id = ?", seqId, taskId, locusId)
-	tx = tx.Joins("JOIN snv__consequence c ON s_snv_o.locus_id=c.locus_id AND c.is_picked = true")
-	tx = tx.Joins("JOIN snv__variant v ON s_snv_o.locus_id=v.locus_id")
-	tx = tx.Joins("LEFT JOIN ensembl_gene g ON g.name=v.symbol")
+	tx = tx.Joins(fmt.Sprintf("JOIN %s c ON s_snv_o.locus_id=c.locus_id AND c.is_picked = true", types.ConsequenceTable.TenantQualifiedName(ctx)))
+	tx = tx.Joins(fmt.Sprintf("JOIN %s v ON s_snv_o.locus_id=v.locus_id", types.VariantTable.TenantQualifiedName(ctx)))
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s g ON g.name=v.symbol", types.EnsemblGeneTable.TenantQualifiedName(ctx)))
 	tx = tx.Select("c.locus_id, v.hgvsg, v.locus, v.chromosome, v.start, v.end, v.symbol, v.transcript_id, v.is_canonical, " +
 		"v.is_mane_select, v.is_mane_plus, c.exon_rank, c.exon_total, v.dna_change, v.vep_impact, v.consequences, " +
 		"v.aa_change, v.rsnumber, v.clinvar_interpretation, c.gnomad_pli, c.gnomad_loeuf, c.spliceai_type, c.spliceai_ds, " +
@@ -103,7 +102,7 @@ func (r *SomaticSNVOccurrencesRepository) GetExpandedOccurrence(ctx context.Cont
 		}
 	}
 
-	txOmim := db.Table("omim_gene_panel omim")
+	txOmim := db.Table(fmt.Sprintf("%s omim", types.OmimGenePanelTable.TenantQualifiedName(ctx)))
 	txOmim = txOmim.Select("omim.omim_phenotype_id, omim.panel, omim.inheritance_code")
 	txOmim = txOmim.Where("omim.omim_phenotype_id is not null and omim.symbol = ?", expandedOccurrence.Symbol)
 	txOmim = txOmim.Order("omim.omim_phenotype_id asc")

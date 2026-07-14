@@ -27,9 +27,8 @@ func (r *GermlineCNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 	if err != nil {
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
-	schema := types.TenantSchema(ctx)
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s.occurrence_note WHERE deleted = false) note ON note.occurrence_id = cnvo.cnv_id AND note.task_id = cnvo.task_id AND note.seq_id = ? AND note.case_id = ?", schema), seqId, caseId)
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s.occurrence_flag flag ON flag.occurrence_id = cnvo.cnv_id AND flag.task_id = cnvo.task_id AND flag.seq_id = ? AND flag.case_id = ?", schema), seqId, caseId)
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = cnvo.cnv_id AND note.task_id = cnvo.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx)), seqId, caseId)
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = cnvo.cnv_id AND flag.task_id = cnvo.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx)), seqId, caseId)
 	if userQuery != nil && userQuery.Filters() != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
 		// We group by name to avoid duplicates when joining with gene panels tables
 		// and use any_value for other fields to satisfy sql requirements
@@ -99,7 +98,7 @@ func (r *GermlineCNVOccurrencesRepository) prepareQuery(ctx context.Context, seq
 	}
 
 	tx := db.Table(
-		fmt.Sprintf("%s %s", types.GermlineCNVOccurrenceTable.Name, types.GermlineCNVOccurrenceTable.Alias),
+		fmt.Sprintf("%s %s", types.GermlineCNVOccurrenceTable.TenantQualifiedName(ctx), types.GermlineCNVOccurrenceTable.Alias),
 	).Where("cnvo.seq_id = ? AND cnvo.task_id = ? AND cnvo.part=?", seqId, taskId, part)
 
 	if userQuery != nil && userQuery.HasFieldFromTables(types.GenePanelsTables...) {
@@ -107,7 +106,7 @@ func (r *GermlineCNVOccurrencesRepository) prepareQuery(ctx context.Context, seq
 		selectedPanelsTables := utils.GetDistinctTablesFromFields(selectedPanelsField)
 		for _, panelsTable := range selectedPanelsTables {
 			tx = tx.
-				Joins(fmt.Sprintf("LEFT JOIN %s %s ON array_contains(%s.symbol, %s.symbol)", panelsTable.Name, panelsTable.Alias, types.GermlineCNVOccurrenceTable.Alias, panelsTable.Alias))
+				Joins(fmt.Sprintf("LEFT JOIN %s %s ON array_contains(%s.symbol, %s.symbol)", panelsTable.TenantQualifiedName(ctx), panelsTable.Alias, types.GermlineCNVOccurrenceTable.Alias, panelsTable.Alias))
 		}
 	}
 	utils.AddWhere(userQuery, tx)
@@ -173,7 +172,7 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, 
 	var chromosome string
 	var start, end, length int
 
-	err = db.Table(types.GermlineCNVOccurrenceTable.Name).
+	err = db.Table(types.GermlineCNVOccurrenceTable.TenantQualifiedName(ctx)).
 		Where("seq_id = ? AND task_id = ? AND part = ? AND cnv_id = ?", seqId, taskId, part, cnvId).
 		Select("chromosome, start, end, length").
 		Row().
@@ -183,7 +182,15 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, 
 		return nil, fmt.Errorf("failed to fetch CNV info: %w", err)
 	}
 
-	sql := `WITH gene_overlap AS (
+	// ensembl_gene / ensembl_exon_by_gene / cytoband are shared reference tables; qualify them with
+	// the shared base database when a tenant is bound (bare otherwise, unchanged pre-rollout).
+	shared := func(name string) string {
+		if db := types.SharedDatabaseOrEmpty(ctx); db != "" {
+			return db + "." + name
+		}
+		return name
+	}
+	sql := fmt.Sprintf(`WITH gene_overlap AS (
     	SELECT
     	    g.gene_id,
     	    g.name AS symbol,
@@ -191,7 +198,7 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, 
     	    GREATEST(0, LEAST(g.end, @cnv_end) - GREATEST(g.start, @cnv_start)) AS nb_overlap_bases,
     	    g.start AS gene_start,
     	    g.end AS gene_end
-    	FROM ensembl_gene g
+    	FROM %s g
     	WHERE g.chromosome = @cnv_chromosome
     	  AND g.end >= @cnv_start
     	  AND g.start <= @cnv_end
@@ -201,7 +208,7 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, 
              go.gene_id,
              COUNT(DISTINCT e.exon_id) AS nb_exons
          FROM gene_overlap go
-                  JOIN ensembl_exon_by_gene e
+                  JOIN %s e
                        ON go.gene_id = e.gene_id
                            AND e.end >= @cnv_start
                            AND e.start <= @cnv_end
@@ -212,7 +219,7 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, 
              go.gene_id,
              array_agg(distinct cb.cytoband order by cb.cytoband asc) AS cytoband
          FROM gene_overlap go
-                  JOIN cytoband cb
+                  JOIN %s cb
                        ON cb.chromosome = @cnv_chromosome
                            AND cb.start <= go.gene_end
                            AND cb.end >= go.gene_start
@@ -235,7 +242,8 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, 
 		FROM gene_overlap go
     	     LEFT JOIN exon_overlap eo ON go.gene_id = eo.gene_id
     	     LEFT JOIN gene_overlap_cytoband gc ON go.gene_id=gc.gene_id
-		ORDER BY overlapping_gene_percent DESC, overlapping_cnv_percent DESC;`
+		ORDER BY overlapping_gene_percent DESC, overlapping_cnv_percent DESC;`,
+		shared("ensembl_gene"), shared("ensembl_exon_by_gene"), shared("cytoband"))
 	var overlaps []types.CNVGeneOverlap
 	query := db.Raw(sql, map[string]interface{}{"cnv_chromosome": chromosome, "cnv_start": start, "cnv_end": end, "cnv_length": length})
 	if err = query.Find(&overlaps).Error; err != nil {

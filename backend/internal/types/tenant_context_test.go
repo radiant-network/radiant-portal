@@ -25,6 +25,42 @@ func Test_TenantSchema_EmptyTenant_ReturnsFederationSchema(t *testing.T) {
 	assert.Equal(t, FederationSchema, TenantSchema(ctx))
 }
 
+func Test_TenantDatabaseOrEmpty_WithTenant_ReturnsTenantDatabase(t *testing.T) {
+	t.Parallel()
+	ctx := ContextWithTenant(context.Background(), "cbtn")
+	assert.Equal(t, "cbtn_tenant", TenantDatabaseOrEmpty(ctx))
+}
+
+func Test_TenantDatabaseOrEmpty_NoTenant_ReturnsEmpty(t *testing.T) {
+	t.Parallel()
+	// Unlike TenantSchema, native tables must fall back to the bare name (empty schema), not the
+	// radiant_jdbc federation.
+	assert.Equal(t, "", TenantDatabaseOrEmpty(context.Background()))
+	assert.Equal(t, "", TenantDatabaseOrEmpty(ContextWithTenant(context.Background(), "")))
+}
+
+func Test_SharedDatabaseOrEmpty_WithTenant_ReturnsSharedDatabase(t *testing.T) {
+	t.Parallel()
+	ctx := ContextWithTenant(context.Background(), "cbtn")
+	assert.Equal(t, SharedDatabase, SharedDatabaseOrEmpty(ctx))
+}
+
+func Test_SharedDatabaseOrEmpty_NoTenant_ReturnsEmpty(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "", SharedDatabaseOrEmpty(context.Background()))
+	assert.Equal(t, "", SharedDatabaseOrEmpty(ContextWithTenant(context.Background(), "")))
+}
+
+func Test_SharedDatabaseFromEnv_DefaultsToRadiant(t *testing.T) {
+	t.Setenv(SharedDatabaseEnv, "")
+	assert.Equal(t, "radiant", sharedDatabaseFromEnv())
+}
+
+func Test_SharedDatabaseFromEnv_ReadsOverride(t *testing.T) {
+	t.Setenv(SharedDatabaseEnv, "base_kb")
+	assert.Equal(t, "base_kb", sharedDatabaseFromEnv())
+}
+
 func Test_TenantFromContext_RoundTrips(t *testing.T) {
 	t.Parallel()
 	code, ok := TenantFromContext(ContextWithTenant(context.Background(), "demo"))

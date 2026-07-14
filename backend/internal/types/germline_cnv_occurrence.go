@@ -37,8 +37,9 @@ type GermlineCNVOccurrence struct {
 }
 
 var GermlineCNVOccurrenceTable = Table{
-	Name:  "germline__cnv__occurrence",
-	Alias: "cnvo",
+	Name:      "germline__cnv__occurrence",
+	Alias:     "cnvo",
+	PerTenant: true,
 }
 
 var GermlineCNVSeqIdField = Field{

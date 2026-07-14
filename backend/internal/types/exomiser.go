@@ -24,6 +24,7 @@ type ExomiserACMGClassificationCounts struct {
 }
 
 var ExomiserTable = Table{
-	Name:  "exomiser",
-	Alias: "ex",
+	Name:      "exomiser",
+	Alias:     "ex",
+	PerTenant: true,
 }

@@ -1,8 +1,10 @@
 package types
 
 import (
-	"github.com/magiconair/properties/assert"
+	"context"
 	"testing"
+
+	"github.com/magiconair/properties/assert"
 )
 
 func Test_FieldGetAlias_Return_Alias_If_Not_Empty(t *testing.T) {
@@ -27,6 +29,33 @@ func Test_Table_In_QualifiesNameWithSchema(t *testing.T) {
 	tbl := Table{Name: "cases", FederationName: "radiant_jdbc.public.cases"}
 	assert.Equal(t, tbl.In("radiant_jdbc.public"), "radiant_jdbc.public.cases")
 	assert.Equal(t, tbl.In("demo_tenant"), "demo_tenant.cases")
+}
+
+func Test_Table_TenantQualifiedName_Federated(t *testing.T) {
+	t.Parallel()
+	tbl := Table{Name: "cases", FederationName: "radiant_jdbc.public.cases"}
+	// No tenant bound → federation schema (unchanged legacy behavior).
+	assert.Equal(t, tbl.TenantQualifiedName(context.Background()), "radiant_jdbc.public.cases")
+	// Tenant bound → that tenant's view database.
+	assert.Equal(t, tbl.TenantQualifiedName(ContextWithTenant(context.Background(), "cbtn")), "cbtn_tenant.cases")
+}
+
+func Test_Table_TenantQualifiedName_PerTenant(t *testing.T) {
+	t.Parallel()
+	tbl := Table{Name: "germline__snv__occurrence", PerTenant: true}
+	// No tenant bound → bare name (shared pool default database).
+	assert.Equal(t, tbl.TenantQualifiedName(context.Background()), "germline__snv__occurrence")
+	// Tenant bound → the tenant database, never any other tenant's.
+	assert.Equal(t, tbl.TenantQualifiedName(ContextWithTenant(context.Background(), "cbtn")), "cbtn_tenant.germline__snv__occurrence")
+}
+
+func Test_Table_TenantQualifiedName_Shared(t *testing.T) {
+	t.Parallel()
+	tbl := Table{Name: "snv__variant"}
+	// No tenant bound → bare name.
+	assert.Equal(t, tbl.TenantQualifiedName(context.Background()), "snv__variant")
+	// Tenant bound → the shared base database.
+	assert.Equal(t, tbl.TenantQualifiedName(ContextWithTenant(context.Background(), "cbtn")), "radiant.snv__variant")
 }
 
 func Test_Table_In_FederationSchemaMatchesFederationName(t *testing.T) {

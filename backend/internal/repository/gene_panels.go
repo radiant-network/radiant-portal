@@ -32,9 +32,9 @@ func (r *GenePanelsRepository) GetVariantGenePanelConditions(ctx context.Context
 		return nil, fmt.Errorf("error while fetching variant gene panel conditions: %s", err)
 	}
 
-	txGene := db.Table(types.ConsequenceTable.Name).Where("locus_id = ?", locusId).Distinct("symbol")
+	txGene := db.Table(types.ConsequenceTable.TenantQualifiedName(ctx)).Where("locus_id = ?", locusId).Distinct("symbol")
 
-	tx := db.Table((*table).Name)
+	tx := db.Table((*table).TenantQualifiedName(ctx))
 	tx = tx.Where("symbol in (?)", txGene)
 
 	switch *table {
@@ -116,7 +116,7 @@ func retrieveTableByPanelType(panelType string) (*types.Table, error) {
 func (r *GenePanelsRepository) CountGenePanel(ctx context.Context, table types.Table, panelColumnName string, conditionFilter string, geneFilter *gorm.DB) (*int64, error) {
 	var count int64
 	like := fmt.Sprintf("%%%s%%", conditionFilter)
-	txCount := r.db.WithContext(ctx).Table(table.Name).Where("symbol in (?)", geneFilter)
+	txCount := r.db.WithContext(ctx).Table(table.TenantQualifiedName(ctx)).Where("symbol in (?)", geneFilter)
 	if len(conditionFilter) > 0 {
 		txCount = txCount.Where(fmt.Sprintf("LOWER(%s) like ?", panelColumnName), strings.ToLower(like))
 	}
