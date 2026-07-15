@@ -1,8 +1,10 @@
 import { OnChangeFn, RowSelectionState } from '@tanstack/react-table';
+
+import { thousandNumberFormat } from '@/components/lib/number-format';
+
 import D3ClipCircle from '../shapes/d3-clip-circle';
 import D3Region from '../shapes/d3-region';
 import D3Text from '../shapes/d3-text';
-import { thousandNumberFormat } from '@/components/lib/number-format';
 
 export const VENN_ID = 'venn-diagram';
 

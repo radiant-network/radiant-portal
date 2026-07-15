@@ -1,14 +1,17 @@
 import { useCallback, useMemo, useState } from 'react';
+import { RowSelectionState } from '@tanstack/react-table';
+import { formatDate } from 'date-fns';
+import { Download } from 'lucide-react';
+
+import { ISqonGroupFacet } from '@/components/base/query-builder/type';
+import { useI18n } from '@/components/hooks/i18n';
+import { downloadSvgAsPng } from '@/components/lib/svg-to-png';
+
+import { Button } from '../../shadcn/button';
+
 import VennChartOperationTable from './venn-chart-operation-table';
 import VennChartSummaryTable from './venn-chart-summary-table';
 import VennD3Chart, { VENN_ID } from './venn-d3-chart';
-import { ISqonGroupFacet } from '@/components/base/query-builder/type';
-import { RowSelectionState } from '@tanstack/react-table';
-import d3ToPng from 'd3-svg-to-png';
-import { Button } from '../../shadcn/button';
-import { useI18n } from '@/components/hooks/i18n';
-import { Download } from 'lucide-react';
-import { formatDate } from 'date-fns';
 
 export type VennSummary = {
   operation: string;
@@ -31,17 +34,18 @@ export type VennChartProps = {
 function VennChart({ summary, operations }: VennChartProps) {
   const { t } = useI18n();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   const handleDownload = useCallback(() => {
     const date = Date.now();
     const formattedDate = formatDate(date, t('common.date.year_month_day'));
     const formattedTime = formatDate(date, t('common.date.hour'));
-    d3ToPng(`#${VENN_ID}`, `venn-diagram-${formattedDate}-${formattedTime}`, {
-      background: 'white',
-      quality: 1,
-      scale: 1,
-      format: 'png',
-    });
+
+    const source = document.getElementById(VENN_ID) as SVGSVGElement | null;
+    if (!source) return;
+
+    downloadSvgAsPng(source, `venn-diagram-${formattedDate}-${formattedTime}`);
   }, [t]);
+
   const chartProps = useMemo(
     () => ({
       sets: summary.map(summary => summary.operation),
