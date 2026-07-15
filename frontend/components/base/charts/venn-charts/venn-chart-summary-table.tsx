@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
-import DisplayTable from '@/components/base/data-table/display-table';
 import { createColumnHelper } from '@tanstack/react-table';
-import { TableColumnDef } from '@/components/base/data-table/data-table';
-import { VennSummary } from './venn-chart';
-import { useI18n } from '@/components/hooks/i18n';
 import { User } from 'lucide-react';
+
+import { TableColumnDef } from '@/components/base/data-table/data-table';
+import DisplayTable from '@/components/base/data-table/display-table';
+import { useI18n } from '@/components/hooks/i18n';
+
+import { VennSummary } from './venn-chart';
 
 const columnHelper = createColumnHelper<VennSummary>();
 

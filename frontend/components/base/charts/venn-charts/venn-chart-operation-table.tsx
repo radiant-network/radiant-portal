@@ -1,12 +1,15 @@
-import { createColumnHelper, OnChangeFn, RowSelectionState } from '@tanstack/react-table';
 import { useMemo } from 'react';
-import { VennOperation } from './venn-chart';
+import { createColumnHelper, OnChangeFn, RowSelectionState } from '@tanstack/react-table';
+import { User } from 'lucide-react';
+
+import { useI18n } from '@/components/hooks/i18n';
+import { thousandNumberFormat } from '@/components/lib/number-format';
+
 import { TableColumnDef } from '../../data-table/data-table';
 import DisplayTable from '../../data-table/display-table';
-import { useI18n } from '@/components/hooks/i18n';
-import { User } from 'lucide-react';
 import { Checkbox } from '../../shadcn/checkbox';
-import { thousandNumberFormat } from '@/components/lib/number-format';
+
+import { VennOperation } from './venn-chart';
 
 const columnHelper = createColumnHelper<VennOperation>();
 
