@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Dna, FlaskConical, Users } from 'lucide-react';
+import { ArchiveIcon, Dna, FlaskConical, Users } from 'lucide-react';
 
 import { MultiSelectorOption } from '@/components/base/data-entry/multi-selector/multi-selector.types';
 import PageHeader from '@/components/base/page/page-header';
@@ -35,6 +35,11 @@ export function getSetTypesList(sets: UserSetOption[]): SetSelectOption[] {
       value: 'biospecimens',
       icon: FlaskConical,
       disabled: sets.filter(set => set.setType == 'biospecimens').length < 2,
+    },
+    {
+      value: 'files',
+      icon: ArchiveIcon,
+      disabled: sets.filter(set => set.setType == 'files').length < 2,
     },
     {
       value: 'variants_germline',
