@@ -12,6 +12,7 @@ type LabelOperatorQueryPillProps = {
 
 /**
  * Label for a pill
+ * @TODO: Change dictionary key from filters to facet
  *
  * The label must match the facet title, so it is resolved from the aggregation's
  * `translation_key` (like the facet does), not the raw sqon field key.
