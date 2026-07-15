@@ -59,7 +59,7 @@ describe('Cases - Batch - Missing fields - String fields', () => {
     expect(response.status).to.eq(400);
   });
 
-  it('Message', () => {
+  it('Message [SJRA-1709]', () => {
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'StatusCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'ProjectCode', 'required'));
     cy.validateMessage(response, apiMessages.ImmediateError('CreateCaseBatchBody.Cases[0]', 'DiagnosticLabCode', 'required'));
