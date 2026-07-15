@@ -81,6 +81,7 @@ function SetOperationsLanding({
               value={selectedSets}
               onChange={onSetsChange}
               defaultOptions={setOptions}
+              maxSelected={3}
               options={setOptions}
               placeholder={t('analysis.set_operations.filters.select_set_placeholder')}
               openOnFocus
