@@ -263,6 +263,13 @@
         "ok": "Supprimer"
       }
     },
+    "query_pill": {
+      "operator": {
+        "change_operator_to": "Changer l'opérateur pour {{operator}}",
+        "and": "et",
+        "or": "ou"
+      }
+    },
     "relationships": {
       "proband": "Proband",
       "mother": "Mère",
