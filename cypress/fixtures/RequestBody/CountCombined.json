@@ -1,0 +1,31 @@
+{
+  "sqon": {
+    "content": [
+      {
+        "content": [
+          {
+            "content": {
+              "field": "_FIELD1",
+              "value": ["_VALUE1"]
+            },
+            "op": "in"
+          }
+        ],
+        "op": "and"
+      },
+      {
+        "content": [
+          {
+            "content": {
+              "field": "_FIELD2",
+              "value": ["_VALUE2"]
+            },
+            "op": "in"
+          }
+        ],
+        "op": "and"
+      }
+    ],
+    "op": "_OP"
+  }
+}
