@@ -1,0 +1,1 @@
+import{r as t}from"./iframe-CuWpm1qa.js";const r=t.createContext(void 0),a=()=>{const e=t.useContext(r);if(e===void 0)throw new Error("useBetaFeatures must be used within a BetaFeatureProvider");return e};export{a as u};

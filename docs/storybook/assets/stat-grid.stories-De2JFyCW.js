@@ -1,0 +1,18 @@
+import{d as m,j as e,c as u}from"./iframe-CuWpm1qa.js";import{S as p}from"./stat-item-Cp8VkL3p.js";import{S as y,a as o}from"./story-section-w3-NF7Xp.js";import{B as g}from"./book-open-text-CqRorx8u.js";import{U as f}from"./users-DKAR_yIA.js";import{F as x}from"./flask-conical-BjJpoDP8.js";import{F as S}from"./file-text-C7drggBM.js";import{D as v}from"./dna-C4D63_1K.js";import"./preload-helper-PPVm8Dsz.js";const b=[["path",{d:"M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5c-1.4 0-2.5-1.1-2.5-2.5V2",key:"125lnx"}],["path",{d:"M8.5 2h7",key:"csnxdl"}],["path",{d:"M14.5 16h-5",key:"1ox875"}]],N=m("test-tube",b);function s({items:i,className:n,iconClassName:l,labelClassName:c,size:d}){return e.jsx("div",{className:u("grid gap-6",n),children:i.map(a=>e.jsx(p,{className:"min-w-0",icon:a.icon,value:a.value,label:a.label,size:d,iconClassName:l,labelClassName:c},a.key))})}s.__docgenInfo={description:"Responsive grid of StatItem figures. Pass column classes via `className`.",methods:[],displayName:"StatGrid",props:{items:{required:!0,tsType:{name:"Array",elements:[{name:"signature",type:"object",raw:`{
+  key: string;
+  icon?: ReactNode;
+  value: ReactNode;
+  label: ReactNode;
+}`,signature:{properties:[{key:"key",value:{name:"string",required:!0}},{key:"icon",value:{name:"ReactNode",required:!1}},{key:"value",value:{name:"ReactNode",required:!0}},{key:"label",value:{name:"ReactNode",required:!0}}]}}],raw:"StatGridItem[]"},description:""},className:{required:!1,tsType:{name:"string"},description:""},iconClassName:{required:!1,tsType:{name:"string"},description:""},labelClassName:{required:!1,tsType:{name:"string"},description:""},size:{required:!1,tsType:{name:"VariantProps['size']",raw:"VariantProps<typeof statItemVariants>['size']"},description:""}}};const t=[{key:"studies",icon:e.jsx(g,{}),value:"8",label:"Studies"},{key:"participants",icon:e.jsx(f,{}),value:"11K",label:"Participants"},{key:"variants",icon:e.jsx(x,{}),value:"39M+",label:"Variants"},{key:"biospecimens",icon:e.jsx(N,{}),value:"16.3K",label:"Biospecimens"},{key:"files",icon:e.jsx(S,{}),value:"680.4 TB",label:"Files"},{key:"genomes",icon:e.jsx(v,{}),value:"9,121",label:"Genomes"}],V={title:"Components/Landing/Stat Grid",component:s,args:{items:t}},r={render:()=>e.jsxs(y,{children:[e.jsx(o,{title:"Three columns (default usage)",children:e.jsx(s,{items:t,className:"grid-cols-2 sm:grid-cols-3"})}),e.jsx(o,{title:"On a colored background (icon / label overrides)",description:"Override icon and label colors so the figures read well on a dark surface.",children:e.jsx("div",{className:"bg-primary text-primary-foreground rounded-md p-6",children:e.jsx(s,{items:t,className:"grid-cols-2 sm:grid-cols-3",iconClassName:"text-primary-foreground",labelClassName:"text-primary-foreground/90"})})})]})};r.parameters={...r.parameters,docs:{...r.parameters?.docs,source:{originalSource:`{
+  render: () => <StoryShowcase>
+      <StorySection title="Three columns (default usage)">
+        <StatGrid items={items} className="grid-cols-2 sm:grid-cols-3" />
+      </StorySection>
+
+      <StorySection title="On a colored background (icon / label overrides)" description="Override icon and label colors so the figures read well on a dark surface.">
+        <div className="bg-primary text-primary-foreground rounded-md p-6">
+          <StatGrid items={items} className="grid-cols-2 sm:grid-cols-3" iconClassName="text-primary-foreground" labelClassName="text-primary-foreground/90" />
+        </div>
+      </StorySection>
+    </StoryShowcase>
+}`,...r.parameters?.docs?.source}}};const I=["AllVariants"];export{r as AllVariants,I as __namedExportsOrder,V as default};
