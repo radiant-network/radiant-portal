@@ -189,6 +189,21 @@ To make a Postgres write test parallel-safe (`WritePostgres` instead of `Exclusi
 
 StarRocks fixtures (`test/data/<folder>/*.tsv`) are loaded once per process per folder and shared across tests; the StarRocks test database is treated as read-only. This invariant is enforced at runtime by a GORM read-only guard (`test/testutils/setup_starrocks.go`): any attempt to INSERT, UPDATE, DELETE, DROP, ALTER, or TRUNCATE through a test StarRocks connection will fail immediately with `testutils.ErrStarrocksReadOnly`. This applies to both ORM operations (`db.Create`, `db.Save`, `db.Delete`) and raw SQL (`db.Exec`).
 
+### Multi-tenant StarRocks fixtures
+
+By default a fixture folder is loaded into a single flat StarRocks database, and tests run with no tenant bound — so `types.Table.TenantQualifiedName` yields bare names. To exercise the real multi-database deployment (shared `types.SharedDatabase` + one `<code>_tenant` database per tenant for `PerTenant` tables), set `Need.Tenants`:
+
+```go
+testutils.RunTest(t, testutils.Need{Starrocks: "simple", Tenants: []string{"tenant1", "tenant2"}},
+    func(t *testing.T, env *testutils.Env) {
+        ctx := env.TenantCtx("tenant1")            // bind the tenant
+        db := env.Starrocks.WithContext(ctx)       // reads resolve to tenant1_tenant.* / radiant.*
+        ...
+    })
+```
+
+The loader (`initStarrocksMultiTenant`) puts shared/reference tables in `radiant` and the four `PerTenant` tables (germline/somatic SNV, germline CNV, exomiser) in each `<code>_tenant` database. `PerTenant`-vs-shared is derived from the `types.Table` defs (`perTenantTables`), so it can't drift. Each tenant's `PerTenant` rows are offset by `testutils.TenantKeyOffset * <tenant index>` on the columns named in `Need.TenantKeyColumns`, so the tenants' data is disjoint and isolation is observable in executed queries (see `Test_SNVOccurrences_TenantIsolation_Executes`, which offsets `seq_id`). `Need.TenantKeyColumns` is per test and has no default: leave it empty and both tenants get identical rows (no isolation), so a test that asserts isolation must name its key column(s). Whatever you offset here must match how the query filters — if you offset `task_id`, the query's `task_id` filter has to use the offset value for the non-zero-index tenant too. The returned connection is not pinned to one database, so fully-qualified cross-database names resolve. Bind the tenant with `env.TenantCtx(code)`; use this mode for tests that assert on `PerTenant`-table behavior. Note: the shared database name is global (`types.SharedDatabase`, resolved once at load), so multi-tenant tests should use a single fixture folder. Federated views (`<code>_tenant` views over `radiant_jdbc`) are not built by this loader — queries that touch federated tables under a bound tenant need those views (a follow-up).
+
 ## Adding a New API Endpoint
 
 Follow the [add-endpoint skill](.claude/skills/add-endpoint/SKILL.md). It covers DB schema, types, repository + tests, handler + tests, route + integration test, swagger + client regeneration, Postman, and updating this file when patterns change.

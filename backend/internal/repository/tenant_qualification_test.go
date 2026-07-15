@@ -57,3 +57,39 @@ func Test_SNVOccurrences_NoTenant_KeepsBareNames(t *testing.T) {
 		assert.Contains(t, sql, "snv__variant")
 	})
 }
+
+func runGermlineSNVJoin(t *testing.T, db *gorm.DB, seqID int) []map[string]any {
+	t.Helper()
+	tx := AddImplicitSNVOccurrencesFilters(types.GermlineSNVOccurrenceTable, seqID, 5, db, 1)
+	tx = JoinSNVOccurrencesWithVariants(types.GermlineSNVOccurrenceTable, tx)
+	var dest []map[string]any
+	if err := tx.Select("g_snv_o.seq_id, g_snv_o.locus_id, v.hgvsg").Find(&dest).Error; err != nil {
+		t.Fatalf("query germline SNV occurrences (seq_id=%d): %v", seqID, err)
+	}
+	return dest
+}
+
+func Test_SNVOccurrences_TenantIsolation_Executes(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{
+		Starrocks:        "simple",
+		Tenants:          []string{"tenant1", "tenant2"},
+		TenantKeyColumns: []string{"seq_id"}, // offset only seq_id; the query still filters task_id=5
+	},
+		func(t *testing.T, env *testutils.Env) {
+			t1 := env.Starrocks.Session(&gorm.Session{}).WithContext(env.TenantCtx("tenant1"))
+			t2 := env.Starrocks.Session(&gorm.Session{}).WithContext(env.TenantCtx("tenant2"))
+
+			// tenant1's seq_id=1 rows live only in tenant1_tenant.
+			assert.NotEmpty(t, runGermlineSNVJoin(t, t1, 1),
+				"tenant1 must see its own seq_id=1 rows")
+			assert.Empty(t, runGermlineSNVJoin(t, t2, 1),
+				"tenant2 must NOT see tenant1's seq_id=1 rows")
+
+			// tenant2's rows are offset and live only in tenant2_tenant.
+			offsetSeqID := 1 + testutils.TenantKeyOffset
+			assert.NotEmpty(t, runGermlineSNVJoin(t, t2, offsetSeqID),
+				"tenant2 must see its own offset rows")
+			assert.Empty(t, runGermlineSNVJoin(t, t1, offsetSeqID),
+				"tenant1 must NOT see tenant2's offset rows")
+		})
+}
