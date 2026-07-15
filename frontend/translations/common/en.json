@@ -224,7 +224,7 @@
     },
     "query_pill": {
       "operator": {
-        "change_operator_to": "Change operator to",
+        "change_operator_to": "Change operator to {{operator}}",
         "and": "and",
         "or": "or"
       }
