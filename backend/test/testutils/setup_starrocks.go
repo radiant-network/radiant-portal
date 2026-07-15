@@ -9,9 +9,11 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 
+	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -43,6 +45,28 @@ func fixtureStateFor(folderName string) *fixtureState {
 		fixtureStates[folderName] = st
 	}
 	return st
+}
+
+var perTenantTables = map[string]bool{
+	types.GermlineSNVOccurrenceTable.Name: types.GermlineSNVOccurrenceTable.PerTenant,
+	types.SomaticSNVOccurrenceTable.Name:  types.SomaticSNVOccurrenceTable.PerTenant,
+	types.GermlineCNVOccurrenceTable.Name: types.GermlineCNVOccurrenceTable.PerTenant,
+	types.ExomiserTable.Name:              types.ExomiserTable.PerTenant,
+}
+
+// TenantKeyOffset is added to each tenant key column, scaled by the tenant's index in Need.Tenants,
+// Example, offsetting seq_id:
+// - tenant index 0: + 0 * TenantKeyOffset (unchanged).
+// - tenant index 1: + 1 * TenantKeyOffset (seq_id 1 -> 10001).
+// - and so on. Keep fixture ids below TenantKeyOffset so ranges never overlap.
+const TenantKeyOffset = 10_000
+
+func keyColumnSet(columns []string) map[string]bool {
+	set := make(map[string]bool, len(columns))
+	for _, c := range columns {
+		set[c] = true
+	}
+	return set
 }
 
 func openStarrocksGorm(dbName string) (*gorm.DB, error) {
@@ -127,11 +151,8 @@ func loadFixtureFolder(folderName, dbName string) error {
 		return fmt.Errorf("failed to access bootstrap sql.DB: %w", err)
 	}
 
-	if _, err := db.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s;", dbName)); err != nil {
-		return fmt.Errorf("failed to drop existing database: %w", err)
-	}
-	if _, err := db.Exec(fmt.Sprintf("CREATE DATABASE %s;", dbName)); err != nil {
-		return fmt.Errorf("failed to create database: %w", err)
+	if err := recreateDatabase(db, dbName); err != nil {
+		return err
 	}
 	if _, err := db.Exec(fmt.Sprintf("USE %s;", dbName)); err != nil {
 		return fmt.Errorf("failed to use database: %w", err)
@@ -145,11 +166,28 @@ func loadFixtureFolder(folderName, dbName string) error {
 		if filepath.Ext(file.Name()) != ".tsv" {
 			continue
 		}
-		if err := createTableAndPopulateData(db, folderName, file); err != nil {
+		if err := createTableAndPopulateData(db, folderName, file, 0, nil); err != nil {
 			return fmt.Errorf("failed to ingest %s: %w", file.Name(), err)
 		}
 	}
 
+	if err := createFederationCatalog(db); err != nil {
+		return err
+	}
+	return nil
+}
+
+func recreateDatabase(db *sql.DB, name string) error {
+	if _, err := db.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s;", name)); err != nil {
+		return fmt.Errorf("failed to drop existing database %s: %w", name, err)
+	}
+	if _, err := db.Exec(fmt.Sprintf("CREATE DATABASE %s;", name)); err != nil {
+		return fmt.Errorf("failed to create database %s: %w", name, err)
+	}
+	return nil
+}
+
+func createFederationCatalog(db *sql.DB) error {
 	federationQuery := fmt.Sprintf(
 		`
 		CREATE EXTERNAL CATALOG IF NOT EXISTS radiant_jdbc
@@ -169,7 +207,87 @@ func loadFixtureFolder(folderName, dbName string) error {
 	return nil
 }
 
-func createTableAndPopulateData(db *sql.DB, folderName string, file os.DirEntry) error {
+func initStarrocksMultiTenant(folderName string, tenants, keyColumns []string) (*gorm.DB, error) {
+	key := folderName + "|multitenant|" + strings.Join(tenants, ",") + "|" + strings.Join(keyColumns, ",")
+	st := fixtureStateFor(key)
+	st.once.Do(func() {
+		st.err = loadMultiTenantFixture(folderName, tenants, keyColumns)
+	})
+	if st.err != nil {
+		log.Fatal("failed to load multi-tenant fixture ", folderName, ": ", st.err)
+	}
+
+	gormDb, err := openStarrocksGorm("")
+	if err != nil {
+		log.Fatal("failed to open connection to StarRocks: ", err)
+	}
+	registerReadOnlyGuard(gormDb)
+	return gormDb, nil
+}
+
+// loadMultiTenantFixture runs once per (folder, tenants, keyColumns) per process.
+func loadMultiTenantFixture(folderName string, tenants, keyColumns []string) error {
+	bootstrap, err := openStarrocksGorm("")
+	if err != nil {
+		return fmt.Errorf("failed to open bootstrap connection: %w", err)
+	}
+	defer func() {
+		if sqlDB, err := bootstrap.DB(); err == nil {
+			_ = sqlDB.Close()
+		}
+	}()
+
+	db, err := bootstrap.DB()
+	if err != nil {
+		return fmt.Errorf("failed to access bootstrap sql.DB: %w", err)
+	}
+
+	keyCols := keyColumnSet(keyColumns)
+
+	if err := recreateDatabase(db, types.SharedDatabase); err != nil {
+		return err
+	}
+	for _, code := range tenants {
+		if err := recreateDatabase(db, types.TenantDatabase(code)); err != nil {
+			return err
+		}
+	}
+	if err := createFederationCatalog(db); err != nil {
+		return err
+	}
+
+	files, err := os.ReadDir(filepath.Join(TestResources, folderName))
+	if err != nil {
+		return fmt.Errorf("failed to read fixture directory: %w", err)
+	}
+	for _, file := range files {
+		if filepath.Ext(file.Name()) != ".tsv" {
+			continue
+		}
+		table := strings.TrimSuffix(file.Name(), ".tsv")
+		if perTenantTables[table] {
+			for i, code := range tenants {
+				tenantDB := types.TenantDatabase(code)
+				if err := loadTableInto(db, tenantDB, folderName, file, i*TenantKeyOffset, keyCols); err != nil {
+					return fmt.Errorf("failed to ingest %s into %s: %w", file.Name(), tenantDB, err)
+				}
+			}
+		} else if err := loadTableInto(db, types.SharedDatabase, folderName, file, 0, nil); err != nil {
+			return fmt.Errorf("failed to ingest %s into %s: %w", file.Name(), types.SharedDatabase, err)
+		}
+	}
+	return nil
+}
+
+// loadTableInto switches the current database and loads one fixture table into it.
+func loadTableInto(db *sql.DB, database, folderName string, file os.DirEntry, keyOffset int, keyColumns map[string]bool) error {
+	if _, err := db.Exec(fmt.Sprintf("USE %s;", database)); err != nil {
+		return fmt.Errorf("failed to use database %s: %w", database, err)
+	}
+	return createTableAndPopulateData(db, folderName, file, keyOffset, keyColumns)
+}
+
+func createTableAndPopulateData(db *sql.DB, folderName string, file os.DirEntry, keyOffset int, keyColumns map[string]bool) error {
 	if filepath.Ext(file.Name()) != ".tsv" {
 		return nil
 	}
@@ -216,9 +334,16 @@ func createTableAndPopulateData(db *sql.DB, folderName string, file os.DirEntry)
 		// Convert to interface{} for stmt.Exec
 		args := make([]interface{}, len(values))
 		for i, v := range values {
-			if v == "NULL" {
+			switch {
+			case v == "NULL":
 				args[i] = nil
-			} else {
+			case keyOffset != 0 && i < len(columns) && keyColumns[columns[i]]:
+				n, err := strconv.Atoi(v)
+				if err != nil {
+					return fmt.Errorf("failed to offset key column %s value %q: %w", columns[i], v, err)
+				}
+				args[i] = n + keyOffset
+			default:
 				args[i] = v // Database driver will handle type conversion
 			}
 		}

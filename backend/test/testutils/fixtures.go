@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"gorm.io/gorm"
 )
 
@@ -31,9 +32,11 @@ const (
 
 // Need declares which test resources are required.
 type Need struct {
-	Starrocks string       // fixture folder name under test/data/; "" = no StarRocks
-	Postgres  PostgresMode // see PostgresMode constants
-	MinIO     bool         // spin up a per-test MinIO container
+	Starrocks        string       // fixture folder name under test/data/; "" = no StarRocks
+	Postgres         PostgresMode // see PostgresMode constants
+	MinIO            bool         // spin up a per-test MinIO container
+	Tenants          []string     // When non-empty, provisions multi-tenant databases
+	TenantKeyColumns []string     // The specific columns to increment between tenants (defaults to empty)
 }
 
 // MinIOEnv groups the MinIO connection details exposed to a test.
@@ -48,6 +51,11 @@ type Env struct {
 	Starrocks *gorm.DB
 	Postgres  *gorm.DB
 	MinIO     *MinIOEnv
+}
+
+// TenantCtx returns Ctx with the tenant
+func (e *Env) TenantCtx(code string) context.Context {
+	return types.ContextWithTenant(e.Ctx, code)
 }
 
 // RunTest sets up the requested resources and runs the test body.
@@ -67,11 +75,19 @@ func RunTest(t *testing.T, need Need, fn func(t *testing.T, env *Env)) {
 
 	// StarRocks (always pulls Postgres up alongside it for the federation catalog).
 	if need.Starrocks != "" {
-		sr, _, err := initStarrocksDb(need.Starrocks)
-		if err != nil {
-			log.Fatal("Failed to init StarRocks: ", err)
+		if len(need.Tenants) > 0 {
+			sr, err := initStarrocksMultiTenant(need.Starrocks, need.Tenants, need.TenantKeyColumns)
+			if err != nil {
+				log.Fatal("Failed to init multi-tenant StarRocks: ", err)
+			}
+			env.Starrocks = sr
+		} else {
+			sr, _, err := initStarrocksDb(need.Starrocks)
+			if err != nil {
+				log.Fatal("Failed to init StarRocks: ", err)
+			}
+			env.Starrocks = sr
 		}
-		env.Starrocks = sr
 	}
 
 	// Postgres (always required when StarRocks is requested, even if not exposed).
