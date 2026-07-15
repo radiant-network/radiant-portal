@@ -1,12 +1,27 @@
 package types
 
-import "context"
+import (
+	"context"
+	"os"
+)
+
+// SharedDatabaseEnv overrides the shared base database name defaults to "radiant".
+const SharedDatabaseEnv = "SHARED_DATABASE"
 
 // FederationSchema is the radiant_jdbc catalog schema the API reads when no tenant is bound
 // to the request context. It is the prefix every FederationName carries
 // ("radiant_jdbc.public.<table>"); until the tenant-views read path is enabled, reads keep
 // targeting it, so behavior is unchanged.
 const FederationSchema = "radiant_jdbc.public"
+
+var SharedDatabase = sharedDatabaseFromEnv()
+
+func sharedDatabaseFromEnv() string {
+	if v := os.Getenv(SharedDatabaseEnv); v != "" {
+		return v
+	}
+	return "radiant"
+}
 
 type tenantContextKey struct{}
 
@@ -30,4 +45,22 @@ func TenantSchema(ctx context.Context) string {
 		return TenantDatabase(code)
 	}
 	return FederationSchema
+}
+
+// TenantDatabaseOrEmpty returns tenant prefix if in context, otherwise returns empty.
+// This is useful for keeping legacy single-database deployment.
+func TenantDatabaseOrEmpty(ctx context.Context) string {
+	if code, ok := TenantFromContext(ctx); ok && code != "" {
+		return TenantDatabase(code)
+	}
+	return ""
+}
+
+// SharedDatabaseOrEmpty returns shared database prefix if in context, otherwise returns empty.
+// This is useful for keeping legacy single-database deployment.
+func SharedDatabaseOrEmpty(ctx context.Context) string {
+	if code, ok := TenantFromContext(ctx); ok && code != "" {
+		return SharedDatabase
+	}
+	return ""
 }

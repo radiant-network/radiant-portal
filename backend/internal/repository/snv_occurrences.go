@@ -10,7 +10,7 @@ import (
 
 func AddImplicitSNVOccurrencesFilters(snvTable types.Table, seqId int, taskId int, db *gorm.DB, part int) *gorm.DB {
 	alias := snvTable.Alias
-	tx := db.Table(fmt.Sprintf("%s %s", snvTable.Name, alias))
+	tx := db.Table(fmt.Sprintf("%s %s", snvTable.TenantQualifiedName(utils.CtxOf(db)), alias))
 	switch snvTable {
 	case types.GermlineSNVOccurrenceTable:
 		tx = tx.Where(fmt.Sprintf("%s.seq_id = ? AND %s.task_id = ? AND %s.part=?", alias, alias, alias), seqId, taskId, part)
@@ -21,15 +21,15 @@ func AddImplicitSNVOccurrencesFilters(snvTable types.Table, seqId int, taskId in
 }
 
 func JoinSNVOccurrencesWithVariants(snvTable types.Table, tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("JOIN %s %s ON %s.locus_id=%s.locus_id", types.VariantTable.Name, types.VariantTable.Alias, types.VariantTable.Alias, snvTable.Alias))
+	return tx.Joins(fmt.Sprintf("JOIN %s %s ON %s.locus_id=%s.locus_id", types.VariantTable.TenantQualifiedName(utils.CtxOf(tx)), types.VariantTable.Alias, types.VariantTable.Alias, snvTable.Alias))
 }
 
 func JoinSNVOccurrencesWithTopMedBravo(snvTable types.Table, tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN topmed_bravo topmed ON topmed.locus_id=%s.locus_id", snvTable.Alias))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s topmed ON topmed.locus_id=%s.locus_id", types.TopmedTable.TenantQualifiedName(utils.CtxOf(tx)), snvTable.Alias))
 }
 
 func JoinSNVOccurrencesWithThousandGenomes(snvTable types.Table, tx *gorm.DB) *gorm.DB {
-	return tx.Joins(fmt.Sprintf("LEFT JOIN 1000_genomes 1000_genomes ON 1000_genomes.locus_id=%s.locus_id", snvTable.Alias))
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s 1000_genomes ON 1000_genomes.locus_id=%s.locus_id", types.ThousandGenomesTable.TenantQualifiedName(utils.CtxOf(tx)), snvTable.Alias))
 }
 
 func PrepareSNVListOrCountQuery(snvTable types.Table, seqId int, taskId int, userQuery types.Query, db *gorm.DB) (*gorm.DB, int, error) {
@@ -71,7 +71,7 @@ func PrepareSNVListOrCountQuery(snvTable types.Table, seqId int, taskId int, use
 				selectedPanelsField := userQuery.GetFieldsFromTables(types.GenePanelsTables...)
 				selectedPanelsTables := utils.GetDistinctTablesFromFields(selectedPanelsField)
 
-				consequenceFilterTable := db.Table("snv__consequence_filter_partitioned cf").Where("part = ?", part)
+				consequenceFilterTable := db.Table(fmt.Sprintf("%s cf", types.ConsequenceFilterTable.TenantQualifiedName(utils.CtxOf(db)))).Where("part = ?", part)
 
 				// overrideTableAliases will be used to override the table aliases when generating the filter. The sub-query will contain the columns with their aliases.
 				// For instance panel column from omim_gene_panel will be aliased as omim_gene_panel in the subquery.
@@ -80,7 +80,7 @@ func PrepareSNVListOrCountQuery(snvTable types.Table, seqId int, taskId int, use
 				overrideTableAliases := map[string]string{"cf": "cf"}
 				for _, panelsTable := range selectedPanelsTables {
 					consequenceFilterTable = consequenceFilterTable.
-						Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.Name, panelsTable.Alias, panelsTable.Alias))
+						Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.TenantQualifiedName(utils.CtxOf(db)), panelsTable.Alias, panelsTable.Alias))
 					overrideTableAliases[panelsTable.Alias] = "cf"
 				}
 
@@ -98,7 +98,7 @@ func PrepareSNVListOrCountQuery(snvTable types.Table, seqId int, taskId int, use
 
 			} else {
 				filters, params := userQuery.Filters().ToSQL(nil)
-				joinClause := fmt.Sprintf("LEFT SEMI JOIN snv__consequence_filter_partitioned cf ON cf.locus_id=%s.locus_id AND cf.part = %s.part and (?)", snvTable.Alias, snvTable.Alias)
+				joinClause := fmt.Sprintf("LEFT SEMI JOIN %s cf ON cf.locus_id=%s.locus_id AND cf.part = %s.part and (?)", types.ConsequenceFilterTable.TenantQualifiedName(utils.CtxOf(db)), snvTable.Alias, snvTable.Alias)
 				tx = tx.Joins(joinClause, gorm.Expr(filters, params...))
 			}
 
@@ -119,12 +119,12 @@ func PrepareSNVAggOrStatisticsQuery(snvTable types.Table, seqId int, taskId int,
 	if userQuery != nil {
 		tx = JoinSNVOccurrencesWithVariants(snvTable, tx)
 		if userQuery.HasFieldFromTables(types.ConsequenceFilterTable) || userQuery.HasFieldFromTables(types.GenePanelsTables...) {
-			joinClause := fmt.Sprintf("LEFT JOIN snv__consequence_filter_partitioned cf ON cf.locus_id=%s.locus_id AND cf.part = %s.part", snvTable.Alias, snvTable.Alias)
+			joinClause := fmt.Sprintf("LEFT JOIN %s cf ON cf.locus_id=%s.locus_id AND cf.part = %s.part", types.ConsequenceFilterTable.TenantQualifiedName(utils.CtxOf(db)), snvTable.Alias, snvTable.Alias)
 			tx = tx.Joins(joinClause)
 			selectedPanelsTables := utils.GetDistinctTablesFromFields(userQuery.GetFieldsFromTables(types.GenePanelsTables...))
 			for _, panelsTable := range selectedPanelsTables {
 				tx = tx.
-					Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.Name, panelsTable.Alias, panelsTable.Alias))
+					Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.symbol=cf.symbol", panelsTable.TenantQualifiedName(utils.CtxOf(db)), panelsTable.Alias, panelsTable.Alias))
 			}
 		}
 		if userQuery.HasFieldFromTables(types.TopmedTable) {

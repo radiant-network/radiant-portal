@@ -21,7 +21,7 @@ func NewExomiserRepository(db *gorm.DB) *ExomiserRepository {
 
 func (r *ExomiserRepository) GetExomiser(ctx context.Context, locusId int) ([]Exomiser, error) {
 	var exomiser []Exomiser
-	tx := r.db.WithContext(ctx).Table(types.ExomiserTable.Name)
+	tx := r.db.WithContext(ctx).Table(types.ExomiserTable.TenantQualifiedName(ctx))
 	tx = tx.Select("part, seq_id, locus_id, id, locus_hash, moi, variant_score, gene_combined_score, variant_rank, rank, symbol, acmg_classification, acmg_evidence")
 	tx = tx.Where("locus_id = ?", locusId)
 
@@ -40,7 +40,7 @@ func (r *ExomiserRepository) GetExomiser(ctx context.Context, locusId int) ([]Ex
 
 func (r *ExomiserRepository) GetExomiserACMGClassificationCounts(ctx context.Context, locusId int) (map[string]int, error) {
 	var exomiser []ExomiserACMGClassificationCounts
-	tx := r.db.WithContext(ctx).Table(types.ExomiserTable.Name)
+	tx := r.db.WithContext(ctx).Table(types.ExomiserTable.TenantQualifiedName(ctx))
 	tx = tx.Select("acmg_classification, COUNT(1) as acmg_classification_count")
 	tx = tx.Where("locus_id = ? and variant_rank=1", locusId)
 	tx = tx.Group("acmg_classification")

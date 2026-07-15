@@ -156,7 +156,7 @@ func GetInterpretationGermline(repo interpretationsStore, termsRepo termNameRead
 			return
 		}
 
-		conditionName, err := termsRepo.GetTermNameById(c.Request.Context(), types.MondoTable.Name, interpretation.Condition)
+		conditionName, err := termsRepo.GetTermNameById(c.Request.Context(), types.MondoTable.TenantQualifiedName(c.Request.Context()), interpretation.Condition)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -334,7 +334,7 @@ func GetInterpretationSomatic(repo interpretationsStore, termsRepo termNameReade
 			return
 		}
 
-		conditionName, err := termsRepo.GetTermNameById(c.Request.Context(), types.MondoTable.Name, interpretation.TumoralType)
+		conditionName, err := termsRepo.GetTermNameById(c.Request.Context(), types.MondoTable.TenantQualifiedName(c.Request.Context()), interpretation.TumoralType)
 		if err != nil {
 			HandleError(c, err)
 			return

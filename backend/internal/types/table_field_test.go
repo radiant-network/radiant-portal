@@ -1,8 +1,10 @@
 package types
 
 import (
-	"github.com/magiconair/properties/assert"
+	"context"
 	"testing"
+
+	"github.com/magiconair/properties/assert"
 )
 
 func Test_FieldGetAlias_Return_Alias_If_Not_Empty(t *testing.T) {
@@ -27,6 +29,27 @@ func Test_Table_In_QualifiesNameWithSchema(t *testing.T) {
 	tbl := Table{Name: "cases", FederationName: "radiant_jdbc.public.cases"}
 	assert.Equal(t, tbl.In("radiant_jdbc.public"), "radiant_jdbc.public.cases")
 	assert.Equal(t, tbl.In("demo_tenant"), "demo_tenant.cases")
+}
+
+func Test_Table_TenantQualifiedName_Federated(t *testing.T) {
+	t.Parallel()
+	tbl := Table{Name: "cases", FederationName: "radiant_jdbc.public.cases"}
+	assert.Equal(t, tbl.TenantQualifiedName(context.Background()), "radiant_jdbc.public.cases")
+	assert.Equal(t, tbl.TenantQualifiedName(ContextWithTenant(context.Background(), "tenant1")), "tenant1_tenant.cases")
+}
+
+func Test_Table_TenantQualifiedName_PerTenant(t *testing.T) {
+	t.Parallel()
+	tbl := Table{Name: "germline__snv__occurrence", PerTenant: true}
+	assert.Equal(t, tbl.TenantQualifiedName(context.Background()), "germline__snv__occurrence")
+	assert.Equal(t, tbl.TenantQualifiedName(ContextWithTenant(context.Background(), "tenant1")), "tenant1_tenant.germline__snv__occurrence")
+}
+
+func Test_Table_TenantQualifiedName_Shared(t *testing.T) {
+	t.Parallel()
+	tbl := Table{Name: "snv__variant"}
+	assert.Equal(t, tbl.TenantQualifiedName(context.Background()), "snv__variant")
+	assert.Equal(t, tbl.TenantQualifiedName(ContextWithTenant(context.Background(), "tenant1")), "radiant.snv__variant")
 }
 
 func Test_Table_In_FederationSchemaMatchesFederationName(t *testing.T) {

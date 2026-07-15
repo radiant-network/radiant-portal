@@ -96,7 +96,7 @@ func GetMondoTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 		if err != nil {
 			limit = 25
 		}
-		mondoTerms, err := repo.GetTermAutoComplete(c.Request.Context(), types.MondoTable.Name, prefix, limit)
+		mondoTerms, err := repo.GetTermAutoComplete(c.Request.Context(), types.MondoTable.TenantQualifiedName(c.Request.Context()), prefix, limit)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -128,7 +128,7 @@ func GetHPOTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 		if err != nil {
 			limit = 25
 		}
-		hpoTerms, err := repo.GetTermAutoComplete(c.Request.Context(), types.HPOTable.Name, prefix, limit)
+		hpoTerms, err := repo.GetTermAutoComplete(c.Request.Context(), types.HPOTable.TenantQualifiedName(c.Request.Context()), prefix, limit)
 		if err != nil {
 			HandleError(c, err)
 			return

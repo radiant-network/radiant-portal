@@ -107,8 +107,9 @@ type ExpandedGermlineSNVOccurrence = struct {
 } // @name ExpandedGermlineSNVOccurrence
 
 var GermlineSNVOccurrenceTable = Table{
-	Name:  "germline__snv__occurrence",
-	Alias: "g_snv_o",
+	Name:      "germline__snv__occurrence",
+	Alias:     "g_snv_o",
+	PerTenant: true,
 }
 
 var GermlineSNVFilterField = Field{

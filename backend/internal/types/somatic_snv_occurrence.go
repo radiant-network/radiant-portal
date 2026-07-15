@@ -83,8 +83,9 @@ type ExpandedSomaticSNVOccurrence struct {
 }
 
 var SomaticSNVOccurrenceTable = Table{
-	Name:  "somatic__snv__occurrence",
-	Alias: "s_snv_o",
+	Name:      "somatic__snv__occurrence",
+	Alias:     "s_snv_o",
+	PerTenant: true,
 }
 
 var SomaticSNVLocusIdField = Field{

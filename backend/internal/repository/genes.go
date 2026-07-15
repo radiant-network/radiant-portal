@@ -58,7 +58,7 @@ func (r *GenesRepository) GetGeneAutoComplete(ctx context.Context, prefix string
 
 	like := fmt.Sprintf("%s%%", strings.ToUpper(prefix))
 	aliasLike := fmt.Sprintf("%%||%s%%", strings.ToUpper(prefix))
-	tx := r.db.WithContext(ctx).Table(types.EnsemblGeneTable.Name)
+	tx := r.db.WithContext(ctx).Table(types.EnsemblGeneTable.TenantQualifiedName(ctx))
 	tx = tx.Select("gene_id, name, (case WHEN name LIKE ? THEN 1 ELSE (CASE WHEN gene_id LIKE ? THEN 2 ELSE (CASE WHEN UPPER(CONCAT('||', array_join(alias, '||'))) LIKE ? THEN 3 ELSE 4 END) END) END) weight", like, like, aliasLike)
 	tx = tx.Where("UPPER(name) like ? or UPPER(gene_id) like ? or UPPER(CONCAT('||', array_join(alias, '||'))) LIKE ?", like, like, aliasLike)
 	tx = tx.Order("weight ASC, name ASC")
@@ -88,7 +88,7 @@ func (r *GenesRepository) SearchGenes(ctx context.Context, inputs []string) (*[]
 		upperInputs = append(upperInputs, strings.ToUpper(input))
 	}
 
-	tx := r.db.WithContext(ctx).Table(types.EnsemblGeneTable.Name)
+	tx := r.db.WithContext(ctx).Table(types.EnsemblGeneTable.TenantQualifiedName(ctx))
 	tx = tx.Select("gene_id, name")
 	tx = tx.Where("UPPER(name) IN ? OR UPPER(gene_id) IN ?", upperInputs, upperInputs)
 	tx = tx.Order("name ASC")

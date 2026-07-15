@@ -67,7 +67,8 @@ func (r *TermsRepository) GetTermNameById(ctx context.Context, termsTable string
 	tx := r.db.WithContext(ctx).Table(termsTable).Select("name").Where("id = ?", id)
 
 	var term types.Term
-	if err := tx.First(&term).Error; err != nil {
+	// Keep Take (not First): First can build invalid SQL when the table name carries a database prefix.
+	if err := tx.Take(&term).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("error while fetching term name: %w", err)
 		} else {
